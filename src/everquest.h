@@ -269,7 +269,7 @@ struct itemItemStruct : public itemStruct
 /*0296*/ uint8_t  unknown0296[16];   // ***Placeholder
 /*0312*/ uint16_t skillModId; // ID of skill that item modifies
 /*0314*/ int8_t   skillModPercent; // Percent that item modifies skill
-/*0315*/ uint8_t  unknown0315[41];
+/*0315*/ uint8_t  unknown0315[45];
 };
  
 // Book Structure (flag == 0x7379) 
@@ -734,7 +734,7 @@ struct deleteSpawnStruct
 
 /*
 ** Player Profile
-** Length: 8246 Octets
+** Length: 8454 Octets
 ** OpCode: CharProfileCode
 */
 
@@ -830,7 +830,7 @@ struct charProfileStruct
 /*5214*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000 
 /*5218*/ uint8_t  unknown5218[36];
 /*5254*/ uint32_t aapoints;               // number of unspent ability points 
-/*5258*/ uint8_t  unknown4983[2988];
+/*5258*/ uint8_t  unknown4983[3196];
 };
 
 
@@ -1234,7 +1234,7 @@ struct actionStruct
 
 /*
 ** New Zone Code
-** Length: 454 Octets
+** Length: 574 Octets
 ** OpCode: NewZoneCode
 */
 
@@ -1246,7 +1246,7 @@ struct newZoneStruct
 /*0032*/ uint8_t unknown0032[34];          // unknown
 /*0066*/ char    shortName[32];            // Zone Short Name
 /*0098*/ char    longName[180];            // Zone Long Name
-/*0278*/ uint8_t unknown0278[176];         // *** Placeholder
+/*0278*/ uint8_t unknown0278[296];         // *** Placeholder
 };
 
 /*
@@ -1541,7 +1541,7 @@ struct zoneChangeStruct
 /*0002*/ char     charName[32];		// Character Name
 /*0034*/ uint8_t  unknown0050[32];	// *** Placeholder
 /*0066*/ uint32_t zoneId;               // zone Id
-/*0070*/ uint32_t unknown;              // unknown
+/*0070*/ uint32_t unknown[8];              // unknown
 };
 
 /*
