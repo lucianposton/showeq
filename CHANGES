@@ -1,3 +1,10 @@
+fee    (29/04/02)
+------------------
+ + reworked fillConTable(), this may have fixed the 1 off con colors some have
+   seen.  There will still be errors in the con color. If you happen to find
+   any errors please see the thread on the dev board and post any corrections 
+   there.
+
 fee    (09/04/02)
 ------------------
  + made spawnlist, stats and skill windows dynamic again. If you choose not
