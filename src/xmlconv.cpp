@@ -4,7 +4,7 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  *
- * Copyright 2002 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ * Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
  *
  * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
  * for use under the terms of the GNU General Public License, 
@@ -12,7 +12,14 @@
  *
  */
 
+#include "xmlconv.h"
+
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+
 #include <qcolor.h>
+#include <qpen.h>
+#include <qbrush.h>
 #include <qfont.h>
 #include <qpoint.h>
 #include <qrect.h>
@@ -22,8 +29,12 @@
 #include <qcursor.h>
 #include <qstringlist.h>
 
-#include "xmlconv.h"
-
+// borrowed with mods from Qt 3.2
+static bool ok_in_hex( QChar c)
+{
+  return c.isDigit() || (c >= 'a' && c < char('a'+6))
+                     || (c >= 'A' && c < char('A'+6));
+}
 
 DomConvenience::DomConvenience(QDomDocument& doc)
   : m_doc(doc)
@@ -91,6 +102,44 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     ok = color.isValid();
 
     v = color;
+
+    if (!ok)
+      qWarning("%s element without valid value!", (const char*)e.tagName());
+  }
+  else if (e.tagName() == "pen")
+  {
+    int base = getBase(e);
+    uint w = 0; 
+    Qt::PenStyle s = Qt::SolidLine;
+    Qt::PenCapStyle c = Qt::SquareCap;
+    Qt::PenJoinStyle j = Qt::BevelJoin;
+    QColor color = getColor(e);
+
+    if (e.hasAttribute("style"))
+      s = (Qt::PenStyle)e.attribute("style").toInt(0, base);
+    if (e.hasAttribute("cap"))
+      c = (Qt::PenCapStyle)e.attribute("cap").toInt(0, base);
+    if (e.hasAttribute("join"))
+      j = (Qt::PenJoinStyle)e.attribute("join").toInt(0, base);
+    
+    ok = color.isValid();
+
+    v = QPen(color, w, s, c, j);
+
+    if (!ok)
+      qWarning("%s element without valid value!", (const char*)e.tagName());
+  }
+  else if (e.tagName() == "brush")
+  {
+    int base = getBase(e);
+    QColor color = getColor(e);
+    Qt::BrushStyle s = Qt::SolidPattern;
+    if (e.hasAttribute("style"))
+      s = (Qt::BrushStyle)e.attribute("style").toInt(0, base);
+    
+    ok = color.isValid();
+    
+    v = QBrush(color, s);
 
     if (!ok)
       qWarning("%s element without valid value!", (const char*)e.tagName());
@@ -231,6 +280,56 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
 
     ok = true;
   }
+  else if (e.tagName() == "uint64")
+  {
+    QString value = e.attribute("value");
+
+    // borrowed more or less from Qt 3.2 (since we have to support older)
+    uint64_t val = 0;
+    const QChar* p = value.unicode();
+    int l = value.length();
+    const uint64_t max_mult = UINT64_MAX / 16;
+
+    if (!p)
+    {
+      qWarning("Invalid value for tag: %s", (const char*)e.tagName());
+      return false;
+    }
+
+    while ( l && p->isSpace() )                 // skip leading space
+      l--,p++;
+    if ( !l )
+      return false;
+    if ( *p == '+' )
+      l--,p++;
+    
+    if ( !l || !ok_in_hex(*p) )
+        return false;
+    while ( l && ok_in_hex(*p) ) 
+    {
+      l--;
+      uint dv;
+      if ( p->isDigit() ) 
+	dv = p->digitValue();
+      else 
+      {
+	if ( *p >= 'a' && *p <= 'f' )
+	  dv = *p - 'a' + 10;
+	else
+	  dv = *p - 'A' + 10;
+      }
+      if ( val > max_mult || (val == max_mult && dv > UINT64_MAX % 16) )
+	return false;
+      val = 16 * val + dv;
+      p++;
+    }
+
+    QByteArray ba;
+    ba.duplicate((const char*)&val, sizeof(uint64_t));
+
+    v = ba;
+    ok = true;
+  }
   else if (e.tagName() == "list")
   {
     qWarning("Unimplemented tag: %s", (const char*)e.tagName());
@@ -286,6 +385,28 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
       e.setAttribute("red", color.red());
       e.setAttribute("green", color.green());
       e.setAttribute("blue", color.blue());
+    }
+    break;
+  case QVariant::Pen:
+    {
+      e.setTagName("pen");
+      QPen pen = v.toPen();
+      e.setAttribute("red", pen.color().red());
+      e.setAttribute("green", pen.color().green());
+      e.setAttribute("blue", pen.color().blue());
+      e.setAttribute("style", pen.style());
+      e.setAttribute("cap", pen.capStyle());
+      e.setAttribute("join", pen.joinStyle());
+    }
+    break;
+  case QVariant::Brush:
+    {
+      e.setTagName("brush");
+      QBrush brush = v.toBrush();
+      e.setAttribute("red", brush.color().red());
+      e.setAttribute("green", brush.color().green());
+      e.setAttribute("blue", brush.color().blue());
+      e.setAttribute("style", brush.style());
     }
     break;
   case QVariant::Point:
@@ -400,6 +521,45 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
     e.setAttribute("sequence", (QString)v.toKeySequence());
     break;
 #endif
+
+  case QVariant::ByteArray: // this is only for [u]int64_t
+    {
+      e.setTagName("uint64");
+      QByteArray ba = v.toByteArray();
+
+      // make sure this only handles [u]int64_t's
+      if (ba.size() != sizeof(uint64_t))
+      {
+	qWarning("Don't know how to persist variant of type: %s (%d) (size=%d)!",
+		 v.typeName(), v.type(), ba.size());
+	ok = false;
+	break;
+      }
+
+      // convert the data back into a uint64_t
+      uint64_t num = *(uint64_t*)ba.data();
+      
+      QChar buff[33];
+      QChar* p = &buff[32];
+      const char* digitSet = "0123456789abcdef";
+      int len = 0;
+
+      // construct the string
+      do 
+      {
+        *--p = digitSet[((int)(num%16))];
+        num = num >> 4; // divide by 16
+        len++;
+      } while ( num );
+
+      // store it in a QString
+      QString storage;
+      storage.setUnicode(p, len);
+      
+      // set the value
+      e.setAttribute("value", storage);
+    }
+    break;
 
 #if 0
   case QVariant::List:

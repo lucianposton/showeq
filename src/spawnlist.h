@@ -45,9 +45,7 @@
 #include "seqwindow.h"
 #include "seqlistview.h"
 #include "spawnlistcommon.h"
-#include "everquest.h"
 #include "spawn.h"
-//#include "player.h"
 
 //--------------------------------------------------
 // forward declarations
@@ -57,7 +55,6 @@ class Item;
 class Player;
 class SpawnShell;
 class FilterMgr;
-class EQPacket;
 
 class SpawnList;
 class SpawnListItem;
@@ -72,7 +69,6 @@ public:
    SpawnList(Player* player, 
 	     SpawnShell* spawnShell, 
 	     CategoryMgr* categoryMgr,
-	     EQPacket* packet,
 	     QWidget *parent = 0, const char * name = 0);
 
    SpawnListItem* Selected();
@@ -143,9 +139,9 @@ class SpawnListWindow : public SEQWindow
   SpawnListWindow(Player* player, 
 		  SpawnShell* spawnShell, 
 		  CategoryMgr* categoryMgr,
-		  EQPacket* packet,
 		  QWidget* parent = 0, const char* name = 0);
   ~SpawnListWindow();
+  virtual QPopupMenu* menu();
   SpawnList* spawnList() { return m_spawnList; }
 
  public slots:
