@@ -30,7 +30,7 @@
    <comment>Don't use promiscous mode</comment>
   </property>
   <property name="ArqSeqGiveUp" >
-   <int value="96" />
+   <int value="256" />
    <comment>Give up waiting for seq arq after cache fills to this size.  Don't set this too low, otherwise showeq will artificially skip packets, minimum is 32, modem users may want to set 256, dsl and cable users may choose 128 or less</comment>
   </property>
   <property name="SessionTracking" >

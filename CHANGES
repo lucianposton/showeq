@@ -1,3 +1,13 @@
+fee (floyd) (08/08/02)
+----------------------
+Modifications:
+ + version 4.2.14
+ + changed default Arq seq give up in seqdef.xml to 256
+ + up'd max Arq seq give up to 1024
+ + added debug macro to prevent /tmp/coords from being written
+ + added zone shortname for JaggedPine to zones.h
+ + added new/updated maps for Jaggedpine, Bazaar, Surefall and Skyshrine
+
 fee (floyd) (29/07/02)
 ----------------------
 Modifications:

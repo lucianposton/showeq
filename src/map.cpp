@@ -1564,6 +1564,7 @@ void Map::mousePressEvent(QMouseEvent* me)
   {
     // display the Map's menu
     menu()->popup(mapToGlobal(me->pos()));
+#ifdef DEBUGMAP
     FILE *f;
     f=fopen("/tmp/coords","at");
     if(f) 
@@ -1573,6 +1574,7 @@ void Map::mousePressEvent(QMouseEvent* me)
 	       (m_param.screenCenterY() - me->y()) * m_param.ratioY());
       fclose(f);
     }
+#endif /* DEBUGMAP */
   }
   else if (me->button () == MidButton) 
   {
@@ -2811,12 +2813,13 @@ void Map::showLineDlg(void)
 
 void Map::addPathPoint() 
 {
-  FILE *f;
 
   // get the player spawns approximate position
   MapPoint point;
   m_player->approximatePosition(m_animate, QTime::currentTime(), point);
 
+#ifdef DEBUGMAP
+  FILE *f;
   f=fopen("/tmp/coords","at");
   if(f) {
     fprintf (f,"%f, %f\n",
@@ -2824,6 +2827,7 @@ void Map::addPathPoint()
              (double)point.y());
     fclose(f);
   }
+#endif
 }
 
 QRect Map::mapRect () const

@@ -706,7 +706,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // Advanced menu
    subMenu = new QPopupMenu;
    QPopupMenu* subSubMenu = new QPopupMenu;
-   QSpinBox* arqSeqGiveUpSpinBox = new QSpinBox(32, 256, 8, subSubMenu);
+   QSpinBox* arqSeqGiveUpSpinBox = new QSpinBox(32, 1024, 8, subSubMenu);
    arqSeqGiveUpSpinBox->setValue(showeq_params->arqSeqGiveUp);
    connect(arqSeqGiveUpSpinBox, SIGNAL(valueChanged(int)),
 	   this, SLOT(set_net_arq_giveup(int)));
