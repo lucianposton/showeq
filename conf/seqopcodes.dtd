@@ -1,0 +1,18 @@
+<!ELEMENT seqopcodes (opcode)* >
+<!ATTLIST seqopcodes 
+ version CDATA #IMPLIED>
+
+<!ELEMENT opcode (comment|payload)* >
+<!ATTLIST opcode 
+  id CDATA #REQUIRED
+  name CDATA ""
+  updated CDATA "">
+
+<!ELEMENT comment (#PCDATA)>
+
+<!ELEMENT payload EMPTY>
+<!ATTLIST payload 
+  dir CDATA "both"
+  typename CDATA ""
+  sizechecktype CDATA "none">
+
