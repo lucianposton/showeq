@@ -381,7 +381,7 @@ cat > conftest.$ac_ext <<EOF
 #include <qthread.h>
 EOF
 
-echo "#if ! (QT_VERSION > 231)" >> conftest.$ac_ext
+echo "#if ! (QT_VERSION > 230)" >> conftest.$ac_ext
 cat >> conftest.$ac_ext <<EOF
 #error 1
 #endif
@@ -493,8 +493,9 @@ AC_ARG_WITH(qt-libraries,
     ])
 
 AC_ARG_WITH(qt-validation,
-   [  --with-qt-validation    enables extra Qt checks... ],
-   [  ac_validate_qt="yes" ])
+   [  --without-qt-validation    disables extra Qt checks... ],
+   [  ac_validate_qt="yes" ]
+   [  ac_validate_qt="no" ])
 
 AC_CACHE_VAL(ac_cv_have_qt,
 [
@@ -606,7 +607,7 @@ elif test $qt_major_version -eq 2 ; then
   if test $qt_minor_version -le 2 ; then
     AC_MSG_ERROR([Please Make sure $qt_target_version or later is installed!!!]);
   elif test $qt_minor_version -eq 3 ; then
-    if test $qt_major_build -le 1 ; then
+    if test $qt_major_build -lt 1 ; then
       AC_MSG_ERROR([Please Make sure $qt_target_version or later is installed!!!]);
     fi;
   fi;
@@ -712,7 +713,7 @@ if [[ -e "$qt_libdir/libqt-mt.so.3" ]]; then
   ac_qt_libraries="$qt_libdir"
 fi
 
-if [[ -n "$ac_qt_libraries" ]] && [[ -n "$ac_validate_qt" ]]; then
+if [[ -n "$ac_qt_libraries" ]] && [[ "$ac_validate_qt" != "no" ]]; then
   if AC_TRY_EVAL(ac_link) && test -s conftest; then
     rm -f conftest*
   else

@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <qapplication.h>
 #include <qpainter.h>
 #include <qpixmap.h>
 #include <qfont.h>
@@ -160,13 +161,15 @@ void CLineDlg::changeColor(const QString &color)
 
 //----------------------------------------------------------------------
 // MapLabel
-MapLabel::MapLabel( Map* map ): QLabel( 0, "mapLabel", WStyle_StaysOnTop + 
-        WStyle_Customize + WStyle_NoBorder + WStyle_Tool  )
+MapLabel::MapLabel( Map* map )
+  : QLabel(map, "mapLabel", 
+	   WStyle_Customize + WStyle_NoBorderEx + WStyle_Tool + WType_TopLevel
+	   + WStyle_Dialog + WX11BypassWM)
 {
   m_Map = map;
   setMargin( 1 );
   setIndent( 0 );
-  setAutoMask( FALSE );
+  setAutoMask( false );
   setFrameStyle( QFrame::Plain | QFrame::Box );
   setLineWidth( 1 );
   setAlignment( AlignLeft | AlignTop );
@@ -175,6 +178,44 @@ MapLabel::MapLabel( Map* map ): QLabel( 0, "mapLabel", WStyle_StaysOnTop +
   adjustSize();        
 }
 
+void MapLabel::popup(const QPoint& pos)
+{
+  // make sure the widgets size is current.
+  adjustSize();
+
+  // borrowed from QPopupMenu::popup()
+
+  // get info about the widget and its environment
+  QWidget *desktop = QApplication::desktop();
+  int sw = desktop->width();                  // screen width
+  int sh = desktop->height();                 // screen height
+  int sx = desktop->x();                      // screen pos
+  int sy = desktop->y();
+  int x  = pos.x();
+  int y  = pos.y();
+  int w  = width();
+  int h  = height();
+
+  // the complete widget must be visible, move it if necessary
+  if ( x+w > sw )
+    x = sw - w;
+  if ( y+h > sh )
+    y = sh - h;
+  if ( x < sx )
+    x = sx;
+  if ( y < sy )
+    y = sy;
+  move( x, y );
+
+  // show the widget
+  show();
+}
+
+void MapLabel::mousePressEvent(QMouseEvent*)
+{
+  // hide if the user clicks on the label
+  hide();
+}
 
 //----------------------------------------------------------------------
 // MapMgr
@@ -4099,11 +4140,8 @@ void Map::mouseMoveEvent( QMouseEvent* event )
 		   sp->count());
 
     m_mapTip->setText( string  );
-    m_mapTip->adjustSize();
     QPoint popPoint = mapToGlobal(event->pos());
-    m_mapTip->move(popPoint.x() + 15, popPoint.y() + 15);
-    m_mapTip->show();
-    m_mapTip->raise();        
+    m_mapTip->popup(QPoint(popPoint.x() + 15, popPoint.y() + 15));
   }
   else if (item != NULL)
   {
@@ -4151,11 +4189,8 @@ void Map::mouseMoveEvent( QMouseEvent* event )
 		     (const char*)item->classString());
 
     m_mapTip->setText( string  );
-    m_mapTip->adjustSize();
     QPoint popPoint = mapToGlobal(event->pos());
-    m_mapTip->move(popPoint.x() + 15, popPoint.y() + 15);
-    m_mapTip->show();
-    m_mapTip->raise();        
+    m_mapTip->popup(QPoint(popPoint.x() + 15, popPoint.y() + 15));
   }
   else
     m_mapTip->hide();
@@ -4634,7 +4669,7 @@ void MapFrame::setregexp(const QString &str)
   if (str == m_lastFilter)
     return;
     
-  printf("New Filter: %s\n", (const char*)str);
+  //printf("New Filter: %s\n", (const char*)str);
 
   bool needCommit = false;
 

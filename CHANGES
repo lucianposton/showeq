@@ -1,6 +1,24 @@
 dohpaZ (13/06/02)
 ------------------
 Modifications:
+ + version 4.2.11
+ + Made the Map tooltips behave better: No longer always on top, parented by 
+   map, tries to make sure entire tip is visible (borrowed logic from 
+   QPopupMenu::popup(), and will dissappear if clicked on.
+ + Changed the DTEAM_ teams to use the same numeric scale as the RTEAM_ teams.
+   This will allow some code simplification in map.cpp.
+ + Updated to new libEQ.a (23249b5a6a04f2b900449d9c4aa0994a).  Includes
+   possible decoding of new spawns without zoning.
+ + Have configure default to validating the Qt install (disable with
+   the --without-qt-validation option).
+ + Made configure properly handle build directories properly again.
+ + Added a configure option (--enable-old-compiler) to allow the use of 
+   certain older gcc compilers (the 2.96.x compilers that come with certain
+   linux distributions).
+
+dohpaZ (13/06/02)
+------------------
+Modifications:
  + Added curio's updated Kurn, Droga, and Hollowshade Moor maps (hopefully for
    real this time (cvs commit didn't catch them last time for some reason).
 

@@ -1915,7 +1915,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             // decode/decompress the payload
             decoded = m_decode->DecodePacket(data, len, decodedData,
                                      &decodedDataLen, showeq_params->ip);
-
             //printf("NewSpawn received:\n");
 
             if (!decoded || showeq_params->broken_decode)

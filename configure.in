@@ -2,11 +2,12 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/main.cpp)
 AC_CANONICAL_SYSTEM
 AM_CONFIG_HEADER(conf.h)
-AM_INIT_AUTOMAKE(showeq, 4.2.10)
+AM_INIT_AUTOMAKE(showeq, 4.2.11)
 AM_MAINTAINER_MODE
 
 dnl Please remember to update this when the official libEQ.a gets updated...
-CURRENT_LIBEQMD5="f1ddd1ffa527125ed09ac5543d1f85b0"
+dnl (* this is list in case we have libEQ.a's for multiple platforms*)
+CURRENT_LIBEQMD5="23249b5a6a04f2b900449d9c4aa0994a"
 
 dnl Use CCd/CXXd rather than CC/CXX otherwise it cache's the value
 dnl and prevents the alternate search from working. Would be better
@@ -18,14 +19,32 @@ AC_CHECK_PROGS(CXXd,$CXX $CCC g++ c++ gcc CC cxx cc++ gcc g++3 g++-3.0)
 CC=$CCd
 CXX=$CXXd
 
+AC_ARG_ENABLE(old-compiler,
+	[  --enable-old-compiler   Compile with an older compiler],
+	[ AC_MSG_CHECKING(whether to build with an older compiler)
+	case "${enableval}" in
+	yes)	AC_MSG_RESULT(yes);
+		ac_cv_showeq_old_compiler=yes
+		;;
+	*)	AC_MSG_RESULT(no)
+		ac_cv_showeq_old_compiler=no
+		;;
+	esac] )
+
 AC_DEFUN(CHECK_COMPILER,[
+ac_save_cxxflags="$CXXFLAGS"
+if [[ "$ac_cv_showeq_old_compiler" == "yes" ]]; then
+	CXXFLAGS="$CXXFLAGS -DOLDCOMPILER"
+fi
+
 AC_TRY_LINK(
 [
 #include <stdio.h>
 ],
 [
 #ifdef __GNUC__
- #if __GNUC__ < 3
+ #if ((!defined(OLDCOMPILER) && (__GNUC__ < 3)) || \
+      ((__GNUC__ < 2) || ((__GNUC__ == 2) && (__GNUC_MINOR__ < 96))))
    #ifdef __GNUC_PATCHLEVEL__
 	printf("Unsupported GCC Version: %d.%d.%d\n", 
 	       __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
@@ -48,21 +67,21 @@ AC_TRY_LINK(
 ],
 [ 
 AC_MSG_RESULT(yes)
-HAVE_GCC3="YES";
+HAVE_GCC="YES";
 ],
 [
 AC_MSG_RESULT(no);
-HAVE_GCC3="NO";
-dnl AC_MSG_ERROR([You need at least GCC G++ 3.0 or greater to compile ShowEQ])
+HAVE_GCC="NO";
 ]
 )
+CXXFLAGS="$ac_save_cxxflags"
 ]
 )
 
 AC_MSG_CHECKING(for supported compiler version)
 AC_LANG_CPLUSPLUS
 CHECK_COMPILER
-if test "$HAVE_GCC3" = "NO"; then
+if test "$HAVE_GCC" = "NO"; then
     unset CC
     unset CXX
     AC_CHECK_PROGS(CC,gcc-3.0 gcc3)
@@ -70,7 +89,7 @@ if test "$HAVE_GCC3" = "NO"; then
     AC_MSG_CHECKING(alternate compiler for supported compiler version)
     CHECK_COMPILER
 fi
-if test "$HAVE_GCC3" = "NO"; then
+if test "$HAVE_GCC" = "NO"; then
     AC_MSG_ERROR([You need at least GCC G++ 3.0 or greater to compile ShowEQ])
 fi
 AC_LANG_C
@@ -200,25 +219,34 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 
 dnl locations to search for libEQ.a in
-LIBEQLOCS="`pwd` `pwd`/src /usr/lib /usr/local/lib /opt/lib /lib"
+LIBEQLOCS="`pwd` `pwd`/${srcdir} `pwd`/${srcdir}/src /usr/lib /usr/local/lib /opt/lib /lib"
 
 dnl libEQ.a error message
 LIBEQERRORMESSAGE="libEQ.a not found, out of date, or not compiled using a compatible compiler.  Be sure libEQ.a is already installed in one of the listed directories ($LIBEQLOCS), is a current version, and you are compiling with g++ 3.x."
 
 AC_DEFUN(CHECK_LIBEQ,[
 LIBEQMD5=`md5sum $1 |cut -d' ' -f1`
-if [[ "$LIBEQMD5" != "$CURRENT_LIBEQMD5" ]]; then
+ac_showeq_found_md5="NO"
+for j in "$CURRENT_LIBEQMD5"
+do
+  if [[ "$LIBEQMD5" == "$j" ]]; then
+    ac_showeq_found_md5="YES"
+  fi
+done
+if [[ "$ac_showeq_found_md5" != "YES" ]]; then
 	AC_MSG_WARN([$1 has md5sum $LIBEQMD5 which doesn't match reference md5sum])
 fi
-AC_MSG_CHECKING([for InitializeLibEQ in $1])
+AC_MSG_CHECKING([for InitializeLibEQ in $1 ])
 ac_save_libs="$LIBS"
+ac_save_cxxflags="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -I${srcdir}/src"
 LIBS="$1 -lz $LIBPTHREAD"
 AC_TRY_LINK(
 [
 #include <stdio.h>
 #undef HAVE_LIBEQ
 #define HAVE_LIBEQ 1
-#include "src/libeq.h"
+#include "libeq.h"
 ],
 [
 InitializeLibEQ(0, 0, 0, 0);
@@ -235,6 +263,7 @@ LIBS=$ac_save_libs
 AC_MSG_RESULT(no);
 ]
 )
+CXXFLAGS="$ac_save_cxxflags"
 ]
 )
 
@@ -247,7 +276,7 @@ AC_DEFUN(AC_FIND_LIBEQ,
 LIBEQ=NO
 for i in $1;
 do
-  AC_MSG_CHECKING([for libEQ.a in $i])
+  AC_MSG_CHECKING([for libEQ.a in $i ])
   if test -r "$i/libEQ.a"; then
     AC_MSG_RESULT(yes)
     CHECK_LIBEQ("$i/libEQ.a", LIBEQ)

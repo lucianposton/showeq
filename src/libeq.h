@@ -11,8 +11,11 @@
 #if HAVE_LIBEQ
 #include <stdint.h>
 
+#ifdef  __cplusplus
 extern "C"
 {
+#endif
+
   // Function to determine the zone key given a spawn and player packet
   uint32_t FindKey(const uint8_t* player, uint32_t plen, 
 		   const uint8_t* spawn, uint32_t slen);
@@ -21,7 +24,7 @@ extern "C"
   int ProcessPacket(const uint8_t* data, uint32_t len,
 		    uint8_t* out, uint32_t* outlen,
 		    uint32_t* key, const char* cli,
-		    const uint8_t* player = NULL, uint32_t plen = 0);
+		    const uint8_t* player, uint32_t plen);
   
   // Function to decode a spawn packet given a pre-determined key
   void DecodeSpawn (const uint8_t* spawn, uint32_t slen, 
@@ -33,7 +36,9 @@ extern "C"
 		       uint16_t zoneSpawns,
 		       uint16_t newSpawn);
 
+#ifdef  __cplusplus
 }
+#endif
 #else
 #warning "HAVE_LIBEQ=0"
 #endif // HAVE_LIBEQ

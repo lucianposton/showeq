@@ -218,7 +218,8 @@ EQDecode::FoundKey ()
 #if HAVE_LIBEQ
     decodedDataLen = PKTBUF_LEN;
     if (ProcessPacket(pkt->data, pkt->len, 
-		      decodedData, &decodedDataLen, &m_decodeKey, ""))
+		      decodedData, &decodedDataLen, &m_decodeKey, "",
+		      NULL, 0))
       emit dispatchDecodedCharProfile(decodedData, decodedDataLen);
     else
 #endif
@@ -236,7 +237,8 @@ EQDecode::FoundKey ()
 #if HAVE_LIBEQ
     decodedDataLen = PKTBUF_LEN;
     if (ProcessPacket(pkt->data, pkt->len, 
-		      decodedData, &decodedDataLen, &m_decodeKey, ""))
+		      decodedData, &decodedDataLen, &m_decodeKey, "",
+		      NULL, 0))
       emit dispatchDecodedZoneSpawns(decodedData, decodedDataLen);
     else
 #endif
@@ -361,12 +363,13 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
 			    &m_decodeKey, cli, player->data, player->len);
   else
      result = ProcessPacket(data, len, 
-			    decodedData, decodedDataLen, &m_decodeKey, cli);
+			    decodedData, decodedDataLen, &m_decodeKey, cli,
+			    NULL, 0);
 #else
   result = 0;
 #endif
 
-  if (result)
+  if (result && player) // only the end if there is a player
   {
     // Release our mutex
     if (m_locateActive)
@@ -396,10 +399,7 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
   }
 
   // Queue it up...  Allocate storage for our encrypted packet
-  if ((opcode == CharProfileCode) || (opcode == ZoneSpawnsCode))
-    pktrec = (EQPktRec *)malloc(sizeof(EQPktRec) + len);
-  else if (opcode == NewSpawnCode)
-    pktrec = (EQPktRec *)malloc(sizeof(EQPktRec) + len);
+  pktrec = (EQPktRec *)malloc(sizeof(EQPktRec) + len);
 
   // Bail if we can't get memory...
   if (!pktrec)

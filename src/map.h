@@ -99,8 +99,10 @@ class MapLabel: public QLabel
 {
  public:
   MapLabel( Map* map );
+  void popup(const QPoint& pos);
 
  protected:
+  virtual void mousePressEvent(QMouseEvent*);
 
   Map*	m_Map;
 };

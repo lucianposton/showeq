@@ -91,9 +91,9 @@
 
 //Team numbers for Deity teams
 #define DTEAM_GOOD			1
-#define DTEAM_NEUTRAL			0
-#define DTEAM_EVIL			-1
-#define DTEAM_OTHER			2
+#define DTEAM_NEUTRAL			2
+#define DTEAM_EVIL			3
+#define DTEAM_OTHER			5
 
 //Team numbers for Race teams
 #define RTEAM_HUMAN			1
