@@ -195,7 +195,7 @@ void NetDiag::seqExpect(int seq, int stream)
   m_seqExp[stream]->setText(disp);
 }
 
-void NetDiag::clientChanged(uint32_t addr)
+void NetDiag::clientChanged(in_addr_t addr)
 {
   QString disp, tmp;
   disp = print_addr(addr);
@@ -219,7 +219,7 @@ void NetDiag::clientChanged(uint32_t addr)
   m_clientLabel->setText(disp);
 }
 
-void NetDiag::clientPortLatched(uint16_t clientPort)
+void NetDiag::clientPortLatched(in_port_t clientPort)
 {
   QString disp, tmp;
   uint32_t addr = m_packet->clientAddr();
@@ -232,7 +232,7 @@ void NetDiag::clientPortLatched(uint16_t clientPort)
   m_clientLabel->setText(disp);
 }
 
-void NetDiag::serverPortLatched(uint16_t port)
+void NetDiag::serverPortLatched(in_port_t port)
 {
   m_serverPortLabel->setText(QString::number(port));
 }
@@ -321,3 +321,5 @@ QString NetDiag::print_addr(in_addr_t  addr)
 
    return paddr;
 }
+
+#include "netdiag.moc"

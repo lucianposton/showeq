@@ -325,3 +325,4 @@ void FilterMgr::runtimeFilterCommit(uint8_t type)
   emit runtimeFiltersChanged(type);
 }
 
+#include "filtermgr.moc"

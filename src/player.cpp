@@ -851,9 +851,9 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
   updateLastChanged();
   emit changeItem(this, tSpawnChangedPosition);
 
-  emit newSpeed((int)lrint(hypot( hypot( (pupdate->deltaX*8), 
-					 (pupdate->deltaY*8)), 
-				  (pupdate->deltaZ*8))));
+  emit newSpeed(hypot( hypot( (pupdate->deltaX*8), 
+			      (pupdate->deltaY*8)), 
+		       (pupdate->deltaZ*8)));
 
   static uint8_t count = 0;
 
@@ -1441,3 +1441,5 @@ void Player::restorePlayerState(void)
     clear();
   }
 }
+
+#include "player.moc"

@@ -151,3 +151,4 @@ void SEQWindow::mousePressEvent(QMouseEvent* e)
     QDockWindow::mousePressEvent(e);
 }
 
+#include "seqwindow.moc"

@@ -7,12 +7,15 @@
  *  Copyright 2003-2004 by the respective ShowEQ Developers
  */
 
+#ifndef _BAZAARLOG_H_
+#define _BAZAARLOG_H_
+
 #include <qobject.h>
 #include "logger.h"
 
 class EQPacket;
 class SpawnShell;
-
+ 
 //----------------------------------------------------------------------
 // BazaarLog is an SEQLogger subclass that handles bazaar packets
 class BazaarLog : public SEQLogger
@@ -32,3 +35,4 @@ class BazaarLog : public SEQLogger
   SpawnShell& m_shell;
 };
 
+#endif // _BAZAARLOG_H_

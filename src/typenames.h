@@ -4,6 +4,8 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  */
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     NULL,			// 0
     "Humanoid",			// 1
     NULL,			// 2
@@ -73,3 +75,5 @@
     "Timer",			// 66
     "EventTrigger",		// 67
     NULL,			// 68
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+

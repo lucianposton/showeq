@@ -1683,7 +1683,7 @@ int displayRecord(EQItemDB* itemDB,
     printf("001: ");
     uint8_t fieldCount = 1;
     uint8_t col = 5;
-    size_t fieldWidth;
+    int fieldWidth;
     const char* curPos = rawData;
     const char* endField;
     

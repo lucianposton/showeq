@@ -2528,3 +2528,4 @@ bool   EQItemDBEntry::IsContainer()
   return (((EQItemDBEntryData_3*)m_itemEntryData)->m_itemType == ItemTypeContainer);
 }
 	  
+#include "itemdb.moc"

@@ -519,3 +519,4 @@ void SpellShell::timeout()
     m_timer->stop();
 }
 
+#include "spellshell.moc"

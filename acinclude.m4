@@ -582,21 +582,30 @@ LIBQT="$LIBQT $X_PRE_LIBS -lXext -lX11 $LIBSOCKET"
 ac_qt_includes=""
 ac_qt_libraries=""
 ac_qt_bindir=""
+ac_qt_docs=""
 
 qt_libraries=""
 qt_includes=""
+qt_docs=""
 
 AC_ARG_WITH(qt-dir,
     [  --with-qt-dir=DIR       where the root of Qt is installed ],
     [  ac_qt_includes="$withval"/include
        ac_qt_libraries="$withval"/lib
        ac_qt_bindir="$withval"/bin
+       ac_qt_docs="$withval"/doc/html
     ])
 
 AC_ARG_WITH(qt-includes,
     [  --with-qt-includes=DIR  where the Qt includes are. ],
     [
        ac_qt_includes="$withval"
+    ])
+
+AC_ARG_WITH(qt-docs,
+    [  --with-qt-docs=DIR  where the Qt docs are. ],
+    [
+       ac_qt_docs="$withval"
     ])
 
 ac_qt_libs_given=no
@@ -622,41 +631,31 @@ qt_incdirs=" $QTDIR/include                     \
              $QTINC                             \
 	     /usr/local/qt3/include		\
              /usr/local/qt/include              \
-             /usr/local/qt2/include             \
-	     /usr/local/qt-2.3.2/include	\
              /usr/local/qt*/include             \
-	     /opt/qt-gcc3-2.3.2/include		\
+	     /usr/qt/3/include			\
+	     /usr/qt/*/include			\
 	     /opt/qt-gcc3-*/include		\
-	     /opt/qt-2.3.2/include		\
 	     /usr/include/qt3			\
              /usr/include/qt                    \
-             /usr/include/qt2                   \
              /usr/include/qt*                   \
              /usr/include                       \
 	     /usr/lib/qt3/include		\
              /usr/lib/qt/include                \
-             /usr/lib/qt2/include               \
              /usr/lib/qt*/include               \
-	     /usr/lib/qtgcc3-2.3.2/include	\
 	     /usr/lib/qtgcc3-*/include		\
 	     /usr/lib/qt3/include		\
              /usr/lib/qt/include                \
-             /usr/lib/qt2/include               \
              /usr/lib/qt*/include               \
-             /usr/X11R6/include/X11/qt2         \
 	     /usr/X11R6/include/X11/qt3		\
              /usr/X11R6/include/X11/qt          \
              /usr/X11R6/include/X11/qt*         \
-             /usr/X11R6/include/X11/qt2/include \
 	     /usr/X11R6/include/X11/qt3/include \
              /usr/X11R6/include/X11/qt/include  \
              /usr/X11R6/include/X11/qt*/include \
-             /usr/X11R6/include/qt2             \
 	     /usr/X11R6/include/qt3		\
              /usr/X11R6/include/qt              \
              /usr/X11R6/include/qt*             \
-             /usr/X11R6/include/qt2/include     \
-	     /usr/X11R6/include/qt3/include	\
+ 	     /usr/X11R6/include/qt3/include	\
              /usr/X11R6/include/qt/include      \
              /usr/X11R6/include/qt*/include     \
              /usr/src/qt-*/include              \
@@ -738,36 +737,27 @@ qt_libdirs=" $QTDIR/lib			\
              $QTLIB			\
 	     /usr/local/qt3/lib		\
              /usr/local/qt/lib		\
-	     /usr/local/qt2/lib		\
-	     /usr/local/qt-2.3.2/lib	\
              /usr/local/qt*/lib		\
-	     /opt/qt-gcc3-2.3.2/lib	\
-	     /opt/qt-2.3.2/lib		\
+	     /usr/qt/3/lib		\
+	     /usr/qt/*/lib		\
 	     /usr/lib/qt3/lib		\
              /usr/lib/qt/lib		\
 	     /usr/lib/qt*/lib		\
 	     /usr/lib/qt3		\
-             /usr/lib/qt2		\
              /usr/lib/qt		\
-             /usr/lib/qt2/lib		\
-	     /usr/lib/qtgcc3-2.3.2/lib	\
              /usr/lib/qt*		\
              /usr/lib			\
 	     /usr/X11R6/lib/X11/qt3	\
              /usr/X11R6/lib/X11/qt	\
-             /usr/X11R6/lib/X11/qt2	\
              /usr/X11R6/lib/X11/qt*	\
 	     /usr/X11R6/lib/X11/qt3/lib	\
              /usr/X11R6/lib/X11/qt/lib	\
-             /usr/X11R6/lib/X11/qt2/lib	\
              /usr/X11R6/lib/X11/qt*/lib	\
 	     /usr/X11R6/lib/qt3		\
              /usr/X11R6/lib/qt		\
-             /usr/X11R6/lib/qt2		\
              /usr/X11R6/lib/qt*		\
 	     /usr/X11R6/lib/qt3/lib	\
              /usr/X11R6/lib/qt/lib	\
-             /usr/X11R6/lib/qt2/lib	\
 	     /usr/X11R6/lib/qt*/lib	\
              /usr/src/qt-*/lib		\
              $x_libraries		\
@@ -788,7 +778,6 @@ for dir in $qt_libdirs; do
   else
     echo "tried $dir" >&AC_FD_CC;
   fi
-
 done
 
 ac_qt_libraries="$qt_libdir"
@@ -845,6 +834,53 @@ LDFLAGS="$ac_ldflags_safe"
 LIBS="$ac_libs_safe"
 
 AC_LANG_RESTORE
+
+dnl ************************************
+dnl * Build yet another search path... *
+dnl ************************************
+
+qt_docdirs=" $QTDIR/doc/html		     \
+	     $qt_incdir../doc/html     	     \
+             /usr/local/qt3/doc/html	     \
+             /usr/local/qt/doc/html	     \
+             /usr/local/qt*/doc/html	     \
+	     /usr/qt/3/doc/html	     	     \
+	     /usr/qt/*/doc/html	     	     \
+	     /usr/lib/qt3/doc/html	     \
+             /usr/lib/qt/doc/html	     \
+	     /usr/lib/qt*/doc/html	     \
+	     /usr/lib/doc/html	     	     \
+             /usr/lib/qt/doc/html	     \
+             /usr/lib/qt*/doc/html	     \
+	     /usr/X11R6/lib/X11/qt3/doc/html \
+             /usr/X11R6/lib/X11/qt/doc/html  \
+             /usr/X11R6/lib/X11/qt*/doc/html \
+	     /usr/X11R6/lib/X11/qt3/doc/html \
+             /usr/X11R6/lib/X11/qt/doc/html  \
+             /usr/X11R6/lib/X11/qt*/doc/html \
+	     /usr/X11R6/lib/qt3/doc/html     \
+             /usr/X11R6/lib/qt/doc/html	     \
+             /usr/X11R6/lib/qt*/doc/html     \
+	     /usr/X11R6/lib/qt3/doc/html     \
+             /usr/X11R6/lib/qt/doc/html	     \
+	     /usr/X11R6/lib/qt*/doc/html     \
+             /usr/src/qt-*/doc/html	     \
+             $qt_docdirs"
+
+[[ "$ac_qt_docs" != "NO" ]]   &&   \
+qt_docdirs="$ac_qt_docs $qt_docdirs"
+
+AC_FIND_FILE("qobject.html", $qt_docdirs, qt_docdir)
+
+ac_qt_docs="$qt_docdir"
+
+if [[ -n "$ac_qt_docs" -a "$ac_qt_docs" != "NO" ]]; then
+  echo -e ">>>> Documentation...:\t$ac_qt_docs/"
+else
+  echo -e ">>>> Documentation...:\tUnable to locate?!?"
+  AC_MSG_WARN([Qt documenation not installed?!]);
+fi;
+
 if [[ -z "$ac_qt_includes" ]] || [[ -z "$ac_qt_libraries" ]]; then
   ac_cv_have_qt="have_qt=no";
   ac_qt_notfound="";
@@ -900,6 +936,7 @@ elif [[ $qt_major_version -lt 3 ]]; then
 
   qt_libraries=$ac_qt_libraries
   qt_includes=$ac_qt_includes
+  qt_docs=$ac_qt_docs
 
 else
 
@@ -914,6 +951,7 @@ else
 
   qt_libraries=$ac_qt_libraries
   qt_includes=$ac_qt_includes
+  qt_docs=$ac_qt_docs
 
 fi
 
@@ -923,6 +961,7 @@ CHECK_QT_DIRECT(qt_libraries= ,[])
 
 AC_SUBST(qt_libraries)
 AC_SUBST(qt_includes)
+AC_SUBST(qt_docs)
 
 if [[ "$qt_includes" == "$x_includes" ]] ||
    [[ -z "$qt_includes" ]]; then
@@ -940,8 +979,11 @@ else
  all_libraries="$all_libraries $QT_LDFLAGS"
 fi
 
+QT_DOCS="$qt_docs"
+
 AC_SUBST(QT_INCLUDES)
 AC_SUBST(QT_LDFLAGS)
+AC_SUBST(QT_DOCS)
 
 LIB_QT='-lqt-mt $(LIBPNG) -lXext $(LIB_X11) $(X_PRE_LIBS)'
 AC_SUBST(LIB_QT)

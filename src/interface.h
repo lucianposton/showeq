@@ -28,7 +28,7 @@
 #include <qtabdialog.h>
 #include <qspinbox.h>
 #include <qintdict.h>
-
+#include <qptrdict.h>
 #include "everquest.h"
 #include "spawnlist.h"
 #include "spawnshell.h"
@@ -106,6 +106,9 @@ const int messageWindowDockBase = 16;
 
 //--------------------------------------------------
 // EQInterface
+/*!
+  \brief QMainWindow from Hell!  Also known as ShowEQ's main window.
+*/
 class EQInterface:public QMainWindow
 {
    Q_OBJECT
@@ -132,7 +135,7 @@ class EQInterface:public QMainWindow
    void newAltExp(uint32_t newExp, uint32_t totalExp, uint32_t totalTick, 
 		  uint32_t maxExp, uint32_t tickExp, uint32_t aapoints);
    void levelChanged(uint8_t level);
-   void newSpeed(int);
+   void newSpeed(double);
    void numPacket(int, int);
    void resetPacket(int, int);
    void attack2Hand1(const uint8_t*);
@@ -390,6 +393,7 @@ class EQInterface:public QMainWindow
    QPopupMenu* m_terminalShowUserFilterMenu;
    QPopupMenu* m_terminalHideUserFilterMenu;
    QPopupMenu* m_windowMenu;
+   QPtrDict<int> m_windowsMenus;
 
    CompassFrame* m_compass;
    MessageWindow* m_messageWindow[maxNumMessageWindows];

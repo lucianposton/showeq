@@ -25,9 +25,7 @@
 #include <qdir.h>
 #include <qfileinfo.h>
 #include <qregexp.h>
-#if QT_VERSION > 300
 #include <qkeysequence.h>
-#endif
 #include <qtextstream.h>
 
 
@@ -112,15 +110,6 @@ void XMLPreferences::loadPreferences(const QString& filename,
     return;
   }
 
-#if QT_VERSION < 300
-  if (!doc.setContent(&f))
-  {
-    qWarning("Unable to set preference document to contents of file: %s!", 
-	     (const char*)filename);
-    f.close();
-    return;
-  }
-#else
   QString errorMsg;
   int errorLine = 0;
   int errorColumn = 0;
@@ -132,7 +121,6 @@ void XMLPreferences::loadPreferences(const QString& filename,
     f.close();
     return;
   }
-#endif
 
   // do more processing here
  QDomElement docElem = doc.documentElement();
@@ -286,15 +274,6 @@ void XMLPreferences::savePreferences(const QString& filename,
   bool loaded = false;
   if (f.open(IO_ReadOnly))
   {
-#if QT_VERSION < 300
-    if (doc.setContent(&f))
-      loaded = true;
-    else
-    {
-      qWarning("Unable to set preference document to contents of file: %s!", 
-	       (const char*)filename);
-    }
-#else
     QString errorMsg;
     int errorLine = 0;
     int errorColumn = 0;
@@ -307,7 +286,6 @@ void XMLPreferences::savePreferences(const QString& filename,
 	       (const char*)errorMsg, errorLine, errorColumn);
 
     }
-#endif
 
     // close the file
     f.close();
@@ -316,16 +294,11 @@ void XMLPreferences::savePreferences(const QString& filename,
   // if no file was loaded, use the template document
   if (!loaded)
   {
-#if QT_VERSION < 300
-    if (doc.setContent(m_templateDoc))
-      loaded = true;
-#else
     QString errorMsg;
     int errorLine = 0;
     int errorColumn = 0;
     if (doc.setContent(m_templateDoc, false, &errorMsg, &errorLine, &errorColumn))
       loaded = true;
-#endif
   }
 
   // if there was an existing file, rename it
@@ -725,11 +698,9 @@ int XMLPreferences::getPrefKey(const QString& inName,
 
     switch(preference->type())
     {
-#if QT_VERSION >= 300
     case QVariant::KeySequence:
       key = preference->toInt();
       break;
-#endif
     case QVariant::String:
       // convert it to a key
       key = QAccel::stringToKey(preference->toString());
@@ -794,7 +765,7 @@ int64_t XMLPreferences::getPrefInt64(const QString& inName,
     default:
       qWarning("XMLPreferences::getPrefInt64(%s, %s, %lld): preference found,\n"
 	       "\tbut type %s is not convertable to type int64_t!",
-	       (const char*)inName, (const char*)inSection, def,
+	       (const char*)inName, (const char*)inSection, (long long)def,
 	       preference->typeName());
     }
 
@@ -840,9 +811,10 @@ uint64_t XMLPreferences::getPrefUInt64(const QString& inName,
 	break;
       }
     default:
-      qWarning("XMLPreferences::getPrefUInt64(%s, %s, %lld): preference found,\n"
+      qWarning("XMLPreferences::getPrefUInt64(%s, %s, %llu): preference found,\n"
 	       "\tbut type %s is not convertable to type uint64_t!",
-	       (const char*)inName, (const char*)inSection, def,
+	       (const char*)inName, (const char*)inSection, 
+	       (unsigned long long)def,
 	       preference->typeName());
     }
 
@@ -909,11 +881,7 @@ void XMLPreferences::setPrefKey(const QString& inName,
 				int inValue,
 				Persistence pers)
 {
-#if QT_VERSION < 300
-  setPref(inName, inSection, QVariant(QAccel::keyToString(inValue)), pers);
-#else
   setPref(inName, inSection, QVariant(QKeySequence(inValue)), pers);
-#endif
 }
 
 void XMLPreferences::setPrefInt64(const QString& inName,
@@ -945,3 +913,4 @@ void XMLPreferences::setPrefVariant(const QString& inName,
   setPref(inName, inSection, inValue, pers);
 }
 
+#include "xmlpreferences.moc"

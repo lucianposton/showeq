@@ -8,17 +8,87 @@ DB3_LIBS = $(DB3_LDFLAGS) -ldb_cxx
 endif
 
 ITEMDB_SRCS = itemdb.cpp gdbmconv.cpp $(DB3_SRCS)
-nodist_ITEMDB_SRCS = m_itemdb.cpp 
+nodist_ITEMDB_SRCS =  
 
 bin_PROGRAMS = showeq showeqitemdbtool
 
-showeq_SOURCES = main.cpp spawn.cpp spawnshell.cpp spawnlist.cpp spellshell.cpp spelllist.cpp vpacket.cpp editor.cpp filter.cpp packetfragment.cpp packetstream.cpp packetinfo.cpp packet.cpp packetcapture.cpp packetformat.cpp interface.cpp compass.cpp map.cpp util.cpp experiencelog.cpp combatlog.cpp player.cpp skilllist.cpp statlist.cpp filtermgr.cpp mapcore.cpp category.cpp compassframe.cpp group.cpp guild.cpp netdiag.cpp logger.cpp xmlconv.cpp xmlpreferences.cpp seqwindow.cpp seqlistview.cpp zonemgr.cpp spawnmonitor.cpp spawnpointlist.cpp spawnlistcommon.cpp spawnlist2.cpp spells.cpp datetimemgr.cpp spawnlog.cpp packetlog.cpp datalocationmgr.cpp eqstr.cpp messages.cpp message.cpp messagefilter.cpp messagewindow.cpp messageshell.cpp terminal.cpp filteredspawnlog.cpp messagefilterdialog.cpp diagnosticmessages.cpp mapicon.cpp filternotifications.cpp netstream.cpp guildshell.cpp guildlist.cpp bazaarlog.cpp $(ITEMDB_SRCS)
+showeq_SOURCES = main.cpp spawn.cpp spawnshell.cpp spawnlist.cpp spellshell.cpp \
+	spelllist.cpp vpacket.cpp editor.cpp filter.cpp packetfragment.cpp packetstream.cpp \
+	packetinfo.cpp packet.cpp packetcapture.cpp packetformat.cpp interface.cpp compass.cpp \
+	map.cpp util.cpp experiencelog.cpp combatlog.cpp player.cpp skilllist.cpp \
+	statlist.cpp filtermgr.cpp mapcore.cpp category.cpp compassframe.cpp group.cpp \
+	guild.cpp netdiag.cpp logger.cpp xmlconv.cpp xmlpreferences.cpp seqwindow.cpp \
+	seqlistview.cpp zonemgr.cpp spawnmonitor.cpp spawnpointlist.cpp spawnlistcommon.cpp \
+	spawnlist2.cpp spells.cpp datetimemgr.cpp spawnlog.cpp packetlog.cpp \
+	datalocationmgr.cpp eqstr.cpp messages.cpp message.cpp messagefilter.cpp messagewindow.cpp \
+	messageshell.cpp terminal.cpp filteredspawnlog.cpp messagefilterdialog.cpp \
+	diagnosticmessages.cpp mapicon.cpp filternotifications.cpp netstream.cpp guildshell.cpp \
+	guildlist.cpp bazaarlog.cpp $(ITEMDB_SRCS) 
 
-nodist_showeq_SOURCES = m_spawnshell.cpp m_spawnlist.cpp m_spellshell.cpp m_spelllist.cpp m_editor.cpp m_packetstream.cpp m_packetinfo.cpp m_packet.cpp m_interface.cpp m_compass.cpp m_map.cpp m_experiencelog.cpp m_combatlog.cpp m_player.cpp m_skilllist.cpp m_statlist.cpp m_filtermgr.cpp m_category.cpp m_compassframe.cpp m_group.cpp m_guild.cpp m_netdiag.cpp m_logger.cpp m_xmlpreferences.cpp m_seqwindow.cpp m_seqlistview.cpp m_zonemgr.cpp m_spawnmonitor.cpp m_spawnpointlist.cpp m_spawnlistcommon.cpp m_spawnlist2.cpp m_datetimemgr.cpp m_spawnlog.cpp m_packetlog.cpp m_messages.cpp m_messagefilter.cpp m_messagewindow.cpp m_messageshell.cpp m_terminal.cpp m_filteredspawnlog.cpp m_messagefilterdialog.cpp m_mapicon.cpp m_filternotifications.cpp m_guildshell.cpp m_guildlist.cpp m_bazaarlog.cpp ui_mapicondialog.h ui_mapicondialog.cpp m_ui_mapicondialog.cpp $(nodist_ITEMDB_SRCS)
+showeq_moc_SRCS = bazaarlog.moc category.moc combatlog.moc compass.moc \
+  compassframe.moc datetimemgr.moc editor.moc experiencelog.moc \
+  filteredspawnlog.moc filtermgr.moc filternotifications.moc group.moc \
+  guild.moc guildlist.moc guildshell.moc interface.moc itemdb.moc logger.moc \
+  map.moc mapicon.moc messagefilter.moc messagefilterdialog.moc messages.moc \
+  messageshell.moc messagewindow.moc netdiag.moc packet.moc packetinfo.moc \
+  packetlog.moc packetstream.moc player.moc seqlistview.moc \
+  seqwindow.moc skilllist.moc spawnlist.moc spawnlist2.moc spawnlistcommon.moc \
+  spawnlog.moc spawnmonitor.moc spawnpointlist.moc spawnshell.moc spelllist.moc \
+  spellshell.moc statlist.moc terminal.moc xmlpreferences.moc zonemgr.moc
+        
+nodist_showeq_SOURCES = ui_mapicondialog.h ui_mapicondialog.cpp $(showeq_moc_SRCS) m_ui_mapicondialog.cpp $(nodist_ITEMDB_SRCS)
+
+$(srcdir)/bazaarlog.cpp: bazaarlog.moc
+$(srcdir)/category.cpp: category.moc
+$(srcdir)/combatlog.cpp: combatlog.moc
+$(srcdir)/compass.cpp: compass.moc
+$(srcdir)/compassframe.cpp: compassframe.moc
+$(srcdir)/datetimemgr.cpp: datetimemgr.moc
+$(srcdir)/editor.cpp: editor.moc
+$(srcdir)/experiencelog.cpp: experiencelog.moc
+$(srcdir)/filteredspawnlog.cpp: filteredspawnlog.moc
+$(srcdir)/filtermgr.cpp: filtermgr.moc
+$(srcdir)/filternotifications.cpp: filternotifications.moc
+$(srcdir)/group.cpp: group.moc
+$(srcdir)/guild.cpp: guild.moc
+$(srcdir)/guildlist.cpp: guildlist.moc
+$(srcdir)/guildshell.cpp: guildshell.moc
+$(srcdir)/interface.cpp: interface.moc
+$(srcdir)/itemdb.cpp: itemdb.moc
+$(srcdir)/logger.cpp: logger.moc
+$(srcdir)/map.cpp: map.moc
+$(srcdir)/mapicon.cpp: mapicon.moc
+$(srcdir)/messagefilter.cpp: messagefilter.moc
+$(srcdir)/messagefilterdialog.cpp: messagefilterdialog.moc
+$(srcdir)/messages.cpp: messages.moc
+$(srcdir)/messageshell.cpp: messageshell.moc
+$(srcdir)/messagewindow.cpp: messagewindow.moc
+$(srcdir)/netdiag.cpp: netdiag.moc
+$(srcdir)/packet.cpp: packet.moc
+$(srcdir)/packetinfo.cpp: packetinfo.moc
+$(srcdir)/packetlog.cpp: packetlog.moc
+$(srcdir)/packetstream.cpp: packetstream.moc
+$(srcdir)/player.cpp: player.moc
+$(srcdir)/seqlistview.cpp: seqlistview.moc
+$(srcdir)/seqwindow.cpp: seqwindow.moc
+$(srcdir)/skilllist.cpp: skilllist.moc
+$(srcdir)/spawnlist.cpp: spawnlist.moc
+$(srcdir)/spawnlist2.cpp: spawnlist2.moc
+$(srcdir)/spawnlistcommon.cpp: spawnlistcommon.moc
+$(srcdir)/spawnlog.cpp: spawnlog.moc
+$(srcdir)/spawnmonitor.cpp: spawnmonitor.moc
+$(srcdir)/spawnpointlist.cpp: spawnpointlist.moc
+$(srcdir)/spawnshell.cpp: spawnshell.moc
+$(srcdir)/spelllist.cpp: spelllist.moc
+$(srcdir)/spellshell.cpp: spellshell.moc
+$(srcdir)/statlist.cpp: statlist.moc
+$(srcdir)/terminal.cpp: terminal.moc
+$(srcdir)/xmlpreferences.cpp: xmlpreferences.moc
+$(srcdir)/zonemgr.cpp: zonemgr.moc
+$(srcdir)/packetinfo.cpp: s_everquest.h
 
 showeq_LDADD = $(QT_LDFLAGS) $(QTLIB) $(DB3_LIBS) $(LIBPTHREAD) $(MEMORY_LIBS) \
 $(PROFILE_LIBS) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
-
 
 showeqitemdbtool_SOURCES = itemdbtool.cpp util.cpp diagnosticmessageslight.cpp datalocationmgr.cpp $(ITEMDB_SRCS)
 nodist_showeqitemdbtool_SOURCES = $(nodist_ITEMDB_SRCS)
@@ -60,20 +130,24 @@ sortitem_SOURCES = sortitem.cpp util.cpp diagnosticmessageslight.cpp
 nodist_sortitem_SOURCES = 
 sortitem_LDADD = $(QT_LDFLAGS) $(QTLIB) $(LIBPTHREAD) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
 
-EXTRA_DIST = classes.h compass.h everquest.h interface.h main.h map.h filter.h vpacket.h editor.h packet.h packetcapture.h packetcommon.h packetformat.h packetstream.h packetfragment.h packetinfo.h races.h skills.h spells.h util.h experiencelog.h combatlog.h spawn.h spawnshell.h spawnlist.h spellshell.h spelllist.h languages.h weapons.h weapons1.h weapons27.h weapons28.h weapons2b.h decode.h itemdb.h gdbmconv.h cgiconv.h skilllist.h statlist.h db3conv.h dbcommon.h deity.h player.h crctab.h filtermgr.h point.h pointarray.h mapcore.h category.h compassframe.h group.h guild.h fixpt.h netdiag.h zones.h logger.h xmlconv.h xmlpreferences.h seqwindow.h seqlistview.h zonemgr.h spawnmonitor.h spawnpointlist.h typenames.h spawnlistcommon.h spawnlist2.h datetimemgr.h spawnlog.h packetlog.h datalocationmgr.h eqstr.h messages.h messagefilter.h messagewindow.h messageshell.h terminal.h filteredspawnlog.h messagefilterdialog.h diagnosticmessages.h mapicon.h mapicondialog.ui mapicondialog.ui.h filternotifications.h netstream.h guildshell.h guildlist.h bazaarlog.h message.h s_everquest.h staticspells.h h2info.pl
+EXTRA_DIST = h2info.pl
+
+noinst_HEADERS = classes.h compass.h everquest.h interface.h main.h map.h filter.h vpacket.h editor.h packet.h packetcapture.h packetcommon.h packetformat.h packetstream.h packetfragment.h packetinfo.h races.h skills.h spells.h util.h experiencelog.h combatlog.h spawn.h spawnshell.h spawnlist.h spellshell.h spelllist.h languages.h weapons.h weapons1.h weapons27.h weapons28.h weapons2b.h decode.h itemdb.h gdbmconv.h cgiconv.h skilllist.h statlist.h db3conv.h dbcommon.h deity.h player.h crctab.h filtermgr.h point.h pointarray.h mapcore.h category.h compassframe.h group.h guild.h fixpt.h netdiag.h zones.h logger.h xmlconv.h xmlpreferences.h seqwindow.h seqlistview.h zonemgr.h spawnmonitor.h spawnpointlist.h typenames.h spawnlistcommon.h spawnlist2.h datetimemgr.h spawnlog.h packetlog.h datalocationmgr.h eqstr.h messages.h messagefilter.h messagewindow.h messageshell.h terminal.h filteredspawnlog.h messagefilterdialog.h diagnosticmessages.h mapicon.h mapicondialog.ui mapicondialog.ui.h filternotifications.h netstream.h guildshell.h guildlist.h bazaarlog.h message.h s_everquest.h staticspells.h 
 
 CLEANFILES = $(nodist_showeq_SOURCES)
 
 MAINTAINERCLEANFILES = Makefile.in s_everquest.h
 
 map.o: map.cpp map.h ui_mapicondialog.h
-packetinfo.o: s_everquest.h
+
+.h.moc:
+	$(MOC) $< -o $@
 
 m_%.cpp: %.h
-	$(MOC) -nw $< -o $@
+	$(MOC) $< -o $@
 
 s_%.h: %.h
-	./h2info.pl $< $@
+	$(srcdir)/h2info.pl $< $@
 
 ui_%.h: %.ui
 	$(UIC) -nounload $< > $@
@@ -91,3 +165,5 @@ install-exec-local: $(CGI_PROGS)
 		else :; fi; \
 	done
 endif
+
+

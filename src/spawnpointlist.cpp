@@ -568,3 +568,5 @@ void SpawnPointWindow::savePrefs(void)
   if (m_spawnPointList)
     m_spawnPointList->savePrefs();
 }
+
+#include "spawnpointlist.moc"

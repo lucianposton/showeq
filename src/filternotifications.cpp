@@ -129,7 +129,7 @@ void FilterNotifications::executeCommand(const Item* item,
   system ((const char*)command);
 }
 
-
+#include "filternotifications.moc"
 
 
 

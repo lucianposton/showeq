@@ -1,5 +1,51 @@
 Version: $Id$ $Name$
+	
+dohpaZ (11/7/04)
+------------------------
++ Updated version to 5.0.0.16
 
+dohpaZ (11/6/04)
+------------------------
++ Minor 64-bit compatibility cleanup.
++ Cleaned up some minor warnings under gcc 3.4.2.
+	
+dophaZ (10/27/04)
+------------------------
++ Applied patch #1047554 "Oct13 struct patch" created by codepig666 and 
+  submitted to the Patches tracker by tanner (Basic).
+	
+dohpaZ (10/2/04)
+------------------------
++ Migrate to new (autoconf >2.50) style AC_INIT & AM_INIT_AUTOMAKE
++ Update INSTALL to reflect new minimum automake 1.7 requirement for 
+  Makefile.dist users.
++ Exclude MOC output files m_*.cpp from Doxygen processing.
++ Removed QT_VERSION checks that for versions of Qt that we no longer 
+  support (Qt 2.x, 3.0.x) to improve code readability/maintainability.
++ Improved MOC file handling.
++ Miscellaneous cleanup.
+
+dohpaZ (10/1/04)
+------------------------
++ Integrated patch #'s: 1037498, 1037496, 1037494, 1037493, 1037491
+  "Doxygen support for autoconf/automake" from tanner(Basic)
++ Added minor Doxygen related tweaks to source.
++ Added automatic Qt tag file generation for use with doxygen, along with  
+  a doxygen-installdox rule to build the html dox and link them to 
+  trolltech's website.
++ Minor bug fix related to a recently integrated patch.
++ Some more robustness modifications. 
++ Fixed a minor warning.
+
+dohpaZ (09/29/04)
+------------------------
++ More kdevelop project related tweaks.
++ Added Doxyfile for DOxygen related configuration.
+	
+dophaZ (09/27/04)
+------------------------
++ Added kdevelop project.
+	
 dophaZ (09/25/04)
 ------------------------
 + Fixed some more gcc 3.4 warnings.
@@ -8,6 +54,7 @@ dophaZ (09/25/04)
 	
 dophaZ (09/24/04)
 ------------------------
++ Updated version to 5.0.0.15
 + Migrated the dominant distribution method of ShowEQ to tarballs and 
   packages.  Support for direct building off of CVS by non-developers, 
   although still supported, is deprecated and strongly discouraged.

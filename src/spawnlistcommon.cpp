@@ -740,3 +740,5 @@ void SpawnListMenu::set_caption(int id)
   if (ok)
     m_spawnlistWindow->setCaption(caption);
 }
+
+#include "spawnlistcommon.moc"

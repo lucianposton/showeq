@@ -368,3 +368,4 @@ const Spawn* GroupMgr::memberBySlot(uint16_t slot )
   return m_members[slot].m_spawn;
 }
 
+#include "group.moc"

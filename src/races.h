@@ -4,6 +4,8 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  */
+ 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     NULL,                     // 0 - Unknown Race
     "Human",                  // 1
     "Barbarian",              // 2
@@ -424,3 +426,5 @@
     "Gelidran",               // 417
     "Discordling",            // 418
     "Girplan",                // 419
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+

@@ -157,14 +157,9 @@ FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive)
 
   if (!m_regexp.isValid())
   {
-#if (QT_VERSION > 0x030100)
     seqWarn("Filter Error: '%s' - %s",
 	    (const char*)m_regexp.pattern(), 
 	    (const char*)m_regexp.errorString());
-#else
-    seqWarn("Filter Error: '%s' - Is Invalid - Upgrade to Qt 3.1 or better for more info...",
-	    (const char*)m_regexp.pattern());
-#endif
   }
 }
 
@@ -176,14 +171,9 @@ FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive,
 {
   if (!m_regexp.isValid())
   {
-#if (QT_VERSION > 0x030100)
     seqWarn("Filter Error: '%s' - %s",
 	    (const char*)m_regexp.pattern(), 
 	    (const char*)m_regexp.errorString());
-#else
-    seqWarn("Filter Error: '%s' - Is Invalid - Upgrade to Qt 3.1 or better for more info...",
-	    (const char*)m_regexp.pattern());
-#endif
   }
 }
 

@@ -89,3 +89,4 @@ void FilteredSpawnLog::logSpawn(const Item* item, const char* action,
   flush();
 }
 
+#include "filteredspawnlog.moc"
