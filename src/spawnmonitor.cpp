@@ -12,14 +12,17 @@
  *
  */
 
+#include "spawnmonitor.h"
+#include "main.h"
+#include "util.h"
+#include "datalocationmgr.h"
+#include "diagnosticmessages.h"
+
 #include <qdir.h>
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qtextstream.h>
 
-#include "spawnmonitor.h"
-#include "main.h"
-#include "util.h"
 
 SpawnPoint::SpawnPoint(uint16_t spawnID, 
 		       const EQPoint& loc, 
@@ -93,10 +96,11 @@ void SpawnPoint::update(const Spawn* spawn)
   m_count++;
 }
 
-SpawnMonitor::SpawnMonitor(ZoneMgr* zoneMgr,
-			   SpawnShell* spawnShell, 
+SpawnMonitor::SpawnMonitor(const DataLocationMgr* dataLocMgr, 
+			   ZoneMgr* zoneMgr, SpawnShell* spawnShell, 
 			   QObject* parent, const char* name )
 : QObject( parent, name ),
+  m_dataLocMgr(dataLocMgr),
   m_spawnShell(spawnShell),
   m_spawns( 613 ),
   m_points( 211 ),
@@ -265,20 +269,25 @@ void SpawnMonitor::saveSpawnPoints()
 
   if ( !m_zoneName.length() )
   {
-    fprintf( stderr, "Zone name not set in 'SpawnMonitor::saveSpawnPoints'!\n" );
+    seqWarn("Zone name not set in 'SpawnMonitor::saveSpawnPoints'!" );
     return;
   }
   
   QString fileName;
   
-  fileName = QString(LOGDIR "/") + m_zoneName + ".sp";
-  
+  fileName = m_zoneName + ".sp";
+
+  QFileInfo fileInfo = 
+    m_dataLocMgr->findWriteFile("spawnpoints", fileName, false);
+
+  fileName = fileInfo.absFilePath();
+
   QString newName = fileName + ".new";
   QFile spFile( newName );
   
   if (!spFile.open(IO_WriteOnly))
   {
-    printf("Failed to open %s for writing", (const char*)newName);
+    seqWarn("Failed to open %s for writing", (const char*)newName);
     return;
   }
   
@@ -316,18 +325,18 @@ void SpawnMonitor::saveSpawnPoints()
     if (dir.rename( fileName, backupName))
     {
       if (!dir.rename( newName, fileName))
-	printf( "Failed to rename %s to %s\n", 
+	seqWarn( "Failed to rename %s to %s", 
 		(const char*)newName, (const char*)fileName);
     }
   }
   else
   {
     if (!dir.rename(newName, fileName))
-      printf("Failed to rename %s to %s\n", 
+      seqWarn("Failed to rename %s to %s", 
 	     (const char*)newName, (const char*)fileName);
   }
   m_modified = false;
-  printf("Saved spawn points: %s\n", (const char*)fileName);
+  seqInfo("Saved spawn points: %s", (const char*)fileName);
 }
 
 
@@ -335,19 +344,25 @@ void SpawnMonitor::loadSpawnPoints()
 {
   QString fileName;
   
-  fileName = QString(LOGDIR "/") + m_zoneName + ".sp";
-  
-  if (!findFile(fileName))
+  fileName = m_zoneName + ".sp";
+
+  QFileInfo fileInfo = 
+    m_dataLocMgr->findExistingFile("spawnpoints", fileName, false);
+
+  if (!fileInfo.exists())
   {
-    printf("Can't find spawn point file %s\n", (const char*)fileName);
+    seqWarn("Can't find spawn point file %s", 
+	   (const char*)fileInfo.absFilePath());
     return;
   }
   
+  fileName = fileInfo.absFilePath();
+
   QFile spFile(fileName);
   
   if (!spFile.open(IO_ReadOnly))
   {
-    printf( "Can't open spawn point file %s\n", (const char*)fileName );
+    seqWarn( "Can't open spawn point file %s", (const char*)fileName );
     return;
   }
   
@@ -381,12 +396,12 @@ void SpawnMonitor::loadSpawnPoints()
       }
       else
       {
-	printf("Warning: spawn point key already in use!\n");
+	seqWarn("Warning: spawn point key already in use!");
 	delete p;
       }
     }
   }
 
-  printf("Loaded spawn points: %s\n", (const char*)fileName);
+  seqInfo("Loaded spawn points: %s", (const char*)fileName);
   m_modified = false;
 }

@@ -2,7 +2,8 @@
  * drawmap.cpp
  *
  * ShowEQ Distributed under GPL
- * http://www.hackersquest.gomp.ch/
+ * http://seq.sf.net/
+ *
  */
 
 #include <stdlib.h>
@@ -567,7 +568,7 @@ int main (int argc, char *argv[])
     QRegExp slashExp("/");
     mapName.replace(slashExp, "_");
 
-    mapName.prepend(MAPDIR "/");
+    mapName.prepend(PKGDATADIR "maps/");
     loadFileMap ((const char*)mapName);
     paintMap();
   }
@@ -602,12 +603,12 @@ int main (int argc, char *argv[])
       "</HTML>\n";
 
     // otherwise display an HTML form to allow the user to choose a map
-    QDir  mapDir(MAPDIR, "*.map", (QDir::Name | QDir::IgnoreCase), 
+    QDir  mapDir(PKGDATADIR "maps/", "*.map", (QDir::Name | QDir::IgnoreCase), 
 		 (QDir::Files | QDir::Readable));
 
     if (!mapDir.exists())
     {
-      out << "<H1>The map directory '" MAPDIR "' doesn't exist!</H1>\n";
+      out << "<H1>The map directory '" PKGDATADIR "/maps/' doesn't exist!</H1>\n";
       out << footer;
       return 0;
     }

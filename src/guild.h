@@ -22,23 +22,21 @@
 #include "everquest.h"
 
 //------------------------------
-// forward declarations
-class EQPacket;
-
+// GuildMgr
 class GuildMgr : public QObject
 {
   Q_OBJECT
 
  public:
 
-  GuildMgr(QString, EQPacket* packet, QObject* parent = 0, const char* name = 0);
+  GuildMgr(QString, QObject* parent = 0, const char* name = 0);
 
   ~GuildMgr();
 
   QString guildIdToName(uint16_t);
 
  public slots:
-  void worldGuildList(const char*, uint32_t);
+  void worldGuildList(const uint8_t*, size_t);
   void readGuildList();
   void guildList2text(QString);
   void listGuildInfo();
@@ -46,7 +44,7 @@ class GuildMgr : public QObject
  private:
   std::vector<QString> m_guildMap;
  
-  void writeGuildList(const char*, uint32_t);
+  void writeGuildList(const worldGuildListStruct*, size_t);
 
   QString guildsFileName;
 
