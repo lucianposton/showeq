@@ -15,6 +15,8 @@
 #include "spawnshell.h"
 #include "spells.h"
 
+// #define DIAG_SPELLSHELL 1 
+
 SpellItem::SpellItem()
 {
    m_spellId = 0;
@@ -316,15 +318,21 @@ void SpellShell::DeleteSpell(SpellItem *item)
 
 void SpellShell::selfStartSpellCast(const startCastStruct *c)
 {
+#ifdef DIAG_SPELLSHELL
    printf("selfStartSpellCast - id=%d on spawnid=%d\n", 
 	  c->spellId, c->targetId);
+#endif // DIAG_SPELLSHELL
+
    InsertSpell(c);
 }
 
 //slot for loading buffs when main char struct is loaded
 void SpellShell::buffLoad(const spellBuff* c)
 {
+#ifdef DIAG_SPELLSHELL
    printf("Loading buff - id=%d.\n",c->spellid);
+#endif // DIAG_SPELLSHELL
+
    InsertSpell(c);
 }
 
@@ -338,7 +346,9 @@ void SpellShell::buffDrop(const buffDropStruct* bd, uint32_t, uint8_t dir)
   if (bd->spellid == 0xffffffff)
     return;
 
+#ifdef DIAG_SPELLSHELL
   printf("Dropping buff - id=%d from spawn=%d\n", bd->spellid, bd->spawnid);
+#endif // DIAG_SPELLSHELL
 
   // find the spell item
   SpellItem* item = FindSpell(bd->spellid, bd->spawnid);
@@ -361,9 +371,11 @@ void SpellShell::action(const actionStruct* a, uint32_t, uint8_t)
   item = FindSpell(a->spell, a->target);
   if (item)
   {
-
+#ifdef DIAG_SPELLSHELL
     printf("action - source=%d (lvl: %d) cast id=%d on target=%d causing %d damage\n", 
 	   a->source, a->level, a->spell, a->target, a->damage);
+#endif // DIAG_SPELLSHELL
+
     UpdateSpell(item, a);
     emit changeSpell(item);
     return;
@@ -372,8 +384,10 @@ void SpellShell::action(const actionStruct* a, uint32_t, uint8_t)
   // otherwise check for spells cast on us
   if (a->target == m_player->id())
   {
+#ifdef DIAG_SPELLSHELL
     printf("action - source=%d (lvl: %d) cast id=%d on target=%d causing %d damage\n", 
 	   a->source, a->level, a->spell, a->target, a->damage);
+#endif // DIAG_SPELLSHELL
 
     // only way to get here is if there wasn't an existing spell, so...
     item = new SpellItem();
