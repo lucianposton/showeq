@@ -1,3 +1,17 @@
+Andon (31/Jan/02)
+-------------------
+
+I'm back! <grins>..
+
+Additions
+ + --enable-cgi-icons to configure, see configure --help..
+
+Bug Fixes
+ + Fixed a few instances in the CGIs where 'cout' calls should have been
+   calls to 'out'..
+ + Optimized portions of the OpCode monitor slightly, saving up to 3-bytes
+   per loop iteration (during the initial list parsing and reloading).
+
 ratt (28/Jan/02)
 --------------------
 
