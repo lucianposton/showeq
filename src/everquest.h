@@ -791,9 +791,9 @@ struct charProfileStruct
 /*5106*/ uint32_t goldBank;               // Gold Pieces in Bank
 /*5110*/ uint32_t silverBank;             // Silver Pieces in Bank
 /*5114*/ uint32_t copperBank;             // Copper Pieces in Bank
-/*5118*/ uint8_t  unknown5118[28];
-/*5150*/ uint32_t skills[74];             // List of skills (MAX_KNOWN_SKILLS)
-/*5446*/ uint8_t  unknown5446[416];       // ***Placeholder
+/*5118*/ uint8_t  unknown5118[32];
+/*5154*/ uint32_t skills[74];             // List of skills (MAX_KNOWN_SKILLS)
+/*5450*/ uint8_t  unknown5446[412];       // ***Placeholder
 /*5858*/ uint32_t zoneId;                 // see zones.h
 /*5862*/ uint8_t  unknown5862[548];
 /*6410*/ uint32_t bindzoneId[5];          // bound to bindzoneId[0]

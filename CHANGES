@@ -1,3 +1,6 @@
+bbobcat 04/19/93
+ + struct update to realign skill values (again)
+
 mvern 04/18/2003
 ----------------
  + applied jonseq's freebsd compatibility patch and fixes for qt2.
