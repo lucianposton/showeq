@@ -1,6 +1,17 @@
 dohpaZ (31/12/01)
 ---------------------
 Modifications:
+ + a few tweaks to configure.  Robustness and made the RPATH, extra libs,
+   and extra includes stuff actually work.
+
+Bug Fixes:
+ + Made ShowEQ not crash and give an appropriate error message if it is 
+   unable to open the network device.  If it detects that the user is 
+   not running as root it will suggest they do so.
+
+dohpaZ (31/12/01)
+---------------------
+Modifications:
  + Updated showeq.conf.dist to reflect that the KeyMap section is no longer 
    used, and how to configure keyboard accelerators on a per map basis
    (see Map section).

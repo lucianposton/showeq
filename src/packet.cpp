@@ -2898,8 +2898,10 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
 
    if (!m_pcache_pcap)
    {
-      pcap_perror (m_pcache_pcap, "pcap_error:pcap_open_live"); 
-      exit(0);
+     fprintf(stderr, "pcap_error:pcap_open_live(%s): %s\n", device, ebuf);
+     if ((getuid() != 0) && (geteuid() != 0))
+       fprintf(stderr, "Make sure you are running ShowEQ as root.\n");
+     exit(0);
    }
 
    if (pcap_compile(m_pcache_pcap, &bpp, filter_buf, 1, 0) == -1)

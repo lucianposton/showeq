@@ -1,4 +1,4 @@
-INCLUDES=$(QT_INCLUDES) $(X_INCLUDES) $(DB3_INCLUDES) -DMAPDIR=\"$(pkgdatadir)\" -DLOGDIR=\"$(pkgdatadir)\" -I/usr/include/pcap
+INCLUDES=$(QT_INCLUDES) $(X_INCLUDES) $(DB3_INCLUDES) -DMAPDIR=\"$(pkgdatadir)\" -DLOGDIR=\"$(pkgdatadir)\" -I/usr/include/pcap $(USER_INCLUDES)
 
 QTLIB=-lqt-mt
 
@@ -13,7 +13,7 @@ bin_PROGRAMS=showeq showeqitemdbtool
 showeq_SOURCES=main.cpp spawn.cpp spawnshell.cpp spawnlist.cpp spellshell.cpp spelllist.cpp preferences.cpp m_preferences.cpp vpacket.cpp editor.cpp filter.cpp m_spawnshell.cpp m_spawnlist.cpp m_spellshell.cpp m_spelllist.cpp m_editor.cpp packet.cpp m_packet.cpp interface.cpp m_interface.cpp compass.cpp m_compass.cpp map.cpp m_map.cpp util.cpp experiencelog.cpp m_experiencelog.cpp msgdlg.cpp m_msgdlg.cpp player.cpp m_player.cpp decode.cpp m_decode.cpp skilllist.cpp m_skilllist.cpp statlist.cpp m_statlist.cpp filtermgr.cpp m_filtermgr.cpp mapcore.cpp category.cpp m_category.cpp compassframe.cpp m_compassframe.cpp group.cpp m_group.cpp $(ITEMDB_SRCS)
 
 showeq_LDADD=$(QT_LDFLAGS) $(QTLIB) $(DB3_LIBS) $(LIBPTHREAD) $(MEMORY_LIBS) \
-$(PROFILE_LIBS)
+$(PROFILE_LIBS) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
 
 TEST_PROGS=sortitem
 
@@ -28,19 +28,19 @@ endif
 noinst_PROGRAMS=$(TEST_PROGS) $(CGI_PROGS)
 
 listitem_cgi_SOURCES=listitem.cpp util.cpp  $(ITEMDB_SRCS) cgiconv.cpp
-listitem_cgi_LDADD=$(QT_LDFLAGS) $(DB3_LIBS) $(QTLIB) $(LIBPTHREAD)
+listitem_cgi_LDADD=$(QT_LDFLAGS) $(DB3_LIBS) $(QTLIB) $(LIBPTHREAD) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
 showitem_cgi_SOURCES=showitem.cpp util.cpp  $(ITEMDB_SRCS) cgiconv.cpp
-showitem_cgi_LDADD=$(QT_LDFLAGS) $(DB3_LIBS) $(QTLIB) $(LIBPTHREAD)
+showitem_cgi_LDADD=$(QT_LDFLAGS) $(DB3_LIBS) $(QTLIB) $(LIBPTHREAD) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
 listspawn_cgi_SOURCES=listspawn.cpp spawn.cpp util.cpp cgiconv.cpp
-listspawn_cgi_LDADD=$(QT_LDFLAGS) $(QTLIB) $(LIBPTHREAD)
+listspawn_cgi_LDADD=$(QT_LDFLAGS) $(QTLIB) $(LIBPTHREAD) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
 showspawn_cgi_SOURCES=showspawn.cpp spawn.cpp util.cpp cgiconv.cpp
-showspawn_cgi_LDADD=$(QT_LDFLAGS) $(QTLIB) $(LIBPTHREAD)
+showspawn_cgi_LDADD=$(QT_LDFLAGS) $(QTLIB) $(LIBPTHREAD) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
 drawmap_cgi_SOURCES=drawmap.cpp util.cpp cgiconv.cpp
-drawmap_cgi_LDADD=$(QT_LDFLAGS) $(QTLIB) -lgd $(LIBPTHREAD)
+drawmap_cgi_LDADD=$(QT_LDFLAGS) $(QTLIB) -lgd $(LIBPTHREAD) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
 sortitem_SOURCES=sortitem.cpp util.cpp 
-sortitem_LDADD=$(QT_LDFLAGS) $(QTLIB) $(LIBPTHREAD)
+sortitem_LDADD=$(QT_LDFLAGS) $(QTLIB) $(LIBPTHREAD) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
 showeqitemdbtool_SOURCES=itemdbtool.cpp util.cpp  $(ITEMDB_SRCS)
-showeqitemdbtool_LDADD=$(QT_LDFLAGS) $(DB3_LIBS) $(QTLIB) $(LIBPTHREAD)
+showeqitemdbtool_LDADD=$(QT_LDFLAGS) $(DB3_LIBS) $(QTLIB) $(LIBPTHREAD) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
 
 EXTRA_DIST=classes.h compass.h everquest.h interface.h main.h map.h filter.h preferences.h vpacket.h editor.h packet.h races.h skills.h spells.h util.h experiencelog.h msgdlg.h spawn.h spawnshell.h spawnlist.h spellshell.h spelllist.h languages.h weapons.h weapons27.h decode.h opcodes.h itemdb.h gdbmconv.h cgiconv.h skilllist.h statlist.h db3conv.h dbcommon.h deity.h dump-seqdb.h player.h spelltimes.h crctab.h filtermgr.h point.h mapcore.h category.h compassframe.h group.h fixpt.h libeq.h cpreferences.h weapons28.h weapons2b.h
 

@@ -7,6 +7,10 @@
 
 #include "group.h"
 
+// ZBTEMP: Will re-enable the group manager when someone figures out
+// how to fix it's crashing bug.
+//#define ENABLE_GROUPMGR 1
+
 GroupMgr::GroupMgr(SpawnShell* spawnShell, 
 		   EQPlayer* player,  
 		   const char* name)
@@ -20,7 +24,9 @@ GroupMgr::GroupMgr(SpawnShell* spawnShell,
  
 void GroupMgr::handleGroupInfo( const struct groupMemberStruct* gmem )
 {
+#ifndef ENABLE_GROUPMGR
   return;
+#endif
 
   QString newName = gmem->membername;
   const Spawn* member;
@@ -72,7 +78,10 @@ void GroupMgr::handleGroupInfo( const struct groupMemberStruct* gmem )
 
 void GroupMgr::delItem(const Item* item)
 {
-  //  return;
+#ifndef ENABLE_GROUPMGR
+  return;
+#endif
+
   const Spawn* spawn = spawnType(item);
 
   if (spawn == NULL)

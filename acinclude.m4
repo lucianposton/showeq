@@ -99,6 +99,12 @@ AC_DEFUN(AC_PATH_QT_MOC,
      AC_FIND_FILE(moc, [ $ac_qt_bindir              \
                          $QTDIR/bin                 \
                          $QTDIR/src/moc             \
+	                 /opt/qt-gcc3-2.3.2/lib	    \
+	                 /usr/lib/qtgcc3-2.3.2/lib  \
+	                 /opt/qt-gcc3-*/lib	    \
+	                 /usr/lib/qtgcc3-*/lib  \
+	                 /opt/qt-2.3.2/lib          \
+	                 /usr/local/qt-2.3.2/lib    \
                          /usr/bin                   \
                          /usr/X11R6/bin             \
                          /usr/X11R6/bin/qt2         \
@@ -498,6 +504,12 @@ dnl  *******************************************
 
 qt_incdirs=" $QTDIR/include                     \
              $QTINC                             \
+	     /opt/qt-gcc3-2.3.2/include		\
+	     /usr/lib/qtgcc3-2.3.2/include	\
+	     /opt/qt-gcc3-*/include		\
+	     /usr/lib/qtgcc3-*/include		\
+	     /opt/qt-2.3.2/include		\
+	     /usr/local/qt-2.3.2/include	\
              /usr/lib/qt2/include               \
 	     /usr/lib/qt3/include		\
              /usr/lib/qt/include                \
@@ -604,6 +616,10 @@ dnl ************************************
 qt_libdirs=" $QTDIR/lib			\
              $LD_LIBRARY_PATH		\
              $QTLIB			\
+	     /opt/qt-gcc3-2.3.2/lib	\
+	     /usr/lib/qtgcc3-2.3.2/lib	\
+	     /opt/qt-2.3.2/lib		\
+	     /usr/local/qt-2.3.2/lib	\
              /usr/lib			\
 	     /usr/local/qt2/lib		\
 	     /usr/local/qt3/lib		\
@@ -833,65 +849,65 @@ AC_DEFUN(KDE_CHECK_FINAL,
   AC_SUBST(KDE_USE_FINAL_FALSE)
 ])
 
-AC_DEFUN(KDE_CHECK_EXTRA_LIBS,
+AC_DEFUN(SHOWEQ_CHECK_EXTRA_LIBS,
 [
 AC_MSG_CHECKING(for extra includes)
 AC_ARG_WITH(extra-includes, [  --with-extra-includes=DIR
                           adds non standard include paths],
-  kde_use_extra_includes="$withval",
-  kde_use_extra_includes=NONE
+  showeq_use_extra_includes="$withval",
+  showeq_use_extra_includes=NONE
 )
-kde_extra_includes=
-if test -n "$kde_use_extra_includes" && \
-   test "$kde_use_extra_includes" != "NONE"; then
+showeq_extra_includes=
+if test -n "$showeq_use_extra_includes" && \
+   test "$showeq_use_extra_includes" != "NONE"; then
 
    ac_save_ifs=$IFS
    IFS=':'
-   for dir in $kde_use_extra_includes; do
-     kde_extra_includes="$kde_extra_includes $dir"
+   for dir in $showeq_use_extra_includes; do
+     showeq_extra_includes="$showeq_extra_includes $dir"
      USER_INCLUDES="$USER_INCLUDES -I$dir"
    done
    IFS=$ac_save_ifs
-   kde_use_extra_includes="added"
+   showeq_use_extra_includes="added"
 else
-   kde_use_extra_includes="no"
+   showeq_use_extra_includes="no"
 fi
 AC_SUBST(USER_INCLUDES)
 
-AC_MSG_RESULT($kde_use_extra_includes)
+AC_MSG_RESULT($showeq_use_extra_includes)
 
-kde_extra_libs=
+showeq_extra_libs=
 AC_MSG_CHECKING(for extra libs)
 AC_ARG_WITH(extra-libs, [  --with-extra-libs=DIR   adds non standard library paths],
-  kde_use_extra_libs=$withval,
-  kde_use_extra_libs=NONE
+  showeq_use_extra_libs=$withval,
+  showeq_use_extra_libs=NONE
 )
-if test -n "$kde_use_extra_libs" && \
-   test "$kde_use_extra_libs" != "NONE"; then
+if test -n "$showeq_use_extra_libs" && \
+   test "$showeq_use_extra_libs" != "NONE"; then
 
    ac_save_ifs=$IFS
    IFS=':'
-   for dir in $kde_use_extra_libs; do
-     kde_extra_libs="$kde_extra_libs $dir"
-     KDE_EXTRA_RPATH="$KDE_EXTRA_RPATH -rpath $dir"
+   for dir in $showeq_use_extra_libs; do
+     showeq_extra_libs="$showeq_extra_libs $dir"
+     SHOWEQ_EXTRA_RPATH="$SHOWEQ_EXTRA_RPATH -rpath $dir"
      USER_LDFLAGS="$USER_LDFLAGS -L$dir"
    done
    IFS=$ac_save_ifs
-   kde_use_extra_libs="added"
+   showeq_use_extra_libs="added"
 else
-   kde_use_extra_libs="no"
+   showeq_use_extra_libs="no"
 fi
 
 AC_SUBST(USER_LDFLAGS)
 
-AC_MSG_RESULT($kde_use_extra_libs)
+AC_MSG_RESULT($showeq_use_extra_libs)
 
 ])
 
 AC_DEFUN(KDE_CHECK_KIMGIO,
 [
    AC_REQUIRE([AC_BASE_PATH_KDE])
-   AC_REQUIRE([KDE_CHECK_EXTRA_LIBS])
+   AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
    AC_REQUIRE([AC_FIND_TIFF])
    AC_REQUIRE([AC_FIND_JPEG])
    AC_REQUIRE([AC_FIND_PNG])
@@ -1229,7 +1245,7 @@ AC_DEFINE_UNQUOTED(HAVE_LIBJPEG, 1, [Define if you have libjpeg])
 
 AC_DEFUN(AC_FIND_ZLIB,
 [
-AC_REQUIRE([KDE_CHECK_EXTRA_LIBS])
+AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 AC_MSG_CHECKING([for libz])
 AC_CACHE_VAL(ac_cv_lib_z,
 [
@@ -1306,7 +1322,7 @@ AC_DEFUN(AC_FIND_TIFF,
 AC_REQUIRE([K_PATH_X])
 AC_REQUIRE([AC_FIND_ZLIB])
 AC_REQUIRE([AC_FIND_JPEG])
-AC_REQUIRE([KDE_CHECK_EXTRA_LIBS])
+AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 
 KDE_TRY_TIFFLIB(tiff, [],
    KDE_TRY_TIFFLIB(tiff34))
@@ -1318,7 +1334,7 @@ AC_SUBST(LIBTIFF)
 AC_DEFUN(AC_FIND_PNG,
 [
 AC_REQUIRE([AC_FIND_ZLIB])
-AC_REQUIRE([KDE_CHECK_EXTRA_LIBS])
+AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 AC_MSG_CHECKING([for libpng])
 AC_CACHE_VAL(ac_cv_lib_png,
 [
@@ -1727,23 +1743,20 @@ AC_ARG_ENABLE(rpath,
       [  --disable-rpath         do not use the rpath feature of ld],
       USE_RPATH=$enableval, USE_RPATH=yes)
 
-if test -z "$KDE_RPATH" && test "$USE_RPATH" = "yes"; then
+if test -z "$SHOWEQ_RPATH" && test "$USE_RPATH" = "yes"; then
 
-  KDE_RPATH="-rpath \$(kde_libraries)"
+  SHOWEQ_RPATH="-rpath \$(qt_libraries)"
 
-  if test -n "$qt_libraries"; then
-    KDE_RPATH="$KDE_RPATH -rpath \$(qt_libraries)"
-  fi
   dnl $x_libraries is set to /usr/lib in case
   if test -n "$X_LDFLAGS"; then
-    KDE_RPATH="$KDE_RPATH -rpath \$(x_libraries)"
+    SHOWEQ_RPATH="$SHOWEQ_RPATH -rpath \$(x_libraries)"
   fi
-  if test -n "$KDE_EXTRA_RPATH"; then
-    KDE_RPATH="$KDE_RPATH \$(KDE_EXTRA_RPATH)"
+  if test -n "$SHOWEQ_EXTRA_RPATH"; then
+    SHOWEQ_RPATH="$SHOWEQ_RPATH \$(SHOWEQ_EXTRA_RPATH)"
   fi
 fi
-AC_SUBST(KDE_EXTRA_RPATH)
-AC_SUBST(KDE_RPATH)
+AC_SUBST(SHOWEQ_EXTRA_RPATH)
+AC_SUBST(SHOWEQ_RPATH)
 AC_MSG_RESULT($USE_RPATH)
 ])
 
@@ -2015,7 +2028,7 @@ __argz_count __argz_stringify __argz_next])
 
 AC_DEFUN(AC_HAVE_XPM,
  [AC_REQUIRE_CPP()dnl
-  AC_REQUIRE([KDE_CHECK_EXTRA_LIBS])
+  AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 
  test -z "$XPM_LDFLAGS" && XPM_LDFLAGS=
  test -z "$XPM_INCLUDE" && XPM_INCLUDE=
@@ -2067,7 +2080,7 @@ AC_DEFUN(AC_HAVE_XPM,
 
 AC_DEFUN(AC_HAVE_DPMS,
  [AC_REQUIRE_CPP()dnl
-  AC_REQUIRE([KDE_CHECK_EXTRA_LIBS])
+  AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 
  test -z "$DPMS_LDFLAGS" && DPMS_LDFLAGS=
  test -z "$DPMS_INCLUDE" && DPMS_INCLUDE=
@@ -2119,7 +2132,7 @@ AC_DEFUN(AC_HAVE_DPMS,
 
 AC_DEFUN(AC_HAVE_GL,
  [AC_REQUIRE_CPP()dnl
-  AC_REQUIRE([KDE_CHECK_EXTRA_LIBS])
+  AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 
  test -z "$GL_LDFLAGS" && GL_LDFLAGS=
  test -z "$GL_INCLUDE" && GL_INCLUDE=
@@ -2654,87 +2667,6 @@ fi
 
 ])
 
-AC_DEFUN(KDE_CHECK_PYTHON,
-[
-AC_REQUIRE([KDE_CHECK_LIBDL])
-AC_REQUIRE([KDE_CHECK_LIBPTHREAD])
-
-AC_MSG_CHECKING([for Python directory])
-
-AC_CACHE_VAL(kde_cv_pythondir,
-[
-  if test -z "$PYTHONDIR"; then
-    kde_cv_pythondir=/usr/local
-  else
-    kde_cv_pythondir="$PYTHONDIR"
-  fi
-])
-
-AC_ARG_WITH(pythondir,
-[  --with-pythondir=pythondir   use python installed in pythondir ],
-[
-  ac_python_dir=$withval
-], ac_python_dir=$kde_cv_pythondir
-)
-
-AC_MSG_RESULT($ac_python_dir)
-
-if test -z "$1"; then
-  version="1.5"
-else
-  version="$1"
-fi
-
-AC_MSG_CHECKING([for Python$version])
-
-python_incdirs="$ac_python_dir/include /usr/include /usr/local/include/ $kde_extra_includes"
-AC_FIND_FILE(Python.h, $python_incdirs, python_incdir)
-if test ! -r $python_incdir/Python.h; then
-  AC_FIND_FILE(python$version/Python.h, $python_incdirs, python_incdir)
-  python_incdir=$python_incdir/python$version
-  if test ! -r $python_incdir/Python.h; then
-    AC_MSG_ERROR(Python.h not found.)
-  fi
-fi
-
-PYTHONINC=-I$python_incdir
-
-python_libdirs="$ac_python_dir/lib /usr/lib /usr/local /usr/lib $kde_extra_libs"
-AC_FIND_FILE(libpython$version.a, $python_libdirs, python_libdir)
-if test ! -r $python_libdir/libpython$version.a; then
-  AC_FIND_FILE(python$version/config/libpython$version.a, $python_libdirs, python_libdir)
-  python_libdir=$python_libdir/python$version/config
-  if test ! -r $python_libdir/libpython$version.a; then
-    AC_MSG_ERROR(libpython$version.a not found.)
-  fi
-fi
-
-PYTHONLIB=-L$python_libdir
-if test -z "$LIBPYTHON"; then
-LIBPYTHON=-lpython$version
-fi
-
-AC_MSG_RESULT(header $python_incdir library $python_libdir)
-
-dnl Note: this test is very weak
-kde_python_link_found=no
-KDE_TRY_LINK_PYTHON(normal)
-KDE_TRY_LINK_PYTHON(m, -lm)
-KDE_TRY_LINK_PYTHON(pthread, $LIBPTHREAD)
-KDE_TRY_LINK_PYTHON(tcl, -ltcl)
-KDE_TRY_LINK_PYTHON(m_and_thread, [$LIBPTHREAD -lm], [],
-	[AC_MSG_WARN([it seems, Python depends on another library.
-    Pleae use \"make LIBPTYHON='-lpython$version -lotherlib'\" to fix this
-    and contact the authors to let them know about this problem])
-	])
-
-LIBPYTHON="$LIBPYTHON $LIBDL $LIBSOCKET"
-AC_SUBST(PYTHONINC)
-AC_SUBST(PYTHONLIB)
-AC_SUBST(LIBPYTHON)
-
-])
-
 
 AC_DEFUN(KDE_CHECK_STL_SGI,
 [
@@ -2800,7 +2732,7 @@ AC_DEFUN(KDE_CHECK_STL,
 
 AC_DEFUN(AC_FIND_QIMGIO,
    [AC_REQUIRE([AC_FIND_JPEG])
-AC_REQUIRE([KDE_CHECK_EXTRA_LIBS])
+AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 AC_MSG_CHECKING([for qimgio])
 AC_CACHE_VAL(ac_cv_lib_qimgio,
 [
