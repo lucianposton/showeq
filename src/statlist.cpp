@@ -22,7 +22,7 @@ StatList::StatList(Player* player,
                        QWidget* parent, 
                        const char* name)
   : SEQListView("StatList", parent, name),
-    m_pPlayer(player)
+    m_player(player)
 {
    int i;
 
@@ -48,17 +48,17 @@ StatList::StatList(Player* player,
      updateStat(nloop);
    }
 
-   connect (m_pPlayer, SIGNAL(statChanged(int,int,int)), 
+   connect (m_player, SIGNAL(statChanged(int,int,int)), 
 	    this, SLOT(statChanged (int,int,int)));
-   connect (m_pPlayer, SIGNAL(expChangedInt(int,int,int)),
+   connect (m_player, SIGNAL(expChangedInt(int,int,int)),
 	    this, SLOT(expChanged(int,int,int)));
-   connect (m_pPlayer, SIGNAL(expAltChangedInt(int,int,int)),
+   connect (m_player, SIGNAL(expAltChangedInt(int,int,int)),
 	    this, SLOT(expAltChanged(int,int,int)));
-   connect (m_pPlayer, SIGNAL(stamChanged(int,int,int,int,int,int)),
+   connect (m_player, SIGNAL(stamChanged(int,int,int,int,int,int)),
 	    this, SLOT(stamChanged(int,int,int,int,int,int)));
-   connect (m_pPlayer, SIGNAL(manaChanged(uint32_t,uint32_t)),
+   connect (m_player, SIGNAL(manaChanged(uint32_t,uint32_t)),
 	    this, SLOT(manaChanged(uint32_t,uint32_t)));
-   connect (m_pPlayer, SIGNAL(hpChanged(int16_t, int16_t)), 
+   connect (m_player, SIGNAL(hpChanged(int16_t, int16_t)), 
 	    this, SLOT(hpChanged(int16_t, int16_t)));
 
    // restore the columns
@@ -266,7 +266,7 @@ void StatList::updateStat(uint8_t stat)
       uint32_t value, max;
 
       // attempt to get the current attribute values...
-      bool valid = m_pPlayer->getStatValue(stat, value, max);
+      bool valid = m_player->getStatValue(stat, value, max);
 
       // if the values are valid, use them...
       if (valid)
@@ -297,9 +297,9 @@ void StatList::updateStat(uint8_t stat)
 	case LIST_EXP: 
 	  {
 	    // get the experiance needed for the previous level
-	    uint32_t minExp = calc_exp(m_pPlayer->level() - 1,
-				       m_pPlayer->race(),
-				       m_pPlayer->classVal());
+	    uint32_t minExp = calc_exp(m_player->level() - 1,
+				       m_player->race(),
+				       m_player->classVal());
 
 	    valStr = Commanate(value - minExp);
 	    maxStr = Commanate(value - max);
@@ -343,10 +343,11 @@ StatListWindow::StatListWindow(Player* player,
 				 QWidget* parent, const char* name)
   : SEQWindow("StatList", "ShowEQ - Stats", parent, name)
 {
-  QVBoxLayout* layout = new QVBoxLayout(this);
-  layout->setAutoAdd(true);
+  //QVBoxLayout* layout = new QVBoxLayout(this);
+  //layout->setAutoAdd(true);
   
   m_statList = new StatList(player, this, name);
+  setWidget(m_statList);
 }
 
 StatListWindow::~StatListWindow()

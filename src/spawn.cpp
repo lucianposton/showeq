@@ -787,7 +787,8 @@ QString Spawn::classString() const
   };
 
   // return class name from list if it's within range
-  if (classVal() < (sizeof(classnames) / sizeof (char*)))
+  if ((classVal() < (sizeof(classnames) / sizeof (char*))) && 
+      (classnames[classVal()] != NULL))
     return classnames[classVal()];
   else
     return QString::number(classVal());
@@ -959,6 +960,7 @@ void Door::update(const doorStruct* d)
 	 (int16_t)(d->z * 10.0));
   setHeading((int8_t)lrintf(d->heading));
   m_name.sprintf("Door: %s (%d) ", d->name, d->doorId);
+  setZonePoint(d->zonePoint);
   updateLast();
 }
 
