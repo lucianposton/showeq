@@ -1,3 +1,12 @@
+dohpaZ (19/03/02)
+------------------
+Modifications:
+ + Tweaked showeq.conf.dist to remove an outdated statement
+ + Tweaked the help to correct some entries
+ + identified animation field in spawnStruct
+ + EQ 19/03/02 Patch fix for "racing"/"raining" PC problem 
+   (notification to client that server is not sending more position updates)".
+
 dohpaZ (18/03/02)
 ------------------
 Modifications:

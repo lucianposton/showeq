@@ -669,7 +669,8 @@ void SpawnShell::updateSpawns(const mobUpdateStruct* updates)
      // even though the velocity numbers arent 0.  this fix should reduce
      // drift when a mob stops moving. (or turns)
 
-     if (updates->spawnUpdate[a].animation != 0)
+     if ((updates->spawnUpdate[a].animation != 0) &&
+	 (updates->spawnUpdate[a].animation != 66))
      {
        updateSpawn(updates->spawnUpdate[a].spawnId,
 		   updates->spawnUpdate[a].xPos,

@@ -324,7 +324,8 @@ struct spawnPositionUpdate
 
 struct spawnStruct 
 { 
-/*0000*/ uint8_t  unknown0000[49];        // Placeholder 
+/*0000*/ uint8_t  unknown0000[48];        // Placeholder 
+/*0048*/ uint8_t  animation;              // Animation spawn is currently using
 /*0049*/ int8_t   heading;                // Current Heading 
 /*0050*/ int8_t   deltaHeading;           // Delta Heading 
 /*0051*/ int16_t  yPos;                   // Y Position 

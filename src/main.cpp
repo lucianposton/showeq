@@ -907,9 +907,9 @@ int main (int argc, char **argv)
       printf ("                                        a previous session    \n");
       printf ("      --restore-player-state            Restores the player state\n");
       printf ("                                        from a previous session    \n");
-      printf ("      --restore-player-spawns           Restores the spawns\n");
+      printf ("      --restore-spawns                  Restores the spawns\n");
       printf ("                                        from a previous session    \n");
-      printf ("      --restore-player-all              Restores decode key, \n");
+      printf ("      --restore-all                     Restores decode key, \n");
       printf ("                                        player state, and spawns   \n");
       printf ("                                        from a previous session    \n");
       exit (0);

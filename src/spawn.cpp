@@ -459,8 +459,8 @@ void Spawn::update(const spawnStruct* s)
   else
     setNPC(s->NPC); // otherwise it is what it is
 
-  // only non corpses move
-  if (!isCorpse())
+  // only non corpses and things with animation != 66 move
+  if (!isCorpse() && (s->animation != 66))
   {
     setDeltas(s->deltaX, s->deltaY, s->deltaZ);
     setHeading(s->heading, s->deltaHeading);

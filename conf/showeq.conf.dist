@@ -533,7 +533,7 @@ DatabasesEnabled    7
 [SaveState]
 DecodeKey          1 # Save the decode key for the current session/zone
 PlayerState        1 # Save the current player state
-Spawns             1 # Save the spawn list (not yet implemented)
+Spawns             1 # Save the spawn list
 SpawnsFrequency    60000 # number of milliseconds between spawn list saves
 #BaseFilename       /usr/local/share/showeq/last # Base filename used to 
                      # construct the others, so for example the DecodeKey
