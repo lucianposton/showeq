@@ -128,7 +128,7 @@
 
 #define cJumpCode                   0x00a6
 
-#define GroupInfoCode               0x2640
+#define GroupInfoCode               0x0263
 
 #define MoneyThingCode              0x2820
 

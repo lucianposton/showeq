@@ -96,7 +96,9 @@ void GuildMgr::readGuildList()
      while (!guildsfile.atEnd())
      {
          guildsfile.readBlock(reinterpret_cast<char*>(&gl), sizeof(gl));
-         if (strlen(gl.guildName) > 0)
+        // Commented out until verified that this needs to actually be 
+		// removed. -- Ratt 
+		// if (strlen(gl.guildName) > 0)
             m_guildMap.push_back(gl.guildName);
      }
      

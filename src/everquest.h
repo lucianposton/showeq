@@ -1875,7 +1875,7 @@ struct xBuffDropStruct
 /*0001*/ uint8_t  version;
 /*0002*/ uint16_t spawnid;
 /*0004*/ uint8_t  unknown0004[4]; 
-/*0008*/ uint16_t spellid;
+/*0008*/ uint16_t spellId;
 /*0010*/ uint8_t  unknown0010[8];
 /*0018*/ uint16_t spellslot;
 /*0020*/ uint8_t  unknown0020[2];
