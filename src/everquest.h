@@ -124,6 +124,8 @@
 #define COMBAT_RIPOSTE					-3
 #define COMBAT_DODGE					-4
 
+#define PLAYER_CLASSES     15
+#define PLAYER_RACES       14
 /*
 ** Compiler override to ensure
 ** byte aligned structures
@@ -386,7 +388,7 @@ struct spawnZoneStruct
 
 /*
 ** Generic Door Struct
-** Length: 48 Octets
+** Length: 44 Octets
 ** Used in: 
 **    cDoorSpawnsStruct(f721)
 **
@@ -399,10 +401,10 @@ struct doorStruct
 /*0016*/ float   yPos;               // y loc
 /*0020*/ float   xPos;               // x loc
 /*0024*/ float   zPos;               // z loc
-/*0028*/ uint8_t unknown0032[12];    // ***Placeholder
-/*0040*/ uint8_t doorId;             // door's id #
-/*0041*/ uint8_t size;               // guess..
-/*0042*/ uint8_t unknown0042[6];     // ***Placeholder
+/*0028*/ uint8_t unknown0032[2];     // ***Placeholder
+/*0030*/ uint8_t doorId;             // door's id #
+/*0031*/ uint8_t size;               // guess..
+/*0032*/ uint8_t unknown0042[12];    // ***Placeholder
 };
 
 /*
@@ -593,7 +595,7 @@ struct ClientZoneEntryStruct
 
 /*
 ** Server Zone Entry struct
-** Length: 322 Octets
+** Length: 318 Octets
 ** OpCode: ZoneEntryCode (when direction == server)
 */
 
@@ -604,20 +606,20 @@ struct ServerZoneEntryStruct
 /*0002*/ uint8_t  unknown0002[5];         // ***Placeholder
 /*0007*/ char     name[30];               // Player first name
 /*0037*/ char     zoneShortName[15];      // Zone Short Name
-/*0052*/ uint8_t  unknown0052[107];       // ***Placeholder
-/*0159*/ uint8_t  class_;                 // Player's Class
-/*0160*/ uint8_t  race;                   // Player's Race
-/*0161*/ uint8_t  unknown0161[2];         // ***Placeholder
-/*0163*/ uint8_t  level;                  // Player's Level
-/*0164*/ uint8_t  unknown0164[148];       // ***Placeholder 
+/*0052*/ uint8_t  unknown0052[103];       // ***Placeholder
+/*0155*/ uint8_t  class_;                 // Player's Class
+/*0156*/ uint8_t  race;                   // Player's Race
+/*0157*/ uint8_t  unknown0161[2];         // ***Placeholder
+/*0159*/ uint8_t  level;                  // Player's Level
+/*0160*/ uint8_t  unknown0164[148];       // ***Placeholder 
                                           //     could be usefull things here
-/*0312*/ uint16_t deity;                  // Player's Deity
-/*0314*/ uint8_t  unknown0314[8];         // ***Placeholder
+/*0308*/ uint16_t deity;                  // Player's Deity
+/*0310*/ uint8_t  unknown0314[8];         // ***Placeholder
 };
 
 /*
 ** Delete Spawn
-** Length: 6 Octets
+** Length: 4 Octets
 ** OpCode: DeleteSpawnCode
 */
 
@@ -626,7 +628,7 @@ struct deleteSpawnStruct
 /*0000*/ uint8_t  opCode;                 // 0x2a
 /*0001*/ uint8_t  version;                // 0x20
 /*0002*/ uint16_t spawnId;                // Spawn ID to delete
-/*0004*/ uint8_t  unknown0004[2];             // ***Placeholder
+/*0004*/ //uint8_t  unknown0004[2];         // ***Placeholder - Appears to be gone Feb 13 2002
 };
 
 /*
@@ -745,9 +747,9 @@ struct considerStruct{
 /*0000*/ uint8_t  opCode;                 // 0x37
 /*0001*/ uint8_t  version;                // 0x21
 /*0002*/ uint16_t playerid;               // PlayerID
-/*0004*/ uint8_t  unknown0004[2];         // ***Placeholder
+/*0004*/ //uint8_t  unknown0004[2];         // ***Placeholder - Removed Feb 13, 2002
 /*0006*/ uint16_t targetid;               // TargetID
-/*0008*/ uint8_t  unknown0008[2];         // ***Placeholder
+/*0008*/ //uint8_t  unknown0008[2];         // ***Placeholder
 /*0010*/ int32_t  faction;                // Faction
 /*0014*/ int32_t  level;                  // Level
 /*0018*/ int32_t  curHp;                  // Current Hitpoints
@@ -927,7 +929,7 @@ struct zoneSpawnsStruct
 
 /*
 ** client changes target struct
-** Length: 6 Octets
+** Length: 4 Octets
 ** OpCode: clientTargetCode
 */
 
@@ -936,7 +938,7 @@ struct clientTargetStruct
 /*0000*/ uint8_t  opCode;                 // 0x62
 /*0001*/ uint8_t  version;                // 0x21
 /*0002*/ uint16_t newTarget;              // Target ID
-/*0004*/ uint16_t unknown0004;            // ***Placeholder
+/*0004*/ //uint16_t unknown0004;          // ***Placeholder - Removed Feb 13, 2002
 };
 
 /*
@@ -1005,9 +1007,9 @@ struct startCastStruct
 /*0002*/ int16_t  unknown0002;            // ***Placeholder
 /*0004*/ uint16_t spellId;                // Spell ID
 /*0006*/ int16_t  unknown0006;            // ***Placeholder
-/*0008*/ int16_t  unknown0008;            // ***Placeholder
-/*0010*/ uint32_t targetId;               // The current selected target
-/*0014*/ uint8_t  unknown0014[4];         // ***Placeholder
+/*0008*/ //int16_t  unknown0008;            // ***Placeholder
+/*0010*/ uint16_t targetId;               // The current selected target
+/*0014*/ uint8_t  unknown0014[4];         // ***Placeholder 
 };
 
 /*

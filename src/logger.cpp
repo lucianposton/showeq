@@ -607,7 +607,6 @@ PktLogger::logDeleteSpawn(const deleteSpawnStruct *s, int len, int dir)
 
     outputf("R %u %04d %d %.2X%.2X %u ", timestamp, len, dir, 
         s->opCode, s->version, s->spawnId);
-    output(s->unknown0004, 2);
     outputf("\n");
     flush();
 }
@@ -1032,9 +1031,7 @@ PktLogger::logStartCast(const startCastStruct *spell, int len, int dir)
     outputf(" %u ", spell->spellId);
     output(&spell->unknown0006, 4);
     outputf(" ");
-    output(&spell->unknown0008, 4);
     outputf(" %u ", spell->targetId);
-    output(spell->unknown0014, 4);
     outputf("\n");
 
     flush();
@@ -1656,9 +1653,7 @@ PktLogger::logConsider(const considerStruct *consider, int len, int dir)
     outputf("R %u %04d %d %.2X%2.X %u ", timestamp, len, dir, 
         consider->opCode, consider->version, consider->playerid);
 
-    output(consider->unknown0004,2);
     outputf(" %u ", consider->targetid);
-    output(consider->unknown0008,2);
     outputf(" %d %d %d %d ", consider->faction, consider->level,
         consider->curHp, consider->maxHp);
     output(&consider->unknown0026,4);
@@ -1737,7 +1732,6 @@ PktLogger::logClientTarget(const clientTargetStruct *target, int len, int dir)
     outputf("R %u %04d %d %.2X%2.X %u ", timestamp, len, dir,
         target->opCode, target->version, target->newTarget);
 
-    output(&target->unknown0004,2);
     outputf("\n");
     flush();
     return;

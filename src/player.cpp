@@ -963,12 +963,12 @@ void EQPlayer::fillConTable()
       }
       else if (m_playerLevel < 58) 
       { // 55 - 57
-	greenRange = -20;
+	greenRange = -21;
 	cyanRange = -16;
       }
       else
       { // 58 - 60
-	greenRange = -21;
+	greenRange = -20;
 	cyanRange = -16;
       }
       
