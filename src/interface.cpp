@@ -3468,6 +3468,10 @@ void EQInterface::killSpawn(const Item* item)
   if (item == NULL)
     return;
 
+  if (item->id() == m_player->getPlayerID())
+    printf("Player died at y:%d, x:%d, z:%d\n", item->yPos(), item->xPos(),
+      item->zPos());
+
   if (m_selectedSpawn != item)
     return;
 
