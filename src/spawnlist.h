@@ -49,9 +49,19 @@
 #include "seqwindow.h"
 #include "seqlistview.h"
 #include "everquest.h"
+#include "spawn.h"
 #include "player.h"
-#include "spawnshell.h"
-#include "category.h"
+
+//--------------------------------------------------
+// forward declarations
+class Category;
+class CategoryMgr;
+class Item;
+class EQPlayer;
+class SpawnShell;
+class FilterMgr;
+class CSpawnList;
+class SpawnListItem;
 
 //--------------------------------------------------
 // defines
@@ -69,11 +79,6 @@
 #define SPAWNCOL_INFO  11
 #define SPAWNCOL_SPAWNTIME 12
 #define SPAWNCOL_MAXCOLS 13
-
-//--------------------------------------------------
-// forward declarations
-class CSpawnList;
-class SpawnListItem;
 
 //--------------------------------------------------
 // SpawnListMenu
@@ -98,6 +103,8 @@ class SpawnListMenu : public QPopupMenu
    void edit_category(int id);
    void delete_category(int id);
    void reload_categories(int id);
+   void set_font(int id);
+   void set_caption(int id);
    void rebuild_spawnlist(int id);
 
  protected:
@@ -134,7 +141,7 @@ public:
    void setFilterFlags(uint32_t flags) { m_filterFlags = flags; }
    void setRuntimeFilterFlags(uint32_t flags) { m_runtimeFilterFlags = flags; }
 
-   void update(uint32_t changeType = tSpawnChangedALL);
+   void update(uint32_t changeType);
    void updateTitle(const QString& name);
    void setShellItem(const Item *);
    itemType type();
@@ -168,15 +175,15 @@ public:
 
    double calcDist(const Item* item)
    { 
-     return item->calcDist(m_player->getPlayerX(), 
-			   m_player->getPlayerY(),
-			   m_player->getPlayerZ());
+     return item->calcDist(m_player->x(), 
+			   m_player->y(),
+			   m_player->z());
    }
 
    int calcDistInt(const Item* item)
    { 
-     return item->calcDist2DInt(m_player->getPlayerX(), 
-				m_player->getPlayerY());
+     return item->calcDist2DInt(m_player->x(), 
+				m_player->y());
    }
 
    QColor pickSpawnColor(const Item *item, QColor def = Qt::black);

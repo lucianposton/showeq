@@ -540,6 +540,8 @@ class EQPacket : public QObject
    unsigned int MonitoredOpCodeList      [OPCODE_SLOTS][3];
    QString MonitoredOpCodeAliasList [OPCODE_SLOTS];
    
+   bool logMessage(const QString& filename,
+		   const QString& message);
    bool logData(const QString& filename,
 		uint32_t       len,
 		const uint8_t* data,
@@ -638,6 +640,10 @@ class EQPacket : public QObject
    void moneyUpdate(const moneyUpdateStruct* money, uint32_t, uint8_t);
    void moneyThing(const moneyThingStruct* money, uint32_t, uint8_t);
    void groupInfo(const groupMemberStruct* gmem, uint32_t, uint8_t);
+   void groupInvite(const groupInviteStruct* gmem, uint32_t, uint8_t);
+   void groupDecline(const groupDeclineStruct* gmem, uint32_t, uint8_t);
+   void groupAccept(const groupAcceptStruct* gmem, uint32_t, uint8_t);
+   void groupDelete(const groupDeleteStruct* gmem, uint32_t, uint8_t);
    void zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t, uint8_t);
    void zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t, uint8_t);
    void zoneEntry(const ClientZoneEntryStruct* zsentry, uint32_t, uint8_t);
@@ -693,7 +699,6 @@ class EQPacket : public QObject
    uint16_t       m_serverPort;
    uint16_t       m_clientPort;
    bool           m_busy_decoding;
-   bool           m_zoning;
    bool           m_serverArqSeqFound;
    bool           m_viewUnknownData;
    bool           m_detectingClient;

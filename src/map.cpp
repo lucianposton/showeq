@@ -38,8 +38,11 @@
 #include "map.h"
 #include "util.h"
 #include "main.h"
-#include "filter.h"
-#include "spawnlist.h"
+#include "filtermgr.h"
+#include "zonemgr.h"
+#include "spawnmonitor.h"
+#include "player.h"
+#include "spawnshell.h"
 #include "itemdb.h"
 
 
@@ -175,8 +178,10 @@ MapLabel::MapLabel( Map* map ): QLabel( 0, "mapLabel", WStyle_StaysOnTop +
 
 //----------------------------------------------------------------------
 // MapMgr
-MapMgr::MapMgr(SpawnShell* spawnShell, EQPlayer* player, QWidget* dialogParent)
-  : m_spawnShell(spawnShell),
+MapMgr::MapMgr(SpawnShell* spawnShell, EQPlayer* player, ZoneMgr* zoneMgr,
+	       QWidget* dialogParent, QObject* parent, const char* name)
+  : QObject(parent, name),
+    m_spawnShell(spawnShell),
     m_player(player),
     m_dialogParent(dialogParent)
 {
@@ -193,15 +198,23 @@ MapMgr::MapMgr(SpawnShell* spawnShell, EQPlayer* player, QWidget* dialogParent)
 	   this, SLOT(addItem(const Item*)));
   connect (m_spawnShell, SIGNAL(delItem(const Item*)),
 	   this, SLOT(delItem(const Item*)));
-  connect (m_spawnShell, SIGNAL(killSpawn(const Item*)),
+  connect (m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
 	   this, SLOT(killSpawn(const Item*)));
   connect (m_spawnShell, SIGNAL(changeItem(const Item*, uint32_t)),
 	   this, SLOT(changeItem(const Item*, uint32_t)));
   connect(m_spawnShell, SIGNAL(clearItems()),
 	  this, SLOT(clearItems()));
 
+  // supply the MapMgr slots with signals from ZoneMgr
+  connect(zoneMgr, SIGNAL(zoneBegin(const QString&)),
+	  this, SLOT(zoneBegin(const QString&)));
+  connect(zoneMgr, SIGNAL(zoneChanged(const QString&)),
+	  this, SLOT(zoneChanged(const QString&)));
+  connect(zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)),
+	  this, SLOT(zoneEnd(const QString&, const QString&)));
+
   // if there is a short zone name already, try to load its map
-  QString shortZoneName = m_player->getShortZoneName();
+  QString shortZoneName = zoneMgr->shortZoneName();
   if (!shortZoneName.isEmpty())
   {
     QString fileName;
@@ -219,11 +232,17 @@ MapMgr::~MapMgr()
 {
 }
 
-void MapMgr::zoneEntry(const ServerZoneEntryStruct* zsentry)
+uint16_t MapMgr::spawnAggroRange(const Spawn* spawn) 
+{ 
+  uint16_t* range = m_spawnAggroRange.find(spawn->id()); 
+  return (!range) ? 0 : *range;
+}
+
+void MapMgr::zoneBegin(const QString& shortZoneName)
 {
 #ifdef DEBUGMAP
-  debug ("zoneEntry(%s)", 
-	 zsentry->zoneShortName);
+  debug ("zoneBegin(%s)", 
+	 shortZoneName);
 #endif /* DEBUGMAP */
   
   // clear the map data
@@ -235,17 +254,17 @@ void MapMgr::zoneEntry(const ServerZoneEntryStruct* zsentry)
   QString fileName;
   
   // construct the map file name
-  fileName.sprintf("%s/%s.map", MAPDIR, (const char*)zone_name(zsentry->zoneId));
+  fileName.sprintf("%s/%s.map", MAPDIR, (const char*)shortZoneName);
   
   // load the map
   loadFileMap(fileName);
 }
 
-void MapMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t dir)
+void MapMgr::zoneChanged(const QString& shortZoneName)
 {
 #ifdef DEBUGMAP
-  debug ("zoneChange(%s, %d)", 
-	 (const char*)zone_name(zoneChange->zoneId), dir);
+  debug ("zoneChanged(%s)", 
+	 (const char*)shortZoneName);
 #endif /* DEBUGMAP */
 
   // clear the map data
@@ -257,23 +276,23 @@ void MapMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t di
   QString fileName;
   
   // construct the map file name
-  fileName.sprintf("%s/%s.map", MAPDIR, (const char*)zone_name(zoneChange->zoneId));
+  fileName.sprintf("%s/%s.map", MAPDIR, (const char*)shortZoneName);
   
   // load the map
   loadFileMap(fileName);
 }
 
-void MapMgr::zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t dir)
+void MapMgr::zoneEnd(const QString& shortZoneName, const QString& longZoneName)
 {
 #ifdef DEBUGMAP
-  debug ("zoneNew(%s, %s, %d)", 
-	 zoneNew->longName, zoneNew->shortName, dir);
+  debug ("zoneEnd(%s, %s)", 
+	 (const char*)longZoneName, (const char*)shortZoneName);
 #endif /* DEBUGMAP */
 
   QString fileName;
   
   // construct the map file name
-  fileName.sprintf("%s/%s.map", MAPDIR, zoneNew->shortName);
+  fileName.sprintf("%s/%s.map", MAPDIR, (const char*)shortZoneName);
   
   // load the map if it's not already loaded
   if (fileName != m_mapData.fileName())
@@ -553,7 +572,8 @@ void MapMgr::dumpInfo(QTextStream& out)
 //----------------------------------------------------------------------
 // MapMenu
 MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
-  : m_map(map)
+  : QPopupMenu(parent, name),
+    m_map(map)
 {
   QString preferenceName = m_map->preferenceName();
 
@@ -614,7 +634,9 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
 
   m_id_spawnDepthFilter = insertItem("Spawn Depth Filter", 
 				     this, SLOT(toggle_spawnDepthFilter(int)));
-  
+  key = pSEQPrefs->getPrefKey("SpawnDepthFilteredKey", preferenceName, "Alt+5");
+  setAccel(key, m_id_spawnDepthFilter);
+
   subMenu = new QPopupMenu(m_map);
   subMenu->setCheckable(true);
   
@@ -632,6 +654,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_spawns = subMenu->insertItem("Spawns", this, SLOT(toggle_spawns(int)));
   m_id_unknownSpawns = subMenu->insertItem("Unknown Spawns", 
 					   this, SLOT(toggle_unknownSpawns(int)));
+  m_id_spawnPoints = subMenu->insertItem("Spawn Points", this, SLOT(toggle_spawnPoints(int)));
   m_id_drops = subMenu->insertItem("Drops", this, SLOT(toggle_drops(int)));
   m_id_coins = subMenu->insertItem("Coins", this, SLOT(toggle_coins(int)));
   m_id_doors = subMenu->insertItem("Doors", this, SLOT(toggle_doors(int)));
@@ -793,6 +816,7 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_gridTicks, m_map->showGridTicks());
   setItemChecked(m_id_locations, m_map->showLocations());
   setItemChecked(m_id_spawns, m_map->showSpawns());
+  setItemChecked(m_id_spawnPoints, m_map->showSpawnPoints());
   setItemChecked(m_id_unknownSpawns, m_map->showUnknownSpawns());
   setItemChecked(m_id_drops, m_map->showDrops());
   setItemChecked(m_id_coins, m_map->showCoins());
@@ -942,6 +966,11 @@ void MapMenu::toggle_locations(int itemId)
 void MapMenu::toggle_spawns(int itemId)
 {
   m_map->setShowSpawns(!m_map->showSpawns());
+}
+
+void MapMenu::toggle_spawnPoints(int itemId)
+{
+  m_map->setShowSpawnPoints(!m_map->showSpawnPoints());
 }
 
 void MapMenu::toggle_unknownSpawns(int itemId)
@@ -1096,6 +1125,8 @@ void MapMenu::select_fovMode(int itemId)
 Map::Map(MapMgr* mapMgr, 
 	 EQPlayer* player, 
 	 SpawnShell* spawnshell, 
+	 ZoneMgr* zoneMgr,
+	 SpawnMonitor* spawnMonitor,
 	 const QString& preferenceName, 
 	 uint32_t runtimeFilterFlagMask,
 	 QWidget * parent, 
@@ -1108,7 +1139,9 @@ Map::Map(MapMgr* mapMgr,
     m_menu(NULL),
     m_runtimeFilterFlagMask(runtimeFilterFlagMask),
     m_player(player),
-    m_spawnShell(spawnshell)
+    m_spawnShell(spawnshell),
+    m_zoneMgr(zoneMgr),
+    m_spawnMonitor(spawnMonitor)
 {
 #ifdef DEBUGMAP
   debug ("Map()");
@@ -1165,6 +1198,9 @@ Map::Map(MapMgr* mapMgr,
   tmpPrefString = "ShowSpawns";
   m_showSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
+  tmpPrefString = "ShowSpawnPoints";
+  m_showSpawnPoints = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
+
   tmpPrefString = "ShowUnknownSpawns";
   m_showUnknownSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 
 					       showeq_params->createUnknownSpawns);
@@ -1192,6 +1228,11 @@ Map::Map(MapMgr* mapMgr,
   m_marker1SizeWH = m_marker1Size << 1; // 2 x size
   m_marker2Size = val + 2;
   m_marker2SizeWH = m_marker2Size << 1; // 2 x size
+  if (val > 1)
+    m_marker0Size = val - 1;
+  else 
+    m_marker0Size = val;
+  m_marker0SizeWH = m_marker0Size << 1; // 2 x size
 
   tmpPrefString = "FOVMode";
   m_fovMode = (FOVMode)pSEQPrefs->getPrefInt(tmpPrefString, prefString, 
@@ -1758,12 +1799,9 @@ void Map::viewLock()
        // next mode is follow none
        m_followMode = tFollowNone;
 
-       // retrieve the approximate position of the player
-       const Spawn* player = m_spawnShell->playerSpawn();
-       
        // retrieve the approximate current player position
        MapPoint targetPoint;
-       player->approximatePosition(m_animate, QTime::currentTime(),
+       m_player->approximatePosition(m_animate, QTime::currentTime(),
 				   targetPoint);
        
        // set the current pan to it's position to avoid jarring the user
@@ -1810,12 +1848,9 @@ void Map::setFollowMode(FollowMode mode)
   case tFollowNone:
     if (m_followMode == tFollowPlayer)
     {
-       // retrieve the approximate position of the player
-       const Spawn* player = m_spawnShell->playerSpawn();
-       
        // retrieve the approximate current player position
        MapPoint targetPoint;
-       player->approximatePosition(m_animate, QTime::currentTime(),
+       m_player->approximatePosition(m_animate, QTime::currentTime(),
 				   targetPoint);
        
        // set the current pan to it's position to avoid jarring the user
@@ -1885,7 +1920,7 @@ void Map::setFrameRate(int val)
 
     emit frameRateChanged(m_frameRate);
 
-    if (/*(m_player->getPlayerID() != 1) &&*/ m_timer->isActive())
+    if (m_timer->isActive())
       m_timer->changeInterval(1000/m_frameRate);
   }
 }
@@ -1901,6 +1936,11 @@ void Map::setDrawSize(int val)
   m_marker1SizeWH = m_marker1Size << 1; // 2 x size
   m_marker2Size = val + 2;
   m_marker2SizeWH = m_marker2Size << 1; // 2 x size
+  if (val > 1)
+    m_marker0Size = val - 1;
+  else 
+    m_marker0Size = val;
+  m_marker0SizeWH = m_marker0Size << 1; // 2 x size
 
   QString tmpPrefString = "DrawSize";
   pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), m_drawSize);
@@ -2010,6 +2050,17 @@ void Map::setShowSpawns(bool val)
 
   QString tmpPrefString = "ShowSpawns";
   pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showSpawns);
+  
+  if(!m_cacheChanges)
+    refreshMap ();
+}
+
+void Map::setShowSpawnPoints(bool val) 
+{ 
+  m_showSpawnPoints = val; 
+
+  QString tmpPrefString = "ShowSpawnPoints";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showSpawnPoints);
   
   if(!m_cacheChanges)
     refreshMap ();
@@ -2212,7 +2263,7 @@ void Map::setMapOptimization(MapOptimizationMethod method)
 
 void Map::setZoom(int val) 
 { 
-  if (m_player->getPlayerID() != 1)
+  if (m_player->id() != 1)
   {
     if (m_param.setZoom(val))
     {
@@ -2561,22 +2612,13 @@ void Map::reAdjust ()
     // fall thru to next case since it's the new mode
   case tFollowPlayer:
   { 
-    // retrieve the approximate position of the player
-    const Spawn* player = m_spawnShell->playerSpawn();
-    
-    // if there's a player, follow it
-    if (player)
-    {
-      // retrieve the approximate current player position
-      MapPoint targetPoint;
-      player->approximatePosition(m_animate, QTime::currentTime(), 
+    // retrieve the approximate current player position
+    MapPoint targetPoint;
+    m_player->approximatePosition(m_animate, QTime::currentTime(), 
 				  targetPoint);
 
-      // adjust around players location
-      m_param.reAdjust(&targetPoint);
-    }
-    else 
-      m_param.reAdjust(NULL);
+    // adjust around players location
+    m_param.reAdjust(&targetPoint);
   }
   break;
   case tFollowNone:
@@ -2607,15 +2649,9 @@ void Map::addLocation(void)
   debug ("addLocation()");
 #endif /* DEBUGMAP */
 
-  // get the player spawn
-  const Spawn* spawn = m_spawnShell->playerSpawn();
-
-  if (!spawn)
-    return;
-
   // get it's approximage location
   MapPoint point;
-  spawn->approximatePosition(m_animate, QTime::currentTime(), point);
+  m_player->approximatePosition(m_animate, QTime::currentTime(), point);
 
 #ifdef DEBUGMAP
   printf("addLocation() point(%d, %d, %d)\n", point.x(), point.y(), point.z());
@@ -2630,15 +2666,9 @@ void Map::startLine (void)
 #ifdef DEBUGMAP
   debug ("startLine()");
 #endif /* DEBUGMAP */
-  // get the player spawn
-  const Spawn* spawn = m_spawnShell->playerSpawn();
-
-  if (!spawn)
-    return;
-
   // get it's approximate position
   MapPoint point;
-  spawn->approximatePosition(m_animate, QTime::currentTime(), point);
+  m_player->approximatePosition(m_animate, QTime::currentTime(), point);
 
 #ifdef DEBUGMAP
   printf("startLine() point(%d, %d, %d)\n", point.x(), point.y(), point.z());
@@ -2654,15 +2684,9 @@ void Map::addLinePoint()
   debug ("addLinePoint()");
 #endif /* DEBUGMAP */
 
-  // get the player spawn
-  const Spawn* spawn = m_spawnShell->playerSpawn();
-
-  if (!spawn)
-    return;
-
   // get the player spawns approximate position
   MapPoint point;
-  spawn->approximatePosition(m_animate, QTime::currentTime(), point);
+  m_player->approximatePosition(m_animate, QTime::currentTime(), point);
 
 
 #ifdef DEBUGMAP
@@ -2694,12 +2718,9 @@ void Map::addPathPoint()
 {
   FILE *f;
 
-  // get the player spawn
-  const Spawn* spawn = m_spawnShell->playerSpawn();
-  
   // get the player spawns approximate position
   MapPoint point;
-  spawn->approximatePosition(m_animate, QTime::currentTime(), point);
+  m_player->approximatePosition(m_animate, QTime::currentTime(), point);
 
   f=fopen("/tmp/coords","at");
   if(f) {
@@ -2740,26 +2761,19 @@ void Map::paintMap (QPainter * p)
   // get the current time
   drawTime.start();
 
-  // retrieve the approximate position of the player
-  const Spawn* player = m_spawnShell->playerSpawn();
-
   EQPoint playerPos;
 
-  // if the player is known, get it's position
-  if (player != NULL)
-  {
-    // retrieve the approximate current player position, and set the 
-    // parameters player position to it.
-    player->approximatePosition(m_animate, drawTime, playerPos);
-    m_param.setPlayer(playerPos);
-
-    // make sure the player stays visible
-    if ((m_param.zoom() > 1) &&
-	((m_followMode == tFollowPlayer) &&
-	 (!inRect(m_param.screenBounds(), 
-		  playerPos.xPos(), playerPos.yPos()))))
-	  reAdjust();
-  }
+  // retrieve the approximate current player position, and set the 
+  // parameters player position to it.
+  m_player->approximatePosition(m_animate, drawTime, playerPos);
+  m_param.setPlayer(playerPos);
+  
+  // make sure the player stays visible
+  if ((m_param.zoom() > 1) &&
+      ((m_followMode == tFollowPlayer) &&
+       (!inRect(m_param.screenBounds(), 
+		playerPos.xPos(), playerPos.yPos()))))
+    reAdjust();
 
   // if following a spawn, and there is a spawn, make sure it's visible.
   if ((m_followMode == tFollowSpawn) &&
@@ -2777,9 +2791,6 @@ void Map::paintMap (QPainter * p)
       reAdjust();
   }
 
-  // retrieve the screen bounds
-  const QRect& screenBounds = m_param.screenBounds();
-
   // copy the background
   const QPixmap& tmpPix = m_mapCache.getMapImage(m_param);
   bitBlt(&m_offscreen, 0, 0,
@@ -2793,8 +2804,8 @@ void Map::paintMap (QPainter * p)
   tmp.setPen (NoPen);
   tmp.setFont (m_param.font());
 
-  if ((player != NULL) && 
-      (inRect(screenBounds, playerPos.xPos(), playerPos.yPos())))
+  if ((!m_zoneMgr->isZoning()) && 
+      (m_player->id() != 0))
   {
     if (m_showPlayerBackground)
       paintPlayerBackground(m_param, tmp);
@@ -2814,6 +2825,9 @@ void Map::paintMap (QPainter * p)
 
   if (m_showDoors)
     paintDoors(m_param, tmp);
+
+  if (m_showSpawnPoints)
+    paintSpawnPoints(m_param, tmp);
 
   if (m_showSpawns)
     paintSpawns(m_param, tmp, drawTime);
@@ -2894,8 +2908,7 @@ void Map::paintPlayerView(MapParameters& param, QPainter& p)
   
   int const player_circle_radius = 4;
   
-  int16_t playerAngle = m_player->getPlayerHeading();
-
+  int16_t playerAngle = m_player->headingDegrees();
   if (playerAngle != -1)
   {
     double const pi = 3.14159265358979323846;
@@ -3094,9 +3107,6 @@ void Map::paintSpawns(MapParameters& param,
   const QRect& screenBounds = m_param.screenBounds();
   bool up2date = false;
 
-  // retrieve the approximate position of the player
-  const Spawn* player = m_spawnShell->playerSpawn();
-
   /* Paint the spawns */
   if ((m_lastFlash.msecsTo(drawTime)) > 100)  // miliseconds between flashing
   {
@@ -3137,12 +3147,12 @@ void Map::paintSpawns(MapParameters& param,
     filterFlags = item->filterFlags();
 
     // only paint if the spawn is not filtered or the m_showFiltered flag is on
-    if ((!m_spawnDepthFilter || 
-	 (item == m_selectedItem) ||
-         ((item->zPos() <= m_param.playerHeadRoom()) && 
-	  (item->zPos() >= m_param.playerFloorRoom()))) &&
-	((!(filterFlags & FILTER_FLAG_FILTERED)) || m_showFiltered) &&
-	(!spawn->isUnknown() || m_showUnknownSpawns))
+    if (((!m_spawnDepthFilter || 
+	  ((item->zPos() <= m_param.playerHeadRoom()) && 
+	   (item->zPos() >= m_param.playerFloorRoom()))) &&
+	 ((!(filterFlags & FILTER_FLAG_FILTERED)) || m_showFiltered) &&
+	 (!spawn->isUnknown() || m_showUnknownSpawns)) ||
+	(item == m_selectedItem))
 	 
     {
       // get the approximate position of the spawn
@@ -3186,8 +3196,7 @@ void Map::paintSpawns(MapParameters& param,
       printf("Draw velocities\n");
 #endif
       /* Draw velocities */
-      if ((m_showVelocityLines && 
-	   !spawn->isSelf()) && //Don't draw line for the self.
+      if (m_showVelocityLines &&
 	  (spawn->deltaX() || spawn->deltaY())) // only if has a delta
       {
 	p.setPen (darkGray);
@@ -3583,7 +3592,7 @@ void Map::paintSpawns(MapParameters& param,
 	  if (spawn->isOtherPlayer())
 	  {
 	    // if not the same team as us
-	    if (!player->isSameRaceTeam(spawn))
+	    if (!m_player->isSameRaceTeam(spawn))
 	    {
 	      int diff = spawn->level() - playerLevel;
 	      if (diff < 0) diff *= -1;
@@ -3651,7 +3660,7 @@ void Map::paintSpawns(MapParameters& param,
 	  // circle around pvp pets
 	  if (owner != NULL)
 	  {
-	    if (!player->isSameRaceTeam(owner))
+	    if (!m_player->isSameRaceTeam(owner))
 	    {
 	      p.setBrush(NoBrush);
 	      p.setPen(m_player->pickConColor(spawn->level()));
@@ -3667,7 +3676,7 @@ void Map::paintSpawns(MapParameters& param,
 	  if (spawn->isOtherPlayer())
 	  {
 	    // if not the same team as us
-	    if (!player->isSameDeityTeam(spawn))
+	    if (!m_player->isSameDeityTeam(spawn))
 	    {
 	      int diff = spawn->level() - playerLevel;
 	      if (diff < -5)  //They are much easier than you.
@@ -3732,7 +3741,7 @@ void Map::paintSpawns(MapParameters& param,
 	  // circle around deity pvp pets
 	  if (owner != NULL)
 	  {
-	    if (!player->isSameDeityTeam(owner))
+	    if (!m_player->isSameDeityTeam(owner))
 	    {
 	      p.setBrush(NoBrush);
 	      p.setPen(m_player->pickConColor(spawn->level()));
@@ -3806,6 +3815,45 @@ void Map::paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
   }
 }
 
+void Map::paintSpawnPoints( MapParameters& param, QPainter& p )
+{
+  long count = m_spawnMonitor->spawnPoints().count();
+  
+  if (!count )
+    return;
+  
+  QAsciiDictIterator<SpawnPoint> it( m_spawnMonitor->spawnPoints() );
+  SpawnPoint* sp;
+  while ((sp = it.current()))
+  {
+    ++it;
+    
+    if ((sp->m_diffTime == 0) || (sp->m_deathTime == 0))
+      p.setPen( darkGray );
+    else
+    {
+      unsigned char age = sp->age();
+      
+      if ( age == 255 )
+	continue;
+      
+      if ( age > 220 )
+      {
+	if (!m_flash)
+	  continue;
+	p.setPen( red );
+      }
+      else
+	p.setPen( QColor( age, age, 0 ) );
+    }
+    
+    int x = m_param.calcXOffsetI(sp->x());
+    int y = m_param.calcYOffsetI(sp->y());
+    
+    p.drawLine( x, y - m_marker0Size, x, y + m_marker0Size );
+    p.drawLine( x - m_marker0Size, y, x + m_marker0Size, y );
+  }
+}
 
 void Map::paintDebugInfo(MapParameters& param, 
 			 QPainter& p, 
@@ -3870,7 +3918,7 @@ void Map::makeSpawnLine(const Item* item)
 
    char dapath[256];
    sprintf(dapath,"%s/%s_mobpath.map", MAPDIR, 
-	   (const char*)m_player->getShortZoneName());
+	   (const char*)m_zoneMgr->shortZoneName());
    FILE *fh = fopen(dapath,"a");
    if (!fh) return;
 
@@ -3960,16 +4008,19 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       else
 	hp = QString::number(spawn->HP());
 
-      string.sprintf("%s\nLevel: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s\nEquipment: %s", 
+      string.sprintf("%s\nLevel: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s", 
 		     (const char*)spawn->transformedName(),
 		     spawn->level(), (const char*)hp,
 		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
 		     showeq_params->retarded_coords ? spawn->yPos() : spawn->xPos(),
 		     showeq_params->retarded_coords ? spawn->xPos() : spawn->yPos(),
 		     item->displayZPos(),
-		     (const char*)spawn->raceName(), 
-		     (const char*)spawn->className(),
-		     (const char*)spawn->info());
+		     (const char*)spawn->raceString(), 
+		     (const char*)spawn->classString());
+      if (spawn->isNPC())
+	string += "\tType: " + spawn->typeString();
+
+      string += "\nEquipment: " + spawn->info();
     }
     else
       string.sprintf("%s\n%.3s/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s", 
@@ -3978,8 +4029,8 @@ void Map::mouseMoveEvent( QMouseEvent* event )
 		     showeq_params->retarded_coords ? item->yPos() : item->xPos(),
 		     showeq_params->retarded_coords ? item->xPos() : item->yPos(),
 		     item->displayZPos(),
-		     (const char*)item->raceName(), 
-		     (const char*)item->className());
+		     (const char*)item->raceString(), 
+		     (const char*)item->classString());
 
     m_mapTip->setText( string  );
     m_mapTip->adjustSize();
@@ -4061,7 +4112,7 @@ void Map::changeItem(const Item* item, uint32_t changeType)
     {
       // follow mode is follow player, check if this is the player spawn
       // and if so, reAdjust around it's position.
-      if (item == (const Item*)m_spawnShell->playerSpawn())
+      if (item == (const Item*)m_player)
 	reAdjust();
     }
   }
@@ -4197,6 +4248,8 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 		   MapMgr* mapMgr,
 		   EQPlayer* player, 
 		   SpawnShell* spawnshell,
+		   ZoneMgr* zoneMgr,
+		   SpawnMonitor* spawnMonitor,
 		   const QString& prefName, 
 		   const QString& defCaption,
 		   const char* mapName,
@@ -4229,8 +4282,9 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 				     m_runtimeFilterFlagMask);
 
   // Create map
-  m_map = new Map(mapMgr, player, spawnshell, m_mapPreferenceName, 
-		  m_runtimeFilterFlagMask, this, mapName);
+  m_map = new Map(mapMgr, player, spawnshell, zoneMgr, spawnMonitor,
+		  m_mapPreferenceName, m_runtimeFilterFlagMask, 
+		  this, mapName);
 
   // setup bottom control window
   m_bottomControlBox = new QHBox(this);

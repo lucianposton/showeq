@@ -50,7 +50,6 @@ private:
 char *print_addr (unsigned long addr);
 
 QString Commanate (uint32_t number);
-QString zone_name(uint32_t);
 
 spellInfoStruct* spell_info (uint16_t spellId);
 QString spell_name (uint16_t spellId);
@@ -116,5 +115,7 @@ QString bitstring(T value)
 
   return bitstring;
 }
+
+bool findFile( QString& fileName );
 
 #endif // EQUTIL_U

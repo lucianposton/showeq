@@ -357,8 +357,7 @@ struct spawnStruct
          signed   deltaX:10;              // Velocity X 
 /*0061*/ uint8_t  unknown0061;            // ***Placeholder 
 /*0062*/ uint16_t spawnId;                // Id of new spawn 
-/*0064*/ int8_t   typeflag;               // 65 is disarmable trap, 
-                                          // 66 and 67 are invis triggers/traps
+/*0064*/ uint8_t  typeflag;               // Bodytype id
 /*0065*/ uint8_t  unknown0065;            // ***Placeholder 
 /*0066*/ uint16_t petOwnerId;             // Id of pet owner (0 if not a pet) 
 /*0068*/ int16_t  maxHp;                  // Maximum hp 
@@ -596,7 +595,7 @@ struct corpseLocStruct
 
 /*
 ** Grouping Infromation
-** Length: 230 Octets
+** Length: 454 Octets
 ** OpCode: groupinfoCode
 */
 
@@ -604,18 +603,69 @@ struct groupInfoStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x26
 /*0001*/ uint8_t  version;                // 0x40
-/*0002*/ char     yourname[32];           // Player Name
-/*0034*/ char     membername[32];         // Goup Member Name
-/*0066*/ uint8_t  unknown0066[35];        // ***Placeholder
-/*0101*/ uint8_t  bgARC;                  // Add = 2, Remove = 3, 
-                                          //     Clear = 0- Bad Guess-ATB
-/*0102*/ uint8_t  unknown0102[83];        // ***Placeholder
-/*0185*/ int8_t   oper;                   // Add = 4, Remove = 3
-/*0186*/ int8_t   ARC2;                   // ?? -  Add = c8, remove 1 = c5, 
-                                          //     clear = 01
-/*0187*/ uint8_t  unknown0187[43];        // ***Placeholder
+/*0002*/ char     yourname[64];           // Player Name
+/*0066*/ char     membername[64];         // Goup Member Name
+/*0130*/ uint8_t  unknown0130[324];        // ***Placeholder
 };
 typedef struct groupInfoStruct groupMemberStruct; // new form
+
+/*
+** Grouping Invite
+** Length 195 Octets
+** Opcode GroupInviteCode
+*/
+
+struct groupInviteStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x40
+/*0001*/ uint8_t  version;                // 0x20
+/*0002*/ char     yourname[64];           // Player Name
+/*0066*/ char     membername[64];         // Invited Member Name
+/*0130*/ uint8_t  unknown0130[65];        // ***Placeholder
+};
+
+/*
+** Grouping Invite Answer - Decline
+** Length 131 Octets
+** Opcode GroupDeclineCode
+*/
+
+struct groupDeclineStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x41
+/*0001*/ uint8_t  version;                // 0x20
+/*0002*/ char     yourname[64];           // Player Name
+/*0066*/ char     membername[64];         // Invited Member Name
+/*0130*/ uint8_t  reason;                 // Already in Group = 1, Declined Invite = 3
+};
+
+/*
+** Grouping Invite Answer - Accept 
+** Length 130 Octets
+** Opcode GroupAcceptCode
+*/
+
+struct groupAcceptStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x42
+/*0001*/ uint8_t  version;                // 0x20
+/*0002*/ char     yourname[64];           // Player Name
+/*0066*/ char     membername[64];         // Invited Member Name
+};
+
+/*
+** Grouping Removal
+** Length 130 Octets
+** Opcode GroupDeleteCode
+*/
+
+struct groupDeleteStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x44
+/*0001*/ uint8_t  version;                // 0x20
+/*0002*/ char     yourname[64];           // Player Name
+/*0066*/ char     membername[64];         // Invited Member Name
+};
 
 /*
 ** Client Zone Entry struct

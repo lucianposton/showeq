@@ -5,10 +5,6 @@
  *  http://seq.sourceforge.net
  */
 
-#include "combatlog.h"
-#include "interface.h"
-#include "util.h"
-
 #include <qgrid.h>
 #include <qtimer.h>
 #include <qhbox.h>
@@ -16,6 +12,10 @@
 #include <qmessagebox.h>
 #include <qlayout.h>
 #include <stdio.h>
+
+#include "combatlog.h"
+#include "player.h"
+#include "util.h"
 
 #define DEBUGCOMBAT
 

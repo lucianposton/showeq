@@ -153,12 +153,18 @@
    <bool value="true" />
    <comment>Save column widths</comment>
   </property>
+  <property name="ShowSkill" >
+   <bool value="true" />
+  </property>
+  <property name="ShowValue" >
+   <bool value="true" />
+  </property>
   <property name="SkillWidth" >
-   <int value="125" />
+   <int value="69" />
    <comment>pixel width of skill name column</comment>
   </property>
   <property name="ValueWidth" >
-   <int value="35" />
+   <int value="30" />
    <comment>pixel width of skill value column</comment>
   </property>
   <property name="SaveShowLanguages" >
@@ -187,6 +193,18 @@
   <property name="ColumnOrder" >
    <string value="0:1:2:3" />
    <comment>order of columns in stat list display</comment>
+  </property>
+  <property name="ShowStat" >
+   <bool value="true" />
+  </property>
+  <property name="ShowValue" >
+   <bool value="true" />
+  </property>
+  <property name="ShowMax" >
+   <bool value="true" />
+  </property>
+  <property name="ShowPercent" >
+   <bool value="true" />
   </property>
   <property name="SaveWidth" >
    <bool value="true" />
@@ -307,20 +325,83 @@
    <bool value="false" />
    <comment>Display real eq name or formatted name</comment>
   </property>
+  <property name="ShowName" >
+   <bool value="true" />
+  </property>
+  <property name="ShowLevel" >
+   <bool value="true" />
+  </property>
+  <property name="ShowHP" >
+   <bool value="false" />
+  </property>
+  <property name="ShowMaxHP" >
+   <bool value="false" />
+  </property>
+  <property name="ShowCoord1" >
+   <bool value="false" />
+  </property>
+  <property name="ShowCoord2" >
+   <bool value="false" />
+  </property>
+  <property name="ShowCoord3" >
+   <bool value="false" />
+  </property>
+  <property name="ShowID" >
+   <bool value="false" />
+  </property>
+  <property name="ShowDist" >
+   <bool value="true" />
+  </property>
+  <property name="ShowRace" >
+   <bool value="true" />
+  </property>
+  <property name="ShowClass" >
+   <bool value="true" />
+  </property>
+  <property name="ShowInfo" >
+   <bool value="true" />
+  </property>
+  <property name="ShowSpawnTime" >
+   <bool value="true" />
+  </property>
+  <property name="NameWidth" >
+   <int value="155" />
+   <comment></comment>
+  </property>
+  <property name="LevelWidth" >
+   <int value="25" />
+   <comment></comment>
+  </property>
+  <property name="HPWidth" >
+   <int value="35" />
+   <comment></comment>
+  </property>
   <property name="MaxHPWidth" >
-   <int value="0" />
+   <int value="35" />
+   <comment></comment>
+  </property>
+  <property name="Coord1Width" >
+   <int value="30" />
+   <comment></comment>
+  </property>
+  <property name="Coord2Width" >
+   <int value="30" />
+   <comment></comment>
+  </property>
+  <property name="Coord3Width" >
+   <int value="30" />
    <comment></comment>
   </property>
   <property name="IDWidth" >
-   <int value="0" />
+   <int value="30" />
    <comment></comment>
   </property>
   <property name="DistWidth" >
    <int value="35" />
    <comment></comment>
   </property>
-  <property name="NameWidth" >
-   <int value="155" />
+  <property name="RaceWidth" >
+   <int value="40" />
    <comment></comment>
   </property>
   <property name="ClassWidth" >
@@ -331,32 +412,8 @@
    <int value="40" />
    <comment></comment>
   </property>
-  <property name="LevelWidth" >
-   <int value="25" />
-   <comment></comment>
-  </property>
-  <property name="RaceWidth" >
-   <int value="40" />
-   <comment></comment>
-  </property>
   <property name="SpawnTimeWidth" >
    <int value="40" />
-   <comment></comment>
-  </property>
-  <property name="Coord1Width" >
-   <int value="0" />
-   <comment></comment>
-  </property>
-  <property name="Coord2Width" >
-   <int value="0" />
-   <comment></comment>
-  </property>
-  <property name="Coord3Width" >
-   <int value="0" />
-   <comment></comment>
-  </property>
-  <property name="HPWidth" >
-   <int value="35" />
    <comment></comment>
   </property>
   <property name="ColumnOrder" >
@@ -567,6 +624,10 @@
    <bool value="true" />
    <comment>Display Spawns</comment>
   </property>
+  <property name="ShowSpawnPoints" >
+   <bool value="true" />
+   <comment>Display Spawn Points</comment>
+  </property>
   <property name="ShowUnknownSpawns" >
    <bool value="false" />
    <comment>Display Unknown Spawns</comment>
@@ -670,6 +731,10 @@
   <property name="MapLineFadedFloorsKey" >
    <key sequence="Alt+3" />
    <comment>Key to switch map to Faded Floors Line display</comment>
+  </property>
+  <property name="SpawnDepthFilteredKey" >
+   <key sequence="Alt+5" />
+   <comment>Key to toggle spawn depth filtering</comment>
   </property>
  </section>
 <!-- ============================================================= -->
@@ -859,6 +924,10 @@
    <bool value="true" />
    <comment>Display Spawns</comment>
   </property>
+  <property name="ShowSpawnPoints" >
+   <bool value="true" />
+   <comment>Display Spawn Points</comment>
+  </property>
   <property name="ShowUnknownSpawns" >
    <bool value="false" />
    <comment>Display Unknown Spawns</comment>
@@ -962,6 +1031,10 @@
   <property name="MapLineFadedFloorsKey" >
    <key sequence="Alt+3" />
    <comment>Key to switch map to Faded Floors Line display</comment>
+  </property>
+  <property name="SpawnDepthFilteredKey" >
+   <key sequence="Alt+5" />
+   <comment>Key to toggle spawn depth filtering</comment>
   </property>
  </section>
 <!-- ============================================================= -->
@@ -1151,6 +1224,10 @@
    <bool value="true" />
    <comment>Display Spawns</comment>
   </property>
+  <property name="ShowSpawnPoints" >
+   <bool value="true" />
+   <comment>Display Spawn Points</comment>
+  </property>
   <property name="ShowUnknownSpawns" >
    <bool value="false" />
    <comment>Display Unknown Spawns</comment>
@@ -1254,6 +1331,10 @@
   <property name="MapLineFadedFloorsKey" >
    <key sequence="Alt+3" />
    <comment>Key to switch map to Faded Floors Line display</comment>
+  </property>
+  <property name="SpawnDepthFilteredKey" >
+   <key sequence="Alt+5" />
+   <comment>Key to toggle spawn depth filtering</comment>
   </property>
  </section>
 <!-- ============================================================= -->
@@ -1443,6 +1524,10 @@
    <bool value="true" />
    <comment>Display Spawns</comment>
   </property>
+  <property name="ShowSpawnPoints" >
+   <bool value="true" />
+   <comment>Display Spawn Points</comment>
+  </property>
   <property name="ShowUnknownSpawns" >
    <bool value="false" />
    <comment>Display Unknown Spawns</comment>
@@ -1546,6 +1631,10 @@
   <property name="MapLineFadedFloorsKey" >
    <key sequence="Alt+3" />
    <comment>Key to switch map to Faded Floors Line display</comment>
+  </property>
+  <property name="SpawnDepthFilteredKey" >
+   <key sequence="Alt+5" />
+   <comment>Key to toggle spawn depth filtering</comment>
   </property>
  </section>
 <!-- ============================================================= -->
@@ -1734,6 +1823,10 @@
    <bool value="true" />
    <comment>Display Spawns</comment>
   </property>
+  <property name="ShowSpawnPoints" >
+   <bool value="true" />
+   <comment>Display Spawn Points</comment>
+  </property>
   <property name="ShowUnknownSpawns" >
    <bool value="false" />
    <comment>Display Unknown Spawns</comment>
@@ -1837,6 +1930,10 @@
   <property name="MapLineFadedFloorsKey" >
    <key sequence="Alt+3" />
    <comment>Key to switch map to Faded Floors Line display</comment>
+  </property>
+  <property name="SpawnDepthFilteredKey" >
+   <key sequence="Alt+5" />
+   <comment>Key to toggle spawn depth filtering</comment>
   </property>
  </section>
 <!-- ============================================================= -->
@@ -2018,24 +2115,48 @@
    <bool value="true" />
    <comment>Save column widths</comment>
   </property>
-  <property name="SpellIDWidth" >
-   <int value="0" />
-   <comment></comment>
+  <property name="ShowSpellName" >
+   <bool value="true" />
+  </property>
+  <property name="ShowSpellID" >
+   <bool value="false" />
+  </property>
+  <property name="ShowCasterID" >
+   <bool value="false" />
+  </property>
+  <property name="ShowCasterName" >
+   <bool value="false" />
+  </property>
+  <property name="ShowTargetID" >
+   <bool value="false" />
+  </property>
+  <property name="ShowTargetName" >
+   <bool value="true" />
+  </property>
+  <property name="ShowCastTime" >
+   <bool value="false" />
+  </property>
+  <property name="ShowRemainTime" >
+   <bool value="true" />
   </property>
   <property name="SpellNameWidth" >
    <int value="90" />
    <comment></comment>
   </property>
+  <property name="SpellIDWidth" >
+   <int value="35" />
+   <comment></comment>
+  </property>
   <property name="CasterIDWidth" >
-   <int value="0" />
+   <int value="35" />
    <comment></comment>
   </property>
   <property name="CasterNameWidth" >
-   <int value="0" />
+   <int value="60" />
    <comment></comment>
   </property>
   <property name="TargetIDWidth" >
-   <int value="0" />
+   <int value="35" />
    <comment></comment>
   </property>
   <property name="TargetNameWidth" >
@@ -2043,16 +2164,22 @@
    <comment></comment>
   </property>
   <property name="CastTimeWidth" >
-   <int value="0" />
+   <int value="60" />
    <comment></comment>
   </property>
   <property name="RemainTimeWidth" >
-   <int value="63" />
+   <int value="60" />
    <comment></comment>
   </property>
   <property name="ColumnOrder" >
    <string value="0:1:2:3:4:5:6:7" />
    <comment>Order of columns</comment>
+  </property>
+  <property name="SortColumn" >
+   <int value="7" />
+  </property>
+  <property name="SortIncreasing" >
+   <bool value="true" />
   </property>
   <property name="SpellTimer" >
    <int value="6" />
@@ -2121,6 +2248,10 @@
   <property name="ShowSpawnList" >
    <bool value="true" />
    <comment>Display Spawn List</comment>
+  </property>
+  <property name="ShowSpawnPointList" >
+   <bool value="false" />
+   <comment>Display Spawn Point List</comment>
   </property>
   <property name="ShowExpWindow" >
    <bool value="false" />
@@ -2253,12 +2384,12 @@
  </section>
 <!-- ============================================================= -->
 <!-- Opcode Monitoring Options -->
- <section name="OpCode" >
-  <property name="OpCodeMonitoring_Enable" >
+ <section name="OpCodeMonitoring" >
+  <property name="Enable" >
    <bool value="false" />
    <comment>ONLY Enable this if you are a developer...</comment>
   </property>
-  <property name="OpCodeMonitoring_List" >
+  <property name="OpCodeList" >
    <string value="" />
    <comment>A list of OpCodes seperated by commas...
 
@@ -2289,6 +2420,12 @@ argument.
 
 If any argument is left blank, it is filled in with its default...
 (see defaults above)</comment>
+  </property>
+  <property name="Log" >
+   <bool value="false" />
+  </property>
+  <property name="LogFilename" >
+   <string value="/sources/local/share/showeq/opcodemonitor.log" />
   </property>
  </section>
 <!-- ============================================================= -->
@@ -2697,6 +2834,71 @@ If any argument is left blank, it is filled in with its default...
   <property name="Button14Active" >
    <bool value="false" />
    <comment>Button state</comment>
+  </property>
+ </section>
+ <section name="SpawnPointList" >
+  <property name="Font" >
+   <font family="Helvetica" bold="false" strikeout="false" underline="false" pointsize="8" italic="false" />
+  </property>
+  <property name="ShowCoord1" >
+   <bool value="true" />
+  </property>
+  <property name="ShowCoord2" >
+   <bool value="true" />
+  </property>
+  <property name="ShowCoord3" >
+   <bool value="true" />
+  </property>
+  <property name="ShowRemaining" >
+   <bool value="true" />
+  </property>
+  <property name="ShowName" >
+   <bool value="true" />
+  </property>
+  <property name="ShowLast" >
+   <bool value="true" />
+  </property>
+  <property name="ShowSpawned" >
+   <bool value="true" />
+  </property>
+  <property name="ShowCount" >
+   <bool value="true" />
+  </property>
+  <property name="Coord1Width" >
+   <int value="40" />
+  </property>
+  <property name="Coord2Width" >
+   <int value="40" />
+  </property>
+  <property name="Coord3Width" >
+   <int value="40" />
+  </property>
+  <property name="RemainingWidth" >
+   <int value="60" />
+  </property>
+  <property name="NameWidth" >
+   <int value="100" />
+  </property>
+  <property name="LastWidth" >
+   <int value="100" />
+  </property>
+  <property name="SpawnedWidth" >
+   <int value="60" />
+  </property>
+  <property name="CountWidth" >
+   <int value="35" />
+  </property>
+  <property name="ColumnOrder" >
+   <string value="0:1:2:3:4:5:6:7" />
+  </property>
+  <property name="SortColumn" >
+   <int value="3" />
+  </property>
+  <property name="SortIncreasing" >
+   <bool value="true" />
+  </property>
+  <property name="WindowSize" >
+   <size width="479" height="248" />
   </property>
  </section>
 <!-- ============================================================= -->

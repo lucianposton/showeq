@@ -68,8 +68,8 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
 				int16_t,int16_t,int16_t,int32_t)));
 
   // initialize compass
-  m_compass->setPos(player->getPlayerX(), player->getPlayerY());
-  m_compass->setHeading(player->getPlayerHeading());
+  m_compass->setPos(player->x(), player->y());
+  m_compass->setHeading(player->headingDegrees());
 }
 
 CompassFrame::~CompassFrame()

@@ -146,7 +146,7 @@ uint16_t Item::race() const
   return 0;
 }
 
-QString Item::raceName() const
+QString Item::raceString() const
 {
   return "Unknown";
 }
@@ -156,7 +156,7 @@ uint8_t Item::classVal() const
   return 0; 
 }
 
-QString Item::className() const
+QString Item::classString() const
 {
   return "Unknown";
 }
@@ -168,8 +168,8 @@ QString Item::info() const
 
 QString Item::filterString() const
 {
-  return QString("Name:") + transformedName() + ":Race:" + raceName()
-    + ":Class:" + className() + ":NPC:" + QString::number(NPC())
+  return QString("Name:") + transformedName() + ":Race:" + raceString()
+    + ":Class:" + classString() + ":NPC:" + QString::number(NPC())
     + ":X:" + QString::number(xPos()) + ":Y:" + QString::number(yPos())
     + ":Z:" + QString::number(zPos());
 }
@@ -233,138 +233,6 @@ Spawn::Spawn(const spawnStruct* s)
   // turn on auto delete for the track list
   m_spawnTrackList.setAutoDelete(true);
 }
-
-Spawn::Spawn(uint16_t id, const spawnStruct* s)
-  : Item(tSpawn, id)
-{
-  // turn on auto delete for the track list
-  m_spawnTrackList.setAutoDelete(true);
-
-  // have update initialize everything
-  update(s);
-
-  // turn on auto delete for the track list
-  m_spawnTrackList.setAutoDelete(true);
-}
-
-Spawn::Spawn(Spawn* item, uint16_t id)
-  : Item(tSpawn, id)
-{
-  // copy over all the values but the ID.
-  setName(item->realName());
-  m_rawName = item->rawName();
-  Item::setPos(item->xPos(), item->yPos(), item->zPos());
-  setDeltas(item->deltaX(), item->deltaY(), item->deltaZ());
-  setHeading(item->heading(), item->deltaHeading());
-  setAnimation(item->animation());
-  setPetOwnerID(item->petOwnerID());
-  setLight(item->light());
-  setGender(item->gender());
-  setDeity(item->deity());
-  setRace(item->race());
-  setClassVal(item->classVal());
-  setHP(item->HP());
-  setMaxHP(item->maxHP());
-  setLevel(item->level());
-  setTypeflag(item->typeflag());
-  
-  for (int i = 0; i < tNumWearSlots; i++)
-    setEquipment(i, item->equipment(i));
-
-  setNPC(item->NPC());
-  setConsidered(item->considered());
-
-  // tell the old object not to auto delete it's track list
-  item->m_spawnTrackList.setAutoDelete(false);
-
-  // copy the track list
-  m_spawnTrackList = item->trackList();
-
-  // clear the old objects copy of the track list
-  item->m_spawnTrackList.clear();
-  
-  // turn on auto delete for the track list
-  m_spawnTrackList.setAutoDelete(true);
-}
-
-Spawn::Spawn(uint16_t id, 
-	     const QString& name, 
-	     const QString& lastName,
-	     uint16_t race, uint8_t classVal,
-	     uint8_t level, uint16_t deity)
-  : Item(tSpawn, id)
-{
-  // set what is known
-  m_rawName = name;
-  m_name = name;
-  if (!lastName.isEmpty())
-    m_name += QString (" (") + lastName + ")";
-
-  setNPC(SPAWN_SELF);
-  setRace(race);
-  setClassVal(classVal);
-  setLevel(level);
-  setDeity(deity);
-
-  // initialize what isn't to 0
-  Item::setPos(0, 0, 0);
-  setDeltas(0, 0, 0);
-  setHeading(0, 0);
-  setPetOwnerID(0);
-  setLight(0);
-  setGender(0);
-  setTypeflag(0);
-  setAnimation(0);
-  setHP(0);
-  setMaxHP(0);
-  for (int i = 0; i < tNumWearSlots; i++)
-    setEquipment(i, 0);
-  setConsidered(false);
-
-  // turn on auto delete for the track list
-  m_spawnTrackList.setAutoDelete(true);
-}
-
-Spawn::Spawn(const charProfileStruct* player) 
-  : Item(tSpawn, 0)
-{
-  // set what's known 
-  setNPC(SPAWN_SELF);
-
-  setRace(player->race);
-  setClassVal(player->class_);
-  setLevel(player->level);
-  setGender(player->gender);
-  setDeity(player->deity);
-  
-  // save the raw name
-  m_rawName = player->name;
-
-  // start with the first name
-  m_name = player->name;
-
-  // if it's got a last name add it
-  if (player->lastName[0] != 0)
-    m_name += QString (" (") + player->lastName + ")";
-
-  // initialize what isn't to 0
-  Item::setPos(0, 0, 0);
-  setDeltas(0, 0, 0);
-  setHeading(0, 0);
-  setAnimation(0);
-  setPetOwnerID(0);
-  setLight(0);
-  setHP(0);
-  setMaxHP(0);
-  for (int i = 0; i < tNumWearSlots; i++)
-    setEquipment(i, 0);
-  setTypeflag(0);
-  setConsidered(false);
-
-  // turn on auto delete for the track list
-  m_spawnTrackList.setAutoDelete(true);
-}
-
 
 Spawn::Spawn(uint16_t id, 
 	     int16_t xPos, int16_t yPos, int16_t zPos,
@@ -578,9 +446,6 @@ void Spawn::backfill(const charProfileStruct* player)
   m_name = player->name;
 
   // if it's got a last name add it
-  if (player->lastName[0] != 0)
-    m_name += QString (" (") + player->lastName + ")";
-
   if (level() < player->level)
     setLevel(player->level);
 }
@@ -600,7 +465,7 @@ void Spawn::killSpawn()
 }
 
 void Spawn::setPos(int16_t xPos, int16_t yPos, int16_t zPos,
-			     bool walkpathrecord, size_t walkpathlength)
+		   bool walkpathrecord, size_t walkpathlength)
 {
   Item::setPos(xPos, yPos, zPos);
  
@@ -823,7 +688,7 @@ uint16_t Spawn::race() const
   return m_race;
 }
 
-QString Spawn::raceName() const
+QString Spawn::raceString() const
 {
   // sparse array of racenames, some are NULL
   static const char*  racenames[] = 
@@ -832,15 +697,15 @@ QString Spawn::raceName() const
   };
 
   // assume no racename found
-  const char *raceName = NULL;
+  const char *raceString = NULL;
 
   // retrieve pointer to race name
   if (race() < (sizeof(racenames) / sizeof (char*)))
-    raceName = racenames[race()];
+    raceString = racenames[race()];
 
   // if race name exists, then return it, otherwise return a number string
-  if (raceName != NULL)
-    return raceName;
+  if (raceString != NULL)
+    return raceString;
   else
     return QString::number(race());
 }
@@ -850,7 +715,7 @@ uint8_t Spawn::classVal() const
   return m_class;
 }
 
-QString Spawn::className() const
+QString Spawn::classString() const
 {
   // a non-sparse array of class names
   static const char*  classnames[] = 
@@ -899,12 +764,25 @@ QString Spawn::info() const
   return temp;
 }
 
+QString Spawn::typeString() const
+{
+  static const char*  typenames[] =
+  {
+#include "typenames.h"
+  };
+
+  if ( (typeflag() < (sizeof(typenames) / sizeof (char*))) && (typenames[typeflag()] != NULL) )
+    return typenames[typeflag()];
+  else
+    return QString::number(typeflag());
+}
+
 QString Spawn::filterString() const
 {
   return QString("Name:") + transformedName() 
     + ":Level:" + QString::number(level())
-    + ":Race:" + raceName()
-    + ":Class:" + className() 
+    + ":Race:" + raceString()
+    + ":Class:" + classString() 
     + ":NPC:" + QString::number((NPC() == 10) ? 0 : NPC())
     + ":X:" + QString::number(xPos()) 
     + ":Y:" + QString::number(yPos())
@@ -913,6 +791,7 @@ QString Spawn::filterString() const
     + ":Deity:" + deityName() 
     + ":RTeam:" + QString::number(raceTeam())
     + ":DTeam:" + QString::number(deityTeam())
+    + ":Type:" + typeString()
     + ":";
 }
 
@@ -923,8 +802,8 @@ QString Spawn::dumpString() const
     + ":Level:" + QString::number(level())
     + ":HP:" + QString::number(HP())
     + ":MaxHP:" + QString::number(maxHP())
-    + ":Race:" + raceName()
-    + ":Class:" + className() 
+    + ":Race:" + raceString()
+    + ":Class:" + classString() 
     + ":NPC:" + QString::number(NPC())
     + ":X:" + QString::number(xPos()) 
     + ":Y:" + QString::number(yPos())
@@ -932,6 +811,7 @@ QString Spawn::dumpString() const
     + ":Deity:" + deityName() 
     + ":RTeam:" + QString::number(raceTeam())
     + ":DTeam:" + QString::number(deityTeam())
+    + ":Type:" + typeString()
     + ":FilterFlags:" + QString::number(filterFlags())
     + ":";
 }
@@ -1010,12 +890,12 @@ void Coin::update(const dropCoinsStruct* c)
   updateLast();
 }
 
-QString Coin::raceName() const
+QString Coin::raceString() const
 {
   return "Coins";
 }
 
-QString Coin::className() const
+QString Coin::classString() const
 {
   return "Thing";
 }
@@ -1044,12 +924,12 @@ void Door::update(const doorStruct* d)
   updateLast();
 }
 
-QString Door::raceName() const
+QString Door::raceString() const
 {
   return "Door";
 }
 
-QString Door::className() const
+QString Door::classString() const
 {
   return "Thing";
 }
@@ -1107,12 +987,12 @@ void Drop::update(const makeDropStruct* d, const QString& name)
   updateLast();
 }
 
-QString Drop::raceName() const
+QString Drop::raceString() const
 {
   return "Drop";
 }
 
-QString Drop::className() const 
+QString Drop::classString() const 
 {
   return "Thing";
 }

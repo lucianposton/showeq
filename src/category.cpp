@@ -22,6 +22,7 @@
 #include "main.h"
 
 #include "category.h"
+#include "filter.h"
 
 // ------------------------------------------------------
 // Category

@@ -6,6 +6,7 @@
  */
 
 #include "group.h"
+#include "player.h"
 
 // ZBTEMP: Will re-enable the group manager when someone figures out
 // how to fix it's crashing bug.
@@ -32,8 +33,8 @@ void GroupMgr::handleGroupInfo( const groupMemberStruct* gmem )
   const Spawn* member;
 
 #ifdef DEBUG  
-  printf("code: 1:%d 2:%d 3:%d Name:%s\n", 
-	 gmem->bgARC, gmem->oper, gmem->ARC2, gmem->membername);
+  printf("Your Name: %s Name: %s\n", 
+	 gmem->yourname, gmem->membername);
 #endif
 
   // is an empty "memberName" really the signal to clear the group?

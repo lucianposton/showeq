@@ -29,22 +29,36 @@
 #include <qspinbox.h>
 #include <qintdict.h>
 
-#include "packet.h"
-#include "compassframe.h"
-#include "map.h"
-#include "experiencelog.h"
-#include "combatlog.h"
-#include "msgdlg.h"
-#include "filtermgr.h"
-#include "spawnshell.h"
-#include "spellshell.h"
+#include "everquest.h"
 #include "spawnlist.h"
-#include "spelllist.h"
-#include "player.h"
-#include "skilllist.h"
-#include "statlist.h"
-#include "group.h"
-#include "netdiag.h"
+#include "spawnshell.h"
+
+//--------------------------------------------------
+// forward declarations
+class EQPlayer;
+class MapMgr;
+class SpawnListWindow;
+class SpellListWindow;
+class SkillListWindow;
+class StatListWindow;
+class SpawnPointWindow;
+class EQPacket;
+class ZoneMgr;
+class FilterMgr;
+class CategoryMgr;
+class SpawnShell;
+class SpellShell;
+class GroupMgr;
+class SpawnMonitor;
+class PktLogger;
+class SpawnLogger;
+class Item;
+class CompassFrame;
+class MapFrame;
+class ExperienceWindow;
+class CombatWindow;
+class NetDiag;
+class MsgDialog;
 
 //--------------------------------------------------
 // typedefs
@@ -57,11 +71,11 @@ const int maxNumMaps = 5;
 
 // This is the base number where the map dock options appear in the
 // Docked menu
-const int mapDockBase = 5; 
+const int mapDockBase = 6; 
 
 // This is the base number where the map caption options appear in the
 // Window caption menu
-const int mapCaptionBase = 9; 
+const int mapCaptionBase = 10; 
 
 //--------------------------------------------------
 // EQInterface
@@ -105,11 +119,18 @@ class EQInterface:public QMainWindow
    void moneyUpdate(const moneyUpdateStruct* money);
    void moneyThing(const moneyThingStruct* money);
    void groupInfo(const groupMemberStruct* gmem);
+   void groupInvite(const groupInviteStruct* gmem);
+   void groupDecline(const groupDeclineStruct* gmem);
+   void groupAccept(const groupAcceptStruct* gmem);
+   void groupDelete(const groupDeleteStruct* gmem);
    void summonedItem(const summonedItemStruct*);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
    void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
    void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
+   void zoneBegin(const QString& shortZoneName);
+   void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
+   void zoneChanged(const QString& shortZoneName);
    void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
    void clientTarget(const clientTargetStruct* cts);
    void spawnSelected(const Item* item);
@@ -149,8 +170,10 @@ class EQInterface:public QMainWindow
    void toggle_view_DockedWin( int id );
    
    void selectTheme(int id);
-   void ToggleOpCodeMonitoring (int id);
-   void ReloadMonitoredOpCodeList (void);
+   void toggle_opcode_monitoring (int id);
+   void set_opcode_monitored_list (void);
+   void toggle_opcode_log(int id);
+   void select_opcode_file(void);
    void toggle_net_session_tracking(void);
    void toggle_net_real_time_thread(int id);
    void toggle_net_broken_decode(int id);
@@ -196,6 +219,7 @@ class EQInterface:public QMainWindow
    void toggle_opt_RetardedCoords(int);
    void toggle_opt_SystimeSpawntime(int);
    void toggle_view_SpawnList();
+   void toggle_view_SpawnPointList();
    void toggle_view_SpellList();
    void toggle_view_PlayerStats();
    void toggle_view_Compass();
@@ -224,12 +248,15 @@ class EQInterface:public QMainWindow
    void toggle_interface_NoBank(int id);
    void toggle_opt_save_DecodeKey(int id);
    void toggle_opt_save_PlayerState(int id);
+   void toggle_opt_save_ZoneState(int id);
    void toggle_opt_save_Spawns(int id);
    void set_opt_save_SpawnFrequency(int frequency);
    void set_opt_save_BaseFilename();
+   void opt_clearChannelMsgs(int id);
    void init_view_menu();
 
  protected:
+   bool getMonitorOpCodeList(const QString& title, const QString& defaultList);
    int setTheme(int id);
    void loadFormatStrings();
    void resizeEvent (QResizeEvent *);
@@ -240,6 +267,7 @@ class EQInterface:public QMainWindow
 		       const QString& audioCue);
    void showMap(int mapNum);
    void showSpawnList(void);
+   void showSpawnPointList(void);
    void showStatList(void);
    void showSkillList(void);
    void showSpellList(void);
@@ -256,13 +284,17 @@ class EQInterface:public QMainWindow
    SpellListWindow* m_spellList;
    SkillListWindow* m_skillList;
    StatListWindow* m_statList;
-   EQPacket*  m_packet;
+   SpawnPointWindow* m_spawnPointList;
+   EQPacket* m_packet;
+   ZoneMgr* m_zoneMgr;
    FilterMgr* m_filterMgr;
    CategoryMgr* m_categoryMgr;
    SpawnShell* m_spawnShell;
    SpellShell* m_spellShell;
    GroupMgr* m_groupMgr;
+   SpawnMonitor* m_spawnMonitor;
    PktLogger* m_pktLogger;
+   SpawnLogger *m_spawnLogger;
    const Item* m_selectedSpawn;
 
    QPopupMenu* m_netMenu;
@@ -311,6 +343,7 @@ class EQInterface:public QMainWindow
    int  m_id_view_ExpWindow;
    int  m_id_view_CombatWindow;
    int  m_id_view_SpawnList;
+   int  m_id_view_SpawnPointList;
    int  m_id_view_PlayerStats;
    int  m_id_view_PlayerSkills;
    int  m_id_view_Compass;
@@ -346,6 +379,7 @@ class EQInterface:public QMainWindow
    bool m_isStatListDocked;
    bool m_isMapDocked[maxNumMaps];
    bool m_isSpawnListDocked;
+   bool m_isSpawnPointListDocked;
    bool m_isSpellListDocked;
    bool m_isCompassDocked;
 

@@ -8,8 +8,6 @@
 #ifndef _SHOWEQ_MAIN_H
 #define _SHOWEQ_MAIN_H
 
-#ifdef __cplusplus
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <deque>
@@ -17,8 +15,7 @@
 #include "xmlpreferences.h"
 extern class XMLPreferences *pSEQPrefs;
 
-#include "itemdb.h"
-#endif
+class EQItemDB;
 
 #include "../conf.h"
 
@@ -106,7 +103,8 @@ struct ShowEQParams
   // OpCode monitoring Variables
   bool           monitorOpCode_Usage;
   QString        monitorOpCode_List;
-
+  bool           monitorOpCode_Log;
+  QString        monitorOpCode_Filename;
   int            ItemDBTypes;
   QString        ItemLoreDBFilename;
   QString        ItemNameDBFilename;
@@ -115,11 +113,13 @@ struct ShowEQParams
   bool           ItemDBEnabled;
 
   bool           saveDecodeKey;
+  bool           saveZoneState;
   bool           savePlayerState;
   bool           saveSpawns;
   uint32_t       saveSpawnsFrequency;
   bool           restoreDecodeKey;
   bool           restorePlayerState;
+  bool           restoreZoneState;
   bool           restoreSpawns;
   QString        saveRestoreBaseFilename;
 };

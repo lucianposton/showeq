@@ -5,16 +5,19 @@
  *  http://www.sourceforge.net/projects/seq
  */
 
-#include "experiencelog.h"
-#include "interface.h"
-#include "util.h"
-
 #include <qgrid.h>
 #include <qtimer.h>
 #include <qhbox.h>
 #include <qvgroupbox.h>
 #include <qmessagebox.h>
 #include <stdio.h>
+
+#include "experiencelog.h"
+#include "interface.h"
+#include "map.h"
+#include "util.h"
+#include "group.h"
+#include "player.h"
 
 #define DEBUGEXP
 

@@ -1,3 +1,53 @@
+dohpaZ (24/05/02)
+------------------
+Modifications:
+ + version 4.2.6
+ + Applied patch# 559953 "Update to Group Packet Structures" 
+   by Bonkers D Bobcat (bonkersbobcat)
+ + Applied patch# 560200 "Bodytype display" by wyvern (mvern)
+ + Fixed some g++ 3.1 compilation issues.  g++ 3.1 is now officially supported
+   and despite some previous reports it DOES work with the libEQ.a that was
+   compiled with g++ 3.0.x.  However, in order to compile ShowEQ with g++ 3.1 
+   your installation of Qt MUST be compiled with g++ 3.1 due to ABI 
+   compatibility issues between the compiler versions
+ + Added the COPYING file that contains the GNU Public licence version 2 under
+   which ShowEQ is licensed.
+ + Added the ZoneMgr object to unify tracking of zone state information,
+   modified the rest of ShowEQ to use it.
+ + Made the selected spawn always be visible on the map irregardless of 
+   being depth filtering, unknown, or filtered.
+ + Added the SINS SpawnMonitor and Spawn Point List to ShowEQ.
+ + Added a right-click context menu to the Spawn Point List.
+ + Made EQPlayer inherit from the Spawn class as well as the QObject class
+   and made the necessary modifications to remove redundancies and fix 
+   conflicts.
+ + Cleaned up SpawnShell, moved SpawnLogger out of SpawnShell.
+ + Cleaned up a bunch of header and source file issues.  Better use of
+   forward declarations instead of including unnecessary header files.
+ + Made it so windows that have a specific font set keep it after
+   interface theme changes.
+ + Cleaned up "View" menu checkmark initialization/handling.
+ + Made the behavior of when the player is painted on the map more sensible.
+ + Added an item to the "Options" menu to "Clear Channel Messages", which 
+   clears out the channel message storage and refreshes all the channel message
+   dialogs.
+ + Added a QInputDialog that will popup when the user chooses to "Enable
+   Opcode Monitoring..." or "Reload Monitored OpCode List..." that allows 
+   the user to edit the list of monitored opcodes.
+ + Added the ability to log monitored OpCode data to a log file and the 
+   ability to configure this logging via the "OpCode" sub-menu of the
+   "Network" menu.
+ + Fixed some bugs in the OpCode monitor.  Changed some of its 
+   configuration parameter names in the process.
+ + Changed/Added a bunch of sections and parameters to/in seqdef.xml.
+ + Fixed a bug in SEQListView::restoreColumns() where it was restoring
+   the visibility state of the columns.
+ + Added an accelerator key for toggling spawn depth filtering.
+   It defaults to Alt+5, configurable by making an appropriate entry
+   in showeq.xml (I wouldn't recommend Alt+4).
+ + Updated the filter string description in filters.conf.dist to reflect
+   the new ":Type:" field.
+
 dohpaZ (21/05/02)
 ------------------
 Modifications:

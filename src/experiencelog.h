@@ -25,8 +25,11 @@
 
 #include "seqwindow.h"
 #include "seqlistview.h"
-#include "packet.h"
-#include "group.h"
+
+//----------------------------------------------------------------------
+// forward declarations
+class GroupMgr;
+class EQPlayer;
 
 class ExperienceRecord 
 {

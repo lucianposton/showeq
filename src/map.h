@@ -20,6 +20,7 @@
 #include <qregexp.h>
 #include <qintdict.h>
 #include <qtextstream.h>
+#include <qdatetime.h>
 
 // includes required for MapMenu
 #include <qpopupmenu.h>
@@ -35,15 +36,19 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "everquest.h"
-#include "spawnshell.h"
-#include "filtermgr.h"
-#include "player.h"
+//#include "everquest.h"
 #include "mapcore.h"
 #include "seqwindow.h"
 
 //----------------------------------------------------------------------
 // forward declarations
+class FilterMgr;
+class ZoneMgr;
+class SpawnMonitor;
+class EQPlayer;
+class SpawnShell;
+class Item;
+class Spawn;
 class CLineDlg;
 class MapLabel;
 class MapMgr;
@@ -106,11 +111,13 @@ class MapMgr : public QObject
    Q_OBJECT
 
  public:
-   MapMgr(SpawnShell* spawnShell, EQPlayer* player, QWidget* dialogParent);
+   MapMgr(SpawnShell* spawnShell, EQPlayer* player, ZoneMgr* zoneMgr, 
+	  QWidget* dialogParent, 
+	  QObject* parent = 0, const char* name = "mapmgr");
    virtual ~MapMgr();
    
-   const MapData& mapData() { return  m_mapData; }
    uint16_t spawnAggroRange(const Spawn* spawn);
+   const MapData& mapData() { return  m_mapData; }
 
   const QString& curLineColor() { return m_curLineColor; }
   const QString& curLineName() { return m_curLineName; }
@@ -120,9 +127,9 @@ class MapMgr : public QObject
 
  public slots:
   // Zone Handling
-  void zoneEntry(const ServerZoneEntryStruct* zsentry);
-  void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
-  void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
+  void zoneBegin(const QString& shortZoneName);
+  void zoneChanged(const QString& shortZoneName);
+  void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
 
    // Map Handling
   void loadMap(void);
@@ -171,13 +178,6 @@ class MapMgr : public QObject
   QString m_curLocationColor;
 };
 
-inline 
-uint16_t MapMgr::spawnAggroRange(const Spawn* spawn) 
-{ 
-  uint16_t* range = m_spawnAggroRange.find(spawn->id()); 
-  return (!range) ? 0 : *range;
-}
-
 //----------------------------------------------------------------------
 // MapMenu
 class MapMenu : public QPopupMenu
@@ -208,6 +208,7 @@ class MapMenu : public QPopupMenu
   void toggle_gridTicks(int itemId);
   void toggle_locations(int itemId);
   void toggle_spawns(int itemId);
+  void toggle_spawnPoints(int itemId);
   void toggle_unknownSpawns(int itemId);
   void toggle_drops(int itemId);
   void toggle_coins(int itemId);
@@ -265,6 +266,7 @@ class MapMenu : public QPopupMenu
   int m_id_gridTicks;
   int m_id_locations;
   int m_id_spawns;
+  int m_id_spawnPoints;
   int m_id_unknownSpawns;
   int m_id_drops;
   int m_id_coins;
@@ -322,7 +324,10 @@ class Map :public QWidget
 
  public:
   Map (MapMgr* m_mapMgr,
-       EQPlayer* player, SpawnShell* spawnshell, 
+       EQPlayer* player, 
+       SpawnShell* spawnshell, 
+       ZoneMgr* zoneMgr,
+       SpawnMonitor* spawnMonitor,
        const QString& preferenceName, uint32_t runtimeFilterFlagMask,
        QWidget * parent = 0, const char *name = "map");
   virtual ~Map(void);
@@ -357,6 +362,7 @@ class Map :public QWidget
   bool showPlayerView() const { return m_showPlayerView; }
   bool showHeading() const { return m_showHeading; }
   bool showSpawns() const { return m_showSpawns; }
+  bool showSpawnPoints() const { return m_showSpawnPoints; }
   bool showUnknownSpawns() const { return m_showUnknownSpawns; }
   bool showDrops() const { return m_showDrops; }
   bool showCoins() const { return m_showCoins; }
@@ -452,6 +458,7 @@ class Map :public QWidget
   void setShowPlayerView(bool val);
   void setShowHeading(bool val);
   void setShowSpawns(bool val);
+  void setShowSpawnPoints(bool val);
   void setShowUnknownSpawns(bool val);
   void setShowDrops(bool val);
   void setShowCoins(bool val);
@@ -523,6 +530,7 @@ protected:
    void paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
 				   const QTime& drawTime);
    void paintSpawns(MapParameters& param, QPainter& p, const QTime& drawTime);
+   void paintSpawnPoints(MapParameters& param, QPainter& p);
    void paintDebugInfo(MapParameters& param, 
 		       QPainter& tmp, 
 		       float fps, 
@@ -559,6 +567,8 @@ private:
    const Item* m_selectedItem;
    EQPlayer* m_player;
    SpawnShell* m_spawnShell;
+   ZoneMgr* m_zoneMgr;
+   SpawnMonitor* m_spawnMonitor;
    MapLabel* m_mapTip;
 
    FollowMode m_followMode;
@@ -566,6 +576,8 @@ private:
    int m_frameRate;
    int m_drawSize;
    int m_drawSizeWH; // 2 * m_drawSize
+   int m_marker0Size; // m_drawSize - 1
+   int m_marker0SizeWH; // 2 * m_marker0SizeWH
    int m_marker1Size; // m_drawSize + 1
    int m_marker1SizeWH; // 2 * m_marker1SizeWH
    int m_marker2Size; // m_drawSize + 2
@@ -585,6 +597,7 @@ private:
    bool m_showCoins;
    bool m_showDoors;
    bool m_showSpawns;
+   bool m_showSpawnPoints;
    bool m_showUnknownSpawns;
    bool m_showSpawnNames;
    bool m_showFiltered;
@@ -626,6 +639,8 @@ class MapFrame : public SEQWindow
 	    MapMgr* mapMgr,
 	    EQPlayer* player, 
 	    SpawnShell* spawnshell,
+	    ZoneMgr* zoneMgr,
+	    SpawnMonitor* spawnMonitor,
 	    const QString& preferenceName = "Map", 
 	    const QString& caption = "Map",
 	    const char* mapName = "map",

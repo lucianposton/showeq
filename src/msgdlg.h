@@ -90,13 +90,13 @@ public slots:
    void showControls(bool);
    void showMsgType(bool);
    void load();
+   void refresh();                      // refresh msgs based on active filters
    virtual void savePrefs();
 
 private slots:
    void editButton(MyButton *);         // popup button edit dialog
    void addFilter(const QString &);     // add a filter (no refresh)
    void delFilter(const QString &);     // delete a filter (no refresh)
-   void refresh();                      // refresh msgs based on active filters
    void addFilter(MyButton *);
    void scrollLock(bool);
    void setIndexing(bool);

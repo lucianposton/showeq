@@ -880,10 +880,11 @@ MyButton::eventFilter(QObject *o, QEvent *e)
     case QEvent::Leave:
       emit setButton(this, FALSE);
       break;
+  default:
+    break;
   }
 
-  return FALSE;
-
+  return QCheckBox::eventFilter(o, e);
 } // end eventFilter
 
 void MyButton::setFilter(const QString& string)  

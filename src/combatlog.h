@@ -29,6 +29,10 @@
 #include "player.h"
 #include "group.h"
 
+//----------------------------------------------------------------------
+// forward declarations
+class EQPlayer;
+
 ////////////////////////////////////////////
 //  CombatOffenseRecord definition
 //////////////////////////////////////////`//

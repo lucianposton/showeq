@@ -49,14 +49,14 @@ QSizePolicy SEQListView::sizePolicy() const
 }
 
 int SEQListView::addColumn(const QString& label,
-			   int width = -1)
+			   int width)
 {
   return addColumn(label, label, width);
 }
 
 int SEQListView::addColumn(const QString& label, 
 			   const QString& preference, 
-			   int width = -1)
+			   int width)
 {
   // add the column to the listview
   int column = QListView::addColumn(label, width);
@@ -134,7 +134,7 @@ void SEQListView::restoreColumns()
   int i;
   int width;
   QString columnName;
-  QString show;
+  QString show = "Show";
  
   // restore the column width's/visibility
   for (i = 0; i < columns(); i++)

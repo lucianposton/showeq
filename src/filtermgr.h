@@ -21,8 +21,11 @@
 
 #include <qobject.h>
 
-#include "filter.h"
 #include "everquest.h"
+
+//----------------------------------------------------------------------
+// forward declarations
+class Filter;
 
 //
 // ZBTEMP: predefined filters and filter flags will be migrated out

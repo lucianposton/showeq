@@ -34,7 +34,12 @@
 #include <qvbox.h>
 #include <qpushbutton.h>
 
-#include "filter.h"
+//----------------------------------------------------------------------
+// forward declarations
+class FilterItem;
+class Category;
+class CategoryMgr;
+class CFilterDlg;
 
 // ------------------------------------------------------
 // Category

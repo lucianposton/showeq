@@ -2024,17 +2024,90 @@ PktLogger::logGroupInfo(const groupMemberStruct *group, uint32_t len, uint8_t di
         if (logOpen() != 0)
             return;
  
-    outputf("R %u %04d %d %.2X%2.X [%.32s] [%.32s] ", timestamp, len,
+    outputf("R %u %04d %d %.2X%2.X [%.64s] [%.64s] ", timestamp, len,
         dir, group->opCode, group->version, group->yourname, group->membername);
 
-    output(group->unknown0066, 35);
-    outputf(" %u ", group->bgARC);
-    output(group->unknown0102, 83);
-    outputf(" %d %d ", group->oper, group->ARC2);
-    output(group->unknown0187, 43);
+    output(group->unknown0130, 324);
     outputf("\n");
     flush();
     return;
+}
+
+void 
+PktLogger::logGroupInvite(const groupInviteStruct *group, uint32_t len, uint8_t dir)
+{
+    if (!isLoggingGroupInfo())
+      return;
+
+    unsigned int timestamp = (unsigned int) time(NULL);
+
+    if (m_FP == NULL)
+        if (logOpen() != 0)
+            return;
+ 
+    outputf("R %u %04d %d %.2X%2.X [%.64s] [%.64s] ", timestamp, len,
+        dir, group->opCode, group->version, group->yourname, group->membername);
+
+    output(group->unknown0130, 65);
+    outputf("\n");
+    flush();
+    return;
+}
+
+void 
+PktLogger::logGroupDecline(const groupDeclineStruct *group, uint32_t len, uint8_t dir)
+{
+    if (!isLoggingGroupInfo())
+      return;
+
+    unsigned int timestamp = (unsigned int) time(NULL);
+
+    if (m_FP == NULL)
+        if (logOpen() != 0)
+            return;
+ 
+    outputf("R %u %04d %d %.2X%2.X [%.64s] [%.64s] %.2X", timestamp, len,
+        dir, group->opCode, group->version, group->yourname, group->membername, group->reason);
+
+    outputf("\n");
+    flush();
+    return;
+}
+
+void 
+PktLogger::logGroupAccept(const groupAcceptStruct *group, uint32_t len, uint8_t dir)
+{
+    if (!isLoggingGroupInfo())
+      return;
+
+    unsigned int timestamp = (unsigned int) time(NULL);
+
+    if (m_FP == NULL)
+        if (logOpen() != 0)
+            return;
+ 
+    outputf("R %u %04d %d %.2X%2.X [%.64s] [%.64s] ", timestamp, len,
+        dir, group->opCode, group->version, group->yourname, group->membername);
+
+    outputf("\n");
+    flush();
+    return;
+}
+
+void 
+PktLogger::logGroupDelete(const groupDeleteStruct *group, uint32_t len, uint8_t dir)
+{
+    if (!isLoggingGroupInfo())
+      return;
+
+    unsigned int timestamp = (unsigned int) time(NULL);
+
+    if (m_FP == NULL)
+        if (logOpen() != 0)
+            return;
+ 
+    outputf("R %u %04d %d %.2X%2.X [%.64s] [%.64s] ", timestamp, len,
+        dir, group->opCode, group->version, group->yourname, group->membername);
 }
 
 void 
@@ -2064,7 +2137,7 @@ SpawnLogger::SpawnLogger(const QString& fname)
   : SEQLogger(fname, NULL, "SpawnLogger")
 {
     version = 3;
-    strcpy(zoneShortName,"unknown");
+    zoneShortName = "unknown";
     l_time = new EQTime();
     return;
 }
@@ -2073,7 +2146,7 @@ SpawnLogger::SpawnLogger(FILE *fp)
   : SEQLogger(fp, NULL, "SpawnLogger")
 {
     version = 3;
-    strcpy(zoneShortName,"unknown");
+    zoneShortName = "unknown";
     l_time = new EQTime();
     return;
 }
@@ -2109,7 +2182,7 @@ SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
         zPos,
         current->tm_hour, current->tm_min, current->tm_sec,
         version,
-        zoneShortName,
+        (const char*)zoneShortName,
         eqDate.hour,
         eqDate.minute,
         eqDate.month,
@@ -2124,6 +2197,15 @@ SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
     return;
 }
 
+void 
+SpawnLogger::logZoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len)
+{
+  int spawndatasize = (len - 2) / sizeof(spawnStruct);
+
+  for (int i = 0; i < spawndatasize; i++)
+    logZoneSpawn(&zspawns->spawn[i].spawn);
+}
+
 void
 SpawnLogger::logZoneSpawn(const spawnStruct *spawn)
 {
@@ -2134,44 +2216,67 @@ SpawnLogger::logZoneSpawn(const spawnStruct *spawn)
 }
 
 void
-SpawnLogger::logNewSpawn(const spawnStruct *spawn)
+SpawnLogger::logZoneSpawn(const newSpawnStruct *nspawn)
 {
-    logSpawnInfo("+",spawn->name,spawn->spawnId,spawn->level,
-                 spawn->xPos, spawn->yPos, spawn->zPos, time(NULL), "", 0);
-
-    return;
+  const spawnStruct* spawn = &nspawn->spawn;
+  logSpawnInfo("z",spawn->name,spawn->spawnId,spawn->level,
+	       spawn->xPos, spawn->yPos, spawn->zPos, time(NULL), "", 0);
+  
+  return;
 }
 
 void
-SpawnLogger::logKilledSpawn(const Spawn *spawn, const char *killedBy, int kid)
+SpawnLogger::logNewSpawn(const newSpawnStruct* nspawn)
 {
-    logSpawnInfo("x",(const char *) spawn->rawName(),spawn->id(), spawn->level(), 
-                 spawn->x(), spawn->y(), spawn->z(), time(NULL),killedBy,kid);
+  const spawnStruct* spawn = &nspawn->spawn;
+  logSpawnInfo("+",spawn->name,spawn->spawnId,spawn->level,
+	       spawn->xPos, spawn->yPos, spawn->zPos, time(NULL), "", 0);
 
-    return;
+  return;
 }
 
 void
-SpawnLogger::logDeleteSpawn(const Spawn *spawn)
+SpawnLogger::logKilledSpawn(const Item *item, const Item* kitem, uint16_t kid)
 {
-    logSpawnInfo("-",(const char *)spawn->rawName(),spawn->id(),spawn->level(),
-                 spawn->x(), spawn->y(), spawn->z(), time(NULL),"",0);
-
+  if (item == NULL)
     return;
+
+  const Spawn* spawn = (const Spawn*)item;
+  const Spawn* killer = (const Spawn*)kitem;
+
+  logSpawnInfo("x",(const char *) spawn->rawName(),spawn->id(), spawn->level(), 
+	       spawn->x(), spawn->y(), spawn->z(), time(NULL),
+	       killer ? (const char*)killer->rawName() : "unknown",
+	       kid);
+
+  return;
 }
 
 void
-SpawnLogger::logNewZone(const char *zonename)
+SpawnLogger::logDeleteSpawn(const Item *item)
+{
+  if (item->type() != tSpawn)
+    return;
+
+  const Spawn* spawn = (const Spawn*)item;
+
+  logSpawnInfo("-",(const char *)spawn->rawName(),spawn->id(),spawn->level(),
+	       spawn->x(), spawn->y(), spawn->z(), time(NULL),"",0);
+
+  return;
+}
+
+void
+SpawnLogger::logNewZone(const QString& zonename)
 {
     if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
-    outputf("----------\nNEW ZONE: %s\n----------\n",zonename);
+    outputf("----------\nNEW ZONE: %s\n----------\n", (const char*)zonename);
     outputf(" :name(spawnID):Level:Xpos:Ypos:Zpos:H.m.s:Ver:Zone:eqHour.eqMinute.eqMonth.eqDay.eqYear:killedBy(spawnID)\n");
     flush();
-    strncpy(zoneShortName,zonename,15);
-    zoneShortName[15] = 0;
+    zoneShortName = zonename;
 }
 
 

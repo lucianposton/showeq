@@ -39,7 +39,9 @@ enum itemType
   tCoins, 
   tDoors, 
   tDrop,
-  tSpawn 
+  tSpawn,
+  tPlayer,
+  tSpawnPoint
 };
 
 enum itemWearSlot
@@ -105,9 +107,9 @@ class Item : public EQPoint
   // virtual methods that provide reasonable default values
   virtual QString transformedName() const;
   virtual uint16_t race() const;
-  virtual QString raceName() const;
+  virtual QString raceString() const;
   virtual uint8_t classVal() const;
-  virtual QString className() const;
+  virtual QString classString() const;
   virtual QString info() const;
   virtual QString filterString() const;
   virtual QString dumpString() const;
@@ -152,24 +154,13 @@ class Spawn : public Item
   // constructors/destructor
   Spawn();
   Spawn(const spawnStruct* s);
-  Spawn(uint16_t id, const spawnStruct* s);
-  Spawn(const charProfileStruct* player);
 
-  Spawn(uint16_t id, 
-	const QString& name, const QString& lastName, 
-	uint16_t race, uint8_t classVal,
-	uint8_t level, uint16_t deity = 0);
-  
   // create an unknown spawn using the data available.
   Spawn(uint16_t id, 
 	int16_t xPos, int16_t yPos, int16_t zPos,
 	int16_t deltaX, int16_t deltaY, int16_t deltaZ,
 	int8_t heading, int8_t deltaHeading,
 	uint8_t animation);
-
-  // destructive copy constructor, clears the track list of the 
-  // spawn being copied.
-  Spawn(Spawn*, uint16_t id);
 
   // restore spawn from QDataStream
   Spawn(QDataStream&, uint16_t id);
@@ -202,7 +193,7 @@ class Spawn : public Item
   uint16_t equipment(uint8_t wearingSlot) const 
     { return m_equipment[wearingSlot]; }
   QString equipmentStr(uint8_t wearingSlot) const;
-  int8_t typeflag() const { return m_typeflag; }
+  uint8_t typeflag() const { return m_typeflag; }
   const SpawnTrackList& trackList() const { return m_spawnTrackList; }
   SpawnTrackList& trackList() { return m_spawnTrackList; }
   QString cleanedName() const;
@@ -213,10 +204,11 @@ class Spawn : public Item
   // virtual get method overloads
   virtual QString transformedName() const;
   virtual uint16_t race() const;
-  virtual QString raceName() const;
+  virtual QString raceString() const;
   virtual uint8_t classVal() const;
-  virtual QString className() const;
+  virtual QString classString() const;
   virtual QString info() const;
+  virtual QString typeString() const;
   virtual QString filterString() const;
   virtual QString dumpString() const;
 
@@ -279,7 +271,7 @@ class Spawn : public Item
   void setEquipment(uint8_t wearSlot, uint16_t itemID)
     { if (wearSlot < tNumWearSlots) { m_equipment[wearSlot] = itemID; } }
   void setNPC(uint8_t NPC) { m_NPC = NPC; }
-  void setTypeflag(int8_t typeflag) { m_typeflag = typeflag; }
+  void setTypeflag(uint8_t typeflag) { m_typeflag = typeflag; }
   void setID(uint16_t id) { m_ID = id; }
   
  protected:
@@ -311,7 +303,7 @@ class Spawn : public Item
   uint8_t m_gender;
   uint8_t m_class;
   uint8_t m_light;
-  int8_t m_typeflag;
+  uint8_t m_typeflag;
   uint8_t m_animation;
   bool m_considered;
 };
@@ -331,8 +323,8 @@ class Coin : public Item
   uint8_t coinType() const { return m_coinType; }
 
   // virtual get method overloads
-  virtual QString raceName() const;
-  virtual QString className() const;
+  virtual QString raceString() const;
+  virtual QString classString() const;
 
   // update methods
   void update(const dropCoinsStruct* c);
@@ -358,8 +350,8 @@ class Door : public Item
   virtual ~Door();
 
   // virtual get method overloads
-  virtual QString raceName() const;
-  virtual QString className() const;
+  virtual QString raceString() const;
+  virtual QString classString() const;
 
   // update methods
   void update(const doorStruct* d);
@@ -380,8 +372,8 @@ class Drop : public Item
   QString idFile() const { return m_idFile; }
 
   // virtual get method overloads
-  virtual QString raceName() const;
-  virtual QString className() const;
+  virtual QString raceString() const;
+  virtual QString classString() const;
   
   // update methods
   void update(const makeDropStruct* d, const QString& name);

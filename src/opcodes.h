@@ -63,7 +63,15 @@
 
 #define MoneyUpdateCode             0x3d21
 
+#define GroupInviteCode             0x4020
+
+#define GroupDeclineCode            0x4120
+
+#define GroupAcceptCode             0x4220
+
 #define CloseGMCode                 0x4321
+
+#define GroupDeleteCode             0x4420
 
 #define CloseVendorCode             0x4521
 

@@ -143,7 +143,7 @@ int main (int argc, char *argv[])
     out << "<OPTION value=\"" << i << "\"";
     if (searchClass == i)
       out << " selected";
-    out << ">" << fake.className() << "</OPTION>\n";
+    out << ">" << fake.classString() << "</OPTION>\n";
   }
   out << "</SELECT></TD>\n";
   
@@ -222,7 +222,7 @@ int main (int argc, char *argv[])
       
       // is it a race search, if so check
       if ((!searchRace.isEmpty()) &&
-	  (spawn.raceName().find(searchRace, 0, false) == -1))
+	  (spawn.raceString().find(searchRace, 0, false) == -1))
 	continue;
       
       // is it a class search, if so check
@@ -243,8 +243,8 @@ int main (int argc, char *argv[])
     out << "<TD align=right>" << spawn.level() << "</TD>\n";
     out << "<TD align=right>" << spawn.HP() << "/"
 	<< spawn.maxHP() << "</TD>\n";
-    out << "<TD>" << spawn.raceName() << "</TD>\n";
-    out << "<TD>" << spawn.className() << "</TD>\n";
+    out << "<TD>" << spawn.raceString() << "</TD>\n";
+    out << "<TD>" << spawn.classString() << "</TD>\n";
     out << "</TR>\n";
     
     // increment the count

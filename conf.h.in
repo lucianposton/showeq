@@ -1,88 +1,50 @@
-/* conf.h.in.  Generated from configure.in by autoheader.  */
+/* conf.h.in.  Generated automatically from configure.in by autoheader.  */
 
-/* Define to 1 if you have the <deque> header file. */
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if you have the <deque> header file.  */
 #undef HAVE_DEQUE
 
-/* Define to 1 if you have the <dlfcn.h> header file. */
+/* Define if you have the <dlfcn.h> header file.  */
 #undef HAVE_DLFCN_H
 
-/* Define if libgd supports PNG */
-#undef HAVE_GD_IMAGEPNG
-
-/* Define to 1 if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
-
-/* Define to 1 if you have the `EQ' library (-lEQ). */
+/* Define if you have the EQ library (-lEQ).  */
 #undef HAVE_LIBEQ
 
-/* Define to 1 if you have the `gdbm' library (-lgdbm). */
+/* Define if you have the gdbm library (-lgdbm).  */
 #undef HAVE_LIBGDBM
 
-/* Define to 1 if you have the `pcap' library (-lpcap). */
+/* Define if you have the pcap library (-lpcap).  */
 #undef HAVE_LIBPCAP
 
-/* Define if you have libpng */
-#undef HAVE_LIBPNG
-
-/* Define to 1 if you have the `z' library (-lz). */
+/* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
-
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
-
-/* Define to 1 if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
-
-/* Define to 1 if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
-
-/* Define to 1 if you have the <string.h> header file. */
-#undef HAVE_STRING_H
-
-/* Define to 1 if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
-
-/* Define to 1 if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
-
-/* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
 
 /* Name of package */
 #undef PACKAGE
 
-/* Define to the address where bug reports for this package should be sent. */
-#undef PACKAGE_BUGREPORT
+/* Version number of package */
+#undef VERSION
 
-/* Define to the full name of this package. */
-#undef PACKAGE_NAME
+/* Define if you have libz */
+#undef HAVE_LIBZ
 
-/* Define to the full name and version of this package. */
-#undef PACKAGE_STRING
+/* Define if you have libpng */
+#undef HAVE_LIBPNG
 
-/* Define to the one symbol short name of this package. */
-#undef PACKAGE_TARNAME
-
-/* Define to the version of this package. */
-#undef PACKAGE_VERSION
-
-/* Define to 1 if you have the ANSI C header files. */
-#undef STDC_HEADERS
-
-/* Define if compiling for test server */
-#undef TEST_SERVER
+/* Define if libgd supports PNG */
+#undef HAVE_GD_IMAGEPNG
 
 /* Define if using Berkeley DB3 for database operations */
 #undef USE_DB3
 
-/* Version number of package */
-#undef VERSION
+/* Define if compiling for test server */
+#undef TEST_SERVER
 
-/* Define to empty if `const' does not conform to ANSI C. */
-#undef const
-
-/* Define to `unsigned' if <sys/types.h> does not define. */
-#undef size_t

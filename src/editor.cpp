@@ -26,8 +26,9 @@
 #include <qtextstream.h> 
 #include <qpaintdevice.h> 
 #include <qobject.h> 
+#include <qmultilineedit.h>
+#include <qmessagebox.h>
 
-#include "interface.h"
 #include "util.h"
 
 #include "editor.h"

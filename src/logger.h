@@ -254,6 +254,10 @@ public:
     void logCDoorSpawns(const cDoorSpawnsStruct* doors, uint32_t len, uint8_t dir);
     void logDoorSpawns(const doorSpawnsStruct* doors, uint32_t len, uint8_t dir);
     void logGroupInfo(const groupMemberStruct* guild, uint32_t len, uint8_t dir);
+    void logGroupInvite(const groupInviteStruct* guild, uint32_t len, uint8_t dir);
+    void logGroupDecline(const groupDeclineStruct* guild, uint32_t len, uint8_t dir);
+    void logGroupAccept(const groupAcceptStruct* guild, uint32_t len, uint8_t dir);
+    void logGroupDelete(const groupDeleteStruct* guild, uint32_t len, uint8_t dir);
     void logUnknownOpcode(const uint8_t* data, uint32_t len, uint8_t dir);
 
 private:
@@ -276,22 +280,25 @@ class SpawnLogger: public SEQLogger
    Q_OBJECT
 
 public:
-public:
     SpawnLogger(const QString& filename);
     SpawnLogger(FILE *fp);
+
+public slots:
     void logTimeSync(const timeOfDayStruct *tday);
+    void logNewZone(const QString& zone);
+    void logZoneSpawn(const newSpawnStruct* nspawn);
     void logZoneSpawn(const spawnStruct *spawn);
-    void logNewSpawn(const spawnStruct *spawn);
-    void logKilledSpawn(const Spawn *spawn,const char *killer,int kid);
-    void logDeleteSpawn(const Spawn *spawn);
-    void logNewZone(const char *zone);
+    void logZoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len);
+    void logNewSpawn(const newSpawnStruct* spawn);
+    void logKilledSpawn(const Item* item, const Item* kitem, uint16_t kid);
+    void logDeleteSpawn(const Item *spawn);
 
 private:
     void logSpawnInfo(const char *type, const char *name, int id, int level, 
                       int xPos, int yPos, int zPos, time_t timeCurrent, 
                       const char *killer, int kid);
     int version;
-    char zoneShortName[16];
+    QString zoneShortName;
     EQTime *l_time;
 };
 

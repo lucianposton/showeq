@@ -437,7 +437,6 @@ QObject (parent, name)
 {
    struct hostent *he;
    struct in_addr  ia;
-
    if (showeq_params->ip.isEmpty() && showeq_params->mac_address.isEmpty())
    {
       printf ("No address specified\n");
@@ -498,7 +497,6 @@ QObject (parent, name)
 
    m_busy_decoding     = false;
    m_serverArqSeqFound = false;
-   m_zoning            = false; //start in non zoning state
 
    m_serverArqSeqExp  = 0;
    m_serverPort       = 0;
@@ -595,7 +593,7 @@ void EQPacket::InitializeOpCodeMonitor (void)
     if (!showeq_params->monitorOpCode_Usage)
       break;
 
-    QString qsMonitoredOpCodes = strdup(showeq_params->monitorOpCode_List);
+    QString qsMonitoredOpCodes = showeq_params->monitorOpCode_List;
 
     if (qsMonitoredOpCodes == "0") /* DISABLED */
       break;
@@ -611,7 +609,7 @@ void EQPacket::InitializeOpCodeMonitor (void)
     int            iColonPos      = 0;
     uint8_t        uiIterationID  = 0;
 
-    for (uint8_t uiIndex = 0; uiIndex < OPCODE_SLOTS && !qsMonitoredOpCodes.isEmpty(); uiIndex ++)
+    for (uint8_t uiIndex = 0; (uiIndex < OPCODE_SLOTS) && !qsMonitoredOpCodes.isEmpty(); uiIndex ++)
     {
       /* Initialize the variables with their default values */
       MonitoredOpCodeList      [uiIndex] [0] = 0; /* OpCode number (16-bit HEX) */
@@ -666,8 +664,15 @@ void EQPacket::InitializeOpCodeMonitor (void)
 
         uiIterationID ++;
       }
+
+#if 1 // ZBTEMP
+      fprintf(stderr, "opcode=%04x name='%s' dir=%d known=%d\n",
+	      MonitoredOpCodeList [uiIndex] [0],
+	      (const char*)MonitoredOpCodeAliasList [uiIndex],
+	      MonitoredOpCodeList [uiIndex] [1],
+	      MonitoredOpCodeList [uiIndex] [2]);
+#endif
     }
-    m_bOpCodeMonitorInitialized = true;
   } while ( "I like to use" == "break for flow control" );
 }
 
@@ -838,6 +843,33 @@ void EQPacket::logRawData ( const char   *filename,
    write(file, data, len);
 
    close (file);
+}
+
+/* Makes a note in a log */
+bool EQPacket::logMessage(const QString& filename,
+			  const QString& message)
+{
+#ifdef DEBUG_PACKET
+   debug ("logData()");
+#endif /* DEBUG_PACKET */
+
+   FILE *lh;
+
+   //printf("FilePath: %s\n", fname);
+   lh = fopen ((const char*)filename, "a");
+
+   if (lh == NULL)
+   {
+      fprintf(stderr, "\aUnable to open file: [%s]\n", 
+	      (const char*)filename);
+      return false;
+   }
+
+   fprintf (lh, "%s\n", (const char*)message);
+
+   fclose (lh);
+
+   return true;
 }
 
 /* Logs packet data in a human-readable format */
@@ -1728,8 +1760,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             unk = ! ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
 
-	    if (!m_zoning)
-	        emit newSpawn((const newSpawnStruct*)decodedData, decodedDataLen, dir);
+	    emit newSpawn((const newSpawnStruct*)decodedData, decodedDataLen, dir);
 
             break;
         }
@@ -1919,8 +1950,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	        unk = true;
 	    }
 #endif
-	    if (!m_zoning)
-	        emit updateSpawns((const mobUpdateStruct *)data, len, dir);
+	    emit updateSpawns((const mobUpdateStruct *)data, len, dir);
 
             break;
         }
@@ -2003,8 +2033,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             // in the process of zoning, server hasn't switched yet.
 
-            m_zoning = true;
-
 	    emit zoneChange((const zoneChangeStruct*)data, len, dir);
 #if HAVE_LIBEQ
             emit resetDecoder();
@@ -2023,17 +2051,12 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 #if HAVE_LIBEQ
                 emit resetDecoder();
 #endif
-	        m_zoning = true;
 	        break;
             }
 
             unk = ! ValidatePayload(ZoneEntryCode, ServerZoneEntryStruct);
 
             emit zoneEntry((const ServerZoneEntryStruct*)data, len, dir);
-
-            // server considers us in the other zone now
-	      
-            m_zoning = false;
 
             break;
         } /* end ZoneEntryCode */
@@ -2044,9 +2067,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
 	    emit zoneNew((const newZoneStruct*)data, len, dir);
 
-	   // note that we're no longer Zoning
-	   m_zoning = false;
-	    
            if (m_vPacket)
               printf("New Zone at byte: %ld\n", m_vPacket->FilePos());
 
@@ -2057,8 +2077,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
             unk = ! ValidatePayload(PlayerPosCode, playerPosStruct);
 
-	    if (!m_zoning)
-	        emit playerUpdate((const playerPosStruct*)data, len, dir);
+	    emit playerUpdate((const playerPosStruct*)data, len, dir);
 
             break;
         }
@@ -2112,8 +2131,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
             unk = ! ValidatePayload(MakeDropCode, makeDropStruct);
 
-	    if (!m_zoning)
-                emit newGroundItem((const makeDropStruct*)data, len, dir);
+	    emit newGroundItem((const makeDropStruct*)data, len, dir);
 
             break;
         }
@@ -2131,8 +2149,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
             unk = ! ValidatePayload(DropCoinsCode, dropCoinsStruct);
 
-	    if (!m_zoning)
-                emit newCoinsItem((const dropCoinsStruct*)data, len, dir);
+	    emit newCoinsItem((const dropCoinsStruct*)data, len, dir);
 
             break;
         }
@@ -2427,6 +2444,46 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    break;
         }
 
+        case GroupInviteCode:
+        {
+
+            unk = ! ValidatePayload(GroupInviteCode, groupInviteStruct);
+
+	    emit groupInvite((const groupInviteStruct*)data, len, dir);
+
+	    break;
+        }
+
+        case GroupDeclineCode:
+        {
+
+            unk = ! ValidatePayload(GroupDeclineCode, groupDeclineStruct);
+
+	    emit groupDecline((const groupDeclineStruct*)data, len, dir);
+
+	    break;
+        }
+
+        case GroupAcceptCode:
+        {
+
+            unk = ! ValidatePayload(GroupAcceptCode, groupAcceptStruct);
+
+	    emit groupAccept((const groupAcceptStruct*)data, len, dir);
+
+	    break;
+        }
+
+        case GroupDeleteCode:
+        {
+
+            unk = ! ValidatePayload(GroupDeleteCode, groupDeleteStruct);
+
+	    emit groupDelete((const groupDeleteStruct*)data, len, dir);
+
+	    break;
+        }
+
         case CharUpdateCode:
         {
         }
@@ -2441,12 +2498,16 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
     if (showeq_params->logUnknownZonePackets && unk)
     {
-        printf ("%04x - %d (%s)\n", opCode, len, 
-	       ((dir == DIR_SERVER) ? 
-		"Server --> Client" : "Client --> Server"));
+      QString tmpStr;
+      tmpStr.sprintf ("%04x - %d (%s)\n", opCode, len, 
+		      ((dir == DIR_SERVER) ? 
+		       "Server --> Client" : "Client --> Server"));
 
-        if (!logData (showeq_params->UnknownZoneLogFilename, len, data))
-            emit toggle_log_UnknownData(); //untoggle the GUI checkmark
+      if (!logMessage(showeq_params->UnknownZoneLogFilename, tmpStr))
+	emit toggle_log_UnknownData(); //untoggle the GUI checkmark
+
+      if (!logData (showeq_params->UnknownZoneLogFilename, len, data))
+	emit toggle_log_UnknownData(); //untoggle the GUI checkmark
     }
 
     unsigned int uiOpCodeIndex = 0;
@@ -2455,64 +2516,82 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     {
         unsigned int uiIndex = 0;
 
-        for (; uiIndex < OPCODE_SLOTS && uiOpCodeIndex == 0; uiIndex ++)
+        for (; ((uiIndex < OPCODE_SLOTS) && (uiOpCodeIndex == 0)); uiIndex ++)
         {
             if (opCode == MonitoredOpCodeList[ uiIndex ][ 0 ])
             {
                 if ((MonitoredOpCodeList[ uiIndex ][ 1 ] == dir) || 
                     (MonitoredOpCodeList[ uiIndex ][ 1 ] == 3))
                 {
-                    if (!unk && MonitoredOpCodeList[ uiIndex ][ 2 ] == 1 || unk)
+                    if ((!unk && (MonitoredOpCodeList[ uiIndex ][ 2 ] == 1)) 
+			|| unk)
                         uiOpCodeIndex = uiIndex + 1;
                 }
             }
         }
    }
 
-   if (m_viewUnknownData && unk || uiOpCodeIndex > 0)
+   if ((m_viewUnknownData && unk) || (uiOpCodeIndex > 0))
    {
+     QString tmpStr;
        if (len == 2)
-           printf ("\n%s: %02x version %02x len %i\n\t", 
-               uiOpCodeIndex > 0 ? 
-                   MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
-                   "UNKNOWN", data[0], data[1], len);
+       {
+	 tmpStr.sprintf ("%s: %02x version %02x len %i", 
+			 uiOpCodeIndex > 0 ? 
+			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
+			 "UNKNOWN", data[0], data[1], len);
+	 printf("\n%s\n\t", (const char*)tmpStr);
+
+	 if ((uiOpCodeIndex > 0) && showeq_params->monitorOpCode_Log)
+	 {
+	   logMessage(showeq_params->monitorOpCode_Filename, tmpStr);
+	   logData(showeq_params->monitorOpCode_Filename, len, data);
+	 }
+       }
        else
        {
-           printf ("\n%s: %02x version %02x len %02d [%s] ID:%i\n\t", 
-               uiOpCodeIndex > 0 ? 
-                   MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
-                   "UNKNOWN", data[0], data[1], len, 
-                   dir == 2 ? "Server --> Client" : "Client --> Server", 
-                   data[3] * 256 + data[2]);
+	 tmpStr.sprintf ("%s: %02x version %02x len %02d [%s] ID:%i", 
+			 uiOpCodeIndex > 0 ? 
+			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
+			 "UNKNOWN", data[0], data[1], len, 
+			 dir == 2 ? "Server --> Client" : "Client --> Server", 
+			 data[3] * 256 + data[2]);
 
-           for (uint32_t a = 0; a < len; a ++)
-           {
-               if ((data[a] >= 32) && (data[a] <= 126))
-                   printf ("%c", data[a]);
-               else
-                   printf (".");
-           }
+	 if ((uiOpCodeIndex > 0) && showeq_params->monitorOpCode_Log)
+	 {
+	   logMessage(showeq_params->monitorOpCode_Filename, tmpStr);
+	   logData(showeq_params->monitorOpCode_Filename, len, data);
+	 }
 
-           printf ("\n");
+	 printf("\n%s\n\t", (const char*)tmpStr);
+	 for (uint32_t a = 0; a < len; a ++)
+         {
+	   if ((data[a] >= 32) && (data[a] <= 126))
+	     printf ("%c", data[a]);
+	   else
+	     printf (".");
+	 }
+	 
+	 printf ("\n");
 
-           for (uint32_t a = 0; a < len; a ++)
-           {
-               if (data[a] < 32)
-                  printf ("%c", data[a] + 95);
-               else if (data[a] > 126)
-                  printf ("%c", data[a] - 95);
-               else if (data[a] > 221)
-                  printf ("%c", data[a] - 190);
-               else
-                  printf ("%c", data[a]);
-           }
+	 for (uint32_t a = 0; a < len; a ++)
+         {
+	   if (data[a] < 32)
+	     printf ("%c", data[a] + 95);
+	   else if (data[a] > 126)
+	     printf ("%c", data[a] - 95);
+	   else if (data[a] > 221)
+	     printf ("%c", data[a] - 190);
+	   else
+	     printf ("%c", data[a]);
+	 }
 
-           printf ("\n\n"); /* Adding an extra line break makes it easier
-                                for people trying to decode the OpCodes to
-                                tell where the raw data ends and the next
-                                message begins...  -Andon */
-        }
-    }
+	 printf ("\n\n"); /* Adding an extra line break makes it easier
+			     for people trying to decode the OpCodes to
+			     tell where the raw data ends and the next
+			     message begins...  -Andon */
+       }
+   }
 }
 
 void EQPacket::setViewUnknownData (bool flag)

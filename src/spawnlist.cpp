@@ -30,9 +30,13 @@
 #include <qfont.h>
 #include <qheader.h>
 #include <qinputdialog.h>
+#include <qfontdialog.h>
 #include <qmessagebox.h>
 
 #include "spawnlist.h"
+#include "category.h"
+#include "spawnshell.h"
+#include "filtermgr.h"
 #include "util.h"
 #include "itemdb.h"
 
@@ -210,10 +214,10 @@ void SpawnListItem::update(uint32_t changeType)
      setText(SPAWNCOL_ID, buff);
      
      // Race
-     setText(SPAWNCOL_RACE, item()->raceName());
+     setText(SPAWNCOL_RACE, item()->raceString());
      
      // Class
-     setText(SPAWNCOL_CLASS, item()->className());
+     setText(SPAWNCOL_CLASS, item()->classString());
      
      // Spawntime
      setText(SPAWNCOL_SPAWNTIME, m_item->spawnTimeStr());
@@ -299,7 +303,7 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
 	   this, SLOT(delItem(const Item *)));
    connect(m_spawnShell, SIGNAL(changeItem(const Item *, uint32_t)),
 	   this, SLOT(changeItem(const Item *, uint32_t)));
-   connect(m_spawnShell, SIGNAL(killSpawn(const Item *)),
+   connect(m_spawnShell, SIGNAL(killSpawn(const Item *, const Item*, uint16_t)),
 	   this, SLOT(killSpawn(const Item *)));
    connect(m_spawnShell, SIGNAL(selectSpawn(const Item *)),
 	   this, SLOT(selectSpawn(const Item *)));
@@ -523,7 +527,7 @@ void CSpawnList::addItem(const Item* item)
       while (j != NULL)
       {
 	// update the SpawnListItem
-	j->update();
+	j->update(tSpawnChangedALL);
 
 	// find the next one
 	j = Find(it, item);
@@ -562,7 +566,7 @@ void CSpawnList::addItem(const Item* item)
 	k->setTextColor(pickSpawnColor(item));
 	k->setFilterFlags(item->filterFlags());
 	k->setRuntimeFilterFlags(item->runtimeFilterFlags());
-	k->update();
+	k->update(tSpawnChangedALL);
 	
 	// find the next item
 	j = Find(it, i);
@@ -604,7 +608,7 @@ void CSpawnList::addItem(const Item* item)
 	j->setShellItem(item);
 	j->setFilterFlags(item->filterFlags());
 	j->setRuntimeFilterFlags(item->runtimeFilterFlags());
-	j->update();
+	j->update(tSpawnChangedALL);
 
 	// color spawn
 	j->setTextColor(pickSpawnColor(item, cat->color()));
@@ -624,7 +628,7 @@ void CSpawnList::addItem(const Item* item)
      
      // color spawn
      j->setTextColor(pickSpawnColor(item));
-     j->update();
+     j->update(tSpawnChangedALL);
    } // else
    
    return;
@@ -1110,7 +1114,7 @@ void CSpawnList::populateCategory(const Category* cat)
       litem->setShellItem(item);
       litem->setFilterFlags(item->filterFlags());
       litem->setRuntimeFilterFlags(item->runtimeFilterFlags());
-      litem->update();
+      litem->update(tSpawnChangedALL);
       
       // color the spawn
       litem->setTextColor(pickSpawnColor(item, cat->color()));
@@ -1145,7 +1149,7 @@ void CSpawnList::populateCategory(const Category* cat)
 	litem->setShellItem(item);
 	litem->setFilterFlags(item->filterFlags());
 	litem->setRuntimeFilterFlags(item->runtimeFilterFlags());
-	litem->update();
+	litem->update(tSpawnChangedALL);
 
 	// color the spawn
 	litem->setTextColor(pickSpawnColor(item, cat->color()));
@@ -1211,7 +1215,7 @@ void CSpawnList::populateSpawns(void)
 	  litem->setShellItem(item);
 	  litem->setFilterFlags(item->filterFlags());
 	  litem->setRuntimeFilterFlags(item->runtimeFilterFlags());
-	  litem->update();
+	  litem->update(tSpawnChangedALL);
 	  
 	  // color the spawn
 	  litem->setTextColor(pickSpawnColor(item, cat->color()));
@@ -1256,7 +1260,7 @@ void CSpawnList::populateSpawns(void)
 	    litem->setShellItem(item);
 	    litem->setFilterFlags(item->filterFlags());
 	    litem->setRuntimeFilterFlags(item->runtimeFilterFlags());
-	    litem->update();
+	    litem->update(tSpawnChangedALL);
 	    
 	    // color the spawn
 	    litem->setTextColor(pickSpawnColor(item, cat->color()));
@@ -1299,7 +1303,7 @@ void CSpawnList::populateSpawns(void)
 	
 	// color spawn
 	litem->setTextColor(pickSpawnColor(item));
-	litem->update();
+	litem->update(tSpawnChangedALL);
       }
     }
   }
@@ -1492,7 +1496,7 @@ SpawnListMenu::SpawnListMenu(CSpawnList* spawnlist,
   // Show Columns
   QPopupMenu* spawnListColMenu = new QPopupMenu;
   insertItem( "Show &Column", spawnListColMenu);
-  spawnListColMenu->setCheckable(TRUE);
+  spawnListColMenu->setCheckable(true);
   m_id_spawnList_Cols[SPAWNCOL_NAME] = 
     spawnListColMenu->insertItem("&Name");
   spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_NAME], 
@@ -1574,6 +1578,9 @@ SpawnListMenu::SpawnListMenu(CSpawnList* spawnlist,
     insertItem("&Delete Category...", this, SLOT(delete_category(int)));
   insertItem("&Reload Categories", this, SLOT(reload_categories(int)));
   insertItem("Re&build Spawnlist", this, SLOT(rebuild_spawnlist(int)));
+  insertSeparator(-1);
+  insertItem("&Font...", this, SLOT(set_font(int)));
+  insertItem("&Caption...", this, SLOT(set_caption(int)));
 
   connect(this, SIGNAL(aboutToShow()),
 	  this, SLOT(init_Menu()));
@@ -1585,7 +1592,6 @@ SpawnListMenu::~SpawnListMenu()
 
 void SpawnListMenu::init_Menu(void)
 {
-
   // make sure the menu bar settings are correct
   for (int i = 0; i < SPAWNCOL_MAXCOLS; i++)
     setItemChecked(m_id_spawnList_Cols[i], 
@@ -1639,17 +1645,9 @@ void SpawnListMenu::toggle_spawnListCol(int id)
   colnum = itemParameter(id);
   
   if (isItemChecked(id))
-  {
-    setItemChecked(id, FALSE);
-    
     m_spawnlist->setColumnVisible(colnum, false);
-  }
   else
-  {
-    setItemChecked(id, TRUE);
-    
     m_spawnlist->setColumnVisible(colnum, true);
-   }
 }
 
 void SpawnListMenu::add_filter(int id)
@@ -1707,6 +1705,39 @@ void SpawnListMenu::reload_categories(int id)
 {
   // reload the categories
   m_categoryMgr->reloadCategories();
+}
+
+
+void SpawnListMenu::set_font(int id)
+{
+  QFont newFont;
+  bool ok = false;
+  SEQWindow* window = (SEQWindow*)m_spawnlist->parent();
+
+  // get a new font
+  newFont = QFontDialog::getFont(&ok, window->font(), 
+				 this, "ShowEQ Spawn List Font");
+    
+    
+    // if the user entered a font and clicked ok, set the windows font
+    if (ok)
+      window->setWindowFont(newFont);
+}
+
+void SpawnListMenu::set_caption(int id)
+{
+  bool ok = false;
+  SEQWindow* window = (SEQWindow*)m_spawnlist->parent();
+
+  QString caption = 
+    QInputDialog::getText("ShowEQ Spawn List Window Caption",
+			  "Enter caption for the Spawn List Window:",
+			  QLineEdit::Normal, window->caption(),
+			  &ok, this);
+  
+  // if the user entered a caption and clicked ok, set the windows caption
+  if (ok)
+    window->setCaption(caption);
 }
 
 void SpawnListMenu::rebuild_spawnlist(int id)

@@ -60,8 +60,9 @@
 #define   STATUS_FONT_SIZE              4
 #define   RESTORE_DECODE_KEY            5
 #define   RESTORE_PLAYER_STATE          6
-#define   RESTORE_SPAWNS                7
-#define   RESTORE_ALL                   8
+#define   RESTORE_ZONE_STATE            7
+#define   RESTORE_SPAWNS                8
+#define   RESTORE_ALL                   9
 
 /* Note that ASCII 32 is a space, best to stop at 31 and pick up again
    at 128 or higher
@@ -131,6 +132,7 @@ static struct option option_list[] = {
   {"itemdb-disable",               no_argument,        NULL, ITEMDB_DISABLE},
   {"restore-decode-key",           no_argument,        NULL, RESTORE_DECODE_KEY},
   {"restore-player-state",         no_argument,        NULL, RESTORE_PLAYER_STATE},
+  {"restore-zone",                 no_argument,        NULL, RESTORE_ZONE_STATE},
   {"restore-spawns",               no_argument,        NULL, RESTORE_SPAWNS},
   {"restore-all",                  no_argument,        NULL, RESTORE_ALL},
   {0,                              0,                  0,     0}
@@ -263,9 +265,16 @@ int main (int argc, char **argv)
    showeq_params->showRealName = pSEQPrefs->getPrefBool("ShowRealName", section, false);
 
    /* OpCode monitoring preferences */
-   section = "OpCode";
-   showeq_params->monitorOpCode_Usage = pSEQPrefs->getPrefBool("OpCodeMonitoring_Enable", section, 0 );   /*  Disabled  */
-   showeq_params->monitorOpCode_List  = pSEQPrefs->getPrefString("OpCodeMonitoring_List", section, "");  /*    NONE    */
+   section = "OpCodeMonitoring";
+   showeq_params->monitorOpCode_Usage = 
+     pSEQPrefs->getPrefBool("Enable", section, false);   /*  Disabled  */
+   showeq_params->monitorOpCode_List = 
+     pSEQPrefs->getPrefString("OpCodeList", section, "");  /*    NONE    */
+   showeq_params->monitorOpCode_Log = 
+     pSEQPrefs->getPrefBool("Log", section, false);
+   showeq_params->monitorOpCode_Filename =
+     pSEQPrefs->getPrefString("LogFilename", section, 
+			      LOGDIR "/opcodemonitor.log");
 
    /* Packet logging preferences */
    section = "PacketLogging";
@@ -293,6 +302,8 @@ int main (int argc, char **argv)
    section = "SaveState";
    showeq_params->saveDecodeKey = 
      pSEQPrefs->getPrefBool("DecodeKey", section, 1);
+   showeq_params->saveZoneState = 
+     pSEQPrefs->getPrefBool("ZoneState", section, 1);
    showeq_params->savePlayerState = 
      pSEQPrefs->getPrefBool("PlayerState", section, 1);
    showeq_params->saveSpawns = pSEQPrefs->getPrefBool("Spawns", section, false);
@@ -300,6 +311,7 @@ int main (int argc, char **argv)
      pSEQPrefs->getPrefInt("SpawnsFrequency", section, (120 * 1000));
    showeq_params->restoreDecodeKey = false;
    showeq_params->restorePlayerState = false;
+   showeq_params->restoreZoneState = false;
    showeq_params->restoreSpawns = false;
    showeq_params->saveRestoreBaseFilename = pSEQPrefs->getPrefString("BaseFilename", section, LOGDIR "/last");
 
@@ -726,6 +738,11 @@ int main (int argc, char **argv)
 	   showeq_params->restorePlayerState = true;
 	   break;
 	 }
+         case RESTORE_ZONE_STATE:
+	 {
+	   showeq_params->restoreZoneState = true;
+	   break;
+	 }
          case RESTORE_SPAWNS:
 	 {
 	   showeq_params->restoreSpawns = true;
@@ -735,6 +752,7 @@ int main (int argc, char **argv)
 	 {
 	   showeq_params->restoreDecodeKey = true;
 	   showeq_params->restorePlayerState = true;
+	   showeq_params->restoreZoneState = true;
 	   showeq_params->restoreSpawns = true;
 	   break;
 	 }
@@ -831,6 +849,8 @@ int main (int argc, char **argv)
       printf ("      --restore-decode-key              Restores the decode key from\n");
       printf ("                                        a previous session    \n");
       printf ("      --restore-player-state            Restores the player state\n");
+      printf ("                                        from a previous session    \n");
+      printf ("      --restore-zone-state              Restores the zone state\n");
       printf ("                                        from a previous session    \n");
       printf ("      --restore-spawns                  Restores the spawns\n");
       printf ("                                        from a previous session    \n");

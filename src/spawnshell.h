@@ -27,13 +27,13 @@
 #include <qtextstream.h>
 
 #include "everquest.h"
-#include "filtermgr.h"
 #include "spawn.h"
-#include "player.h"
-#include "logger.h"
 
 //----------------------------------------------------------------------
 // forward declarations
+class EQPlayer;
+class ZoneMgr;
+class FilterMgr;
 class SpawnShell;
 
 //----------------------------------------------------------------------
@@ -84,18 +84,15 @@ class SpawnShell : public QObject
 {
    Q_OBJECT
 public:
-   SpawnShell(FilterMgr& filterMgr, EQPlayer* player);
+   SpawnShell(FilterMgr& filterMgr, ZoneMgr* zoneMgr, EQPlayer* player);
 
    const Item* findID(itemType type, int idSpawn);
    
    const Item* findClosestItem(itemType type, 
-					 int16_t x,
-					 int16_t y, 
-					 double& minDistance);
+			       int16_t x,
+			       int16_t y, 
+			       double& minDistance);
    const Spawn* findSpawnByRawName(const QString& name);
-   const Spawn* playerSpawn() { return m_playerSpawn; }
-
-   int playerId();
 
    void dumpSpawns(itemType type, QTextStream& out);
    FilterMgr* filterMgr(void) { return &m_filterMgr; }
@@ -108,7 +105,7 @@ signals:
    void addItem(const Item* item);
    void delItem(const Item* item);
    void changeItem(const Item* item, uint32_t changeType);
-   void killSpawn(const Item*);
+   void killSpawn(const Item* deceased, const Item* killer, uint16_t killerId);
    void selectSpawn(const Item* item);
    void spawnConsidered(const Item* item);
    void clearItems();
@@ -128,8 +125,7 @@ public slots:
    void newDoorSpawn(const doorStruct* d);
    void removeCoinsItem(const removeCoinsStruct*);
    void zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len);
-   void timeOfDay(const timeOfDayStruct *tday);
-   void zoneEntry(const ServerZoneEntryStruct *zone);
+   void zoneBegin(const QString& shortZoneName);
    void newSpawn(const newSpawnStruct* spawn);
    void newSpawn(const spawnStruct& s);
    void playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t);
@@ -142,16 +138,13 @@ public slots:
    void updateSpawnHP(const hpUpdateStruct* hpupdate);
    void spawnWearingUpdate(const wearChangeStruct* wearing);
    void consMessage(const considerStruct* con, uint32_t, uint8_t);
-   void updateLevel(const levelUpUpdateStruct* levelup);
    void deleteSpawn(const deleteSpawnStruct* delspawn);
    void killSpawn(const newCorpseStruct* deadspawn);
    void corpseLoc(const corpseLocStruct* corpseLoc);
 
-   void setPlayerID(uint16_t id);
    void backfillSpawn(const newSpawnStruct* nspawn);
    void backfillSpawn(const spawnStruct* spawn);
    void backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t);
-   void backfillPlayer(const charProfileStruct* player);
    void refilterSpawns();
    void refilterSpawnsRuntime();
    void saveSpawns(void);
@@ -171,11 +164,8 @@ public slots:
    void clearMap(ItemMap& map);
    
  private:
-   // current player ID info
-   uint16_t m_playerId;
-   bool m_playerIdSet;
+   ZoneMgr* m_zoneMgr;
    EQPlayer* m_player;
-   Spawn* m_playerSpawn;
 
    // track recently killed spawns
    uint16_t m_deadSpawnID[MAX_DEAD_SPAWNIDS];
@@ -193,8 +183,6 @@ public slots:
 
    // filter manager
    FilterMgr& m_filterMgr;
-
-   SpawnLogger *m_spawnlogger;
 };
 
 inline

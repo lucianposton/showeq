@@ -13,8 +13,8 @@
 #include <qcolor.h>
 #include <qregexp.h> 
 #include <qfileinfo.h>
+#include <qdir.h>
 
-#include "itemdb.h"
 #include "util.h"
 #include "main.h"
 
@@ -45,26 +45,6 @@ Commanate(uint32_t number)
 
    return newstring;
 } /* END Commanate */
-
-QString zone_name(uint32_t zoneID)
-{
-   QString tmpstr;
-   tmpstr.sprintf("unk_zone_%d",zoneID);
-   static const char* zonenames[] =
-   {
-#include "zones.h"
-   };
-
-   const char* zoneName = NULL;
-   if (zoneID < (sizeof(zonenames) / sizeof (char*)))
-       zoneName = zonenames[zoneID];
-
-   if (zoneName != NULL)
-      return zoneName;
-   else
-      return tmpstr;
-}
-
 
 QString
 spell_name (uint16_t spellId)
@@ -1036,4 +1016,31 @@ timeOfDayStruct
 EQTime::eqdate(time_t rt)
 {
     return(epdate(eqtime(rt)));
+}
+
+bool findFile( QString& filename )
+{
+  bool                    found = false;
+  
+  QFileInfo               fi( filename );
+  QDir                    dir( fi.dirPath( true ) );
+  QString                 fileLower = fi.fileName().lower();
+  
+  QStringList             dirEntries = dir.entryList();
+  
+  for ( QStringList::Iterator it = dirEntries.begin();
+	it != dirEntries.end();
+	++it )
+  {
+    QString entry( (*it).lower() );
+    if ( entry == fileLower )
+    {
+      filename = fi.dirPath( true );
+      filename += "/";
+      filename += *it;
+      found = true;
+      break;
+    }
+  }
+  return found;
 }
