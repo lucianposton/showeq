@@ -605,7 +605,7 @@ struct ServerZoneEntryStruct
                                           //     could be usefull things here
 /*0308*/ uint16_t deity;                  // Player's Deity
 /*0310*/ uint8_t  unknown0310[8];         // ***Placeholder
-/*0318*/ uint32_t unknown0318[8];            // ***Placeholder
+/*0318*/ uint8_t  unknown0318[8];         // ***Placeholder
 };
 
 /*
@@ -687,6 +687,7 @@ struct charProfileStruct
 /*4538*/ uint8_t  unknown4538[358];       // ***PlaceHolder 
 /*4896*/ uint8_t  aapoints;               // number of ability points? 
 /*4897*/ uint8_t  unknown4897[3209];      // ***PlaceHolder 
+/*8106*/ uint8_t  unknown8106[4];         // ***PlaceHolder 
 };
 
 /*
