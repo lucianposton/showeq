@@ -1,3 +1,10 @@
+dohpaZ (29/03/02)
+------------------
+Modifications:
+ + Updated tradeItemOutStruct
+ + Fixed window caption setting for Spawn List and Compass, just set the Caption.
+ + Updated version to 4.0.1, just for kicks...
+
 dohpaZ (27/03/02)
 ------------------
 Bug Fix:

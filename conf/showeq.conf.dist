@@ -249,6 +249,9 @@ ShowZone          1    # show zone name in status bar
 ShowEQTime        1    # show EQ time in the status bar
 StatusBarActive   1    # Make sure status bar is active
 
+[Compass]
+Caption           "ShowEQ - Compass"
+
 #
 # StatList options
 #
@@ -315,6 +318,7 @@ ColumnOrder       0:1
 # Note:  The default values shown work well for a 10point font
 #
 [SpawnList]
+Caption           "ShowEQ - Spawn List"
 SavePosition      1    # if set and undocked, save window x, y, width, height
 SaveWidth         0    # if set the following values will be saved upon exit
 NameWidth         155  # comment out any of these values to make them autosize
