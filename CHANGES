@@ -1,3 +1,8 @@
+casey 11/07/2002
+----------------------
+ + conf/seqdef.xml
+   - fixed typo (a property tag was missing the y, thx fippy)
+
 fee (floyd) 11/05/2002
 ----------------------
  + ShowEQ 4.3.2
