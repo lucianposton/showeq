@@ -109,42 +109,42 @@ QMainWindow (parent, name)
 	   this, SLOT(attack1Hand1(const attack1Struct *)));
    connect(m_packet, SIGNAL(attack2Hand1(const attack2Struct *)), 
 	    this, SLOT(attack2Hand1(const attack2Struct *)));
-   connect(m_packet, SIGNAL(wearItem(const itemPlayerStruct*)),
-	   this, SLOT(wearItem(const itemPlayerStruct*)));
-   connect(m_packet, SIGNAL(itemShop(const itemShopStruct*)),
-	   this, SLOT(itemShop(const itemShopStruct*)));
+   connect(m_packet, SIGNAL(wearItem(const playerItemStruct*)),
+	   this, SLOT(wearItem(const playerItemStruct*)));
+   connect(m_packet, SIGNAL(itemShop(const itemInShopStruct*)),
+	   this, SLOT(itemShop(const itemInShopStruct*)));
    connect(m_packet, SIGNAL(moneyOnCorpse(const moneyOnCorpseStruct*)),
 	   this, SLOT(moneyOnCorpse(const moneyOnCorpseStruct*)));
-   connect(m_packet, SIGNAL(itemPlayerReceived(const itemReceivedPlayerStruct*)),
-	   this, SLOT(itemPlayerReceived(const itemReceivedPlayerStruct*)));
-   connect(m_packet, SIGNAL(tradeItemOut(const tradeItemStruct*)),
-	   this, SLOT(tradeItemOut(const tradeItemStruct*)));
-   connect(m_packet, SIGNAL(tradeItemIn(const itemReceivedPlayerStruct*)),
-	   this, SLOT(tradeItemIn(const itemReceivedPlayerStruct*)));
+   connect(m_packet, SIGNAL(itemPlayerReceived(const tradeItemInStruct*)),
+	   this, SLOT(itemPlayerReceived(const tradeItemInStruct*)));
+   connect(m_packet, SIGNAL(tradeItemOut(const tradeItemOutStruct*)),
+	   this, SLOT(tradeItemOut(const tradeItemOutStruct*)));
+   connect(m_packet, SIGNAL(tradeItemIn(const tradeItemInStruct*)),
+	   this, SLOT(tradeItemIn(const tradeItemInStruct*)));
    connect(m_packet, SIGNAL(channelMessage(const channelMessageStruct*, bool)),
 	   this, SLOT(channelMessage(const channelMessageStruct*, bool)));
    connect(m_packet, SIGNAL(random(const randomStruct*)),
 	   this, SLOT(random(const randomStruct*)));
    connect(m_packet, SIGNAL(emoteText(const emoteTextStruct*)),
 	   this, SLOT(emoteText(const emoteTextStruct*)));
-   connect(m_packet, SIGNAL(playerBook(const bookPlayerStruct*)),
-	   this, SLOT(playerBook(const bookPlayerStruct*)));
-   connect(m_packet, SIGNAL(playerContainer(const containerPlayerStruct*)),
-	   this, SLOT(playerContainer(const containerPlayerStruct*)));
-   connect(m_packet, SIGNAL(inspectData(const inspectingStruct*)),
-	   this, SLOT(inspectData(const inspectingStruct*)));
+   connect(m_packet, SIGNAL(playerBook(const playerBookStruct*)),
+	   this, SLOT(playerBook(const playerBookStruct*)));
+   connect(m_packet, SIGNAL(playerContainer(const playerContainerStruct*)),
+	   this, SLOT(playerContainer(const playerContainerStruct*)));
+   connect(m_packet, SIGNAL(inspectData(const inspectDataStruct*)),
+	   this, SLOT(inspectData(const inspectDataStruct*)));
    connect(m_packet, SIGNAL(spMessage(const spMesgStruct*)),
 	   this, SLOT(spMessage(const spMesgStruct*)));
-   connect(m_packet, SIGNAL(handleSpell(const spellCastStruct*, bool)),
-	   this, SLOT(handleSpell(const spellCastStruct*, bool)));
+   connect(m_packet, SIGNAL(handleSpell(const memSpellStruct*, bool)),
+	   this, SLOT(handleSpell(const memSpellStruct*, bool)));
    connect(m_packet, SIGNAL(beginCast(const beginCastStruct*, bool)),
 	   this, SLOT(beginCast(const beginCastStruct*)));
-   connect(m_packet, SIGNAL(interruptSpellCast(const interruptCastStruct *)),
-	   this, SLOT(interruptSpellCast(const interruptCastStruct *)));
-   connect(m_packet, SIGNAL(startCast(const castStruct*)),
-	   this, SLOT(startCast(const castStruct*)));
-   connect(m_packet, SIGNAL(systemMessage(const systemMessageStruct*)),
-	   this, SLOT(systemMessage(const systemMessageStruct*)));
+   connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *)),
+	   this, SLOT(interruptSpellCast(const badCastStruct *)));
+   connect(m_packet, SIGNAL(startCast(const startCastStruct*)),
+	   this, SLOT(startCast(const startCastStruct*)));
+   connect(m_packet, SIGNAL(systemMessage(const sysMsgStruct*)),
+	   this, SLOT(systemMessage(const sysMsgStruct*)));
    connect(m_packet, SIGNAL(moneyUpdate(const moneyUpdateStruct*)),
 	   this, SLOT(moneyUpdate(const moneyUpdateStruct*)));
    connect(m_packet, SIGNAL(moneyThing(const moneyUpdateStruct*)),
@@ -377,38 +377,38 @@ QMainWindow (parent, name)
    //	   m_spawnShell, SLOT(clear(void)));
    connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, bool)),
 	   m_spawnShell, SLOT(clear(void)));
-   connect(m_packet, SIGNAL(newGroundItem(const dropThingOnGround*, bool)),
-	   m_spawnShell, SLOT(newGroundItem(const dropThingOnGround *)));
-   connect(m_packet, SIGNAL(removeGroundItem(const removeThingOnGround *)),
-	   m_spawnShell, SLOT(removeGroundItem(const removeThingOnGround *)));
+   connect(m_packet, SIGNAL(newGroundItem(const makeDropStruct*, bool)),
+	   m_spawnShell, SLOT(newGroundItem(const makeDropStruct *)));
+   connect(m_packet, SIGNAL(removeGroundItem(const remDropStruct *)),
+	   m_spawnShell, SLOT(removeGroundItem(const remDropStruct *)));
    connect(m_packet, SIGNAL(newCoinsItem(const dropCoinsStruct *)),
 	   m_spawnShell, SLOT(newCoinsItem(const dropCoinsStruct *)));
    connect(m_packet, SIGNAL(removeCoinsItem(const removeCoinsStruct *)),
 	   m_spawnShell, SLOT(removeCoinsItem(const removeCoinsStruct *)));
-   connect(m_packet, SIGNAL(compressedDoorSpawn(const compressedDoorStruct *)),
-           m_spawnShell, SLOT(compressedDoorSpawn(const compressedDoorStruct*)));
+   connect(m_packet, SIGNAL(compressedDoorSpawn(const cDoorSpawnsStruct *)),
+           m_spawnShell, SLOT(compressedDoorSpawn(const cDoorSpawnsStruct*)));
    connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*)),
 	   m_spawnShell, SLOT(newSpawn(const newSpawnStruct*)));
-   connect(m_packet, SIGNAL(updateSpawns(const spawnPositionUpdateStruct *)),
-	   m_spawnShell, SLOT(updateSpawns(const spawnPositionUpdateStruct *)));
-   connect(m_packet, SIGNAL(updateSpawnHP(const spawnHpUpdateStruct *)),
-	   m_spawnShell, SLOT(updateSpawnHP(const spawnHpUpdateStruct *)));
+   connect(m_packet, SIGNAL(updateSpawns(const mobUpdateStruct *)),
+	   m_spawnShell, SLOT(updateSpawns(const mobUpdateStruct *)));
+   connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct *)),
+	   m_spawnShell, SLOT(updateSpawnHP(const hpUpdateStruct *)));
    connect(m_packet, SIGNAL(deleteSpawn(const deleteSpawnStruct*)),
 	   m_spawnShell, SLOT(deleteSpawn(const deleteSpawnStruct*)));
-   connect(m_packet, SIGNAL(killSpawn(const spawnKilledStruct*)),
-	   m_spawnShell, SLOT(killSpawn(const spawnKilledStruct*)));
+   connect(m_packet, SIGNAL(killSpawn(const newCorpseStruct*)),
+	   m_spawnShell, SLOT(killSpawn(const newCorpseStruct*)));
    connect(m_packet, SIGNAL(backfillSpawn(const spawnStruct *)),
 	   m_spawnShell, SLOT(backfillSpawn(const spawnStruct *)));
-   connect (m_packet, SIGNAL(backfillPlayer(const playerProfileStruct*)),
-	    m_spawnShell, SLOT(backfillPlayer(const playerProfileStruct*)));
+   connect (m_packet, SIGNAL(backfillPlayer(const charProfileStruct*)),
+	    m_spawnShell, SLOT(backfillPlayer(const charProfileStruct*)));
    connect(m_packet, SIGNAL(spawnWearingUpdate(const wearChangeStruct*)),
 	   m_spawnShell, SLOT(spawnWearingUpdate(const wearChangeStruct*)));
    connect(m_packet, SIGNAL(consRequest(const considerStruct*)),
 	   m_spawnShell, SLOT(consRequest(const considerStruct*)));
    connect(m_packet, SIGNAL(consMessage(const considerStruct*)),
 	   m_spawnShell, SLOT(consMessage(const considerStruct*)));
-   connect(m_packet, SIGNAL(playerUpdate(const playerUpdateStruct*, bool)),
-	   m_spawnShell, SLOT(playerUpdate(const playerUpdateStruct*, bool)));
+   connect(m_packet, SIGNAL(playerUpdate(const playerPosStruct*, bool)),
+	   m_spawnShell, SLOT(playerUpdate(const playerPosStruct*, bool)));
    connect(m_packet, SIGNAL(corpseLoc(const corpseLocStruct*)),
 	   m_spawnShell, SLOT(corpseLoc(const corpseLocStruct*)));
    connect(m_packet, SIGNAL(zoneSpawns(const zoneSpawnsStruct*, int)),
@@ -429,42 +429,42 @@ QMainWindow (parent, name)
 	   this, SLOT(changeItem(const Item*)));
 
    // connect the SpellShell slots to EQPacket signals
-   connect(m_packet, SIGNAL(startCast(const castStruct *)),
-	   m_spellShell, SLOT(selfStartSpellCast(const castStruct *)));
-   connect(m_packet, SIGNAL(handleSpell(const spellCastStruct *, bool)),
-	   m_spellShell, SLOT(selfFinishSpellCast(const spellCastStruct *)));
+   connect(m_packet, SIGNAL(startCast(const startCastStruct *)),
+	   m_spellShell, SLOT(selfStartSpellCast(const startCastStruct *)));
+   connect(m_packet, SIGNAL(handleSpell(const memSpellStruct *, bool)),
+	   m_spellShell, SLOT(selfFinishSpellCast(const memSpellStruct *)));
 //   connect(m_packet, SIGNAL(beginCast(struct beginCastStruct *)),
 //      m_spellShell, SLOT(otherStartSpellCast(struct beginCastStruct *)));
-   connect(m_packet, SIGNAL(interruptSpellCast(const interruptCastStruct *)),
-	   m_spellShell, SLOT(interruptSpellCast(const interruptCastStruct *)));
+   connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *)),
+	   m_spellShell, SLOT(interruptSpellCast(const badCastStruct *)));
 
    // connect the SpellShell slots to EQInterface signals
    connect(this, SIGNAL(spellMessage(QString&)),
 	   m_spellShell, SLOT(spellMessage(QString&)));
 
    // connect EQPlayer slots to EQPacket signals
-   connect(m_packet, SIGNAL(backfillPlayer(const playerProfileStruct*)),
-	   m_player, SLOT(backfill(const playerProfileStruct*)));
-   connect(m_packet, SIGNAL(increaseSkill(const skillIncreaseStruct*)),
-	   m_player, SLOT(increaseSkill(const skillIncreaseStruct*)));
+   connect(m_packet, SIGNAL(backfillPlayer(const charProfileStruct*)),
+	   m_player, SLOT(backfill(const charProfileStruct*)));
+   connect(m_packet, SIGNAL(increaseSkill(const skillIncStruct*)),
+	   m_player, SLOT(increaseSkill(const skillIncStruct*)));
    connect(m_packet, SIGNAL(manaChange(const manaDecrementStruct*)),
 	   m_player, SLOT(manaChange(const manaDecrementStruct*)));
-   connect(m_packet, SIGNAL(playerUpdate(const playerUpdateStruct*, bool)),
-	   m_player, SLOT(playerUpdate(const playerUpdateStruct*, bool)));
+   connect(m_packet, SIGNAL(playerUpdate(const playerPosStruct*, bool)),
+	   m_player, SLOT(playerUpdate(const playerPosStruct*, bool)));
    connect(m_packet, SIGNAL(setPlayerID(uint16_t)), 
 	   m_player, SLOT(setPlayerID(uint16_t)));
-   connect(m_packet, SIGNAL(updateAltExp(const expAltUpdateStruct*)),
-	   m_player, SLOT(updateAltExp(const expAltUpdateStruct*)));
+   connect(m_packet, SIGNAL(updateAltExp(const altExpUpdateStruct*)),
+	   m_player, SLOT(updateAltExp(const altExpUpdateStruct*)));
    connect(m_packet, SIGNAL(updateExp(const expUpdateStruct*)),
 	   m_player, SLOT(updateExp(const expUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateLevel(const levelUpStruct*)),
-	   m_player, SLOT(updateLevel(const levelUpStruct*)));
-   connect(m_packet, SIGNAL(updateSpawnHP(const spawnHpUpdateStruct*)),
-	   m_player, SLOT(updateSpawnHP(const spawnHpUpdateStruct*)));
+   connect(m_packet, SIGNAL(updateLevel(const levelUpUpdateStruct*)),
+	   m_player, SLOT(updateLevel(const levelUpUpdateStruct*)));
+   connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct*)),
+	   m_player, SLOT(updateSpawnHP(const hpUpdateStruct*)));
    connect(m_packet, SIGNAL(updateStamina(const staminaStruct*)),
 	   m_player, SLOT(updateStamina(const staminaStruct*)));
-   connect(m_packet, SIGNAL(wearItem(const itemPlayerStruct*)),
-	   m_player, SLOT(wearItem(const itemPlayerStruct*)));
+   connect(m_packet, SIGNAL(wearItem(const playerItemStruct*)),
+	   m_player, SLOT(wearItem(const playerItemStruct*)));
    connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, bool)),
 	   m_player, SLOT(zoneChange(const zoneChangeStruct*, bool)));
    connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*)),
@@ -2500,11 +2500,11 @@ printf("Attack1: '%s' hit by %d damage (%d:%d:%d:%d:%d:%d)\n",
         QString temp("");
         temp.sprintf("ATTACK1: %i, u1:%i, u2:%i, u3:%i, u4:%i, u5:%i",
            atk1->spawnId,
-           atk1->unknown1,
-           atk1->unknown2,
-           atk1->unknown3,
-           atk1->unknown4,
-           atk1->unknown5);
+           atk1->param1,
+           atk1->param2,
+           atk1->param3,
+           atk1->param4,
+           atk1->param5);
         emit
            msgReceived(temp);
     }
@@ -2529,18 +2529,18 @@ printf("Attack2: '%s' hit by %d damage (%d:%d:%d:%d:%d:%d)\n",
         QString temp("");
         temp.sprintf("ATTACK2: %i, u1:%i, u2:%i, u3:%i, u4:%i, u5:%i",
            atk2->spawnId,
-           atk2->unknown1,
-           atk2->unknown2,
-           atk2->unknown3,
-           atk2->unknown4,
-           atk2->unknown5);
+           atk2->param1,
+           atk2->param2,
+           atk2->param3,
+           atk2->param4,
+           atk2->param5);
         emit
            msgReceived(temp);
     }
   }
 }
 
-void EQInterface::itemShop(const itemShopStruct* items)
+void EQInterface::itemShop(const itemInShopStruct* items)
 {
   QString tempStr;
 
@@ -2616,7 +2616,7 @@ void EQInterface::moneyOnCorpse(const moneyOnCorpseStruct* money)
   }
 }
 
-void EQInterface::itemPlayerReceived(const itemReceivedPlayerStruct* itemc)
+void EQInterface::itemPlayerReceived(const tradeItemInStruct* itemc)
 {
   QString tempStr;
 
@@ -2631,7 +2631,7 @@ void EQInterface::itemPlayerReceived(const itemReceivedPlayerStruct* itemc)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::tradeItemOut(const tradeItemStruct* itemt)
+void EQInterface::tradeItemOut(const tradeItemOutStruct* itemt)
 {
   QString tempStr;
 
@@ -2647,7 +2647,7 @@ void EQInterface::tradeItemOut(const tradeItemStruct* itemt)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::tradeItemIn(const itemReceivedPlayerStruct* itemr)
+void EQInterface::tradeItemIn(const tradeItemInStruct* itemr)
 {
   QString tempStr;
 
@@ -2664,7 +2664,7 @@ void EQInterface::tradeItemIn(const itemReceivedPlayerStruct* itemr)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::wearItem(const itemPlayerStruct* itemp)
+void EQInterface::wearItem(const playerItemStruct* itemp)
 {
   QString tempStr;
 
@@ -2784,7 +2784,7 @@ void EQInterface::emoteText(const emoteTextStruct* emotetext)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::playerBook(const bookPlayerStruct* bookp)
+void EQInterface::playerBook(const playerBookStruct* bookp)
 {
   QString tempStr;
 
@@ -2803,7 +2803,7 @@ void EQInterface::playerBook(const bookPlayerStruct* bookp)
   }
 }
 
-void EQInterface::playerContainer(const containerPlayerStruct *containp)
+void EQInterface::playerContainer(const playerContainerStruct *containp)
 {
   QString tempStr;
 
@@ -2832,7 +2832,7 @@ void EQInterface::playerContainer(const containerPlayerStruct *containp)
   }
 }
 
-void EQInterface::inspectData(const inspectingStruct *inspt)
+void EQInterface::inspectData(const inspectDataStruct *inspt)
 {
   for (int inp = 0; inp < 21; inp ++)
     printf("He has %s (icn:%i)\n", inspt->itemNames[inp], inspt->icons[inp]);
@@ -2900,7 +2900,7 @@ void EQInterface::spMessage(const spMesgStruct *spmsg)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::handleSpell(const spellCastStruct* mem, bool client)
+void EQInterface::handleSpell(const memSpellStruct* mem, bool client)
 {
   QString tempStr;
 
@@ -2999,7 +2999,7 @@ void EQInterface::beginCast(const beginCastStruct *bcast)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::interruptSpellCast(const interruptCastStruct *icast)
+void EQInterface::interruptSpellCast(const badCastStruct *icast)
 {
   const Item* item = m_spawnShell->findID(tSpawn, icast->spawnId);
 
@@ -3011,7 +3011,7 @@ void EQInterface::interruptSpellCast(const interruptCastStruct *icast)
 	   icast->spawnId, icast->message);
 }
 
-void EQInterface::startCast(const castStruct* cast)
+void EQInterface::startCast(const startCastStruct* cast)
 {
   printf("SPELL: You begin casting %s.  Current Target is ", 
 	 (const char*)spell_name(cast->spellId) );
@@ -3026,7 +3026,7 @@ void EQInterface::startCast(const castStruct* cast)
   printf("\n");
 }
 
-void EQInterface::systemMessage(const systemMessageStruct* smsg)
+void EQInterface::systemMessage(const sysMsgStruct* smsg)
 {
   QString tempStr;
 
@@ -3043,7 +3043,7 @@ void EQInterface::systemMessage(const systemMessageStruct* smsg)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::newGroundItem(const dropThingOnGround* adrop, bool client)
+void EQInterface::newGroundItem(const makeDropStruct* adrop, bool client)
 {
   QString tempStr;
 

@@ -73,24 +73,24 @@ class EQInterface:public QMainWindow
    void numPacket(int);
    void attack1Hand1(const attack1Struct *);
    void attack2Hand1(const attack2Struct *);
-   void itemShop(const itemShopStruct* items);
+   void itemShop(const itemInShopStruct* items);
    void moneyOnCorpse(const moneyOnCorpseStruct* money);
-   void itemPlayerReceived(const itemReceivedPlayerStruct* itemc);
-   void tradeItemOut(const tradeItemStruct* itemt);
-   void tradeItemIn(const itemReceivedPlayerStruct* itemr);
-   void wearItem(const itemPlayerStruct* itemp);
+   void itemPlayerReceived(const tradeItemInStruct* itemc);
+   void tradeItemOut(const tradeItemOutStruct* itemt);
+   void tradeItemIn(const tradeItemInStruct* itemr);
+   void wearItem(const playerItemStruct* itemp);
    void channelMessage(const channelMessageStruct* cmsg, bool client);
    void random(const randomStruct* randr);
    void emoteText(const emoteTextStruct* emotetext);
-   void playerBook(const bookPlayerStruct* bookp);
-   void playerContainer(const containerPlayerStruct* containp);
-   void inspectData(const inspectingStruct* inspt);
+   void playerBook(const playerBookStruct* bookp);
+   void playerContainer(const playerContainerStruct* containp);
+   void inspectData(const inspectDataStruct* inspt);
    void spMessage(const spMesgStruct* spmsg);
-   void handleSpell(const spellCastStruct* mem, bool client);
+   void handleSpell(const memSpellStruct* mem, bool client);
    void beginCast(const beginCastStruct* bcast);
-   void interruptSpellCast(const interruptCastStruct *icast);
-   void startCast(const castStruct* cast);
-   void systemMessage(const systemMessageStruct* smsg);
+   void interruptSpellCast(const badCastStruct *icast);
+   void startCast(const startCastStruct* cast);
+   void systemMessage(const sysMsgStruct* smsg);
    void moneyUpdate(const moneyUpdateStruct* money);
    void moneyThing(const moneyUpdateStruct* money);
    void groupInfo(const groupMemberStruct* gmem);
@@ -99,7 +99,7 @@ class EQInterface:public QMainWindow
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
    void zoneChange(const zoneChangeStruct* zoneChange, bool client);
    void zoneNew(const newZoneStruct* zoneNew, bool client);
-   void newGroundItem(const dropThingOnGround*, bool client);
+   void newGroundItem(const makeDropStruct*, bool client);
    void clientTarget(const clientTargetStruct* cts);
    void spawnSelected(const Item* item);
    void spawnConsidered(const Item* item);
@@ -155,7 +155,7 @@ class EQInterface:public QMainWindow
    void spellMessage(QString&);
 
    // Decoder signals
-   void backfillPlayer(playerProfileStruct *);
+   void backfillPlayer(charProfileStruct *);
    void backfillSpawn(spawnStruct *);
 
  private slots:

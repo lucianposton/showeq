@@ -93,6 +93,8 @@ struct ShowEQParams
   const char    *ZoneLogFilename;
   const char    *UnknownZoneLogFilename;
   const char    *EncryptedLogFilenameBase;
+  const char    *PktLoggerMask;
+  char          *PktLoggerFilename;
   char          *CharProfileCodeFilename;
   char          *NewSpawnCodeFilename;
   char          *ZoneSpawnsCodeFilename;

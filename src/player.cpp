@@ -37,7 +37,7 @@ EQPlayer::EQPlayer (int level = 0,
     clear();
 }
 
-void EQPlayer::backfill(const playerProfileStruct* player)
+void EQPlayer::backfill(const charProfileStruct* player)
 {
   QString messag;
 
@@ -63,7 +63,7 @@ void EQPlayer::backfill(const playerProfileStruct* player)
 
 
 // Stats hanling
-  memcpy(&m_thePlayer, player, sizeof(playerProfileStruct));
+  memcpy(&m_thePlayer, player, sizeof(charProfileStruct));
   
   m_playerLevel = player->level;
   m_playerRace = player->race;
@@ -191,7 +191,7 @@ void EQPlayer::clear()
 
 void EQPlayer::reset()
 {
-  memset(&m_thePlayer, 0, sizeof(playerProfileStruct));
+  memset(&m_thePlayer, 0, sizeof(charProfileStruct));
 
   setUseDefaults(true);
 
@@ -219,7 +219,7 @@ void EQPlayer::reset()
   fillConTable();
 }
 
-void EQPlayer::wearItem(const itemPlayerStruct* itemp)
+void EQPlayer::wearItem(const playerItemStruct* itemp)
 {
   const itemStruct* item = &itemp->item;
 
@@ -367,7 +367,7 @@ void EQPlayer::removeItem(const itemStruct* item)
   }
 }
 
-void EQPlayer::increaseSkill(const skillIncreaseStruct* skilli)
+void EQPlayer::increaseSkill(const skillIncStruct* skilli)
 {
   // save the new skill value
   m_playerSkills[skilli->skillId] = skilli->value;
@@ -396,7 +396,7 @@ void EQPlayer::manaChange(const manaDecrementStruct *mana)
   emit manaChanged(m_thePlayer.MANA, m_maxMana);  // Needs max mana
 }
 
-void EQPlayer::updateAltExp(const expAltUpdateStruct* altexp)
+void EQPlayer::updateAltExp(const altExpUpdateStruct* altexp)
 {
   QString totalAltExp;
   QString leftAltExp;
@@ -503,7 +503,7 @@ printf("exp_debug: fract %d, min %d, max %d, diff %d, real %d, inc %d\n", fracte
   m_validExp = true;
 }
 
-void EQPlayer::updateLevel(const levelUpStruct *levelup)
+void EQPlayer::updateLevel(const levelUpUpdateStruct *levelup)
 {
   QString totalExp;
   QString gainedExp;
@@ -556,7 +556,7 @@ void EQPlayer::updateLevel(const levelUpStruct *levelup)
   fillConTable();
 }
 
-void EQPlayer::updateSpawnHP(const spawnHpUpdateStruct *hpupdate)
+void EQPlayer::updateSpawnHP(const hpUpdateStruct *hpupdate)
 {
   if (hpupdate->spawnId != m_playerID)
     return;
@@ -628,7 +628,7 @@ void EQPlayer::zoneNew(const newZoneStruct* zoneNew, bool client)
 }
 
 
-void EQPlayer::playerUpdate(const playerUpdateStruct *pupdate, bool client)
+void EQPlayer::playerUpdate(const playerPosStruct *pupdate, bool client)
 {
   if (!client && (pupdate->spawnId != m_playerID))
     return;

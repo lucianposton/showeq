@@ -30,17 +30,17 @@ public:
 	    int deity = DEITY_AGNOSTIC);
 
  public slots:
-   void backfill(const playerProfileStruct* player); 
+   void backfill(const charProfileStruct* player); 
    void clear();
    void reset();
-   void wearItem(const itemPlayerStruct* itemp);
+   void wearItem(const playerItemStruct* itemp);
    void removeItem(const itemStruct* item);
-   void increaseSkill(const skillIncreaseStruct* skilli);
+   void increaseSkill(const skillIncStruct* skilli);
    void manaChange(const manaDecrementStruct* mana);
    void updateExp(const expUpdateStruct* exp);
-   void updateAltExp(const expAltUpdateStruct* altexp);
-   void updateLevel(const levelUpStruct* levelup);
-   void updateSpawnHP(const spawnHpUpdateStruct* hpupdate);
+   void updateAltExp(const altExpUpdateStruct* altexp);
+   void updateLevel(const levelUpUpdateStruct* levelup);
+   void updateSpawnHP(const hpUpdateStruct* hpupdate);
    void updateStamina(const staminaStruct* stam);
    void setLastKill(const QString& name, uint8_t level);
    void setLastSpell(uint16_t spellId);
@@ -48,7 +48,7 @@ public:
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
    void zoneChange(const zoneChangeStruct* zoneChange, bool client);
    void zoneNew(const newZoneStruct* zoneNew, bool client);
-   void playerUpdate(const playerUpdateStruct* pupdate, bool client);
+   void playerUpdate(const playerPosStruct* pupdate, bool client);
 
    void setPlayerName(const QString& playerName);
    void setPlayerLastName(const QString& playerLastName);
@@ -201,7 +201,7 @@ public:
    uint16_t m_deltaZ;
    int16_t  m_heading;
 
-   struct playerProfileStruct m_thePlayer; 
+   charProfileStruct m_thePlayer; 
    uint8_t m_playerSkills [MAX_KNOWN_SKILLS];
    uint8_t m_playerLanguages [MAX_KNOWN_LANGS];
 

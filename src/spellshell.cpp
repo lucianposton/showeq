@@ -17,7 +17,7 @@
 
 SpellItem::SpellItem(SpawnShell* spawnShell, 
 		     uint16_t casterId,
-		     const castStruct *c)
+		     const startCastStruct *c)
 {
    m_spellId = 0;
    m_casterId = 0;
@@ -34,7 +34,7 @@ SpellItem::SpellItem(SpawnShell* spawnShell,
 
 void SpellItem::UpdateSpell(SpawnShell* spawnShell,
 			    uint16_t casterId,
-			    const castStruct *c)
+			    const startCastStruct *c)
 {
    if (c) {
       m_spellId = c->spellId;
@@ -147,7 +147,7 @@ const QString SpellItem::casterName() const
    return m_casterName;
 }
 
-//struct castStruct* SpellItem::cast()
+//struct startCastStruct* SpellItem::cast()
 //{
 //   return &m_cast;
 //}
@@ -180,7 +180,7 @@ SpellItem* SpellShell::FindSpell(int spell_id, int caster_id, int target_id)
    return NULL;
 }
 
-void SpellShell::UpdateSpell(const castStruct *c)
+void SpellShell::UpdateSpell(const startCastStruct *c)
 {
    if (c) {
       SpellItem *item = FindSpell(c->spellId, m_player->getPlayerID(),
@@ -201,7 +201,7 @@ void SpellShell::clear()
    emit clearSpells();
 }
 
-SpellItem* SpellShell::InsertSpell(const castStruct *c)
+SpellItem* SpellShell::InsertSpell(const startCastStruct *c)
 {
    if (c) {
       SpellItem *item = FindSpell(c->spellId, m_player->getPlayerID(),
@@ -233,7 +233,7 @@ void SpellShell::DeleteSpell(SpellItem *item)
 }
 
 // slots
-void SpellShell::selfStartSpellCast(const castStruct *c)
+void SpellShell::selfStartSpellCast(const startCastStruct *c)
 {
    printf("selfStartSpellCast - id=%d\n", c->spellId);
    InsertSpell(c);
@@ -243,7 +243,7 @@ void SpellShell::selfStartSpellCast(const castStruct *c)
 //{
 //}
 
-void SpellShell::interruptSpellCast(const interruptCastStruct *icast)
+void SpellShell::interruptSpellCast(const badCastStruct *icast)
 {
    // Check the last spell in the list, if spawnId and casterId match,
    // reset spell.
@@ -264,7 +264,7 @@ void SpellShell::interruptSpellCast(const interruptCastStruct *icast)
 }
 
 
-void SpellShell::selfFinishSpellCast(const spellCastStruct *b)
+void SpellShell::selfFinishSpellCast(const memSpellStruct *b)
 {
   if (b->param2 != 3)
     return;

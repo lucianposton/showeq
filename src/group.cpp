@@ -22,7 +22,7 @@ GroupMgr::GroupMgr(SpawnShell* spawnShell,
   m_group.setAutoDelete(false);
 }
  
-void GroupMgr::handleGroupInfo( const struct groupMemberStruct* gmem )
+void GroupMgr::handleGroupInfo( const groupMemberStruct* gmem )
 {
 #ifndef ENABLE_GROUPMGR
   return;

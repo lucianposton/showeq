@@ -280,6 +280,8 @@ int main (int argc, char **argv)
    /* Different files for different kinds of encrypted data */
    showeq_params->logEncrypted = pSEQPrefs->getPrefBool("LogEncrypted", section, 0);
    showeq_params->EncryptedLogFilenameBase = strdup(pSEQPrefs->getPrefString("EncryptedLogFilenameBase", section, "/usr/local/share/showeq/encrypted"));
+   showeq_params->PktLoggerMask = strdup( pSEQPrefs->getPrefString("PktLoggerMask", section, ""));
+   showeq_params->PktLoggerFilename = strdup( pSEQPrefs->getPrefString("PktLoggerFilename", section, "/usr/local/share/showeq/packet.log"));
 
    // item database parameters
    section = "ItemDB";

@@ -120,33 +120,33 @@ public slots:
    void clear();
 
    // slots to receive from EQPacket...
-   void newGroundItem(const dropThingOnGround*);
-   void removeGroundItem(const removeThingOnGround*);
+   void newGroundItem(const makeDropStruct*);
+   void removeGroundItem(const remDropStruct*);
    void newCoinsItem(const dropCoinsStruct*);
-   void compressedDoorSpawn (const compressedDoorStruct* c);
+   void compressedDoorSpawn (const cDoorSpawnsStruct* c);
    void newDoorSpawn(const doorStruct* d);
    void removeCoinsItem(const removeCoinsStruct*);
    void zoneSpawns(const zoneSpawnsStruct* zspawns, int len);
    void newSpawn(const newSpawnStruct* spawn);
    void newSpawn(const spawnStruct& s);
-   void playerUpdate(const playerUpdateStruct *pupdate, bool client);
+   void playerUpdate(const playerPosStruct *pupdate, bool client);
    void updateSpawn(uint16_t, 
 		    int16_t, int16_t, int16_t, 
 		    int16_t, int16_t, int16_t,
 		    int8_t, int8_t);
-   void updateSpawns(const spawnPositionUpdateStruct* updates);
-   void updateSpawnHP(const spawnHpUpdateStruct* hpupdate);
+   void updateSpawns(const mobUpdateStruct* updates);
+   void updateSpawnHP(const hpUpdateStruct* hpupdate);
    void spawnWearingUpdate(const wearChangeStruct* wearing);
    void consRequest(const considerStruct* con);
    void consMessage(const considerStruct* con);
-   void updateLevel(const levelUpStruct* levelup);
+   void updateLevel(const levelUpUpdateStruct* levelup);
    void deleteSpawn(const deleteSpawnStruct* delspawn);
-   void killSpawn(const spawnKilledStruct* deadspawn);
+   void killSpawn(const newCorpseStruct* deadspawn);
    void corpseLoc(const corpseLocStruct* corpseLoc);
 
    void setPlayerID(uint16_t id);
    void backfillSpawn(const spawnStruct* spawn);
-   void backfillPlayer(const playerProfileStruct* player);
+   void backfillPlayer(const charProfileStruct* player);
    void refilterSpawns();
    void refilterSpawnsRuntime();
 

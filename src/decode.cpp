@@ -263,8 +263,7 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
 
   // Get the opcode of the current packet
   // Check to see if it is a compressed packet
-  if ((opcode == CompressedPlayerItemCode) || 
-      (opcode == CompressedDoorSpawnCode))
+  if ((opcode == CPlayerItemsCode) || (opcode == CDoorSpawnsCode))
   {
      uint8_t pbUncompressedData[PKTBUF_LEN-4];
      uint32_t nUncompressedLength;

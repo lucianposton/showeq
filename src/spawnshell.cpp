@@ -309,10 +309,10 @@ void SpawnShell::dumpSpawns(itemType type, QTextStream& out)
 }
 
 // same-name slots, connecting to Packet signals
-void SpawnShell::newGroundItem(const dropThingOnGround *d)
+void SpawnShell::newGroundItem(const makeDropStruct *d)
 {
 #ifdef SPAWNSHELL_DIAG
-   printf("SpawnShell::newGroundItem(dropThingOnGround *)\n");
+   printf("SpawnShell::newGroundItem(makeDropStruct *)\n");
 #endif
    if (!d)
      return;
@@ -344,16 +344,16 @@ void SpawnShell::newGroundItem(const dropThingOnGround *d)
      emit handleAlert(item, tNewSpawn);
 }
 
-void SpawnShell::removeGroundItem(const removeThingOnGround *d)
+void SpawnShell::removeGroundItem(const remDropStruct *d)
 {
 #ifdef SPAWNSHELL_DIAG
-   printf("SpawnShell::removeGroundItem(removeThingOnGround *)\n");
+   printf("SpawnShell::removeGroundItem(remDropStruct *)\n");
 #endif
    if (d)
       deleteItem(tDrop, d->dropId);
 }
 
-void SpawnShell::compressedDoorSpawn(const compressedDoorStruct *c)
+void SpawnShell::compressedDoorSpawn(const cDoorSpawnsStruct *c)
 {
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::compressedDoorSpawn(compressedDoorStruct*)\n");
@@ -517,7 +517,7 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      emit handleAlert(item, tNewSpawn);
 }
 
-void SpawnShell::playerUpdate(const playerUpdateStruct *pupdate, bool client)
+void SpawnShell::playerUpdate(const playerPosStruct *pupdate, bool client)
 {
   if (!client && (pupdate->spawnId != m_playerId))
     return;
@@ -608,7 +608,7 @@ void SpawnShell::updateSpawn(uint16_t id,
    }
 }
 
-void SpawnShell::updateSpawns(const spawnPositionUpdateStruct* updates)
+void SpawnShell::updateSpawns(const mobUpdateStruct* updates)
 {
    for (int a = 0; a < updates->numUpdates; a++)
    {
@@ -644,7 +644,7 @@ void SpawnShell::updateSpawns(const spawnPositionUpdateStruct* updates)
    }
 }
 
-void SpawnShell::updateSpawnHP(const spawnHpUpdateStruct* hpupdate)
+void SpawnShell::updateSpawnHP(const hpUpdateStruct* hpupdate)
 {
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::updateSpawnHp(id=%d, hp=%d, maxHp=%d)\n", 
@@ -836,7 +836,7 @@ void SpawnShell::consMessage(const considerStruct * con)
   emit msgReceived(msg);
 } // end consMessage()
 
-void SpawnShell::updateLevel(const levelUpStruct* levelup)
+void SpawnShell::updateLevel(const levelUpUpdateStruct* levelup)
 {
   if (m_playerSpawn != NULL)
   {
@@ -864,13 +864,13 @@ void SpawnShell::deleteSpawn(const deleteSpawnStruct* delspawn)
    deleteItem(tSpawn, delspawn->spawnId);
 }
 
-void SpawnShell::killSpawn(const spawnKilledStruct* deadspawn)
+void SpawnShell::killSpawn(const newCorpseStruct* deadspawn)
 {
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::killSpawn(id=%d)\n", deadspawn->spawnId);
 #endif
 #ifdef SPAWNSHELL_DIAG_STRUCTS
-   printf("spawnKilledStruct: spawnId=%d", deadspawn->spawnId);
+   printf("newCorpseStruct: spawnId=%d", deadspawn->spawnId);
    ItemMap::iterator tmpit = m_spawns.find(deadspawn->spawnId);
    if (tmpit != m_spawns.end())
        printf("(%s)", (const char*)tmpit->second->name());
@@ -1043,7 +1043,7 @@ void SpawnShell::backfillSpawn(const spawnStruct *spawn)
   }
 }
 
-void SpawnShell::backfillPlayer(const playerProfileStruct* player)
+void SpawnShell::backfillPlayer(const charProfileStruct* player)
 {
   // if there is a player spawn, fill it in
   if (m_playerSpawn != NULL)

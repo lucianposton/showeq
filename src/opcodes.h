@@ -10,7 +10,6 @@
 
 #define opCodeVersion               3
 
-
 /*
 ** Please be kind and remember to correctly re-order
 ** the values in here whenever you add a new item,
@@ -22,17 +21,17 @@
 #define ZoneServerInfo              0x0480
 
 /* Zone Server OpCodes */
-#define dropCoinsVer                3
-#define dropCoinsCode               0x0720
+#define DropCoinsVer                3
+#define DropCoinsCode               0x0720
 
 #define ChannelMessageVer           3
 #define ChannelMessageCode          0x0721
 
-#define removeCoinsVer              3
-#define removeCoinsCode             0x0820
+#define RemoveCoinsVer              3
+#define RemoveCoinsCode             0x0820
 
-#define openVendorVer               3
-#define openVendorCode              0x0b20
+#define OpenVendorVer               3
+#define OpenVendorCode              0x0b20
 
 #define ItemInShopVer               3
 #define ItemInShopCode              0x0c20
@@ -40,20 +39,20 @@
 #define SysMsgVer                   3
 #define SysMsgCode                  0x1420
 
-#define emoteTextVer                3
-#define emoteTextCode               0x1520
+#define EmoteTextVer                3
+#define EmoteTextCode               0x1520
 
-#define corpseLocVer                3
-#define corpseLocCode               0x2120
+#define CorpseLocVer                3
+#define CorpseLocCode               0x2120
 
 #define AltExpUpdateVer             3
 #define AltExpUpdateCode            0x2322 
 
-#define groupinfoVer                3
-#define groupinfoCode               0x2640
+#define GroupInfoVer                3
+#define GroupInfoCode               0x2640
 
-#define moneyThingVer               3
-#define moneyThingCode              0x2820
+#define MoneyThingVer               3
+#define MoneyThingCode              0x2820
 
 #define ZoneEntryVer                3
 #define ZoneEntryCode               0x2920
@@ -67,32 +66,32 @@
 #define MakeDropVer                 3
 #define MakeDropCode                0x2d20
 
-#define ItemTradeVer                3
-#define ItemTradeCode               0x3120
+#define TradeItemInVer              3
+#define TradeItemInCode             0x3120
 
 #define CharProfileVer              3
 #define CharProfileCode             0x3620
 
-#define considerVer                 3
-#define considerCode                0x3721
+#define ConsiderVer                 3
+#define ConsiderCode                0x3721
 
-#define moneyUpdateVer              3
-#define moneyUpdateCode             0x3d21
+#define MoneyUpdateVer              3
+#define MoneyUpdateCode             0x3d21
 
-#define closeGMVer                  3
-#define closeGMCode                 0x4321
+#define CloseGMVer                  3
+#define CloseGMCode                 0x4321
 
-#define closeVendorVer              3
-#define closeVendorCode             0x4521
+#define CloseVendorVer              3
+#define CloseVendorCode             0x4521
 
-#define castOnVer                   3
-#define castOnCode                  0x4620
+#define CastOnVer                   3
+#define CastOnCode                  0x4620
 
 #define NewSpawnVer                 3
 #define NewSpawnCode                0x4921
 
-#define CorpseVer                   3
-#define CorpseCode                  0x4a20
+#define NewCorpseVer                3
+#define NewCorpseCode               0x4a20
 
 #define MoneyOnCorpseVer            3
 #define MoneyOnCorpseCode           0x5020
@@ -100,8 +99,8 @@
 #define ItemOnCorpseVer             3
 #define ItemOnCorpseCode            0x5220
 
-#define staminaVer                  3
-#define staminaCode                 0x5721
+#define StaminaVer                  3
+#define StaminaCode                 0x5721
 
 #define ActionVer                   3
 #define ActionCode                  0x5820
@@ -112,8 +111,8 @@
 #define ZoneSpawnsVer               3
 #define ZoneSpawnsCode              0x6121
 
-#define clientTargetVer             3
-#define clientTargetCode            0x6221
+#define ClientTargetVer             3
+#define ClientTargetCode            0x6221
 
 #define PlayerItemVer               3
 #define PlayerItemCode              0x6421
@@ -124,17 +123,17 @@
 #define PlayerContainerVer          3
 #define PlayerContainerCode         0x6621
 
-#define summonedItemVer             3
-#define summonedItemCode            0x7821
+#define SummonedItemVer             3
+#define SummonedItemCode            0x7821
 
-#define newGuildInZoneVer           3
-#define newGuildInZoneCode          0x7b21
+#define NewGuildInZoneVer           3
+#define NewGuildInZoneCode          0x7b21
 
 #define StartCastVer                3
 #define StartCastCode               0x7e21
 
-#define manaDecrementVer            3
-#define manaDecrementCode           0x7f21
+#define ManaDecrementVer            3
+#define ManaDecrementCode           0x7f21
 
 #define SPMesgVer                   3
 #define SPMesgCode                  0x8021
@@ -142,8 +141,8 @@
 #define MemSpellVer                 3
 #define MemSpellCode                0x8221
 
-#define bindWoundVer                3
-#define bindWoundCode               0x8321
+#define BindWoundVer                3
+#define BindWoundCode               0x8321
 
 #define SkillIncVer                 3
 #define SkillIncCode                0x8921
@@ -166,14 +165,14 @@
 #define ExpUpdateVer                3
 #define ExpUpdateCode               0x9921
 
-#define openGMVer                   3
-#define openGMCode                  0x9c20
+#define OpenGMVer                   3
+#define OpenGMCode                  0x9c20
 
 #define MobUpdateVer                3
 #define MobUpdateCode               0x9f20
 
-#define attack2Ver                  3
-#define attack2Code                 0xa120
+#define Attack2Ver                  3
+#define Attack2Code                 0xa120
 
 #define ZoneChangeVer               3
 #define ZoneChangeCode              0xa320
@@ -193,8 +192,8 @@
 #define BadCastVer                  3
 #define BadCastCode                 0xd321
 
-#define tradeItemVer                3
-#define tradeItemCode               0xdf20
+#define TradeItemOutVer             3
+#define TradeItemOutCode            0xdf20
 
 #define RandomVer                   3
 #define RandomCode                  0xe721
@@ -205,13 +204,13 @@
 #define PlayerPosVer                3
 #define PlayerPosCode               0xf320
 
-#define spawnAppearanceVer          3
-#define spawnAppearanceCode         0xf520
+#define SpawnAppearanceVer          3
+#define SpawnAppearanceCode         0xf520
 
-#define CompressedPlayerItemVer     3
-#define CompressedPlayerItemCode    0xf621
+#define CPlayerItemsVer             3
+#define CPlayerItemsCode            0xf621
 
-#define CompressedDoorSpawnVer      3
-#define CompressedDoorSpawnCode     0xf721
+#define CDoorSpawnsVer              3
+#define CDoorSpawnsCode             0xf721
 
 #endif // OPCODES_H

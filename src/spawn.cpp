@@ -320,7 +320,7 @@ Spawn::Spawn(uint16_t id,
   m_spawnTrackList.setAutoDelete(true);
 }
 
-Spawn::Spawn(const playerProfileStruct* player) : Item(tSpawn, 0)
+Spawn::Spawn(const charProfileStruct* player) : Item(tSpawn, 0)
 {
   // set what's known 
   setNPC(SPAWN_SELF);
@@ -523,7 +523,7 @@ void Spawn::backfill(const spawnStruct* s)
     setLevel(s->level);
 }
 
-void Spawn::backfill(const playerProfileStruct* player)
+void Spawn::backfill(const charProfileStruct* player)
 {
   // set the characteristics that probably haven't changed.
   setNPC(SPAWN_SELF);
@@ -992,7 +992,7 @@ QString Door::className() const
 
 //----------------------------------------------------------------------
 // Drop
-Drop::Drop(const dropThingOnGround* d, const QString& name)
+Drop::Drop(const makeDropStruct* d, const QString& name)
   : Item(tDrop, d->dropId)
 {
   m_NPC = SPAWN_DROP;
@@ -1004,7 +1004,7 @@ Drop::~Drop()
 {
 }
 
-void Drop::update(const dropThingOnGround* d, const QString& name)
+void Drop::update(const makeDropStruct* d, const QString& name)
 {
   int itemId;
   QString buff;

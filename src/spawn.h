@@ -130,7 +130,7 @@ class Spawn : public Item
   Spawn();
   Spawn(const spawnStruct* s);
   Spawn(uint16_t id, const spawnStruct* s);
-  Spawn(const playerProfileStruct* player);
+  Spawn(const charProfileStruct* player);
 
   Spawn(uint16_t id, 
 		  const QString& name, const QString& lastName, 
@@ -224,7 +224,7 @@ class Spawn : public Item
 
   // updates the data, careful not to overwrite existing correct data
   void backfill(const spawnStruct* s);
-  void backfill(const playerProfileStruct* player);
+  void backfill(const charProfileStruct* player);
 
   // change spawn state
   void killSpawn();
@@ -338,7 +338,7 @@ class Drop : public Item
 {
  public:
   // constructor/destructor
-  Drop(const dropThingOnGround* d, const QString& name);
+  Drop(const makeDropStruct* d, const QString& name);
   virtual ~Drop();
 
   // drop specific get methods
@@ -350,7 +350,7 @@ class Drop : public Item
   virtual QString className() const;
   
   // update methods
-  void update(const dropThingOnGround* d, const QString& name);
+  void update(const makeDropStruct* d, const QString& name);
 
   // drop specific set methods
   void setItemNr(uint16_t itemNr) 

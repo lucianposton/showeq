@@ -1,3 +1,20 @@
+fee (17/01/02)
+--------------------
+
+Additions
+ + applied patch #502126 by Yendor, this patch introduces an advanced
+   packet logging facility. This patch adds 2 definitions to showeq.conf
+   PktLoggerMask and PktLoggerFilename. See the patch manager, logger.h 
+   and showeq.conf.dist for details.  Great addition Yendor!
+
+
+Modifications
+ + patch #502126 extensivley modifies opcode and structure names. If you have
+   submitted prior patches that have not been accepted at this time, then please
+   review your changes for compatibility.
+
+ + slipped in some changes from patch #503766, redefining the ITEM_xxxx.
+
 fee (14/01/02)
 --------------------
 

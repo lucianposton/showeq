@@ -8,9 +8,8 @@ DB3_LIBS=$(DB3_LDFLAGS) -ldb_cxx
 endif
 
 ITEMDB_SRCS=itemdb.cpp gdbmconv.cpp $(DB3_SRCS)
-
 bin_PROGRAMS=showeq showeqitemdbtool
-showeq_SOURCES=main.cpp spawn.cpp spawnshell.cpp spawnlist.cpp spellshell.cpp spelllist.cpp preferences.cpp m_preferences.cpp vpacket.cpp editor.cpp filter.cpp m_spawnshell.cpp m_spawnlist.cpp m_spellshell.cpp m_spelllist.cpp m_editor.cpp packet.cpp m_packet.cpp interface.cpp m_interface.cpp compass.cpp m_compass.cpp map.cpp m_map.cpp util.cpp experiencelog.cpp m_experiencelog.cpp msgdlg.cpp m_msgdlg.cpp player.cpp m_player.cpp decode.cpp m_decode.cpp skilllist.cpp m_skilllist.cpp statlist.cpp m_statlist.cpp filtermgr.cpp m_filtermgr.cpp mapcore.cpp category.cpp m_category.cpp compassframe.cpp m_compassframe.cpp group.cpp m_group.cpp $(ITEMDB_SRCS)
+showeq_SOURCES=logger.cpp main.cpp spawn.cpp spawnshell.cpp spawnlist.cpp spellshell.cpp spelllist.cpp preferences.cpp m_preferences.cpp vpacket.cpp editor.cpp filter.cpp m_spawnshell.cpp m_spawnlist.cpp m_spellshell.cpp m_spelllist.cpp m_editor.cpp packet.cpp m_packet.cpp interface.cpp m_interface.cpp compass.cpp m_compass.cpp map.cpp m_map.cpp util.cpp experiencelog.cpp m_experiencelog.cpp msgdlg.cpp m_msgdlg.cpp player.cpp m_player.cpp decode.cpp m_decode.cpp skilllist.cpp m_skilllist.cpp statlist.cpp m_statlist.cpp filtermgr.cpp m_filtermgr.cpp mapcore.cpp category.cpp m_category.cpp compassframe.cpp m_compassframe.cpp group.cpp m_group.cpp $(ITEMDB_SRCS)
 
 showeq_LDADD=$(QT_LDFLAGS) $(QTLIB) $(DB3_LIBS) $(LIBPTHREAD) $(MEMORY_LIBS) \
 $(PROFILE_LIBS) $(SHOWEQ_RPATH) $(USER_LDFLAGS)

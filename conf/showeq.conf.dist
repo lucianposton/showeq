@@ -446,6 +446,9 @@ GlobalLogFilename	/usr/local/share/showeq/global.log
 ZoneLogFilename		/usr/local/share/showeq/zone.log
 UnknownZoneLogFilename	/usr/local/share/showeq/unknownzone.log
 EncryptedLogFilenameBase /usr/local/share/showeq/encrypted.log
+#PktLoggerMask 0xFFFFFFFFFFFFFFFFFFFFFFFF # 333333332222222211111111 
+#PktLoggerFilename /usr/local/share/showeq/packet.log
+
 
 [Misc]
 BrokenDecode            0 # set to 1 to skip spawn packets

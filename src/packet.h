@@ -33,6 +33,7 @@
 #include "decode.h"
 #include "opcodes.h"
 #include "util.h"
+#include "logger.h"
 
 #if defined (__GLIBC__) && (__GLIBC__ < 2)
 #error "Need glibc 2.1.3 or better"
@@ -568,16 +569,16 @@ class EQPacket : public QObject
 
  signals:
    // EQPlayer signals
-   void backfillPlayer         (const playerProfileStruct *);
-   void increaseSkill          (const skillIncreaseStruct* skilli);
+   void backfillPlayer         (const charProfileStruct *);
+   void increaseSkill          (const skillIncStruct* skilli);
    void manaChange             (const manaDecrementStruct* mana);
-   void playerUpdate           (const playerUpdateStruct* pupdate, bool client);
+   void playerUpdate           (const playerPosStruct* pupdate, bool client);
    void setPlayerID            (uint16_t);
    void updateExp              (const expUpdateStruct* exp);
-   void updateAltExp           (const expAltUpdateStruct* altexp);
-   void updateLevel            (const levelUpStruct* levelup);
+   void updateAltExp           (const altExpUpdateStruct* altexp);
+   void updateLevel            (const levelUpUpdateStruct* levelup);
    void updateStamina          (const staminaStruct* stam);
-   void wearItem               (const itemPlayerStruct* itemp);
+   void wearItem               (const playerItemStruct* itemp);
 
 
    //group signals
@@ -602,42 +603,42 @@ class EQPacket : public QObject
    void consMessage            (const considerStruct*);
    
    void clientTarget(const clientTargetStruct* target);
-   void compressedDoorSpawn    (const compressedDoorStruct*);
+   void compressedDoorSpawn    (const cDoorSpawnsStruct*);
    void spawnWearingUpdate     (const wearChangeStruct*);
 
-   void newGroundItem          (const dropThingOnGround*, bool client);
-   void removeGroundItem       (const removeThingOnGround*);
+   void newGroundItem          (const makeDropStruct*, bool client);
+   void removeGroundItem       (const remDropStruct*);
    void newCoinsItem           (const dropCoinsStruct*);
    void removeCoinsItem        (const removeCoinsStruct*);
 
-   void updateSpawns           (const spawnPositionUpdateStruct* updates);
-   void updateSpawnHP          (const spawnHpUpdateStruct* hpupdate);
+   void updateSpawns           (const mobUpdateStruct* updates);
+   void updateSpawnHP          (const hpUpdateStruct* hpupdate);
 
    void refreshMap             (void);
    void newSpawn               (const newSpawnStruct* spawn);
    void deleteSpawn            (const deleteSpawnStruct* delspawn);
-   void killSpawn              (const spawnKilledStruct* deadspawn);
+   void killSpawn              (const newCorpseStruct* deadspawn);
    void corpseLoc              (const corpseLocStruct*);
    void newZone                (char *, char *, bool);
    void zoneChanged            (void);
    void eqTimeChangedStr       (const QString &);
 
-   void itemShop(const itemShopStruct* items);
+   void itemShop(const itemInShopStruct* items);
    void moneyOnCorpse(const moneyOnCorpseStruct* money);
-   void itemPlayerReceived(const itemReceivedPlayerStruct* itemc);
-   void tradeItemOut(const tradeItemStruct* itemt);
-   void tradeItemIn(const itemReceivedPlayerStruct* itemr);
+   void itemPlayerReceived(const tradeItemInStruct* itemc);
+   void tradeItemOut(const tradeItemOutStruct* itemt);
+   void tradeItemIn(const tradeItemInStruct* itemr);
    void channelMessage(const channelMessageStruct* cmsg, bool client);
    void random(const randomStruct* randr);
    void emoteText(const emoteTextStruct* emotetext);
-   void playerBook(const bookPlayerStruct* bookp);
-   void playerContainer(const containerPlayerStruct* containp);
-   void inspectData(const inspectingStruct* inspt);
+   void playerBook(const playerBookStruct* bookp);
+   void playerContainer(const playerContainerStruct* containp);
+   void inspectData(const inspectDataStruct* inspt);
    void spMessage(const spMesgStruct* spmsg);
-   void handleSpell(const spellCastStruct* mem, bool client);
+   void handleSpell(const memSpellStruct* mem, bool client);
    void beginCast(const beginCastStruct* bcast, bool client);
-   void startCast(const castStruct* cast);
-   void systemMessage(const systemMessageStruct* smsg);
+   void startCast(const startCastStruct* cast);
+   void systemMessage(const sysMsgStruct* smsg);
    void moneyUpdate(const moneyUpdateStruct* money);
    void moneyThing(const moneyUpdateStruct* money);
    void groupInfo(const groupMemberStruct* gmem);
@@ -661,7 +662,7 @@ class EQPacket : public QObject
    void backfillSpawn      (const spawnStruct *);
 
    // Spell signals
-   void interruptSpellCast(const interruptCastStruct *);
+   void interruptSpellCast(const badCastStruct *);
  
  private:
    /* The player object, keeps track player's level, race and class.
@@ -671,7 +672,7 @@ class EQPacket : public QObject
    EQDecode            *m_decode;
    PacketCaptureThread *m_packetCapture;
    VPacket             *m_vPacket;
-
+   PktLogger           *m_logger;
    QString print_addr   (in_addr_t addr);
    
    QTimer         *m_timer;
