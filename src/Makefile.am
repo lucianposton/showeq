@@ -9,7 +9,7 @@ endif
 
 ITEMDB_SRCS=itemdb.cpp m_itemdb.cpp gdbmconv.cpp $(DB3_SRCS)
 bin_PROGRAMS=showeq showeqitemdbtool
-showeq_SOURCES=main.cpp spawn.cpp spawnshell.cpp spawnlist.cpp spellshell.cpp spelllist.cpp vpacket.cpp editor.cpp filter.cpp m_spawnshell.cpp m_spawnlist.cpp m_spellshell.cpp m_spelllist.cpp m_editor.cpp packet.cpp m_packet.cpp interface.cpp m_interface.cpp compass.cpp m_compass.cpp map.cpp m_map.cpp util.cpp experiencelog.cpp m_experiencelog.cpp combatlog.cpp m_combatlog.cpp msgdlg.cpp m_msgdlg.cpp player.cpp m_player.cpp decode.cpp m_decode.cpp skilllist.cpp m_skilllist.cpp statlist.cpp m_statlist.cpp filtermgr.cpp m_filtermgr.cpp mapcore.cpp category.cpp m_category.cpp compassframe.cpp m_compassframe.cpp group.cpp m_group.cpp guild.cpp m_guild.cpp netdiag.cpp m_netdiag.cpp logger.cpp m_logger.cpp xmlconv.cpp xmlpreferences.cpp m_xmlpreferences.cpp seqwindow.cpp m_seqwindow.cpp seqlistview.cpp m_seqlistview.cpp zonemgr.cpp m_zonemgr.cpp spawnmonitor.cpp m_spawnmonitor.cpp spawnpointlist.cpp m_spawnpointlist.cpp spawnlistcommon.cpp m_spawnlistcommon.cpp spawnlist2.cpp m_spawnlist2.cpp $(ITEMDB_SRCS)
+showeq_SOURCES=main.cpp spawn.cpp spawnshell.cpp spawnlist.cpp spellshell.cpp spelllist.cpp vpacket.cpp editor.cpp filter.cpp m_spawnshell.cpp m_spawnlist.cpp m_spellshell.cpp m_spelllist.cpp m_editor.cpp packet.cpp m_packet.cpp interface.cpp m_interface.cpp compass.cpp m_compass.cpp map.cpp m_map.cpp util.cpp experiencelog.cpp m_experiencelog.cpp combatlog.cpp m_combatlog.cpp msgdlg.cpp m_msgdlg.cpp player.cpp m_player.cpp decode.cpp m_decode.cpp skilllist.cpp m_skilllist.cpp statlist.cpp m_statlist.cpp filtermgr.cpp m_filtermgr.cpp mapcore.cpp category.cpp m_category.cpp compassframe.cpp m_compassframe.cpp group.cpp m_group.cpp guild.cpp m_guild.cpp netdiag.cpp m_netdiag.cpp logger.cpp m_logger.cpp xmlconv.cpp xmlpreferences.cpp m_xmlpreferences.cpp seqwindow.cpp m_seqwindow.cpp seqlistview.cpp m_seqlistview.cpp zonemgr.cpp m_zonemgr.cpp spawnmonitor.cpp m_spawnmonitor.cpp spawnpointlist.cpp m_spawnpointlist.cpp spawnlistcommon.cpp m_spawnlistcommon.cpp spawnlist2.cpp m_spawnlist2.cpp libEQ.cpp $(ITEMDB_SRCS)
 
 showeq_LDADD=$(QT_LDFLAGS) $(QTLIB) $(DB3_LIBS) $(LIBPTHREAD) $(MEMORY_LIBS) \
 $(PROFILE_LIBS) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
@@ -49,7 +49,7 @@ m_experiencelog.cpp m_combatlog.cpp m_msgdlg.cpp m_player.cpp m_decode.cpp m_ski
 m_statlist.cpp m_filtermgr.cpp m_category.cpp m_compassframe.cpp \
 m_group.cpp m_guild.cpp m_netdiag.cpp m_logger.cpp m_xmlpreferences.cpp m_seqwindow.cpp \
 m_seqlistview.cpp m_zonemgr.cpp m_spawnmonitor.cpp m_spawnpointlist.cpp \
-m_spawnlistcommon.cpp m_spawnlist2.cpp m_itemdb.cpp
+m_spawnlistcommon.cpp m_spawnlist2.cpp m_itemdb.cpp m_libEQ.cpp
 
 CLEANFILES=$(BUILT_SOURCES)
 

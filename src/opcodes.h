@@ -27,45 +27,63 @@
 /* Zone Server OpCodes */
 
 
-#define ZoneEntryCode               0x0010
+//#define ZoneEntryCode               0x0010
+#define ZoneEntryCode               0x0254
 
-#define CharProfileCode             0x0084
+//#define CharProfileCode             0x0084
+#define CharProfileCode             0x006b
 
-#define ChannelMessageCode          0x0133
+//#define ChannelMessageCode          0x0133
+#define ChannelMessageCode          0x001f
 
-#define PlayerPosCode               0x0136
+//#define PlayerPosCode               0x0136
+#define PlayerPosCode               0x0022
 
-#define ConsiderCode                0x0165
+//#define ConsiderCode                0x0165
+#define ConsiderCode                0x0175
 
-#define ZoneSpawnsCode              0x0179
+//#define ZoneSpawnsCode              0x0179
+#define ZoneSpawnsCode              0x0189
 
-#define ClientTargetCode            0x017c
+//#define ClientTargetCode            0x017c
+#define ClientTargetCode            0x018c
 
-#define CPlayerItemsCode            0x01f6
+//#define CPlayerItemsCode            0x01f6
+#define CPlayerItemsCode            0x01dd
 
-#define NewSpawnCode                0x023a
+//#define NewSpawnCode                0x023a
+#define NewSpawnCode                0x0229
 
-#define MobUpdateCode               0x0242
+//#define MobUpdateCode               0x0242
+#define MobUpdateCode               0x0039
 
-#define sWhoAllOutputCode           0x025e
+//#define sWhoAllOutputCode           0x025e
+#define sWhoAllOutputCode           0x023e
 
-#define NewZoneCode                 0x00ba
+//#define NewZoneCode                 0x00ba
+#define NewZoneCode                 0x00f0
 
-#define DeleteSpawnCode             0x00ca
+//#define DeleteSpawnCode             0x00ca
+#define DeleteSpawnCode             0x00f8
 
-#define EmoteTextCode               0x00c1
+//#define EmoteTextCode               0x00c1
+#define EmoteTextCode               0x00f7
 
-#define MakeDropCode                0x00d1
+//#define MakeDropCode                0x00d1
+#define MakeDropCode                0x00ff
 
-#define DoorSpawnsCode              0x01f7
+//#define DoorSpawnsCode              0x01f7
+#define DoorSpawnsCode              0x01de
 
 #define GuildMemberUpdate           0x02a0
 
 #define NpcHpUpdateCode             0x0263
 
-#define SpawnUpdateCode             0x014a
+//#define SpawnUpdateCode             0x014a
+#define SpawnUpdateCode             0x015a
 
-#define NewCorpseCode               0x00e5
+//#define NewCorpseCode               0x00e5
+#define NewCorpseCode               0x0115
 
 /*********************/
 /* outdated          */
@@ -114,7 +132,7 @@
 
 #define MoneyThingCode              0x2820
 
-#define cCursorItemCode             0x015a
+#define cCursorItemCode             0x014a
 
 #define CharInfo                    0x2e40
 

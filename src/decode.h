@@ -20,10 +20,18 @@
 
 #include "everquest.h"
 
-#define FLAG_COMP         0x2000
-#define FLAG_COMBINED     0x4000
+//#define FLAG_COMP         0x2000
+//#define FLAG_COMBINED     0x4000
+//#define FLAG_IMPLICIT     0x8000
+//#define FLAG_CRYPTO       0x1000
+//#define FLAG_COMP         0x0800
+//#define FLAG_COMBINED     0x8000
+//#define FLAG_IMPLICIT     0x4000
+//#define FLAG_CRYPTO       0x2000
+#define FLAG_COMP         0x1000
+#define FLAG_COMBINED     0x2000
 #define FLAG_IMPLICIT     0x8000
-#define FLAG_CRYPTO       0x1000
+#define FLAG_CRYPTO       0x4000
 #define FLAG_DECODE       ( FLAG_COMP | FLAG_COMBINED | FLAG_IMPLICIT | FLAG_CRYPTO )
 
 struct packetbuff {

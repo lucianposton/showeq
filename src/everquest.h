@@ -318,10 +318,7 @@ struct spawnPositionUpdate
 {
 /*0000*/ uint16_t opcode;
 /*0002*/ int16_t  spawnId;
-/*0004*/ int64_t  unused:7,
-         y:19,
-         z:19,
-	 x:19;
+/*0004*/ int64_t  y:19, z:19, x:19, u3:7;
 /*0012*/ unsigned heading:12;
          signed unused2:4;
 };
@@ -339,43 +336,47 @@ struct spawnPositionUpdate
 
 struct spawnStruct
 {
-/*0000*/ char unknown0000;
-/*0001*/ int8_t curHp;
-/*0002*/ char unknown0002[8];
-/*0010*/ char name[64];			 // name
-/*0074*/ int32_t equipment[9];		 // 0=helm, 1=chest, 2=arm, 3=bracer
-                                         // 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2
-/*0110*/ int32_t dyergb[7];              // armor dye colors
-/*0138*/ uint8_t light;                  
-/*0139*/ char unknown0112[7];
-/*0146*/ char lastName[20];		 // lastname
-/*0166*/ char unknown0162[2];
-/*0168*/ int32_t maxHp;			 // max hp
-/*0172*/ char unknown0174[10];
 /*0182*/ int32_t race;			 // race
+/*0172*/ char unknown0174[4];
 /*0186*/ uint8_t class_;		 // class
-/*0207*/ uint8_t gender;		 // 0=male, 1=female, 2=other
 /*0208*/ uint16_t level;
-/*0190*/ unsigned animation:10;
-         unsigned heading:12;
-         signed   deltaHeading:10;
-/*0194*/ signed   x:19;
+/*0139*/ char unknown0113[1];
+/*0001*/ int8_t curHp;
+/*0139*/ char unknown0114[2];
+/*0210*/ uint8_t NPC;			 // 0=player,1=npc,2=pc corpse,3=npc corpse,4=???,5=unknown spawn,10=self
+/*0139*/ char unknown0112[6];
+/*0168*/ int32_t maxHp;			 // max hp
+/*0207*/ uint8_t gender;		 // 0=male, 1=female, 2=other
+/*0172*/ char unknown0173[4];
          signed   deltaX:13;
-/*0198*/ signed   y:19;
+/*0198*/ signed   x:19;
+/*0194*/ signed   y:19;
          signed   deltaY:13;
 /*0202*/ signed   z:19;
          signed   deltaZ:13;
-/*0206*/ char unknown0206[4];
-/*0210*/ uint8_t NPC;			 // 0=player,1=npc,2=pc corpse,3=npc corpse,4=???,5=unknown spawn,10=self
-/*0211*/ char unknown0216[21];
+/*0242*/ uint16_t petOwnerId;
+/*0246*/ uint16_t spawnId;		 // Id of spawn
+/*0002*/ char unknown0003[3];
+/*0146*/ char lastName[20];		 // lastname
 /*0232*/ int32_t guildID;		 // GuildID
 /*0236*/ uint32_t typeflag;		 // Bodytype
-/*0242*/ uint16_t petOwnerId;
+/*0074*/ int32_t equipment[9];		 // 0=helm, 1=chest, 2=arm, 3=bracer
+                                         // 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2
+/*0206*/ char unknown0206[4];
+/*0010*/ char name[64];			 // name
+/*0110*/ int32_t dyergb[7];              // armor dye colors
+/*0000*/ char unknown0000;
+/*0138*/ uint8_t light;                  
+/*0166*/ char unknown0162[2];
+/*0190*/ unsigned animation:10;
+         unsigned heading:12;
+         signed   deltaHeading:10;
+/*0211*/ char unknown0216[14];
 /*0244*/ char unknown0244[2];
-/*0246*/ uint16_t spawnId;		 // Id of spawn
 /*0248*/ char unknown0248[2];
 /*0250*/ int16_t deity;			 // deity
 /*0252*/ char unknown0252[3];
+/*0002*/ char unknown0002[12];
 }; // 255
 
 /* 
@@ -691,30 +692,31 @@ struct ClientZoneEntryStruct
 
 struct ServerZoneEntryStruct
 {
-/*0000*/ uint8_t  opCode;                 // 0x29
-/*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint32_t checksum;               // some kind of checksum
-/*0006*/ char     unknown0004[28];
-/*0034*/ char     name[64];               // Player first name
-/*0098*/ uint32_t zoneId;                 // zone number
-/*0102*/ char     unknown0104[7];
-/*0109*/ uint8_t  class_;                 // Player's Class
-/*0110*/ uint32_t race;                   // Player's Race
-/*0114*/ char     gender;
-/*0115*/ uint32_t level;                  // Player's Level
-/*0119*/ char     unknown0119[15];
-/*0134*/ float    y;
-/*0138*/ char     unknown0138[8];
-/*0146*/ float    z;
-/*0150*/ float    x;
-/*0154*/ char     unknown0152[36];
-/*0190*/ uint32_t guildId;
-/*0194*/ char     unknown0194[76];
-/*0270*/ char     lastName[20];
-/*0290*/ char     unknown0290[96];
-/*0386*/ uint32_t deity;                  // Player's Deity
-/*0390*/ float    heading;
-/*0390*/ char     unknown0390[4];
+/*000*/ uint8_t  opCode;                 // 0x29
+/*001*/ uint8_t  version;                // 0x20
+/*002*/ uint32_t checksum;               // some kind of checksum
+/*006*/ uint8_t gender;
+/*007*/ char	name[64];
+/*071*/ char     unknown071[15];
+/*086*/ float	x;
+/*090*/ float    heading;
+/*094*/ float	y;
+/*098*/ float	z;
+/*102*/ char     unknown102[124];
+/*226*/ uint32_t zoneId;
+/*230*/ char     unknown230[24];
+/*254*/ char     lastName[20];
+/*274*/ char     unknown274[48];
+/*322*/ uint16_t level;                  // Player's Level
+/*324*/ char     unknown324[4];
+/*328*/ uint8_t  class_;                 // Player's Class
+/*329*/ char     unknown329[13];
+/*342*/ uint32_t race;                   // Player's Race
+/*346*/ char     unknown346[28];
+/*374*/ uint32_t deity;                  // Player's Deity
+/*378*/ char     unknown378[8];
+/*386*/ uint32_t guildId;
+/*390*/ char     unknown390[8];
 }; // 398
 
 /*
@@ -825,6 +827,7 @@ struct charProfileStruct
 /*10517*/ uint8_t  unknown10517[428];
 /*10945*/ uint32_t aapoints;               // number of unspent ability points
 /*10949*/ uint8_t  unknown10949[3293];
+/*10949*/ uint8_t  unknown10950[60];
 }; // 13562
 
 #if 0
@@ -1651,14 +1654,14 @@ struct playerPosStruct
 {
 /*0000*/ uint16_t opCode;
 /*0002*/ uint16_t spawnId;
-/*0004*/ unsigned animation:10;
          unsigned heading:12;
+/*0004*/ unsigned animation:10;
          signed   deltaHeading:10;
-/*0008*/ signed   x:19;
          signed   deltaX:13;
-/*0012*/ signed   y:19;
+/*0194*/ signed   x:19;
+/*0198*/ signed   y:19;
          signed   deltaY:13;
-/*0016*/ signed   z:19;
+/*0202*/ signed   z:19;
          signed   deltaZ:13;
 };
 
