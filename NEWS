@@ -1,3 +1,6 @@
+This is a terse description of the features added to 5.0.0.16 since the 
+release of 5.0.0.15.
+
 This is a terse description of the features added to 5.0.0.15 since the 
 release of 5.0.0.14.
 
@@ -8,3 +11,4 @@ release of 5.0.0.14.
 
 3. Migrated the distribution of ShowEQ to tarballs and packages, instead of 
    directly off CVS.
+
