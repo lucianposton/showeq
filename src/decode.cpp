@@ -40,7 +40,7 @@ ThreadFunc (void *param)
   return(NULL);
 }
 
-EQDecode::EQDecode (QObject *parent = 0, const char *name = 0)
+EQDecode::EQDecode (QObject *parent, const char *name)
 : QObject (parent, name)
 {
   // Link the packet class resetDecoder signal to our ResetDecoder slot

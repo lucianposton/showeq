@@ -22,10 +22,10 @@ const int staleKillCutoff = 5;
 
 EQPlayer::EQPlayer (QObject* parent,
 		    const char* name,
-		    int level = 0, 
-		    uint16_t race = 1, 
-		    int class_ = 1, 
-		    int deity = DEITY_AGNOSTIC)
+		    int level, 
+		    uint16_t race, 
+		    int class_, 
+		    int deity)
 : QObject (parent, name)
 {
 #ifdef DEBUG_PLAYER
@@ -961,8 +961,8 @@ void EQPlayer::fillConTable()
       }
       else if (m_playerLevel < 57) 
       { // 55 - 56
-	greenRange = -21;
-	cyanRange = -16;
+	greenRange = -20;
+	cyanRange = -15;
       }
       else
       { // 57 - 60

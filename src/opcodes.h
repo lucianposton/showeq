@@ -51,6 +51,8 @@
 
 #define MakeDropCode                0x2d20
 
+#define CharInfo                    0x2e20
+
 #define TradeItemInCode             0x3120
 
 #define CharProfileCode             0x3620

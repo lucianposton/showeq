@@ -28,6 +28,7 @@ MapParameters::MapParameters(const MapData& mapData)
     m_curPlayer(0, 0, 0),
     m_screenLength(600, 600)
 {
+  m_zoomDefault = 1;
   m_screenCenter = QPoint(300, 300);
   m_zoomMapLength = QSize(100, 100);
   m_panOffsetX = 0;
@@ -65,7 +66,7 @@ MapParameters::~MapParameters()
 
 void MapParameters::reset()
 {
-  m_zoom = 1;
+  m_zoom = m_zoomDefault;
   m_panOffsetX = 0;
   m_panOffsetY = 0;
 }

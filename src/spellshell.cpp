@@ -268,7 +268,7 @@ void SpellShell::selfFinishSpellCast(const memSpellStruct *b)
     return;
 
    printf("selfFinishSpellCast - id=%d, by=%d\n", b->spellId, b->spawnId);
-   SpellItem *item = FindSpell(b->spellId, m_player->getPlayerID());
+   SpellItem *item = FindSpell(b->spellId, m_player->getPlayerID(), b->spawnId);
    if (item) {
       struct spellInfoStruct *info = spell_info(b->spellId);
       item->setDuration(info->duration);

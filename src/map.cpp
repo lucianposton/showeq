@@ -490,6 +490,8 @@ void MapMgr::setLineName(const QString &name)
   // save the name for future use
   m_curLineName = name;
 
+  pSEQPrefs->setPrefString("DefaultLineName", "MapMgr", m_curLineName);
+
   // signal that the map has been updated
   emit mapUpdated();
 }
@@ -501,6 +503,8 @@ void MapMgr::setLineColor(const QString &color)
 
   // save the line color for future use
   m_curLineColor = color;
+
+  pSEQPrefs->setPrefString("DefaultLineColor", "MapMgr", m_curLineColor);
 
   // signal that the map has been updated
   emit mapUpdated();
@@ -517,9 +521,9 @@ void MapMgr::showLineDlg(QWidget* parent)
 
 void MapMgr::savePrefs(void)
 {
-  pSEQPrefs->setPrefString("DefaultLineColor", "MapMgr", m_curLineColor);
-  pSEQPrefs->setPrefString("DefaultLineName", "MapMgr", m_curLineName);
+#if 0 // ZBTEMP: Migrate to place where ever this is set
   pSEQPrefs->setPrefString("DefaultLocationColor", "MapMgr", m_curLocationColor);
+#endif
 }
 
 void MapMgr::dumpInfo(QTextStream& out)
@@ -545,13 +549,14 @@ void MapMgr::dumpInfo(QTextStream& out)
 
 //----------------------------------------------------------------------
 // MapMenu
-MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
+MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   : m_map(map)
 {
   QString preferenceName = m_map->preferenceName();
 
   // set the caption to be the preference name of the map
   setCaption(preferenceName);
+  setCheckable(true);
 
   QPopupMenu* subMenu;
 
@@ -570,16 +575,16 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   subMenu = new QPopupMenu(m_map);
   int key; 
 
-  key = keyPref("AddLocationKey", preferenceName, "Ctrl+O");
+  key = pSEQPrefs->getPrefKey("AddLocationKey", preferenceName, "Ctrl+O");
   m_id_addLocation = subMenu->insertItem("Add Location...",
 					 m_map, SLOT(addLocation()), key);
-  key = keyPref("StartLineKey", preferenceName, "Ctrl+L");
+  key = pSEQPrefs->getPrefKey("StartLineKey", preferenceName, "Ctrl+L");
   m_id_startLine = subMenu->insertItem("Start Line",
 				       m_map, SLOT(startLine()), key);
-  key = keyPref("AddLinePointKey", preferenceName, "Ctrl+P");
+  key = pSEQPrefs->getPrefKey("AddLinePointKey", preferenceName, "Ctrl+P");
   m_id_addLinePoint = subMenu->insertItem("Add Line Point",
 					  m_map, SLOT(addLinePoint()), key);
-  key = keyPref("DelLinePointKey", preferenceName, "Ctrl+D");
+  key = pSEQPrefs->getPrefKey("DelLinePointKey", preferenceName, "Ctrl+D");
   m_id_delLinePoint = subMenu->insertItem("Delete Line Point",
 					  m_map, SLOT(delLinePoint()), key);
   m_id_showLineDlg = subMenu->insertItem("Show Line Dialog...",
@@ -590,15 +595,15 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   subMenu->setCheckable(true);
   m_id_mapLineStyle_Normal = subMenu->insertItem("Normal");
   subMenu->setItemParameter(m_id_mapLineStyle_Normal, tMap_Normal);
-  key = keyPref("MapLineNormalKey", preferenceName, "Alt+1");
+  key = pSEQPrefs->getPrefKey("MapLineNormalKey", preferenceName, "Alt+1");
   subMenu->setAccel(key, m_id_mapLineStyle_Normal);
   m_id_mapLineStyle_DepthFiltered = subMenu->insertItem("Depth Filtered");
   subMenu->setItemParameter(m_id_mapLineStyle_DepthFiltered, tMap_DepthFiltered);
-  key = keyPref("MapLineDepthFilteredKey", preferenceName, "Alt+2");
+  key = pSEQPrefs->getPrefKey("MapLineDepthFilteredKey", preferenceName, "Alt+2");
   subMenu->setAccel(key, m_id_mapLineStyle_DepthFiltered);
   m_id_mapLineStyle_FadedFloors = subMenu->insertItem("Faded Floors");
   subMenu->setItemParameter(m_id_mapLineStyle_FadedFloors, tMap_FadedFloors);
-  key = keyPref("MapLineFadedFloorsKey", preferenceName, "Alt+3");
+  key = pSEQPrefs->getPrefKey("MapLineFadedFloorsKey", preferenceName, "Alt+3");
   subMenu->setAccel(key, m_id_mapLineStyle_FadedFloors);
   connect(subMenu, SIGNAL(activated(int)),
 	  this, SLOT(select_mapLine(int)));
@@ -622,6 +627,8 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   m_id_gridTicks = subMenu->insertItem("Grid Ticks", this, SLOT(toggle_gridTicks(int)));
   m_id_locations = subMenu->insertItem("Locations", this, SLOT(toggle_locations(int)));
   m_id_spawns = subMenu->insertItem("Spawns", this, SLOT(toggle_spawns(int)));
+  m_id_unknownSpawns = subMenu->insertItem("Unknown Spawns", 
+					   this, SLOT(toggle_unknownSpawns(int)));
   m_id_drops = subMenu->insertItem("Drops", this, SLOT(toggle_drops(int)));
   m_id_coins = subMenu->insertItem("Coins", this, SLOT(toggle_coins(int)));
   m_id_doors = subMenu->insertItem("Doors", this, SLOT(toggle_doors(int)));
@@ -677,6 +684,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   m_id_FOVDistance = subMenu->insertItem(tmpHBox);
   m_id_FOVColor = subMenu->insertItem("Color...",
 				      this, SLOT(select_fovColor(int)));
+
   QPopupMenu* subSubMenu;
 
   subSubMenu = new QPopupMenu;
@@ -729,6 +737,23 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
 
   m_id_FOV = insertItem("Player FOV", subMenu);
 
+  subMenu = new QPopupMenu;
+  m_zoomDefaultSpinBox = new QSpinBox(1, 32, 1, subMenu);
+  m_zoomDefaultSpinBox->setValue(m_map->drawSize());
+  connect(m_zoomDefaultSpinBox, SIGNAL(valueChanged(int)),
+	  m_map, SLOT(setZoomDefault(int)));
+  m_id_zoomDefault = subMenu->insertItem(m_zoomDefaultSpinBox);
+  m_id_zoomDefaultMenu = insertItem("Default Zoom", subMenu);
+
+  m_id_cacheAlwaysRepaint = insertItem("Always Repaint Map Cache",
+				       this, 
+				       SLOT(toggle_cacheAlwaysRepaint()));
+
+  m_id_cacheChanges = insertItem("Cache Changes",
+				 this, 
+				 SLOT(toggle_cacheChanges()));
+
+
   connect(this, SIGNAL(aboutToShow()),
 	  this, SLOT(init_Menu()));
 }
@@ -765,6 +790,7 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_gridTicks, m_map->showGridTicks());
   setItemChecked(m_id_locations, m_map->showLocations());
   setItemChecked(m_id_spawns, m_map->showSpawns());
+  setItemChecked(m_id_unknownSpawns, m_map->showUnknownSpawns());
   setItemChecked(m_id_drops, m_map->showDrops());
   setItemChecked(m_id_coins, m_map->showCoins());
   setItemChecked(m_id_doors, m_map->showDoors());
@@ -804,6 +830,11 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_FOVDiagCrossPattern, (fovStyle == Qt::DiagCrossPattern));
 
   init_fovMenu();
+
+  m_zoomDefaultSpinBox->setValue(m_map->zoomDefault());
+
+  setItemChecked(m_id_cacheAlwaysRepaint, m_map->cacheAlwaysRepaint());
+  setItemChecked(m_id_cacheChanges, m_map->cacheChanges());
 }
 
 void MapMenu::init_fovMenu(void)
@@ -910,6 +941,11 @@ void MapMenu::toggle_spawns(int itemId)
   m_map->setShowSpawns(!m_map->showSpawns());
 }
 
+void MapMenu::toggle_unknownSpawns(int itemId)
+{
+  m_map->setShowUnknownSpawns(!m_map->showUnknownSpawns());
+}
+
 void MapMenu::toggle_drops(int itemId)
 {
   m_map->setShowDrops(!m_map->showDrops());
@@ -951,6 +987,16 @@ void MapMenu::toggle_debugInfo(int itemId)
   m_map->setShowDebugInfo(!m_map->showDebugInfo());
 }
 #endif
+
+void MapMenu::toggle_cacheAlwaysRepaint()
+{
+  m_map->setCacheAlwaysRepaint(!m_map->cacheAlwaysRepaint());
+}
+
+void MapMenu::toggle_cacheChanges()
+{
+  m_map->setCacheChanges(!m_map->cacheChanges());
+}
 
 void MapMenu::select_mapOptimization(int itemId)
 {
@@ -1073,61 +1119,73 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "Caption";
   tmpDefault = QString("ShowEQ - ") + prefString;
-  setCaption(pSEQPrefs->getPrefString(tmpPrefString, tmpDefault));
+  setCaption(pSEQPrefs->getPrefString(tmpPrefString, prefString, tmpDefault));
+
+  tmpPrefString = "CacheChanges";
+  m_cacheChanges = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "AnimateSpawnMovement";
-  m_animate = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_animate = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
   tmpPrefString = "VelocityLines";
-  m_showVelocityLines = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_showVelocityLines = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "SpawnDepthFilter";
-  m_spawnDepthFilter = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 0);
+  m_spawnDepthFilter = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
   tmpPrefString = "Framerate";
   m_frameRate = pSEQPrefs->getPrefInt(tmpPrefString, prefString, 5);
 
 #ifdef DEBUG
   tmpPrefString = "ShowDebugInfo";
-  m_showDebugInfo = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 0);
+  m_showDebugInfo = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 #endif
 
   tmpPrefString = "ShowPlayer";
-  m_showPlayer = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_showPlayer = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "ShowPlayerBackground";
-  m_showPlayerBackground = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_showPlayerBackground = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "ShowPlayerView";
-  m_showPlayerView = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_showPlayerView = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "ShowDroppedItems";
-  m_showDrops = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_showDrops = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "ShowDroppedCoins";
-  m_showCoins = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_showCoins = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
   tmpPrefString = "ShowDoors";
-  m_showDoors = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_showDoors = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
   tmpPrefString = "ShowSpawns";
-  m_showSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_showSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
+
+  tmpPrefString = "ShowUnknownSpawns";
+  m_showUnknownSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 
+					       showeq_params->createUnknownSpawns);
 
   tmpPrefString = "ShowSpawnNames";
-  m_showSpawnNames = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 0);
+  m_showSpawnNames = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
   tmpPrefString = "HighlightConsideredSpawns";
-  m_highlightConsideredSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_highlightConsideredSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "ShowTooltips";
-  m_showTooltips = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_showTooltips = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "WalkPathShowSelect";
-  m_walkpathshowselect = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+  m_walkpathshowselect = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "DrawSize";
-  setDrawSize(3); // in case the user gave a ridiculous size
-  setDrawSize(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 3));
+  int val = pSEQPrefs->getPrefInt(tmpPrefString, prefString, 3);
+  m_drawSize = val; 
+  m_drawSizeWH = val << 1; // 2 x size
+  m_marker1Size = val + 1;
+  m_marker1SizeWH = m_marker1Size << 1; // 2 x size
+  m_marker2Size = val + 2;
+  m_marker2SizeWH = m_marker2Size << 1; // 2 x size
 
   tmpPrefString = "FOVMode";
   m_fovMode = (FOVMode)pSEQPrefs->getPrefInt(tmpPrefString, prefString, 
@@ -1145,18 +1203,15 @@ Map::Map(MapMgr* mapMgr,
   m_fovStyle = pSEQPrefs->getPrefInt(tmpPrefString, prefString, QBrush::Dense7Pattern);
 
   tmpPrefString = "FOVColor";
-  tmp = pSEQPrefs->getPrefString(tmpPrefString, prefString, "#505050");
-  if (tmp.isEmpty())
-    tmp = "#505050";
-  m_fovColor = QColor(tmp);
+  m_fovColor = pSEQPrefs->getPrefColor(tmpPrefString, prefString, QColor("#505050"));
 
   // mainly for backwards compatibility
   tmpPrefString = "MapDepthFilter";
-  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, 0))
+  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, false))
     m_param.setMapLineStyle(tMap_DepthFiltered);
 
   tmpPrefString = "FadingFloors";
-  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, 0))
+  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, false))
     m_param.setMapLineStyle(tMap_FadedFloors);
 
   // the new setting overrides old settings
@@ -1166,19 +1221,19 @@ Map::Map(MapMgr* mapMgr,
 								tMap_Normal));
 
   tmpPrefString = "ShowMapPoints";
-  m_param.setShowLocations(pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1));
+  m_param.setShowLocations(pSEQPrefs->getPrefBool(tmpPrefString, prefString, true));
 
   tmpPrefString = "ShowMapLines";
-  m_param.setShowLines(pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1));
+  m_param.setShowLines(pSEQPrefs->getPrefBool(tmpPrefString, prefString, true));
 
   tmpPrefString = "ShowGridLines";
-  m_param.setShowGridLines(pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1));
+  m_param.setShowGridLines(pSEQPrefs->getPrefBool(tmpPrefString, prefString, true));
 
   tmpPrefString = "ShowGridTicks";
-  m_param.setShowGridTicks(pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1));
+  m_param.setShowGridTicks(pSEQPrefs->getPrefBool(tmpPrefString, prefString, true));
 
   tmpPrefString = "ShowBackgroundImage";
-  m_param.setShowBackgroundImage(pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1));
+  m_param.setShowBackgroundImage(pSEQPrefs->getPrefBool(tmpPrefString, prefString, true));
 
   tmpPrefString = "GridResolution";
   m_param.setGridResolution(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 500));
@@ -1190,22 +1245,13 @@ Map::Map(MapMgr* mapMgr,
   m_param.setFont(stringToFont(tmpFontString));
 
   tmpPrefString = "GridTickColor";
-  tmp = pSEQPrefs->getPrefString(tmpPrefString, prefString, "#E1C819");
-  if (tmp.isEmpty())
-    tmp = "#E1C819";
-  m_param.setGridTickColor(QColor(tmp));
+  m_param.setGridTickColor(pSEQPrefs->getPrefColor(tmpPrefString, prefString, QColor("#E1C819")));
 
   tmpPrefString = "GridLineColor";
-  tmp = pSEQPrefs->getPrefString(tmpPrefString, prefString, "#194819");
-  if (tmp.isEmpty())
-    tmp = "#194819";
-  m_param.setGridLineColor(QColor(tmp));
+  m_param.setGridLineColor(pSEQPrefs->getPrefColor(tmpPrefString, prefString, QColor("#194819")));
 
   tmpPrefString = "BackgroundColor";
-  tmp = pSEQPrefs->getPrefString(tmpPrefString, prefString, "black");
-  if (tmp.isEmpty())
-    tmp = "black";
-  m_param.setBackgroundColor(QColor(tmp));
+  m_param.setBackgroundColor(pSEQPrefs->getPrefColor(tmpPrefString, prefString, QColor("black")));
 
   tmpPrefString = "OverheadDepth";
   m_param.setHeadRoom(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 75));
@@ -1215,6 +1261,9 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "OptimizeMethod";
   m_param.setMapOptimizationMethod((MapOptimizationMethod)pSEQPrefs->getPrefInt(tmpPrefString, prefString, (int)tMap_NormalOptim));
+
+  tmpPrefString = "ZoomDefault";
+  m_param.setZoomDefault(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 1));
 
   tmpPrefString = "CacheAlwaysRepaint";
   m_mapCache.setAlwaysRepaint(pSEQPrefs->getPrefBool(tmpPrefString, prefString, false));
@@ -1228,45 +1277,47 @@ Map::Map(MapMgr* mapMgr,
   // Accelerators
   QAccel *accel = new QAccel(this);
   int key;
-  key = keyPref("ZoomInKey", prefString, "+");
+  key = pSEQPrefs->getPrefKey("ZoomInKey", prefString, "+");
   accel->connectItem(accel->insertItem(key), this, SLOT(zoomIn()));
 
-  key = keyPref("ZoomOutKey", prefString, "-");
+  key = pSEQPrefs->getPrefKey("ZoomOutKey", prefString, "-");
   accel->connectItem(accel->insertItem(key), this, SLOT(zoomOut()));
 
-  key = keyPref("PanDownLeftKey", prefString, "Ctrl+1");
+  key = pSEQPrefs->getPrefKey("PanDownLeftKey", prefString, "Ctrl+1");
   accel->connectItem(accel->insertItem(key), this, SLOT(panDownLeft()));
 
-  key = keyPref("PanDownKey", prefString, "Ctrl+2");
+  key = pSEQPrefs->getPrefKey("PanDownKey", prefString, "Ctrl+2");
   accel->connectItem(accel->insertItem(key), this, SLOT(panDown()));
 
-  key = keyPref("PanDownRightKey", prefString, "Ctrl+3");
+  key = pSEQPrefs->getPrefKey("PanDownRightKey", prefString, "Ctrl+3");
   accel->connectItem(accel->insertItem(key), this, SLOT(panDownRight()));
 
-  key = keyPref("PanLeftKey", prefString, "Ctrl+4");
+  key = pSEQPrefs->getPrefKey("PanLeftKey", prefString, "Ctrl+4");
   accel->connectItem(accel->insertItem(key), this, SLOT(panLeft()));
 
-  key = keyPref("CenterSelectedKey", prefString, "Ctrl+5");
+  key = pSEQPrefs->getPrefKey("CenterSelectedKey", prefString, "Ctrl+5");
   accel->connectItem(accel->insertItem(key), this, SLOT(viewTarget()));
 
-  key = keyPref("PanRightKey", prefString, "Ctrl+6");
+  key = pSEQPrefs->getPrefKey("PanRightKey", prefString, "Ctrl+6");
   accel->connectItem(accel->insertItem(key), this, SLOT(panRight()));
 
-  key = keyPref("PanUpLeftKey", prefString, "Ctrl+7");
+  key = pSEQPrefs->getPrefKey("PanUpLeftKey", prefString, "Ctrl+7");
   accel->connectItem(accel->insertItem(key), this, SLOT(panUpLeft()));
 
-  key = keyPref("PanUpKey", prefString, "Ctrl+8");
+  key = pSEQPrefs->getPrefKey("PanUpKey", prefString, "Ctrl+8");
   accel->connectItem(accel->insertItem(key), this, SLOT(panUp()));
 
-  key = keyPref("PanUpRightKey", prefString, "Ctrl+9");
+  key = pSEQPrefs->getPrefKey("PanUpRightKey", prefString, "Ctrl+9");
   accel->connectItem(accel->insertItem(key), this, SLOT(panUpRight()));
 
-  key = keyPref("ViewLockKey", prefString, "Ctrl+0");
+  key = pSEQPrefs->getPrefKey("ViewLockKey", prefString, "Ctrl+0");
   accel->connectItem(accel->insertItem(key), this, SLOT(viewLock()));
 
   m_followMode = tFollowPlayer;
   
   m_selectedItem = NULL;
+
+  setMinimumSize(100, 100);
 
 #ifdef DEBUG
   for (int i = 0; i < maxFrameTimes; i++)
@@ -1313,7 +1364,6 @@ Map::Map(MapMgr* mapMgr,
   connect (m_spawnShell, SIGNAL(changeItem(const Item*, uint32_t)),
 	   this, SLOT(changeItem(const Item*, uint32_t)));
 
-  //  if (m_mapMgr->mapData().mapLoaded() || showeq_params->fast_machine)
     m_timer->start(1000/m_frameRate, false);
 
 #ifdef DEBUG  
@@ -1331,128 +1381,6 @@ void Map::savePrefs(void)
   QString prefString = preferenceName();
   QString tmpPrefString;
 
-  tmpPrefString = "AnimateSpawnMovement";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_animate);
-
-  tmpPrefString = "VelocityLines";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showVelocityLines);
-
-  tmpPrefString = "SpawnDepthFilter";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_spawnDepthFilter);
-
-  tmpPrefString = "Framerate";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_frameRate);
-
-#ifdef DEBUG
-  tmpPrefString = "ShowDebugInfo";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showDebugInfo);
-#endif
-
-  tmpPrefString = "ShowPlayer";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showPlayer);
-
-  tmpPrefString = "ShowPlayerBackground";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showPlayerBackground);
-
-  tmpPrefString = "ShowPlayerView";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showPlayerView);
-
-  tmpPrefString = "ShowDroppedItems";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showDrops);
-
-  tmpPrefString = "ShowDroppedCoins";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showCoins);
-
-  tmpPrefString = "ShowDoors";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showDoors);
-
-  tmpPrefString = "ShowSpawns";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showSpawns);
-
-  tmpPrefString = "ShowSpawnNames";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showSpawnNames);
-
-  tmpPrefString = "HighlightConsideredSpawns";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_highlightConsideredSpawns);
-
-  tmpPrefString = "ShowTooltips";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showTooltips);
-
-  tmpPrefString = "WalkPathShowSelect";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_walkpathshowselect);
-
-  tmpPrefString = "DrawSize";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_drawSize);
-
-  tmpPrefString = "FOVMode";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_fovMode );
-
-  tmpPrefString = "FOVDistance";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_fovDistance);
-
-  tmpPrefString = "FOVStyle";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_fovStyle);
-
-  tmpPrefString = "FOVColor";
-  pSEQPrefs->setPrefString(tmpPrefString, prefString, m_fovColor.name());
-
-  tmpPrefString = "MapLineStyle";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_param.mapLineStyle());
-
-  tmpPrefString = "ShowMapPoints";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_param.showLocations());
-
-  tmpPrefString = "ShowMapLines";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_param.showLines());
-
-  tmpPrefString = "ShowGridLines";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_param.showGridLines());
-
-  tmpPrefString = "ShowGridTicks";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_param.showGridTicks());
-
-  tmpPrefString = "ShowBackgroundImage";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_param.showBackgroundImage());
-
-  tmpPrefString = "GridResolution";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_param.gridResolution());
-
-  tmpPrefString = "GridTickColor";
-  pSEQPrefs->setPrefString(tmpPrefString, prefString, m_param.gridTickColor().name());
-
-  tmpPrefString = "GridLineColor";
-  pSEQPrefs->setPrefString(tmpPrefString, prefString, m_param.gridLineColor().name());
-
-  tmpPrefString = "BackgroundColor";
-  pSEQPrefs->setPrefString(tmpPrefString, prefString, m_param.backgroundColor().name());
-
-  tmpPrefString = "OverheadDepth";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_param.headRoom());
-
-  tmpPrefString = "UnderfeetDepth";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_param.floorRoom());
-
-  tmpPrefString = "OptimizeMethod";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString,  
-			  (int)m_param.mapOptimizationMethod());
-
-  tmpPrefString = "CacheAlwaysRepaint";
-  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_mapCache.alwaysRepaint());
-
-  if (showeq_params->deitypvp != m_deityPvP)
-  {
-    tmpPrefString = "DeityPvP";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_deityPvP);
-  }
-
-  if (showeq_params->pvp != m_racePvP)
-  {
-    tmpPrefString = "RacePvP";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_racePvP);
-  }
-
-  tmpPrefString = "Font";
-  pSEQPrefs->setPrefString(tmpPrefString, prefString, fontToString(m_param.font()));
 }
 
 MapMenu* Map::menu()
@@ -1552,7 +1480,7 @@ void Map::mousePressEvent(QMouseEvent* me)
       reAdjust();
 
       // repaint if necessary
-      if(!showeq_params->fast_machine)
+      if(!m_cacheChanges)
 	refreshMap ();
     }
   }
@@ -1572,7 +1500,7 @@ void Map::zoomIn()
        // requires ReAdjust
        reAdjust();
 
-       if (!showeq_params->fast_machine)
+       if (!m_cacheChanges)
          refreshMap ();
      }
    }
@@ -1593,7 +1521,7 @@ void Map::zoomOut()
        // requires ReAdjust
        reAdjust();
 
-       if(!showeq_params->fast_machine)
+       if(!m_cacheChanges)
          refreshMap ();
      }
    }    
@@ -1610,7 +1538,7 @@ void Map::panRight()
    
    reAdjust();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1625,7 +1553,7 @@ void Map::panLeft()
 
    reAdjust();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1641,7 +1569,7 @@ void Map::panDown()
 
    reAdjust();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1657,7 +1585,7 @@ void Map::panUp()
 
    reAdjust();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1673,7 +1601,7 @@ void Map::panUpRight()
 
    reAdjust();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1689,7 +1617,7 @@ void Map::panUpLeft()
 
    reAdjust();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1705,7 +1633,7 @@ void Map::panDownRight()
 
    reAdjust();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1721,7 +1649,7 @@ void Map::panDownLeft()
 
    reAdjust();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1729,7 +1657,7 @@ void Map::increaseGridResolution (void)
 {
   m_param.increaseGridResolution();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1737,7 +1665,7 @@ void Map::decreaseGridResolution (void)
 {
   m_param.decreaseGridResolution();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1767,7 +1695,7 @@ void Map::viewTarget()
   
   reAdjust();
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -1849,7 +1777,7 @@ void Map::viewLock()
   // this requires a reAdjust
    reAdjust();
 
-   if(!showeq_params->fast_machine)
+   if(!m_cacheChanges)
      refreshMap ();
 }
 
@@ -1917,7 +1845,7 @@ void Map::setFollowMode(FollowMode mode)
   // this requires a reAdjust
   reAdjust();
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -1941,6 +1869,9 @@ void Map::setFrameRate(int val)
   {
     m_frameRate = val;
 
+    QString tmpPrefString = "Framerate";
+    pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), m_frameRate);
+
     emit frameRateChanged(m_frameRate);
 
     if (/*(m_player->getPlayerID() != 1) &&*/ m_timer->isActive())
@@ -1959,8 +1890,11 @@ void Map::setDrawSize(int val)
   m_marker1SizeWH = m_marker1Size << 1; // 2 x size
   m_marker2Size = val + 2;
   m_marker2SizeWH = m_marker2Size << 1; // 2 x size
+
+  QString tmpPrefString = "DrawSize";
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), m_drawSize);
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -1970,10 +1904,13 @@ void Map::setFOVDistance(int val)
     return;
 
   m_fovDistance = val; 
+
+  QString tmpPrefString = "FOVDistance";
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), m_fovDistance);
   
   reAdjust();
 
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -1983,6 +1920,9 @@ void Map::setFOVStyle(int val)
     return;
 
   m_fovStyle = val;
+
+  QString tmpPrefString = "FOVStyle";
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), m_fovStyle);
 }
 
 void Map::setFOVMode(FOVMode mode)
@@ -1991,18 +1931,24 @@ void Map::setFOVMode(FOVMode mode)
     return;
 
   m_fovMode = mode;
+
+  QString tmpPrefString = "FOVMode";
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), m_fovMode );
 }
 
 void Map::setFOVColor(const QColor& color)
 {
   m_fovColor = color;
+
+  // set color preference
+  pSEQPrefs->setPrefColor("FOVColor", preferenceName(), m_fovColor);
 }
 
 void Map::setShowMapLines(bool val) 
 { 
   m_showMapLines = val; 
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2010,7 +1956,10 @@ void Map::setShowPlayer(bool val)
 { 
   m_showPlayer = val; 
   
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "ShowPlayer";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showPlayer);
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2018,15 +1967,21 @@ void Map::setShowPlayerBackground(bool val)
 { 
   m_showPlayerBackground = val; 
   
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "ShowPlayerBackground";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showPlayerBackground);
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
 void Map::setShowPlayerView(bool val) 
 { 
   m_showPlayerView = val; 
+
+  QString tmpPrefString = "ShowPlayerView";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showPlayerView);
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2034,47 +1989,73 @@ void Map::setShowHeading(bool val)
 { 
   m_showHeading = val; 
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
 void Map::setShowSpawns(bool val) 
 { 
   m_showSpawns = val; 
+
+  QString tmpPrefString = "ShowSpawns";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showSpawns);
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
+    refreshMap ();
+}
+
+void Map::setShowUnknownSpawns(bool val) 
+{ 
+  m_showUnknownSpawns = val; 
+
+  QString tmpPrefString = "ShowUnknownSpawns";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showUnknownSpawns);
+  
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
 void Map::setShowDrops(bool val) 
 { 
   m_showDrops = val; 
+
+  QString tmpPrefString = "ShowDroppedItems";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showDrops);
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
 void Map::setShowCoins(bool val) 
 { 
   m_showCoins = val; 
+
+  QString tmpPrefString = "ShowDroppedCoins";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showCoins);
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
 void Map::setShowDoors(bool val) 
 { 
   m_showDoors = val; 
+
+  QString tmpPrefString = "ShowDoors";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showDoors);
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
 void Map::setShowSpawnNames(bool val) 
 { 
   m_showSpawnNames = val; 
+
+  QString tmpPrefString = "ShowSpawnNames";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showSpawnNames);
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2082,7 +2063,10 @@ void Map::setShowVelocityLines(bool val)
 { 
   m_showVelocityLines = val; 
   
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "VelocityLines";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showVelocityLines);
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2091,7 +2075,10 @@ void Map::setShowDebugInfo(bool val)
 { 
   m_showDebugInfo = val; 
   
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "ShowDebugInfo";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showDebugInfo);
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 #endif
@@ -2100,10 +2087,24 @@ void Map::setAnimate(bool val)
 { 
   m_animate = val; 
 
+  QString tmpPrefString = "AnimateSpawnMovement";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_animate);
+
   // this requires a reAdjust
   reAdjust();
 
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
+    refreshMap ();
+}
+
+void Map::setCacheChanges(bool val) 
+{ 
+  m_cacheChanges = val; 
+
+  QString tmpPrefString = "CacheChanges";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_cacheChanges);
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2111,21 +2112,30 @@ void Map::setSpawnDepthFilter(bool val)
 {
   m_spawnDepthFilter = val; 
   
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "SpawnDepthFilter";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_spawnDepthFilter);
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
 void Map::setHighlightConsideredSpawns(bool val) 
 { 
   m_highlightConsideredSpawns = val; 
+
+  QString tmpPrefString = "HighlightConsideredSpawns";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_highlightConsideredSpawns);
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
 void Map::setShowTooltips(bool val) 
 { 
   m_showTooltips = val; 
+
+  QString tmpPrefString = "ShowTooltips";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showTooltips);
 
   // make sure it's hidden if they hid it
   if (!m_showTooltips)
@@ -2135,16 +2145,22 @@ void Map::setShowTooltips(bool val)
 void Map::setWalkPathShowSelect(bool val) 
 { 
   m_walkpathshowselect = val; 
+
+  QString tmpPrefString = "WalkPathShowSelect";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_walkpathshowselect);
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
 void Map::setDeityPvP(bool val) 
 { 
   m_deityPvP = val; 
+
+  QString tmpPrefString = "DeityPvP";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_deityPvP);
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2152,15 +2168,21 @@ void Map::setRacePvP(bool val)
 { 
   m_racePvP = val; 
   
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "RacePvP";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_racePvP);
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
 void Map::setMapLineStyle(MapLineStyle style) 
 { 
   m_param.setMapLineStyle(style); 
+
+  QString tmpPrefString = "MapLineStyle";
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), m_param.mapLineStyle());
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2169,9 +2191,12 @@ void Map::setMapOptimization(MapOptimizationMethod method)
   // set the general optimization method
   m_param.setMapOptimizationMethod(method);
 
+  QString tmpPrefString = "OptimizeMethod";
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(),  
+			  (int)m_param.mapOptimizationMethod());
+
   // set the offscreen images optimization method
   m_offscreen.setOptimization(m_param.pixmapOptimizationMethod());
-
 }
 
 void Map::setZoom(int val) 
@@ -2185,10 +2210,24 @@ void Map::setZoom(int val)
       // requires reAdjust
       reAdjust();
       
-      if (!showeq_params->fast_machine)
+      if (!m_cacheChanges)
 	refreshMap ();
     }
   }
+}
+
+void Map::setZoomDefault(int val) 
+{ 
+  if (val == m_param.zoomDefault())
+    return;
+
+  m_param.setZoomDefault(val);
+
+  QString tmpPrefString = "ZoomDefault";
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(),  
+			m_param.zoomDefault());
+
+  emit zoomDefaultChanged(val);
 }
 
 void Map::setPanOffsetX(int val) 
@@ -2198,7 +2237,7 @@ void Map::setPanOffsetX(int val)
   // this requires a reAdjust
   reAdjust();
 
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2209,7 +2248,7 @@ void Map::setPanOffsetY(int val)
   // this requires a reAdjust
   reAdjust();
 
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2217,9 +2256,12 @@ void Map::setGridResolution(int val)
 { 
   m_param.setGridResolution(val); 
 
+  QString tmpPrefString = "GridResolution";
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), m_param.gridResolution());
+
   reAdjust();
 
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2227,7 +2269,10 @@ void Map::setGridTickColor(const QColor& color)
 { 
   m_param.setGridTickColor(color); 
 
-  if(!showeq_params->fast_machine)
+  // set color preference
+  pSEQPrefs->setPrefColor("GridTickColor", preferenceName(), m_param.gridTickColor());
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2235,7 +2280,10 @@ void Map::setGridLineColor(const QColor& color)
 { 
   m_param.setGridLineColor(color); 
 
-  if(!showeq_params->fast_machine)
+  // set color preference
+  pSEQPrefs->setPrefColor("GridLineColor", preferenceName(), m_param.gridLineColor());
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2243,7 +2291,10 @@ void Map::setBackgroundColor(const QColor& color)
 { 
   m_param.setBackgroundColor(color); 
 
-  if(!showeq_params->fast_machine)
+  // set color preference
+  pSEQPrefs->setPrefColor("BackgroundColor", preferenceName(), m_param.backgroundColor());
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2251,7 +2302,10 @@ void Map::setFont(const QFont& font)
 { 
   m_param.setFont(font); 
 
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "Font";
+  pSEQPrefs->setPrefFont(tmpPrefString, preferenceName(), m_param.font());
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2259,11 +2313,14 @@ void Map::setHeadRoom(int val)
 { 
   m_param.setHeadRoom(val); 
 
+  QString tmpPrefString = "HeadRoom";
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), m_param.headRoom());
+
   emit headRoomChanged(m_param.headRoom());
 
   reAdjust();
 
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2271,11 +2328,14 @@ void Map::setFloorRoom(int val)
 { 
   m_param.setFloorRoom(val); 
 
+  QString tmpPrefString = "FloorRoom";
+  pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(), m_param.floorRoom());
+
   emit floorRoomChanged(m_param.floorRoom());
 
   reAdjust();
 
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2283,7 +2343,10 @@ void Map::setShowBackgroundImage(bool val)
 { 
   m_param.setShowBackgroundImage(val); 
 
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "ShowBackgroundImage";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_param.showBackgroundImage());
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2291,7 +2354,10 @@ void Map::setShowLocations(bool val)
 { 
   m_param.setShowLocations(val); 
 
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "ShowMapPoints";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_param.showLocations());
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2299,7 +2365,10 @@ void Map::setShowLines(bool val)
 { 
   m_param.setShowLines(val); 
 
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "ShowMapLines";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_param.showLines());
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2307,7 +2376,10 @@ void Map::setShowGridLines(bool val)
 { 
   m_param.setShowGridLines(val); 
 
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "ShowGridLines";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_param.showGridLines());
+
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -2315,8 +2387,19 @@ void Map::setShowGridTicks(bool val)
 { 
   m_param.setShowGridTicks(val); 
 
-  if(!showeq_params->fast_machine)
+  QString tmpPrefString = "ShowGridTicks";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_param.showGridTicks());
+
+  if(!m_cacheChanges)
     refreshMap ();
+}
+
+void Map::setCacheAlwaysRepaint(bool val) 
+{ 
+  m_mapCache.setAlwaysRepaint(val); 
+
+  QString tmpPrefString = "CacheAlwaysRepaint";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_mapCache.alwaysRepaint());
 }
 
 void Map::dumpInfo(QTextStream& out)
@@ -3046,7 +3129,8 @@ void Map::paintSpawns(MapParameters& param,
 	 (item == m_selectedItem) ||
          ((item->zPos() <= m_param.playerHeadRoom()) && 
 	  (item->zPos() >= m_param.playerFloorRoom()))) &&
-	((!(filterFlags & FILTER_FLAG_FILTERED)) || m_showFiltered))
+	((!(filterFlags & FILTER_FLAG_FILTERED)) || m_showFiltered) &&
+	(!spawn->isUnknown() || m_showUnknownSpawns))
 	 
     {
       // get the approximate position of the spawn
@@ -3068,7 +3152,12 @@ void Map::paintSpawns(MapParameters& param,
       // distance
       if (m_showSpawnNames)
       {
-	if (location.calcDist2DInt(param.player()) < m_fovDistance)
+	if (!showeq_params->fast_machine)
+	  distance = location.calcDist2DInt(param.player());
+	else
+	  distance = (int)location.calcDist(param.player());
+
+	if (distance < m_fovDistance)
 	{
 	  spawnNameText.sprintf("%2d: %s",
 				spawn->level(),
@@ -3368,7 +3457,10 @@ void Map::paintSpawns(MapParameters& param,
       {
 	if (filterFlags & FILTER_FLAG_DANGER)
 	{
-	  distance = location.calcDist2DInt(param.player());
+	  if (!showeq_params->fast_machine)
+	    distance = location.calcDist2DInt(param.player());
+	  else
+	    distance = (int)location.calcDist(param.player());
 	  p.setPen(red);
 	  p.setBrush(NoBrush);
 	  if(m_flash)
@@ -3395,7 +3487,10 @@ void Map::paintSpawns(MapParameters& param,
 	}
 	else if (filterFlags & FILTER_FLAG_CAUTION)
 	{
-	  distance = location.calcDist2DInt(param.player());
+	  if (!showeq_params->fast_machine)
+	    distance = location.calcDist2DInt(param.player());
+	  else
+	    distance = (int)location.calcDist(param.player());
 	  p.setPen(yellow);
 	  p.setBrush(NoBrush);
 	  if(m_flash)
@@ -3820,7 +3915,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     
     reAdjust();
 
-    if(!showeq_params->fast_machine)
+    if(!m_cacheChanges)
       refreshMap();
   }
   
@@ -3898,7 +3993,7 @@ void Map::selectSpawn(const Item* item)
   if (m_followMode == tFollowSpawn)
     reAdjust();
 
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -3917,7 +4012,7 @@ void Map::delItem(const Item* item)
       reAdjust();
   }
 
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap ();
 }
 
@@ -4063,7 +4158,7 @@ void Map::mapLoaded(void)
 
   reAdjust();
   
-  if (!showeq_params->fast_machine)
+  if (!m_cacheChanges)
     refreshMap();
   
   // start the map update timer if necessary
@@ -4080,7 +4175,7 @@ void Map::mapUpdated(void)
 {
   reAdjust();
   
-  if(!showeq_params->fast_machine)
+  if(!m_cacheChanges)
     refreshMap();
 }
 
@@ -4103,7 +4198,9 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   QString tmpPrefString;
 
   tmpPrefString = "Caption";
-  setCaption(pSEQPrefs->getPrefString(tmpPrefString, prefString, (const char*)defCaption));
+  QVBox::setCaption(pSEQPrefs->getPrefString(tmpPrefString, 
+					     prefString, 
+					     (const char*)defCaption));
 
   QLabel* tmpLabel;
 
@@ -4325,6 +4422,15 @@ MapFrame::~MapFrame()
 {
 }
 
+void MapFrame::setCaption(const QString& text)
+{
+  // set the caption
+  QVBox::setCaption(text);
+
+  // set the preference
+  pSEQPrefs->setPrefString("Caption", preferenceName(), caption());
+}
+
 void MapFrame::filterConfirmed()
 {
   setregexp(m_filter->text());
@@ -4413,58 +4519,18 @@ void MapFrame::savePrefs(void)
   QString prefString = preferenceName();
   QString tmpPrefString;
 
-  tmpPrefString = "Caption";
-  pSEQPrefs->setPrefString(tmpPrefString, prefString, caption());
-
   tmpPrefString = "SaveSize";
-  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
+  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, true))
   {
-    tmpPrefString = "WindowW";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, width());
-
-    tmpPrefString = "WindowH";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, height());
+    tmpPrefString = "WindowSize";
+    pSEQPrefs->setPrefSize(tmpPrefString, prefString, size());
   }
 
   tmpPrefString = "SavePosition";
-  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
+  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, true))
   {
-    tmpPrefString = "WindowX";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, x());
-
-    tmpPrefString = "WindowY";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, y());
-  }
-
-  tmpPrefString = "SaveControls";
-  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
-  {
-    tmpPrefString = "ShowStatusBox";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_topControlBox->isVisible());
-
-    tmpPrefString = "ShowZoom";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_zoomBox->isVisible());
-
-    tmpPrefString = "ShowPlayerLocation";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_playerLocationBox->isVisible());
-
-    tmpPrefString = "ShowMouseLocation";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_mouseLocationBox->isVisible());
-
-    tmpPrefString = "ShowFilter";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_filterBox->isVisible());
-
-    tmpPrefString = "ShowControlBox";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_bottomControlBox->isVisible());
-
-    tmpPrefString = "ShowFrameRate";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_frameRateBox->isVisible());
-
-    tmpPrefString = "ShowPanControls";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_panBox->isVisible());
-
-    tmpPrefString = "ShowDepthFilterControls";
-    pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_depthControlBox->isVisible());
+    tmpPrefString = "WindowPos";
+    pSEQPrefs->setPrefPoint(tmpPrefString, prefString, pos());
   }
 
   // make the map belonging to this frame save it's preferences
@@ -4475,33 +4541,19 @@ void MapFrame::savePrefs(void)
 void MapFrame::restoreSize()
 {
   QString prefString = preferenceName();
-  QString wPrefString, hPrefString;
-  wPrefString = "WindowW";
-  hPrefString = "WindowH";
+  QSize s = pSEQPrefs->getPrefSize("WindowSize", prefString, size());
 
-  // only restore position if it the info is available
-  if (pSEQPrefs->isPreference(wPrefString, prefString) &&
-      pSEQPrefs->isPreference(hPrefString, prefString))
-  {
-    resize(pSEQPrefs->getPrefInt(wPrefString, prefString, width()),
-	   pSEQPrefs->getPrefInt(wPrefString, prefString, height()));
-  }
+  resize(s);
 }
 
 void MapFrame::restorePosition()
 {
   QString prefString = preferenceName();
-  QString xPrefString, yPrefString;
-  xPrefString = "WindowX";
-  yPrefString = "WindowY";
 
-  // only restore position if it the info is available
-  if (pSEQPrefs->isPreference(xPrefString, prefString) &&
-      pSEQPrefs->isPreference(yPrefString, prefString))
-  {
-    move(pSEQPrefs->getPrefInt(xPrefString, prefString, x()),
-	 pSEQPrefs->getPrefInt(yPrefString, prefString, y()));
-  }
+  QPoint p = pSEQPrefs->getPrefPoint("WindowPos", prefString, pos());
+
+  // Move window to new position
+  move(p);
 }
 
 void MapFrame::dumpInfo(QTextStream& out)
@@ -4564,6 +4616,13 @@ void MapFrame::toggle_top_controls(int id)
     m_topControlBox->hide();
   else
     m_topControlBox->show();
+
+  QString tmpPrefString = "SaveControls";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, preferenceName(), true))
+  {
+    tmpPrefString = "ShowStatusBox";
+    pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_topControlBox->isVisible());
+  }
 }
 
 void MapFrame::toggle_bottom_controls(int id)
@@ -4572,6 +4631,13 @@ void MapFrame::toggle_bottom_controls(int id)
     m_bottomControlBox->hide();
   else
     m_bottomControlBox->show();
+
+  QString tmpPrefString = "SaveControls";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, preferenceName(), true))
+  {
+    tmpPrefString = "ShowControlBox";
+    pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_bottomControlBox->isVisible());
+  }
 }
 
 void MapFrame::toggle_zoom(int id)
@@ -4580,6 +4646,13 @@ void MapFrame::toggle_zoom(int id)
     m_zoomBox->hide();
   else
     m_zoomBox->show();
+
+  QString tmpPrefString = "SaveControls";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, preferenceName(), true))
+  {
+    tmpPrefString = "ShowZoom";
+    pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_zoomBox->isVisible());
+  }
 }
 
 void MapFrame::toggle_playerLocation(int id)
@@ -4588,6 +4661,13 @@ void MapFrame::toggle_playerLocation(int id)
     m_playerLocationBox->hide();
   else
     m_playerLocationBox->show();
+
+  QString tmpPrefString = "SaveControls";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, preferenceName(), true))
+  {
+    tmpPrefString = "ShowPlayerLocation";
+    pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_playerLocationBox->isVisible());
+  }
 }
 
 void MapFrame::toggle_mouseLocation(int id)
@@ -4596,6 +4676,13 @@ void MapFrame::toggle_mouseLocation(int id)
     m_mouseLocationBox->hide();
   else
     m_mouseLocationBox->show();
+
+  QString tmpPrefString = "SaveControls";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, preferenceName(), true))
+  {
+    tmpPrefString = "ShowMouseLocation";
+    pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_mouseLocationBox->isVisible());
+  }
 }
 
 void MapFrame::toggle_filter(int id)
@@ -4604,6 +4691,13 @@ void MapFrame::toggle_filter(int id)
     m_filterBox->hide();
   else
     m_filterBox->show();
+
+  QString tmpPrefString = "SaveControls";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, preferenceName(), true))
+  {
+    tmpPrefString = "ShowFilter";
+    pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_filterBox->isVisible());
+  }
 }
 
 void MapFrame::toggle_frameRate(int id)
@@ -4612,6 +4706,13 @@ void MapFrame::toggle_frameRate(int id)
     m_frameRateBox->hide();
   else
     m_frameRateBox->show();
+
+  QString tmpPrefString = "SaveControls";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, preferenceName(), true))
+  {
+    tmpPrefString = "ShowFrameRate";
+    pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_frameRateBox->isVisible());
+  }
 }
 
 void MapFrame::toggle_pan(int id)
@@ -4620,6 +4721,13 @@ void MapFrame::toggle_pan(int id)
     m_panBox->hide();
   else
     m_panBox->show();
+
+  QString tmpPrefString = "SaveControls";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, preferenceName(), true))
+  {
+    tmpPrefString = "ShowPanControls";
+    pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_panBox->isVisible());
+  }
 }
 
 void MapFrame::toggle_depthControls(int id)
@@ -4628,4 +4736,11 @@ void MapFrame::toggle_depthControls(int id)
     m_depthControlBox->hide();
   else
     m_depthControlBox->show();
+
+  QString tmpPrefString = "SaveControls";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, preferenceName(), true))
+  {
+    tmpPrefString = "ShowDepthFilterControls";
+    pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_depthControlBox->isVisible()); 
+ }
 }

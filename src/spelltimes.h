@@ -5400,7 +5400,7 @@ case 0x069A:
         break;
 case 0x069B:
         // 069B, Glamour of Kintaz, 5, All
-        d = 30;
+        d = 54;
         break;
 case 0x069C:
         // 069C, Rapture, 4, All

@@ -32,8 +32,8 @@ EQSkillList::EQSkillList(EQPlayer* player,
    setShowSortIndicator(TRUE);
 #endif
    setRootIsDecorated(false);
-   setCaption(pSEQPrefs->getPrefString("Caption", section,
-				       "ShowEQ - Skills"));
+   QListView::setCaption(pSEQPrefs->getPrefString("Caption", section,
+						  "ShowEQ - Skills"));
 
   // set font and add the columns
   setFont(QFont("Helvetica", showeq_params->fontsize));
@@ -93,11 +93,48 @@ EQSkillList::EQSkillList(EQPlayer* player,
      addSkill(i, m_pPlayer->getSkill(i));
 
    // show the languages or not according to the user preference
-   showLanguages(bool(pSEQPrefs->getPrefBool("ShowLanguages", section, 1)));
+   m_showLanguages = pSEQPrefs->getPrefBool("ShowLanguages", section, true);
+   if (m_showLanguages)
+     addLanguages();
 }
 
 EQSkillList::~EQSkillList()
 {
+}
+
+void EQSkillList::savePrefs(void)
+{
+  QString section = "SkillList";
+  // only save the preferences if visible
+  if (isVisible())
+  {
+    // only save column widths if the user has set for it
+    if (pSEQPrefs->getPrefBool("SaveWidth", section, true))
+    {
+      pSEQPrefs->setPrefInt("SkillWidth", section, 
+			      columnWidth(0));
+      pSEQPrefs->setPrefInt("ValueWidth", section, 
+			      columnWidth(1));
+    }
+
+    char tempStr[256], tempStr2[256];
+    if (header()->count() > 0)
+      sprintf(tempStr, "%d", header()->mapToSection(0));
+    for(int i=1; i<header()->count(); i++) {
+      sprintf(tempStr2, ":%d", header()->mapToSection(i));
+      strcat(tempStr, tempStr2);
+    }
+    pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
+  }
+}
+
+void EQSkillList::setCaption(const QString& text)
+{
+  // set the caption
+  QListView::setCaption(text);
+
+  // set the preference
+  pSEQPrefs->setPrefString("Caption", "SkillList", caption());
 }
 
 /* Called to add a skill to the skills list */
@@ -198,7 +235,7 @@ void EQSkillList::addLanguage (int langId, int value)
   // add it to the list
   if (!m_languageList[langId])
     m_languageList[langId] =
-      new QListViewItem (this, language_name (langId), str);
+      new QListViewItem (this, language_name(langId), str);
   else
       m_languageList[langId]->setText (1, str);
 }
@@ -210,7 +247,7 @@ void EQSkillList::changeLanguage (int langId, int value)
   if (!m_showLanguages)
     return;
 
-  if (langId >= MAX_KNOWN_LANGS)
+  if (langId > MAX_KNOWN_LANGS)
   {
     printf("Warning: langId (%d) is more than max langId (%d)\n", 
 	   langId, MAX_KNOWN_LANGS - 1);
@@ -242,46 +279,28 @@ void EQSkillList::deleteLanguages()
     }
 }
 
+void EQSkillList::addLanguages() 
+{
+  if (!m_showLanguages)
+    return;
+
+  for (int i = 0; i < MAX_KNOWN_LANGS; i++)
+    addLanguage(i, m_pPlayer->getLanguage(i));
+}
+
 void EQSkillList::showLanguages(bool show)
 {
   m_showLanguages = show;
 
+  QString section = "SkillList";
+
+  // only save language visibility if the user has set for it
+  if (pSEQPrefs->getPrefBool("SaveShowLanguages", section, true))
+    pSEQPrefs->setPrefBool("ShowLanguages", section, m_showLanguages);
+
   if (m_showLanguages)
-    for (int i = 0; i < MAX_KNOWN_LANGS; i++)
-      addLanguage(i, m_pPlayer->getLanguage(i));
+    addLanguages();
   else
     deleteLanguages();
 }
 
-void EQSkillList::savePrefs(void)
-{
-  QString section = "SkillList";
-  // only save the preferences if visible
-  if (isVisible())
-  {
-    pSEQPrefs->setPrefString("Caption", section, caption());
-
-    // only save column widths if the user has set for it
-    if (pSEQPrefs->getPrefBool("SaveWidth", section, 1))
-    {
-      pSEQPrefs->setPrefInt("SkillWidth", section, 
-			      columnWidth(0));
-      pSEQPrefs->setPrefInt("ValueWidth", section, 
-			      columnWidth(1));
-    }
-
-    // only save language visibility if the user has set for it
-    if (pSEQPrefs->getPrefBool("SaveShowLanguages", section, 1))
-    {
-      pSEQPrefs->setPrefInt("ShowLanguages", section, m_showLanguages);
-    }
-    char tempStr[256], tempStr2[256];
-    if (header()->count() > 0)
-      sprintf(tempStr, "%d", header()->mapToSection(0));
-    for(int i=1; i<header()->count(); i++) {
-      sprintf(tempStr2, ":%d", header()->mapToSection(i));
-      strcat(tempStr, tempStr2);
-    }
-    pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
-  }
-}

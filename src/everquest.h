@@ -104,7 +104,7 @@
 
 //Maximum limits of certain types of data
 #define MAX_KNOWN_SKILLS                74
-#define MAX_KNOWN_LANGS                 26
+#define MAX_KNOWN_LANGS                 25
 
 //Item Flags
 #define ITEM_NORMAL1                    0x0031
@@ -492,14 +492,13 @@ struct channelMessageStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x07
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ uint16_t unknown0002[16];        // ***Placeholder
-/*0034*/ char     sender[23];             // The senders name (len may be wrong)
-/*0057*/ uint8_t  unknown0057[9];         // ***Placeholder
-/*0066*/ uint8_t  language;               // Language
-/*0067*/ int8_t   unknown0064;            // ***Placeholder
-/*0068*/ uint8_t  chanNum;                // Channel
-/*0069*/ uint8_t  unknown0069[5];         // ***Placeholder
-/*0074*/ char     message[0];             // Variable length message
+/*0002*/ char     target[64];             // the target characters name
+/*0066*/ char     sender[64];             // The senders name 
+/*0130*/ uint8_t  language;               // Language
+/*0131*/ uint8_t  unknown0131;         // ***Placeholder
+/*0132*/ uint8_t  chanNum;                // Channel
+/*0133*/ int8_t   unknown0133[5];            // ***Placeholder
+/*0138*/ char     message[0];             // Variable length message
 };
 
 /*
@@ -691,10 +690,10 @@ struct charProfileStruct
 /*0000*/ uint8_t  opCode;                 // 0x36
 /*0001*/ uint8_t  version;                // 0x20
 /*0002*/ uint32_t checksum;               // some pre-encryption checksum
-/*0006*/ uint16_t unknown0006;            // ***Placeholder
+/*0006*/ uint8_t  unknown0006[2];         // ***Placeholder
 /*0008*/ char     name[64];               // Name of player sizes not right
 /*0072*/ char     lastName[70];           // Last name of player sizes not right
-/*0142*/ uint8_t  unknown0058[2];
+/*0142*/ uint8_t  unknown0142[2];
 /*0144*/ uint16_t race;                   // Player race
 /*0146*/ uint8_t  class_;                 // Player class
 /*0147*/ uint8_t  unknown0147;
@@ -718,8 +717,8 @@ struct charProfileStruct
 /*0180*/ uint16_t unknown0180;    
 /*0182*/ uint8_t  unknown0182[44];
 /*0226*/ uint16_t inventory[30];          // inventory images?
-/*0286*/ uint8_t  languages[26];          // List of languages (MAX_KNOWN_LANGS)
-/*0312*/ uint8_t  unknown0312[6];         // unknown ?more languages?
+/*0286*/ uint8_t  languages[25];          // List of languages (MAX_KNOWN_LANGS)
+/*0311*/ uint8_t  unknown0311[7];         // unknown ?more languages?
 /*0318*/ struct itemPropertiesStruct invitemprops[30]; 
                                           // these correlate with inventory[30]
 /*0618*/ struct spellBuff buffs[15];      // Buffs currently on the player
@@ -748,22 +747,22 @@ struct charProfileStruct
 /*2946*/ uint32_t goldBank;               // Gold Pieces in Bank
 /*2950*/ uint32_t silverBank;             // Silver Pieces in Bank
 /*2954*/ uint32_t copperBank;             // Copper Pieces in Bank
-/*2960*/ uint8_t  unknown2960[30];
+/*2958*/ uint8_t  unknown2958[32];
 
 /*2990*/ uint16_t skills[74];             // List of skills (MAX_KNOWN_SKILLS)
-/*3138*/ uint8_t  unknown3140[308];       // ***Placeholder
-/*3446*/ uint32_t zoneId;                 // see zones.h
-/*3450*/ uint8_t  unknown3450[128];
-/*3578*/ uint32_t bindzoneId[5];          // bound to bindzoneId[0]
-/*3598*/ float    sYpos[5];               // starting locs per bindzoneId
-/*3618*/ float    sXpos[5];               // starting locs per bindzoneId
-/*3638*/ float    sZpos[5];               // starting locs per bindzoneId
-/*3658*/ uint8_t  unknown3658[1080];
-/*4738*/ uint16_t deity;                  // deity
-/*xxxx*/ char     GroupMembers[5][48];    // List of all the members in group
-/*xxxx*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000 
-/*xxxx*/ uint8_t  aapoints;               // number of ability points? 
-/*xxxx*/ uint8_t  unknown[3263];
+/*3138*/ uint8_t  unknown3138[306];       // ***Placeholder
+/*3444*/ uint32_t zoneId;                 // see zones.h
+/*3448*/ uint8_t  unknown3448[128];
+/*3576*/ uint32_t bindzoneId[5];          // bound to bindzoneId[0]
+/*3596*/ float    sYpos[5];               // starting locs per bindzoneId
+/*3616*/ float    sXpos[5];               // starting locs per bindzoneId
+/*3636*/ float    sZpos[5];               // starting locs per bindzoneId
+/*3656*/ uint8_t  unknown3658[1080];
+/*4736*/ uint16_t deity;                  // deity
+/*4738*/ char     GroupMembers[5][48];    // List of all the members in group
+/*4978*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000 
+/*4982*/ uint8_t  aapoints;               // number of ability points? 
+/*4983*/ uint8_t  unknown4983[3263];
 };
 
 

@@ -305,7 +305,7 @@ void CategoryMgr::reloadCategories(void)
         sprintf(tempStr, "Category%d_Filter", i);
         QString filter = pSEQPrefs->getPrefString(tempStr, section);
         sprintf(tempStr, "Category%d_Color", i);
-        QString color = pSEQPrefs->getPrefString(tempStr, section);
+        QColor color = pSEQPrefs->getPrefColor(tempStr, section, QColor("black"));
         sprintf(tempStr, "Category%d_FilterOut", i);
         QString filterout;
         if (pSEQPrefs->isPreference(tempStr, section))

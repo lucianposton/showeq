@@ -667,13 +667,12 @@ PktLogger::logChannelMessage(const channelMessageStruct *msg, uint32_t len, uint
     outputf("R %u %04d %d %.2X%2.X ", timestamp, len, dir, 
         msg->opCode, msg->version);
 
-    output(msg->unknown0002,32);
-    outputf(" [%.23s] ", msg->sender);
-    output(msg->unknown0057,9);
+    outputf(" [%.64s] ", msg->target);
+    outputf(" [%.64s] ", msg->sender);
     outputf(" %u ", msg->language);
-    output(&msg->unknown0064,1);
+    output(&msg->unknown0131,1);
     outputf(" %u ", msg->chanNum);
-    output(msg->unknown0069,5);
+    output(&msg->unknown0133,5);
     outputf(" [%s]\n", msg->message);
     flush();
     return;
@@ -1442,8 +1441,8 @@ PktLogger::logZoneChange(const zoneChangeStruct *zone, uint32_t len, uint8_t dir
         if (logOpen() != 0)
             return;
  
-   // outputf("R %u %04d %d %.2X%.2X [%.32s] ", timestamp, len,
-     //   dir, zone->opCode, zone->version, zone->charName,);
+    outputf("R %u %04d %d %.2X%.2X [%.32s] ", timestamp, len,
+	    dir, zone->opCode, zone->version, zone->charName);
 
     output(zone->unknown0050, 20);
     outputf("\n");

@@ -562,8 +562,11 @@ class EQPacket : public QObject
    void incPlayback(void);
    void decPlayback(void);
    void setPlayback(int);
+   void monitorIPClient(const QString& address);   
+   void monitorMACClient(const QString& address);   
    void monitorNextClient();   
    void session_tracking();
+   void setArqSeqGiveUp(int giveUp);
 
    // Decoder slots
    void dispatchDecodedCharProfile(const uint8_t* decodedData, uint32_t len);

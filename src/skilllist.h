@@ -38,8 +38,10 @@ class EQSkillList : public QListView
    void addLanguage(int langId, int value);
    void changeLanguage(int langId, int value);
    void deleteLanguages(void);
+   void addLanguages(void);
    void showLanguages(bool show);
    void savePrefs(void);
+   virtual void setCaption(const QString&);
 
  private:
    // the player this skill list is monitoring

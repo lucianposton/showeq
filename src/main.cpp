@@ -21,7 +21,7 @@
 
 #include "interface.h"
 #include "main.h"
-#include "preferences.h"      // prefrence file class
+#include "xmlpreferences.h"      // prefrence file class
 #include "conf.h"              // autoconf/configure definitions
 #include "itemdb.h"
 
@@ -96,6 +96,7 @@ static struct option option_list[] = {
   {"use-retarded-coords",          no_argument,        NULL,  'c'},
   {"fast-machine",                 no_argument,        NULL,  'F'},
   {"spawn-alert",                  no_argument,        NULL,  'A'},
+  {"create-unknown-spawns",        no_argument,        NULL,  'K'},
   {"show-unknown-spawns",          no_argument,        NULL,  'K'},
   {"select-on-consider",           no_argument,        NULL,  'S'},
   {"select-on-target",             no_argument,        NULL,  'e'},
@@ -141,7 +142,7 @@ static struct option option_list[] = {
 
 /* Global parameters, so all parts of ShowEQ has access to it */
 struct ShowEQParams *showeq_params;
-PreferenceFile      *pSEQPrefs; 
+XMLPreferences      *pSEQPrefs; 
 class EQItemDB* pItemDB;
 
 int main (int argc, char **argv)
@@ -163,10 +164,14 @@ int main (int argc, char **argv)
    printf ("software is doing so in violation of the express wishes and intents of the authors of this product.\n\n");
    printf ("Please see http://seq.sourceforge.net for further information\n\n");
 
+   /* Create application instance */
+   QApplication::setStyle( new QWindowsStyle );
+   QApplication qapp (argc, argv);
+
    /* Initialize the parameters with default values */
-   char *configfile = "showeq.conf";
-   if (stat (LOGDIR "/showeq.conf", &ss) == 0)
-      configfile = LOGDIR "/showeq.conf";
+   char *configfile = "showeq.xml";
+   if (stat (LOGDIR "/showeq.xml", &ss) == 0)
+      configfile = LOGDIR "/showeq.xml";
 
 
    // scan command line arguments for a specified config file
@@ -181,7 +186,7 @@ int main (int argc, char **argv)
 
    /* NOTE: See preferencefile.cpp for info on how to use prefrences class */
    printf("Using config file '%s'\n", configfile);
-   pSEQPrefs = new PreferenceFile(configfile);
+   pSEQPrefs = new XMLPreferences(LOGDIR "/seqdef.xml", configfile);
 
    showeq_params = new ShowEQParams;
 
@@ -193,59 +198,57 @@ int main (int argc, char **argv)
    showeq_params->ip = strdup(pSEQPrefs->getPrefString("IP", section,
 						       AUTOMATIC_CLIENT_IP));
    showeq_params->mac_address = strdup(pSEQPrefs->getPrefString("MAC", section, "0"));
-   showeq_params->realtime = pSEQPrefs->getPrefBool("RealTimeThread", section,   0);
-   showeq_params->promisc = pSEQPrefs->getPrefBool("NoPromiscuous", section, 1);
+   showeq_params->realtime = pSEQPrefs->getPrefBool("RealTimeThread", section,   false);
+   showeq_params->promisc = pSEQPrefs->getPrefBool("NoPromiscuous", section, true);
    showeq_params->arqSeqGiveUp = pSEQPrefs->getPrefInt("ArqSeqGiveUp", section, 96);
    showeq_params->session_tracking = pSEQPrefs->getPrefBool("SessionTracking", section, 0);
-
-
-   section = "Interface";
-   /* Allow map depth filtering */
-   showeq_params->retarded_coords  = pSEQPrefs->getPrefBool("RetardedCoords", section, 0);
-   showeq_params->fontsize = pSEQPrefs->getPrefInt("FontSize", section, 8);
-   showeq_params->statusfontsize = pSEQPrefs->getPrefInt("StatusFontSize", section, 8);
-   showeq_params->con_select = pSEQPrefs->getPrefBool("SelectOnCon", section, 0);
-   showeq_params->tar_select = pSEQPrefs->getPrefBool("SelectOnTarget", section, 0);
-   showeq_params->net_stats = pSEQPrefs->getPrefBool("NetStats", section, 0);
-   showeq_params->systime_spawntime = pSEQPrefs->getPrefBool("SystimeSpawntime", section, 0);
-   showeq_params->pvp = pSEQPrefs->getPrefBool("PvPTeamColoring", section, 0);
-   showeq_params->deitypvp = pSEQPrefs->getPrefBool("DeityPvPTeamColoring", section, 0);
-   showeq_params->keep_selected_visible = pSEQPrefs->getPrefBool("KeepSelected", section, 1);
-
-   showeq_params->spawnfilter_regexp = 0;
-
-   section = "Interface_StatusBar";
-   showeq_params->showEQTime = pSEQPrefs->getPrefBool("ShowEQTime",section,0);
-   section = "Misc";
-   showeq_params->no_bank = pSEQPrefs->getPrefBool("NoBank", section, 1);
-   showeq_params->walkpathrecord = pSEQPrefs->getPrefBool("WalkPathRecording", section, 0);
-   showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 25);
-   showeq_params->logSpawns = pSEQPrefs->getPrefBool("LogSpawns", section, 0);
-   showeq_params->logItems = pSEQPrefs->getPrefBool("LogItems",  section, 0);
-   /* Tells SEQ whether or not to display casting messages (Turn this off if you're on a big raid) */
-   showeq_params->showSpellMsgs = pSEQPrefs->getPrefBool("ShowSpellMessages", section, 1);
-   /* Spawn logging preferences */
-   showeq_params->SpawnLogFilename = pSEQPrefs->getPrefString("SpawnLogFilename", section, LOGDIR "/spawnlog.txt");
-   showeq_params->spawnlog_enabled = pSEQPrefs->getPrefBool("SpawnLogEnabled", section,  TRUE);
-/* Decoder override for coping with encryption changes */
 #if HAVE_LIBEQ
    showeq_params->broken_decode = pSEQPrefs->getPrefBool("BrokenDecode", section, 0);
 
    if (showeq_params->broken_decode)
-      printf("Disabling decoder due to showeq.conf preferences\n");
+      printf("Disabling decoder due to showeq.xml preferences\n");
 #else
    /* Default to broken decoder if libEQ not present */
    showeq_params->broken_decode = 1;
    printf("Disabling decoder due to missing libEQ.a\n");
 #endif
 
-   section = "Map";
-   showeq_params->fast_machine = pSEQPrefs->getPrefBool("FastMachine", section, 1);
-   showeq_params->showUnknownSpawns = pSEQPrefs->getPrefBool("ShowUnknownSpawns", section, 0);
+   section = "Interface";
+   /* Allow map depth filtering */
+   showeq_params->retarded_coords  = pSEQPrefs->getPrefBool("RetardedCoords", section, 0);
+   showeq_params->fontsize = pSEQPrefs->getPrefInt("FontSize", section, 8);
+   showeq_params->statusfontsize = pSEQPrefs->getPrefInt("StatusFontSize", section, 8);
+   showeq_params->con_select = pSEQPrefs->getPrefBool("SelectOnCon", section, false);
+   showeq_params->tar_select = pSEQPrefs->getPrefBool("SelectOnTarget", section, false);
+   showeq_params->net_stats = pSEQPrefs->getPrefBool("NetStats", section, false);
+   showeq_params->systime_spawntime = pSEQPrefs->getPrefBool("SystimeSpawntime", section, false);
+   showeq_params->pvp = pSEQPrefs->getPrefBool("PvPTeamColoring", section, false);
+   showeq_params->deitypvp = pSEQPrefs->getPrefBool("DeityPvPTeamColoring", section, false);
+   showeq_params->keep_selected_visible = pSEQPrefs->getPrefBool("KeepSelected", section, true);
+
+   showeq_params->no_bank = pSEQPrefs->getPrefBool("NoBank", section, true);
+   showeq_params->spawnfilter_regexp = 0;
+
+   section = "Interface_StatusBar";
+   showeq_params->showEQTime = pSEQPrefs->getPrefBool("ShowEQTime",section,false);
+   section = "Misc";
+   showeq_params->fast_machine = pSEQPrefs->getPrefBool("FastMachine", section, true);
+   showeq_params->createUnknownSpawns = pSEQPrefs->getPrefBool("CreateUnknownSpawns", section, false);
+
+   showeq_params->walkpathrecord = pSEQPrefs->getPrefBool("WalkPathRecording", section, false);
+   showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 25);
+   showeq_params->logSpawns = pSEQPrefs->getPrefBool("LogSpawns", section, false);
+   showeq_params->logItems = pSEQPrefs->getPrefBool("LogItems",  section, false);
+   /* Tells SEQ whether or not to display casting messages (Turn this off if you're on a big raid) */
+   showeq_params->showSpellMsgs = pSEQPrefs->getPrefBool("ShowSpellMessages", section, true);
+   /* Spawn logging preferences */
+   showeq_params->SpawnLogFilename = pSEQPrefs->getPrefString("SpawnLogFilename", section, LOGDIR "/spawnlog.txt");
+   showeq_params->spawnlog_enabled = pSEQPrefs->getPrefBool("SpawnLogEnabled", section,  true);
+/* Decoder override for coping with encryption changes */
 
    section = "Filters";
    showeq_params->filterfile = pSEQPrefs->getPrefString("FilterFile", section, LOGDIR "/filters.conf");
-   showeq_params->spawnfilter_audio = pSEQPrefs->getPrefBool("SpawnFilterAudio", section, 0);
+   showeq_params->spawnfilter_audio = pSEQPrefs->getPrefBool("SpawnFilterAudio", section, false);
    showeq_params->spawnfilter_loglocates = pSEQPrefs->getPrefBool("LogLocates", section, 0);
    showeq_params->spawnfilter_logcautions = pSEQPrefs->getPrefBool("LogCautions", section, 0);
    showeq_params->spawnfilter_loghunts = pSEQPrefs->getPrefBool("LogHunts", section, 0);
@@ -267,11 +270,12 @@ int main (int argc, char **argv)
 
    /* VPacket (Packet Recording / Playback) */
    section = "VPacket";
-   showeq_params->playbackpackets = pSEQPrefs->getPrefBool("Playback", section,  0);
-   showeq_params->recordpackets = pSEQPrefs->getPrefBool("Record", section, 0);
-   showeq_params->playbackspeed = pSEQPrefs->getPrefBool("PlaybackRate", section, 0);
-   showeq_params->showRealName = pSEQPrefs->getPrefBool("SpawnList_ShowRealName", section, 0);
-  
+   showeq_params->playbackpackets = pSEQPrefs->getPrefBool("Playback", section,  false);
+   showeq_params->recordpackets = pSEQPrefs->getPrefBool("Record", section, false);
+   showeq_params->playbackspeed = pSEQPrefs->getPrefBool("PlaybackRate", section, false);
+
+   section = "SpawnList";
+   showeq_params->showRealName = pSEQPrefs->getPrefBool("ShowRealName", section, false);
 
    /* OpCode monitoring preferences */
    section = "OpCode";
@@ -306,9 +310,9 @@ int main (int argc, char **argv)
      pSEQPrefs->getPrefBool("DecodeKey", section, 1);
    showeq_params->savePlayerState = 
      pSEQPrefs->getPrefBool("PlayerState", section, 1);
-   showeq_params->saveSpawns = pSEQPrefs->getPrefBool("Spawns", section, 1);
+   showeq_params->saveSpawns = pSEQPrefs->getPrefBool("Spawns", section, false);
    showeq_params->saveSpawnsFrequency = 
-     pSEQPrefs->getPrefInt("SpawnsFrequency", section, 60 * 1000);
+     pSEQPrefs->getPrefInt("SpawnsFrequency", section, (120 * 1000));
    showeq_params->restoreDecodeKey = false;
    showeq_params->restorePlayerState = false;
    showeq_params->restoreSpawns = false;
@@ -362,7 +366,7 @@ int main (int argc, char **argv)
          case 'j':
          {            
             if (optarg)
-               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, FALSE);
+               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, XMLPreferences::Runtime);
 
             showeq_params->playbackpackets = 1;
             showeq_params->recordpackets   = 0;
@@ -374,7 +378,7 @@ int main (int argc, char **argv)
          case 'g':
          {
             if (optarg)
-               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, FALSE);
+               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, XMLPreferences::Runtime);
 
             showeq_params->recordpackets   = 1;
             showeq_params->playbackpackets = 0;
@@ -452,7 +456,7 @@ int main (int argc, char **argv)
          /* Show unknown spawns */
          case 'K':
          {
-            showeq_params->showUnknownSpawns = 1;
+            showeq_params->createUnknownSpawns = 1;
             break;
          }
 
@@ -790,27 +794,13 @@ int main (int argc, char **argv)
       }
    }
 
-
-#ifndef DEBUG
-   /*
-      This code blocks the use of QT command line parameters.  The useful ones (setting of
-      styles, etc) are taken care of via UI, but there are QT debugging parameters we can
-      use, so I've chosen to leave it in for release builds.
-   */
-   if (optind < (argc - 1))
-   {
-      /* If there were arguments we did not understand, print out the help */
-      bOptionHelp = true;
-   }
-#endif /* DEBUG */
-
    if (bOptionHelp)
    {
       /* The default help text */
       printf ("Usage:\n  %s [<options>] [<client IP address>]\n\n", argv[0]);
       
       printf ("  -h, --help                            Shows this help\n");
-      printf ("  -o CONFIGFILE                         Alternate showeq.conf pathname\n");
+      printf ("  -o CONFIGFILE                         Alternate showeq.xml pathname\n");
       printf ("      --version                         Prints ShowEQ version number\n");
       printf ("  -i, --net-interface=DEVICE            Specify which network device to bind to\n");
       printf ("  -r, --realtime                        Set the network thread realtime\n");
@@ -827,11 +817,11 @@ int main (int argc, char **argv)
       printf ("      --status-font-size=SIZE           Set the point size of the status bar\n");
       printf ("                                        fonts\n");
       printf ("  -c, --use-retarded-coords             Use \"retarded\" YXZ coordinates\n");
-      printf ("  -F, --fast-machine                    Fast machine - framerate based vs. \n");
-      printf ("                                        packet based updates\n");
+      printf ("  -F, --fast-machine                    Fast machine - perform more accurate vs. \n");
+      printf ("                                        less accurate calculations.\n");
       printf ("  -A, --spawn-alert                     Use name/race/class/light/equipment for \n");
       printf ("                                        spawn matching\n");
-      printf ("  -K, --show-unknown-spawns             Display unknown spawns\n");
+      printf ("  -K, --create-unknown-spawns           create unknown spawns\n");
       printf ("  -S, --select-on-consider              Select the spawn considered\n");
       printf ("  -e, --select-on-target                Select the spawn targetted\n");
       printf ("  -V, --no-keep-selected-visible        Don't force the listbox to keep selected\n");
@@ -969,14 +959,10 @@ int main (int argc, char **argv)
       {
          showeq_params->monitorOpCode_Usage = false;
          printf( "\nOpCode monitoring COULD NOT BE ENABLED!\n"
-                 ">> Please check your ShowEQ.conf file for a list entry under [OpCodeMonitoring]\n\n"
+                 ">> Please check your ShowEQ.xml file for a list entry under [OpCodeMonitoring]\n\n"
                );
       }
    }
-
-   /* Create application instance */
-   QApplication::setStyle( new QWindowsStyle );
-   QApplication qapp (argc, argv);
 
    /* The main interface widget */
    EQInterface intf (0, "interface");
@@ -989,30 +975,11 @@ int main (int argc, char **argv)
    if (pItemDB != NULL)
      pItemDB->Shutdown();
 
-   pSEQPrefs->save();
-   //   intf.savePrefs();
-
    // delete the ItemDB before application exit
    delete pItemDB;
 
    // Causes segv on exit all of a sudden.  why?  no changes to cprefs classes. -- cybertech
-//   delete pSEQPrefs;
+   delete pSEQPrefs;
 
    return ret;
-}
-
-//----------------------------------------------------------------------
-// Key Preference
-int keyPref(QString pref, QString section, QString def)
-{
-  // get the key string
-  QString keyString = pSEQPrefs->getPrefString(pref, section, def);
-
-  // get the key code
-  int key = QAccel::stringToKey(keyString);
-  
-  // fix the key code (deal with Qt brain death)
-  key &= ~Qt::UNICODE_ACCEL;
-
-  return key;
 }

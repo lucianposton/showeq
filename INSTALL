@@ -21,8 +21,8 @@ Below is a list of packages you will need in order to compile ShowEQ:
    Name:      Minimum:  Suggested:
    -----------------------------------
    *** 3rd party libraries ***
-   qt         2.3.2     (Must be compiled with -thread) (don't use Qt 3.x yet!)
-   qt-devel   2.3.2     (Must be compiled with -thread) (don't use Qt 3.x yet!)
+   qt         2.3.2     (Must be compiled with -thread) (Qt 3.x is iffy!)
+   qt-devel   2.3.2     (Must be compiled with -thread) (Qt 3.x is iffy!)
    libpcap    0.62
    gdbm       1.8.0
 
@@ -69,10 +69,10 @@ Please note that ShowEQ requires root privileges, otherwise the pcap library
 cannot be initialized and ShowEQ will fail to load... You should not use SEQ
 on a computer where root access presents a security issue.
 
-Configuration values are stored in the file showeq.conf.  This file will 
+Configuration values are stored in the file showeq.xml.  This file will 
 be looked for in the local directory first, then the /usr/local/share/showeq 
 directory.  The contents of this file are layed out in a fairly readable form 
-and comments are provided in the distributed showeq.conf file.
+and comments are provided in the distributed seqdef.xml file.
 
 Filters for 'hiding' spawns from the spawnlist and map can be configured via 
 a file specified in the config file (typically 'filters.conf').  A sample 

@@ -43,7 +43,10 @@ class EQStatList : public QListView
    void stamChanged(int Sval, int Smax, int Fval, int Fmax, int Wval, int Wmax);
    void statChanged (int statNum, int val, int max);
    void resetMaxMana(void);
-   void updateStat(uint8_t stat, bool enable);
+   void enableStat(uint8_t stat, bool enable);
+   void updateStat(uint8_t stat);
+   virtual void setCaption(const QString&);
+
  private:
    // the player this skill list is monitoring
    EQPlayer* m_pPlayer;

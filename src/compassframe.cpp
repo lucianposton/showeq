@@ -15,8 +15,8 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
 {
   QString section = "Compass";
 
-  setCaption(pSEQPrefs->getPrefString("Caption", section,
-				      "ShowEQ - Compass"));
+  QVBox::setCaption(pSEQPrefs->getPrefString("Caption", section,
+					     "ShowEQ - Compass"));
   
   m_compass = new Compass (this, "compass");
   QHBox* coordsbox = new QHBox(this);
@@ -82,6 +82,15 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
 
 CompassFrame::~CompassFrame()
 {
+}
+
+void CompassFrame::setCaption(const QString& text)
+{
+  // set the caption
+  QVBox::setCaption(text);
+
+  // set the preference
+  pSEQPrefs->setPrefString("Caption", "Compass", caption());
 }
 
 void CompassFrame::selectSpawn(const Item* item)

@@ -191,6 +191,7 @@ public slots:
    void loadedCategories(void);
    
    void rebuildSpawnList();
+   virtual void setCaption(const QString&);
    
 private slots:
    void selChanged(QListViewItem*);

@@ -27,11 +27,11 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   tmpGrid->addRowSpacing(8, 5);
 
   // get preferences
-  QString section = "NetStats";
+  QString section = "NetDiag";
 
   // set caption
-  setCaption(pSEQPrefs->getPrefString("Caption", section,
-				      "ShowEQ - Network Diagnostics"));
+  QFrame::setCaption(pSEQPrefs->getPrefString("Caption", section,
+					      "ShowEQ - Network Diagnostics"));
 
   int row = 0;
   int col = 0;
@@ -138,9 +138,9 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 
     QAccel* accel = new QAccel(this);
     int key;
-    key = keyPref("IncPlaybackSpeedKey", section, "Ctrl+X");
+    key = pSEQPrefs->getPrefKey("IncPlaybackSpeedKey", section, "Ctrl+X");
     accel->connectItem(accel->insertItem(key), m_packet, SLOT(incPlayback()));
-    key = keyPref("IncPlaybackSpeedKey", section, "Ctrl+Z");
+    key = pSEQPrefs->getPrefKey("IncPlaybackSpeedKey", section, "Ctrl+Z");
     accel->connectItem(accel->insertItem(key), m_packet, SLOT(decPlayback()));
   }
   
@@ -177,6 +177,15 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 
 NetDiag::~NetDiag()
 {
+}
+
+void NetDiag::setCaption(const QString& text)
+{
+  // set the caption
+  QFrame::setCaption(text);
+
+  // set the preference
+  pSEQPrefs->setPrefString("Caption", "NetDiag", caption());
 }
 
 void NetDiag::seqReceive(int seq)

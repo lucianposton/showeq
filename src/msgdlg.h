@@ -79,7 +79,7 @@ public slots:
    void setAdditive(bool bAdd);
    void setMargin(int nIndent);
    void addButton(const QString &name, const QString &filter,
-           const QString &color, bool bAct);
+           const QColor &color, bool bAct);
    void toggleControls(void);
    void setButton(MyButton* but, bool active);
    void showControls(bool);
@@ -106,7 +106,7 @@ private:
    void addMessage(QString &);
    bool eventFilter(QObject *, QEvent *);
    MyButton* newButton(const QString &name, const QString &filter,
-           const QString &color, bool bAct);
+           const QColor &color, bool bAct);
    void rightButtonPressed(void);
    void applyStyle(QString &);
    void closeEvent( QCloseEvent *e);

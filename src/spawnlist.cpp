@@ -245,8 +245,8 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
 
    setRootIsDecorated(true);
    setShowSortIndicator(true);
-   setCaption(pSEQPrefs->getPrefString("Caption", section,
-				       "ShowEQ - Spawn List"));
+   QListView::setCaption(pSEQPrefs->getPrefString("Caption", section,
+						  "ShowEQ - Spawn List"));
 
    setFont(QFont("Helvetica", showeq_params->fontsize));
    addColumn ("Name");
@@ -463,6 +463,15 @@ void CSpawnList::savePrefs()
     }
     pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
   }
+}
+
+void CSpawnList::setCaption(const QString& text)
+{
+  // set the caption
+  QListView::setCaption(text);
+
+  // set the preference
+  pSEQPrefs->setPrefString("Caption", "SpawnList", caption());
 }
 
 void CSpawnList::setColumnVisible(int id, bool visible)
@@ -1691,7 +1700,7 @@ SpawnListMenu* CSpawnList::menu()
 }
 
 SpawnListMenu::SpawnListMenu(CSpawnList* spawnlist,
-		             QWidget* parent = 0, const char* name = 0)
+		             QWidget* parent, const char* name)
                              : m_spawnlist(spawnlist)
 {
 

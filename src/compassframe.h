@@ -29,6 +29,7 @@ class CompassFrame : public QVBox
  public slots:
   void selectSpawn(const Item* item);
   void posChanged(int16_t,int16_t,int16_t,int16_t,int16_t,int16_t,int32_t);
+  virtual void setCaption(const QString&);
   
  private:
   Compass* m_compass;

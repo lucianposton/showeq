@@ -85,6 +85,7 @@ class SpellList : public QListView
       void activated(int);
 
       void savePrefs(void);
+      virtual void setCaption(const QString&);
 
    private:
       void selectAndOpen(SpellListItem *);

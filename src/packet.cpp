@@ -309,7 +309,7 @@ QString EQPacketFormat::headerFlags(const QString& prefix,
 // EQUDPIPPacketFormat class methods
 EQUDPIPPacketFormat::EQUDPIPPacketFormat(uint8_t* data, 
 					 uint32_t length, 
-					 bool copy = false)
+					 bool copy)
 {
   uint8_t* ipdata;
   if (copy)
@@ -331,7 +331,7 @@ EQUDPIPPacketFormat::EQUDPIPPacketFormat(uint8_t* data,
 }
 
 EQUDPIPPacketFormat::EQUDPIPPacketFormat(EQUDPIPPacketFormat& packet,
-					 bool copy = false)
+					 bool copy)
 {
   // note whether or not this object ownw the memory
   m_ownCopy = copy;
@@ -844,10 +844,10 @@ void EQPacket::logRawData ( const char   *filename,
 bool EQPacket::logData ( const QString& filename,
 			 uint32_t       len,
 			 const uint8_t* data,
-			 in_addr_t      saddr    = 0,
-			 in_addr_t      daddr    = 0,
-			 in_port_t      sport    = 0,
-			 in_port_t      dport    = 0
+			 in_addr_t      saddr,
+			 in_addr_t      daddr,
+			 in_port_t      sport,
+			 in_port_t      dport
 			 )
 {
 #ifdef DEBUG_PACKET
@@ -1380,7 +1380,7 @@ void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf, uint8_t dir)
 //EQPacket::dispatchWorldData  
 // note this dispatch gets just the payload
 void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data, 
-				  uint8_t direction = 0)
+				  uint8_t direction)
 {
 #ifdef DEBUG_PACKET
   debug ("dispatchWorldData()");
@@ -1688,6 +1688,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         case ChannelMessageCode:
         {
             unk = false;
+
+#if 1 // ZBTEMP
+	    logData("/tmp/channelMessages.log", len, data);
+#endif
 
             emit channelMessage((const channelMessageStruct*)data, len, dir);
 
@@ -2707,6 +2711,42 @@ char* getTime(char* pchTime)
    return pchTime;
 }
 
+void EQPacket::monitorIPClient(const QString& ip)
+{
+  showeq_params->ip = ip;
+  struct in_addr  ia;
+  inet_aton (showeq_params->ip, &ia);
+  m_client_addr = ia.s_addr;
+  emit clientChanged(m_client_addr);
+  printf("Listening for IP client: %s\n", (const char*)showeq_params->ip);
+  m_session_tracking_enabled = showeq_params->session_tracking;
+  emit sessionTrackingChanged(m_session_tracking_enabled);
+
+  if (!showeq_params->playbackpackets)
+    m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+			       showeq_params->realtime, 
+			       IP_ADDRESS_TYPE, 0, 0);
+}
+
+void EQPacket::monitorMACClient(const QString& mac)
+{
+  showeq_params->mac_address = mac;
+  m_detectingClient = true;
+  struct in_addr  ia;
+  inet_aton (AUTOMATIC_CLIENT_IP, &ia);
+  m_client_addr = ia.s_addr;
+  emit clientChanged(m_client_addr);
+  printf("Listening for MAC client: %s\n", 
+	 (const char*)showeq_params->mac_address);
+  m_session_tracking_enabled = showeq_params->session_tracking;
+  emit sessionTrackingChanged(m_session_tracking_enabled);
+
+  if (!showeq_params->playbackpackets)
+    m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+			       showeq_params->realtime, 
+			       IP_ADDRESS_TYPE, 0, 0);
+}
+
 void EQPacket::monitorNextClient()
 {
   m_detectingClient = true;
@@ -2715,6 +2755,8 @@ void EQPacket::monitorNextClient()
   inet_aton (showeq_params->ip, &ia);
   m_client_addr = ia.s_addr;
   emit clientChanged(m_client_addr);
+  m_session_tracking_enabled = showeq_params->session_tracking;
+  emit sessionTrackingChanged(m_session_tracking_enabled);
   printf("Listening for next client seen. (you must zone for this to work!)\n");
 
   if (!showeq_params->playbackpackets)
@@ -2727,6 +2769,19 @@ void EQPacket::session_tracking()
 {
    m_session_tracking_enabled = showeq_params->session_tracking;
    emit sessionTrackingChanged(m_session_tracking_enabled);
+}
+
+void EQPacket::setArqSeqGiveUp(int giveUp)
+{
+  // a sanity check, if the user set it to below 32, they're prolly nuts
+  if (giveUp >= 32)
+    showeq_params->arqSeqGiveUp = giveUp;
+
+  // a sanity check, if the user set it to below 32, they're prolly nuts
+  if (showeq_params->arqSeqGiveUp >= 32)
+    m_serverArqSeqGiveUp = showeq_params->arqSeqGiveUp;
+  else
+    m_serverArqSeqGiveUp = 32;
 }
    
 //----------------------------------------------------------------------

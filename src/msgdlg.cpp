@@ -524,11 +524,11 @@ MsgDialog::setButton(MyButton* but, bool active)
 //
 MyButton *
 MsgDialog::newButton(const QString &name, const QString &filter,
-           const QString &color, bool bAct)
+           const QColor &color, bool bAct)
 {
 #ifdef DEBUGMSG
   qDebug("newButton() '%s', '%s', '%s' %s", name.ascii(), filter.ascii(),
-       color.ascii(), bAct?"Active":"InActive");
+       color.name().ascii(), bAct?"Active":"InActive");
 #endif
 
   // Create a new button
@@ -549,7 +549,7 @@ MsgDialog::newButton(const QString &name, const QString &filter,
                this, SLOT (setButton(MyButton*, bool)));
 
   // setup Color
-  but->setColor(QColor(color));
+  but->setColor(color);
 
   // add to the button layout
   m_nButtons++;
@@ -603,7 +603,7 @@ MsgDialog::addButton(void)
   qDebug("addButton()");
 #endif
 
-  MyButton* but = newButton("Name", "Filter", "Color", FALSE);
+  MyButton* but = newButton("Name", "Filter", QColor("black"), FALSE);
 
   QString oldfilter(but->filter());  // hold copy of old filter
   CButDlg butdlg(parentWidget(), "ButtonDlg", but);
@@ -669,11 +669,11 @@ MsgDialog::showMsgType(bool bshow)
 //
 void
 MsgDialog::addButton(const QString &name, const QString &filter,
-           const QString &color, bool bAct)
+           const QColor &color, bool bAct)
 {
 #ifdef DEBUGMSG
   qDebug("addButton() '%s', '%s', '%s' %s", name.ascii(), filter.ascii(),
-       color.ascii(), bAct?"Active":"InActive");
+       color.name().ascii(), bAct?"Active":"InActive");
 #endif
 
   newButton(name, filter, color, bAct);

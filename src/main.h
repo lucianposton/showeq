@@ -14,8 +14,8 @@
 #include <stdlib.h>
 #include <deque>
 
-#include "preferences.h"
-extern class PreferenceFile *pSEQPrefs;
+#include "xmlpreferences.h"
+extern class XMLPreferences *pSEQPrefs;
 
 #include "itemdb.h"
 #endif
@@ -57,7 +57,7 @@ struct ShowEQParams
   bool           retarded_coords; // Verant style YXZ instead of XYZ
   bool           fast_machine;
   bool           spawn_alert_plus_plus;
-  bool           showUnknownSpawns;
+  bool           createUnknownSpawns;
   bool           con_select;
   bool           tar_select;
   bool           keep_selected_visible;
@@ -126,7 +126,7 @@ struct ShowEQParams
   bool           saveDecodeKey;
   bool           savePlayerState;
   bool           saveSpawns;
-  uint8_t        saveSpawnsFrequency;
+  uint32_t        saveSpawnsFrequency;
   bool           restoreDecodeKey;
   bool           restorePlayerState;
   bool           restoreSpawns;
@@ -136,6 +136,4 @@ struct ShowEQParams
 extern struct ShowEQParams *showeq_params;
 extern class EQItemDB* pItemDB;
 
-int keyPref(QString pref, QString section, QString def);
-  
 #endif

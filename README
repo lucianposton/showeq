@@ -1,4 +1,4 @@
-ShowEQ v2.x
+ShowEQ v4.x
 -----------
 Realtime packet analyzer for Everquest
 
@@ -24,4 +24,5 @@ Usage:
   ./showeq --help
 
 shows current command line arguments.  Also look at the 
-conf/showeq.conf.dist file for configuration file options and defaults.
+conf/seqdef.xml file for configuration file options and defaults.
+Most configuration changes can be done via the user interface.

@@ -1,0 +1,397 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<!DOCTYPE seqpreferences SYSTEM "seqpref.dtd">
+<seqpreferences version="1.0" >
+<!-- ============================================================= -->
+<!-- Category Manager Options -->
+ <section name="CategoryMgr" >
+  <property name="Category1_Name" >
+   <string value="All" />
+   <comment>Category for all spawns but filtered</comment>
+  </property>
+  <property name="Category1_Filter" >
+   <string value="." />
+   <comment>regular expression for all filtered spawns</comment>
+  </property>
+  <property name="Category1_Color" >
+   <color name="black" />
+   <comment></comment>
+  </property>
+  <property name="Category2_Name" >
+   <string value="NPCs" />
+   <comment>Category for all NPC's</comment>
+  </property>
+  <property name="Category2_Filter" >
+   <string value="NPC:1" />
+   <comment>regular expression for all NPC's</comment>
+  </property>
+  <property name="Category2_Color" >
+   <color name="black" />
+   <comment></comment>
+  </property>
+  <property name="Category3_Name" >
+   <string value="Players" />
+   <comment>Category for all Player's</comment>
+  </property>
+  <property name="Category3_Filter" >
+   <string value="NPC:0" />
+   <comment>regular expression to match all PC's</comment>
+  </property>
+  <property name="Category3_Color" >
+   <color name="black" />
+   <comment></comment>
+  </property>
+  <property name="Category4_Name" >
+   <string value="Shop and Bank" />
+   <comment>Category for Shopkeepers and Bankers</comment>
+  </property>
+  <property name="Category4_Filter" >
+   <string value="Class:Shopkeeper|Class:Banker" />
+   <comment>regular expression to match shopkeepers and bankers</comment>
+  </property>
+  <property name="Category4_Color" >
+   <color name="black" />
+   <comment></comment>
+  </property>
+  <property name="Category5_Name" >
+   <string value="Will-o-Wisps" />
+   <comment>Category matching all will-o-wisp's carrying GLS's</comment>
+  </property>
+  <property name="Category5_Filter" >
+   <string value=":Race:Will[^:]:Light:GLS:" />
+   <comment>regular expression to match all will-o-wisp's carrying GLS's</comment>
+  </property>
+  <property name="Category5_Color" >
+   <color name="black" />
+   <comment></comment>
+  </property>
+  <property name="Category6_Name" >
+   <string value="Corpses/Players" />
+   <comment>Player Corpses</comment>
+  </property>
+  <property name="Category6_Filter" >
+   <string value="NPC:2" />
+   <comment>regular expression to match all PC corpses</comment>
+  </property>
+  <property name="Category6_Color" >
+   <color name="black" />
+   <comment></comment>
+  </property>
+  <property name="Category7_Name" >
+   <string value="Corpses/NPCs" />
+   <comment>NPC Corpses</comment>
+  </property>
+  <property name="Category7_Filter" >
+   <string value="NPC:3" />
+   <comment>regular expresssion matching all NPC corpses</comment>
+  </property>
+  <property name="Category7_Color" >
+   <color name="black" />
+   <comment></comment>
+  </property>
+  <property name="Category8_Name" >
+   <string value="Hunting" />
+   <comment>category for all spawns matching Hunt filter</comment>
+  </property>
+  <property name="Category8_Filter" >
+   <string value=":Hunt:" />
+   <comment>regular expression matching Hunt filters</comment>
+  </property>
+  <property name="Category8_Color" >
+   <color name="DarkBlue" />
+   <comment></comment>
+  </property>
+  <property name="Category9_Name" >
+   <string value="Alert" />
+   <comment>Category for all spawns matching all spwawns we want to be alerted about</comment>
+  </property>
+  <property name="Category9_Filter" >
+   <string value=":Alert:" />
+   <comment>Regular expression matching Alert filters</comment>
+  </property>
+  <property name="Category9_Color" >
+   <color name="DarkMagenta" />
+   <comment></comment>
+  </property>
+  <property name="Category10_Name" >
+   <string value="Locate" />
+   <comment>Category for all spawns we want located</comment>
+  </property>
+  <property name="Category10_Filter" >
+   <string value=":Locate:" />
+   <comment>Regular expression matching Locate filters</comment>
+  </property>
+  <property name="Category10_Color" >
+   <color name="black" />
+   <comment></comment>
+  </property>
+  <property name="Category11_Name" >
+   <string value="Filtered" />
+   <comment>Category matching all filtered spawns</comment>
+  </property>
+  <property name="Category11_Filter" >
+   <string value=":Filtered:" />
+   <comment>regular expression matching filtered spawns</comment>
+  </property>
+  <property name="Category11_Color" >
+   <color name="black" />
+   <comment></comment>
+  </property>
+  <property name="Category12_Name" >
+   <string value="Map Found" />
+   <comment>Category for spawns matching map Find queries</comment>
+  </property>
+  <property name="Category12_Filter" >
+   <string value=":Map[2-5]{0,1}:" />
+   <comment>regular expression matching any of the Maps 1-5</comment>
+  </property>
+  <property name="Category12_Color" >
+   <color name="black" />
+   <comment></comment>
+  </property>
+ </section>
+<!-- ============================================================= -->
+<!-- Message Box 1 Options -->
+ <section name="MessageBox1" >
+  <property name="Caption" >
+   <string value="ShowEQ - Channel Messages" />
+   <comment>Window caption</comment>
+  </property>
+  <property name="HideControls" >
+   <bool value="false" />
+   <comment>Displays the toggle buttons</comment>
+  </property>
+  <property name="ShowMsgType" >
+   <bool value="true" />
+   <comment>Displays the message type</comment>
+  </property>
+  <property name="Additive" >
+   <bool value="true" />
+   <comment>Selects additive or subtractive filtering</comment>
+  </property>
+  <property name="Button1Name" >
+   <string value="Shout" />
+   <comment>Name to put on button 1</comment>
+  </property>
+  <property name="Button1Filter" >
+   <string value="^Shout" />
+   <comment>Filter to use for button 1</comment>
+  </property>
+  <property name="Button1Color" >
+   <color name="black" />
+   <comment>Color for button 1</comment>
+  </property>
+  <property name="Button1Active" >
+   <bool value="true" />
+   <comment>Button 1 checked/unchecked state</comment>
+  </property>
+  <property name="Button2Name" >
+   <string value="Group" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button2Filter" >
+   <string value="^Group" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button2Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button2Active" >
+   <bool value="true" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button3Name" >
+   <string value="Tell" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button3Filter" >
+   <string value="^Tell" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button3Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button3Active" >
+   <bool value="true" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button4Name" >
+   <string value="Auc" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button4Filter" >
+   <string value="^Auc" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button4Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button4Active" >
+   <bool value="true" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button5Name" >
+   <string value="Say" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button5Filter" >
+   <string value="^Say" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button5Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button5Active" >
+   <bool value="true" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button6Name" >
+   <string value="Emote" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button6Filter" >
+   <string value="^Emote" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button6Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button6Active" >
+   <bool value="true" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button7Name" >
+   <string value="OOC" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button7Filter" >
+   <string value="^OOC" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button7Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button7Active" >
+   <bool value="true" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button8Name" >
+   <string value="Guild" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button8Filter" >
+   <string value="^Guild" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button8Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button8Active" >
+   <bool value="true" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button9Name" >
+   <string value="Form" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button9Filter" >
+   <string value="^Formatted:" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button9Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button9Active" >
+   <bool value="true" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button10Name" >
+   <string value="Spells" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button10Filter" >
+   <string value="^SPELL:" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button10Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button10Active" >
+   <bool value="true" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button11Name" >
+   <string value="Items" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button11Filter" >
+   <string value="^Item" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button11Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button11Active" >
+   <bool value="false" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button12Name" >
+   <string value="Zone" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button12Filter" >
+   <string value="^Zone" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button12Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button12Active" >
+   <bool value="false" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button13Name" >
+   <string value="" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button13Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button13Filter" >
+   <string value="" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button13Active" >
+   <bool value="false" />
+   <comment>Button state</comment>
+  </property>
+  <property name="Button14Name" >
+   <string value="" />
+   <comment>Button Name</comment>
+  </property>
+  <property name="Button14Filter" >
+   <string value="" />
+   <comment>Filter for button</comment>
+  </property>
+  <property name="Button14Color" >
+   <color name="black" />
+   <comment>Color</comment>
+  </property>
+  <property name="Button14Active" >
+   <bool value="false" />
+   <comment>Button state</comment>
+  </property>
+ </section>
+<!-- ============================================================= -->
+</seqpreferences>

@@ -106,20 +106,17 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr, EQPlayer* player)
    if (showeq_params->restoreSpawns)
      restoreSpawns();
 
-   // setup the automatic saving of the spawn list
+   // create the timer
+   m_timer = new QTimer(this);
+
+   // connect the timer
+   connect(m_timer, SIGNAL(timeout()),
+	   this, SLOT(saveSpawns(void)));
+
+   // start the timer (changed to oneshot to help prevent a backlog on slower
+   // machines)
    if (showeq_params->saveSpawns)
-   {
-     // create the timer
-     m_timer = new QTimer(this);
-
-     connect(m_timer, SIGNAL(timeout()),
-	     this, SLOT(saveSpawns(void)));
-
-     // start the timer
-     m_timer->start(showeq_params->saveSpawnsFrequency, false);
-   }
-   else
-     m_timer = NULL;
+     m_timer->start(showeq_params->saveSpawnsFrequency, true);
 }
 
 void
@@ -662,7 +659,7 @@ void SpawnShell::updateSpawn(uint16_t id,
      item->updateLast();
      emit changeItem(item, tSpawnChangedPosition);
    }
-   else if (showeq_params->showUnknownSpawns)
+   else if (showeq_params->createUnknownSpawns)
    {
      // not the player, so check if it's a recently deleted spawn
      for (int i =0; i < m_cntDeadSpawnIDs; i++)
@@ -675,8 +672,10 @@ void SpawnShell::updateSpawn(uint16_t id,
 	 // found a match, ignore it
 	 m_deadSpawnID[i] = 0;
 
-	 printf("\a(%d) had been removed from the zone, but saw a position update on it, so assuming new.\n", 
+	 printf("\a(%d) had been removed from the zone, but saw a position update on it, so assuming bogus update.\n", 
 		id);
+
+	 return;
        }
      }
 
@@ -1328,6 +1327,10 @@ void SpawnShell::saveSpawns(void)
       spawn->saveSpawn(d);
     }
   }
+
+   // re-start the timer
+   if (showeq_params->saveSpawns)
+     m_timer->start(showeq_params->saveSpawnsFrequency, true);
 }
 
 void SpawnShell::restoreSpawns(void)

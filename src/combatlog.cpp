@@ -224,7 +224,7 @@ CombatWindow::CombatWindow(EQPlayer* player)
   m_dDPSLast(0.0)
 {
    QString section = "Combat";
-   setCaption(pSEQPrefs->getPrefString("Title", section, "ShowEQ Combat"));
+   setCaption(pSEQPrefs->getPrefString("Caption", section, "ShowEQ Combat"));
 
   /* Hopefully this is only called once to set up the window,
      so this is a good place to initialize some things which

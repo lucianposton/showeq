@@ -36,8 +36,8 @@ EQStatList::EQStatList(EQPlayer* player,
    setShowSortIndicator(TRUE);
 #endif
    setRootIsDecorated(false);
-   setCaption(pSEQPrefs->getPrefString("Caption", section, 
-				       "ShowEQ - Stats"));
+   QListView::setCaption(pSEQPrefs->getPrefString("Caption", section, 
+						  "ShowEQ - Stats"));
 
    // set font and add columns
    setFont(QFont("Helvetica", showeq_params->fontsize));
@@ -51,7 +51,8 @@ EQStatList::EQStatList(EQPlayer* player,
    for (int nloop = 0; nloop < LIST_MAXLIST; nloop++)
    {
      statPrefName.sprintf("show%s", statNames[nloop]);
-     updateStat(nloop, pSEQPrefs->getPrefBool(statPrefName, section, 0));
+     m_showStat[nloop] = pSEQPrefs->getPrefBool(statPrefName, section, false);
+     updateStat(nloop);
    }
 
    // Restore column order
@@ -124,7 +125,7 @@ void EQStatList::savePrefs(void)
   // only save the preferences if visible
   if (isVisible())
   {
-    if (pSEQPrefs->getPrefBool("SaveWidth", section, 1))
+    if (pSEQPrefs->getPrefBool("SaveWidth", section, true))
     {
       pSEQPrefs->setPrefInt("StatWidth", section, 
 			      columnWidth(STATCOL_NAME));
@@ -144,14 +145,16 @@ void EQStatList::savePrefs(void)
       strcat(tempStr, tempStr2);
     }
     pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
-
-    QString statPrefName;
-    for (int nloop = 0; nloop < LIST_MAXLIST; nloop++)
-    {
-      statPrefName.sprintf("show%s", statNames[nloop]);
-      pSEQPrefs->setPrefInt(statPrefName, section, m_showStat[nloop]);
-    }
   }
+}
+
+void EQStatList::setCaption(const QString& text)
+{
+  // set the caption
+  QListView::setCaption(text);
+
+  // set the preference
+  pSEQPrefs->setPrefString("Caption", "StatList", caption());
 }
 
 void EQStatList::expChanged  (int val, int min, int max) 
@@ -315,7 +318,7 @@ void EQStatList::resetMaxMana(void)
    m_statList[LIST_MANA]->setText (2, buf);
 }
 
-void EQStatList::updateStat(uint8_t stat, bool enabled)
+void EQStatList::enableStat(uint8_t stat, bool enabled)
 {
   // validate argument
   if (stat >= LIST_MAXLIST)
@@ -324,6 +327,20 @@ void EQStatList::updateStat(uint8_t stat, bool enabled)
   // set the enabled status of the stat
   m_showStat[stat] = enabled;
 
+  QString statPrefName;
+  statPrefName.sprintf("show%s", statNames[stat]);
+
+  pSEQPrefs->setPrefBool(statPrefName, "StatList", m_showStat[stat]);
+
+  updateStat(stat);
+}
+
+void EQStatList::updateStat(uint8_t stat)
+{
+  // validate argument
+  if (stat >= LIST_MAXLIST)
+    return;
+ 
   // should this status be displayed?
   if (m_showStat[stat])
   {

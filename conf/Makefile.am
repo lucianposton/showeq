@@ -1,4 +1,4 @@
-pkgdata_DATA=$(wildcard *.conf*)
+pkgdata_DATA=$(wildcard *.xml* *.dtd*)
 
 EXTRA_DIST=$(pkgdata_DATA) README
 

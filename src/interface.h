@@ -59,6 +59,10 @@ const int maxNumMaps = 5;
 // Docked menu
 const int mapDockBase = 5; 
 
+// This is the base number where the map caption options appear in the
+// Window caption menu
+const int mapCaptionBase = 9; 
+
 //--------------------------------------------------
 // EQInterface
 class EQInterface:public QMainWindow
@@ -147,7 +151,14 @@ class EQInterface:public QMainWindow
    void selectTheme(int id);
    void ToggleOpCodeMonitoring (int id);
    void ReloadMonitoredOpCodeList (void);
-   void toggle_session_tracking(void);
+   void toggle_net_session_tracking(void);
+   void toggle_net_real_time_thread(int id);
+   void toggle_net_broken_decode(int id);
+   void set_net_monitor_next_client();
+   void set_net_client_IP_address();
+   void set_net_client_MAC_address();
+   void set_net_arq_giveup(int giveup);
+   virtual void setCaption(const QString&);
 
  signals:
    void newMessage(int index);
@@ -175,6 +186,7 @@ class EQInterface:public QMainWindow
    void toggle_opt_LogSpawns();
    void toggle_opt_PvPTeams();
    void toggle_opt_PvPDeity();
+   void toggle_opt_CreateUnknownSpawns(int);
    void toggle_view_SpawnList();
    void toggle_view_SpellList();
    void toggle_view_PlayerStats();
@@ -187,8 +199,15 @@ class EQInterface:public QMainWindow
    void select_filter_file();
    void toggle_view_menubar();
    void toggle_view_statusbar();
+   void set_interface_WindowCaption(int id);
+   void toggle_opt_save_DecodeKey(int id);
+   void toggle_opt_save_PlayerState(int id);
+   void toggle_opt_save_Spawns(int id);
+   void set_opt_save_SpawnFrequency(int frequency);
+   void set_opt_save_BaseFilename();
 
  protected:
+   int setTheme(int id);
    void loadFormatStrings();
    void resizeEvent (QResizeEvent *);
    void logFilteredSpawn(const Item* item, uint32_t flag);
@@ -198,6 +217,8 @@ class EQInterface:public QMainWindow
 		       const QString& audioCue);
    void showMap(int mapNum);
    void showSpawnList(void);
+   void showStatList(void);
+   void showSkillList(void);
    void showSpellList(void);
    void showCompass(void);
    void showNetDiag(void);
@@ -221,16 +242,17 @@ class EQInterface:public QMainWindow
    PktLogger* m_pktLogger;
    const Item* m_selectedSpawn;
 
-   QPopupMenu* pNetMenu;
-   QPopupMenu* pStatWinMenu;
-   QPopupMenu* pSkillWinMenu;
-   QPopupMenu* pSpawnListMenu;
-   QPopupMenu* pDockedWinMenu;
-   QPopupMenu* pCharMenu;
-   QPopupMenu* pCharLevelMenu;
-   QSpinBox* levelSpinBox;
-   QPopupMenu* pCharClassMenu;
-   QPopupMenu* pCharRaceMenu;
+   QPopupMenu* m_netMenu;
+   QPopupMenu* m_statWinMenu;
+   QPopupMenu* m_skillWinMenu;
+   QPopupMenu* m_spawnListMenu;
+   QPopupMenu* m_dockedWinMenu;
+   QPopupMenu* m_windowCaptionMenu;
+   QPopupMenu* m_charMenu;
+   QPopupMenu* m_charLevelMenu;
+   QSpinBox* m_levelSpinBox;
+   QPopupMenu* m_charClassMenu;
+   QPopupMenu* m_charRaceMenu;
 
    CompassFrame* m_compass;
    MapFrame*  m_map[maxNumMaps];

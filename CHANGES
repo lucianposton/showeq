@@ -1,3 +1,61 @@
+dohpaZ (11/05/02)
+------------------
+Modifications:
+ + version 4.2.0
+ + Applied patch #539485 "spells update" by wyvern (mvern)
+ + Applied patch #554633 "Default Parameter/Minimum Size Fixes" 
+   by asdf (adenine)
+ + Applied fixes from Ryntar's "Some bug fixes..." post from 5/10/2002
+ + Fixed language handling
+ + Fixed so that recieving a position update on a just deleted spawn
+   will no longer create an unknown spawn
+ + Packet Structure Changes
+   - channelMessageStruct
+   - charProfileStruct
+ + Added support for a per-map default zoom level
+ + Added ability to set window captions from the Interface menu
+ + Added map menu options to control map repainting.
+ + Added Network menu options to allow setting of various parameters previously
+   only exposed via the config file
+ + Added the ability to change the Save State options from a sub-menu off of
+   the Options menu.
+ + Added ability to control creation of unknown spawns from the Options menu
+ + Added map menu option for controlling the display of unknown spawns on a
+   per-map basis.
+ + Made some of the default settings more slow machine friendly:
+   AnimateSpawns(false), ShowDoors(false), ShowDroppedCoins(false), 
+   CacheChanges(true), FastMachine(false), FrameRate(5),
+   SaveState Spawns(false)
+ + Removed the code to prevent using Qt command line arguments since a number
+   of useful options are/were not supported via ShowEQ GUI or command line
+ + Actually made the Spawn list, Stat List, Skill List, and Spell List 
+   dynamic again and only created when needed.  Thereby finally fixing the 
+   regressions introduced in interface.cpp version 1.16 on 22/02/02.
+ + Made FastMachine meaningful.  It now just controls 2D integer vs. 
+   3D floating point distance calculation.  Previously it also forced a 
+   map repaint on every change that effected a visible map element, which
+   actually ended up having the opposite of the intended effect.
+ + No longer save preferences on exit, only save when user chooses to via
+   the menu "File" -> "Save Preferences" or via the CTRL+S accelerator
+ + Migrated to an XML based preference system.
+     + The configuration file seqdef.xml contains the ShowEQ defaults and
+       will usually only be modified to change site specific things, if ever.  
+     + The user configuration file showeq.xml can be used as a template 
+       to create user specific overrides of specific options.  It contains
+       Category Manager and Message Box (Channel messages) window descriptions
+       by default.  Many user settable parameters may now be set via the GUI
+       and will be saved to this file via the "File" menu's "Save Preferences"
+       option.
+     + The DTD describing the specific XML format used in the files is called
+       seqpref.dtd for those who understand such things.
+
+Notes:
+ + Make sure to do a clean build and install, starting from 
+  'make -f Makefile.dist' and ending with a make install.
+ + The old configuration files will no longer be used, a method for migrating
+   configuration information from these files has not been provided.
+ 
+
 fee    (ocho de mayo)
 ---------------------
 + version 4.1.0
