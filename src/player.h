@@ -163,6 +163,8 @@ public:
   void changeItem(const Item* item, uint32_t changeType);
   void headingChanged(int32_t heading);
   void levelChanged(uint8_t level);
+  
+  void getPlayerGuildTag(void);
 
  protected:
   void fillConTable();

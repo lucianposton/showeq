@@ -127,7 +127,7 @@ void Player::backfill(const charProfileStruct* player)
   setLevel(player->level);
 
   // save the raw name
-  setTypeflag(0);
+  setTypeflag(1);
 
   Spawn::setName(player->name);
   setLastName(player->lastName);
@@ -139,6 +139,9 @@ void Player::backfill(const charProfileStruct* player)
   // Stats hanling
   setUseDefaults(false);
   setDeity(player->deity);
+  setGuildID(player->guildID);
+
+  emit getPlayerGuildTag();
 
   // update the con table
   fillConTable();

@@ -114,7 +114,7 @@ class MapMgr : public QObject
    Q_OBJECT
 
  public:
-   MapMgr(SpawnShell* spawnShell, Player* player, ZoneMgr* zoneMgr, 
+   MapMgr(SpawnShell* spawnShell, Player* player, ZoneMgr* zoneMgr,
 	  QWidget* dialogParent, 
 	  QObject* parent = 0, const char* name = "mapmgr");
    virtual ~MapMgr();

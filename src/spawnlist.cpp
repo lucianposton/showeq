@@ -72,6 +72,7 @@ SpawnList::SpawnList(Player* player,
    addColumn ("SpawnTime");
    addColumn("Deity");
    addColumn("Body Type", "BodyType");
+   addColumn("Guild Tag", "GuildTag");
 
    // restore the columns settings from preferences
    restoreColumns();

@@ -35,6 +35,7 @@ class ZoneMgr;
 class FilterMgr;
 class SpawnShell;
 class EQItemDB;
+class GuildMgr;
 
 //----------------------------------------------------------------------
 // constants
@@ -69,7 +70,8 @@ public:
    SpawnShell(FilterMgr& filterMgr, 
 	      ZoneMgr* zoneMgr, 
 	      Player* player,
-	      EQItemDB* itemDB);
+	      EQItemDB* itemDB,
+              GuildMgr* guildMgr);
 
    const Item* findID(itemType type, int idSpawn);
    
@@ -134,6 +136,7 @@ public slots:
    void refilterSpawnsRuntime();
    void saveSpawns(void);
    void restoreSpawns(void);
+   void setPlayerGuildTag(void);
 
  protected:
    void refilterSpawns(itemType type);
@@ -149,6 +152,7 @@ public slots:
    Player* m_player;
    FilterMgr& m_filterMgr;
    EQItemDB* m_itemDB;
+   GuildMgr* m_guildMgr;
 
    // track recently killed spawns
    uint16_t m_deadSpawnID[MAX_DEAD_SPAWNIDS];

@@ -18,7 +18,7 @@
 # + This Perl script requires the Unicode::String module that be retrieved off
 #   of CPAN from the URL: http://search.cpan.org/search?module=Unicode::String
 
-use Unicode::String qw(latin1 utf16);
+use Unicode::String qw(latin1 utf16 ucs2 utf8);
 
 $infile = "spells_en.txt";
 $outfile = "/tmp/spells.h";
@@ -60,7 +60,7 @@ print SPELLSH "\n";
 while($line = <SPELLSEN>)
 {
 #    print STDERR $count++, "\n";
-    $u = utf16($line);
+    $u = utf8($line);
     $latin1line = $u->latin1;
 #    print SPELLSH $latin1line;
     @fields = split(/\^/, $latin1line);

@@ -707,6 +707,7 @@ class EQPacket : public QObject
    void bindWound(const bindWoundStruct*, uint32_t, uint8_t);
    void unknownOpcode(const uint8_t*, uint32_t, uint8_t);
 
+   void worldGuildList(const char*, uint32_t);
  private:
       
    EQDecode            *m_decode;

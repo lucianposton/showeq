@@ -295,7 +295,7 @@ public slots:
 private:
     void logSpawnInfo(const char *type, const char *name, int id, int level, 
                       int x, int y, int z, time_t timeCurrent, 
-                      const char *killer, int kid);
+                      const char *killer, int kid, int guildid);
     int version;
     QString zoneShortName;
     EQTime *l_time;

@@ -51,7 +51,8 @@ const int tSpawnColInfo = 11;
 const int tSpawnColSpawnTime =12;
 const int tSpawnColDeity = 13;
 const int tSpawnColBodyType = 14;
-const int tSpawnColMaxCols = 15;
+const int tSpawnColGuildID = 15;
+const int tSpawnColMaxCols = 16;
 
 //--------------------------------------------------
 // SpawnListItem

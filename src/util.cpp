@@ -153,7 +153,6 @@ void spawndb (const dbSpawnStruct *dbSpawn)
 	   if (dbname[a]<='9')
 	     dbname[a]=0;
 	 if (	(!strcmp(dbname, thisname)) &&
-		(dbSpawn->spawn.maxHp == s.spawn.maxHp) &&	// Added to catch changed guards
 		(dbSpawn->spawn.level == s.spawn.level) &&
 		(!strcmp(dbSpawn->zoneName, s.zoneName)) )
 	 {

@@ -1678,48 +1678,35 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
      if (!logData (showeq_params->WorldLogFilename, len, data))
         emit toggle_log_WorldData(); //untoggle the GUI checkmark
 
-  //uint16_t opCode = eqntohuint16(data);
+  uint16_t opCode = eqntohuint16(data);
 
-#if 0
-  if ((opCode == ZoneServerInfo) && (direction == DIR_SERVER))
+  bool unk = true;
+
+  switch (opCode)
   {
-    //printf(" ZoneServerInfo 0x%04x, m_client_addr %d, sessionTrack = %d\n", 
-    //	   opCode, m_client_addr, m_session_tracking_enabled);
-    uint16_t zone_server_port = eqntohuint16(data + 130);
-    m_serverPort = zone_server_port;
-
-    emit zoneServerInfo(data, len, direction);
-
-    // only reset packet filter if this is a live session
-    if (!showeq_params->playbackpackets && (m_session_tracking_enabled < 2))
-    {
-      if (showeq_params->mac_address.length() == 17)
+      case GuildListCode:
       {
-	m_packetCapture->setFilter(showeq_params->device, 
-				   showeq_params->mac_address,
-				   showeq_params->realtime, 
-				   MAC_ADDRESS_TYPE, zone_server_port, 0);
-	printf ("dispatchWorldData: ZoneServerInfo detected - Building new pcap filter: EQ Client %s, Zone Server port %d\n",
-		(const char*)showeq_params->mac_address, zone_server_port);
-      }
-      else
-      {
-	m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
-				   showeq_params->realtime, IP_ADDRESS_TYPE,
-				   zone_server_port, 0);
-	printf ("dispatchWorldData: ZoneServerInfo detected - Building new pcap filter: EQ Client %s, Zone Server port %d\n",
-		(const char*)showeq_params->ip, zone_server_port);
-      }
+	   logData("/tmp/guildlist.log", len, data);
 
-    // notify that the server port has been latched
-    emit serverPortLatched(m_serverPort);
-    
-    
-    return;
-    }
+           if (direction != DIR_SERVER || len != sizeof(worldGuildListStruct)+2)
+              break;
+
+           unk = ! ValidatePayload(GuildListCode, rawWorldGuildListStruct);
+
+           emit worldGuildList((const char*)data+2, len-2);
+
+           break;
+      } /* end GuildListCode */
+
+      default:
+      {
+          unk = true;
+          break;
+      }
   }
-#endif
-}
+
+
+} // end dispatchWorld
 
 ///////////////////////////////////////////
 //EQPacket::dispatchWorldChatData  
@@ -1761,437 +1748,428 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     //Logging 
     if (showeq_params->logZonePackets)
         if (!logData (showeq_params->ZoneLogFilename, len, data))
-            emit toggle_log_ZoneData(); //untoggle the GUI checkmark
+           emit toggle_log_ZoneData(); //untoggle the GUI checkmark
 
     bool unk = true;
 
     /* Update EQ Time every 50 packets so we don't overload the CPU */
-    
-    if ( showeq_params->showEQTime && (m_packetCount[m_eqstreamid] % 50 == 0))
+	    
+    if (showeq_params->showEQTime && (m_packetCount[m_eqstreamid] % 50 == 0))
     {
-        char timeMessage[30];
-        time_t timeCurrent = time(NULL);
+       char timeMessage[30];
+       time_t timeCurrent = time(NULL);
 
-        struct timeOfDayStruct eqTime;
-        getEQTimeOfDay( timeCurrent, &eqTime);
+       struct timeOfDayStruct eqTime;
+       getEQTimeOfDay( timeCurrent, &eqTime);
 
-        if (eqTime.hour >= 0 && eqTime.minute >= 0)
-        {
-            sprintf(timeMessage,"EQTime [%02d:%02d %s]",
-                       (eqTime.hour % 12) == 0 ? 12 : (eqTime.hour % 12),
-                       (eqTime.minute),
-                       ((eqTime.hour >= 12 && eqTime.hour << 24) || (eqTime.hour == 24 && eqTime.minute == 0)) ? "pm" : "am"
-                   );
-            emit eqTimeChangedStr(QString (timeMessage));
-        }
+       if (eqTime.hour >= 0 && eqTime.minute >= 0)
+       {
+          sprintf(timeMessage,"EQTime [%02d:%02d %s]",
+                  (eqTime.hour % 12) == 0 ? 12 : (eqTime.hour % 12),
+                  (eqTime.minute),
+                  ((eqTime.hour >= 12 && eqTime.hour << 24) ||
+                   (eqTime.hour == 24 && eqTime.minute == 0)) ? "pm" : "am");
+          emit eqTimeChangedStr(QString (timeMessage));
+       }
     }
 
     switch (opCode)
     {
-        case CPlayerItemsCode:
-        {
-	    unk = false;
+       case CPlayerItemsCode:
+       {
+           unk = false;
 
-            // decode/decompress the payload
-            decoded = m_decode->DecodePacket(data, len, decodedData,
-                                     &decodedDataLen, showeq_params->ip);
-	    if (!decoded)
-            {
-                printf("EQPacket: could not decompress CPlayerItemsCode 0x%x\n", opCode);
-	        break;
-            }
+           // decode/decompress the payload
+           decoded = m_decode->DecodePacket(data, len, decodedData,
+                               &decodedDataLen, showeq_params->ip);
+           if (!decoded)
+           {
+              printf("EQPacket: could not decompress CPlayerItemsCode 0x%x\n", opCode);
+              break;
+           }
 
-            cPlayerItemsStruct *citems;
-            citems = (cPlayerItemsStruct *)(decodedData);
+           cPlayerItemsStruct *citems;
+           citems = (cPlayerItemsStruct *)(decodedData);
 
-	    emit cPlayerItems(citems, decodedDataLen, dir);
-	    
-	    fprintf(stderr, 
-		    "CPlayerItems: count=%d size=%d packetsize=%d expsize=%d\n",
-		    citems->count,
-		    decodedDataLen,
-		    ((decodedDataLen - 4)/citems->count),
-		    sizeof(playerItemStruct));
+           emit cPlayerItems(citems, decodedDataLen, dir);
 
-            // Make sure we do not divide by zero and there 
-            // is something to process
-           
-            if (citems->count)
-            {
-                // Determine the size of a single structure in 
-                // the compressed packet
-              
-                int nPacketSize=((decodedDataLen - 4)/citems->count);
+           fprintf(stderr, 
+           "CPlayerItems: count=%d size=%d packetsize=%d expsize=%d\n",
+           citems->count,
+           decodedDataLen,
+           ((decodedDataLen - 4)/citems->count),
+           sizeof(playerItemStruct));
 
-                // See if it is the size that we expect
-              
-                int nVerifySize = sizeof(playerItemStruct);
-	    
+           // Make sure we do not divide by zero and there 
+           // is something to process
+   
+           if (citems->count)
+           {
+               // Determine the size of a single structure in 
+               // the compressed packet
+ 
+               int nPacketSize=((decodedDataLen - 4)/citems->count);
+
+               // See if it is the size that we expect
+ 
+               int nVerifySize = sizeof(playerItemStruct);
+    
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
-                if (nVerifySize != nPacketSize)
-		{
-		  printf("WARNING: CPlayerItemsCode: packetSize:%d != "
-			 "sizeof(playerItemStruct):%d!\n",
-			 nPacketSize, nVerifySize);
-		  unk = true;
-		}
+               if (nVerifySize != nPacketSize)
+               {
+                  printf("WARNING: CPlayerItemsCode: packetSize:%d != "
+                  "sizeof(playerItemStruct):%d!\n",
+                  nPacketSize, nVerifySize);
+                  unk = true;
+               }
 #endif
 
-		if (!showeq_params->no_bank)
-		{
-		  tempStr = "Item: Dispatching compressed Items " 
-		    "(count = " +
-		    QString::number(citems->count) + ")";
-		  
-		  emit msgReceived(tempStr);
-		  
-		  for (int i=0; i < citems->count; i++)
-		    dispatchZoneData( nPacketSize,
-				      &citems->compressedData[i*nPacketSize], 
-				      dir);
-		  
-		  emit msgReceived(QString("Item: Finished dispatching"));
-		}
-		else
-		{
-		  // Quietly dispatch the compressed data
-		  
-		  for ( int i=0; i<citems->count; i++ )
-		    dispatchZoneData( nPacketSize, 
-				      &citems->compressedData[i*nPacketSize], 
-				      dir);
-		}
-            }
-	    break;
-        } /* end CPlayerItemCode */
+               if (!showeq_params->no_bank)
+               {
+                  tempStr = "Item: Dispatching compressed Items " 
+                  "(count = " +
+                  QString::number(citems->count) + ")";
 
-        case PlayerItemCode:
-        {
-            unk = ! ValidatePayload(PlayerItemCode, playerItemStruct);
+                  emit msgReceived(tempStr);
+ 
+                  for (int i=0; i < citems->count; i++)
+                      dispatchZoneData(nPacketSize,
+                                      &citems->compressedData[i*nPacketSize], dir);
 
-            emit playerItem((const playerItemStruct*)data, len, dir);
-	    
-            break;
-        }
+                  emit msgReceived(QString("Item: Finished dispatching"));
+               }
+               else
+               {
+                  // Quietly dispatch the compressed data
+                  for (int i=0; i<citems->count; i++)
+                      dispatchZoneData(nPacketSize,
+                                       &citems->compressedData[i*nPacketSize], dir);
+               }
+           }
+           break;
+       } /* end CPlayerItemCode */
 
-        case ItemInShopCode:
-        {
+       case PlayerItemCode:
+       {
+           unk = ! ValidatePayload(PlayerItemCode, playerItemStruct);
+
+           emit playerItem((const playerItemStruct*)data, len, dir);
+ 
+           break;
+       }
+
+       case ItemInShopCode:
+       {
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
-	  itemInShopStruct* items = (itemInShopStruct*)data;
-	  switch (items->itemType)
-	  {
-	  case 0: // it is an item, use the regular method
-            unk = ! ValidatePayload(ItemInShopCode, itemInShopStruct);
-	    break;
-	  case 1: // it is a container
-	    {
-	      size_t items_size = sizeof(itemInShopStruct) 
-		- sizeof(itemItemStruct)
-		+ sizeof(itemContainerStruct);
+           itemInShopStruct* items = (itemInShopStruct*)data;
+           switch (items->itemType)
+           {
+               case 0: // it is an item, use the regular method
+                   unk = ! ValidatePayload(ItemInShopCode, itemInShopStruct);
+                   break;
+               case 1: // it is a container
+               {
+                   size_t items_size = sizeof(itemInShopStruct) 
+                                       - sizeof(itemItemStruct) 
+                                  + sizeof(itemContainerStruct);
 
-	      if (items_size != len)
-	      {
-		fprintf(stderr, 
-			"WARNING: ItemInShopCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
-			ItemInShopCode, len, items_size);
-		unk = true;
-	      }
-	      else
-		unk = false;
-	      
-	      break;
-	    }
-	  case 2: // it is a book
-	    {
-	      size_t items_size = sizeof(itemInShopStruct) 
-		- sizeof(itemItemStruct)
-		+ sizeof(itemBookStruct);
-	      
-	      if (items_size != len)
-	      {
-		fprintf(stderr, 
-			"WARNING: ItemInShopeCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
-			ItemInShopCode, len, items_size);
-		unk = true;
-	      }
-	      else
-		unk = false;
-	      
-	      break;
-	    }
-	  };
+                   if (items_size != len)
+                   {
+                      fprintf(stderr,
+                       "WARNING: ItemInShopCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
+                       ItemInShopCode, len, items_size);
+                      unk = true;
+                   }
+                   else
+                      unk = false;
+                      break;
+               }
+               case 2: // it is a book
+               {
+                   size_t items_size = sizeof(itemInShopStruct) 
+                                       - sizeof(itemItemStruct)
+                                       + sizeof(itemBookStruct);
+
+                   if (items_size != len)
+                   {
+                      fprintf(stderr, 
+                       "WARNING: ItemInShopeCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
+                       ItemInShopCode, len, items_size);
+                       unk = true;
+                   }
+                   else
+                      unk = false;
+                      break;
+               }
+           };
 #endif
-	    
-            emit itemShop((const itemInShopStruct*)data, len, dir);
-	    
-            break;
-        } /* end ItemInShopCode */
+   
+           emit itemShop((const itemInShopStruct*)data, len, dir);
 
-        case MoneyOnCorpseCode:
-        {
-            unk = ! ValidatePayload(MoneyOnCorpseCode, moneyOnCorpseStruct);
+           break;
+       } /* end ItemInShopCode */
 
-            emit moneyOnCorpse((const moneyOnCorpseStruct*)data, len, dir);
+       case MoneyOnCorpseCode:
+       {
+           unk = ! ValidatePayload(MoneyOnCorpseCode, moneyOnCorpseStruct);
 
-            break;
-        } /* end MoneyOnCorpseCode */
+           emit moneyOnCorpse((const moneyOnCorpseStruct*)data, len, dir);
 
-        case ItemOnCorpseCode:
-        {
-            unk = ! ValidatePayload(ItemOnCorpseCode, itemOnCorpseStruct);
+           break;
+       } /* end MoneyOnCorpseCode */
 
-	    emit itemPlayerReceived((const itemOnCorpseStruct *)data, len, dir);
+       case ItemOnCorpseCode:
+       {
+           unk = ! ValidatePayload(ItemOnCorpseCode, itemOnCorpseStruct);
 
-            break;
-        } /* end ItemOnCorpseCode */
+           emit itemPlayerReceived((const itemOnCorpseStruct *)data, len, dir);
 
-        case TradeItemOutCode:
-        {
+           break;
+       } /* end ItemOnCorpseCode */
+
+       case TradeItemOutCode:
+       {
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
-	  tradeItemOutStruct* itemt = (tradeItemOutStruct*)data;
-	  switch (itemt->itemType)
-	  {
-	  case 0: // it is an item, use the regular method
-            unk = ! ValidatePayload(TradeItemOutCode, tradeItemOutStruct);
-	    break;
-	  case 1: // it is a container
-	    {
-	      size_t itemt_size = sizeof(tradeItemOutStruct) 
-		- sizeof(itemItemStruct)
-		+ sizeof(itemContainerStruct);
+           tradeItemOutStruct* itemt = (tradeItemOutStruct*)data;
+           switch (itemt->itemType)
+           {
+               case 0: // it is an item, use the regular method
+                 unk = ! ValidatePayload(TradeItemOutCode, tradeItemOutStruct);
+                 break;
+               case 1: // it is a container
+               {
+                 size_t itemt_size = sizeof(tradeItemOutStruct) 
+                                       - sizeof(itemItemStruct)
+                                  + sizeof(itemContainerStruct);
 
-	      if (itemt_size != len)
-	      {
-		fprintf(stderr, 
-			"WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
-			TradeItemOutCode, len, itemt_size);
-		unk = true;
-	      }
-	      else
-		unk = false;
-	      
-	      break;
-	    }
-	  case 2: // it is a book
-	    {
-	      size_t itemt_size = sizeof(tradeItemOutStruct) 
-		- sizeof(itemItemStruct)
-		+ sizeof(itemBookStruct);
-	      
-	      if (itemt_size != len)
-	      {
-		fprintf(stderr, 
-			"WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
-			TradeItemOutCode, len, itemt_size);
-		unk = true;
-	      }
-	      else
-		unk = false;
-	      
-	      break;
-	    }
-	  };
+                 if (itemt_size != len)
+                 {
+                    fprintf(stderr, 
+                     "WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
+                     TradeItemOutCode, len, itemt_size);
+                     unk = true;
+                 }
+                 else
+                    unk = false;
+      
+                 break;
+               }
+               case 2: // it is a book
+               {
+                 size_t itemt_size = sizeof(tradeItemOutStruct) 
+                                       - sizeof(itemItemStruct)
+                                       + sizeof(itemBookStruct);
+      
+                 if (itemt_size != len)
+                 {
+                    fprintf(stderr, 
+                     "WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
+                     TradeItemOutCode, len, itemt_size);
+                     unk = true;
+                 }
+                 else
+                    unk = false;
+   
+                 break;
+               }
+           };
 #endif
 
-            emit tradeItemOut((const tradeItemOutStruct*)data, len, dir);
+           emit tradeItemOut((const tradeItemOutStruct*)data, len, dir);
 
-            break;
-        } /* end tradeItemCode */
+           break;
+       } /* end tradeItemCode */
 
-        case TradeItemInCode:	// Item received by player
-        {
-            unk = ! ValidatePayload(TradeItemInCode, tradeItemInStruct);
+       case TradeItemInCode:	// Item received by player
+       {
+           unk = ! ValidatePayload(TradeItemInCode, tradeItemInStruct);
 
-            emit tradeItemIn((const tradeItemInStruct*)data, len, dir);
+           emit tradeItemIn((const tradeItemInStruct*)data, len, dir);
 
-            break;
-        } /* end TradeItemInCode */
+           break;
+       } /* end TradeItemInCode */
 
-        case TradeContainerInCode:	// Container received by player
-        {
-            unk = ! ValidatePayload(TradeContainerInCode, tradeContainerInStruct);
+       case TradeContainerInCode:	// Container received by player
+       {
+           unk = ! ValidatePayload(TradeContainerInCode, tradeContainerInStruct);
 
-            emit tradeContainerIn((const tradeContainerInStruct*)data, len, dir);
+           emit tradeContainerIn((const tradeContainerInStruct*)data, len, dir);
 
-            break;
-        } /* end TradeContainerInCode */
-        
-        case TradeBookInCode:	// Item received by player
-        {
-            unk = ! ValidatePayload(TradeBookInCode, tradeBookInStruct);
+           break;
+       } /* end TradeContainerInCode */
 
-            emit tradeBookIn((const tradeBookInStruct*)data, len, dir);
+       case TradeBookInCode:	// Item received by player
+       {
+           unk = ! ValidatePayload(TradeBookInCode, tradeBookInStruct);
 
-            break;
-        } /* end TradeItemInCode */
+           emit tradeBookIn((const tradeBookInStruct*)data, len, dir);
 
-        case SummonedItemCode:
-        {
-            unk = ! ValidatePayload(SummonedItemCode, summonedItemStruct);
-	
-	    emit summonedItem((const summonedItemStruct*)data, len, dir);
+           break;
+       } /* end TradeItemInCode */
 
-            break;
-        }
-        
-        case SummonedContainerCode:
-        {
-            unk = ! ValidatePayload(SummonedContainerCode, summonedContainerStruct);
-	
-	    emit summonedContainer((const summonedContainerStruct*)data, len, dir);
+       case SummonedItemCode:
+       {
+           unk = ! ValidatePayload(SummonedItemCode, summonedItemStruct);
 
-            break;
-        }
+           emit summonedItem((const summonedItemStruct*)data, len, dir);
 
-        case CharProfileCode:	// Character Profile server to client
-        {
-            /* This is an encrypted packet type, so log the raw packet for
-               detailed analysis */
+           break;
+       }
 
-            if (showeq_params->logEncrypted)
-	      logData(showeq_params->CharProfileCodeFilename, len, data);
+       case SummonedContainerCode:
+       {
+           unk = ! ValidatePayload(SummonedContainerCode, summonedContainerStruct);
 
-            unk = false; // move above if to prevent duplicate logging
-                         // not sure if its placement was intentional before.
+           emit summonedContainer((const summonedContainerStruct*)data, len, dir);
+
+           break;
+       }
+
+       case CharProfileCode:	// Character Profile server to client
+       {
+           /* This is an encrypted packet type, so log the raw packet for
+              detailed analysis */
+
+           if (showeq_params->logEncrypted)
+              logData(showeq_params->CharProfileCodeFilename, len, data);
+
+           unk = false; // move above if to prevent duplicate logging
+                        // not sure if its placement was intentional before.
+ 
+           // decode/decompress the payload
+           decoded = m_decode->DecodePacket(data, len, decodedData,
+                                 &decodedDataLen, showeq_params->ip);
+
+           if (decoded && !showeq_params->broken_decode)
+           {
+              printf("EQPacket::dispatchZoneData():CharProfileCode:Decoded\n");
+              // just call dispatchDecodedCharProfile (logged there as well)
+
+              dispatchDecodedCharProfile(decodedData, decodedDataLen);
+           }
+           else
+              printf("EQPacket::dispatchZoneData():CharProfileCode:Not Decoded\n");
+           break;
+       }
+
+       case NewCorpseCode:
+       {
+           unk = ! ValidatePayload(NewCorpseCode, newCorpseStruct);
+
+           emit killSpawn((const newCorpseStruct*) data, len, dir);
+
+           break;
+       } /* end CorpseCode */
+
+       case DeleteSpawnCode:
+       {
+           unk = ! ValidatePayload(DeleteSpawnCode, deleteSpawnStruct);
+
+           emit deleteSpawn((const deleteSpawnStruct*)data, len, dir);
+
+           break;
+       }
+
+       case ChannelMessageCode:
+       {
+           unk = false;
+
+           emit channelMessage((const channelMessageStruct*)data, len, dir);
+
+           break;
+       }
+
+       case FormattedMessageCode:
+       {
+           unk = false;
+
+           emit formattedMessage((const formattedMessageStruct*)data, len, dir);
+
+           break;
+       }
+
+       case NewSpawnCode:
+       {
+           /* This is one of the encrypted packet types, so log it */
+
+           if (showeq_params->logEncrypted)
+              logData(showeq_params->NewSpawnCodeFilename, len, data);
 	    
-            // decode/decompress the payload
-            decoded = m_decode->DecodePacket(data, len, decodedData,
-                                     &decodedDataLen, showeq_params->ip);
+           // decode/decompress the payload
+           decoded = m_decode->DecodePacket(data, len, decodedData,
+                                    &decodedDataLen, showeq_params->ip);
+           //printf("NewSpawn received:\n");
 
-            if (decoded && !showeq_params->broken_decode)
-            {
-	        printf("EQPacket::dispatchZoneData():CharProfileCode:Decoded\n");
-	        // just call dispatchDecodedCharProfile (logged there as well)
-	       
-                dispatchDecodedCharProfile(decodedData, decodedDataLen);
-            }
-            else
-	        printf("EQPacket::dispatchZoneData():CharProfileCode:Not Decoded\n");
-            break;
-        }
+           if (!decoded || showeq_params->broken_decode)
+              break;
 
-        case NewCorpseCode:
-        {
-            unk = ! ValidatePayload(NewCorpseCode, newCorpseStruct);
+           unk = ! ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
 
-            emit killSpawn((const newCorpseStruct*) data, len, dir);
+           emit newSpawn((const newSpawnStruct*)decodedData, decodedDataLen, dir);
 
-            break;
-        } /* end CorpseCode */
+           break;
+       }
 
-        case DeleteSpawnCode:
-        {
-            unk = ! ValidatePayload(DeleteSpawnCode, deleteSpawnStruct);
+       case ZoneSpawnsCode:
+       {
+           // printf ("ZONESPAWNS1: %d\n", len);
 
-            emit deleteSpawn((const deleteSpawnStruct*)data, len, dir);
+           /* This is one of the encrypted packet types, so log it */
 
-            break;
-        }
-
-        case ChannelMessageCode:
-        {
-            unk = false;
-
-#if 0 // ZBTEMP
-	    logData("/tmp/channelMessages.log", len, data);
-#endif
-
-            emit channelMessage((const channelMessageStruct*)data, len, dir);
-
-            break;
-        }
-
-        case FormattedMessageCode:
-        {
-            unk = false;
-
-            emit formattedMessage((const formattedMessageStruct*)data, len, dir);
-
-            break;
-        }
-
-        case NewSpawnCode:
-        {
-            /* This is one of the encrypted packet types, so log it */
-
-            if (showeq_params->logEncrypted)
-                logData(showeq_params->NewSpawnCodeFilename, len, data);
-	    
-            // decode/decompress the payload
-            decoded = m_decode->DecodePacket(data, len, decodedData,
-                                     &decodedDataLen, showeq_params->ip);
-            //printf("NewSpawn received:\n");
-
-            if (!decoded || showeq_params->broken_decode)
-                break;
-
-            unk = ! ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
-
-	    emit newSpawn((const newSpawnStruct*)decodedData, decodedDataLen, dir);
-
-            break;
-        }
-
-        case ZoneSpawnsCode:
-        {
-            // printf ("ZONESPAWNS1: %d\n", len);
-
-            /* This is one of the encrypted packet types, so log it */
-
-            if (showeq_params->logEncrypted)
-                logData(showeq_params->ZoneSpawnsCodeFilename, len, data);
+           if (showeq_params->logEncrypted)
+              logData(showeq_params->ZoneSpawnsCodeFilename, len, data);
   
-            unk = false; // move above break to prevent duplicate logging
-                         // not sure if its placement was intentional before.
+           unk = false; // move above break to prevent duplicate logging
+                        // not sure if its placement was intentional before.
 	    
-            // decode/decompress the payload
-            decoded = m_decode->DecodePacket(data, len, decodedData,
-                                     &decodedDataLen, showeq_params->ip);
+           // decode/decompress the payload
+           decoded = m_decode->DecodePacket(data, len, decodedData,
+                                 &decodedDataLen, showeq_params->ip);
 
-            if (!decoded || showeq_params->broken_decode)
-                break;
+           if (!decoded || showeq_params->broken_decode)
+              break;
 
-            emit zoneSpawns((const zoneSpawnsStruct*)decodedData, 
-	                    decodedDataLen, dir);
+           emit zoneSpawns((const zoneSpawnsStruct*)decodedData, 
+                           decodedDataLen, dir);
 
-            break;
-        }
+           break;
+       }
 
-        case TimeOfDayCode:
-        {
-            struct timeOfDayStruct *tday;
+       case TimeOfDayCode:
+       {
+           struct timeOfDayStruct *tday;
 
-            unk = ! ValidatePayload(TimeOfDayCode, timeOfDayStruct);
+           unk = ! ValidatePayload(TimeOfDayCode, timeOfDayStruct);
 
-            tday = (struct timeOfDayStruct *) data;
+           tday = (struct timeOfDayStruct *) data;
 
-            m_eqTime.zoneInTime.minute   = tday->minute;
-            m_eqTime.zoneInTime.hour     = tday->hour;
-            m_eqTime.zoneInTime.day      = tday->day;
-            m_eqTime.zoneInTime.month    = tday->month;
-            m_eqTime.zoneInTime.year     = tday->year;
+           m_eqTime.zoneInTime.minute   = tday->minute;
+           m_eqTime.zoneInTime.hour     = tday->hour;
+           m_eqTime.zoneInTime.day      = tday->day;
+           m_eqTime.zoneInTime.month    = tday->month;
+           m_eqTime.zoneInTime.year     = tday->year;
 
-            m_eqTime.packetReferenceTime = time(NULL);
+           m_eqTime.packetReferenceTime = time(NULL);
 
-            printf( "TIME: %02d:%02d %02d/%02d/%04d\n",
-                    tday->hour,
-                    tday->minute,
-                    tday->month,
-                    tday->day,
-                    tday->year
+           printf( "TIME: %02d:%02d %02d/%02d/%04d\n",
+                   tday->hour,
+                   tday->minute,
+                   tday->month,
+                   tday->day,
+                   tday->year
                  );
-            emit timeOfDay(tday, len, dir);
-            break;
-        }
+           emit timeOfDay(tday, len, dir);
+           break;
+       }
 
-        case BookTextCode:
-        {
-            unk = false;
+       case BookTextCode:
+       {
+           unk = false;
 
-	    emit bookText((const bookTextStruct*)data, len, dir);
+	   emit bookText((const bookTextStruct*)data, len, dir);
 
-            break;
-        }
+           break;
+       }
 
         case RandomCode:
         {
@@ -2845,7 +2823,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case GroupInviteCode:
         {
-
             unk = ! ValidatePayload(GroupInviteCode, groupInviteStruct);
 
 	    emit groupInvite((const groupInviteStruct*)data, len, dir);
@@ -2855,7 +2832,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case GroupDeclineCode:
         {
-
             unk = ! ValidatePayload(GroupDeclineCode, groupDeclineStruct);
 
 	    emit groupDecline((const groupDeclineStruct*)data, len, dir);
@@ -2865,7 +2841,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case GroupAcceptCode:
         {
-
             unk = ! ValidatePayload(GroupAcceptCode, groupAcceptStruct);
 
 	    emit groupAccept((const groupAcceptStruct*)data, len, dir);
@@ -2875,7 +2850,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case GroupDeleteCode:
         {
-
             unk = ! ValidatePayload(GroupDeleteCode, groupDeleteStruct);
 
 	    emit groupDelete((const groupDeleteStruct*)data, len, dir);
@@ -2885,6 +2859,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case CharUpdateCode:
         {
+            break;
         }
 
 	case cRunToggleCode:

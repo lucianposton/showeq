@@ -328,6 +328,9 @@
   <property name="ShowName" >
    <bool value="true" />
   </property>
+  <property name="ShowGuildTag" >
+   <bool value="true" />
+  </property>
   <property name="ShowLevel" >
    <bool value="true" />
   </property>
@@ -459,6 +462,9 @@
   </property>
   <property name="ShowHP" >
    <bool value="false" />
+  </property>
+  <property name="ShowGuildTag" >
+   <bool value="true" />
   </property>
   <property name="ShowMaxHP" >
    <bool value="false" />
@@ -2474,7 +2480,15 @@
   <property name="NoBank" >
    <bool value="true" />
    <comment>set to true to print bank/inventory items to stdout</comment> 
- </property>
+  </property>
+  <property name="GuildsFile" >
+   <string value="/usr/local/share/showeq/guilds2.dat" />
+   <comment>Location of file containing guild strings</comment>
+  </property>
+  <property name="GuildsDumpFile" >
+   <string value="/usr/local/share/showeq/guilds.txt" />
+   <comment>Location to write plain text file containing guild strings</comment>
+  </property>
  </section>
 <!-- ============================================================= -->
 <!-- Combat Window Options -->

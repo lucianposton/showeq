@@ -360,8 +360,8 @@ struct spawnStruct
 /*0064*/ uint8_t  typeflag;               // Bodytype id
 /*0065*/ uint8_t  unknown0065;            // ***Placeholder 
 /*0066*/ uint16_t petOwnerId;             // Id of pet owner (0 if not a pet) 
-/*0068*/ int16_t  maxHp;                  // Maximum hp 
-/*0070*/ int16_t  curHp;                  // Current hp // GuildID now?
+/*0068*/ int16_t  curHp;                  // Maximum hp 
+/*0070*/ uint16_t  guildID;                  // Current hp // GuildID now?
 /*0072*/ uint16_t race;                   // Race 
 /*0074*/ uint8_t  NPC;                    // NPC type: 0=Player, 1=NPC,
                                           // 2=Player Corpse, 3=Monster Corpse,
@@ -757,10 +757,10 @@ struct charProfileStruct
 /*0151*/ uint8_t  unknown0151;            // ***Placeholder
 /*0152*/ uint16_t unknown0152;            // ***Placeholder
 /*0154*/ uint32_t exp;                    // Current Experience
-/*0158*/ uint16_t face;                   // ***Placeholder
+/*0158*/ uint16_t unknown0158;            // ***Placeholder
 /*0160*/ uint16_t MANA;                   // MANA
 /*0162*/ uint16_t curHp;                  // current hp
-/*0164*/ uint16_t unknown0124;            // ***Placeholder
+/*0164*/ uint16_t unknown0164;            // ***Placeholder
 /*0166*/ uint16_t STR;                    // Strength
 /*0168*/ uint16_t STA;                    // Stamina
 /*0170*/ uint16_t CHA;                    // Charisma
@@ -806,32 +806,32 @@ struct charProfileStruct
 /*2990*/ uint16_t skills[74];             // List of skills (MAX_KNOWN_SKILLS)
 /*3138*/ uint8_t  unknown3138[308];       // ***Placeholder
 /*3446*/ uint32_t zoneId;                 // see zones.h
-/*3450*/ uint8_t  unknown3448[128];
-/*3578*/ uint32_t bindzoneId[5];          // bound to bindzoneId[0]
-/*3598*/ float    sYpos[5];               // starting locs per bindzoneId
-/*3618*/ float    sXpos[5];               // starting locs per bindzoneId
-/*3638*/ float    sZpos[5];               // starting locs per bindzoneId
-/*3658*/ uint8_t  unknown3658[20];
-/*3678*/ struct itemPropertiesStruct bankinvprops[8];
-/*3758*/ struct itemPropertiesStruct bankinvcontprops[80];
-/*4558*/ uint8_t  unknown4558[4];
-/*4562*/ uint16_t bank_inv[8];            // itemIds of the 8 bank slots
-/*4578*/ uint16_t bank_cont_inv[80];      // itemIds of items inside containers in bank
-/*4738*/ uint16_t deity;                  // deity
-/*4740*/ uint16_t guildId;                // guildId
-/*4742*/ uint8_t  unknown4742[15];
-/*4757*/ uint8_t  pvp;
-/*4758*/ uint8_t  _level;                 // seems to be player level
-/*4759*/ uint8_t  anon;                   // 0 plain, 1 anon, 2 roleplay, 
-/*4760*/ uint8_t  gm;                     // gm flag?
-/*4761*/ uint8_t  guildstatus;            // 0 member, 1 officer, 2 leader
-/*4762*/ uint8_t  unknown4762[44]; 
-/*4806*/ char     GroupMembers[5][64];    // List of all the members in group
-/*5126*/ uint8_t  uknown5060[296];
+/*3450*/ uint8_t  unknown3450[336];
+/*3786*/ uint32_t bindzoneId[5];          // bound to bindzoneId[0]
+/*3806*/ float    sYpos[5];               // starting locs per bindzoneId
+/*3826*/ float    sXpos[5];               // starting locs per bindzoneId
+/*3846*/ float    sZpos[5];               // starting locs per bindzoneId
+/*3866*/ uint8_t  unknown3658[20];
+/*3886*/ struct itemPropertiesStruct bankinvprops[8];
+/*3966*/ struct itemPropertiesStruct bankinvcontprops[80];
+/*4766*/ uint8_t  unknown4558[4];
+/*4770*/ uint16_t bank_inv[8];            // itemIds of the 8 bank slots
+/*4786*/ uint16_t bank_cont_inv[80];      // itemIds of items inside containers in bank
+/*4946*/ uint16_t deity;                  // deity
+/*4948*/ uint16_t guildID;                // guild ID
+/*4950*/ uint8_t  unknown4742[15];
+/*4965*/ uint8_t  pvp;
+/*4966*/ uint8_t  _level;                 // seems to be player level
+/*4967*/ uint8_t  anon;                   // 0 plain, 1 anon, 2 roleplay, 
+/*4968*/ uint8_t  gm;                     // gm flag?
+/*4969*/ uint8_t  guildstatus;            // 0 member, 1 officer, 2 leader
+/*4970*/ uint8_t  unknown4970[44]; 
+/*5014*/ char     GroupMembers[6][64];    // all the members in group, including self
+/*5398*/ uint8_t  uknown5398[24];
 /*5422*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000 
-/*5426*/ uint8_t  unknown5218[36];
-/*5462*/ uint32_t aapoints;               // number of unspent ability points 
-/*5466*/ uint8_t  unknown4983[2988];
+/*5426*/ uint8_t  unknown5426[478];
+/*5904*/ uint32_t aapoints;               // number of unspent ability points 
+/*5908*/ uint8_t  unknown4983[2546];
 };
 
 
@@ -1851,6 +1851,42 @@ struct xTradeSpellBookSlotsStruct
 /*0001*/ uint8_t  version;
 /*0002*/ uint32_t slot1;
 /*0006*/ uint32_t slot2;
+};
+
+
+/*
+** Guild List (from world server)
+** Length: 96 Octets
+** used in: worldGuildList
+*/
+
+struct guildListStruct
+{
+/*0000*/ uint16_t guildID;
+/*0002*/ uint16_t unknown0006;
+/*0004*/ char     guildName[60];
+/*0064*/ uint8_t  unknown0064[8]; 
+/*0072*/ uint32_t valid;
+/*0076*/ uint8_t  unknown0076[20];
+};
+
+/*
+** Guild List (from world server)
+** Length: 49158 Octets
+** OpCode: GuildListCode 0x9221
+*/
+#define MAXGUILDS 512
+struct worldGuildListStruct
+{
+/*0000*/ uint32_t header;  // probably a checksum
+/*0004*/ guildListStruct guilds[MAXGUILDS];
+};
+
+struct rawWorldGuildListStruct
+{
+/*0000*/ uint8_t opCode;
+/*0001*/ uint8_t version;
+/*0002*/ worldGuildListStruct guildlist;
 };
 
 // Restore structure packing to default

@@ -1,3 +1,20 @@
+fee (floyd) (10/03/02)
+----------------------
+New Features:
+  GuildMgr Class
+     captures guilds2.dat from worldserver
+     reads the regular eq client guilds2.dat (File->Reload Guilds File)
+     dump a plain text list of guild id to guild tag (Debug->List/Dump Guild Info)
+     filter and category support for spawnlists(regex on 'Guild:')
+     map tip support
+     spawnlog support, guild id added as last field in the output
+Updates:
+    random clean ups
+    new guildlist structs
+    updated charprofilestruct
+    spells.h regenerated from current spells_en.txt
+    applied patch[604874] - thanks to Bonkers D Bobcat (bonkersbobcat)
+
 fee (10/09/02)
 ---------------------
  + updated charProfile struct, includes correct offset for AAXP

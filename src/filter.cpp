@@ -406,6 +406,18 @@ Filter::isFiltered(const QString& filterString, int level)
 }
 
 bool
+Filter::saveAsFilters(const QString& filterFileName)
+{
+#ifdef DEBUG_FILTER
+   printf("Filter::saveAsFilters(void)\n");
+#endif
+
+   m_file = filterFileName;
+
+   return saveFilters();
+}
+
+bool
 Filter::saveFilters(void)
 {
   FILE *in;

@@ -60,6 +60,7 @@ class ExperienceWindow;
 class CombatWindow;
 class NetDiag;
 class MsgDialog;
+class GuildMgr;
 
 //--------------------------------------------------
 // typedefs
@@ -167,6 +168,7 @@ class EQInterface:public QMainWindow
    void dumpDrops(void);
    void dumpCoins(void);
    void dumpMapInfo(void);
+   void dumpGuildInfo(void);
    void launch_editor_filters(void);
    void toggleAutoDetectCharSettings(int id);
    void SetDefaultCharacterClass(int id);
@@ -194,6 +196,7 @@ class EQInterface:public QMainWindow
    void restoreStatusFont();
 
  signals:
+   void guildList2text(QString);
    void newMessage(int index);
    void loadFileMap();
    void selectSpawn(const Item* item);
@@ -239,6 +242,7 @@ class EQInterface:public QMainWindow
    void resetMaxMana();
    void createMessageBox();
    void select_filter_file();
+   void save_as_filter_file();
    void toggle_filter_Case(int id);
    void toggle_filter_AlertInfo(int id);
    void toggle_filter_Audio(int id);
@@ -341,6 +345,10 @@ class EQInterface:public QMainWindow
 
    QList<MsgDialog>  m_msgDialogList;   
 
+   GuildMgr* m_guildmgr;
+
+   QIntDict<QString> m_formattedMessageStrings;
+
    bool viewUnknownData;
 
    int char_ClassID[PLAYER_CLASSES];
@@ -385,8 +393,6 @@ class EQInterface:public QMainWindow
 
    QStringList m_StringList;
    QDialog *dialogbox;
-
-   QIntDict<QString> m_formattedMessageStrings;
 
    bool m_viewChannelMsgs;
 

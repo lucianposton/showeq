@@ -69,6 +69,7 @@ public:
 
    bool loadFilters(void);
    bool saveFilters(void);
+   bool saveAsFilters(const QString& filterFileName);
    bool isFiltered(const QString& filterString, int level);
    bool addFilter(const QString& filterPattern);
    void remFilter(const QString& filterPattern); 

@@ -89,6 +89,7 @@ class FilterMgr : public QObject
   void loadFilters(void);
   void loadFilters(const QString& filterFile);
   void saveFilters(void);
+  void saveAsFilters(const QString& shortZoneName);
   void listFilters(void);
   void loadZone(const QString& zoneShortName);
   

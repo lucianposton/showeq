@@ -12,6 +12,7 @@
 //
 
 #include <stdio.h>
+#include <errno.h>
 
 #include <qregexp.h>
 #include <qstring.h>
@@ -161,6 +162,7 @@ void FilterMgr::loadFilters(const QString& filterFileName)
   emit filtersChanged();
 }
 
+
 void FilterMgr::saveFilters(void)
 {
   printf("Saving filters to %s\n", (const char*)m_filterFile);
@@ -168,6 +170,69 @@ void FilterMgr::saveFilters(void)
   for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
     m_filters[index]->saveFilters();
 }
+
+
+void FilterMgr::saveAsFilters(const QString& shortZoneName)
+{
+   QString zoneFilterFileName;
+
+   zoneFilterFileName.sprintf(LOGDIR "/filters_%s.conf", 
+			     (const char*)shortZoneName.lower());
+
+
+   // If we are not already in a zone-specific filter, copy the current file to the
+   // zone-specific file name
+
+   if (zoneFilterFileName != m_filterFile)
+   {
+      FILE *in;
+      FILE *out;
+      char buf[100];
+      unsigned i;
+
+      printf("Copying filter file '%s' -> '%s'\n", (const char*)m_filterFile, (const char*)zoneFilterFileName);
+
+      if ((in = fopen((const char*)m_filterFile, "r"))==NULL)
+      {
+         fprintf (stderr, "Couldn't open filter file for copy. '%s' - %s\n",
+                 (const char*)m_filterFile, strerror(errno));
+         return;
+      }
+      if ((out = fopen((const char*)zoneFilterFileName, "w+"))==NULL)
+      {
+         fclose(in);
+         fprintf (stderr, "Couldn't open filter file for copy. '%s' - %s\n",
+                 (const char*)zoneFilterFileName, strerror(errno));
+         return;
+      }
+
+      while ((i=fread(buf,1,100,in)))
+         if (fwrite(buf,1,i,out)!=i)
+            break;
+
+      if (ferror(in)||ferror(out))
+      {
+         fprintf (stderr, "Couldn't copy filter file.  - %s\n",
+                 strerror(errno));
+         fclose(in);
+         fclose(out);
+         return;
+      }
+
+      fclose(in);
+      fclose(out);
+
+      m_filterFile = zoneFilterFileName;
+   }
+
+  printf("Saving filters to %s\n", (const char*)m_filterFile);
+
+  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
+    m_filters[index]->saveAsFilters(zoneFilterFileName);
+}
+
+
+
 
 void FilterMgr::listFilters(void)
 {

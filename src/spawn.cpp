@@ -212,6 +212,8 @@ Spawn::Spawn()
   setClassVal(0);
   setHP(0);
   setMaxHP(0);
+  setGuildID(0xffff);
+  setGuildTag(NULL);
   setLevel(0);
   setTypeflag(0);
   for (int i = 0; i < tNumWearSlots; i++)
@@ -319,7 +321,9 @@ void Spawn::update(const spawnStruct* s)
   setRace(s->race);
   setClassVal(s->class_);
   setHP(s->curHp);
-  setMaxHP(s->maxHp);
+  //setMaxHP(s->maxHp);
+  setMaxHP(s->curHp); //maxHp is no longer part of the struct
+  setGuildID(s->guildID);
   setLevel(s->level);
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s->equipment[i]);
@@ -419,6 +423,12 @@ void Spawn::backfill(const spawnStruct* s)
   // only set the level if it's higher (not perfect I know)
   if (m_level < s->level)
     setLevel(s->level);
+
+  // set guildID
+  if (s->NPC == SPAWN_PLAYER || s->NPC == SPAWN_SELF)
+    setGuildID(s->guildID);
+  else 
+    setGuildID(0xffff);
 }
 
 void Spawn::killSpawn()
@@ -768,7 +778,7 @@ QString Spawn::filterString() const
 {
   QString buff;
   buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
-	       "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:",
+	       "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:",
 	       (const char*)transformedName(),
 	       level(),
 	       (const char*)raceString(),
@@ -780,7 +790,8 @@ QString Spawn::filterString() const
 	       raceTeam(), 
 	       deityTeam(),
 	       (const char*)typeString(),
-	       (const char*)lastName());
+	       (const char*)lastName(),
+               (const char*)GuildTag());
   return buff;
 }
 
@@ -802,6 +813,7 @@ QString Spawn::dumpString() const
     + ":RTeam:" + QString::number(raceTeam())
     + ":DTeam:" + QString::number(deityTeam())
     + ":Type:" + typeString()
+    + ":Guild:" + GuildTag()
     + ":FilterFlags:" + QString::number(filterFlags())
     + ":";
 }

@@ -18,6 +18,8 @@
 
 #define ZoneServerInfo              0x0480
 
+#define GuildListCode               0x9221
+
 /* Zone Server OpCodes */
 #define DropCoinsCode               0x0720
 

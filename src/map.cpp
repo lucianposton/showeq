@@ -4152,6 +4152,17 @@ void Map::mouseMoveEvent( QMouseEvent* event )
 
     if (spawn)
     {
+      QString guild;
+      if (spawn->GuildID() < 512)
+      {
+          if (spawn->GuildTag())
+            guild.sprintf("<%s>", (const char*)spawn->GuildTag());
+          else
+            guild = QString::number(spawn->GuildID());
+      }
+      else
+          guild = " ";
+
       QString hp;
       
       if (spawn->HP() <= 0)
@@ -4159,10 +4170,10 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       else
 	hp = QString::number(spawn->HP());
 
-      string.sprintf("%s\n"
+      string.sprintf("%s  %s\n"
 		     "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5.1f\n"
 		     "Race: %s\t Class: %s", 
-		     (const char*)spawn->transformedName(),
+		     (const char*)spawn->transformedName(),(const char*)guild,
 		     spawn->level(), (const char*)hp,
 		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
 		     showeq_params->retarded_coords ? spawn->y() : spawn->x(),

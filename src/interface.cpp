@@ -39,6 +39,7 @@
 #include "logger.h"
 #include "category.h"
 #include "itemdb.h"
+#include "guild.h"
 
 #include <qfont.h>
 #include <qapplication.h>
@@ -92,6 +93,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
     m_expWindow(NULL),
     m_combatWindow(NULL),
     m_netDiag(NULL),
+    m_guildmgr(NULL),
     m_formattedMessageStrings(2099) // increase if eqstr_en.txt gets longer
 {
   for (int l = 0; l < maxNumMaps; l++)
@@ -156,8 +158,11 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    if (!shortZoneName.isEmpty())
      m_filterMgr->loadZone(shortZoneName);
    
+   // Create GuildMgr object
+   m_guildmgr = new GuildMgr(pSEQPrefs->getPrefString("GuildsFile", "Interface",
+                                             LOGDIR "/guilds2.dat"), m_packet, this, "guildmgr");
    // Create the spawn shell
-   m_spawnShell = new SpawnShell(*m_filterMgr, m_zoneMgr, m_player, m_itemDB);
+   m_spawnShell = new SpawnShell(*m_filterMgr, m_zoneMgr, m_player, m_itemDB, m_guildmgr);
 
    // Create the Category manager
    m_categoryMgr = new CategoryMgr();
@@ -317,6 +322,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    pFileMenu->insertItem("&Save Preferences", this, SLOT(savePrefs()), CTRL+Key_S);
    pFileMenu->insertItem("Open &Map", m_mapMgr, SLOT(loadMap()), Key_F1);
    pFileMenu->insertItem("Sa&ve Map", m_mapMgr, SLOT(saveMap()), Key_F2);
+   pFileMenu->insertItem("Reload Guilds File", m_guildmgr, SLOT(readGuildList()));
    pFileMenu->insertItem("Add Spawn Category", this, SLOT(addCategory()) , ALT+Key_C);
    pFileMenu->insertItem("Rebuild SpawnList", this, SLOT(rebuildSpawnList()) , ALT+Key_R);
    pFileMenu->insertItem("Reload Categories", this, SLOT(reloadCategories()) , CTRL+Key_R);
@@ -468,6 +474,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
     m_id_view_SpawnList_Cols[tSpawnColHP] = m_spawnListMenu->insertItem("&HP");
     m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColHP], tSpawnColHP);
 
+    m_id_view_SpawnList_Cols[tSpawnColGuildID] = m_spawnListMenu->insertItem("Guild Tag");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColGuildID], tSpawnColGuildID);
     m_id_view_SpawnList_Cols[tSpawnColMaxHP] = m_spawnListMenu->insertItem("&Max HP");
     m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColMaxHP], tSpawnColMaxHP);
 
@@ -772,6 +780,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
    filterMenu->insertItem("&Reload Filters", m_filterMgr, SLOT(loadFilters()), Key_F3);
    filterMenu->insertItem("&Save Filters", m_filterMgr, SLOT(saveFilters()), Key_F4);
+   if (!shortZoneName.isEmpty())
+      filterMenu->insertItem("Save &Zone Filter", this, SLOT(save_as_filter_file()));
    filterMenu->insertItem("&Edit Filters", this, SLOT(launch_editor_filters()));
    filterMenu->insertItem("Select Fil&ter Fi&le", this, SLOT(select_filter_file()));
 
@@ -1026,17 +1036,18 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 			       this, SLOT(select_main_FormatFile(int)));
 
    // Debug menu
-   //pDebugMenu = new QPopupMenu;
    QPopupMenu* pDebugMenu = new QPopupMenu;
    menuBar()->insertItem("&Debug", pDebugMenu);
    pDebugMenu->insertItem("List &Spawns", this, SLOT(listSpawns()), ALT+CTRL+Key_S);
    pDebugMenu->insertItem("List &Drops", this, SLOT(listDrops()), ALT+CTRL+Key_D);
    pDebugMenu->insertItem("List &Coins", this, SLOT(listCoins()), ALT+CTRL+Key_C);
    pDebugMenu->insertItem("List &Map Info", this, SLOT(listMapInfo()), ALT+CTRL+Key_M);
+   pDebugMenu->insertItem("List Guild Info", m_guildmgr, SLOT(listGuildInfo()));
    pDebugMenu->insertItem("Dump &Spawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_S);
    pDebugMenu->insertItem("Dump &Drops", this, SLOT(dumpDrops()), ALT+SHIFT+CTRL+Key_D);
    pDebugMenu->insertItem("Dump &Coins", this, SLOT(dumpCoins()), ALT+SHIFT+CTRL+Key_C);
    pDebugMenu->insertItem("Dump Map &Info", this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
+   pDebugMenu->insertItem("Dump Guild Info", this , SLOT(dumpGuildInfo()));
    pDebugMenu->insertItem("&List Filters", m_filterMgr, SLOT(listFilters()), ALT+Key_I);
 
 ////////////////////
@@ -2544,6 +2555,14 @@ EQInterface::select_filter_file(void)
     m_filterMgr->loadFilters(filterFile);
 }
 
+void
+EQInterface::save_as_filter_file(void)
+{
+   QString shortZoneName = m_zoneMgr->shortZoneName();
+   if (!shortZoneName.isEmpty())
+      m_filterMgr->saveAsFilters(shortZoneName);
+}
+
 void EQInterface::toggle_filter_Case(int id)
 {
   showeq_params->spawnfilter_case = !showeq_params->spawnfilter_case;
@@ -2789,6 +2808,11 @@ void EQInterface::dumpMapInfo(void)
     if (m_map[i] != NULL)
       m_map[i]->dumpInfo(out);
   }
+}
+
+void EQInterface::dumpGuildInfo(void)
+{
+  emit guildList2text(pSEQPrefs->getPrefString("GuildsDumpFile", "Interface", LOGDIR "/guilds.txt"));
 }
 
 void

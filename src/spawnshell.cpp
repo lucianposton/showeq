@@ -26,6 +26,7 @@
 #include "player.h"
 #include "util.h"
 #include "itemdb.h"
+#include "guild.h"
 
 //----------------------------------------------------------------------
 // useful macro definitions
@@ -81,12 +82,14 @@ static bool isValidName(const char* name, uint32_t len)
 SpawnShell::SpawnShell(FilterMgr& filterMgr, 
 		       ZoneMgr* zoneMgr, 
 		       Player* player,
-		       EQItemDB* itemDB)
+		       EQItemDB* itemDB,
+                       GuildMgr* guildMgr)
   : QObject(NULL, "spawnshell"),
     m_zoneMgr(zoneMgr),
     m_player(player),
     m_filterMgr(filterMgr),
     m_itemDB(itemDB),
+    m_guildMgr(guildMgr),
     m_spawns(701),
     m_drops(211),
     m_coins(101),
@@ -129,6 +132,11 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
    // connect Player signals to SpawnShell slots
    connect(m_player, SIGNAL(changedID(uint16_t)),
 	   this, SLOT(playerChangedID(uint16_t)));
+   connect(m_player, SIGNAL(getPlayerGuildTag()),
+	   this, SLOT(setPlayerGuildTag()));
+
+   // restore the spawn list if necessary
+   if (showeq_params->restoreSpawns)
 
    // restore the spawn list if necessary
    if (showeq_params->restoreSpawns)
@@ -500,6 +508,10 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      updateFilterFlags(spawn);
      updateRuntimeFilterFlags(spawn);
      item->updateLastChanged();
+
+     if (spawn->GuildID() < MAXGUILDS)
+        spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->GuildID()));
+
      emit changeItem(item, tSpawnChangedALL);
    }
    else
@@ -509,6 +521,10 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      updateFilterFlags(spawn);
      updateRuntimeFilterFlags(spawn);
      m_spawns.insert(s.spawnId, item);
+
+     if (spawn->GuildID() < MAXGUILDS)
+        spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->GuildID()));
+
      emit addItem(item);
 
      // send notification of new spawn count
@@ -932,6 +948,9 @@ void SpawnShell::backfillSpawn(const spawnStruct *spawn)
     updateFilterFlags(spawnItem);
     updateRuntimeFilterFlags(spawnItem);
 
+    if (spawnItem->GuildID() < MAXGUILDS)
+        spawnItem->setGuildTag(m_guildMgr->guildIdToName(spawnItem->GuildID()));
+
     spawnItem->updateLastChanged();
     emit changeItem(spawnItem, tSpawnChangedALL);
     
@@ -949,6 +968,11 @@ void SpawnShell::playerChangedID(uint16_t playerID)
   m_players.replace(playerID, m_player);
 
   emit changeItem(m_player, tSpawnChangedALL);
+}
+
+void SpawnShell::setPlayerGuildTag()
+{
+    m_player->setGuildTag(m_guildMgr->guildIdToName(m_player->GuildID()));
 }
 
 void SpawnShell::refilterSpawns()

@@ -720,7 +720,7 @@ PktLogger::logSpawnStruct(const spawnStruct *spawn)
     //output(spawn->unknown0065, 1);
 
     outputf(" %u %d %d %u %u %u %u %u ", spawn->petOwnerId,
-        spawn->maxHp, spawn->curHp, spawn->race, spawn->NPC, spawn->class_,
+        spawn->guildID, spawn->curHp, spawn->race, spawn->NPC, spawn->class_,
         spawn->gender, spawn->level);
 
     //output(spawn->unknown0077,4);
@@ -2167,7 +2167,7 @@ SpawnLogger::logTimeSync(const timeOfDayStruct *tday)
 void
 SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
                           int x, int y, int z, time_t timeCurrent,
-                          const char *killedBy, int kid)
+                          const char *killedBy, int kid, int guildid)
 {
     struct timeOfDayStruct eqDate;
     struct tm* current;
@@ -2179,7 +2179,7 @@ SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
     eqDate  = l_time->eqdate(timeCurrent);
     current = localtime(&timeCurrent);
 
-    outputf("%s:%s(%d):%d:%d,%d,%d:%02d.%02d.%02d:%d:%s:%02d.%02d.%02d.%02d.%04d:%s(%d)\n",
+    outputf("%s:%s(%d):%d:%d,%d,%d:%02d.%02d.%02d:%d:%s:%02d.%02d.%02d.%02d.%04d:%s(%d):%d\n",
         type,
         name,
         id,
@@ -2196,7 +2196,8 @@ SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
         eqDate.day,
         eqDate.year,
         killedBy,
-        kid
+        kid,
+        guildid
     );
 
     flush();
@@ -2217,7 +2218,7 @@ void
 SpawnLogger::logZoneSpawn(const spawnStruct *spawn)
 {
     logSpawnInfo("z",spawn->name,spawn->spawnId,spawn->level,
-                 spawn->x, spawn->y, spawn->z, time(NULL), "", 0);
+                 spawn->x, spawn->y, spawn->z, time(NULL), "", 0, spawn->guildID);
 
     return;
 }
@@ -2227,7 +2228,7 @@ SpawnLogger::logZoneSpawn(const newSpawnStruct *nspawn)
 {
   const spawnStruct* spawn = &nspawn->spawn;
   logSpawnInfo("z",spawn->name,spawn->spawnId,spawn->level,
-	       spawn->x, spawn->y, spawn->z, time(NULL), "", 0);
+	       spawn->x, spawn->y, spawn->z, time(NULL), "", 0, spawn->guildID);
   
   return;
 }
@@ -2237,7 +2238,7 @@ SpawnLogger::logNewSpawn(const newSpawnStruct* nspawn)
 {
   const spawnStruct* spawn = &nspawn->spawn;
   logSpawnInfo("+",spawn->name,spawn->spawnId,spawn->level,
-	       spawn->x, spawn->y, spawn->z, time(NULL), "", 0);
+	       spawn->x, spawn->y, spawn->z, time(NULL), "", 0, spawn->guildID);
 
   return;
 }
@@ -2254,7 +2255,7 @@ SpawnLogger::logKilledSpawn(const Item *item, const Item* kitem, uint16_t kid)
   logSpawnInfo("x",(const char *) spawn->name(),spawn->id(), spawn->level(), 
 	       spawn->x(), spawn->y(), spawn->z(), time(NULL),
 	       killer ? (const char*)killer->name() : "unknown",
-	       kid);
+	       kid, spawn->GuildID());
 
   return;
 }
@@ -2268,7 +2269,7 @@ SpawnLogger::logDeleteSpawn(const Item *item)
   const Spawn* spawn = (const Spawn*)item;
 
   logSpawnInfo("-",(const char *)spawn->name(),spawn->id(),spawn->level(),
-	       spawn->x(), spawn->y(), spawn->z(), time(NULL),"",0);
+	       spawn->x(), spawn->y(), spawn->z(), time(NULL),"",0, spawn->GuildID());
 
   return;
 }

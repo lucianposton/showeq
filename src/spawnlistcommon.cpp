@@ -10,6 +10,8 @@
  * Date   - 3/16/00
  */
 
+#include <string.h>
+
 #include <qfontdialog.h>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -111,7 +113,7 @@ QString SpawnListItem::key(int column, bool ascending) const
   if (m_item == NULL)
     return text(0);
     
-  if ((column < tSpawnColLevel) || (column > tSpawnColDist))
+  if ((column < tSpawnColHP) || (column > tSpawnColDist))
     return text(column);
 
   double num = text(column).toDouble();
@@ -169,6 +171,13 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      {
        setText(tSpawnColDeity, spawn->deityName());
        setText(tSpawnColBodyType, spawn->typeString());
+       if (spawn->GuildID() < 512)
+       {  
+          if(spawn->GuildTag())
+            setText(tSpawnColGuildID, spawn->GuildTag());
+          else
+            setText(tSpawnColGuildID, QString::number(spawn->GuildID()));
+       }
      }
    }
    else if (changeType == tSpawnChangedALL)
@@ -349,26 +358,20 @@ SpawnListMenu::SpawnListMenu(SEQListView* spawnlist,
 				     tSpawnColLevel);
   m_id_spawnList_Cols[tSpawnColHP] = spawnListColMenu->insertItem("&HP");
   spawnListColMenu->setItemParameter(m_id_spawnList_Cols[tSpawnColHP], 
-
 				     tSpawnColHP);
-  m_id_spawnList_Cols[tSpawnColMaxHP] = 
-    spawnListColMenu->insertItem("&Max HP");
+  m_id_spawnList_Cols[tSpawnColMaxHP] = spawnListColMenu->insertItem("&Max HP");
   spawnListColMenu->setItemParameter(m_id_spawnList_Cols[tSpawnColMaxHP], 
 				     tSpawnColMaxHP);
-  m_id_spawnList_Cols[tSpawnColXPos] = 
-    spawnListColMenu->insertItem("Coord &1");
+  m_id_spawnList_Cols[tSpawnColXPos] = spawnListColMenu->insertItem("Coord &1");
   spawnListColMenu->setItemParameter(m_id_spawnList_Cols[tSpawnColXPos], 
 				     tSpawnColXPos);
-  m_id_spawnList_Cols[tSpawnColYPos] = 
-    spawnListColMenu->insertItem("Coord &2");
+  m_id_spawnList_Cols[tSpawnColYPos] = spawnListColMenu->insertItem("Coord &2");
   spawnListColMenu->setItemParameter(m_id_spawnList_Cols[tSpawnColYPos], 
 				     tSpawnColYPos);
-  m_id_spawnList_Cols[tSpawnColZPos] = 
-    spawnListColMenu->insertItem("Coord &3");
+  m_id_spawnList_Cols[tSpawnColZPos] = spawnListColMenu->insertItem("Coord &3");
   spawnListColMenu->setItemParameter(m_id_spawnList_Cols[tSpawnColZPos], 
 				     tSpawnColZPos);
-  m_id_spawnList_Cols[tSpawnColID] = 
-    spawnListColMenu->insertItem("I&D");
+  m_id_spawnList_Cols[tSpawnColID] = spawnListColMenu->insertItem("I&D");
   spawnListColMenu->setItemParameter(m_id_spawnList_Cols[tSpawnColID], 
 				     tSpawnColID);
   m_id_spawnList_Cols[tSpawnColDist] = spawnListColMenu->insertItem("&Dist");
@@ -383,8 +386,7 @@ SpawnListMenu::SpawnListMenu(SEQListView* spawnlist,
   m_id_spawnList_Cols[tSpawnColInfo] = spawnListColMenu->insertItem("&Info");
   spawnListColMenu->setItemParameter(m_id_spawnList_Cols[tSpawnColInfo], 
 				     tSpawnColInfo);
-  m_id_spawnList_Cols[tSpawnColSpawnTime] = 
-    spawnListColMenu->insertItem("Spawn &Time");
+  m_id_spawnList_Cols[tSpawnColSpawnTime] = spawnListColMenu->insertItem("Spawn &Time");
   spawnListColMenu->setItemParameter(m_id_spawnList_Cols[tSpawnColSpawnTime], 
 				     tSpawnColSpawnTime);
   m_id_spawnList_Cols[tSpawnColDeity] = spawnListColMenu->insertItem("&Deity");
@@ -393,6 +395,9 @@ SpawnListMenu::SpawnListMenu(SEQListView* spawnlist,
   m_id_spawnList_Cols[tSpawnColBodyType] = spawnListColMenu->insertItem("&Body Type");
   spawnListColMenu->setItemParameter(m_id_spawnList_Cols[tSpawnColBodyType], 
 				     tSpawnColBodyType);
+  m_id_spawnList_Cols[tSpawnColGuildID] = spawnListColMenu->insertItem("Guild Tag");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[tSpawnColGuildID], 
+				     tSpawnColGuildID);
   
   connect (spawnListColMenu, SIGNAL(activated(int)), 
 	   this, SLOT(toggle_spawnListCol(int)));

@@ -92,6 +92,7 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   m_spawnList->addColumn ("SpawnTime");
   m_spawnList->addColumn("Deity");
   m_spawnList->addColumn("Body Type", "BodyType");
+  m_spawnList->addColumn("Guild Tag", "GuildTag");
   
   // restore the columns settings from preferences
   m_spawnList->restoreColumns();
