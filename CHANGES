@@ -1,7 +1,38 @@
+dohpaZ (26/03/02)
+------------------
+Modifications:
+ + Remove artificial dependency on EQPacket from CombatWindow and 
+   ExperienceWindow.  
+ + Remove artificial dependency on EQPlayer from EQPacket.  Also removed
+   non-sensical m_parent member from EQPacket.
+ + Assorted general code cleanup
+ + updated itemInShopStruct (more or less)
+ + added formattedMessageStruct and it's opcode FormattedMessageCode (0x3622)
+   These are used for many of the messages displayed to the user, by default
+   only the message code and it's arguments are displayed.  But, if you copy
+   the eqstr_en.txt from your everquest installation to LOGDIR "/eqstr_en.txt",
+   which would typically result in "/usr/local/share/showeq/eqstr_en.txt", 
+   the actual text messages will be displayed with the appropriate 
+   substitutions.
+ + Made the logger stuff derive from QObjects and moved the PktLogger stuff out
+   of EQPacket and made it fed by EQPackets signals to remove the dependency.
+ + updated showeq.conf.dist [MessageBox1] section by adding a button for 
+   Formatted messages
+
 cwebster (26/03/02)
 -------------------
 Bugfix:
  + added logger.h to EXTRA_DIST in the automake template
+
+fee (23/03/02)
+-------------------
+Modifications:
+ + Updated charProileStrcut and ServerZoneEntryStruct
+ 
+dohpaZ (20/03/02)
+------------------
+Modifications:
+ + Fix listspawn.cpp to compile and run again.
 
 dohpaZ (20/03/02)
 ------------------

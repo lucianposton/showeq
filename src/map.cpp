@@ -238,11 +238,11 @@ void MapMgr::zoneEntry(const ServerZoneEntryStruct* zsentry)
   loadFileMap(fileName);
 }
 
-void MapMgr::zoneChange(const zoneChangeStruct* zoneChange, bool client)
+void MapMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t dir)
 {
 #ifdef DEBUGMAP
-  debug ("zoneChange(%s, %1d)", 
-	 zoneChange->zoneName, client);
+  debug ("zoneChange(%s, %d)", 
+	 zoneChange->zoneName, dir);
 #endif /* DEBUGMAP */
 
   // clear the map data
@@ -260,11 +260,11 @@ void MapMgr::zoneChange(const zoneChangeStruct* zoneChange, bool client)
   loadFileMap(fileName);
 }
 
-void MapMgr::zoneNew(const newZoneStruct* zoneNew, bool client)
+void MapMgr::zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t dir)
 {
 #ifdef DEBUGMAP
-  debug ("zoneNew(%s, %s, %1d)", 
-	 zoneNew->longName, zoneNew->shortName, client);
+  debug ("zoneNew(%s, %s, %d)", 
+	 zoneNew->longName, zoneNew->shortName, dir);
 #endif /* DEBUGMAP */
 
   QString fileName;

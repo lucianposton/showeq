@@ -40,15 +40,13 @@ extern class PreferenceFile *pSEQPrefs;
 
 struct ShowEQParams
 {
-  const char    *device;
-  const char    *ip;
-  const char    *mac_address;
+  QString        device;
+  QString        ip;
+  QString        mac_address;
   bool           session_tracking;
   bool           realtime;
   uint16_t       arqSeqGiveUp;
-  const char    *spawnfilter_filterfile;
-  const char    *spawnfilter_spawnfile;
-  const char    *filterfile;
+  QString        filterfile;
   bool           despawnalert;
   bool           deathalert;
   bool           spawnfilter_regexp;
@@ -67,7 +65,7 @@ struct ShowEQParams
   bool           net_stats;
   bool           recordpackets;
   bool           playbackpackets;
-  char           playbackspeed; // Should be signed since -1 is pause
+  int8_t         playbackspeed; // Should be signed since -1 is pause
   bool           pvp;
   bool		 deitypvp;
   bool           broken_decode;
@@ -81,22 +79,22 @@ struct ShowEQParams
   bool           spawnfilter_loghunts;
   bool           systime_spawntime;
   bool           showRealName;
-  const char    *SpawnLogFilename;
+  QString        SpawnLogFilename;
   bool           spawnlog_enabled;
   
   bool           logAllPackets;
   bool           logZonePackets;
   bool           logUnknownZonePackets;
   bool           logEncrypted;
-  const char    *GlobalLogFilename;
-  const char    *ZoneLogFilename;
-  const char    *UnknownZoneLogFilename;
-  const char    *EncryptedLogFilenameBase;
-  const char    *PktLoggerMask;
-  char          *PktLoggerFilename;
-  char          *CharProfileCodeFilename;
-  char          *NewSpawnCodeFilename;
-  char          *ZoneSpawnsCodeFilename;
+  QString        GlobalLogFilename;
+  QString        ZoneLogFilename;
+  QString        UnknownZoneLogFilename;
+  QString        EncryptedLogFilenameBase;
+  QString        PktLoggerMask;
+  QString        PktLoggerFilename;
+  QString        CharProfileCodeFilename;
+  QString        NewSpawnCodeFilename;
+  QString        ZoneSpawnsCodeFilename;
  
   bool           AutoDetectCharSettings;
   QString        defaultName;
@@ -116,7 +114,7 @@ struct ShowEQParams
 
   // OpCode monitoring Variables
   bool           monitorOpCode_Usage;
-  const char    *monitorOpCode_List;
+  QString        monitorOpCode_List;
 
   int            ItemDBTypes;
   QString        ItemLoreDBFilename;
@@ -136,7 +134,6 @@ struct ShowEQParams
 };
  
 extern struct ShowEQParams *showeq_params;
-extern struct ShowEQShell *pSEQShell;
 extern class EQItemDB* pItemDB;
 
 int keyPref(QString pref, QString section, QString def);

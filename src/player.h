@@ -24,7 +24,9 @@ class EQPlayer : public QObject
 {
   Q_OBJECT 
 public:
-  EQPlayer (int level = 0, 
+  EQPlayer (QObject* parent,
+	    const char* name = "player",
+	    int level = 0, 
 	    int race = 1, 
 	    int class_ = 1, 
 	    int deity = DEITY_AGNOSTIC);
@@ -46,9 +48,9 @@ public:
    void setLastSpell(uint16_t spellId);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
-   void zoneChange(const zoneChangeStruct* zoneChange, bool client);
-   void zoneNew(const newZoneStruct* zoneNew, bool client);
-   void playerUpdate(const playerPosStruct* pupdate, bool client);
+   void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
+   void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
+   void playerUpdate(const playerPosStruct* pupdate, uint32_t, uint8_t);
 
    void setPlayerName(const QString& playerName);
    void setPlayerLastName(const QString& playerLastName);

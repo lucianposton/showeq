@@ -29,6 +29,8 @@
 #include <qmessagebox.h>
 #include <qfiledialog.h>
 #include <qaccel.h>
+#include <qfile.h>
+#include <qtextstream.h>
 
 #include <qwindowsstyle.h>
 #include <qplatinumstyle.h>
@@ -41,8 +43,9 @@
 #undef DEBUG
 
 /* The main interface widget */
-EQInterface::EQInterface (QWidget * parent, const char *name) :                 
-QMainWindow (parent, name)
+EQInterface::EQInterface (QWidget * parent, const char *name) 
+  : QMainWindow (parent, name),
+    m_formattedMessageStrings(3001)
 {
    int x,y,w,h;
    char tempStr[256];
@@ -64,7 +67,7 @@ QMainWindow (parent, name)
    m_packetStartTime = 0;
 
    // Create our player object
-   m_player = new EQPlayer();
+   m_player = new EQPlayer(this);
 
    // Create the filter manager
    m_filterMgr = new FilterMgr();
@@ -87,16 +90,20 @@ QMainWindow (parent, name)
    m_spellShell = new SpellShell(m_player, m_spawnShell);
 
    // Create the packet object
-   m_packet = new EQPacket (m_player, this, "packet");
+   m_packet = new EQPacket (this, "packet");
 
    // Create the Group Manager
    m_groupMgr = new GroupMgr(m_spawnShell, m_player, "groupmgr");
 
    // Initialize the experience window;
-   m_expWindow = new ExperienceWindow(m_packet, m_groupMgr);
+   m_expWindow = new ExperienceWindow(m_player, m_groupMgr);
 
    // Initialize the combat window
-   m_combatWindow = new CombatWindow(m_packet);
+   m_combatWindow = new CombatWindow(m_player);
+
+   // create the packet logger
+   m_pktLogger = new PktLogger(showeq_params->PktLoggerFilename,
+			       showeq_params->PktLoggerMask);
 
 /////////////////
 // Main widgets
@@ -773,7 +780,7 @@ QMainWindow (parent, name)
 	   m_mapMgr, SLOT(savePrefs(void)));
 
    // connect GroupMgr slots to EQPacket signals
-   connect(m_packet, SIGNAL(groupInfo(const groupMemberStruct*)),
+   connect(m_packet, SIGNAL(groupInfo(const groupMemberStruct*, uint32_t, uint8_t)),
 	   m_groupMgr, SLOT(handleGroupInfo(const groupMemberStruct*)));
 
    // connect GroupMgr slots to SpawnShell signals
@@ -781,64 +788,66 @@ QMainWindow (parent, name)
 	   m_groupMgr, SLOT(delItem(const Item*)));
 
    // connect interface slots to Packet signals
-   connect(m_packet, SIGNAL(clientTarget(const clientTargetStruct*)),
+   connect(m_packet, SIGNAL(clientTarget(const clientTargetStruct*, uint32_t, uint8_t)),
 	   this, SLOT(clientTarget(const clientTargetStruct*)));
-   connect(m_packet, SIGNAL(attack2Hand1(const attack2Struct*)), 
+   connect(m_packet, SIGNAL(attack2Hand1(const attack2Struct*, uint32_t, uint8_t)), 
 	   this, SLOT(attack2Hand1(const attack2Struct*)));
-   connect(m_packet, SIGNAL(action2Message(const action2Struct*)),
+   connect(m_packet, SIGNAL(action2Message(const action2Struct*, uint32_t, uint8_t)),
            this, SLOT(action2Message(const action2Struct*)));
-   connect(m_packet, SIGNAL(wearItem(const playerItemStruct*)),
+   connect(m_packet, SIGNAL(wearItem(const playerItemStruct*, uint32_t, uint8_t)),
 	   this, SLOT(wearItem(const playerItemStruct*)));
-   connect(m_packet, SIGNAL(itemShop(const itemInShopStruct*)),
+   connect(m_packet, SIGNAL(itemShop(const itemInShopStruct*, uint32_t, uint8_t)),
 	   this, SLOT(itemShop(const itemInShopStruct*)));
-   connect(m_packet, SIGNAL(moneyOnCorpse(const moneyOnCorpseStruct*)),
+   connect(m_packet, SIGNAL(moneyOnCorpse(const moneyOnCorpseStruct*, uint32_t, uint8_t)),
 	   this, SLOT(moneyOnCorpse(const moneyOnCorpseStruct*)));
-   connect(m_packet, SIGNAL(itemPlayerReceived(const tradeItemInStruct*)),
-	   this, SLOT(itemPlayerReceived(const tradeItemInStruct*)));
-   connect(m_packet, SIGNAL(tradeItemOut(const tradeItemOutStruct*)),
+   connect(m_packet, SIGNAL(itemPlayerReceived(const itemOnCorpseStruct*, uint32_t, uint8_t)),
+	   this, SLOT(itemPlayerReceived(const itemOnCorpseStruct*)));
+   connect(m_packet, SIGNAL(tradeItemOut(const tradeItemOutStruct*, uint32_t, uint8_t)),
 	   this, SLOT(tradeItemOut(const tradeItemOutStruct*)));
-   connect(m_packet, SIGNAL(tradeItemIn(const tradeItemInStruct*)),
+   connect(m_packet, SIGNAL(tradeItemIn(const tradeItemInStruct*, uint32_t, uint8_t)),
 	   this, SLOT(tradeItemIn(const tradeItemInStruct*)));
-   connect(m_packet, SIGNAL(channelMessage(const channelMessageStruct*, bool)),
-	   this, SLOT(channelMessage(const channelMessageStruct*, bool)));
-   connect(m_packet, SIGNAL(random(const randomStruct*)),
+   connect(m_packet, SIGNAL(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)),
+	   this, SLOT(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(formattedMessage(const formattedMessageStruct*, uint32_t, uint8_t)),
+	   this, SLOT(formattedMessage(const formattedMessageStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(random(const randomStruct*, uint32_t, uint8_t)),
 	   this, SLOT(random(const randomStruct*)));
-   connect(m_packet, SIGNAL(emoteText(const emoteTextStruct*)),
+   connect(m_packet, SIGNAL(emoteText(const emoteTextStruct*, uint32_t, uint8_t)),
 	   this, SLOT(emoteText(const emoteTextStruct*)));
-   connect(m_packet, SIGNAL(playerBook(const playerBookStruct*)),
+   connect(m_packet, SIGNAL(playerBook(const playerBookStruct*, uint32_t, uint8_t)),
 	   this, SLOT(playerBook(const playerBookStruct*)));
-   connect(m_packet, SIGNAL(playerContainer(const playerContainerStruct*)),
+   connect(m_packet, SIGNAL(playerContainer(const playerContainerStruct*, uint32_t, uint8_t)),
 	   this, SLOT(playerContainer(const playerContainerStruct*)));
-   connect(m_packet, SIGNAL(inspectData(const inspectDataStruct*)),
+   connect(m_packet, SIGNAL(inspectData(const inspectDataStruct*, uint32_t, uint8_t)),
 	   this, SLOT(inspectData(const inspectDataStruct*)));
-   connect(m_packet, SIGNAL(spMessage(const spMesgStruct*)),
+   connect(m_packet, SIGNAL(spMessage(const spMesgStruct*, uint32_t, uint8_t)),
 	   this, SLOT(spMessage(const spMesgStruct*)));
-   connect(m_packet, SIGNAL(handleSpell(const memSpellStruct*, bool)),
-	   this, SLOT(handleSpell(const memSpellStruct*, bool)));
-   connect(m_packet, SIGNAL(beginCast(const beginCastStruct*, bool)),
+   connect(m_packet, SIGNAL(handleSpell(const memSpellStruct*, uint32_t, uint8_t)),
+	   this, SLOT(handleSpell(const memSpellStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(beginCast(const beginCastStruct*, uint32_t, uint8_t)),
 	   this, SLOT(beginCast(const beginCastStruct*)));
-   connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *)),
+   connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *, uint32_t, uint8_t)),
 	   this, SLOT(interruptSpellCast(const badCastStruct *)));
-   connect(m_packet, SIGNAL(startCast(const startCastStruct*)),
+   connect(m_packet, SIGNAL(startCast(const startCastStruct*, uint32_t, uint8_t)),
 	   this, SLOT(startCast(const startCastStruct*)));
-   connect(m_packet, SIGNAL(systemMessage(const sysMsgStruct*)),
+   connect(m_packet, SIGNAL(systemMessage(const sysMsgStruct*, uint32_t, uint8_t)),
 	   this, SLOT(systemMessage(const sysMsgStruct*)));
-   connect(m_packet, SIGNAL(moneyUpdate(const moneyUpdateStruct*)),
+   connect(m_packet, SIGNAL(moneyUpdate(const moneyUpdateStruct*, uint32_t, uint8_t)),
 	   this, SLOT(moneyUpdate(const moneyUpdateStruct*)));
-   connect(m_packet, SIGNAL(moneyThing(const moneyUpdateStruct*)),
-	   this, SLOT(moneyThing(const moneyUpdateStruct*)));
-   connect(m_packet, SIGNAL(groupInfo(const groupMemberStruct*)),
+   connect(m_packet, SIGNAL(moneyThing(const moneyThingStruct*, uint32_t, uint8_t)),
+	   this, SLOT(moneyThing(const moneyThingStruct*)));
+   connect(m_packet, SIGNAL(groupInfo(const groupMemberStruct*, uint32_t, uint8_t)),
 	   this, SLOT(groupInfo(const groupMemberStruct*)));
-   connect(m_packet, SIGNAL(summonedItem(const summonedItemStruct*)),
+   connect(m_packet, SIGNAL(summonedItem(const summonedItemStruct*, uint32_t, uint8_t)),
 	   this, SLOT(summonedItem(const summonedItemStruct*)));
-   connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*)),
+   connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)),
 	   this, SLOT(zoneEntry(const ClientZoneEntryStruct*)));
-   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*)),
+   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
 	   this, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
-   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, bool)),
-	   this, SLOT(zoneChange(const zoneChangeStruct*, bool)));
-   connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, bool)),
-	   this, SLOT(zoneNew(const newZoneStruct*, bool)));
+   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)),
+	   this, SLOT(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
+	   this, SLOT(zoneNew(const newZoneStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(toggle_session_tracking()),
 	   this, SLOT(toggle_session_tracking()));
 
@@ -861,98 +870,98 @@ QMainWindow (parent, name)
 	   m_spellShell, SLOT(spellMessage(QString&)));
 
    // connect MapMgr slots to Packet signals
-   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*)),
+   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
 	   m_mapMgr, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
-   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, bool)),
-	   m_mapMgr, SLOT(zoneChange(const zoneChangeStruct*, bool)));
-   connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, bool)),
-	   m_mapMgr, SLOT(zoneNew(const newZoneStruct*, bool)));
+   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)),
+	   m_mapMgr, SLOT(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
+	   m_mapMgr, SLOT(zoneNew(const newZoneStruct*, uint32_t, uint8_t)));
 
    // connect the SpawnShell slots to Packet signals
-   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*)),
+   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
-   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, bool)),
+   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(clear(void)));
-   connect(m_packet, SIGNAL(newGroundItem(const makeDropStruct*, bool)),
+   connect(m_packet, SIGNAL(newGroundItem(const makeDropStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(newGroundItem(const makeDropStruct *)));
-   connect(m_packet, SIGNAL(removeGroundItem(const remDropStruct *)),
+   connect(m_packet, SIGNAL(removeGroundItem(const remDropStruct *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(removeGroundItem(const remDropStruct *)));
-   connect(m_packet, SIGNAL(newCoinsItem(const dropCoinsStruct *)),
+   connect(m_packet, SIGNAL(newCoinsItem(const dropCoinsStruct *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(newCoinsItem(const dropCoinsStruct *)));
-   connect(m_packet, SIGNAL(removeCoinsItem(const removeCoinsStruct *)),
+   connect(m_packet, SIGNAL(removeCoinsItem(const removeCoinsStruct *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(removeCoinsItem(const removeCoinsStruct *)));
-   connect(m_packet, SIGNAL(compressedDoorSpawn(const cDoorSpawnsStruct *)),
+   connect(m_packet, SIGNAL(compressedDoorSpawn(const cDoorSpawnsStruct *, uint32_t, uint8_t)),
            m_spawnShell, SLOT(compressedDoorSpawn(const cDoorSpawnsStruct*)));
-   connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*)),
+   connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(newSpawn(const newSpawnStruct*)));
-   connect(m_packet, SIGNAL(timeOfDay(const timeOfDayStruct *)),
+   connect(m_packet, SIGNAL(timeOfDay(const timeOfDayStruct *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(timeOfDay(const timeOfDayStruct *)));
-   connect(m_packet, SIGNAL(updateSpawns(const mobUpdateStruct *)),
+   connect(m_packet, SIGNAL(updateSpawns(const mobUpdateStruct *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(updateSpawns(const mobUpdateStruct *)));
-   connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct *)),
+   connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(updateSpawnHP(const hpUpdateStruct *)));
-   connect(m_packet, SIGNAL(deleteSpawn(const deleteSpawnStruct*)),
+   connect(m_packet, SIGNAL(deleteSpawn(const deleteSpawnStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(deleteSpawn(const deleteSpawnStruct*)));
-   connect(m_packet, SIGNAL(killSpawn(const newCorpseStruct*)),
+   connect(m_packet, SIGNAL(killSpawn(const newCorpseStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(killSpawn(const newCorpseStruct*)));
-   connect(m_packet, SIGNAL(backfillSpawn(const spawnStruct *)),
-	   m_spawnShell, SLOT(backfillSpawn(const spawnStruct *)));
-   connect(m_packet, SIGNAL(backfillPlayer(const charProfileStruct*)),
+   connect(m_packet, SIGNAL(backfillSpawn(const newSpawnStruct *, uint32_t, uint8_t)),
+	   m_spawnShell, SLOT(backfillSpawn(const newSpawnStruct *)));
+   connect(m_packet, SIGNAL(backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)),
+	   m_spawnShell, SLOT(backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t)));
+   connect(m_packet, SIGNAL(backfillPlayer(const charProfileStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(backfillPlayer(const charProfileStruct*)));
-   connect(m_packet, SIGNAL(spawnWearingUpdate(const wearChangeStruct*)),
+   connect(m_packet, SIGNAL(spawnWearingUpdate(const wearChangeStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(spawnWearingUpdate(const wearChangeStruct*)));
-   connect(m_packet, SIGNAL(consRequest(const considerStruct*)),
-	   m_spawnShell, SLOT(consRequest(const considerStruct*)));
-   connect(m_packet, SIGNAL(consMessage(const considerStruct*)),
-	   m_spawnShell, SLOT(consMessage(const considerStruct*)));
-   connect(m_packet, SIGNAL(playerUpdate(const playerPosStruct*, bool)),
-	   m_spawnShell, SLOT(playerUpdate(const playerPosStruct*, bool)));
-   connect(m_packet, SIGNAL(corpseLoc(const corpseLocStruct*)),
+   connect(m_packet, SIGNAL(consMessage(const considerStruct*, uint32_t, uint8_t)),
+	   m_spawnShell, SLOT(consMessage(const considerStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(playerUpdate(const playerPosStruct*, uint32_t, uint8_t)),
+	   m_spawnShell, SLOT(playerUpdate(const playerPosStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(corpseLoc(const corpseLocStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(corpseLoc(const corpseLocStruct*)));
-   connect(m_packet, SIGNAL(zoneSpawns(const zoneSpawnsStruct*, int)),
-	   m_spawnShell, SLOT(zoneSpawns(const zoneSpawnsStruct*, int)));
+   connect(m_packet, SIGNAL(zoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)),
+	   m_spawnShell, SLOT(zoneSpawns(const zoneSpawnsStruct*, uint32_t)));
 
    // connect the SpellShell slots to EQPacket signals
-   connect(m_packet, SIGNAL(startCast(const startCastStruct *)),
+   connect(m_packet, SIGNAL(startCast(const startCastStruct *, uint32_t, uint8_t)),
 	   m_spellShell, SLOT(selfStartSpellCast(const startCastStruct *)));
-   connect(m_packet, SIGNAL(handleSpell(const memSpellStruct *, bool)),
+   connect(m_packet, SIGNAL(handleSpell(const memSpellStruct *, uint32_t, uint8_t)),
 	   m_spellShell, SLOT(selfFinishSpellCast(const memSpellStruct *)));
 //   connect(m_packet, SIGNAL(beginCast(struct beginCastStruct *)),
 //      m_spellShell, SLOT(otherStartSpellCast(struct beginCastStruct *)));
-   connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *)),
+   connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *, uint32_t, uint8_t)),
 	   m_spellShell, SLOT(interruptSpellCast(const badCastStruct *)));
 
    // connect EQPlayer slots to EQPacket signals
-   connect(m_packet, SIGNAL(backfillPlayer(const charProfileStruct*)),
+   connect(m_packet, SIGNAL(backfillPlayer(const charProfileStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(backfill(const charProfileStruct*)));
-   connect(m_packet, SIGNAL(increaseSkill(const skillIncStruct*)),
+   connect(m_packet, SIGNAL(increaseSkill(const skillIncStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(increaseSkill(const skillIncStruct*)));
-   connect(m_packet, SIGNAL(manaChange(const manaDecrementStruct*)),
+   connect(m_packet, SIGNAL(manaChange(const manaDecrementStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(manaChange(const manaDecrementStruct*)));
-   connect(m_packet, SIGNAL(playerUpdate(const playerPosStruct*, bool)),
-	   m_player, SLOT(playerUpdate(const playerPosStruct*, bool)));
+   connect(m_packet, SIGNAL(playerUpdate(const playerPosStruct*, uint32_t, uint8_t)),
+	   m_player, SLOT(playerUpdate(const playerPosStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(setPlayerID(uint16_t)), 
 	   m_player, SLOT(setPlayerID(uint16_t)));
-   connect(m_packet, SIGNAL(updateAltExp(const altExpUpdateStruct*)),
+   connect(m_packet, SIGNAL(updateAltExp(const altExpUpdateStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(updateAltExp(const altExpUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateExp(const expUpdateStruct*)),
+   connect(m_packet, SIGNAL(updateExp(const expUpdateStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(updateExp(const expUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateLevel(const levelUpUpdateStruct*)),
+   connect(m_packet, SIGNAL(updateLevel(const levelUpUpdateStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(updateLevel(const levelUpUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct*)),
+   connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(updateSpawnHP(const hpUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateStamina(const staminaStruct*)),
+   connect(m_packet, SIGNAL(updateStamina(const staminaStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(updateStamina(const staminaStruct*)));
-   connect(m_packet, SIGNAL(wearItem(const playerItemStruct*)),
+   connect(m_packet, SIGNAL(wearItem(const playerItemStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(wearItem(const playerItemStruct*)));
-   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, bool)),
-	   m_player, SLOT(zoneChange(const zoneChangeStruct*, bool)));
-   connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*)),
+   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)),
+	   m_player, SLOT(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(zoneEntry(const ClientZoneEntryStruct*)));
-   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*)),
+   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
-   connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, bool)),
-	   m_player, SLOT(zoneNew(const newZoneStruct*, bool)));
+   connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
+	   m_player, SLOT(zoneNew(const newZoneStruct*, uint32_t, uint8_t)));
 
    // connect EQInterface slots to EQPacket signals
    connect (m_packet, SIGNAL(toggle_log_AllPackets()),
@@ -992,14 +1001,143 @@ QMainWindow (parent, name)
    connect (m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
    	    m_combatWindow, SLOT(resetDPS()));
 
-#if 0 // ZBTEMP: These will go to tthe new group object
-   connect (m_packet, SIGNAL(addGroup(char*, int)), 
-	    m_map, SLOT(addGroup(char*, int)));
-   connect (m_packet, SIGNAL(remGroup(char*, int)), 
-	    m_map, SLOT(remGroup(char*, int)));
-   connect (m_packet, SIGNAL(clrGroup()), 
-	    m_map, SLOT(clrGroup()));
-#endif
+   // connect PktLogger to EQPacket signals
+   connect (m_packet, SIGNAL(zoneServerInfo(const uint8_t*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logZoneServerInfo(const uint8_t*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(cPlayerItems(const cPlayerItemsStruct *, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logCPlayerItems(const cPlayerItemsStruct *, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(itemShop(const itemInShopStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logItemInShop(const itemInShopStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(moneyOnCorpse(const moneyOnCorpseStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logMoneyOnCorpse(const moneyOnCorpseStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(itemPlayerReceived(const itemOnCorpseStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logItemOnCorpse(const itemOnCorpseStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(tradeItemOut(const tradeItemOutStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logTradeItemOut(const tradeItemOutStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(tradeItemIn(const tradeItemInStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logTradeItemIn(const tradeItemInStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(wearItem(const playerItemStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logPlayerItem(const playerItemStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(summonedItem(const summonedItemStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logSummonedItem(const summonedItemStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(killSpawn(const newCorpseStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logNewCorpse(const newCorpseStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(deleteSpawn(const deleteSpawnStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logDeleteSpawn(const deleteSpawnStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logChannelMessage(const channelMessageStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(newSpawn(const newSpawnStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logNewSpawn(const newSpawnStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(zoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logZoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(timeOfDay(const timeOfDayStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logTimeOfDay(const timeOfDayStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(bookText(const bookTextStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logBookText(const bookTextStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(random(const randomStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logRandom(const randomStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(emoteText(const emoteTextStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logEmoteText(const emoteTextStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(corpseLoc(const corpseLocStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logCorpseLoc(const corpseLocStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(playerBook(const playerBookStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logPlayerBook(const playerBookStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(playerContainer(const playerContainerStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logPlayerContainer(const playerContainerStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(inspectData(const inspectDataStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logInspectData(const inspectDataStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logHPUpdate(const hpUpdateStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(spMessage(const spMesgStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logSPMesg(const spMesgStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(handleSpell(const memSpellStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logMemSpell(const memSpellStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(beginCast(const beginCastStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logBeginCast(const beginCastStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(startCast(const startCastStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logStartCast(const startCastStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(updateSpawns(const mobUpdateStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logMobUpdate(const mobUpdateStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(updateExp(const expUpdateStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logExpUpdate(const expUpdateStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(updateAltExp(const altExpUpdateStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logAltExpUpdate(const altExpUpdateStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(updateLevel(const levelUpUpdateStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logLevelUpUpdate(const levelUpUpdateStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(increaseSkill(const skillIncStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logSkillInc(const skillIncStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(doorOpen(const uint8_t*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logDoorOpen(const uint8_t*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(illusion(const uint8_t*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logIllusion(const uint8_t*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(interruptSpellCast(const badCastStruct *, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logBadCast(const badCastStruct *, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(systemMessage(const sysMsgStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logSysMsg(const sysMsgStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logZoneChange(const zoneChangeStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logZoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logZoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logNewZone(const newZoneStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(playerUpdate(const playerPosStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logPlayerPos(const playerPosStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(spawnWearingUpdate(const wearChangeStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logWearChange(const wearChangeStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(action2Message(const action2Struct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logAction(const action2Struct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(castOn(const castOnStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logCastOn(const castOnStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(manaChange(const manaDecrementStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logManaDecrement(const manaDecrementStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(updateStamina(const staminaStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logStamina(const staminaStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(newGroundItem(const makeDropStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logMakeDrop(const makeDropStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(removeGroundItem(const remDropStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logRemDrop(const remDropStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(newCoinsItem(const dropCoinsStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logDropCoins(const dropCoinsStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(removeCoinsItem(const removeCoinsStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logRemoveCoins(const removeCoinsStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(openVendor(const uint8_t*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logOpenVendor(const uint8_t*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(closeVendor(const uint8_t*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logCloseVendor(const uint8_t*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(openGM(const uint8_t*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logOpenGM(const uint8_t*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(closeGM(const uint8_t*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logCloseGM(const uint8_t*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(spawnAppearance(const spawnAppearanceStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logSpawnAppearance(const spawnAppearanceStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(attack2Hand1(const attack2Struct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logAttack2(const attack2Struct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(consMessage(const considerStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logConsider(const considerStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(newGuildInZone(const newGuildInZoneStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logNewGuildInZone(const newGuildInZoneStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(moneyUpdate(const moneyUpdateStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logMoneyUpdate(const moneyUpdateStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(moneyThing(const moneyThingStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logMoneyThing(const moneyThingStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(clientTarget(const clientTargetStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logClientTarget(const clientTargetStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(bindWound(const bindWoundStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logBindWound(const bindWoundStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(compressedDoorSpawn(const cDoorSpawnsStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logCDoorSpawns(const cDoorSpawnsStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(groupInfo(const groupMemberStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logGroupInfo(const groupMemberStruct*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(unknownOpcode(const uint8_t*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logUnknownOpcode(const uint8_t*, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(backfillPlayer(const charProfileStruct *, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logCharProfile(const charProfileStruct *, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(backfillSpawn(const newSpawnStruct *, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logNewSpawn(const newSpawnStruct *, uint32_t, uint8_t)));
+   connect (m_packet, SIGNAL(backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)),
+	    m_pktLogger, SLOT(logZoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)));
 
    // Create message boxes defined in config preferences
    QString title;
@@ -1195,6 +1333,9 @@ printf("Resizing %d/%d\n", w, h);
 
    setCaption(pSEQPrefs->getPrefString("Title", section, 
 				       "ShowEQ - Main (ctrl+alt+t to toggle menubar)"));
+
+   // load the format strings for display
+   loadFormatStrings();
 
    /* Start the packet capturing */
    m_packet->start (10);
@@ -1560,6 +1701,52 @@ EQInterface::savePrefs(void)
    }
 } // end savePrefs
 
+void EQInterface::loadFormatStrings()
+{
+  // clear out any existing contents
+  m_formattedMessageStrings.setAutoDelete(true);
+  m_formattedMessageStrings.clear();
+
+  // get the name of the format file
+  QString formatFileName = pSEQPrefs->getPrefString("FormatFile", "Interface", 
+						    LOGDIR "/eqstr_en.txt");
+
+  // create a QFile on the file
+  QFile formatFile(formatFileName);
+
+  // open the file read only
+  if (formatFile.open(IO_ReadOnly))
+  {
+    // create a text stream on the file
+    QTextStream fft(&formatFile);
+
+    // read in the magic id string
+    QString magicString = fft.readLine();
+    int tmp;
+    int count;
+    int formatId;
+    QString formatString;
+
+    // read in the number of entries
+    fft >> tmp >> count;
+
+    //fprintf(stderr, "Reading %d formatted strings\n", count);
+    
+    // read count format strings in
+    while (count--)
+    {
+      // read in the format string id
+      fft >> formatId >> ws;
+
+      // read in the format string
+      formatString = fft.readLine();
+      
+      // insert a message format indexed by the formatId
+      m_formattedMessageStrings.insert(formatId, new QString(formatString));
+    }
+  }
+}
+
 /* Capture resize events and reset the geometry */
 void
 EQInterface::resizeEvent (QResizeEvent *e)
@@ -1716,14 +1903,6 @@ EQInterface::launch_editor_filters(void)
   EditorWindow * ew = new EditorWindow(m_filterMgr->filterFile());
   ew->setCaption(m_filterMgr->filterFile());
   ew->show();
-}
-
-void
-EQInterface::launch_editor_spawns(void)
-{
- EditorWindow * ew = new EditorWindow(showeq_params->spawnfilter_spawnfile);
- ew->setCaption(showeq_params->spawnfilter_spawnfile);
- ew->show();
 }
 
 void
@@ -2085,7 +2264,7 @@ EQInterface::ToggleOpCodeMonitoring (int id)
 {
   if(!showeq_params->monitorOpCode_Usage)
   {
-    if (!((QString)showeq_params->monitorOpCode_List).isEmpty())
+    if (!showeq_params->monitorOpCode_List.isEmpty())
     {
         if (m_packet->m_bOpCodeMonitorInitialized == false)
           m_packet->InitializeOpCodeMonitor();
@@ -2093,7 +2272,8 @@ EQInterface::ToggleOpCodeMonitoring (int id)
         pSEQPrefs->setPrefInt ("Enable", "OpCodeMonitoring", 1, true );
         showeq_params->monitorOpCode_Usage = true;
 
-        printf("OpCode monitoring is now ENABLED...\nUsing list:\t%s\n", showeq_params->monitorOpCode_List);
+        printf("OpCode monitoring is now ENABLED...\nUsing list:\t%s\n", 
+	       (const char*)showeq_params->monitorOpCode_List);
 
         menuBar()->changeItem( id, "Disable &OpCode Monitoring" );
     }
@@ -2121,9 +2301,11 @@ EQInterface::ToggleOpCodeMonitoring (int id)
 void EQInterface::ReloadMonitoredOpCodeList (void)
 {
   pSEQPrefs->revert();
-  showeq_params->monitorOpCode_List = strdup(pSEQPrefs->getPrefString ("List", "OpCodeMonitoring", ""));
+  showeq_params->monitorOpCode_List = 
+    pSEQPrefs->getPrefString ("List", "OpCodeMonitoring", "");
   m_packet->InitializeOpCodeMonitor();
-  printf("The monitored OpCode list has been reloaded...\nUsing list:\t%s\n", showeq_params->monitorOpCode_List);
+  printf("The monitored OpCode list has been reloaded...\nUsing list:\t%s\n", 
+	 (const char*)showeq_params->monitorOpCode_List);
 }
 
 void EQInterface::resetMaxMana(void)
@@ -2353,7 +2535,7 @@ void EQInterface::moneyOnCorpse(const moneyOnCorpseStruct* money)
   }
 }
 
-void EQInterface::itemPlayerReceived(const tradeItemInStruct* itemc)
+void EQInterface::itemPlayerReceived(const itemOnCorpseStruct* itemc)
 {
   QString tempStr;
 
@@ -2435,12 +2617,12 @@ void EQInterface::summonedItem(const summonedItemStruct* itemsum)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::channelMessage(const channelMessageStruct* cmsg, bool client)
+void EQInterface::channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t dir)
 {
   QString tempStr;
 
   // avoid client chatter and do nothing if not viewing channel messages
-  if (client || !m_viewChannelMsgs)
+  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
     return;
 
   switch (cmsg->chanNum)
@@ -2503,11 +2685,62 @@ void EQInterface::channelMessage(const channelMessageStruct* cmsg, bool client)
   emit msgReceived(tempStr);
 }
 
+void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t len, uint8_t dir)
+{
+  QString tempStr;
+
+  // avoid client chatter and do nothing if not viewing channel messages
+  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
+    return;
+
+  int messagesLen = 
+    len
+    - ((uint8_t*)&fmsg->messages[0] - (uint8_t*)fmsg) 
+    - sizeof(fmsg->unknownXXXX);
+
+  QString formatString = *(m_formattedMessageStrings.find(fmsg->messageFormat));
+
+  if (formatString.isEmpty())
+  {
+    tempStr.sprintf( "Formatted: %04x: %s",
+		     fmsg->messageFormat,
+		     fmsg->messages);
+
+    int totalArgsLen = strlen(fmsg->messages) + 1;
+    
+    const char* curMsg;
+    while (totalArgsLen < messagesLen)
+    {
+      curMsg = fmsg->messages + totalArgsLen;
+      tempStr += QString(", ") + curMsg;
+      totalArgsLen += strlen(curMsg) + 1;
+    }
+  }
+  else
+  {
+    tempStr = QString("Formatted: ") + formatString;
+    int totalArgsLen = 0;
+    const char* curMsg;
+    while (totalArgsLen < messagesLen)
+    {
+      curMsg = fmsg->messages + totalArgsLen;
+      tempStr = tempStr.arg(curMsg);
+      totalArgsLen += strlen(curMsg) + 1;
+    }
+  }
+
+  emit msgReceived(tempStr);
+}
+
 void EQInterface::random(const randomStruct* randr)
 {
-  printf ( "RANDOM: Request random number between %d and %d\n",
-	   randr->bottom,
-	   randr->top);
+  QString tempStr;
+
+  tempStr.sprintf ( "RANDOM: Request random number between %d and %d\n",
+		    randr->bottom,
+		    randr->top);
+  
+  emit msgReceived(tempStr);
 }
 
 void EQInterface::emoteText(const emoteTextStruct* emotetext)
@@ -2518,6 +2751,7 @@ void EQInterface::emoteText(const emoteTextStruct* emotetext)
     return;
 
   tempStr.sprintf("Emote: %s", emotetext->text);
+
   emit msgReceived(tempStr);
 }
 
@@ -2637,13 +2871,15 @@ void EQInterface::spMessage(const spMesgStruct *spmsg)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::handleSpell(const memSpellStruct* mem, bool client)
+void EQInterface::handleSpell(const memSpellStruct* mem, uint32_t, uint8_t dir)
 {
   QString tempStr;
 
   if (!showeq_params->showSpellMsgs)
     return;
   
+  bool client = (dir == DIR_CLIENT);
+
   tempStr = "";
   
   switch (mem->param2)
@@ -2780,11 +3016,11 @@ void EQInterface::systemMessage(const sysMsgStruct* smsg)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::newGroundItem(const makeDropStruct* adrop, bool client)
+void EQInterface::newGroundItem(const makeDropStruct* adrop, uint32_t, uint8_t dir)
 {
   QString tempStr;
 
-  if (!client)
+  if (dir != DIR_CLIENT)
     return;
 
   /* If the packet is outbound  ( Client --> Server ) then it
@@ -2813,7 +3049,7 @@ void EQInterface::moneyUpdate(const moneyUpdateStruct* money)
   emit msgReceived("Money: Update");
 }
 
-void EQInterface::moneyThing(const moneyUpdateStruct* money)
+void EQInterface::moneyThing(const moneyThingStruct* money)
 {
   emit msgReceived("Money: Thing");
 }
@@ -2850,14 +3086,14 @@ void EQInterface::zoneEntry(const ServerZoneEntryStruct* zsentry)
   m_filterMgr->loadZone(zsentry->zoneShortName);
 }
 
-void EQInterface::zoneChange(const zoneChangeStruct* zoneChange, bool client)
+void EQInterface::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t dir)
 {
   QString tempStr;
 
   stsMessage("- Busy Zoning -");
   emit newZoneName(zoneChange->zoneName);
 
-  if (client)
+  if (dir == DIR_CLIENT)
   {
 #ifdef ZONE_ORDER_DIAG
     tempStr = "Zone: ChangeCode: Client, Zone: ";
@@ -2881,7 +3117,7 @@ void EQInterface::zoneChange(const zoneChangeStruct* zoneChange, bool client)
   }
 }
 
-void EQInterface::zoneNew(const newZoneStruct* zoneNew, bool client)
+void EQInterface::zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t dir)
 {
   QString tempStr;
 
@@ -3499,10 +3735,6 @@ void EQInterface::showMap(int i)
     // supply the Map slots with signals from EQInterface
     connect (this, SIGNAL(selectSpawn(const Item*)), 
 	     map, SLOT(selectSpawn(const Item*)));
-    
-    // supply the Map slots with signals from EQPacket
-    connect (m_packet, SIGNAL(refreshMap(void)), 
-	     map, SLOT(refreshMap(void)));
     
     // supply EQInterface slots with signals from Map
     connect (map, SIGNAL(spawnSelected(const Item*)),

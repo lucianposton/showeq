@@ -134,7 +134,7 @@ int main (int argc, char *argv[])
     out << " selected";
   out << ">Any</OPTION>\n";
 
-  Spawn fake(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  Spawn fake(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   // start at class value 1, and go until maximum known class value
   for (int i = 1; i <= 32; ++i)
   {

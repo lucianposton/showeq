@@ -20,11 +20,13 @@
 // the last kill is no longer considered valid
 const int staleKillCutoff = 5;
 
-EQPlayer::EQPlayer (int level = 0, 
+EQPlayer::EQPlayer (QObject* parent,
+		    const char* name,
+		    int level = 0, 
 		    int race = 1, 
 		    int class_ = 1, 
 		    int deity = DEITY_AGNOSTIC)
-: QObject (NULL, "player")
+: QObject (parent, name)
 {
 #ifdef DEBUG_PLAYER
     debug("EQPlayer()");
@@ -661,7 +663,7 @@ void EQPlayer::zoneEntry(const ServerZoneEntryStruct* zsentry)
     savePlayerState();
 }
 
-void EQPlayer::zoneChange(const zoneChangeStruct* zoneChange, bool client)
+void EQPlayer::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t)
 {
   m_shortZoneName = zoneChange->zoneName;
 
@@ -669,7 +671,7 @@ void EQPlayer::zoneChange(const zoneChangeStruct* zoneChange, bool client)
     savePlayerState();
 }
 
-void EQPlayer::zoneNew(const newZoneStruct* zoneNew, bool client)
+void EQPlayer::zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t)
 {
   m_shortZoneName = zoneNew->shortName;
   m_longZoneName = zoneNew->longName;
@@ -679,11 +681,11 @@ void EQPlayer::zoneNew(const newZoneStruct* zoneNew, bool client)
 }
 
 
-void EQPlayer::playerUpdate(const playerPosStruct *pupdate, bool client)
+void EQPlayer::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t dir)
 {
-  if (!client && (pupdate->spawnId != m_playerID))
+  if ((dir != DIR_CLIENT) && (pupdate->spawnId != m_playerID))
     return;
-  else if (client)
+  else if (dir == DIR_CLIENT)
     setPlayerID(pupdate->spawnId);
  
   m_xPos = pupdate->xPos;

@@ -118,8 +118,8 @@ class MapMgr : public QObject
  public slots:
   // Zone Handling
   void zoneEntry(const ServerZoneEntryStruct* zsentry);
-  void zoneChange(const zoneChangeStruct* zoneChange, bool client);
-  void zoneNew(const newZoneStruct* zoneNew, bool client);
+  void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
+  void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
 
    // Map Handling
   void loadMap(void);

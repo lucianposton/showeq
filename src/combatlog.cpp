@@ -24,9 +24,9 @@
 ////////////////////////////////////////////
 //  CombatOffenseRecord implementation
 ////////////////////////////////////////////
-CombatOffenseRecord::CombatOffenseRecord( int iType, EQPacket* p) :
+CombatOffenseRecord::CombatOffenseRecord( int iType, EQPlayer* p) :
 	m_iType(iType),
-	m_packet(p),
+	m_player(p),
 	m_iHits(0),
 	m_iMisses(0),
 	m_iMinDamage(65536),
@@ -57,8 +57,8 @@ void CombatOffenseRecord::addHit(int iDamage)
 ////////////////////////////////////////////
 //  CombatDefenseRecord implementation
 ////////////////////////////////////////////
-CombatDefenseRecord::CombatDefenseRecord(EQPacket* p) :
-	m_packet(p),
+CombatDefenseRecord::CombatDefenseRecord(EQPlayer* p) :
+	m_player(p),
 	m_iHits(0),
 	m_iMisses(0),
 	m_iBlocks(0),
@@ -137,9 +137,9 @@ void CombatDefenseRecord::addMiss(int iMissReason)
 ////////////////////////////////////////////
 //	CombatMobRecord implementation
 ////////////////////////////////////////////
-CombatMobRecord::CombatMobRecord(int iID, int iStartTime, EQPacket* p) :
+CombatMobRecord::CombatMobRecord(int iID, int iStartTime, EQPlayer* p) :
 m_iID(iID),
-m_packet(p),
+m_player(p),
 m_iStartTime(iStartTime),
 m_iLastTime(iStartTime),
 m_iDamageGiven(0),
@@ -177,7 +177,7 @@ double CombatMobRecord::getMobDPS()
 void CombatMobRecord::addHit(int iTarget, int iSource, int iDamage)
 {
 
-	int iPlayerID = m_packet->getplayer()->getPlayerID();
+	int iPlayerID = m_player->getPlayerID();
 
 	if(iSource == iPlayerID && iTarget == m_iID)
 	{
@@ -215,8 +215,8 @@ CombatWindow::~CombatWindow()
 	}
 }
 
-CombatWindow::CombatWindow(EQPacket* p)
-  : m_packet(p),
+CombatWindow::CombatWindow(EQPlayer* player)
+  : m_player(player),
   m_iCurrentDPSTotal(0),
   m_iDPSStartTime(0),
   m_iDPSTimeLast(0),
@@ -231,7 +231,7 @@ CombatWindow::CombatWindow(EQPacket* p)
      otherwise won't be. */
 
 	m_combat_offense_list.setAutoDelete(true);
-	m_combat_defense_record = new CombatDefenseRecord(p);
+	m_combat_defense_record = new CombatDefenseRecord(player);
 	m_combat_mob_list.setAutoDelete(true);
 
 	initUI();
@@ -675,7 +675,7 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 			iTargetID, iSourceID, iType, iSpell, iDamage);
 #endif
 
-	int iPlayerID = m_packet->getplayer()->getPlayerID();
+	int iPlayerID = m_player->getPlayerID();
 
 	//	The one case we won't handle (for now) is where the Target
 	//	and Source are the same.
@@ -725,7 +725,7 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage)
 
 	if(!bFoundRecord)
 	{
-		pRecord = new CombatOffenseRecord(iType, m_packet);
+		pRecord = new CombatOffenseRecord(iType, m_player);
 		m_combat_offense_list.append(pRecord);
 	}
 
@@ -760,7 +760,7 @@ void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage)
 #endif
 
 	int iTimeNow = mTime();
-	int iPlayerID = m_packet->getplayer()->getPlayerID();
+	int iPlayerID = m_player->getPlayerID();
 	int iMobID;
 
 	if(iPlayerID == iTargetID)
@@ -793,7 +793,7 @@ void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage)
 
 	if(!bFoundRecord)
 	{
-		pRecord = new CombatMobRecord(iMobID, iTimeNow, m_packet);
+		pRecord = new CombatMobRecord(iMobID, iTimeNow, m_player);
 		m_combat_mob_list.append(pRecord);
 	}
 

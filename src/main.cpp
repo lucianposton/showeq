@@ -88,7 +88,6 @@ static struct option option_list[] = {
   {"playback-filename",            optional_argument,  NULL,  'j'},
   {"playback-speed",               required_argument,  NULL,  PLAYBACK_SPEED_OPTION},
   {"record-filename",              optional_argument,  NULL,  'g'},
-  {"spawn-filename",               required_argument,  NULL,  's'},
   {"enlightenment-audio",          no_argument,        NULL,  'a'},
   {"spawn-regex",                  no_argument,        NULL,  'R'},
   {"filter-case-sensitive",        no_argument,        NULL,  'C'},
@@ -188,12 +187,9 @@ int main (int argc, char **argv)
 
    QString section;
 
-   showeq_params->spawnfilter_spawnfile  = LOGDIR "/spawns.conf";
-   showeq_params->spawnfilter_filterfile = LOGDIR "/filters.conf";
-
    /* TODO: Add some sanity checks to the MAC address option.  cpphack */
    section = "Network";
-   showeq_params->device = strdup(pSEQPrefs->getPrefString("Device", section, "eth0"));
+   showeq_params->device = pSEQPrefs->getPrefString("Device", section, "eth0");
    showeq_params->ip = strdup(pSEQPrefs->getPrefString("IP", section,
 						       AUTOMATIC_CLIENT_IP));
    showeq_params->mac_address = strdup(pSEQPrefs->getPrefString("MAC", section, "0"));
@@ -229,7 +225,7 @@ int main (int argc, char **argv)
    /* Tells SEQ whether or not to display casting messages (Turn this off if you're on a big raid) */
    showeq_params->showSpellMsgs = pSEQPrefs->getPrefBool("ShowSpellMessages", section, 1);
    /* Spawn logging preferences */
-   showeq_params->SpawnLogFilename = strdup(pSEQPrefs->getPrefString("SpawnLogFilename", section, LOGDIR "/spawnlog.txt"));
+   showeq_params->SpawnLogFilename = pSEQPrefs->getPrefString("SpawnLogFilename", section, LOGDIR "/spawnlog.txt");
    showeq_params->spawnlog_enabled = pSEQPrefs->getPrefBool("SpawnLogEnabled", section,  TRUE);
 /* Decoder override for coping with encryption changes */
 #if HAVE_LIBEQ
@@ -248,7 +244,7 @@ int main (int argc, char **argv)
    showeq_params->showUnknownSpawns = pSEQPrefs->getPrefBool("ShowUnknownSpawns", section, 0);
 
    section = "Filters";
-   showeq_params->filterfile = strdup (pSEQPrefs->getPrefString("FilterFile", section, LOGDIR "/filters.conf"));
+   showeq_params->filterfile = pSEQPrefs->getPrefString("FilterFile", section, LOGDIR "/filters.conf");
    showeq_params->spawnfilter_audio = pSEQPrefs->getPrefBool("SpawnFilterAudio", section, 0);
    showeq_params->spawnfilter_loglocates = pSEQPrefs->getPrefBool("LogLocates", section, 0);
    showeq_params->spawnfilter_logcautions = pSEQPrefs->getPrefBool("LogCautions", section, 0);
@@ -280,21 +276,21 @@ int main (int argc, char **argv)
    /* OpCode monitoring preferences */
    section = "OpCode";
    showeq_params->monitorOpCode_Usage = pSEQPrefs->getPrefBool("OpCodeMonitoring_Enable", section, 0 );   /*  Disabled  */
-   showeq_params->monitorOpCode_List  = strdup(pSEQPrefs->getPrefString("OpCodeMonitoring_List", section, ""));  /*    NONE    */
+   showeq_params->monitorOpCode_List  = pSEQPrefs->getPrefString("OpCodeMonitoring_List", section, "");  /*    NONE    */
 
    /* Packet logging preferences */
    section = "PacketLogging";
    showeq_params->logAllPackets = pSEQPrefs->getPrefBool("LogAllPackets", section, 0);
    showeq_params->logZonePackets = pSEQPrefs->getPrefBool("LogZonePackets", section, 0);
    showeq_params->logUnknownZonePackets  = pSEQPrefs->getPrefBool("LogUnknownZonePackets", section,  0);
-   showeq_params->GlobalLogFilename = strdup(pSEQPrefs->getPrefString("GlobalLogFilename", section, "/usr/local/share/showeq/global.log"));
-   showeq_params->ZoneLogFilename = strdup(pSEQPrefs->getPrefString("ZoneLogFilename", section, "/usr/local/share/showeq/zone.log"));
-   showeq_params->UnknownZoneLogFilename = strdup(pSEQPrefs->getPrefString("UnknownZoneLogFilename", section, "/usr/local/share/showeq/unknownzone.log"));
+   showeq_params->GlobalLogFilename = pSEQPrefs->getPrefString("GlobalLogFilename", section, LOGDIR "/global.log") ;
+   showeq_params->ZoneLogFilename = pSEQPrefs->getPrefString("ZoneLogFilename", section, LOGDIR "/zone.log");
+   showeq_params->UnknownZoneLogFilename = pSEQPrefs->getPrefString("UnknownZoneLogFilename", section, LOGDIR "/unknownzone.log") ;
    /* Different files for different kinds of encrypted data */
    showeq_params->logEncrypted = pSEQPrefs->getPrefBool("LogEncrypted", section, 0);
-   showeq_params->EncryptedLogFilenameBase = strdup(pSEQPrefs->getPrefString("EncryptedLogFilenameBase", section, "/usr/local/share/showeq/encrypted"));
-   showeq_params->PktLoggerMask = strdup( pSEQPrefs->getPrefString("PktLoggerMask", section, ""));
-   showeq_params->PktLoggerFilename = strdup( pSEQPrefs->getPrefString("PktLoggerFilename", section, "/usr/local/share/showeq/packet.log"));
+   showeq_params->EncryptedLogFilenameBase = pSEQPrefs->getPrefString("EncryptedLogFilenameBase", section, LOGDIR "/encrypted") ;
+   showeq_params->PktLoggerMask = pSEQPrefs->getPrefString("PktLoggerMask", section, "");
+   showeq_params->PktLoggerFilename = pSEQPrefs->getPrefString("PktLoggerFilename", section, LOGDIR "/packet.log") ;
 
    // item database parameters
    section = "ItemDB";
@@ -357,7 +353,6 @@ int main (int argc, char **argv)
          case 'f':
          {
             showeq_params->filterfile             = optarg;
-            showeq_params->spawnfilter_filterfile = optarg;
             
             break;
          }
@@ -384,14 +379,6 @@ int main (int argc, char **argv)
             showeq_params->recordpackets   = 1;
             showeq_params->playbackpackets = 0;
             
-            break;
-         }
-
-
-         /* Set the spawn alert file */
-         case 's':
-         {
-            showeq_params->spawnfilter_spawnfile = optarg;
             break;
          }
 
@@ -921,25 +908,14 @@ int main (int argc, char **argv)
    */
 
    /* NewSpawnCode */
-   showeq_params->NewSpawnCodeFilename = (char *) malloc( strlen(showeq_params->EncryptedLogFilenameBase)
-                                                          +      strlen("NewSpawnCode.log")       +     2
-                                                        );
-   sprintf(showeq_params->NewSpawnCodeFilename, "%s_%s", showeq_params->EncryptedLogFilenameBase, "NewSpawnCode.log");
+   showeq_params->NewSpawnCodeFilename = showeq_params->EncryptedLogFilenameBase + QString("_NewSpawnCode.log");
    
    
    /* ZoneSpawnsCode */
-   showeq_params->ZoneSpawnsCodeFilename = (char *) malloc( strlen(showeq_params->EncryptedLogFilenameBase)
-                                                            +    strlen("ZoneSpawnsCode.log")     +      2
-                                                          );
-   sprintf(showeq_params->ZoneSpawnsCodeFilename, "%s_%s", showeq_params->EncryptedLogFilenameBase, "ZoneSpawnsCode.log");
-   
+   showeq_params->ZoneSpawnsCodeFilename = showeq_params->EncryptedLogFilenameBase + QString("_ZoneSpawnsCode.log");
   
    /* CharProfileCode */
-   showeq_params->CharProfileCodeFilename = (char *) malloc( strlen(showeq_params->EncryptedLogFilenameBase)
-                                                             +   strlen("CharProfileCode.log")    +       2
-                                                           );
-   sprintf(showeq_params->CharProfileCodeFilename, "%s_%s", showeq_params->EncryptedLogFilenameBase, "CharProfileCode.log");
-   
+   showeq_params->CharProfileCodeFilename = showeq_params->EncryptedLogFilenameBase + QString ("CharProfileCode.log");
 
    if (showeq_params->ItemDBEnabled)
    {
@@ -962,9 +938,12 @@ int main (int argc, char **argv)
 
    if (showeq_params->logEncrypted)
    {
-      printf("Logging CharProfileCode packets to: %s\n",showeq_params->CharProfileCodeFilename);
-      printf("Logging ZoneSpawnsCode packets to: %s\n",showeq_params->ZoneSpawnsCodeFilename);
-      printf("Logging NewSpawnCode packets to: %s\n",showeq_params->NewSpawnCodeFilename);
+      printf("Logging CharProfileCode packets to: %s\n",
+	     (const char*)showeq_params->CharProfileCodeFilename);
+      printf("Logging ZoneSpawnsCode packets to: %s\n",
+	     (const char*)showeq_params->ZoneSpawnsCodeFilename);
+      printf("Logging NewSpawnCode packets to: %s\n",
+	     (const char*)showeq_params->NewSpawnCodeFilename);
    }
 
    if (showeq_params->broken_decode)   
@@ -979,11 +958,11 @@ int main (int argc, char **argv)
    /* Verify OpCode Monitor settings... */
    if (showeq_params->monitorOpCode_Usage)
    {
-      if (!((QString)showeq_params->monitorOpCode_List).isEmpty())
+     if (!(showeq_params->monitorOpCode_List.isEmpty()))
          printf( "\nOpCode monitoring ENABLED...\n"
                  "Using list:\t%s\n\n",
                  
-                 showeq_params->monitorOpCode_List
+                 (const char*)showeq_params->monitorOpCode_List
                );
 
       else

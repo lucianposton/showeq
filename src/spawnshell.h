@@ -127,12 +127,12 @@ public slots:
    void compressedDoorSpawn (const cDoorSpawnsStruct* c);
    void newDoorSpawn(const doorStruct* d);
    void removeCoinsItem(const removeCoinsStruct*);
-   void zoneSpawns(const zoneSpawnsStruct* zspawns, int len);
+   void zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len);
    void timeOfDay(const timeOfDayStruct *tday);
    void zoneEntry(const ServerZoneEntryStruct *zone);
    void newSpawn(const newSpawnStruct* spawn);
    void newSpawn(const spawnStruct& s);
-   void playerUpdate(const playerPosStruct *pupdate, bool client);
+   void playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t);
    void updateSpawn(uint16_t id, 
 		    int16_t x, int16_t y, int16_t z,
 		    int16_t xVel, int16_t yVel, int16_t zVel,
@@ -141,15 +141,16 @@ public slots:
    void updateSpawns(const mobUpdateStruct* updates);
    void updateSpawnHP(const hpUpdateStruct* hpupdate);
    void spawnWearingUpdate(const wearChangeStruct* wearing);
-   void consRequest(const considerStruct* con);
-   void consMessage(const considerStruct* con);
+   void consMessage(const considerStruct* con, uint32_t, uint8_t);
    void updateLevel(const levelUpUpdateStruct* levelup);
    void deleteSpawn(const deleteSpawnStruct* delspawn);
    void killSpawn(const newCorpseStruct* deadspawn);
    void corpseLoc(const corpseLocStruct* corpseLoc);
 
    void setPlayerID(uint16_t id);
+   void backfillSpawn(const newSpawnStruct* nspawn);
    void backfillSpawn(const spawnStruct* spawn);
+   void backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t);
    void backfillPlayer(const charProfileStruct* player);
    void refilterSpawns();
    void refilterSpawnsRuntime();

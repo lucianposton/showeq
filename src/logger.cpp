@@ -20,41 +20,42 @@
 #include "logger.h"
 #include "util.h"
 
-SEQLogger::SEQLogger(FILE *fp)
+SEQLogger::SEQLogger(FILE *fp, QObject* parent, const char* name)
+  : QObject(parent, name)
 {
-    FP = fp;
-    filename = NULL;
-    errOpen = 0;
+    m_FP = fp;
+    m_errOpen = 0;
 }
 
-SEQLogger::SEQLogger(const char *fname)
+SEQLogger::SEQLogger(const QString& fname, QObject* parent, const char* name)
+  : QObject(parent, name)
 {
-    FP = NULL;
-    filename = strdup(fname);
-    errOpen = 0;
+    m_FP = NULL;
+    m_filename = fname;
+    m_errOpen = 0;
 }
 
 int
 SEQLogger::logOpen()
 {
-    if (FP != NULL)
+    if (m_FP != NULL)
         return(0);
 
-    FP = fopen(filename,"a");
+    m_FP = fopen((const char*)m_filename,"a");
 
-    if (FP == NULL)
+    if (m_FP == NULL)
     { 
-        if (errOpen == 0)
+        if (m_errOpen == 0)
         {
             fprintf(stderr,"Error opening %s: %s (will keep trying)\n",
-               filename, strerror(errno));
-            errOpen = 1;
+		    (const char*)m_filename, strerror(errno));
+            m_errOpen = 1;
         }
 
         return(-1);
     }
  
-    errOpen = 0;
+    m_errOpen = 0;
 
     return(0);
 }
@@ -65,17 +66,17 @@ SEQLogger::outputf(const char *fmt, ...)
     va_list args;
     int count;
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         return(0);
 
     va_start(args, fmt);
-    count = vfprintf(FP, fmt, args);
+    count = vfprintf(m_FP, fmt, args);
     va_end(args);
     return(count);
 }
 
 int
-SEQLogger::output(const void *data, int length)
+SEQLogger::output(const void* data, int length)
 {
     int i;
     int count = 0;
@@ -146,26 +147,31 @@ PktLogger::logProcessMaskString(const char *maskstr, unsigned *m1, unsigned *m2,
 }
 
 
-PktLogger::PktLogger(FILE *fp, unsigned m1, unsigned m2, unsigned m3):SEQLogger(fp)
+PktLogger::PktLogger(FILE *fp, unsigned m1, unsigned m2, unsigned m3)
+  : SEQLogger(fp, NULL, "PktLogger")
 {
     mask1 = m1;
     mask2 = m2;
     mask3 = m3;
 }
 
-PktLogger::PktLogger(FILE *fp, const char *maskstr):SEQLogger(fp)
+PktLogger::PktLogger(FILE *fp, const QString& maskstr)
+  : SEQLogger(fp, NULL, "PktLogger")
 {
     logProcessMaskString(maskstr,&mask1,&mask2,&mask3);
 }
 
-PktLogger::PktLogger(const char *fname, unsigned m1, unsigned m2, unsigned m3):SEQLogger(fname)
+PktLogger::PktLogger(const QString& fname, 
+		     unsigned m1, unsigned m2, unsigned m3)
+  : SEQLogger(fname, NULL, "PktLogger")
 {
     mask1 = m1;
     mask2 = m2;
     mask3 = m3;
 }
 
-PktLogger::PktLogger(const char *fname, const char *maskstr):SEQLogger(fname)
+PktLogger::PktLogger(const QString& fname, const QString& maskstr)
+  : SEQLogger(fname, NULL, "PktLogger")
 {
     logProcessMaskString(maskstr,&mask1,&mask2,&mask3);
 }
@@ -259,27 +265,28 @@ PktLogger::logNormalItem(const itemStruct *item)
 void
 PktLogger::logItem(const itemStruct *item)
 {
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
-    if (item->flag == 0x7669) /* book */
+    if (isItemBook(*item)) /* book */
         logBookItem(item);
-    else if (item->flag == 0x5400) /* container */   
-        logContainerItem(item);
-    else if (item->flag == 0x5450) /* container */   
+    else if (isItemContainer(*item)) /* container */   
         logContainerItem(item);
     else /* normal item */
         logNormalItem(item);
 }
 
 void
-PktLogger::logZoneServerInfo(const void *data, int len, int dir)
+PktLogger::logZoneServerInfo(const uint8_t* data, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingZoneServerInfo())
+      return;
+
     struct opCode *op = (struct opCode *) data;
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -294,11 +301,14 @@ PktLogger::logZoneServerInfo(const void *data, int len, int dir)
 }
 
 void 
-PktLogger::logCPlayerItems(const cPlayerItemsStruct *citems, int len, int dir)
+PktLogger::logCPlayerItems(const cPlayerItemsStruct *citems, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingCPlayerItems())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -314,24 +324,27 @@ PktLogger::logCPlayerItems(const cPlayerItemsStruct *citems, int len, int dir)
 }
 
 void 
-PktLogger::logItemInShop(const itemInShopStruct *sitem, int len, int dir)
+PktLogger::logItemInShop(const itemInShopStruct *sitem, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingItemInShop())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
     outputf("R %u %04d %d %.2X%2.X ", timestamp, len, dir, 
         sitem->opCode, sitem->version);
 
-    output(sitem->unknown0002, 4);
+    outputf(" %d ", sitem->playerid);
     outputf(" %d ", sitem->itemType);
 
     logItem(&sitem->item);
 
     outputf(" ");
-    output(sitem->unknown0251, 4);
+    output(sitem->unknown0297, 6);
 
     outputf("\n");
     flush();
@@ -339,11 +352,14 @@ PktLogger::logItemInShop(const itemInShopStruct *sitem, int len, int dir)
 }
 
 void
-PktLogger::logMoneyOnCorpse(const moneyOnCorpseStruct *money, int len, int dir)
+PktLogger::logMoneyOnCorpse(const moneyOnCorpseStruct *money, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingMoneyOnCorpse())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -359,11 +375,14 @@ PktLogger::logMoneyOnCorpse(const moneyOnCorpseStruct *money, int len, int dir)
 }
 
 void
-PktLogger::logItemOnCorpse(const itemOnCorpseStruct *item, int len, int dir)
+PktLogger::logItemOnCorpse(const itemOnCorpseStruct *item, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingItemOnCorpse())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -378,11 +397,14 @@ PktLogger::logItemOnCorpse(const itemOnCorpseStruct *item, int len, int dir)
 }
 
 void
-PktLogger::logTradeItemIn(const tradeItemInStruct *item, int len, int dir)
+PktLogger::logTradeItemIn(const tradeItemInStruct *item, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingTradeItemIn())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -397,11 +419,14 @@ PktLogger::logTradeItemIn(const tradeItemInStruct *item, int len, int dir)
 }
 
 void
-PktLogger::logTradeItemOut(const tradeItemOutStruct *item, int len, int dir)
+PktLogger::logTradeItemOut(const tradeItemOutStruct *item, uint32_t len, uint8_t dir)
 {
+    if (isLoggingTradeItemOut())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -422,11 +447,14 @@ PktLogger::logTradeItemOut(const tradeItemOutStruct *item, int len, int dir)
 }
 
 void
-PktLogger::logPlayerItem(const playerItemStruct *item, int len, int dir)
+PktLogger::logPlayerItem(const playerItemStruct *item, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingPlayerItem())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -441,11 +469,14 @@ PktLogger::logPlayerItem(const playerItemStruct *item, int len, int dir)
 }
 
 void
-PktLogger::logSummonedItem(const summonedItemStruct *item, int len, int dir)
+PktLogger::logSummonedItem(const summonedItemStruct *item, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingSummonedItem())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -460,11 +491,14 @@ PktLogger::logSummonedItem(const summonedItemStruct *item, int len, int dir)
 }
 
 void 
-PktLogger::logECharProfile(const charProfileStruct *data, int len, int dir)
+PktLogger::logECharProfile(const charProfileStruct *data, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingECharProfile())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -479,13 +513,16 @@ PktLogger::logECharProfile(const charProfileStruct *data, int len, int dir)
 }
 
 void
-PktLogger::logCharProfile(const charProfileStruct *profile, int len, int dir)
+PktLogger::logCharProfile(const charProfileStruct *profile, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingCharProfile())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
     const struct spellBuff *buff;
     int i;
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -570,11 +607,14 @@ PktLogger::logCharProfile(const charProfileStruct *profile, int len, int dir)
 }
 
 void
-PktLogger::logNewCorpse(const newCorpseStruct *s, int len, int dir)
+PktLogger::logNewCorpse(const newCorpseStruct *s, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingNewCorpse())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -593,11 +633,14 @@ PktLogger::logNewCorpse(const newCorpseStruct *s, int len, int dir)
 }
 
 void
-PktLogger::logDeleteSpawn(const deleteSpawnStruct *s, int len, int dir)
+PktLogger::logDeleteSpawn(const deleteSpawnStruct *s, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingDeleteSpawn())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -608,13 +651,16 @@ PktLogger::logDeleteSpawn(const deleteSpawnStruct *s, int len, int dir)
 }
 
 void
-PktLogger::logChannelMessage(const channelMessageStruct *msg, int len, int dir)
+PktLogger::logChannelMessage(const channelMessageStruct *msg, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingChannelMessage())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
     zoneTimestamp = timestamp; /* save for future Decrypt log */
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -634,11 +680,14 @@ PktLogger::logChannelMessage(const channelMessageStruct *msg, int len, int dir)
 }
 
 void
-PktLogger::logENewSpawn(const newSpawnStruct *spawn, int len, int dir)
+PktLogger::logENewSpawn(const newSpawnStruct *spawn, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingENewSpawn())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -684,11 +733,14 @@ PktLogger::logSpawnStruct(const spawnStruct *spawn)
 }
 
 void
-PktLogger::logNewSpawn(const newSpawnStruct *s, int len, int dir)
+PktLogger::logNewSpawn(const newSpawnStruct *s, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingNewSpawn())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -713,11 +765,16 @@ PktLogger::logNewSpawn(const newSpawnStruct *s, int len, int dir)
 */
 
 void
-PktLogger::logZoneSpawns(const zoneSpawnsStruct* zspawns, int len, int dir)
+PktLogger::logZoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len, uint8_t dir)
 {
+  logZoneSpawnsTimestamp();
+
+    if (!isLoggingZoneSpawns())
+      return;
+
     int spawndatasize = (len - 2) / sizeof(spawnStruct);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -740,13 +797,16 @@ PktLogger::logZoneSpawns(const zoneSpawnsStruct* zspawns, int len, int dir)
 }
 
 void
-PktLogger::logEZoneSpawns(const zoneSpawnsStruct *zone, int len, int dir)
+PktLogger::logEZoneSpawns(const zoneSpawnsStruct *zone, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingEZoneSpawns())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
     zoneTimestamp = timestamp; /* save for future Decrypt log */
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -760,11 +820,14 @@ PktLogger::logEZoneSpawns(const zoneSpawnsStruct *zone, int len, int dir)
 }
 
 void
-PktLogger::logTimeOfDay(const timeOfDayStruct *tday, int len, int dir)
+PktLogger::logTimeOfDay(const timeOfDayStruct *tday, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingTimeOfDay())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -792,13 +855,16 @@ PktLogger::logZoneSpawnsTimestamp()
 }
 
 void
-PktLogger::logBookText(const bookTextStruct *book, int len, int dir)
+PktLogger::logBookText(const bookTextStruct *book, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingBookText())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
     char *text;
     int tlen;
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -825,11 +891,14 @@ PktLogger::logBookText(const bookTextStruct *book, int len, int dir)
 }
 
 void
-PktLogger::logRandom(const randomStruct *ran, int len, int dir)
+PktLogger::logRandom(const randomStruct *ran, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingRandom())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
     
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -840,11 +909,14 @@ PktLogger::logRandom(const randomStruct *ran, int len, int dir)
 }
 
 void
-PktLogger::logEmoteText(const emoteTextStruct *emote, int len, int dir)
+PktLogger::logEmoteText(const emoteTextStruct *emote, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingEmoteText())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
     
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -857,11 +929,14 @@ PktLogger::logEmoteText(const emoteTextStruct *emote, int len, int dir)
 }
 
 void
-PktLogger::logCorpseLoc(const corpseLocStruct *corpse, int len, int dir)
+PktLogger::logCorpseLoc(const corpseLocStruct *corpse, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingCorpseLoc())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -875,11 +950,14 @@ PktLogger::logCorpseLoc(const corpseLocStruct *corpse, int len, int dir)
 }
 
 void
-PktLogger::logPlayerBook(const playerBookStruct *book, int len, int dir)
+PktLogger::logPlayerBook(const playerBookStruct *book, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingPlayerBook())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -894,11 +972,14 @@ PktLogger::logPlayerBook(const playerBookStruct *book, int len, int dir)
 }
 
 void 
-PktLogger::logPlayerContainer(const playerContainerStruct *container, int len, int dir)
+PktLogger::logPlayerContainer(const playerContainerStruct *container, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingPlayerContainer())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -913,12 +994,15 @@ PktLogger::logPlayerContainer(const playerContainerStruct *container, int len, i
 }
 
 void 
-PktLogger::logInspectData(const inspectDataStruct *data, int len, int dir)
+PktLogger::logInspectData(const inspectDataStruct *data, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingInspectData())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
     int i;
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -942,11 +1026,14 @@ PktLogger::logInspectData(const inspectDataStruct *data, int len, int dir)
 }
 
 void 
-PktLogger::logHPUpdate(const hpUpdateStruct *hp, int len, int dir)
+PktLogger::logHPUpdate(const hpUpdateStruct *hp, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingHPUpdate())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -963,11 +1050,14 @@ PktLogger::logHPUpdate(const hpUpdateStruct *hp, int len, int dir)
 }
 
 void 
-PktLogger::logSPMesg(const spMesgStruct *msg, int len, int dir)
+PktLogger::logSPMesg(const spMesgStruct *msg, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingSPMesg())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -978,11 +1068,14 @@ PktLogger::logSPMesg(const spMesgStruct *msg, int len, int dir)
 }
 
 void 
-PktLogger::logMemSpell(const memSpellStruct *spell, int len, int dir)
+PktLogger::logMemSpell(const memSpellStruct *spell, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingMemSpell())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -996,11 +1089,14 @@ PktLogger::logMemSpell(const memSpellStruct *spell, int len, int dir)
 }
 
 void 
-PktLogger::logBeginCast(const beginCastStruct *spell, int len, int dir)
+PktLogger::logBeginCast(const beginCastStruct *spell, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingBeginCast())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1012,11 +1108,14 @@ PktLogger::logBeginCast(const beginCastStruct *spell, int len, int dir)
 }
 
 void 
-PktLogger::logStartCast(const startCastStruct *spell, int len, int dir)
+PktLogger::logStartCast(const startCastStruct *spell, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingStartCast())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1034,13 +1133,16 @@ PktLogger::logStartCast(const startCastStruct *spell, int len, int dir)
 }
 
 void 
-PktLogger::logMobUpdate(const mobUpdateStruct *update, int len, int dir)
+PktLogger::logMobUpdate(const mobUpdateStruct *update, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingMobUpdate())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
     const spawnPositionUpdate *pos;
     int i;
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1061,11 +1163,14 @@ PktLogger::logMobUpdate(const mobUpdateStruct *update, int len, int dir)
 }
 
 void 
-PktLogger::logExpUpdate(const expUpdateStruct *exp, int len, int dir)
+PktLogger::logExpUpdate(const expUpdateStruct *exp, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingExpUpdate())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1078,11 +1183,14 @@ PktLogger::logExpUpdate(const expUpdateStruct *exp, int len, int dir)
 }
 
 void 
-PktLogger::logAltExpUpdate(const altExpUpdateStruct *alt, int len, int dir)
+PktLogger::logAltExpUpdate(const altExpUpdateStruct *alt, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingAltExpUpdate())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1098,11 +1206,14 @@ PktLogger::logAltExpUpdate(const altExpUpdateStruct *alt, int len, int dir)
 }
 
 void 
-PktLogger::logLevelUpUpdate(const levelUpUpdateStruct *level, int len, int dir)
+PktLogger::logLevelUpUpdate(const levelUpUpdateStruct *level, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingLevelUpUpdate())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1115,11 +1226,14 @@ PktLogger::logLevelUpUpdate(const levelUpUpdateStruct *level, int len, int dir)
 }
 
 void 
-PktLogger::logSkillInc(const skillIncStruct *skill, int len, int dir)
+PktLogger::logSkillInc(const skillIncStruct *skill, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingSkillInc())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1135,12 +1249,15 @@ PktLogger::logSkillInc(const skillIncStruct *skill, int len, int dir)
 }
 
 void 
-PktLogger::logDoorOpen(void *data, int len, int dir)
+PktLogger::logDoorOpen(const uint8_t* data, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingDoorOpen())
+      return;
+
     struct opCode *op = (struct opCode *) data;
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1154,12 +1271,15 @@ PktLogger::logDoorOpen(void *data, int len, int dir)
 }
 
 void 
-PktLogger::logIllusion(void *data, int len, int dir)
+PktLogger::logIllusion(const uint8_t* data, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingIllusion())
+      return;
+
     struct opCode *op = (struct opCode *) data;
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1173,11 +1293,14 @@ PktLogger::logIllusion(void *data, int len, int dir)
 }
 
 void 
-PktLogger::logBadCast(const badCastStruct *spell, int len, int dir)
+PktLogger::logBadCast(const badCastStruct *spell, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingBadCast())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1189,12 +1312,15 @@ PktLogger::logBadCast(const badCastStruct *spell, int len, int dir)
 }
 
 void 
-PktLogger::logSysMsg(const sysMsgStruct *msg, int len, int dir)
+PktLogger::logSysMsg(const sysMsgStruct *msg, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingSysMsg())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
     char *text;
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1225,56 +1351,69 @@ PktLogger::logSysMsg(const sysMsgStruct *msg, int len, int dir)
 }
 
 void
-PktLogger::logZoneEntry(const void *data, int len, int dir)
+PktLogger::logZoneEntry(const ServerZoneEntryStruct* zone, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingZoneChange())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
-    if (dir == 2)
-    {
-        const ServerZoneEntryStruct *zone = (ServerZoneEntryStruct *) data;
-
-        outputf("R %u %04d %d %.2X%.2X ", timestamp, len, dir,
+    outputf("R %u %04d %d %.2X%.2X ", timestamp, len, dir,
             zone->opCode,zone->version);
-
-        output(zone->unknown0002, 5);
-        outputf(" [%s] [%s] ", zone->name, zone->zoneShortName);
-        output(zone->unknown0052, 107);
-        outputf(" %u %u ", zone->class_, zone->race);
-        output(zone->unknown0161, 2);
-        outputf(" %u ", zone->level);
-        output(zone->unknown0164, 148);
-        outputf(" %u ", zone->deity);
-        output(&zone->unknown0310, 8);
-        output(&zone->unknown0318, 8);
-        outputf("\n");
-    }
-    else
-    {
-        const ClientZoneEntryStruct *zone = (ClientZoneEntryStruct *) data;
-
-        outputf("R %u %04d %d %.2X%.2X ", timestamp, len, dir,
-            zone->opCode,zone->version);
-
-        output(&zone->unknown0002,4);
-        outputf(" [%.30s] ", zone->name);
-        output(&zone->unknown0036,2);
-        outputf("\n");
-    }
+    
+    output(zone->unknown0002, 5);
+    outputf(" [%s] [%s] ", zone->name, zone->zoneShortName);
+    output(zone->unknown0052, 107);
+    outputf(" %u %u ", zone->class_, zone->race);
+    output(zone->unknown0161, 2);
+    outputf(" %u ", zone->level);
+    output(zone->unknown0164, 148);
+    outputf(" %u ", zone->deity);
+    output(&zone->unknown0310, 8);
+    output(&zone->unknown0318, 8);
+    outputf("\n");
 
     flush();
     return;
 }
 
 void
-PktLogger::logNewZone(const newZoneStruct *zone, int len, int dir)
+PktLogger::logZoneEntry(const ClientZoneEntryStruct* zone, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingZoneChange())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
+        if (logOpen() != 0)
+            return;
+
+    outputf("R %u %04d %d %.2X%.2X ", timestamp, len, dir,
+            zone->opCode,zone->version);
+    
+    output(&zone->unknown0002,4);
+    outputf(" [%.30s] ", zone->name);
+    output(&zone->unknown0036,2);
+    outputf("\n");
+
+    flush();
+    return;
+}
+
+void
+PktLogger::logNewZone(const newZoneStruct *zone, uint32_t len, uint8_t dir)
+{
+    if (!isLoggingZoneEntry())
+      return;
+
+    unsigned int timestamp = (unsigned int) time(NULL);
+
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1292,11 +1431,14 @@ PktLogger::logNewZone(const newZoneStruct *zone, int len, int dir)
 }
 
 void 
-PktLogger::logZoneChange(const zoneChangeStruct *zone, int len, int dir)
+PktLogger::logZoneChange(const zoneChangeStruct *zone, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingNewZone())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1310,11 +1452,14 @@ PktLogger::logZoneChange(const zoneChangeStruct *zone, int len, int dir)
 }
 
 void 
-PktLogger::logPlayerPos(const playerPosStruct *pos, int len, int dir)
+PktLogger::logPlayerPos(const playerPosStruct *pos, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingPlayerPos())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1331,11 +1476,14 @@ PktLogger::logPlayerPos(const playerPosStruct *pos, int len, int dir)
 }
 
 void 
-PktLogger::logWearChange(const wearChangeStruct *wear, int len, int dir)
+PktLogger::logWearChange(const wearChangeStruct *wear, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingWearChange())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1351,35 +1499,39 @@ PktLogger::logWearChange(const wearChangeStruct *wear, int len, int dir)
 }
 
 void 
-PktLogger::logAction(const actionStruct *action, int len, int dir)
+PktLogger::logAction(const action2Struct *action, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingAction())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
-    outputf("R %u %04d %d %.2X%.2X %u ", timestamp, len, dir,
-        action->opCode, action->version, action->target);
+    outputf("R %u %04d %d %.2X%.2X %u %u %d ", 
+	    timestamp, len, dir,
+	    action->opCode, action->version, 
+	    action->target, action->source, action->type);
 
-    output(action->unknown0004,2);
-    outputf(" %u ",action->source);
-    output(action->unknown0008,2);
-    outputf(" %d ",action->type);
-    output(&action->unknown0011,1);
+    output(&action->unknown0007,1);
     outputf(" %d %d ",action->spell, action->damage);
-    output(action->unknown0018,12);
+    output(action->unknown0014,16);
     outputf("\n");
     flush();
     return;
 }
 
 void 
-PktLogger::logCastOn(const castOnStruct *spell, int len, int dir)
+PktLogger::logCastOn(const castOnStruct *spell, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingCastOn())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1399,11 +1551,14 @@ PktLogger::logCastOn(const castOnStruct *spell, int len, int dir)
 }
 
 void 
-PktLogger::logManaDecrement(const manaDecrementStruct *mana, int len, int dir)
+PktLogger::logManaDecrement(const manaDecrementStruct *mana, uint32_t len, uint8_t dir)
 {
+    if (isLoggingManaDecrement())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1415,11 +1570,14 @@ PktLogger::logManaDecrement(const manaDecrementStruct *mana, int len, int dir)
 }
 
 void 
-PktLogger::logStamina(const staminaStruct *stamina, int len, int dir)
+PktLogger::logStamina(const staminaStruct *stamina, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingStamina())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1432,11 +1590,14 @@ PktLogger::logStamina(const staminaStruct *stamina, int len, int dir)
 }
 
 void
-PktLogger::logMakeDrop(const makeDropStruct *item, int len, int dir)
+PktLogger::logMakeDrop(const makeDropStruct *item, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingMakeDrop())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1458,11 +1619,14 @@ PktLogger::logMakeDrop(const makeDropStruct *item, int len, int dir)
 }
 
 void 
-PktLogger::logRemDrop(const remDropStruct *item, int len, int dir)
+PktLogger::logRemDrop(const remDropStruct *item, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingRemDrop())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1478,11 +1642,14 @@ PktLogger::logRemDrop(const remDropStruct *item, int len, int dir)
 }
 
 void 
-PktLogger::logDropCoins(const dropCoinsStruct *coins, int len, int dir)
+PktLogger::logDropCoins(const dropCoinsStruct *coins, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingDropCoins())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1505,11 +1672,14 @@ PktLogger::logDropCoins(const dropCoinsStruct *coins, int len, int dir)
 }
 
 void 
-PktLogger::logRemoveCoins(const removeCoinsStruct *coins, int len, int dir)
+PktLogger::logRemoveCoins(const removeCoinsStruct *coins, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingRemoveCoins())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1525,12 +1695,15 @@ PktLogger::logRemoveCoins(const removeCoinsStruct *coins, int len, int dir)
 }
 
 void 
-PktLogger::logOpenVendor(const void *data, int len, int dir)
+PktLogger::logOpenVendor(const uint8_t* data, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingOpenVendor())
+      return;
+
     struct opCode *op = (struct opCode *) data;
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1544,12 +1717,15 @@ PktLogger::logOpenVendor(const void *data, int len, int dir)
 }
 
 void 
-PktLogger::logCloseVendor(const void *data, int len, int dir)
+PktLogger::logCloseVendor(const uint8_t* data, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingCloseVendor())
+      return;
+
     struct opCode *op = (struct opCode *) data;
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1563,12 +1739,15 @@ PktLogger::logCloseVendor(const void *data, int len, int dir)
 }
 
 void 
-PktLogger::logOpenGM(const void *data, int len, int dir)
+PktLogger::logOpenGM(const uint8_t* data, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingOpenGM())
+      return;
+
     struct opCode *op = (struct opCode *) data;
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1582,12 +1761,15 @@ PktLogger::logOpenGM(const void *data, int len, int dir)
 }
 
 void 
-PktLogger::logCloseGM(const void *data, int len, int dir)
+PktLogger::logCloseGM(const uint8_t* data, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingCloseGM())
+      return;
+
     struct opCode *op = (struct opCode *) data;
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1601,11 +1783,14 @@ PktLogger::logCloseGM(const void *data, int len, int dir)
 }
 
 void 
-PktLogger::logSpawnAppearance(const spawnAppearanceStruct *spawn, int len, int dir)
+PktLogger::logSpawnAppearance(const spawnAppearanceStruct *spawn, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingSpawnAppearance())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1621,11 +1806,14 @@ PktLogger::logSpawnAppearance(const spawnAppearanceStruct *spawn, int len, int d
 }
 
 void 
-PktLogger::logAttack2(const attack2Struct *attack, int len, int dir)
+PktLogger::logAttack2(const attack2Struct *attack, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingAttack2())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1639,11 +1827,14 @@ PktLogger::logAttack2(const attack2Struct *attack, int len, int dir)
 }
 
 void 
-PktLogger::logConsider(const considerStruct *consider, int len, int dir)
+PktLogger::logConsider(const considerStruct *consider, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingConsider())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1660,11 +1851,14 @@ PktLogger::logConsider(const considerStruct *consider, int len, int dir)
 }
 
 void 
-PktLogger::logNewGuildInZone(const newGuildInZoneStruct *guild, int len, int dir)
+PktLogger::logNewGuildInZone(const newGuildInZoneStruct *guild, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingNewGuildInZone())
+      return;
+   
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1678,11 +1872,14 @@ PktLogger::logNewGuildInZone(const newGuildInZoneStruct *guild, int len, int dir
 }
 
 void 
-PktLogger::logMoneyUpdate(const moneyUpdateStruct *money, int len, int dir)
+PktLogger::logMoneyUpdate(const moneyUpdateStruct *money, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingMoneyUpdate())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1698,11 +1895,14 @@ PktLogger::logMoneyUpdate(const moneyUpdateStruct *money, int len, int dir)
 }
 
 void
-PktLogger::logMoneyThing(const moneyThingStruct *thing, int len, int dir)
+PktLogger::logMoneyThing(const moneyThingStruct *thing, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingMoneyThing())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1718,11 +1918,14 @@ PktLogger::logMoneyThing(const moneyThingStruct *thing, int len, int dir)
 }
 
 void 
-PktLogger::logClientTarget(const clientTargetStruct *target, int len, int dir)
+PktLogger::logClientTarget(const clientTargetStruct *target, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingClientTarget())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1735,11 +1938,14 @@ PktLogger::logClientTarget(const clientTargetStruct *target, int len, int dir)
 }
 
 void 
-PktLogger::logBindWound(const bindWoundStruct *bind, int len, int dir)
+PktLogger::logBindWound(const bindWoundStruct *bind, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingBindWound())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1753,11 +1959,14 @@ PktLogger::logBindWound(const bindWoundStruct *bind, int len, int dir)
 }
 
 void 
-PktLogger::logCDoorSpawns(const cDoorSpawnsStruct *doors, int len, int dir)
+PktLogger::logCDoorSpawns(const cDoorSpawnsStruct *doors, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingCDoorSpawns())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1771,12 +1980,15 @@ PktLogger::logCDoorSpawns(const cDoorSpawnsStruct *doors, int len, int dir)
 }
 
 void 
-PktLogger::logDoorSpawns(const doorSpawnsStruct *doors, int len, int dir)
+PktLogger::logDoorSpawns(const doorSpawnsStruct *doors, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingDoorSpawns())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
     int i;
     
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1802,11 +2014,14 @@ PktLogger::logDoorSpawns(const doorSpawnsStruct *doors, int len, int dir)
 }
 
 void 
-PktLogger::logGroupInfo(const groupInfoStruct *group, int len, int dir)
+PktLogger::logGroupInfo(const groupMemberStruct *group, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingGroupInfo())
+      return;
+
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1824,12 +2039,15 @@ PktLogger::logGroupInfo(const groupInfoStruct *group, int len, int dir)
 }
 
 void 
-PktLogger::logUnknownOpcode(void *data, int len, int dir)
+PktLogger::logUnknownOpcode(const uint8_t* data, uint32_t len, uint8_t dir)
 {
+    if (!isLoggingUnknownOpcode())
+      return;
+
     struct opCode *op = (struct opCode *) data;
     unsigned int timestamp = (unsigned int) time(NULL);
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
  
@@ -1843,7 +2061,8 @@ PktLogger::logUnknownOpcode(void *data, int len, int dir)
 }
 
 
-SpawnLogger::SpawnLogger(const char *fname):SEQLogger(fname)
+SpawnLogger::SpawnLogger(const QString& fname)
+  : SEQLogger(fname, NULL, "SpawnLogger")
 {
     version = 3;
     strcpy(zoneShortName,"unknown");
@@ -1851,7 +2070,8 @@ SpawnLogger::SpawnLogger(const char *fname):SEQLogger(fname)
     return;
 }
 
-SpawnLogger::SpawnLogger(FILE *fp):SEQLogger(fp)
+SpawnLogger::SpawnLogger(FILE *fp)
+  : SEQLogger(fp, NULL, "SpawnLogger")
 {
     version = 3;
     strcpy(zoneShortName,"unknown");
@@ -1873,7 +2093,7 @@ SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
     struct timeOfDayStruct eqDate;
     struct tm* current;
 
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 
@@ -1944,7 +2164,7 @@ SpawnLogger::logDeleteSpawn(const Spawn *spawn)
 void
 SpawnLogger::logNewZone(const char *zonename)
 {
-    if (FP == NULL)
+    if (m_FP == NULL)
         if (logOpen() != 0)
             return;
 

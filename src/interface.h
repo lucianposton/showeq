@@ -27,6 +27,7 @@
 #include <qmessagebox.h>
 #include <qtabdialog.h>
 #include <qspinbox.h>
+#include <qintdict.h>
 
 #include "packet.h"
 #include "compassframe.h"
@@ -80,31 +81,32 @@ class EQInterface:public QMainWindow
    void action2Message(const action2Struct *);
    void itemShop(const itemInShopStruct* items);
    void moneyOnCorpse(const moneyOnCorpseStruct* money);
-   void itemPlayerReceived(const tradeItemInStruct* itemc);
+   void itemPlayerReceived(const itemOnCorpseStruct* itemc);
    void tradeItemOut(const tradeItemOutStruct* itemt);
    void tradeItemIn(const tradeItemInStruct* itemr);
    void wearItem(const playerItemStruct* itemp);
-   void channelMessage(const channelMessageStruct* cmsg, bool client);
+   void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
+   void formattedMessage(const formattedMessageStruct* cmsg, uint32_t, uint8_t);
    void random(const randomStruct* randr);
    void emoteText(const emoteTextStruct* emotetext);
    void playerBook(const playerBookStruct* bookp);
    void playerContainer(const playerContainerStruct* containp);
    void inspectData(const inspectDataStruct* inspt);
    void spMessage(const spMesgStruct* spmsg);
-   void handleSpell(const memSpellStruct* mem, bool client);
+   void handleSpell(const memSpellStruct* mem, uint32_t, uint8_t);
    void beginCast(const beginCastStruct* bcast);
    void interruptSpellCast(const badCastStruct *icast);
    void startCast(const startCastStruct* cast);
    void systemMessage(const sysMsgStruct* smsg);
    void moneyUpdate(const moneyUpdateStruct* money);
-   void moneyThing(const moneyUpdateStruct* money);
+   void moneyThing(const moneyThingStruct* money);
    void groupInfo(const groupMemberStruct* gmem);
    void summonedItem(const summonedItemStruct*);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
-   void zoneChange(const zoneChangeStruct* zoneChange, bool client);
-   void zoneNew(const newZoneStruct* zoneNew, bool client);
-   void newGroundItem(const makeDropStruct*, bool client);
+   void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
+   void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
+   void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
    void clientTarget(const clientTargetStruct* cts);
    void spawnSelected(const Item* item);
    void spawnConsidered(const Item* item);
@@ -133,7 +135,6 @@ class EQInterface:public QMainWindow
    void dumpCoins(void);
    void dumpMapInfo(void);
    void launch_editor_filters(void);
-   void launch_editor_spawns(void);
    void toggleAutoDetectCharSettings(int id);
    void SetDefaultCharacterClass(int id);
    void SetDefaultCharacterRace(int id);
@@ -188,6 +189,7 @@ class EQInterface:public QMainWindow
    void toggle_view_statusbar();
 
  protected:
+   void loadFormatStrings();
    void resizeEvent (QResizeEvent *);
    void logFilteredSpawn(const Item* item, uint32_t flag);
    void makeNoise( const Item* item, char* szAudioCmd, char* szSoundType);
@@ -216,6 +218,7 @@ class EQInterface:public QMainWindow
    SpawnShell* m_spawnShell;
    SpellShell* m_spellShell;
    GroupMgr* m_groupMgr;
+   PktLogger* m_pktLogger;
    const Item* m_selectedSpawn;
 
    QPopupMenu* pNetMenu;
@@ -289,6 +292,9 @@ class EQInterface:public QMainWindow
 
    QStringList m_StringList;
    QDialog *dialogbox;
+
+   QIntDict<QString> m_formattedMessageStrings;
+
    bool m_viewChannelMsgs;
 
    bool m_isSkillListDocked;

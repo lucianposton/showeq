@@ -24,17 +24,17 @@
 # include <fcntl.h>
 # include <stdio.h>
 
-#include "packet.h"
+#include "player.h"
 #include "group.h"
 
 ////////////////////////////////////////////
 //  CombatOffenseRecord definition
-////////////////////////////////////////////
+//////////////////////////////////////////`//
 class CombatOffenseRecord
 {
 public:
 
-	CombatOffenseRecord(int iType, EQPacket* p);
+	CombatOffenseRecord(int iType, EQPlayer* p);
 
 	int		getType() { return m_iType; };
 	int		getHits() { return m_iHits; };
@@ -48,7 +48,7 @@ public:
 
 private:
 	int			m_iType;
-	EQPacket*	m_packet;
+	EQPlayer*	m_player;
 
 	int 		m_iHits;
 	int			m_iMisses;
@@ -66,7 +66,7 @@ class CombatDefenseRecord
 {
 public:
 
-	CombatDefenseRecord(EQPacket* p);
+	CombatDefenseRecord(EQPlayer* p);
 
 	int		getHits() { return m_iHits; };
 	int		getMisses() { return m_iMisses; };
@@ -83,7 +83,7 @@ public:
 	void	addHit(int iDamage);
 
 private:
-	EQPacket*	m_packet;
+	EQPlayer*	m_player;
 
 	int 		m_iHits;
 	int			m_iMisses;
@@ -105,7 +105,7 @@ class CombatMobRecord
 {
 public:
 
-	CombatMobRecord(int iID, int iStartTime, EQPacket* p);
+	CombatMobRecord(int iID, int iStartTime, EQPlayer* p);
 
 	int		getID() { return m_iID; };
 	int		getDuration() { return (m_iLastTime - m_iStartTime); };
@@ -119,7 +119,7 @@ public:
 
 private:
 	int			m_iID;
-	EQPacket*	m_packet;
+	EQPlayer*	m_player;
 
 	int			m_iStartTime;
 	int			m_iLastTime;
@@ -138,7 +138,7 @@ class CombatWindow : public QTabWidget
 
 public:
 
-	CombatWindow(EQPacket* p);
+	CombatWindow(EQPlayer* player);
 	~CombatWindow();
 
 public slots:
@@ -164,53 +164,52 @@ private:
 
 
 private:
+	EQPlayer*	m_player;
 
-	EQPacket	*m_packet;
+	QWidget* 	m_widget_offense;
+	QWidget* 	m_widget_defense;
+	QWidget*	m_widget_mob;
 
-	QWidget 	*m_widget_offense;
-	QWidget 	*m_widget_defense;
-	QWidget		*m_widget_mob;
+	QVBoxLayout*	m_layout_offense;
+	QVBoxLayout*	m_layout_defense;
+	QVBoxLayout*	m_layout_mob;
 
-	QVBoxLayout	*m_layout_offense;
-	QVBoxLayout	*m_layout_defense;
-	QVBoxLayout	*m_layout_mob;
+	QListView* 	m_listview_offense;
+	QListView* 	m_listview_mob;
 
-	QListView 	*m_listview_offense;
-	QListView 	*m_listview_mob;
+	QLabel* 	m_label_offense_totaldamage;
+	QLabel*		m_label_offense_percentspecial;
+	QLabel*		m_label_offense_percentnonmelee;
+	QLabel*		m_label_offense_avgmelee;
+	QLabel*		m_label_offense_avgspecial;
+	QLabel*		m_label_offense_avgnonmelee;
 
-	QLabel 		*m_label_offense_totaldamage;
-	QLabel		*m_label_offense_percentspecial;
-	QLabel		*m_label_offense_percentnonmelee;
-	QLabel		*m_label_offense_avgmelee;
-	QLabel		*m_label_offense_avgspecial;
-	QLabel		*m_label_offense_avgnonmelee;
+	QLabel*		m_label_defense_avoid_misses;
+	QLabel*		m_label_defense_avoid_block;
+	QLabel*		m_label_defense_avoid_parry;
+	QLabel*		m_label_defense_avoid_riposte;
+	QLabel*		m_label_defense_avoid_dodge;
+	QLabel*		m_label_defense_avoid_total;
+	QLabel*		m_label_defense_mitigate_avghit;
+	QLabel*		m_label_defense_mitigate_minhit;
+	QLabel*		m_label_defense_mitigate_maxhit;
+	QLabel*		m_label_defense_summary_mobattacks;
+	QLabel*		m_label_defense_summary_percentavoided;
+	//QLabel*		m_label_defense_summary_ratio;
+	QLabel*		m_label_defense_summary_totaldamage;
 
-	QLabel		*m_label_defense_avoid_misses;
-	QLabel		*m_label_defense_avoid_block;
-	QLabel		*m_label_defense_avoid_parry;
-	QLabel		*m_label_defense_avoid_riposte;
-	QLabel		*m_label_defense_avoid_dodge;
-	QLabel		*m_label_defense_avoid_total;
-	QLabel		*m_label_defense_mitigate_avghit;
-	QLabel		*m_label_defense_mitigate_minhit;
-	QLabel		*m_label_defense_mitigate_maxhit;
-	QLabel		*m_label_defense_summary_mobattacks;
-	QLabel		*m_label_defense_summary_percentavoided;
-	//QLabel		*m_label_defense_summary_ratio;
-	QLabel		*m_label_defense_summary_totaldamage;
-
-	QLabel		*m_label_mob_totalmobs;
-	QLabel		*m_label_mob_avgdps;
-	QLabel		*m_label_mob_currentdps;
-	QLabel		*m_label_mob_lastdps;
+	QLabel*		m_label_mob_totalmobs;
+	QLabel*		m_label_mob_avgdps;
+	QLabel*		m_label_mob_currentdps;
+	QLabel*		m_label_mob_lastdps;
 
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	CombatDefenseRecord *m_combat_defense_record;
 	QList<CombatMobRecord> m_combat_mob_list;
 
-	int			m_iCurrentDPSTotal;
-	int			m_iDPSStartTime;
-	int			m_iDPSTimeLast;
+	int		m_iCurrentDPSTotal;
+	int		m_iDPSStartTime;
+	int		m_iDPSTimeLast;
 	double		m_dDPS;
 	double		m_dDPSLast;
 

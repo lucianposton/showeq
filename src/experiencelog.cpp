@@ -25,10 +25,10 @@ ExperienceRecord::ExperienceRecord( const QString &mob_name,
 				    long xp_gained, 
 				    time_t time, 
 				    const QString &zone_name, 
-				    EQPacket* p,
-				    GroupMgr* g) 
-: m_packet(p), 
-  m_group(g),
+				    EQPlayer* player,
+				    GroupMgr* groupMgr) 
+: m_player(player), 
+  m_group(groupMgr),
   m_zone_name(zone_name), 
   m_mob_name(mob_name),
   m_mob_level(mob_level),
@@ -65,7 +65,7 @@ long ExperienceRecord::getExpValue() const
 
 long ExperienceRecord::getExpValueZEM() const 
 {
-   EQInterface *parent = (EQInterface*)m_packet->m_parent;
+   EQInterface *parent = (EQInterface*)m_player->parent();
    int ZEM = parent->mapMgr()->getZEM();
    return m_mob_level*m_mob_level*ZEM;
 }
@@ -75,7 +75,7 @@ long ExperienceRecord::getExpValuep() const
    int p_penalty; 
    // WAR and ROG are at 10 since thier EXP is not scaled to compensate
    // for thier bonus
-   switch (m_packet->getplayer()->getPlayerClass())
+   switch (m_player->getPlayerClass())
    {
       case 1 : p_penalty = 10; break; // WAR
       case 2 : p_penalty = 10; break; // CLR
@@ -102,7 +102,7 @@ long ExperienceRecord::getExpValueg() const
 {
    int pExp = getExpValuep();
    int gbonus;
-   int myLevel = m_packet->getplayer()->getPlayerLevel();
+   int myLevel = m_player->getPlayerLevel();
    int group_ag;
 
    gbonus = m_group->groupPercentBonus();
@@ -135,9 +135,10 @@ ExperienceWindow::~ExperienceWindow()
       close(logfd);
 }
 
-ExperienceWindow::ExperienceWindow( EQPacket* p, GroupMgr* g ) 
-  : m_packet(p),
-    m_group(g)
+ExperienceWindow::ExperienceWindow( EQPlayer* player, 
+				    GroupMgr* groupMgr) 
+  : m_player(player),
+    m_group(groupMgr)
 {
   /* Hopefully this is only called once to set up the window,
      so this is a good place to initialize some things which
@@ -266,7 +267,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 {
 
    ExperienceRecord *xp = new ExperienceRecord( mob_name, mob_level,
-      xp_gained, time(0), zone_name, m_packet, m_group);
+      xp_gained, time(0), zone_name, m_player, m_group);
 
 #ifdef DEBUGEXP
    resize( sizeHint() );
@@ -295,7 +296,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    }   
    s_xp_value.setNum(xp->getExpValue());
    QString s_xp_valueZEM;
-   EQInterface *parent = (EQInterface*)m_packet->m_parent;
+   EQInterface *parent = (EQInterface*)m_player->parent();
    switch (m_ZEMviewtype) {
       case 1 : s_xp_valueZEM.setNum(parent->mapMgr()->getZEM()); break;
       case 2 : s_xp_valueZEM.setNum(((float)(parent->mapMgr()->getZEM()-75)/(float)75)*100);
@@ -329,24 +330,18 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 
    if (newlogfp != NULL)
    {   
-      EQPlayer* eqplayer = m_packet->getplayer();
-      long client_addr = m_packet->clientAddr();
-
       // append a new record entry
+
       fprintf(newlogfp, 
-              "0\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%ld.%ld.%ld.%ld\t%s\t%s\t%d\t%d\t%d", 
+              "0\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d", 
               s_time, (const char*)s_mob_name, mob_level, 
               (const char*)s_xp_value, (const char*)s_xp_valueZEM,
               (const char*)s_xp_valuep, (const char*)s_xp_valueg,
               (const char*)s_xp_gained, 
-              (client_addr &  0x000000ff),
-              ((client_addr & 0x0000ff00) >> 8),
-              ((client_addr & 0x00ff0000) >> 16),
-              ((client_addr & 0xff000000) >> 24),
-              (const char*)eqplayer->getPlayerName(),
-              (const char*)eqplayer->getPlayerLastName(),
-              eqplayer->getPlayerLevel(), 
-              eqplayer->getPlayerClass(), m_group->groupSize());
+              (const char*)m_player->getPlayerName(),
+              (const char*)m_player->getPlayerLastName(),
+              m_player->getPlayerLevel(), 
+              m_player->getPlayerClass(), m_group->groupSize());
 
       // continue with info for group members
       for (int i=0; i < m_group->groupSize(); i++)
@@ -354,7 +349,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 
       // finish the record with a line
       fprintf(newlogfp, "\n"); 
-        
+
       // close the file (so multiple ShowEQ instances can be up at once)
       fclose(newlogfp);
    }
@@ -445,17 +440,16 @@ void ExperienceWindow::updateAverage( )
    else
       s_mob_avg_exp="0";
 
-   EQPlayer* player= m_packet->getplayer();
    int exp_remaining;
    
-   if ( (player->getMaxExp() > player->getCurrentExp()) &&
-	(player->getCurrentExp() > 0))
+   if ( (m_player->getMaxExp() > m_player->getCurrentExp()) &&
+	(m_player->getCurrentExp() > 0))
    {
      /* since currentExp is calculated before maxExp when the decoder
 	is broken, sometimes maxExp ends up set to zero or undefined.
 	This can result in strange exp_remaining values, so some sanity
 	checks have been added.  cpphack */
-     exp_remaining = player->getMaxExp() - player->getCurrentExp();
+     exp_remaining = m_player->getMaxExp() - m_player->getCurrentExp();
    } 
    else
      exp_remaining = 0;
@@ -630,8 +624,8 @@ void ExperienceWindow::logexp(long xp_gained, int mob_level)
 
    fprintf(logstr, "1 %d %d %ld %d %d %d", 
 	   (int)time(NULL), mob_level, 
-      xp_gained, m_packet->getplayer()->getPlayerLevel(), 
-      m_packet->getplayer()->getPlayerClass(), m_group->groupSize());
+      xp_gained, m_player->getPlayerLevel(), 
+      m_player->getPlayerClass(), m_group->groupSize());
 
    for (int i=0; i < m_group->groupSize(); i++)
       fprintf(logstr, " %d", m_group->memberBySlot(i)->level());
@@ -644,9 +638,9 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
 {
    int gbonus=100;
    int penalty; 
-   int myLevel = m_packet->getplayer()->getPlayerLevel();
+   int myLevel = m_player->getPlayerLevel();
    int group_ag;
-   EQInterface *parent = (EQInterface*)m_packet->m_parent;
+   EQInterface *parent = (EQInterface*)m_player->parent();
    gbonus = m_group->groupPercentBonus();
    group_ag = m_group->totalLevels();
    if (m_group->groupSize())
@@ -656,7 +650,7 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
    }
    // WAR and ROG are at 10 since thier EXP is not scaled to compensate
    // for thier bonus
-   switch (m_packet->getplayer()->getPlayerClass())
+   switch (m_player->getPlayerClass())
    {
       case 1 : penalty = 10; break; // WAR
       case 2 : penalty = 10; break; // CLR

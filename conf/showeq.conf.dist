@@ -417,15 +417,18 @@ Button7Active   1
 Button8Name     Guild
 Button8Filter   "^Guild"
 Button8Active   1
-Button9Name	Spells
-Button9Filter	"^SPELL:"
+Button9Name	"Formatted"
+Button9Filter	"^Formatted:"
 Button9Active	1
-Button10Name	Items
-Button10Filter	"^Item"
-Button10Active	0
-Button11Name	Zone
-Button11Filter	"^Zone"
+Button10Name	Spells
+Button10Filter	"^SPELL:"
+Button10Active	1
+Button11Name	Items
+Button11Filter	"^Item"
 Button11Active	0
+Button12Name	Zone
+Button12Filter	"^Zone"
+Button12Active	0
 
 [MessageBox2]
 #Title           "Skills"      # uncomment this line to enable this box

@@ -30,7 +30,6 @@
 #include "util.h"
 #include "main.h"
 #include "vpacket.h"
-#include "itemdb.h"
 
 //----------------------------------------------------------------------
 // Macros
@@ -426,62 +425,56 @@ QString EQUDPIPPacketFormat::headerFlags(bool brief) const
 // EQPacket class methods
 
 /* EQPacket Class - Sets up packet capturing */
-EQPacket::EQPacket (EQPlayer* pplayer, QObject * parent, const char *name):
+EQPacket::EQPacket (QObject * parent, const char *name):
 QObject (parent, name)
 {
    struct hostent *he;
    struct in_addr  ia;
 
-   m_player = pplayer;
-   m_parent = parent;
-
-   if (!showeq_params->ip && !showeq_params->mac_address)
+   if (showeq_params->ip.isEmpty() && showeq_params->mac_address.isEmpty())
    {
       printf ("No address specified\n");
       exit(0);
    }
 
-   m_logger = new PktLogger(showeq_params->PktLoggerFilename,
-                            showeq_params->PktLoggerMask);
-
-   if (showeq_params->ip)
+   if (!showeq_params->ip.isEmpty())
    {
       /* Substitute "special" IP which is interpreted 
          to set up a different filter for picking up new sessions */
 
-      if (strcasecmp(showeq_params->ip, "auto") == 0)
+     if (showeq_params->ip == "auto")
 	inet_aton (AUTOMATIC_CLIENT_IP, &ia);
-      else if (inet_aton (showeq_params->ip, &ia) == 0)
-      {
-         he = gethostbyname(showeq_params->ip);
-         if (!he)
-         {
-            printf ("Invalid address; %s\n", showeq_params->ip);
-            exit (0);
-         }
-         memcpy (&ia, he->h_addr_list[0], he->h_length);
-      }
-      m_client_addr = ia.s_addr;
-      free((void*)showeq_params->ip);
-      showeq_params->ip = strdup(inet_ntoa(ia));
-
-      if (!strcmp(showeq_params->ip, AUTOMATIC_CLIENT_IP))
-      {
-	m_detectingClient = true;
-	printf("Listening for first client seen.\n");
-      }
-      else
-      {
-	m_detectingClient = false;
-	printf("Listening for client: %s\n", showeq_params->ip);
-      }
+     else if (inet_aton (showeq_params->ip, &ia) == 0)
+     {
+       he = gethostbyname(showeq_params->ip);
+       if (!he)
+       {
+	 printf ("Invalid address; %s\n", (const char*)showeq_params->ip);
+	 exit (0);
+       }
+       memcpy (&ia, he->h_addr_list[0], he->h_length);
+     }
+     m_client_addr = ia.s_addr;
+     showeq_params->ip = inet_ntoa(ia);
+     
+     if (showeq_params->ip ==  AUTOMATIC_CLIENT_IP)
+     {
+       m_detectingClient = true;
+       printf("Listening for first client seen.\n");
+     }
+     else
+     {
+       m_detectingClient = false;
+       printf("Listening for client: %s\n",
+	      (const char*)showeq_params->ip);
+     }
    }
 
    if (!showeq_params->playbackpackets)
    {
       // create the pcap object and initialize, either with MAC or IP
       m_packetCapture = new PacketCaptureThread();
-      if (strlen(showeq_params->mac_address) == 17)
+      if (showeq_params->mac_address.length() == 17)
          m_packetCapture->start(showeq_params->device, 
 				showeq_params->mac_address, 
 				showeq_params->realtime, MAC_ADDRESS_TYPE );
@@ -848,7 +841,7 @@ void EQPacket::logRawData ( const char   *filename,
 }
 
 /* Logs packet data in a human-readable format */
-bool EQPacket::logData ( const char*    filename,
+bool EQPacket::logData ( const QString& filename,
 			 uint32_t       len,
 			 const uint8_t* data,
 			 in_addr_t      saddr    = 0,
@@ -864,11 +857,12 @@ bool EQPacket::logData ( const char*    filename,
    FILE *lh;
 
    //printf("FilePath: %s\n", fname);
-   lh = fopen (filename, "a");
+   lh = fopen ((const char*)filename, "a");
 
    if (lh == NULL)
    {
-      fprintf(stderr, "\aUnable to open file: [%s]\n", filename);
+      fprintf(stderr, "\aUnable to open file: [%s]\n", 
+	      (const char*)filename);
       return false;
    }
 
@@ -958,12 +952,12 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 
     if (m_detectingClient)
     {
-      free((void*)showeq_params->ip);
-      showeq_params->ip = strdup ((const char*)packet.getIPv4DestA());
+      showeq_params->ip = packet.getIPv4DestA();
       m_client_addr = packet.getIPv4DestN();
       m_detectingClient = false;
       emit clientChanged(m_client_addr);
-      printf("Client Detected: %s\n", showeq_params->ip);
+      printf("Client Detected: %s\n", 
+	     (const char*)showeq_params->ip);
     }
 
     dispatchWorldData (packet.payloadLength(), packet.payload(), DIR_SERVER);
@@ -975,12 +969,12 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
        be able to safely ignore sequencing and arq */
     if (m_detectingClient)
     {
-      free((void*)showeq_params->ip);
-      showeq_params->ip = strdup ((const char*)packet.getIPv4SourceA());
+      showeq_params->ip = packet.getIPv4SourceA();
       m_client_addr = packet.getIPv4SourceN();
       m_detectingClient = false;
       emit clientChanged(m_client_addr);
-      printf("Client Detected: %s\n", showeq_params->ip);
+      printf("Client Detected: %s\n", 
+	     (const char*)showeq_params->ip);
     }
 
     dispatchWorldData (packet.payloadLength(), packet.payload(), DIR_CLIENT);
@@ -998,7 +992,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 	
 	if (!showeq_params->playbackpackets)
 	{
-	  if (strlen(showeq_params->mac_address) == 17)
+	  if (showeq_params->mac_address.length() == 17)
           {
 	    m_packetCapture->setFilter(showeq_params->device, 
 				       showeq_params->mac_address,
@@ -1006,7 +1000,8 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 				       MAC_ADDRESS_TYPE, m_serverPort, 
 				       m_clientPort);
 	    printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
-		    showeq_params->mac_address, m_clientPort, m_serverPort);
+		    (const char*)showeq_params->mac_address, 
+		    m_clientPort, m_serverPort);
 	  }
 	  else
 	  {
@@ -1016,7 +1011,8 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 				       IP_ADDRESS_TYPE, m_serverPort, 
 				       m_clientPort);
 	    printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
-		    showeq_params->ip, m_clientPort, m_serverPort);
+		    (const char*)showeq_params->ip, 
+		    m_clientPort, m_serverPort);
 	  }
 	}
 
@@ -1350,21 +1346,20 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
     //	   opCode, m_client_addr, m_session_tracking_enabled);
     uint16_t zone_server_port = eqntohuint16(data + 130);
     m_serverPort = zone_server_port;
-    
-    if (m_logger->isLoggingZoneServerInfo())
-        m_logger->logZoneServerInfo(data,len,direction);
+
+    emit zoneServerInfo(data, len, direction);
 
     // only reset packet filter if this is a live session
     if (!showeq_params->playbackpackets && (m_session_tracking_enabled < 2))
     {
-      if (strlen(showeq_params->mac_address) == 17)
+      if (showeq_params->mac_address.length() == 17)
       {
 	m_packetCapture->setFilter(showeq_params->device, 
 				   showeq_params->mac_address,
 				   showeq_params->realtime, 
 				   MAC_ADDRESS_TYPE, zone_server_port, 0);
 	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
-		showeq_params->mac_address, zone_server_port);
+		(const char*)showeq_params->mac_address, zone_server_port);
       }
       else
       {
@@ -1372,7 +1367,7 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
 				   showeq_params->realtime, IP_ADDRESS_TYPE,
 				   zone_server_port, 0);
 	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
-                 showeq_params->ip, zone_server_port);
+		(const char*)showeq_params->ip, zone_server_port);
       }
     }
 
@@ -1457,12 +1452,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     {
         case CPlayerItemsCode:
         {
-            if (m_logger->isLoggingCPlayerItems())
-                m_logger->logCPlayerItems((cPlayerItemsStruct *)data,len,dir);
-
-            if (CPlayerItemsVer != opCodeVersion)
-                break;
-	
 	    unk = false;
 
 	    if (!decoded)
@@ -1470,7 +1459,9 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             cPlayerItemsStruct *citems;
             citems = (cPlayerItemsStruct *)(decodedData);
-	
+
+	    emit cPlayerItems(citems, decodedDataLen, dir);
+
             // Make sure we do not divide by zero and there 
             // is something to process
            
@@ -1518,122 +1509,74 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case ItemInShopCode:
         {
-            if (m_logger->isLoggingItemInShop())
-                m_logger->logItemInShop((itemInShopStruct *)data,len,dir);
-
-            if (ItemInShopVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(ItemInShopCode, itemInShopStruct);
 	    
-            emit itemShop((const itemInShopStruct*)data);
+            emit itemShop((const itemInShopStruct*)data, len, dir);
 	    
             break;
         } /* end ItemInShopCode */
 
         case MoneyOnCorpseCode:
         {
-            if (m_logger->isLoggingMoneyOnCorpse())
-                m_logger->logMoneyOnCorpse((moneyOnCorpseStruct *)data,len,dir);
-
-	    if (MoneyOnCorpseVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(MoneyOnCorpseCode, moneyOnCorpseStruct);
 
-            emit moneyOnCorpse((const moneyOnCorpseStruct*)data);
+            emit moneyOnCorpse((const moneyOnCorpseStruct*)data, len, dir);
 
             break;
         } /* end MoneyOnCorpseCode */
 
         case ItemOnCorpseCode:
         {
-            if (m_logger->isLoggingItemOnCorpse())
-                m_logger->logItemOnCorpse((itemOnCorpseStruct *)data,len,dir);
-
-            if (ItemOnCorpseVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(ItemOnCorpseCode, itemOnCorpseStruct);
 
-	    emit itemPlayerReceived((const tradeItemInStruct *)data);
+	    emit itemPlayerReceived((const itemOnCorpseStruct *)data, len, dir);
 
             break;
         } /* end ItemOnCorpseCode */
 
         case TradeItemOutCode:
         {
-            if (m_logger->isLoggingTradeItemOut())
-                m_logger->logTradeItemOut((tradeItemOutStruct *)data,len,dir);
-
-            if (TradeItemOutVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(TradeItemOutCode, tradeItemOutStruct);
 
-            emit tradeItemOut((const tradeItemOutStruct*)data);
+            emit tradeItemOut((const tradeItemOutStruct*)data, len, dir);
 
             break;
         } /* end tradeItemCode */
 
         case TradeItemInCode:	// Item received by player
         {
-            if (m_logger->isLoggingTradeItemIn())
-                m_logger->logTradeItemIn((tradeItemInStruct *)data,len,dir);
-
-            if (TradeItemInVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(TradeItemInCode, tradeItemInStruct);
 
-            emit tradeItemIn((const tradeItemInStruct*)data);
+            emit tradeItemIn((const tradeItemInStruct*)data, len, dir);
 
             break;
         } /* end ItemTradeCode */
         
         case PlayerItemCode:
         {
-            if (m_logger->isLoggingPlayerItem())
-                m_logger->logPlayerItem((playerItemStruct *)data,len,dir);
- 
-            if (PlayerItemVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(PlayerItemCode, playerItemStruct);
 
-            emit wearItem((const playerItemStruct*)data);
+            emit wearItem((const playerItemStruct*)data, len, dir);
 
             break;
         }
 
         case SummonedItemCode:
         {
-            if (m_logger->isLoggingSummonedItem())
-                m_logger->logSummonedItem((summonedItemStruct *)data,len,dir);
-    
-            if (SummonedItemVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(SummonedItemCode, summonedItemStruct);
 	
-	    emit summonedItem((const summonedItemStruct*)data);
+	    emit summonedItem((const summonedItemStruct*)data, len, dir);
 
             break;
         }
 
         case CharProfileCode:	// Character Profile server to client
         {
-            if (m_logger->isLoggingECharProfile())
-                m_logger->logECharProfile((charProfileStruct *)data,len,dir);
-
-            if (CharProfileVer != opCodeVersion)
-                break;
-
             /* This is an encrypted packet type, so log the raw packet for
                detailed analysis */
 
             if (showeq_params->logEncrypted)
-                logData(showeq_params->CharProfileCodeFilename, len, data);
+	      logData(showeq_params->CharProfileCodeFilename, len, data);
 
             unk = false; // move above if to prevent duplicate logging
                          // not sure if its placement was intentional before.
@@ -1652,58 +1595,42 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case NewCorpseCode:
         {
-            if (m_logger->isLoggingNewCorpse())
-                m_logger->logNewCorpse((newCorpseStruct *)data,len,dir);
-
-            if (NewCorpseVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(NewCorpseCode, newCorpseStruct);
 
-            emit killSpawn((const newCorpseStruct*) data);
+            emit killSpawn((const newCorpseStruct*) data, len, dir);
 
             break;
         } /* end CorpseCode */
 
         case DeleteSpawnCode:
         {
-            if (m_logger->isLoggingDeleteSpawn())
-                m_logger->logDeleteSpawn((deleteSpawnStruct *)data,len,dir);
-
-            if (DeleteSpawnVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(DeleteSpawnCode, deleteSpawnStruct);
 
-            emit deleteSpawn((const deleteSpawnStruct*)data);
+            emit deleteSpawn((const deleteSpawnStruct*)data, len, dir);
 
             break;
         }
 
         case ChannelMessageCode:
         {
-            if (m_logger->isLoggingChannelMessage())
-                m_logger->logChannelMessage((channelMessageStruct *)data,len,dir);
-
-            if (ChannelMessageVer != opCodeVersion)
-                break;
-
             unk = false;
 
-            emit channelMessage((const channelMessageStruct*)data,
-                                (dir == DIR_CLIENT));
+            emit channelMessage((const channelMessageStruct*)data, len, dir);
+
+            break;
+        }
+
+        case FormattedMessageCode:
+        {
+            unk = false;
+
+            emit formattedMessage((const formattedMessageStruct*)data, len, dir);
 
             break;
         }
 
         case NewSpawnCode:
         {
-            if (m_logger->isLoggingENewSpawn())
-                m_logger->logENewSpawn((newSpawnStruct *)data,len,dir);
-
-            if (NewSpawnVer != opCodeVersion)
-                break;
-
             /* This is one of the encrypted packet types, so log it */
 
             if (showeq_params->logEncrypted)
@@ -1714,46 +1641,31 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             if (!decoded || showeq_params->broken_decode)
                 break;
 
-            if (m_logger->isLoggingNewSpawn())
-                m_logger->logNewSpawn((newSpawnStruct *)decodedData,len,dir);
-
             unk = ! ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
 
 	    if (!m_zoning)
-	        emit newSpawn((const newSpawnStruct*)decodedData);
+	        emit newSpawn((const newSpawnStruct*)decodedData, decodedDataLen, dir);
 
             break;
         }
 
         case ZoneSpawnsCode:
         {
-            if (m_logger->isLoggingEZoneSpawns())
-                m_logger->logEZoneSpawns((zoneSpawnsStruct *)data,len,dir);
-
             // printf ("ZONESPAWNS1: %d\n", len);
-
-            if (ZoneSpawnsVer != opCodeVersion)
-                break;
 
             /* This is one of the encrypted packet types, so log it */
 
             if (showeq_params->logEncrypted)
                 logData(showeq_params->ZoneSpawnsCodeFilename, len, data);
   
-            m_logger->logZoneSpawnsTimestamp(); // save timestamp for later log
-
             unk = false; // move above break to prevent duplicate logging
                          // not sure if its placement was intentional before.
 
             if (!decoded || showeq_params->broken_decode)
                 break;
 
-            if (m_logger->isLoggingZoneSpawns())
-                m_logger->logZoneSpawns((zoneSpawnsStruct *) 
-                   decodedData, decodedDataLen, dir);
- 
             emit zoneSpawns((const zoneSpawnsStruct*)decodedData, 
-	                    decodedDataLen);
+	                    decodedDataLen, dir);
 
             break;
         }
@@ -1761,12 +1673,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         case TimeOfDayCode:
         {
             struct timeOfDayStruct *tday;
-
-            if (m_logger->isLoggingTimeOfDay())
-                m_logger->logTimeOfDay((timeOfDayStruct *)data,len,dir);
-
-            if (TimeOfDayVer != opCodeVersion)
-                break;
 
             unk = ! ValidatePayload(TimeOfDayCode, timeOfDayStruct);
 
@@ -1787,25 +1693,15 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
                     tday->day,
                     tday->year
                  );
-            emit timeOfDay(tday);
+            emit timeOfDay(tday, len, dir);
             break;
         }
 
         case BookTextCode:
         {
-            struct bookTextStruct *booktext;
-
-            if (m_logger->isLoggingBookText())
-                m_logger->logBookText((bookTextStruct *)data,len,dir);
-
-            if (BookTextVer != opCodeVersion)
-               break;
-
             unk = false;
 
-            booktext = (struct bookTextStruct *) data;
-
-            // printf ("BOOK: %s\n", booktext->text);
+	    emit bookText((const bookTextStruct*)data, len, dir);
 
             break;
         }
@@ -1815,180 +1711,105 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             if (dir != DIR_CLIENT)
                 break;
 
-            if (m_logger->isLoggingRandom())
-                m_logger->logRandom((randomStruct *)data,len,dir);
-
-            if (RandomVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(RandomCode, randomStruct);
 
-	    emit random((const randomStruct*)data);
+	    emit random((const randomStruct*)data, len, dir);
 
             break;
         }
 
         case EmoteTextCode:
         {
-            if (m_logger->isLoggingEmoteText())
-                 m_logger->logEmoteText((emoteTextStruct *)data,len,dir);
-
-            if (EmoteTextVer != opCodeVersion)
-                break;
-
             unk = false;
 
-	    emit emoteText((const emoteTextStruct*)data);
+	    emit emoteText((const emoteTextStruct*)data, len, dir);
 
             break;
         }
 
         case CorpseLocCode:
         {
-            if (m_logger->isLoggingCorpseLoc())
-                m_logger->logCorpseLoc((corpseLocStruct *)data,len,dir);
-
-	    if (CorpseLocCode != opCodeVersion)
-	        break;
-
 	    unk = ! ValidatePayload(CorpseLocCode, corpseLocStruct);
            
-	    emit corpseLoc((const corpseLocStruct*)data);
+	    emit corpseLoc((const corpseLocStruct*)data, len, dir);
 
             break;
         }
         
         case PlayerBookCode:
         {
-            if (m_logger->isLoggingPlayerBook())
-                m_logger->logPlayerBook((playerBookStruct *)data,len,dir);
-            
-            if (PlayerBookVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(PlayerBookCode, playerBookStruct);
  
-            emit playerBook((const playerBookStruct*)data);
+            emit playerBook((const playerBookStruct*)data, len, dir);
 
             break;
         }
 
         case PlayerContainerCode:
         {
-            if (m_logger->isLoggingPlayerContainer())
-                m_logger->logPlayerContainer((playerContainerStruct *)data,len,dir);
-
-            if (PlayerContainerVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(PlayerContainerCode, playerContainerStruct);
 
-            emit playerContainer((const playerContainerStruct *)data);
+            emit playerContainer((const playerContainerStruct *)data, len, dir);
 
             break;
         }
 
         case InspectDataCode:
         {
-            if (m_logger->isLoggingInspectData())
-                m_logger->logInspectData((inspectDataStruct *)data,len,dir);
-
-            if (InspectDataVer != opCodeVersion)
-                break;
-
             unk = false;
 
-            emit inspectData((const inspectDataStruct *)data);
+            emit inspectData((const inspectDataStruct *)data, len, dir);
 
             break;
         }
 
         case HPUpdateCode:
         {
-            if (m_logger->isLoggingHPUpdate())
-                m_logger->logHPUpdate((hpUpdateStruct *)data,len,dir);
-
-            if (HPUpdateVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(HPUpdateCode, hpUpdateStruct);
 
-            emit updateSpawnHP((const hpUpdateStruct*)data);
+            emit updateSpawnHP((const hpUpdateStruct*)data, len, dir);
 
             break;
         }
 
         case SPMesgCode:
         {
-            if (m_logger->isLoggingSPMesg())
-                m_logger->logSPMesg((const spMesgStruct *)data,len,dir);
-
-            // struct spMesgStruct * spmsg1 = (struct spMesgStruct *) data;
-            // printf("Special (%d): '%s' (%ld)\n", 
-            //     opCodeVersion, spmsg1->message, spmsg1->msgType);
-
-            if (SPMesgVer != opCodeVersion)
-                break;
-
             unk = false;
 
-            emit spMessage((const spMesgStruct *)data);
+            emit spMessage((const spMesgStruct *)data, len, dir);
 
             break;
         }
 
         case MemSpellCode:
         {
-            if (m_logger->isLoggingMemSpell())
-                m_logger->logMemSpell((const memSpellStruct *)data,len,dir);
-
-            if (MemSpellVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(MemSpellCode, memSpellStruct);
 
-            emit handleSpell((const memSpellStruct*)data, 
-                             (dir == DIR_CLIENT));
+            emit handleSpell((const memSpellStruct*)data, len, dir);
 
             break;
         }
 
         case BeginCastCode:
         {
-            if (m_logger->isLoggingBeginCast())
-                m_logger->logBeginCast((beginCastStruct *)data,len,dir);
-
-            if (BeginCastVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(BeginCastCode, beginCastStruct);
 
-            emit beginCast((const beginCastStruct*)data, 
-                           (dir == DIR_CLIENT));
+            emit beginCast((const beginCastStruct*)data, len, dir);
 
             break;
         }
 
         case StartCastCode:
         {
-            if (m_logger->isLoggingStartCast())
-                m_logger->logStartCast((startCastStruct *)data,len,dir);
-
 	    unk = ! ValidatePayload(StartCastCode, startCastStruct);
 
-	    emit startCast((const startCastStruct*)data);
+	    emit startCast((const startCastStruct*)data, len, dir);
 
 	    break;
         }
 
         case MobUpdateCode:
         {
-            if (m_logger->isLoggingMobUpdate())
-                m_logger->logMobUpdate((const mobUpdateStruct *)data,len,dir);
-
-            if (MobUpdateVer != opCodeVersion)
-                break;
-
             unk = false;
 
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
@@ -2010,143 +1831,92 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    }
 #endif
 	    if (!m_zoning)
-	        emit updateSpawns((const mobUpdateStruct *)data);
+	        emit updateSpawns((const mobUpdateStruct *)data, len, dir);
 
             break;
         }
 
         case ExpUpdateCode:
         {
-            if (m_logger->isLoggingExpUpdate())
-                m_logger->logExpUpdate((const expUpdateStruct *)data,len,dir);
-
-            if (ExpUpdateVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(ExpUpdateCode, expUpdateStruct);
 
-            emit updateExp((const expUpdateStruct*)data);
+            emit updateExp((const expUpdateStruct*)data, len, dir);
 
             break;
         }
 
         case AltExpUpdateCode:
         {
-            if (m_logger->isLoggingAltExpUpdate())
-                m_logger->logAltExpUpdate((const altExpUpdateStruct *)data,len,dir);
-
-            if (AltExpUpdateVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(AltExpUpdateCode, altExpUpdateStruct);
 
-            emit updateAltExp((const altExpUpdateStruct*)data);
+            emit updateAltExp((const altExpUpdateStruct*)data, len, dir);
 
             break;
         }
 
         case LevelUpUpdateCode:
         {
-            if (m_logger->isLoggingLevelUpUpdate())
-                m_logger->logLevelUpUpdate((levelUpUpdateStruct *)data,len,dir);
-
-            if (LevelUpUpdateVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(LevelUpUpdateCode, levelUpUpdateStruct);
 
-            emit updateLevel((const levelUpUpdateStruct *)data);
+            emit updateLevel((const levelUpUpdateStruct *)data, len, dir);
 
             break;
         }
 
         case SkillIncCode:
         {
-            if (m_logger->isLoggingSkillInc())
-                m_logger->logSkillInc((skillIncStruct *)data,len,dir);
-
-            if (SkillIncVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(SkillIncCode, skillIncStruct);
 
-	    emit increaseSkill((const skillIncStruct *)data);
+	    emit increaseSkill((const skillIncStruct *)data, len, dir);
 
             break;
         }
 
         case DoorOpenCode:
         {
-            if (m_logger->isLoggingDoorOpen())
-                m_logger->logDoorOpen(data, len, dir);
-
-            if (DoorOpenVer != opCodeVersion)
-                break;
-
             unk = false;
+
+	    emit doorOpen(data, len, dir);
 
             break;
         }
 
         case IllusionCode:
         {
-            if (m_logger->isLoggingIllusion())
-                m_logger->logIllusion(data,len,dir);
-
-            if (IllusionVer != opCodeVersion)
-                break;
-
             unk = false;
+
+	    emit illusion(data, len, dir);
 
             break;
         }
 
         case BadCastCode:
         {
-            if (m_logger->isLoggingBadCast())
-                m_logger->logBadCast((badCastStruct *)data,len,dir);
-
-            if (BadCastVer != opCodeVersion)
-                break;
-
             unk = false; //! ValidatePayload(BadCastCode, badCastStruct);
 
-            emit interruptSpellCast((const badCastStruct*)data);
+            emit interruptSpellCast((const badCastStruct*)data, len, dir);
 
             break;
         }
 
         case SysMsgCode:
         {
-            if (m_logger->isLoggingSysMsg())
-                m_logger->logSysMsg((sysMsgStruct *)data,len,dir);
-
-            if (SysMsgVer != opCodeVersion)
-                break;
-
             unk = false;
 
-	    emit systemMessage((const sysMsgStruct*)data);
+	    emit systemMessage((const sysMsgStruct*)data, len, dir);
 
             break;
         }
 
         case ZoneChangeCode:
         {
-            if (m_logger->isLoggingZoneChange())
-                m_logger->logZoneChange((zoneChangeStruct *)data,len,dir);
-
-            if (ZoneChangeVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(ZoneChangeCode, zoneChangeStruct);
 
             // in the process of zoning, server hasn't switched yet.
 
             m_zoning = true;
 
-	    emit zoneChange((const zoneChangeStruct*)data, 
-			    (dir == DIR_CLIENT));
+	    emit zoneChange((const zoneChangeStruct*)data, len, dir);
 #if HAVE_LIBEQ
             emit resetDecoder();
 #endif
@@ -2155,18 +1925,12 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case ZoneEntryCode:
         {
-            if (m_logger->isLoggingZoneEntry())
-                m_logger->logZoneEntry(data, len, dir);
-
-            if (ZoneEntryVer != opCodeVersion)
-                break;
-
             // We're only interested in the server version
 
             if (dir == DIR_CLIENT)
 	    {
 	        unk = ! ValidatePayload(ZoneEntryCode, ClientZoneEntryStruct);
-	        emit zoneEntry((const ClientZoneEntryStruct*)data);
+	        emit zoneEntry((const ClientZoneEntryStruct*)data, len, dir);
 #if HAVE_LIBEQ
                 emit resetDecoder();
 #endif
@@ -2176,7 +1940,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             unk = ! ValidatePayload(ZoneEntryCode, ServerZoneEntryStruct);
 
-            emit zoneEntry((const ServerZoneEntryStruct*)data);
+            emit zoneEntry((const ServerZoneEntryStruct*)data, len, dir);
 
             // server considers us in the other zone now
 	      
@@ -2187,18 +1951,9 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case NewZoneCode:
         {
-            logData("/tmp/NewZone.log", len, data);
-
-            if (m_logger->isLoggingNewZone())
-                m_logger->logNewZone((newZoneStruct *)data,len,dir);
-
-            if (NewZoneVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(NewZoneCode, newZoneStruct);
 
-	    emit zoneNew((const newZoneStruct*)data,
-			 (dir == DIR_CLIENT));
+	    emit zoneNew((const newZoneStruct*)data, len, dir);
 
 	   // note that we're no longer Zoning
 	   m_zoning = false;
@@ -2211,219 +1966,129 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case PlayerPosCode:
         {
-            if (m_logger->isLoggingPlayerPos())
-                m_logger->logPlayerPos((playerPosStruct *)data,len,dir);
-
-            if (PlayerPosVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(PlayerPosCode, playerPosStruct);
 
 	    if (!m_zoning)
-	        emit playerUpdate((const playerPosStruct*)data, 
-		                  (dir == DIR_CLIENT));
+	        emit playerUpdate((const playerPosStruct*)data, len, dir);
 
             break;
         }
 
         case WearChangeCode:
         {
-            if (m_logger->isLoggingWearChange())
-                m_logger->logWearChange((wearChangeStruct *)data,len,dir);
-
-            if (WearChangeVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(WearChangeCode, wearChangeStruct);
 
-            emit spawnWearingUpdate ((const wearChangeStruct*)data);
+            emit spawnWearingUpdate ((const wearChangeStruct*)data, len, dir);
 
             break;
         }
 
         case ActionCode:
         {
-            if (m_logger->isLoggingAction())
-                m_logger->logAction((actionStruct *)data,len,dir);
-
-            if (ActionVer != opCodeVersion)
-                break;
-
             unk = false;
 
-            emit action2Message ((const action2Struct *)data);
-
-#if 0
-            struct actionStruct* action;
-            action = (struct actionStruct*)(data);
-
-            if( action->spell != -1 )
-            {
-               printf("%s(%d) casted %s on %s(%d) for (%d) points of damage\n",
-                   m_Spawns[action->source].name, action->source, 
-                   (const char*)spell_name(action->spell), 
-                   m_Spawns[action->target].name, action->target, 
-                   action->damage );
-            }
-#endif 
+            emit action2Message ((const action2Struct *)data, len, dir);
 
             break;
         }
 
         case CastOnCode:
         {
-            if (m_logger->isLoggingCastOn())
-                m_logger->logCastOn((castOnStruct *)data,len,dir);
-
-            if (CastOnVer != opCodeVersion)
-                break;
-
             unk = false;
+
+	    emit castOn((castOnStruct*)data, len, dir);
 
             break;
         }
 
         case ManaDecrementCode:
         {
-            if (m_logger->isLoggingManaDecrement())
-                m_logger->logManaDecrement((manaDecrementStruct *)data,len,dir);
-
-            if (ManaDecrementVer != opCodeVersion)
-               break;
-
             unk = ! ValidatePayload(ManaDecrementCode, manaDecrementStruct);
 
-	    emit manaChange((struct manaDecrementStruct *)data);
+	    emit manaChange((struct manaDecrementStruct *)data, len, dir);
 
             break;
         }
 
         case StaminaCode:
         {
-            if (m_logger->isLoggingStamina())
-                m_logger->logStamina((staminaStruct *)data,len,dir);
-
-            if (StaminaVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(StaminaCode, staminaStruct);
 
-	    emit updateStamina((const staminaStruct *)data);
+	    emit updateStamina((const staminaStruct *)data, len, dir);
 
             break;
         }
 
         case MakeDropCode:
         {
-            if (m_logger->isLoggingMakeDrop())
-                m_logger->logMakeDrop((makeDropStruct *)data,len,dir);
-
-            if (MakeDropVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(MakeDropCode, makeDropStruct);
 
 	    if (!m_zoning)
-                emit newGroundItem((const makeDropStruct*)data, 
-		                   (dir == DIR_CLIENT));
+                emit newGroundItem((const makeDropStruct*)data, len, dir);
 
             break;
         }
 
         case RemDropCode:
         {
-            if (m_logger->isLoggingRemDrop())
-                m_logger->logRemDrop((remDropStruct *)data,len,dir);
-
-            if (RemDropVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(RemDropCode, remDropStruct);
 
-            emit removeGroundItem((const remDropStruct *)data);
+            emit removeGroundItem((const remDropStruct *)data, len, dir);
 
             break;
         }
 
         case DropCoinsCode:
         {
-            if (m_logger->isLoggingDropCoins())
-                m_logger->logDropCoins((dropCoinsStruct *)data,len,dir);
-
-            if (DropCoinsVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(DropCoinsCode, dropCoinsStruct);
 
 	    if (!m_zoning)
-                emit newCoinsItem((const dropCoinsStruct*)data);
+                emit newCoinsItem((const dropCoinsStruct*)data, len, dir);
 
             break;
         }
 
         case RemoveCoinsCode:
         {
-            if (m_logger->isLoggingRemoveCoins())
-                m_logger->logRemoveCoins((removeCoinsStruct *)data,len,dir);
-
-            if (RemoveCoinsVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(RemoveCoinsCode, removeCoinsStruct);
 
-            emit removeCoinsItem ((const removeCoinsStruct *)data);
+            emit removeCoinsItem ((const removeCoinsStruct *)data, len, dir);
 
             break;
         }
 
         case OpenVendorCode:
         {
-            if (m_logger->isLoggingOpenVendor())
-                m_logger->logOpenVendor(data,len,dir);
-
-            if (OpenVendorVer != opCodeVersion)
-                break;
-
             unk = false;
+
+	    emit openVendor(data, len, dir);
 
             break;
         }
 
         case CloseVendorCode:
         {
-            if (m_logger->isLoggingCloseVendor())
-                m_logger->logCloseVendor(data,len,dir);
-
-            if (CloseVendorVer != opCodeVersion)
-                break;
-
             unk = false;
+
+	    emit closeVendor(data, len, dir);
 
             break;
         }
 
         case OpenGMCode:
         {
-            if (m_logger->isLoggingOpenGM())
-                m_logger->logOpenGM(data,len,dir);
-
-            if (OpenGMVer != opCodeVersion)
-                break;
-
             unk = false;
+
+	    emit openGM(data, len, dir);
 
             break;
         }
 
         case CloseGMCode:
         {
-            if (m_logger->isLoggingCloseGM())
-                m_logger->logCloseGM(data,len,dir);
-
-            if (CloseGMVer != opCodeVersion)
-                break;
-
             unk = false;
+
+	    emit closeGM(data, len, dir);
 
             break;
         }
@@ -2432,13 +2097,9 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
             struct spawnAppearanceStruct * appearance;
 
-            if (m_logger->isLoggingSpawnAppearance())
-                m_logger->logSpawnAppearance((spawnAppearanceStruct *) data,len,dir);
-
-            if (SpawnAppearanceVer != opCodeVersion)
-                break;
-
             unk = false;
+
+	    emit spawnAppearance((const spawnAppearanceStruct*)data, len, dir);
 
             appearance = (struct spawnAppearanceStruct *) (data);
             
@@ -2572,47 +2233,26 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             
         case Attack2Code:
         {
-            if (m_logger->isLoggingAttack2())
-                m_logger->logAttack2((attack2Struct *)data,len,dir);
-
-            if (Attack2Ver != opCodeVersion)
-                break;
-
             unk = false;
 
-            emit attack2Hand1 ((const attack2Struct *)data);
+            emit attack2Hand1 ((const attack2Struct *)data, len, dir);
 
             break;
         }
 
         case ConsiderCode:
         {
-            if (m_logger->isLoggingConsider())
-                m_logger->logConsider((considerStruct *)data,len,dir);
-
-            if (ConsiderVer != opCodeVersion)
-                break;
-
             unk = false;
 
 	    ValidatePayload(ConsiderCode, considerStruct);
 
-            if (dir == DIR_CLIENT)
-	        emit consRequest((const considerStruct*)data);
-            else
-                emit consMessage((const considerStruct*)data);
+	    emit consMessage((const considerStruct*)data, len, dir);
 
             break;
         }
 
         case NewGuildInZoneCode:
         {
-            if (m_logger->isLoggingNewGuildInZone())
-                m_logger->logNewGuildInZone((newGuildInZoneStruct *)data,len,dir);
-
-            if (NewGuildInZoneVer != opCodeVersion)
-               break;
-
             unk = false;
 
             break;
@@ -2620,70 +2260,42 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case MoneyUpdateCode:
         {  
-            if (m_logger->isLoggingMoneyUpdate())
-                m_logger->logMoneyUpdate((moneyUpdateStruct *)data,len,dir);
-
-            if (MoneyUpdateVer != opCodeVersion)
-               break;
-
             unk = false;
 
-	    emit moneyUpdate((const moneyUpdateStruct*)data);
+	    emit moneyUpdate((const moneyUpdateStruct*)data, len, dir);
 
             break;
         }
 
         case MoneyThingCode:
         {
-            if (m_logger->isLoggingMoneyThing())
-                m_logger->logMoneyThing((moneyThingStruct *)data,len,dir);
-
-            if (MoneyThingVer != opCodeVersion)
-                break;
-
             unk = false;
 
-	    emit moneyThing((const moneyThingStruct*)data);
+	    emit moneyThing((const moneyThingStruct*)data, len, dir);
 
             break;
         }
 
         case ClientTargetCode:
         {
-            if (m_logger->isLoggingClientTarget())
-                m_logger->logClientTarget((clientTargetStruct *)data,len,dir);
-
-            if (ClientTargetVer != opCodeVersion)
-                break;
-
             unk = ! ValidatePayload(ClientTargetCode, clientTargetStruct);
 
-            emit clientTarget((const clientTargetStruct*) data);
+            emit clientTarget((const clientTargetStruct*) data, len, dir);
 
             break;
         }
 
         case BindWoundCode:
         {
-            if (m_logger->isLoggingBindWound())
-                m_logger->logBindWound((bindWoundStruct *)data,len,dir);
-
-            if (BindWoundVer != opCodeVersion)
-                break;
-
             unk = false;
             
+	    emit bindWound((bindWoundStruct*)data, len, dir);
+
             break;
         }
 
         case CDoorSpawnsCode:
         {
-            if (m_logger->isLoggingCDoorSpawns())
-                m_logger->logCDoorSpawns((cDoorSpawnsStruct *)data,len,dir);
-
-            if (CDoorSpawnsVer != opCodeVersion)
-                break;
-
             unk = false;
 
             if (!decoded)
@@ -2706,34 +2318,26 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	        unk = true;
             }
 #endif
-            if (m_logger->isLoggingDoorSpawns())
-                m_logger->logDoorSpawns((doorSpawnsStruct *) decodedData, decodedDataLen, dir);
 
-            emit compressedDoorSpawn((const cDoorSpawnsStruct *)decodedData);
+            emit compressedDoorSpawn((const cDoorSpawnsStruct *)decodedData, len, dir);
 
             break;
         }
 
         case GroupInfoCode:
         {
-            if (m_logger->isLoggingGroupInfo())
-                m_logger->logGroupInfo((groupInfoStruct *)data,len,dir);
-
-            if (GroupInfoVer != opCodeVersion)
-                break;
-
             // Too much still unknown.
 
             unk = ! ValidatePayload(GroupInfoCode, groupMemberStruct);
 
-	    emit groupInfo((const groupMemberStruct*)data);
+	    emit groupInfo((const groupMemberStruct*)data, len, dir);
 
 	    break;
         }
     } /* end switch(opCode) */
        
-    if (unk && (m_logger->isLoggingUnknownOpcode()))
-        m_logger->logUnknownOpcode(data,len,dir);
+    if (unk)
+      emit unknownOpcode(data, len, dir);
 
     if (showeq_params->logUnknownZonePackets && unk)
     {
@@ -2912,36 +2516,28 @@ void EQPacket::dispatchDecodedCharProfile(const uint8_t* decodedData,
 {
   ValidateDecodedPayload(CharProfileCode, charProfileStruct);
 
-  if (m_logger->isLoggingCharProfile())
-      m_logger->logCharProfile((charProfileStruct *)decodedData,decodedDataLen,0);
-
-  emit backfillPlayer((const charProfileStruct*)decodedData);
+  emit backfillPlayer((const charProfileStruct*)decodedData, decodedDataLen, DIR_SERVER);
 }
 
 void EQPacket::dispatchDecodedNewSpawn(const uint8_t* decodedData, 
 				       uint32_t decodedDataLen)
 {
-  if (m_logger->isLoggingNewSpawn())
-      m_logger->logNewSpawn((newSpawnStruct *) decodedData, decodedDataLen, 0);
-
   ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
 
-  newSpawnStruct* ndata = (newSpawnStruct*)decodedData;
-  spawnStruct* sdata = &ndata->spawn;
-  emit backfillSpawn(sdata);
+  emit backfillSpawn((newSpawnStruct*)decodedData, decodedDataLen, DIR_SERVER);
 }
 
 void EQPacket::dispatchDecodedZoneSpawns(const uint8_t* decodedData, 
 					 uint32_t decodedDataLen)
 {
   zoneSpawnsStruct* zdata = (struct zoneSpawnsStruct *)(decodedData);
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
   int zoneSpawnsStructHeaderData = 
     ((uint8_t*)&zdata->spawn[0]) - decodedData;
 
   int zoneSpawnsStructPayloadCount = 
        (decodedDataLen - zoneSpawnsStructHeaderData) / sizeof(spawnZoneStruct);
 
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
   // validate payload size, decodedDataLen - zoneSpawnsStructHeader should be
   // an exact multiple of the size of spawnZoneStruct
   int remainder = 
@@ -2955,16 +2551,7 @@ void EQPacket::dispatchDecodedZoneSpawns(const uint8_t* decodedData,
   }
 #endif
 
-  if (m_logger->isLoggingZoneSpawns())
-      m_logger->logZoneSpawns(zdata, decodedDataLen, 0);
-
-  spawnStruct* sdata;
- 
-  for (int j = 0; j < zoneSpawnsStructPayloadCount; j++)
-  {
-    sdata = &zdata->spawn[j].spawn;
-    emit backfillSpawn(sdata);
-  }
+  emit backfillZoneSpawns(zdata, decodedDataLen, DIR_SERVER);
 }
 
 int EQPacket::getEQTimeOfDay( time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay )
@@ -3030,15 +2617,13 @@ char* getTime(char* pchTime)
 void EQPacket::monitorNextClient()
 {
   m_detectingClient = true;
-  free((void*)showeq_params->ip);
-  showeq_params->ip = strdup(AUTOMATIC_CLIENT_IP);
+  showeq_params->ip = AUTOMATIC_CLIENT_IP;
   struct in_addr  ia;
   inet_aton (showeq_params->ip, &ia);
   m_client_addr = ia.s_addr;
   emit clientChanged(m_client_addr);
   printf("Listening for next client seen. (you must zone for this to work!)\n");
 
-  emit (toggle_session_tracking());
   if (!showeq_params->playbackpackets)
     m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
 			       showeq_params->realtime, 

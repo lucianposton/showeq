@@ -25,6 +25,7 @@
 /*
 ** ShowEQ specific definitions
 */
+// Statistical list defines
 #define LIST_HP                         0
 #define LIST_MANA                       1
 #define LIST_STAM                       2
@@ -46,6 +47,10 @@
 #define LIST_AC                         18
 #define LIST_ALTEXP                     19
 #define LIST_MAXLIST                    20 
+
+// direction the data is coming from
+#define DIR_CLIENT 1
+#define DIR_SERVER 2
 
 /*
 ** MOB Spawn Type
@@ -249,9 +254,9 @@ struct itemStruct
       /*0206*/ uint16_t spellId0;         // SpellID of special effect
       /*0208*/ uint16_t classes;          // Classes that can use this item
       /*0210*/ uint8_t  unknown0210[2];   // ***Placeholder
-	  /*0212*/ uint16_t races;            // Races that can use this item
-	  /*0214*/ int8_t   unknown0214[3];   // ***Placeholder
-      /*0217*/ uint8_t  level;             // Casting level
+      /*0212*/ uint16_t races;            // Races that can use this item
+      /*0214*/ int8_t   unknown0214[3];   // ***Placeholder
+      /*0217*/ uint8_t  level;            // Casting level
 
       union // 0218 has different meanings depending on an unknown indicator
       {
@@ -276,7 +281,7 @@ struct itemStruct
       /*0214*/ int8_t   unknown0214;         // ***Placeholder
       /*0215*/ int8_t   sizeCapacity;        // Maximum size item container can hold
       /*0216*/ uint8_t  weightReduction;     // % weight reduction of container
-      /*0217*/ uint8_t  unknown0192[75];     // ***Placeholder
+      /*0217*/ uint8_t  unknown0217[75];     // ***Placeholder
     } container;
   };
 };
@@ -286,7 +291,7 @@ struct itemStruct
 inline bool isItemBook(const struct itemStruct& i) 
     { return (i.flag == ITEM_BOOK); }
 
-inline bool IsItemContainer(const struct itemStruct& i)
+inline bool isItemContainer(const struct itemStruct& i)
     { return ((i.flag == ITEM_CONTAINER) || (i.flag == ITEM_CONTAINER_PLAIN)); }
 
 /*
@@ -494,10 +499,10 @@ struct itemInShopStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x0c
 /*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint8_t  unknown0002[4];         // Shopkeeper ID must be in here
-/*0006*/ int8_t   itemType;               // 0 - item, 1 - container, 2 - book
-/*0007*/ struct   itemStruct item;        // Refer to itemStruct for members
-/*0251*/ uint8_t  unknown0251[4];         // ***Placeholder
+/*0002*/ uint16_t playerid;               // player ID
+/*0004*/ int8_t   itemType;               // 0 - item, 1 - container, 2 - book
+/*0005*/ struct   itemStruct item;        // Refer to itemStruct for members
+/*0297*/ uint8_t  unknown0297[6];         // ***Placeholder
 };
 
 /*
@@ -525,6 +530,23 @@ struct emoteTextStruct
 /*0001*/ uint8_t  version;                // 0x20
 /*0002*/ uint8_t  unknown0002[2];         // ***Placeholder
 /*0004*/ char     text[0];                // Emote `Text
+};
+
+/*
+** Formatted text messages
+** Length: Variable Text
+** OpCode: emoteTextCode
+*/
+
+struct formattedMessageStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x15
+/*0001*/ uint8_t  version;                // 0x20
+/*0002*/ uint8_t  unknown0002[2];         // ***Placeholder
+/*0003*/ uint16_t messageFormat;          // Indicates the message format
+/*0005*/ uint8_t  unknown0004[2];         // ***Placeholder (arguments?)
+/*0007*/ char     messages[0];            // messages(NULL delimited)
+/*0???*/ uint8_t  unknownXXXX[8];         // ***Placeholder
 };
 
 /*

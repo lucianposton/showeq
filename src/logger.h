@@ -8,22 +8,26 @@
 #ifndef SEQLOGGER_H
 #define SEQLOGGER_H
 
+#include <qobject.h>
+
 #include "spawn.h"
 #include "util.h"
 
-class SEQLogger
+class SEQLogger : public QObject
 {
+   Q_OBJECT
+
 public:
-    SEQLogger(const char *fname);
-    SEQLogger(FILE *fp);
+    SEQLogger(const QString& fname, QObject* parent=0, const char* name="SEQLogger");
+    SEQLogger(FILE *fp, QObject* parent=0, const char* name="SEQLogger");
 protected:
     int logOpen(void);
     int outputf(const char *fmt, ...);
     int output(const void *data, int length);
-    void flush() { fflush(FP); }
-    FILE *FP;
-    char *filename;
-    int errOpen;
+    void flush() { fflush(m_FP); }
+    FILE* m_FP;
+    QString m_filename;
+    int m_errOpen;
 };
 
 #define ZoneServerInfoMask 0x00000001 /* mask 1 */
@@ -100,6 +104,9 @@ protected:
 
 class PktLogger: public SEQLogger 
 {
+   Q_OBJECT
+
+public:
 public:
     int  isLoggingZoneServerInfo()  { return( mask1 & ZoneServerInfoMask );  }
     int  isLoggingCPlayerItems()    { return( mask2 & CPlayerItemsMask );    }
@@ -172,80 +179,82 @@ public:
     int  isLoggingDoorSpawns()      { return( mask3 & DoorSpawnsMask );      }
 
     PktLogger(FILE *fp, unsigned mask1, unsigned mask2, unsigned mask3);
-    PktLogger(const char *fname,unsigned mask1,unsigned mask2,unsigned mask3);
-    PktLogger(FILE *fp, const char *maskstr);
-    PktLogger(const char *fname, const char *maskstr);
+    PktLogger(const QString& fname,unsigned mask1,unsigned mask2,unsigned mask3);
+    PktLogger(FILE *fp, const QString& maskstr);
+    PktLogger(const QString& fname, const QString& maskstr);
 
+ public slots:
     void logZoneSpawnsTimestamp(void);
-    void logZoneServerInfo(const void *data,int len,int dir);
-    void logCPlayerItems(const cPlayerItemsStruct *citems,int len,int dir);
-    void logItemInShop(const itemInShopStruct *item,int len,int dir);
-    void logMoneyOnCorpse(const moneyOnCorpseStruct *money,int len,int dir);
-    void logItemOnCorpse(const itemOnCorpseStruct *item,int len,int dir);
-    void logTradeItemOut(const tradeItemOutStruct *item,int len,int dir);
-    void logTradeItemIn(const tradeItemInStruct *item,int len,int dir);
-    void logPlayerItem(const playerItemStruct *item,int len,int dir);
-    void logSummonedItem(const summonedItemStruct *item,int len,int dir);
-    void logZoneEntry(const void *data,int len,int dir);
-    void logECharProfile(const charProfileStruct *data,int len,int dir);
-    void logCharProfile(const charProfileStruct *profile,int len,int dir);
-    void logNewCorpse(const newCorpseStruct *corpse,int len,int dir);
-    void logDeleteSpawn(const deleteSpawnStruct *spawn,int len,int dir);
-    void logChannelMessage(const channelMessageStruct *msg,int len,int dir);
-    void logENewSpawn(const newSpawnStruct *spawn,int len,int dir);
-    void logNewSpawn(const newSpawnStruct *spawn,int len,int dir);
-    void logEZoneSpawns(const zoneSpawnsStruct *spawns,int len,int dir);
-    void logZoneSpawns(const zoneSpawnsStruct *spawns,int len,int dir);
-    void logTimeOfDay(const timeOfDayStruct *tday,int len,int dir);
-    void logBookText(const bookTextStruct *book,int len,int dir);
-    void logRandom(const randomStruct *ran,int len,int dir);
-    void logEmoteText(const emoteTextStruct *emote,int len,int dir);
-    void logCorpseLoc(const corpseLocStruct *corpse,int len,int dir);
-    void logPlayerBook(const playerBookStruct *item,int len,int dir);
-    void logPlayerContainer(const playerContainerStruct *item,int len,int dir);
-    void logInspectData(const inspectDataStruct *data,int len,int dir);
-    void logHPUpdate(const hpUpdateStruct *hp,int len,int dir);
-    void logSPMesg(const spMesgStruct *msg,int len,int dir);
-    void logMemSpell(const memSpellStruct *spell,int len,int dir);
-    void logBeginCast(const beginCastStruct *spell,int len,int dir);
-    void logStartCast(const startCastStruct *spell,int len,int dir);
-    void logMobUpdate(const mobUpdateStruct *update,int len,int dir);
-    void logExpUpdate(const expUpdateStruct *exp,int len,int dir);
-    void logAltExpUpdate(const altExpUpdateStruct *alt,int len,int dir);
-    void logLevelUpUpdate(const levelUpUpdateStruct *level,int len,int dir);
-    void logSkillInc(const skillIncStruct *skill,int len,int dir);
-    void logDoorOpen(void *data,int len,int dir);
-    void logIllusion(void *data,int len,int dir);
-    void logBadCast(const badCastStruct *spell,int len,int dir);
-    void logSysMsg(const sysMsgStruct *msg,int len,int dir);
-    void logZoneChange(const zoneChangeStruct *zone,int len,int dir);
-    void logNewZone(const newZoneStruct *zone,int len,int dir);
-    void logPlayerPos(const playerPosStruct *pos,int len,int dir);
-    void logWearChange(const wearChangeStruct *wear,int len,int dir);
-    void logAction(const actionStruct *action,int len,int dir);
-    void logCastOn(const castOnStruct *spell,int len,int dir);
-    void logManaDecrement(const manaDecrementStruct *mana,int len,int dir);
-    void logStamina(const staminaStruct *stamina,int len,int dir);
-    void logMakeDrop(const makeDropStruct *item,int len,int dir);
-    void logRemDrop(const remDropStruct *item,int len,int dir);
-    void logDropCoins(const dropCoinsStruct *coins,int len,int dir);
-    void logRemoveCoins(const removeCoinsStruct *coins,int len,int dir);
-    void logOpenVendor(const void *data,int len,int dir);
-    void logCloseVendor(const void *data,int len,int dir);
-    void logOpenGM(const void *data,int len,int dir);
-    void logCloseGM(const void *data,int len,int dir);
-    void logSpawnAppearance(const spawnAppearanceStruct *spawn,int len,int dir);
-    void logAttack2(const attack2Struct *attack,int len,int dir);
-    void logConsider(const considerStruct *consider,int len,int dir);
-    void logNewGuildInZone(const newGuildInZoneStruct *guild,int len,int dir);
-    void logMoneyUpdate(const moneyUpdateStruct *money,int len,int dir);
-    void logMoneyThing(const moneyThingStruct *thing,int len,int dir);
-    void logClientTarget(const clientTargetStruct *target,int len,int dir);
-    void logBindWound(const bindWoundStruct *bind,int len,int dir);
-    void logCDoorSpawns(const cDoorSpawnsStruct *doors,int len,int dir);
-    void logDoorSpawns(const doorSpawnsStruct *doors,int len,int dir);
-    void logGroupInfo(const groupInfoStruct *guild,int len,int dir);
-    void logUnknownOpcode(void *data,int len,int dir);
+    void logZoneServerInfo(const uint8_t* data, uint32_t len, uint8_t dir);
+    void logCPlayerItems(const cPlayerItemsStruct* citems, uint32_t len, uint8_t dir);
+    void logItemInShop(const itemInShopStruct* item, uint32_t len, uint8_t dir);
+    void logMoneyOnCorpse(const moneyOnCorpseStruct* money, uint32_t len, uint8_t dir);
+    void logItemOnCorpse(const itemOnCorpseStruct* item, uint32_t len, uint8_t dir);
+    void logTradeItemOut(const tradeItemOutStruct* item, uint32_t len, uint8_t dir);
+    void logTradeItemIn(const tradeItemInStruct* item, uint32_t len, uint8_t dir);
+    void logPlayerItem(const playerItemStruct* item, uint32_t len, uint8_t dir);
+    void logSummonedItem(const summonedItemStruct* item, uint32_t len, uint8_t dir);
+    void logZoneEntry(const ServerZoneEntryStruct* data, uint32_t len, uint8_t dir);
+    void logZoneEntry(const ClientZoneEntryStruct* data, uint32_t len, uint8_t dir);
+    void logECharProfile(const charProfileStruct* data, uint32_t len, uint8_t dir);
+    void logCharProfile(const charProfileStruct* profile, uint32_t len, uint8_t dir);
+    void logNewCorpse(const newCorpseStruct* corpse, uint32_t len, uint8_t dir);
+    void logDeleteSpawn(const deleteSpawnStruct* spawn, uint32_t len, uint8_t dir);
+    void logChannelMessage(const channelMessageStruct* msg, uint32_t len, uint8_t dir);
+    void logENewSpawn(const newSpawnStruct* spawn, uint32_t len, uint8_t dir);
+    void logNewSpawn(const newSpawnStruct* spawn, uint32_t len, uint8_t dir);
+    void logEZoneSpawns(const zoneSpawnsStruct* spawns, uint32_t len, uint8_t dir);
+    void logZoneSpawns(const zoneSpawnsStruct* spawns, uint32_t len, uint8_t dir);
+    void logTimeOfDay(const timeOfDayStruct* tday, uint32_t len, uint8_t dir);
+    void logBookText(const bookTextStruct* book, uint32_t len, uint8_t dir);
+    void logRandom(const randomStruct* ran, uint32_t len, uint8_t dir);
+    void logEmoteText(const emoteTextStruct* emote, uint32_t len, uint8_t dir);
+    void logCorpseLoc(const corpseLocStruct* corpse, uint32_t len, uint8_t dir);
+    void logPlayerBook(const playerBookStruct* item, uint32_t len, uint8_t dir);
+    void logPlayerContainer(const playerContainerStruct* item, uint32_t len, uint8_t dir);
+    void logInspectData(const inspectDataStruct* data, uint32_t len, uint8_t dir);
+    void logHPUpdate(const hpUpdateStruct* hp, uint32_t len, uint8_t dir);
+    void logSPMesg(const spMesgStruct* msg, uint32_t len, uint8_t dir);
+    void logMemSpell(const memSpellStruct* spell, uint32_t len, uint8_t dir);
+    void logBeginCast(const beginCastStruct* spell, uint32_t len, uint8_t dir);
+    void logStartCast(const startCastStruct* spell, uint32_t len, uint8_t dir);
+    void logMobUpdate(const mobUpdateStruct* update, uint32_t len, uint8_t dir);
+    void logExpUpdate(const expUpdateStruct* exp, uint32_t len, uint8_t dir);
+    void logAltExpUpdate(const altExpUpdateStruct* alt, uint32_t len, uint8_t dir);
+    void logLevelUpUpdate(const levelUpUpdateStruct* level, uint32_t len, uint8_t dir);
+    void logSkillInc(const skillIncStruct* skill, uint32_t len, uint8_t dir);
+    void logDoorOpen(const uint8_t* data, uint32_t len, uint8_t dir);
+    void logIllusion(const uint8_t* data, uint32_t len, uint8_t dir);
+    void logBadCast(const badCastStruct* spell, uint32_t len, uint8_t dir);
+    void logSysMsg(const sysMsgStruct* msg, uint32_t len, uint8_t dir);
+    void logZoneChange(const zoneChangeStruct* zone, uint32_t len, uint8_t dir);
+    void logNewZone(const newZoneStruct* zone, uint32_t len, uint8_t dir);
+    void logPlayerPos(const playerPosStruct* pos, uint32_t len, uint8_t dir);
+    void logWearChange(const wearChangeStruct* wear, uint32_t len, uint8_t dir);
+    void logAction(const action2Struct* action, uint32_t len, uint8_t dir);
+    void logCastOn(const castOnStruct* spell, uint32_t len, uint8_t dir);
+    void logManaDecrement(const manaDecrementStruct* mana, uint32_t len, uint8_t dir);
+    void logStamina(const staminaStruct* stamina, uint32_t len, uint8_t dir);
+    void logMakeDrop(const makeDropStruct* item, uint32_t len, uint8_t dir);
+    void logRemDrop(const remDropStruct* item, uint32_t len, uint8_t dir);
+    void logDropCoins(const dropCoinsStruct* coins, uint32_t len, uint8_t dir);
+    void logRemoveCoins(const removeCoinsStruct* coins, uint32_t len, uint8_t dir);
+    void logOpenVendor(const uint8_t* data, uint32_t len, uint8_t dir);
+    void logCloseVendor(const uint8_t* data, uint32_t len, uint8_t dir);
+    void logOpenGM(const uint8_t* data, uint32_t len, uint8_t dir);
+    void logCloseGM(const uint8_t* data, uint32_t len, uint8_t dir);
+    void logSpawnAppearance(const spawnAppearanceStruct* spawn, uint32_t len, uint8_t dir);
+    void logAttack2(const attack2Struct* attack, uint32_t len, uint8_t dir);
+    void logConsider(const considerStruct* consider, uint32_t len, uint8_t dir);
+    void logNewGuildInZone(const newGuildInZoneStruct* guild, uint32_t len, uint8_t dir);
+    void logMoneyUpdate(const moneyUpdateStruct* money, uint32_t len, uint8_t dir);
+    void logMoneyThing(const moneyThingStruct* thing, uint32_t len, uint8_t dir);
+    void logClientTarget(const clientTargetStruct* target, uint32_t len, uint8_t dir);
+    void logBindWound(const bindWoundStruct* bind, uint32_t len, uint8_t dir);
+    void logCDoorSpawns(const cDoorSpawnsStruct* doors, uint32_t len, uint8_t dir);
+    void logDoorSpawns(const doorSpawnsStruct* doors, uint32_t len, uint8_t dir);
+    void logGroupInfo(const groupMemberStruct* guild, uint32_t len, uint8_t dir);
+    void logUnknownOpcode(const uint8_t* data, uint32_t len, uint8_t dir);
 
 private:
     void logItemHeader(const itemStruct *item);
@@ -264,8 +273,11 @@ private:
 
 class SpawnLogger: public SEQLogger 
 {
+   Q_OBJECT
+
 public:
-    SpawnLogger(const char *filename);
+public:
+    SpawnLogger(const QString& filename);
     SpawnLogger(FILE *fp);
     void logTimeSync(const timeOfDayStruct *tday);
     void logZoneSpawn(const spawnStruct *spawn);

@@ -31,7 +31,7 @@ class ExperienceRecord
 public:
 
    ExperienceRecord( const QString &mob_name, int mob_level, long xp_gained,
-      time_t time, const QString &zone_name, EQPacket* p, GroupMgr* g);
+      time_t time, const QString &zone_name, EQPlayer* p, GroupMgr* g);
 
    const QString &getMobName() const;
    int getMobLevel() const;
@@ -44,7 +44,7 @@ public:
    const QString &getZoneName() const;
 
 private:
-   EQPacket* m_packet;
+   EQPlayer* m_player;
    GroupMgr* m_group;
    QString m_zone_name;
    QString m_mob_name;
@@ -60,7 +60,7 @@ class ExperienceWindow : public QWidget
 
 public:
 
-   ExperienceWindow( EQPacket* p, GroupMgr* g );
+   ExperienceWindow( EQPlayer* player, GroupMgr* g );
    ~ExperienceWindow();
 
 public slots:
@@ -87,7 +87,7 @@ private:
    void logexp(long xp_gained, int mob_level);
 
    // Need to grab xp totals from here
-   EQPacket* m_packet;
+   EQPlayer* m_player;
    GroupMgr* m_group;
 
    QVBoxLayout *m_layout;

@@ -470,7 +470,7 @@ void SpawnShell::removeCoinsItem(const removeCoinsStruct *c)
       deleteItem(tDrop, c->dropId);
 }
 
-void SpawnShell::zoneSpawns(const zoneSpawnsStruct* zspawns, int len)
+void SpawnShell::zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len)
 {
   int spawndatasize = (len - 2) / sizeof(spawnStruct);
 
@@ -559,9 +559,10 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      emit handleAlert(item, tNewSpawn);
 }
 
-void SpawnShell::playerUpdate(const playerPosStruct *pupdate, bool client)
+void SpawnShell::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t dir)
 {
-  if (!client && (pupdate->spawnId != m_playerId)) // PC Corpse Movement
+  if ((dir != DIR_CLIENT) && 
+      (pupdate->spawnId != m_playerId)) // PC Corpse Movement
   {
        updateSpawn(pupdate->spawnId,  
                    pupdate->xPos,
@@ -726,26 +727,27 @@ void SpawnShell::spawnWearingUpdate(const wearChangeStruct *wearing)
    }
 }
 
-void SpawnShell::consRequest(const considerStruct * con) 
+void SpawnShell::consMessage(const considerStruct * con, uint32_t, uint8_t dir) 
 {
-  if (con->playerid != con->targetid) 
+  if (dir == DIR_CLIENT)
   {
-    Spawn* item;
-    ItemMap::iterator it = m_spawns.find(con->targetid);
-    if (it != m_spawns.end())
+    if (con->playerid != con->targetid) 
     {
-      item = (Spawn*)it->second;
-
-      // note that this spawn has been considered
-      item->setConsidered(true);
-
-      emit spawnConsidered(item);
+      Spawn* item;
+      ItemMap::iterator it = m_spawns.find(con->targetid);
+      if (it != m_spawns.end())
+      {
+	item = (Spawn*)it->second;
+	
+	// note that this spawn has been considered
+	item->setConsidered(true);
+	
+	emit spawnConsidered(item);
+      }
     }
+    return;
   }
-}
 
-void SpawnShell::consMessage(const considerStruct * con) 
-{
   Spawn* item;
   QString lvl("");
   QString hps("");
@@ -1073,6 +1075,24 @@ void SpawnShell::setPlayerID(uint16_t id)
    if (!m_playerSpawn->isSelf())
      fprintf(stderr, "SpawnShell::setPlayerId(id=%d): Player spawn doesn't have correct NPC setting, has %d\n", id, m_playerSpawn->NPC());
 #endif
+}
+
+void SpawnShell::backfillZoneSpawns(const zoneSpawnsStruct* zdata, uint32_t len)
+{
+  int zoneSpawnsStructHeaderData = 
+    ((uint8_t*)&zdata->spawn[0]) - (uint8_t*)zdata;
+
+  int zoneSpawnsStructPayloadCount = 
+       (len - zoneSpawnsStructHeaderData) / sizeof(spawnZoneStruct);
+
+  for (int j = 0; j < zoneSpawnsStructPayloadCount; j++)
+    backfillSpawn(&zdata->spawn[j].spawn);
+}
+
+void SpawnShell::backfillSpawn(const newSpawnStruct *ndata)
+{
+  const spawnStruct* sdata = &ndata->spawn;
+  backfillSpawn(sdata);
 }
 
 void SpawnShell::backfillSpawn(const spawnStruct *spawn)
