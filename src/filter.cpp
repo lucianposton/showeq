@@ -670,7 +670,7 @@ Filter::addFilter(const QString& filterPattern)
   m_filterItems.append(re);
 
 #ifdef DEBUG_FILTER
-printf("Added Filter '%s'\n", string);
+printf("Added Filter '%s'\n", filterPattern);
 #endif
 
  return re->valid(); 

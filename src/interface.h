@@ -187,6 +187,7 @@ class EQInterface:public QMainWindow
  protected:
    void resizeEvent (QResizeEvent *);
    void logFilteredSpawn(const Item* item, uint32_t flag);
+   void makeNoise( const Item* item, char* szAudioCmd, char* szSoundType);
    void doAlertCommand(const Item* item, 
 		       const QString& command,
 		       const QString& audioCue);
