@@ -1,3 +1,181 @@
+Version: $Id$ $Name$
+
+dohpaZ (02/14/04)
+---------------------
++ Updated version to 5.0.0.6
++ Patch to fix QCursor issue.
++ More updates to work with 02/10/04 EQLive
++ Added the "Dockable" sub-menu to the View menu to control the dockability 
+  of various windows.
+
+dohpaZ (02/11/04)
+---------------------
++ Updated version to 5.0.0.5
++ Updated to work with 02/10/04 EQLive
++ Added Beserker class
++ Added Gate of Discord (GoD) maps.
++ Integrated patch #893070 "Races Update (GoD)" by curioseq
++ Minor fix to guild member list online member count tracking.
++ Make sure to cleanup guild list/shell when shutting down
++ Added special map icon for zone doors.
+
+dohpaZ (01/18/04)
+---------------------
++ Updated version to 5.0.0.4
++ More updates to work with 12/19/03 EQLive 
++ Fix border cases in SpellShell that would cause ShowEQ to crash.
++ Added a workaround for ISO/ANSI/IEC C++ and C conformance regressions
+  in gcc 3.3.
++ Minor fix in h2info.pl that fixes the comment and operation with certain
+  versions of perl.
++ Made packet handling more robust in the face of corrupt and non-EQ packets
+  that are captured.
++ Support display of a zone's safepoint from the zone packet on the map.
++ Added NetStream classes for handling network byte order data streams.
++ Cleaned up the textual dump of guild names
++ Added GuildShell to track the list of guild members.
++ Added support for LoY guild information capture/display.
++ Made filter2xml.pl more robust in the face of trailing spaces and Windows
+  line termination.
++ Integrated patch #861374 "Fix-three options aren't saved".
++ Integrated patch #864328 "Nedaria's Landing Map".
++ Integrated patch #864329 "Map: JaggedPine touchups".
++ Integrated patch #868227 "Restore light sources".
+
+dohpaZ (12/19/03)
+---------------------
++ Updated version to 5.0.0.3
++ Updated to work with 12/19/03 EQLive 
++ Fixed spell related crashes when using either an outdated spells_us.txt
+  or not using one.
++ Fixed uic configure problem caused by people running ./configure while su'd
+  to root.
+
+dohpaZ (12/13/03)
+---------------------
++ Updated version to 5.0.0.2
++ Updated the default ArqSeqGiveUp to 512 since with the current encryption
+  scheme a single missed packet can have greater ramifications then under the
+  previous one.
++ Removed some extraneous command line options.
++ Removed some more cruft from ShowEQParams.
++ Minor tweak to map spawn color selection to deal with properly with traps,
+  event-triggers, and timers.
+
++ Many SpellShell improvements
+  + Made it delete expired spells faster (after up to 6 seconds of 0, 
+    rather then 20).  
+  + Modified it to delete spells from the list for spawns that are killed.  
+  + It also now clears the caster and target ids when you zone, since they are 
+    not valid in the new zone.  This allows for it to fall back to matching
+    by target name for spells not cast in the current zone.
+  + Major revamp of how spells are internally managed.  This fixed numerous
+    bugs and usability issues.
+  + Added support for handling spell failure messages so that failed spells 
+    will be removed from the list.
++ Fixed parsing of the spells_us.txt for the targettype field. This fixed
+  numerous problems with the handling of self-only spells.
++ Added a workaround to allow the use of autoconf 2.13 which turns out not
+  to properly support automake's BUILT_SOURCES feature.
++ Added stdlib.h inclusion to xmlpreferences.cpp to fix the build on some
+  Linux distributions.
++ Fixed addition/update of the user message filter list when no or only
+  one item is present.
++ Integrated patches # 855993 "Map: potimea", # 855994 "Map: potime-b", 
+  # 855995 "Map: poearth-a", # 855996 "Map: poearth-b" submitted by curioseq
++ Integrated patch "showeq-5.0.0-gcc-3.3.x.patch.gz" that fixes the gcc 3.3 
+  compatibility problem caused by a noxious bug introduced in gcc 3.3.
++ Updated several structures in everquest.h to be more inline with EQEmu's
+  latest updates.
++ Added Group opcodes to zoneopcodes.xml.  Updated group structures, and 
+  updated group notification support in MessageShell.
++ Major revamp of the GroupMgr.  It now actually works.
++ Fixed map loading to be more robust in the face of malformed map files.
++ Fixed line 77 of Overthere.map (which map loading was choking on).
+
+dohpaZ (12/7/03)
+---------------------
++ Updated version to 5.0.0.1
++ OPCode and structure fixes for 11/05/03 patch.
++ Some minor optimization of door spawn handling.
++ Added zone safepoint support to ZoneMgr
++ Some dependency cleanups.
++ Fix to support people running EQ under winex.
++ Added support for user configurable map icons (spawns, pc's, items, etc...)
++ Added support for rescaling the Z for a whole map to allow migration of 
+  old/borked maps.
++ Added minimal support for importing maps (warning, this imports everything,
+  so if not importing other SOE layers you will probably end up with duplicate
+  lines, points, etc...).
++ Support for direct loading of SOE txt format map files.
++ Slight improvement in map loading speeds.
++ Added zone point destination information to map tooltip for teleport doors.
++ New message storage.
++ New message filtering system.
++ Entirely new message window, with greatly enhanced functionality.
++ Got rid of the old MsgDialog classes
++ Move terminal UI to its own class
++ Added diagnostic message functions to unify how certain messages were 
+  being handled.  The message output is now included with the rest of the 
+  text messages.
++ Moved eqstr_{}.txt handling to its own class.
++ Added Proper seperation of user data from distributed program data.
+ + Support .showeq directory
+ + Moved maps, filters, spawnpoints, and logs to their own subdirectories.
++ Switch to using QRegExp for filter pattern matching.
++ Major cleanup/revamp of Filter handling (stage 1), filters are now stored in 
+  their own sub-directories, and now uses an XML format.
++ Created a perl script filter2xml.pl which can be used to convert existing
+  filter conf files to the new XML format.
++ Fixed the duplicate accelerator bug.  Shift+F3 is now "Reload Zone Filters",
+  and Shift+F4 is now "Save Zone Filters".  Also fixed a bug that was causing
+  the zone specific filters not to be used.
++ Moved filter notification handling out of EQInterface and into its own class.
+  "Use Spawn Audio" has been split into "Use System Beep" and "Use Command"
+  in the process to create more flexibility.
++ Assorted changes/fixes to experience handling in the Player object. No more
+  bizarre out of range values.
++ Improved behaviour when swapping players.
++ Modifed default player characteristic handling.  Made the code more 
+  responsive to configuration changes.
++ Assorted experience window fixes, including the use of the ZEM that the
+  zonemgr gets from the zone packets.
++ More major cleanup of packet handling (stage 2).  Migrated opcode,implicitlen
+  and dispatch handling to an XML based system (see worldopcodes.xml and
+  zoneopcodes.xml).
++ Modified logging of decoded world/zone packets to include which 
+  packet in the opcode DB they matched, when the entry was updated, 
+  and information about the type that is supposed to be in the payload.
++ Migrated SEQWindow to be based off of QDockWindow so that all classes 
+  derived from it could take advantage of Qt's native dockable window support.
++ Made the right-click menus of SEQWindow derived windows come up in a
+  more consistent fashion.
++ Add a Window menu item to the menubar.  It contains items the control window
+  display and behaviour and also gives access to the popup menus of all 
+  active SEQWindow derived windows.
++ Added support for storing 64 bit integers, QPens, and QBrushes to the 
+  XML preference system.
++ Fixed the spawn logger to log the adjusted x/y/z values for zone/new spawns..
++ Found zonePoint in doorStruct.  
++ Made itemdb support default to disabled until the new version is in-place.
++ zones.h, changed 162 to be ssratemple and 182 to be nedaria, thanks to 
+  darkgrue and uRit1u2CBBA= respectively.
++ Integrated patch# 832080 "freebsd-stable compile 10/24/03" from jonseq
++ Integrated patch# 844078 "Fix to class displays" by belith (UnGod).
++ Integrated patch# 851037 "New map for Mistmoore" by showeqfan & Boredmapper
++ Integrated patch# 850894 "Map for Cabilis West" by showeqfan
++ Integrated patch# 846353 "ZEM Display" by archpriest (with fixes).
++ Added mir{a-j], mmc[a-j], and ruj[a-j] LDoN maps.
+
++ Requirement update
+  ShowEQ will now require Qt 3.1+ from this release forward. 
+
+dohpaZ (10/24/03)
+---------------------
++ Updated version to 4.3.17.1
++ Fixed build for certain Linux variants.
++ Made it support Qt 3.0.5 again.
+
 dohpaZ (10/24/03)
 ---------------------
 + Updated version to 4.3.17
