@@ -34,6 +34,8 @@ class NetDiag : public QFrame
    void seqExpect              (int);
    void keyChanged             (void);
    virtual void setCaption(const QString&);
+   void setWindowFont(const QFont&);
+   void restoreFont();
 
  protected:
    QString print_addr(in_addr_t);

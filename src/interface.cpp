@@ -33,6 +33,7 @@
 #include <qfile.h>
 #include <qtextstream.h>
 #include <qinputdialog.h>
+#include <qfontdialog.h>
 
 #include <qwindowsstyle.h>
 #include <qplatinumstyle.h>
@@ -62,6 +63,14 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
                                  "Troll", "Ogre", "Halfling", "Gnome", "Iksar",
                                  "Vah Shir"
                                 };
+
+   // set the applications default font
+   if (pSEQPrefs->isPreference("Font", section))
+   {
+     QFont appFont = pSEQPrefs->getPrefFont("Font", section, qApp->font());
+     qApp->setFont( appFont, true );
+   }
+
 
    // initialize packet count
    m_initialcount = 0;
@@ -108,11 +117,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
 /////////////////
 // Main widgets
-   if (pSEQPrefs->getPrefString("Font", "Interface", "default") == "default")
-       QFont appFont = QApplication::font();
-   else
-       QFont appFont(pSEQPrefs->getPrefString("Font", "Interface", "default"), showeq_params->fontsize, QFont::Normal, FALSE);
-   qApp->setFont( appFont, TRUE );
    // Make a VBox to use as central widget
    QVBox* pCentralBox = new QVBox(this);
    setCentralWidget(pCentralBox);
@@ -472,11 +476,20 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_id_opt_ResetMana = pOptMenu->insertItem("Reset Max Mana", this, SLOT(resetMaxMana()));
    m_id_opt_PvPTeams  = pOptMenu->insertItem("PvP Teams", this, SLOT(toggle_opt_PvPTeams()));
    m_id_opt_PvPDeity  = pOptMenu->insertItem("PvP Deity", this, SLOT(toggle_opt_PvPDeity()));
-   x = pOptMenu->insertItem("Create Unknown Spawns", this, SLOT(toggle_opt_CreateUnknownSpawns(int)));
+   x = pOptMenu->insertItem("Create Unknown Spawns", 
+			    this, SLOT(toggle_opt_CreateUnknownSpawns(int)));
    menuBar()->setItemChecked (x, showeq_params->createUnknownSpawns);
-   x = pOptMenu->insertItem("Show Spell Messages", this, SLOT(toggle_opt_ShowSpellMessages(int)));
+   x = pOptMenu->insertItem("Show Spell Messages", 
+			    this, SLOT(toggle_opt_ShowSpellMessages(int)));
    menuBar()->setItemChecked (x, showeq_params->showSpellMsgs);
-   x = pOptMenu->insertItem("Record Spawn Walk Paths", this, SLOT(toggle_opt_WalkPathRecord(int)));
+   x = pOptMenu->insertItem("Use EQ Retarded Coordinates", 
+			    this, SLOT(toggle_opt_RetardedCoords(int)));
+   menuBar()->setItemChecked (x, showeq_params->retarded_coords);
+   x = pOptMenu->insertItem("Use Unix System Time for Spawn Time", 
+			    this, SLOT(toggle_opt_SystimeSpawntime(int)));
+   menuBar()->setItemChecked (x, showeq_params->systime_spawntime);
+   x = pOptMenu->insertItem("Record Spawn Walk Paths", 
+			    this, SLOT(toggle_opt_WalkPathRecord(int)));
    menuBar()->setItemChecked (x, showeq_params->walkpathrecord);
 
    QPopupMenu* subMenu = new QPopupMenu;
@@ -687,7 +700,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    menuBar()->insertItem( "&Interface" , pInterfaceMenu);
 
    pInterfaceMenu->insertItem("Hide MenuBar", this, SLOT(toggle_view_menubar()));
-   pInterfaceMenu->insertItem("Hide/Unhide StatusBar", this, SLOT(toggle_view_statusbar()));
 
    // Interface -> Style
    //pStyleMenu = new QPopupMenu;
@@ -720,31 +732,31 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_windowCaptionMenu = new QPopupMenu;
    pInterfaceMenu->insertItem( "Window &Caption", m_windowCaptionMenu);
     
-   x = m_windowCaptionMenu->insertItem("&Main Window");
+   x = m_windowCaptionMenu->insertItem("&Main Window...");
    m_windowCaptionMenu->setItemParameter(x, 5);
     
-   x = m_windowCaptionMenu->insertItem("Spawn &List");
+   x = m_windowCaptionMenu->insertItem("Spawn &List...");
    m_windowCaptionMenu->setItemParameter(x, 0);
     
-   x = m_windowCaptionMenu->insertItem("&Player Stats");
+   x = m_windowCaptionMenu->insertItem("&Player Stats...");
    m_windowCaptionMenu->setItemParameter(x, 1);
     
-   x = m_windowCaptionMenu->insertItem("&Player Skills");
+   x = m_windowCaptionMenu->insertItem("Player &Skills...");
    m_windowCaptionMenu->setItemParameter(x, 2);
     
-   x = m_windowCaptionMenu->insertItem("Sp&ell List");
+   x = m_windowCaptionMenu->insertItem("Spell L&ist...");
    m_windowCaptionMenu->setItemParameter(x, 3);
     
-   x = m_windowCaptionMenu->insertItem("&Compass");
+   x = m_windowCaptionMenu->insertItem("&Compass...");
    m_windowCaptionMenu->setItemParameter(x, 4);
     
-   x = m_windowCaptionMenu->insertItem("&Experience Window");
+   x = m_windowCaptionMenu->insertItem("&Experience Window...");
    m_windowCaptionMenu->setItemParameter(x, 6);
     
-   x = m_windowCaptionMenu->insertItem("&Combat Window");
+   x = m_windowCaptionMenu->insertItem("Comb&at Window...");
    m_windowCaptionMenu->setItemParameter(x, 7);
     
-   x = m_windowCaptionMenu->insertItem("&Network Diagnostics");
+   x = m_windowCaptionMenu->insertItem("&Network Diagnostics...");
    m_windowCaptionMenu->setItemParameter(x, 8);
 
    // insert Map docking options 
@@ -758,15 +770,109 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
         m_windowCaptionMenu->setItemParameter(x, i + mapDockBase);
    }
     
-   connect (m_windowCaptionMenu, SIGNAL(activated(int)), this, SLOT(set_interface_WindowCaption(int)));
-   x = pInterfaceMenu->insertItem("Save Window Sizes & Positions", this, SLOT(toggle_opt_SavePosition(int)));
+   connect (m_windowCaptionMenu, SIGNAL(activated(int)), 
+	    this, SLOT(set_interface_WindowCaption(int)));
+
+   // Interface -> Window Font
+   QPopupMenu* windowFontMenu = new QPopupMenu;
+   pInterfaceMenu->insertItem( "&Font", windowFontMenu);
+    
+   windowFontMenu->insertItem( "&Applicatoin Default...", 
+			       this, SLOT(set_interface_Font(int)));
+
+   windowFontMenu->insertItem( "Main Window Status Font...", 
+			      this, SLOT(set_interface_statusbar_Font(int)));
+   //   x = windowFontMenu->insertItem("&Main Window");
+   //   windowFontMenu->setItemParameter(x, 5);
+    
+   x = windowFontMenu->insertItem("Spawn &List...");
+   windowFontMenu->setItemParameter(x, 0);
+    
+   x = windowFontMenu->insertItem("&Player Stats...");
+   windowFontMenu->setItemParameter(x, 1);
+    
+   x = windowFontMenu->insertItem("Player &Skills...");
+   windowFontMenu->setItemParameter(x, 2);
+    
+   x = windowFontMenu->insertItem("Spell L&ist...");
+   windowFontMenu->setItemParameter(x, 3);
+    
+   x = windowFontMenu->insertItem("&Compass...");
+   windowFontMenu->setItemParameter(x, 4);
+    
+   x = windowFontMenu->insertItem("&Experience Window...");
+   windowFontMenu->setItemParameter(x, 6);
+    
+   x = windowFontMenu->insertItem("Comb&at Window...");
+   windowFontMenu->setItemParameter(x, 7);
+    
+   x = windowFontMenu->insertItem("&Network Diagnostics...");
+   windowFontMenu->setItemParameter(x, 8);
+
+   connect (windowFontMenu, SIGNAL(activated(int)), 
+	    this, SLOT(set_interface_WindowFont(int)));
+
+
+   // Interface -> Status Bar
+   QPopupMenu* statusBarMenu = new QPopupMenu;
+   statusBarMenu->setCheckable(true);
+   pInterfaceMenu->insertItem("&Status Bar", statusBarMenu);
+   statusBarMenu->insertItem("Show/Hide", 
+			      this, SLOT(toggle_view_statusbar()));
+   x = statusBarMenu->insertItem( "Status");
+   statusBarMenu->setItemParameter(x, 1);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowStatus",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "Zone");
+   statusBarMenu->setItemParameter(x, 2);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowZone",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "Spawns");
+   statusBarMenu->setItemParameter(x, 3);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowSpawns",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "Experience");
+   statusBarMenu->setItemParameter(x, 4);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowExp",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "AA Experience");
+   statusBarMenu->setItemParameter(x, 5);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowExpAA",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "Packet Counter");
+   statusBarMenu->setItemParameter(x, 6);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowPacketCounter",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "EQ Time");
+   statusBarMenu->setItemParameter(x, 7);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowEQTime",
+							   "Interface_StatusBar", false));
+    
+   connect (statusBarMenu, SIGNAL(activated(int)), 
+	    this, SLOT(toggle_interface_statusbar_Window(int)));
+
+
+   x = pInterfaceMenu->insertItem("Save Window Sizes & Positions", 
+				  this, SLOT(toggle_interface_SavePosition(int)));
    menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("SavePosition", 
 							"Interface",
 							true));
-   x = pInterfaceMenu->insertItem("Restore Window Positions", this, SLOT(toggle_opt_UseWindowPos(int)));
+   x = pInterfaceMenu->insertItem("Restore Window Positions", 
+				  this, SLOT(toggle_interface_UseWindowPos(int)));
    menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("UseWindowPos", 
 							"Interface",
 							true));
+   x = pInterfaceMenu->insertItem("Use Stdout", 
+				  this, SLOT(toggle_interface_UseStdout(int)));
+   menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("UseStdout", 
+							"Interface",
+							true));
+   x = pInterfaceMenu->insertItem("No Bank", 
+				  this, SLOT(toggle_interface_NoBank(int)));
+   menuBar()->setItemChecked (x, showeq_params->no_bank); 
+
+   pInterfaceMenu->insertItem( "Formatted Messages File...", 
+			       this, SLOT(select_interface_FormatFile(int)));
 
    // Debug menu
    //pDebugMenu = new QPopupMenu;
@@ -790,53 +896,42 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
    //Status widget
      m_stsbarStatus = new QLabel(statusBar(), "Status");
-     m_stsbarStatus->setFont(QFont("Helvetica", showeq_params->statusfontsize));
-     m_stsbarStatus->setFixedHeight(showeq_params->statusfontsize + 6);
      m_stsbarStatus->setMinimumWidth(80);
      m_stsbarStatus->setText(QString("ShowEQ %1").arg(VERSION));
      statusBar()->addWidget(m_stsbarStatus, 8);
 
    //Zone widget
      m_stsbarZone = new QLabel(statusBar(), "Zone");
-     m_stsbarZone->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarZone->setText("Zone: [unknown]");
-     m_stsbarZone->setFixedHeight(showeq_params->statusfontsize + 6);
      statusBar()->addWidget(m_stsbarZone, 2);
 
    //Mobs widget
      m_stsbarSpawns = new QLabel(statusBar(), "Mobs");
-     m_stsbarSpawns->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarSpawns->setText("Mobs:");
-     m_stsbarSpawns->setFixedHeight(showeq_params->statusfontsize + 6);
      statusBar()->addWidget(m_stsbarSpawns, 1);
 
    //Exp widget
      m_stsbarExp = new QLabel(statusBar(), "Exp");
-     m_stsbarExp->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarExp->setText("Exp [unknown]");
-     m_stsbarExp->setFixedHeight(showeq_params->statusfontsize + 6);
      statusBar()->addWidget(m_stsbarExp, 2);
 
    //ExpAA widget
      m_stsbarExpAA = new QLabel(statusBar(), "ExpAA");
-     m_stsbarExpAA->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarExpAA->setText("ExpAA [unknown]");
-     m_stsbarExpAA->setFixedHeight(showeq_params->statusfontsize + 6);
      statusBar()->addWidget(m_stsbarExpAA, 2);
    
    //Pkt widget
      m_stsbarPkt = new QLabel(statusBar(), "Pkt");
-     m_stsbarPkt->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarPkt->setText("Pkt 0");
-     m_stsbarPkt->setFixedHeight(showeq_params->statusfontsize + 6);
      statusBar()->addWidget(m_stsbarPkt, 1);
 
    //EQTime widget
      m_stsbarEQTime = new QLabel(statusBar(), "EQTime");
-     m_stsbarEQTime->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarEQTime->setText("EQTime [UNKNOWN]");
-     m_stsbarEQTime->setFixedHeight(showeq_params->statusfontsize + 6);
      statusBar()->addWidget(m_stsbarEQTime, 1);
+
+     // setup the status fonts correctly
+     restoreStatusFont();
 
    if (!pSEQPrefs->getPrefBool("ShowStatus", statusBarSection, true))
      m_stsbarStatus->hide();
@@ -886,6 +981,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
 /////////////////
 // interface connections
+   // connect EQInterface slots to its own signals
+   connect(this, SIGNAL(restoreFonts(void)),
+	   this, SLOT(restoreStatusFont(void)));
 
    // connect MapMgr slots to interface signals
    connect(this, SIGNAL(saveAllPrefs(void)),
@@ -1107,11 +1205,17 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    connect (m_player, SIGNAL(expGained(const QString &, int, long, QString )),
 	    m_expWindow, SLOT(addExpRecord(const QString &, int, long,QString )));
 
+   // connect ExperienceWindow slots to EQInterface signals
+    connect(this, SIGNAL(restoreFonts(void)),
+	    m_expWindow, SLOT(restoreFont(void)));
+
    // connect CombatWindow slots to the signals
    connect (this, SIGNAL(combatSignal(int, int, int, int, int)),
             m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int)));
    connect (m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
    	    m_combatWindow, SLOT(resetDPS()));
+   connect(this, SIGNAL(restoreFonts(void)),
+	   m_combatWindow, SLOT(restoreFont(void)));
 
    // connect PktLogger to EQPacket signals
    connect (m_packet, SIGNAL(zoneServerInfo(const uint8_t*, uint32_t, uint8_t)),
@@ -1257,19 +1361,15 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    int j = 0;
    MsgDialog* pMsgDlg;
    QString msgSection;
+   bool haveMsgDialogs = false;
    for(i = 1; i < 15; i++)
    {
       // attempt to pull a button title from the preferences
      msgSection.sprintf("MessageBox%d", i);
      if (pSEQPrefs->isPreference("Caption", msgSection))
      {
-       m_viewChannelMsgs = true;
-       menuBar()->setItemChecked (m_id_view_ChannelMsgs, m_viewChannelMsgs);
+       haveMsgDialogs = true;
        title = pSEQPrefs->getPrefString("Caption", msgSection);
-//        pMsgDlg = new MsgDialog(topLevelWidget(), title, m_StringList);
-//        pMsgDlg = new MsgDialog(this, title, m_StringList);
-        // using the parentWidget makes this messagebox isolated from the
-        // main application
         pMsgDlg = new MsgDialog(parentWidget(), title, m_StringList);
         m_msgDialogList.append(pMsgDlg);
 
@@ -1315,8 +1415,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
                fprintf(stderr, "Error: Incomplete definition of Button '%s'\n",
 		       (const char*)title);
              }
-// allow skipped numbers
-//             break; // no more buttons
           }
 
         } // end for buttons
@@ -1325,7 +1423,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
         QSize s = pSEQPrefs->getPrefSize("WindowSize", msgSection, 
 					 pMsgDlg->size());
         pMsgDlg->resize(s);
-        pMsgDlg->show();
         if (pSEQPrefs->getPrefBool("UseWindowPos", section, true))
 	{
 	  QPoint p = pSEQPrefs->getPrefPoint("WindowPos", msgSection, 
@@ -1333,12 +1430,21 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
           pMsgDlg->move(p);
 	}
       } // end if dialog config section found
-
-// allow skipped numbers
-//      else
-//        break;
-
    } // for all message boxes defined in pref file
+
+   m_viewChannelMsgs = pSEQPrefs->getPrefBool("ShowChannel", section, 
+					      haveMsgDialogs);
+   menuBar()->setItemChecked (m_id_view_ChannelMsgs, m_viewChannelMsgs);
+   for(MsgDialog *diag=m_msgDialogList.first(); 
+       diag != 0; 
+       diag=m_msgDialogList.next() ) 
+   {
+     if (m_viewChannelMsgs)
+       diag->show();
+     else
+       diag->hide();
+   }
+
 
    // connect signals for receiving string messages
    connect (m_packet, SIGNAL (msgReceived(const QString &)),
@@ -1446,6 +1552,32 @@ EQInterface::~EQInterface()
 {
   if (m_packet != NULL)
     delete m_packet;
+}
+
+void EQInterface::restoreStatusFont()
+{
+   QFont defFont;
+   defFont.setPointSize(8);
+   QFont statusFont = pSEQPrefs->getPrefFont("StatusFont", "Interface", 
+					     defFont);
+				  
+   int statusFixedHeight = statusFont.pointSize() + 6;
+
+   // set the correct font information and sizes of the status bar widgets
+   m_stsbarStatus->setFont(statusFont);
+   m_stsbarStatus->setFixedHeight(statusFixedHeight);
+   m_stsbarZone->setFont(statusFont);
+   m_stsbarZone->setFixedHeight(statusFixedHeight);
+   m_stsbarSpawns->setFont(statusFont);
+   m_stsbarSpawns->setFixedHeight(statusFixedHeight);
+   m_stsbarExp->setFont(statusFont);
+   m_stsbarExp->setFixedHeight(statusFixedHeight);
+   m_stsbarExpAA->setFont(statusFont);
+   m_stsbarExpAA->setFixedHeight(statusFixedHeight);
+   m_stsbarPkt->setFont(statusFont);
+   m_stsbarPkt->setFixedHeight(statusFixedHeight);
+   m_stsbarEQTime->setFont(statusFont);
+   m_stsbarEQTime->setFixedHeight(statusFixedHeight);
 }
 
 void EQInterface::toggle_view_StatWin( int id )
@@ -1647,7 +1779,7 @@ void EQInterface::set_interface_WindowCaption( int id )
   QString window;
 
   // get the window number parameter
-  winnum = m_windowCaptionMenu->itemParameter(id);
+  winnum = menuBar()->itemParameter(id);
 
   switch(winnum)
   {
@@ -1723,6 +1855,287 @@ void EQInterface::set_interface_WindowCaption( int id )
     if (ok)
       widget->setCaption(caption);
   }
+}
+
+
+void EQInterface::set_interface_WindowFont( int id )
+{
+  int winnum;
+  QString window;
+
+  // get the window number parameter
+  winnum = menuBar()->itemParameter(id);
+
+  bool ok = false;
+  QFont newFont;
+  //
+  // NOTE: Yeah, this sucks for now, but until the architecture gets cleaned
+  // up it will have to do
+  switch(winnum)
+  {
+  case 0: // Spawn List
+    // get a new font
+    newFont = QFontDialog::getFont(&ok, m_spawnList->font(), 
+				   this, "ShowEQ Spawn List Font");
+    
+    
+    // if the user entered a font and clicked ok, set the windows font
+    if (ok)
+      m_spawnList->setWindowFont(newFont);
+    break;
+  case 1: // Player Stats
+    // get a new font
+    newFont = QFontDialog::getFont(&ok, m_statList->font(), 
+				   this, "ShowEQ Player Stats Font");
+    
+    
+    // if the user entered a font and clicked ok, set the windows font
+    if (ok)
+      m_statList->setWindowFont(newFont);
+    break;
+  case 2: // Player Skills
+    // get a new font
+    newFont = QFontDialog::getFont(&ok, m_skillList->font(), 
+				   this, "ShowEQ Player Skills Font");
+    
+    
+    // if the user entered a font and clicked ok, set the windows font
+    if (ok)
+      m_skillList->setWindowFont(newFont);
+    break;
+  case 3: // Spell List
+    // get a new font
+    newFont = QFontDialog::getFont(&ok, m_spellList->font(), 
+				   this, "ShowEQ Spell List Font");
+    
+    
+    // if the user entered a font and clicked ok, set the windows font
+    if (ok)
+      m_spellList->setWindowFont(newFont);
+    break;
+  case 4: // Compass
+    // get a new font
+    newFont = QFontDialog::getFont(&ok, m_compass->font(), 
+				   this, "ShowEQ Compass Font");
+    
+    
+    // if the user entered a font and clicked ok, set the windows font
+    if (ok)
+      m_compass->setWindowFont(newFont);
+    break;
+  case 5: // Interface
+    // window = "Main Window";
+    break;
+  case 6: // Experience Window
+    // get a new font
+    newFont = QFontDialog::getFont(&ok, m_expWindow->font(), 
+				   this, "ShowEQ Experience Window Font");
+    
+    
+    // if the user entered a font and clicked ok, set the windows font
+    if (ok)
+      m_expWindow->setWindowFont(newFont);
+    break;
+  case 7: // Combat Window
+    // get a new font
+    newFont = QFontDialog::getFont(&ok, m_combatWindow->font(), 
+				   this, "ShowEQ Combat Window Font");
+    
+    
+    // if the user entered a font and clicked ok, set the windows font
+    if (ok)
+      m_combatWindow->setWindowFont(newFont);
+    break;
+  case 8: // Network Diagnostics
+    // get a new font
+    newFont = QFontDialog::getFont(&ok, m_netDiag->font(), 
+				   this, "ShowEQ Network Diagnostics Font");
+    
+    
+    // if the user entered a font and clicked ok, set the windows font
+    if (ok)
+      m_netDiag->setWindowFont(newFont);
+    break;
+  default:
+    break;
+    };
+}
+
+void EQInterface::set_interface_Font(int id)
+{
+  QString name = "ShowEQ - Application Font";
+  bool ok = false;
+
+  // get a new application font
+  QFont newFont;
+  newFont = QFontDialog::getFont(&ok, QApplication::font(), 
+				 this, name);
+
+  // if the user clicked ok and selected a valid font, set it
+  if (ok)
+  {
+    // set the new application font
+    qApp->setFont( newFont, true );
+
+    // set the preference for future sessions
+    pSEQPrefs->setPrefFont("Font", "Interface", 
+			   newFont);
+
+    // make sure the windows that override the application font, do so
+    emit restoreFonts();
+  }
+}
+
+
+void EQInterface::select_interface_FormatFile(int id)
+{
+  QString formatFile = pSEQPrefs->getPrefString("FormatFile", "Interface", 
+						    LOGDIR "/eqstr_en.txt");
+  QString newFormatFile = 
+    QFileDialog::getOpenFileName(formatFile, "*.txt", this, "FormatFile",
+				 "Select Format File");
+
+  // if the newFormatFile name is not empty, then the user selected a file
+  if (!newFormatFile.isEmpty())
+  {
+    // set the new format file to use
+    pSEQPrefs->setPrefString("FormatFile", "Interface", newFormatFile);
+			     
+    // reload the format strings
+    loadFormatStrings();
+  }
+}
+
+void EQInterface::toggle_interface_statusbar_Window(int id)
+{
+  QWidget* window = NULL;
+  QString preference;
+
+  switch (menuBar()->itemParameter(id))
+  {
+  case 1:
+    window = m_stsbarStatus;
+
+    preference = "ShowStatus";
+    break;
+  case 2:
+    window = m_stsbarZone;
+
+    preference = "ShowZone";
+    break;
+  case 3:
+    window = m_stsbarSpawns;
+
+    preference = "ShowSpawns";
+    break;
+  case 4:
+    window = m_stsbarExp;
+
+    preference = "ShowExp";
+    break;
+  case 5:
+    window = m_stsbarExpAA;
+
+    preference = "ShowExpAA";
+    break;
+  case 6:
+    window = m_stsbarPkt;
+
+    preference = "ShowPacketCounter";
+    break;
+  case 7:
+    window = m_stsbarEQTime;
+
+    preference = "ShowEQTime";
+    break;
+  default:
+    return;
+  }
+
+  if (window == NULL)
+    return;
+
+  // should the window be visible
+  bool show = !window->isVisible();
+
+  // show or hide the window as necessary
+  if (show)
+    window->show();
+  else
+    window->hide();
+
+  // check/uncheck the menu item
+  menuBar()->setItemChecked(id, show); 
+
+  // set the preference for future sessions
+  pSEQPrefs->setPrefBool(preference, "Interface_StatusBar", show);
+}
+
+void EQInterface::set_interface_statusbar_Font(int id)
+{
+  QString name = "ShowEQ - Status Font";
+  bool ok = false;
+
+  // setup a default new status font
+  QFont newFont = QApplication::font();
+  newFont.setPointSize(8);
+
+  // get new status font
+  newFont = QFontDialog::getFont(&ok, 
+				 pSEQPrefs->getPrefFont("StatusFont",
+							"Interface",
+							newFont),
+				 this, name);
+
+  // if the user clicked ok and selected a valid font, set it
+  if (ok)
+  {
+    // set the preference for future sessions
+    pSEQPrefs->setPrefFont("StatusFont", "Interface", 
+			   newFont);
+
+    // make sure to reset the status font since the previous call may have 
+    // changed it
+    restoreStatusFont();
+  }
+}
+
+void
+EQInterface::toggle_interface_SavePosition (int id)
+{
+    pSEQPrefs->setPrefBool("SavePosition", "Interface", 
+			   !pSEQPrefs->getPrefBool("SavePosition", 
+						   "Interface"));
+    menuBar()->setItemChecked(id, pSEQPrefs->getPrefBool("SavePosition", 
+							 "Interface"));
+}
+
+void
+EQInterface::toggle_interface_UseWindowPos (int id)
+{
+    pSEQPrefs->setPrefBool("UseWindowPos", "Interface", 
+			   !pSEQPrefs->getPrefBool("UseWindowPos", 
+						   "Interface"));
+    menuBar()->setItemChecked(id, pSEQPrefs->getPrefBool("UseWindowPos", 
+							 "Interface"));
+}
+
+void
+EQInterface::toggle_interface_UseStdout (int id)
+{
+    pSEQPrefs->setPrefBool("UseStdout", "Interface", 
+			   !pSEQPrefs->getPrefBool("UseStdout", 
+						   "Interface"));
+    menuBar()->setItemChecked(id, pSEQPrefs->getPrefBool("UseStdout", 
+							 "Interface"));
+}
+
+void
+EQInterface::toggle_interface_NoBank (int id)
+{
+  showeq_params->no_bank = !showeq_params->no_bank;
+  pSEQPrefs->setPrefBool("NoBank", "Interface", showeq_params->no_bank);
+  menuBar()->setItemChecked(id, showeq_params->no_bank);
 }
 
 //
@@ -2230,17 +2643,20 @@ void EQInterface::toggle_log_UnknownData (void)
 void
 EQInterface::toggle_view_ChannelMsgs (void)
 {
-    m_viewChannelMsgs = !m_viewChannelMsgs;
-    menuBar()->setItemChecked (m_id_view_ChannelMsgs, m_viewChannelMsgs);
-    /* From Daisy, hide Channel Messages if the view flag is false */
-    for(MsgDialog *diag=m_msgDialogList.first(); diag != 0; diag=m_msgDialogList.next() ) {
-      if (m_viewChannelMsgs) {
-	diag->show();
-      }
-      else {
-	diag->hide();
-      }
-    }
+  m_viewChannelMsgs = !m_viewChannelMsgs;
+  menuBar()->setItemChecked (m_id_view_ChannelMsgs, m_viewChannelMsgs);
+  /* From Daisy, hide Channel Messages if the view flag is false */
+  for(MsgDialog *diag=m_msgDialogList.first(); 
+      diag != 0;
+      diag=m_msgDialogList.next() ) 
+  {
+    if (m_viewChannelMsgs)
+      diag->show();
+    else
+      diag->hide();
+  }
+  // set the preference
+  pSEQPrefs->setPrefBool("ShowChannel", "Interface", m_viewChannelMsgs);
 }
 
 void
@@ -2661,23 +3077,19 @@ EQInterface::set_opt_WalkPathLength(int len)
 }
 
 void
-EQInterface::toggle_opt_SavePosition (int id)
+EQInterface::toggle_opt_RetardedCoords (int id)
 {
-    pSEQPrefs->setPrefBool("SavePosition", "Interface", 
-			   !pSEQPrefs->getPrefBool("SavePosition", 
-						   "Interface"));
-    menuBar()->setItemChecked(id, pSEQPrefs->getPrefBool("SavePosition", 
-							 "Interface"));
+    showeq_params->retarded_coords = !showeq_params->retarded_coords;
+    menuBar()->setItemChecked(id, showeq_params->retarded_coords);
+    pSEQPrefs->setPrefBool("RetardedCoords", "Interface", showeq_params->walkpathrecord);
 }
 
 void
-EQInterface::toggle_opt_UseWindowPos (int id)
+EQInterface::toggle_opt_SystimeSpawntime (int id)
 {
-    pSEQPrefs->setPrefBool("UseWindowPos", "Interface", 
-			   !pSEQPrefs->getPrefBool("UseWindowPos", 
-						   "Interface"));
-    menuBar()->setItemChecked(id, pSEQPrefs->getPrefBool("UseWindowPos", 
-							 "Interface"));
+    showeq_params->systime_spawntime = !showeq_params->systime_spawntime;
+    menuBar()->setItemChecked(id, showeq_params->systime_spawntime);
+    pSEQPrefs->setPrefBool("SystimeSpawntime", "Interface", showeq_params->walkpathrecord);
 }
 
 void
@@ -4238,6 +4650,8 @@ void EQInterface::showMap(int i)
       
     connect(this, SIGNAL(saveAllPrefs(void)),
 	    m_map[i], SLOT(savePrefs(void)));
+    connect(this, SIGNAL(restoreFonts(void)),
+	    m_map[i], SLOT(restoreFont(void)));
     
     // Get the map...
     Map* map = m_map[i]->map();
@@ -4300,6 +4714,8 @@ void EQInterface::showSpawnList(void)
 	      m_spawnList, SLOT(selectSpawn(const Item*)));
      connect(this, SIGNAL(saveAllPrefs(void)),
 	     m_spawnList, SLOT(savePrefs(void)));
+     connect(this, SIGNAL(restoreFonts(void)),
+	     m_spawnList, SLOT(restoreFont(void)));
   }
 
   // make sure it's visible
@@ -4319,6 +4735,8 @@ void EQInterface::showStatList(void)
     // connect stat list slots to interface signals
     connect(this, SIGNAL(saveAllPrefs(void)),
 	    m_statList, SLOT(savePrefs(void)));
+    connect(this, SIGNAL(restoreFonts(void)),
+	    m_statList, SLOT(restoreFont(void)));
   }
 
   // make sure it's visible
@@ -4338,6 +4756,8 @@ void EQInterface::showSkillList(void)
     // connect skill list slots to interfaces signals
     connect(this, SIGNAL(saveAllPrefs(void)),
 	    m_skillList, SLOT(savePrefs(void)));
+    connect(this, SIGNAL(restoreFonts(void)),
+	    m_skillList, SLOT(restoreFont(void)));
   }
 
   // make sure it's visible
@@ -4365,7 +4785,8 @@ void EQInterface::showSpellList(void)
 	    m_spellList, SLOT(clear()));
     connect(this, SIGNAL(saveAllPrefs(void)),
 	    m_spellList, SLOT(savePrefs(void)));
-
+    connect(this, SIGNAL(restoreFonts(void)),
+	    m_spellList, SLOT(restoreFont(void)));
   }
 
   // make sure it's visible
@@ -4383,8 +4804,10 @@ void EQInterface::showCompass(void)
       m_compass = new CompassFrame(m_player, NULL, "compass");
 
     // supply the compass slots with EQInterface signals
-     connect (this, SIGNAL(selectSpawn(const Item*)),
-	      m_compass, SLOT(selectSpawn(const Item*)));
+    connect (this, SIGNAL(selectSpawn(const Item*)),
+	     m_compass, SLOT(selectSpawn(const Item*)));
+    connect(this, SIGNAL(restoreFonts(void)),
+	    m_compass, SLOT(restoreFont(void)));
   }
 
   // make sure it's visible
@@ -4394,7 +4817,12 @@ void EQInterface::showCompass(void)
 void EQInterface::showNetDiag()
 {
   if (m_netDiag == NULL)
+  {
     m_netDiag = new NetDiag(m_packet, NULL, "NetDiag");
+    
+    connect(this, SIGNAL(restoreFonts(void)),
+	    m_netDiag, SLOT(restoreFont(void)));
+  }
 
   // make sure it's visible
   m_netDiag->show();

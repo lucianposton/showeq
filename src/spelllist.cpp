@@ -113,7 +113,15 @@ SpellList::SpellList(QWidget *parent, const char *name)
    setShowSortIndicator(TRUE);
 #endif
    setRootIsDecorated(false);
-   setFont(QFont("Helvetica", showeq_params->fontsize));
+
+   QString section = "SpellList";
+
+   // restore the windows caption
+   QListView::setCaption(pSEQPrefs->getPrefString("Caption", section,
+						  "ShowEQ - Spells"));
+
+   // restore the font
+   restoreFont();
 
    //addColumn... spell icon
    addColumn("Spell");
@@ -126,9 +134,7 @@ SpellList::SpellList(QWidget *parent, const char *name)
    addColumn("Remain");
    setAllColumnsShowFocus(true);
    setSorting(SPELLCOL_DURATION);
-   QListView::setCaption("ShowEQ - Spells");
 
-   QString section = "SpellList";
    // Restore column order
    QString tStr = pSEQPrefs->getPrefString("ColumnOrder", section, "N/A");
    if (tStr != "N/A") {
@@ -260,6 +266,28 @@ void SpellList::setCaption(const QString& text)
 
   // set the preference
   pSEQPrefs->setPrefString("Caption", "SpellList", caption());
+}
+
+
+void SpellList::setWindowFont(const QFont& font)
+{
+  // set the font preference
+  pSEQPrefs->setPrefFont("Font", "SpellList", font);
+
+  // restore the font to the preference
+  restoreFont();
+}
+
+void SpellList::restoreFont()
+{
+  QString section = "SpellList";
+  // set the applications default font
+  if (pSEQPrefs->isPreference("Font", section))
+  {
+    // use the font specified in the preferences
+    QFont font = pSEQPrefs->getPrefFont("Font", section);
+    setFont( font);
+  }
 }
 
 void SpellList::selectSpell(SpellItem *item)

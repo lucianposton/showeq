@@ -18,6 +18,14 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
     m_packet(packet),
     m_playbackSpeed(NULL)
 {
+  // get preferences
+  QString section = "NetDiag";
+
+  // set caption
+  QFrame::setCaption(pSEQPrefs->getPrefString("Caption", section,
+					      "ShowEQ - Network Diagnostics"));
+  restoreFont();
+
   QGridLayout* tmpGrid = new QGridLayout(this, 6, 9);
   tmpGrid->addColSpacing(3, 5);
   tmpGrid->addColSpacing(6, 5);
@@ -25,13 +33,6 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   tmpGrid->addRowSpacing(3, 5);
   tmpGrid->addRowSpacing(6, 5);
   tmpGrid->addRowSpacing(8, 5);
-
-  // get preferences
-  QString section = "NetDiag";
-
-  // set caption
-  QFrame::setCaption(pSEQPrefs->getPrefString("Caption", section,
-					      "ShowEQ - Network Diagnostics"));
 
   int row = 0;
   int col = 0;
@@ -186,6 +187,27 @@ void NetDiag::setCaption(const QString& text)
 
   // set the preference
   pSEQPrefs->setPrefString("Caption", "NetDiag", caption());
+}
+
+void NetDiag::setWindowFont(const QFont& font)
+{
+  // set the font preference
+  pSEQPrefs->setPrefFont("Font", "NetDiag", font);
+
+  // restore the font to the preference
+  restoreFont();
+}
+
+void NetDiag::restoreFont()
+{
+  QString section = "NetDiag";
+  // set the applications default font
+  if (pSEQPrefs->isPreference("Font", section))
+  {
+    // use the font specified in the preferences
+    QFont font = pSEQPrefs->getPrefFont("Font", section);
+    setFont( font);
+  }
 }
 
 void NetDiag::seqReceive(int seq)

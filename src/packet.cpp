@@ -1356,7 +1356,7 @@ void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf, uint8_t dir)
    }
 
    if ((m_serverDataSize + pf.payloadLength()) > sizeof(m_serverData))
-     printf("WARNING: ServerDataSize(%d) > sizeof(serverData)(%d)\n",
+     printf("\a\aWARNING: ServerDataSize(%d) > sizeof(serverData)(%d)\a\a\n",
 	    (m_serverDataSize + pf.payloadLength()), sizeof(m_serverData));
 
    // Add data

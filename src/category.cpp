@@ -84,6 +84,8 @@ CFilterDlg::CFilterDlg(QWidget *parent, QString name)
 #ifdef DEBUG
    debug ("CFilterDlg()");
 #endif /* DEBUG */
+   QFont labelFont;
+   labelFont.setBold(true);
 
    QBoxLayout* topLayout = new QVBoxLayout(this);
    QBoxLayout* row4Layout = new QHBoxLayout(topLayout);
@@ -93,7 +95,7 @@ CFilterDlg::CFilterDlg(QWidget *parent, QString name)
    QBoxLayout* row0Layout = new QHBoxLayout(topLayout);
 
    QLabel *colorLabel = new QLabel ("Color", this);
-   colorLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   colorLabel->setFont(labelFont);
    colorLabel->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
    row1Layout->addWidget(colorLabel);
 
@@ -116,34 +118,34 @@ CFilterDlg::CFilterDlg(QWidget *parent, QString name)
    m_Color->insertItem("yellow");
    m_Color->insertItem("white");
 
-   m_Color->setFont(QFont("Helvetica", 12));
+   m_Color->setFont(labelFont);
    row1Layout->addWidget(m_Color, 0, AlignLeft);
 
    QLabel *nameLabel = new QLabel ("Name", this);
-   nameLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   nameLabel->setFont(labelFont);
    nameLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
    row4Layout->addWidget(nameLabel);
 
    m_Name = new QLineEdit(this, "Name");
-   m_Name->setFont(QFont("Helvetica", 12, QFont::Bold));
+   m_Name->setFont(labelFont);
    row4Layout->addWidget(m_Name);
 
    QLabel *filterLabel = new QLabel ("Filter", this);
-   filterLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   filterLabel->setFont(labelFont);
    filterLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
    row3Layout->addWidget(filterLabel);
 
    m_Filter  = new QLineEdit(this, "Filter");
-   m_Filter->setFont(QFont("Helvetica", 12, QFont::Bold));
+   m_Filter->setFont(labelFont);
    row3Layout->addWidget(m_Filter);
 
    QLabel *filteroutLabel = new QLabel ("FilterOut", this);
-   filteroutLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   filteroutLabel->setFont(labelFont);
    filteroutLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
    row2Layout->addWidget(filteroutLabel);
 
    m_FilterOut  = new QLineEdit(this, "FilterOut");
-   m_FilterOut->setFont(QFont("Helvetica", 12, QFont::Bold));
+   m_FilterOut->setFont(labelFont);
    row2Layout->addWidget(m_FilterOut);
 
    QPushButton *ok = new QPushButton("OK", this);

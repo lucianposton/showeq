@@ -145,6 +145,9 @@ public slots:
 
 	void addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage);
 	void resetDPS();
+	virtual void setCaption(const QString&);
+	void setWindowFont(const QFont&);
+	void restoreFont();
 
 private:
 

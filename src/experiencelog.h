@@ -79,6 +79,9 @@ public slots:
    void viewZEMraw();
    void viewZEMpercent();
    void viewZEMcalculated();
+   virtual void setCaption(const QString&);
+   void setWindowFont(const QFont&);
+   void restoreFont();
 
 private:
 

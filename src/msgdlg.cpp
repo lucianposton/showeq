@@ -124,7 +124,6 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
    m_pEdit = new MyEdit(this, "edit"); 
    m_pEdit->setFrameStyle(QFrame::Panel | QFrame::Sunken);
    m_pEdit->setReadOnly(TRUE);
-   m_pEdit->setFont(QFont("Helvetica", 10));
    m_pEdit->setWordWrap(QMultiLineEdit::WidgetWidth);
    m_pEdit->setWrapPolicy(QMultiLineEdit::AtWhiteSpace);
    middleLayout->addWidget(m_pEdit);
@@ -783,8 +782,11 @@ CButDlg::CButDlg(QWidget *parent, QString name, MyButton *but)
    QBoxLayout *row1Layout = new QHBoxLayout(topLayout);
    QBoxLayout *row2Layout = new QHBoxLayout(topLayout);
 
+   QFont labelFont;
+   labelFont.setBold(true);
+
    QLabel *nameLabel = new QLabel ("Name", this);
-   nameLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   nameLabel->setFont(labelFont);
    nameLabel->setFixedHeight(nameLabel->sizeHint().height());
    nameLabel->setFixedWidth(80);
    nameLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
@@ -792,13 +794,13 @@ CButDlg::CButDlg(QWidget *parent, QString name, MyButton *but)
   
    QLineEdit *nameEdit = new QLineEdit (this, "Name");
    nameEdit->setText(but->text());
-   nameEdit->setFont(QFont("Helvetica", 12, QFont::Bold));
+   nameEdit->setFont(labelFont);
    nameEdit->setFixedHeight(nameEdit->sizeHint().height());
    nameEdit->setFixedWidth(150);
    row1Layout->addWidget(nameEdit);
 
    QLabel *filterLabel = new QLabel ("Filter", this);
-   filterLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   filterLabel->setFont(labelFont);
    filterLabel->setFixedHeight(filterLabel->sizeHint().height());
    filterLabel->setFixedWidth(80);
    filterLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
@@ -806,7 +808,7 @@ CButDlg::CButDlg(QWidget *parent, QString name, MyButton *but)
   
    QLineEdit *filterEdit = new QLineEdit (this, "Filter");
    filterEdit->setText(but->filter());
-   filterEdit->setFont(QFont("Helvetica", 12, QFont::Bold));
+   filterEdit->setFont(labelFont);
    filterEdit->setFixedHeight(filterEdit->sizeHint().height());
    filterEdit->setFixedWidth(150);
    row2Layout->addWidget(filterEdit);

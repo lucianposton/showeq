@@ -49,8 +49,6 @@ struct ShowEQParams
   QString        filterfile;
   bool           spawnfilter_case;
   bool           spawnfilter_audio;
-  int            fontsize;
-  unsigned char  statusfontsize;
   bool           retarded_coords; // Verant style YXZ instead of XYZ
   bool           fast_machine;
   bool           spawn_alert_plus_plus;
@@ -101,10 +99,6 @@ struct ShowEQParams
   unsigned char  defaultClass;
   unsigned char  defaultDeity;
 
-  
-  int            walkpathmanymode;
-
-  
   bool           showSpellMsgs;
   bool           no_bank;
   bool           showEQTime;
@@ -123,7 +117,7 @@ struct ShowEQParams
   bool           saveDecodeKey;
   bool           savePlayerState;
   bool           saveSpawns;
-  uint32_t        saveSpawnsFrequency;
+  uint32_t       saveSpawnsFrequency;
   bool           restoreDecodeKey;
   bool           restorePlayerState;
   bool           restoreSpawns;

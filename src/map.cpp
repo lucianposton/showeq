@@ -64,12 +64,15 @@ CLineDlg::CLineDlg(QWidget *parent, QString name, MapMgr *mapMgr)
   debug ("CLineDlg()");
 #endif /* DEBUGMAP */
    
+  QFont labelFont;
+  labelFont.setBold(true);
+
   QBoxLayout *topLayout = new QVBoxLayout(this);
   QBoxLayout *row2Layout = new QHBoxLayout(topLayout);
   QBoxLayout *row1Layout = new QHBoxLayout(topLayout);
   
   QLabel *colorLabel = new QLabel ("Color", this);
-  colorLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+  colorLabel->setFont(labelFont);
   colorLabel->setFixedHeight(colorLabel->sizeHint().height());
   colorLabel->setFixedWidth(colorLabel->sizeHint().width()+10);
   colorLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
@@ -95,7 +98,7 @@ CLineDlg::CLineDlg(QWidget *parent, QString name, MapMgr *mapMgr)
   m_LineColor->insertItem("yellow");
   m_LineColor->insertItem("white");
   
-  m_LineColor->setFont(QFont("Helvetica", 12));
+  m_LineColor->setFont(labelFont);
   m_LineColor->setFixedHeight(m_LineColor->sizeHint().height());
   m_LineColor->setFixedWidth(m_LineColor->sizeHint().width());
   row1Layout->addWidget(m_LineColor, 0, AlignLeft);
@@ -112,14 +115,14 @@ CLineDlg::CLineDlg(QWidget *parent, QString name, MapMgr *mapMgr)
   connect(m_LineColor, SIGNAL(activated(const QString &)), SLOT(changeColor(const QString &)));
   
   QLabel *nameLabel = new QLabel ("Name", this);
-  nameLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+  nameLabel->setFont(labelFont);
   nameLabel->setFixedHeight(nameLabel->sizeHint().height());
   nameLabel->setFixedWidth(nameLabel->sizeHint().width()+5);
   nameLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
   row2Layout->addWidget(nameLabel);
 
   m_LineName  = new QLineEdit(this, "LineName");
-  m_LineName->setFont(QFont("Helvetica", 12, QFont::Bold));
+  m_LineName->setFont(labelFont);
   m_LineName->setFixedHeight(m_LineName->sizeHint().height());
   m_LineName->setFixedWidth(150);
   row2Layout->addWidget(m_LineName);
@@ -1238,11 +1241,8 @@ Map::Map(MapMgr* mapMgr,
   tmpPrefString = "GridResolution";
   m_param.setGridResolution(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 500));
 
-  // default is Null string, so if no preference stringToFont will use app 
-  // default.
   tmpPrefString = "Font";
-  QString tmpFontString = pSEQPrefs->getPrefString(tmpPrefString, prefString, "");
-  m_param.setFont(stringToFont(tmpFontString));
+  m_param.setFont(pSEQPrefs->getPrefFont(tmpPrefString, prefString));
 
   tmpPrefString = "GridTickColor";
   m_param.setGridTickColor(pSEQPrefs->getPrefColor(tmpPrefString, prefString, QColor("#E1C819")));
@@ -2779,7 +2779,7 @@ void Map::paintMap (QPainter * p)
   /* Begin painting */
   tmp.begin (&m_offscreen);
   tmp.setPen (NoPen);
-  tmp.setFont (QFont("Helvetica", 8, QFont::Normal));
+  tmp.setFont (m_param.font());
 
   if ((player != NULL) && 
       (inRect(screenBounds, playerPos.xPos(), playerPos.yPos())))
@@ -4194,6 +4194,9 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 {
   m_filterMgr = filterMgr;
 
+  // don't wan't to auto delete the status widgets
+  m_statusWidgets.setAutoDelete(false);
+
   QString prefString = MapFrame::preferenceName();
   QString tmpPrefString;
 
@@ -4234,7 +4237,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_zoomBox = new QHBox(m_topControlBox);
   tmpLabel = new QLabel(m_zoomBox);
   tmpLabel->setText("Zoom:");
-  tmpLabel->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(tmpLabel);
   m_zoom = new QSpinBox(1, 32, 1, m_zoomBox);
   m_zoom->setWrapping(true);
   m_zoom->setSuffix("x");
@@ -4252,12 +4255,12 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_playerLocationBox = new QHBox(m_topControlBox);
   tmpLabel = new QLabel(m_playerLocationBox);
   tmpLabel->setText("You:");
-  tmpLabel->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(tmpLabel);
   m_playerLocation = new QLabel(m_playerLocationBox);
   m_playerLocation->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   m_playerLocation->setText("0      0      0      ");
   m_playerLocation->setMinimumWidth(90);
-  m_playerLocation->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(m_playerLocation);
   tmpLabel->setBuddy(m_playerLocation);
   tmpPrefString = "ShowPlayerLocation";
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
@@ -4271,12 +4274,12 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_mouseLocationBox = new QHBox(m_topControlBox);
   tmpLabel = new QLabel(m_mouseLocationBox);
   tmpLabel->setText("Cursor:");
-  tmpLabel->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(tmpLabel);
   m_mouseLocation = new QLabel(m_mouseLocationBox);
   m_mouseLocation->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   m_mouseLocation->setText("0      0      ");
   m_mouseLocation->setMinimumWidth(70);
-  m_mouseLocation->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(m_mouseLocation);
   tmpLabel->setBuddy(m_mouseLocationBox);
   tmpPrefString = "ShowMouseLocation";
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
@@ -4288,7 +4291,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_filterBox = new QHBox(m_topControlBox);
   tmpLabel = new QLabel(m_filterBox);
   tmpLabel->setText("Find:");
-  tmpLabel->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(tmpLabel);
   m_filter = new MapFilterLineEdit(m_filterBox);
   //  m_filter->setAlignment(Qt::AlignCenter);
   tmpLabel->setBuddy(m_filter);
@@ -4307,7 +4310,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_frameRateBox = new QHBox(m_bottomControlBox);
   tmpLabel = new QLabel(m_frameRateBox);
   tmpLabel->setText("Frame Rate:");
-  tmpLabel->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(tmpLabel);
   m_frameRate = new QSpinBox(1, 60, 1, m_frameRateBox);
   m_frameRate->setWrapping(true);
   m_frameRate->setSuffix(" fps");
@@ -4326,12 +4329,12 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_panBox = new QHBox(m_bottomControlBox);
   tmpLabel = new QLabel(m_panBox);
   tmpLabel->setText("Pan X:");
-  tmpLabel->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(tmpLabel);
   m_panX = new QSpinBox(-8192, 8192, 16, m_panBox);
   m_panX->setValue(m_map->panOffsetX());
   tmpLabel = new QLabel(m_panBox);
   tmpLabel->setText("Y:");
-  tmpLabel->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(tmpLabel);
   m_panY = new QSpinBox(-8192, 8192, 16, m_panBox);
   m_panY->setValue(m_map->panOffsetY());
   tmpPrefString = "ShowPanControls";
@@ -4349,12 +4352,12 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_depthControlBox = new QHBox(m_bottomControlBox);
   tmpLabel = new QLabel(m_depthControlBox);
   tmpLabel->setText("Head:");
-  tmpLabel->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(tmpLabel);
   m_head = new QSpinBox(5, 3000, 10, m_depthControlBox);
   m_head->setValue(m_map->headRoom());
   tmpLabel = new QLabel(m_depthControlBox);
   tmpLabel->setText("Floor:");
-  tmpLabel->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+  m_statusWidgets.append(tmpLabel);
   m_floor = new QSpinBox(5, 3000, 10, m_depthControlBox);
   m_floor->setValue(m_map->floorRoom());
   tmpPrefString = "ShowDepthFilterControls";
@@ -4381,6 +4384,10 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_id_bottomControl = mapMenu->insertItem("Show Bottom Controls",
 					   this, 
 					   SLOT(toggle_bottom_controls(int)));
+
+  mapMenu->insertItem("Status Font...",
+		      this, 
+		      SLOT(set_statusFont(int)));
 
   // insert a seperator to seperate main controls from sub-menus
   mapMenu->insertSeparator(-1);
@@ -4416,10 +4423,31 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   // setup signal to initialize menu items when the map is about to be displayeed
   connect(mapMenu, SIGNAL(aboutToShow()),
 	  this, SLOT(init_Menu()));
+
+  // set the status widget fonts
+  restoreFont();
 }
 
 MapFrame::~MapFrame()
 {
+}
+
+void MapFrame::restoreFont()
+{
+  // setup the default status font
+  QFont def;
+  def.setPointSize(8);
+
+  // get the preferred status font
+  QFont statusFont = pSEQPrefs->getPrefFont("StatusFont",
+					    preferenceName(),
+					    def);
+  QWidget* widget;
+  // iterate over the status widgets and set their font
+  for (widget = m_statusWidgets.first(); 
+       widget != NULL;
+       widget = m_statusWidgets.next())
+    widget->setFont(statusFont);
 }
 
 void MapFrame::setCaption(const QString& text)
@@ -4632,6 +4660,35 @@ void MapFrame::toggle_bottom_controls(int id)
   {
     tmpPrefString = "ShowControlBox";
     pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_bottomControlBox->isVisible());
+  }
+}
+
+void MapFrame::set_statusFont(int id)
+{
+  QString name = "ShowEQ - Status Font";
+  bool ok = false;
+
+  // setup a default new status font
+  QFont newFont;
+  newFont.setPointSize(8);
+
+  // get new status font
+  newFont = QFontDialog::getFont(&ok, 
+				 pSEQPrefs->getPrefFont("StatusFont",
+							preferenceName(),
+							newFont),
+				 this, name);
+
+  // if the user clicked ok and selected a valid font, set it
+  if (ok)
+  {
+    // set the preference for future sessions
+    pSEQPrefs->setPrefFont("StatusFont", preferenceName(), 
+			   newFont);
+
+    // make sure to reset the status font since the previous call may have 
+    // changed it
+    restoreFont();
   }
 }
 

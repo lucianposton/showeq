@@ -28,6 +28,7 @@
 #include <qvbox.h>
 #include <qhbox.h>
 #include <qspinbox.h>
+#include <qlist.h>
 
 #include <time.h>
 #include <sys/time.h>
@@ -643,6 +644,7 @@ class MapFrame : public QVBox
    void savePrefs(void);
    void restoreSize();
    void restorePosition();
+   void restoreFont();
 
   // dump debug info
   void dumpInfo(QTextStream& out);
@@ -660,8 +662,10 @@ class MapFrame : public QVBox
    void toggle_frameRate(int id);
    void toggle_pan(int id);
    void toggle_depthControls(int id);
+   void set_statusFont(int id);
 
  private:
+
    // pointer to the Map that this frame contains/controls
    Map* m_map;
 
@@ -691,6 +695,7 @@ class MapFrame : public QVBox
    QHBox* m_depthControlBox;
    QSpinBox* m_head;
    QSpinBox* m_floor;
+   QList<QWidget> m_statusWidgets;
    
    int m_id_topControl;
    int m_id_bottomControl;

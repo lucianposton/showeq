@@ -10,7 +10,7 @@
 
 #define MAXPACKETCACHECOUNT 256
 #define MAXPACKETCACHESIZE  640
-#define MAXSPAWNDATA        49152
+#define MAXSPAWNDATA        98304
 
 #include <stdint.h>
 

@@ -159,6 +159,7 @@ class EQInterface:public QMainWindow
    void set_net_client_MAC_address();
    void set_net_arq_giveup(int giveup);
    virtual void setCaption(const QString&);
+   void restoreStatusFont();
 
  signals:
    void newMessage(int index);
@@ -167,6 +168,7 @@ class EQInterface:public QMainWindow
    void saveAllPrefs(void);
    void newZoneName (const QString &); 
    void spellMessage(QString&);
+   void restoreFonts();
 
    // Decoder signals
    void backfillPlayer(charProfileStruct *);
@@ -190,8 +192,8 @@ class EQInterface:public QMainWindow
    void toggle_opt_ShowSpellMessages(int);
    void toggle_opt_WalkPathRecord(int);
    void set_opt_WalkPathLength(int);
-   void toggle_opt_SavePosition(int);
-   void toggle_opt_UseWindowPos(int);
+   void toggle_opt_RetardedCoords(int);
+   void toggle_opt_SystimeSpawntime(int);
    void toggle_view_SpawnList();
    void toggle_view_SpellList();
    void toggle_view_PlayerStats();
@@ -210,6 +212,15 @@ class EQInterface:public QMainWindow
    void toggle_view_menubar();
    void toggle_view_statusbar();
    void set_interface_WindowCaption(int id);
+   void set_interface_WindowFont(int id);
+   void set_interface_Font(int id);
+   void select_interface_FormatFile(int id);
+   void toggle_interface_statusbar_Window(int id);
+   void set_interface_statusbar_Font(int id);
+   void toggle_interface_SavePosition(int id);
+   void toggle_interface_UseWindowPos(int id);
+   void toggle_interface_UseStdout(int id);
+   void toggle_interface_NoBank(int id);
    void toggle_opt_save_DecodeKey(int id);
    void toggle_opt_save_PlayerState(int id);
    void toggle_opt_save_Spawns(int id);

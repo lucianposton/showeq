@@ -248,7 +248,8 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
    QListView::setCaption(pSEQPrefs->getPrefString("Caption", section,
 						  "ShowEQ - Spawn List"));
 
-   setFont(QFont("Helvetica", showeq_params->fontsize));
+   restoreFont();
+
    addColumn ("Name");
    addColumn ("Lvl");
    addColumn ("Hp");
@@ -472,6 +473,27 @@ void CSpawnList::setCaption(const QString& text)
 
   // set the preference
   pSEQPrefs->setPrefString("Caption", "SpawnList", caption());
+}
+
+void CSpawnList::setWindowFont(const QFont& font)
+{
+  // set the font preference
+  pSEQPrefs->setPrefFont("Font", "SpawnList", font);
+
+  // restore the font to the preference
+  restoreFont();
+}
+
+void CSpawnList::restoreFont()
+{
+  QString section = "SpawnList";
+  // set the applications default font
+  if (pSEQPrefs->isPreference("Font", section))
+  {
+    // use the font specified in the preferences
+    QFont font = pSEQPrefs->getPrefFont("Font", section);
+    setFont( font);
+  }
 }
 
 void CSpawnList::setColumnVisible(int id, bool visible)

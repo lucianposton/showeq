@@ -149,6 +149,12 @@ ExperienceWindow::ExperienceWindow( EQPlayer* player,
    m_calcZEM=0;
    m_ZEMviewtype = 0;
 
+   QString section = "Experience";
+   QWidget::setCaption(pSEQPrefs->getPrefString("Caption", section, 
+						"ShowEQ - Experience"));
+
+   restoreFont();
+
    m_view_menu = new QPopupMenu( this );
    m_view_menu->insertItem( "&All Mobs", this, SLOT(viewAll()) );
    m_view_menu->insertItem( "Previous &15 Minutes", this, SLOT(view15Minutes()) );
@@ -180,9 +186,6 @@ ExperienceWindow::ExperienceWindow( EQPlayer* player,
 
    m_layout = new QVBoxLayout( this );
    m_layout->addSpacing( m_menu_bar->height() + 5 );
-
-   QString section = "Experience";
-   setCaption(pSEQPrefs->getPrefString("Title", section, "ShowEQ - Experience"));
 
    QGroupBox *listGBox = new QVGroupBox( "Experience Log", this );
    m_layout->addWidget( listGBox );
@@ -260,6 +263,37 @@ ExperienceWindow::ExperienceWindow( EQPlayer* player,
       logstr = fdopen(logfd, "a");
    }
 
+}
+
+
+void ExperienceWindow::setCaption(const QString& text)
+{
+  // set the caption
+  QWidget::setCaption(text);
+
+  // set the preference
+  pSEQPrefs->setPrefString("Caption", "Experience", caption());
+}
+
+void ExperienceWindow::setWindowFont(const QFont& font)
+{
+  // set the font preference
+  pSEQPrefs->setPrefFont("Font", "Experience", font);
+
+  // restore the font to the preference
+  restoreFont();
+}
+
+void ExperienceWindow::restoreFont()
+{
+  QString section = "Experience";
+  // set the applications default font
+  if (pSEQPrefs->isPreference("Font", section))
+  {
+    // use the font specified in the preferences
+    QFont font = pSEQPrefs->getPrefFont("Font", section);
+    setFont( font);
+  }
 }
 
 void ExperienceWindow::addExpRecord(const QString &mob_name,

@@ -1,3 +1,28 @@
+dohpaZ (14/05/02)
+------------------
+Modifications:
+ + version 4.2.2
+ + Changed how fonts are set and configured.  Ended the Helvetica tyranny 
+   (where no matter what font you set over half the GUI would still use 
+   Helvetica and not at the size you specified).
+ + Added menu option to allow setting of the application font from the
+   "Interface" menu.
+ + Added "Status Bar" sub-menu to the "Interface" menu, included options to
+   show/hide status bar windows.
+ + Added additional options to the "Options" menu to control the use
+   of EQ retarded coordinates, use of unix system time for spawn times"
+ + Added additional options to the "Interface" menu to control the display
+   of messages to Stdout, and whether bank info is displayed, to set the 
+   location of the formatted messages file
+ + Added "Font" sub-menu to the "Options" menu to control the application 
+   default font, main window status bar font, and the fonts used by 
+   numerous other windows (not all windows added yet).
+ + Made the show/hide of the channel messages dialogs persistant
+ + Changed MAXSPAWNDATA size from 49152 to 98304 since I was seeing the
+   EQPacket::m_serverData buffer whose size is determined by it overflowing, 
+   which in turn caused crashes.  Added \a's (bell's) around the warning
+   message so that it is more noticable.
+
 dohpaZ (12/05/02)
 ------------------
 Modifications:

@@ -28,7 +28,7 @@
 /* **********************************
    defines used for option processing
    ********************************** */
-#define OPTION_LIST "i:rf:g::j:::s:aeo:Cp:ncFAKSVPNbtL:xWX:Y:Z:"
+#define OPTION_LIST "i:rf:g::j:::s:aeo:CncFAKSVPNbtL:xWX:Y:Z:"
 
 /* For long options without any short (single letter) equivalent, we'll
    assign single char nonprinting character equivalents, as is common
@@ -89,8 +89,6 @@ static struct option option_list[] = {
   {"record-filename",              optional_argument,  NULL,  'g'},
   {"enlightenment-audio",          no_argument,        NULL,  'a'},
   {"filter-case-sensitive",        no_argument,        NULL,  'C'},
-  {"font-size",                    required_argument,  NULL,  'p'},
-  {"status-font-size",             required_argument,  NULL,  STATUS_FONT_SIZE},
   {"use-retarded-coords",          no_argument,        NULL,  'c'},
   {"fast-machine",                 no_argument,        NULL,  'F'},
   {"spawn-alert",                  no_argument,        NULL,  'A'},
@@ -214,8 +212,6 @@ int main (int argc, char **argv)
    section = "Interface";
    /* Allow map depth filtering */
    showeq_params->retarded_coords  = pSEQPrefs->getPrefBool("RetardedCoords", section, 0);
-   showeq_params->fontsize = pSEQPrefs->getPrefInt("FontSize", section, 8);
-   showeq_params->statusfontsize = pSEQPrefs->getPrefInt("StatusFontSize", section, 8);
    showeq_params->con_select = pSEQPrefs->getPrefBool("SelectOnCon", section, false);
    showeq_params->tar_select = pSEQPrefs->getPrefBool("SelectOnTarget", section, false);
    showeq_params->net_stats = pSEQPrefs->getPrefBool("NetStats", section, false);
@@ -393,21 +389,6 @@ int main (int argc, char **argv)
          case 'C':
          {
             showeq_params->spawnfilter_case = 1;
-            break;
-         }
-
-
-         /* Set point size of skills and spawn font */
-         case 'p':
-         {
-            showeq_params->fontsize = atoi(optarg);
-            break;
-         }
-
-         /* Set point size of status bar and top text (RegEx / Cursor position) */
-         case STATUS_FONT_SIZE:
-         {
-            showeq_params->statusfontsize = atoi(optarg);
             break;
          }
 
@@ -789,10 +770,6 @@ int main (int argc, char **argv)
       printf ("  -s, --spawn-file=FILENAME             Sets spawn alert file\n");
       printf ("  -C, --filter-case-sensitive           Spawn alert and filter is case sensitive\n");
       printf ("  -a, --enlightenment-audio             Use ESD to play alert during spawn alert\n");
-      printf ("  -p, --font-size=SIZE                  Sets the point size of the skill and\n");
-      printf ("                                        spawn table fonts\n");
-      printf ("      --status-font-size=SIZE           Set the point size of the status bar\n");
-      printf ("                                        fonts\n");
       printf ("  -c, --use-retarded-coords             Use \"retarded\" YXZ coordinates\n");
       printf ("  -F, --fast-machine                    Fast machine - perform more accurate vs. \n");
       printf ("                                        less accurate calculations.\n");

@@ -42,6 +42,8 @@ class EQSkillList : public QListView
    void showLanguages(bool show);
    void savePrefs(void);
    virtual void setCaption(const QString&);
+   void setWindowFont(const QFont&);
+   void restoreFont();
 
  private:
    // the player this skill list is monitoring

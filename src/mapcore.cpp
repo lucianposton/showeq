@@ -1820,7 +1820,7 @@ const QPixmap& MapCache::getMapImage(MapParameters& param)
   // Begin Painting
   tmp.begin (&m_mapImage);
   tmp.setPen (QPen::NoPen);
-  tmp.setFont (QFont("Helvetica", 8, QFont::Normal));
+  tmp.setFont (param.font());
 
   // load the background image or paint the background
   if (!m_mapData.imageLoaded() || 

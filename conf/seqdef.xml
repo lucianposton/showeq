@@ -1,5 +1,11 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE seqpreferences SYSTEM "seqpref.dtd">
+<!-- ============================================================= -->
+<!-- NOTE: You'll save yourself a LOT of grief if you don't edit this 
+     file, it should only need to be edited by developers and those
+     that run multiple ShowEQ instances who are trying to maintain site 
+     default preferences -->
+<!-- ============================================================= -->
 <seqpreferences version="1.0" >
 <!-- ============================================================= -->
  <section name="Network" >
@@ -136,6 +142,13 @@
 <!-- ============================================================= -->
 <!-- Skill List Options -->
  <section name="SkillList" >
+  <property name="Caption" >
+   <string value="ShowEQ - Skills" />
+   <comment>Skill list window caption when undocked</comment>
+  </property>
+  <property name="Font" >
+   <font family="adobe-helvetica" bold="false" strikeout="false" underline="false" pointsize="10" italic="false" />
+  </property>
   <property name="SaveWidth" >
    <bool value="true" />
    <comment>Save column widths</comment>
@@ -156,10 +169,6 @@
    <bool value="true" />
    <comment>Skill list includes language skills</comment>
   </property>
-  <property name="Caption" >
-   <string value="ShowEQ - Skills" />
-   <comment>Skill list window caption when undocked</comment>
-  </property>
   <property name="ColumnOrder" >
    <string value="0:1" />
    <comment>order of columns in skill list</comment>
@@ -171,6 +180,9 @@
   <property name="Caption" >
    <string value="ShowEQ - Stats" />
    <comment>Window caption when undocked</comment>
+  </property>
+  <property name="Font" >
+   <font family="adobe-helvetica" bold="false" strikeout="false" underline="false" pointsize="10" italic="false" />
   </property>
   <property name="ColumnOrder" >
    <string value="0:1:2:3" />
@@ -283,6 +295,9 @@
   <property name="Caption" >
    <string value="ShowEQ - Spawn List" />
    <comment>Window caption when undocked</comment>
+  </property>
+  <property name="Font" >
+   <font family="adobe-helvetica" bold="false" strikeout="false" underline="false" pointsize="8" italic="false" />
   </property>
   <property name="SaveWidth" >
    <bool value="true" />
@@ -453,7 +468,7 @@
    <comment>Base size of spawn elements in display</comment>
   </property>
   <property name="Font" >
-   <string value="" />
+   <font family="Helvetica" bold="false" strikeout="false" underline="false" pointsize="8" italic="false" />
    <comment>Font used for map captions</comment>
   </property>
   <property name="GridResolution" >
@@ -745,7 +760,7 @@
    <comment>Base size of spawn elements in display</comment>
   </property>
   <property name="Font" >
-   <string value="" />
+   <font family="Helvetica" bold="false" strikeout="false" underline="false" pointsize="8" italic="false" />
    <comment>Font used for map captions</comment>
   </property>
   <property name="GridResolution" >
@@ -1037,7 +1052,7 @@
    <comment>Base size of spawn elements in display</comment>
   </property>
   <property name="Font" >
-   <string value="" />
+   <font family="Helvetica" bold="false" strikeout="false" underline="false" pointsize="8" italic="false" />
    <comment>Font used for map captions</comment>
   </property>
   <property name="GridResolution" >
@@ -1329,7 +1344,7 @@
    <comment>Base size of spawn elements in display</comment>
   </property>
   <property name="Font" >
-   <string value="" />
+   <font family="Helvetica" bold="false" strikeout="false" underline="false" pointsize="8" italic="false" />
    <comment>Font used for map captions</comment>
   </property>
   <property name="GridResolution" >
@@ -1620,7 +1635,7 @@
    <comment>Base size of spawn elements in display</comment>
   </property>
   <property name="Font" >
-   <string value="" />
+   <font family="Helvetica" bold="false" strikeout="false" underline="false" pointsize="8" italic="false" />
    <comment>Font used for map captions</comment>
   </property>
   <property name="GridResolution" >
@@ -2016,7 +2031,7 @@
    <comment></comment>
   </property>
   <property name="CasterNameWidth" >
-   <int value="79" />
+   <int value="0" />
    <comment></comment>
   </property>
   <property name="TargetIDWidth" >
@@ -2058,14 +2073,6 @@
   <property name="UseWindowPos" >
    <bool value="true" />
    <comment>Use window position information</comment>
-  </property>
-  <property name="FontSize" >
-   <int value="8" />
-   <comment>Size of Font used in the interface</comment>
-  </property>
-  <property name="StatusFontSize" >
-   <int value="8" />
-   <comment>Size of Font used in status bar windows</comment>
   </property>
   <property name="SelectOnCon" >
    <bool value="false" />
@@ -2198,10 +2205,6 @@
   <property name="FormatFile" >
    <string value="/usr/local/share/showeq/eqstr_en.txt" />
    <comment>Location of file containing formatted strings</comment>
-  </property>
-  <property name="Font" >
-   <string value="default" />
-   <comment></comment>
   </property>
   <property name="NoBank" >
    <bool value="true" />

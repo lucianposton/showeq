@@ -30,6 +30,8 @@ class CompassFrame : public QVBox
   void selectSpawn(const Item* item);
   void posChanged(int16_t,int16_t,int16_t,int16_t,int16_t,int16_t,int32_t);
   virtual void setCaption(const QString&);
+  void setWindowFont(const QFont&);
+  void restoreFont();
   
  private:
   Compass* m_compass;

@@ -36,11 +36,15 @@ EQStatList::EQStatList(EQPlayer* player,
    setShowSortIndicator(TRUE);
 #endif
    setRootIsDecorated(false);
+
+   // set the windows caption
    QListView::setCaption(pSEQPrefs->getPrefString("Caption", section, 
 						  "ShowEQ - Stats"));
 
-   // set font and add columns
-   setFont(QFont("Helvetica", showeq_params->fontsize));
+   // restore the windows font
+   restoreFont();
+
+   // add columns
    addColumn("Stat");
    addColumn("Val");
    addColumn("Max");
@@ -155,6 +159,27 @@ void EQStatList::setCaption(const QString& text)
 
   // set the preference
   pSEQPrefs->setPrefString("Caption", "StatList", caption());
+}
+
+void EQStatList::setWindowFont(const QFont& font)
+{
+  // set the font preference
+  pSEQPrefs->setPrefFont("Font", "StatList", font);
+
+  // restore the font to the preference
+  restoreFont();
+}
+
+void EQStatList::restoreFont()
+{
+  QString section = "StatList";
+  // set the applications default font
+  if (pSEQPrefs->isPreference("Font", section))
+  {
+    // use the font specified in the preferences
+    QFont font = pSEQPrefs->getPrefFont("Font", section);
+    setFont( font);
+  }
 }
 
 void EQStatList::expChanged  (int val, int min, int max) 

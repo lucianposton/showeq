@@ -32,11 +32,15 @@ EQSkillList::EQSkillList(EQPlayer* player,
    setShowSortIndicator(TRUE);
 #endif
    setRootIsDecorated(false);
+
+   // set the windows caption
    QListView::setCaption(pSEQPrefs->getPrefString("Caption", section,
 						  "ShowEQ - Skills"));
+   
+   // restore font to the preference
+   restoreFont();
 
-  // set font and add the columns
-  setFont(QFont("Helvetica", showeq_params->fontsize));
+  // add the columns
   addColumn("Skill");
   addColumn("Value");
   setAllColumnsShowFocus(true);
@@ -135,6 +139,27 @@ void EQSkillList::setCaption(const QString& text)
 
   // set the preference
   pSEQPrefs->setPrefString("Caption", "SkillList", caption());
+}
+
+void EQSkillList::setWindowFont(const QFont& font)
+{
+  // set the font preference
+  pSEQPrefs->setPrefFont("Font", "SkillList", font);
+
+  // restore the font to the preference
+  restoreFont();
+}
+
+void EQSkillList::restoreFont()
+{
+  QString section = "SkillList";
+  // set the applications default font
+  if (pSEQPrefs->isPreference("Font", section))
+  {
+    // use the font specified in the preferences
+    QFont font = pSEQPrefs->getPrefFont("Font", section);
+    setFont( font);
+  }
 }
 
 /* Called to add a skill to the skills list */

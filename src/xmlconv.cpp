@@ -172,7 +172,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     if (e.hasAttribute("family"))
       f.setFamily(e.attribute("family"));
     if (e.hasAttribute("pointsize"))
-      f.setPointSize(e.attribute("family").toInt());
+      f.setPointSize(e.attribute("pointsize").toInt());
     if (e.hasAttribute("bold"))
       f.setBold(getBoolFromString(e.attribute("bold"), boolOk));
     if (e.hasAttribute("italic"))
@@ -256,12 +256,11 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
   switch (v.type())
   {
   case QVariant::String:
-    {
-      e.setTagName("string");
-      e.setAttribute("value", v.toString().utf8());
-    }
+    e.setTagName("string");
+    e.setAttribute("value", v.toString().utf8());
     break;
   case QVariant::CString:
+    e.setTagName("string");
     e.setAttribute("value", v.toCString());
     break;
   case QVariant::Int:

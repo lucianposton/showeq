@@ -17,7 +17,9 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
 
   QVBox::setCaption(pSEQPrefs->getPrefString("Caption", section,
 					     "ShowEQ - Compass"));
-  
+
+  restoreFont();
+
   m_compass = new Compass (this, "compass");
   QHBox* coordsbox = new QHBox(this);
   m_compass->setFixedWidth(120);
@@ -31,13 +33,11 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
       QLabel *labelx = new QLabel(showeq_params->retarded_coords?"E/W:":"X:",
 				  coordsbox);
       labelx->setFixedHeight(labelx->sizeHint().height());
-      labelx->setFont(QFont("Helvetica", 10, QFont::Bold));
       labelx->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
       
       // Create the xpos label
       m_xPos = new QLabel("----",coordsbox);
       m_xPos->setFixedHeight(m_xPos->sizeHint().height());
-      m_xPos->setFont(QFont("Helvetica", 10));
       m_xPos->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
     } 
     else 
@@ -46,13 +46,11 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
       QLabel *labely = new QLabel(showeq_params->retarded_coords?"N/S:":"Y:",
 				  coordsbox);
       labely->setFixedHeight(labely->sizeHint().height());
-      labely->setFont(QFont("Helvetica", 10, QFont::Bold));
       labely->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
       
       // Create the ypos label
       m_yPos = new QLabel("----",coordsbox);
       m_yPos->setFixedHeight(m_yPos->sizeHint().height());
-      m_yPos->setFont(QFont("Helvetica", 10));
       m_yPos->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
     }
    }
@@ -60,13 +58,11 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
   // Create the z: label
   QLabel *labelz = new QLabel("Z:",coordsbox);
   labelz->setFixedHeight(labelz->sizeHint().height());
-  labelz->setFont(QFont("Helvetica", 10, QFont::Bold));
   labelz->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
   
   // Create the zpos label
   m_zPos = new QLabel("----",coordsbox);
   m_zPos->setFixedHeight(m_zPos->sizeHint().height());      
-  m_zPos->setFont(QFont("Helvetica", 10));
   m_zPos->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
 
   // connect
@@ -91,6 +87,27 @@ void CompassFrame::setCaption(const QString& text)
 
   // set the preference
   pSEQPrefs->setPrefString("Caption", "Compass", caption());
+}
+
+void CompassFrame::setWindowFont(const QFont& font)
+{
+  // set the font preference
+  pSEQPrefs->setPrefFont("Font", "Compass", font);
+
+  // restore the font to the preference
+  restoreFont();
+}
+
+void CompassFrame::restoreFont()
+{
+  QString section = "Compass";
+  // set the applications default font
+  if (pSEQPrefs->isPreference("Font", section))
+  {
+    // use the font specified in the preferences
+    QFont font = pSEQPrefs->getPrefFont("Font", section);
+    setFont( font);
+  }
 }
 
 void CompassFrame::selectSpawn(const Item* item)

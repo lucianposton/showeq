@@ -46,6 +46,8 @@ class EQStatList : public QListView
    void enableStat(uint8_t stat, bool enable);
    void updateStat(uint8_t stat);
    virtual void setCaption(const QString&);
+   void setWindowFont(const QFont&);
+   void restoreFont();
 
  private:
    // the player this skill list is monitoring

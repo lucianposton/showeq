@@ -224,7 +224,10 @@ CombatWindow::CombatWindow(EQPlayer* player)
   m_dDPSLast(0.0)
 {
    QString section = "Combat";
-   setCaption(pSEQPrefs->getPrefString("Caption", section, "ShowEQ Combat"));
+   QTabWidget::setCaption(pSEQPrefs->getPrefString("Caption", section, 
+						   "ShowEQ Combat"));
+
+   restoreFont();
 
   /* Hopefully this is only called once to set up the window,
      so this is a good place to initialize some things which
@@ -446,6 +449,36 @@ QWidget* CombatWindow::initMobWidget()
 	return pWidget;
 }
 
+
+void CombatWindow::setCaption(const QString& text)
+{
+  // set the caption
+  QTabWidget::setCaption(text);
+
+  // set the preference
+  pSEQPrefs->setPrefString("Caption", "Combat", caption());
+}
+
+void CombatWindow::setWindowFont(const QFont& font)
+{
+  // set the font preference
+  pSEQPrefs->setPrefFont("Font", "Combat", font);
+
+  // restore the font to the preference
+  restoreFont();
+}
+
+void CombatWindow::restoreFont()
+{
+  QString section = "Combat";
+  // set the applications default font
+  if (pSEQPrefs->isPreference("Font", section))
+  {
+    // use the font specified in the preferences
+    QFont font = pSEQPrefs->getPrefFont("Font", section);
+    setFont( font);
+  }
+}
 
 void CombatWindow::updateOffense()
 {
