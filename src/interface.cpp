@@ -3393,7 +3393,7 @@ EQInterface::toggle_opt_WalkPathRecord (int id)
 void
 EQInterface::set_opt_WalkPathLength(int len)
 {
-  if ((len < 0) && (len <= 8192))
+  if ((len > 0) && (len <= 8192))
     showeq_params->walkpathlength = len;
 
     pSEQPrefs->setPrefInt("WalkPathLength", "Misc", showeq_params->walkpathrecord);
