@@ -94,7 +94,7 @@
 
 #define MoneyThingCode              0x2820
 
-#define RemDropCode                 0x0025
+#define RemDropCode                 0x0020
 
 #define cCursorItemCode             0x2c41
 
