@@ -579,12 +579,13 @@ qt_version_number=`cat $qt_incdir/$qt_version_source 2> configure.dbg |\
                    sed 's/QT_VERSION//'                               |\
                    sed 's/#define//g'                                 |\
                    sed 's/ //g'                                       |\
-                   sed 's/	//g'`;
+                   sed 's/	//g'                                  |\
+                   sed 's/0x//'`;
 
- qt_major_version=`echo ${[qt_version_number%[0-9][0-9]*]}`
- qt_minor_version=`echo ${[qt_version_number%[0-9]*]}`
- qt_minor_version=`echo ${[qt_minor_version#[0-9]*]}`
-   qt_major_build=`echo ${[qt_version_number#[0-9][0-9]*]}`
+ qt_major_version=`echo ${[qt_version_string%%.[0-9]*]}`
+ qt_minor_version=`echo ${[qt_version_string#[0-9]*.]}`
+ qt_minor_version=`echo ${[qt_minor_version%.[0-9]*]}`
+   qt_major_build=`echo ${[qt_version_string##[0-9]*.]}`
  qt_lib_major_ver="libqt-mt.so.$qt_major_version"
 
  qt_lib_minor_ver="libqt-mt.so.$qt_major_version.$qt_minor_version"

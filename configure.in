@@ -198,8 +198,8 @@ AC_CHECK_LIB(pcap, pcap_open_live,
 
 AC_CHECK_LIB(gd, gdImageCreate, 
 	havegd=true, 
-	havegd = false)
-AM_CONDITIONAL(HAVE_GD, test x$havegd = xtrue)
+	havegd=false)
+AM_CONDITIONAL(HAVE_GD, test x$havegd=xtrue)
 
 AC_CHECK_LIB(gd, gdImagePng, 
 	AC_DEFINE(HAVE_GD_IMAGEPNG, 1, Define if libgd supports PNG))
