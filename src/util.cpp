@@ -649,11 +649,15 @@ uint32_t calc_exp (int level, uint16_t race, uint8_t class_)
   else if (level<57)	exp*=23;
   else if (level<58)	exp*=25;
   else if (level<59)	exp*=27;
-  else if (level<60)    exp*=30;
+  else if (level<61)    exp*=30;
 // Rough estimate so far, seems to hold up perfectly though.
 // Kinder, gentler exping?  Less punishing time commitment?  Haha I don't friggin think so.
 // -- Ratt
-  else                exp*=32;
+  else if (level<62)    exp*=32;
+  else if (level<63)    exp*=34;
+  else if (level<64)    exp*=36;
+  else if (level<65)    exp*=38;
+  else                  exp*=40;
   
   // Do the race mod
   
