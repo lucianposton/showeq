@@ -1,20 +1,21 @@
-Document Version 4.2.3
+Document Version 4.2.12
 
-- 1.9 Changing Configurations
-    Deleted the change configuration part. With the xml implementation there is no need to change configuration manually, everything should be able to be saved while ShowEQ runs using the inprogram Save option.
-- 5. Version History of this document
-    Changed current version to match latest CVS commit
-- 6. Credits
-    Added Credits Chapter
+Changes from previous version:
+
+- 1.5 NOTE TO USERS WITH A HIGHER VERSION OF gcc
+    Added section, renamed following sections
+- 3.2 Updating ShowEQ from cvs
+    Corrected two typos in the commands
+- Added Hard Breaks in document for better reading.
 
 
 Following this file does not exempt you from reading and understanding the
 regular INSTALL file.  This should give you the knowledge you need to
 understand that file if you are new to linux and the development process.
 
-This does not cover the details of the RedHat 7.2 installation itself.  RedHat
-has lots of helpful advice on their web site, and USENET newsgroups are full
-of hints as well.
+This does not cover the details of the RedHat 7.2 installation itself.
+RedHat has lots of helpful advice on their web site, and USENET
+newsgroups are full of hints as well.
 
 For details on RedHat/Linux installation try:
 
@@ -30,7 +31,8 @@ Redhat 7.2 install
 ------------------
 
 Important things to know:
-- Linux, unlike Windows, does make a difference between Uppercase and Lowercase. Please keep that in mind when issueing commands.
+- Linux, unlike Windows, does make a difference between Uppercase and
+  Lowercase. Please keep that in mind when issueing commands.
 
 Index:
 
@@ -39,10 +41,11 @@ Index:
 1.2 Packet Selection
 1.3 Downloading qt-2.3.2
 1.4 Editting linux-g++-shared
-1.5 Compiling QT
-1.6 Downloading latest version of ShowEQ
-1.7 Downloading most recent libEQ.a file
-1.8 Compiling ShowEQ
+1.5 NOTE TO USERS WITH A HIGHER VERSION OF gcc
+1.6 Compiling QT
+1.7 Downloading latest version of ShowEQ
+1.8 Downloading most recent libEQ.a file
+1.9 Compiling ShowEQ
 
 2.  Running ShowEQ
 2.1 Start X Windows Environment
@@ -68,10 +71,28 @@ Index:
 1. Installation: 
 
 1.1 Downloading Red Hat 7.2
-    Download or buy RedHat 7.2, start the installation and choose what ever options you want, paying attention to a few small key steps outlined below. We will try and get all of the required rpms installed at installation to avoid more work later. During install, I always choose "custom" so that i get the most control over what i install. The iso version makes cds that are bootable, and of course the purchased cds are bootable as well. Another suggestion would be to choose a journaling filesystem like ReiserFS or ext3. this just means that you won't have to wait for the system to scan the disk when you do a dirty reboot.
+    Download or buy RedHat 7.2, start the installation and choose what
+    ever options you want, paying attention to a few small key steps
+    outlined below. We will try and get all of the required rpms installed
+    at installation to avoid more work later. During install, I always
+    choose "custom" so that i get the most control over what i install.
+    The ISO version makes cds that are bootable, and of course the
+    purchased cds are bootable as well. Another suggestion would be to
+    choose a journaling filesystem like ReiserFS or ext3. this just means
+    that you won't have to wait for the system to scan the disk when you
+    do a dirty reboot.
+
+
 
 1.2 Packet Selection
-    The next important step is the package selection. you need to choose "select individual packages" and i personally choose "software development" and "Kernel development" in hopes that i have to pick fewer packages at the next stage. here are the rpms i think you will need (some might already be selected). in "flat view" they are easier to find. they may not be required, but i was able to compile without installing any additional rpms when these were installed. this should be the name as they appear in the redhat 7.2 install. 
+    The next important step is the package selection. you need to choose
+    "select individual packages" and i personally choose "software
+    development" and "Kernel development" in hopes that i have to pick
+    fewer packages at the next stage. here are the rpms i think you will
+    need (some might already be selected). in "flat view" they are
+    easier to find. they may not be required, but i was able to compile
+    without installing any additional rpms when these were installed.
+    This should be the name as they appear in the redhat 7.2 install. 
 
 
 XFree86-devel 
@@ -109,11 +130,14 @@ libmng-devel
 freetype 
 
 
-Once Red Hat 7.2 is installed, you login as root with the password you entered during the install. You will notice the command prompt: "[]#"
+Once Red Hat 7.2 is installed, you login as root with the password you
+entered during the install. You will notice the command prompt: "[]#"
+
 
 
 1.3 Downloading qt-2.3.2
-    Download qt-2.3.2 at ftp.trolltech.com and extract it to it's own directory.
+    Download qt-2.3.2 at ftp.trolltech.com and extract it to it's own
+    directory.
 
 Code: 
 
@@ -124,17 +148,57 @@ Code:
 
 
 1.4 Editting linux-g++-shared
-    edit the file "qt-src/configs/linux-g++-shared and change all references to "gcc" to "gcc3" as well as "g++" to "g++3" (lines 3, 4, 35, and 59). save your changes (ctrl-o, ctrl-x) 
+    edit the file "qt-src/configs/linux-g++-shared and change all
+    references to "gcc" to "gcc3" as well as "g++" to "g++3"
+    (lines 3, 4, 35, and 59). save your changes (ctrl-o, ctrl-x) 
 
 Code: 
 
 []# pico -w /usr/lib/qt-2.3.2/configs/linux-g++-shared 
+
+
+
+1.5 NOTE TO USERS WITH A HIGHER VERSION OF gcc
+
+    This document assumes you have gcc3 and g++3 executable on your system
+    (as included in Red Hat 7.2). Depending on the distro (in other words:
+    anything other then Red Hat 7.2), which RPMs you used and the phase of
+    the moon, you may only have gcc<specified-version-number> or
+    g++<specified-version-number> executables.
+
+    Change everywhere in this document where it says gcc3 to gcc<version>
+    and g++3 to g++<version>
+
+    To see the version numbers for your installed compiler, please follow
+    the next steps:
+
+- Open a console and type "gcc" then press the <TAB> key once or twice.
+This will attempt to "auto complete" what you are typing. Pressing it
+twice should list all the options you have.
+
+Result:
+
+[]# gcc
+gcc  gcc-3.1
+[]#
+
+Do NOT use plain gcc, you need at least gcc3 or a higher version. In this
+example you'd use "gcc-3.1" and "g++-3.1" instead of the mentioned "gcc3"
+and "g++3"
+
+If you do not see any other versions of gcc then plain "gcc"on your
+system, then you did not install all specified packages as mentioned
+in step 1.2
+
+
+
+1.6 Compiling QT
+    "export QTDIR" and configure and compile qt-2.3.2 with the -thread
+    option. Optionally you can use "make -j2" to possibly speed up
+    compile. If you have 2 cpus then you can even use use "make -j3"
  
-
-
-1.5 Compiling QT
-    "export QTDIR" and configure and compile qt-2.3.2 with the -thread option. Optionally you can use "make -j2" to possibly speed up compile. If you have 2 cpus then you can even use use "make -j3" 
-**this compile will take a LONG time, possibly as few as 1 hour and as many as 6 depending on cpu speed.
+** this compile will take a LONG time, possibly as few as 1 hour and as
+many as 6 depending on cpu speed. **
 
 Code: 
 
@@ -144,17 +208,22 @@ Code:
 []# make 
  
 
-You might find that adding the line "/usr/lib/qt-2.3.2/lib" to the file "/etc/ld.so.conf" then running "ldconfig" will help you. 
+You might find that adding the line "/usr/lib/qt-2.3.2/lib" to the file
+"/etc/ld.so.conf" then running "ldconfig" will help you. 
 
 Code: 
 
 []# echo "/usr/lib/qt-2.3.2/lib" >> /etc/ld.so.conf 
 []# ldconfig 
+
  
 
-
-1.6 Downloading latest version of ShowEQ
-    now we need to get the latest version of showeq from cvs. this step is pretty easy. Some people remove or copy their ENTIRE source tree before re-compiling, but that's not realy necessary, so we leave that upto you. I am going to assume we are downloading in /seq and that showeq will end up in /seq/showeq. 
+1.7 Downloading latest version of ShowEQ
+    now we need to get the latest version of showeq from cvs. this step
+    is pretty easy. Some people remove or copy their ENTIRE source tree
+    before re-compiling, but that's not realy necessary, so we leave
+    that upto you. I am going to assume we are downloading in /seq
+    and that showeq will end up in /seq/showeq. 
 
 Code: 
 
@@ -167,13 +236,18 @@ Code:
  
 
 
-1.7 Downloading most recent libEQ.a file
-    getting latest libEQ.a (see the file README.libEQ in cvs files) put this file in /usr/lib as well. it is important that this is the ONLY libEQ.a in the library path, and that it be the most current. It is okay to have an extra copy in say /seq, but not in /lib or a few other places. 
+1.8 Downloading most recent libEQ.a file
+    getting latest libEQ.a (see the file README.libEQ in cvs files) put
+    this file in /usr/lib as well. it is important that this is the ONLY
+    libEQ.a in the library path, and that it be the most current. It is
+    okay to have an extra copy in say /seq, but not in /lib or a few
+    other places. 
 
 []# pico /seq/showeq/README.libEQ
 
 
-1.8 Compiling ShowEQ
+
+1.9 Compiling ShowEQ
     configuring and compiling showeq v4.x
 
 Code: 
@@ -193,7 +267,10 @@ Code:
 2. Running ShowEQ 
 
 IMPORTANT NOTICE:
-The next thing you do is to run X, It is important that you should NEVER start X as root. It's better and safer to use a seperate account to do things and loginto root while being on that account. If you did not yet make an account during install, please do so now:
+The next thing you do is to run X, It is important that you should
+NEVER start X as root. It's better and safer to use a seperate
+account to do things and loginto root while being on that account.
+If you did not yet make an account during install, please do so now:
 
 []# /usr/sbin/adduser -g users -n <your accountname here>
 
@@ -202,6 +279,8 @@ Enter a password and re-enter the password to confirm
 []# logout
 
 Enter your accountname you just made and supply the password
+
+
 
 2.1 Start X Windows Environment
     running it! start up X.
@@ -217,13 +296,21 @@ Code:
 
 <enter your root password>
 
+
+
 2.3 Starting ShowEQ
 []# export QTDIR=/usr/lib/qt-2.3.2 
 []# cd /usr/local/bin
 []# ./showeq eth0 --ip-address=10.0.0.10 
- 
 
-Of course, for it to work you will need to replace my ip (10.0.0.10) with the ip of your computer that is/will be playing everquest. if your showeq box is also your gateway, you might want to use "eth1" instead of "eth0". 
+OR
+
+[]# showeq eth0 --ip-address=10.0.0.10 
+ 
+Of course, for it to work you will need to replace my ip (10.0.0.10)
+with the ip of your computer that is/will be playing everquest. if
+your showeq box is also your gateway, you might want to use "eth1"
+instead of "eth0". 
 
 
 
@@ -236,16 +323,21 @@ Of course, for it to work you will need to replace my ip (10.0.0.10) with the ip
 
 []# pico /seq/showeq/README.libEQ
 
+
+
 3.2 Updating ShowEQ from cvs
-    So, you think there might be an update out... but you don't want to download the whole thing again? Try this. If it gets a couple changes, read the CHANGES file and see whats up. Then compile it if you want. 
+    There's an update out... but you don't want
+    to download the whole thing again? Try this. If it gets a couple
+    changes, read the CHANGES file and see whats up. Then compile it
+    if you want. 
 
 Code: 
 
 []# cd /seq/showeq 
 []# make distclean 
-[]# cvs -d :pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq login 
+[]# cvs -d:pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq login 
 []# cvs -z3 update 
-[]# cvs -d :pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq logout 
+[]# cvs -d:pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq logout 
 []# export CC=gcc3
 []# export CXX=g++3
 []# export QTDIR=/usr/lib/qt-2.3.2 
@@ -254,8 +346,12 @@ Code:
 []# make
 []# make install 
 
+
+
 3.3 Zone Specific Filter Files: 
-    Is your filters.conf file getting really big? Taking 20min to parse the zone you just got into? You can get BlueAdept's zone specific filter files to help you out with that.
+    Is your filters.conf file getting really big? Taking 20min to
+    parse the zone you just got into? You can get BlueAdept's zone
+    specific filter files to help you out with that.
 
 Code: 
 
@@ -263,7 +359,8 @@ Code:
 []# wget --passive ftp http://www27.brinkster.com/blueadept/filters/zonefilters.zip
 []# unzip zonefilters.zip
 
-There is no need to recompile ShowEQ after you downloaded a new set of filters.
+There is no need to recompile ShowEQ after you downloaded a new set
+of filters.
 
 
 
@@ -274,11 +371,17 @@ There is no need to recompile ShowEQ after you downloaded a new set of filters.
 4.1 Getting Help
     You can find help on the ShowEQ messageboards at:
 http://seq.sourceforge.net/
-but please, before going there, read the following pdf file about what is custom on a board like that. This will prevent you from being dissappointed and should clarify a few things you might encounter.
+
+but please, before going there, read the following pdf file about what
+is custom on a board like that. This will prevent you from being
+dissappointed and should clarify a few things you might encounter.
 http://www.smoothwall.org/download/pdf/docs/0.9.9/doc.faq.pdf
 
+
+
 4.2 Saving Space
-    Is your qt-2.3.2 directory pretty big? want to reclaim some space? delete the "tutorials" and "examples" directory! 
+    Is your qt-2.3.2 directory pretty big? want to reclaim some space?
+    delete the "tutorials" and "examples" directory! 
 
 Code: 
 
@@ -290,14 +393,28 @@ Code:
 
 5. Version History of this document:
 
+Version 4.2.12
+
+- 1.5 NOTE TO USERS WITH A HIGHER VERSION OF gcc
+    Added section, renamed following sections
+- 3.2 Updating ShowEQ from cvs
+    Corrected two typos in the commands
+- Added Hard Breaks in document for better reading.
+
+
+
 Version 4.2.3
 
 - 1.9 Changing Configurations
-    Deleted the change configuration part. With the xml implementation there is no need to change configuration manually, everything should be able to be saved while ShowEQ runs using the inprogram Save option.
+    Deleted the change configuration part. With the xml implementation
+    there is no need to change configuration manually, everything should
+    be able to be saved while ShowEQ runs using the inprogram Save option.
 - 5. Version History of this document
     Changed current version to match latest CVS commit
 - 6. Credits
     Added Credits Chapter
+
+
 
 Version 0.1.2
 
@@ -305,6 +422,8 @@ Changes:
 
 - 1.9 Changing Configurations
     Changed to reflect new configuration way: showeq.xml
+
+
 
 Version 0.1.1
 
@@ -336,8 +455,12 @@ Sep 06, 2001
 Reupdated for ShowEQ 4.x by Mr. Suspicious
 May 09, 2002
 
+Thanks to fryfrog for providing an easy way to check the names of your
+gcc executable (as used in step 1.5)
+
 Reference url's that contributed to this update:
-   
+
 http://seq.sourceforge.net/showthread.php?s=&threadid=400 by monkey679
 http://www.hackersquest.org/boards/viewtopic.php?t=274 also by monkey679
-
+http://seq.sourceforge.net/showthread.php?s=&threadid=985
+http://seq.sourceforge.net/showthread.php?s=&threadid=1485
