@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #include <pthread.h>
-#include <deque.h>
+#include <deque>
 
 #include <qobject.h>
 #include <qevent.h>
@@ -24,7 +24,7 @@ typedef struct
   unsigned char data[0];
 } EQPktRec;
 
-typedef deque<EQPktRec *> EQPktQueue;
+typedef std::deque<EQPktRec *> EQPktQueue;
 
 class FoundKeyEvent : public QCustomEvent
 {
@@ -45,9 +45,10 @@ class EQDecode : public QObject
   void ResetDecoder (void);
 
  signals:
-  void KeyChanged (void);
-  void BackfillPlayer (const playerProfileStruct *);
-  void BackfillSpawn (const spawnStruct *);
+  void keyChanged (void);
+  void dispatchDecodedCharProfile(const uint8_t* decodedData, uint32_t len);
+  void dispatchDecodedNewSpawn(const uint8_t* decodedData, uint32_t len);
+  void dispatchDecodedZoneSpawns(const uint8_t* decodedData, uint32_t len);
 
  public:
   int DecodePacket(const uint8_t *data, uint32_t len, 
@@ -59,6 +60,7 @@ class EQDecode : public QObject
   // overloaded event member for syncronization
   virtual bool event(QEvent*);
 
+  uint32_t decodeKey() { return m_decodeKey; }
  private:
   int InflatePacket(const uint8_t *pbDataIn, uint32_t cbDataInLen, 
 		    uint8_t* pbDataOut, uint32_t* pcbDataOutLen);

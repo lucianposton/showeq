@@ -5,6 +5,7 @@
 
 #include <qstring.h>
 #include <qtextstream.h>
+#include <qregexp.h>
 
 #include "cgiconv.h"
 #include "spawnshell.h"
@@ -131,18 +132,18 @@ int main (int argc, char *argv[])
   out << "<TD><SELECT name=\"class\" size=\"1\">\n";
   out << "<OPTION value=\"0\"";
   if (searchClass == 0)
-    cout << " selected";
+    out << " selected";
   out << ">Any</OPTION>\n";
 
-  Spawn fake(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  Spawn fake(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   // start at class value 1, and go until maximum known class value
   for (int i = 1; i <= 32; ++i)
   {
     fake.setClassVal(i);
     out << "<OPTION value=\"" << i << "\"";
     if (searchClass == i)
-      cout << " selected";
-    out << ">" << fake.className() << "</OPTION>\n";
+      out << " selected";
+    out << ">" << fake.classString() << "</OPTION>\n";
   }
   out << "</SELECT></TD>\n";
   
@@ -221,7 +222,7 @@ int main (int argc, char *argv[])
       
       // is it a race search, if so check
       if ((!searchRace.isEmpty()) &&
-	  (spawn.raceName().find(searchRace, 0, false) == -1))
+	  (spawn.raceString().find(searchRace, 0, false) == -1))
 	continue;
       
       // is it a class search, if so check
@@ -242,8 +243,8 @@ int main (int argc, char *argv[])
     out << "<TD align=right>" << spawn.level() << "</TD>\n";
     out << "<TD align=right>" << spawn.HP() << "/"
 	<< spawn.maxHP() << "</TD>\n";
-    out << "<TD>" << spawn.raceName() << "</TD>\n";
-    out << "<TD>" << spawn.className() << "</TD>\n";
+    out << "<TD>" << spawn.raceString() << "</TD>\n";
+    out << "<TD>" << spawn.classString() << "</TD>\n";
     out << "</TR>\n";
     
     // increment the count

@@ -6,6 +6,11 @@
  */
 
 #include "group.h"
+#include "player.h"
+
+// ZBTEMP: Will re-enable the group manager when someone figures out
+// how to fix it's crashing bug.
+//#define ENABLE_GROUPMGR 1
 
 GroupMgr::GroupMgr(SpawnShell* spawnShell, 
 		   EQPlayer* player,  
@@ -18,15 +23,18 @@ GroupMgr::GroupMgr(SpawnShell* spawnShell,
   m_group.setAutoDelete(false);
 }
  
-void GroupMgr::handleGroupInfo( const struct groupMemberStruct* gmem )
+void GroupMgr::handleGroupInfo( const groupMemberStruct* gmem )
 {
-  //  return;
+#ifndef ENABLE_GROUPMGR
+  return;
+#endif
+
   QString newName = gmem->membername;
   const Spawn* member;
 
 #ifdef DEBUG  
-  printf("code: 1:%d 2:%d 3:%d Name:%s\n", 
-	 gmem->bgARC, gmem->oper, gmem->ARC2, gmem->membername);
+  printf("Your Name: %s Name: %s\n", 
+	 gmem->yourname, gmem->membername);
 #endif
 
   // is an empty "memberName" really the signal to clear the group?
@@ -71,7 +79,10 @@ void GroupMgr::handleGroupInfo( const struct groupMemberStruct* gmem )
 
 void GroupMgr::delItem(const Item* item)
 {
-  //  return;
+#ifndef ENABLE_GROUPMGR
+  return;
+#endif
+
   const Spawn* spawn = spawnType(item);
 
   if (spawn == NULL)
@@ -90,19 +101,19 @@ void GroupMgr::delItem(const Item* item)
 
 int GroupMgr::groupSize()
 {
-  return m_group.count() + 1;
+  return m_group.count();
 }
 
 int GroupMgr::groupPercentBonus()
 {
   switch ( groupSize() )
   {
-  case 1:		return 100;
-  case 2:		return 102;
-  case 3:		return 106;
-  case 4:		return 110;
-  case 5:		return 114;
-  case 6:		return 120;
+  case 0:		return 100;
+  case 1:		return 102;
+  case 2:		return 106;
+  case 3:		return 110;
+  case 4:		return 114;
+  case 5:		return 120;
   default:	return 100;
   }
 }
@@ -136,6 +147,21 @@ const Spawn* GroupMgr::memberByName(const QString& name)
   for ( member = m_group.first(); member != NULL; member = m_group.next() )
   {
     if (member->rawName() == name)
+      return member;
+  }
+
+  return NULL;
+}
+
+const Spawn* GroupMgr::memberBySlot(uint16_t slot )
+{
+  const Spawn* member;
+  int curSlot;
+  for (curSlot = 0, member = m_group.first(); 
+       member != NULL; 
+       curSlot++, member = m_group.next() )
+  {
+    if (curSlot == slot)
       return member;
   }
 

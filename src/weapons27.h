@@ -20,21 +20,21 @@
     NULL,                 // 0x0d
     NULL,                 // 0x0e
     NULL,                 // 0x0f
-    NULL,                 // 0x10
-    NULL,                 // 0x11
+    "Luclin Long Sword",  // 0x10
+    "Luclin Great Mace",  // 0x11
     NULL,                 // 0x12
-    NULL,                 // 0x13
-    NULL,                 // 0x14
+    "Luclin Warhammer",   // 0x13
+    "Luclin 2H Sword",    // 0x14
     NULL,                 // 0x15
-    NULL,                 // 0x16
-    NULL,                 // 0x17
-    NULL,                 // 0x18
-    NULL,                 // 0x19
+    "Gladius",            // 0x16
+    "Luclin Mace",        // 0x17
+    "Luclin Battle Staff",// 0x18
+    "Luclin Dagger",      // 0x19
     NULL,                 // 0x1a
     "Stone Axe",          // 0x1b
     "Stone Hammer",       // 0x1c
-    NULL,                 // 0x1d
-    NULL,                 // 0x1e
+    "Stone Warhammer",    // 0x1d
+    "Curved Blade",       // 0x1e
     NULL,                 // 0x1f
     NULL,                 // 0x20
     NULL,                 // 0x21
@@ -43,11 +43,11 @@
     NULL,                 // 0x24
     NULL,                 // 0x25
     NULL,                 // 0x26
-    NULL,                 // 0x27
+    "Luclin Scimitar",    // 0x27
     NULL,                 // 0x28
-    NULL,                 // 0x29
+    "Bone Blade",         // 0x29
     NULL,                 // 0x2a
-    NULL,                 // 0x2b
+    "Mining Pick",        // 0x2b
     NULL,                 // 0x2c
     NULL,                 // 0x2d
     NULL,                 // 0x2e
@@ -120,15 +120,160 @@
     NULL,                 // 0x71
     NULL,                 // 0x72
     NULL,                 // 0x73
-    NULL,                 // 0x74
+    "Luclin Spear",       // 0x74
     "Wood Spear",         // 0x75
     NULL,                 // 0x76
-    NULL,                 // 0x77
+    "Wood Spear",         // 0x77
     NULL,                 // 0x78
     NULL,                 // 0x79
     "Stone Spear",        // 0x7a
-    NULL,                 // 0x7b
-    NULL,                 // 0x7c
+    "Stone Spear",        // 0x7b
+    "Bone Tipped Spear",  // 0x7c
     "Bone Spear",         // 0x7d
     NULL,                 // 0x7e
     NULL,                 // 0x7f
+
+    NULL,                 // 0x80
+    NULL,                 // 0x81
+    NULL,                 // 0x82
+    NULL,                 // 0x83
+    NULL,                 // 0x84
+    NULL,                 // 0x85
+    NULL,                 // 0x86
+    NULL,                 // 0x87
+    NULL,                 // 0x88
+    NULL,                 // 0x89
+    NULL,                 // 0x8a
+    NULL,                 // 0x8b
+    NULL,                 // 0x8c
+    NULL,                 // 0x8d
+    NULL,                 // 0x8e
+    NULL,                 // 0x8f
+    NULL,                 // 0x90
+    NULL,                 // 0x91
+    NULL,                 // 0x92
+    NULL,                 // 0x93
+    NULL,                 // 0x94
+    NULL,                 // 0x95
+    NULL,                 // 0x96
+    NULL,                 // 0x97
+    NULL,                 // 0x98
+    NULL,                 // 0x99
+    NULL,                 // 0x9a
+    NULL,                 // 0x9b
+    NULL,                 // 0x9c
+    NULL,                 // 0x9d
+    NULL,                 // 0x9e
+    NULL,                 // 0x9f
+    NULL,                 // 0x90
+    NULL,                 // 0x91
+    NULL,                 // 0x92
+    NULL,                 // 0x93
+    NULL,                 // 0x94
+    NULL,                 // 0x95
+    NULL,                 // 0x96
+    NULL,                 // 0x97
+    NULL,                 // 0x98
+    NULL,                 // 0x99
+    NULL,                 // 0x9a
+    NULL,                 // 0x9b
+    NULL,                 // 0x9c
+    NULL,                 // 0x9d
+    NULL,                 // 0x9e
+    NULL,                 // 0x9f
+    NULL,                 // 0xa0
+    NULL,                 // 0xa1
+    NULL,                 // 0xa2
+    NULL,                 // 0xa3
+    NULL,                 // 0xa4
+    NULL,                 // 0xa5
+    NULL,                 // 0xa6
+    NULL,                 // 0xa7
+    NULL,                 // 0xa8
+    NULL,                 // 0xa9
+    NULL,                 // 0xaa
+    NULL,                 // 0xab
+    NULL,                 // 0xac
+    NULL,                 // 0xad
+    NULL,                 // 0xae
+    NULL,                 // 0xaf
+    NULL,                 // 0xb0
+    NULL,                 // 0xb1
+    NULL,                 // 0xb2
+    NULL,                 // 0xb3
+    NULL,                 // 0xb4
+    NULL,                 // 0xb5
+    NULL,                 // 0xb6
+    NULL,                 // 0xb7
+    NULL,                 // 0xb8
+    NULL,                 // 0xb9
+    NULL,                 // 0xba
+    NULL,                 // 0xbb
+    NULL,                 // 0xbc
+    NULL,                 // 0xbd
+    NULL,                 // 0xbe
+    NULL,                 // 0xbf
+    NULL,                 // 0xc0
+    NULL,                 // 0xc1
+    NULL,                 // 0xc2
+    NULL,                 // 0xc3
+    NULL,                 // 0xc4
+    NULL,                 // 0xc5
+    NULL,                 // 0xc6
+    NULL,                 // 0xc7
+    NULL,                 // 0xc8
+    NULL,                 // 0xc9
+    NULL,                 // 0xca
+    NULL,                 // 0xcb
+    NULL,                 // 0xcc
+    NULL,                 // 0xcd
+    NULL,                 // 0xce
+    NULL,                 // 0xcf
+    NULL,                 // 0xd0
+    NULL,                 // 0xd1
+    NULL,                 // 0xd2
+    NULL,                 // 0xd3
+    NULL,                 // 0xd4
+    NULL,                 // 0xd5
+    NULL,                 // 0xd6
+    NULL,                 // 0xd7
+    "Luclin Staff",       // 0xd8
+    NULL,                 // 0xd9
+    NULL,                 // 0xda
+    "Horned Staff",       // 0xdb
+    NULL,                 // 0xdc
+    NULL,                 // 0xdd
+    NULL,                 // 0xde
+    NULL,                 // 0xdf
+    NULL,                 // 0xe0
+    NULL,                 // 0xe1
+    NULL,                 // 0xe2
+    NULL,                 // 0xe3
+    NULL,                 // 0xe4
+    NULL,                 // 0xe5
+    NULL,                 // 0xe6
+    NULL,                 // 0xe7
+    NULL,                 // 0xe8
+    NULL,                 // 0xe9
+    NULL,                 // 0xea
+    NULL,                 // 0xeb
+    NULL,                 // 0xec
+    NULL,                 // 0xed
+    NULL,                 // 0xee
+    NULL,                 // 0xef
+    NULL,                 // 0xf0
+    NULL,                 // 0xf1
+    NULL,                 // 0xf2
+    NULL,                 // 0xf3
+    NULL,                 // 0xf4
+    NULL,                 // 0xf5
+    NULL,                 // 0xf6
+    NULL,                 // 0xf7
+    NULL,                 // 0xf8
+    NULL,                 // 0xf9
+    NULL,                 // 0xfa
+    NULL,                 // 0xfb
+    NULL,                 // 0xfc
+    NULL,                 // 0xfd
+    NULL,                 // 0xfe
+    NULL,                 // 0xff

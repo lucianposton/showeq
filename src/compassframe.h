@@ -15,8 +15,9 @@
 #include "player.h"
 #include "spawnshell.h"
 #include "compass.h"
+#include "seqwindow.h"
 
-class CompassFrame : public QVBox
+class CompassFrame : public SEQWindow
 {
   Q_OBJECT
 

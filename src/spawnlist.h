@@ -31,6 +31,7 @@
 #include <qvaluelist.h>
 #include <qlistview.h>
 #include <qptrdict.h>
+#include <qtextstream.h>
 
 // these are all used for the CFilterDlg
 #include <regex.h>
@@ -43,11 +44,24 @@
 #include <qhbox.h>
 #include <qvbox.h>
 #include <qpushbutton.h>
+#include <qpopupmenu.h>
 
+#include "seqwindow.h"
+#include "seqlistview.h"
 #include "everquest.h"
+#include "spawn.h"
 #include "player.h"
-#include "spawnshell.h"
-#include "category.h"
+
+//--------------------------------------------------
+// forward declarations
+class Category;
+class CategoryMgr;
+class Item;
+class EQPlayer;
+class SpawnShell;
+class FilterMgr;
+class CSpawnList;
+class SpawnListItem;
 
 //--------------------------------------------------
 // defines
@@ -67,6 +81,46 @@
 #define SPAWNCOL_MAXCOLS 13
 
 //--------------------------------------------------
+// SpawnListMenu
+class SpawnListMenu : public QPopupMenu
+{
+   Q_OBJECT
+
+ public:
+  SpawnListMenu(CSpawnList* spawnlist, 
+		FilterMgr* filterMgr, 
+		CategoryMgr* categoryMgr,
+		QWidget* parent = 0, const char* name = 0);
+  virtual ~SpawnListMenu();
+  void setCurrentCategory(const Category* cat);
+  void setCurrentItem(const Item* item);
+
+ protected slots:
+   void init_Menu(void);
+   void toggle_spawnListCol( int id );
+   void add_filter(int id);
+   void add_category(int id);
+   void edit_category(int id);
+   void delete_category(int id);
+   void reload_categories(int id);
+   void set_font(int id);
+   void set_caption(int id);
+   void rebuild_spawnlist(int id);
+
+ protected:
+  CSpawnList* m_spawnlist;
+  FilterMgr* m_filterMgr;
+  CategoryMgr* m_categoryMgr;
+  const Category* m_currentCategory;
+  const Item* m_currentItem;
+  int m_id_filterMenu;
+  int m_id_spawnList_Cols[SPAWNCOL_MAXCOLS];
+  int m_id_edit_category;
+  int m_id_delete_category;
+};
+
+
+//--------------------------------------------------
 // SpawnListItem
 class SpawnListItem : public QListViewItem
 {
@@ -80,22 +134,22 @@ public:
 
    const QColor textColor()  { return m_textColor; }
    void setTextColor(const QColor &color)  
-                             { m_textColor = QColor(color); m_btextSet = TRUE; }
+                             { m_textColor = QColor(color); }
    const Item*    item() { return m_item; }
    uint32_t filterFlags() { return m_filterFlags; }
    uint32_t runtimeFilterFlags() { return m_runtimeFilterFlags; }
    void setFilterFlags(uint32_t flags) { m_filterFlags = flags; }
    void setRuntimeFilterFlags(uint32_t flags) { m_runtimeFilterFlags = flags; }
 
-   void update(uint32_t changeType = tSpawnChangedALL);
+   void update(uint32_t changeType);
    void updateTitle(const QString& name);
    void setShellItem(const Item *);
    itemType type();
+   virtual QString key(int column, bool ascending) const;
    //--------------------------------------------------
    int m_npc;
 private:
    QColor m_textColor;
-   bool m_btextSet;
    uint32_t m_filterFlags;
    uint32_t m_runtimeFilterFlags;    
 
@@ -104,7 +158,7 @@ private:
 
 //--------------------------------------------------
 // CSpawnList
-class CSpawnList : public QListView
+class CSpawnList : public SEQListView
 {
    Q_OBJECT
 public:
@@ -113,7 +167,6 @@ public:
 	      CategoryMgr* categoryMgr,
 	      QWidget *parent = 0, const char * name = 0);
 
-public:
    SpawnListItem* Selected();
    void DeleteItem(const Item* item);
    SpawnListItem* Find(QListViewItemIterator& it, 
@@ -122,20 +175,22 @@ public:
 
    double calcDist(const Item* item)
    { 
-     return item->calcDist(m_player->getPlayerX(), 
-			   m_player->getPlayerY(),
-			   m_player->getPlayerZ());
+     return item->calcDist(m_player->x(), 
+			   m_player->y(),
+			   m_player->z());
    }
 
    int calcDistInt(const Item* item)
    { 
-     return item->calcDist2DInt(m_player->getPlayerX(), 
-				m_player->getPlayerY());
+     return item->calcDist2DInt(m_player->x(), 
+				m_player->y());
    }
 
    QColor pickSpawnColor(const Item *item, QColor def = Qt::black);
    const Category* getCategory(SpawnListItem *);
    bool debug() { return bDebug; };
+
+   SpawnListMenu* menu();
 
 signals:
    void listUpdated();   // flags in spawns have changed
@@ -144,14 +199,12 @@ signals:
    void keepUpdated(bool on);
 
 public slots: 
-   void savePrefs();
    void setPlayer(int16_t xPos, int16_t yPos, int16_t zPos, 
 		  int16_t deltaX, int16_t deltaY, int16_t deltaZ, 
 		  int32_t degrees); 
    void setDebug(bool bset)       { bDebug = bset; }
    void selectNext(void);
    void selectPrev(void);
-   void setColumnVisible(int id, bool visible);
    // SpawnShell signals
    void addItem(const Item *);
    void delItem(const Item *);
@@ -159,25 +212,22 @@ public slots:
    void killSpawn(const Item *);
    void selectSpawn(const Item *);
    void clear();
-
    void addCategory(const Category* cat);
    void delCategory(const Category* cat);
    void clearedCategories(void);
    void loadedCategories(void);
    
    void rebuildSpawnList();
+   void playerLevelChanged(uint8_t);
    
 private slots:
    void selChanged(QListViewItem*);
-   void rightBtnPressed(QListViewItem* litem, 
-			const QPoint &point, 
-			int col);
-   void rightBtnReleased(QListViewItem *item,
-			 const QPoint &point, 
-			 int col);
+
+   void mousePressEvent (int button, QListViewItem *litem, const QPoint &point, int col);
+   void mouseDoubleClickEvent(QListViewItem *litem);
 
 private:
-   void setSelectedQueit(QListViewItem* item, bool selected);
+   void setSelectedQuiet(QListViewItem* item, bool selected);
    void populateSpawns(void);
    void populateCategory(const Category* cat);
    QString filterString(const Item *item, int flags = 0);
@@ -190,6 +240,27 @@ private:
    // category pointer used as keys to look up the associated SpawnListItem
    QPtrDict<SpawnListItem> m_categoryListItems;
    bool     bDebug;
+
+   SpawnListMenu* m_menu;
+};
+
+class SpawnListWindow : public SEQWindow
+{
+  Q_OBJECT
+
+ public:
+  SpawnListWindow(EQPlayer* player, 
+		  SpawnShell* spawnShell, 
+		  CategoryMgr* categoryMgr,
+		  QWidget* parent = 0, const char* name = 0);
+  ~SpawnListWindow();
+  CSpawnList* spawnList() { return m_spawnList; }
+
+ public slots:
+  virtual void savePrefs(void);
+
+ protected:
+  CSpawnList* m_spawnList;
 };
 
 #endif // SPAWNLIST_H

@@ -41,7 +41,7 @@ static char *id="@(#) $Id$";
 
 ///////////////////////////////////
 //   defines used for option processing
-#define OPTION_LIST "dl::f:r:o:e:c:DRi:UuhvV"
+#define OPTION_LIST "dl::f:r:o:e:x:z:c:DRi:UuhvV"
 
 ///////////////////////////////////
 // For long options without any short (single letter) equivalent, we'll
@@ -68,6 +68,7 @@ static struct option option_list[] = {
   {"import-old-GDBM",          required_argument,  NULL,  'o'},
   {"export-raw-record",        required_argument,  NULL,  'e'},
   {"export-csv",               required_argument,  NULL,  'x'},
+  {"export-lsv",               required_argument,  NULL,  'z'},
   {"reorganize",               no_argument,        NULL,  'R'},
   {"itemdb-lore-filename",     required_argument,  NULL, ITEMDB_LORE_FILENAME_OPTION},
   {"itemdb-name-filename",     required_argument,  NULL, ITEMDB_NAME_FILENAME_OPTION},
@@ -102,7 +103,8 @@ int exportRawRecord(EQItemDB* itemDB,
 		    uint16_t itemNr);
 int exportRecordCSV(EQItemDB* itemDB, 
 		    const char* filename, 
-		    uint16_t itemNr);
+		    uint16_t itemNr,
+		    char action);
 int deleteRecord(EQItemDB* itemDB, 
 		 uint16_t itemNr, 
 		 bool force);
@@ -176,6 +178,7 @@ main (int argc, char *argv[])
 	case 'o': // import from an old GDBM file
 	case 'e': // export a raw data record
 	case 'x': // export database as a CSV file
+	case 'z': // export database as a label seperated list
 	case 'D': // delete a record
 	case 'R': // reorganize database
 	case 'u': // upgrade ItemDB to current format
@@ -310,7 +313,10 @@ main (int argc, char *argv[])
       result = exportRawRecord(itemDB, action_arg, itemNr);
       break;
     case 'x': // export database as a CSV file
-      result = exportRecordCSV(itemDB, action_arg, itemNr);
+      result = exportRecordCSV(itemDB, action_arg, itemNr, action);
+      break;
+    case 'z': // export database as a label seperated list
+      result = exportRecordCSV(itemDB, action_arg, itemNr, action);
       break;
     case 'D': // delete a record
       result = deleteRecord(itemDB, itemNr, forceAction);
@@ -342,6 +348,7 @@ void displayUsage()
   printf("  -o <FILE>, --import-old-GDBM=FILE    import data from old GDBM file FILE\n");
   printf("  -e <FILE>, --export-raw-record=FILE  export raw data record(s) to flat file\n");
   printf("  -x <FILE>, --export-csv=FILE         export item data to a CSV File\n");
+  printf("  -z <FILE>, --export-lsv=FILE         export item data to LABELED SV File\n");
   printf("  -d, --display                        display the specified item\n");
   printf("  -l [SEARCH], --list[SEARCH]          list items matching SEARCH or all\n");
   printf("  -D, --delete                         delete the specified item\n");
@@ -349,11 +356,11 @@ void displayUsage()
   printf("  -i <NUM>, --item=<NUM>               specify the item to manipulate\n");
   printf("  -U, --update-records                 specifies to update existing records.\n");
   printf("  --force                              force an action, don't confirm\n");
-  printf ("  --itemdb-lore-filename=FILE          Use FILE instead of itemlore.dbm\n");
-  printf ("  --itemdb-name-filename=FILE          Use FILE instead of itemname.dbm\n");
-  printf ("  --itemdb-data-filename=FILE          Use FILE instead of itemdata.dbm\n");
-  printf ("  --itemdb-raw-data-filename=FILE      Use FILE instead of itemrawdata.dbm\n");
-  printf ("  --itemdb-databases-enabled=DBS       enable DBS set of item databases\n");
+  printf("  --itemdb-lore-filename=FILE          Use FILE instead of itemlore.dbm\n");
+  printf("  --itemdb-name-filename=FILE          Use FILE instead of itemname.dbm\n");
+  printf("  --itemdb-data-filename=FILE          Use FILE instead of itemdata.dbm\n");
+  printf("  --itemdb-raw-data-filename=FILE      Use FILE instead of itemrawdata.dbm\n");
+  printf("  --itemdb-databases-enabled=DBS       enable DBS set of item databases\n");
   printf("  -h, --help                           display this help and exit\n");
   printf("  -v, --version                        output version information\n");
   printf("\n");
@@ -411,7 +418,7 @@ void displayVersion(EQItemDB* itemDB)
   printf ("\tSee: http://www.gnu.org/copyleft/gpl.html for more details...\n\n");
   
   printf ("\tFor updates and information, please visit:\n"
-	  "\t\thttp://www.sourceforge.net/projects/seq\n\n");
+	  "\t\thttp://seq.sourceforge.net\n\n");
 
   
   /////////////////////////////////
@@ -956,15 +963,312 @@ int exportRawRecord(EQItemDB* itemDB,
   return result;
 }
 
-int exportRecordCSV(EQItemDB* itemDB, 
-		    const char* filename, 
+int
+dumpItemCSV(EQItemDB* itemDB, 
+			FILE* fh,
 		    uint16_t itemNr)
 {
-  // export data to Comma Seperated Value file
-  fprintf(stderr, "%s: TODO: Implement exportRecordCSV!\n",
-	  progname);
+	QString nameString;
+	QString loreString;
+	bool hasEntry = false;
+	EQItemDBEntry* entry = NULL;
 
-  return -1;
+	nameString = itemDB->GetItemName(itemNr);
+	loreString = itemDB->GetItemLoreName(itemNr);
+	hasEntry = itemDB->GetItemData(itemNr, &entry);
+
+	fprintf (fh, "\"%d\",", itemNr);
+	if (!nameString.isEmpty()) fprintf (fh, "\"%s\",", (const char*)nameString);
+	else fprintf (fh, "\"\",");
+
+	if (hasEntry)
+	{
+		if (loreString[0] == '*')
+			{
+				fprintf (fh, "\"%s\",", (const char*)loreString);
+				fprintf (fh, "\"1\",");
+			}
+		else
+			{
+				fprintf (fh, "\"\",");
+				fprintf (fh, "\"0\",");
+			}
+	
+			fprintf (fh, "\"%.1f\",", (entry->GetWeight())/10.0);
+			fprintf (fh, "\"%#06x\",", entry->GetFlag());
+			fprintf (fh, "\"%d\",", entry->GetSize());
+			fprintf (fh, "\"%d\",", entry->GetSlots());
+			fprintf (fh, "\"%d\",", entry->GetIconNr());
+	
+			if (entry->GetNoDrop() == 0) fprintf (fh, "\"1\",");
+			else fprintf (fh, "\"0\",");
+	
+			if (entry->GetNoSave() == 0) fprintf (fh, "\"1\",");
+			else fprintf (fh, "\"0\",");
+	
+			if (entry->IsBook() == 0) fprintf (fh, "\"1\",");
+			else fprintf (fh, "\"0\",");
+			
+				if (entry->GetMagic() == 1)	fprintf (fh, "\"1\",");
+				else fprintf(fh, "\"0\",");
+				if (entry->GetLight())		fprintf (fh, "\"%d\",", entry->GetLight());
+				else fprintf(fh, "\"\",");
+				if (entry->GetSTR())		fprintf (fh, "\"%d\",", entry->GetSTR());
+				else fprintf(fh, "\"\",");
+				if (entry->GetSTA())		fprintf (fh, "\"%d\",", entry->GetSTA());
+				else fprintf(fh, "\"\",");
+				if (entry->GetCHA())		fprintf (fh, "\"%d\",", entry->GetCHA());
+				else fprintf(fh, "\"\",");
+				if (entry->GetDEX())		fprintf (fh, "\"%d\",", entry->GetDEX());
+				else fprintf(fh, "\"\",");
+				if (entry->GetINT())		fprintf (fh, "\"%d\",", entry->GetINT());
+				else fprintf(fh, "\"\",");
+				if (entry->GetAGI())		fprintf (fh, "\"%d\",", entry->GetAGI());
+				else fprintf(fh, "\"\",");
+				if (entry->GetWIS())		fprintf (fh, "\"%d\",", entry->GetWIS());
+				else fprintf(fh, "\"\",");
+				if (entry->GetMR())			fprintf (fh, "\"%d\",", entry->GetMR());
+				else fprintf(fh, "\"\",");
+				if (entry->GetFR())			fprintf (fh, "\"%d\",", entry->GetFR());
+				else fprintf(fh, "\"\",");
+				if (entry->GetCR())			fprintf (fh, "\"%d\",", entry->GetCR());
+				else fprintf(fh, "\"\",");
+				if (entry->GetDR())			fprintf (fh, "\"%d\",", entry->GetDR());
+				else fprintf(fh, "\"\",");
+				if (entry->GetPR())			fprintf (fh, "\"%d\",", entry->GetPR());
+				else fprintf(fh, "\"\",");
+				if (entry->GetHP())			fprintf (fh, "\"%d\",", entry->GetHP());
+				else fprintf(fh, "\"\",");
+				if (entry->GetMana())		fprintf (fh, "\"%d\",", entry->GetMana());
+				else fprintf(fh, "\"\",");
+				if (entry->GetAC())			fprintf (fh, "\"%d\",", entry->GetAC());
+				else fprintf(fh, "\"\",");
+				if (entry->GetDelay())		fprintf (fh, "\"%d\",", entry->GetDelay());
+				else fprintf(fh, "\"\",");
+				if (entry->GetDamage())
+				{
+					fprintf (fh, "\"%d\",", entry->GetDamage());
+					fprintf (fh, "\"%d\",", entry->GetSkill());
+				}
+				else
+				{
+					fprintf (fh, "\"\",");
+					fprintf (fh, "\"\",");
+				}
+				if (entry->GetRange())		fprintf (fh, "\"%d\",", entry->GetRange());
+				else fprintf(fh, "\"\",");
+	
+				if (entry->GetSpellId0()) 	fprintf (fh, "\"%d\",", entry->GetSpellId0());
+				else fprintf (fh, "\"\",");
+				if (entry->GetLevel())		fprintf (fh, "\"%d\",", entry->GetLevel());
+				else fprintf (fh, "\"\",");
+				if (entry->GetCharges())	fprintf (fh, "\"%d\",", entry->GetCharges());
+				else fprintf (fh, "\"\",");
+				
+				fprintf (fh, "\"%d\",", entry->GetClasses());
+	
+				if (entry->IsContainer()) fprintf (fh, "\"1\",");
+				else fprintf (fh, "\"0\",");
+				
+				if (entry->GetNumSlots())			fprintf (fh, "\"%d\",", entry->GetNumSlots());
+				else fprintf (fh, "\"\",");
+				if (entry->GetSizeCapacity())		fprintf (fh, "\"%d\",", entry->GetSizeCapacity());
+				else fprintf (fh, "\"\",");
+				if (entry->GetWeightReduction())	fprintf (fh, "\"%d\",", entry->GetWeightReduction());
+				else fprintf (fh, "\"\",");
+				
+				if (!entry->IsContainer())	fprintf (fh, "\"%d\"", entry->GetRaces());
+				else fprintf (fh, "\"\"");
+	
+			fprintf (fh, "\n");
+	
+			// don't need the entry anymore, delete it.
+			delete entry;
+		}
+		else return -1;
+	
+		return 0;
+}
+
+int
+dumpItemLabeled(EQItemDB* itemDB, 
+			FILE* fh,
+		    uint16_t itemNr)
+{
+	QString nameString;
+	QString loreString;
+	bool hasEntry = false;
+	EQItemDBEntry* entry = NULL;
+
+	nameString = itemDB->GetItemName(itemNr);
+	loreString = itemDB->GetItemLoreName(itemNr);
+	hasEntry = itemDB->GetItemData(itemNr, &entry);
+
+	fprintf (fh, "itemNr|%d|", itemNr);
+	if (!nameString.isEmpty())
+		fprintf (fh, "Name|%s|", (const char*)nameString);
+
+	if (hasEntry)
+	{
+		if (loreString[0] == '*')
+		{
+			fprintf (fh, "Lore|%s|", (const char*)loreString);
+			fprintf (fh, "LORE|1|");
+		}
+		fprintf (fh, "Weight|%.1f|", (entry->GetWeight())/10.0);
+		fprintf (fh, "Flag|%#06x|", entry->GetFlag());
+		fprintf (fh, "Size|%d|", entry->GetSize());
+		fprintf (fh, "Slot|%d|", entry->GetSlots());
+		fprintf (fh, "Icon|%d|", entry->GetIconNr());
+		if (entry->GetNoDrop() == 0)
+			fprintf (fh, "NODROP|1|");
+		if (entry->GetNoSave() == 0)
+			fprintf (fh, "NORENT|1|");
+
+		if (entry->IsBook() == 0 && entry->IsContainer() == 0)
+		{
+			if (entry->GetMagic() == 1)
+				fprintf (fh, "MAGIC|1|");
+			if (entry->GetLight())
+				fprintf (fh, "Light|%d|", entry->GetLight());
+			if (entry->GetSTR())
+				fprintf (fh, "Str|%d|", entry->GetSTR());
+			if (entry->GetSTA())
+				fprintf (fh, "Sta|%d|", entry->GetSTA());
+			if (entry->GetCHA())
+				fprintf (fh, "Cha|%d|", entry->GetCHA());
+			if (entry->GetDEX())
+				fprintf (fh, "Dex|%d|", entry->GetDEX());
+			if (entry->GetINT())
+				fprintf (fh, "Int|%d|", entry->GetINT());
+			if (entry->GetAGI())
+				fprintf (fh, "Agi|%d|", entry->GetAGI());
+			if (entry->GetWIS())
+				fprintf (fh, "Wis|%d|", entry->GetWIS());
+			if (entry->GetMR())
+				fprintf (fh, "SvM|%d|", entry->GetMR());
+			if (entry->GetFR())
+				fprintf (fh, "SvF|%d|", entry->GetFR());
+			if (entry->GetCR())
+				fprintf (fh, "SvC|%d|", entry->GetCR());
+			if (entry->GetDR())
+				fprintf (fh, "SvD|%d|", entry->GetDR());
+			if (entry->GetPR())
+				fprintf (fh, "SvP|%d|", entry->GetPR());
+			if (entry->GetHP())
+				fprintf (fh, "HP|%d|", entry->GetHP());
+			if (entry->GetMana())
+				fprintf (fh, "Mana|%d|", entry->GetMana());
+			if (entry->GetAC())
+				fprintf (fh, "AC|%d|", entry->GetAC());
+			if (entry->GetDelay())
+				fprintf (fh, "Del|%d|", entry->GetDelay());
+			if (entry->GetDamage())
+			{
+				fprintf (fh, "Dam|%d|", entry->GetDamage());
+				fprintf (fh, "Skill|%d|", entry->GetSkill());
+			}
+			if (entry->GetRange())
+				fprintf (fh, "Range|%d|", entry->GetRange());
+			if (entry->GetSpellId0() != ITEM_SPELLID_NOSPELL && entry->GetSpellId0() != 0)
+			{
+				fprintf (fh, "Effect|%d|", entry->GetSpellId0());
+				if (entry->GetLevel())
+					fprintf (fh, "EffLvl|%d|", entry->GetLevel());
+				if (entry->GetCharges())
+					fprintf (fh, "EffChg|%d|", entry->GetCharges());
+			}
+			fprintf (fh, "Class|%d|", entry->GetClasses());
+			fprintf (fh, "Race|%d|", entry->GetRaces());
+			}
+			if (entry->IsContainer())
+			{
+				if (entry->GetNumSlots())
+				fprintf (fh, "ConSlot|%d|", entry->GetNumSlots());
+				if (entry->GetSizeCapacity())
+				fprintf (fh, "ConCap|%d|", entry->GetSizeCapacity());
+				if (entry->GetWeightReduction())
+				fprintf (fh, "ConWr|%d|", entry->GetWeightReduction());
+		}
+		fprintf (fh, "\n");
+
+		// don't need the entry anymore, delete it.
+		delete entry;
+	} else {
+		return -1;
+	}
+	return 0;
+}
+
+int exportRecordCSV(EQItemDB* itemDB, 
+	const char* filename,
+	uint16_t itemNr,
+	char action)
+{
+	int result = 0;
+	FILE* outfile;
+	int count = 0;
+
+	// open the output file
+	outfile = fopen(filename, "w");
+
+	// if unable to open it, just error out now
+	if (outfile == NULL)
+	{
+		fprintf(stderr, "%s: Unable to open output file '%s'\n", progname, filename);
+			return 1;
+	}
+
+	// if an item number was specified, just get that item
+	if (itemNr != 0)
+	{
+		// retrieve item data
+		dumpItemCSV(itemDB, outfile, itemNr);
+		count++;
+	}
+	else
+	{
+		// They didn't specify a specific item, so dump them all.
+
+		// retrieve an iterator over the RAW_DATA_DB
+		EQItemDBIterator* it = new EQItemDBIterator(itemDB, EQItemDB::RAW_DATA_DB);
+
+		// make sure there is an iterator
+		if (it == NULL)
+		{
+			// if unable to retrieve an iterator on the item raw data db
+			// then nothing else to do
+			fprintf(stderr, "%s: Unable to open iterator on item raw data db!\n", progname);
+			result = 4;
+		}
+		else
+		{
+			uint16_t nextItemNr, currentItemNr;
+			bool hasNext;
+
+			// retrieve the first item number
+			hasNext = it->GetFirstItemNumber(&nextItemNr);
+
+			// keep going until no more items
+			while (hasNext)
+			{
+				// the next item number is now the current item number
+				currentItemNr = nextItemNr;
+
+				// attempt to retrive a new next item number
+				hasNext = it->GetNextItemNumber(&nextItemNr);
+				// retrieve item data
+
+				if (action == 'x') dumpItemCSV(itemDB, outfile, currentItemNr);
+				else if (action == 'z') dumpItemLabeled(itemDB, outfile, currentItemNr);
+				count++;
+			}
+		}
+	}
+	fprintf(stderr, "%s: Wrote %d items to file '%s'.\n",
+		progname, count, filename);
+
+	return result;
 }
 
 int deleteRecord(EQItemDB* itemDB, 
@@ -1236,7 +1540,7 @@ int displayRecord(EQItemDB* itemDB,
     printf ("Model: %s\n", (const char*)entry->GetIdFile());
     printf ("flag: 0x%4.4x\n", entry->GetFlag());
     printf ("MagicFlag: 0x%2.2x\n", entry->GetMagic());
-    printf ("Weight: %d\n", entry->GetWeight());
+    printf ("Weight: %.1f\n", (entry->GetWeight())/10.0);
     printf ("Flags: ");
     if (entry->IsBook())
       printf (" BOOK");

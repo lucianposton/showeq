@@ -44,12 +44,12 @@ class SpellItem
    public:
       SpellItem(SpawnShell* spawnShell, 
 		uint16_t casterId,
-		const castStruct *c = NULL);
+		const startCastStruct *c = NULL);
       //SpellItem(struct beginCastStruct *b = NULL);
 
       void UpdateSpell(SpawnShell* spawnShell, 
 		       uint16_t casterId,
-		       const castStruct *c = NULL);
+		       const startCastStruct *c = NULL);
       //void UpdateSpell(struct beginCastStruct *b = NULL);
       
       int spellId() const;
@@ -77,7 +77,7 @@ class SpellItem
       QString m_casterName;
       QString m_targetName;
 
-      struct castStruct m_cast; // Needed?
+      struct startCastStruct m_cast; // Needed?
 };
 
 class SpellShell : public QObject
@@ -85,8 +85,8 @@ class SpellShell : public QObject
    Q_OBJECT
    public:
       SpellShell(EQPlayer* player, SpawnShell* spawnshell);
-      SpellItem* InsertSpell(const castStruct *c);
-      void UpdateSpell(const castStruct *);
+      SpellItem* InsertSpell(const startCastStruct *c);
+      void UpdateSpell(const startCastStruct *);
       //void UpdateSpell(struct beginCastStruct *);
       void DeleteSpell(SpellItem *);
       void clear();
@@ -101,10 +101,10 @@ class SpellShell : public QObject
 
    public slots:
       // slots received from EQPacket...
-      void selfStartSpellCast(const castStruct *);
+      void selfStartSpellCast(const startCastStruct *);
       //void spellStartCast(struct beginCastStruct *);
-      void interruptSpellCast(const interruptCastStruct *);
-      void selfFinishSpellCast(const spellCastStruct *);
+      void interruptSpellCast(const badCastStruct *);
+      void selfFinishSpellCast(const memSpellStruct *);
       void spellMessage(QString&);
       void timeout();
 

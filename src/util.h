@@ -30,6 +30,23 @@ struct spellInfoStruct {
    bool target;
 };
 
+typedef unsigned int eqtime_t;
+
+class EQTime
+{
+public:
+    EQTime(void);
+
+    eqtime_t        eptime(const timeOfDayStruct *date);
+    void            setepoch(time_t now, const timeOfDayStruct *date);
+    timeOfDayStruct epdate(eqtime_t et);
+    eqtime_t        eqtime(time_t rt);
+    timeOfDayStruct eqdate(time_t rt);
+
+private:
+    time_t epoch;
+};
+
 char *print_addr (unsigned long addr);
 
 QString Commanate (uint32_t number);
@@ -49,7 +66,7 @@ QString print_material (uint8_t material);
 QString print_skill (uint8_t skill);
 QString print_faction (int32_t faction);
 
-uint32_t calc_exp (int level, uint8_t race, uint8_t class_);
+uint32_t calc_exp (int level, uint16_t race, uint8_t class_);
 
 int  mTime(void);
 int calcMaxMana(int INT, int WIS, int daclass, int level);
@@ -98,5 +115,7 @@ QString bitstring(T value)
 
   return bitstring;
 }
+
+bool findFile( QString& fileName );
 
 #endif // EQUTIL_U

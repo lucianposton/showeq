@@ -686,7 +686,7 @@ int main (int argc, char *argv[])
     {
       out << "<OPTION value=\"" << fi->fileName() << "\"";
       if (mapName == fi->fileName())
-	cout << " selected";
+	out << " selected";
       out << ">" << fi->baseName() << "</OPTION>\n";
       
       // goto next element from list

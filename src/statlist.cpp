@@ -5,6 +5,8 @@
  *  http://seq.sourceforge.net/
  */
 
+#include <qlayout.h>
+
 #include "player.h"
 #include "statlist.h"
 #include "util.h"
@@ -13,117 +15,58 @@
 static const char* statNames[] =
 { 
   "HP", "Mana", "Stam", "Exp", "Food", "Watr", "STR", "STA", "CHA", "DEX", 
-  "INT", "AGI", "WIS", "MR", "FR", "CR", "DR", "PR", "AC", "RSV",
+  "INT", "AGI", "WIS", "MR", "FR", "CR", "DR", "PR", "AC", "ExpAA", "RSV",
 };
 
 EQStatList::EQStatList(EQPlayer* player,
-			 QWidget* parent, 
-			 const char* name)
-  : QListView(parent, name),
+                       QWidget* parent, 
+                       const char* name)
+  : SEQListView("StatList", parent, name),
     m_pPlayer(player)
 {
-  int i;
+   int i;
 
    m_guessMaxMana = 0;
 
    for (i = 0; i < LIST_MAXLIST; i++)
      m_statList[i] = NULL;
 
-   QString section = "StatList";
-#if QT_VERSION >= 210
-   setShowSortIndicator(TRUE);
-#endif
-   setRootIsDecorated(false);
-   setAllColumnsShowFocus(true);
-   setCaption(pSEQPrefs->getPrefString("Caption", section, 
-				       "ShowEQ - Stats"));
-
-   // set font and add columns
-   setFont(QFont("Helvetica", showeq_params->fontsize));
+   // add columns
    addColumn("Stat");
-   addColumn("Val");
+   addColumn("Val", "Value");
    addColumn("Max");
-   addColumn("%");
-   setAllColumnsShowFocus(true);
+   addColumn("%", "Percent");
+
+   restoreColumns();
 
    QString statPrefName;
    for (int nloop = 0; nloop < LIST_MAXLIST; nloop++)
    {
      statPrefName.sprintf("show%s", statNames[nloop]);
-     updateStat(nloop, pSEQPrefs->getPrefBool(statPrefName, section, 0));
-   }
-
-   // StatList column sizes
-   if (pSEQPrefs->isPreference("StatWidth", section))
-   {
-     i = pSEQPrefs->getPrefInt("StatWidth", section, 
-			       columnWidth(0));
-     setColumnWidthMode(0, QListView::Manual);
-     setColumnWidth(0, i);
-   }
-   if (pSEQPrefs->isPreference("ValueWidth", section))
-   {
-     i = pSEQPrefs->getPrefInt("ValueWidth", section, 
-			       columnWidth(1));
-     setColumnWidthMode(1, QListView::Manual);
-     setColumnWidth(1, i);
-   }
-   if (pSEQPrefs->isPreference("MaxWidth", section))
-   {
-     i = pSEQPrefs->getPrefInt("MaxWidth", section, 
-			       columnWidth(2));
-     setColumnWidthMode(2, QListView::Manual);
-     setColumnWidth(2, i);
-   }
-   if (pSEQPrefs->isPreference("PercentWidth", section))
-   {
-     i = pSEQPrefs->getPrefInt("PercentWidth", section, 
-			       columnWidth(3));
-     setColumnWidthMode(3, QListView::Manual);
-     setColumnWidth(3, i);
+     m_showStat[nloop] = pSEQPrefs->getPrefBool(statPrefName, 
+						preferenceName(), false);
+     updateStat(nloop);
    }
 
    connect (m_pPlayer, SIGNAL(statChanged(int,int,int)), 
 	    this, SLOT(statChanged (int,int,int)));
    connect (m_pPlayer, SIGNAL(expChangedInt(int,int,int)),
 	    this, SLOT(expChanged(int,int,int)));
+   connect (m_pPlayer, SIGNAL(expAltChangedInt(int,int,int)),
+	    this, SLOT(expAltChanged(int,int,int)));
    connect (m_pPlayer, SIGNAL(stamChanged(int,int,int,int,int,int)),
 	    this, SLOT(stamChanged(int,int,int,int,int,int)));
    connect (m_pPlayer, SIGNAL(manaChanged(uint32_t,uint32_t)),
 	    this, SLOT(manaChanged(uint32_t,uint32_t)));
    connect (m_pPlayer, SIGNAL(hpChanged(uint16_t, uint16_t)), 
 	    this, SLOT(hpChanged(uint16_t, uint16_t)));
+
+   // restore the columns
+   restoreColumns();
 }
 
 EQStatList::~EQStatList()
 {
-}
-
-void EQStatList::savePrefs(void)
-{
-  QString section = "StatList";
-  // only save the preferences if visible
-  if (isVisible())
-  {
-    if (pSEQPrefs->getPrefBool("SaveWidth", section, 1))
-    {
-      pSEQPrefs->setPrefInt("StatWidth", section, 
-			      columnWidth(0));
-      pSEQPrefs->setPrefInt("ValueWidth", section, 
-			      columnWidth(1));
-      pSEQPrefs->setPrefInt("MaxWidth", section, 
-			      columnWidth(2));
-      pSEQPrefs->setPrefInt("PercentWidth", section, 
-			      columnWidth(3));
-    }
-
-    QString statPrefName;
-    for (int nloop = 0; nloop < LIST_MAXLIST; nloop++)
-    {
-      statPrefName.sprintf("show%s", statNames[nloop]);
-      pSEQPrefs->setPrefInt(statPrefName, section, m_showStat[nloop]);
-    }
-  }
 }
 
 void EQStatList::expChanged  (int val, int min, int max) 
@@ -139,6 +82,21 @@ void EQStatList::expChanged  (int val, int min, int max)
     buf = Commanate((uint32_t) ((val - min) / ((max - min)/100))) + " %";
 
     m_statList[LIST_EXP]->setText (3, buf);
+}
+
+void EQStatList::expAltChanged  (int val, int min, int max) 
+{
+    if (!m_showStat[LIST_ALTEXP])
+      return;
+
+    QString buf;
+
+    m_statList[LIST_ALTEXP]->setText (1, Commanate((uint32_t) (val - min)));
+    m_statList[LIST_ALTEXP]->setText (2, Commanate((uint32_t) (max - min)));
+
+    buf = Commanate((uint32_t) ((val - min) / ((max - min)/100))) + " %";
+
+    m_statList[LIST_ALTEXP]->setText (3, buf);
 }
 
 void EQStatList::statChanged (int stat, int val, int max)
@@ -272,7 +230,7 @@ void EQStatList::resetMaxMana(void)
    m_statList[LIST_MANA]->setText (2, buf);
 }
 
-void EQStatList::updateStat(uint8_t stat, bool enabled)
+void EQStatList::enableStat(uint8_t stat, bool enabled)
 {
   // validate argument
   if (stat >= LIST_MAXLIST)
@@ -281,6 +239,20 @@ void EQStatList::updateStat(uint8_t stat, bool enabled)
   // set the enabled status of the stat
   m_showStat[stat] = enabled;
 
+  QString statPrefName;
+  statPrefName.sprintf("show%s", statNames[stat]);
+
+  pSEQPrefs->setPrefBool(statPrefName, "StatList", m_showStat[stat]);
+
+  updateStat(stat);
+}
+
+void EQStatList::updateStat(uint8_t stat)
+{
+  // validate argument
+  if (stat >= LIST_MAXLIST)
+    return;
+ 
   // should this status be displayed?
   if (m_showStat[stat])
   {
@@ -364,4 +336,29 @@ void EQStatList::updateStat(uint8_t stat, bool enabled)
       m_statList[stat] = NULL;
     }
   }
+}
+
+
+StatListWindow::StatListWindow(EQPlayer* player, 
+				 QWidget* parent, const char* name)
+  : SEQWindow("StatList", "ShowEQ - Stats", parent, name)
+{
+  QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setAutoAdd(true);
+  
+  m_statList = new EQStatList(player, this, name);
+}
+
+StatListWindow::~StatListWindow()
+{
+  delete m_statList;
+}
+
+void StatListWindow::savePrefs(void)
+{
+  // save SEQWindow prefs
+  SEQWindow::savePrefs();
+
+  // make the listview save it's prefs
+  m_statList->savePrefs();
 }

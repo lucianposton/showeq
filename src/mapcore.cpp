@@ -28,6 +28,7 @@ MapParameters::MapParameters(const MapData& mapData)
     m_curPlayer(0, 0, 0),
     m_screenLength(600, 600)
 {
+  m_zoomDefault = 1;
   m_screenCenter = QPoint(300, 300);
   m_zoomMapLength = QSize(100, 100);
   m_panOffsetX = 0;
@@ -65,7 +66,7 @@ MapParameters::~MapParameters()
 
 void MapParameters::reset()
 {
-  m_zoom = 1;
+  m_zoom = m_zoomDefault;
   m_panOffsetX = 0;
   m_panOffsetY = 0;
 }
@@ -1819,7 +1820,7 @@ const QPixmap& MapCache::getMapImage(MapParameters& param)
   // Begin Painting
   tmp.begin (&m_mapImage);
   tmp.setPen (QPen::NoPen);
-  tmp.setFont (QFont("Helvetica", 8, QFont::Normal));
+  tmp.setFont (param.font());
 
   // load the background image or paint the background
   if (!m_mapData.imageLoaded() || 

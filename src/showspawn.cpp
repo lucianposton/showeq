@@ -141,7 +141,7 @@ int main (int argc, char *argv[])
   out << "<TD><SELECT name=\"class\" size=\"1\">\n";
   out << "<OPTION value=\"0\"";
   if (searchClass == 0)
-    cout << " selected";
+    out << " selected";
   out << ">Any</OPTION>\n";
 
   // create a fake spawn to get class names
@@ -155,10 +155,10 @@ int main (int argc, char *argv[])
 
     out << "<OPTION value=\"" << i << "\"";
     if (searchClass == i)
-      cout << " selected";
+      out << " selected";
 
     // output the name corresponding to the class value
-    out << ">" << fakeSpawn.className() << "</OPTION>\n";
+    out << ">" << fakeSpawn.classString() << "</OPTION>\n";
   }
   out << "</SELECT></TD>\n";
   
@@ -216,7 +216,7 @@ int main (int argc, char *argv[])
       
       // is it a race search, if so check
       if ((!searchRace.isEmpty()) &&
-	  (spawn.raceName().find(searchRace, 0, false) == -1))
+	  (spawn.raceString().find(searchRace, 0, false) == -1))
 	continue;
       
       // is it a class search, if so check
@@ -234,8 +234,8 @@ int main (int argc, char *argv[])
     out << "Level: " << spawn.level() << "<BR>\n";
     out << "HP: " << spawn.HP() << "/"
 	<< spawn.maxHP() << "<BR>\n";
-    out << "Race: " << spawn.raceName() << "<BR>\n";
-    out << "Class: " << spawn.className() << "<BR>\n";
+    out << "Race: " << spawn.raceString() << "<BR>\n";
+    out << "Class: " << spawn.classString() << "<BR>\n";
     out << "Found in Zone: " << dbSpawn.zoneName << "<BR>\n";
     out << "Position: " <<  spawn.yPos() << ", " 
 	<< spawn.xPos() << ", "

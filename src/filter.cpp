@@ -310,7 +310,12 @@ Filter::loadFilters(void)
      {
        printf (">> No such file: '%s', creating new one...\n", 
 	       (const char*)m_file);
-       fputs ("[Spawn]\n", fopen ((const char*)m_file, "a"));
+       in = fopen ((const char*)m_file, "a");
+       if (in != 0)
+       {
+	 fputs ("[Spawn]\n", in);
+	 fclose(in);
+       }
      }
      else
      {
@@ -670,7 +675,7 @@ Filter::addFilter(const QString& filterPattern)
   m_filterItems.append(re);
 
 #ifdef DEBUG_FILTER
-printf("Added Filter '%s'\n", string);
+printf("Added Filter '%s'\n", filterPattern);
 #endif
 
  return re->valid(); 

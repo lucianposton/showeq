@@ -229,7 +229,7 @@ void parseitems(void) {
       unsignednumprint(LONG_FORMAT,"spellId0",(long int) items->common.spellId0);
       unsignednumprint(LONG_FORMAT,"classes",(long int) items->common.classes);
       unsignednumprint(LONG_FORMAT,"races",(long int) items->common.normal.races);
-      signednumprint(LONG_FORMAT,"numSlots",(long int) items->common.container.numSlots);
+      signednumprint(LONG_FORMAT,"numSlots",(long int) items->container.numSlots);
       unsignednumprint(LONG_FORMAT,"level",(long int) items->common.level);
       signednumprint(LONG_FORMAT,"number",(long int) items->common.number);
       unsignednumprint(LONG_FORMAT,"spellId",(long int) items->common.spellId);

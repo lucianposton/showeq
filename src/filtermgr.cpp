@@ -118,6 +118,32 @@ QString FilterMgr::filterString(uint32_t filterFlags) const
    return text;
 }
 
+QString FilterMgr::filterName(uint8_t filter) const
+{
+  if (filter == HUNT_FILTER)
+    return "Hunt";
+
+   if (filter == CAUTION_FILTER)
+     return "Caution";
+
+   if (filter == DANGER_FILTER)
+     return "Danger";
+
+   if (filter == LOCATE_FILTER)
+     return "Locate";
+
+   if (filter == ALERT_FILTER)
+     return "Alert";
+
+   if (filter == FILTERED_FILTER)
+     return "Filtered";
+
+   if (filter == TRACER_FILTER)
+     return "Tracer";
+
+   return QString("Unknown ") + QString::number(filter);
+}
+
 void FilterMgr::loadFilters(void)
 {
   // load the filters using the existing filter file
@@ -154,19 +180,55 @@ void FilterMgr::listFilters(void)
   }
 }
 
-void FilterMgr::zoneNew(const newZoneStruct* zoneNew, bool client)
+bool FilterMgr::addFilter(uint8_t filter, const QString& filterString)
+{
+  // make sure it's actually a filter
+  if (filter >= SIZEOF_FILTERS)
+    return false;
+
+  // add the filter
+  bool ok = m_filters[filter]->addFilter(filterString);
+
+  // signal that the filters have changed
+  emit filtersChanged();
+
+  return ok;
+}
+
+void FilterMgr::remFilter(uint8_t filter, const QString& filterString)
+{
+  // validate that it's a valid filter
+  if (filter >= SIZEOF_FILTERS)
+    return;
+
+  // remove a filter
+  m_filters[filter]->remFilter(filterString);
+
+  // notify that the filters have changed
+  emit filtersChanged();
+}
+
+void FilterMgr::loadZone(const QString& shortZoneName)
 {
   QString zoneFilterFileName;
 
   zoneFilterFileName.sprintf(LOGDIR "/filters_%s.conf", 
-			     zoneNew->shortName);
+			     (const char*)shortZoneName.lower());
 
   QFileInfo fileInfo(zoneFilterFileName);
 
   if (fileInfo.exists())
+  {
     m_filterFile = zoneFilterFileName;
+    printf("Loading Filter File: %s\n", (const char*)m_filterFile);
+  }
   else
+  {
     m_filterFile = showeq_params->filterfile;
+    printf("No Zone Specific filter file '%s'.\n"
+	   "Loading default '%s'.\n",
+	   (const char*)zoneFilterFileName, (const char*)m_filterFile);
+  }
 
   for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
     m_filters[index]->changeFilterFile(m_filterFile);

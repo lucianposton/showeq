@@ -220,24 +220,24 @@
     "Wetfang Minnow",         // 213
     "Thought Horror",         // 214
     "Tegi",                   // 215 
-    "Shissar Horse",          // 216 
-    "Fungal Fiend",           // 217 
-    "Vampire Volatalis",      // 218 
-    "StoneGrabber",           // 219 
-    "Scarlet Cheetah",        // 220 
-    "Zelniak",                // 221 
-    "Lightcrawler",           // 222 
-    "Shade",                  // 223 
-    "Sunflower",              // 224 
-    "Sun Revenant",           // 225 
-    "Shrieker",               // 226 
-    "Galorian",               // 227 
-    "Netherbian",             // 228 
-    "Akheva",                 // 229 
-    "Spire Spirit",           // 230 
-    "Sonic Wolf",             // 231 
-    "Ground Shaker",          // 232 
-    "Teleport Man",           // 233 
+    "Horse",                  // 216
+    "Shissar",                // 217 
+    "Fungal Fiend",           // 218 
+    "Vampire Volatalis",      // 219 
+    "StoneGrabber",           // 220 
+    "Scarlet Cheetah",        // 221 
+    "Zelniak",                // 222 
+    "Lightcrawler",           // 223 
+    "Shade",                  // 224 
+    "Sunflower",              // 225 
+    "Sun Revenant",           // 226 
+    "Shrieker",               // 227 
+    "Galorian",               // 228 
+    "Netherbian",             // 229 
+    "Akheva",                 // 230 
+    "Spire Spirit",           // 231 
+    "Sonic Wolf",             // 232 
+    "Teleport Man",           // 233
     "Vah Shir Skeleton",      // 234
     "Mutant Humanoid",        // 235
     "Seru",                   // 236

@@ -13,10 +13,15 @@
 
 #include <qapplication.h>
 
+#include <qfile.h>
+#include <qdatastream.h>
+
 #include "main.h"
 #include "decode.h"
 #include "opcodes.h"
 #include "libeq.h"
+
+//#define DIAG_DECODE_ZLIB_ERROR
 
 #define PKTBUF_LEN	65535
 
@@ -35,19 +40,23 @@ ThreadFunc (void *param)
   return(NULL);
 }
 
-EQDecode::EQDecode (QObject *parent = 0, const char *name = 0)
+EQDecode::EQDecode (QObject *parent, const char *name)
 : QObject (parent, name)
 {
   // Link the packet class resetDecoder signal to our ResetDecoder slot
   connect (parent, SIGNAL(resetDecoder()), this, SLOT(ResetDecoder()));
 
   // Link our BackfillPlayer signal to the packet class backfillPlayer slot
-  connect (this, SIGNAL(BackfillPlayer(const playerProfileStruct *)),
-           parent, SLOT(pkt_backfillPlayer(const playerProfileStruct *)));
+  connect (this, SIGNAL(dispatchDecodedCharProfile(const uint8_t*, uint32_t)),
+           parent, SLOT(dispatchDecodedCharProfile(const uint8_t*, uint32_t)));
 
   // Link our BackfillSpawn signal to the packet class backfillSpawn slot
-  connect (this, SIGNAL(BackfillSpawn(const spawnStruct *)),
-           parent, SLOT(pkt_backfillSpawn(const spawnStruct *)));
+  connect (this, SIGNAL(dispatchDecodedNewSpawn(const uint8_t*, uint32_t)),
+           parent, SLOT(dispatchDecodedNewSpawn(const uint8_t*, uint32_t)));
+
+  // Link our BackfillZoneSpawns signal to the packet class backfillSpawn slot
+  connect (this, SIGNAL(dispatchDecodedZoneSpawns(const uint8_t*, uint32_t)),
+           parent, SLOT(dispatchDecodedZoneSpawns(const uint8_t*, uint32_t)));
 
   // Our key is unknown
   m_decodeKey = 0;
@@ -62,6 +71,23 @@ EQDecode::EQDecode (QObject *parent = 0, const char *name = 0)
   // Initialize LIBEQ
   if (!showeq_params->broken_decode)
     InitializeLibEQ(0, CharProfileCode, ZoneSpawnsCode, NewSpawnCode);
+
+  // restore the decodeKey if the user requested it
+  if (showeq_params->restoreDecodeKey)
+  {
+    QString fileName = showeq_params->saveRestoreBaseFilename + "Key.dat";
+    QFile keyFile(fileName);
+    if (keyFile.open(IO_ReadOnly))
+    {
+      QDataStream d(&keyFile);
+      d >> m_decodeKey;
+
+      fprintf(stderr, "Restored KEY: 0x%08x\n", m_decodeKey);
+    }
+    else
+      fprintf(stderr, "Failure loading %s: Unable to open!\n",
+	      (const char*)fileName);
+  }
 #endif
 }
 
@@ -119,7 +145,7 @@ EQDecode::ResetDecoder (void)
   m_decodeKey = 0;
 
   // Let anyone interested know we changed it
-  emit KeyChanged();
+  emit keyChanged();
 
   // We're no longer looking
   m_locateActive = false;
@@ -163,14 +189,10 @@ EQDecode::LocateKey ()
 void
 EQDecode::FoundKey ()
 {
-  unsigned int i, j;
+  unsigned int i;
   EQPktRec *pkt;
   uint32_t decodedDataLen = PKTBUF_LEN;
   uint8_t decodedData[decodedDataLen];
-  struct playerProfileStruct *pdata;
-  struct zoneSpawnsStruct *zdata;
-  struct newSpawnStruct *ndata;
-  struct spawnStruct *sdata;
 
 #if !HAVE_LIBEQ
   printf("BUG: libEQ not present, returning from FoundKey()\n");
@@ -179,7 +201,7 @@ EQDecode::FoundKey ()
 
   // Pass on the good news!
   printf("Decrypting and dispatching with key: 0x%08x\n", m_decodeKey);
-  emit KeyChanged();
+  emit keyChanged();
 
   // Check to see if we've been cancelled
   pthread_testcancel();
@@ -195,10 +217,7 @@ EQDecode::FoundKey ()
     decodedDataLen = PKTBUF_LEN;
     if (ProcessPacket(pkt->data, pkt->len, 
 		      decodedData, &decodedDataLen, &m_decodeKey, ""))
-    {
-      pdata = (struct playerProfileStruct *)(decodedData);
-      emit BackfillPlayer(pdata);
-    }
+      emit dispatchDecodedCharProfile(decodedData, decodedDataLen);
     else
 #endif
       printf("Warning: Failed to decrypt queued Player Profile packet: %d.\n", i);
@@ -216,14 +235,7 @@ EQDecode::FoundKey ()
     decodedDataLen = PKTBUF_LEN;
     if (ProcessPacket(pkt->data, pkt->len, 
 		      decodedData, &decodedDataLen, &m_decodeKey, ""))
-    {
-      zdata = (struct zoneSpawnsStruct *)(decodedData);
-      for (j = 0; j < (decodedDataLen - 2) / sizeof(spawnZoneStruct); j++)
-      {
-        sdata = (struct spawnStruct *)(&zdata->spawn[j]);
-        emit BackfillSpawn(sdata);
-      }
-    }
+      emit dispatchDecodedZoneSpawns(decodedData, decodedDataLen);
     else
 #endif
       printf("Warning: Failed to decrypt queued Zone Spawns packet: %d.\n", i);
@@ -241,9 +253,7 @@ EQDecode::FoundKey ()
     decodedDataLen = PKTBUF_LEN;
     DecodeSpawn(pkt->data, pkt->len, decodedData, &decodedDataLen, 
 		m_decodeKey);
-    ndata = (struct newSpawnStruct *)(decodedData);
-    sdata = (struct spawnStruct *)(&ndata->spawn);
-    emit BackfillSpawn(sdata);
+    emit dispatchDecodedNewSpawn(decodedData, decodedDataLen);
     free(pkt);
   }
 #endif
@@ -256,6 +266,16 @@ EQDecode::FoundKey ()
 
   // Let them know we're done
   m_locateActive = false;
+
+  if (showeq_params->saveDecodeKey)
+  {
+    QFile keyFile(showeq_params->saveRestoreBaseFilename + "Key.dat");
+    if (keyFile.open(IO_WriteOnly))
+    {
+      QDataStream d(&keyFile);
+      d << m_decodeKey;
+    }
+  }
 
   // Get outa here
   return;
@@ -273,7 +293,7 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
 
   // Get the opcode of the current packet
   // Check to see if it is a compressed packet
-  if (( opcode == CompressedPlayerItemCode ) || ( opcode == CompressedDoorSpawnCode ) )
+  if ((opcode == CPlayerItemsCode) || (opcode == CDoorSpawnsCode))
   {
      uint8_t pbUncompressedData[PKTBUF_LEN-4];
      uint32_t nUncompressedLength;
@@ -359,7 +379,16 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
 
       FoundKey();
     }
-    return(result);
+    return result;
+  }
+  else if (showeq_params->restoreDecodeKey)
+  {
+    // if the ProcessPacket failed and this is a restored session, clear
+    // the restored decode key, it's probably invalid
+    m_decodeKey = 0;
+
+    // also note that the restored decode key is no longer being used
+    showeq_params->restoreDecodeKey = false;
   }
 
   // Queue it up...  Allocate storage for our encrypted packet
@@ -469,6 +498,10 @@ int EQDecode::InflatePacket(const uint8_t *pbDataIn, uint32_t cbDataInLen,
 	}
 	else
 	{
+#ifdef DIAG_DECODE_ZLIB_ERROR
+	  printf("InflatePacket: Failed! inflate() returned %d '%s'\n",
+		 zerror, zstream.msg);
+#endif
 		zerror = inflateEnd( &zstream );
 		*pcbDataOutLen = 0;
 		return 0;

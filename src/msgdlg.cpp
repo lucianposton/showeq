@@ -12,6 +12,13 @@
  * Date   - 3/19/00
  */
 
+//
+// Notes: This REALLY needs to be cleaned up
+//  + Possibly use filter classes to do the filtering as oppossed to 
+//    constantly re-compiling the regex
+//  + Add ability for user to specify a filter like in the Map code
+//  + General cleanup
+
 /*
  * Todo: MyButton should be put inside of the MsgDialog class
  *       to avoid namespace collsions.  How to do this with Qt moc?
@@ -63,6 +70,7 @@
 #include <qlineedit.h>
 
 #include "msgdlg.h"
+#include "main.h"
 
 //#define DEBUGMSG
 
@@ -72,9 +80,9 @@
 //
 // Constructor
 //                                                                  
-MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
-// : QDialog(parent, name)
- : QWidget(parent, name)
+MsgDialog::MsgDialog(QWidget *parent, const char *name, 
+		     const QString& prefName, QStringList &list)
+  : SEQWindow(prefName, name, parent, name)
 {
 #ifdef DEBUGMSG
   qDebug("MsgDialog() '%s' List passed by ref with %d elements", 
@@ -90,33 +98,13 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
    m_bShowType = TRUE;
    m_nShown = 0;
    m_nEditItem = -1;
+   m_nDeleteItem = -1;
    m_bAdditiveFilter = FALSE;
-
-#if 0
-   m_pMsgTypeCheckBox = 0;
-   m_pButtonsPanel = 0;
-   m_pEdit = 0;
-   m_pStatusBar = 0;
-   m_pStatusBarLock = 0;
-   m_pStatusBarMsgcount = 0;
-   m_pStatusBarTotMsgcount = 0;
-   m_pStatusBarFilter = 0;
-   m_pButtonsLayout = 0;
-   m_pMenu = 0;
-   m_pStringList = 0;
-#endif
-
-//  Anyone want to explain to me why ShowEQ segfaults upon exit when I
-//  uncomment out the following line.  This baffles me.... it acts like 
-//  it causes something to get destroyed when it's not supposed to be
-//     - Maerlyn
-//   m_pButtonOver = 0;
+   m_pButtonOver = NULL;
+   m_buttonList.setAutoDelete(false);
 
    // use the shared list given to us
    m_pStringList = &list;
-
-   // set Title
-   setCaption(QString(name));
 
    // install event filter to catch right clicks to add buttons 
    installEventFilter(this);
@@ -128,11 +116,11 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
    QBoxLayout *middleLayout = new QHBoxLayout(topLayout);
   
    // add the edit
-//   m_pEdit = new QMultiLineEdit(this, "edit"); 
    m_pEdit = new MyEdit(this, "edit"); 
    m_pEdit->setFrameStyle(QFrame::Panel | QFrame::Sunken);
    m_pEdit->setReadOnly(TRUE);
-   m_pEdit->setFont(QFont("Helvetica", 10));
+   m_pEdit->setWordWrap(QMultiLineEdit::WidgetWidth);
+   m_pEdit->setWrapPolicy(QMultiLineEdit::AtWhiteSpace);
    middleLayout->addWidget(m_pEdit);
   
    // add a vertical box to hold the button layout and the stretch 
@@ -194,22 +182,6 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
    m_pStatusBarLock->setFrameStyle(QFrame::Panel | QFrame::Sunken);
    statusLayout->addWidget(m_pStatusBarLock, 1);
   
-
-#if 0
-   // Add some default filter buttons
-   MyButton *but;
- 
-   for (int i = 0; i < 5; i++)
-   {
-      char temp[15];
-      sprintf(temp, "Empty%d", i);
-      QString name(temp);
-      QString filter(temp);
-      QString color("Black");
-      newButton(name, filter, color, FALSE);
-   } 
-#endif
-
    // Add an empty widget to fill the space and stretch when resized
    rightLayout->addStretch(10);
   
@@ -220,7 +192,10 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
    m_pMenu->insertItem("&Toggle Controls", this, SLOT(toggleControls()));
    connect(m_pMenu, SIGNAL (aboutToShow(void)), 
               this, SLOT (menuAboutToShow(void)));
-  
+
+   // load the preferences
+   load();
+
    // refresh the messages 
    refresh();
   
@@ -302,9 +277,11 @@ MsgDialog::newMessage(int index)
   // set index
   m_nIndex = index;
 
+#if QT_VERSION < 300 // only necessary for older Qt pre-3.0
   // keep at bottom
   if (m_pEdit && !m_bScrollLock)
     m_pEdit->pageDown(FALSE);
+#endif
 
 } // end newMessage
  
@@ -353,12 +330,11 @@ MsgDialog::addMessage(QString &string)
         if (index)
         {
            QString temp(string.right(string.length() - (index + 1)));
-           appendWithWrap(temp);
-//           appendWithWrap(QString(string.right(string.length() - index)));
+	   m_pEdit->append(temp);
         }
      }
      else 
-       appendWithWrap(string);
+       m_pEdit->append(string);
    }
 
 } // end addMessage()
@@ -405,102 +381,6 @@ MsgDialog::delFilter(const QString &filter)
 
 } // delFilter
 
-
-//
-// appendWithWrap(QString &message)  - append a msg to the current text
-//
-// Word wrap is performed to wrap messages and indent them according to
-// the indentation configured
-//
-void
-MsgDialog::appendWithWrap(QString &s)
-{
-  QFontMetrics fm( font() );
-  int i = 0;
-  int a = 0;
-  int lastSpace = 0;
-  int linew = 0;
-  int lastw = 0;
-  bool doBreak = FALSE;
-  bool bWrap = FALSE;
-  int indentw = 0;
-  QString indentStr("                                         ");
-
-  if (!m_pEdit) return;
-
-#ifdef DEBUGMSG
-//  qDebug("appendWithWrap() '%s'", s.ascii() );
-#endif
-  while( i<int(s.length()) ) 
-  {
-    doBreak = FALSE;
-    if ( s[i] != '\n' )
-    {
-      linew += fm.width( s[i] );
-      if (lastSpace > a)
-      {
-        if ( (linew + indentw + 10) >= m_pEdit->contentsRect().width())
-        {
-          doBreak = TRUE;
-          if (lastSpace > a)
-          {
-            i = lastSpace;
-            linew = lastw;
-          }
-          else
-            i = QMAX(a, i-1);
-        }
-      }
-    }
-//printf("doBreak %d, a %d, i %d\n", doBreak, a, i); 
-    if (doBreak)
-    {
-       QString newstring = s.mid(a, i - a);
-
-       linew = 0;
-       lastSpace = a;
-       if (bWrap)
-         newstring.insert(0,indentStr.left(m_nIndent));
-//printf("Adding '%s'\n", newstring.ascii());
-       if (m_bUseIndexing)
-       {
-          QString index("");
-          index.sprintf("%05d: ", m_nIndex);
-          newstring.insert(0, index);
-       }
-       m_pEdit->append(newstring);
-       bWrap = TRUE;
-       indentw = m_nIndent * fm.width(s[32]); 
-       a=i+1;
-    }
-
-    if (s[i].isSpace())
-    {
-       lastSpace = i;
-       lastw = linew;
-    }
-    if (lastSpace <= a)
-      lastw = linew;
-
-    i++;
-  }
-
-  // add remainder of line
-  QString newstring = s.mid(a, i - a);
-  if (bWrap)
-     newstring.insert(0,indentStr.left(m_nIndent));
-  if (m_bUseIndexing)
-  {
-     QString index("");
-     index.sprintf("%05d: ", m_nIndex);
-     newstring.insert(0, index);
-  }
-  m_pEdit->append(newstring);
-//printf("Adding '%s'\n", newstring.ascii());
-
-} // end appendWithWrap 
-
-
 //
 // eventFilter - filter events looking for a rightclick
 //
@@ -534,7 +414,7 @@ MsgDialog::eventFilter(QObject *o, QEvent *e)
         break;
    }
 
-   return FALSE;
+   return QWidget::eventFilter(o, e);
 
 } // end eventFilter
 
@@ -547,6 +427,8 @@ MsgDialog::setAdditive(bool bAdd)
 #endif
    m_bAdditiveFilter = bAdd;
    m_pAdditiveCheckBox->setChecked(m_bAdditiveFilter);
+
+   pSEQPrefs->setPrefBool("Additive", preferenceName(), m_bAdditiveFilter);
    refresh();
 }
 
@@ -618,16 +500,56 @@ MsgDialog::editButton(void)
 }
 
 void
+MsgDialog::deleteButton(void)
+{
+  if (!m_pButtonOver)
+    return;
+
+#ifdef DEBUGMSG
+  qDebug("deleteButton() '%s'", m_pButtonOver->text().ascii());
+#endif
+
+  // remove the filter if active
+  if (m_pButtonOver->isChecked())
+    delFilter(m_pButtonOver->filter());
+
+  // remove the button from the button list
+  m_buttonList.remove(m_pButtonOver);
+
+  // delete the button
+  delete m_pButtonOver;
+
+  // reset the button over to NULL
+  m_pButtonOver = NULL;
+  
+  // delete the associated menu items
+  if (-1 != m_nDeleteItem)
+  {
+    m_pMenu->removeItem(m_nDeleteItem);
+    m_nDeleteItem = -1;
+  }
+  if (-1 != m_nEditItem)
+  {
+    m_pMenu->removeItem(m_nEditItem);
+    m_nEditItem = -1;
+  }
+}
+
+void
 MsgDialog::setButton(MyButton* but, bool active)
 {
   if (active)
   {
+    if (-1 != m_nDeleteItem)
+      m_pMenu->removeItem(m_nDeleteItem);
     if (-1 != m_nEditItem)
-       m_pMenu->removeItem(m_nEditItem);
+      m_pMenu->removeItem(m_nEditItem);
 
-    QString tempstr("");
+    QString tempstr;
     tempstr.sprintf("&Edit '%s'", but->name().ascii());
     m_nEditItem = m_pMenu->insertItem(tempstr, this, SLOT(editButton()));
+    tempstr.sprintf("&Delete '%s'", but->name().ascii());
+    m_nDeleteItem = m_pMenu->insertItem(tempstr, this, SLOT(deleteButton()));
     m_pButtonOver = but;
   }
 }
@@ -641,11 +563,11 @@ MsgDialog::setButton(MyButton* but, bool active)
 //
 MyButton *
 MsgDialog::newButton(const QString &name, const QString &filter,
-           const QString &color, bool bAct)
+           const QColor &color, bool bAct)
 {
 #ifdef DEBUGMSG
   qDebug("newButton() '%s', '%s', '%s' %s", name.ascii(), filter.ascii(),
-       color.ascii(), bAct?"Active":"InActive");
+       color.name().ascii(), bAct?"Active":"InActive");
 #endif
 
   // Create a new button
@@ -655,23 +577,26 @@ MsgDialog::newButton(const QString &name, const QString &filter,
 
   // setup signals        
   connect(but, SIGNAL (editButton(MyButton *)),
-               this, SLOT (editButton(MyButton *)));
+	  this, SLOT (editButton(MyButton *)));
   connect(but, SIGNAL (addFilter(const QString &)),
-               this, SLOT (addFilter(const QString &)));
+	  this, SLOT (addFilter(const QString &)));
   connect(but, SIGNAL (delFilter(const QString &)),
-               this, SLOT (delFilter(const QString &)));
+	  this, SLOT (delFilter(const QString &)));
   connect(but, SIGNAL (toggled(bool)),
-               but, SLOT (toggled(bool)));
+	  but, SLOT (toggled(bool)));
   connect(but, SIGNAL (setButton(MyButton*, bool)),
-               this, SLOT (setButton(MyButton*, bool)));
+	  this, SLOT (setButton(MyButton*, bool)));
 
   // setup Color
-  but->setColor(QColor(color));
+  but->setColor(color);
 
   // add to the button layout
   m_nButtons++;
   m_pButtonsLayout->addWidget(but);
   but->show();
+
+  // add the button to the button list
+  m_buttonList.append(but);
 
   // re-apply the filter if we are active
   if (but->isChecked())
@@ -692,16 +617,21 @@ MsgDialog::toggleControls(void)
       m_pButtonsPanel->hide();
    else
       m_pButtonsPanel->show();
+
+  pSEQPrefs->setPrefBool("HideControls", preferenceName(), 
+			 !m_pButtonsPanel->isVisible());
 }
 
 
 void
 MsgDialog::showControls(bool bShow)
 {
-   if (bShow)
-      m_pButtonsPanel->show();
-   else
-      m_pButtonsPanel->hide();
+  if (bShow)
+    m_pButtonsPanel->show();
+  else
+    m_pButtonsPanel->hide();
+  
+  pSEQPrefs->setPrefBool("HideControls", preferenceName(), !bShow);
 }
 
 
@@ -720,7 +650,7 @@ MsgDialog::addButton(void)
   qDebug("addButton()");
 #endif
 
-  MyButton* but = newButton("Name", "Filter", "Color", FALSE);
+  MyButton* but = newButton("Name", "Filter", QColor("black"), FALSE);
 
   QString oldfilter(but->filter());  // hold copy of old filter
   CButDlg butdlg(parentWidget(), "ButtonDlg", but);
@@ -774,9 +704,95 @@ MsgDialog::showMsgType(bool bshow)
      
   if (m_pMsgTypeCheckBox)
     m_pMsgTypeCheckBox->setChecked(m_bShowType);
+  
+  pSEQPrefs->setPrefBool("ShowMsgType", preferenceName(), m_bShowType);
   refresh();
 }
 
+void 
+MsgDialog::load()
+{
+  QString tempStr;
+  
+  // set Additive mode
+  m_bAdditiveFilter = pSEQPrefs->getPrefBool("Additive", preferenceName());
+  m_pAdditiveCheckBox->setChecked(m_bAdditiveFilter);
+  
+  // set control mode
+  if (pSEQPrefs->getPrefBool("HideControls", preferenceName()))
+    m_pButtonsPanel->hide();
+  else
+    m_pButtonsPanel->show();
+  
+  // set Msg Type mode
+  m_bShowType = pSEQPrefs->getPrefBool("ShowMsgType", preferenceName());
+  if (m_pMsgTypeCheckBox)
+    m_pMsgTypeCheckBox->setChecked(m_bShowType);
+  
+  int j = 0;
+  // Configure buttons
+  for(j = 1; j < 15; j++)
+  {
+    // attempt to pull button description from the preferences
+    tempStr.sprintf("Button%dName", j);
+    QString buttonname(pSEQPrefs->getPrefString(tempStr, preferenceName()));
+    tempStr.sprintf("Button%dFilter", j);
+    QString buttonfilter(pSEQPrefs->getPrefString(tempStr, preferenceName()));
+    tempStr.sprintf("Button%dColor", j);
+    QColor buttoncolor(pSEQPrefs->getPrefColor(tempStr, preferenceName(), 
+					       QColor("black")));
+    tempStr.sprintf("Button%dActive", j);
+    
+    // if we have a name and filter string
+    if (!buttonname.isEmpty() && !buttonfilter.isEmpty())
+    {
+      // Add the button
+      addButton(buttonname, buttonfilter,
+		buttoncolor, 
+		pSEQPrefs->getPrefBool(tempStr, preferenceName()));
+    }
+    else
+    {
+      if (!buttonname.isEmpty() || !buttonfilter.isEmpty())
+	fprintf(stderr, "Error: Incomplete definition of Button '%s'\n",
+		       (const char*)caption());
+    }
+  } // end for buttons
+}
+
+void MsgDialog::savePrefs()
+{
+  SEQWindow::savePrefs();
+
+  QString tempStr;
+  MyButton* but;
+  int j = 1;
+  for (but = m_buttonList.first(); but != NULL; but = m_buttonList.next())
+  {
+    tempStr.sprintf("Button%dName", j);
+    pSEQPrefs->setPrefString(tempStr, preferenceName(), but->name());
+    tempStr.sprintf("Button%dFilter", j);
+    pSEQPrefs->setPrefString(tempStr, preferenceName(), but->filter());
+    tempStr.sprintf("Button%dColor", j);
+    pSEQPrefs->setPrefColor(tempStr, preferenceName(), but->color());
+    tempStr.sprintf("Button%dActive", j);
+    pSEQPrefs->setPrefBool(tempStr, preferenceName(), but->isChecked());
+    j++;
+  }
+
+  while (j < 15)
+  {
+    tempStr.sprintf("Button%dName", j);
+    pSEQPrefs->setPrefString(tempStr, preferenceName(), "");
+    tempStr.sprintf("Button%dFilter", j);
+    pSEQPrefs->setPrefString(tempStr, preferenceName(), "");
+    tempStr.sprintf("Button%dColor", j);
+    pSEQPrefs->setPrefColor(tempStr, preferenceName(), "");
+    tempStr.sprintf("Button%dActive", j);
+    pSEQPrefs->setPrefBool(tempStr, preferenceName(), "");
+    j++;
+  }
+}
 
 //
 // addButton - add a button
@@ -786,11 +802,11 @@ MsgDialog::showMsgType(bool bshow)
 //
 void
 MsgDialog::addButton(const QString &name, const QString &filter,
-           const QString &color, bool bAct)
+		     const QColor &color, bool bAct)
 {
 #ifdef DEBUGMSG
   qDebug("addButton() '%s', '%s', '%s' %s", name.ascii(), filter.ascii(),
-       color.ascii(), bAct?"Active":"InActive");
+       color.name().ascii(), bAct?"Active":"InActive");
 #endif
 
   newButton(name, filter, color, bAct);
@@ -809,6 +825,11 @@ MsgDialog::menuAboutToShow(void)
 {
 }
 
+void MsgDialog::closeEvent( QCloseEvent *e)
+{
+    e->accept();
+    emit toggle_view_ChannelMsgs();
+}
 
 //
 //
@@ -859,12 +880,36 @@ MyButton::eventFilter(QObject *o, QEvent *e)
     case QEvent::Leave:
       emit setButton(this, FALSE);
       break;
+  default:
+    break;
   }
 
-  return FALSE;
-
+  return QCheckBox::eventFilter(o, e);
 } // end eventFilter
 
+void MyButton::setFilter(const QString& string)  
+{ 
+  m_filter = string; 
+}
+
+void MyButton::setText(const QString& string)    
+{ 
+  QButton::setText(string); 
+  m_name = string;
+}
+
+void MyButton::toggled(bool on)       
+{  
+  if (on) 
+    emit addFilter(m_filter);
+  else 
+    emit delFilter(m_filter); 
+}
+
+void MyButton::setColor(const QColor& color)
+{ 
+  m_color = color; 
+} 
 
 //
 // paintCell
@@ -895,8 +940,11 @@ CButDlg::CButDlg(QWidget *parent, QString name, MyButton *but)
    QBoxLayout *row1Layout = new QHBoxLayout(topLayout);
    QBoxLayout *row2Layout = new QHBoxLayout(topLayout);
 
+   QFont labelFont(font());
+   labelFont.setBold(true);
+
    QLabel *nameLabel = new QLabel ("Name", this);
-   nameLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   nameLabel->setFont(labelFont);
    nameLabel->setFixedHeight(nameLabel->sizeHint().height());
    nameLabel->setFixedWidth(80);
    nameLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
@@ -904,13 +952,13 @@ CButDlg::CButDlg(QWidget *parent, QString name, MyButton *but)
   
    QLineEdit *nameEdit = new QLineEdit (this, "Name");
    nameEdit->setText(but->text());
-   nameEdit->setFont(QFont("Helvetica", 12, QFont::Bold));
+   nameEdit->setFont(labelFont);
    nameEdit->setFixedHeight(nameEdit->sizeHint().height());
    nameEdit->setFixedWidth(150);
    row1Layout->addWidget(nameEdit);
 
    QLabel *filterLabel = new QLabel ("Filter", this);
-   filterLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   filterLabel->setFont(labelFont);
    filterLabel->setFixedHeight(filterLabel->sizeHint().height());
    filterLabel->setFixedWidth(80);
    filterLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
@@ -918,7 +966,7 @@ CButDlg::CButDlg(QWidget *parent, QString name, MyButton *but)
   
    QLineEdit *filterEdit = new QLineEdit (this, "Filter");
    filterEdit->setText(but->filter());
-   filterEdit->setFont(QFont("Helvetica", 12, QFont::Bold));
+   filterEdit->setFont(labelFont);
    filterEdit->setFixedHeight(filterEdit->sizeHint().height());
    filterEdit->setFixedWidth(150);
    row2Layout->addWidget(filterEdit);
@@ -949,7 +997,7 @@ MyEdit::MyEdit( QWidget* parent, const char* name)
  : QMultiLineEdit(parent, name)
 {
    // install event filter to catch right clicks to add buttons 
-   installEventFilter(this);
+  installEventFilter(this);
 }
    
 
@@ -985,8 +1033,8 @@ MyEdit::eventFilter(QObject *o, QEvent *e)
         break;
    }
 
-   return FALSE;
-
+  // the parent widget may have it's own event filter, pass the call on
+  return QMultiLineEdit::eventFilter(o, e);
 } // end eventFilter
 
 

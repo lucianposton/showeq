@@ -3,9 +3,6 @@ To Do list
 A full "to do" list is maintained on SourceForge 
 (http://sourceforge.net/projects/seq) under the "Tasks" heading.
 
-- Color Code Mana/HP/STA display in the stat window
-
-- Have auto changing colors of HP/Mana/STA cycling from
-  Green -> Yellow -> Red depending on how low you get
-  (IE - >66% mana = Green, 34 - 65% mana = yellow, <33% mana = red)
-
++ Add GUI support for deleting categories from the category manager
++ Add GUI support for deleting message boxes
++ Add GUI support for deleting buttons from message boxes

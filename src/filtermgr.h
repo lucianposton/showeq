@@ -21,8 +21,11 @@
 
 #include <qobject.h>
 
-#include "filter.h"
 #include "everquest.h"
+
+//----------------------------------------------------------------------
+// forward declarations
+class Filter;
 
 //
 // ZBTEMP: predefined filters and filter flags will be migrated out
@@ -68,8 +71,10 @@ class FilterMgr : public QObject
   
   uint32_t filterFlags(const QString& filterString, int level) const;
   QString filterString(uint32_t filterFlags) const;
+  QString filterName(uint8_t filter) const;
   const QString& filterFile(void) { return m_filterFile; }
-  
+  bool addFilter(uint8_t filter, const QString& filterString);
+  void remFilter(uint8_t filter, const QString& filterString);
   bool registerRuntimeFilter(const QString& name, 
 			     uint8_t& flag,
 			     uint32_t& flagMask);
@@ -85,11 +90,12 @@ class FilterMgr : public QObject
   void loadFilters(const QString& filterFile);
   void saveFilters(void);
   void listFilters(void);
-  void zoneNew(const newZoneStruct* zoneNew, bool client);
+  void loadZone(const QString& zoneShortName);
   
  signals:
   void filtersChanged();
   void runtimeFiltersChanged(uint8_t flag);
+
 
  private:
   QString m_filterFile;
