@@ -110,7 +110,6 @@ public slots:
    void newDoorSpawn(const doorStruct* d);
    void removeCoinsItem(const removeCoinsStruct*);
    void zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len);
-   void zoneBegin(const QString& shortZoneName);
    void newSpawn(const newSpawnStruct* spawn);
    void newSpawn(const spawnStruct& s);
    void playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t);
@@ -141,14 +140,10 @@ public slots:
    void refilterSpawnsRuntime(itemType type);
    void deleteItem(itemType type, int id);
    bool updateFilterFlags(Item* item);
-   bool updateFilterFlags(Spawn* spawn);
    bool updateRuntimeFilterFlags(Item* item);
-   bool updateRuntimeFilterFlags(Spawn* spawn);
 
    ItemMap& getMap(itemType type);
 
-   void clearMap(ItemMap& map);
-   
  private:
    ZoneMgr* m_zoneMgr;
    Player* m_player;

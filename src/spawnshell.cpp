@@ -95,13 +95,17 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
 {
    m_cntDeadSpawnIDs = 0;
    m_posDeadSpawnIDs = 0;
-   memset((void*)&m_deadSpawnID[0], 0, sizeof(m_deadSpawnID));
+   for (int i = 0; i < MAX_DEAD_SPAWNIDS; i++)
+     m_deadSpawnID[i] = 0;
 
+   // these should auto delete
    m_spawns.setAutoDelete(true);
    m_drops.setAutoDelete(true);
    m_coins.setAutoDelete(true);
    m_doors.setAutoDelete(true);
-   m_players.setAutoDelete(false); // we don't want this one to auto-delete
+
+   // we don't want this one to auto-delete
+   m_players.setAutoDelete(false); 
 
    // bogus list
    m_players.insert(0, m_player);
@@ -114,7 +118,7 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
 
    // connect SpawnShell slots to ZoneMgr signals
    connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
-	   this, SLOT(zoneBegin(const QString&)));
+	   this, SLOT(clear(void)));
    connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
 	   this, SLOT(clear(void)));
 
@@ -143,16 +147,6 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
      m_timer->start(showeq_params->saveSpawnsFrequency, true);
 }
 
-void SpawnShell::zoneBegin(const QString& shortZoneName)
-{
-  clear();
-}     
-
-void SpawnShell::clearMap(ItemMap& map)
-{
-  map.clear();
-}
-
 void SpawnShell::clear(void)
 {
 #ifdef SPAWNSHELL_DIAG
@@ -161,10 +155,10 @@ void SpawnShell::clear(void)
 
    emit clearItems();
 
-   clearMap(m_spawns);
-   clearMap(m_coins);
-   clearMap(m_doors);
-   clearMap(m_drops);
+   m_spawns.clear();
+   m_coins.clear();
+   m_doors.clear();
+   m_drops.clear();
 
    // clear the players list, reinsert the player
    m_players.clear();
@@ -175,7 +169,8 @@ void SpawnShell::clear(void)
 
    m_cntDeadSpawnIDs = 0;
    m_posDeadSpawnIDs = 0;
-   memset((void*)&m_deadSpawnID[0], 0, sizeof(m_deadSpawnID));
+   for (int i = 0; i < MAX_DEAD_SPAWNIDS; i++)
+     m_deadSpawnID[i] = 0;
 } // end clear
 
 const Item* SpawnShell::findID(itemType type, int id)
@@ -272,8 +267,13 @@ void SpawnShell::deleteItem(itemType type, int id)
 
 bool SpawnShell::updateFilterFlags(Item* item)
 {
+  uint8_t level = 0;
+
+  if (item->type() == tSpawn)
+    level = ((Spawn*)item)->level();
+
   // get the filter flags
-  uint32_t flags = m_filterMgr.filterFlags(item->filterString(), 0);
+  uint32_t flags = m_filterMgr.filterFlags(item->filterString(), level);
 
   // see if the new filter flags are different from the old ones
   if (flags != item->filterFlags())
@@ -289,56 +289,21 @@ bool SpawnShell::updateFilterFlags(Item* item)
   return false;
 }
 
-bool SpawnShell::updateFilterFlags(Spawn* spawn)
-{
-  // get the filter flags
-  uint32_t flags = m_filterMgr.filterFlags(spawn->filterString(), 
-					   spawn->level());
-
-  // see if the new filter flags are different from the old ones
-  if (flags != spawn->filterFlags())
-  {
-    // yes, set the new filter flags
-    spawn->setFilterFlags(flags);
-
-    // return true to indicate that the flags have changed
-    return true;
-  }
-
-  // flags haven't changed
-  return false;
-}
-
 bool SpawnShell::updateRuntimeFilterFlags(Item* item)
 {
+  uint8_t level = 0;
+
+  if (item->type() == tSpawn)
+    level = ((Spawn*)item)->level();
+
   // get the filter flags
-  uint32_t flags = m_filterMgr.runtimeFilterFlags(item->filterString(), 0);
+  uint32_t flags = m_filterMgr.runtimeFilterFlags(item->filterString(), level);
 
   // see if the new filter flags are different from the old ones
   if (flags != item->runtimeFilterFlags())
   {
     // yes, set the new filter flags
     item->setRuntimeFilterFlags(flags);
-
-    // return true to indicate that the flags have changed
-    return true;
-  }
-
-  // flags haven't changed
-  return false;
-}
-
-bool SpawnShell::updateRuntimeFilterFlags(Spawn* spawn)
-{
-  // get the filter flags
-  uint32_t flags = m_filterMgr.runtimeFilterFlags(spawn->filterString(), 
-						  spawn->level());
-
-  // see if the new filter flags are different from the old ones
-  if (flags != spawn->runtimeFilterFlags())
-  {
-    // yes, set the new filter flags
-    spawn->setRuntimeFilterFlags(flags);
 
     // return true to indicate that the flags have changed
     return true;
@@ -532,16 +497,17 @@ void SpawnShell::newSpawn(const spawnStruct& s)
    {
      Spawn* spawn = (Spawn*)item;
      spawn->update(&s);
-     updateFilterFlags(item);
-     updateRuntimeFilterFlags(item);
+     updateFilterFlags(spawn);
+     updateRuntimeFilterFlags(spawn);
      item->updateLastChanged();
      emit changeItem(item, tSpawnChangedALL);
    }
    else
    {
      item = new Spawn(&s);
-     updateFilterFlags(item);
-     updateRuntimeFilterFlags(item);
+     Spawn* spawn = (Spawn*)item;
+     updateFilterFlags(spawn);
+     updateRuntimeFilterFlags(spawn);
      m_spawns.insert(s.spawnId, item);
      emit addItem(item);
 
@@ -729,8 +695,6 @@ void SpawnShell::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
   QString cn("");
 
   QString msg("Faction: Your faction standing with ");
-
-  //printf("%i, %i, %i, %i\n", con->unknown1[0], con->unknown1[1], con->unknown2[0], con->unknown2[1]);
 
   // is it you that you've conned?
   if (con->playerid == con->targetid) 
@@ -1039,6 +1003,9 @@ void SpawnShell::refilterSpawns(itemType type)
 void SpawnShell::refilterSpawnsRuntime()
 {
   refilterSpawnsRuntime(tSpawn);
+  refilterSpawnsRuntime(tDrop);
+  refilterSpawnsRuntime(tCoins);
+  refilterSpawnsRuntime(tDoors);
 }
 
 void SpawnShell::refilterSpawnsRuntime(itemType type)

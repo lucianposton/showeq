@@ -76,9 +76,6 @@ bool Category::isFiltered(const QString& filterString, int level) const
 CategoryDlg::CategoryDlg(QWidget *parent, QString name)
  : QDialog(parent, name, TRUE)
 {
-#ifdef DEBUG
-   debug ("CategoryDlg()");
-#endif /* DEBUG */
    QFont labelFont;
    labelFont.setBold(true);
 

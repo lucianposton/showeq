@@ -6,7 +6,9 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 
+#include <qdir.h>
 #include <qfile.h>
 #include <qdatastream.h>
 
@@ -20,6 +22,17 @@
 static const char magicStr[5] = "plr2"; // magic is the size of uint32_t + a null
 static const uint32_t* magic = (uint32_t*)magicStr;
 
+static const char* conColorBasePrefNames[] =
+{
+  "GreenBase",
+  "CyanBase",
+  "BlueBase",
+  "Even",
+  "YellowBase",
+  "RedBase",
+  "Unknown"
+};
+
 
 Player::Player (QObject* parent,
 		ZoneMgr* zoneMgr,
@@ -29,24 +42,53 @@ Player::Player (QObject* parent,
     m_zoneMgr(zoneMgr)
 {
 #ifdef DEBUG_PLAYER
-    debug("Player()");
+  debug("Player()");
 #endif
-    m_NPC = SPAWN_SELF;
-    
-    setDefaults();
-    setUseDefaults(true);
+  m_NPC = SPAWN_SELF;
+  
+  setDefaults();
+  setUseDefaults(true);
+  
+  // set the name to the default name
+  Spawn::setName(m_defaultName);
 
-    // set the name to the default name
-    Spawn::setName(m_defaultName);
-
-    // restore the player state if the user requested it...
-    if (showeq_params->restorePlayerState)
-      restorePlayerState();
-    else
-    {
-      reset();
-      clear();
-    }
+  m_conColorBases[tGreenSpawn] = 
+    pSEQPrefs->getPrefColor(conColorBasePrefNames[tGreenSpawn],
+			    "Player",
+			    QColor(0, 95, 0));
+  m_conColorBases[tCyanSpawn] = 
+    pSEQPrefs->getPrefColor(conColorBasePrefNames[tCyanSpawn],
+			    "Player",
+			    QColor(0, 255, 255));
+  m_conColorBases[tBlueSpawn] = 
+    pSEQPrefs->getPrefColor(conColorBasePrefNames[tBlueSpawn],
+			    "Player",
+			    QColor(0, 0, 160));
+  m_conColorBases[tEvenSpawn] = 
+    pSEQPrefs->getPrefColor(conColorBasePrefNames[tEvenSpawn],
+			    "Player",
+			    QColor(255, 255, 255));
+  m_conColorBases[tYellowSpawn] = 
+    pSEQPrefs->getPrefColor(conColorBasePrefNames[tYellowSpawn],
+			    "Player",
+			    QColor(255, 255, 0));
+  m_conColorBases[tRedSpawn] = 
+    pSEQPrefs->getPrefColor(conColorBasePrefNames[tRedSpawn],
+			    "Player",
+			    QColor(127, 0, 0));
+  m_conColorBases[tUnknownSpawn] = 
+    pSEQPrefs->getPrefColor(conColorBasePrefNames[tUnknownSpawn],
+			    "Player",
+			    gray);
+						 
+  // restore the player state if the user requested it...
+  if (showeq_params->restorePlayerState)
+    restorePlayerState();
+  else
+  {
+    reset();
+    clear();
+  }
 }
 
 Player::~Player()
@@ -59,7 +101,6 @@ void Player::backfill(const charProfileStruct* player)
 
   printf("Player::backfill():\n");
 
-  
   messag.sprintf("Player: Name: '%s' Last: '%s'\n", 
  		 player->name, player->lastName);
   emit msgReceived(messag);
@@ -192,6 +233,10 @@ void Player::backfill(const charProfileStruct* player)
   updateLastChanged();
 
   emit changeItem(this, tSpawnChangedALL);
+
+  QDir tmp("/tmp/");
+  tmp.rename(QString("bankfile.") + QString::number(getpid()),
+	     QString("bankfile.") + player->name);
 }
 
 void Player::clear()
@@ -850,6 +895,33 @@ bool Player::getStatValue(uint8_t stat,
 }
 
 
+const QColor& Player::conColorBase(ColorLevel level)
+{
+  static const QColor invalidColor;
+
+  // only retrieve valid color levels
+  if (level < tMaxColorLevels)
+    return m_conColorBases[level];
+  else
+    return invalidColor;
+}
+
+void Player::setConColorBase(ColorLevel level, const QColor& color)
+{
+  // only set valid color levels
+  if (level >= tMaxColorLevels)
+    return;
+
+  // note the new color base
+  m_conColorBases[level] = color;
+
+  // set the color in the preferences
+  pSEQPrefs->setPrefColor(conColorBasePrefNames[level], "Player", color);
+
+  // refill the con table
+  fillConTable();
+}
+
 void Player::fillConTable()
 {
 // keep around for historical giggles
@@ -888,117 +960,131 @@ void Player::fillConTable()
 // 55-57	-20?	-16?	+3
 // 58-60        -21     -16     +3
 
-      int greenRange; 
-      int cyanRange; 
+  int greenRange; 
+  int cyanRange; 
 
-      if (m_level < 8) 
-      { // 1 - 7 
-         greenRange = -4;
-         cyanRange = -8;
-      } 
-      else if (m_level < 13) 
-      { // 8 - 12 
-	greenRange = -5;
-	cyanRange = -4;
-      }
-      else if (m_level < 23) 
-      { // 
-	greenRange = -7;
-	cyanRange = -5;
-      }
-      else if (m_level < 27) 
-      { //
-	greenRange = -10;
-	cyanRange = -8;
-      }
-      else if (m_level < 29)
-      { //
-	greenRange = -11;
-	cyanRange = -8;
-      }
-      else if (m_level < 34) 
-      { // 
-	greenRange = -12;
-	cyanRange = -9;
-      }
-      else if (m_level < 37) 
-      { // 
-	greenRange = -13;
-	cyanRange = -10;
-      }
-      else if (m_level < 40) 
-      { // 43 - 44
-	greenRange = -14;
-	cyanRange = -11;
-      }
-      else if (m_level < 49) 
-      { // 45 - 48
-	greenRange = -17;
-	cyanRange = -13;
-      }
-      else if (m_level < 53) 
-      { // 49 - 52
-	greenRange = -18;
-	cyanRange = -14;
-      }
-      else if (m_level < 55) 
-      { // 52 - 54
-	greenRange = -19;
-	cyanRange = -15;
-      }
-      else if (m_level < 57) 
-      { // 55 - 56
-	greenRange = -20;
-	cyanRange = -15;
-      }
-      else
-      { // 57 - 60
-	greenRange = -21;
-	cyanRange = -16;
-      }
-      
-  uint8_t level = 1; 
+  if (level() < 8) 
+  { // 1 - 7 
+    greenRange = -4;
+    cyanRange = -8;
+  } 
+  else if (level() < 13) 
+  { // 8 - 12 
+    greenRange = -5;
+    cyanRange = -4;
+  }
+  else if (level() < 23) 
+  { // 
+    greenRange = -7;
+    cyanRange = -5;
+  }
+  else if (level() < 27) 
+  { //
+    greenRange = -10;
+    cyanRange = -8;
+  }
+  else if (level() < 29)
+  { //
+    greenRange = -11;
+    cyanRange = -8;
+  }
+  else if (level() < 34) 
+  { // 
+    greenRange = -12;
+    cyanRange = -9;
+  }
+  else if (level() < 37) 
+  { // 
+    greenRange = -13;
+    cyanRange = -10;
+  }
+  else if (level() < 40) 
+  { // 43 - 44
+    greenRange = -14;
+    cyanRange = -11;
+  }
+  else if (level() < 49) 
+  { // 45 - 48
+    greenRange = -17;
+    cyanRange = -13;
+  }
+  else if (level() < 53) 
+  { // 49 - 52
+    greenRange = -18;
+    cyanRange = -14;
+  }
+  else if (level() < 55) 
+  { // 52 - 54
+    greenRange = -19;
+    cyanRange = -15;
+  }
+  else if (level() < 57) 
+  { // 55 - 56
+    greenRange = -20;
+    cyanRange = -15;
+  }
+  else
+  { // 57 - 60
+    greenRange = -21;
+    cyanRange = -16;
+  }
+  
+  uint8_t spawnLevel = 1; 
   uint8_t scale;
 
-  for (; level <= (greenRange + m_level); level++)
+  uint8_t greenBase = m_conColorBases[tGreenSpawn].green();
+  uint8_t greenScale = 255 - greenBase;
+  for (; spawnLevel <= (greenRange + level()); spawnLevel++)
   { // this loop handles all GREEN cons
-      if (level <= (greenRange + m_level - 5))
-         m_conTable[level] = QColor(0, 95, 0);
-      else
-      {
-         scale = 160/(greenRange + m_level - level + 1);
-         m_conTable[level] = QColor(0, (95 + scale), 0);
-      }
+    if (spawnLevel <= (greenRange + level() - 5))
+      m_conTable[spawnLevel] = m_conColorBases[tGreenSpawn];
+    else
+    {
+      scale = greenScale/(greenRange + level() - spawnLevel + 1);
+      m_conTable[spawnLevel] = QColor(m_conColorBases[tGreenSpawn].red(), 
+				 (greenBase + scale), 
+				 m_conColorBases[tGreenSpawn].blue());
+    }
   }
 
-  for (; level <= cyanRange + m_level; level++)
+  for (; spawnLevel <= cyanRange + level(); spawnLevel++)
   { // light blue cons, no need to gradient a small range
-      m_conTable[level] = QColor(0, 255, 255);
+    m_conTable[spawnLevel] = m_conColorBases[tCyanSpawn];
   }
 
-  for (; level < m_level; level++)
+  uint8_t blueBase = m_conColorBases[tBlueSpawn].blue();
+  uint8_t blueScale = 255 - blueBase;
+  for (; spawnLevel < level(); spawnLevel++)
   { // blue cons here
-    scale = 95/(m_level - level);
-    m_conTable[level] = QColor(0, 0, (160 + scale));
+    scale = blueScale/(level() - spawnLevel);
+    m_conTable[spawnLevel] = QColor(m_conColorBases[tBlueSpawn].red(), 
+			       m_conColorBases[tBlueSpawn].green(), 
+			       (blueBase + scale));
   }
 
-  m_conTable[level++] = QColor(255, 255, 255); // even con
-  m_conTable[level++] = QColor(255, 255, 0);   // yellow con
-  m_conTable[level++] = QColor(255, 200, 0);   // yellow con
+  m_conTable[spawnLevel++] = m_conColorBases[tEvenSpawn]; // even con
+  m_conTable[spawnLevel++] = m_conColorBases[tYellowSpawn];   // yellow con
+  m_conTable[spawnLevel++] = QColor(m_conColorBases[tYellowSpawn].red(), 
+			       m_conColorBases[tYellowSpawn].green() - 30,
+			       m_conColorBases[tYellowSpawn].blue());   // yellow con
   
-  for (; level < maxSpawnLevel; level++)
+  uint8_t redBase = m_conColorBases[tRedSpawn].red();
+  uint8_t redScale = 255 - redBase;
+  for (; spawnLevel < maxSpawnLevel; spawnLevel++)
   { // red cons
-      if (level > m_level + 13) 
-         m_conTable[level] = QColor(127, 0, 0);
-      else
-      {
-         scale = 128/(level - m_level - 2);
-         m_conTable[level] = QColor((127 + scale), 0, 0);
-      }
+    if (spawnLevel > level() + 13) 
+      m_conTable[spawnLevel] = m_conColorBases[tRedSpawn];
+    else
+    {
+      scale = redScale/(spawnLevel - level() - 2);
+      m_conTable[spawnLevel] = QColor((redBase + scale), 
+				 m_conColorBases[tRedSpawn].green(), 
+				 m_conColorBases[tRedSpawn].blue());
+    }
   }
 
   // level 0 is unknown, and thus gray
-  m_conTable[0] = gray;
+  m_conTable[0] = m_conColorBases[tUnknownSpawn];
 }
 
 QString Player::name() const

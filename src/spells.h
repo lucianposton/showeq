@@ -1099,15 +1099,15 @@
 /* 0x043f */ { "Mechinetic Dislocation I", 0, true }, 
 /* 0x0440 */ { "Mechinetic Dislocation II", 0, true }, 
 /* 0x0441 */ { "Mechinetic Dislocation III", 0, true }, 
-/* 0x0442 */ { NULL, 0, false },
-/* 0x0443 */ { NULL, 0, false },
-/* 0x0444 */ { NULL, 0, false },
-/* 0x0445 */ { NULL, 0, false },
-/* 0x0446 */ { NULL, 0, false },
-/* 0x0447 */ { NULL, 0, false },
-/* 0x0448 */ { NULL, 0, false },
-/* 0x0449 */ { NULL, 0, false },
-/* 0x044a */ { NULL, 0, false },
+/* 0x0442 */ { "Mechinetic Dislocation IV", 0, true }, 
+/* 0x0443 */ { "Mechinetic Dislocation V", 0, true }, 
+/* 0x0444 */ { "Mechinetic Dislocation VI", 0, true }, 
+/* 0x0445 */ { "Mechinetic Dislocation VII", 0, true }, 
+/* 0x0446 */ { "Mechinetic Dislocation VIII", 0, true }, 
+/* 0x0447 */ { "Mechinetic Dislocation IX", 0, true }, 
+/* 0x0448 */ { "Mechinetic Dislocation X", 0, true }, 
+/* 0x0449 */ { "Wind of the West", 0, true }, 
+/* 0x044a */ { "Wind of the Earth", 0, true }, 
 /* 0x044b */ { NULL, 0, false },
 /* 0x044c */ { NULL, 0, false },
 /* 0x044d */ { "Spin the Bottle", 12, false }, 
@@ -2183,7 +2183,7 @@
 /* 0x087b */ { "Renewal", 0, true }, 
 /* 0x087c */ { "Restoration", 0, true }, 
 /* 0x087d */ { "Hand of the Gods", 0, true }, 
-/* 0x087e */ { "Medic's Acceleration", 0, false }, 
+/* 0x087e */ { "Grandmaster's Satchel", 0, false }, 
 /* 0x087f */ { "Initiate's Wounding Accel", 0, false }, 
 /* 0x0880 */ { "Wounding Accel Mastery II", 0, false }, 
 /* 0x0881 */ { "Initiate's Protection Accel", 0, false }, 
@@ -2946,8 +2946,8 @@
 /* 0x0b76 */ { "Curse of Eternal Suffering", 600, true }, 
 /* 0x0b77 */ { "Journey: Luclin", 0, true }, 
 /* 0x0b78 */ { "Ervaj's Lost Composition", 0, true }, 
-/* 0x0b79 */ { "Harmonize", 720, false }, 
-/* 0x0b7a */ { "Harmonize", 720, false }, 
+/* 0x0b79 */ { "Syncopation", 720, false }, 
+/* 0x0b7a */ { "Resonance", 720, false }, 
 /* 0x0b7b */ { "Harmonize", 720, false }, 
 /* 0x0b7c */ { "Eugene's Memory Blur", 0, true }, 
 /* 0x0b7d */ { "Savagery", 0, true }, 
@@ -3010,5 +3010,5 @@
 /* 0x0bb6 */ { "Claw of the Savage Lord", 0, true }, 
 // 
 // Max SpellId: 0x0bb7
-// Number of Spells: 2697
-// Empty Entries: 302
+// Number of Spells: 2706
+// Empty Entries: 293

@@ -222,6 +222,7 @@ class EQInterface:public QMainWindow
    void set_opt_WalkPathLength(int);
    void toggle_opt_RetardedCoords(int);
    void toggle_opt_SystimeSpawntime(int);
+   void select_opt_conColorBase(int);
    void toggle_view_SpawnList();
    void toggle_view_SpawnList2();
    void toggle_view_SpawnPointList();

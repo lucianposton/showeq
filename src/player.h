@@ -20,6 +20,18 @@
 // constants
 const int maxSpawnLevel = 100;
 
+enum ColorLevel
+{
+  tGreenSpawn = 0,
+  tCyanSpawn = 1,
+  tBlueSpawn = 2,
+  tEvenSpawn = 3,
+  tYellowSpawn = 4,
+  tRedSpawn = 5,
+  tUnknownSpawn = 6,
+  tMaxColorLevels = 7
+};
+
 //----------------------------------------------------------------------
 // Player
 class Player : public QObject, public Spawn
@@ -85,6 +97,9 @@ public:
 
    uint32_t getCurrentExp() { return m_currentExp; }
    uint32_t getMaxExp() { return m_maxExp; }
+   
+   const QColor& conColorBase(ColorLevel level);
+   void setConColorBase(ColorLevel level, const QColor& color);
    const QColor& pickConColor(int otherSpawnLevel) const;
 
 
@@ -153,7 +168,6 @@ public:
   void fillConTable();
   
  private:
- public:
   ZoneMgr* m_zoneMgr;
   
    // The default values are set either by info showeq_params.
@@ -189,6 +203,9 @@ public:
    uint16_t m_currentAApts;
    uint32_t m_currentExp;
    uint32_t m_maxExp;
+
+   // con color bases
+   QColor m_conColorBases[tMaxColorLevels];
 
    // con color table
    QColor m_conTable[maxSpawnLevel];

@@ -108,7 +108,11 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   col++;
   tmpGrid->addWidget(new QLabel("HAVE_LIBEQ: ", this), row, col++);
   tmpLabel = new QLabel(this);
-  tmpLabel->setText(QString::number(HAVE_LIBEQ));
+  int num = 0;
+#ifdef HAVE_LIBEQ
+  num = HAVE_LIBEQ;
+#endif
+  tmpLabel->setText(QString::number(num));
   tmpGrid->addWidget(tmpLabel, row, col++);
   col++;
   tmpGrid->addWidget(new QLabel("Key: ", this), row, col++);

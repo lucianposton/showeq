@@ -83,7 +83,7 @@ public slots:
    void finishedDecodeBatch(void);
 
    // category combo box signals
-   void categorySelected(const QString& categoryName);
+   void categorySelected(int index);
    
     // listview signals
    void selChanged(QListViewItem*);

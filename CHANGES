@@ -1,3 +1,25 @@
+dohpaZ (12/06/02)
+------------------
+Modifications:
+ + version 4.2.10
+ + Added ./doc/map.html which describes the map file format
+ + Made the search and checks for libEQ.a more robust and report more
+   information
+ + Added code to SpawnList2 to protect against situations where there aren't 
+   any categories.  Also made SpawnList2 save/restore the currently selected
+   category.
+ + Updated spells.h to 12/06/02 patch
+ + Added Pasla's Shawl 8 spawn points to the Iceclad map
+ + Added curio's updated Kurn, Droga, and Hollowsahde Moor maps
+ + Applied patch # 566996 "Patch to dump player + bank items" from nalr 
+   (Morannon).
+ + Modified the code to dump bank items to use the Qt classes.
+ + Added a "Refilter Spawns" menu pick to the "Filters" menu.  
+ + Simplified some filtering logic in SpawnShell.  This fixed where filters 
+   with level's specified weren't being checked properly in some cases.
+ + Added the ability to select the base con colors from the "Con Colors"
+   sub-menu of the "Options" menu.
+
 dohpaZ (08/06/02)
 ------------------
 Modifications:

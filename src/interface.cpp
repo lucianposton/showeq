@@ -55,7 +55,7 @@
 #include <qtextstream.h>
 #include <qinputdialog.h>
 #include <qfontdialog.h>
-
+#include <qcolordialog.h>
 #include <qwindowsstyle.h>
 #include <qplatinumstyle.h>
 #include <qmotifstyle.h>
@@ -630,6 +630,26 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    pOptMenu->insertItem("Clear Channel Messages", 
 			this, SLOT(opt_clearChannelMsgs(int)));
 
+   // Con Color base menu
+   QPopupMenu* conColorBaseMenu = new QPopupMenu;
+   x = conColorBaseMenu->insertItem("Green Spawn Base...");
+   conColorBaseMenu->setItemParameter(x, tGreenSpawn);
+   x = conColorBaseMenu->insertItem("Cyan Spawn Base...");
+   conColorBaseMenu->setItemParameter(x, tCyanSpawn);
+   x = conColorBaseMenu->insertItem("Blue Spawn Base...");
+   conColorBaseMenu->setItemParameter(x, tBlueSpawn);
+   x = conColorBaseMenu->insertItem("Even Spawn...");
+   conColorBaseMenu->setItemParameter(x, tEvenSpawn);
+   x = conColorBaseMenu->insertItem("Yellow Spawn Base...");
+   conColorBaseMenu->setItemParameter(x, tYellowSpawn);
+   x = conColorBaseMenu->insertItem("Red Spawn Base...");
+   conColorBaseMenu->setItemParameter(x, tRedSpawn);
+   x = conColorBaseMenu->insertItem("Unknown Spawn...");
+   conColorBaseMenu->setItemParameter(x, tUnknownSpawn);
+   connect(conColorBaseMenu, SIGNAL(activated(int)),
+	   this, SLOT(select_opt_conColorBase(int)));
+   pOptMenu->insertItem("Con &Colors", conColorBaseMenu);
+
    // Network Menu
    m_netMenu = new QPopupMenu;
    menuBar()->insertItem("&Network", m_netMenu);
@@ -747,8 +767,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    filterMenu->insertItem("&Reload Filters", m_filterMgr, SLOT(loadFilters()), Key_F3);
    filterMenu->insertItem("&Save Filters", m_filterMgr, SLOT(saveFilters()), Key_F4);
    filterMenu->insertItem("&Edit Filters", this, SLOT(launch_editor_filters()));
-   filterMenu->insertItem("Select Fil&ter File", this, SLOT(select_filter_file()));
+   filterMenu->insertItem("Select Fil&ter Fi&le", this, SLOT(select_filter_file()));
 
+   filterMenu->insertItem("Re&filter Spawns", m_spawnShell, SLOT(refilterSpawns()));
    x = filterMenu->insertItem("&Is Case Sensitive", this, SLOT(toggle_filter_Case(int)));
    filterMenu->setItemChecked(x, showeq_params->spawnfilter_case);
    x = filterMenu->insertItem("&Display Alert Info", this, SLOT(toggle_filter_AlertInfo(int)));
@@ -3322,6 +3343,28 @@ EQInterface::toggle_opt_SystimeSpawntime (int id)
     pSEQPrefs->setPrefBool("SystimeSpawntime", "Interface", showeq_params->walkpathrecord);
 }
 
+void 
+EQInterface::select_opt_conColorBase(int id)
+{
+  ColorLevel level = (ColorLevel)menuBar()->itemParameter(id);
+  
+  // get the current color
+  QColor color = m_player->conColorBase(level);
+
+  // get the new color
+  QColor newColor = QColorDialog::getColor(color, this, "ShowEQ - Con Color");
+
+  // only set if the user selected a valid color and clicked ok
+  if (newColor.isValid())
+  {
+    // set the new con color
+    m_player->setConColorBase(level, newColor);
+    
+    // force the spawn lists to get rebuilt with the new colors
+    rebuildSpawnList();
+  }
+}
+
 void
 EQInterface::createMessageBox(void)
 {
@@ -3792,6 +3835,14 @@ void EQInterface::playerItem(const playerItemStruct* itemp)
       + ", Value: " + reformatMoney(itemp->item.cost);
     
     emit msgReceived(tempStr);
+  }
+
+  QFile bankfile(QString("/tmp/bankfile.") + QString::number(getpid()));
+  if (bankfile.open(IO_Append | IO_WriteOnly))
+  {
+    QTextStream out(&bankfile);
+    out << "Item: " << itemp->item.lore << ", Slot: " << itemp->item.equipSlot 
+	<< endl;
   }
 }
 

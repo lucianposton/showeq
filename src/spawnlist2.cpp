@@ -50,8 +50,8 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   m_categoryCombo = new QComboBox(false, this, "spawnlistcombo");
   m_categoryCombo->setDuplicatesEnabled(false);
   hLayout->addWidget(m_categoryCombo, 0, AlignLeft);
-  connect(m_categoryCombo, SIGNAL(activated(const QString&)),
-	  this, SLOT(categorySelected(const QString&)));
+  connect(m_categoryCombo, SIGNAL(activated(int)),
+	  this, SLOT(categorySelected(int)));
 
   // setup spinbox to control frame rate (FPM)
   m_fpmSpinBox = new QSpinBox(5, 60, 1, this, "fpmSpinBox");
@@ -265,12 +265,18 @@ void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
     return;
   }
 
-  uint8_t level = 0;
+  // make sure there is a current category, otherwise, nothing gets done
+  // This quick check is in case someone deleted all their categories or 
+  // are an idiot using an outdated seqdef.xml
+  if (m_currentCategory == NULL)
+    return;
 
+  uint8_t level = 0;
+  
   // if item is a spawn get its level
   if ((item->type() == tSpawn) || (item->type() == tPlayer))
     level = ((Spawn*)item)->level();
-
+    
   // if this is a filtered spawn and the current category isn't a filtered 
   // filter category, then don't add it
   if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
@@ -280,14 +286,14 @@ void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
     if (litem != NULL)
     {
       m_spawnListItemDict.remove((void*)item);
-
+      
       delete litem;
     }
-
+    
     // nothing more to do
     return;
   }
-
+  
   // if this item doesn't fit the filter
   if (!m_currentCategory->isFiltered(filterString(item), level))
   {
@@ -295,7 +301,7 @@ void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
     if (litem != NULL)
     {
       m_spawnListItemDict.remove((void*)item);
-
+      
       delete litem;
     }
     
@@ -395,7 +401,7 @@ void SpawnListWindow2::delCategory(const Category* cat)
     // if the category being removed was the current category, 
     // set the selected category to the new selected category (if any).
     if (cat == m_currentCategory)
-      categorySelected(m_categoryCombo->currentText());
+      categorySelected(m_categoryCombo->currentItem());
   }
 }
 
@@ -421,7 +427,10 @@ void SpawnListWindow2::loadedCategories(void)
   const Category* cat;
   for (cat = it.toFirst(); cat != NULL; cat = ++it)
     m_categoryCombo->insertItem(cat->name());
-  categorySelected(m_categoryCombo->currentText());
+
+  int n = pSEQPrefs->getPrefInt("CurrentCategory", preferenceName(), 0);
+  m_categoryCombo->setCurrentItem(n);
+  categorySelected(m_categoryCombo->currentItem());
 
   // clear the spawn list
   clear();
@@ -436,6 +445,9 @@ void SpawnListWindow2::loadedCategories(void)
 
 void SpawnListWindow2::playerLevelChanged(uint8_t)
 {
+  if (m_currentCategory == NULL)
+    return;
+
   QListViewItemIterator it(m_spawnList);
   SpawnListItem* slitem = NULL;
   const Item* item;
@@ -450,10 +462,7 @@ void SpawnListWindow2::playerLevelChanged(uint8_t)
     item = slitem->item();
     
     // set the color
-    if (m_currentCategory != NULL)
-      slitem->pickTextColor(item, m_player, m_currentCategory->color());
-    else
-      slitem->pickTextColor(item, m_player);
+    slitem->pickTextColor(item, m_player, m_currentCategory->color());
 
     ++it;
   }
@@ -653,6 +662,10 @@ void SpawnListWindow2::refresh(void)
 
 void SpawnListWindow2::savePrefs(void)
 {
+  // save the current category
+  pSEQPrefs->setPrefInt("CurrentCategory", preferenceName(), 
+			m_categoryCombo->currentItem());
+
   // save the underlying SEQWindows prefs
   SEQWindow::savePrefs();
   
@@ -674,15 +687,15 @@ void SpawnListWindow2::finishedDecodeBatch(void)
   rebuildSpawnList();
 }
 
-void SpawnListWindow2::categorySelected(const QString& categoryName)
+void SpawnListWindow2::categorySelected(int index)
 {
-  Category* cat;
-
   CategoryListIterator it(m_categoryMgr->getCategories());
-  for (cat = it.current(); cat != NULL; cat = ++it)
+  Category* cat = it.toFirst();
+  int i = 0;
+  while ((cat != NULL) && (i < index))
   {
-    if (categoryName == cat->name())
-      break;
+    cat = ++it;
+    ++i;
   }
 
   // set the current category

@@ -2,8 +2,11 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/main.cpp)
 AC_CANONICAL_SYSTEM
 AM_CONFIG_HEADER(conf.h)
-AM_INIT_AUTOMAKE(showeq, 4.2.9)
+AM_INIT_AUTOMAKE(showeq, 4.2.10)
 AM_MAINTAINER_MODE
+
+dnl Please remember to update this when the official libEQ.a gets updated...
+CURRENT_LIBEQMD5="f1ddd1ffa527125ed09ac5543d1f85b0"
 
 dnl Use CCd/CXXd rather than CC/CXX otherwise it cache's the value
 dnl and prevents the alternate search from working. Would be better
@@ -196,6 +199,72 @@ AC_CHECK_HEADERS(deque,,AC_MSG_ERROR(cannot find deque, normally part of a c++ d
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 
+dnl locations to search for libEQ.a in
+LIBEQLOCS="`pwd` `pwd`/src /usr/lib /usr/local/lib /opt/lib /lib"
+
+dnl libEQ.a error message
+LIBEQERRORMESSAGE="libEQ.a not found, out of date, or not compiled using a compatible compiler.  Be sure libEQ.a is already installed in one of the listed directories ($LIBEQLOCS), is a current version, and you are compiling with g++ 3.x."
+
+AC_DEFUN(CHECK_LIBEQ,[
+LIBEQMD5=`md5sum $1 |cut -d' ' -f1`
+if [[ "$LIBEQMD5" != "$CURRENT_LIBEQMD5" ]]; then
+	AC_MSG_WARN([$1 has md5sum $LIBEQMD5 which doesn't match reference md5sum])
+fi
+AC_MSG_CHECKING([for InitializeLibEQ in $1])
+ac_save_libs="$LIBS"
+LIBS="$1 -lz $LIBPTHREAD"
+AC_TRY_LINK(
+[
+#include <stdio.h>
+#undef HAVE_LIBEQ
+#define HAVE_LIBEQ 1
+#include "src/libeq.h"
+],
+[
+InitializeLibEQ(0, 0, 0, 0);
+],
+[ 
+$2=$1
+LIBS="$1 $ac_save_libs"
+AC_DEFINE(HAVE_LIBEQ)
+AC_MSG_RESULT(yes)
+],
+[
+$2=NO
+LIBS=$ac_save_libs
+AC_MSG_RESULT(no);
+]
+)
+]
+)
+
+dnl ------------------------------------------------------------------------
+dnl Find libEQ.a
+dnl ------------------------------------------------------------------------
+dnl
+AC_DEFUN(AC_FIND_LIBEQ,
+[
+LIBEQ=NO
+for i in $1;
+do
+  AC_MSG_CHECKING([for libEQ.a in $i])
+  if test -r "$i/libEQ.a"; then
+    AC_MSG_RESULT(yes)
+    CHECK_LIBEQ("$i/libEQ.a", LIBEQ)
+    if [[ "$LIBEQ" != "NO" ]]; then
+      break 
+    fi
+  else
+    AC_MSG_RESULT(no)
+  fi
+done
+
+dnl if not found, error out
+if [[ "$LIBEQ" == "NO" ]]; then
+  AC_MSG_ERROR($LIBEQERRORMESSAGE)
+fi
+])
+
 AC_MSG_CHECKING(whether to build with decryption)
 AC_ARG_ENABLE(decryption,
 	[  --disable-decryption    Do not build with libEQ.a],
@@ -203,17 +272,12 @@ AC_ARG_ENABLE(decryption,
 	no)     AC_MSG_RESULT(no)
 		;;
 	*)      AC_MSG_RESULT(yes)
-		AC_CHECK_LIB(EQ, InitializeLibEQ,
-			, 
-			AC_MSG_ERROR(libEQ.a not found or out of date.  Be sure libEQ.a is already installed in /usr/local/lib or /usr/lib, and is a current version.),
-		-lz $LIBPTHREAD)
+	        AC_FIND_LIBEQ($LIBEQLOCS)
 		;;
 	esac],
 	[ AC_MSG_RESULT(yes)
-          AC_CHECK_LIB(EQ, InitializeLibEQ,
-			, 
-			AC_MSG_ERROR(libEQ.a not found or out of date.  Be sure libEQ.a is already installed in /usr/local/lib or /usr/lib, and is a current version.),
-		-lz $LIBPTHREAD) ] )
+	  AC_FIND_LIBEQ($LIBEQLOCS)
+        ] )
 	
 AC_ARG_ENABLE(cgi, 
 [  --enable-cgi=DIR        Compile CGIs and install in specified DIR],
@@ -368,19 +432,6 @@ AC_ARG_ENABLE(inlines,
 )
 
 MEMORY_LIBS=
-
-AC_ARG_ENABLE(electricfence,
-	[  --enable-electricfence  Compile with ElectricFence],
-	[ AC_MSG_CHECKING(whether to build with ElectricFence)
-	case "${enableval}" in
-	yes)	AC_MSG_RESULT(yes);
-		MEMORY_LIBS="$LIBS -lefence"
-		ac_cv_showeq_electricfence=yes
-		;;
-	*)	AC_MSG_RESULT(no)
-		ac_cv_showeq_electricfence=no
-		;;
-	esac] )
 
 AC_ARG_ENABLE(mpr,
 	[  --enable-mpr            Compile with mpr],

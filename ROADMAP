@@ -236,6 +236,7 @@ Player (player.cpp)
 + uses:
  + ZoneMgr
  + ShowEQParams
+ + XMLPreferences
 + signaled by:
  + EQPacket
  + ZoneMgr

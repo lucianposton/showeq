@@ -2970,6 +2970,7 @@ If any argument is left blank, it is filled in with its default...
    <comment>Button state</comment>
   </property>
  </section>
+<!-- ============================================================= -->
  <section name="SpawnPointList" >
   <property name="Font" >
    <font family="Helvetica" bold="false" strikeout="false" underline="false" pointsize="8" italic="false" />
@@ -3033,6 +3034,30 @@ If any argument is left blank, it is filled in with its default...
   </property>
   <property name="WindowSize" >
    <size width="479" height="248" />
+  </property>
+ </section>
+<!-- ============================================================= -->
+ <section name="Player" >
+  <property name="GreenBase" >
+   <color blue="0" red="0" green="95" />
+  </property>
+  <property name="CyanBase" >
+   <color blue="255" red="0" green="255" />
+  </property>
+  <property name="BlueBase" >
+   <color blue="160" red="0" green="0" />
+  </property>
+  <property name="Even" >
+   <color blue="255" red="255" green="255" />
+  </property>
+  <property name="YellowBase" >
+   <color blue="0" red="255" green="255" />
+  </property>
+  <property name="RedBase" >
+   <color blue="0" red="127" green="0" />
+  </property>
+  <property name="Unknown" >
+   <color blue="164" red="160" green="160" />
   </property>
  </section>
 <!-- ============================================================= -->
