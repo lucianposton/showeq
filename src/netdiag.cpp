@@ -20,8 +20,9 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
     m_packet(packet),
     m_playbackSpeed(NULL)
 {
+  //  setResizeEnabled(false);
   // get preferences
-  QGridLayout* tmpGrid = new QGridLayout(this, 26, 9);
+  QGridLayout* tmpGrid = new QGridLayout(boxLayout(), 26, 9);
   tmpGrid->addColSpacing(3, 5);
   tmpGrid->addColSpacing(6, 5);
   tmpGrid->addRowSpacing(1, 5);
@@ -50,12 +51,12 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   row++; col = 1;
   tmpGrid->addWidget(new QLabel("Device: ", this), row, col++);
   QLabel* tmpLabel = new QLabel(this);
-  tmpLabel->setText(showeq_params->device);
+  tmpLabel->setText(m_packet->device());
   tmpGrid->addWidget(tmpLabel, row, col++);
   col++;
   tmpGrid->addWidget(new QLabel("MAC: ", this), row, col++);
   tmpLabel = new QLabel(this);
-  tmpLabel->setText(showeq_params->mac_address);
+  tmpLabel->setText(m_packet->mac());
   tmpGrid->addWidget(tmpLabel, row, col++);
   col++;
   tmpGrid->addWidget(new QLabel("Track: ", this), row, col++);
@@ -72,13 +73,13 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   tmpGrid->addWidget(new QLabel("Pcap Thread: ", this), row, col++);
   tmpGrid->addWidget(new QLabel("Realtime: ", this), row, col++);
   tmpLabel = new QLabel(this);
-  tmpLabel->setText(QString::number(showeq_params->realtime));
+  tmpLabel->setText(QString::number(m_packet->realtime()));
   tmpGrid->addWidget(tmpLabel, row, col++);
   row++; col = 1;
   tmpGrid->addWidget(new QLabel("Filter: ", this), row, col++);
   m_filterLabel = new QLabel(this);
   m_filterLabel->setText(m_packet->pcapFilter());
-  tmpGrid->addWidget(m_filterLabel, row, col++);
+  tmpGrid->addMultiCellWidget(m_filterLabel, row, row, col, col+5);
   
   // stream specific statistics
   row++; row++; col = 0;
@@ -125,7 +126,7 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
      m_seqCur[a]->setText("????");
   }
 
-  if (showeq_params->playbackpackets)
+  if (m_packet->playbackPackets())
   {
     tmpGrid->addWidget(new QLabel("Playback ", this), row, col++);
     tmpGrid->addWidget(new QLabel("Rate: ", this), row, col++);
@@ -135,8 +136,7 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
     m_playbackSpeed->setWrapping(true);
     tmpGrid->addWidget(m_playbackSpeed, row, col++, Qt::AlignLeft);
 
-    int speed = m_packet->playbackSpeed();
-    m_playbackSpeed->setValue(speed);
+    m_playbackSpeed->setValue(m_packet->playbackSpeed());
 
     QAccel* accel = new QAccel(this);
     int key;

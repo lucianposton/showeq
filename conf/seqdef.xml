@@ -30,16 +30,20 @@
    <comment>Don't use promiscous mode</comment>
   </property>
   <property name="ArqSeqGiveUp" >
-   <int value="256" />
-   <comment>Give up waiting for seq arq after cache fills to this size.  Don't set this too low, otherwise showeq will artificially skip packets, minimum is 32, modem users may want to set 256, dsl and cable users may choose 128 or less</comment>
+   <int value="512" />
+   <comment>Give up waiting for seq arq after cache fills to this size.  Don't set this too low, otherwise showeq will artificially skip packets, minimum is 32, modem users may want to set 512, dsl and cable users may choose 256 or less</comment>
   </property>
   <property name="SessionTracking" >
    <bool value="false" />
    <comment>enable/disable session tracking</comment>
   </property>
-  <property name="BrokenDecode" >
-   <bool value="false" />
-   <comment>set to true to skip decoding of spawn packets</comment>
+  <property name="WorldOPCodes" >
+   <string value="worldopcodes.xml" />
+   <comment>Name of the file containing data about world opcodes</comment>
+  </property>
+  <property name="ZoneOPCodes" >
+   <string value="zoneopcodes.xml" />
+   <comment>Name of the file containing data about zone opcodes</comment>
   </property>
  </section>
 <!-- ============================================================= -->
@@ -593,7 +597,7 @@
    <comment>Display the mouse location</comment>
   </property>
   <property name="ShowPlayerLocation" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Display the player location</comment>
   </property>
   <property name="ShowFrameRate" >
@@ -893,7 +897,7 @@
    <comment>Display the mouse location</comment>
   </property>
   <property name="ShowPlayerLocation" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Display the player location</comment>
   </property>
   <property name="ShowFrameRate" >
@@ -1193,7 +1197,7 @@
    <comment>Display the mouse location</comment>
   </property>
   <property name="ShowPlayerLocation" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Display the player location</comment>
   </property>
   <property name="ShowFrameRate" >
@@ -1493,7 +1497,7 @@
    <comment>Display the mouse location</comment>
   </property>
   <property name="ShowPlayerLocation" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Display the player location</comment>
   </property>
   <property name="ShowFrameRate" >
@@ -1793,7 +1797,7 @@
    <comment>Display the mouse location</comment>
   </property>
   <property name="ShowPlayerLocation" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Display the player location</comment>
   </property>
   <property name="ShowFrameRate" >
@@ -2079,7 +2083,10 @@
    <bool value="false" />
    <comment>Log zone packets to zone log file</comment>
   </property>
-  <property name="LogUnknownZonePackets" >
+  <property name="LogBazaarPackets" >
+   <bool value="false" />
+   <comment>Log bazaar packets to bazaar log file</comment>
+  </property>  <property name="LogUnknownZonePackets" >
    <bool value="false" />
    <comment>Log unknown packets to unknown zone log file</comment>
   </property>
@@ -2092,19 +2099,23 @@
    <comment>log encrypted packets to encrypted log file</comment>
   </property>
   <property name="GlobalLogFilename" >
-   <string value="/usr/local/share/showeq/global.log" />
+   <string value="global.log" />
    <comment>Global log file (enabled with LogAllPackets)</comment>
   </property>
   <property name="ZoneLogFilename" >
-   <string value="/usr/local/share/showeq/zone.log" />
+   <string value="zone.log" />
    <comment>Zone log file (enabled with LogZonePackets)</comment>
+  </property> 
+  <property name="BazaarLogFilename" >
+   <string value="bazaar.log" />
+   <comment>Zone log file (enabled with LogBazaarPackets)</comment>
   </property>
-  <property name="UnknownZoneLogFilename" >
-   <string value="/usr/local/share/showeq/unknownzone.log" />
+ <property name="UnknownZoneLogFilename" >
+   <string value="unknownzone.log" />
    <comment>Unknown Zone log file (enabled with LogUnknownZonePackets)</comment>
   </property>
   <property name="EncryptedLogFilenameBase" >
-   <string value="/usr/local/share/showeq/encrypted" />
+   <string value="encrypted" />
    <comment>Encrypted log file (enabled with LogEncrypted)</comment>
   </property>
   <property name="PktLoggerMask" >
@@ -2112,7 +2123,7 @@
    <comment></comment>
   </property>
   <property name="PktLoggerFilename" >
-   <string value="/usr/local/share/showeq/packet.log" />
+   <string value="packet.log" />
    <comment></comment>
   </property>
  </section>
@@ -2156,24 +2167,12 @@
 <!-- Filter options -->
  <section name="Filters" >
   <property name="FilterFile" >
-   <string value="/usr/local/share/showeq/filters.conf" />
+   <string value="global.xml" />
    <comment>Name of default filter file</comment>
   </property>
-  <property name="LogLocates" >
-   <bool value="false" />
-   <comment>Log spawns that match Locate filter</comment>
-  </property>
-  <property name="LogHunts" >
-   <bool value="false" />
-   <comment>Log spawns that match Hunt filter</comment>
-  </property>
-  <property name="LogCautions" >
-   <bool value="false" />
-   <comment>Log spawns that match Caution filter</comment>
-  </property>
-  <property name="LogDangers" >
-   <bool value="false" />
-   <comment>Log spawns that match Danger filter</comment>
+  <property name="Log" >
+   <int value="0" />
+   <comment>Log spawns that match the specified logable filters</comment>
   </property>
   <property name="IsCaseSensitive" >
    <bool value="false" />
@@ -2220,7 +2219,7 @@
 <!-- Item Database Options -->
  <section name="ItemDB" >
   <property name="Enabled" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Enables ItemDB, setting to false will disable all ItemDB functionality within ShowEQ</comment>
   </property>
   <property name="DatabasesEnabled" >
@@ -2366,11 +2365,11 @@
    <comment>Display compass</comment>
   </property>
   <property name="ShowPlayerSkills" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Display Player Skill List</comment>
   </property>
   <property name="ShowPlayerStats" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Display Player Stats List</comment>
   </property>
   <property name="ShowSpawnList" >
@@ -2382,7 +2381,7 @@
    <comment>Display New Spawn List</comment>
   </property>
   <property name="ShowSpawnPointList" >
-   <bool value="false" />
+   <bool value="true" />
    <comment>Display Spawn Point List</comment>
   </property>
   <property name="ShowExpWindow" >
@@ -2394,7 +2393,7 @@
    <comment>Display Combat Window</comment>
   </property>
   <property name="ShowSpellList" >
-   <bool value="false" />
+   <bool value="true" />
    <comment>Display Spell List</comment>
   </property>
   <property name="SystimeSpawntime" >
@@ -2426,11 +2425,11 @@
    <comment>Display Map 5</comment>
   </property>
   <property name="DockedPlayerSkills" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Dock Player Skill List</comment>
   </property>
   <property name="DockedPlayerStats" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Dock Player Stats</comment>
   </property>
   <property name="DockedSpawnList" >
@@ -2470,23 +2469,38 @@
    <comment>Dock Compass</comment>
   </property>
   <property name="FormatFile" >
-   <string value="/usr/local/share/showeq/eqstr_us.txt" />
+   <string value="eqstr_us.txt" />
    <comment>Location of file containing formatted strings</comment>
   </property>
   <property name="SpellsFile" >
-   <string value="/usr/local/share/showeq/spells_us.txt" />
+   <string value="spells_us.txt" />
    <comment>Location of file containing spell information</comment>
   </property>
   <property name="NoBank" >
    <bool value="true" />
    <comment>set to true to print bank/inventory items to stdout</comment> 
   </property>
+  <property name="DockingInfo" >
+    <comment>Automatically generated window position information</comment>
+    <string value="
+ShowEQ - Experience,ShowEQ Combat,
+[ShowEQ - Experience,400,360,800,480,0][ShowEQ Combat,400,360,800,480,0]
+
+
+
+
+
+
+ShowEQ - Spawn List 2,ShowEQ - Spawn Points,ShowEQ - Spell List,Map ,
+[ShowEQ - Spawn List 2,64,1,378,190,1][ShowEQ - Spawn Points,0,0,378,118,1][ShowEQ - Spell List,0,0,378,136,1][Map ,0,1,378,766,1]
+" />
+  </property>
   <property name="GuildsFile" >
-   <string value="/usr/local/share/showeq/guilds2.dat" />
+   <string value="guilds2.dat" />
    <comment>Location of file containing guild strings</comment>
   </property>
   <property name="GuildsDumpFile" >
-   <string value="/usr/local/share/showeq/guilds.txt" />
+   <string value="guilds.txt" />
    <comment>Location to write plain text file containing guild strings</comment>
   </property>
  </section>
@@ -2518,7 +2532,7 @@
    <comment>number of milliseconds between spawn list saves</comment>
   </property>
   <property name="BaseFilename" >
-   <string value="/usr/local/share/showeq/last" />
+   <string value="last" />
    <comment>Base filename used to construct the others, so for example the DecodeKey would be in /usr/local/share/showeq/lastKey.dat using the default location</comment>
   </property>
  </section>
@@ -2588,7 +2602,7 @@ If any argument is left blank, it is filled in with its default...
    <bool value="false" />
   </property>
   <property name="LogFilename" >
-   <string value="/usr/local/share/showeq/opcodemonitor.log" />
+   <string value="opcodemonitor.log" />
   </property>
  </section>
 <!-- ============================================================= -->
@@ -2678,7 +2692,7 @@ If any argument is left blank, it is filled in with its default...
    <string value="NPC:2" />
    <comment>regular expression to match all PC corpses</comment>
   </property>
-  <property name="Category6_Color" >
+  <property name="Category6_Color">
    <color name="black" />
    <comment></comment>
   </property>
@@ -2756,247 +2770,381 @@ If any argument is left blank, it is filled in with its default...
   </property>
  </section>
 <!-- ============================================================= -->
-<!-- Message Box 1 Options -->
- <section name="MessageBox1" >
+<!-- Message Window 1 Options -->
+ <section name="MessageWindow1">
   <property name="Caption" >
    <string value="ShowEQ - Channel Messages" />
    <comment>Window caption</comment>
   </property>
-  <property name="HideControls" >
+  <property name="Create" >
+   <bool value="true" />
+   <comment>Causes this window to be created</comment>
+  </property>
+  <property name="DefaultColor">
+   <color name="black" />
+  </property>
+  <property name="DefaultBGColor">
+   <color name="white" />
+  </property>
+  <property name="GuildColor">
+   <color name="green" />
+  </property>
+  <property name="GroupColor">
+   <color name="cyan" />
+  </property>
+  <property name="ShoutColor">
+   <color name="red" />
+  </property>
+  <property name="AuctionBGColor">
+   <color name="green" />
+  </property>
+  <property name="OOCColor">
+   <color name="darkGreen" />
+  </property>
+  <property name="TellColor">
+   <color name="magenta" />
+  </property>
+  <property name="SayColor">
+   <color name="green" />
+  </property>
+  <property name="GMTellColor">
+   <color name="red" />
+  </property>
+  <property name="RaidColor">
+   <color name="darkCyan" />
+  </property>
+  <property name="SpellColor">
+   <color name="blue" />
+  </property>
+  <property name="AlertBGColor">
+   <color name="magenta" />
+  </property>
+  <property name="DangerBGColor">
+   <color name="red" />
+  </property>
+  <property name="CautionBGColor">
+   <color name="yellow" />
+  </property>
+  <property name="HuntBGColor">
+   <color name="cyan" />
+  </property>
+  <property name="LocateBGColor">
+   <color name="blue" />
+  </property>
+ </section>
+<!-- ============================================================= -->
+<!-- Message Window 2 Options -->
+ <section name="MessageWindow2">
+  <property name="Caption" >
+   <string value="ShowEQ - Channel Messages 2" />
+   <comment>Window caption</comment>
+  </property>
+  <property name="Create" >
+   <bool value="true" />
+   <comment>Causes this window to be created</comment>
+  </property>
+  <property name="DefaultColor">
+   <color name="black" />
+  </property>
+  <property name="DefaultBGColor">
+   <color name="white" />
+  </property>
+  <property name="GuildColor">
+   <color name="green" />
+  </property>
+  <property name="GroupColor">
+   <color name="cyan" />
+  </property>
+  <property name="ShoutColor">
+   <color name="red" />
+  </property>
+  <property name="AuctionBGColor">
+   <color name="green" />
+  </property>
+  <property name="OOCColor">
+   <color name="darkGreen" />
+  </property>
+  <property name="TellColor">
+   <color name="magenta" />
+  </property>
+  <property name="SayColor">
+   <color name="green" />
+  </property>
+  <property name="GMTellColor">
+   <color name="red" />
+  </property>
+  <property name="RaidColor">
+   <color name="darkCyan" />
+  </property>
+  <property name="SpellColor">
+   <color name="blue" />
+  </property>
+  <property name="AlertBGColor">
+   <color name="magenta" />
+  </property>
+  <property name="DangerBGColor">
+   <color name="red" />
+  </property>
+  <property name="CautionBGColor">
+   <color name="yellow" />
+  </property>
+  <property name="HuntBGColor">
+   <color name="cyan" />
+  </property>
+  <property name="LocateBGColor">
+   <color name="blue" />
+  </property>
+ </section>
+<!-- ============================================================= -->
+<!-- Message Window 3 Options -->
+ <section name="MessageWindow3">
+  <property name="Caption" >
+   <string value="ShowEQ - Channel Messages 3" />
+   <comment>Window caption</comment>
+  </property>
+  <property name="Create" >
    <bool value="false" />
-   <comment>Displays the toggle buttons</comment>
+   <comment>Causes this window to be created</comment>
   </property>
-  <property name="ShowMsgType" >
-   <bool value="true" />
-   <comment>Displays the message type</comment>
-  </property>
-  <property name="Additive" >
-   <bool value="true" />
-   <comment>Selects additive or subtractive filtering</comment>
-  </property>
-  <property name="Button1Name" >
-   <string value="Shout" />
-   <comment>Name to put on button 1</comment>
-  </property>
-  <property name="Button1Filter" >
-   <string value="^Shout" />
-   <comment>Filter to use for button 1</comment>
-  </property>
-  <property name="Button1Color" >
+  <property name="DefaultColor">
    <color name="black" />
-   <comment>Color for button 1</comment>
   </property>
-  <property name="Button1Active" >
-   <bool value="true" />
-   <comment>Button 1 checked/unchecked state</comment>
+  <property name="DefaultBGColor">
+   <color name="white" />
   </property>
-  <property name="Button2Name" >
-   <string value="Group" />
-   <comment>Button Name</comment>
+  <property name="GuildColor">
+   <color name="green" />
   </property>
-  <property name="Button2Filter" >
-   <string value="^Group" />
-   <comment>Filter for button</comment>
+  <property name="GroupColor">
+   <color name="cyan" />
   </property>
-  <property name="Button2Color" >
-   <color name="black" />
-   <comment>Color</comment>
+  <property name="ShoutColor">
+   <color name="red" />
   </property>
-  <property name="Button2Active" >
-   <bool value="true" />
-   <comment>Button state</comment>
+  <property name="AuctionBGColor">
+   <color name="green" />
   </property>
-  <property name="Button3Name" >
-   <string value="Tell" />
-   <comment>Button Name</comment>
+  <property name="OOCColor">
+   <color name="darkGreen" />
   </property>
-  <property name="Button3Filter" >
-   <string value="^Tell" />
-   <comment>Filter for button</comment>
+  <property name="TellColor">
+   <color name="magenta" />
   </property>
-  <property name="Button3Color" >
-   <color name="black" />
-   <comment>Color</comment>
+  <property name="SayColor">
+   <color name="green" />
   </property>
-  <property name="Button3Active" >
-   <bool value="true" />
-   <comment>Button state</comment>
+  <property name="GMTellColor">
+   <color name="red" />
   </property>
-  <property name="Button4Name" >
-   <string value="Auc" />
-   <comment>Button Name</comment>
+  <property name="RaidColor">
+   <color name="darkCyan" />
   </property>
-  <property name="Button4Filter" >
-   <string value="^Auc" />
-   <comment>Filter for button</comment>
+  <property name="SpellColor">
+   <color name="blue" />
   </property>
-  <property name="Button4Color" >
-   <color name="black" />
-   <comment>Color</comment>
+  <property name="AlertBGColor">
+   <color name="magenta" />
   </property>
-  <property name="Button4Active" >
-   <bool value="true" />
-   <comment>Button state</comment>
+  <property name="DangerBGColor">
+   <color name="red" />
   </property>
-  <property name="Button5Name" >
-   <string value="Say" />
-   <comment>Button Name</comment>
+  <property name="CautionBGColor">
+   <color name="yellow" />
   </property>
-  <property name="Button5Filter" >
-   <string value="^Say" />
-   <comment>Filter for button</comment>
+  <property name="HuntBGColor">
+   <color name="cyan" />
   </property>
-  <property name="Button5Color" >
-   <color name="black" />
-   <comment>Color</comment>
+  <property name="LocateBGColor">
+   <color name="blue" />
   </property>
-  <property name="Button5Active" >
-   <bool value="true" />
-   <comment>Button state</comment>
+ </section>
+<!-- ============================================================= -->
+<!-- Message Window 4 Options -->
+ <section name="MessageWindow4">
+  <property name="Caption" >
+   <string value="ShowEQ - Channel Messages 4" />
+   <comment>Window caption</comment>
   </property>
-  <property name="Button6Name" >
-   <string value="Emote" />
-   <comment>Button Name</comment>
-  </property>
-  <property name="Button6Filter" >
-   <string value="^Emote" />
-   <comment>Filter for button</comment>
-  </property>
-  <property name="Button6Color" >
-   <color name="black" />
-   <comment>Color</comment>
-  </property>
-  <property name="Button6Active" >
-   <bool value="true" />
-   <comment>Button state</comment>
-  </property>
-  <property name="Button7Name" >
-   <string value="OOC" />
-   <comment>Button Name</comment>
-  </property>
-  <property name="Button7Filter" >
-   <string value="^OOC" />
-   <comment>Filter for button</comment>
-  </property>
-  <property name="Button7Color" >
-   <color name="black" />
-   <comment>Color</comment>
-  </property>
-  <property name="Button7Active" >
-   <bool value="true" />
-   <comment>Button state</comment>
-  </property>
-  <property name="Button8Name" >
-   <string value="Guild" />
-   <comment>Button Name</comment>
-  </property>
-  <property name="Button8Filter" >
-   <string value="^Guild" />
-   <comment>Filter for button</comment>
-  </property>
-  <property name="Button8Color" >
-   <color name="black" />
-   <comment>Color</comment>
-  </property>
-  <property name="Button8Active" >
-   <bool value="true" />
-   <comment>Button state</comment>
-  </property>
-  <property name="Button9Name" >
-   <string value="Form" />
-   <comment>Button Name</comment>
-  </property>
-  <property name="Button9Filter" >
-   <string value="^Formatted:" />
-   <comment>Filter for button</comment>
-  </property>
-  <property name="Button9Color" >
-   <color name="black" />
-   <comment>Color</comment>
-  </property>
-  <property name="Button9Active" >
-   <bool value="true" />
-   <comment>Button state</comment>
-  </property>
-  <property name="Button10Name" >
-   <string value="Spells" />
-   <comment>Button Name</comment>
-  </property>
-  <property name="Button10Filter" >
-   <string value="^SPELL:" />
-   <comment>Filter for button</comment>
-  </property>
-  <property name="Button10Color" >
-   <color name="black" />
-   <comment>Color</comment>
-  </property>
-  <property name="Button10Active" >
-   <bool value="true" />
-   <comment>Button state</comment>
-  </property>
-  <property name="Button11Name" >
-   <string value="Items" />
-   <comment>Button Name</comment>
-  </property>
-  <property name="Button11Filter" >
-   <string value="^Item" />
-   <comment>Filter for button</comment>
-  </property>
-  <property name="Button11Color" >
-   <color name="black" />
-   <comment>Color</comment>
-  </property>
-  <property name="Button11Active" >
+  <property name="Create" >
    <bool value="false" />
-   <comment>Button state</comment>
+   <comment>Causes this window to be created</comment>
   </property>
-  <property name="Button12Name" >
-   <string value="Zone" />
-   <comment>Button Name</comment>
-  </property>
-  <property name="Button12Filter" >
-   <string value="^Zone" />
-   <comment>Filter for button</comment>
-  </property>
-  <property name="Button12Color" >
+  <property name="DefaultColor">
    <color name="black" />
-   <comment>Color</comment>
   </property>
-  <property name="Button12Active" >
+  <property name="DefaultBGColor">
+   <color name="white" />
+  </property>
+  <property name="GuildColor">
+   <color name="green" />
+  </property>
+  <property name="GroupColor">
+   <color name="cyan" />
+  </property>
+  <property name="ShoutColor">
+   <color name="red" />
+  </property>
+  <property name="AuctionBGColor">
+   <color name="green" />
+  </property>
+  <property name="OOCColor">
+   <color name="darkGreen" />
+  </property>
+  <property name="TellColor">
+   <color name="magenta" />
+  </property>
+  <property name="SayColor">
+   <color name="green" />
+  </property>
+  <property name="GMTellColor">
+   <color name="red" />
+  </property>
+  <property name="RaidColor">
+   <color name="darkCyan" />
+  </property>
+  <property name="SpellColor">
+   <color name="blue" />
+  </property>
+  <property name="AlertBGColor">
+   <color name="magenta" />
+  </property>
+  <property name="DangerBGColor">
+   <color name="red" />
+  </property>
+  <property name="CautionBGColor">
+   <color name="yellow" />
+  </property>
+  <property name="HuntBGColor">
+   <color name="cyan" />
+  </property>
+  <property name="LocateBGColor">
+   <color name="blue" />
+  </property>
+ </section>
+<!-- ============================================================= -->
+<!-- Message Window 5 Options -->
+ <section name="MessageWindow5">
+  <property name="Caption" >
+   <string value="ShowEQ - Channel Messages 5" />
+   <comment>Window caption</comment>
+  </property>
+  <property name="Create" >
    <bool value="false" />
-   <comment>Button state</comment>
+   <comment>Causes this window to be created</comment>
   </property>
-  <property name="Button13Name" >
-   <string value="" />
-   <comment>Button Name</comment>
-  </property>
-  <property name="Button13Color" >
+  <property name="DefaultColor">
    <color name="black" />
-   <comment>Color</comment>
   </property>
-  <property name="Button13Filter" >
-   <string value="" />
-   <comment>Filter for button</comment>
+  <property name="DefaultBGColor">
+   <color name="white" />
   </property>
-  <property name="Button13Active" >
+  <property name="GuildColor">
+   <color name="green" />
+  </property>
+  <property name="GroupColor">
+   <color name="cyan" />
+  </property>
+  <property name="ShoutColor">
+   <color name="red" />
+  </property>
+  <property name="AuctionBGColor">
+   <color name="green" />
+  </property>
+  <property name="OOCColor">
+   <color name="darkGreen" />
+  </property>
+  <property name="TellColor">
+   <color name="magenta" />
+  </property>
+  <property name="SayColor">
+   <color name="green" />
+  </property>
+  <property name="GMTellColor">
+   <color name="red" />
+  </property>
+  <property name="RaidColor">
+   <color name="darkCyan" />
+  </property>
+  <property name="SpellColor">
+   <color name="blue" />
+  </property>
+  <property name="AlertBGColor">
+   <color name="magenta" />
+  </property>
+  <property name="DangerBGColor">
+   <color name="red" />
+  </property>
+  <property name="CautionBGColor">
+   <color name="yellow" />
+  </property>
+  <property name="HuntBGColor">
+   <color name="cyan" />
+  </property>
+  <property name="LocateBGColor">
+   <color name="blue" />
+  </property>
+ </section>
+<!-- ============================================================= -->
+<!-- Message Window 6 Options -->
+ <section name="MessageWindow6">
+  <property name="Caption" >
+   <string value="ShowEQ - Channel Messages 6" />
+   <comment>Window caption</comment>
+  </property>
+  <property name="Create" >
    <bool value="false" />
-   <comment>Button state</comment>
+   <comment>Causes this window to be created</comment>
   </property>
-  <property name="Button14Name" >
-   <string value="" />
-   <comment>Button Name</comment>
-  </property>
-  <property name="Button14Filter" >
-   <string value="" />
-   <comment>Filter for button</comment>
-  </property>
-  <property name="Button14Color" >
+  <property name="DefaultColor">
    <color name="black" />
-   <comment>Color</comment>
   </property>
-  <property name="Button14Active" >
-   <bool value="false" />
-   <comment>Button state</comment>
+  <property name="DefaultBGColor">
+   <color name="white" />
+  </property>
+  <property name="GuildColor">
+   <color name="green" />
+  </property>
+  <property name="GroupColor">
+   <color name="cyan" />
+  </property>
+  <property name="ShoutColor">
+   <color name="red" />
+  </property>
+  <property name="AuctionBGColor">
+   <color name="green" />
+  </property>
+  <property name="OOCColor">
+   <color name="darkGreen" />
+  </property>
+  <property name="TellColor">
+   <color name="magenta" />
+  </property>
+  <property name="SayColor">
+   <color name="green" />
+  </property>
+  <property name="GMTellColor">
+   <color name="red" />
+  </property>
+  <property name="RaidColor">
+   <color name="darkCyan" />
+  </property>
+  <property name="SpellColor">
+   <color name="blue" />
+  </property>
+  <property name="AlertBGColor">
+   <color name="magenta" />
+  </property>
+  <property name="DangerBGColor">
+   <color name="red" />
+  </property>
+  <property name="CautionBGColor">
+   <color name="yellow" />
+  </property>
+  <property name="HuntBGColor">
+   <color name="cyan" />
+  </property>
+  <property name="LocateBGColor">
+   <color name="blue" />
   </property>
  </section>
 <!-- ============================================================= -->
@@ -3060,9 +3208,6 @@ If any argument is left blank, it is filled in with its default...
   </property>
   <property name="SortIncreasing" >
    <bool value="true" />
-  </property>
-  <property name="WindowSize" >
-   <size width="479" height="248" />
   </property>
  </section>
 <!-- ============================================================= -->
