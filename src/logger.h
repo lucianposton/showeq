@@ -94,7 +94,7 @@ protected:
 #define TimeOfDayMask       0x10000000
 #define PlayerPosMask       0x20000000
 #define SpawnAppearanceMask 0x40000000
-#define CPlayerItemsMask    0x80000000 /* mask 2 */
+#define PlayerItemsMask    0x80000000 /* mask 2 */
 
 #define CDoorSpawnsMask     0x00000001 /* mask 3 */
 #define ZoneSpawnsMask      0x00000002
@@ -109,7 +109,7 @@ class PktLogger: public SEQLogger
 public:
 public:
     int  isLoggingZoneServerInfo()  { return( mask1 & ZoneServerInfoMask );  }
-    int  isLoggingCPlayerItems()    { return( mask2 & CPlayerItemsMask );    }
+    int  isLoggingPlayerItems()    { return( mask2 & PlayerItemsMask );    }
     int  isLoggingItemInShop()      { return( mask1 & ItemInShopMask );      }
     int  isLoggingMoneyOnCorpse()   { return( mask1 & MoneyOnCorpseMask );   }
     int  isLoggingItemOnCorpse()    { return( mask1 & ItemOnCorpseMask );    }
@@ -186,7 +186,7 @@ public:
  public slots:
     void logZoneSpawnsTimestamp(void);
     void logZoneServerInfo(const uint8_t* data, uint32_t len, uint8_t dir);
-    void logCPlayerItems(const cPlayerItemsStruct* citems, uint32_t len, uint8_t dir);
+    void logPlayerItems(const playerItemsStruct* items, uint32_t len, uint8_t dir);
     void logItemInShop(const itemInShopStruct* item, uint32_t len, uint8_t dir);
     void logMoneyOnCorpse(const moneyOnCorpseStruct* money, uint32_t len, uint8_t dir);
     void logItemOnCorpse(const itemOnCorpseStruct* item, uint32_t len, uint8_t dir);
@@ -229,7 +229,8 @@ public:
     void logSysMsg(const sysMsgStruct* msg, uint32_t len, uint8_t dir);
     void logZoneChange(const zoneChangeStruct* zone, uint32_t len, uint8_t dir);
     void logNewZone(const newZoneStruct* zone, uint32_t len, uint8_t dir);
-    void logPlayerPos(const playerPosStruct* pos, uint32_t len, uint8_t dir);
+    void logPlayerPos(const playerSpawnPosStruct* pos, uint32_t len, uint8_t dir);
+    void logPlayerPos(const playerSelfPosStruct* pos, uint32_t len, uint8_t dir);
     void logWearChange(const wearChangeStruct* wear, uint32_t len, uint8_t dir);
     void logAction(const action2Struct* action, uint32_t len, uint8_t dir);
     void logCastOn(const castOnStruct* spell, uint32_t len, uint8_t dir);

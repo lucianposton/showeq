@@ -59,7 +59,7 @@ public:
    void setLastKill(const QString& name, uint8_t level);
    void zoneChanged(void);
    void zoneBegin(const ServerZoneEntryStruct* zsentry);
-   void playerUpdate(const playerPosStruct* pupdate, uint32_t, uint8_t);
+   void playerUpdate(const playerSelfPosStruct* pupdate, uint32_t, uint8_t);
    void consMessage(const considerStruct * con, uint32_t, uint8_t dir);
 
    void setPlayerID(uint16_t playerID);

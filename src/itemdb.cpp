@@ -1296,7 +1296,7 @@ void EQItemDB::playerContainer(const playerContainerStruct* containp, uint32_t s
 		sizeof(itemItemStruct))))
     AddItem(&containp->container, sizeof(containp->container), ITEM_CONTAINER);
   else 
-    fprintf(stderr, "Ooops!!!! plyaerContainer()\n");
+    fprintf(stderr, "Ooops!!!! playerContainer()\n");
 }
 
 ////////////////////////////////////////////////////////////////////

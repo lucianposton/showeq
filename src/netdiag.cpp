@@ -74,16 +74,18 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   tmpGrid->addWidget(tmpLabel, row, col++);
   row++; col = 1;
   tmpGrid->addWidget(new QLabel("Filter: ", this), row, col++);
-  tmpLabel->setText(m_packet->pcap_filter());
+  tmpLabel = new QLabel(this);
+  tmpLabel->setText(m_packet->pcapFilter());
+  tmpGrid->addWidget(tmpLabel, row, col++);
   
   // stream specific statistics
   row++; row++; col = 0;
 
-  static const char* EQStreamStr[] = {"client-world", "world-client", "client-zone", "zone-client"};
+  QString eqStreams[] = {"client->world", "world->client", "client->zone", "zone->client"};
 
   for (int a = 0; a < MAXSTREAMS; a++)
   {
-      tmpGrid->addWidget(new QLabel(EQStreamStr[a], this), row++, col);
+      tmpGrid->addWidget(new QLabel(eqStreams[a], this), row++, col);
 
      // packet throughput
      tmpGrid->addWidget(new QLabel("Packets ", this), row, col++);
@@ -161,8 +163,6 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 	   this, SLOT(numPacket(int, int)));
   connect (m_packet, SIGNAL(resetPacket(int, int)),
 	   this, SLOT(resetPacket(int, int)));
-  connect (m_packet, SIGNAL(keyChanged(void)),
-	   this, SLOT(keyChanged(void)));
 
   if (m_playbackSpeed)
   {

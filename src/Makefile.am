@@ -41,7 +41,7 @@ sortitem_LDADD=$(QT_LDFLAGS) $(QTLIB) $(LIBPTHREAD) $(SHOWEQ_RPATH) $(USER_LDFLA
 showeqitemdbtool_SOURCES=itemdbtool.cpp util.cpp  $(ITEMDB_SRCS)
 showeqitemdbtool_LDADD=$(QT_LDFLAGS) $(DB3_LIBS) $(QTLIB) $(LIBPTHREAD) $(SHOWEQ_RPATH) $(USER_LDFLAGS)
 
-EXTRA_DIST=classes.h compass.h everquest.h interface.h main.h map.h filter.h vpacket.h editor.h packet.h races.h skills.h spells.h util.h experiencelog.h combatlog.h msgdlg.h spawn.h spawnshell.h spawnlist.h spellshell.h spelllist.h languages.h weapons.h weapons27.h decode.h opcodes.h itemdb.h gdbmconv.h cgiconv.h skilllist.h statlist.h db3conv.h dbcommon.h deity.h dump-seqdb.h player.h crctab.h filtermgr.h point.h mapcore.h category.h compassframe.h group.h guild.h fixpt.h libeq.h weapons28.h weapons2b.h netdiag.h zones.h logger.h xmlconv.h xmlpreferences.h seqwindow.h seqlistview.h zonemgr.h spawnmonitor.h spawnpointlist.h typenames.h spawnlistcommon.h spawnlist2.h
+EXTRA_DIST=classes.h compass.h everquest.h interface.h main.h map.h filter.h vpacket.h editor.h packet.h races.h skills.h spells.h util.h experiencelog.h combatlog.h msgdlg.h spawn.h spawnshell.h spawnlist.h spellshell.h spelllist.h languages.h weapons.h weapons27.h decode.h opcodes.h itemdb.h gdbmconv.h cgiconv.h skilllist.h statlist.h db3conv.h dbcommon.h deity.h dump-seqdb.h player.h crctab.h filtermgr.h point.h mapcore.h category.h compassframe.h group.h guild.h fixpt.h weapons28.h weapons2b.h netdiag.h zones.h logger.h xmlconv.h xmlpreferences.h seqwindow.h seqlistview.h zonemgr.h spawnmonitor.h spawnpointlist.h typenames.h spawnlistcommon.h spawnlist2.h
 
 BUILT_SOURCES=m_packet.cpp m_spawnshell.cpp m_spawnlist.cpp m_spellshell.cpp \
 m_spelllist.cpp m_editor.cpp m_interface.cpp m_compass.cpp m_map.cpp \
@@ -49,7 +49,7 @@ m_experiencelog.cpp m_combatlog.cpp m_msgdlg.cpp m_player.cpp m_decode.cpp m_ski
 m_statlist.cpp m_filtermgr.cpp m_category.cpp m_compassframe.cpp \
 m_group.cpp m_guild.cpp m_netdiag.cpp m_logger.cpp m_xmlpreferences.cpp m_seqwindow.cpp \
 m_seqlistview.cpp m_zonemgr.cpp m_spawnmonitor.cpp m_spawnpointlist.cpp \
-m_spawnlistcommon.cpp m_spawnlist2.cpp m_itemdb.cpp m_libEQ.cpp
+m_spawnlistcommon.cpp m_spawnlist2.cpp m_itemdb.cpp 
 
 CLEANFILES=$(BUILT_SOURCES)
 

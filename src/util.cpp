@@ -252,11 +252,13 @@ QString print_races (uint16_t races)
     race_str += "IKS ";
   if (races & 8192)
     race_str += "VAH ";
+  if (races & 16384)
+    race_str += "FRG ";
 
-  if (races >= 16384) // 2^14 aka (1 << 14)
+  if (races >= 32768) // 2^15 aka (1 << 15)
   {
     int new_race;
-    for (int i = 14; i < 31; ++i)
+    for (int i = 15; i < 31; ++i)
     { 
       new_race = 1 << i;
       if (races & new_race)
@@ -602,7 +604,7 @@ QString slot_to_name(int16_t slotnr)
     // get slot name
     slotname = topSlotNames[slotnr];
 
-  } else if (slotnr >= 2000 && slotnr <= 2007)
+  } else if (slotnr >= 2000 && slotnr <= 2015)
   {
     static const char* bankSlotNames[] =
     {
@@ -614,6 +616,14 @@ QString slot_to_name(int16_t slotnr)
       "Bank6",
       "Bank7",
       "Bank8",
+      "Bank9",
+      "Bank10",
+      "Bank11",
+      "Bank12",
+      "Bank13",
+      "Bank14",
+      "Bank15",
+      "Bank16",
     };
 
     // get slot name
@@ -623,12 +633,14 @@ QString slot_to_name(int16_t slotnr)
     bag = slotnr / 10 - 24;
     slot = slotnr % 10 + 1;
     slotname = QString("General") + QString::number(bag) + QString("->Pos") + QString::number(slot);
-  } else if (slotnr >= 2030 && slotnr <= 2109)
+  } else if (slotnr >= 2030 && slotnr <= 2189)
   {
-    bag = slotnr / 10 - 202;
-    slot = slotnr % 10 + 1;
+    bag = (slotnr - 1) / 10 - 202;
+    slot = (slotnr - 1) % 10 + 1;
     slotname = QString("Bank") + QString::number(bag) + QString("->Pos") + QString::number(slot);
   }
+  else 
+    slotname = QString("Unknown") + QString::number(slotnr);
 
   return slotname;
 }

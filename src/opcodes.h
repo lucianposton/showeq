@@ -27,88 +27,83 @@
 /* Zone Server OpCodes */
 
 
-//#define ZoneEntryCode               0x0010
-#define ZoneEntryCode               0x0254
+#define ChannelMessageCode          0x001f // 
 
-//#define CharProfileCode             0x0084
-#define CharProfileCode             0x006b
+#define PlayerPosCode               0x0022 // 
 
-//#define ChannelMessageCode          0x0133
-#define ChannelMessageCode          0x001f
+#define MobUpdateCode               0x0039 //
 
-//#define PlayerPosCode               0x0136
-#define PlayerPosCode               0x0022
+#define GuildMemberUpdate           0x0055 //?
 
-//#define ConsiderCode                0x0165
-#define ConsiderCode                0x0175
+#define CharProfileCode             0x0067 //
 
-//#define ZoneSpawnsCode              0x0179
-#define ZoneSpawnsCode              0x0189
+#define StartCastCode               0x00bb //
 
-//#define ClientTargetCode            0x017c
-#define ClientTargetCode            0x018c
+#define MemSpellCode                0x00bf // 
 
-//#define CPlayerItemsCode            0x01f6
-#define CPlayerItemsCode            0x01dd
+#define NewZoneCode                 0x00e4 //
 
-//#define NewSpawnCode                0x023a
-#define NewSpawnCode                0x0229
+#define EmoteTextCode               0x00eb //
 
-//#define MobUpdateCode               0x0242
-#define MobUpdateCode               0x0039
+#define DeleteSpawnCode             0x00ec //
 
-//#define sWhoAllOutputCode           0x025e
-#define sWhoAllOutputCode           0x023e
+#define MakeDropCode                0x00f3 //
 
-//#define NewZoneCode                 0x00ba
-#define NewZoneCode                 0x00f0
+#define RemDropCode                 0x00fd //?
 
-//#define DeleteSpawnCode             0x00ca
-#define DeleteSpawnCode             0x00f8
+#define NewCorpseCode               0x00fe //
 
-//#define EmoteTextCode               0x00c1
-#define EmoteTextCode               0x00f7
+#define SpawnUpdateCode             0x013a //
 
-//#define MakeDropCode                0x00d1
-#define MakeDropCode                0x00ff
+#define ZoneChangeCode              0x0136 // 
 
-//#define DoorSpawnsCode              0x01f7
-#define DoorSpawnsCode              0x01de
+#define xBuffDropCode               0x0150 //
 
-#define GuildMemberUpdate           0x02a0
+#define ConsiderCode                0x0155 //
+
+#define ZoneSpawnsCode              0x0169 //
+
+#define ClientTargetCode            0x016c //
+
+#define DoorSpawnsCode              0x01b8 //
+
+#define FormattedMessageCode        0x01dd //
+
+#define NewSpawnCode                0x0201 //
+
+#define sWhoAllOutputCode           0x0212 //
+
+#define ZoneEntryCode               0x0224 //
 
 #define NpcHpUpdateCode             0x0999
 
-//#define SpawnUpdateCode             0x014a
-#define SpawnUpdateCode             0x015a
-
-//#define NewCorpseCode               0x00e5
-#define NewCorpseCode               0x0115
-
-/*********************/
-/* outdated          */
-
-#define ZoneChangeCode              0xff01
-
 #define CorpseLocCode               0xf014
-
-#define RemDropCode 				0x00fe
 
 #define ActionCode                  0xf04d
 
 #define TimeOfDayCode               0xf0fe
 
-#define SpawnAppearanceCode         0xf101
-
 #define ManaDecrementCode           0xf175
-
-#define StartCastCode 				0x00c6
-
-#define MemSpellCode                0xf178
 
 #define ExpUpdateCode               0xf187
 
 #define AltExpUpdateCode            0xf209
+
+
+// Obsoleted Item Codes, new code is 0x02c5 with entirely different format
+// and handling as of 08/26/03
+#define PlayerItemsCode             0x01dc
+
+#define PlayerContainerCode         0x018c
+
+#define PlayerBookCode              0x018d
+
+#define PlayerItemCode              0x018f
+
+/*********************/
+/* out of date          */
+
+#define SpawnAppearanceCode         0x0125 //
 
 #define DropCoinsCode               0x0740
 
@@ -116,9 +111,9 @@
 
 #define RemoveCoinsCode             0x0820
 
-#define OpenVendorCode              0x00ce
+#define OpenVendorCode              0x00cd
 
-#define cItemInShopCode             0x0080
+#define cItemInShopCode             0x007f
 
 #define SysMsgCode                  0x1420
 
@@ -126,13 +121,13 @@
 
 #define cRunToggleCode              0x1f40
 
-#define cJumpCode                   0x00a6
+#define cJumpCode                   0x00a5
 
 #define GroupInfoCode               0x0263
 
 #define MoneyThingCode              0x2820
 
-#define cCursorItemCode             0x014a
+#define cCursorItemCode             0x0149
 
 #define CharInfo                    0x2e40
 
@@ -140,17 +135,13 @@
 
 #define TradeItemInCode             0x3140
 
-#define xBuffDropCode               0x0160
-
 #define TradeBookInCode             0x3440
 
-#define cConCorpseCode              0x021a
+#define cConCorpseCode              0x0219
 
 #define xBuyItemCode                0x3540
 
 #define sSpellFizzleRegainCode      0x3542
-
-#define FormattedMessageCode        0x0204
 
 #define MoneyUpdateCode             0x3d41
 
@@ -186,12 +177,6 @@
 
 #define cOpenSpellBookCode          0x5821
 
-#define PlayerItemCode              0x6441
-
-#define PlayerBookCode              0x6541
-
-#define PlayerContainerCode         0x6641
-
 #define SummonedItemCode            0x7841
 
 #define SummonedContainerCode       0x7921
@@ -208,11 +193,11 @@
 
 #define cHideCode                   0x8641
 
-#define cSenseHeadingCode           0x006a
+#define cSenseHeadingCode           0x006b
 
 #define SkillIncCode                0x8941
 
-#define DoorOpenCode                0x0111
+#define DoorOpenCode                0x0110
 
 #define IllusionCode                0x9140
 
@@ -228,9 +213,9 @@
 
 #define Attack2Code                 0xa140
 
-#define BeginCastCode               0x0017
+#define BeginCastCode               0x0016
 
-#define InspectDataCode             0x0262
+#define InspectDataCode             0x0261
 
 #define BookTextCode                0xffd2
 

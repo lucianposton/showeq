@@ -556,7 +556,7 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      emit handleAlert(item, tNewSpawn);
 }
 
-void SpawnShell::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t dir)
+void SpawnShell::playerUpdate(const playerSpawnPosStruct *pupdate, uint32_t, uint8_t dir)
 {
   // if zoning, then don't do anything
   if (m_zoneMgr->isZoning())

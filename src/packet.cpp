@@ -31,7 +31,6 @@
 #include "main.h"
 #include "vpacket.h"
 #include "logger.h"
-#include "libeq.h"
 
 //----------------------------------------------------------------------
 // Macros
@@ -85,7 +84,7 @@ static size_t maxServerCacheCount = 0;
 #endif
 
 // used to translate EQStreamID to a string for debug and reporting
-static const char* EQStreamStr[] = {"client-world", "world-client", "client-zone", "zone-client"};
+static const char* const EQStreamStr[] = {"client-world", "world-client", "client-zone", "zone-client"};
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -584,7 +583,7 @@ EQPacket::EQPacket (QObject * parent, const char *name)
    if (showeq_params->broken_decode)
        printf("Running with broken decode set to true.\n");
 #else
-   printf("Running without libEQ.a linked in.\n");
+   printf("Running without libEQ.cpp linked in.\n");
 #endif
 }
 
@@ -890,7 +889,7 @@ bool EQPacket::logMessage(const QString& filename,
 			  const QString& message)
 {
 #ifdef DEBUG_PACKET
-   debug ("logData()");
+   debug ("logMessage()");
 #endif /* DEBUG_PACKET */
 
    FILE *lh;
@@ -1820,11 +1819,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
     QString  tempStr;
 
-    //Logging 
-    if (showeq_params->logZonePackets)
-        if (!logData (showeq_params->ZoneLogFilename, len, data))
-           emit toggle_log_ZoneData(); //untoggle the GUI checkmark
-
     bool unk = true;
 
     /* Update EQ Time every 50 packets so we don't overload the CPU */
@@ -1851,95 +1845,16 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     for (unsigned int packetNum = 0; packetNum < pktlist.size(); packetNum++) {
 	data = pktlist[packetNum].data;
 	len = pktlist[packetNum].len;
+
+	//Logging 
+	if (showeq_params->logZonePackets)
+	  if (!logData (showeq_params->ZoneLogFilename, len, data))
+	    emit toggle_log_ZoneData(); //untoggle the GUI checkmark
+
 	uint16_t opCode = *((uint16_t *)data);
 	
 	switch (opCode)
 	{
-	case CPlayerItemsCode:
-	{
-	    unk = false;
-	    // This is all totally broken, and needs to be rewritten to work like
-	    // the door code, but I don't care enough to do it
-#if 0
-	    // decode/decompress the payload
-	    decoded = m_decode->DecodePacket(data, len, decodedData,
-					     &decodedDataLen, showeq_params->ip);
-	    if (!decoded)
-	    {
-		printf("EQPacket: could not decompress CPlayerItemsCode 0x%x\n", opCode);
-		break;
-	    }
-	    cPlayerItemsStruct *citems;
-	    citems = (cPlayerItemsStruct *)(data);
-
-	    emit cPlayerItems(citems, len, dir);
-
-	    fprintf(stderr, 
-		    "CPlayerItems: count=%d size=%d packetsize=%d expsize=%d\n",
-		    citems->count,
-		    len,
-		    ((len - 6)/citems->count),
-		    sizeof(playerItemStruct));
-
-	    // Make sure we do not divide by zero and there 
-	    // is something to process
-   
-	    if (citems->count)
-	    {
-		// Determine the size of a single structure in 
-		// the compressed packet
- 
-		int nPacketSize=((len - 6)/citems->count);
-
-		// See if it is the size that we expect
- 
-		int nVerifySize = sizeof(playerItemStruct);
-    
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-		if (nVerifySize != nPacketSize)
-		{
-		    printf("WARNING: CPlayerItemsCode: packetSize:%d != "
-			   "sizeof(playerItemStruct):%d!\n",
-			   nPacketSize, nVerifySize);
-		    unk = true;
-		}
-#endif
-
-		if (!showeq_params->no_bank)
-		{
-		    tempStr = "Item: Dispatching compressed Items " 
-			"(count = " +
-			QString::number(citems->count) + ")";
-
-		    emit msgReceived(tempStr);
- 
-		    for (unsigned int i=0; i < citems->count; i++)
-			dispatchZoneData(nPacketSize,
-					 &citems->compressedData[i*nPacketSize], dir);
-
-		    emit msgReceived(QString("Item: Finished dispatching"));
-		}
-		else
-		{
-		    // Quietly dispatch the compressed data
-		    for (unsigned int i=0; i<citems->count; i++)
-			dispatchZoneData(nPacketSize,
-					 &citems->compressedData[i*nPacketSize], dir);
-		}
-	    }
-#endif
-	    break;
-	} /* end CPlayerItemCode */
-
-	case PlayerItemCode:
-	{
-	    unk = ! ValidatePayload(PlayerItemCode, playerItemStruct);
-
-	    emit playerItem((const playerItemStruct*)data, len, dir);
- 
-	    break;
-	}
-
 	case cItemInShopCode:
 	{
 	    cItemInShopStruct *citems;
@@ -2225,56 +2140,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             break;
         }
-        
-        case PlayerBookCode:
-        {
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-	    size_t test_size = (sizeof(playerBookStruct) - 
-				sizeof(itemContainerStruct) + 
-				sizeof(itemItemStruct));
-
-	    if ((len != sizeof(playerBookStruct)) &&
-		(len != test_size))
-	    {
-		fprintf(stderr,
-			"WARNING: PlayerBookCode (%04x) (dataLen:%d != sizeof(playerBookStruct:%d or %d\n",
-			PlayerBookCode, len, sizeof(playerBookStruct),
-			test_size);
-		unk = true;
-	    }
-	    else
-		unk = false;
-#endif
- 
-            emit playerBook((const playerBookStruct*)data, len, dir);
-
-            break;
-        }
-
-        case PlayerContainerCode:
-        {
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-	    size_t test_size = (sizeof(playerContainerStruct) - 
-				sizeof(itemContainerStruct) + 
-				sizeof(itemItemStruct));
-
-	    if ((len != sizeof(playerContainerStruct)) &&
-		(len != test_size))
-	    {
-		fprintf(stderr,
-			"WARNING: PlayerContainerCode (%04x) (dataLen:%d != sizeof(playerContainerStruct:%d or %d\n",
-			PlayerContainerCode, len, sizeof(playerContainerStruct),
-			test_size);
-		unk = true;
-	    }
-	    else
-		unk = false;
-#endif
-
-            emit playerContainer((const playerContainerStruct *)data, len, dir);
-
-            break;
-        }
 
         case InspectDataCode:
         {
@@ -2469,9 +2334,27 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case PlayerPosCode:
         {
-            unk = ! ValidatePayload(PlayerPosCode, playerPosStruct);
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+	  if ((len != sizeof(playerSpawnPosStruct)) &&
+	      (len != sizeof(playerSelfPosStruct)))
+	  {
+	    fprintf(stderr, "WARNING: PlayerPosCode (%04x) (dataLen: %d != sizeof(playerSpawnPosStruct):%d or sizeof(playerSpawnSelfStruct):%d)\n",
+		    PlayerPosCode, len, 
+		    sizeof(playerSpawnPosStruct), sizeof(playerSelfPosStruct));
+	    unk = true;
+	  }
+	  else
+	    unk = false;
+#else
+	  unk = false;
+#endif
 
-	    emit playerUpdate((const playerPosStruct*)data, len, dir);
+	  if (len == sizeof(playerSpawnPosStruct))
+	    emit playerUpdate((const playerSpawnPosStruct*)data, len, dir);
+	  else if (len == sizeof(playerSelfPosStruct))
+	    emit playerUpdate((const playerSelfPosStruct*)data, len, dir);
+	  else
+	    unk = true;
 
             break;
         }
@@ -2525,7 +2408,8 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
             unk = ! ValidatePayload(MakeDropCode, makeDropStruct);
 	    
-	    emit newGroundItem((const makeDropStruct*)data, len, dir);
+	    if (!unk)
+	      emit newGroundItem((const makeDropStruct*)data, len, dir);
 
             break;
         }
@@ -2992,9 +2876,9 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
 	case xBuffDropCode:  //unknown contents
 	{
-	    //unk = ! ValidatePayload(xBuffDropCode, xBuffDropStruct);
-	    //emit xBuffDrop((const xBuffDropStruct*)data, len, dir);
-	    //this is the server 'buff fading' AND the client 'cancel buff'
+	  //unk = ! ValidatePayload(xBuffDropCode, xBuffDropStruct);
+	  //	    emit xBuffDrop((const xBuffDropStruct*)data, len, dir);
+	  // this is the server 'buff fading' AND the client 'cancel buff'
 	    break;
 	}
 
@@ -3457,8 +3341,12 @@ void EQPacket::resetEQPacket()
    stopDecode();
 }
 
-char* EQPacket::pcap_filter()
+const QString EQPacket::pcapFilter()
 {
+  // make sure we aren't playing back packets
+  if (showeq_params->playbackpackets)
+    return QString("Playback");
+
   return m_packetCapture->getFilter();
 }
 
@@ -3701,11 +3589,11 @@ void PacketCaptureThread::setFilter (const char *device,
            fprintf (stderr, "Failed to set capture thread realtime.");
     }
 
-    strcpy(pcap_filter, filter_buf);
+    m_pcapFilter = filter_buf;
 }
 
-char* PacketCaptureThread::getFilter()
+const QString PacketCaptureThread::getFilter()
 {
-  return pcap_filter;
+  return m_pcapFilter;
 }
 

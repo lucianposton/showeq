@@ -179,6 +179,7 @@ PktLogger::PktLogger(const QString& fname, const QString& maskstr)
 void
 PktLogger::logItemHeader(const itemStruct *item)
 {
+#if 0
     outputf("[%.35s] ", item->name);
     outputf("[%.60s] ", item->lore);
     outputf("[%.6s] ", item->idfile);
@@ -190,6 +191,7 @@ PktLogger::logItemHeader(const itemStruct *item)
     outputf("%d ", item->cost);
     output(item->unknown0196, 40);
     outputf(" ");
+#endif
     return;
 }
 
@@ -197,15 +199,18 @@ void
 PktLogger::logBookItem(const itemBookStruct *book)
 {
     logItemHeader(book);
+#if 0
     output(book->unknown0228, 3);
     outputf(" [%15s] ", book->file);
     output(book->unknown0246, 18);
+#endif
     return;
 }   
     
 void
 PktLogger::logItemCommons(const itemItemStruct *item)
 {
+#if 0
     outputf(" %d %d %d ", 
         item->STR, item->STA, item->CHA);
     outputf("%d %d %d ", 
@@ -229,12 +234,14 @@ PktLogger::logItemCommons(const itemItemStruct *item)
     outputf(" %d %d ", 
         item->spellId0, item->classes);
     outputf(" ");
+#endif
     return;
 }
 
 void
 PktLogger::logContainerItem(const itemContainerStruct *container)
 {
+#if 0
     logItemHeader(container);
     output(&container->unknown0228,41);
     outputf(" %d ", container->numSlots);
@@ -242,11 +249,13 @@ PktLogger::logContainerItem(const itemContainerStruct *container)
     outputf(" %d ", container->sizeCapacity);
     outputf("%d ", container->weightReduction);
     output(&container->unknown0273, 3);
+#endif
 }   
     
 void
 PktLogger::logNormalItem(const itemItemStruct *item)
 {
+#if 0
     logItemHeader(item);
     logItemCommons(item);
     outputf(" %d ", item->races);
@@ -258,6 +267,7 @@ PktLogger::logNormalItem(const itemItemStruct *item)
     outputf(" %d ", item->castTime);
     output(item->unknown0296, 16);
     outputf(" ");
+#endif
 }
 
 void
@@ -284,9 +294,9 @@ PktLogger::logZoneServerInfo(const uint8_t* data, uint32_t len, uint8_t dir)
 }
 
 void 
-PktLogger::logCPlayerItems(const cPlayerItemsStruct *citems, uint32_t len, uint8_t dir)
+PktLogger::logPlayerItems(const playerItemsStruct *items, uint32_t len, uint8_t dir)
 {
-    if (!isLoggingCPlayerItems())
+    if (!isLoggingPlayerItems())
       return;
 
     unsigned int timestamp = (unsigned int) time(NULL);
@@ -296,9 +306,9 @@ PktLogger::logCPlayerItems(const cPlayerItemsStruct *citems, uint32_t len, uint8
             return;
 
     outputf("R %u %04d %d %.2X%2.X ", timestamp, len, dir, 
-        citems->opCode, citems->version);
+        items->opCode, items->version);
 
-    output(citems->compressedData, len);
+    output(items->items, len - 2);
 
     outputf("\n");
     flush();
@@ -551,24 +561,24 @@ PktLogger::logCharProfile(const charProfileStruct *profile, uint32_t len, uint8_
     for(i = 0; i < 25; i++)
         outputf("%u ", profile->languages[i]);
 
-    for(i = 0; i < 25; i++)
+    for(i = 0; i < 15; i++)
     {
         buff = &profile->buffs[i];
 
-        output(&buff->unknown0000,4);
-        output(&buff->unknown0001,1);
+        output(&buff->unknown0000,1);
+        output(&buff->unknown0002,2);
 
         outputf(" %d %d %d ", buff->level, buff->spell, 
             buff->duration);
 
-        output(&buff->unknown0002,2);
+        output(&buff->unknown0012,4);
         outputf(" ");
     }
 
     //output(profile->unknown0800, 1080);
     outputf(" ");
     
-    for(i = 0; i < 256; i++)
+    for(i = 0; i < 400; i++)
         outputf("%d ", profile->sSpellBook[i]);
 
     for(i = 0; i < 8; i++)
@@ -597,7 +607,7 @@ PktLogger::logCharProfile(const charProfileStruct *profile, uint32_t len, uint8_
     outputf(" ");
 
     for(i = 0; i < 5; i++)
-        outputf("[%.48s] ", &profile->GroupMembers[i][0]);
+      outputf("[%.64s] ", &profile->groupMembers[i][0]);
 
     //output(profile->unknown4462, 72); 
     outputf(" %u ", profile->altexp);
@@ -1068,7 +1078,7 @@ PktLogger::logMemSpell(const memSpellStruct *spell, uint32_t len, uint8_t dir)
             return;
 
     outputf("R %u %04d %d %.2X%.2X %u ", timestamp, len, dir,
-       spell->opCode, spell->version, spell->spawnId);
+       spell->opCode, spell->version, spell->slotId);
 
     // output(&spell->unknown0004, 2);
     outputf(" %d %d %d %d\n", 
@@ -1417,7 +1427,7 @@ PktLogger::logZoneChange(const zoneChangeStruct *zone, uint32_t len, uint8_t dir
 }
 
 void 
-PktLogger::logPlayerPos(const playerPosStruct *pos, uint32_t len, uint8_t dir)
+PktLogger::logPlayerPos(const playerSpawnPosStruct *pos, uint32_t len, uint8_t dir)
 {
     if (!isLoggingPlayerPos())
       return;
@@ -1432,6 +1442,29 @@ PktLogger::logPlayerPos(const playerPosStruct *pos, uint32_t len, uint8_t dir)
         pos->opCode, pos->spawnId);
 
     outputf(" %d %d %d %d %d %d %d %d\n", pos->heading, 
+        pos->deltaHeading, pos->y, pos->x, pos->z, pos->deltaY,
+        pos->deltaZ, pos->deltaX);
+
+    flush();
+    return;
+}
+
+void 
+PktLogger::logPlayerPos(const playerSelfPosStruct *pos, uint32_t len, uint8_t dir)
+{
+    if (!isLoggingPlayerPos())
+      return;
+
+    unsigned int timestamp = (unsigned int) time(NULL);
+
+    if (m_FP == NULL)
+        if (logOpen() != 0)
+            return;
+
+    outputf("R %u %04d %d 0x%04x %u %u", timestamp, len, dir,
+        pos->opCode, pos->spawnId, pos->animation);
+
+    outputf(" %d %d %f %f %f %f %f %f\n", pos->heading, 
         pos->deltaHeading, pos->y, pos->x, pos->z, pos->deltaY,
         pos->deltaZ, pos->deltaX);
 
@@ -1568,13 +1601,11 @@ PktLogger::logMakeDrop(const makeDropStruct *item, uint32_t len, uint8_t dir)
 
     output(item->unknown0002,8);
     outputf(" %u ", item->itemNr);
-    //output(item->unknown0012,2);
     outputf(" %u ", item->dropId);
-    output(item->unknown0146,130);
-    outputf(" %f %f %f ", item->y, item->x, item->z);
-    output(item->unknown0174,4);
+    output(item->unknown0018,16);
+    outputf(" %f %f %f ", item->z, item->x, item->y);
     outputf(" [%.16s] ", item->idFile);
-    output(item->unknown0178,48);
+    output(item->unknown0062,32);
     outputf("\n");
     flush();
     return;

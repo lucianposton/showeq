@@ -1,3 +1,17 @@
+dohpaZ (08/27/03)
+---------------------
++ Removed references to libEQ.h
++ Removed HAVE_LIBEQ usage
++ Updated documentation to reflect that libEQ.a is no longer needed
++ Updated Copyright years in a few places
++ Incorporated patches # 753236, 784791, 784794, 787748, Zoolander
++ Minor cleanups in netdiag, packet, and interface
++ Fixed assorted opcodes and structures
++ Fixed bank item slot printout for high number slots
++ Fixed formatted message, opcode, and updated to current format handling 
++ Updated to work with 08/26/03 EQ patch (with help from codepig666, Talorn, 
+  and DebianSEQ)
+
 ratt 07 Jun 03
 ---------------------
 
@@ -50,6 +64,7 @@ Ratt 21/Apr/03
 + Other small misc things
 
 bbobcat 04/19/2003
+----------------
  + struct update to realign skill values (again)
 
 mvern 04/18/2003
@@ -75,12 +90,10 @@ fee (floyd) 02/21/2003
 
 bbobcat 02/20/03
 -----------------------
-
  + struct update to realign skill values so they work
 
 mvern  02/18/03
 -----------------------
-
  + Misc. opcode and struct updates, also reordered the updated/working
       opcodes in opcodes.h
  + Applied patch #650401 - races fix 

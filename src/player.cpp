@@ -770,20 +770,19 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
   emit changeItem(this, tSpawnChangedALL);
 }
 
-void Player::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t dir)
+void Player::playerUpdate(const playerSelfPosStruct *pupdate, uint32_t, uint8_t dir)
 {
   if ((dir != DIR_CLIENT) && (pupdate->spawnId != id()))
     return;
   else if (dir == DIR_CLIENT)
     setPlayerID(pupdate->spawnId);
   
-  int16_t py = pupdate->y / 8;
-  int16_t px = pupdate->x / 8;
-  int16_t pz = pupdate->z / 8;
-  int16_t pdeltaX = pupdate->deltaX / 4;
-  int16_t pdeltaY = pupdate->deltaY / 4;
-  int16_t pdeltaZ = pupdate->deltaZ / 4;
-
+  int16_t py = int16_t(pupdate->y);
+  int16_t px = int16_t(pupdate->x);
+  int16_t pz = int16_t(pupdate->z);
+  int16_t pdeltaX = int16_t(pupdate->deltaX);
+  int16_t pdeltaY = int16_t(pupdate->deltaY);
+  int16_t pdeltaZ = int16_t(pupdate->deltaZ);
 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);
   setDeltas(pdeltaX, pdeltaY, pdeltaZ);

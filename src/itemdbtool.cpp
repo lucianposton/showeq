@@ -409,7 +409,7 @@ void displayVersion(EQItemDB* itemDB)
 
   /////////////////////////////////
   // Display copyright information
-  printf ("\tCopyright (C) 1999-2001 ShowEQ Contributors\n\n");
+  printf ("\tCopyright (C) 1999-2003 ShowEQ Contributors\n\n");
   
   printf ("\tShowEQ comes with NO WARRANTY.\n\n");
   

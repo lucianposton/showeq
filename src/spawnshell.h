@@ -118,7 +118,7 @@ public slots:
    void zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len);
    void newSpawn(const newSpawnStruct* spawn);
    void newSpawn(const spawnStruct& s);
-   void playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t);
+   void playerUpdate(const playerSpawnPosStruct *pupdate, uint32_t, uint8_t);
    void updateSpawn(uint16_t id, 
 		    int16_t x, int16_t y, int16_t z,
 		    int16_t xVel, int16_t yVel, int16_t zVel,

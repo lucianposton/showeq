@@ -8,10 +8,7 @@ Laboratory (www.tcpdump.org), also the GNU database library gdbm
 (ftp.gnu.org), and pthread support (provided via glibc).  Also
 it can be configured to use Berkeley DB3 instead of gdbm.
 
-Additionally, the libEQ.a file (once included with ShowEQ) has been
-removed. You must download and install this file in your compiler's
-library path for ShowEQ to be able to decrypt the Everquest data stream.
-ShowEQ will work without this library, but only in 'broken decode' mode.
+Additionally, the need for the library libEQ.a has been removed. 
 
 
 PRE-REQUISITES:

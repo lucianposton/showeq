@@ -159,7 +159,7 @@ int main (int argc, char **argv)
    /* Print the version number */
    printf ("ShowEQ %s, released under the GPL.\n", VERSION);
    printf ("  SINS 0.5, released under the GPL.\n");
-   printf ("All ShowEQ source code is Copyright (C) 2000, 2001, 2002 by the respective ShowEQ Developers\n");
+   printf ("All ShowEQ source code is Copyright (C) 2000-2003 by the respective ShowEQ Developers\n");
    printf ("Binary distribution without source code and resale are explictily NOT authorized by ANY party.\n");
    printf ("If you have paid for this software in any way, shape, or form, the person selling the\n");
    printf ("software is doing so in violation of the express wishes and intents of the authors of this product.\n\n");
@@ -200,23 +200,17 @@ int main (int argc, char **argv)
    showeq_params->promisc = pSEQPrefs->getPrefBool("NoPromiscuous", section, true);
    showeq_params->arqSeqGiveUp = pSEQPrefs->getPrefInt("ArqSeqGiveUp", section, 96);
    showeq_params->session_tracking = pSEQPrefs->getPrefBool("SessionTracking", section, 0);
-#if HAVE_LIBEQ
    showeq_params->broken_decode = pSEQPrefs->getPrefBool("BrokenDecode", section, 0);
 
    if (showeq_params->broken_decode)
       printf("Disabling decoder due to showeq.xml preferences\n");
-#else
-   /* Default to broken decoder if libEQ not present */
-   showeq_params->broken_decode = 1;
-   printf("Disabling decoder due to missing libEQ.a\n");
-#endif
 
    section = "Interface";
    /* Allow map depth filtering */
    showeq_params->retarded_coords  = pSEQPrefs->getPrefBool("RetardedCoords", section, 0);
    showeq_params->con_select = pSEQPrefs->getPrefBool("SelectOnCon", section, false);
    showeq_params->tar_select = pSEQPrefs->getPrefBool("SelectOnTarget", section, false);
-   showeq_params->net_stats = pSEQPrefs->getPrefBool("NetStats", section, false);
+   showeq_params->net_stats = pSEQPrefs->getPrefBool("ShowNetStats", section, false);
    showeq_params->systime_spawntime = pSEQPrefs->getPrefBool("SystimeSpawntime", section, false);
    showeq_params->pvp = pSEQPrefs->getPrefBool("PvPTeamColoring", section, false);
    showeq_params->deitypvp = pSEQPrefs->getPrefBool("DeityPvPTeamColoring", section, false);
@@ -567,7 +561,7 @@ int main (int argc, char **argv)
          case VERSION_OPTION:
          {
             printf ("ShowEQ %s\n",VERSION);
-            printf ("Copyright (C) 1999-2001 ShowEQ Contributors\n\n");
+            printf ("Copyright (C) 1999-2003 ShowEQ Contributors\n\n");
             
             printf ("ShowEQ comes with NO WARRANTY.\n\n");
             
@@ -892,7 +886,7 @@ int main (int argc, char **argv)
     printf( "***DECRYPTION DISABLED***\n\n"
     
             "Decoder has been manually disabled by either -b, the BrokenDecode option,\n"
-            "or a missing libEQ.a library.\n\n"
+            "or a missing libEQ.cpp.\n\n"
             
             "(There should be a more detailed message above)\n"
           );

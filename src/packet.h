@@ -554,7 +554,7 @@ class EQPacket : public QObject
    void stop(void);
    void setViewUnknownData(bool);
 
-   char* pcap_filter();
+   const QString pcapFilter();
    int packetCount(int);
    uint32_t clientAddr(void);
    uint16_t clientPort(void);
@@ -624,7 +624,8 @@ class EQPacket : public QObject
    void backfillPlayer(const charProfileStruct *, uint32_t, uint8_t);
    void increaseSkill(const skillIncStruct* skilli, uint32_t, uint8_t);
    void manaChange(const manaDecrementStruct* mana, uint32_t, uint8_t);
-   void playerUpdate(const playerPosStruct* pupdate, uint32_t, uint8_t);
+   void playerUpdate(const playerSpawnPosStruct* pupdate, uint32_t, uint8_t);
+   void playerUpdate(const playerSelfPosStruct* pupdate, uint32_t, uint8_t);
    void updateExp(const expUpdateStruct* exp, uint32_t, uint8_t);
    void updateAltExp(const altExpUpdateStruct* altexp, uint32_t, uint8_t);
    void updateLevel(const levelUpUpdateStruct* levelup, uint32_t, uint8_t);
@@ -667,9 +668,11 @@ class EQPacket : public QObject
    void formattedMessage(const formattedMessageStruct* fmsg, uint32_t, uint8_t);
    void random(const randomStruct* randr, uint32_t, uint8_t);
    void emoteText(const emoteTextStruct* emotetext, uint32_t, uint8_t);
+#if 1 // ZBTEMP: dead signals as of 08/26/03 patch - cleanup later
    void playerItem(const playerItemStruct* itemp, uint32_t, uint8_t);
    void playerBook(const playerBookStruct* bookp, uint32_t, uint8_t);
    void playerContainer(const playerContainerStruct* containp, uint32_t, uint8_t);
+#endif
    void inspectData(const inspectDataStruct* inspt, uint32_t, uint8_t);
    void spMessage(const spMesgStruct* spmsg, uint32_t, uint8_t);
    void handleSpell(const memSpellStruct* mem, uint32_t, uint8_t);
@@ -705,7 +708,7 @@ class EQPacket : public QObject
 
    // other signals
    void zoneServerInfo(const uint8_t*, uint32_t, uint8_t);
-   void cPlayerItems(const cPlayerItemsStruct *, uint32_t, uint8_t);
+   void playerItems(const playerItemsStruct *, uint32_t, uint8_t);
    void bookText(const bookTextStruct*, uint32_t, uint8_t);
    void doorOpen(const uint8_t*, uint32_t, uint8_t);
    void illusion(const uint8_t*, uint32_t, uint8_t);
@@ -820,7 +823,7 @@ class PacketCaptureThread
          uint16_t getPacket (unsigned char *buff); 
          void setFilter (const char *device, const char *hostname, bool realtime,
                         uint8_t address_type, uint16_t zone_server_port, uint16_t client_port);
-	 char* getFilter();
+	 const QString getFilter();
          
  private:
          static void* loop(void *param);
@@ -840,7 +843,7 @@ class PacketCaptureThread
 
          pcap_t *m_pcache_pcap;
 
-	 char pcap_filter[256];
+	 QString m_pcapFilter;
 };
 
 #endif // EQPACKET_H

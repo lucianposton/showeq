@@ -1,9 +1,6 @@
-Document Version 1.4
+Document Version $Revision$
+Last Updated: $Date$
 
-Changes from previous version:
-
-- changed all references from qt-2.3.2 to qt-3.0.5 and
-	included the correct install sequence for QT 3.0.5
 
 Following this file does not exempt you from reading and understanding the
 regular INSTALL file.  This should give you the knowledge you need to
@@ -40,8 +37,7 @@ Index:
 1.5 NOTE TO USERS WITH A HIGHER VERSION OF gcc
 1.6 Compiling QT
 1.7 Downloading latest version of ShowEQ
-1.8 Downloading most recent libEQ.a file
-1.9 Compiling ShowEQ
+1.8 Compiling ShowEQ
 
 2.  Running ShowEQ
 2.1 Start X Windows Environment
@@ -49,9 +45,8 @@ Index:
 2.3 Starting ShowEQ
 
 3.  Updating
-3.1 Getting a new libEQ.a
-3.2 Updating ShowEQ from cvs
-3.3 Zone Specific Filter Files
+3.1 Updating ShowEQ from cvs
+3.2 Zone Specific Filter Files
 
 4.  Usefull Information
 4.1 Getting Help
@@ -238,18 +233,7 @@ Code:
  
 
 
-1.8 Downloading most recent libEQ.a file
-    getting latest libEQ.a (see the file README.libEQ in cvs files) put
-    this file in /usr/lib as well. it is important that this is the ONLY
-    libEQ.a in the library path, and that it be the most current. It is
-    okay to have an extra copy in say /seq, but not in /lib or a few
-    other places. 
-
-[]# pico /seq/showeq/README.libEQ
-
-
-
-1.9 Compiling ShowEQ
+1.8 Compiling ShowEQ
     configuring and compiling showeq v4.x
 
 Code: 
@@ -320,14 +304,7 @@ instead of "eth0".
 
 3. Updating
 
-3.1 Getting a new libEQ.a
-    Please consult the file README.libEQ about this issue
-
-[]# pico /seq/showeq/README.libEQ
-
-
-
-3.2 Updating ShowEQ from cvs
+3.1 Updating ShowEQ from cvs
     There's an update out... but you don't want
     to download the whole thing again? Try this. If it gets a couple
     changes, read the CHANGES file and see whats up. Then compile it
@@ -350,7 +327,7 @@ Code:
 
 
 
-3.3 Zone Specific Filter Files: 
+3.2 Zone Specific Filter Files: 
     Is your filters.conf file getting really big? Taking 20min to
     parse the zone you just got into? You can get BlueAdept's zone
     specific filter files to help you out with that.
@@ -394,6 +371,9 @@ Code:
 --------------
 
 5. Version History of this document:
+
+Version 4.3.9
+- removed references to libEQ.a since it is no longer needed.
 
 Version 1.4
 

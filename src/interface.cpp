@@ -46,6 +46,7 @@
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qvaluelist.h>
+#include <qvaluevector.h>
 #include <qstatusbar.h>
 #include <qvaluelist.h>
 #include <qlineedit.h>
@@ -1338,8 +1339,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_spawnShell, SLOT(spawnWearingUpdate(const wearChangeStruct*)));
    connect(m_packet, SIGNAL(consMessage(const considerStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(consMessage(const considerStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(playerUpdate(const playerPosStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(playerUpdate(const playerPosStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(playerUpdate(const playerSpawnPosStruct*, uint32_t, uint8_t)),
+	   m_spawnShell, SLOT(playerUpdate(const playerSpawnPosStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(corpseLoc(const corpseLocStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(corpseLoc(const corpseLocStruct*)));
    connect(m_packet, SIGNAL(zoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)),
@@ -1360,8 +1361,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_player, SLOT(increaseSkill(const skillIncStruct*)));
    connect(m_packet, SIGNAL(manaChange(const manaDecrementStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(manaChange(const manaDecrementStruct*)));
-   connect(m_packet, SIGNAL(playerUpdate(const playerPosStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(playerUpdate(const playerPosStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(playerUpdate(const playerSelfPosStruct*, uint32_t, uint8_t)),
+	   m_player, SLOT(playerUpdate(const playerSelfPosStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(setPlayerID(uint16_t)), 
 	   m_player, SLOT(setPlayerID(uint16_t)));
    connect(m_packet, SIGNAL(updateAltExp(const altExpUpdateStruct*, uint32_t, uint8_t)),
@@ -1442,8 +1443,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    {
      connect (m_packet, SIGNAL(zoneServerInfo(const uint8_t*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logZoneServerInfo(const uint8_t*, uint32_t, uint8_t)));
-     connect (m_packet, SIGNAL(cPlayerItems(const cPlayerItemsStruct *, uint32_t, uint8_t)),
-	      m_pktLogger, SLOT(logCPlayerItems(const cPlayerItemsStruct *, uint32_t, uint8_t)));
+     connect (m_packet, SIGNAL(playerItems(const playerItemsStruct *, uint32_t, uint8_t)),
+	      m_pktLogger, SLOT(logPlayerItems(const playerItemsStruct *, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(itemShop(const itemInShopStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logItemInShop(const itemInShopStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(moneyOnCorpse(const moneyOnCorpseStruct*, uint32_t, uint8_t)),
@@ -1520,8 +1521,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	      m_pktLogger, SLOT(logZoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logNewZone(const newZoneStruct*, uint32_t, uint8_t)));
-     connect (m_packet, SIGNAL(playerUpdate(const playerPosStruct*, uint32_t, uint8_t)),
-	      m_pktLogger, SLOT(logPlayerPos(const playerPosStruct*, uint32_t, uint8_t)));
+     connect (m_packet, SIGNAL(playerUpdate(const playerSelfPosStruct*, uint32_t, uint8_t)),
+	      m_pktLogger, SLOT(logPlayerPos(const playerSelfPosStruct*, uint32_t, uint8_t)));
+     connect (m_packet, SIGNAL(playerUpdate(const playerSpawnPosStruct*, uint32_t, uint8_t)),
+	      m_pktLogger, SLOT(logPlayerPos(const playerSpawnPosStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(spawnWearingUpdate(const wearChangeStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logWearChange(const wearChangeStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(action2Message(const action2Struct*, uint32_t, uint8_t)),
@@ -3201,6 +3204,8 @@ EQInterface::toggle_view_NetDiag(void)
     // make sure to clear it's variable
     m_netDiag = NULL;
   }
+
+  pSEQPrefs->setPrefBool("ShowNetStats", "Interface", !wasVisible);
 }
 
 bool 
@@ -3873,15 +3878,82 @@ void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t 
   }
   else
   {
-    tempStr = QString("Formatted: ") + *formatStringRes;
+    QValueVector<QString> argList;
+    argList.reserve(5); // reserve space for 5 elements to handle most common sizes
+    
+    // 
     int totalArgsLen = 0;
-    const char* curMsg;
+    const char* curArg;
     while (totalArgsLen < messagesLen)
     {
-      curMsg = fmsg->messages + totalArgsLen;
-      tempStr = tempStr.arg(curMsg);
-      totalArgsLen += strlen(curMsg) + 1;
+      curArg = fmsg->messages + totalArgsLen;
+      // insert argument into the argument list
+      argList.push_back(QString(curArg));
+      totalArgsLen += strlen(curArg) + 1;
     }
+
+    bool ok;
+    int curPos;
+    size_t substArg;
+    int substArgValue;
+    QString* substFormatStringRes;
+    QString substFormatString;
+
+    ////////////////////////////
+    // replace template (%T) arguments in formatted string
+    QString formatString = *formatStringRes;
+    QRegExp rxt("%T(\\d{1,3})", true, false);
+
+    // find first template substitution
+    curPos = rxt.search(formatString, 0);
+
+    while (curPos != -1)
+    {
+      substFormatStringRes = NULL;
+      substArg = rxt.cap(1).toInt(&ok);
+      if (ok && (substArg <= argList.size()))
+      {
+	substArgValue = argList[substArg-1].toInt(&ok);
+
+	if (ok)
+	  substFormatStringRes = m_formattedMessageStrings.find(substArgValue);
+      }
+      
+      // replace template argument with subst string
+      if (substFormatStringRes != NULL)
+	formatString.replace(curPos, rxt.matchedLength(), *substFormatStringRes);
+      else
+	curPos += rxt.matchedLength(); // if no replacement string, skip over
+      
+      // find next substitution
+      curPos = rxt.search(formatString, curPos);
+    }
+
+    ////////////////////////////
+    // now replace substitution arguments in formatted string
+    // NOTE: not using QString::arg() because not all arguments are always used
+    //       and it will do screwy stuff in this situation
+    QRegExp rx("%(\\d{1,3})", true, false);
+
+    // find first template substitution
+    curPos = rx.search(formatString, 0);
+
+    while (curPos != -1)
+    {
+      substArg = rx.cap(1).toInt(&ok);
+
+      // replace substitution argument with argument from list
+      if (ok && (substArg <= argList.size()))
+	formatString.replace(curPos, rx.matchedLength(), argList[substArg-1]);
+      else
+	curPos += rx.matchedLength(); // if no such argument, skip over
+
+      // find next substitution
+      curPos = rx.search(formatString, curPos);
+    }
+    
+    
+    tempStr = QString("Formatted: ") + formatString;
   }
 
   emit msgReceived(tempStr);
@@ -4081,7 +4153,7 @@ void EQInterface::handleSpell(const memSpellStruct* mem, uint32_t, uint8_t dir)
 
   tempStr = "";
   
-  switch (mem->param2)
+  switch (mem->param1)
   {
   case 0:
     {
@@ -4125,11 +4197,11 @@ void EQInterface::handleSpell(const memSpellStruct* mem, uint32_t, uint8_t dir)
   
   if (!tempStr.isEmpty())
   {
-    if (mem->param2 != 3)
+    if (mem->param1 != 3)
       tempStr.sprintf("SPELL: %s%s', slot %d.", 
 		      tempStr.ascii(), 
 		      (const char*)spell_name (mem->spellId), 
-		      mem->spawnId);
+		      mem->slotId);
     else 
     {
       tempStr.sprintf("SPELL: %s%s'.", 
@@ -4878,7 +4950,7 @@ void EQInterface::toggle_net_broken_decode(int id)
 {
    showeq_params->broken_decode = !showeq_params->broken_decode;
    m_netMenu->setItemChecked(id, showeq_params->broken_decode);
-   pSEQPrefs->setPrefBool("RealTimeThread", "Network", showeq_params->broken_decode);
+   pSEQPrefs->setPrefBool("BrokenDecode", "Network", showeq_params->broken_decode);
 }
 
 void EQInterface::set_net_monitor_next_client()
