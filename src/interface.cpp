@@ -1332,8 +1332,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
            m_spawnShell, SLOT(compressedDoorSpawn(const cDoorSpawnsStruct*)));
    connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(newSpawn(const newSpawnStruct*)));
-   connect(m_packet, SIGNAL(updateSpawns(const mobUpdateStruct *, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(updateSpawns(const mobUpdateStruct *)));
+   connect(m_packet, SIGNAL(updateSpawns(const spawnPositionUpdate *, uint32_t, uint8_t)),
+	   m_spawnShell, SLOT(updateSpawns(const spawnPositionUpdate *)));
    connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(updateSpawnHP(const hpUpdateStruct *)));
    connect(m_packet, SIGNAL(deleteSpawn(const deleteSpawnStruct*, uint32_t, uint8_t)),
@@ -1504,8 +1504,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	      m_pktLogger, SLOT(logBeginCast(const beginCastStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(startCast(const startCastStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logStartCast(const startCastStruct*, uint32_t, uint8_t)));
-     connect (m_packet, SIGNAL(updateSpawns(const mobUpdateStruct*, uint32_t, uint8_t)),
-	      m_pktLogger, SLOT(logMobUpdate(const mobUpdateStruct*, uint32_t, uint8_t)));
+     connect (m_packet, SIGNAL(updateSpawns(const spawnPositionUpdate*, uint32_t, uint8_t)),
+	      m_pktLogger, SLOT(logMobUpdate(const spawnPositionUpdate*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(updateExp(const expUpdateStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logExpUpdate(const expUpdateStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(updateAltExp(const altExpUpdateStruct*, uint32_t, uint8_t)),

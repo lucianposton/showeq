@@ -120,7 +120,7 @@ public slots:
 		    int16_t xVel, int16_t yVel, int16_t zVel,
 		    int8_t heading, int8_t deltaHeading,
 		    uint8_t animation);
-   void updateSpawns(const mobUpdateStruct* updates);
+   void updateSpawns(const spawnPositionUpdate* updates);
    void updateSpawnHP(const hpUpdateStruct* hpupdate);
    void spawnWearingUpdate(const wearChangeStruct* wearing);
    void consMessage(const considerStruct* con, uint32_t, uint8_t);

@@ -25,9 +25,48 @@
 
 /***********************/
 /* Zone Server OpCodes */
-#define DropCoinsCode               0x0740
+#define NewSpawnCode                0x023f
 
-#define ChannelMessageCode          0x0741
+#define MobUpdateCode               0x0002
+
+#define ConsiderCode                0x0136
+
+#define ChannelMessageCode          0x00fc
+
+#define PlayerPosCode               0x00ff
+
+#define ZoneChangeCode              0x00a9
+
+#define ZoneEntryCode               0x02ae
+
+#define NewZoneCode                 0x0056
+
+#define CPlayerItemsCode            0x01e9
+
+#define ClientTargetCode            0x014b
+
+#define ZoneSpawnsCode              0x0148
+
+#define CharProfileCode             0x002e
+
+#define DeleteSpawnCode             0x001e
+
+#define NewCorpseCode               0x0042
+
+#define ActionCode                  0x004d
+
+#define CorpseLocCode               0x0014
+
+#define CDoorSpawnsCode             0x01ea
+
+#define ManaDecrementCode           0x0175
+
+#define HPUpdateCode                0x0101
+
+/*********************/
+/* outdated          */
+
+#define DropCoinsCode               0x0740
 
 #define cStartCampingCode           0x0742
 
@@ -49,17 +88,11 @@
 
 #define cJumpCode                   0x2040
 
-#define CorpseLocCode               0x2140
-
 #define AltExpUpdateCode            0x2342
 
 #define GroupInfoCode               0x2640
 
 #define MoneyThingCode              0x2820
-
-#define ZoneEntryCode               0x2840
-
-#define DeleteSpawnCode             0x2940
 
 #define RemDropCode                 0x2b40
 
@@ -83,11 +116,7 @@
 
 #define sSpellFizzleRegainCode      0x3542
 
-#define CharProfileCode             0x3640
-
 #define FormattedMessageCode        0x3642
-
-#define ConsiderCode                0x3741
 
 #define MoneyUpdateCode             0x3d41
 
@@ -109,10 +138,6 @@
 
 #define CastOnCode                  0x4640
 
-#define NewSpawnCode                0x6b42
-
-#define NewCorpseCode               0x4a40
-
 #define cLootCorpseCode             0x4e20
 
 #define cDoneLootingCode            0x4f20
@@ -125,15 +150,7 @@
 
 #define StaminaCode                 0x5741
 
-#define ActionCode                  0x5840
-
 #define cOpenSpellBookCode          0x5821
-
-#define NewZoneCode                 0x5b40
-
-#define ZoneSpawnsCode              0x5f41
-
-#define ClientTargetCode            0x6241
 
 #define PlayerItemCode              0x6441
 
@@ -152,8 +169,6 @@
 #define NewGuildInZoneCode          0x7b21
 
 #define StartCastCode               0x7e41
-
-#define ManaDecrementCode           0x7f41
 
 #define SPMesgCode                  0x8041
 
@@ -187,17 +202,11 @@
 
 #define OpenGMCode                  0x9c20
 
-#define MobUpdateCode               0x9f40
-
 #define sLootItemCode               0xa040
 
 #define Attack2Code                 0xa140
 
-#define ZoneChangeCode              0xa340
-
 #define BeginCastCode               0xa940
-
-#define HPUpdateCode                0xb240
 
 #define InspectDataCode             0xb640
 
@@ -215,15 +224,9 @@
 
 #define TimeOfDayCode               0xf240
 
-#define PlayerPosCode               0xf340
-
 #define cWhoAllCode                 0xf440
 
 #define SpawnAppearanceCode         0xf540
-
-#define CPlayerItemsCode            0xf641
-
-#define CDoorSpawnsCode             0xf741
 
 #define cChatFiltersCode            0xff41
 

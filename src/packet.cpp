@@ -87,6 +87,8 @@ static const char* EQStreamStr[] = {"client-world", "world-client", "client-zone
 
 //----------------------------------------------------------------------
 // global variables
+int32_t decodex_key = 0;
+bool decodex = false;
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -1184,6 +1186,9 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
         printf("EQPacket: SEQStart found, setting arq seq, %04x  stream %s\n",
                serverArqSeq, EQStreamStr[m_eqstreamid]);
 #endif
+	// initial decryption key
+	decodex_key = 0x14ae2355;
+	decodex = true;
 
         // hey, a SEQStart, use it's packet to set ARQ
         m_serverArqSeqExp[m_eqstreamid] = serverArqSeq;
@@ -1285,6 +1290,9 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 
            if (m_session_tracking_enabled)
               m_session_tracking_enabled = 1; 
+
+           // decode key no longer valid
+	   decodex = false;
 
            // we'll be waiting for a new SEQStart for ALL streams
            // it seems we only ever see a proper closing sequence from the zone server
@@ -1775,7 +1783,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     uint32_t decodedDataLen = 131072;
     uint8_t  decodedData[decodedDataLen];
 
-    uint16_t opCode = eqntohuint16(data); // data[1] | (data[0] << 8);
+    uint16_t opCode = *((uint16_t *)data);
     
     //Logging 
     if (showeq_params->logZonePackets)
@@ -1805,7 +1813,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
        }
     }
 
-    if (opCode & 0x0080)
+    if (opCode & 0x8000)
     {
 	uint8_t *decompressed;
 	uint32_t dcomplen = PKTBUF_LEN;
@@ -1814,75 +1822,121 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
 	if (m_decode->InflatePacket (&data[2], len-2, decompressed+2, &dcomplen) != 1)
 	{
-	   free (decompressed);
-	   return;
+            printf ("decompression failed on 0x%04x\n", opCode);
+	    free (decompressed);
+	    return;
 	}
 
-	opCode = htons(opCode & ~0x0080);
+	opCode = opCode & ~0x8000;
 	memcpy (decompressed, &opCode, 2);
 	dispatchZoneData (dcomplen+2, decompressed, dir);
 	free (decompressed);
         return;
     }
-    
-    if (opCode & 0x0040)
+
+    if (opCode & 0x1000)
     {
-	int left;
-	unsigned char *dptr;
-
-	left = len;
-	dptr = data;
-
-	while (left > 0)
+        if (decodex)
 	{
-	   unsigned char *packet;
-	   unsigned short expected_dlen = 0;
+	    int32_t tmplen = len-2;
+	    uint8_t *dptr = data+2;
+	    int32_t loc3 = abs(decodex_key) % (tmplen-4);
 
-	   memcpy (&opCode, dptr, 2);
-	   opCode = opCode & ~0x4000;
-
-	   dptr += 2;
-	   left -= 2;
-
-	   if (dptr[0] == 0xff)
-	   {
-		dptr++;
-		expected_dlen = eqntohuint16(dptr);
-		dptr += 2;
-		left -= 3;
-	   } else {
-		expected_dlen = dptr[0];
-		dptr++;
-		left -= 1;
-	   }
-
-	   if (expected_dlen > left)
-	   {
-		printf ("Error: Expected %d, but only %d left\n", expected_dlen, left);
-		return;
-	   }
-
-	   packet = (unsigned char *) malloc (expected_dlen+2);
-
-	   memcpy (packet, &opCode, 2);
-	   memcpy (packet+2, dptr, expected_dlen);
-	   dptr += expected_dlen;
-	   left -= expected_dlen;
-
-	   dispatchZoneData (expected_dlen+2, packet, dir);
-	   free (packet);
+	    //printf ("decoding 0x%04x with 0x%08x at %d, 8, & 1.\n", 
+			   // opCode, decodex_key, loc3);
+	    *((int32_t *)(dptr+loc3)) = *((int32_t *)(dptr+loc3)) ^ decodex_key;
+	    *((int32_t *)(dptr+8)) = *((int32_t *)(dptr+8)) ^ decodex_key;
+	    *((int32_t *)(dptr+1)) = *((int32_t *)(dptr+1)) ^ decodex_key;
+	    decodex_key = decodex_key ^ *((int32_t *)(dptr+(tmplen/3)));
+	    opCode = opCode & ~0x1000;
+	    memcpy (data, &opCode, 2);
+	    //printf ("decoded: 0x%04x, %d, new key: 0x%08x\n", opCode, len, decodex_key);
+	    dispatchZoneData (len, data, dir);
 	}
-
+	
 	return;
     }
-    
-    // remove this when opcodes are fixed
-    // ---
-    uint16_t op;
-    opCode = opCode | 0x0040;
-    op = htons (opCode);
-    memcpy (data, &op, 2);
-    // ---
+
+    while (len > 2)
+    {
+        if (opCode & 0x4000)
+        {
+	    bool repeatop = false;
+	    uint8_t *dptr = data+2;
+	    uint32_t left = len-2;
+	    int32_t count = 1;
+
+	    //printf ("unrolling 0x%04x\n", opCode);
+	    opCode = opCode & ~0x4000;
+
+	    if (opCode & 0x2000)
+	    {
+	        opCode = opCode & ~0x2000;
+	        repeatop = true;
+	    }
+
+	    while (count > 0)
+	    {
+	        uint16_t size;
+
+	        size = implicitlen(opCode);
+	        if (size == 0)
+	        {
+	            if (dptr[0] == 0xff)
+		    {
+		        left--;
+		        dptr++;
+		        size = ntohs(*((uint16_t *)dptr));
+		        left -= 2;
+		        dptr += 2;
+		    } else {
+		        size = dptr[0];
+		        left--;
+		        dptr++;
+		    }
+	        }
+	        //printf ("size is %d\n", size);
+	    
+	        if (size > left)
+	        {
+		    printf ("error: size > left (size=%d, left=%d, opcode=0x%04x)\n", size, left, opCode);
+		    return;
+	        }
+
+	        uint8_t *pkt = new uint8_t[size+2];
+	        memcpy (pkt, &opCode, 2);
+	        memcpy (pkt+2, dptr, size);
+	        //printf ("sending: 0x%04x, %d\n", opCode, size);
+	        dispatchZoneData (size+2, pkt, dir);
+	        delete[] pkt;
+
+	        dptr += size;
+	        left -= size;
+
+	        count--;
+	        if (repeatop)
+	        {
+		    count = dptr[0];
+		    dptr++;
+		    left--;
+		    repeatop = false;
+		    //printf ("repeating %d times\n", count);
+	        }
+	    }
+
+	    if (left > 2)
+	    {
+ 	        opCode = *((unsigned short *)dptr);
+	        //printf ("doing leftover: 0x%04x, %d\n", opCode, left);
+	        data = dptr;
+	        len = left;
+		continue;
+	    }
+	    return;
+        } else {
+	    break;
+	}
+    }
 
     switch (opCode)
     {
@@ -2411,27 +2465,9 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case MobUpdateCode:
         {
-            unk = false;
+            unk = ! ValidatePayload(MobUpdateCode, spawnPositionUpdate);
 
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-            struct mobUpdateStruct *updates;
-
-            updates = (mobUpdateStruct *) (data);
-
-            // verify size
-
-            int updateSize = (len - 6) / updates->numUpdates;
-
-            if (updateSize != sizeof(spawnPositionUpdate))
-            {
-                printf("WARNING: MobUpdateCode (dataLen:%d != "
-                       "sizeof(spawnPositionUpdate):%d)!\n", 
-                       updateSize, sizeof(spawnPositionUpdate));
-
-	        unk = true;
-	    }
-#endif
-	    emit updateSpawns((const mobUpdateStruct *)data, len, dir);
+            emit updateSpawns((const spawnPositionUpdate *)data, len, dir);
 
             break;
         }
@@ -3176,10 +3212,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
      QString tmpStr;
        if (len == 2)
        {
-	 tmpStr.sprintf ("%s: %02x version %02x len %i [%s]", 
+	 tmpStr.sprintf ("%s: %04x len %i [%s]", 
 			 uiOpCodeIndex > 0 ? 
 			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
-			 "UNKNOWN", data[0], data[1], len,
+			 "UNKNOWN", opCode, len,
 			 dir == 2 ? "Server --> Client" : "Client --> Server");
 	 printf("\n%s\n\t", (const char*)tmpStr);
 
@@ -3191,10 +3227,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
        }
        else
        {
-	 tmpStr.sprintf ("%s: %02x version %02x len %02d [%s] ID:%i", 
+	 tmpStr.sprintf ("%s: %04x len %02d [%s] ID:%i", 
 			 uiOpCodeIndex > 0 ? 
 			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
-			 "UNKNOWN", data[0], data[1], len, 
+			 "UNKNOWN", opCode, len, 
 			 dir == 2 ? "Server --> Client" : "Client --> Server", 
 			 data[3] * 256 + data[2]);
 

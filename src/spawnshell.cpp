@@ -660,32 +660,14 @@ void SpawnShell::updateSpawn(uint16_t id,
    }
 }
 
-void SpawnShell::updateSpawns(const mobUpdateStruct* updates)
+void SpawnShell::updateSpawns(const spawnPositionUpdate* updates)
 {
   // if zoning, then don't do anything
   if (m_zoneMgr->isZoning())
     return;
 
-   for (int a = 0; a < updates->numUpdates; a++)
-   {
-     // I have done some checking.  It appears that this feild
-     // (animation) contains the curent animation loop of the mob
-     // in question (walking/running/standing etc..
-     // 0 = staning.  When this is 0 the mob stops moving in the game
-     // even though the velocity numbers arent 0.  this fix should reduce
-     // drift when a mob stops moving. (or turns)
-
-     updateSpawn(updates->spawnUpdate[a].spawnId,
-		 updates->spawnUpdate[a].x,
-		 updates->spawnUpdate[a].y,
-		 updates->spawnUpdate[a].z,
-		 updates->spawnUpdate[a].deltaX,
-		 updates->spawnUpdate[a].deltaY,
-		 updates->spawnUpdate[a].deltaZ,
-		 updates->spawnUpdate[a].heading,
-		 updates->spawnUpdate[a].deltaHeading,
-		 updates->spawnUpdate[a].animation);
-   }
+  updateSpawn(updates->spawnId, updates->x, updates->y, updates->z,
+		 0,0,0,updates->heading,0,0);
 }
 
 void SpawnShell::updateSpawnHP(const hpUpdateStruct* hpupdate)

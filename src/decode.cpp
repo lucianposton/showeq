@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <zlib.h>
 #include <string.h>
+#include <netinet/in.h>
 
 #include <qapplication.h>
 #include <qfile.h>
@@ -46,7 +47,7 @@ EQDecode::EQDecode (QObject *parent, const char *name)
 #if HAVE_LIBEQ
   // Initialize LIBEQ
   if (!showeq_params->broken_decode)
-    InitializeLibEQ(0, CharProfileCode, ZoneSpawnsCode, NewSpawnCode);
+    InitializeLibEQ(0, ntohs(CharProfileCode), ntohs(ZoneSpawnsCode), ntohs(NewSpawnCode));
 
   // restore the decodeKey if the user requested it
   if (showeq_params->restoreDecodeKey)
@@ -222,7 +223,7 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
   EQPktRec *player, *pktrec;
   int result;
   uint64_t prevKey;
-  opcode = data[1] | (data[0] << 8);
+  opcode = *(uint16_t *)data;
 
   // Get the opcode of the current packet
   // Check to see if it is a compressed packet

@@ -634,7 +634,7 @@ class EQPacket : public QObject
    void newCoinsItem(const dropCoinsStruct*, uint32_t, uint8_t);
    void removeCoinsItem(const removeCoinsStruct*, uint32_t, uint8_t);
 
-   void updateSpawns(const mobUpdateStruct* updates, uint32_t, uint8_t);
+   void updateSpawns(const spawnPositionUpdate* updates, uint32_t, uint8_t);
    void updateSpawnHP(const hpUpdateStruct* hpupdate, uint32_t, uint8_t);
 
    void newSpawn(const newSpawnStruct* spawn, uint32_t, uint8_t);

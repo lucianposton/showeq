@@ -116,5 +116,6 @@ QString bitstring(T value)
 }
 
 bool findFile( QString& fileName );
+uint16_t implicitlen (uint16_t opcode);
 
 #endif // EQUTIL_U

@@ -218,7 +218,7 @@ public:
     void logMemSpell(const memSpellStruct* spell, uint32_t len, uint8_t dir);
     void logBeginCast(const beginCastStruct* spell, uint32_t len, uint8_t dir);
     void logStartCast(const startCastStruct* spell, uint32_t len, uint8_t dir);
-    void logMobUpdate(const mobUpdateStruct* update, uint32_t len, uint8_t dir);
+    void logMobUpdate(const spawnPositionUpdate* update, uint32_t len, uint8_t dir);
     void logExpUpdate(const expUpdateStruct* exp, uint32_t len, uint8_t dir);
     void logAltExpUpdate(const altExpUpdateStruct* alt, uint32_t len, uint8_t dir);
     void logLevelUpUpdate(const levelUpUpdateStruct* level, uint32_t len, uint8_t dir);

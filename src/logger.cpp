@@ -623,13 +623,8 @@ PktLogger::logNewCorpse(const newCorpseStruct *s, uint32_t len, uint8_t dir)
 
     outputf("R %u %04d %d %.2X%.2X %u %u ", timestamp, len, dir,              s->opCode, s->version, s->spawnId, s->killerId);
 
-    output(s->unknown0006, 4);
     outputf(" %u %d ", s->spellId, s->type);
-    output(&s->unknown0013, 1);
     outputf(" %u ", s->damage);
-    output(s->unknown0016, 2);
-    outputf(" ");
-    output(s->unknown0018, 10);
     outputf("\n");
     flush();
     return;
@@ -1132,33 +1127,10 @@ PktLogger::logStartCast(const startCastStruct *spell, uint32_t len, uint8_t dir)
 }
 
 void 
-PktLogger::logMobUpdate(const mobUpdateStruct *update, uint32_t len, uint8_t dir)
+PktLogger::logMobUpdate(const spawnPositionUpdate *update, uint32_t len, uint8_t dir)
 {
     if (!isLoggingMobUpdate())
       return;
-
-    unsigned int timestamp = (unsigned int) time(NULL);
-    const spawnPositionUpdate *pos;
-    int i;
-
-    if (m_FP == NULL)
-        if (logOpen() != 0)
-            return;
-
-    outputf("R %u %04d %d %.2X%.2X %d ", timestamp, len, dir,
-       update->opCode, update->version, update->numUpdates);
-
-    for(i = 0; i < update->numUpdates; i++)
-    {
-        pos = &update->spawnUpdate[i];
-        outputf("%u %d %d %d %d %d %d %d %u %d %u %d ",
-            pos->spawnId, pos->animation, pos->heading,
-            pos->deltaHeading, pos->y, pos->x,
-            pos->z, pos->deltaY, pos->spacer1,
-            pos->deltaX, pos->spacer2, pos->deltaZ);
-    }
-    outputf("\n");
-    flush();
 }
 
 void 
@@ -1464,7 +1436,6 @@ PktLogger::logPlayerPos(const playerPosStruct *pos, uint32_t len, uint8_t dir)
     outputf("R %u %04d %d %.2X%.2X %u ", timestamp, len, dir,
         pos->opCode, pos->version, pos->spawnId);
 
-    output(pos->unknown0004,1);
     outputf(" %d %d %d %d %d %d %u %d %u %d\n", pos->heading, 
         pos->deltaHeading, pos->y, pos->x, pos->z, pos->deltaY,
         pos->spacer1, pos->deltaZ, pos->spacer2, pos->deltaX);
@@ -1513,9 +1484,7 @@ PktLogger::logAction(const action2Struct *action, uint32_t len, uint8_t dir)
 	    action->opCode, action->version, 
 	    action->target, action->source, action->type);
 
-    output(&action->unknown0007,1);
     outputf(" %d %d ",action->spell, action->damage);
-    output(action->unknown0014,16);
     outputf("\n");
     flush();
     return;

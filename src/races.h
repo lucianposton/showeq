@@ -333,5 +333,7 @@
     "Nightmare Spider",       // 326
     "Crystal Spider",         // 327
     "A Tower",                // 328
+    NULL,                     // 329
+    "Froglok",                // 330
 
 
