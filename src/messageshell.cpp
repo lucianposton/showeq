@@ -604,12 +604,13 @@ void MessageShell::startCast(const uint8_t* data)
 }
 
 
-void MessageShell::groupInfo(const uint8_t* data)
+void MessageShell::groupUpdate(const uint8_t* data, size_t size, uint8_t dir)
 {
-  const groupInfoStruct* gmem = (const groupInfoStruct*)data;
+  const groupUpdateStruct* gmem = (const groupUpdateStruct*)data;
   QString tempStr;
-  tempStr.sprintf ("Member: %s - %s", 
-		   gmem->yourname, gmem->membername);
+  tempStr.sprintf ("Update: action:%d - %s - %s (unknown: %d)", 
+		   gmem->action, gmem->yourname, gmem->membername, 
+		   gmem->unknown0132);
   m_messages->addMessage(MT_Group, tempStr);
 }
 
@@ -617,8 +618,8 @@ void MessageShell::groupInvite(const uint8_t* data)
 {
   const groupInviteStruct* gmem = (const groupInviteStruct*)data;
   QString tempStr;
-  tempStr.sprintf ("Invite: %s invites %s", 
-		   gmem->membername, gmem->yourname);
+  tempStr.sprintf("Invite: %s invites %s", 
+		  gmem->inviter, gmem->invitee);
   m_messages->addMessage(MT_Group, tempStr);
 }
 
@@ -626,25 +627,25 @@ void MessageShell::groupDecline(const uint8_t* data)
 {
   const groupDeclineStruct* gmem = (const groupDeclineStruct*)data;
   QString tempStr;
-  tempStr.sprintf ("Invite: %s declines invite from %s (%i)", 
-		   gmem->membername, gmem->yourname, gmem->reason);
+  tempStr.sprintf("Invite: %s declines invite from %s (%i)", 
+		  gmem->membername, gmem->yourname, gmem->reason);
   m_messages->addMessage(MT_Group, tempStr);
 }
 
-void MessageShell::groupAccept(const uint8_t* data)
+void MessageShell::groupFollow(const uint8_t* data)
 {
-  const groupAcceptStruct* gmem = (const groupAcceptStruct*)data;
+  const groupFollowStruct* gmem = (const groupFollowStruct*)data;
   QString tempStr;
-  tempStr.sprintf ("Invite: %s accepts invite from %s", 
-		   gmem->membername, gmem->yourname);
+  tempStr.sprintf("Follow: %s accepts invite from %s", 
+		  gmem->invitee, gmem->inviter);
   m_messages->addMessage(MT_Group, tempStr);
 }
 
-void MessageShell::groupDelete(const uint8_t* data)
+void MessageShell::groupDisband(const uint8_t* data, size_t, uint8_t dir)
 {
-  const groupDeleteStruct* gmem = (const groupDeleteStruct*)data;
+  const groupDisbandStruct* gmem = (const groupDisbandStruct*)data;
   QString tempStr;
-  tempStr.sprintf ("Delete: %s - %s", 
+  tempStr.sprintf ("Disband: %s - %s", 
 		   gmem->membername, gmem->yourname);
   m_messages->addMessage(MT_Group, tempStr);
 }

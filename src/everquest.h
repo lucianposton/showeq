@@ -104,6 +104,7 @@
 #define MAX_KNOWN_SKILLS                74
 #define MAX_KNOWN_LANGS                 25
 #define MAX_SPELLBOOK_SLOTS             400
+#define MAX_GROUP_MEMBERS               6
 
 //Item Flags
 #define ITEM_NORMAL                     0x0000
@@ -244,6 +245,19 @@ enum ChatColor
   CC_User_MyPet            = 328,
   CC_User_DamageShield     = 329,
 };
+
+/*
+** Guild Update actions
+*/
+enum GuildUpdateAction
+{
+  GUA_Joined = 0,
+  GUA_Left = 1,
+  GUA_LastLeft = 6,
+  GUA_FullGroupInfo = 7,
+  GUA_Started = 9,
+};
+
 
 /*
 ** Compiler override to ensure
@@ -389,7 +403,7 @@ struct ServerZoneEntryStruct
 	     /*0268*/ Color_Struct color_primary;   // Color of primary item
 	     /*0272*/ Color_Struct color_secondary; // Color of secondary item
 	   } equipment_colors;
-	   /*0240*/ uint32_t colors[9];             // Array elements correspond to struct equipment_colors above
+	   /*0240*/ Color_Struct colors[9];             // Array elements correspond to struct equipment_colors above
          };
 /*276*/  union 
          {
@@ -405,7 +419,7 @@ struct ServerZoneEntryStruct
 	     /*0304*/ uint32_t equip_primary;   // Equipment: Primary Visual
 	     /*0308*/ uint32_t equip_secondary; // Equipment: Secondary Visual
 	   } equipment;
-	   /*0276*/ uint32_t equip[9];            // Array elements correspond to struct equipment above
+	   /*0276*/ Color_Struct equip[9];            // Array elements correspond to struct equipment above
          };
 /*0312*/ uint16_t zoneId;
 /*0314*/ uint16_t zoneInstance;
@@ -510,7 +524,8 @@ struct charProfileStruct
 /*0217*/ uint8_t   beard;              // Player beard type
 /*0218*/ uint8_t   unknown0218[2];     // *** Placeholder
 /*0220*/ uint32_t  item_material[9];   // Item texture/material of worn/held items
-/*0256*/ uint8_t   unknown0256[88];    // *** Placeholder
+/*0256*/ uint8_t   unknown0256[52];    // *** Placeholder
+/*0716*/ Color_Struct item_tint[9];    // RR GG BB 00
 /*0344*/ AA_Array  aa_array[122];      // Length may not be right
 /*0588*/ char 	   servername[64];     // length probably not right
 /*0652*/ uint32_t  altexp;  	       // aaxp? (wrong?
@@ -527,8 +542,7 @@ struct charProfileStruct
 /*0696*/ uint32_t  AGI;                // Agility
 /*0700*/ uint32_t  WIS;                // Wisdom
 /*0704*/ uint8_t   face;               // Player face
-/*0705*/ uint8_t   unknown0705[11];    // *** Placeholder
-/*0716*/ Color_Struct item_tint[9];    // RR GG BB 00
+/*0705*/ uint8_t   unknown0705[47];    // *** Placeholder
 /*0752*/ uint8_t   languages[28];      // List of languages (MAX_KNOWN_LANGS)
 /*0780*/ uint8_t   unknown0780[4];     // All 0x00
 /*0784*/ int32_t   sSpellBook[400];    // List of the Spells in spellbook
@@ -559,7 +573,7 @@ struct charProfileStruct
 /*3700*/ uint16_t  zoneId;             // see zones.h
 /*3702*/ uint16_t  zoneInstance;       // 
 /*3704*/ spellBuff buffs[15];          // Buffs currently on the player
-/*3944*/ char      groupMembers[6][64];// all the members in group, including self 
+/*3944*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
 /*4328*/ uint8_t   unknown4328[4];     // *** Placeholder
 /*4332*/ uint32_t  ldon_guk_points;    // Earned Deepest Guk points
 /*4336*/ uint32_t  ldon_mir_points;    // Earned Deepest Guk points
@@ -801,9 +815,10 @@ struct spawnStruct
 /*182*/ int32_t  dye_rgb[7];      // armor dye colors
 /*210*/ uint8_t  unknown210[8];
 /*218*/ float    size;            // Size
-/*222*/ uint8_t  unknown222[5];
+/*222*/ uint8_t  helm;
+/*223*/ float    runspeed;        // 
 /*227*/ uint8_t  gm;              // 0=not GM,1=GM
-/*228*/ uint8_t  unknown228[4];   // *** Placeholder
+/*228*/ float    walkspeed;       // 
 /*232*/ uint32_t guildID;         // GuildID
 /*236*/ uint8_t  linkdead;        // 0=Not LD, 1=LD
 /*237*/ uint32_t bodytype;        // Bodytype
@@ -1108,34 +1123,51 @@ struct corpseLocStruct
 
 /*
 ** Grouping Infromation
-** Length: 138 Octets
-** OpCode: groupinfoCode
+** Length: 136 Octets
+** OpCode: OP_GroupUpdate
 */
 
-struct groupInfoStruct
+struct groupUpdateStruct
 {
-/*0000*/ uint8_t  unknown0002[4];
+/*0000*/ int32_t  action;
 /*0004*/ char     yourname[64];           // Player Name
 /*0068*/ char     membername[64];         // Goup Member Name
-/*0132*/ uint8_t  unknown0130[4];        // ***Placeholder
+/*0132*/ uint32_t unknown0132;            // ***Placeholder
+/*0136*/
+};
+
+
+/*
+** Grouping Infromation
+** Length: 452 Octets
+** OpCode: OP_GroupUpdate
+*/
+
+struct groupFullUpdateStruct
+{
+/*0000*/ int32_t  action;
+/*0004*/ char     membernames[MAX_GROUP_MEMBERS][64]; // Group Member Names
+/*0388*/ char     leader[64];                         // Goup Member Name
+/*0452*/
 };
 
 /*
 ** Grouping Invite
-** Length 195 Octets
-** Opcode GroupInviteCode
+** Length 193 Octets
+** Opcode OP_GroupInvite
 */
 
 struct groupInviteStruct
 {
-/*0000*/ char     yourname[64];           // Player Name
-/*0064*/ char     membername[64];         // Invited Member Name
+/*0000*/ char     invitee[64];           // Invitee's Name
+/*0064*/ char     inviter[64];           // Inviter's Name
 /*0128*/ uint8_t  unknown0130[65];        // ***Placeholder
+/*0193*/
 };
 
 /*
 ** Grouping Invite Answer - Decline
-** Length 131 Octets
+** Length 129 Octets
 ** Opcode GroupDeclineCode
 */
 
@@ -1144,30 +1176,33 @@ struct groupDeclineStruct
 /*0000*/ char     yourname[64];           // Player Name
 /*0064*/ char     membername[64];         // Invited Member Name
 /*0128*/ uint8_t  reason;                 // Already in Group = 1, Declined Invite = 3
+/*0129*/
 };
 
 /*
 ** Grouping Invite Answer - Accept 
-** Length 130 Octets
-** Opcode GroupAcceptCode
+** Length 128 Octets
+** Opcode OP_GroupFollow
 */
 
-struct groupAcceptStruct
+struct groupFollowStruct
 {
-/*0000*/ char     yourname[64];           // Player Name
-/*0064*/ char     membername[64];         // Invited Member Name
+/*0000*/ char     inviter[64];           // Inviter's Name
+/*0064*/ char     invitee[64];           // Invitee's Member Name
+/*0128*/
 };
 
 /*
-** Grouping Removal
-** Length 130 Octets
-** Opcode GroupDeleteCode
+** Group Disbanding
+** Length 128 Octets
+** Opcode 
 */
 
-struct groupDeleteStruct
+struct groupDisbandStruct
 {
 /*0000*/ char     yourname[64];           // Player Name
 /*0064*/ char     membername[64];         // Invited Member Name
+/*0128*/
 };
 
 
@@ -1334,11 +1369,11 @@ struct clientTargetStruct
 
 struct startCastStruct 
 {
-/*0000*/ int32_t  unknown0002;            // ***Placeholder
+/*0000*/ int32_t  slot;                   // ***Placeholder
 /*0004*/ uint32_t spellId;                // Spell ID
-/*0008*/ int32_t  unknown0010;            // ***Placeholder
+/*0008*/ int32_t  inventorySlot;          // ***Placeholder
 /*0012*/ uint32_t targetId;               // The current selected target
-/*0016*/ uint32_t unknown0018;            // ***Placeholder 
+/*0016*/ uint8_t  unknown0018[4];         // ***Placeholder 
 /*0020*/
 };
 

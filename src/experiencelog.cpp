@@ -36,12 +36,12 @@ ExperienceRecord::ExperienceRecord( const QString &mob_name,
 				    const QString &zone_name, 
 				    uint8_t classVal, uint8_t level, float zem,
 				    float totalLevels, 
-				    float groupPercentBonus) 
+				    float groupBonus) 
   : m_class(classVal),
     m_level(level),
     m_zem(zem),
     m_totalLevels(totalLevels),
-    m_groupPercentBonus(groupPercentBonus),
+    m_groupBonus(groupBonus),
     m_zone_name(zone_name), 
     m_mob_name(mob_name),
     m_mob_level(mob_level),
@@ -115,7 +115,7 @@ long ExperienceRecord::getExpValueg() const
    int pExp = getExpValuep();
    int myLevel = m_level;
 
-   return (int) (((float)pExp)*(m_groupPercentBonus/(float)100)*((float)myLevel/m_totalLevels));
+   return int(((float)pExp)*m_groupBonus*((float)myLevel/m_totalLevels));
 }
 
 time_t ExperienceRecord::getTime() const 
@@ -284,7 +284,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 			  m_player->classVal(), m_player->level(), 
 			  m_zoneMgr->zoneExpMultiplier(), 
 			  m_group->totalLevels(),
-			  m_group->groupPercentBonus());
+			  m_group->groupBonus());
 
 #ifdef DEBUGEXP
    resize( sizeHint() );
@@ -309,7 +309,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    {
       calculateZEM(xp_gained, mob_level);
       m_calcZEM = 0;
-      m_view_menu->setItemChecked(m_view_menu->idAt(9), false);
+      m_view_menu->setItemChecked(m_view_menu->idAt(10), false);
    }   
    s_xp_value.setNum(xp->getExpValue());
    QString s_xp_valueZEM;
@@ -359,9 +359,14 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
               m_player->level(), 
               m_player->classVal(), m_group->groupSize());
 
+      const Spawn* spawn;
       // continue with info for group members
-      for (int i=0; i < m_group->groupSize(); i++)
-        fprintf(newlogfp, "\t%d", m_group->memberBySlot(i)->level());
+      for (int i=0; i < MAX_GROUP_MEMBERS; i++)
+      {
+	spawn = m_group->memberBySlot(i);
+	if (spawn)
+	  fprintf(newlogfp, "\t%d", spawn->level());
+      }
 
       // finish the record with a line
       fprintf(newlogfp, "\n"); 
@@ -586,7 +591,7 @@ void ExperienceWindow::viewRatePerMinute()
 void ExperienceWindow::calcZEMNextKill() 
 {
    m_calcZEM = 1;
-   m_view_menu->setItemChecked(m_view_menu->idAt(9), true);
+   m_view_menu->setItemChecked(m_view_menu->idAt(10), true);
 }
 
 void ExperienceWindow::viewZEMcalculated() 
@@ -643,8 +648,13 @@ void ExperienceWindow::logexp(long xp_gained, int mob_level)
       xp_gained, m_player->level(), 
       m_player->classVal(), m_group->groupSize());
 
-   for (int i=0; i < m_group->groupSize(); i++)
-      fprintf(m_log, " %d", m_group->memberBySlot(i)->level());
+   const Spawn* spawn;
+   for (int i=0; i < MAX_GROUP_MEMBERS; i++)
+   {
+     spawn = m_group->memberBySlot(i);
+     if (spawn)
+       fprintf(m_log, " %d", spawn->level());
+   }
 
    fprintf(m_log, "\n"); 
    fflush(m_log); /* some people like to tail -f and see live data :) */
@@ -652,16 +662,16 @@ void ExperienceWindow::logexp(long xp_gained, int mob_level)
 
 void ExperienceWindow::calculateZEM(long xp_gained, int mob_level) 
 {
-   int gbonus=100;
+   float gbonus=1.00;
    int penalty; 
    int myLevel = m_player->level();
    int group_ag;
-   gbonus = m_group->groupPercentBonus();
+   gbonus = m_group->groupBonus();
    group_ag = m_group->totalLevels();
    if (m_group->groupSize())
    {
      seqInfo("MY Level: %d GroupTot: %d BONUS   :%d", 
-	     myLevel, group_ag, gbonus);
+	     myLevel, group_ag, gbonus * 100);
    }
    // WAR and ROG are at 10 since thier EXP is not scaled to compensate
    // for thier bonus
@@ -683,7 +693,7 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
       default: /* why are we here? */
          penalty = 10; break; 
    }
-   unsigned char ZEM = (unsigned char) ((float)xp_gained*((float)((float)group_ag/(float)myLevel)*(float)((float)100/(float)gbonus))*((float)1/(float)(mob_level*mob_level))*((float)10/(float)penalty));
+   unsigned char ZEM = (unsigned char) ((float)xp_gained*((float)((float)group_ag/(float)myLevel)*(float)((float)1.0/(float)gbonus))*((float)1/(float)(mob_level*mob_level))*((float)10/(float)penalty));
    seqInfo("xpgained: %ld group_ag: %d myLevel: %d gbonus: %d mob_level: %d penalty: %d ", xp_gained, group_ag, myLevel, gbonus, mob_level, penalty);
    seqInfo("ZEM - ZEM - ZEM ===== %d ", ZEM);
 }

@@ -75,11 +75,11 @@ class MessageShell : public QObject
    void interruptSpellCast(const uint8_t*icast);
    void startCast(const uint8_t* cast);
 
-   void groupInfo(const uint8_t* gmem);
+   void groupUpdate(const uint8_t* gmem, size_t, uint8_t);
    void groupInvite(const uint8_t* gmem);
    void groupDecline(const uint8_t* gmem);
-   void groupAccept(const uint8_t* gmem);
-   void groupDelete(const uint8_t* gmem);
+   void groupFollow(const uint8_t* gmem);
+   void groupDisband(const uint8_t* gmem, size_t, uint8_t);
 
    void syncDateTime(const QDateTime&);
 

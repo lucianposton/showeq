@@ -47,7 +47,7 @@ static const char *id="@(#) $Id$ $Name$";
 /* **********************************
    defines used for option processing
    ********************************** */
-#define OPTION_LIST "i:rf:g::j:::s:aeo:CncFKSVvPNtL:xWX:Y:Z:"
+#define OPTION_LIST "i:rf:g::j:::s:eo:CncFKSVvNtL:xWX:Y:Z:"
 
 /* For long options without any short (single letter) equivalent, we'll
    assign single char nonprinting character equivalents, as is common
@@ -104,7 +104,6 @@ static struct option option_list[] = {
   {"playback-filename",            optional_argument,  NULL,  'j'},
   {"playback-speed",               required_argument,  NULL,  PLAYBACK_SPEED_OPTION},
   {"record-filename",              optional_argument,  NULL,  'g'},
-  {"enlightenment-audio",          no_argument,        NULL,  'a'},
   {"filter-case-sensitive",        no_argument,        NULL,  'C'},
   {"use-retarded-coords",          no_argument,        NULL,  'c'},
   {"fast-machine",                 no_argument,        NULL,  'F'},
@@ -112,7 +111,6 @@ static struct option option_list[] = {
   {"show-unknown-spawns",          no_argument,        NULL,  'K'},
   {"select-on-consider",           no_argument,        NULL,  'S'},
   {"select-on-target",             no_argument,        NULL,  'e'},
-  {"no-promiscuous",               no_argument,        NULL,  'P'},
   {"show-packet-numbers",          no_argument,        NULL,  'N'},
   {"show-selected",                no_argument,        NULL,  't'},
   {"spawn-path-length",            required_argument,  NULL,  'L'},
@@ -215,14 +213,9 @@ int main (int argc, char **argv)
 
    QString section;
 
-   /* TODO: Add some sanity checks to the MAC address option.  cpphack */
-   section = "Network";
-   showeq_params->promisc = pSEQPrefs->getPrefBool("NoPromiscuous", section, true);
-
    section = "Interface";
    /* Allow map depth filtering */
    showeq_params->retarded_coords  = pSEQPrefs->getPrefBool("RetardedCoords", section, 0);
-   showeq_params->net_stats = pSEQPrefs->getPrefBool("ShowNetStats", section, false);
    showeq_params->systime_spawntime = pSEQPrefs->getPrefBool("SystimeSpawntime", section, false);
    showeq_params->pvp = pSEQPrefs->getPrefBool("PvPTeamColoring", section, false);
    showeq_params->deitypvp = pSEQPrefs->getPrefBool("DeityPvPTeamColoring", section, false);
@@ -235,11 +228,6 @@ int main (int argc, char **argv)
    showeq_params->walkpathrecord = pSEQPrefs->getPrefBool("WalkPathRecording", section, false);
    showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 25);
    /* Tells SEQ whether or not to display casting messages (Turn this off if you're on a big raid) */
-
-   section = "Filters";
-   showeq_params->spawnfilter_audio = pSEQPrefs->getPrefBool("Audio", section, false);
-
-   /* Default Level / Race / Class preferences */
 
    section = "SpawnList";
    showeq_params->showRealName = pSEQPrefs->getPrefBool("ShowRealName", section, false);
@@ -337,14 +325,6 @@ int main (int argc, char **argv)
             break;
 
 
-         /* Enable use of enlightenment audio */
-         case 'a':
-         {
-            showeq_params->spawnfilter_audio = 1;
-            break;
-         }
-
-
          /* Make filter case sensitive */
          case 'C':
          {
@@ -395,19 +375,12 @@ int main (int argc, char **argv)
          }
 
 
-         /* Don't use Promiscuous mode on sniffing */
-         case 'P':
-         {
-            showeq_params->promisc = 0;
-            break;
-         }
-
-
          /* Show net info */
          case 'N':
          {
-            showeq_params->net_stats = 1;
-            break;
+	   pSEQPrefs->getPrefBool("ShowNetStats", section, true, 
+				  XMLPreferences::Runtime);
+	   break;
          }
 
 
@@ -797,16 +770,13 @@ void displayOptions(const char* progName)
   printf ("  -f, --filter-file=FILENAME            Sets spawn filter file\n");
   printf ("  -s, --spawn-file=FILENAME             Sets spawn alert file\n");
   printf ("  -C, --filter-case-sensitive           Spawn alert and filter is case sensitive\n");
-  printf ("  -a, --enlightenment-audio             Use ESD to play alert during spawn alert\n");
   printf ("  -c, --use-retarded-coords             Use \"retarded\" YXZ coordinates\n");
   printf ("  -F, --fast-machine                    Fast machine - perform more accurate vs. \n");
   printf ("                                        less accurate calculations.\n");
-  printf ("  -A, --spawn-alert                     Use name/race/class/light/equipment for \n");
   printf ("                                        spawn matching\n");
   printf ("  -K, --create-unknown-spawns           create unknown spawns\n");
   printf ("  -S, --select-on-consider              Select the spawn considered\n");
   printf ("  -e, --select-on-target                Select the spawn targetted\n");
-  printf ("  -P, --no-promiscuous                  Don't sniff the network in promiscuous\n");
   printf ("                                        mode (Don't process packets bound for\n");
   printf ("                                        other machines).\n");
   printf ("  -N, --show-packet-numbers             Show network info dialog\n");

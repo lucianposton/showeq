@@ -357,6 +357,14 @@ void MessageFilterDialog::removedFilter(uint32_t mask, uint8_t filter)
 void MessageFilterDialog::addedFilter(uint32_t mask, uint8_t filterid, 
 				      const MessageFilter& filter)
 {
+  if (m_existingFilters->count() == 0)
+  {
+      // add the new message filter 
+      new MessageFilterListBoxText(m_existingFilters, 0,
+				   filter.name(), filterid);
+
+  }
+
   // iterate over all the existing filters
   for (QListBoxItem* currentLBT = m_existingFilters->firstItem();
        currentLBT;

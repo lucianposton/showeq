@@ -396,7 +396,7 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
     m_typeFilterMenu(0),
     m_findDialog(0),
     m_filterDialog(0),
-    m_enabledTypes(0xFFFFFFFFFFFFFFFF),
+    m_enabledTypes(0xFFFFFFFFFFFFFFFFULL),
     m_enabledShowUserFilters(0),
     m_enabledHideUserFilters(0),
     m_defaultColor(black),
@@ -853,7 +853,7 @@ void MessageWindow::disableAllTypeFilters()
 void MessageWindow::enableAllTypeFilters()
 {
   // set and save all message types enabled
-  m_enabledTypes = 0xFFFFFFFFFFFFFFFF;
+  m_enabledTypes = 0xFFFFFFFFFFFFFFFFULL;
   pSEQPrefs->setPrefUInt64("EnabledTypes", preferenceName(), m_enabledTypes);
 
   // make sure the All menu items are unchecked

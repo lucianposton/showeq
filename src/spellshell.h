@@ -27,6 +27,8 @@
 class Player;
 class SpawnShell;
 class Spells;
+class Spell;
+class Item;
 
 /* 
  * SpellItem
@@ -61,7 +63,7 @@ class SpellItem
   const QString casterName() const;
   void setDuration(int);
   
-  // set accessorsj
+  // set accessors
   void setSpellId(uint16_t spellid);
   void setTargetId(uint16_t target);
   void setCasterId(uint16_t caster);
@@ -69,17 +71,21 @@ class SpellItem
   void setCasterName(const QString& name);
   void setTargetName(const QString& name);
   void updateCastTime();
+
+  void update(uint16_t spellId, const Spell* spell, int duration,
+	      uint16_t casterId, const QString& casterName,
+	      uint16_t targetId, const QString& targetName);
   
  private:
-  uint16_t m_spellId; 
-  uint16_t m_casterId; 
-  uint16_t m_targetId;
-  int m_duration;
-  timeval m_castTime;
-  
   QString m_spellName;
   QString m_casterName;
   QString m_targetName;
+  int m_duration;
+  timeval m_castTime;
+
+  uint16_t m_spellId; 
+  uint16_t m_casterId; 
+  uint16_t m_targetId;
   
   struct startCastStruct m_cast; // Needed?
 };
@@ -165,7 +171,7 @@ class SpellShell : public QObject
   Q_OBJECT
  public:
   SpellShell(Player* player, SpawnShell* spawnshell, Spells* spells);
-  void DeleteSpell(const SpellItem*);
+  void deleteSpell(const SpellItem*);
   
  signals:
   void addSpell(const SpellItem *); // done
@@ -181,28 +187,25 @@ class SpellShell : public QObject
   void buffLoad(const spellBuff*);
   void buff(const uint8_t*, size_t, uint8_t);
   void action(const uint8_t*, size_t, uint8_t);
-  void interruptSpellCast(const uint8_t*);
-  void selfFinishSpellCast(const uint8_t*);
+  void simpleMessage(const uint8_t* cmsg, size_t, uint8_t);
   void spellMessage(QString&);
+  void zoneChanged(void);
+  void killSpawn(const Item* deceased);
   void timeout();
 
  protected:
-  SpellItem* InsertSpell(const startCastStruct *c);
-  SpellItem* InsertSpell(const spellBuff *c);
-  void UpdateSpell(SpellItem* item, const startCastStruct *);
-  void UpdateSpell(SpellItem* item, const spellBuff *); //for spellBuff loading
-  void UpdateSpell(SpellItem* item, const actionStruct *); // for others spells
-  void UpdateSpell(SpellItem* item, const buffStruct *b);
-  void DeleteSpell(SpellItem *);
-  SpellItem* FindSpell(int spell_id, int caster_id, int target_id);
+  void deleteSpell(SpellItem *);
+  SpellItem* findSpell(uint16_t spellId, 
+		       uint16_t targetId, const QString& targetName);
+  SpellItem* findSpell(int spell_id);
   SpellItem* FindSpell(int spell_id, int target_id);
-  SpellItem* FindSpell(int spell_id);
   
  private:
   Player* m_player;
   SpawnShell* m_spawnShell;
   Spells* m_spells;
-  QValueList<SpellItem *> m_spellList, m_deleteList;
+  QValueList<SpellItem *> m_spellList;
+  SpellItem* m_lastPlayerSpell;
   QTimer *m_timer;
 };
 

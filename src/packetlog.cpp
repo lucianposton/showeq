@@ -329,7 +329,8 @@ void PacketStreamLog::decodedStreamPacket(const uint8_t* data, size_t len,
 					  uint8_t dir, uint16_t opcode, 
 					  const EQPacketOPCode* opcodeEntry)
 {
-  logData(data, len, dir, opcode, opcodeEntry, "[Decoded]");
+  if ((opcode != 0x0024) && (opcode != 0x003b))
+    logData(data, len, dir, opcode, opcodeEntry, "[Decoded]");
 }
 
 //----------------------------------------------------------------------

@@ -325,6 +325,7 @@ class MapIcons : public QObject
  protected:
   QColor pickSpawnPointColor(const SpawnPoint* sp, 
 			     const QColor& defColor);
+  QColor pickSpawnColor(const Spawn* spawn);
   Player* m_player; 
   QString m_preferenceName;
   MapIcon m_mapIcons[tIconTypeMax+1];

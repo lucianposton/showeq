@@ -62,7 +62,7 @@ Terminal::Terminal(Messages* messages,
 		   QObject* parent, const char* name)
   : QObject(parent, name),
     m_messages(messages),
-    m_enabledTypes(0xFFFFFFFFFFFFFFFF),
+    m_enabledTypes(0xFFFFFFFFFFFFFFFFULL),
     m_itemPattern("\022(\\d{5,7})\\w*-\\d+-\\d+-\\d+-\\d+-.{13}([^\022]+)\022"),    m_dateTimeFormat("hh:mm"),
     m_eqDateTimeFormat("ddd M/d/yyyy h:mm"),
     m_displayType(true),

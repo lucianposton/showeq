@@ -1,5 +1,46 @@
 Version: $Id$ $Name$
 
+dohpaZ (12/?/03)
+---------------------
++ Updated version to 5.0.0.2
++ Updated the default ArqSeqGiveUp to 512 since with the current encryption
+  scheme a single missed packet can have greater ramifications then under the
+  previous one.
++ Removed some extraneous command line options.
++ Removed some more cruft from ShowEQParams.
++ Minor tweak to map spawn color selection to deal with properly with traps,
+  event-triggers, and timers.
++ Many SpellShell improvements
+  + Made it delete expired spells faster (after up to 6 seconds of 0, 
+    rather then 20).  
+  + Modified it to delete spells from the list for spawns that are killed.  
+  + It also now clears the caster and target ids when you zone, since they are 
+    not valid in the new zone.  This allows for it to fall back to matching
+    by target name for spells not cast in the current zone.
+  + Major revamp of how spells are internally managed.  This fixed numerous
+    bugs and usability issues.
+  + Added support for handling spell failure messages so that failed spells 
+    will be removed from the list.
++ Fixed parsing of the spells_us.txt for the targettype field. This fixed
+  numerous problems with the handling of self-only spells.
++ Added a workaround to allow the use of autoconf 2.13 which turns out not
+  to properly support automake's BUILT_SOURCES feature.
++ Added stdlib.h inclusion to xmlpreferences.cpp to fix the build on some
+  Linux distributions.
++ Fixed addition/update of the user message filter list when no or only
+  one item is present.
++ Integrated patches # 855993 "Map: potimea", # 855994 "Map: potime-b", 
+  # 855995 "Map: poearth-a", # 855996 "Map: poearth-b" submitted by curioseq
++ Integrated patch "showeq-5.0.0-gcc-3.3.x.patch.gz" that fixes the gcc 3.3 
+  compatibility problem caused by a noxious bug introduced in gcc 3.3.
++ Updated several structures in everquest.h to be more inline with EQEmu's
+  latest updates.
++ Added Group opcodes to zoneopcodes.xml.  Updated group structures, and 
+  updated group notification support in MessageShell.
++ Major revamp of the GroupMgr.  It now actually works.
++ Fixed map loading to be more robust in the face of malformed map files.
++ Fixed line 77 of Overthere.map (which map loading was choking on).
+
 dohpaZ (12/7/03)
 ---------------------
 + Updated version to 5.0.0.1

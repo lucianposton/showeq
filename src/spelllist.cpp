@@ -314,7 +314,7 @@ void SpellList::mouseDoubleClicked(QListViewItem *item)
   SpellListItem *i = (SpellListItem *)item;
   const SpellItem *j = i->item(); 
   if (j)
-    m_spellShell->DeleteSpell(j);
+    m_spellShell->deleteSpell(j);
 }
 
 void SpellList::rightButtonClicked(QListViewItem *item, const QPoint& pos,

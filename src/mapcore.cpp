@@ -628,15 +628,15 @@ void MapData::loadMap(const QString& fileName, bool import)
 	
 	// create an M line
 	currentLineM = new MapLineM(name, color, linePoints);
-	
+
 	numPoints = 0;
-	while (fit != fields.end()) 
+	while ((fit != fields.end()) && (numPoints < linePoints))
         {
 	  // X coord
 	  mx = (*fit++).toShort();
 	  my = (*fit++).toShort();
 	  mz = (*fit++).toShort();
-	  
+
 	  // set the point data
 	  currentLineM->setPoint(numPoints, mx, my, mz);
 	  
@@ -717,7 +717,7 @@ void MapData::loadMap(const QString& fileName, bool import)
 	numPoints = 0;
 	
 	// keep going until we run out of fields... 
-	while (numPoints < linePoints) 
+	while ((fit != fields.end()) && (numPoints < linePoints))
         {
 	  // X coord
 	  mx = (*fit++).toShort();

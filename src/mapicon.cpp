@@ -1032,7 +1032,7 @@ void MapIcons::paintSpawnIcon(MapParameters& param,
     if (mapIcon.imageUseSpawnColorPen())
     {
       QPen pen = mapIcon.imagePen();
-      pen.setColor(m_player->pickConColor(spawn->level()));
+      pen.setColor(pickSpawnColor(spawn));
       p.setPen(pen);
     }
     else
@@ -1041,7 +1041,7 @@ void MapIcons::paintSpawnIcon(MapParameters& param,
     if (mapIcon.imageUseSpawnColorBrush())
     {
       QBrush brush = mapIcon.imageBrush();
-      brush.setColor(m_player->pickConColor(spawn->level()));
+      brush.setColor(pickSpawnColor(spawn));
       p.setBrush(brush);
     }
     else
@@ -1060,7 +1060,7 @@ void MapIcons::paintSpawnIcon(MapParameters& param,
     if (mapIcon.highlightUseSpawnColorPen())
     {
       QPen pen = mapIcon.highlightPen();
-      pen.setColor(m_player->pickConColor(spawn->level()));
+      pen.setColor(pickSpawnColor(spawn));
       p.setPen(pen);
     }
     else
@@ -1069,7 +1069,7 @@ void MapIcons::paintSpawnIcon(MapParameters& param,
     if (mapIcon.highlightUseSpawnColorBrush())
     {
       QBrush brush = mapIcon.highlightBrush();
-      brush.setColor(m_player->pickConColor(spawn->level()));
+      brush.setColor(pickSpawnColor(spawn));
       p.setBrush(brush);
     }
     else
@@ -1227,3 +1227,18 @@ QColor MapIcons::pickSpawnPointColor(const SpawnPoint* sp,
   return color;
 }
 
+QColor MapIcons::pickSpawnColor(const Spawn* spawn)
+{
+  switch (spawn->typeflag())
+  {
+  case 65:
+    return Qt::magenta;
+  case 66:
+  case 67:
+    return Qt::darkMagenta;
+  default:
+    break;
+  }
+
+  return m_player->pickConColor(spawn->level());
+}

@@ -688,20 +688,27 @@ void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len,
  #ifdef PACKET_PAYLOAD_SIZE_DIAG
     if (!found && !opcodeEntry->isEmpty())
     {
-      seqWarn("Warning: %s  (%#04x) (dataLen: %d) doesn't match:",
-	      (const char*)opcodeEntry->name(), opcodeEntry->opcode(), len);
-      while ((payload = pit.current()) != 0)
+      QString tempStr;
+      tempStr.sprintf("%s  (%#04x) (dataLen: %d) doesn't match:",
+		      (const char*)opcodeEntry->name(), opcodeEntry->opcode(), 
+		      len);
+      
+      for (payload = pit.toFirst(); 
+	   payload != 0; 
+	   payload = ++pit)
       {
 	if (payload->dir() & m_dir)
         {
 	  if (payload->sizeCheckType() == SZC_Match)
-	    seqWarn("\tsizeof(%s):%d", 
-		       (const char*)payload->typeName(), payload->typeSize());
+	    tempStr += QString(" sizeof(%1):%2")
+	      .arg(payload->typeName()).arg(payload->typeSize());
 	  else if (payload->sizeCheckType() == SZC_Modulus)
-	    seqWarn("\tmodulus of sizeof(%s):%d", 
-		       (const char*)payload->typeName(), payload->typeSize());
+	    tempStr += QString(" modulus of sizeof(%s):%d")
+	      .arg(payload->typeName()).arg(payload->typeSize());
 	}
       }      
+
+      seqWarn(tempStr);
     }
 #endif // PACKET_PAYLOAD_SIZE_DIAG
   }

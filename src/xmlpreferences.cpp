@@ -14,6 +14,11 @@
  */
 
 
+#include "xmlpreferences.h"
+#include "xmlconv.h"
+
+#include <stdlib.h>
+
 #include <qfile.h>
 #include <qnamespace.h>
 #include <qaccel.h>
@@ -25,8 +30,6 @@
 #endif
 #include <qtextstream.h>
 
-#include "xmlpreferences.h"
-#include "xmlconv.h"
 
 const float seqPrefVersion = 1.0;
 const char* seqPrefName = "seqpreferences";

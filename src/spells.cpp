@@ -159,7 +159,7 @@ Spell::Spell(const QString& spells_enLine)
   m_name = spellInfo[1];
   m_buffDurationFormula = spellInfo[16].toUShort();
   m_buffDurationArgument = spellInfo[17].toUShort();
-  m_targetType = uint8_t(spellInfo[86].toUShort());
+  m_targetType = uint8_t(spellInfo[98].toUShort());
 
   for (size_t i = 0; i < playerClasses; i++)
     m_classLevels[i] = uint8_t(spellInfo[104 + i].toUShort());

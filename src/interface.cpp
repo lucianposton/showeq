@@ -201,7 +201,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    m_packet = new EQPacket(fileInfo.absFilePath(),
 			   fileInfo2.absFilePath(),
-			   pSEQPrefs->getPrefInt("ArqSeqGiveUp", section, 256),
+			   pSEQPrefs->getPrefInt("ArqSeqGiveUp", section, 512),
 			   pSEQPrefs->getPrefString("Device", section, "eth0"),
 			   pSEQPrefs->getPrefString("IP", section,
 						    AUTOMATIC_CLIENT_IP),
@@ -310,7 +310,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 				     m_zoneMgr, m_spawnShell);
 
    // Create the Group Manager
-   m_groupMgr = new GroupMgr(m_spawnShell, m_player, "groupmgr");
+   m_groupMgr = new GroupMgr(m_spawnShell, m_player, this, "groupmgr");
 
    // Create the message shell
    m_messageShell = new MessageShell(m_messages, m_eqStrings, m_spells, 
@@ -499,7 +499,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    //
    // Create the Net Statistics window as required
    // 
-   if (showeq_params->net_stats)
+   if (pSEQPrefs->getPrefBool("ShowNetStats", section, false))
      showNetDiag();
 
 /////////////////////
@@ -1379,12 +1379,14 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    pDebugMenu->insertItem("List S&pawns", this, SLOT(listSpawns()), ALT+CTRL+Key_P);
    pDebugMenu->insertItem("List &Drops", this, SLOT(listDrops()), ALT+CTRL+Key_D);
    pDebugMenu->insertItem("List &Map Info", this, SLOT(listMapInfo()), ALT+CTRL+Key_M);
-   pDebugMenu->insertItem("List Guild Info", m_guildmgr, SLOT(listGuildInfo()));
-   pDebugMenu->insertItem("Dump S&pawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_P);
-   pDebugMenu->insertItem("Dump &Drops", this, SLOT(dumpDrops()), ALT+SHIFT+CTRL+Key_D);
-   pDebugMenu->insertItem("Dump Map &Info", this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
+   pDebugMenu->insertItem("List G&uild Info", m_guildmgr, SLOT(listGuildInfo()));
+   pDebugMenu->insertItem("List &Group", this, SLOT(listGroup()), ALT+CTRL+Key_G);
+   pDebugMenu->insertItem("Dump Spawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_P);
+   pDebugMenu->insertItem("Dump Drops", this, SLOT(dumpDrops()), ALT+SHIFT+CTRL+Key_D);
+   pDebugMenu->insertItem("Dump Map Info", this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
    pDebugMenu->insertItem("Dump Guild Info", this , SLOT(dumpGuildInfo()));
    pDebugMenu->insertItem("Dump SpellBook Info", this , SLOT(dumpSpellBook()));
+   pDebugMenu->insertItem("Dump Group", this, SLOT(dumpGroup()), ALT+CTRL+SHIFT+Key_G);
    pDebugMenu->insertItem("List &Filters", m_filterMgr, SLOT(listFilters()), ALT+CTRL+Key_F);
    pDebugMenu->insertItem("List &Zone Filters", m_filterMgr, SLOT(listZoneFilters()));
 
@@ -1526,15 +1528,24 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    if (m_groupMgr != 0)
    {
-#if 0 // ZBTEMP: Until we re-figure this packet out
-     // connect GroupMgr slots to EQPacket signals
-     connect(m_packet, SIGNAL(groupInfo(const uint8_t*, size_t, uint8_t)),
-	     m_groupMgr, SLOT(handleGroupInfo(const uint8_t*)));
-#endif
-
+     m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
+			"charProfileStruct", SZC_Match,
+			m_groupMgr, SLOT(player(const uint8_t*)));
+     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
+			"groupUpdateStruct", SZC_Match,
+			m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));
+     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
+			"groupFullUpdateStruct", SZC_Match,
+			m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));
+     // connect GroupMgr slots to SpawnShell signals
+     connect(m_spawnShell, SIGNAL(addItem(const Item*)),
+	     m_groupMgr, SLOT(addItem(const Item*)));
      // connect GroupMgr slots to SpawnShell signals
      connect(m_spawnShell, SIGNAL(delItem(const Item*)),
 	     m_groupMgr, SLOT(delItem(const Item*)));
+     // connect GroupMgr slots to SpawnShell signals
+     connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
+	     m_groupMgr, SLOT(killSpawn(const Item*)));
    }
 
    if (m_dateTimeMgr)
@@ -1701,17 +1712,28 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
      connect(m_dateTimeMgr, SIGNAL(syncDateTime(const QDateTime&)),
 	     m_messageShell, SLOT(syncDateTime(const QDateTime&)));
+
+     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
+			"groupUpdateStruct", SZC_Match,
+			m_messageShell, SLOT(groupUpdate(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
+			"groupFullUpdateStruct", SZC_Match,
+			m_messageShell, SLOT(groupUpdate(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Server|DIR_Client,
+			"groupInviteStruct", SZC_Match,
+			m_messageShell, SLOT(groupInvite(const uint8_t*)));
+     m_packet->connect2("OP_GroupInvite2", SP_Zone, DIR_Server|DIR_Client,
+			"groupInviteStruct", SZC_Match,
+			m_messageShell, SLOT(groupInvite(const uint8_t*)));
+     m_packet->connect2("OP_GroupFollow", SP_Zone, DIR_Server|DIR_Client,
+			"groupFollowStruct", SZC_Match,
+			m_messageShell, SLOT(groupFollow(const uint8_t*)));
+     m_packet->connect2("OP_GroupDisband", SP_Zone, DIR_Server|DIR_Client,
+			"groupDisbandStruct", SZC_Match,
+			m_messageShell, SLOT(groupDisband(const uint8_t*, size_t, uint8_t)));
 #if 0 // ZBTEMP
-     connect(m_packet, SIGNAL(groupInfo(const uint8_t*, size_t, uint8_t)),
-	     m_messageShell, SLOT(groupInfo(const uint8_t*)));
-     connect(m_packet, SIGNAL(groupInvite(const uint8_t*, size_t, uint8_t)),
-	     m_messageShell, SLOT(groupInvite(const uint8_t*)));
      connect(m_packet, SIGNAL(groupDecline(const uint8_t*, size_t, uint8_t)),
 	     m_messageShell, SLOT(groupDecline(const uint8_t*)));
-     connect(m_packet, SIGNAL(groupAccept(const uint8_t*, size_t, uint8_t)),
-	     m_messageShell, SLOT(groupAccept(const uint8_t*)));
-     connect(m_packet, SIGNAL(groupDelete(const uint8_t*, size_t, uint8_t)),
-	     m_messageShell, SLOT(groupDelete(const uint8_t*)));
 #endif // ZBTEMP
    }
 
@@ -1823,7 +1845,15 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 		      "spawnStruct", SZC_Modulus,
 		      m_spawnShell, SLOT(zoneSpawns(const uint8_t*, size_t)));
 
-  // connect the SpellShell slot to Player Signal
+   // connect the SpellShell slots to ZoneMgr signals
+   connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
+	   m_spellShell, SLOT(zoneChanged()));
+   
+   // connect the SpellShell slots to SpawnShell signals
+   connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
+	   m_spellShell, SLOT(killSpawn(const Item*)));
+   
+   // connect the SpellShell slots to Player signals
    connect(m_player, SIGNAL(newPlayer(void)),
 	   m_spellShell, SLOT(clear()));
    connect(m_player, SIGNAL(buffLoad(const spellBuff *)), 
@@ -1833,19 +1863,17 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_CastSpell", SP_Zone, DIR_Server|DIR_Client,
 		      "startCastStruct", SZC_Match,
 		      m_spellShell, SLOT(selfStartSpellCast(const uint8_t*)));
-   m_packet->connect2("OP_MemorizeSpell", SP_Zone, DIR_Server|DIR_Client,
-		      "memSpellStruct", SZC_Match,
-		      m_spellShell, SLOT(selfFinishSpellCast(const uint8_t*)));
    m_packet->connect2("OP_Buff", SP_Zone, DIR_Server|DIR_Client,
 		      "buffStruct", SZC_Match,
 		      m_spellShell, SLOT(buff(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_Action", SP_Zone, DIR_Server|DIR_Client,
 		      "actionStruct", SZC_Match,
 		      m_spellShell, SLOT(action(const uint8_t*, size_t, uint8_t)));
-#if 0 // ZBTEMP
-   connect(m_packet, SIGNAL(interruptSpellCast(const uint8_t*, size_t, uint8_t)),
-	   m_spellShell, SLOT(interruptSpellCast(const uint8_t*)));
-#endif
+   m_packet->connect2("OP_SimpleMessage", SP_Zone, DIR_Server,
+		      "simpleMessageStruct", SZC_None,
+		      m_spellShell,
+		      SLOT(simpleMessage(const uint8_t*, size_t, uint8_t)));
+
 
    // connect Player slots to EQPacket signals
    m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
@@ -2889,11 +2917,15 @@ void EQInterface::listSpawns (void)
   debug ("listSpawns()");
 #endif /* DEBUG */
 
+  QString outText;
+
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
+  QTextStream out(&outText, IO_WriteOnly);
   
    // dump the spawns 
   m_spawnShell->dumpSpawns(tSpawn, out);
+
+  seqInfo((const char*)outText);
 }
 
 void EQInterface::listDrops (void)
@@ -2901,12 +2933,15 @@ void EQInterface::listDrops (void)
 #ifdef DEBUG
   debug ("listDrops()");
 #endif /* DEBUG */
+  QString outText;
 
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
+  QTextStream out(&outText, IO_WriteOnly);
 
   // dump the drops
   m_spawnShell->dumpSpawns(tDrop, out);
+
+  seqInfo((const char*)outText);
 }
 
 void EQInterface::listMapInfo(void)
@@ -2914,9 +2949,10 @@ void EQInterface::listMapInfo(void)
 #ifdef DEBUG
   debug ("listMapInfo()");
 #endif /* DEBUG */
+  QString outText;
 
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
+  QTextStream out(&outText, IO_WriteOnly);
 
   // dump map managers info
   m_mapMgr->dumpInfo(out);
@@ -2928,6 +2964,8 @@ void EQInterface::listMapInfo(void)
     if (m_map[i] != 0)
       m_map[i]->dumpInfo(out);
   }
+
+  seqInfo((const char*)outText);
 }
 
 void EQInterface::listInterfaceInfo(void)
@@ -2936,13 +2974,34 @@ void EQInterface::listInterfaceInfo(void)
   debug ("listMapInfo()");
 #endif /* DEBUG */
 
+  QString outText;
+
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
+  QTextStream out(&outText, IO_WriteOnly);
 
   out << "Map window layout info:" << endl;
   out << "-----------------------" << endl;
   out << *this;
   out << "-----------------------" << endl;
+
+
+  seqInfo((const char*)outText);
+}
+
+void EQInterface::listGroup(void)
+{
+#ifdef DEBUG
+  debug ("listGroup()");
+#endif /* DEBUG */
+  QString outText;
+
+  // open the output data stream
+  QTextStream out(&outText, IO_WriteOnly);
+
+  // dump the drops
+  m_groupMgr->dumpInfo(out);
+
+  seqInfo((const char*)outText);
 }
 
 
@@ -3081,6 +3140,26 @@ void EQInterface::dumpSpellBook(void)
 
     out << txt << endl;
   }
+}
+
+void EQInterface::dumpGroup(void)
+{
+#ifdef DEBUG
+  debug ("dumpGroup()");
+#endif /* DEBUG */
+
+  QString logFile = pSEQPrefs->getPrefString("DumpGroupFilename", "Interface",
+					     "dumpgroup.txt");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("dumps", logFile);
+
+  // open the output data stream
+  QFile file(logFileInfo.absFilePath());
+  file.open(IO_WriteOnly);
+  QTextStream out(&file);
+
+  // dump the drops
+  m_groupMgr->dumpInfo(out);
 }
 
 void
@@ -3674,10 +3753,14 @@ void EQInterface::toggle_opcode_log(int id)
   bool state = !pSEQPrefs->getPrefBool("Log", section, false);
 
   if (m_opcodeMonitorLog)
+  {
     m_opcodeMonitorLog->setLog(state);
 
+    state = m_opcodeMonitorLog->log();
+  }
+
   menuBar()->setItemChecked (id, state);
-  pSEQPrefs->setPrefBool("logs", section, state);
+  pSEQPrefs->setPrefBool("Log", section, state);
 }
 
 void EQInterface::toggle_opcode_view(int id)
@@ -4647,7 +4730,7 @@ void EQInterface::disableAllTypeFilters()
 
 void EQInterface::enableAllTypeFilters()
 {
-  m_terminal->setEnabledTypes(0xFFFFFFFFFFFFFFFF);
+  m_terminal->setEnabledTypes(0xFFFFFFFFFFFFFFFFULL);
 
   // make sure the All menu items are unchecked
   m_terminalTypeFilterMenu->setItemChecked(64, false);

@@ -179,6 +179,10 @@
     <opcode id="00c0" name="OP_SenseHeading" updated="11/05/03">
         <comment>old cSenseHeadingCode</comment>
     </opcode>
+    <opcode id="00cd" name="OP_GroupInvite2" updated="11/05/03">
+        <payload dir="both" typename="groupInviteStruct" sizechecktype="match"/>
+        <comment></comment>
+    </opcode>
     <opcode id="00d0" name="OP_Jump" updated="11/05/03">
         <comment>old cJumpCode?</comment>
     </opcode>
@@ -237,6 +241,10 @@
     </opcode>
     <opcode id="00f6" name="OP_ReqClientSpawn" updated="11/05/03">
         <comment>Client requesting spawn data</comment>
+    </opcode>
+    <opcode id="00f8" name="OP_GroupDisband" updated="11/05/03">
+        <comment></comment>
+        <payload dir="both" typename="groupDisbandStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="00f9" name="?" implicitlen="136" updated="11/05/03">
         <comment>Unknown, but has implicit length</comment>
@@ -572,6 +580,19 @@
     <opcode id="0232" name="OP_InspectAnswer" updated="11/05/03">
         <comment>old InspectDataCode</comment>
         <payload dir="server" typename="inspectDataStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="0233" name="OP_GroupUpdate" updated="11/05/03">
+        <payload dir="server" typename="groupUpdateStruct" sizechecktype="match"/>
+        <payload dir="server" typename="groupFullUpdateStruct" sizechecktype="match"/>
+        <comment></comment>
+    </opcode>
+    <opcode id="0247" name="OP_GroupFollow" updated="11/05/03">
+        <payload dir="both" typename="groupFollowStruct" sizechecktype="match"/>
+        <comment></comment>
+    </opcode>
+    <opcode id="0248" name="OP_GroupInvite" updated="11/05/03">
+        <payload dir="both" typename="groupInviteStruct" sizechecktype="match"/>
+        <comment></comment>
     </opcode>
     <opcode id="024e" name="OP_ZoneUnavail" updated="11/05/03">
         <comment></comment>
