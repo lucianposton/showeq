@@ -1,3 +1,9 @@
+dohpaZ (02/01/02)
+---------------------
+Bug Fixes:
+ + Fixed it so that people who don't need to specify a path to the qt libraries
+   won't get a bogus -rpath in their link lines.
+
 dohpaZ (01/01/02)
 ---------------------
 Modifications:

@@ -3226,10 +3226,10 @@ void EQInterface::addItem(const Item* item)
     if (showeq_params->spawnfilter_loglocates)
       logFilteredSpawn(item, FILTER_FLAG_LOCATE);
 
-	// Deside how to handle audio alerts
-	//
-	makeNoise(item, "LocateSpawnAudioCommand", "Locate Spawned");
-
+    // Deside how to handle audio alerts
+    //
+    makeNoise(item, "LocateSpawnAudioCommand", "Locate Spawned");
+    
     // note the new selection
     m_selectedSpawn = item;
     
@@ -3250,9 +3250,9 @@ void EQInterface::addItem(const Item* item)
     if (showeq_params->spawnfilter_logcautions)
       logFilteredSpawn(item, FILTER_FLAG_CAUTION);
 
-	// Deside how to handle audio alerts
-	//
-	makeNoise(item, "CautionSpawnAudioCommand", "Caution Spawned");
+    // Deside how to handle audio alerts
+    //
+    makeNoise(item, "CautionSpawnAudioCommand", "Caution Spawned");
 
   } // End CAUTION Filter alerting
   
@@ -3266,9 +3266,9 @@ void EQInterface::addItem(const Item* item)
     if (showeq_params->spawnfilter_loghunts)
       logFilteredSpawn(item, FILTER_FLAG_HUNT);
 
-	// Deside how to handle audio alerts
+    // Deside how to handle audio alerts
     //
-	makeNoise(item, "HuntSpawnAudioCommand", "Hunt Spawned");
+    makeNoise(item, "HuntSpawnAudioCommand", "Hunt Spawned");
 
   } // End HUNT Filter alerting
   
@@ -3282,10 +3282,9 @@ void EQInterface::addItem(const Item* item)
     if (showeq_params->spawnfilter_logdangers)
       logFilteredSpawn(item, FILTER_FLAG_DANGER);
 
-	// Deside how to handle audio alerts
+    // Deside how to handle audio alerts
     //
-	makeNoise(item, "DangerSpawnAudioCommand", "Danger Spawned");
-
+    makeNoise(item, "DangerSpawnAudioCommand", "Danger Spawned");
   } // End DANGER Filter alerting
 }
 
@@ -3432,17 +3431,19 @@ void EQInterface::handleAlert(const Item* item,
 
 // Deside how to handle audio alerts
 //
-void EQInterface::makeNoise( const Item* item, char* szAudioCmd, char* szSoundType)
+void EQInterface::makeNoise( const Item* item, 
+			     char* szAudioCmd, 
+			     char* szSoundType)
 {
-    if (!showeq_params->spawnfilter_audio)
-		{
-		fprintf(stderr,"\a");
-		fflush(stderr);
-		}
-    else
-      doAlertCommand(item, 
-		     pSEQPrefs->getPrefString(szAudioCmd, "Filters"),
-		     szSoundType);
+  if (!showeq_params->spawnfilter_audio)
+  {
+    fprintf(stderr,"\a");
+    fflush(stderr);
+  }
+  else
+    doAlertCommand(item, 
+		   pSEQPrefs->getPrefString(szAudioCmd, "Filters"),
+		   szSoundType);
 }
 
 void EQInterface::doAlertCommand(const Item* item, 

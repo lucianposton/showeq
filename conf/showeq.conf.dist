@@ -26,7 +26,6 @@ DefaultDeity            140
 #Tribunal 214, Tun 215, Rodcet 212, Veeshan 216
 
 [Filters]
-UseOldFilters               0    # if 1, old alert/filter method (SpawnFilterFile and spawns.conf for alerts)
 FilterFile                  /usr/local/share/showeq/filters.conf
 SpawnFilterFile             /usr/local/share/showeq/filter.conf
 LogLocates					1

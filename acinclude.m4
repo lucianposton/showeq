@@ -1748,7 +1748,11 @@ AC_ARG_ENABLE(rpath,
 
 if test -z "$SHOWEQ_RPATH" && test "$USE_RPATH" = "yes"; then
 
-  SHOWEQ_RPATH="-rpath \$(qt_libraries)"
+  SHOWEQ_RPATH=
+
+  if test -n "$qt_libraries"; then
+    SHOWEQ_RPATH="$SHOWEQ_RPATH -rpath \$(qt_libraries)"
+  fi
 
   dnl $x_libraries is set to /usr/lib in case
   if test -n "$X_LDFLAGS"; then
