@@ -1,3 +1,9 @@
+dohpaZ (13/06/02)
+------------------
+Modifications:
+ + Added curio's updated Kurn, Droga, and Hollowshade Moor maps (hopefully for
+   real this time (cvs commit didn't catch them last time for some reason).
+
 dohpaZ (12/06/02)
 ------------------
 Modifications:
@@ -10,7 +16,7 @@ Modifications:
    category.
  + Updated spells.h to 12/06/02 patch
  + Added Pasla's Shawl 8 spawn points to the Iceclad map
- + Added curio's updated Kurn, Droga, and Hollowsahde Moor maps
+ + Added curio's updated Kurn, Droga, and Hollowshade Moor maps
  + Applied patch # 566996 "Patch to dump player + bank items" from nalr 
    (Morannon).
  + Modified the code to dump bank items to use the Qt classes.
