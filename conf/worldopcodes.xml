@@ -4,7 +4,7 @@
     <opcode id="0018" name="OP_AckPacket" updated="02/10/04">
         <comment>Appears to be generic ack at the presentation level</comment>
     </opcode>
-    <opcode id="005e" name="OP_GuildList" updated="02/10/04">
+    <opcode id="005d" name="OP_GuildList" updated="07/14/04">
         <comment>old GuildListCode</comment>
         <payload dir="server" typename="worldGuildListStruct" sizechecktype="match"/>
     </opcode>
@@ -14,7 +14,7 @@
     <opcode id="00ec" name="OP_DeleteCharacter" updated="02/10/04">
         <comment>Delete character @ char select</comment>
     </opcode>
-    <opcode id="0104" name="OP_SendCharInfo" updated="02/10/04">
+    <opcode id="0102" name="OP_SendCharInfo" updated="07/14/04">
         <comment>Send all chars visible @ char select</comment>
     </opcode>
     <opcode id="0106" name="OP_CharacterCreate" updated="02/10/04">
@@ -23,7 +23,7 @@
     <opcode id="0127" name="OP_ApproveName" updated="02/10/04">
         <comment>Approving new character name @ char creation</comment>
     </opcode>
-    <opcode id="015c" name="OP_World_Client_CRC1" updated="02/10/04">
+    <opcode id="015a" name="OP_World_Client_CRC1" updated="07/14/04">
         <comment>Contains a snippet of spell data</comment>
     </opcode>
     <opcode id="0160" name="OP_World_Client_CRC2" updated="02/10/04">

@@ -305,3 +305,42 @@
 { "qvic", "Qvic, Prayer Grounds of Calling" }, // 295
 { "inktuta", "Inktu`Ta, The Unmasked Chapel" }, // 296
 { "txevu", "Txevu, Lair of the Elite" }, // 297
+{ "tacvi", "Tacvi, Seat of the Slaver" }, // 298
+{ "qvicb", "Qvic, the Hiden Vault" }, // 299
+{ "wallofslaughter", "Wall of Slaughter" }, // 300
+{ "bloodfields", "The Bloodfields" }, // 301
+{ "draniksscar", "Dranik's Scar" }, // 302
+{ "causeway", "Nobles' Causeway" }, // 303
+{ "chambera", "Mata Muram's Labyrinth" }, // 304
+{ "chamberb", "Mata Muram's Labyrinth" }, // 305
+{ "chamberc", "Mata Muram's Labyrinth" }, // 306
+{ "chamberd", "Mata Muram's Labyrinth" }, // 307
+{ "chambere", "Mata Muram's Labyrinth" }, // 308
+{ "chamberf", "Mata Muram's Labyrinth" }, // 309
+{ NULL, NULL }, // 310
+{ NULL, NULL }, // 311
+{ NULL, NULL }, // 312
+{ NULL, NULL }, // 313
+{ NULL, NULL }, // 314
+{ NULL, NULL }, // 315
+{ "provinggrounds", "Muramite Provinggrounds" }, // 316
+{ "anguish", "Asylum of Anguish" }, // 317
+{ "dranikhollowsa", "Dranik's Hollows" }, // 318
+{ "dranikhollowsb", "Dranik's Hollows" }, // 319
+{ "dranikhollowsc", "Dranik's Hollows" }, // 320
+{ "dranikhollowsd", "Dranik's Hollows" }, // 321
+{ "dranikhollowse", "Dranik's Hollows" }, // 322
+{ "dranikhollowsf", "Dranik's Hollows" }, // 323
+{ "dranikhollowsg", "Dranik's Hollows" }, // 324
+{ "dranikhollowsh", "Dranik's Hollows" }, // 325
+{ "dranikhollowsi", "Dranik's Hollows" }, // 326
+{ "dranikhollowsj", "Dranik's Hollows" }, // 327
+{ "dranikcatacombsa", "Catacombs of Dranik" }, // 328
+{ "dranikcatacombsb", "Catacombs of Dranik" }, // 329
+{ "dranikcatacombsc", "Catacombs of Dranik" }, // 330
+{ "draniksewersa", "Sewers of Dranik" }, // 331
+{ "draniksewersb", "Sewers of Dranik" }, // 332
+{ "draniksewersc", "Sewers of Dranik" }, // 333
+{ "riftseekers", "Riftbreakers' Sanctum" }, // 334
+{ "harbingers", "Harbingers' Spire" }, // 335
+{ "dranik", "The Ruined City of Dranik" }, // 336

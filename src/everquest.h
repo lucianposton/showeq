@@ -297,12 +297,12 @@ struct Color_Struct
   {
     struct
     {
-      uint8_t red;
-      uint8_t green;
-      uint8_t blue;
-      uint8_t unused;
+/*0000*/uint8_t blue;
+/*0001*/uint8_t red;
+/*0002*/uint8_t green;
+/*0003*/uint8_t unknown0003;
     } rgb;
-    uint32_t color;
+/*0000*/uint32_t color;
   };
 };
 
