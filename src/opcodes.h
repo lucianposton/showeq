@@ -29,17 +29,31 @@
 
 #define ChannelMessageCode          0x001f // 
 
+#define TimeOfDayCode               0x0021 //
+
 #define PlayerPosCode               0x0022 // 
 
 #define MobUpdateCode               0x0039 //
 
 #define GuildMemberUpdate           0x0055 //?
 
+#define SkillIncCode                0x0060 //
+
+#define xBuyItemCode                0x0061 //
+
 #define CharProfileCode             0x0067 //
+
+#define CloseVendorCode             0x0068 // 
 
 #define StartCastCode               0x00bb //
 
 #define MemSpellCode                0x00bf // 
+
+#define cSenseHeadingCode           0x00c0 //
+
+#define cJumpCode                   0x00d0 //
+
+#define ActionCode                  0x00db //
 
 #define NewZoneCode                 0x00e4 //
 
@@ -47,15 +61,25 @@
 
 #define DeleteSpawnCode             0x00ec //
 
-#define MakeDropCode                0x00f3 //
+#define OpenVendorCode              0x00f0 // 
 
-#define RemDropCode                 0x00fd //?
+#define RemDropCode                 0x00f2 //
+
+#define MakeDropCode                0x00f3 //
 
 #define NewCorpseCode               0x00fe //
 
-#define SpawnUpdateCode             0x013a //
+#define DoorOpenCode                0x0121 //
+
+#define SpawnUpdateCode             0x0125 //?
+
+#define OpenGMCode                  0x012f //
+
+#define CloseGMCode                 0x0133 //
 
 #define ZoneChangeCode              0x0136 // 
+
+#define SpawnAppearanceCode         0x013a //
 
 #define xBuffDropCode               0x0150 //
 
@@ -67,6 +91,10 @@
 
 #define DoorSpawnsCode              0x01b8 //
 
+#define cStartCampingCode           0x01c7 //
+
+#define cConCorpseCode              0x01db //
+
 #define FormattedMessageCode        0x01dd //
 
 #define NewSpawnCode                0x0201 //
@@ -75,13 +103,11 @@
 
 #define ZoneEntryCode               0x0224 //
 
+#define InspectDataCode             0x0232 // 
+
 #define NpcHpUpdateCode             0x0999
 
 #define CorpseLocCode               0xf014
-
-#define ActionCode                  0xf04d
-
-#define TimeOfDayCode               0xf0fe
 
 #define ManaDecrementCode           0xf175
 
@@ -90,30 +116,16 @@
 #define AltExpUpdateCode            0xf209
 
 
-// Obsoleted Item Codes, new code is 0x02c5 with entirely different format
-// and handling as of 08/26/03
-#define PlayerItemsCode             0x01dc
-
-#define PlayerContainerCode         0x018c
-
-#define PlayerBookCode              0x018d
-
-#define PlayerItemCode              0x018f
-
 /*********************/
 /* out of date          */
 
-#define SpawnAppearanceCode         0x0125 //
-
-#define DropCoinsCode               0x0740
-
-#define cStartCampingCode           0x0206
-
-#define RemoveCoinsCode             0x0820
-
-#define OpenVendorCode              0x00cd
+#define BeginCastCode               0x0016
 
 #define cItemInShopCode             0x007f
+
+#define cCursorItemCode             0x0149
+
+#define GroupInfoCode               0x0263
 
 #define SysMsgCode                  0x1420
 
@@ -121,13 +133,7 @@
 
 #define cRunToggleCode              0x1f40
 
-#define cJumpCode                   0x00a5
-
-#define GroupInfoCode               0x0263
-
 #define MoneyThingCode              0x2820
-
-#define cCursorItemCode             0x0149
 
 #define CharInfo                    0x2e40
 
@@ -136,10 +142,6 @@
 #define TradeItemInCode             0x3140
 
 #define TradeBookInCode             0x3440
-
-#define cConCorpseCode              0x0219
-
-#define xBuyItemCode                0x3540
 
 #define sSpellFizzleRegainCode      0x3542
 
@@ -153,13 +155,9 @@
 
 #define sSpellInterruptedCode       0x4142
 
-#define CloseGMCode                 0x4321
-
 #define GroupDeleteCode             0x4420
 
 #define sDoneLootingCode            0x4421
-
-#define CloseVendorCode             0x4541
 
 #define CastOnCode                  0x4640
 
@@ -193,12 +191,6 @@
 
 #define cHideCode                   0x8641
 
-#define cSenseHeadingCode           0x006b
-
-#define SkillIncCode                0x8941
-
-#define DoorOpenCode                0x0110
-
 #define IllusionCode                0x9140
 
 #define WearChangeCode              0x9240
@@ -207,15 +199,9 @@
 
 #define LevelUpUpdateCode           0x9841
 
-#define OpenGMCode                  0x9c20
-
 #define sLootItemCode               0xa040
 
 #define Attack2Code                 0xa140
-
-#define BeginCastCode               0x0016
-
-#define InspectDataCode             0x0261
 
 #define BookTextCode                0xffd2
 
@@ -232,5 +218,18 @@
 #define cWhoAllCode                 0xf440
 
 #define cChatFiltersCode            0xff41
+// Obsoleted Item Codes, new code is 0x02c5 with entirely different format
+// and handling as of 08/26/03
+#define PlayerItemsCode             0x01dc
+
+#define PlayerContainerCode         0x018c
+
+#define PlayerBookCode              0x018d
+
+#define PlayerItemCode              0x018f
+
+#define DropCoinsCode               0x0740 // Long since dead
+
+#define RemoveCoinsCode             0x0820 // Long since dead
 
 #endif // OPCODES_H

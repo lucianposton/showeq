@@ -128,13 +128,13 @@ void MapParameters::reAdjust()
   {
     m_zoomMapLength.setHeight((int)(m_screenLength.height() / xrat));
     if (m_zoom <= 1)
-      yoff = (m_zoomMapLength.height() - pyrat) / 2;
+      yoff = (m_zoomMapLength.height() - pyrat) >> 1;
   } 
   else if (yrat) 
   {
     m_zoomMapLength.setWidth((int)(m_screenLength.width() / yrat));
     if (m_zoom <= 1)
-      xoff = (m_zoomMapLength.width() - pxrat) / 2;
+      xoff = (m_zoomMapLength.width() - pxrat) >> 1;
   }
 
   // calculate the scaling ratio to use
@@ -149,19 +149,19 @@ void MapParameters::reAdjust()
   // center on the target based on target
   if (m_targetPointSet)
   {
-    iZMaxX = m_targetPoint.x() + m_panOffsetX + m_zoomMapLength.width() / 2;
-    iZMinX = m_targetPoint.x() + m_panOffsetX - m_zoomMapLength.width() / 2;
+    iZMaxX = m_targetPoint.x() + m_panOffsetX +( m_zoomMapLength.width() >> 1);
+    iZMinX = m_targetPoint.x() + m_panOffsetX - (m_zoomMapLength.width() >> 1);
     
-    iZMaxY = m_targetPoint.y() + m_panOffsetY + m_zoomMapLength.height() / 2;
-    iZMinY = m_targetPoint.y() + m_panOffsetY - m_zoomMapLength.height() / 2;
+    iZMaxY = m_targetPoint.y() + m_panOffsetY + (m_zoomMapLength.height() >> 1);
+    iZMinY = m_targetPoint.y() + m_panOffsetY - (m_zoomMapLength.height() >> 1);
   }
   else
   {
-    iZMaxX = m_panOffsetX + m_zoomMapLength.width()  / 2;
-    iZMinX = m_panOffsetX - m_zoomMapLength.width() / 2;
+    iZMaxX = m_panOffsetX + (m_zoomMapLength.width() >> 1);
+    iZMinX = m_panOffsetX - (m_zoomMapLength.width() >> 1);
     
-    iZMaxY = m_panOffsetY + m_zoomMapLength.height() / 2;
-    iZMinY = m_panOffsetY - m_zoomMapLength.height() / 2;
+    iZMaxY = m_panOffsetY + (m_zoomMapLength.height() >> 1);
+    iZMinY = m_panOffsetY - (m_zoomMapLength.height() >> 1);
   }
 
   // try not to have blank space on the sides
@@ -1472,7 +1472,7 @@ void MapData::paintDepthFilteredLines(MapParameters& param, QPainter& p) const
       // get current coordinates
       curX = mData[i].x();
       curY = mData[i].y();
-      curZ = mData[0].z();
+      curZ = mData[i].z();
       
       // determine if the current position is in bounds
       curInBounds = (inRect(screenBounds, curX, curY) &&
@@ -1674,7 +1674,7 @@ void MapData::paintFadedFloorsLines(MapParameters& param, QPainter& p) const
       curInBounds = inRect(screenBounds, curX, curY);
       
       // the use color is the average of the two colors
-      useColor = (newColor + oldColor) / 2;
+      useColor = (newColor + oldColor) >> 1;
       
       // draw the line segment if either end is in bounds
       if ((lastInBounds || curInBounds) && (useColor != 0))

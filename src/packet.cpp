@@ -2529,7 +2529,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 		** assigned the players ID
 		*/
 		 
-		emit setPlayerID( appearance->paramter );
+	      emit setPlayerID( appearance->paramter );
 
 		break;
 	    }

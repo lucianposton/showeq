@@ -321,7 +321,7 @@ void Spawn::update(const spawnStruct* s)
     setLastName(s->lastName);
   }
 
-  setPos(s->x / 8, s->y / 8, s->z / 8);
+  setPos(s->x >> 3, s->y >> 3, s->z >> 3);
   setPetOwnerID(s->petOwnerId);
   setLight(s->light);
   setGender(s->gender);
@@ -350,7 +350,7 @@ void Spawn::update(const spawnStruct* s)
   // only non corpses and things with animation != 66 move
   if (!isCorpse() && (s->animation != 66))
   {
-    setDeltas(s->deltaX / 4, s->deltaY / 4, s->deltaZ / 4);
+    setDeltas(s->deltaX >> 2, s->deltaY >> 2, s->deltaZ >> 2);
     setHeading(s->heading, s->deltaHeading);
   }
   else

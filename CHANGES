@@ -1,3 +1,14 @@
+dohpaZ (08/28/03)
+---------------------
++ Updated version to 4.3.10
++ More updates related to 08/26/03 EQ patch numerous opcodes (one from x_b)
+  and a structure change
++ Updated INSTALL doc.
++ Minor speed improvements (people should learn that multiplying and dividing
+  by a power of 2 in integer math are performed fastest using a bitshift)
++ Incorporated Patch # 797336 "mapcore.cpp / player.cpp fix" from 
+  Philip (guice) containing fixes by Elyon, con >= 60 and minor map fix.
+
 dohpaZ (08/27/03)
 ---------------------
 + Updated version to 4.3.9

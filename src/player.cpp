@@ -286,7 +286,7 @@ void Player::clear()
   m_freshKill = false;
 
   m_heading = 0;
-  m_headingDegrees = 360 - (m_heading * 360) / 256;
+  m_headingDegrees = 360 - ((m_heading * 360) >> 11);
   
   setID(0);
   setPoint(0,0,0);
@@ -754,7 +754,7 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
   setDeltas(0,0,0);
   setHeading((int8_t)lrintf(zsentry->heading), 0);
 
-  m_headingDegrees = 360 - (((int8_t)lrintf(zsentry->heading)) * 360) / 256;
+  m_headingDegrees = 360 - ((((int8_t)lrintf(zsentry->heading)) * 360) >> 11);
   emit headingChanged(m_headingDegrees);
   emit posChanged(x(), y(), z(), 
 		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
@@ -789,8 +789,7 @@ void Player::playerUpdate(const playerSelfPosStruct *pupdate, uint32_t, uint8_t 
   setHeading(pupdate->heading, pupdate->deltaHeading);
   updateLast();
 
-//  m_headingDegrees = 360 - (pupdate->heading * 360) / 256;
-  m_headingDegrees = 360 - (pupdate->heading * 360) / 2048;
+  m_headingDegrees = 360 - ((pupdate->heading * 360) >> 11);
   emit headingChanged(m_headingDegrees);
 
   emit posChanged(x(), y(), z(), 
@@ -799,7 +798,8 @@ void Player::playerUpdate(const playerSelfPosStruct *pupdate, uint32_t, uint8_t 
   updateLastChanged();
   emit changeItem(this, tSpawnChangedPosition);
 
-  emit newSpeed((int)lrint(hypot( hypot( pupdate->deltaX, pupdate->deltaY ), pupdate->deltaZ)));
+  emit newSpeed((int)lrint(hypot( hypot( pdeltaX, pdeltaY), 
+				  pdeltaZ)));
 
   static uint8_t count = 0;
 
@@ -1070,30 +1070,10 @@ void Player::fillConTable()
     greenRange = -20;
     cyanRange = -15;
   }
-  else if (level() < 61)
+  else if (level() > 59) // 60+
   { // 57 - 60
     greenRange = -21;
     cyanRange = -16;
-  }
-  else if (level() == 61) //61+
-  {
-    greenRange = -19;
-    cyanRange = -14;
-  }
-  else if (level() == 62)
-  {
-    greenRange = -18;
-    cyanRange = -13;
-  }
-  else if (level() == 63)
-  {
-    greenRange = -17;
-    cyanRange = -12;
-  }
-  else if (level() < 66) //64 - 65
-  {
-    greenRange = -16;
-    cyanRange = -11;
   }
   
   uint8_t spawnLevel = 1; 

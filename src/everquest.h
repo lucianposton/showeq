@@ -1503,8 +1503,10 @@ struct SpawnUpdateStruct
 /*0002*/ uint16_t spawnId;                // Id of spawn to update
 /*0004*/ uint16_t subcommand;             // some sort of subcommand type
 /*0006*/ int16_t  arg1;                   // first option
-/*0008*/ int16_t  arg2;                  // second option
-}; // 10
+/*0008*/ int16_t  arg2;                   // second option
+/*0010*/ uint8_t  arg3;                   // third option?
+/*0011*/
+};
 
 /*
 ** NPC Hp Update
