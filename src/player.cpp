@@ -862,6 +862,159 @@ bool EQPlayer::getStatValue(uint8_t stat,
   return valid;
 }
 
+
+void EQPlayer::fillConTable()
+{
+// keep around for historical giggles
+//
+// to make changes here, simply alter greenRange and cyanRange
+//
+// *OLD* This is the info we have to work with
+// Level Range		Green		Red
+// 1-12				-4			+3
+// 13-22			-6			+3
+// 23-24			-7			+3
+// 25-34			-8			+3
+// 35-40			-10			+3
+// 41-42			-11			+3
+// 43-44			-12			+3
+// 45-48			-13			+3
+// 49-51			-14			+3
+// 52-54			-15			+3
+// 55-57			-16			+3
+// 58-60			-17			+3
+
+// *NEW* 
+// Levels	Green	Cyan    Red
+// 1-7		-4      n/a	+3
+// 8-?          -5      -4      +3
+// 11-?         -6      -5      +3
+// 13-22	-7      -5	+3
+// 23-24	-10?    -7?  	+3
+// 25-34	-13     -10	+3
+// 35-40	-14?	-10?	+3
+// 41-42	-15?	-11?	+3
+// 43-44	-16?	-12?	+3
+// 45-48	-17?	-13?	+3
+// 49-51	-18	-14?    +3
+// 52-54        -19?	-15?    +3
+// 55-57	-20?	-16?	+3
+// 58-60        -21     -16     +3
+
+      int greenRange; 
+      int cyanRange; 
+
+      if (m_playerLevel < 8) 
+      { // 1 - 7 
+         greenRange = -4;
+         cyanRange = -8;
+      } 
+      else if (m_playerLevel < 13) 
+      { // 8 - 12 
+	greenRange = -5;
+	cyanRange = -4;
+      }
+      else if (m_playerLevel < 23) 
+      { // 
+	greenRange = -7;
+	cyanRange = -5;
+      }
+      else if (m_playerLevel < 27) 
+      { //
+	greenRange = -10;
+	cyanRange = -8;
+      }
+      else if (m_playerLevel < 29)
+      { //
+	greenRange = -11;
+	cyanRange = -8;
+      }
+      else if (m_playerLevel < 34) 
+      { // 
+	greenRange = -12;
+	cyanRange = -9;
+      }
+      else if (m_playerLevel < 37) 
+      { // 
+	greenRange = -13;
+	cyanRange = -10;
+      }
+      else if (m_playerLevel < 40) 
+      { // 43 - 44
+	greenRange = -14;
+	cyanRange = -11;
+      }
+      else if (m_playerLevel < 49) 
+      { // 45 - 48
+	greenRange = -17;
+	cyanRange = -13;
+      }
+      else if (m_playerLevel < 53) 
+      { // 49 - 52
+	greenRange = -18;
+	cyanRange = -14;
+      }
+      else if (m_playerLevel < 55) 
+      { // 52 - 54
+	greenRange = -19;
+	cyanRange = -15;
+      }
+      else if (m_playerLevel < 57) 
+      { // 55 - 56
+	greenRange = -21;
+	cyanRange = -16;
+      }
+      else
+      { // 57 - 60
+	greenRange = -21;
+	cyanRange = -16;
+      }
+      
+  uint8_t level = 1; 
+  uint8_t scale;
+
+  for (; level <= (greenRange + m_playerLevel); level++)
+  { // this loop handles all GREEN cons
+      if (level <= (greenRange + m_playerLevel - 5))
+         m_conTable[level] = QColor(0, 95, 0);
+      else
+      {
+         scale = 160/(greenRange + m_playerLevel - level + 1);
+         m_conTable[level] = QColor(0, (95 + scale), 0);
+      }
+  }
+
+  for (; level <= cyanRange + m_playerLevel; level++)
+  { // light blue cons, no need to gradient a small range
+      m_conTable[level] = QColor(0, 255, 255);
+  }
+
+  for (; level < m_playerLevel; level++)
+  { // blue cons here
+    scale = 95/(m_playerLevel - level);
+    m_conTable[level] = QColor(0, 0, (160 + scale));
+  }
+
+  m_conTable[level++] = QColor(255, 255, 255); // even con
+  m_conTable[level++] = QColor(255, 255, 0);   // yellow con
+  m_conTable[level++] = QColor(255, 200, 0);   // yellow con
+  
+  for (; level < maxSpawnLevel; level++)
+  { // red cons
+      if (level > m_playerLevel + 13) 
+         m_conTable[level] = QColor(127, 0, 0);
+      else
+      {
+         scale = 128/(level - m_playerLevel - 2);
+         m_conTable[level] = QColor((127 + scale), 0, 0);
+      }
+  }
+
+  // level 0 is unknown, and thus gray
+  m_conTable[0] = gray;
+}
+    
+#if 0  // this function no longer in use
 void calcPickConColor(int greenRange, int cyanRange, int levelDif, 
 		      QColor& color)
 {
@@ -922,138 +1075,7 @@ void calcPickConColor(int greenRange, int cyanRange, int levelDif,
       color = QColor( 0, 0, 255 );
   }
 }
-
-void EQPlayer::fillConTable()
-{
-// *OLD* This is the info we have to work with
-// Level Range		Green		Red
-// 1-12				-4			+3
-// 13-22			-6			+3
-// 23-24			-7			+3
-// 25-34			-8			+3
-// 35-40			-10			+3
-// 41-42			-11			+3
-// 43-44			-12			+3
-// 45-48			-13			+3
-// 49-51			-14			+3
-// 52-54			-15			+3
-// 55-57			-16			+3
-// 58-60			-17			+3
-
-// *NEW* 
-// Levels	Green	Cyan    Red
-// 1-7		-4      n/a	+3
-// 8-?          -5      -4      +3
-// 11-?         -6      -5      +3
-// 13-22	-7      -5	+3
-// 23-24	-10?    -7?  	+3
-// 25-34	-13     -10	+3
-// 35-40	-14?	-10?	+3
-// 41-42	-15?	-11?	+3
-// 43-44	-16?	-12?	+3
-// 45-48	-17?	-13?	+3
-// 49-51	-18	-14?    +3
-// 52-54        -19?	-15?    +3
-// 55-57	-20?	-16?	+3
-// 58-60        -21     -16     +3
-
-  for (uint8_t level = 1; level < maxSpawnLevel; level++)
-  {	
-    // all levels have red as +3, yellow as +1 and +2
-    // so lets get the those and even con out of the way first
-    if  ( m_playerLevel == level )
-      m_conTable[ level ] = QColor( 255, 255, 255 );
-    else if ( m_playerLevel == ( level - 1 ) )
-      m_conTable[ level ] = QColor( 255, 255, 0 );
-    else if ( m_playerLevel == ( level - 2 ) )
-      m_conTable[ level ] = QColor( 255, 190, 0 );
-    else if ( m_playerLevel <= ( level - 3 ) )
-    {
-      // do the red shading
-      if ( m_playerLevel <= ( level - 13 ) )
-	m_conTable[ level ] = QColor( 95, 0, 0 );
-      else
-      {
-	int scale = ( level - m_playerLevel ) - 3;
-	int redval = 255 - scale * 16;
-	m_conTable[ level ] = QColor( redval, 0, 0 );
-      }
-    }
-    else 
-    {
-      // 1 - 7
-      int greenRange = -4;
-      int cyanRange = -4;
-      
-      if (m_playerLevel < 10) 
-      { // 8 - 12 
-	greenRange = -5;
-	cyanRange = -4;
-      }
-      else if (m_playerLevel < 23) 
-      { // 13 - 22
-	greenRange = -7;
-	cyanRange = -5;
-      }
-      else if (m_playerLevel < 25) 
-      { // 23 - 24
-	greenRange = -10;
-	cyanRange = -7;
-      }
-      else if (m_playerLevel < 35)
-      { // 25 - 34
-	greenRange = -11;
-	cyanRange = -10;
-      }
-      else if (m_playerLevel < 41) 
-      { // 35 - 40
-	greenRange = -14;
-	cyanRange = -10;
-      }
-      else if (m_playerLevel < 43) 
-      { // 41 - 42
-	greenRange = -15;
-	cyanRange = -11;
-      }
-      else if (m_playerLevel < 45) 
-      { // 43 - 44
-	greenRange = -16;
-	cyanRange = -12;
-      }
-      else if (m_playerLevel < 49) 
-      { // 45 - 48
-	greenRange = -17;
-	cyanRange = -13;
-      }
-      else if (m_playerLevel < 52) 
-      { // 49 - 51
-	greenRange = -18;
-	cyanRange = -14;
-      }
-      else if (m_playerLevel < 55) 
-      { // 52 - 54
-	greenRange = -19;
-	cyanRange = -15;
-      }
-      else if (m_playerLevel < 58) 
-      { // 55 - 57
-	greenRange = -21;
-	cyanRange = -16;
-      }
-      else
-      { // 58 - 60
-	greenRange = -20;
-	cyanRange = -16;
-      }
-      
-      calcPickConColor(greenRange, cyanRange, level - m_playerLevel,
-		       m_conTable[level]);
-    }
-  }
-
-  // level 0 is unknown, and thus gray
-  m_conTable[0] = gray;
-}
+#endif
 
 void EQPlayer::savePlayerState(void)
 {
