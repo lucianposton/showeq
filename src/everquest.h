@@ -275,7 +275,7 @@ struct itemItemStruct : public itemStruct
 // Book Structure (flag == 0x7379) 
 struct itemBookStruct : public itemStruct
 {
-  /*0228*/ uint8_t  unknown0228[6];      // ***Placeholder
+  /*0228*/ uint8_t  unknown0228[3];      // ***Placeholder
   /*0234*/ char     file[15];            // Filename of book text on server
   /*0249*/ uint8_t  unknown0246[15];    // ***Placeholder 
   // pad out to 0264
@@ -600,7 +600,7 @@ struct corpseLocStruct
 
 /*
 ** Grouping Infromation
-** Length: 454 Octets
+** Length: 138 Octets
 ** OpCode: groupinfoCode
 */
 
@@ -608,9 +608,10 @@ struct groupInfoStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x26
 /*0001*/ uint8_t  version;                // 0x40
-/*0002*/ char     yourname[64];           // Player Name
-/*0066*/ char     membername[64];         // Goup Member Name
-/*0130*/ uint8_t  unknown0130[324];        // ***Placeholder
+/*0002*/ uint8_t  unknown0002[4];
+/*0006*/ char     yourname[64];           // Player Name
+/*0070*/ char     membername[64];         // Goup Member Name
+/*0134*/ uint8_t  unknown0130[4];        // ***Placeholder
 };
 typedef struct groupInfoStruct groupMemberStruct; // new form
 
@@ -826,11 +827,11 @@ struct charProfileStruct
 /*4761*/ uint8_t  guildstatus;            // 0 member, 1 officer, 2 leader
 /*4762*/ uint8_t  unknown4762[44]; 
 /*4806*/ char     GroupMembers[5][64];    // List of all the members in group
-/*5126*/ uint8_t  uknown5060[88];
-/*5214*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000 
-/*5218*/ uint8_t  unknown5218[36];
-/*5254*/ uint32_t aapoints;               // number of unspent ability points 
-/*5258*/ uint8_t  unknown4983[3196];
+/*5126*/ uint8_t  uknown5060[296];
+/*5422*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000 
+/*5426*/ uint8_t  unknown5218[36];
+/*5462*/ uint32_t aapoints;               // number of unspent ability points 
+/*5466*/ uint8_t  unknown4983[2988];
 };
 
 
@@ -1564,7 +1565,7 @@ struct hpUpdateStruct
 
 /*
 ** Inspecting Information
-** Length: 1042 Octets
+** Length: 1746 Octets
 ** OpCode: InspectDataCode
 */
 
@@ -1572,13 +1573,13 @@ struct inspectDataStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0xb6
 /*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint8_t  unknown0002[36];        // ***Placeholder
-/*0038*/ char     itemNames[21][32];      // 21 items with names 
-                                          //    32 characters long.
-/*0710*/ int16_t  icons[21];              // Icon Information
-/*0752*/ uint8_t  unknown0756[2];         // ***Placeholder
-/*0754*/ char     mytext[200];            // Player Defined Text Info
-/*0954*/ uint8_t  unknown0958[88];        // ***Placeholder
+/*0002*/ uint8_t  unknown0002[68];        // ***Placeholder
+/*0070*/ char     itemNames[21][64];      // 21 items with names 
+                                          //    64 characters long.
+/*1414*/ uint8_t  unknown1344[2];         // ***placeholder
+/*1416*/ int16_t  icons[21];              // Icon Information
+/*1458*/ char     mytext[200];            // Player Defined Text Info
+/*1658*/ uint8_t  unknown0958[88];        // ***Placeholder
 };
 
 /*

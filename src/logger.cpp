@@ -1024,7 +1024,7 @@ PktLogger::logInspectData(const inspectDataStruct *data, uint32_t len, uint8_t d
     for(i = 0; i < 21; i++)
         outputf("%d ", data->icons[i]);
 
-    output(data->unknown0756,2);
+    //output(data->unknown0756,2);
     outputf(" [%.200s] ", data->mytext);
     output(data->unknown0958,88);
     outputf("\n");
