@@ -2698,9 +2698,9 @@ void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t 
     - ((uint8_t*)&fmsg->messages[0] - (uint8_t*)fmsg) 
     - sizeof(fmsg->unknownXXXX);
 
-  QString formatString = *(m_formattedMessageStrings.find(fmsg->messageFormat));
+  QString* formatStringRes = m_formattedMessageStrings.find(fmsg->messageFormat);
 
-  if (formatString.isEmpty())
+  if (formatStringRes == NULL)
   {
     tempStr.sprintf( "Formatted: %04x: %s",
 		     fmsg->messageFormat,
@@ -2718,7 +2718,7 @@ void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t 
   }
   else
   {
-    tempStr = QString("Formatted: ") + formatString;
+    tempStr = QString("Formatted: ") + *formatStringRes;
     int totalArgsLen = 0;
     const char* curMsg;
     while (totalArgsLen < messagesLen)

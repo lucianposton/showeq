@@ -1,3 +1,8 @@
+dohpaZ (27/03/02)
+------------------
+Bug Fix:
+ + No longer crash if LOGDIR "/eqstr_en.txt" isn't there... ;-) Doh!
+
 dohpaZ (26/03/02)
 ------------------
 Modifications:
