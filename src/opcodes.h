@@ -109,7 +109,7 @@
 
 #define CastOnCode                  0x4640
 
-#define NewSpawnCode                0x4341
+#define NewSpawnCode                0x6b42
 
 #define NewCorpseCode               0x4a40
 
