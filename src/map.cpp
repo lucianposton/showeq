@@ -1295,10 +1295,10 @@ Map::Map(MapMgr* mapMgr,
   tmpPrefString = "BackgroundColor";
   m_param.setBackgroundColor(pSEQPrefs->getPrefColor(tmpPrefString, prefString, QColor("black")));
 
-  tmpPrefString = "OverheadDepth";
+  tmpPrefString = "HeadRoom";
   m_param.setHeadRoom(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 75));
 
-  tmpPrefString = "UnderfeetDepth";
+  tmpPrefString = "FloorRoom";
   m_param.setFloorRoom(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 75));
 
   tmpPrefString = "OptimizeMethod";
