@@ -194,7 +194,6 @@ int main (int argc, char **argv)
 						       AUTOMATIC_CLIENT_IP));
    showeq_params->mac_address = strdup(pSEQPrefs->getPrefString("MAC", section, "0"));
    showeq_params->realtime = pSEQPrefs->getPrefBool("RealTimeThread", section,   0);
-   showeq_params->no_bank = pSEQPrefs->getPrefBool("NoBank", section, 0);
    showeq_params->promisc = pSEQPrefs->getPrefBool("NoPromiscuous", section, 1);
    showeq_params->arqSeqGiveUp = pSEQPrefs->getPrefInt("ArqSeqGiveUp", section, 96);
    showeq_params->session_tracking = pSEQPrefs->getPrefBool("SessionTracking", section, 0);
@@ -218,6 +217,7 @@ int main (int argc, char **argv)
    section = "Interface_StatusBar";
    showeq_params->showEQTime = pSEQPrefs->getPrefBool("ShowEQTime",section,0);
    section = "Misc";
+   showeq_params->no_bank = pSEQPrefs->getPrefBool("NoBank", section, 1);
    showeq_params->walkpathrecord = pSEQPrefs->getPrefBool("WalkPathRecording", section, 0);
    showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 25);
    showeq_params->logSpawns = pSEQPrefs->getPrefBool("LogSpawns", section, 0);

@@ -55,19 +55,19 @@ void EQPlayer::backfill(const charProfileStruct* player)
   printf("EQPlayer::backfill():\n");
 
   
-  messag.sprintf("Zone: Name='%s' Last='%s'\n", 
+  messag.sprintf("EQPlayer: Name: '%s' Last: '%s'\n", 
  		 player->name, player->lastName);
   emit msgReceived(messag);
   
-  messag.sprintf("Zone: Level: %d\n", player->level);
+  messag.sprintf("EQPlayer: Level: %d\n", player->level);
   emit msgReceived(messag);
   
-  messag.sprintf("Zone: PlayerMoney: P=%d G=%d S=%d C=%d\n",
+  messag.sprintf("EQPlayer: PlayerMoney: P=%d G=%d S=%d C=%d\n",
 		 player->platinum, player->gold, 
 		 player->silver, player->copper);
   emit msgReceived(messag);
   
-  messag.sprintf("Zone: BankMoney: P=%d G=%d S=%d C=%d\n",
+  messag.sprintf("EQPlayer: BankMoney: P=%d G=%d S=%d C=%d\n",
 		 player->platinumBank, player->goldBank, 
 		 player->silverBank, player->copperBank);
   emit msgReceived(messag);
@@ -152,18 +152,22 @@ void EQPlayer::backfill(const charProfileStruct* player)
      m_currentAltExp = player->altexp;
      m_currentAApts = player->aapoints;
 
-     emit expChangedStr (messag);
      emit expChangedInt (m_currentExp, minexp, m_maxExp);
 
-     emit expAltChangedStr (messag);
+     messag = "Exp: " + Commanate(player->exp);
+     emit expChangedStr(messag);
+
      emit expAltChangedInt(m_currentAltExp, 0, 15000000);
+
+     messag = "ExpAA: " + Commanate(player->altexp);
+     emit expAltChangedStr(messag);
 
   }
 
-  messag = "Exp: " + Commanate(player->exp);
+  messag = "EQPlayer: Exp =" + Commanate(player->exp);
   emit msgReceived(messag);
 
-  messag = "ExpAA: " + Commanate(player->altexp);
+  messag = "EQPlayer: ExpAA =" + Commanate(player->altexp);
   emit msgReceived(messag);
 
   if (showeq_params->savePlayerState)
@@ -936,10 +940,12 @@ void EQPlayer::fillConTable()
 // 55-57			-16			+3
 // 58-60			-17			+3
 
-// *NEW* <Malakin 2001-11-15>
+// *NEW* 
 // Levels	Green	Cyan    Red
-// 1-12		-6       -4	+3
-// 13-22	-7       -5	+3
+// 1-7		-4      n/a	+3
+// 8-?          -5      -4      +3
+// 11-?         -6      -5      +3
+// 13-22	-7      -5	+3
 // 23-24	-10?    -7?  	+3
 // 25-34	-13     -10	+3
 // 35-40	-14?	-10?	+3
@@ -975,11 +981,16 @@ void EQPlayer::fillConTable()
     }
     else 
     {
-      // 1 - 12
-      int greenRange = -6;
+      // 1 - 7
+      int greenRange = -4;
       int cyanRange = -4;
       
-      if (m_playerLevel < 23) 
+      if (m_playerLevel < 10) 
+      { // 8 - 12 
+	greenRange = -5;
+	cyanRange = -4;
+      }
+      else if (m_playerLevel < 23) 
       { // 13 - 22
 	greenRange = -7;
 	cyanRange = -5;

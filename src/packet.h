@@ -709,7 +709,7 @@ class EQPacket : public QObject
    void decodePacket   (int size, unsigned char *buffer);
    void dispatchWorldData (uint32_t len, uint8_t* data, uint8_t direction = 0);
    void dispatchZoneData (uint32_t len, uint8_t* data, uint8_t direction = 0);
-   void dispatchZoneSplitData (EQPacketFormat& pf);
+   void dispatchZoneSplitData (EQPacketFormat& pf, uint8_t dir);
    void logRawData (const char   *filename, unsigned char *data, unsigned int len);
 
 };

@@ -1028,6 +1028,8 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 		       packet.payload(), DIR_CLIENT);
       return;
     }
+    else
+	  dispatchZoneSplitData (packet, DIR_CLIENT);
     return;
   }
 
@@ -1099,7 +1101,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 	  dispatchZoneData (packet.payloadLength(),
 			    packet.payload(), DIR_SERVER);
 	else
-	  dispatchZoneSplitData (packet);
+	  dispatchZoneSplitData (packet, DIR_SERVER);
       }
       // it's a packet from the future, add it to the cache
       else if ((serverArqSeq > m_serverArqSeqExp) || 
@@ -1246,7 +1248,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 		   pf->arq(), pf->flagsHi(), m_serverCache.size());
 #endif
 
-	    dispatchZoneSplitData(*pf);
+	    dispatchZoneSplitData(*pf, DIR_SERVER);
 	  }
 
 	  eraseIt = it;
@@ -1294,7 +1296,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 }
 
 /* Combines data from split packets */
-void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf)
+void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf, uint8_t dir)
 {
 #ifdef DEBUG_PACKET
    debug ("dispatchZoneSplitData()");
@@ -1322,7 +1324,7 @@ void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf)
       printf("SEQ: seq complete, dispatching (opcode=%04x)\n", 
 	     eqntohuint16(m_serverData));
 #endif
-      dispatchZoneData (m_serverDataSize, m_serverData, DIR_SERVER);
+      dispatchZoneData (m_serverDataSize, m_serverData, dir);
    }
 }
 
@@ -1369,7 +1371,6 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
 	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
 		(const char*)showeq_params->ip, zone_server_port);
       }
-    }
 
     // notify that the server port has been latched
     emit serverPortLatched(m_serverPort);
@@ -1395,6 +1396,7 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
     m_serverCache.clear();
     emit cacheSize(0);
     return;
+    }
   }
 }
 
@@ -1636,7 +1638,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             if (showeq_params->logEncrypted)
                 logData(showeq_params->NewSpawnCodeFilename, len, data);
 
-            // printf("NewSpawn received\n");
+            //printf("NewSpawn received:\n");
 
             if (!decoded || showeq_params->broken_decode)
                 break;
@@ -2333,6 +2335,11 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    emit groupInfo((const groupMemberStruct*)data, len, dir);
 
 	    break;
+        }
+
+        case CharUpdateCode:
+        {
+           //logData("/tmp/CharUpdate.log", len, data);
         }
     } /* end switch(opCode) */
        

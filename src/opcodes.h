@@ -73,6 +73,8 @@
 
 #define ItemOnCorpseCode            0x5220
 
+#define CharUpdateCode              0x5521
+
 #define StaminaCode                 0x5721
 
 #define ActionCode                  0x5820

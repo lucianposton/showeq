@@ -484,6 +484,7 @@ WalkPathShowSelect      0  #
 WalkPathLength          0  # 
 LogSpawns               0  # 
 LogItems                0  # 
+NoBank                  1  # 0/1 prints items to stdout
 
 [OpCodeMonitoring]
 Enabled                 0  # ONLY Enable this if you are a developer...

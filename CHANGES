@@ -1,3 +1,15 @@
+fee    (01/04/02)
+------------------
+Modifications:
+ + clean up some stdout messages
+ + added NoBank option under [Misc] in showeq.conf.dist
+   set to 1(now default) causes inventory items not to be printed out to stdout
+   set to 0 to see inventory 
+ + added new OpCode named CharUpdate for lack of a better idea, may have future uses
+ + fixed bug were exp and aaexp were not being displayed in status bar correctly
+ + showeq will no long support libEQ, you will now need to type in characted and 
+   mob information manually after you zone.
+
 dohpaZ (29/03/02)
 ------------------
 Modifications:
