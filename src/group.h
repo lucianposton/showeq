@@ -28,6 +28,7 @@ class GroupMgr: public QObject
   GroupMgr(SpawnShell* spawnShell, 
 	   Player* player,  
 	   QObject* parent = 0, const char* name = 0);
+  virtual ~GroupMgr();
  
   const Spawn* memberByID( uint16_t id );
   const Spawn* memberByName( const QString& name );

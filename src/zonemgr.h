@@ -35,6 +35,7 @@ class ZoneMgr : public QObject
 
  public:
   ZoneMgr(QObject* parent = 0, const char* name =0);
+  virtual ~ZoneMgr();
 
   QString zoneNameFromID(uint16_t zoneId);
   QString zoneLongNameFromID(uint16_t zoneId);

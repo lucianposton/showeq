@@ -117,6 +117,11 @@ SpellShell::SpellShell(Player* player, SpawnShell* spawnshell, Spells* spells)
    connect(m_timer, SIGNAL(timeout()), SLOT(timeout()));
 }
 
+SpellShell::~SpellShell()
+{
+  clearSpells();
+}
+
 SpellItem* SpellShell::findSpell(uint16_t spellId, 
 				 uint16_t targetId, const QString& targetName)
 {

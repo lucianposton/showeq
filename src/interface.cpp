@@ -1902,19 +1902,16 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Server|DIR_Client,
 			"groupInviteStruct", SZC_Match,
 			m_messageShell, SLOT(groupInvite(const uint8_t*)));
-     m_packet->connect2("OP_GroupInvite2", SP_Zone, DIR_Server|DIR_Client,
-			"groupInviteStruct", SZC_Match,
-			m_messageShell, SLOT(groupInvite(const uint8_t*)));
      m_packet->connect2("OP_GroupFollow", SP_Zone, DIR_Server|DIR_Client,
 			"groupFollowStruct", SZC_Match,
 			m_messageShell, SLOT(groupFollow(const uint8_t*)));
-     m_packet->connect2("OP_GroupDisband", SP_Zone, DIR_Server|DIR_Client,
+     m_packet->connect2("OP_GroupDisband", SP_Zone, DIR_Server,
 			"groupDisbandStruct", SZC_Match,
-			m_messageShell, SLOT(groupDisband(const uint8_t*, size_t, uint8_t)));
-#if 0 // ZBTEMP
-     connect(m_packet, SIGNAL(groupDecline(const uint8_t*, size_t, uint8_t)),
-	     m_messageShell, SLOT(groupDecline(const uint8_t*)));
-#endif // ZBTEMP
+            m_messageShell, SLOT(groupDisband(const uint8_t*, size_t, uint8_t)));
+
+     m_packet->connect2("OP_CancelInvite", SP_Zone, DIR_Server|DIR_Client,
+			"groupDeclineStruct", SZC_Match,
+			m_messageShell, SLOT(groupDecline(const uint8_t*)));
    }
 
    if (m_filterNotifications)
@@ -2260,6 +2257,9 @@ EQInterface::~EQInterface()
 
   if (m_spellShell != 0)
     delete m_spellShell;
+  
+  if (m_spells != 0)
+    delete m_spells;
 
   if (m_mapMgr != 0)
     delete m_mapMgr;

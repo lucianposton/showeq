@@ -55,13 +55,22 @@ static const uint16_t OP_SessionStatRequest = 0x0700;
 static const uint16_t OP_SessionStatResponse= 0x0800;
 static const uint16_t OP_Packet             = 0x0900;
 static const uint16_t OP_Oversized          = 0x0d00;
-static const uint16_t OP_Resend             = 0x1100;
+static const uint16_t OP_AckFuture          = 0x1100;
 static const uint16_t OP_Ack                = 0x1500;
 static const uint16_t OP_AppCombined        = 0x1900;
+static const uint16_t OP_AckAfterDisconnect = 0x1d00;
 
 // Detect app opcode vs net opcode by the 2nd byte. 0x00 = net opcode.
 #define IS_APP_OPCODE(uint16) (((uint16) & 0x00ff) != 0x0000)
 #define IS_NET_OPCODE(uint16) (((uint16) & 0x00ff) == 0x0000)
+
+// Protocol flag bitmasks. Actually, we just flag straight to compressed
+// which is 5a right now. I wonder what the significance of that is.
+#define PROTOCOL_FLAG_COMPRESSED 0x5a
+
+// Should we apply CRC checking. This should be yes, but if for some reason
+// it is getting in the way while debugging, can turn it off
+#define APPLY_CRC_CHECK
 
 //----------------------------------------------------------------------
 // EQProtocolPacket
@@ -77,11 +86,13 @@ class EQProtocolPacket
   EQProtocolPacket()
     : m_packet(NULL), 
       m_length(0), 
+      m_flags(0),
       m_payload(NULL), 
+      m_bAllocedPayload(false),
+      m_bDecoded(false),
       m_payloadLength(0),
       m_arqSeq(0), 
       m_ownCopy(false), 
-      m_isValid(false),
       m_subpacket(false)
     {  }
     
@@ -99,7 +110,32 @@ class EQProtocolPacket
   // operators
   EQProtocolPacket& operator=(const EQProtocolPacket& packet);
 
+  // Decode the packet. This processed compressed packets and readjusts
+  // alignments if needed. If this returns false, using the packet isn't
+  // recommended!
+  bool decode(uint32_t maxPacketLength);
+
   uint16_t getNetOpCode() const { return m_netOp; }
+
+  bool hasFlags() const
+  {
+    // Subpackets don't have flags, the outer packet does.
+    if (m_subpacket) return false;
+
+    switch (m_netOp)
+    {
+      case OP_SessionStatRequest:
+      case OP_SessionStatResponse:
+      case OP_Combined:
+      case OP_Packet:
+      case OP_Oversized:
+      case OP_AppCombined:
+        return true;
+      default :
+        return IS_APP_OPCODE(m_netOp);
+    }
+  }
+  uint8_t getFlags() const { return m_flags; }
 
   bool hasArqSeq() const
   {
@@ -133,27 +169,40 @@ class EQProtocolPacket
 
   bool isSubpacket() const { return m_subpacket; }
 
+  // Payload is uncompressed (after decode is called) and aligned to the
+  // beginning of the payload (after net op, flags, seq if applicable)
   uint8_t* payload() const { return m_payload; }
   uint16_t payloadLength() const { return m_payloadLength; }
-  uint8_t* rawPayload() const { return m_packet; }
-  uint16_t rawPayloadLength() const { return m_length; }
+
+  // Raw Packet is compressed and aligned to the start of the net op. Length
+  // includes CRC if applicable.
+  uint8_t* rawPacket() const { return m_packet; }
+  uint16_t rawPacketLength() const { return m_length; }
+
+  // Raw payload is uncompressed (after decode is called) and aligned to
+  // the beginning of what was decompressed. This is what is alloced if
+  // m_bAllocPayload is true.
+  uint8_t* rawPayload() const { return m_rawPayload; }
+  uint16_t rawPayloadLength() const { return m_rawPayloadLength; }
 
  protected:
   void init();
   void init(uint8_t* packet, uint16_t length, 
     bool copy=false, bool subpacket=false);
 
-  QString headerFlags(const QString& prefix, bool brief = false) const;
-  
  private:
-  uint8_t* m_packet; // raw packet
-  uint16_t m_length;
-  uint16_t m_netOp;
-  uint8_t* m_payload; // packet without netop, crc. Mem owned by m_packet.
-  uint16_t m_payloadLength;
+  uint8_t* m_packet; // raw packet, untouched starting at net opcode
+  uint16_t m_length; // raw packet length
+  uint16_t m_netOp; // protocol opcode
+  uint8_t m_flags; // protocol flags
+  uint8_t* m_payload; // packet payload. Aligned and uncompressed if necessary.
+  bool m_bAllocedPayload; // Whether payload was alloced or not
+  bool m_bDecoded; // Whether this packet has been decoded
+  uint16_t m_payloadLength; // length of payload
+  uint8_t* m_rawPayload; // decompressed but not aligned payload
+  uint16_t m_rawPayloadLength; // length of raw payload
   uint16_t m_arqSeq; // local copy to speed up comparisons
   bool m_ownCopy;
-  bool m_isValid;
   bool m_subpacket;
 };
 
@@ -214,8 +263,6 @@ class EQUDPIPPacketFormat : public EQProtocolPacket
   in_addr getIPv4DestInAddr() const { return m_ip->ip_dst; }
   
   // Don't currently support IPv6, so no IPv6 accessors
-
-  QString headerFlags(bool brief = false) const;
 
   uint32_t getSessionKey() const { return m_sessionKey; }
   void setSessionKey(uint32_t sessionKey) { m_sessionKey = sessionKey; }

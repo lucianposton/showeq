@@ -26,7 +26,7 @@ class EQPacketFragmentSequence
   EQPacketFragmentSequence(EQStreamID streamid);
   ~EQPacketFragmentSequence();
   void reset();
-  void addFragment(EQProtocolPacket& pf);
+  void addFragment(EQProtocolPacket& packet);
   bool isComplete();
 
   uint8_t* data();

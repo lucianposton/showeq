@@ -171,6 +171,7 @@ class SpellShell : public QObject
   Q_OBJECT
  public:
   SpellShell(Player* player, SpawnShell* spawnshell, Spells* spells);
+  virtual ~SpellShell();
   void deleteSpell(const SpellItem*);
   
  signals:

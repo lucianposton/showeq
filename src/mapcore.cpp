@@ -66,6 +66,7 @@ MapParameters::MapParameters(const MapData& mapData)
   m_showLines = true;
   m_showGridLines = true;
   m_showGridTicks = true;
+  m_optimization = tMap_NormalOptim;
 
   reset();
 }

@@ -374,7 +374,7 @@ void Player::player(const uint8_t* data)
   //Added by Halcyon
   int buffnumber;
   const struct spellBuff *buff;
-  for (buffnumber=0;buffnumber<20;buffnumber++)
+  for (buffnumber=0;buffnumber<MAX_BUFFS;buffnumber++)
   {
     if (player->buffs[buffnumber].spellid && player->buffs[buffnumber].duration)
     {
@@ -799,7 +799,7 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
          zsentry->z >> 3,
 	 showeq_params->walkpathrecord,
 	 showeq_params->walkpathlength);
-  seqDebug("Player::zoneBegin(): Pos (%f/%f/%f) Heading: %f",
+  seqDebug("Player::zoneBegin(): Pos (%f/%f/%f)",
 	   float(zsentry->x)/8.0, float(zsentry->y)/8.0, float(zsentry->z)/8.0);
   setHeading(zsentry->heading, 0);
   m_validPos = true;

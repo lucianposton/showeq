@@ -64,6 +64,8 @@ protected:
 EQPacketTypeDB::EQPacketTypeDB()
   : m_typeSizeDict(127) // increase this number if we ever get >= 97 types
 {
+  m_typeSizeDict.setAutoDelete(true);
+
   // define the convenience macro used in the generated file
 #define AddStruct(typeName) addStruct(#typeName, sizeof(typeName))
 

@@ -54,7 +54,8 @@ XMLPreferences::XMLPreferences(const QString& defaultsFileName,
   // automatically delete removed sections
   m_userSections.setAutoDelete(true);
   m_defaultsSections.setAutoDelete(true);
-  
+  m_commentSections.setAutoDelete(true);
+
   // load the preferences
   load();
 }

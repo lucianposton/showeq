@@ -61,6 +61,12 @@ ZoneMgr::ZoneMgr(QObject* parent, const char* name)
     restoreZoneState();
 }
 
+ZoneMgr::~ZoneMgr()
+{
+  if (m_zonePoints)
+    delete [] m_zonePoints;
+}
+
 struct ZoneNames
 {
   const char* shortName;

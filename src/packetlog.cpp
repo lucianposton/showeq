@@ -236,10 +236,27 @@ void PacketLog::logData(const EQUDPIPPacketFormat& packet)
 
   if (! packet.hasCRC() || 
     packet.crc() == (calcedCRC = ::calcCRC16(
-      packet.rawPayload(), packet.rawPayloadLength()-2, 
+      packet.rawPacket(), packet.rawPacketLength()-2, 
         packet.getSessionKey())))
   {
-    m_out << packet.headerFlags(false) << endl;
+    m_out << "[OPCode: 0x" << QString::number(packet.getNetOpCode(), 16) << "]";
+
+    if (packet.hasArqSeq())
+    {
+      m_out << " [Seq: " << QString::number(packet.arqSeq(), 16) << "]";
+    }
+
+    if (packet.hasFlags())
+    {
+      m_out << " [Flags: " << QString::number(packet.getFlags(), 16) << "]";
+    }
+
+    if (packet.hasCRC())
+    {
+      m_out << " [CRC ok]" << endl;
+    }
+
+    m_out << endl;
   }
   else
   {

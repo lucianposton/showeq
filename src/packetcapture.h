@@ -61,6 +61,7 @@ class PacketCaptureThread
          };
          struct packetCache *m_pcache_first;
          struct packetCache *m_pcache_last;
+         bool m_pcache_closed;
 
 	 pthread_t m_tid;
          pthread_mutex_t m_pcache_mutex;

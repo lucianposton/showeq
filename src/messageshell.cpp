@@ -38,11 +38,11 @@ MessageShell::MessageShell(Messages* messages, EQStr* eqStrings,
 
 void MessageShell::channelMessage(const uint8_t* data, size_t, uint8_t dir)
 {
-  // avoid client chatter and do nothing if not viewing channel messages
-  //  if (dir == DIR_Client)
-  //    return;
-
   const channelMessageStruct* cmsg = (const channelMessageStruct*)data;
+
+  // Tells happen twice *shrug*
+  if (dir == DIR_Client && cmsg->chanNum == MT_Tell)
+    return;
 
   QString tempStr;
 
@@ -611,11 +611,38 @@ void MessageShell::startCast(const uint8_t* data)
 
 void MessageShell::groupUpdate(const uint8_t* data, size_t size, uint8_t dir)
 {
+  if (size != sizeof(groupUpdateStruct))
+  {
+    // Ignore groupFullUpdateStruct
+    return;
+  }
   const groupUpdateStruct* gmem = (const groupUpdateStruct*)data;
   QString tempStr;
-  tempStr.sprintf ("Update: action:%d - %s - %s (unknown: %d)", 
-		   gmem->action, gmem->yourname, gmem->membername, 
-		   gmem->unknown0132);
+
+  switch (gmem->action)
+  {
+    case GUA_Joined :
+      tempStr.sprintf ("Update: %s has joined the group.", gmem->membername);
+      break;
+    case GUA_Left :
+      tempStr.sprintf ("Update: %s has left the group.", gmem->membername);
+      break;
+    case GUA_LastLeft :
+      tempStr.sprintf ("Update: The group has been disbanded when %s left.",
+         gmem->membername);
+      break;
+    case GUA_MakeLeader : 
+      tempStr.sprintf ("Update: %s is now the leader of the group.", 
+         gmem->membername);
+      break;
+    case GUA_Started :
+      tempStr.sprintf ("Update: %s has formed the group.", gmem->membername);
+      break;
+    default :
+       tempStr.sprintf ("Update: Unknown Update action:%d - %s - %s)", 
+		   gmem->action, gmem->yourname, gmem->membername);
+  }
+
   m_messages->addMessage(MT_Group, tempStr);
 }
 
@@ -623,7 +650,7 @@ void MessageShell::groupInvite(const uint8_t* data)
 {
   const groupInviteStruct* gmem = (const groupInviteStruct*)data;
   QString tempStr;
-  tempStr.sprintf("Invite: %s invites %s", 
+  tempStr.sprintf("Invite: %s invites %s to join the group", 
 		  gmem->inviter, gmem->invitee);
   m_messages->addMessage(MT_Group, tempStr);
 }
@@ -650,8 +677,7 @@ void MessageShell::groupDisband(const uint8_t* data, size_t, uint8_t dir)
 {
   const groupDisbandStruct* gmem = (const groupDisbandStruct*)data;
   QString tempStr;
-  tempStr.sprintf ("Disband: %s - %s", 
-		   gmem->membername, gmem->yourname);
+  tempStr.sprintf ("Disband: %s disbands from the group", gmem->membername);
   m_messages->addMessage(MT_Group, tempStr);
 }
 
@@ -701,7 +727,7 @@ void MessageShell::player(const uint8_t* data)
   m_messages->addMessage(MT_Player, message);
 
   int buffnumber;
-  for (buffnumber=0;buffnumber<20;buffnumber++)
+  for (buffnumber=0;buffnumber<MAX_BUFFS;buffnumber++)
   {
     if (player->buffs[buffnumber].spellid && player->buffs[buffnumber].duration)
     {
@@ -799,6 +825,7 @@ void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
   switch (con->level) 
   {
   case 0:
+  case 20:
     msg += " (even)";
     break;
   case 2:

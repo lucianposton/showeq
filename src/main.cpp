@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  *
- *  Copyright 2000-2004 by the respective ShowEQ Developers
+ *  Copyright 2000-2005 by the respective ShowEQ Developers
  */
 
 /* main.cpp is the entrypoint to ShowEQ, it parses the commandline
@@ -702,7 +702,7 @@ void displayVersion(void)
 {
    printf ("ShowEQ %s, released under the GPL.\n", VERSION);
    printf ("  SINS 0.5, released under the GPL.\n");
-   printf ("All ShowEQ source code is Copyright (C) 2000-2004 by the respective ShowEQ Developers\n");
+   printf ("All ShowEQ source code is Copyright (C) 2000-2005 by the respective ShowEQ Developers\n");
   
   printf ("ShowEQ comes with NO WARRANTY.\n\n");
   

@@ -105,6 +105,7 @@
 #define MAX_KNOWN_LANGS                 25
 #define MAX_SPELLBOOK_SLOTS             400
 #define MAX_GROUP_MEMBERS               6
+#define MAX_BUFFS                       25
 
 //Item Flags
 #define ITEM_NORMAL                     0x0000
@@ -247,14 +248,15 @@ enum ChatColor
 };
 
 /*
-** Guild Update actions
+** Group Update actions
 */
-enum GuildUpdateAction
+enum GroupUpdateAction
 {
   GUA_Joined = 0,
   GUA_Left = 1,
   GUA_LastLeft = 6,
   GUA_FullGroupInfo = 7,
+  GUA_MakeLeader = 8,
   GUA_Started = 9,
 };
 
@@ -520,7 +522,7 @@ struct newZoneStruct
 
 /*
 ** Player Profile
-** Length: 18288 Octets
+** Length: 18496 Octets
 ** OpCode: CharProfileCode
 */
 struct charProfileStruct
@@ -608,7 +610,7 @@ struct charProfileStruct
 /*4132*/ uint8_t   unknown4132[408];   // *** Placeholder
 /*4540*/ uint32_t  zoneId;             // see zones.h
 /*4544 uint32_t  zoneInstance;       // Used to be here... */
-/*4544*/ spellBuff buffs[20];          // Buffs currently on the player
+/*4544*/ spellBuff buffs[MAX_BUFFS];   // Buffs currently on the player
 /*4864*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
 /*5248*/ uint8_t   unknown5248[668];   // *** Placeholder
 /*5916*/ uint32_t  ldon_guk_points;    // Earned GUK points
@@ -624,7 +626,7 @@ struct charProfileStruct
 /*6652*/ uint8_t   unknown6652[4888];  // *** Placeholder 
 /*11540*/ uint16_t altexp;             // Total aaxp points
 /*11542*/ uint8_t  unknown11542[6874]; // *** Placeholder
-}; /* 18416 */
+}; /* 18496 */
 
 #if 1
 struct playerAAStruct {
@@ -1181,23 +1183,23 @@ struct consentResponseStruct
 
 /*
 ** Grouping Infromation
-** Length: 136 Octets
+** Length: 452 Octets
 ** OpCode: OP_GroupUpdate
 */
 
 struct groupUpdateStruct
 {
-/*0000*/ int32_t  action;
-/*0004*/ char     yourname[64];           // Player Name
-/*0068*/ char     membername[64];         // Goup Member Name
-/*0132*/ uint32_t unknown0132;            // ***Placeholder
-/*0136*/
+/*0000*/ int32_t  action;           // Group update action
+/*0004*/ char     yourname[64];     // Group Member Names
+/*0068*/ char     membername[64];   // Group leader name
+/*0132*/ uint8_t  unknown0132[320]; // ***Placeholder
+/*452*/
 };
 
 
 /*
 ** Grouping Infromation
-** Length: 452 Octets
+** Length: 768 Octets
 ** OpCode: OP_GroupUpdate
 */
 
@@ -1205,8 +1207,9 @@ struct groupFullUpdateStruct
 {
 /*0000*/ int32_t  action;
 /*0004*/ char     membernames[MAX_GROUP_MEMBERS][64]; // Group Member Names
-/*0388*/ char     leader[64];                         // Goup Member Name
-/*0452*/
+/*0388*/ char     leader[64];                         // Group leader Name
+/*0452*/ char     unknown0452[316];                   // ***Placeholder
+/*0768*/
 };
 
 /*
@@ -1676,7 +1679,7 @@ struct badCastStruct
 
 /*
 ** Random Number Request
-** Length: 10 Octets
+** Length: 8 Octets
 ** OpCode: RandomCode
 */
 struct randomReqStruct 
@@ -1687,7 +1690,7 @@ struct randomReqStruct
 
 /*
 ** Random Number Result
-** Length: 78 Octets
+** Length: 76 Octets
 ** OpCode: RandomCode
 */
 struct randomStruct 
@@ -1722,7 +1725,7 @@ struct playerSpawnPosStruct
 
 /*
 ** Self Position Update
-** Length: 32 Octets
+** Length: 30 Octets
 ** OpCode: PlayerPosCode
 */
 

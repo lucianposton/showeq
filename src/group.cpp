@@ -33,6 +33,14 @@ GroupMgr::GroupMgr(SpawnShell* spawnShell,
     m_members[i].m_spawn = 0;
 }
 
+GroupMgr::~GroupMgr()
+{
+  if (m_members)
+  {
+    delete[] m_members;
+  }
+}
+
 void GroupMgr::player(const uint8_t* data)
 {
   const charProfileStruct* player = (const charProfileStruct*)data;

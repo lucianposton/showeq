@@ -136,9 +136,6 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
 
    // restore the spawn list if necessary
    if (showeq_params->restoreSpawns)
-
-   // restore the spawn list if necessary
-   if (showeq_params->restoreSpawns)
      restoreSpawns();
 
    // create the timer
@@ -480,6 +477,8 @@ void SpawnShell::newSpawn(const spawnStruct& s)
 
      if (spawn->guildID() < MAXGUILDS)
         spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
+     else
+        spawn->setGuildTag("");
      if (!showeq_params->fast_machine)
         item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
      else
@@ -497,6 +496,8 @@ void SpawnShell::newSpawn(const spawnStruct& s)
 
      if (spawn->guildID() < MAXGUILDS)
         spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
+     else
+        spawn->setGuildTag("");
      if (!showeq_params->fast_machine)
         item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
      else

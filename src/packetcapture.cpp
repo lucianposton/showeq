@@ -26,6 +26,25 @@ PacketCaptureThread::PacketCaptureThread()
 
 PacketCaptureThread::~PacketCaptureThread()
 {
+  // Drop the packets we have lying around
+  pthread_mutex_lock (&m_pcache_mutex);
+
+  struct packetCache *pc = m_pcache_first;
+  struct packetCache* freeMe = NULL;
+
+  while (pc)
+  {
+    freeMe = pc;
+    pc = pc->next;
+
+    free(freeMe);
+  }
+
+  m_pcache_first = NULL;
+  m_pcache_last = NULL;
+  m_pcache_closed = true;
+
+  pthread_mutex_unlock (&m_pcache_mutex);
 }
 
 void PacketCaptureThread::start(const char *device, const char *host, bool realtime, uint8_t address_type)
@@ -37,6 +56,7 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
     struct sched_param sp;
 
     seqInfo("Initializing Packet Capture Thread: ");
+    m_pcache_closed = false;
 
    // create pcap style filter expressions
    if (address_type == IP_ADDRESS_TYPE)
@@ -156,14 +176,21 @@ void PacketCaptureThread::packetCallBack(u_char * param,
     pc->next = NULL;
 
     pthread_mutex_lock (&myThis->m_pcache_mutex);
-
-    if (myThis->m_pcache_last)
+   
+    if (! myThis->m_pcache_closed)
+    {
+      if (myThis->m_pcache_last)
        myThis->m_pcache_last->next = pc;
 
-    myThis->m_pcache_last = pc;
+      myThis->m_pcache_last = pc;
 
-    if (!myThis->m_pcache_first)
+      if (!myThis->m_pcache_first)
        myThis->m_pcache_first = pc;
+    }
+    else
+    {
+      free(pc);
+    }
 
     pthread_mutex_unlock (&myThis->m_pcache_mutex);
 }

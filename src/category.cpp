@@ -161,6 +161,18 @@ CategoryMgr::CategoryMgr(QObject* parent, const char* name)
 
 CategoryMgr::~CategoryMgr()
 {
+  // Clear the categories list. Since AutoDelete is off. This is manual.
+  if (m_categories.first())
+  {
+    Category* deleteMe;
+
+    while ((deleteMe = m_categories.current()))
+    {
+      m_categories.remove();
+
+      delete deleteMe;
+    }
+  }
 }
 
 const CategoryList CategoryMgr::findCategories(const QString& filterString, 
@@ -318,9 +330,9 @@ void CategoryMgr::reloadCategories(void)
       //seqDebug("%d: Got '%s' '%s' '%s'", i, name, filter, color);
       if (!name.isEmpty() && !filter.isEmpty())
       {
-	Category* newcat = new Category(name, filter, filterout, color);
+        Category* newcat = new Category(name, filter, filterout, color);
 	
-	m_categories.append(newcat);
+        m_categories.append(newcat);
       }
     }
   }

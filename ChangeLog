@@ -1,5 +1,18 @@
 Version: $Id$ $Name$
 
+BBobcat (02/20/05)
+-----------------------
+
++ Updated version to 5.0.0.18
++ Included Purple's "-purple2" patch
++ + Deal with a now compressed protocol
++ + Increased buff slots (25)
++ + Updated world and game opcodes
++ + Updated structures
++ + Logging and console message clean up
++ + Memory cleanups
++ Included uRit1u2CBBA= zones.h update (For DoN zones)
+
 purple (02/08/05)
 -----------------------
 + Updated version to 5.0.0.17

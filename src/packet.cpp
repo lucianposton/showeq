@@ -61,6 +61,7 @@
 
 const in_port_t WorldServerGeneralPort = 9000;
 const in_port_t WorldServerChatPort = 9876;
+const in_port_t WorldServerChat2Port = 9875; //%%% what is this?
 const in_port_t LoginServerMinPort = 15900;
 const in_port_t LoginServerMaxPort = 15910;
 const in_port_t ChatServerPort = 5998;
@@ -423,6 +424,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 // Destructor
 EQPacket::~EQPacket()
 {
+
   if (m_packetCapture != NULL)
   {
     // stop any packet capture 
@@ -457,6 +459,19 @@ EQPacket::~EQPacket()
   delete m_world2ClientStream;
   delete m_client2ZoneStream;
   delete m_zone2ClientStream;
+
+  if (m_packetTypeDB)
+  {
+    delete m_packetTypeDB;
+  }
+  if (m_zoneOPCodeDB)
+  {
+    delete m_zoneOPCodeDB;
+  }
+  if (m_worldOPCodeDB)
+  {
+    delete m_worldOPCodeDB;
+  }
 }
 
 /* Start the timer to process packets */
@@ -621,8 +636,8 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     emit clientChanged(m_client_addr);
     seqInfo("Client Detected: %s", (const char*)m_ip);
   }
-
   /* end client detection */
+
   /* Find the stream we are sending this to */
   EQPacketStream* stream;
 
@@ -633,6 +648,10 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
 
   if ((packet.getDestPort() == WorldServerChatPort) ||
       (packet.getSourcePort() == WorldServerChatPort))
+    return;
+
+  if ((packet.getDestPort() == WorldServerChat2Port) ||
+      (packet.getSourcePort() == WorldServerChat2Port))
     return;
 
   if (((packet.getDestPort() >= LoginServerMinPort) &&
@@ -665,10 +684,7 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
   // the stream the packet came from.
   packet.setSessionKey(stream->getSessionKey());
 
-#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-  seqDebug("%s", (const char*)packet.headerFlags((PACKET_PROCESS_DIAG < 3)));
-#endif
-
+#ifdef APPLY_CRC_CHECK
   // Check CRC. Have to ask the stream to do it, since the packet doesn't know
   // it's sessionKey yet.
   if (packet.hasCRC())
@@ -687,12 +703,14 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
       return;
     }
   }
+#endif /* APPLY_CRC_CHECK */
 
   /* discard pure ack/req packets */
   if (packet.getNetOpCode() == OP_KeepAlive ||
       packet.getNetOpCode() == OP_SessionStatRequest ||
       packet.getNetOpCode() == OP_SessionStatResponse ||
-      packet.getNetOpCode() == OP_Resend ||
+      packet.getNetOpCode() == OP_AckFuture ||
+      packet.getNetOpCode() == OP_AckAfterDisconnect ||
       packet.getNetOpCode() == OP_Ack)
   {
 #if defined(PACKET_PROCESS_DIAG)
