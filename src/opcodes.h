@@ -94,11 +94,11 @@
 
 #define MoneyThingCode              0x2820
 
-#define RemDropCode                 0x2b40
+#define RemDropCode                 0x0025
 
 #define cCursorItemCode             0x2c41
 
-#define MakeDropCode                0x2c40
+#define MakeDropCode                0x0021
 
 #define CharInfo                    0x2e40
 
@@ -168,11 +168,11 @@
 
 #define NewGuildInZoneCode          0x7b21
 
-#define StartCastCode               0x7e41
+#define StartCastCode               0x0174
 
 #define SPMesgCode                  0x8041
 
-#define MemSpellCode                0x8241
+#define MemSpellCode                0x0178
 
 #define BindWoundCode               0x8341
 
@@ -222,7 +222,7 @@
 
 #define LFGCode                     0xf041
 
-#define TimeOfDayCode               0xf240
+#define TimeOfDayCode               0x00fe
 
 #define cWhoAllCode                 0xf440
 
