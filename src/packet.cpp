@@ -47,7 +47,7 @@
 //#define PACKET_CACHE_DIAG 3 // verbosity level (0-n)
 
 // define this to be pedantic about what packets are acceptable (no CRC errors)
-//#define PACKET_PEDANTIC 2
+#define PACKET_PEDANTIC 2
 
 // diagnose structure size changes
 #define PACKET_PAYLOAD_SIZE_DIAG 1
@@ -461,12 +461,11 @@ QObject (parent, name)
 
    if (showeq_params->ip)
    {
-      /* Substitute "special" IP which is interpreted in pcap.c
+      /* Substitute "special" IP which is interpreted 
          to set up a different filter for picking up new sessions */
 
       if (strcasecmp(showeq_params->ip, "auto") == 0)
-          inet_aton ("127.0.0.0", &ia);
-
+	inet_aton (AUTOMATIC_CLIENT_IP, &ia);
       else if (inet_aton (showeq_params->ip, &ia) == 0)
       {
          he = gethostbyname(showeq_params->ip);
@@ -478,7 +477,19 @@ QObject (parent, name)
          memcpy (&ia, he->h_addr_list[0], he->h_length);
       }
       m_client_addr = ia.s_addr;
+      free((void*)showeq_params->ip);
       showeq_params->ip = strdup(inet_ntoa(ia));
+
+      if (!strcmp(showeq_params->ip, AUTOMATIC_CLIENT_IP))
+      {
+	m_detectingClient = true;
+	printf("Listening for first client seen.\n");
+      }
+      else
+      {
+	m_detectingClient = false;
+	printf("Listening for client: %s\n", showeq_params->ip);
+      }
    }
 
    if (!showeq_params->playbackpackets)
@@ -486,9 +497,12 @@ QObject (parent, name)
       // create the pcap object and initialize, either with MAC or IP
       m_packetCapture = new PacketCaptureThread();
       if (strlen(showeq_params->mac_address) == 17)
-         m_packetCapture->start(showeq_params->device, showeq_params->mac_address, showeq_params->realtime, MAC_ADDRESS_TYPE );
+         m_packetCapture->start(showeq_params->device, 
+				showeq_params->mac_address, 
+				showeq_params->realtime, MAC_ADDRESS_TYPE );
       else
-         m_packetCapture->start(showeq_params->device, showeq_params->ip, showeq_params->realtime, IP_ADDRESS_TYPE );
+         m_packetCapture->start(showeq_params->device, showeq_params->ip, 
+				showeq_params->realtime, IP_ADDRESS_TYPE );
    }
 
 #if HAVE_LIBEQ
@@ -921,10 +935,6 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   if ((packet.getDestPort() == 5999) || (packet.getSourcePort() == 5999))
     return;
 
-   /* Client -> World Server Packet, Discard for now */
-  if (packet.getDestPort() == 9000)
-    return;
-
   /* discard pure ack/req packets and non valid flags*/
   if (packet.flagsHi() < 0x08 || packet.flagsHi() > 0x46 || size < 10)
     return;    
@@ -958,7 +968,32 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
     /* unless we really start paying attention to World Servers, we should 
        be able to safely ignore sequencing and arq */
 
-    dispatchWorldData (size, buffer, DIR_SERVER);
+    if (m_detectingClient)
+    {
+      free((void*)showeq_params->ip);
+      showeq_params->ip = strdup ((const char*)packet.getIPv4DestA());
+      m_client_addr = packet.getIPv4DestN();
+      m_detectingClient = false;
+      printf("Client Detected: %s\n", showeq_params->ip);
+    }
+
+    dispatchWorldData (packet.payloadLength(), packet.payload(), DIR_SERVER);
+    return;
+  }
+  else if (packet.getDestPort() == 9000)
+  {
+    /* unless we really start paying attention to World Servers, we should 
+       be able to safely ignore sequencing and arq */
+    if (m_detectingClient)
+    {
+      free((void*)showeq_params->ip);
+      showeq_params->ip = strdup ((const char*)packet.getIPv4SourceA());
+      m_client_addr = packet.getIPv4SourceN();
+      m_detectingClient = false;
+      printf("Client Detected: %s\n", showeq_params->ip);
+    }
+
+    dispatchWorldData (packet.payloadLength(), packet.payload(), DIR_CLIENT);
     return;
   }
 
@@ -1263,71 +1298,68 @@ void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf)
 
 ///////////////////////////////////////////
 //EQPacket::dispatchWorldData  
-// note this dispatch get a full IP packet NOT just the payload
-void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data, uint8_t direction = 0)
+// note this dispatch gets just the payload
+void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data, 
+				  uint8_t direction = 0)
 {
 #ifdef DEBUG_PACKET
-   debug ("dispatchWorldData()");
+  debug ("dispatchWorldData()");
 #endif /* DEBUG_PACKET */
-   if (len < 0)
-       return;
-
-   EQUDPIPPacketFormat pkt(data, len, false);
-   
-   uint16_t opCode = eqntohuint16(pkt.payload());
-
-   //printf(" ZoneServerInfo 0x%04x, ip_dest %d, m_client_addr %d,\n", opCode, pkt.getIPv4DestN(), m_client_addr);
-   if (opCode == ZoneServerInfo && pkt.getIPv4DestN() == m_client_addr) 
-   {   
-      if (strcmp(showeq_params->ip, "127.0.0.0") == 0) 
+  if (len < 0)
+    return;
+  
+  uint16_t opCode = eqntohuint16(data);
+  
+  //printf(" ZoneServerInfo 0x%04x, ip_dest %d, m_client_addr %d,\n", opCode, pkt.getIPv4DestN(), m_client_addr);
+  if ((opCode == ZoneServerInfo) && 
+      (direction == DIR_SERVER))
+  {
+    uint16_t zone_server_port = eqntohuint16(data + 130);
+    
+    // only reset packet filter if this is a live session
+    if (!showeq_params->playbackpackets)
+    {
+      if (strlen(showeq_params->mac_address) == 17)
       {
-         showeq_params->ip = strdup ((const char*)pkt.getIPv4DestA());
-         m_client_addr = pkt.getIPv4DestN();
+	m_packetCapture->setFilter(showeq_params->device, 
+				   showeq_params->mac_address,
+				   showeq_params->realtime, 
+				   MAC_ADDRESS_TYPE, zone_server_port);
+	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
+		showeq_params->mac_address, zone_server_port);
       }
-
-     uint16_t zone_server_port = eqntohuint16(pkt.payload() + 130);
-     
-     // only reset packet filter if this is a live session
-     if (!showeq_params->playbackpackets)
-     {
-        if (strlen(showeq_params->mac_address) == 17)
-        {
-           m_packetCapture->setFilter(showeq_params->device, showeq_params->mac_address,
-		  showeq_params->realtime, MAC_ADDRESS_TYPE, zone_server_port);
-           printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
-	           showeq_params->mac_address, zone_server_port);
-        }
-        else
-        {
-	   m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
-                  showeq_params->realtime, IP_ADDRESS_TYPE, zone_server_port);
-           printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
-	           showeq_params->ip, zone_server_port);
-        }
-     }
-
-     // we'll be wainting for a new SEQStart
-     m_serverArqSeqFound = false;
-
-     // clear out all the cache entries
-
-     // first delete all the entries
-     EQPacketMap::iterator it = m_serverCache.begin();
-     EQPacketFormat* pf;
-     fprintf(stderr, "Clearing Cache: Count: %d\n", m_serverCache.size());
-     while (it != m_serverCache.end())
-     {
-	pf = it->second;
-	delete pf;
-	it++;
-     }
-
-     // now clear the cache
-     printf ("Reseting sequence cache\n");
-     m_serverCache.clear();
-     emit cacheSize(0);
-     return;
-   }
+      else
+      {
+	m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+				   showeq_params->realtime, IP_ADDRESS_TYPE,
+				   zone_server_port);
+	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
+		showeq_params->ip, zone_server_port);
+      }
+    }
+    
+    // we'll be wainting for a new SEQStart
+    m_serverArqSeqFound = false;
+      
+    // clear out all the cache entries
+    
+    // first delete all the entries
+    EQPacketMap::iterator it = m_serverCache.begin();
+    EQPacketFormat* pf;
+    fprintf(stderr, "Clearing Cache: Count: %d\n", m_serverCache.size());
+    while (it != m_serverCache.end())
+    {
+      pf = it->second;
+      delete pf;
+      it++;
+    }
+    
+    // now clear the cache
+    printf ("Reseting sequence cache\n");
+    m_serverCache.clear();
+    emit cacheSize(0);
+    return;
+  }
 
    return;
 }
@@ -2794,10 +2826,20 @@ long EQPacket::getclientaddr(void)
    return m_client_addr;
 }
 
-void EQPacket::resetPcapFilter()
+void EQPacket::monitorNextClient()
 {
-   m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
-                showeq_params->realtime, DEFAULT_ADDRESS_TYPE, 0);
+  m_detectingClient = true;
+  free((void*)showeq_params->ip);
+  showeq_params->ip = strdup(AUTOMATIC_CLIENT_IP);
+  struct in_addr  ia;
+  inet_aton (showeq_params->ip, &ia);
+  m_client_addr = ia.s_addr;
+  printf("Listening for next client seen.\n");
+
+  if (!showeq_params->playbackpackets)
+    m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+			       showeq_params->realtime, 
+			       DEFAULT_ADDRESS_TYPE, 0);
 }
    
 //----------------------------------------------------------------------
@@ -2827,7 +2869,7 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
    // create pcap style filter expressions
    if (address_type == IP_ADDRESS_TYPE)
    {
-      if (strcmp(host, "127.0.0.0") == 0)
+      if (strcmp(host, AUTOMATIC_CLIENT_IP) == 0)
       {
           printf ("Filtering packets on device %s, searching for EQ client...\n", device);
           sprintf (filter_buf, "(udp[0:2] > 1024 or udp[2:2] > 1024) and ether proto 0x0800");

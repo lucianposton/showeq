@@ -956,7 +956,7 @@ QMainWindow (parent, name)
    /* This seems to be the default, or at least things still work
       without this, and it wasn't in the qt-2.0.1 docs */
    pAddrMenu->setCheckable(TRUE);
-   pAddrMenu->insertItem("Monitor &Next EQ Client Seen", m_packet, SLOT(resetPcapFilter()));
+   pAddrMenu->insertItem("Monitor &Next EQ Client Seen", m_packet, SLOT(monitorNextClient()));
    menuBar()->insertItem("&Network", pAddrMenu);
 
    

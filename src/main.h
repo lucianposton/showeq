@@ -23,6 +23,22 @@ extern class PreferenceFile *pSEQPrefs;
 
 #include "../conf.h"
 
+//----------------------------------------------------------------------
+// Macros
+#ifndef LOGDIR
+#define LOGDIR "../logs"
+#endif
+  
+#ifndef MAPDIR
+#define MAPDIR "../maps"
+#endif
+  
+#ifndef SPAWNFILE
+#define SPAWNFILE        LOGDIR "/spawn.db"
+#endif
+
+#define AUTOMATIC_CLIENT_IP "127.0.0.0"
+
 struct ShowEQParams
 {
   const char    *device;
@@ -107,18 +123,6 @@ struct ShowEQParams
   QString        ItemRawDataDBFileName;
   bool           ItemDBEnabled;
 };
-  
-#ifndef LOGDIR
-#define LOGDIR "../logs"
-#endif
-  
-#ifndef MAPDIR
-#define MAPDIR "../maps"
-#endif
-  
-#ifndef SPAWNFILE
-#define SPAWNFILE        LOGDIR "/spawn.db"
-#endif
  
 extern struct ShowEQParams *showeq_params;
 extern struct ShowEQShell *pSEQShell;

@@ -178,7 +178,8 @@ int main (int argc, char **argv)
    /* TODO: Add some sanity checks to the MAC address option.  cpphack */
    section = "Network";
    showeq_params->device = strdup(pSEQPrefs->getPrefString("Device", section, "eth0"));
-   showeq_params->ip = strdup(pSEQPrefs->getPrefString("IP", section, "127.0.0.1"));
+   showeq_params->ip = strdup(pSEQPrefs->getPrefString("IP", section,
+						       AUTOMATIC_CLIENT_IP));
    showeq_params->mac_address = strdup(pSEQPrefs->getPrefString("MAC", section, "0"));
    showeq_params->realtime = pSEQPrefs->getPrefBool("RealTimeThread", section,   0);
    showeq_params->no_bank = pSEQPrefs->getPrefBool("NoBank", section, 0);
@@ -588,7 +589,7 @@ int main (int argc, char **argv)
          /* IP address to track */
          case IPADDR_OPTION:
          {
-            showeq_params->ip = optarg;
+            showeq_params->ip = strdup(optarg);
             break;
          }
 
@@ -930,7 +931,7 @@ int main (int argc, char **argv)
    QApplication qapp (argc, argv);
 
    if (optind != argc)
-      showeq_params->ip = argv[optind];
+      showeq_params->ip = strdup(argv[optind]);
 
    /* The main interface widget */
    EQInterface intf (0, "interface");

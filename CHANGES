@@ -1,3 +1,13 @@
+dohpaZ (31/12/01)
+---------------------
+Modifications:
+ + Updated showeq.conf.dist to reflect that the KeyMap section is no longer 
+   used, and how to configure keyboard accelerators on a per map basis
+   (see Map section).
+
+Bug Fixes:
+ + Made automatic client detection work again.
+
 fee (31/12/01)
 ---------------------
 Mods:

@@ -79,6 +79,26 @@ ShowMapPoints             1  # 1 = (normal) Show map points of interest
 HighlightConsideredSpawns 0  # 1 = Draw a red box around spawns that have been considered
 Optimize_Method           1  # 0=Memory, 1=Normal, 2=Speed
 ShowTooltips              1  # Gives you info about the spawn your mouse is over
+ZoomInKey                 +
+ZoomOutKey                -
+CenterSelectedKey         Ctrl+5
+ViewLockKey               Ctrl+0
+PanDownLeftKey            Ctrl+1
+PanDownKey                Ctrl+2
+PanDownRightKey           Ctrl+3
+PanLeftKey                Ctrl+4
+PanRightKey               Ctrl+6
+PanUpLeftKey              Ctrl+7
+PanUpKey                  Ctrl+8
+PanUpRightKey             Ctrl+9
+AddLocationKey            Ctrl+O
+StartLineKey              Ctrl+L
+AddLinePointKey           Ctrl+P
+DeleteLinePointKey        Ctrl+D
+MapLineNormalKey          Alt+1
+MapLineDepthFilteredKey   Alt+2
+MapLineFadedFloorsKey     Alt+3
+
 
 [Map2Frame]
 Caption	"ShowEQ - Map 2"	# Caption to use for the first Map Frame
@@ -436,10 +456,6 @@ WalkPathShowSelect      0  #
 WalkPathLength          0  # 
 LogSpawns               0  # 
 LogItems                0  # 
-
-[KeyMap]
-ZoomIn                  "+"
-ZoomOut                 "-"
 
 [OpCodeMonitoring]
 Enabled                 0  # ONLY Enable this if you are a developer...

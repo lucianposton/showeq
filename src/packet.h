@@ -547,7 +547,7 @@ class EQPacket : public QObject
    void processPlaybackPackets (void);
    void incPlayback        (void);
    void decPlayback        (void);
-   void resetPcapFilter();   
+   void monitorNextClient();   
 
    // Decoder slots
    void dispatchDecodedCharProfile(const uint8_t* decodedData, uint32_t len);
@@ -757,7 +757,8 @@ class EQPacket : public QObject
    VPacket        *m_vPacket;
    
    struct eqTimeOfDay         m_eqTime;
- 
+
+   bool           m_detectingClient;
  public:
 };
 
