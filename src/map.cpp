@@ -1588,7 +1588,9 @@ void Map::mousePressEvent(QMouseEvent* me)
     closestSpawn = closestSpawnToPoint(me->pos(), dist);
 
     // check for closest spawn point
-    const SpawnPoint* closestSP = closestSpawnPointToPoint(me->pos(), dist);
+    const SpawnPoint* closestSP = NULL;
+    if (m_showSpawnPoints)
+      closestSP = closestSpawnPointToPoint(me->pos(), dist);
 
     // only get a spawn point if the user clicked closer to it then a
     // the closest spawn
@@ -4085,7 +4087,9 @@ void Map::mouseMoveEvent( QMouseEvent* event )
   const Item* item = closestSpawnToPoint(event->pos(), dist);
 
   // check for closest spawn point
-  const SpawnPoint* sp = closestSpawnPointToPoint(event->pos(), dist);
+  const SpawnPoint* sp = NULL;
+  if (m_showSpawnPoints)
+    sp = closestSpawnPointToPoint(event->pos(), dist);
 
   // spawn point was closer, display it's info
   if (sp != NULL)
@@ -4273,9 +4277,14 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
 
   const Item* item;
   itemType itemTypes[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
+  const bool* showType[] = { &m_showSpawns, &m_showDrops, &m_showCoins, 
+			     &m_showDoors, &m_showPlayer };
   
   for (uint8_t i = 0; i < (sizeof(itemTypes) / sizeof(itemType)); i++)
   {
+    if (!*showType[i])
+      continue;
+
     const ItemMap& itemMap = m_spawnShell->getConstMap(itemTypes[i]);
     ItemConstIterator it(itemMap);
 
@@ -4290,8 +4299,14 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
 	   (item->z() < m_param.playerFloorRoom())))
 	continue;
 
+      if (!m_showFiltered && (item->filterFlags() & FILTER_FLAG_FILTERED))
+	continue;
+
       if ((item->type() == tSpawn) || (item->type() == tPlayer))
       {
+	if (!m_showUnknownSpawns && ((const Spawn*)item)->isUnknown())
+	  continue;
+
 	((const Spawn*)item)->approximatePosition(m_animate, 
 						  QTime::currentTime(), 
 						  location);

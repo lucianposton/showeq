@@ -1,6 +1,14 @@
 dohpaZ (22/06/02)
 ------------------
 Modifications:
+ + Made the Map::closestSpawnToPoint() method pay more attention to whether or 
+   not items are displayed on the map.  This should greatly reduce the number
+   of times a tooltip pops up for an item that isn't displayed (filtered,
+   etc...) or an item that isn't displayed is selected via mouse click.  
+
+dohpaZ (22/06/02)
+------------------
+Modifications:
  + version 4.2.12
  + Applied patch # 569708 "bugfix for filter.cpp" by mydor
  + Applied patch # 570621 "Update to saving of player inventory"
