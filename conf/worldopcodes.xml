@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE seqopcodes SYSTEM "seqopcodes.dtd">
+<seqopcodes>
+    <opcode id="0018" name="OP_AckPacket" updated="12/18/03">
+        <comment>Appears to be generic ack at the presentation level</comment>
+    </opcode>
+    <opcode id="005e" name="OP_GuildList" updated="12/18/03">
+        <comment>old GuildListCode</comment>
+        <payload dir="server" typename="worldGuildListStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="00e3" name="OP_ExpansionInfo" updated="12/18/03">
+        <comment>Which expansions user has</comment>
+    </opcode>
+    <opcode id="00ec" name="OP_DeleteCharacter" updated="12/18/03">
+        <comment>Delete character @ char select</comment>
+    </opcode>
+    <opcode id="0104" name="OP_SendCharInfo" updated="12/18/03">
+        <comment>Send all chars visible @ char select</comment>
+    </opcode>
+    <opcode id="0106" name="OP_CharacterCreate" updated="12/18/03">
+        <comment>Create character @ char select</comment>
+    </opcode>
+    <opcode id="0127" name="OP_ApproveName" updated="12/18/03">
+        <comment>Approving new character name @ char creation</comment>
+    </opcode>
+    <opcode id="015c" name="OP_World_Client_CRC1" updated="12/18/03">
+        <comment>Contains a snippet of spell data</comment>
+    </opcode>
+    <opcode id="0160" name="OP_World_Client_CRC2" updated="12/18/03">
+        <comment>Second client verification packet</comment>
+    </opcode>
+    <opcode id="0188" name="OP_LogServer" updated="12/18/03">
+        <comment></comment>
+    </opcode>
+    <opcode id="0196" name="OP_ApproveWorld" updated="12/18/03">
+        <comment></comment>
+    </opcode>
+    <opcode id="01b3" name="OP_MOTD" updated="12/18/03">
+        <comment>old MOTDCode Server message of the day</comment>
+        <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
+    </opcode>
+    <opcode id="0241" name="OP_SendLoginInfo" updated="12/18/03">
+        <comment></comment>
+    </opcode>
+    <opcode id="0251" name="OP_EnterWorld" updated="12/18/03">
+        <comment>Server approval for client to enter world</comment>
+    </opcode>
+    <opcode id="0254" name="OP_ZoneServerInfo" updated="12/18/03">
+        <comment>old ZoneServerInfo</comment>
+    </opcode>
+    <opcode id="0259" name="OP_SetChatServer" updated="12/18/03">
+        <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
+    </opcode>
+    <opcode id="029b" name="OP_GetName" updated="12/18/03">
+        <comment>Returns a random name</comment>
+    </opcode>
+</seqopcodes>

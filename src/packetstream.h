@@ -16,6 +16,7 @@
 
 #include "packetcommon.h"
 #include "packetfragment.h"
+#include "packetinfo.h"
 
 #if (defined(__FreeBSD__) || defined(__linux__)) && defined(__GLIBC__) && (__GLIBC__ == 2) && (__GLIBC_MINOR__ < 2)
 typedef uint16_t in_port_t;
@@ -26,6 +27,8 @@ typedef uint32_t in_addr_t;
 
 class EQUDPIPPacketFormat;
 class EQPacketFormat;
+class EQPacketOPCodeDB;
+class EQPacketOPCode;
 
 //----------------------------------------------------------------------
 // map type used for caching packets.
@@ -39,7 +42,7 @@ class EQPacketFormat;
 // with the packet data's behavior using an iterator as a hint for 
 // insertion location to typically yield amortized constant time behavior.
 // 3) Another optimization possible with this data set using a map 
-// is that after a matchintg arq is found in the map,  finding/checking 
+// is that after a matching arq is found in the map,  finding/checking 
 // for the next expected arq in the map only requires moving the iterator 
 // forward (using operator++()) once and checking if the next key in the list
 // is the expected arq.  This results in the check for followers to only 
@@ -55,6 +58,7 @@ class EQPacketStream : public QObject
 
  public:
   EQPacketStream(EQStreamID streamid, uint8_t dir, uint16_t m_arqSeqGiveUp,
+		 EQPacketOPCodeDB& opcodeDB, 
 		 QObject* parent = 0, const char* name = 0);
   ~EQPacketStream();
   void reset();
@@ -67,6 +71,9 @@ class EQPacketStream : public QObject
   EQStreamID streamID();
   size_t currentCacheSize();
   uint16_t arqSeqExp();
+  bool connect2(const QString& opcodeName, 
+		const char* payload,  EQSizeCheckType szt, 
+		const QObject* receiver, const char* member);
   
  public slots:
   void handlePacket(EQUDPIPPacketFormat& pf);
@@ -75,9 +82,10 @@ class EQPacketStream : public QObject
   void rawPacket(const uint8_t* data, size_t len, uint8_t dir, 
 		 uint16_t opcode);
   void decodedPacket(const uint8_t* data, size_t len, uint8_t dir,
-		     uint16_t opcode);
-  void dispatchData(const uint8_t* data, size_t len, uint8_t dir, 
-		    uint16_t opCode);
+		     uint16_t opcode, const EQPacketOPCode* opcodeEntry);
+  void decodedPacket(const uint8_t* data, size_t len, uint8_t dir,
+		     uint16_t opcode, const EQPacketOPCode* opcodeEntry,
+		     bool unknown);
 
   // this signals stream closure
   void closing();
@@ -104,7 +112,12 @@ class EQPacketStream : public QObject
   uint8_t* decodeOpCode(uint8_t *data, size_t *len, uint16_t& opCode);
   void decodePacket(uint8_t *data, size_t len, uint16_t opCode);
   void processPayload(uint8_t* data, size_t len);
+  void dispatchPacket(const uint8_t* data, size_t len,
+		      uint16_t opCode, const EQPacketOPCode* opcodeEntry);
 
+
+  EQPacketOPCodeDB& m_opcodeDB;
+  QPtrDict<EQPacketDispatch> m_dispatchers;
   EQStreamID m_streamid;
   uint8_t m_dir;
   int m_packetCount;

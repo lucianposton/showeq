@@ -4,8 +4,8 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2003 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Copyright 2000-2004 by the respective ShowEQ Developers
+ *  Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
  */
 
 /* Implementation of packet format classes class */
@@ -79,12 +79,11 @@ QString EQPacketFormatRaw::headerFlags(const QString& prefix,
 //----------------------------------------------------------------------
 // EQPacketFormat class methods
 EQPacketFormat::EQPacketFormat(EQPacketFormat& packet, bool copy)
+  : m_ownCopy(copy),
+    m_isValid(packet.m_isValid)
 {
   if (!copy)
   {
-    // the data is someone elses memory
-    m_ownCopy = false;
-
     // just copy all their values
     m_packet = packet.m_packet;
     m_length = packet.m_length;
@@ -155,21 +154,37 @@ void EQPacketFormat::init(EQPacketFormatRaw* packet,
 
 void EQPacketFormat::init()
 {
-  // calculate position of first byte past the skipable data
-  m_postSkipData = ((uint8_t*)m_packet) + m_packet->skip() + 2;
-
-  // calculate the length of the rest of the data
-  m_postSkipDataLength = m_length - (m_postSkipData - ((uint8_t*)m_packet));
-
-  // get the location of the payload
-  m_payload = m_packet->payload();
-
-  // calculate the lenght of the payload (length - diff - len(checkSum))
-  m_payloadLength = m_length - (m_payload - ((uint8_t*)m_packet)) - 4; 
+  // finish initialization iff the packet has a valid CRC32
+  if (validate())
+  {
+    m_postSkipData = ((uint8_t*)m_packet) + m_packet->skip() + 2;
     
+    // calculate the length of the rest of the data
+    m_postSkipDataLength = m_length - (m_postSkipData - ((uint8_t*)m_packet));
+    
+    // get the location of the payload
+    m_payload = m_packet->payload();
+    
+    // calculate the lenght of the payload (length - diff - len(checkSum))
+    m_payloadLength = m_length - (m_payload - ((uint8_t*)m_packet)) - 4; 
+    
+    // make a local copy of the arq to speed up comparisons
+    m_arq = eqntohuint16(&m_postSkipData[2]);
+  }
+  else 
+  {
+    m_postSkipData = 0;
+    m_postSkipDataLength = 0;
+    m_payload = 0;
+    m_payloadLength = 0;
+    m_arq = 0;
+  }
+}
 
-  // make a local copy of the arq to speed up comparisons
-  m_arq = eqntohuint16(&m_postSkipData[2]);
+bool EQPacketFormat::validate()
+{ 
+  m_isValid = ((m_length >= 4) && (crc32() == calcCRC32())); 
+  return m_isValid;
 }
 
 QString EQPacketFormat::headerFlags(const QString& prefix, 
@@ -177,28 +192,32 @@ QString EQPacketFormat::headerFlags(const QString& prefix,
 {
   QString tmp;
 
-  if (brief)
-    tmp = prefix + ": ";
-  else
-    tmp = prefix + " Hdr (" + QString::number(flagsHi(), 16) + ", "
-      + QString::number(flagsLo(), 16) + "): ";
-
-  tmp += m_packet->headerFlags("", true);
-
-  if (!brief)
+  if (m_isValid)
   {
-    if (isARQ())
-      tmp += QString("arq: ") + QString::number(arq(), 16) + ", ";
+    if (brief)
+      tmp = prefix + ": ";
+    else
+      tmp = prefix + " Hdr (" + QString::number(flagsHi(), 16) + ", "
+	+ QString::number(flagsLo(), 16) + "): ";
     
-    if (isFragment())
+    tmp += m_packet->headerFlags("", true);
+    
+    if (!brief)
     {
-      tmp += QString("FragSeq: ") + QString::number(fragSeq(), 16)
-	+ ", FragCur: " + QString::number(fragCur(), 16)
-	+ ", FragTot: " + QString::number(fragTot(), 16) + ", ";
-    }
+      if (isARQ())
+	tmp += QString("arq: ") + QString::number(arq(), 16) + ", ";
+      
+      if (isFragment())
+	tmp += QString("FragSeq: ") + QString::number(fragSeq(), 16)
+	  + ", FragCur: " + QString::number(fragCur(), 16)
+	  + ", FragTot: " + QString::number(fragTot(), 16) + ", ";
 
-    tmp += QString("Opcode: ") + QString::number(eqntohuint16(payload()), 16);
+      tmp += QString("Opcode: ") 
+	+ QString::number(eqntohuint16(payload()), 16);
+    }
   }
+  else
+      tmp = prefix + ": INVALID CRC32! Possible non-EQ packet?!";
 
   return tmp;
 }
