@@ -25,43 +25,66 @@
 
 /***********************/
 /* Zone Server OpCodes */
-#define NewSpawnCode                0x023f
 
 #define MobUpdateCode               0x0002
 
-#define ConsiderCode                0x0136
+#define EmoteTextCode               0x0008
 
-#define ChannelMessageCode          0x00fc
-
-#define PlayerPosCode               0x00ff
-
-#define ZoneChangeCode              0x00a9
-
-#define ZoneEntryCode               0x02ae
-
-#define NewZoneCode                 0x0056
-
-#define CPlayerItemsCode            0x01e9
-
-#define ClientTargetCode            0x014b
-
-#define ZoneSpawnsCode              0x0148
-
-#define CharProfileCode             0x002e
+#define CorpseLocCode               0x0014
 
 #define DeleteSpawnCode             0x001e
+
+#define RemDropCode                 0x0020
+
+#define MakeDropCode                0x0021
+
+#define CharProfileCode             0x002e
 
 #define NewCorpseCode               0x0042
 
 #define ActionCode                  0x004d
 
-#define CorpseLocCode               0x0014
+#define NewZoneCode                 0x0056
 
-#define CDoorSpawnsCode             0x01ea
+#define ZoneChangeCode              0x00a9
+
+#define HPUpdateCode                0x00b6
+
+#define ChannelMessageCode          0x00fc
+
+#define TimeOfDayCode               0x00fe
+
+#define PlayerPosCode               0x00ff
+
+#define SpawnAppearanceCode         0x0101
+
+#define ConsiderCode                0x0136
 
 #define ManaDecrementCode           0x0175
 
-#define HPUpdateCode                0x0101
+#define ZoneSpawnsCode              0x0148
+
+#define ClientTargetCode            0x014b
+
+#define StartCastCode               0x0174
+
+#define MemSpellCode                0x0178
+
+#define ExpUpdateCode               0x0187
+
+#define CPlayerItemsCode            0x01e9
+
+#define CDoorSpawnsCode             0x01ea
+
+#define AltExpUpdateCode            0x0209
+
+#define NewSpawnCode                0x023f
+
+#define sWhoAllOutputCode           0x0259
+
+#define NpcHpUpdateCode             0x02a5
+
+#define ZoneEntryCode               0x02ae
 
 /*********************/
 /* outdated          */
@@ -74,13 +97,9 @@
 
 #define OpenVendorCode              0x0b40
 
-#define sWhoAllOutputCode           0x0b20
-
 #define cItemInShopCode             0x0c40
 
 #define SysMsgCode                  0x1420
-
-#define EmoteTextCode               0x1540
 
 #define PlayerAACode                0x1522
 
@@ -88,17 +107,11 @@
 
 #define cJumpCode                   0x2040
 
-#define AltExpUpdateCode            0x2342
-
 #define GroupInfoCode               0x2640
 
 #define MoneyThingCode              0x2820
 
-#define RemDropCode                 0x0020
-
 #define cCursorItemCode             0x2c41
-
-#define MakeDropCode                0x0021
 
 #define CharInfo                    0x2e40
 
@@ -158,21 +171,13 @@
 
 #define PlayerContainerCode         0x6641
 
-#define CompressedWrapCode          0x7642
-
-#define PacketWrapCode              0x7742
-
 #define SummonedItemCode            0x7841
 
 #define SummonedContainerCode       0x7921
 
 #define NewGuildInZoneCode          0x7b21
 
-#define StartCastCode               0x0174
-
 #define SPMesgCode                  0x8041
-
-#define MemSpellCode                0x0178
 
 #define BindWoundCode               0x8341
 
@@ -198,8 +203,6 @@
 
 #define LevelUpUpdateCode           0x9841
 
-#define ExpUpdateCode               0x9941
-
 #define OpenGMCode                  0x9c20
 
 #define sLootItemCode               0xa040
@@ -222,11 +225,7 @@
 
 #define LFGCode                     0xf041
 
-#define TimeOfDayCode               0x00fe
-
 #define cWhoAllCode                 0xf440
-
-#define SpawnAppearanceCode         0xf540
 
 #define cChatFiltersCode            0xff41
 

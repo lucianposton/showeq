@@ -293,8 +293,8 @@
     "Necromancer Priest",     // 286
     "Nightmare",              // 287
     "New Rallos Zek",         // 288
-    "Tallon Zek",             // 289
-    "Vallon Zek",             // 290
+    "Vallon Zek",             // 289
+    "Tallon Zek",             // 290
     "Air Mephit",             // 291
     "Earth Mephit",           // 292
     "Fire Mephit",	      // 293

@@ -1764,9 +1764,7 @@ PktLogger::logSpawnAppearance(const spawnAppearanceStruct *spawn, uint32_t len, 
     outputf("R %u %04d %d %.2X%2.X %u", timestamp, len, dir, 
         spawn->opCode, spawn->version, spawn->spawnId);
 
-    output(&spawn->unknown0004,2);
     outputf(" %d ", spawn->type);
-    output(&spawn->unknown0008,2);
     outputf(" %d\n", spawn->paramter);
     flush();
     return;

@@ -1520,19 +1520,31 @@ struct zoneChangeStruct
 };
 
 /*
-** Spawn HP Update
-** Length: 10 Octets
+** Player HP Update
+** Length: 8 Octets
 ** OpCode: HPUpdateCode
 */
 
 struct hpUpdateStruct
 {
-/*0000*/ uint8_t  opCode;                 // 0xb2
-/*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint16_t spawnId;                // Id of spawn to update
+/*0000*/ uint8_t  opCode;                 // 0xb6
+/*0001*/ uint8_t  version;                // 0x00
+/*0002*/ int16_t  maxHp;                  // Maximum hp of spawn
 /*0004*/ int16_t  curHp;                  // Current hp of spawn
-/*0006*/ int16_t  maxHp;                  // Maximum hp of spawn
-/*0008*/ int16_t  unknown;
+/*0006*/ uint16_t spawnId;                // Id of spawn to update
+};
+
+/*
+** NPC Hp Update
+** Length: 5 Octets
+** Opcode NpcHpUpdateCode
+*/
+
+struct hpNpcUpdateStruct
+{
+/*0000*/ uint16_t opcode;
+/*0002*/ uint16_t spawnId;
+/*0004*/ int8_t   curHp;
 };
 
 /*
@@ -1659,7 +1671,7 @@ int8_t animation;
 
 /*
 ** Spawn Appearance
-** Length: 14 Octets
+** Length: 10 Octets
 ** OpCode: spawnAppearanceCode
 */
 
@@ -1668,10 +1680,8 @@ struct spawnAppearanceStruct
 /*0000*/ uint8_t  opCode;                 // 0xf5
 /*0001*/ uint8_t  version;                // 0x20
 /*0002*/ uint16_t spawnId;                // ID of the spawn
-/*0004*/ int16_t  unknown0004;            // ***Placeholder
-/*0006*/ int16_t  type;                   // Type of data sent
-/*0008*/ int16_t  unknown0008;            // ***Placeholder
-/*0010*/ uint32_t paramter;               // Values associated with the type
+/*0004*/ int16_t  type;                   // Type of data sent
+/*0006*/ uint32_t paramter;               // Values associated with the type
 };
 
 /*

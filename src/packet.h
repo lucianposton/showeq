@@ -712,6 +712,8 @@ class EQPacket : public QObject
    void unknownOpcode(const uint8_t*, uint32_t, uint8_t);
 
    void worldGuildList(const char*, uint32_t);
+   void updateNpcHP(const hpNpcUpdateStruct* hpupdate, uint32_t, uint8_t);
+
  private:
       
    EQDecode            *m_decode;

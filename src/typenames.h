@@ -23,7 +23,7 @@
     "Seru",			// 16
     NULL,			// 17
     NULL,			// 18
-    NULL,			// 19
+    "Zek",			// 19
     NULL,			// 20
     "Animal",			// 21
     "Insect",			// 22

@@ -1336,6 +1336,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_spawnShell, SLOT(updateSpawns(const spawnPositionUpdate *)));
    connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(updateSpawnHP(const hpUpdateStruct *)));
+   connect(m_packet, SIGNAL(updateNpcHP(const hpNpcUpdateStruct*, uint32_t, uint8_t)),
+           m_spawnShell, SLOT(updateNpcHP(const hpNpcUpdateStruct*)));
    connect(m_packet, SIGNAL(deleteSpawn(const deleteSpawnStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(deleteSpawn(const deleteSpawnStruct*)));
    connect(m_packet, SIGNAL(killSpawn(const newCorpseStruct*, uint32_t, uint8_t)),

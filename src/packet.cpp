@@ -2426,6 +2426,15 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             break;
         }
+	
+	case NpcHpUpdateCode:
+	{
+	    unk = ! ValidatePayload(NpcHpUpdateCode, hpNpcUpdateStruct);
+
+	    emit updateNpcHP((const hpNpcUpdateStruct*)data, len, dir);
+
+	    break;
+	}
 
         case SPMesgCode:
         {

@@ -1,3 +1,10 @@
+mvern  02/18/03
+-----------------------
+
+ + Misc. opcode and struct updates, also reordered the updated/working
+      opcodes in opcodes.h
+ + Applied patch #650401 - races fix 
+
 ratt 15 Feb 03
 -----------------------
 
