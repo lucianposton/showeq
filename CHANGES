@@ -1,3 +1,7 @@
+fee (floyd) 24/May/03
+---------------------
++ added LoY maps by request
+
 bbobcat 21/May/03
 -----------------
 + Call the save of spawnpoint data upon zone end, in addtion to on zone change.
