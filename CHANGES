@@ -1,5 +1,11 @@
 dohpaZ (10/24/03)
 ---------------------
++ Updated version to 4.3.17.1
++ Fixed build for certain Linux variants.
++ Made it support Qt 3.0.5 again.
+
+dohpaZ (10/24/03)
+---------------------
 + Updated version to 4.3.17
 + More opcode and structure fixes for 10/09/03 patch.  This includes ones that
   appear to made the Combat Window and Experience Window not work.  It also
