@@ -1176,7 +1176,7 @@ printf("Resizing %d/%d\n", w, h);
    // Set main window title
    // TODO: Add % replacement values and a signal to update, for ip address currently
    // TODO: being monitored.
-   setCaption(QString("ShowEQ - Main (ctrl+alt+m to toggle menubar)"));
+   setCaption(QString("ShowEQ - Main (ctrl+alt+t to toggle menubar)"));
 
 
    /* Start the packet capturing */
