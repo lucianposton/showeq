@@ -1,4 +1,4 @@
-e*
+/*
  *  everquest.h
  *
  *  ShowEQ Distributed under GPL
