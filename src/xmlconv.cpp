@@ -252,7 +252,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
   else if (e.tagName() == "cursor")
   {
     if (e.hasAttribute("shape"))
-      v = QVariant(QCursor(e.attribute("shape").toUInt(&ok, 10)));
+      v = QVariant(QCursor(e.attribute("shape").toInt(&ok, 10)));
     else
       qWarning("%s element without value!", (const char*)e.tagName());
   }

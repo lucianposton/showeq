@@ -51,7 +51,13 @@
     <opcode id="026c" name="OP_SetChatServer" updated="02/10/04">
         <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
-    <opcode id="029b" name="OP_GetName" updated="02/10/04">
+    <opcode id="02a5" name="OP_UserCompInfo" updated="02/10/04">
+        <comment>User submitted computer information</comment>
+    </opcode>
+    <opcode id="02ae" name="OP_GetName" updated="02/10/04">
         <comment>Returns a random name</comment>
+    </opcode>
+    <opcode id="02db" name="OP_LoginComplete" updated="02/10/04">
+        <comment></comment>
     </opcode>
 </seqopcodes>

@@ -193,9 +193,6 @@ void ZoneMgr::zonePlayer(const uint8_t* data)
 void ZoneMgr::zoneEntryServer(const uint8_t* data, size_t len, uint8_t dir)
 {
   const ServerZoneEntryStruct* zsentry = (const ServerZoneEntryStruct*)data;
-#if 0 // ZBTEMP
-  m_shortZoneName = zoneNameFromID(zsentry->zoneId);
-#endif // ZBTEMP
   m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
   m_zoning = false;
   emit zoneBegin(m_shortZoneName);

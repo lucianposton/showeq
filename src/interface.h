@@ -89,7 +89,7 @@ const int maxNumMaps = 5;
 
 // This is the base number where the map dock options appear in the
 // Docked menu
-const int mapDockBase = 7; 
+const int mapDockBase = 11; 
 
 // This is the base number where the map caption options appear in the
 // Window caption menu
@@ -97,6 +97,10 @@ const int mapCaptionBase = 11;
 
 // maximum number of message windows
 const int maxNumMessageWindows = 10;
+
+// This is the base number where the message window dock options appear
+// in the Docked menu
+const int messageWindowDockBase = 16;
 
 //--------------------------------------------------
 // EQInterface
@@ -190,6 +194,7 @@ class EQInterface:public QMainWindow
    void toggle_view_SkillWin(int id);
    void toggle_view_SpawnListCol( int id );
    void toggle_view_DockedWin( int id );
+   void toggle_view_DockableWin( int id );
    
    void selectTheme(int id);
    void toggle_opcode_monitoring (int id);
@@ -317,6 +322,7 @@ class EQInterface:public QMainWindow
    void createOPCodeMonitorLog(const QString&);
    void insertWindowMenu(SEQWindow* window);
    void removeWindowMenu(SEQWindow* window);
+   void setDockEnabled(QDockWindow* dw, bool enable);
 
  public:
    Player* m_player;
@@ -367,6 +373,7 @@ class EQInterface:public QMainWindow
    QPopupMenu* m_skillWinMenu;
    QPopupMenu* m_spawnListMenu;
    QPopupMenu* m_dockedWinMenu;
+   QPopupMenu* m_dockableWinMenu;
    QPopupMenu* m_windowCaptionMenu;
    QPopupMenu* m_charMenu;
    QPopupMenu* m_charLevelMenu;
