@@ -488,6 +488,7 @@ class EQUDPIPPacketFormat : public EQPacketFormat
   in_port_t getSourcePortN() const { return m_udp->uh_sport; }
   in_port_t getDestPort() const { return ntohs(m_udp->uh_dport); }
   in_port_t getDestPortN() const { return m_udp->uh_dport; }
+  uint8_t * getUDPPayload() const { return m_rawpayload; }
 
   // IP accessors
   uint8_t getIPVersion() const { return (uint8_t)m_ip->ip_v; }
@@ -512,6 +513,7 @@ class EQUDPIPPacketFormat : public EQPacketFormat
 
   QString headerFlags(bool brief = false) const;
 
+
  protected:
   void init(uint8_t* data);
   
@@ -520,6 +522,7 @@ class EQUDPIPPacketFormat : public EQPacketFormat
   struct ip* m_ip;
   struct udphdr *m_udp;
   bool m_ownCopy;
+  uint8_t* m_rawpayload;
 };
 
 //----------------------------------------------------------------------
@@ -539,6 +542,7 @@ class EQPacket : public QObject
    char* pcap_filter();
    int packetCount(int);
    uint32_t clientAddr(void);
+   uint16_t keyPort(void);
    uint16_t clientPort(void);
    uint16_t serverPort(void);
    uint8_t session_tracking_enabled(void);
@@ -719,6 +723,7 @@ class EQPacket : public QObject
    int            m_packetCount[MAXSTREAMS];
    uint16_t       m_serverPort;
    uint16_t       m_clientPort;
+   uint16_t       m_keyPort;
    bool           m_busy_decoding;
    bool           m_viewUnknownData;
    bool           m_detectingClient;
@@ -768,6 +773,11 @@ inline uint32_t EQPacket::clientAddr(void)
    return m_client_addr;
 }
 
+inline uint16_t EQPacket::keyPort(void)
+{
+  return m_keyPort;
+}
+
 inline uint16_t EQPacket::clientPort(void)
 {
   return m_clientPort;
@@ -809,7 +819,7 @@ class PacketCaptureThread
 	 void stop ();
          uint16_t getPacket (unsigned char *buff); 
          void setFilter (const char *device, const char *hostname, bool realtime,
-                        uint8_t address_type, uint16_t zone_server_port, uint16_t client_port);
+                        uint8_t address_type, uint16_t zone_server_port, uint16_t client_port, uint16_t key_port);
 	 char* getFilter();
          
  private:

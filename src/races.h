@@ -219,24 +219,24 @@
     "Fire Elemental",         // 212
     "Wetfang Minnow",         // 213
     "Thought Horror",         // 214
-    "Tegi",                   // 215 
+    "Tegi",                   // 215
     "Horse",                  // 216
-    "Shissar",                // 217 
-    "Fungal Fiend",           // 218 
-    "Vampire Volatalis",      // 219 
-    "StoneGrabber",           // 220 
-    "Scarlet Cheetah",        // 221 
-    "Zelniak",                // 222 
-    "Lightcrawler",           // 223 
-    "Shade",                  // 224 
-    "Sunflower",              // 225 
-    "Sun Revenant",           // 226 
-    "Shrieker",               // 227 
-    "Galorian",               // 228 
-    "Netherbian",             // 229 
-    "Akheva",                 // 230 
-    "Spire Spirit",           // 231 
-    "Sonic Wolf",             // 232 
+    "Shissar",                // 217
+    "Fungal Fiend",           // 218
+    "Vampire Volatalis",      // 219
+    "StoneGrabber",           // 220
+    "Scarlet Cheetah",        // 221
+    "Zelniak",                // 222
+    "Lightcrawler",           // 223
+    "Shade",                  // 224
+    "Sunflower",              // 225
+    "Sun Revenant",           // 226
+    "Shrieker",               // 227
+    "Galorian",               // 228
+    "Netherbian",             // 229
+    "Akheva",                 // 230
+    "Spire Spirit",           // 231
+    "Sonic Wolf",             // 232
     "Teleport Man",           // 233
     "Vah Shir Skeleton",      // 234
     "Mutant Humanoid",        // 235
@@ -244,60 +244,94 @@
     "Recuso",                 // 237
     "Vah Shir King",          // 238
     "Vah Shir Guard",         // 239
+    "Teleport Man",           // 240
+    "Lujein",                 // 241
+    "Naiad",                  // 242
+    "Nymph",                  // 243
+    "Ent",                    // 244
+    "Wrinnfly",               // 245
+    "Tarew Marr",             // 246
+    "Solusek Ro",             // 247
+    "Clockwork Golem",        // 248
+    "Clockwork Brain",        // 249
+    "Spectral Banshee",       // 250
+    "Guard of Justice",       // 251
+    "PoM Castle",             // 252
+    "Disease Boss",           // 253
+    "Solusek Ro Guard",       // 254
+    "Bertoxxulous",           // 255
+    "New Tribunal",           // 256
+    "Terris Thule",           // 257
+    "Vegerog",                // 258
+    "Crocodile",              // 259
+    "Bat",                    // 260
+    "Slarghilug",             // 261
+    "Tranquilion",            // 262
+    "Tin Soldier",            // 263
+    "Nightmare Wraith",       // 264
+    "Malarian",               // 265
+    "Knight of Pestilence",   // 266
+    "Lepertoloth",            // 267
+    "Bubonian Boss",          // 268
+    "Bubonian Underling",     // 269
+    "Pusling",                // 270
+    "Water Mephit",           // 271
+    "Stormrider",             // 272
+    "Junk Beast",             // 273
+    "Broken Clockwork",	      // 274
+    "Giant Clockwork",	      // 275
+    "Clockwork Beetle",	      // 276
+    "Nightmare Goblin",	      // 277
+    "Karana",                 // 278
+    "Blood Raven",	      // 279
+    "Nightmare Gargoyle",     // 280
+    "Mouths of Insanity",     // 281
+    "Skeletal Horse",	      // 282
+    "Saryn",                  // 283
+    "Fennin Ro",              // 284
+    "Tormentor",              // 285
+    "Necromancer Priest",     // 286
+    "Nightmare",              // 287
+    "New Rallos Zek",         // 288
+    "Tallon Zek",             // 289
+    "Vallon Zek",             // 290
+    "Air Mephit",             // 291
+    "Earth Mephit",           // 292
+    "Fire Mephit",	      // 293
+    "Nightmare Mephit",	      // 294
+    "Zebukoruk",              // 295
+    "Mithaniel Marr",         // 296
+    "Knightmare",             // 297
+    "The Rathe",              // 298
+    "Xegony",                 // 299
+    "Balrog",                 // 300
+    "Unknown Race",           // 301
+    "Lobster Monster",        // 302
+    "Pheonix",                // 303
+    "Tiamat",                 // 304
+    "Bear PoP",               // 305
+    "Earth Golem",            // 306
+    "Iron Golem",             // 307
+    "Storm Golem",            // 308
+    "Air Golem",              // 309
+    "Wood Golem",             // 310
+    "Fire Golem",             // 311
+    "Water Golem",            // 312
+    "Veiled Gargoyle",        // 313
+    "Lynx",                   // 314
+    "Squid",                  // 315
+    "Frog",                   // 316
+    "Flying Serpent",         // 317
+    "War Soldier",            // 318
+    "Armored Boar",           // 319
+    "Djinni",                 // 320
+    "Boar",                   // 321
+    "Armor Knight",           // 322
+    "Ghost Armor",            // 323
+    "Death Knight",           // 324
+    "Zek Ogre",               // 325
+    "Nightmare Spider",       // 326
+    "Crystal Spider",         // 327
+    "A Tower",                // 328
 
-    "Lujein",	              // 240
-    "Naiad",	              // 241
-    "Nymph",	              // 242
-    "Ent",		      // 243
-    "Wrinnfly",	              // 244
-    "Tarew Marr",	      // 245
-    "Solusek Ro",	      // 246
-    "Clockwork Golem",	      // 247
-    "Clockwork Brain",	      // 248
-    "Spectral Banshee",	      // 249
-    "Guard of Justice",	      // 250
-    NULL,	              // 251
-    "Disease Boss",	      // 252
-    "Solusek Ro Guard",	      // 253
-    "Bertoxxulous",	      // 254
-    "New Tribunal",	      // 255
-    "Terris Thule",	      // 256
-    "Vegerog",	              // 257
-    "Crocodile",	      // 258
-    "Bat",	              // 259
-    "Slarghilug",	      // 260
-    "Tranquilion",	      // 261
-    "Tin Soldier",	      // 262
-    "Nightmare Wraith",	      // 263
-    "Malarian",	              // 264
-    "Knight of Pestilence",   // 265
-    "Lepertoloth",	      // 266
-    "Bubonian Boss",	      // 267
-    "Bubonian Underling",     // 268
-    "Pusling",	              // 269
-    "Water Mephit",	      // 270
-    "Stormrider",	      // 271
-    "Junk Beast",	      // 272
-    "Broken Clockwork",	      // 273
-    "Giant Clockwork",	      // 274
-    "Clockwork Beetle",	      // 275
-    "Nightmare Goblin",	      // 276
-    "Karana",	              // 277
-    "Blood Raven",	      // 278
-    "Nightmare Gargoyle",     // 279
-    "Mouths of Insanity",     // 280
-    "Skeletal Horse",	      // 281
-    "Saryn",	              // 282
-    "Fennin Ro",	      // 283
-    "Tormentor",	      // 284
-    "Necromancer Priest",     // 285
-    "Nightmare",	      // 286
-    "New Rallos Zek",	      // 287
-    "Tallon Zek",	      // 288
-    "Vallon Zek",	      // 289
-    "Air Mephit",	      // 290
-    "Earth Mephit",	      // 291
-    "Fire Mephit",	      // 292
-    "Nightmare Mephit",	      // 293
-    "UNKNOWN RACE",           // Unknown Race (Literally)
 

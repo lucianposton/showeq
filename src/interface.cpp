@@ -732,6 +732,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_decoderMenu->insertItem("Load Session Key", this, SLOT(load_decoder_key()));
    m_decoderMenu->insertItem("Key Filename...", this, 
 			      SLOT(set_opt_enc_BaseFilename(void)));
+   m_decoderMenu->insertItem("Key Port", this, SLOT(set_key_port()));
    
    // Character Menu 
    m_charMenu = new QPopupMenu;
@@ -742,7 +743,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // Character -> Level
    m_charLevelMenu = new QPopupMenu;
    m_charMenu->insertItem("Choose &Level", m_charLevelMenu);
-   m_levelSpinBox = new QSpinBox(1, 60, 1, this, "m_levelSpinBox");
+   m_levelSpinBox = new QSpinBox(1, 65, 1, this, "m_levelSpinBox");
    m_charLevelMenu->insertItem( m_levelSpinBox );
    m_levelSpinBox->setWrapping( true );
    m_levelSpinBox->setButtonSymbols(QSpinBox::PlusMinus);
@@ -5588,8 +5589,24 @@ void EQInterface::set_opt_enc_BaseFilename()
     showeq_params->KeyBaseFilename = fileName;
     
     // set preference to use for next session
-    pSEQPrefs->setPrefString("BaseFilename", "SaveState", 
+    pSEQPrefs->setPrefString("BaseFilename", "KeyFile", 
 			     showeq_params->KeyBaseFilename);
   }
 }
 
+void EQInterface::set_key_port()
+{
+  bool ok = FALSE;
+
+  QString key_port = QInputDialog::getText(
+                     tr("Set Decoder Key Port"),
+                     tr("Port"),
+                     QLineEdit::Normal, QString::null, &ok, this);
+
+  if (ok && !key_port.isEmpty())
+  {
+     qDebug("set_decoder_key: User specified key port: %s", (const char*)key_port);
+     pSEQPrefs->setPrefInt("KeyPort", "KeyFile", (uint16_t)atoi(key_port));
+     showeq_params->keyport = (uint16_t)atoi(key_port);
+  }
+}

@@ -535,7 +535,10 @@ void EQDecode::setHash(uint8_t* data, uint32_t len)
 
 void EQDecode::theKey(uint64_t key)
 {
-      m_decodeKey = key;
+  if (m_decodeKey == key || key == 0xffffffffffffffff)
+      return;
+
+  m_decodeKey = key;
   // post the FoundKeyEvent to the main/GUI thread to be handled their
   QApplication::postEvent(this, new FoundKeyEvent());
 }

@@ -44,6 +44,7 @@
 // constants
 static const char magicStr[5] = "spn4"; // magic is the size of uint32_t + a null
 static const uint32_t* magic = (uint32_t*)magicStr;
+static const char * Spawn_Corpse_Designator = "'s corpse";
 
 //----------------------------------------------------------------------
 // Handy utility function
@@ -881,7 +882,11 @@ void SpawnShell::killSpawn(const newCorpseStruct* deadspawn)
      spawn->killSpawn();
      updateFilterFlags(item);
      updateRuntimeFilterFlags(item);
+
+     spawn->setName(spawn->realName() + Spawn_Corpse_Designator);
+
      emit killSpawn(item, killer, deadspawn->killerId);
+
 
      if (item->filterFlags() & FILTER_FLAG_ALERT)
        emit handleAlert(item, tKillSpawn);
@@ -896,10 +901,20 @@ void SpawnShell::corpseLoc(const corpseLocStruct* corpseLoc)
     Spawn* spawn = (Spawn*)item;
 
     // set the corpses location, and make sure it's not moving... 
-    spawn->setPos(int16_t(corpseLoc->x), int16_t(corpseLoc->y), 
-		  int16_t(corpseLoc->z),
-		  showeq_params->walkpathrecord,
-		  showeq_params->walkpathlength);
+    if ((spawn->NPC() == SPAWN_PLAYER) || (spawn->NPC() == SPAWN_PC_CORPSE))
+    {
+        spawn->setPos(int16_t(corpseLoc->y), int16_t(corpseLoc->x), 
+                      int16_t(corpseLoc->z),
+                      showeq_params->walkpathrecord,
+                      showeq_params->walkpathlength);
+    }
+    else 
+    {
+        spawn->setPos(int16_t(corpseLoc->x), int16_t(corpseLoc->y), 
+                      int16_t(corpseLoc->z),
+                      showeq_params->walkpathrecord,
+                      showeq_params->walkpathlength);
+    }
     spawn->killSpawn();
     spawn->updateLast();
     spawn->updateLastChanged();

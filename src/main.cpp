@@ -320,6 +320,7 @@ int main (int argc, char **argv)
 
    section = "KeyFile";
    showeq_params->KeyBaseFilename = pSEQPrefs->getPrefString("BaseFilename", section, LOGDIR "/keyfile.dat");
+   showeq_params->keyport = pSEQPrefs->getPrefInt("KeyPort", section, 10000);
 
    /* Parse the commandline for commandline parameters */
    while ((opt = getopt_long( argc,

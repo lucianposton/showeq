@@ -437,12 +437,12 @@ void Spawn::killSpawn()
   setHeading(0, 0);
   setHP(0);
   setMaxHP(0);
-  if ((NPC() == SPAWN_PLAYER) || (NPC() == SPAWN_SELF))
+  if ((NPC() == SPAWN_PLAYER) || (NPC() == SPAWN_SELF) || (NPC() == SPAWN_PC_CORPSE))
     setNPC(SPAWN_PC_CORPSE);
   else
     setNPC(SPAWN_NPC_CORPSE);
-  
-  setName(realName() + Spawn_Corpse_Designator);
+
+   //setName(realName() + Spawn_Corpse_Designator);
 }
 
 void Spawn::setPos(int16_t x, int16_t y, int16_t z,

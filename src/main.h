@@ -125,6 +125,7 @@ struct ShowEQParams
   bool           restoreSpawns;
   QString        saveRestoreBaseFilename;
   QString        KeyBaseFilename;
+  uint16_t       keyport;
 };
  
 extern struct ShowEQParams *showeq_params;

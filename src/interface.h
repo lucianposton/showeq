@@ -273,6 +273,7 @@ class EQInterface:public QMainWindow
    void set_decoder_key();
    void load_decoder_key();
    void set_opt_enc_BaseFilename();
+   void set_key_port();
 
  protected:
    bool getMonitorOpCodeList(const QString& title, const QString& defaultList);

@@ -2529,6 +2529,10 @@
    <string value="/usr/local/share/showeq/keyfile.dat" />
    <comment>Base filename used to construct the others, so for example the DecodeKey would be in /usr/local/share/showeq/keyfile.dat using the default location</comment>
   </property>
+  <propert name =KeyPort">
+    <int value="10000">
+  <comment>Port that key will be sent to</comment>
+  </property>
  </section>
 <!-- ============================================================= -->
 <!-- Experience Window Options -->

@@ -1,3 +1,29 @@
+fee (floyd) 11/05/2002
+----------------------
+ + ShowEQ 4.3.2
+
+ + Bug Fixes
+   - player corpses will now appear as yellow boxes, not cyan +
+   - player corpses will now appear at the correct coordinates
+   - corpses will not have the extra Soandso's corpse's corpse (not working 100% but close)
+
+ + Features and Updates
+   - ShowEQ can now be configured to listen on a specified port
+     for a decryption key, expects a udp packet with an 8 byte
+     payload containing the key in little endian byte order
+   - updated races.h, thank you Ty
+   - updated concolors for post 60 players
+
+ + New Maps, Thank you Dok
+   - Povalor
+   - Powater
+   - Potactics
+   - Bothunder
+   - Potorment
+   - Pofire
+   - Postorms
+   - Poair
+
 fee (floyd) 11/01/2002
 ----------------------
  + ShowEQ 4.3.1

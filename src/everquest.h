@@ -355,8 +355,9 @@ struct spawnStruct
          signed   deltaZ:10;              // Velocity Z 
          unsigned spacer2:1;              // ***Placeholder 
          signed   deltaX:10;              // Velocity X 
-/*0013*/ uint16_t petOwnerId;
-/*0015*/ uint8_t  unknown0013[9];
+/*0013*/ uint8_t  unkown0013;
+/*0014*/ uint16_t petOwnerId;
+/*0016*/ uint8_t  unknown0013[8];
 /*0024*/ float    size;
 /*0028*/ float    walkspeed;
 /*0032*/ float    runspeed;
@@ -1959,6 +1960,11 @@ struct rawWorldGuildListStruct
 /*0000*/ uint8_t opCode;
 /*0001*/ uint8_t version;
 /*0002*/ worldGuildListStruct guildlist;
+};
+
+struct keyStruct
+{
+/*0002*/ uint64_t key;
 };
 
 // Restore structure packing to default

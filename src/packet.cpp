@@ -419,6 +419,7 @@ void EQUDPIPPacketFormat::init(uint8_t* data)
   // skip over UDP header
   length  -= sizeof  (struct udphdr);
   data += (sizeof (struct udphdr));
+  m_rawpayload = data;
 
   // initialize underlying EQPacketFormat with the UDP payload
   EQPacketFormat::init((EQPacketFormatRaw*)data, length, false);
@@ -459,6 +460,7 @@ EQPacket::EQPacket (QObject * parent, const char *name)
        m_packetCount[a] = 0;
    }
 
+   m_keyPort = showeq_params->keyport;
    m_session_tracking_enabled = showeq_params->session_tracking;
    m_eqstreamid = unknown_stream;
    m_clientPort = 0;
@@ -514,7 +516,8 @@ EQPacket::EQPacket (QObject * parent, const char *name)
 				showeq_params->mac_address, 
 				showeq_params->realtime, MAC_ADDRESS_TYPE );
       else
-         m_packetCapture->start(showeq_params->device, showeq_params->ip, 
+         m_packetCapture->start(showeq_params->device,
+                                showeq_params->ip, 
 				showeq_params->realtime, IP_ADDRESS_TYPE );
    }
 
@@ -1011,6 +1014,14 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
     }
   }
 
+  /* Key Sniffer Hook */
+  if ((packet.getDestPort() == m_keyPort))
+  {
+     keyStruct* keypacket = (keyStruct *)packet.getUDPPayload();
+     m_decode->theKey(keypacket->key);
+     return;
+  }
+ 
   /* Chat and Login Server Packets, Discard for now */
   if ((packet.getDestPort() == ChatServerPort) ||
       (packet.getSourcePort() == ChatServerPort))
@@ -1191,10 +1202,11 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   				            showeq_params->mac_address,
 				            showeq_params->realtime, 
 				            MAC_ADDRESS_TYPE, 0, 
-				            m_clientPort);
-	         printf ("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d\n",
+				            m_clientPort,
+                                            m_keyPort);
+	         printf ("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d, Key port %d\n",
 		         (const char*)showeq_params->mac_address, 
-		         m_clientPort);
+		         m_clientPort, m_keyPort);
 	      }
 	      else
 	      {
@@ -1202,10 +1214,11 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 	     			            showeq_params->ip,
 				            showeq_params->realtime, 
 				            IP_ADDRESS_TYPE, 0, 
-				            m_clientPort);
-	         printf ("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d\n",
+				            m_clientPort,
+                                            m_keyPort);
+	         printf ("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d, Key port %d\n",
 	  	         (const char*)showeq_params->ip, 
-		         m_clientPort);
+		         m_clientPort, m_keyPort);
 	      }
 	   }
         }
@@ -1262,7 +1275,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
            // the race condition between timer and processing the zoneServerInfo
            if(!showeq_params->playbackpackets) 
              m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
-                                        showeq_params->realtime, IP_ADDRESS_TYPE, 0, 0);
+                                        showeq_params->realtime, IP_ADDRESS_TYPE, 0, 0, m_keyPort);
 	   printf ("EQPacket: SEQClosing detected, awaiting next zone session,  pcap filter: EQ Client %s\n",
 	  	   (const char*)showeq_params->ip);
 
@@ -1480,7 +1493,7 @@ void EQPacket::processCache()
         // the race condition between timer and processing the zoneServerInfo
         if(!showeq_params->playbackpackets) 
           m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
-                                     showeq_params->realtime, IP_ADDRESS_TYPE, 0, 0);
+                                     showeq_params->realtime, IP_ADDRESS_TYPE, 0, 0, m_keyPort);
 	printf ("EQPacket: SEQClosing detected, awaiting next zone session,  pcap filter: EQ Client %s\n",
                 (const char*)showeq_params->ip);
 
@@ -3250,6 +3263,7 @@ void EQPacket::dispatchDecodedCharProfile(const uint8_t* decodedData,
 {
   ValidateDecodedPayload(CharProfileCode, charProfileStruct);
 
+              //logData ("/tmp/charprofile.log", decodedDataLen, decodedData);
   emit backfillPlayer((const charProfileStruct*)decodedData, decodedDataLen, DIR_SERVER);
 }
 
@@ -3258,6 +3272,7 @@ void EQPacket::dispatchDecodedNewSpawn(const uint8_t* decodedData,
 {
   ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
 
+              //logData ("/tmp/newspawn.log", decodedDataLen, decodedData);
   emit backfillSpawn((newSpawnStruct*)decodedData, decodedDataLen, DIR_SERVER);
 }
 
@@ -3286,6 +3301,7 @@ void EQPacket::dispatchDecodedZoneSpawns(const uint8_t* decodedData,
   }
 #endif
 
+              //logData ("/tmp/zonespawn.log", decodedDataLen, decodedData);
   emit backfillZoneSpawns(zdata, decodedDataLen, DIR_SERVER);
 }
 
@@ -3363,7 +3379,7 @@ void EQPacket::monitorIPClient(const QString& ip)
   if (!showeq_params->playbackpackets)
     m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
 			       showeq_params->realtime, 
-			       IP_ADDRESS_TYPE, 0, 0);
+			       IP_ADDRESS_TYPE, 0, 0, m_keyPort);
 }
 
 void EQPacket::monitorMACClient(const QString& mac)
@@ -3383,7 +3399,7 @@ void EQPacket::monitorMACClient(const QString& mac)
   if (!showeq_params->playbackpackets)
     m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
 			       showeq_params->realtime, 
-			       IP_ADDRESS_TYPE, 0, 0);
+			       IP_ADDRESS_TYPE, 0, 0, m_keyPort);
 }
 
 void EQPacket::monitorNextClient()
@@ -3402,7 +3418,7 @@ void EQPacket::monitorNextClient()
   if (!showeq_params->playbackpackets)
     m_packetCapture->setFilter(showeq_params->device, NULL,
 			       showeq_params->realtime, 
-			       DEFAULT_ADDRESS_TYPE, 0, 0);
+			       DEFAULT_ADDRESS_TYPE, 0, 0, m_keyPort);
 }
 
 void EQPacket::monitorDevice(const QString& dev)
@@ -3512,6 +3528,7 @@ void EQPacket::resetEQPacket()
 
    m_clientPort = 0;
    m_serverPort = 0;
+   m_keyPort = showeq_params->keyport;
 
    m_eqstreamid = unknown_stream;
 
@@ -3712,7 +3729,8 @@ void PacketCaptureThread::setFilter (const char *device,
                                      bool realtime,
                                      uint8_t address_type,
                                      uint16_t zone_port,
-				     uint16_t client_port
+				     uint16_t client_port,
+                                     uint16_t key_port
                                     )
 {
     char filter_buf[256]; // pcap filter buffer 
@@ -3721,13 +3739,13 @@ void PacketCaptureThread::setFilter (const char *device,
 
     /* Listen to World Server or the specified Zone Server */
     if (address_type == IP_ADDRESS_TYPE && client_port)   
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, key_port, hostname);
     else if (address_type == IP_ADDRESS_TYPE && zone_port) 
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_port, zone_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_port, zone_port, key_port, hostname);
     else if (address_type == MAC_ADDRESS_TYPE && client_port)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, key_port, hostname);
     else if (address_type == MAC_ADDRESS_TYPE && zone_port)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_port, zone_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_port, zone_port, key_port, hostname);
     else if (hostname != NULL && !client_port && !zone_port)
          sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and host %s", hostname);
     else

@@ -964,8 +964,8 @@ void Player::fillConTable()
 // 58-60        -21     -16     +3
 // 61           -13	-17	+3
 
-  int greenRange; 
-  int cyanRange; 
+  int greenRange = 0; 
+  int cyanRange = 0; 
 
   if (level() < 8) 
   { // 1 - 7 
@@ -1037,10 +1037,25 @@ void Player::fillConTable()
     greenRange = -21;
     cyanRange = -16;
   }
-  else //61+
+  else if (level() == 61) //61+
+  {
+    greenRange = -19;
+    cyanRange = -14;
+  }
+  else if (level() == 62)
+  {
+    greenRange = -18;
+    cyanRange = -13;
+  }
+  else if (level() == 63)
   {
     greenRange = -17;
-    cyanRange = -14;
+    cyanRange = -12;
+  }
+  else if (level() < 66) //64 - 65
+  {
+    greenRange = -16;
+    cyanRange = -11;
   }
   
   uint8_t spawnLevel = 1; 
