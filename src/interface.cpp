@@ -3506,11 +3506,16 @@ void EQInterface::channelMessage(const channelMessageStruct* cmsg, uint32_t, uin
     target = true;
     break;
     
+  case 11:
+    tempStr.sprintf("GMSAY");
+    target = true;
+    break;
+
   case 14:
     tempStr.sprintf("GM-Tell");
     target = true;
     break;
-    
+
   default:
     tempStr.sprintf("Chan%02x", cmsg->chanNum);
     target = true;
