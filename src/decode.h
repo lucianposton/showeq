@@ -17,7 +17,7 @@
 #include "everquest.h"
 
 
-#define PKTBUF_LEN 65535
+#define PKTBUF_LEN 131070 
 
 typedef struct
 {
@@ -67,9 +67,9 @@ class EQDecode : public QObject
   virtual bool event(QEvent*);
 
   uint64_t decodeKey() { return m_decodeKey; }
- private:
   int InflatePacket(const uint8_t *pbDataIn, uint32_t cbDataInLen, 
 		    uint8_t* pbDataOut, uint32_t* pcbDataOutLen);
+private:
   EQPktQueue m_queuePlayerProfile;
   EQPktQueue m_queueZoneSpawns;
   EQPktQueue m_queueSpawns;

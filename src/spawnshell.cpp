@@ -398,7 +398,7 @@ void SpawnShell::compressedDoorSpawn(const cDoorSpawnsStruct *c)
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::compressedDoorSpawn(compressedDoorStruct*)\n");
 #endif
-   for (int i=0; i<c->count; i++)
+   for (unsigned int i=0; i<c->count; i++)
    {
       newDoorSpawn((const doorStruct*)&c->doors[i]);
    }

@@ -1772,7 +1772,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
     QString  tempStr;
     int      decoded = 0;
-    uint32_t decodedDataLen = 65536;
+    uint32_t decodedDataLen = 131072;
     uint8_t  decodedData[decodedDataLen];
 
     uint16_t opCode = eqntohuint16(data); // data[1] | (data[0] << 8);
@@ -1829,7 +1829,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
            "CPlayerItems: count=%d size=%d packetsize=%d expsize=%d\n",
            citems->count,
            decodedDataLen,
-           ((decodedDataLen - 4)/citems->count),
+           ((decodedDataLen - 6)/citems->count),
            sizeof(playerItemStruct));
 
            // Make sure we do not divide by zero and there 
@@ -1840,7 +1840,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
                // Determine the size of a single structure in 
                // the compressed packet
  
-               int nPacketSize=((decodedDataLen - 4)/citems->count);
+               int nPacketSize=((decodedDataLen - 6)/citems->count);
 
                // See if it is the size that we expect
  
@@ -1864,7 +1864,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
                   emit msgReceived(tempStr);
  
-                  for (int i=0; i < citems->count; i++)
+                  for (unsigned int i=0; i < citems->count; i++)
                       dispatchZoneData(nPacketSize,
                                       &citems->compressedData[i*nPacketSize], dir);
 
@@ -1873,7 +1873,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
                else
                {
                   // Quietly dispatch the compressed data
-                  for (int i=0; i<citems->count; i++)
+                  for (unsigned int i=0; i<citems->count; i++)
                       dispatchZoneData(nPacketSize,
                                        &citems->compressedData[i*nPacketSize], dir);
                }
@@ -2526,7 +2526,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         case MakeDropCode:
         {
             unk = ! ValidatePayload(MakeDropCode, makeDropStruct);
-
+	    
 	    emit newGroundItem((const makeDropStruct*)data, len, dir);
 
             break;
@@ -3046,6 +3046,96 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    //unk = ! ValidatePayload(xBuyItemCode, xBuyItemStruct);
 	    //emit xBuyItem((const xBuyItemStruct*)data, len, dir);
 	    //both the client command and the server acknowledgement when buying
+	    break;
+	}
+	
+	case CompressedWrapCode:
+	{
+	    int offset;
+	    uint8_t *decompressed;
+	    uint32_t dcomplen;
+	    unsigned short expected_dcomplen = 0;
+
+	    unk = false;
+	
+	    if (data[4] == 0xff)
+	    {
+		offset = 7;
+		expected_dcomplen = eqntohuint16 (data+5);
+	    } else {
+		offset = 5;
+		expected_dcomplen = data[4];
+	    }
+
+	    decompressed = (unsigned char *) malloc (expected_dcomplen+2);
+	    dcomplen = expected_dcomplen;
+
+	    if (m_decode->InflatePacket (&data[offset], len-offset, decompressed+2, &dcomplen) != 1)
+	    {
+		free (decompressed);
+		break;
+	    }
+
+	    if (dcomplen != expected_dcomplen)
+	    {
+		printf ("Warning:  Decompressed %d, but expected %d!\n", dcomplen, expected_dcomplen);
+		free (decompressed);
+		break;
+	    }
+
+	    memcpy (decompressed, data+2, 2);
+	    dispatchZoneData (dcomplen+2, decompressed, dir);
+	    free (decompressed);
+
+            break;
+	}
+	
+	case PacketWrapCode:
+	{
+	    int left;
+	    unsigned char *dptr;
+
+	    unk = false;
+	    left = len-2;
+	    dptr = data+2;
+
+	    // data left?
+	    while (left > 0)
+	    {
+		unsigned char *packet;
+		unsigned short expected_dlen = 0;
+
+		if (dptr[0] == 0xff)
+		{
+			dptr++;
+			expected_dlen = eqntohuint16(dptr);
+			dptr += 2;
+			left -= 3;
+		} else {
+			expected_dlen = dptr[0];
+			dptr++;
+			left -= 1;
+		}
+		if (expected_dlen+2 > left)
+		{
+			printf ("Warning:  Expected %d, but only %d left\n", expected_dlen, left);
+			break;
+		}
+
+		packet = (unsigned char *) malloc (expected_dlen+2);
+
+		memcpy (packet, dptr, 2);
+		dptr += 2;
+		left -= 2;
+
+		memcpy (packet+2, dptr, expected_dlen);
+		dptr += expected_dlen;
+		left -= expected_dlen;
+
+	        dispatchZoneData (expected_dlen+2, packet, dir);
+
+		free (packet);
+	    }	
 	    break;
 	}
 

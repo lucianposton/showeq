@@ -228,7 +228,7 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
   // Check to see if it is a compressed packet
   if ((opcode == CPlayerItemsCode) || (opcode == CDoorSpawnsCode) || (opcode == cItemInShopCode))
   {
-     uint8_t pbUncompressedData[PKTBUF_LEN-4];
+     uint8_t pbUncompressedData[PKTBUF_LEN-6];
      uint32_t nUncompressedLength;
      int nErrorCode;
 
@@ -236,19 +236,19 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
      nUncompressedLength = sizeof(pbUncompressedData);
 
      // Inflate the packet
-     nErrorCode = InflatePacket( &data[4], len - 4, 
+     nErrorCode = InflatePacket( &data[6], len - 6, 
 				 pbUncompressedData, &nUncompressedLength);
 	
      if( nErrorCode )
      {
-       // copy the first 4 bytes
-       *(uint32_t*)decodedData = *(uint32_t*)data;
+       // copy the first 6 bytes
+       memcpy (decodedData, data, 6);
 
        // copy the uncompressed data to the rest of the buffer
-       memcpy( decodedData+4, pbUncompressedData , nUncompressedLength );
+       memcpy( decodedData+6, pbUncompressedData , nUncompressedLength );
 
        // size of decoded data
-       *decodedDataLen = nUncompressedLength + 4;
+       *decodedDataLen = nUncompressedLength + 6;
      }
      return nErrorCode;
   }

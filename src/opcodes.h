@@ -141,6 +141,10 @@
 
 #define PlayerContainerCode         0x6641
 
+#define CompressedWrapCode          0x7642
+
+#define PacketWrapCode              0x7742
+
 #define SummonedItemCode            0x7841
 
 #define SummonedContainerCode       0x7921
