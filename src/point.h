@@ -26,7 +26,7 @@
 #include <stdarg.h>
 
 #include <qpoint.h>
-#include <qarray.h>
+#include <qmemarray.h>
 
 template <class _T>
 class Point3D 
@@ -38,6 +38,7 @@ class Point3D
   Point3D();
   Point3D(_T x, _T y, _T z);
   Point3D(const Point3D& point);
+  Point3D(const QPoint& point);
 
   // virtual destructor
   virtual ~Point3D();
@@ -51,6 +52,7 @@ class Point3D
   Point3D& operator/=(int coef);
   Point3D& operator/=(double coef);
   bool operator==(const Point3D& point) const;
+  bool isEqual(_T x, _T y, _T z) const;
 
   // get methods
   _T x() const { return m_x; }
@@ -120,6 +122,13 @@ template <class _T> inline
 Point3D<_T>::Point3D<_T>(const Point3D<_T>& point)
 {
   setPoint(point.x(), point.y(), point.z());
+}
+
+// copy constructor
+template <class _T> inline
+Point3D<_T>::Point3D<_T>(const QPoint& point)
+{
+  setPoint(point.x(), point.y(), 0);
 }
 
 // convenience constructor
@@ -208,6 +217,14 @@ bool Point3D<_T>::operator==(const Point3D<_T>& point) const
 	  (z() == point.z()));
 }
 
+template <class _T> inline
+bool Point3D<_T>::isEqual(_T x, _T y, _T z) const
+{
+  return ((m_x == x) &&
+	  (m_y == y) &&
+	  (m_z == z));
+}
+
 // returns true if all 3 dimensions are 0
 template <class _T> inline
 bool Point3D<_T>::isNull() const
@@ -284,12 +301,12 @@ double Point3D<_T>::calcDist(_T x_, _T y_, _T z_) const
 
 // Point3DArray
 template <class _T>
-class Point3DArray : public QArray<Point3D<_T> >
+class Point3DArray : public QMemArray<Point3D<_T> >
 {
  public:
   Point3DArray() {};
-  Point3DArray(int size) : QArray<Point3D<_T> > (size) {}
-  Point3DArray(const Point3DArray<_T>& array) : QArray<Point3D<_T> > (array) {}
+  Point3DArray(int size) : QMemArray<Point3D<_T> > (size) {}
+  Point3DArray(const Point3DArray<_T>& array) : QMemArray<Point3D<_T> > (array) {}
   Point3DArray(uint32_t nPoints, const _T* points);
   ~Point3DArray() {};
 
@@ -350,7 +367,7 @@ QRect Point3DArray<_T>::boundingRect() const
 template <class _T> inline
 void Point3DArray<_T>::point(uint32_t index, _T* x, _T* y, _T* z) const
 {
-  Point3D<_T> p = QArray<Point3D<_T> >::at(index);
+  Point3D<_T> p = QMemArray<Point3D<_T> >::at(index);
   *x = p.x();
   *y = p. y();
   *z = p. z();
@@ -359,19 +376,19 @@ void Point3DArray<_T>::point(uint32_t index, _T* x, _T* y, _T* z) const
 template <class _T> inline 
 const Point3D<_T>& Point3DArray<_T>::point(uint32_t index) const
 {
-  return QArray<Point3D<_T> >::at(index);
+  return QMemArray<Point3D<_T> >::at(index);
 }
 
 template <class _T> inline
 void Point3DArray<_T>::setPoint(uint32_t index, _T x, _T y, _T z)
 {
-  QArray<Point3D<_T> >::at(index) = Point3D<_T>(x, y, z);
+  QMemArray<Point3D<_T> >::at(index) = Point3D<_T>(x, y, z);
 }
 
 template <class _T> inline 
 void Point3DArray<_T>::setPoint(uint32_t index, const Point3D<_T>& p)
 {
-  QArray<Point3D<_T> >::at(index) = p;
+  QMemArray<Point3D<_T> >::at(index) = p;
 }
 
 template <class _T> inline

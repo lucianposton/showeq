@@ -5,12 +5,14 @@
  *  http://seq.sourceforge.net/
  */
 
-#include <qlayout.h>
-
 #include "player.h"
 #include "skilllist.h"
 #include "util.h"
 #include "main.h" // for pSEQPrefs & showeq_params
+#include "diagnosticmessages.h"
+
+#include <qlayout.h>
+
 
 SkillList::SkillList(Player* player,
 			 QWidget* parent, 
@@ -66,7 +68,7 @@ void SkillList::addSkill (int skillId, int value)
 {
   if (skillId >= MAX_KNOWN_SKILLS)
   {
-    printf("Warning: skillId (%d) is more than max skillId (%d)\n", 
+    seqWarn("skillId (%d) is more than max skillId (%d)\n", 
 	   skillId, MAX_KNOWN_SKILLS - 1);
 
     return;
@@ -99,7 +101,7 @@ void SkillList::changeSkill (int skillId, int value)
 {
   if (skillId >= MAX_KNOWN_SKILLS)
   {
-    printf("Warning: skillId (%d) is more than max skillId (%d)\n", 
+    seqWarn("skillId (%d) is more than max skillId (%d)\n", 
 	   skillId, MAX_KNOWN_SKILLS - 1);
 
     return;
@@ -137,7 +139,7 @@ void SkillList::addLanguage (int langId, int value)
 
   if (langId >= MAX_KNOWN_LANGS)
   {
-    printf("Warning: langId (%d) is more than max langId (%d)\n", 
+    seqWarn("langId (%d) is more than max langId (%d)\n", 
 	   langId, MAX_KNOWN_LANGS - 1);
 
     return;
@@ -173,8 +175,8 @@ void SkillList::changeLanguage (int langId, int value)
 
   if (langId > MAX_KNOWN_LANGS)
   {
-    printf("Warning: langId (%d) is more than max langId (%d)\n", 
-	   langId, MAX_KNOWN_LANGS - 1);
+    seqWarn("Warning: langId (%d) is more than max langId (%d)\n", 
+	    langId, MAX_KNOWN_LANGS - 1);
 
     return;
   }
@@ -230,10 +232,11 @@ SkillListWindow::SkillListWindow(Player* player,
 				 QWidget* parent, const char* name)
   : SEQWindow("SkillList", "ShowEQ - Skills", parent, name)
 {
-  QVBoxLayout* layout = new QVBoxLayout(this);
-  layout->setAutoAdd(true);
+  //  QVBoxLayout* layout = new QVBoxLayout(this);
+  //layout->setAutoAdd(true);
   
   m_skillList = new SkillList(player, this, name);
+  setWidget(m_skillList);
 }
 
 SkillListWindow::~SkillListWindow()

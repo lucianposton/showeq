@@ -5,6 +5,10 @@
  *  http://seq.sourceforge.net/
  */
 
+#include "util.h"
+#include "diagnosticmessages.h"
+#include "main.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,8 +18,28 @@
 #include <qfileinfo.h>
 #include <qdir.h>
 
-#include "util.h"
-#include "main.h"
+#ifdef __FreeBSD__
+long int lroundf(float x)
+  //closest int away from 0
+{
+  if (x < 0)
+    return -lrint(-x);
+  else
+    return lrint(x);
+}
+
+long int lrint(double x)
+{
+  long int l=(long int)(x+.5);
+  return l;
+}
+
+long int lrintf(float x)
+{
+  return lrint(x);
+}
+#endif
+
 
 struct spellInfoStruct 
 {
@@ -113,98 +137,6 @@ language_name (uint8_t langId)
     return languagenames[langId];
   else
     return QString::number(langId);
-}
-
-/* Saves spawn to spawn DB */
-void spawndb (const dbSpawnStruct *dbSpawn)
-{
-   FILE *sdb;
-   struct dbSpawnStruct s;
-   int found=0;
-   char thisname[256];
-   char dbname[256];
-
-   /* Check if this is not a player or a corpse */
-   if (dbSpawn->spawn.NPC == 0 || dbSpawn->spawn.NPC == 2) {
-      return;
-   }
-
-   strcpy (thisname, dbSpawn->spawn.name);
-
-   /* Strip off number after spawn name */
-   size_t nameLen = strlen(dbSpawn->spawn.name);
-   for (size_t a=0; a < nameLen; a++)
-     if (thisname[a]<='9')
-       thisname[a]=0;
-
-   if ((sdb = fopen (SPAWNFILE, "r")) != NULL)
-   {
-      while (fread (&s, sizeof(dbSpawnStruct), 1, sdb))
-      {
-	 strcpy (dbname, s.spawn.name);
-	 size_t nameLen = strlen(s.spawn.name);
-	 for (size_t a=0; a < nameLen; a++)
-	   if (dbname[a]<='9')
-	     dbname[a]=0;
-	 if (	(!strcmp(dbname, thisname)) &&
-		(dbSpawn->spawn.level == s.spawn.level) &&
-		(!strcmp(dbSpawn->zoneName, s.zoneName)) )
-	 {
-	    found=1;
-	    break;
-	 }
-      }
-
-      fclose (sdb);
-   }
-   else {
-      puts("Error opening spawn file '" SPAWNFILE "'");
-   }
-
-   if (!found)
-   {
-      if ((sdb = fopen (SPAWNFILE, "a")) != NULL)
-      {
-	 fwrite (dbSpawn, sizeof(dbSpawnStruct), 1, sdb);
-	 fclose (sdb);
-      }
-      else {
-         puts("Error opening spawn file '" SPAWNFILE "'");
-      }
-   }
-}
-
-void petdb(const petStruct *spawn)
-{
-   FILE *pdb;
-   struct petStruct s;
-   int found=0;
-
-   if ((pdb = fopen (LOGDIR "/pet.db", "r")) != NULL)
-   {
-      while (fread (&s, sizeof(petStruct), 1, pdb))
-      {
-	 // Unique on owner class, owner level and pet level
-	 if ((spawn->owner.class_==s.owner.class_) && 
-	     (spawn->owner.level==s.owner.level) &&
-	     (spawn->pet.level==s.pet.level))
-	 {
-	    found=1;
-	    break;
-	 }
-      }
-
-      fclose (pdb);
-   }
-
-   if (!found)
-   {
-      if ((pdb = fopen (LOGDIR "/pet.db", "a")) != NULL)
-      {
-	 fwrite (spawn, sizeof(petStruct), 1, pdb);
-	 fclose (pdb);
-      }
-   }   
 }
 
 QString print_races (uint16_t races)
@@ -857,26 +789,26 @@ void diagFileWriteFail(QString filename)
   {
     // if what's supposed to be a directory isn't somethings wierd.
     if (!dirInfo.isDir())
-      fprintf(stderr, "\tDirectory '%s' isn't a directory!\n",
+      seqWarn("\tDirectory '%s' isn't a directory!",
 	      (const char*)dirInfo.absFilePath());
     else
     {
       // if the directory isn't writable, that might explain it
       if (!dirInfo.isWritable())
-	fprintf(stderr, "\tCan't write to directory: %s\n",
+	seqWarn("\tCan't write to directory: %s",
 		(const char*)dirInfo.absFilePath());
       // if the directory isn't readable, that might explain it
       if (!dirInfo.isReadable())
-	fprintf(stderr, "\tCan't read directory: %s\n",
+	seqWarn("\tCan't read directory: %s",
 		(const char*)dirInfo.absFilePath());
       // is the directory executable (listable),
       if (!dirInfo.isExecutable())
-	fprintf(stderr, "\tCan't execute/access directory: %s\n",
+	seqWarn("\tCan't execute/access directory: %s",
 		(const char*)dirInfo.absFilePath());
     }
   }
   else // directory doesn't exist
-    fprintf(stderr, "\tDirectory '%s' doesn't exist!\n",
+    seqWarn("\tDirectory '%s' doesn't exist!",
 	    (const char*)dirInfo.absFilePath());
   
   
@@ -885,12 +817,12 @@ void diagFileWriteFail(QString filename)
   {
     // The file exists, but is it writable
     if (!fileInfo.isWritable())
-      fprintf(stderr, "\tCan't write to file: %s\n",
+      seqWarn("\tCan't write to file: %s",
 	      (const char*)fileInfo.absFilePath());
 
     // Is the file really a file (or did someone do something wierd)
     if (!fileInfo.isFile())
-      fprintf(stderr, "\tNot a file:'%s'!",
+      seqWarn("\tNot a file:'%s'!",
 	      (const char*)fileInfo.absFilePath());
   }
 }
@@ -908,22 +840,22 @@ void diagFileReadFail(QString filename)
   {
     // if what's supposed to be a directory isn't somethings wierd.
     if (!dirInfo.isDir())
-      fprintf(stderr, "\tDirectory '%s' isn't a directory!\n",
+      seqWarn("\tDirectory '%s' isn't a directory!",
 	      (const char*)dirInfo.absFilePath());
     else
     {
       // if the directory isn't readable, that might explain it
       if (!dirInfo.isReadable())
-	fprintf(stderr, "\tCan't read directory: %s\n",
+	seqWarn("\tCan't read directory: %s",
 		(const char*)dirInfo.absFilePath());
       // is the directory executable (listable),
       if (!dirInfo.isExecutable())
-	fprintf(stderr, "\tCan't execute/access directory: %s\n",
+	seqWarn("\tCan't execute/access directory: %s",
 		(const char*)dirInfo.absFilePath());
     }
   }
   else // directory doesn't exist
-    fprintf(stderr, "\tDirectory '%s' doesn't exist!\n",
+    seqWarn("\tDirectory '%s' doesn't exist!",
 	    (const char*)dirInfo.absFilePath());
   
   
@@ -932,16 +864,16 @@ void diagFileReadFail(QString filename)
   {
     // The file exists, but is it writable
     if (!fileInfo.isReadable())
-      fprintf(stderr, "\tCan't read to file: %s\n",
+      seqWarn("\tCan't read to file: %s",
 	      (const char*)fileInfo.absFilePath());
 
     // Is the file really a file (or did someone do something wierd)
     if (!fileInfo.isFile())
-      fprintf(stderr, "\tNot a file:'%s'!",
+      seqWarn("\tNot a file:'%s'!",
 	      (const char*)fileInfo.absFilePath());
   }
   else
-    fprintf(stderr, "\tFile '%s' doesn't exist.\n",
+    seqWarn("\tFile '%s' doesn't exist.",
 	    (const char*)fileInfo.absFilePath());
 }
 
@@ -1015,31 +947,4 @@ uint32_t calcCRC32(const uint8_t* p,
   return crc ^ 0xFFFFFFFF;
 }
 
-
-bool findFile( QString& filename )
-{
-  bool                    found = false;
-  
-  QFileInfo               fi( filename );
-  QDir                    dir( fi.dirPath( true ) );
-  QString                 fileLower = fi.fileName().lower();
-  
-  QStringList             dirEntries = dir.entryList();
-  
-  for ( QStringList::Iterator it = dirEntries.begin();
-	it != dirEntries.end();
-	++it )
-  {
-    QString entry( (*it).lower() );
-    if ( entry == fileLower )
-    {
-      filename = fi.dirPath( true );
-      filename += "/";
-      filename += *it;
-      found = true;
-      break;
-    }
-  }
-  return found;
-}
 

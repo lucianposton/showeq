@@ -4,7 +4,7 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  *
- * Copyright 2002 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ * Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
  *
  * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
  * for use under the terms of the GNU General Public License, 
@@ -27,6 +27,8 @@
 #include <qdict.h>
 #include <qdom.h>
 #include <qcolor.h>
+#include <qpen.h>
+#include <qbrush.h>
 #include <qfont.h>
 #include <qsizepolicy.h>
 #include <qcursor.h>
@@ -95,12 +97,20 @@ class XMLPreferences
 		 int def = -1, Persistence pers = Any);
   uint getPrefUInt(const QString& inName, const QString& inSection, 
 		   uint def = 0, Persistence pers = Any);
+  int64_t getPrefInt64(const QString& inName, const QString& inSection, 
+		       int64_t def = -1, Persistence pers = Any);
+  uint64_t getPrefUInt64(const QString& inName, const QString& inSection, 
+			 uint64_t def = 0, Persistence pers = Any);
   double getPrefDouble(const QString& inName, const QString& inSection, 
 		       double def = -0.0, Persistence pers = Any);
   bool getPrefBool(const QString& inName, const QString& inSection, 
 		   bool def = false, Persistence pers = Any);
   QColor getPrefColor(const QString& inName, const QString& inSection, 
 		      const QColor& def = QColor(), Persistence pers = Any);
+  QPen getPrefPen(const QString& inName, const QString& inSection, 
+		  const QPen& def = QPen(), Persistence pers = Any);
+  QBrush getPrefBrush(const QString& inName, const QString& inSection, 
+		      const QBrush& def = QBrush(), Persistence pers = Any);
   QPoint getPrefPoint(const QString& inName, const QString& inSection, 
 		      const QPoint& def = QPoint(), Persistence pers = Any);
   QRect getPrefRect(const QString& inName, const QString& inSection, 
@@ -136,12 +146,20 @@ class XMLPreferences
 		  int inValue, Persistence pers = User);
   void setPrefUInt(const QString& inName, const QString& inSection, 
 		   uint inValue, Persistence pers = User);
+  void setPrefInt64(const QString& inName, const QString& inSection, 
+		    int64_t inValue, Persistence pers = User);
+  void setPrefUInt64(const QString& inName, const QString& inSection, 
+		     uint64_t inValue, Persistence pers = User);
   void setPrefDouble(const QString& inName, const QString& inSection, 
 		     double inValue, Persistence pers = User);
   void setPrefBool(const QString& inName, const QString& inSection, 
 		   bool inValue, Persistence pers = User);
   void setPrefColor(const QString& inName, const QString& inSection, 
 		    const QColor& inValue, Persistence pers = User);
+  void setPrefPen(const QString& inName, const QString& inSection, 
+		    const QPen& inValue, Persistence pers = User);
+  void setPrefBrush(const QString& inName, const QString& inSection, 
+		    const QBrush& inValue, Persistence pers = User);
   void setPrefPoint(const QString& inName, const QString& inSection, 
 		    const QPoint& inValue, Persistence pers = User);
   void setPrefRect(const QString& inName, const QString& inSection, 

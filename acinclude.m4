@@ -162,6 +162,121 @@ AC_DEFUN(AC_PATH_QT_MOC,
   fi
 ])
 
+AC_DEFUN(UIC_ERROR_MESSAGE,
+[
+
+HEADER="No working Qt user interface compiler (uic) found!
+"
+
+FOOTER="
+
+As a last resort, it may be possible to eliminate this error by typing:
+
+	export UIC=\`updatedb && locate uic | grep bin/uic\`  (with the \`s)"
+
+if [[ -e "$ac_cv_path_uic" ]]; then
+  if ! [[ -x "$ac_cv_path_uic" ]]; then
+    AC_MSG_ERROR([$HEADER
+Configure found and tried to use '$ac_cv_path_uic', but failed...
+
+The problem appears to be the lack of an executable flag for the file...
+Try changing the permissions of '$ac_cv_path_uic' by issuing the following:
+
+	chmod 774 $ac_cv_path_uic    (NOTE: > 774 may pose a security risk...)])
+  else
+    AC_MSG_ERROR([$HEADER
+Configure found and tried to use '$ac_cv_path_uic', but failed...
+
+If configure shouldn't have tried '$ac_cv_path_uic', please set the environment 
+variable UIC to point to the location of your prefered uic binary and run
+configure over. $FOOTER])
+  fi
+else
+  AC_MSG_ERROR([$HEADER
+Configure was unable to locate a uic binary anywhere on your system!
+
+If you have a working uic binary, please set the environment variable UIC
+to point to the location of your uic binary and run configure over. $FOOTER])
+fi
+])
+
+
+dnl ------------------------------------------------------------------------
+dnl Find the meta object compiler in the PATH, in $QTDIR/bin, and some
+dnl more usual places
+dnl ------------------------------------------------------------------------
+dnl
+AC_DEFUN(AC_PATH_QT_UIC,
+[
+  if [[ -n "$ac_qt_includes" ]]; then
+   
+     AC_MSG_CHECKING([for Qt UIC]);
+     AC_FIND_FILE(uic, [ $ac_qt_bindir              \
+                         $QTDIR/bin                 \
+                         $QTDIR/src/uic             \
+                         /usr/local/qt3/bin	    \
+                         /usr/local/qt/bin          \
+                         /usr/local/qt2/bin         \
+	                 /usr/local/qt-2.3.2/lib    \
+                         /usr/local/qt*/bin         \
+	                 /usr/lib/qtgcc3-2.3.2/lib  \
+	                 /usr/lib/qtgcc3-*/lib  \
+	                 /opt/qt-gcc3-2.3.2/lib	    \
+	                 /opt/qt-gcc3-*/lib	    \
+	                 /opt/qt-2.3.2/lib          \
+                         /usr/bin                   \
+                         /usr/X11R6/bin             \
+                         /usr/X11R6/bin/qt3	    \
+                         /usr/X11R6/bin/qt          \
+                         /usr/X11R6/bin/qt2         \
+                         /usr/X11R6/bin/qt*         \
+                         /usr/X11R6/bin/qt2/bin     \
+                         /usr/X11R6/bin/qt3/bin     \
+                         /usr/X11R6/bin/qt/bin      \
+                         /usr/X11R6/bin/qt*/bin     \
+                         /usr/X11R6/bin/X11/qt3     \
+                         /usr/X11R6/bin/X11/qt      \
+                         /usr/X11R6/bin/X11/qt2     \
+                         /usr/X11R6/bin/X11/qt*     \
+                         /usr/X11R6/bin/X11/qt3/bin \
+                         /usr/X11R6/bin/X11/qt/bin  \
+                         /usr/X11R6/bin/X11/qt2/bin \
+                         /usr/X11R6/bin/X11/qt*/bin \
+                         /usr/lib/qt3/bin	    \
+                         /usr/lib/qt/bin            \
+                         /usr/lib/qt2/bin           \
+                         /usr/lib/qt*/bin           \
+                         /usr/src/qt-*/bin            ],
+
+             UIC)
+
+     UIC="$UIC/uic"
+     ac_cv_path_uic="$UIC"
+
+     if [[ -n "$ac_cv_path_uic" ]]; then
+       if ! [[ -e "$ac_cv_path_uic" ]]; then
+         UIC_ERROR_MESSAGE
+       fi
+
+       if ! [[ -x "$ac_cv_path_uic" ]]; then
+         UIC_ERROR_MESSAGE
+       fi
+
+       output=`eval "$ac_cv_path_uic --help  2>&1 | sed -e '1q' | grep Qt"`
+
+       echo "configure:__oline__: tried to call $ac_cv_path_uic --help 2>&1 | sed -e '1q' | grep Qt" >&AC_FD_CC
+       echo "configure:__oline__: uic output: $output" >&AC_FD_CC
+
+       if [[ -z "$output" ]]; then
+         UIC_ERROR_MESSAGE
+       fi
+     fi
+
+     AC_SUBST(UIC)
+     AC_MSG_RESULT(yes)
+  fi
+])
+
 AC_DEFUN(KDE_MISC_TESTS,
 [
    AC_LANG_C
@@ -600,7 +715,7 @@ else
   AC_MSG_ERROR([Please verify your Qt devel install!]);
 fi;
 
-qt_target_version="3.0.5"
+qt_target_version="3.1.0"
 
 if test $qt_major_version -le 1 ; then
   AC_MSG_ERROR([Please Make sure $qt_target_version or later is installed!!!]);
@@ -776,10 +891,10 @@ elif [[ $qt_major_version -lt 3 ]]; then
        echo "]]]]]" > /dev/null 2>&1`;
 
   if [[ -n "$MBY" ]]; then
-    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 3.0.5+, please upgrade
+    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 3.1.0+, please upgrade
 >>>>>> Workable..:	$MBY]);
   else
-    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 3.0.5+, please upgrade
+    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 3.1.0+, please upgrade
 >>>>>> Workable..:  -*{ ??? }*-]);
   fi
 
@@ -803,6 +918,7 @@ else
 fi
 
 AC_PATH_QT_MOC
+AC_PATH_QT_UIC
 CHECK_QT_DIRECT(qt_libraries= ,[])
 
 AC_SUBST(qt_libraries)

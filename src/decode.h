@@ -20,6 +20,4 @@
 #define FLAG_IMPLICIT     0x8000 // Packet with implicit length
 #define FLAG_DECODE       ( FLAG_COMP | FLAG_COMBINED | FLAG_IMPLICIT | FLAG_CRYPTO )
 
-uint16_t implicitlen (uint16_t opcode);
-
 #endif	// EQDECODE_H
