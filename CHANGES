@@ -1,3 +1,12 @@
+fee (floyd) 10/25/2002
+----------------------
+ + Version 4.3.0
+ + update spawnStruct
+ + update opcode, thanks to all who helped find them
+ + update EQDecode class in preparation for a new libEQ, if such time as
+   one becomes available
+ + update spells.h
+
 casey (10/24/02)
 ----------------------
 

@@ -85,19 +85,19 @@
 
 #define ConsiderCode                0x3741
 
-#define MoneyUpdateCode             0x3d21
+#define MoneyUpdateCode             0x3d41
 
-#define GroupInviteCode             0x4020
+#define GroupInviteCode             0x3e20
 
-#define GroupDeclineCode            0x4120
+#define GroupDeclineCode            0x4140
 
 #define sSpellInterruptedCode       0x4122
 
-#define GroupAcceptCode             0x4220
+#define GroupAcceptCode             0x3d20
 
 #define CloseGMCode                 0x4321
 
-#define GroupDeleteCode             0x4420
+#define GroupDeleteCode             0x4440
 
 #define sDoneLootingCode            0x4421
 
@@ -137,7 +137,7 @@
 
 #define PlayerContainerCode         0x6641
 
-#define SummonedItemCode            0x7821
+#define SummonedItemCode            0x7841
 
 #define SummonedContainerCode       0x7921
 
@@ -149,19 +149,19 @@
 
 #define SPMesgCode                  0x8041
 
-#define MemSpellCode                0x8221
+#define MemSpellCode                0x8241
 
-#define BindWoundCode               0x8321
+#define BindWoundCode               0x8341
 
-#define cTrackCode                  0x8421
+#define cTrackCode                  0x8441
 
 #define cSneakCode                  0x8521
 
-#define cHideCode                   0x8621
+#define cHideCode                   0x8641
 
-#define cSenseHeadingCode           0x8721
+#define cSenseHeadingCode           0x8741
 
-#define SkillIncCode                0x8921
+#define SkillIncCode                0x8941
 
 #define DoorOpenCode                0x8e40
 
@@ -169,7 +169,7 @@
 
 #define WearChangeCode              0x9240
 
-#define cForageCode                 0x9420
+#define cForageCode                 0x9440
 
 #define DoorSpawnCode               0x9520
 
@@ -191,17 +191,17 @@
 
 #define HPUpdateCode                0xb240
 
-#define InspectDataCode             0xb620
+#define InspectDataCode             0xb640
 
 #define BookTextCode                0xce20
 
-#define xTradeSpellBookSlotsCode    0xce21
+#define xTradeSpellBookSlotsCode    0xce41
 
 #define BadCastCode                 0xd321
 
 #define TradeItemOutCode            0xdf20
 
-#define RandomCode                  0xe721
+#define RandomCode                  0xe741
 
 #define TimeOfDayCode               0xf240
 

@@ -23,13 +23,13 @@ extern "C"
   // Function to decode the packet given a pre-determined key
   int ProcessPacket(const uint8_t* data, uint32_t len,
 		    uint8_t* out, uint32_t* outlen,
-		    uint32_t* key, const char* cli,
+		    uint64_t* key, const char* cli,
 		    const uint8_t* player, uint32_t plen);
   
   // Function to decode a spawn packet given a pre-determined key
   void DecodeSpawn (const uint8_t* spawn, uint32_t slen, 
 		    uint8_t* out, uint32_t* outlen,
-		    uint32_t key);
+		    uint64_t key);
   
   bool InitializeLibEQ(uint16_t cookie,
 		       uint16_t charProfile,

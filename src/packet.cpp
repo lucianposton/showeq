@@ -3246,9 +3246,6 @@ void EQPacket::decPlayback(void)
 void EQPacket::dispatchDecodedCharProfile(const uint8_t* decodedData, 
 					  uint32_t decodedDataLen)
 {
-#if 0 // FEETEMP
-	    logData("/tmp/charprofile.log", decodedDataLen, decodedData);
-#endif
   ValidateDecodedPayload(CharProfileCode, charProfileStruct);
 
   emit backfillPlayer((const charProfileStruct*)decodedData, decodedDataLen, DIR_SERVER);
@@ -3257,9 +3254,6 @@ void EQPacket::dispatchDecodedCharProfile(const uint8_t* decodedData,
 void EQPacket::dispatchDecodedNewSpawn(const uint8_t* decodedData, 
 				       uint32_t decodedDataLen)
 {
-#if 0 // FEETEMP
-	    logData("/tmp/newspawn.log", decodedDataLen, decodedData);
-#endif
   ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
 
   emit backfillSpawn((newSpawnStruct*)decodedData, decodedDataLen, DIR_SERVER);
@@ -3268,9 +3262,7 @@ void EQPacket::dispatchDecodedNewSpawn(const uint8_t* decodedData,
 void EQPacket::dispatchDecodedZoneSpawns(const uint8_t* decodedData, 
 					 uint32_t decodedDataLen)
 {
-#if 0 // FEETEMP
-	    logData("/tmp/zonespawn.log", decodedDataLen, decodedData);
-#endif
+
   zoneSpawnsStruct* zdata = (struct zoneSpawnsStruct *)(decodedData);
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
   int zoneSpawnsStructHeaderData = 

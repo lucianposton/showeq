@@ -59,7 +59,7 @@ EQDecode::EQDecode (QObject *parent, const char *name)
            parent, SLOT(dispatchDecodedZoneSpawns(const uint8_t*, uint32_t)));
 
   // Our key is unknown
-  m_decodeKey = 0;
+  m_decodeKey = 0xffffffffffffffff;
 
   // We're not locating keys
   m_locateActive = false;
@@ -80,9 +80,9 @@ EQDecode::EQDecode (QObject *parent, const char *name)
     if (keyFile.open(IO_ReadOnly))
     {
       QDataStream d(&keyFile);
-      d >> m_decodeKey;
+      d >> (Q_UINT64)m_decodeKey;
 
-      fprintf(stderr, "Restored KEY: 0x%08x\n", m_decodeKey);
+      fprintf(stderr, "Restored KEY: 0x%016llx\n", m_decodeKey);
     }
     else
       fprintf(stderr, "Failure loading %s: Unable to open!\n",
@@ -142,7 +142,7 @@ EQDecode::ResetDecoder (void)
   m_queueSpawns.clear();
 
   // Set our key to zero
-  m_decodeKey = 0;
+  m_decodeKey = 0xffffffffffffffff;
 
   // Let anyone interested know we changed it
   emit keyChanged();
@@ -154,6 +154,10 @@ EQDecode::ResetDecoder (void)
 void
 EQDecode::LocateKey ()
 {
+  m_decodeKey = 0xffffffffffffffff;
+  return;
+
+
   unsigned int i;
   EQPktRec *player, *spawn;
 
@@ -180,7 +184,7 @@ EQDecode::LocateKey ()
     return;
   }
 
-  printf("LocateKey(): FOUND KEY: 0x%08x\n", m_decodeKey);
+  printf("LocateKey(): FOUND KEY: 0x%016llx\n", m_decodeKey);
 
   // post the FoundKeyEvent to the main/GUI thread to be handled their
   QApplication::postEvent(this, new FoundKeyEvent());
@@ -200,7 +204,7 @@ EQDecode::FoundKey ()
 #endif
 
   // Pass on the good news!
-  printf("Decrypting and dispatching with key: 0x%08x\n", m_decodeKey);
+  printf("Decrypting and dispatching with key: 0x%016llx\n", m_decodeKey);
   emit keyChanged();
 
   // Check to see if we've been cancelled
@@ -277,7 +281,7 @@ EQDecode::FoundKey ()
     if (keyFile.open(IO_WriteOnly))
     {
       QDataStream d(&keyFile);
-      d << m_decodeKey;
+      d << (Q_UINT64)m_decodeKey;
     }
   }
   
@@ -294,7 +298,7 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
   uint16_t opcode;
   EQPktRec *player, *pktrec;
   int result;
-  uint32_t prevKey;
+  uint64_t prevKey;
   opcode = data[1] | (data[0] << 8);
 
   // Get the opcode of the current packet
@@ -382,7 +386,7 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
     // Check to see if we found a key
     if ( prevKey != m_decodeKey)
     {
-      printf("DecodePacket(): FOUND KEY: 0x%08x\n", m_decodeKey);
+      printf("DecodePacket(): FOUND KEY: 0x%016llx\n", m_decodeKey);
 
       FoundKey();
     }
