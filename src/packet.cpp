@@ -527,6 +527,8 @@ EQPacket::EQPacket (QObject * parent, const char *name)
 	   this, SIGNAL(startDecodeBatch(void)));
    connect(m_decode, SIGNAL(finishedDecodeBatch(void)),
 	   this, SIGNAL(finishedDecodeBatch(void)));
+   connect(parent, SIGNAL(theKey(uint64_t)),
+           m_decode, SLOT(theKey(uint64_t)));
 
    m_busy_decoding     = false;
    for (int i = 0; i < MAXSTREAMS + 1 ; i++)

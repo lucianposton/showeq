@@ -25,6 +25,7 @@
 
 //#define PKTBUF_LEN	65535
 
+#if 0
 void *
 ThreadFunc (void *param)
 {
@@ -39,6 +40,7 @@ ThreadFunc (void *param)
   // Get outa here
   return(NULL);
 }
+#endif
 
 EQDecode::EQDecode (QObject *parent, const char *name)
 : QObject (parent, name)
@@ -154,10 +156,9 @@ EQDecode::ResetDecoder (void)
 void
 EQDecode::LocateKey ()
 {
-  m_decodeKey = 0xffffffffffffffff;
   return;
 
-
+#if 0
   unsigned int i;
   EQPktRec *player, *spawn;
 
@@ -188,6 +189,7 @@ EQDecode::LocateKey ()
 
   // post the FoundKeyEvent to the main/GUI thread to be handled their
   QApplication::postEvent(this, new FoundKeyEvent());
+#endif
 }
 
 void
@@ -442,6 +444,7 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
     return(result);
   }
 
+#if 0
   // Start the locate thread if we have player/spawn packets available
   if (m_queuePlayerProfile.size() && m_queueSpawns.size())
   {
@@ -455,6 +458,7 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
     // And don't retain any results
     pthread_detach(m_locateThread); 
   }
+#endif
 
   // Get outa here...
  
@@ -524,3 +528,8 @@ void EQDecode::setHash(uint8_t* data, uint32_t len)
       m_decodeHlen = len;
 }
 
+void EQDecode::theKey(uint64_t key)
+{
+      m_decodeKey = key;
+      FoundKey();
+}

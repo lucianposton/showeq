@@ -725,6 +725,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    if(showeq_params->session_tracking)
       m_packet->session_tracking();
 
+   // Decoder Menu
+   m_decoderMenu = new QPopupMenu;
+   menuBar()->insertItem("&Decoder, m_decoderMenu);
+   m_netMenu->insertItem("Input Session Key", this, SLOT(set_decoder_key()));
    
    // Character Menu 
    m_charMenu = new QPopupMenu;
@@ -5541,4 +5545,12 @@ void EQInterface::showNetDiag()
 
   // make sure it's visible
   m_netDiag->show();
+}
+
+void EQInterface::set_decoder_key()
+{
+//uint64_t key = 0xffffffffffffffff; // this is the bad value
+
+//dialog here
+//emit theKey(key);
 }

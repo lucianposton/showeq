@@ -1871,6 +1871,60 @@ struct xTradeSpellBookSlotsStruct
 
 
 /*
+** serverLFGStruct
+** Length: 10 Octets
+** signifies LFG, maybe afk, role, ld, etc
+*/
+
+struct serverLFGStruct
+{
+/*0000*/ uint8_t  opCode;
+/*0001*/ uint8_t  version;
+/*0002*/ uint16_t spawnID;
+/*0004*/ uint16_t unknown0004;
+/*0006*/ uint16_t LFG;             //1=LFG
+/*0008*/ uint16_t unknown0008;
+};
+
+/*
+** clientLFGStruct
+** Length: 70 Octets
+** signifies LFG, maybe afk, role, ld, etc
+*/
+
+struct clientLFGStruct
+{
+/*0000*/ uint8_t  opCode;
+/*0001*/ uint8_t  version;
+/*0002*/ uint8_t  name[64];
+/*0006*/ uint16_t LFG;             //1=LFG
+/*0008*/ uint16_t unknown0008;
+};
+
+/*
+** xBuffDropStruct
+** Length: 10 Octets
+** signifies LFG, maybe afk, role, ld, etc
+*/
+
+struct xBuffDropStruct
+{
+/*0000*/ uint8_t  opCode;
+/*0001*/ uint8_t  version;
+/*0002*/ uint16_t spawnid;
+/*0004*/ uint8_t  unknown0004[4]; 
+/*0008*/ uint16_t spellid;
+/*0010*/ uint8_t  unknown0010[8];
+/*0018*/ uint16_t spellslot;
+/*0020*/ uint8_t  unknown0020[2];
+};
+
+
+
+/*******************************/
+/* World Server Structs        */
+
+/*
 ** Guild List (from world server)
 ** Length: 96 Octets
 ** used in: worldGuildList

@@ -14,14 +14,16 @@
 ** thanks.  - Andon
 */
 
+/************************/
 /* World Server OpCodes */
 
 #define ZoneServerInfo              0x0480
 
-#define GuildListCode               0x9241
-
 #define ClientHashCode              0x3941
 
+#define GuildListCode               0x9241
+
+/***********************/
 /* Zone Server OpCodes */
 #define DropCoinsCode               0x0740
 
@@ -47,7 +49,7 @@
 
 #define cJumpCode                   0x2040
 
-#define CorpseLocCode               0x2120
+#define CorpseLocCode               0x2140
 
 #define AltExpUpdateCode            0x2342
 
@@ -89,13 +91,13 @@
 
 #define MoneyUpdateCode             0x3d41
 
+#define GroupAcceptCode             0x3d20
+
 #define GroupInviteCode             0x3e20
 
 #define GroupDeclineCode            0x4140
 
 #define sSpellInterruptedCode       0x4142
-
-#define GroupAcceptCode             0x3d20
 
 #define CloseGMCode                 0x4321
 
@@ -204,6 +206,8 @@
 #define TradeItemOutCode            0xdf40
 
 #define RandomCode                  0xe741
+
+#define LFGCode                     0xf041
 
 #define TimeOfDayCode               0xf240
 
