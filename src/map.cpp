@@ -2900,7 +2900,7 @@ void Map::paintMap (QPainter * p)
   tmp.setFont (m_param.font());
 
   // determine the flash state
-  if ((m_lastFlash.msecsTo(drawTime)) > 100)  // miliseconds between flashing
+  if ((m_lastFlash.msecsTo(drawTime) > 100) || (m_lastFlash.msecsTo(drawTime) < 0))  // miliseconds between flashing
   {
     // invert flash value
     m_flash = !m_flash;
