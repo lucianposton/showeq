@@ -474,13 +474,17 @@ uint8_t* EQPacketStream::decodeOpCode(uint8_t *data, size_t *len,
 // decode, decrypt, and unroll packet
 void EQPacketStream::decodePacket(uint8_t *data, size_t len, uint16_t opCode)
 {
+  emit rawPacket(data, len, m_dir, opCode);
+
   if (opCode & FLAG_CRYPTO || opCode & FLAG_COMP) 
   {
     data = decodeOpCode (data, &len, opCode);
     if (data == NULL)
       return;
-  }
 
+    emit rawPacket(data, len, m_dir, opCode);
+  }
+  
   const EQPacketOPCode* opcodeEntry = 0;
 
   // this works, but could really use a cleanup - mvern
@@ -623,12 +627,14 @@ void EQPacketStream::processPayload(uint8_t* data, size_t len)
   data += 2;
   len -= 2;
   
-  emit rawPacket(data, len, m_dir, opCode);
-  
   if (opCode & FLAG_DECODE)
     decodePacket(data, len, opCode);
   else
+  {
+    emit rawPacket(data, len, m_dir, opCode);
+
     dispatchPacket(data, len, opCode, m_opcodeDB.find(opCode));
+  }
 }
 
 void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len, 

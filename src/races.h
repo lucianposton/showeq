@@ -404,8 +404,23 @@
     "Invader Soldier",        // 397
     "Invader Brute",          // 398
     "Invader Force Commander",// 399
-    "Invader Lieutenant Boss",// 400
+    "Huvul",                  // 400
     "Invader War Beast",      // 401
     "Invader Soldier Elite",  // 402
     "UNKNOWN RACE",           // 403
     "Discord Ship",           // 404
+    NULL,                     // 405
+    NULL,                     // 406
+    "Lightning Armor",        // 407
+    NULL,                     // 408
+    "Bazu",                   // 409
+    "Feran",                  // 410
+    "Pyrilen",                // 411
+    "Chimera",                // 412
+    "Dragorn",                // 413
+    "Murkglider",             // 414
+    NULL,                     // 415
+    NULL,                     // 416
+    "Gelidran",               // 417
+    "Discordling",            // 418
+    "Girplan",                // 419

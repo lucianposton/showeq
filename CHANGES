@@ -1,4 +1,15 @@
 Version: $Id$ $Name$
+
+dophaZ (09/17/04)
+------------------------
++ Updated version to 5.0.0.14
++ Applied pac1085's level70 and race patches.
++ Applied ksmith's structure patch.
++ Changed autoconf min version requirement to 2.54.
++ Tweaked raw packet logging to log both pre and post decompress/decrypted raw
+  packets to aide in debugging packet unrolling problems.
++ Made ShowEQ ignore new login server ports...
+
 BonkersBobcat (09/05/04)
 ------------------------
 + Updated version to 5.0.0.13

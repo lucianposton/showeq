@@ -180,7 +180,7 @@
         <comment>old StartCastCode</comment>
         <payload dir="both" typename="startCastStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="00bf" name="OP_ManaChange" implicitlen="12" updated="05/26/04">
+    <opcode id="00bf" name="OP_ManaChange" implicitlen="16" updated="09/16/04">
         <comment></comment>
         <payload dir="both" typename="manaDecrementStruct" sizechecktype="match"/>
     </opcode>

@@ -59,8 +59,8 @@
 
 const in_port_t WorldServerGeneralPort = 9000;
 const in_port_t WorldServerChatPort = 9876;
-const in_port_t LoginServerMinPort = 15000;
-const in_port_t LoginServerMaxPort = 15010;
+const in_port_t LoginServerMinPort = 15900;
+const in_port_t LoginServerMaxPort = 15910;
 const in_port_t ChatServerPort = 5998;
 
 //----------------------------------------------------------------------
