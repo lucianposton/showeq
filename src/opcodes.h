@@ -228,7 +228,7 @@
 
 #define Attack2Code                 0xa140
 
-#define BeginCastCode               0xa940
+#define BeginCastCode               0x0017
 
 #define InspectDataCode             0xb640
 
