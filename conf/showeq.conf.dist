@@ -530,3 +530,8 @@ DatabasesEnabled    7
 # DataDBFilename    /usr/local/share/showeq/itemdata
 # DataDBFilename    /usr/local/share/showeq/itemrawdata
 
+[SaveState]
+DecodeKey          1 # Save the decode key for the current session/zone
+PlayerState        1 # Save the current player state
+Spawns             1 # Save the spawn list (not yet implemented)
+SpawnsFrequency    10000 # number of milliseconds between spawn list saves

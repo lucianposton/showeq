@@ -24,6 +24,7 @@
 #include <math.h>
 
 #include <qdatetime.h>
+#include <qdatastream.h>
 
 #include "everquest.h"
 #include "point.h"
@@ -146,7 +147,13 @@ class Spawn : public Item
   // destructive copy constructor, clears the track list of the 
   // spawn being copied.
   Spawn(Spawn*, uint16_t id);
+
+  // restore spawn from QDataStream
+  Spawn(QDataStream&, uint16_t id);
   virtual ~Spawn();
+
+  // save spawn to QDataStream
+  void saveSpawn(QDataStream& d);
 
   // spawn specific get methods
   const QString& rawName() const { return m_rawName; }

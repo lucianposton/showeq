@@ -397,6 +397,45 @@ Spawn::Spawn(uint16_t id,
   m_spawnTrackList.setAutoDelete(true);
 }
 		  
+Spawn::Spawn(QDataStream& d, uint16_t id)
+  : Item(tSpawn, id)
+{
+  // restore Spawn info
+  d >> m_name;
+  d >> m_NPC;
+  d >> m_xPos;
+  d >> m_yPos;
+  d >> m_zPos;
+  d >> m_lastUpdate;
+  d >> m_spawnTime;
+  d >> m_rawName;
+  d >> m_petOwnerID;
+  d >> m_curHP;
+  d >> m_maxHP;
+  d >> m_level;
+  d >> m_race;
+  d >> m_deity;
+  d >> m_gender;
+  d >> m_class;
+  d >> m_light;
+
+  for (int i = 0; i < 9; i++)
+    d >> m_equipment[i];
+
+  // calculate race/deity team info
+  calcRaceTeam();
+  calcDeityTeam();
+  
+  // don't trust old movement data (minimize walkoffs causing scaling)
+  setDeltas(0, 0, 0);
+  setHeading(0, 0);
+
+  // even if it had been considered, mark it as not
+  setConsidered(false);
+
+  // clear other questionables...
+  setTypeflag(0);
+}
 
 Spawn::~Spawn()
 {
@@ -921,6 +960,31 @@ bool Spawn::approximatePosition(bool animating,
   }
 
   return true;
+}
+
+void Spawn::saveSpawn(QDataStream& d)
+{
+  // dump spawn info
+  d << m_name;
+  d << m_NPC;
+  d << m_xPos;
+  d << m_yPos;
+  d << m_zPos;
+  d << m_lastUpdate;
+  d << m_spawnTime;
+  d << m_rawName;
+  d << m_petOwnerID;
+  d << m_curHP;
+  d << m_maxHP;
+  d << m_level;
+  d << m_race;
+  d << m_deity;
+  d << m_gender;
+  d << m_class;
+  d << m_light;
+
+  for (int i = 0; i < 9; i++)
+    d << m_equipment[i];
 }
 
 //----------------------------------------------------------------------

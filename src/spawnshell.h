@@ -23,6 +23,7 @@
 
 #include <map>
 
+#include <qtimer.h>
 #include <qtextstream.h>
 
 #include "everquest.h"
@@ -151,6 +152,8 @@ public slots:
    void backfillPlayer(const charProfileStruct* player);
    void refilterSpawns();
    void refilterSpawnsRuntime();
+   void saveSpawns(void);
+   void restoreSpawns(void);
 
  protected:
    void refilterSpawns(itemType type);
@@ -182,6 +185,9 @@ public slots:
    ItemMap m_drops;
    ItemMap m_coins;
    ItemMap m_doors;
+
+   // timer for saving spawns
+   QTimer* m_timer;
 
    // filter manager
    FilterMgr& m_filterMgr;

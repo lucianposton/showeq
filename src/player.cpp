@@ -7,6 +7,9 @@
 
 #include <stdio.h>
 
+#include <qfile.h>
+#include <qdatastream.h>
+
 #include "player.h"
 #include "util.h"
 
@@ -33,8 +36,14 @@ EQPlayer::EQPlayer (int level = 0,
     
     setDefaults();
     setUseDefaults(true);
-    reset();
-    clear();
+    // restore the player state if the user requested it...
+    if (showeq_params->restorePlayerState)
+      restorePlayerState();
+    else
+    {
+      reset();
+      clear();
+    }
 }
 
 void EQPlayer::backfill(const charProfileStruct* player)
@@ -155,6 +164,8 @@ void EQPlayer::backfill(const charProfileStruct* player)
   messag = "ExpAA: " + Commanate(player->altexp);
   emit msgReceived(messag);
 
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::clear()
@@ -186,6 +197,9 @@ void EQPlayer::clear()
 
   m_heading = -1;
   m_playerID = 10;
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::reset()
@@ -216,6 +230,9 @@ void EQPlayer::reset()
 
   // update the con table
   fillConTable();
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::wearItem(const playerItemStruct* itemp)
@@ -290,6 +307,9 @@ void EQPlayer::wearItem(const playerItemStruct* itemp)
 
       m_validMana = true;
     }
+
+    if (showeq_params->savePlayerState)
+      savePlayerState();
   }
 }
 
@@ -363,6 +383,9 @@ void EQPlayer::removeItem(const itemStruct* item)
 
       m_validMana = true;
     }
+
+    if (showeq_params->savePlayerState)
+      savePlayerState();
   }
 }
 
@@ -382,6 +405,9 @@ void EQPlayer::increaseSkill(const skillIncStruct* skilli)
 
   emit msgReceived(tempStr);
   emit stsMessage(tempStr);
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::manaChange(const manaDecrementStruct *mana)
@@ -393,6 +419,9 @@ void EQPlayer::manaChange(const manaDecrementStruct *mana)
 
   // notify others of this change
   emit manaChanged(m_thePlayer.MANA, m_maxMana);  // Needs max mana
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::updateAltExp(const altExpUpdateStruct* altexp)
@@ -427,6 +456,9 @@ void EQPlayer::updateAltExp(const altExpUpdateStruct* altexp)
   tempStr = QString("ExpAA: %1 (%2/330) left %3 - 1/330 = %4").arg(totalAltExp).arg(tempStr2.sprintf("%u",altexp->altexp)).arg(leftAltExp).arg(incrementAltExp);
   emit msgReceived(tempStr);
 
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::updateExp(const expUpdateStruct* exp)
@@ -499,6 +531,9 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
   
   m_currentExp = realexp;
   m_validExp = true;
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::updateLevel(const levelUpUpdateStruct *levelup)
@@ -552,6 +587,9 @@ void EQPlayer::updateLevel(const levelUpUpdateStruct *levelup)
 
   // update the con table
   fillConTable();
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::updateSpawnHP(const hpUpdateStruct *hpupdate)
@@ -565,6 +603,9 @@ void EQPlayer::updateSpawnHP(const hpUpdateStruct *hpupdate)
   m_validHP = true;
 
   emit hpChanged(m_currentHP, m_maxHP);
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::updateStamina(const staminaStruct *stam)
@@ -582,6 +623,9 @@ void EQPlayer::updateStamina(const staminaStruct *stam)
 		    127
 		    );
 
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::setLastKill(const QString& name, uint8_t level)
@@ -612,17 +656,26 @@ void EQPlayer::zoneEntry(const ServerZoneEntryStruct* zsentry)
   setPlayerLevel(zsentry->level);
   setPlayerClass(zsentry->class_);
   setPlayerRace(zsentry->race);
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::zoneChange(const zoneChangeStruct* zoneChange, bool client)
 {
   m_shortZoneName = zoneChange->zoneName;
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 void EQPlayer::zoneNew(const newZoneStruct* zoneNew, bool client)
 {
   m_shortZoneName = zoneNew->shortName;
   m_longZoneName = zoneNew->longName;
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
 }
 
 
@@ -644,6 +697,16 @@ void EQPlayer::playerUpdate(const playerPosStruct *pupdate, bool client)
   emit headingChanged(m_heading);
   emit posChanged(m_xPos, m_yPos, m_zPos, 
 		  m_deltaX, m_deltaY, m_deltaZ, m_heading);
+
+  static uint8_t count = 0;
+
+  // only save player position every 64 updates
+  if (showeq_params->savePlayerState)
+  {
+    count++;
+    if (count % 64)
+      savePlayerState();
+  }
 }
 
 // setPlayer* only updates player*.  If you want to change and use the defaults you
@@ -977,4 +1040,213 @@ void EQPlayer::fillConTable()
 
   // level 0 is unknown, and thus gray
   m_conTable[0] = gray;
+}
+
+void EQPlayer::savePlayerState(void)
+{
+  QFile keyFile(LOGDIR "/lastPlayer.dat");
+  if (keyFile.open(IO_WriteOnly))
+  {
+    QDataStream d(&keyFile);
+
+    int i;
+
+    // write a test value at the top of the file for a validity check
+    size_t testVal = sizeof(m_thePlayer);
+    d << testVal;
+    d << MAX_KNOWN_SKILLS;
+    d << MAX_KNOWN_LANGS;
+
+    // write the player structure to the stream first
+    d.writeRawBytes((const char*)&m_thePlayer, sizeof(m_thePlayer));
+    
+    // write out the rest
+    d << m_playerName;
+    d << m_playerLastName;
+    d << m_playerLevel;
+    d << m_playerClass;
+    d << m_playerDeity;
+    d << m_playerID;
+    d << m_xPos;
+    d << m_yPos;
+    d << m_zPos;
+    d << m_deltaX;
+    d << m_deltaY;
+    d << m_deltaZ;
+    d << m_heading;
+
+    for (i = 0; i < MAX_KNOWN_SKILLS; ++i)
+      d << m_playerSkills[i];
+
+    for (i = 0; i < MAX_KNOWN_LANGS; ++i)
+      d << m_playerLanguages[i];
+
+    d << m_plusMana;
+    d << m_plusHP;
+    d << m_currentHP;
+
+    d << m_maxMana;
+    d << m_maxSTR;
+    d << m_maxSTA;
+    d << m_maxCHA;
+    d << m_maxDEX;
+    d << m_maxINT;
+    d << m_maxAGI;
+    d << m_maxWIS;
+    d << m_maxHP;
+
+    d << m_food;
+    d << m_water;
+    d << m_fatigue;
+
+    d << m_currentAltExp;
+    d << m_currentAApts;
+    d << m_currentExp;
+    d << m_maxExp;
+
+    d << m_longZoneName;
+    d << m_shortZoneName;
+
+    uint8_t flags = 0;
+    if (m_validStam)
+      flags |= 0x01;
+    if (m_validMana)
+      flags |= 0x02;
+    if (m_validHP)
+      flags |= 0x04;
+    if (m_validExp)
+      flags |= 0x08;
+    if (m_validAttributes)
+      flags |= 0x10;
+    if (m_useDefaults)
+      flags |= 0x20;
+
+    d << flags;
+  }
+}
+
+void EQPlayer::restorePlayerState(void)
+{
+  QFile keyFile(LOGDIR "/lastPlayer.dat");
+  if (keyFile.open(IO_ReadOnly))
+  {
+    int i;
+    size_t testVal;
+    QDataStream d(&keyFile);
+
+    // check the test value at the top of the file
+    d >> testVal;
+    if (testVal != sizeof(m_thePlayer))
+    {
+      fprintf(stderr, 
+	      "Failure loading " LOGDIR "/lastPlayer.dat: Bad player size!\n");
+      reset();
+      clear();
+      return;
+    }
+
+    d >> testVal;
+    if (testVal != MAX_KNOWN_SKILLS)
+    {
+      fprintf(stderr, 
+	      "Failure loading " LOGDIR "/lastPlayer.dat: Bad known skills!\n");
+      reset();
+      clear();
+      return;
+    }
+
+    d >> testVal;
+    if (testVal != MAX_KNOWN_LANGS)
+    {
+      fprintf(stderr, 
+	      "Failure loading " LOGDIR "/lastPlayer.dat: Bad known langs!\n");
+      reset();
+      clear();
+      return;
+    }
+
+    // read the player structure from the stream first
+    d.readRawBytes((char*)&m_thePlayer, sizeof(m_thePlayer));
+
+    // read in the rest
+    d >> m_playerName;
+    d >> m_playerLastName;
+    d >> m_playerLevel;
+    d >> m_playerClass;
+    d >> m_playerDeity;
+    d >> m_playerID;
+    d >> m_xPos;
+    d >> m_yPos;
+    d >> m_zPos;
+    d >> m_deltaX;
+    d >> m_deltaY;
+    d >> m_deltaZ;
+    d >> m_heading;
+
+    for (i = 0; i < MAX_KNOWN_SKILLS; ++i)
+      d >> m_playerSkills[i];
+
+    for (i = 0; i < MAX_KNOWN_LANGS; ++i)
+      d >> m_playerLanguages[i];
+
+    d >> m_plusMana;
+    d >> m_plusHP;
+    d >> m_currentHP;
+
+    d >> m_maxMana;
+    d >> m_maxSTR;
+    d >> m_maxSTA;
+    d >> m_maxCHA;
+    d >> m_maxDEX;
+    d >> m_maxINT;
+    d >> m_maxAGI;
+    d >> m_maxWIS;
+    d >> m_maxHP;
+
+    d >> m_food;
+    d >> m_water;
+    d >> m_fatigue;
+
+    d >> m_currentAltExp;
+    d >> m_currentAApts;
+    d >> m_currentExp;
+    d >> m_maxExp;
+
+    d >> m_longZoneName;
+    d >> m_shortZoneName;
+
+    uint8_t flags;
+    d >> flags;
+
+    if (flags & 0x01)
+      m_validStam = true;
+    if (flags & 0x02)
+      m_validMana = true;
+    if (flags & 0x04)
+      m_validHP = true;
+    if (flags & 0x08)
+      m_validExp = true;
+    if (flags & 0x10)
+      m_validAttributes = true;
+    if (flags & 0x20)
+      m_useDefaults = true;
+    else 
+      m_useDefaults = false;
+
+    // now fill out the con table
+    fillConTable();
+
+    fprintf(stderr, "Restored PLAYER: %s (%s) in zone %s (%s)!\n",
+	    (const char*)m_playerName,
+	    (const char*)m_playerLastName,
+	    (const char*)m_longZoneName,
+	    (const char*)m_shortZoneName);
+  }
+  else
+  {
+    fprintf(stderr,
+	    "Failure loading " LOGDIR "/lastPlayer.dat: Unable to open!\n");
+    reset();
+    clear();
+  }
 }

@@ -58,6 +58,10 @@
 #define   ITEMDB_DATABASES_ENABLED      31
 #define   ITEMDB_DISABLE                3
 #define   STATUS_FONT_SIZE              4
+#define   RESTORE_DECODE_KEY            5
+#define   RESTORE_PLAYER_STATE          6
+#define   RESTORE_SPAWNS                7
+#define   RESTORE_ALL                   8
 
 /* Note that ASCII 32 is a space, best to stop at 31 and pick up again
    at 128 or higher
@@ -129,6 +133,10 @@ static struct option option_list[] = {
   {"itemdb-raw-data-filename",     required_argument,  NULL, ITEMDB_RAW_FILENAME_OPTION},
   {"itemdb-databases-enabled",     required_argument,  NULL, ITEMDB_DATABASES_ENABLED},
   {"itemdb-disable",               no_argument,        NULL, ITEMDB_DISABLE},
+  {"restore-decode-key",           no_argument,        NULL, RESTORE_DECODE_KEY},
+  {"restore-player-state",         no_argument,        NULL, RESTORE_PLAYER_STATE},
+  {"restore-spawns",               no_argument,        NULL, RESTORE_SPAWNS},
+  {"restore-all",                  no_argument,        NULL, RESTORE_ALL},
   {0,                              0,                  0,     0}
 };
 
@@ -296,6 +304,18 @@ int main (int argc, char **argv)
    showeq_params->ItemRawDataDBFileName = pSEQPrefs->getPrefString("RawDataDBFilename", section, LOGDIR "/itemrawdata");
    showeq_params->ItemDBTypes = pSEQPrefs->getPrefInt("DatabasesEnabled", section, (EQItemDB::LORE_DB | EQItemDB::NAME_DB | EQItemDB::DATA_DB));
    showeq_params->ItemDBEnabled = pSEQPrefs->getPrefBool("Enabled", section, 1);
+
+   section = "SaveState";
+   showeq_params->saveDecodeKey = 
+     pSEQPrefs->getPrefBool("DecodeKey", section, 1);
+   showeq_params->savePlayerState = 
+     pSEQPrefs->getPrefBool("PlayerState", section, 1);
+   showeq_params->saveSpawns = pSEQPrefs->getPrefBool("Spawns", section, 1);
+   showeq_params->saveSpawnsFrequency = 
+     pSEQPrefs->getPrefInt("SpawnsFrequency", section, 10 * 1000);
+   showeq_params->restoreDecodeKey = false;
+   showeq_params->restorePlayerState = false;
+   showeq_params->restoreSpawns = false;
 
    /* Parse the commandline for commandline parameters */
    while ((opt = getopt_long( argc,
@@ -748,6 +768,30 @@ int main (int argc, char **argv)
 	   break;
 	 }
 
+         case RESTORE_DECODE_KEY:
+	 {
+	   showeq_params->restoreDecodeKey = true;
+	   break;
+	 }
+         case RESTORE_PLAYER_STATE:
+	 {
+	   showeq_params->restorePlayerState = true;
+	   break;
+	 }
+         case RESTORE_SPAWNS:
+	 {
+	   showeq_params->restoreSpawns = true;
+	   break;
+	 }
+         case RESTORE_ALL:
+	 {
+	   showeq_params->restoreDecodeKey = true;
+	   showeq_params->restorePlayerState = true;
+	   showeq_params->restoreSpawns = true;
+	   break;
+	 }
+
+
          /* Spit out the help */
          case 'h': /* Fall through */
          default:
@@ -855,6 +899,18 @@ int main (int argc, char **argv)
       printf ("\n\t                                    SHM 10, NEC 11, WIZ 12");
       printf ("\n\t                                    MAG 13, ENC 14\n");
       
+      printf ("                                                                   \n");
+      printf ("                                                                   \n");
+      printf (" The following four options should be used with extreme care!         \n");
+      printf ("      --restore-decode-key              Restores the decode key from\n");
+      printf ("                                        a previous session    \n");
+      printf ("      --restore-player-state            Restores the player state\n");
+      printf ("                                        from a previous session    \n");
+      printf ("      --restore-player-spawns           Restores the spawns\n");
+      printf ("                                        from a previous session    \n");
+      printf ("      --restore-player-all              Restores decode key, \n");
+      printf ("                                        player state, and spawns   \n");
+      printf ("                                        from a previous session    \n");
       exit (0);
    }
 

@@ -13,6 +13,9 @@
 
 #include <qapplication.h>
 
+#include <qfile.h>
+#include <qdatastream.h>
+
 #include "main.h"
 #include "decode.h"
 #include "opcodes.h"
@@ -68,6 +71,19 @@ EQDecode::EQDecode (QObject *parent = 0, const char *name = 0)
   // Initialize LIBEQ
   if (!showeq_params->broken_decode)
     InitializeLibEQ(0, CharProfileCode, ZoneSpawnsCode, NewSpawnCode);
+
+  // restore the decodeKey if the user requested it
+  if (showeq_params->restoreDecodeKey)
+  {
+    QFile keyFile(LOGDIR "/lastKey.dat");
+    if (keyFile.open(IO_ReadOnly))
+    {
+      QDataStream d(&keyFile);
+      d >> m_decodeKey;
+
+      fprintf(stderr, "Restored KEY: 0x%08x\n", m_decodeKey);
+    }
+  }
 #endif
 }
 
@@ -247,6 +263,16 @@ EQDecode::FoundKey ()
   // Let them know we're done
   m_locateActive = false;
 
+  if (showeq_params->saveDecodeKey)
+  {
+    QFile keyFile(LOGDIR "/lastKey.dat");
+    if (keyFile.open(IO_WriteOnly))
+    {
+      QDataStream d(&keyFile);
+      d << m_decodeKey;
+    }
+  }
+
   // Get outa here
   return;
 }
@@ -349,7 +375,16 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
 
       FoundKey();
     }
-    return(result);
+    return result;
+  }
+  else if (showeq_params->restoreDecodeKey)
+  {
+    // if the ProcessPacket failed and this is a restored session, clear
+    // the restored decode key, it's probably invalid
+    m_decodeKey = 0;
+
+    // also note that the restored decode key is no longer being used
+    showeq_params->restoreDecodeKey = false;
   }
 
   // Queue it up...  Allocate storage for our encrypted packet

@@ -59,6 +59,8 @@ public:
    void setPlayerID(uint16_t playerID);
    void checkDefaults(void) { setDefaults(); } // Update our default values
    void setUseDefaults (bool bdefaults) { m_useDefaults = bdefaults; }
+   void savePlayerState(void);
+   void restorePlayerState(void);
 
  public:
    QString getPlayerName(void) const 

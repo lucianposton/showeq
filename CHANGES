@@ -1,3 +1,23 @@
+dohpaZ (17/03/02)
+------------------
+Modifications:
+ + Added the ability to save/restore the decode key, player state and/or
+   the spawns to allow the recover of a session after a crash.  
+ + Added [SaveState] section to showeq.conf.dist with examples of how to 
+   enable/disable saving of showeq state for later restoration.  
+ + Added new command line options for the restoration of state after a crash:
+   --restore-decode-key 
+   --restore-player-state
+   --restore-spawns
+   --restore-all
+
+Notes:
+ + Restoring after a crash will not necessarily result in a stable ShowEQ,
+   make sure you only specify the --restore-{} command line options if
+   you are in the same zone and in the same session as before the crash.
+   DO NOT USE THESE IF YOU'VE ZONED OR LOGGED OUT/IN, WIERD THINGS WILL HAPPEN!
+   YOU HAVE BEEN WARNED!
+
 dohpaZ (16/03/02)
 ------------------
 Patches Applied:

@@ -69,6 +69,11 @@ QMainWindow (parent, name)
    // Create the filter manager
    m_filterMgr = new FilterMgr();
 
+   // if there is a short zone name already, try to load its filters
+   QString shortZoneName = m_player->getShortZoneName();
+   if (!shortZoneName.isEmpty())
+     m_filterMgr->loadZone(shortZoneName);
+   
    // Create the Category manager
    m_categoryMgr = new CategoryMgr();
 

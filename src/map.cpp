@@ -196,6 +196,20 @@ MapMgr::MapMgr(SpawnShell* spawnShell, EQPlayer* player, QWidget* dialogParent)
 	   this, SLOT(changeItem(const Item*, uint32_t)));
   connect(m_spawnShell, SIGNAL(clearItems()),
 	  this, SLOT(clearItems()));
+
+  // if there is a short zone name already, try to load its map
+  QString shortZoneName = m_player->getShortZoneName();
+  if (!shortZoneName.isEmpty())
+  {
+    QString fileName;
+  
+    // construct the map file name
+    fileName.sprintf("%s/%s.map", 
+		     MAPDIR, (const char*)shortZoneName);
+    
+    // load the map
+    loadFileMap(fileName);
+  }
 }
 
 MapMgr::~MapMgr()

@@ -10,6 +10,10 @@
  * Date   - 7/31/2001
  */
 
+
+#include <qfile.h>
+#include <qdatastream.h>
+
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #endif
@@ -95,6 +99,25 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr, EQPlayer* player)
    // connect SpawnShell slots to EQPlayer signals
    connect(m_player, SIGNAL(setID(uint16_t)),
 	   this, SLOT(setPlayerID(uint16_t)));
+
+   // restore the spawn list if necessary
+   if (showeq_params->restoreSpawns)
+     restoreSpawns();
+
+   // setup the automatic saving of the spawn list
+   if (showeq_params->saveSpawns)
+   {
+     // create the timer
+     m_timer = new QTimer(this);
+
+     connect(m_timer, SIGNAL(timeout()),
+	     this, SLOT(saveSpawns(void)));
+
+     // start the timer
+     m_timer->start(showeq_params->saveSpawnsFrequency, false);
+   }
+   else
+     m_timer = NULL;
 }
 
 void
@@ -1218,3 +1241,113 @@ void SpawnShell::refilterSpawnsRuntime(itemType type)
    }
 }
 
+void SpawnShell::saveSpawns(void)
+{
+  QFile keyFile(LOGDIR "/lastSpawns.dat");
+  if (keyFile.open(IO_WriteOnly))
+  {
+    QDataStream d(&keyFile);
+
+    uint8_t flag;
+
+    // write a test value at the top of the file for a validity check
+    size_t testVal = sizeof(spawnStruct);
+    d << testVal;
+
+    // save the player id info
+    d << m_playerId;
+    flag = m_playerIdSet ? 1 : 0;
+    d << flag;
+
+    // save the spawns
+    ItemMap& theMap = getMap(tSpawn);
+
+    // save the number of spawns
+    testVal = theMap.size();
+    d << testVal;
+
+    ItemMap::iterator it;
+    Spawn* spawn;
+    
+    // iterate over all the items in the map
+    for (it = theMap.begin(); it != theMap.end(); it++)
+    {
+      // get the spawn
+      spawn = (Spawn*)it->second;
+
+      // save the spawn id
+      d << it->first;
+
+      // save the spawn
+      spawn->saveSpawn(d);
+    }
+  }
+}
+
+void SpawnShell::restoreSpawns(void)
+{
+  QFile keyFile(LOGDIR "/lastSpawns.dat");
+  if (keyFile.open(IO_ReadOnly))
+  {
+    size_t i;
+    size_t testVal;
+    uint16_t id;
+    uint8_t flag;
+    Spawn* item;
+
+    QDataStream d(&keyFile);
+
+    // check the test value at the top of the file
+    d >> testVal;
+    if (testVal != sizeof(spawnStruct))
+    {
+      fprintf(stderr, 
+	      "Failure loading " LOGDIR "/lastPlayer.dat: Bad spawnStruct size!\n");
+      return;
+    }
+
+    // restore the player Id info
+    d >> m_playerId;
+    d >> flag;
+    m_playerIdSet = flag ? true : false;
+
+
+    // read the expected number of elements
+    d >> testVal;
+
+    // read in the spawns
+    for (i = 0; i < testVal; i++)
+    {
+      // get the spawn id
+      d >> id;
+
+      // re-create the spawn
+      item = new Spawn(d, id);
+
+      // filter and add it to the list
+      updateFilterFlags(item);
+      updateRuntimeFilterFlags(item);
+      m_spawns.insert(ItemMap::value_type(id, item));
+      emit addItem(item);
+      
+      // if this is the player, keep a direct pointer to it for player related
+      // updates
+      if (item->isSelf())
+      {
+	fprintf(stderr, "Restored player spawn!\n");
+	m_playerSpawn = item;
+      }
+    }
+
+    emit numSpawns(m_spawns.size());
+
+    fprintf(stderr,
+	    "Restored SPAWNS: count=%d playerID=%d (set=%d)!\n",
+	    m_spawns.size(), m_playerId, m_playerIdSet);
+  }
+  else
+  {
+    fprintf(stderr,
+	    "Failure loading " LOGDIR "/lastSpawns.dat: Unable to open!\n");
+  }
+}
