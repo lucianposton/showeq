@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+dophaZ (09/25/04)
+------------------------
++ Fixed some more gcc 3.4 warnings.
++ Made configure pay attention to CFLAGS and CXXFLAGS passed in on the 
+  the command line.
+	
 dophaZ (09/24/04)
 ------------------------
 + Migrated the dominant distribution method of ShowEQ to tarballs and 
