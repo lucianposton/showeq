@@ -619,7 +619,7 @@ void EQPlayer::playerUpdate(const playerUpdateStruct *pupdate, bool client)
  
   m_xPos = pupdate->xPos;
   m_yPos = pupdate->yPos;
-  m_zPos = pupdate->zPos / 10;
+  m_zPos = pupdate->zPos;
   m_deltaX = pupdate->deltaX;
   m_deltaY = pupdate->deltaY;
   m_deltaZ = pupdate->deltaZ;

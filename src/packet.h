@@ -594,14 +594,13 @@ class EQPacket : public QObject
    void consMessage            (const considerStruct*);
    
    void clientTarget(const clientTargetStruct* target);
-   void compressedDoorSpawn(const compressedDoorStruct* target);
+   void compressedDoorSpawn    (const compressedDoorStruct*);
    void spawnWearingUpdate     (const wearChangeStruct*);
 
    void newGroundItem          (const dropThingOnGround*, bool client);
    void removeGroundItem       (const removeThingOnGround*);
    void newCoinsItem           (const dropCoinsStruct*);
    void removeCoinsItem        (const removeCoinsStruct*);
-   void newDoorSpawn           (const doorStruct*);
 
    void updateSpawns           (const spawnPositionUpdateStruct* updates);
    void updateSpawnHP          (const spawnHpUpdateStruct* hpupdate);

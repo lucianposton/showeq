@@ -374,8 +374,8 @@ QMainWindow (parent, name)
 	   m_spawnShell, SLOT(newCoinsItem(const dropCoinsStruct *)));
    connect(m_packet, SIGNAL(removeCoinsItem(const removeCoinsStruct *)),
 	   m_spawnShell, SLOT(removeCoinsItem(const removeCoinsStruct *)));
-   connect(m_packet, SIGNAL(newDoorSpawn(const doorStruct *)),
-           m_spawnShell, SLOT(newDoorSpawn(const doorStruct*)));
+   connect(m_packet, SIGNAL(compressedDoorSpawn(const compressedDoorStruct *)),
+           m_spawnShell, SLOT(compressedDoorSpawn(const compressedDoorStruct*)));
    connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*)),
 	   m_spawnShell, SLOT(newSpawn(const newSpawnStruct*)));
    connect(m_packet, SIGNAL(updateSpawns(const spawnPositionUpdateStruct *)),
@@ -3221,9 +3221,9 @@ void EQInterface::addItem(const Item* item)
   if (filterFlags & FILTER_FLAG_LOCATE)
   {
     printf ("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
-    printf ("LocateSpawn: %s spawned LOC %dy, %dx, %dz at %s",
+    printf ("LocateSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s",
 	    (const char*)item->name(), 
-	    item->yPos(), item->xPos(), item->yPos(),
+	    item->yPos(), item->xPos(), item->displayZPos(),
 	    (const char*)item->spawnTimeStr());
     printf ("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n\n");
     
@@ -3246,9 +3246,9 @@ void EQInterface::addItem(const Item* item)
   
   if (filterFlags & FILTER_FLAG_CAUTION)
   {
-    printf ("CautionSpawn: %s spawned LOC %dy, %dx, %dz at %s", 
+    printf ("CautionSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s", 
 	    (const char*)item->name(), 
-	    item->yPos(), item->xPos(), item->yPos(),
+	    item->yPos(), item->xPos(), item->displayZPos(),
 	    (const char*)item->spawnTimeStr());
     
     if (showeq_params->spawnfilter_logcautions)
@@ -3262,9 +3262,9 @@ void EQInterface::addItem(const Item* item)
   
   if (filterFlags & FILTER_FLAG_HUNT)
   {
-    printf ("HuntSpawn: %s spawned LOC %dy, %dx, %dz at %s", 
+    printf ("HuntSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s", 
 	    (const char*)item->name(), 
-	    item->yPos(), item->xPos(), item->yPos(),
+	    item->yPos(), item->xPos(), item->displayZPos(),
 	    (const char*)item->spawnTimeStr());
     
     if (showeq_params->spawnfilter_loghunts)
@@ -3278,9 +3278,9 @@ void EQInterface::addItem(const Item* item)
   
   if (filterFlags & FILTER_FLAG_DANGER)
   {
-    printf ("DangerSpawn: %s spawned LOC %dy, %dx, %dz at %s", 
+    printf ("DangerSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s", 
 	    (const char*)item->name(), 
-	    item->yPos(), item->xPos(), item->yPos(),
+	    item->yPos(), item->xPos(), item->displayZPos(),
 	    (const char*)item->spawnTimeStr());
     
     if (showeq_params->spawnfilter_logdangers)
@@ -3373,16 +3373,16 @@ void EQInterface::handleAlert(const Item* item,
     if (type == tNewSpawn)
     {
       if (spawn)
-	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%d) LVL %d, HP %d/%d", 
+	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%5.1f) LVL %d, HP %d/%d", 
 		     1900 + tp->tm_year, tp->tm_mon, tp->tm_mday,
 		     tp->tm_hour, tp->tm_min, tp->tm_sec,
-		     item->xPos(), item->yPos(), item->zPos(),
+		     item->xPos(), item->yPos(), item->displayZPos(),
 		     spawn->level(), spawn->HP(), spawn->maxHP());
       else
-	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%d)", 
+	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%5.1f)", 
 		     1900 + tp->tm_year, tp->tm_mon, tp->tm_mday,
 		     tp->tm_hour, tp->tm_min, tp->tm_sec,
-		     item->xPos(), item->yPos(), item->zPos());
+		     item->xPos(), item->yPos(), item->displayZPos());
     }
     else
       temp.sprintf(" [%d-%d-%d %d:%d:%d]", 
@@ -3483,7 +3483,7 @@ void EQInterface::logFilteredSpawn(const Item* item, uint32_t flag)
     fprintf (rar, "%s %s spawned LOC %dy, %dx, %dz at %s", 
 	     (const char*)m_filterMgr->filterString(flag),
 	     (const char*)item->name(), 
-	     item->yPos(), item->xPos(), item->yPos(),
+	     item->yPos(), item->xPos(), item->zPos(),
 	     (const char*)item->spawnTimeStr());
     fclose(rar);
   }
@@ -3512,11 +3512,11 @@ void EQInterface::updateSelectedSpawnStatus(const Item* item)
   if (showeq_params->retarded_coords)
     string += QString::number(item->yPos()) + "/" 
       + QString::number(item->xPos()) + "/" 
-      + QString::number(item->zPos());
+      + QString::number(item->displayZPos(), 'f', 1);
   else
     string += QString::number(item->xPos()) + "/" 
       + QString::number(item->yPos()) + "/" 
-      + QString::number(item->zPos());
+      + QString::number(item->displayZPos(), 'f', 1);
 
   string += QString(" (") 
     + QString::number(item->calcDist(m_player->getPlayerX(),

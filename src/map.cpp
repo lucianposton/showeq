@@ -2613,7 +2613,10 @@ void Map::paintDrops(MapParameters& param,
     item = it->second;
 
     // make sure coin is within bounds
-    if (!inRect(screenBounds, item->xPos(), item->yPos()))
+    if (!inRect(screenBounds, item->xPos(), item->yPos()) ||
+	(m_spawnDepthFilter &&
+	 ((item->zPos() > m_param.playerHeadRoom()) ||
+	  (item->zPos() < m_param.playerFloorRoom()))))
       continue;
 
     ixlOffset = param.calcXOffsetI(item->xPos());
@@ -2656,7 +2659,10 @@ void Map::paintCoins(MapParameters& param,
     item = it->second;
 
     // make sure coin is within bounds
-    if (!inRect(screenBounds, item->xPos(), item->yPos()))
+    if (!inRect(screenBounds, item->xPos(), item->yPos()) ||
+	(m_spawnDepthFilter &&
+	 ((item->zPos() > m_param.playerHeadRoom()) ||
+	  (item->zPos() < m_param.playerFloorRoom()))))
       continue;
 
     ixlOffset = param.calcXOffsetI(item->xPos());
@@ -2698,7 +2704,11 @@ void Map::paintDoors(MapParameters& param,
     // get the item from the list
     item = it->second;
 
-    if (!inRect(screenBounds, item->xPos(), item->yPos()))
+    // make sure doors are within bounds
+    if (!inRect(screenBounds, item->xPos(), item->yPos()) ||
+	(m_spawnDepthFilter &&
+	 ((item->zPos() > m_param.playerHeadRoom()) ||
+	  (item->zPos() < m_param.playerFloorRoom()))))
       continue;
 
     ixlOffset = param.calcXOffsetI(item->xPos());
@@ -3562,18 +3572,18 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       else
 	hp = QString::number(spawn->HP());
 
-      string.sprintf("%s\nLevel: %2d\tHP: %s\t Y/X/Z: %5d/%5d/%5d\nRace: %s\t Class: %s\nEquipment: %s", 
+      string.sprintf("%s\nLevel: %2d\tHP: %s\t Y/X/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s\nEquipment: %s", 
 		     (const char*)spawn->transformedName(),
 		     spawn->level(), (const char*)hp,
-		     spawn->xPos(), spawn->yPos(), item->zPos(),
+		     spawn->xPos(), spawn->yPos(), item->displayZPos(),
 		     (const char*)spawn->raceName(), 
 		     (const char*)spawn->className(),
 		     (const char*)spawn->info());
     }
     else
-      string.sprintf("%s\nY/X/Z: %5d/%5d/%5d\nRace: %s\t Class: %s", 
+      string.sprintf("%s\nY/X/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s", 
 		     (const char*)item->transformedName(),
-		     item->xPos(), item->yPos(), item->zPos(),
+		     item->xPos(), item->yPos(), item->displayZPos(),
 		     (const char*)item->raceName(), 
 		     (const char*)item->className());
 

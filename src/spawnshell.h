@@ -123,7 +123,8 @@ public slots:
    void newGroundItem(const dropThingOnGround*);
    void removeGroundItem(const removeThingOnGround*);
    void newCoinsItem(const dropCoinsStruct*);
-   void newDoorSpawn(const doorStruct*);
+   void compressedDoorSpawn (const compressedDoorStruct* c);
+   void newDoorSpawn(const doorStruct* d);
    void removeCoinsItem(const removeCoinsStruct*);
    void zoneSpawns(const zoneSpawnsStruct* zspawns, int len);
    void newSpawn(const newSpawnStruct* spawn);

@@ -18,6 +18,8 @@
 #include "opcodes.h"
 #include "libeq.h"
 
+//#define DIAG_DECODE_ZLIB_ERROR
+
 #define PKTBUF_LEN	65535
 
 void *
@@ -261,7 +263,8 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
 
   // Get the opcode of the current packet
   // Check to see if it is a compressed packet
-  if (( opcode == CompressedPlayerItemCode ) || ( opcode == CompressedDoorSpawnCode ) )
+  if ((opcode == CompressedPlayerItemCode) || 
+      (opcode == CompressedDoorSpawnCode))
   {
      uint8_t pbUncompressedData[PKTBUF_LEN-4];
      uint32_t nUncompressedLength;
@@ -457,6 +460,10 @@ int EQDecode::InflatePacket(const uint8_t *pbDataIn, uint32_t cbDataInLen,
 	}
 	else
 	{
+#ifdef DIAG_DECODE_ZLIB_ERROR
+	  printf("InflatePacket: Failed! inflate() returned %d '%s'\n",
+		 zerror, zstream.msg);
+#endif
 		zerror = inflateEnd( &zstream );
 		*pcbDataOutLen = 0;
 		return 0;

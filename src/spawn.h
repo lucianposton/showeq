@@ -79,6 +79,7 @@ class Item : public EQPoint
   uint32_t runtimeFilterFlags() const { return m_runtimeFilterFlags; }
   QString name() const;
   uint8_t NPC() const { return m_NPC; }
+  float displayZPos() const { return m_zDisplay; }
 
   // virtual methods that provide reasonable default values
   virtual QString transformedName() const;
@@ -114,6 +115,7 @@ class Item : public EQPoint
   QTime m_spawnTime; 
   uint32_t m_filterFlags;
   uint32_t m_runtimeFilterFlags;
+  float m_zDisplay;
   uint16_t m_ID;
   uint8_t m_NPC;
   itemType m_type;

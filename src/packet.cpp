@@ -1386,7 +1386,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
    /* pre-process the packets */
    decoded = m_decode->DecodePacket(data, len, decodedData,
-                        &decodedDataLen, showeq_params->ip);
+				    &decodedDataLen, showeq_params->ip);
 
    uint16_t opCode = eqntohuint16(data); // data[1] | (data[0] << 8);
 
@@ -2507,26 +2507,25 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             unk = false;
 
-            compressedPacket* compressed;
-            compressed = (compressedPacket*)(decodedData);
+            if (!decoded)
+               break;
 
-            // Make sure we do not divide by zero and there is something to process
-            if (compressed->count)
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+            compressedDoorStruct* compressed;
+            compressed = (compressedDoorStruct *)(decodedData);
+
+            // verify size
+            int pSize = (decodedDataLen - 4) / compressed->count;
+
+            if (pSize != sizeof(doorStruct))
             {
-                // Determine the size of a single structure in the compressed packet
-                int nPacketSize=((decodedDataLen - 4)/compressed->count);
+	       printf("WARNING: CompressedDoorSpawnCode (dataLen:%d != sizeof(doorStruct):%d)!\n", pSize, sizeof(doorStruct));
 
-                // See if it is the size that we expect
-                int nVerifySize = sizeof(struct doorStruct);
-
-                if (nVerifySize == nPacketSize)
-                {
-                    for ( int i=0; i<compressed->count; i++ )
-                    {
-                        emit newDoorSpawn ((const doorStruct*)&compressed->compressedData[i*nPacketSize]);
-                    }
-                }
+	       unk = true;
             }
+#endif
+
+            emit compressedDoorSpawn((const compressedDoorStruct *)decodedData);
 
             break;
       }
@@ -2547,7 +2546,9 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
    if (showeq_params->logUnknownZonePackets && unk)
    {
-       printf ("%04x - %d\n", opCode, len);
+       printf ("%04x - %d (%s)\n", opCode, len, 
+	       ((direction == DIR_SERVER) ? 
+		"Server --> Client" : "Client --> Server"));
 
        if (!logData (showeq_params->UnknownZoneLogFilename, len, data))
             emit toggle_log_UnknownData(); //untoggle the GUI checkmark

@@ -177,7 +177,7 @@ void SpawnListItem::update(uint32_t changeType)
      setText(SPAWNCOL_YPOS, buff);
      
      // Z position
-     buff.sprintf("%5d", (int)item()->zPos());
+     buff.sprintf("%5.1f", item()->displayZPos());
      setText(SPAWNCOL_ZPOS, buff);
 
      // Distance

@@ -353,13 +353,22 @@ void SpawnShell::removeGroundItem(const removeThingOnGround *d)
       deleteItem(tDrop, d->dropId);
 }
 
-void SpawnShell::newDoorSpawn(const doorStruct *d)
+void SpawnShell::compressedDoorSpawn(const compressedDoorStruct *c)
+{
+#ifdef SPAWNSHELL_DIAG
+   printf("SpawnShell::compressedDoorSpawn(compressedDoorStruct*)\n");
+#endif
+   for (int i=0; i<c->count; i++)
+   {
+      newDoorSpawn((const doorStruct*)&c->doors[i]);
+   }
+}
+
+void SpawnShell::newDoorSpawn(const doorStruct* d)
 {
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::newDoorSpawn(doorStruct*)\n");
 #endif
-   if (!d)
-     return;
    ItemMap::iterator it;
    Door* item;
    it = m_doors.find(d->doorId);
@@ -515,7 +524,7 @@ void SpawnShell::playerUpdate(const playerUpdateStruct *pupdate, bool client)
 
   if (m_playerSpawn != NULL)
   {
-    m_playerSpawn->setPos(pupdate->xPos, pupdate->yPos, pupdate->zPos / 10,
+    m_playerSpawn->setPos(pupdate->xPos, pupdate->yPos, pupdate->zPos,
 			  showeq_params->walkpathrecord,
 			  showeq_params->walkpathlength);
     m_playerSpawn->setDeltas(pupdate->deltaX, pupdate->deltaY, 
@@ -537,7 +546,7 @@ void SpawnShell::playerUpdate(const playerUpdateStruct *pupdate, bool client)
 			      m_player->getPlayerDeity());
 
     // and set it's info
-    m_playerSpawn->setPos(pupdate->xPos, pupdate->yPos, pupdate->zPos / 10,
+    m_playerSpawn->setPos(pupdate->xPos, pupdate->yPos, pupdate->zPos,
 			  showeq_params->walkpathrecord,
 			  showeq_params->walkpathlength);
     m_playerSpawn->setDeltas(pupdate->deltaX, pupdate->deltaY, 
@@ -615,7 +624,7 @@ void SpawnShell::updateSpawns(const spawnPositionUpdateStruct* updates)
        updateSpawn(updates->spawnUpdate[a].spawnId,
 		   updates->spawnUpdate[a].xPos,
 		   updates->spawnUpdate[a].yPos,
-		   updates->spawnUpdate[a].zPos / 10,
+		   updates->spawnUpdate[a].zPos,
 		   updates->spawnUpdate[a].deltaX,
 		   updates->spawnUpdate[a].deltaY,
 		   updates->spawnUpdate[a].deltaZ,
@@ -627,7 +636,7 @@ void SpawnShell::updateSpawns(const spawnPositionUpdateStruct* updates)
        updateSpawn(updates->spawnUpdate[a].spawnId,
 		   updates->spawnUpdate[a].xPos,
 		   updates->spawnUpdate[a].yPos,
-		   updates->spawnUpdate[a].zPos / 10,
+		   updates->spawnUpdate[a].zPos,
 		   0, 0, 0,
 		   updates->spawnUpdate[a].heading, 
 		   0);

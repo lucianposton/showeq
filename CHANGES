@@ -1,6 +1,27 @@
 dohpaZ (03/01/02)
 ---------------------
 Modifications:
+ + Un-applied patch #498562 "Spawn z loc patch" by wyvern (mvern),
+   it turns out that this had negative implications for the map code in
+   regards to existing maps and depth scaling.
+ + Applied patch #498938 "doors patch part 2" by wyvern (mvern)
+ + Applied patch #498735 "ShowEQ install/usability patch" 
+   by Kenny FromSouthPark (kennysp)
+ + Modified the Drop, Coin, and Door classes to multiply the Z up by 10.0
+   and have the Item class also save a floating point version of the Z
+   coordinate that is Z divided by 10, and added a displayZPos() method.
+ + Modified the Spawn List, Interface, and Map to use the displayZPos() for
+   textual display purposes.
+ + Modified the paintDrops(), paintCoins(), and painDoors() methods to 
+   pay attention to Spawn Depth Filter setting.
+
+Bug Fixes:
+ + Made the text output when a spawn that matches a filter is seen actually
+   display the z coordinate instead of print the y coordinat twice.
+
+dohpaZ (03/01/02)
+---------------------
+Modifications:
  + Applied patch #498090 "find and use gcc3 or gcc-3.0 if present" 
    by njk (yendor)
  + Applied patch #498465 "Timeout for pcap_open_live()" by grendel (runlevel)

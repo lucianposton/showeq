@@ -179,7 +179,11 @@ QString Item::dumpString() const
 
 void Item::setPos(int16_t xPos, int16_t yPos, int16_t zPos)
 {
+  // set the item position
   setPoint(xPos, yPos, zPos);
+
+  // set scale Z for display purposes
+  m_zDisplay = float(zPos) / 10.0;
 }
 
 //----------------------------------------------------------------------
@@ -929,7 +933,7 @@ void Coin::update(const dropCoinsStruct* c)
   QString temp;
   setPos((int16_t)(c->xPos), 
 	 (int16_t)(c->yPos), 
-	 (int16_t)(c->zPos));
+	 (int16_t)(c->zPos * 10.0));
   setAmount(c->amount);
   setCoinType(c->type[0]);
   m_name.sprintf("Coints: %c %d", c->type[0], c->amount);
@@ -965,7 +969,7 @@ void Door::update(const doorStruct* d)
   QString temp;
   setPos((int16_t)(d->xPos), 
 	 (int16_t)(d->yPos), 
-	 (int16_t)(d->zPos));
+	 (int16_t)(d->zPos * 10.0));
   m_name.sprintf("Door: %s (%d) ", d->name, d->doorId);
   updateLast();
 }
@@ -1002,7 +1006,7 @@ void Drop::update(const dropThingOnGround* d, const QString& name)
   // set the position
   setPos((int16_t)d->xPos, 
 	 (int16_t)d->yPos, 
-	 (int16_t)d->zPos);
+	 (int16_t)d->zPos * 10.0);
 
   // set the drop specific info
   setItemNr(d->itemNr);
