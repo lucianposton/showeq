@@ -604,7 +604,8 @@ struct ServerZoneEntryStruct
 /*0160*/ uint8_t  unknown0164[148];       // ***Placeholder 
                                           //     could be usefull things here
 /*0308*/ uint16_t deity;                  // Player's Deity
-/*0310*/ uint8_t  unknown0314[8];         // ***Placeholder
+/*0310*/ uint8_t  unknown0310[8];         // ***Placeholder
+/*0318*/ uint32_t unknown0318[8];            // ***Placeholder
 };
 
 /*
@@ -1090,10 +1091,11 @@ struct wearChangeStruct
 /*0000*/ uint8_t  opCode;                 // 0x92
 /*0001*/ uint8_t  version;                // 0x20
 /*0002*/ uint16_t spawnId;                // SpawnID
-/*0004*/ uint8_t  unknown0004[2];         // ***Placeholder
-/*0006*/ int8_t   wearSlotId;             // Slot
-/*0007*/ uint8_t  newItemId;              // Item ID
-/*0008*/ uint8_t  unknown0008[10];        // first few react to clothing changes
+/*0004*/ uint8_t  wearSlotId;             // Slot ID
+/*0005*/ uint8_t  unknown0005;            // unknown
+/*0006*/ uint16_t newItemId;              // Item ID see weaponsX.h or util.cpp
+/*0008*/ uint8_t  unknown0008[2];         // unknown
+/*0010*/ uint32_t color;                  // color
 };
 
 /*

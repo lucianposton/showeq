@@ -1,3 +1,8 @@
+fee (21/03/02)
+------------------
+Modifications:
+ + fixed the wearChangeStruct and ServerZoneEntryStruct 
+
 dohpaZ (20/03/02)
 ------------------
 Modifications:

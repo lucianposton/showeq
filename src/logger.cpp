@@ -1248,7 +1248,8 @@ PktLogger::logZoneEntry(const void *data, int len, int dir)
         outputf(" %u ", zone->level);
         output(zone->unknown0164, 148);
         outputf(" %u ", zone->deity);
-        output(&zone->unknown0314, 8);
+        output(&zone->unknown0310, 8);
+        output(&zone->unknown0318, 8);
         outputf("\n");
     }
     else
@@ -1341,9 +1342,9 @@ PktLogger::logWearChange(const wearChangeStruct *wear, int len, int dir)
     outputf("R %u %04d %d %.2X%.2X %u ", timestamp, len, dir,
         wear->opCode,wear->version, wear->spawnId);
 
-    output(wear->unknown0004,2);
+    output(wear->unknown0005,1);
     outputf("%d %u ", wear->wearSlotId, wear->newItemId);
-    output(wear->unknown0008,10);
+    output(wear->unknown0008,2);
     outputf("\n");
     flush();
     return;
