@@ -102,7 +102,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
    const char* player_classes[] = {"Warrior", "Cleric", "Ranger", "Paladin",
                                    "Shadow Knight", "Druid", "Monk", "Bard",
-                                   "Rogue", "Shaman", "Necromancer", "Wizzard",
+                                   "Rogue", "Shaman", "Necromancer", "Wizard",
                                    "Magician", "Enchanter", "Beastlord"
                                   };
    const char* player_races[] = {"Human", "Barbarian", "Erudite", "Wood elf",
