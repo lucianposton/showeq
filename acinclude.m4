@@ -99,38 +99,38 @@ AC_DEFUN(AC_PATH_QT_MOC,
      AC_FIND_FILE(moc, [ $ac_qt_bindir              \
                          $QTDIR/bin                 \
                          $QTDIR/src/moc             \
-	                 /opt/qt-gcc3-2.3.2/lib	    \
-	                 /usr/lib/qtgcc3-2.3.2/lib  \
-	                 /opt/qt-gcc3-*/lib	    \
-	                 /usr/lib/qtgcc3-*/lib  \
-	                 /opt/qt-2.3.2/lib          \
+                         /usr/local/qt3/bin	    \
+                         /usr/local/qt/bin          \
+                         /usr/local/qt2/bin         \
 	                 /usr/local/qt-2.3.2/lib    \
+                         /usr/local/qt*/bin         \
+	                 /usr/lib/qtgcc3-2.3.2/lib  \
+	                 /usr/lib/qtgcc3-*/lib  \
+	                 /opt/qt-gcc3-2.3.2/lib	    \
+	                 /opt/qt-gcc3-*/lib	    \
+	                 /opt/qt-2.3.2/lib          \
                          /usr/bin                   \
                          /usr/X11R6/bin             \
-                         /usr/X11R6/bin/qt2         \
                          /usr/X11R6/bin/qt3	    \
                          /usr/X11R6/bin/qt          \
+                         /usr/X11R6/bin/qt2         \
                          /usr/X11R6/bin/qt*         \
                          /usr/X11R6/bin/qt2/bin     \
                          /usr/X11R6/bin/qt3/bin     \
                          /usr/X11R6/bin/qt/bin      \
                          /usr/X11R6/bin/qt*/bin     \
-                         /usr/X11R6/bin/X11/qt2     \
                          /usr/X11R6/bin/X11/qt3     \
                          /usr/X11R6/bin/X11/qt      \
+                         /usr/X11R6/bin/X11/qt2     \
                          /usr/X11R6/bin/X11/qt*     \
-                         /usr/X11R6/bin/X11/qt2/bin \
                          /usr/X11R6/bin/X11/qt3/bin \
                          /usr/X11R6/bin/X11/qt/bin  \
+                         /usr/X11R6/bin/X11/qt2/bin \
                          /usr/X11R6/bin/X11/qt*/bin \
-                         /usr/lib/qt2/bin           \
                          /usr/lib/qt3/bin	    \
                          /usr/lib/qt/bin            \
+                         /usr/lib/qt2/bin           \
                          /usr/lib/qt*/bin           \
-                         /usr/local/qt2/bin         \
-                         /usr/local/qt3/bin	    \
-                         /usr/local/qt/bin          \
-                         /usr/local/qt*/bin         \
                          /usr/src/qt-*/bin            ],
 
              MOC)
@@ -505,28 +505,28 @@ dnl  *******************************************
 
 qt_incdirs=" $QTDIR/include                     \
              $QTINC                             \
-	     /opt/qt-gcc3-2.3.2/include		\
-	     /usr/lib/qtgcc3-2.3.2/include	\
-	     /opt/qt-gcc3-*/include		\
-	     /usr/lib/qtgcc3-*/include		\
-	     /opt/qt-2.3.2/include		\
-	     /usr/local/qt-2.3.2/include	\
-             /usr/lib/qt2/include               \
-	     /usr/lib/qt3/include		\
-             /usr/lib/qt/include                \
-             /usr/lib/qt*/include               \
-             /usr/local/qt2/include             \
 	     /usr/local/qt3/include		\
              /usr/local/qt/include              \
+             /usr/local/qt2/include             \
+	     /usr/local/qt-2.3.2/include	\
              /usr/local/qt*/include             \
-             /usr/include/qt2                   \
+	     /opt/qt-gcc3-2.3.2/include		\
+	     /opt/qt-gcc3-*/include		\
+	     /opt/qt-2.3.2/include		\
 	     /usr/include/qt3			\
              /usr/include/qt                    \
+             /usr/include/qt2                   \
              /usr/include/qt*                   \
              /usr/include                       \
-             /usr/lib/qt2/include               \
 	     /usr/lib/qt3/include		\
              /usr/lib/qt/include                \
+             /usr/lib/qt2/include               \
+             /usr/lib/qt*/include               \
+	     /usr/lib/qtgcc3-2.3.2/include	\
+	     /usr/lib/qtgcc3-*/include		\
+	     /usr/lib/qt3/include		\
+             /usr/lib/qt/include                \
+             /usr/lib/qt2/include               \
              /usr/lib/qt*/include               \
              /usr/X11R6/include/X11/qt2         \
 	     /usr/X11R6/include/X11/qt3		\
@@ -621,38 +621,38 @@ dnl ************************************
 qt_libdirs=" $QTDIR/lib			\
              $LD_LIBRARY_PATH		\
              $QTLIB			\
-	     /opt/qt-gcc3-2.3.2/lib	\
-	     /usr/lib/qtgcc3-2.3.2/lib	\
-	     /opt/qt-2.3.2/lib		\
-	     /usr/local/qt-2.3.2/lib	\
-             /usr/lib			\
-	     /usr/local/qt2/lib		\
 	     /usr/local/qt3/lib		\
              /usr/local/qt/lib		\
+	     /usr/local/qt2/lib		\
+	     /usr/local/qt-2.3.2/lib	\
              /usr/local/qt*/lib		\
-             /usr/lib/qt2/lib		\
+	     /opt/qt-gcc3-2.3.2/lib	\
+	     /opt/qt-2.3.2/lib		\
 	     /usr/lib/qt3/lib		\
              /usr/lib/qt/lib		\
 	     /usr/lib/qt*/lib		\
-             /usr/lib/qt2		\
 	     /usr/lib/qt3		\
+             /usr/lib/qt2		\
              /usr/lib/qt		\
+             /usr/lib/qt2/lib		\
+	     /usr/lib/qtgcc3-2.3.2/lib	\
              /usr/lib/qt*		\
-             /usr/X11R6/lib/X11/qt2	\
+             /usr/lib			\
 	     /usr/X11R6/lib/X11/qt3	\
              /usr/X11R6/lib/X11/qt	\
+             /usr/X11R6/lib/X11/qt2	\
              /usr/X11R6/lib/X11/qt*	\
-             /usr/X11R6/lib/X11/qt2/lib	\
 	     /usr/X11R6/lib/X11/qt3/lib	\
              /usr/X11R6/lib/X11/qt/lib	\
+             /usr/X11R6/lib/X11/qt2/lib	\
              /usr/X11R6/lib/X11/qt*/lib	\
-             /usr/X11R6/lib/qt2		\
 	     /usr/X11R6/lib/qt3		\
              /usr/X11R6/lib/qt		\
+             /usr/X11R6/lib/qt2		\
              /usr/X11R6/lib/qt*		\
-             /usr/X11R6/lib/qt2/lib	\
 	     /usr/X11R6/lib/qt3/lib	\
              /usr/X11R6/lib/qt/lib	\
+             /usr/X11R6/lib/qt2/lib	\
 	     /usr/X11R6/lib/qt*/lib	\
              /usr/src/qt-*/lib		\
              $x_libraries		\
