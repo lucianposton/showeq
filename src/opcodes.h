@@ -78,7 +78,7 @@
 
 #define OP_MobUpdate                0x003f // 12/18/03  - old MobUpdateCode
 
-#define OP_TradeSkillCombine        0x003f // 12/18/03 
+#define OP_TradeSkillCombine        0x0043 // 12/18/03 
  
 #define OP_GMFind                   0x0048 // 12/18/03  GM /find	- ?
 
