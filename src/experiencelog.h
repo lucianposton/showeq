@@ -8,6 +8,9 @@
 #ifndef EXPERIENCELOG_H
 # define EXPERIENCELOG_H
 
+#include "seqwindow.h"
+#include "seqlistview.h"
+
 # include <qobject.h>
 # include <qwidget.h>
 # include <qlist.h>
@@ -17,26 +20,30 @@
 # include <qlayout.h>
 # include <qmenubar.h>
 
+#include <stdint.h>
 # include <sys/time.h>
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fcntl.h>
 # include <stdio.h>
 
-#include "seqwindow.h"
-#include "seqlistview.h"
-
 //----------------------------------------------------------------------
 // forward declarations
 class GroupMgr;
 class Player;
-
+class DataLocationMgr;
+class ZoneMgr;
+	    
+//----------------------------------------------------------------------
+// ExperienceRecord
 class ExperienceRecord 
 {
 public:
 
-   ExperienceRecord( const QString &mob_name, int mob_level, long xp_gained,
-      time_t time, const QString &zone_name, Player* p, GroupMgr* g);
+   ExperienceRecord(const QString &mob_name, int mob_level, long xp_gained,
+		    time_t time, const QString &zone_name, 
+		    uint8_t classVal, uint8_t level, float zem, 
+		    float totalLevels, float groupPercentBonus);
 
    const QString &getMobName() const;
    int getMobLevel() const;
@@ -49,7 +56,11 @@ public:
    const QString &getZoneName() const;
 
 private:
-   Player* m_player;
+   uint8_t m_class;
+   uint8_t m_level;
+   float m_zem;
+   float m_totalLevels;
+   float m_groupPercentBonus;
    GroupMgr* m_group;
    QString m_zone_name;
    QString m_mob_name;
@@ -59,14 +70,16 @@ private:
 
 };
 
+//----------------------------------------------------------------------
+// ExperienceWindow
 class ExperienceWindow : public SEQWindow
 {
    Q_OBJECT
 
 public:
-
-   ExperienceWindow( Player* player, GroupMgr* g, 
-		     QWidget* parent = 0, const char* name = 0 );
+   ExperienceWindow(const DataLocationMgr* dataLocMgr, 
+		    Player* player, GroupMgr* g, ZoneMgr* zoneMgr,
+		    QWidget* parent = 0, const char* name = 0 );
    ~ExperienceWindow();
 
 public slots:
@@ -86,6 +99,7 @@ public slots:
    void viewZEMraw();
    void viewZEMpercent();
    void viewZEMcalculated();
+   void clear(void);
 
 private:
 
@@ -94,8 +108,11 @@ private:
    void logexp(long xp_gained, int mob_level);
 
    // Need to grab xp totals from here
+   const DataLocationMgr* m_dataLocMgr;
+   QString m_newExpLogFile;
    Player* m_player;
    GroupMgr* m_group;
+   ZoneMgr* m_zoneMgr;
 
    QVBoxLayout *m_layout;
 
@@ -116,8 +133,7 @@ private:
    int m_calcZEM;
    int m_ZEMviewtype;
    int m_log_exp;
-   int logfd;
-   FILE *logstr;
+   FILE* m_log;
 
 };
 

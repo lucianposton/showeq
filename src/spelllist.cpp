@@ -108,7 +108,8 @@ void SpellListItem::setCategory(QString& cat)
 
 SpellList::SpellList(SpellShell* sshell, QWidget *parent, const char *name)
   : SEQListView("SpellList", parent, name),
-    m_spellShell(sshell)
+    m_spellShell(sshell),
+    m_menu(0)
 {
    //addColumn... spell icon
    addColumn("Spell", "SpellName");
@@ -127,6 +128,42 @@ SpellList::SpellList(SpellShell* sshell, QWidget *parent, const char *name)
 	    this, SLOT(mouseDoubleClicked(QListViewItem*)));
    connect(this, SIGNAL(rightButtonClicked(QListViewItem*, const QPoint&, int)),
 	   this, SLOT(rightButtonClicked(QListViewItem*, const QPoint&, int)));
+}
+
+QPopupMenu* SpellList::menu()
+{
+  // if the menu already exists, return it
+  if (m_menu)
+    return m_menu;
+  
+  m_menu = new QPopupMenu(this);
+  m_menu->setCheckable(true);
+  
+  mid_spellName = m_menu->insertItem("Spell Name");
+  mid_spellId = m_menu->insertItem("Spell ID");
+  mid_casterId = m_menu->insertItem("Caster ID");
+  mid_casterName = m_menu->insertItem("Caster Name");
+  mid_targetId = m_menu->insertItem("Target ID");
+  mid_targetName = m_menu->insertItem("Target Name");
+  mid_casttime = m_menu->insertItem("Cast Time");
+  mid_duration = m_menu->insertItem("Remaining Time");
+
+  connect(m_menu, SIGNAL(activated(int)), this, SLOT(activated(int)));
+  connect(m_menu, SIGNAL(aboutToShow()), this, SLOT(init_menu()));
+  
+  return m_menu;
+}
+
+void SpellList::init_menu(void)
+{ 
+  m_menu->setItemChecked(mid_spellName, columnWidth(SPELLCOL_SPELLNAME) != 0);
+  m_menu->setItemChecked(mid_spellId, columnWidth(SPELLCOL_SPELLID) != 0);
+  m_menu->setItemChecked(mid_casterId, columnWidth(SPELLCOL_CASTERID) != 0);
+  m_menu->setItemChecked(mid_casterName, columnWidth(SPELLCOL_CASTERNAME) != 0);
+  m_menu->setItemChecked(mid_targetId, columnWidth(SPELLCOL_TARGETID) != 0);
+  m_menu->setItemChecked(mid_targetName, columnWidth(SPELLCOL_TARGETNAME) != 0);
+  m_menu->setItemChecked(mid_casttime, columnWidth(SPELLCOL_CASTTIME) != 0);
+  m_menu->setItemChecked(mid_duration, columnWidth(SPELLCOL_DURATION) != 0);
 }
 
 void SpellList::selectSpell(const SpellItem *item)
@@ -283,39 +320,10 @@ void SpellList::mouseDoubleClicked(QListViewItem *item)
 void SpellList::rightButtonClicked(QListViewItem *item, const QPoint& pos,
       int col)
 {
-   //printf("rightButtonClicked()\n");
-   //if (!m_menu) {
-   m_menu = new QPopupMenu(this);
-   m_menu->setCheckable(true);
+  QPopupMenu* slMenu = menu();
 
-   mid_spellName = m_menu->insertItem("Spell Name");
-   if (columnWidth(SPELLCOL_SPELLNAME))
-      m_menu->setItemChecked(mid_spellName, true);
-   mid_spellId = m_menu->insertItem("Spell ID");
-   if (columnWidth(SPELLCOL_SPELLID))
-      m_menu->setItemChecked(mid_spellId, true);
-   mid_casterId = m_menu->insertItem("Caster ID");
-   if (columnWidth(SPELLCOL_CASTERID))
-      m_menu->setItemChecked(mid_casterId, true);
-   mid_casterName = m_menu->insertItem("Caster Name");
-   if (columnWidth(SPELLCOL_CASTERNAME))
-      m_menu->setItemChecked(mid_casterName, true);
-   mid_targetId = m_menu->insertItem("Target ID");
-   if (columnWidth(SPELLCOL_TARGETID))
-      m_menu->setItemChecked(mid_targetId, true);
-   mid_targetName = m_menu->insertItem("Target Name");
-   if (columnWidth(SPELLCOL_TARGETNAME))
-      m_menu->setItemChecked(mid_targetName, true);
-   mid_casttime = m_menu->insertItem("Cast Time");
-   if (columnWidth(SPELLCOL_CASTTIME))
-      m_menu->setItemChecked(mid_casttime, true);
-   mid_duration = m_menu->insertItem("Remaining Time");
-   if (columnWidth(SPELLCOL_DURATION))
-      m_menu->setItemChecked(mid_duration, true);
-   //}
-
-   connect(m_menu, SIGNAL(activated(int)), this, SLOT(activated(int)));
-   m_menu->popup(pos);
+  if (slMenu)
+    slMenu->popup(pos);
 }
 
 void SpellList::activated(int mid)
@@ -360,15 +368,21 @@ SpellListWindow::SpellListWindow(SpellShell* sshell,
 				 QWidget* parent, const char* name)
   : SEQWindow("SpellList", "ShowEQ - Spell List", parent, name)
 {
-  QVBoxLayout* layout = new QVBoxLayout(this);
-  layout->setAutoAdd(true);
+  //QVBoxLayout* layout = new QVBoxLayout(this);
+  //layout->setAutoAdd(true);
   
   m_spellList = new SpellList(sshell, this, name);
+  setWidget(m_spellList);
 }
 
 SpellListWindow::~SpellListWindow()
 {
   delete m_spellList;
+}
+
+QPopupMenu* SpellListWindow::menu()
+{
+  return m_spellList->menu();
 }
 
 void SpellListWindow::savePrefs(void)

@@ -15,10 +15,15 @@
 #ifndef SPELLS_H_
 #define SPELLS_H_
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 #include <qstringlist.h>
 #include <qstring.h>
 
+const size_t playerClasses = 15;
 
 class Spell
 {
@@ -37,12 +42,12 @@ class Spell
   int16_t calcDuration(uint8_t level) const;
 
  private:
-  QStringList m_spellInfo;
   QString m_name;
   uint16_t m_spell;
   int16_t m_buffDurationFormula;
   int16_t m_buffDurationArgument;
   uint8_t m_targetType;
+  uint8_t m_classLevels[playerClasses];
 };
 
 class Spells

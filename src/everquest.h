@@ -53,10 +53,6 @@
 #define LIST_ALTEXP                     19
 #define LIST_MAXLIST                    20 
 
-// direction the data is coming from
-#define DIR_CLIENT 1
-#define DIR_SERVER 2
-
 /*
 ** MOB Spawn Type
 */
@@ -242,6 +238,11 @@ enum ChatColor
   CC_User_EchoChat8        = 322,
   CC_User_EchoChat9        = 323,
   CC_User_EchoChat10       = 324,
+  CC_User_UnusedAtThisTime = 325,
+  CC_User_ItemTags         = 326,
+  CC_User_RaidSay          = 327,
+  CC_User_MyPet            = 328,
+  CC_User_DamageShield     = 329,
 };
 
 /*
@@ -559,178 +560,178 @@ struct charProfileStruct
 /*3702*/ uint16_t  zoneInstance;       // 
 /*3704*/ spellBuff buffs[15];          // Buffs currently on the player
 /*3944*/ char      groupMembers[6][64];// all the members in group, including self 
-/*4328*/ uint8_t   unknown4330[4];     // *** Placeholder
+/*4328*/ uint8_t   unknown4328[4];     // *** Placeholder
 /*4332*/ uint32_t  ldon_guk_points;    // Earned Deepest Guk points
 /*4336*/ uint32_t  ldon_mir_points;    // Earned Deepest Guk points
 /*4340*/ uint32_t  ldon_mmc_points;    // Earned Deepest Guk points
 /*4344*/ uint32_t  ldon_ruj_points;    // Earned Deepest Guk points
 /*4348*/ uint32_t  ldon_tak_points;    // Earned Deepest Guk points
-/*4352*/ uint8_t   unknown4354[24];    // *** Placeholder
+/*4352*/ uint8_t   unknown4352[24];    // *** Placeholder
 /*4376*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*4380*/ uint8_t   unknown4382[4];     // *** Placeholder
-/*4384*/	
+/*4380*/ uint8_t   unknown4380[268];   // *** Placeholder
+/*4644*/	
 };
 
 
-#if 0
+#if 1
 struct playerAAStruct {
-/*    0 */  uint8 unknown0;
+/*    0 */  uint8_t unknown0;
   union {
-    uint8 unnamed[17];
+    uint8_t unnamed[17];
     struct _named {  
-/*    1 */  uint8 innate_strength;
-/*    2 */  uint8 innate_stamina;
-/*    3 */  uint8 innate_agility;
-/*    4 */  uint8 innate_dexterity;
-/*    5 */  uint8 innate_intelligence;
-/*    6 */  uint8 innate_wisdom;
-/*    7 */  uint8 innate_charisma;
-/*    8 */  uint8 innate_fire_protection;
-/*    9 */  uint8 innate_cold_protection;
-/*   10 */  uint8 innate_magic_protection;
-/*   11 */  uint8 innate_poison_protection;
-/*   12 */  uint8 innate_disease_protection;
-/*   13 */  uint8 innate_run_speed;
-/*   14 */  uint8 innate_regeneration;
-/*   15 */  uint8 innate_metabolism;
-/*   16 */  uint8 innate_lung_capacity;
-/*   17 */  uint8 first_aid;
+/*    1 */  uint8_t innate_strength;
+/*    2 */  uint8_t innate_stamina;
+/*    3 */  uint8_t innate_agility;
+/*    4 */  uint8_t innate_dexterity;
+/*    5 */  uint8_t innate_intelligence;
+/*    6 */  uint8_t innate_wisdom;
+/*    7 */  uint8_t innate_charisma;
+/*    8 */  uint8_t innate_fire_protection;
+/*    9 */  uint8_t innate_cold_protection;
+/*   10 */  uint8_t innate_magic_protection;
+/*   11 */  uint8_t innate_poison_protection;
+/*   12 */  uint8_t innate_disease_protection;
+/*   13 */  uint8_t innate_run_speed;
+/*   14 */  uint8_t innate_regeneration;
+/*   15 */  uint8_t innate_metabolism;
+/*   16 */  uint8_t innate_lung_capacity;
+/*   17 */  uint8_t first_aid;
     } named;
   } general_skills;
   union {
-    uint8 unnamed[17];
+    uint8_t unnamed[17];
     struct _named {
-/*   18 */  uint8 healing_adept;
-/*   19 */  uint8 healing_gift;
-/*   20 */  uint8 unknown20;
-/*   21 */  uint8 spell_casting_reinforcement;
-/*   22 */  uint8 mental_clarity;
-/*   23 */  uint8 spell_casting_fury;
-/*   24 */  uint8 chanelling_focus;
-/*   25 */  uint8 unknown25;
-/*   26 */  uint8 unknown26;
-/*   27 */  uint8 unknown27;
-/*   28 */  uint8 natural_durability;
-/*   29 */  uint8 natural_healing;
-/*   30 */  uint8 combat_fury;
-/*   31 */  uint8 fear_resistance;
-/*   32 */  uint8 finishing_blow;
-/*   33 */  uint8 combat_stability;
-/*   34 */  uint8 combat_agility;
+/*   18 */  uint8_t healing_adept;
+/*   19 */  uint8_t healing_gift;
+/*   20 */  uint8_t unknown20;
+/*   21 */  uint8_t spell_casting_reinforcement;
+/*   22 */  uint8_t mental_clarity;
+/*   23 */  uint8_t spell_casting_fury;
+/*   24 */  uint8_t chanelling_focus;
+/*   25 */  uint8_t unknown25;
+/*   26 */  uint8_t unknown26;
+/*   27 */  uint8_t unknown27;
+/*   28 */  uint8_t natural_durability;
+/*   29 */  uint8_t natural_healing;
+/*   30 */  uint8_t combat_fury;
+/*   31 */  uint8_t fear_resistance;
+/*   32 */  uint8_t finishing_blow;
+/*   33 */  uint8_t combat_stability;
+/*   34 */  uint8_t combat_agility;
     } named;
   } archetype_skills;
   union {
-    uint8 unnamed[93];
+    uint8_t unnamed[93];
     struct _name {
-/*   35 */  uint8 mass_group_buff; // All group-buff-casting classes(?)
+/*   35 */  uint8_t mass_group_buff; // All group-buff-casting classes(?)
 // ===== Cleric =====
-/*   36 */  uint8 divine_resurrection;
-/*   37 */  uint8 innate_invis_to_undead; // cleric, necromancer
-/*   38 */  uint8 celestial_regeneration;
-/*   39 */  uint8 bestow_divine_aura;
-/*   40 */  uint8 turn_undead;
-/*   41 */  uint8 purify_soul;
+/*   36 */  uint8_t divine_resurrection;
+/*   37 */  uint8_t innate_invis_to_undead; // cleric, necromancer
+/*   38 */  uint8_t celestial_regeneration;
+/*   39 */  uint8_t bestow_divine_aura;
+/*   40 */  uint8_t turn_undead;
+/*   41 */  uint8_t purify_soul;
 // ===== Druid =====
-/*   42 */  uint8 quick_evacuation; // wizard, druid
-/*   43 */  uint8 exodus; // wizard, druid
-/*   44 */  uint8 quick_damage; // wizard, druid
-/*   45 */  uint8 enhanced_root; // druid
-/*   46 */  uint8 dire_charm; // enchanter, druid, necromancer
+/*   42 */  uint8_t quick_evacuation; // wizard, druid
+/*   43 */  uint8_t exodus; // wizard, druid
+/*   44 */  uint8_t quick_damage; // wizard, druid
+/*   45 */  uint8_t enhanced_root; // druid
+/*   46 */  uint8_t dire_charm; // enchanter, druid, necromancer
 // ===== Shaman =====
-/*   47 */  uint8 cannibalization;
-/*   48 */  uint8 quick_buff; // shaman, enchanter
-/*   49 */  uint8 alchemy_mastery;
-/*   50 */  uint8 rabid_bear;
+/*   47 */  uint8_t cannibalization;
+/*   48 */  uint8_t quick_buff; // shaman, enchanter
+/*   49 */  uint8_t alchemy_mastery;
+/*   50 */  uint8_t rabid_bear;
 // ===== Wizard =====
-/*   51 */  uint8 mana_burn;
-/*   52 */  uint8 improved_familiar;
-/*   53 */  uint8 nexus_gate;
+/*   51 */  uint8_t mana_burn;
+/*   52 */  uint8_t improved_familiar;
+/*   53 */  uint8_t nexus_gate;
 // ===== Enchanter  =====
-/*   54 */  uint8 unknown54;
-/*   55 */  uint8 permanent_illusion;
-/*   56 */  uint8 jewel_craft_mastery;
-/*   57 */  uint8 gather_mana;
+/*   54 */  uint8_t unknown54;
+/*   55 */  uint8_t permanent_illusion;
+/*   56 */  uint8_t jewel_craft_mastery;
+/*   57 */  uint8_t gather_mana;
 // ===== Mage =====
-/*   58 */  uint8 mend_companion; // mage, necromancer
-/*   59 */  uint8 quick_summoning;
-/*   60 */  uint8 frenzied_burnout;
-/*   61 */  uint8 elemental_form_fire;
-/*   62 */  uint8 elemental_form_water;
-/*   63 */  uint8 elemental_form_earth;
-/*   64 */  uint8 elemental_form_air;
-/*   65 */  uint8 improved_reclaim_energy;
-/*   66 */  uint8 turn_summoned;
-/*   67 */  uint8 elemental_pact;
+/*   58 */  uint8_t mend_companion; // mage, necromancer
+/*   59 */  uint8_t quick_summoning;
+/*   60 */  uint8_t frenzied_burnout;
+/*   61 */  uint8_t elemental_form_fire;
+/*   62 */  uint8_t elemental_form_water;
+/*   63 */  uint8_t elemental_form_earth;
+/*   64 */  uint8_t elemental_form_air;
+/*   65 */  uint8_t improved_reclaim_energy;
+/*   66 */  uint8_t turn_summoned;
+/*   67 */  uint8_t elemental_pact;
 // ===== Necromancer =====
-/*   68 */  uint8 life_burn;
-/*   69 */  uint8 dead_mesmerization;
-/*   70 */  uint8 fearstorm;
-/*   71 */  uint8 flesh_to_bone;
-/*   72 */  uint8 call_to_corpse;
+/*   68 */  uint8_t life_burn;
+/*   69 */  uint8_t dead_mesmerization;
+/*   70 */  uint8_t fearstorm;
+/*   71 */  uint8_t flesh_to_bone;
+/*   72 */  uint8_t call_to_corpse;
 // ===== Paladin =====
-/*   73 */  uint8 divine_stun;
-/*   74 */  uint8 improved_lay_of_hands;
-/*   75 */  uint8 slay_undead;
-/*   76 */  uint8 act_of_valor;
-/*   77 */  uint8 holy_steed;
-/*   78 */  uint8 fearless; // paladin, shadowknight
+/*   73 */  uint8_t divine_stun;
+/*   74 */  uint8_t improved_lay_of_hands;
+/*   75 */  uint8_t slay_undead;
+/*   76 */  uint8_t act_of_valor;
+/*   77 */  uint8_t holy_steed;
+/*   78 */  uint8_t fearless; // paladin, shadowknight
 
-/*   79 */  uint8 two_hand_bash; // paladin, shadowknight
+/*   79 */  uint8_t two_hand_bash; // paladin, shadowknight
 // ===== Ranger =====
-/*   80 */  uint8 innate_camouflage; // ranger, druid
-/*   81 */  uint8 ambidexterity; // all "dual-wield" users
-/*   82 */  uint8 archery_mastery; // ranger
-/*   83 */  uint8 unknown83;
-/*   84 */  uint8 endless_quiver; // ranger
+/*   80 */  uint8_t innate_camouflage; // ranger, druid
+/*   81 */  uint8_t ambidexterity; // all "dual-wield" users
+/*   82 */  uint8_t archery_mastery; // ranger
+/*   83 */  uint8_t unknown83;
+/*   84 */  uint8_t endless_quiver; // ranger
 // ===== Shadow Knight =====
-/*   85 */  uint8 unholy_steed;
-/*   86 */  uint8 improved_harm_touch;
-/*   87 */  uint8 leech_touch;
-/*   88 */  uint8 unknown88;
-/*   89 */  uint8 soul_abrasion;
+/*   85 */  uint8_t unholy_steed;
+/*   86 */  uint8_t improved_harm_touch;
+/*   87 */  uint8_t leech_touch;
+/*   88 */  uint8_t unknown88;
+/*   89 */  uint8_t soul_abrasion;
 // ===== Bard =====
-/*   90 */  uint8 instrument_mastery;
-/*   91 */  uint8 unknown91;
-/*   92 */  uint8 unknown92;
-/*   93 */  uint8 unknown93;
-/*   94 */  uint8 jam_fest;
-/*   95 */  uint8 unknown95;
-/*   96 */  uint8 unknown96;
+/*   90 */  uint8_t instrument_mastery;
+/*   91 */  uint8_t unknown91;
+/*   92 */  uint8_t unknown92;
+/*   93 */  uint8_t unknown93;
+/*   94 */  uint8_t jam_fest;
+/*   95 */  uint8_t unknown95;
+/*   96 */  uint8_t unknown96;
 // ===== Monk =====
-/*   97 */  uint8 critical_mend;
-/*   98 */  uint8 purify_body;
-/*   99 */  uint8 unknown99;
-/*  100 */  uint8 rapid_feign;
-/*  101 */  uint8 return_kick;
+/*   97 */  uint8_t critical_mend;
+/*   98 */  uint8_t purify_body;
+/*   99 */  uint8_t unknown99;
+/*  100 */  uint8_t rapid_feign;
+/*  101 */  uint8_t return_kick;
 // ===== Rogue =====
-/*  102 */  uint8 escape;
-/*  103 */  uint8 poison_mastery;
-/*  104 */  uint8 double_riposte; // all "riposte" users
-/*  105 */  uint8 unknown105;
-/*  106 */  uint8 unknown106;
-/*  107 */  uint8 purge_poison; // rogue
+/*  102 */  uint8_t escape;
+/*  103 */  uint8_t poison_mastery;
+/*  104 */  uint8_t double_riposte; // all "riposte" users
+/*  105 */  uint8_t unknown105;
+/*  106 */  uint8_t unknown106;
+/*  107 */  uint8_t purge_poison; // rogue
 // ===== Warrior =====
-/*  108 */  uint8 flurry;
-/*  109 */  uint8 rampage;
-/*  110 */  uint8 area_taunt;
-/*  111 */  uint8 warcry;
-/*  112 */  uint8 bandage_wound;
+/*  108 */  uint8_t flurry;
+/*  109 */  uint8_t rampage;
+/*  110 */  uint8_t area_taunt;
+/*  111 */  uint8_t warcry;
+/*  112 */  uint8_t bandage_wound;
 // ===== (Other) =====
-/*  113 */  uint8 spell_casting_reinforcement_mastery; // all "pure" casters
-/*  114 */  uint8 unknown114;
-/*  115 */  uint8 extended_notes; // bard
-/*  116 */  uint8 dragon_punch; // monk
-/*  117 */  uint8 strong_root; // wizard
-/*  118 */  uint8 singing_mastery; // bard
-/*  119 */  uint8 body_and_mind_rejuvenation; // paladin, ranger, bard
-/*  120 */  uint8 physical_enhancement; // paladin, ranger, bard
-/*  121 */  uint8 adv_trap_negotiation; // rogue, bard
-/*  122 */  uint8 acrobatics; // all "safe-fall" users
-/*  123 */  uint8 scribble_notes; // bard
-/*  124 */  uint8 chaotic_stab; // rogue
-/*  125 */  uint8 pet_discipline; // all pet classes except enchanter
-/*  126 */  uint8 unknown126;
-/*  127 */  uint8 unknown127;
+/*  113 */  uint8_t spell_casting_reinforcement_mastery; // all "pure" casters
+/*  114 */  uint8_t unknown114;
+/*  115 */  uint8_t extended_notes; // bard
+/*  116 */  uint8_t dragon_punch; // monk
+/*  117 */  uint8_t strong_root; // wizard
+/*  118 */  uint8_t singing_mastery; // bard
+/*  119 */  uint8_t body_and_mind_rejuvenation; // paladin, ranger, bard
+/*  120 */  uint8_t physical_enhancement; // paladin, ranger, bard
+/*  121 */  uint8_t adv_trap_negotiation; // rogue, bard
+/*  122 */  uint8_t acrobatics; // all "safe-fall" users
+/*  123 */  uint8_t scribble_notes; // bard
+/*  124 */  uint8_t chaotic_stab; // rogue
+/*  125 */  uint8_t pet_discipline; // all pet classes except enchanter
+/*  126 */  uint8_t unknown126;
+/*  127 */  uint8_t unknown127;
     } named;
   } class_skills;
 };
@@ -815,22 +816,13 @@ struct spawnStruct
 };
 
 /*
-** Zone Spawns
-** Length: 6Octets + Variable Length Spawn Data
-** OpCode: ZoneSpawnsCode
-*/
-struct zoneSpawnsStruct
-{
-/*0000*/ struct spawnStruct spawn[0];    // Variable number of spawns
-};
-
-/*
 ** Generic Door Struct
 ** Length: 52 Octets
 ** Used in: 
 **    cDoorSpawnsStruct(f721)
 **
 */
+
 struct doorStruct
 {
 /*0000*/ char     name[16];        // Filename of Door?
@@ -841,13 +833,13 @@ struct doorStruct
 /*0032*/ uint8_t  unknown0028[7]; // ***Placeholder
 /*0039*/ int8_t   auto_return;
 /*0040*/ uint8_t  initialState;
-/*0041*/ uint16_t holdstateforever;
-/*0043*/ uint8_t  unknown043;
+/*0041*/ uint8_t  unknown041[3];
 /*0044*/ uint8_t  doorId;          // door's id #
-/*0045*/ uint8_t  opentypee;       
-/*0046*/ uint8_t  unknown046; 
-/*0047*/ uint8_t  size;           // size of door
-/*0048*/ uint8_t  unknown040[8]; // ***Placeholder
+/*0045*/ uint8_t  opentype;       
+/*0046*/ uint8_t  size;           // size of door
+/*0047*/ uint8_t holdstateforever;
+/*0048*/ uint32_t zonePoint;
+/*0052*/ uint8_t  unknown052[4]; // ***Placeholder
 /*0056*/
 }; 
 
@@ -1019,7 +1011,7 @@ struct sysMsgStruct
 
 struct emoteTextStruct
 {
-/*0000*/ uint8_t  unknown0002[2];         // ***Placeholder
+/*0000*/ uint8_t  unknown0002[4];         // ***Placeholder
 /*0002*/ char     text[0];                // Emote `Text
 };
 
@@ -1033,10 +1025,10 @@ struct channelMessageStruct
 {
 /*0000*/ char     target[64];             // the target characters name
 /*0064*/ char     sender[64];             // The senders name 
-/*0128*/ uint8_t  language;               // Language
-/*0129*/ uint8_t  unknown0129[3];         // ***Placeholder
-/*0132*/ uint8_t  chanNum;                // Channel
-/*0133*/ int8_t   unknown0133[11];            // ***Placeholder
+/*0128*/ uint32_t language;               // Language
+/*0132*/ uint32_t chanNum;                // Channel
+/*0136*/ int8_t   unknown0136[4];        // ***Placeholder
+/*0140*/ uint32_t skillInLanguage;        // senders skill in language
 /*0144*/ char     message[0];             // Variable length message
 };
 
@@ -1050,7 +1042,7 @@ struct formattedMessageStruct
 {
 /*0000*/ uint8_t  unknown0002[4];         // ***Placeholder
 /*0004*/ uint32_t messageFormat;          // Indicates the message format
-/*0008*/ uint8_t  unknown0010[4];         // ***Placeholder (arguments?)
+/*0008*/ ChatColor messageColor;          // Message color
 /*0012*/ char     messages[0];            // messages(NULL delimited)
 /*0???*/ uint8_t  unknownXXXX[8];         // ***Placeholder
 };
@@ -1063,9 +1055,9 @@ struct formattedMessageStruct
 
 struct simpleMessageStruct
 {
-/*0000*/ uint32_t messageFormat;          // Indicates the message format
-/*0005*/ uint32_t color;                  // Message color
-/*0008*/ uint32_t unknown;                // ***Placeholder
+/*0000*/ uint32_t  messageFormat;          // Indicates the message format
+/*0005*/ ChatColor messageColor;                  // Message color
+/*0008*/ uint32_t  unknown;                // ***Placeholder
 /*0012*/
 };
 
@@ -1127,7 +1119,6 @@ struct groupInfoStruct
 /*0068*/ char     membername[64];         // Goup Member Name
 /*0132*/ uint8_t  unknown0130[4];        // ***Placeholder
 };
-typedef struct groupInfoStruct groupMemberStruct; // new form
 
 /*
 ** Grouping Invite
@@ -1240,17 +1231,6 @@ struct castOnStruct
 /*0032*/ uint16_t spellId;                // Spell Id
 /*0034*/ uint8_t  unknown0034[2];         // ***Placeholder
 };
-
-/*
-** New Spawn
-** Length: xxx Octets
-** OpCode: NewSpawnCode
-*/
-
-struct newSpawnStruct
-{
-/*0000*/ struct spawnStruct spawn;       // Spawn Information
-}; // 255
 
 /*
 ** Spawn Death Blow
@@ -1460,14 +1440,13 @@ struct skillIncStruct
 ** Opcode: WearChangeCode
 */
 
+// ZBTEMP: Find newItemID
 struct wearChangeStruct
 {
-/*0000*/ uint32_t spawnId;                // SpawnID
-/*0004*/ uint8_t  wearSlotId;             // Slot ID
-/*0005*/ uint8_t  unknown0005[3];            // unknown
-/*0006*/ uint16_t newItemId;              // Item ID see weaponsX.h or util.cpp
-/*0008*/ uint8_t  unknown0008[2];         // unknown
-/*0010*/ uint32_t color;                  // color
+/*0000*/ uint16_t spawnId;                // SpawnID
+/*0002*/ Color_Struct color;              // item color
+/*0006*/ uint8_t  wearSlotId;             // Slot ID
+/*0007*/ uint8_t  unknown0005[7];         // unknown
 /*0014*/
 };
 
@@ -1494,7 +1473,7 @@ struct levelUpUpdateStruct
 struct expUpdateStruct
 {
 /*0000*/ uint32_t exp;                    // experience value  x/330
-/*0004*/ uint32_t unknown0004;            // ***Place Holder
+/*0004*/ uint32_t type;                   // 0=set, 2=update
 /*0008*/
 };
 
@@ -1672,17 +1651,6 @@ struct spawnAppearanceStruct
 /*0008*/
 };
 
-/*
-** Combined Door Struct
-** Length: 4 + (count * sizeof(doorStruct)) Octets
-** OpCode: DoorSpawnCode
-*/
-
-struct DoorSpawnsStruct
-{
-/*0000*/ struct doorStruct doors[0];     // door structures
-};
-typedef struct DoorSpawnsStruct doorSpawnsStruct; // alias
 
 /*
 **               Structures that are not being currently used
@@ -1737,13 +1705,11 @@ struct newGuildInZoneStruct
 
 struct moneyUpdateStruct
 {
-/*0000*/ uint16_t unknown0002;            // ***Placeholder
-/*0004*/ uint8_t  cointype;               // Coin Type
-/*0005*/ uint8_t  unknown0007[3];         // ***Placeholder
-/*0008*/ uint32_t amount;                 // Amount
+/*0000*/ uint32_t spawnid;            // ***Placeholder
+/*0004*/ uint32_t cointype;           // Coin Type
+/*0008*/ uint32_t amount;             // Amount
 /*0012*/
 };
-typedef struct moneyUpdateStruct moneyThingStruct; 
 
 /* Memorize slot operations, mem, forget, etc */
 

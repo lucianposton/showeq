@@ -12,6 +12,7 @@
 
 #include "packetfragment.h"
 #include "packetformat.h"
+#include "diagnosticmessages.h"
 
 //----------------------------------------------------------------------
 // Macros
@@ -78,7 +79,7 @@ void EQPacketFragmentSequence::addFragment(EQPacketFormat& pf)
 #endif /* DEBUG_PACKET */
 
 #ifdef PACKET_PROCESS_FRAG_DIAG
-   printf("EQPacketFragmentSequence::addFragment(): pf.arq 0x%04x, pf.fragSeq 0x%04x, pf.fragCur 0x%04x, pf.fragTot 0x%04x\n", pf.arq(), pf.fragSeq(), pf.fragCur(), pf.fragTot());
+   seqDebug("EQPacketFragmentSequence::addFragment(): pf.arq 0x%04x, pf.fragSeq 0x%04x, pf.fragCur 0x%04x, pf.fragTot 0x%04x", pf.arq(), pf.fragSeq(), pf.fragCur(), pf.fragTot());
 #endif /* PACKET_PROCESS_FRAG_DIAG */
 
    // fragments with ASQ signify the beginning of a new series
@@ -90,9 +91,9 @@ void EQPacketFragmentSequence::addFragment(EQPacketFormat& pf)
       {
          if (!pf.fragSeq() == 0) // surpress WARNING for duplicate SEQStart/fragment start (e.g.0x3a)
          {
-            printf("EQPacketFragmentSequence::addFragment(): WARNING OpCode 0x%04x will not be processed due to loss\n",
+	   seqWarn("EQPacketFragmentSequence::addFragment(): WARNING OpCode 0x%04x will not be processed due to loss",
                    eqntohuint16(m_data));
-            printf("EQPacketFragmentSequence::addFragment(): recieved new fragment seq 0x%04x before completion of 0x%04x\n",
+	   seqWarn("EQPacketFragmentSequence::addFragment(): recieved new fragment seq 0x%04x before completion of 0x%04x",
                    pf.fragSeq(), m_seq);
          }
       }
@@ -112,7 +113,7 @@ void EQPacketFragmentSequence::addFragment(EQPacketFormat& pf)
       
 
 #ifdef PACKET_PROCESS_FRAG_DIAG
-      printf("EQPacketFragmentSequence::addFragment(): Allocating %d bytes for fragmentSeq %d, stream %d, OpCode 0x%04x\n",
+      seqDebug("EQPacketFragmentSequence::addFragment(): Allocating %d bytes for fragmentSeq %d, stream %d, OpCode 0x%04x",
              (pf.fragTot() * pf.payloadLength()), pf.fragSeq(), m_streamid, eqntohuint16(m_data));
 #endif
    }
@@ -121,9 +122,9 @@ void EQPacketFragmentSequence::addFragment(EQPacketFormat& pf)
    {
       if (pf.fragSeq() != m_seq || pf.fragCur() != m_current)
       {
-         printf("EQPacketFragmentSequence::addFragment: WARNING OpCode 0x%04x will not be processed due to loss\n",
+	seqWarn("EQPacketFragmentSequence::addFragment: WARNING OpCode 0x%04x will not be processed due to loss",
              eqntohuint16(m_data)); 
-         printf("EQPacketFragmentSequence::addFragment(): recieved Out-Of-Order fragment seq 0x%04x (0x%04x) expected 0x%04x\n",
+	seqWarn("EQPacketFragmentSequence::addFragment(): recieved Out-Of-Order fragment seq 0x%04x (0x%04x) expected 0x%04x",
               pf.fragCur(), pf.fragSeq(), m_current);
          return;
       }
@@ -158,7 +159,7 @@ void EQPacketFragmentSequence::addFragment(EQPacketFormat& pf)
    }
    else
    {
-     printf("EQPacketFragmentSequence::addFragment(): recieved fragment component (fragSeq 0x%04x, fragCur 0x%04x) before fragment start\n",
+     seqWarn("EQPacketFragmentSequence::addFragment(): recieved fragment component (fragSeq 0x%04x, fragCur 0x%04x) before fragment start",
 	    pf.fragSeq(), pf.fragCur());
 #endif
    }

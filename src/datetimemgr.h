@@ -15,6 +15,9 @@
 #ifndef _DATETIMEMGR_H_
 #define _DATETIMEMGR_H_
 
+#include <sys/types.h>
+#include <stdint.h>
+
 #include <qobject.h>
 #include <qdatetime.h>
 
@@ -32,7 +35,7 @@ class DateTimeMgr : public QObject
   void setUpdateFrequency(int seconds); // 3 seconds = 1 EQ minute
 
  public slots:
-  void timeOfDay(const timeOfDayStruct *tday);
+  void timeOfDay(const uint8_t* tday);
   void update();
 
  signals:
