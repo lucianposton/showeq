@@ -265,7 +265,7 @@ struct itemItemStruct : public itemStruct
 /*0320*/ uint8_t  unknown0296[16];  // ***Placeholder
 /*0336*/ uint32_t skillModId;       // ID of skill that item modifies
 /*0340*/ int32_t  skillModPercent;  // Percent that item modifies skill
-/*0344*/ uint8_t  unknown0315[88];
+/*0344*/ uint8_t  unknown0315[120];
 }; // 432
  
 // Book Structure (flag == 0x7379) 
@@ -1253,7 +1253,7 @@ struct actionStruct
 
 /*
 ** New Zone Code
-** Length: 574 Octets
+** Length: 578 Octets
 ** OpCode: NewZoneCode
 */
 
@@ -1264,7 +1264,7 @@ struct newZoneStruct
 /*0002*/ char    name[64];                 // Character name
 /*0066*/ char    shortName[32];            // Zone Short Name
 /*0098*/ char    longName[180];            // Zone Long Name
-/*0278*/ uint8_t unknown0278[296];         // *** Placeholder
+/*0278*/ uint8_t unknown0278[300];         // *** Placeholder
 };
 
 /*
