@@ -4,7 +4,7 @@
 # ShowEQ Distributed under GPL
 # http://seq.sourceforge.net/
 #
-# Copyright 2001 Zaphod (dohpaz@users.sourceforge.net)
+# Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net)
 #
 # Contributed to ShowEQ by Zaphod (dophaZ@users.sourceforge.net)
 # for use under the terms of the GNU General Public Licence,
@@ -26,6 +26,9 @@ $outfile = "/tmp/staticspells.h";
 # file fields
 $spellIdField = 0;
 $nameField = 1;
+
+# Target type ID
+$targetSelf = 0x06;
 
 unless (open(SPELLSEN, "<$infile")) 
 {
@@ -73,10 +76,6 @@ while($line = <SPELLSEN>)
 				 $spellId,
 				 $spellName);
 
-    $formulas{$fields[16]} .= $spellId . "," . $fields[17] . "," . $spellName . ";";
-    $records[$spellId] .= "// durationFormula=" . $fields[16] 
-	. " durationArgument=" . $fields[17];
-
     $maxSpellId = $spellId if ($spellId > $maxSpellId);
 }
 
@@ -98,15 +97,3 @@ print SPELLSH "// \n";
 printf SPELLSH "// Max SpellId: 0x%04x = %5d\n", $maxSpellId, $maxSpellId;
 print SPELLSH "// Number of Spells: ", $#records - $emptyCount, "\n";
 print SPELLSH "// Empty Entries: ", $emptyCount, "\n";
-
-print "Formula\tSpellId\tName\tArgument\n";
-
-foreach $formula (sort keys %formulas)
-{
-    @spells = split(m/;/, $formulas{$formula});
-    foreach $spell (@spells)
-    {
-	@spellInfo = split(m/,/, $spell);
-	print $formula, "\t", $spellInfo[0], "\t", $spellInfo[2], "\t", $spellInfo[1], "\n";
-    }
-}
