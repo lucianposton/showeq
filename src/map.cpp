@@ -631,14 +631,6 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   m_id_spawns = insertItem("Show Spawns",
 			   this, SLOT(toggle_spawns(int)));
   m_id_drops = insertItem("Show Drops",
-
-
-
-
-
-
-
-
 			  this, SLOT(toggle_drops(int)));
   m_id_coins = insertItem("Show Coins",
 			  this, SLOT(toggle_coins(int)));
@@ -666,6 +658,8 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   subMenu->setItemParameter(m_id_mapOptimization_Normal, tMap_NormalOptim);
   m_id_mapOptimization_Best = subMenu->insertItem("Speed");
   subMenu->setItemParameter(m_id_mapOptimization_Best, tMap_BestOptim);
+  connect(subMenu, SIGNAL(activated(int)),
+	  this, SLOT(select_mapOptimization(int)));
   m_id_mapOptimization = insertItem("Map Optimization", subMenu);
 
   m_id_gridTickColor = insertItem("Grid Tick Color...",
@@ -676,6 +670,62 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
 				    this, SLOT(select_backgroundColor(int)));
   m_id_font = insertItem("Font...",
 			 this, SLOT(select_font(int)));
+
+  subMenu = new QPopupMenu;
+  m_drawSizeSpinBox = new QSpinBox(1, 6, 1, subMenu);
+  m_drawSizeSpinBox->setValue(m_map->drawSize());
+  connect(m_drawSizeSpinBox, SIGNAL(valueChanged(int)),
+	  m_map, SLOT(setDrawSize(int)));
+  m_id_drawSize = subMenu->insertItem(m_drawSizeSpinBox);
+  m_id_drawSizeMenu = insertItem("Draw Size", subMenu);
+
+  subMenu = new QPopupMenu;
+  QHBox* tmpHBox = new QHBox(subMenu);
+  new QLabel("Distance:", tmpHBox);
+  m_fovSpinBox = new QSpinBox(20, 1200, 20, tmpHBox, "FOV");
+  m_fovSpinBox->setValue(m_map->fovDistance());
+  connect(m_fovSpinBox, SIGNAL(valueChanged(int)),
+	  m_map, SLOT(setFOVDistance(int)));
+  m_id_FOVDistance = subMenu->insertItem(tmpHBox);
+  m_id_FOVColor = subMenu->insertItem("Color...",
+				      this, SLOT(select_fovColor(int)));
+  QPopupMenu* subSubMenu = new QPopupMenu;
+  subMenu->setCheckable(true);
+  m_id_FOVNoBrush = subSubMenu->insertItem("No Background");
+  subSubMenu->setItemParameter(m_id_FOVNoBrush, Qt::NoBrush); 
+  m_id_FOVSolidPattern = subSubMenu->insertItem("Solid (Not Recommended)");
+  subSubMenu->setItemParameter(m_id_FOVSolidPattern, Qt::SolidPattern); 
+  m_id_FOVDense1Pattern = subSubMenu->insertItem("94% fill");
+  subSubMenu->setItemParameter(m_id_FOVDense1Pattern, Qt::Dense1Pattern); 
+  m_id_FOVDense2Pattern = subSubMenu->insertItem("88% fill");
+  subSubMenu->setItemParameter(m_id_FOVDense2Pattern, Qt::Dense2Pattern); 
+  m_id_FOVDense3Pattern  = subSubMenu->insertItem("63% fill");
+  subSubMenu->setItemParameter(m_id_FOVDense3Pattern, Qt::Dense3Pattern); 
+  m_id_FOVDense4Pattern = subSubMenu->insertItem("50% fill");
+  subSubMenu->setItemParameter(m_id_FOVDense4Pattern, Qt::Dense4Pattern); 
+  m_id_FOVDense5Pattern = subSubMenu->insertItem("37% fill");
+  subSubMenu->setItemParameter(m_id_FOVDense5Pattern, Qt::Dense5Pattern); 
+  m_id_FOVDense6Pattern = subSubMenu->insertItem("12% fill");
+  subSubMenu->setItemParameter(m_id_FOVDense6Pattern, Qt::Dense6Pattern); 
+  m_id_FOVDense7Pattern = subSubMenu->insertItem("6% fill");
+  subSubMenu->setItemParameter(m_id_FOVDense7Pattern, Qt::Dense7Pattern); 
+  m_id_FOVHorPattern = subSubMenu->insertItem("Horizontal lines");
+  subSubMenu->setItemParameter(m_id_FOVHorPattern, Qt::HorPattern); 
+  m_id_FOVVerPattern = subSubMenu->insertItem("Vertical lines");
+  subSubMenu->setItemParameter(m_id_FOVVerPattern, Qt::VerPattern); 
+  m_id_FOVCrossPattern = subSubMenu->insertItem("Crossing lines");
+  subSubMenu->setItemParameter(m_id_FOVCrossPattern, Qt::CrossPattern); 
+  m_id_FOVBDiagPattern = subSubMenu->insertItem("Diagonal lines (directed /)");
+  subSubMenu->setItemParameter(m_id_FOVBDiagPattern, Qt::BDiagPattern); 
+  m_id_FOVFDiagPattern = subSubMenu->insertItem("Diagonal lines (directed \\)");
+  subSubMenu->setItemParameter(m_id_FOVFDiagPattern, Qt::FDiagPattern); 
+  m_id_FOVDiagCrossPattern = subSubMenu->insertItem("Diagonal crossing lines");
+  subSubMenu->setItemParameter(m_id_FOVDiagCrossPattern, Qt::DiagCrossPattern); 
+  connect(subSubMenu, SIGNAL(activated(int)),
+	  this, SLOT(select_fovStyle(int)));
+
+  subMenu->insertItem("FOV Style", subSubMenu);
+  m_id_FOV = insertItem("Player FOV", subMenu);
 
   connect(this, SIGNAL(aboutToShow()),
 	  this, SLOT(init_Menu()));
@@ -729,6 +779,27 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_mapOptimization_Memory, (method == tMap_MemoryOptim));
   setItemChecked(m_id_mapOptimization_Normal, (method == tMap_NormalOptim));
   setItemChecked(m_id_mapOptimization_Best, (method == tMap_BestOptim));
+
+  m_drawSizeSpinBox->setValue(m_map->drawSize());
+
+  int fovStyle = m_map->fovStyle();
+  setItemChecked(m_id_FOVNoBrush, (fovStyle == Qt::NoBrush));
+  setItemChecked(m_id_FOVSolidPattern, (fovStyle == Qt::SolidPattern));
+  setItemChecked(m_id_FOVDense1Pattern, (fovStyle == Qt::Dense1Pattern));
+  setItemChecked(m_id_FOVDense2Pattern, (fovStyle == Qt::Dense2Pattern));
+  setItemChecked(m_id_FOVDense3Pattern, (fovStyle == Qt::Dense3Pattern));
+  setItemChecked(m_id_FOVDense4Pattern, (fovStyle == Qt::Dense4Pattern));
+  setItemChecked(m_id_FOVDense5Pattern, (fovStyle == Qt::Dense5Pattern));
+  setItemChecked(m_id_FOVDense6Pattern, (fovStyle == Qt::Dense6Pattern));
+  setItemChecked(m_id_FOVDense7Pattern, (fovStyle == Qt::Dense7Pattern));
+  setItemChecked(m_id_FOVHorPattern, (fovStyle == Qt::HorPattern));
+  setItemChecked(m_id_FOVVerPattern, (fovStyle == Qt::VerPattern));
+  setItemChecked(m_id_FOVCrossPattern, (fovStyle == Qt::CrossPattern));
+  setItemChecked(m_id_FOVBDiagPattern, (fovStyle == Qt::BDiagPattern));
+  setItemChecked(m_id_FOVFDiagPattern, (fovStyle == Qt::FDiagPattern));
+  setItemChecked(m_id_FOVDiagCrossPattern, (fovStyle == Qt::DiagCrossPattern));
+
+  m_fovSpinBox->setValue(m_map->fovDistance());
 }
 
 void MapMenu::select_follow(int itemId)
@@ -849,6 +920,11 @@ void MapMenu::toggle_debugInfo(int itemId)
 }
 #endif
 
+void MapMenu::select_mapOptimization(int itemId)
+{
+  m_map->setMapOptimization((MapOptimizationMethod)itemParameter(itemId));
+}
+
 void MapMenu::select_gridTickColor(int itemId)
 {
   QString name = QString("ShowEQ - ") + m_map->preferenceName() 
@@ -898,7 +974,21 @@ void MapMenu::select_font(int itemId)
     m_map->setFont(newFont);
 }
 
+void MapMenu::select_fovColor(int itemId)
+{
+  QString name = QString("ShowEQ - ") + m_map->preferenceName() 
+    + " Player FOV Color";
+  QColor newColor = QColorDialog::getColor(m_map->fovColor(),
+					   m_map, (const char*)name);
 
+  if (newColor.isValid())
+    m_map->setFOVColor(newColor);
+}
+
+void MapMenu::select_fovStyle(int itemId)
+{
+  m_map->setFOVStyle(itemParameter(itemId));
+}
 
 //----------------------------------------------------------------------
 // Map
@@ -983,8 +1073,18 @@ Map::Map(MapMgr* mapMgr,
   m_walkpathshowselect = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
 
   tmpPrefString = "DrawSize";
-  m_drawSize = pSEQPrefs->getPrefInt(tmpPrefString, prefString, 3);
+  setDrawSize(3); // in case the user gave a ridiculous size
+  setDrawSize(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 3));
 
+  tmpPrefString = "FOVDistance";
+  m_fovDistance = pSEQPrefs->getPrefInt(tmpPrefString, prefString, 200);
+
+  tmpPrefString = "FOVStyle";
+  m_fovStyle = pSEQPrefs->getPrefInt(tmpPrefString, prefString, QBrush::Dense7Pattern);
+
+  tmpPrefString = "FOVColor";
+  m_fovColor = QColor(pSEQPrefs->getPrefString(tmpPrefString, prefString, 
+					       "#505050"));
 
   // mainly for backwards compatibility
   tmpPrefString = "MapDepthFilter";
@@ -1210,6 +1310,15 @@ void Map::savePrefs(void)
 
   tmpPrefString = "DrawSize";
   pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_drawSize);
+
+  tmpPrefString = "fovDistance";
+  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_fovDistance);
+
+  tmpPrefString = "fovStyle";
+  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_fovStyle);
+
+  tmpPrefString = "fovColor";
+  pSEQPrefs->setPrefString(tmpPrefString, prefString, m_fovColor.name());
 
   tmpPrefString = "MapLineStyle";
   pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_param.mapLineStyle());
@@ -1769,9 +1878,40 @@ void Map::setDrawSize(int val)
     return;
 
   m_drawSize = val; 
+  m_drawSizeWH = val << 1; // 2 x size
+  m_marker1Size = val + 1;
+  m_marker1SizeWH = m_marker1Size << 1; // 2 x size
+  m_marker2Size = val + 2;
+  m_marker2SizeWH = m_marker2Size << 1; // 2 x size
   
   if(!showeq_params->fast_machine)
     refreshMap ();
+}
+
+void Map::setFOVDistance(int val) 
+{ 
+  if ((val < 1) || (val > 1200))
+    return;
+
+  m_fovDistance = val; 
+  
+  reAdjust();
+
+  if(!showeq_params->fast_machine)
+    refreshMap ();
+}
+
+void Map::setFOVStyle(int val)
+{
+  if ((val < Qt::NoBrush) || (val > Qt::DiagCrossPattern))
+    return;
+
+  m_fovStyle = val;
+}
+
+void Map::setFOVColor(const QColor& color)
+{
+  m_fovColor = color;
 }
 
 void Map::setShowMapLines(bool val) 
@@ -2118,6 +2258,9 @@ void Map::dumpInfo(QTextStream& out)
   out << "ShowTooltips: " << m_showTooltips << endl;
   out << "WalkPathShowSelect: " << m_walkpathshowselect << endl;
   out << "DrawSize: " << m_drawSize << endl;
+  out << "FOVDistance: " << m_fovDistance << endl;
+  out << "FOVStyle: " << m_fovStyle << endl;
+  out << "FOVColor: " << m_fovColor.name() << endl;
 
   out << endl;
   out << "[" << preferenceName() << " Parameters]" << endl;
@@ -2159,6 +2302,7 @@ void Map::dumpInfo(QTextStream& out)
       << ") z(" << m_param.player().z() << ")" << endl;
   out << "playerOffset: x(" << m_param.playerOffset().x() 
       << ") y(" << m_param.playerOffset().y() << ")" << endl;
+  out << "scaledFOVDistance: " << m_scaledFOVDistance << endl;
   out << "playerHeadRoom: " << m_param.playerHeadRoom() << endl;
   out << "playerFloorRoom: " << m_param.playerFloorRoom() << endl;
   out << "FollowMode: " << m_followMode << endl;
@@ -2259,6 +2403,11 @@ void Map::reAdjust ()
     m_param.reAdjust(NULL);
     break;
   }
+
+  // scaled FOV Distance (m_fovDistance * scale)
+  m_scaledFOVDistance = fixPtMulII(m_param.ratioIFixPt(), 
+				   MapParameters::qFormat,
+				   m_fovDistance);
 }
 
 void Map::addLocation(void)
@@ -2520,15 +2669,20 @@ void Map::paintMap (QPainter * p)
 void Map::paintPlayerBackground(MapParameters& param, QPainter& p)
 {
   /* Paint player position background */
-  p.setPen (QColor (80, 80, 80));
+  p.setPen (m_fovColor);
 
   QBrush tmpBrush;
-  tmpBrush.setColor(QColor (80, 80, 80));
-  tmpBrush.setStyle(QBrush::Dense7Pattern);
+  tmpBrush.setColor(m_fovColor);
+  tmpBrush.setStyle((Qt::BrushStyle)m_fovStyle);
   p.setBrush(tmpBrush);
-  // FOV Distance (40)
-  p.drawEllipse (m_param.playerXOffset() - 40, 
-		 m_param.playerYOffset() - 40, 80, 80);
+
+  // sizeWH is 2 * centerOffset
+  int sizeWH = m_scaledFOVDistance << 1; 
+
+  // FOV Distance 
+  p.drawEllipse (m_param.playerXOffset() - m_scaledFOVDistance, 
+		 m_param.playerYOffset() - m_scaledFOVDistance, 
+		 sizeWH, sizeWH);
 }
 
 void Map::paintPlayerView(MapParameters& param, QPainter& p)
@@ -2538,8 +2692,6 @@ void Map::paintPlayerView(MapParameters& param, QPainter& p)
   printf("Paint the player direction\n");
 #endif
   
-  p.setBrush (QColor (80, 80, 80));
-
   int const player_circle_radius = 4;
   
   int16_t playerAngle = m_player->getPlayerHeading();
@@ -2549,7 +2701,6 @@ void Map::paintPlayerView(MapParameters& param, QPainter& p)
     double const pi = 3.14159265358979323846;
     double const radians_per_circle = pi * 2;
     double const angle = (360 - playerAngle - 180) / 360.0 * radians_per_circle;
-    int const compass_length = 39 + m_param.zoom();  
     int start_offset_x = int(sin( angle - radians_per_circle * 0.25 ) * player_circle_radius);
     int start_offset_y = int(cos( angle - radians_per_circle * 0.25 ) * player_circle_radius);
     double const fov_angle = radians_per_circle * 0.25;
@@ -2557,8 +2708,8 @@ void Map::paintPlayerView(MapParameters& param, QPainter& p)
     
     p.setPen(yellow); // color
     p.drawLine( m_param.playerXOffset(), m_param.playerYOffset(),
-		  m_param.playerXOffset() + int (sin( angle ) * compass_length),
-		  m_param.playerYOffset() + int (cos( angle ) * compass_length) );
+		m_param.playerXOffset() + int (sin( angle ) * m_scaledFOVDistance),
+		m_param.playerYOffset() + int (cos( angle ) * m_scaledFOVDistance) );
     
     p.setPen(red); // color
     for ( int n = 2; n--; )
@@ -2567,8 +2718,8 @@ void Map::paintPlayerView(MapParameters& param, QPainter& p)
       int const start_y = m_param.playerYOffset() + start_offset_y;
       
       p.drawLine( start_x, start_y,
-		    start_x + int (sin( angle - fox_angle_offset ) * compass_length),
-		    start_y + int (cos( angle - fox_angle_offset ) * compass_length) );
+		  start_x + int (sin( angle - fox_angle_offset ) * m_scaledFOVDistance),
+		  start_y + int (cos( angle - fox_angle_offset ) * m_scaledFOVDistance) );
       start_offset_x *= -1;
       start_offset_y *= -1;
       fox_angle_offset *= -1;
@@ -2735,8 +2886,10 @@ void Map::paintSpawns(MapParameters& param,
   EQPoint location;
   QPen tmpPen;
   uint8_t playerLevel = m_player->getPlayerLevel();
-  uint32_t scaledFOVDistance = uint32_t(40 * m_param.ratio());
   int spawnOffsetXPos, spawnOffsetYPos;
+  uint16_t range;
+  int scaledRange;
+  int sizeWH;
   const QRect& screenBounds = m_param.screenBounds();
   bool up2date = false;
 
@@ -2807,7 +2960,7 @@ void Map::paintSpawns(MapParameters& param,
       // distance
       if (m_showSpawnNames)
       {
-	if (location.calcDist2DInt(param.player()) < scaledFOVDistance)
+	if (location.calcDist2DInt(param.player()) < m_fovDistance)
 	{
 	  spawnNameText.sprintf("%2d: %s",
 				spawn->level(),
@@ -2879,26 +3032,25 @@ void Map::paintSpawns(MapParameters& param,
 	// draw the regular spawn dot
 	p.drawEllipse (spawnOffsetXPos - m_drawSize, 
 		       spawnOffsetYPos - m_drawSize, 
-		       2 * m_drawSize, 2 * m_drawSize);
+		       m_drawSizeWH, m_drawSizeWH);
 	  
 	// retrieve the spawns aggro range
-	uint16_t range = m_mapMgr->spawnAggroRange(spawn);
+	range = m_mapMgr->spawnAggroRange(spawn);
 
 	// if aggro range is known (non-zero), draw the aggro range circle
 	if (range != 0)
 	{
-	  int xrange = abs(m_param.calcXOffsetI (location.xPos() + range) - 
-			   m_param.calcXOffsetI (location.xPos() - range));
-	  int yrange = abs(m_param.calcYOffsetI (location.yPos() + range) - 
-			   m_param.calcYOffsetI (location.yPos() - range));
+	  scaledRange = fixPtMulII(m_param.ratioIFixPt(), 
+				   MapParameters::qFormat, range);
+	  sizeWH = scaledRange << 1;
 
 	  p.setBrush(NoBrush);
 	  p.setPen(red); 
 
-	  p.drawEllipse(spawnOffsetXPos - xrange, 
-			spawnOffsetYPos - yrange, 
-			2 * xrange, 
-			2 * yrange);
+	  p.drawEllipse(spawnOffsetXPos - scaledRange, 
+			spawnOffsetYPos - scaledRange, 
+			sizeWH, 
+			sizeWH);
 	}
       }
       else if (spawn->isOtherPlayer())
@@ -2950,7 +3102,7 @@ void Map::paintSpawns(MapParameters& param,
 	  {
 	  case DTEAM_GOOD:
 	    { // Up Triangle
-	      atri.setPoint(0, spawnOffsetXPos, spawnOffsetYPos - 2 * m_drawSize);
+	      atri.setPoint(0, spawnOffsetXPos, spawnOffsetYPos - m_drawSizeWH);
 	      atri.setPoint(1, spawnOffsetXPos + m_drawSize, 
 			    spawnOffsetYPos + m_drawSize);
 	      atri.setPoint(2, spawnOffsetXPos - m_drawSize, 
@@ -2960,7 +3112,7 @@ void Map::paintSpawns(MapParameters& param,
 	    }
 	  case DTEAM_NEUTRAL:
 	    { // Right Triangle
-	      atri.setPoint(0, spawnOffsetXPos + 2 * m_drawSize, spawnOffsetYPos);
+	      atri.setPoint(0, spawnOffsetXPos + m_drawSizeWH, spawnOffsetYPos);
 	      atri.setPoint(1, spawnOffsetXPos - m_drawSize, 
 			    spawnOffsetYPos + m_drawSize);
 	      atri.setPoint(2, spawnOffsetXPos - m_drawSize, 
@@ -2971,7 +3123,7 @@ void Map::paintSpawns(MapParameters& param,
 	  case DTEAM_EVIL:
 	    { // Down Triangle
 	      atri.setPoint(0, spawnOffsetXPos, 
-			    spawnOffsetYPos + 2 * m_drawSize);
+			    spawnOffsetYPos + m_drawSizeWH);
 	      atri.setPoint(1, spawnOffsetXPos + m_drawSize, 
 			    spawnOffsetYPos - m_drawSize);
 	      atri.setPoint(2, spawnOffsetXPos - m_drawSize, 
@@ -2982,7 +3134,7 @@ void Map::paintSpawns(MapParameters& param,
 	  default:
 	    p.drawRect(spawnOffsetXPos - m_drawSize, 
 		       spawnOffsetYPos - m_drawSize, 
-		       2 * m_drawSize, 2 * m_drawSize);
+		       m_drawSizeWH, m_drawSizeWH);
 	    break;
 	  }
 	}
@@ -2994,7 +3146,7 @@ void Map::paintSpawns(MapParameters& param,
 	  {
 	  case RTEAM_HUMAN:
 	    { // Up Triangle
-	      atri.setPoint(0, spawnOffsetXPos, spawnOffsetYPos - 2 * m_drawSize);
+	      atri.setPoint(0, spawnOffsetXPos, spawnOffsetYPos - m_drawSizeWH);
 	      atri.setPoint(1, spawnOffsetXPos + m_drawSize, 
 			    spawnOffsetYPos + m_drawSize);
 	      atri.setPoint(2, spawnOffsetXPos - m_drawSize, 
@@ -3004,7 +3156,7 @@ void Map::paintSpawns(MapParameters& param,
 	    }
 	  case RTEAM_ELF:
 	    { // Right Triangle
-	      atri.setPoint(0, spawnOffsetXPos + 2 * m_drawSize, spawnOffsetYPos);
+	      atri.setPoint(0, spawnOffsetXPos + m_drawSizeWH, spawnOffsetYPos);
 	      atri.setPoint(1, spawnOffsetXPos - m_drawSize, 
 			    spawnOffsetYPos + m_drawSize);
 	      atri.setPoint(2, spawnOffsetXPos - m_drawSize, 
@@ -3015,7 +3167,7 @@ void Map::paintSpawns(MapParameters& param,
 	  case RTEAM_DARK:
 	    { // Down Triangle
 	      atri.setPoint(0, spawnOffsetXPos, 
-			    spawnOffsetYPos + 2 * m_drawSize);
+			    spawnOffsetYPos + m_drawSizeWH);
 	      atri.setPoint(1, spawnOffsetXPos + m_drawSize, 
 			    spawnOffsetYPos - m_drawSize);
 	      atri.setPoint(2, spawnOffsetXPos - m_drawSize, 
@@ -3025,7 +3177,7 @@ void Map::paintSpawns(MapParameters& param,
 	    }
 	  case RTEAM_SHORT:
 	    { // Left Triangle
-	      atri.setPoint(0, spawnOffsetXPos - 2 * m_drawSize, 
+	      atri.setPoint(0, spawnOffsetXPos - m_drawSizeWH, 
 			    spawnOffsetYPos);
 	      atri.setPoint(1, spawnOffsetXPos + m_drawSize, 
 			    spawnOffsetYPos + m_drawSize);
@@ -3037,14 +3189,14 @@ void Map::paintSpawns(MapParameters& param,
 	  default:
 	    p.drawRect(spawnOffsetXPos - m_drawSize, 
 		       spawnOffsetYPos - m_drawSize, 
-		       2 * m_drawSize, 2 * m_drawSize);
+		       m_drawSizeWH, m_drawSizeWH);
 	    break;
 	  }
 	}
 	else
 	  p.drawRect(spawnOffsetXPos - m_drawSize, 
 		     spawnOffsetYPos - m_drawSize, 
-		     2 * m_drawSize, 2 * m_drawSize);
+		     m_drawSizeWH, m_drawSizeWH);
       }
       else if (spawn->NPC() == SPAWN_NPC_CORPSE) // x for NPC corpse
       {
@@ -3081,7 +3233,7 @@ void Map::paintSpawns(MapParameters& param,
 
 	p.drawRect(spawnOffsetXPos - m_drawSize, 
 		   spawnOffsetYPos - m_drawSize, 
-		   2 * m_drawSize, 2 * m_drawSize);
+		   m_drawSizeWH, m_drawSizeWH);
 
 	// nothing more to be done to the dead, next...
 	continue;
@@ -3097,7 +3249,7 @@ void Map::paintSpawns(MapParameters& param,
 	// draw the regular spawn dot
 	p.drawEllipse (spawnOffsetXPos - m_drawSize, 
 		       spawnOffsetYPos - m_drawSize, 
-		       2 * m_drawSize, 2 * m_drawSize);
+		       m_drawSizeWH, m_drawSizeWH);
 
 	// nothing more to be done to the unknown, next...
 	continue;
@@ -3112,7 +3264,9 @@ void Map::paintSpawns(MapParameters& param,
 	  p.setPen(red);
 	  p.setBrush(NoBrush);
 	  if(m_flash)
-	    p.drawEllipse (spawnOffsetXPos - 4, spawnOffsetYPos - 4, 8, 8);
+	    p.drawEllipse (spawnOffsetXPos - m_marker1Size, 
+			   spawnOffsetYPos - m_marker1Size, 
+			   m_marker1SizeWH, m_marker1SizeWH);
 	  if(distance < 500)
 	  {
 	    if(m_flash)
@@ -3137,7 +3291,9 @@ void Map::paintSpawns(MapParameters& param,
 	  p.setPen(yellow);
 	  p.setBrush(NoBrush);
 	  if(m_flash)
-	    p.drawEllipse (spawnOffsetXPos - 4, spawnOffsetYPos - 4, 8, 8);
+	    p.drawEllipse (spawnOffsetXPos - m_marker1Size, 
+			   spawnOffsetYPos - m_marker1Size, 
+			   m_marker1SizeWH, m_marker1SizeWH);
 	  if(distance < 500)
 	  {
 	    p.drawLine (m_param.playerXOffset(), 
@@ -3150,14 +3306,18 @@ void Map::paintSpawns(MapParameters& param,
 	  p.setPen(gray);
 	  p.setBrush(NoBrush);
 	  if(m_flash)
-	    p.drawEllipse (spawnOffsetXPos - 4, spawnOffsetYPos - 4, 8, 8);
+	    p.drawEllipse (spawnOffsetXPos - m_marker1Size, 
+			   spawnOffsetYPos - m_marker1Size, 
+			   m_marker1SizeWH, m_marker1SizeWH);
 	}
 	else if (spawn->filterFlags() & FILTER_FLAG_LOCATE)
 	{
 	  p.setPen(white);
 	  p.setBrush(NoBrush);
 	  if(m_flash)
-	    p.drawEllipse (spawnOffsetXPos - 4, spawnOffsetYPos - 4, 8, 8);
+	    p.drawEllipse (spawnOffsetXPos - m_marker1Size, 
+			   spawnOffsetYPos - m_marker1Size, 
+			   m_marker1SizeWH, m_marker1SizeWH);
 	  
 	  p.drawLine(m_param.playerXOffset(), 
 		     m_param.playerYOffset(),
@@ -3167,8 +3327,9 @@ void Map::paintSpawns(MapParameters& param,
         {
 	  p.setBrush(NoBrush);
 	  p.setPen(yellow);
-	  p.drawRect(spawnOffsetXPos - 4, spawnOffsetYPos - 4, 
-		     8, 8);
+	  p.drawRect(spawnOffsetXPos - m_marker1Size, 
+		     spawnOffsetYPos - m_marker1Size, 
+		     m_marker1SizeWH, m_marker1SizeWH);
 	}
       }
 
@@ -3178,8 +3339,9 @@ void Map::paintSpawns(MapParameters& param,
       {
 	p.setBrush(NoBrush);
 	p.setPen(red);
-	p.drawRect(spawnOffsetXPos - 4,
-		   spawnOffsetYPos - 4, 8, 8);
+	p.drawRect(spawnOffsetXPos - m_marker1Size,
+		   spawnOffsetYPos - m_marker1Size, 
+		   m_marker1SizeWH, m_marker1SizeWH);
       }
 
       //--------------------------------------------------
@@ -3263,9 +3425,9 @@ void Map::paintSpawns(MapParameters& param,
 		  break;
 		}
 		p.setBrush(NoBrush);
-		p.drawRect (spawnOffsetXPos - m_drawSize - 1,
-			    spawnOffsetYPos - m_drawSize - 1, 
-			    2 * (m_drawSize + 1), 2 * (m_drawSize + 1));
+		p.drawRect (spawnOffsetXPos - m_marker2Size,
+			    spawnOffsetYPos - m_marker2Size, 
+			    m_marker2SizeWH, m_marker2SizeWH);
 		p.setBrush(SolidPattern);
 	      }
 	    }
@@ -3278,8 +3440,9 @@ void Map::paintSpawns(MapParameters& param,
 	    {
 	      p.setBrush(NoBrush);
 	      p.setPen(m_player->pickConColor(spawn->level()));
-	      p.drawEllipse (spawnOffsetXPos - 3,
-			     spawnOffsetYPos - 3, 6, 6);
+	      p.drawEllipse (spawnOffsetXPos - m_marker2Size,
+			     spawnOffsetYPos - m_marker2Size, 
+			     m_marker2SizeWH, m_marker2SizeWH);
 	      p.setBrush(SolidPattern);
 	    }
 	  }
@@ -3343,9 +3506,9 @@ void Map::paintSpawns(MapParameters& param,
 		  break;
 		}
 		p.setBrush(NoBrush);
-		p.drawRect (spawnOffsetXPos - m_drawSize - 1,
-			    spawnOffsetYPos - m_drawSize - 1, 
-			    2 * (m_drawSize + 1), 2 * (m_drawSize + 1));
+		p.drawRect (spawnOffsetXPos - m_marker2Size,
+			    spawnOffsetYPos - m_marker2Size, 
+			    m_marker2SizeWH, m_marker2SizeWH);
 		p.setBrush(SolidPattern);
 	      }
 	    }
@@ -3358,8 +3521,9 @@ void Map::paintSpawns(MapParameters& param,
 	    {
 	      p.setBrush(NoBrush);
 	      p.setPen(m_player->pickConColor(spawn->level()));
-	      p.drawEllipse (spawnOffsetXPos - 3,
-			     spawnOffsetYPos - 3, 6, 6);
+	      p.drawEllipse (spawnOffsetXPos - m_marker2Size,
+			     spawnOffsetYPos - m_marker2Size,
+			     m_marker2SizeWH, m_marker2SizeWH);
 	      p.setBrush(SolidPattern);
 	    }
 	  }

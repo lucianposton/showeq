@@ -18,12 +18,13 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
     m_packet(packet),
     m_playbackSpeed(NULL)
 {
-  QGridLayout* tmpGrid = new QGridLayout(this, 6, 8);
+  QGridLayout* tmpGrid = new QGridLayout(this, 6, 9);
   tmpGrid->addColSpacing(3, 5);
   tmpGrid->addColSpacing(6, 5);
   tmpGrid->addRowSpacing(1, 5);
   tmpGrid->addRowSpacing(3, 5);
-  tmpGrid->addRowSpacing(5, 5);
+  tmpGrid->addRowSpacing(6, 5);
+  tmpGrid->addRowSpacing(8, 5);
 
   // get preferences
   QString section = "NetStats";
@@ -36,6 +37,7 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   int col = 0;
 
   // create a widgets to display the info
+  // packet throughput
   tmpGrid->addWidget(new QLabel("Packets ", this), row, col++);
   tmpGrid->addWidget(new QLabel("Total: ", this), row, col++);
   m_packetTotal = new QLabel(this, "count");
@@ -51,10 +53,11 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   resetPacket(m_packet->packetCount());
   row++; row++; col = 0;
 
+  // network status
   tmpGrid->addWidget(new QLabel("Status ", this), row, col++);
   tmpGrid->addWidget(new QLabel("Cached: ", this), row, col++);
   QLabel* cache = new QLabel(this, "cached");
-  cache->setNum(0);
+  cache->setNum(m_packet->currentCacheSize());
   tmpGrid->addWidget(cache, row, col++);
   col++;
   tmpGrid->addWidget(new QLabel("SeqExp: ", this), row, col++);
@@ -65,8 +68,8 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   m_seqCur = new QLabel(this, "seqcur");
   tmpGrid->addWidget(m_seqCur, row, col++);
   row++; row++; col = 0;
-  seqExpect(0);
-  seqReceive(0);
+  seqExpect(m_packet->serverSeqExp());
+  m_seqCur->setText("????");
 
   // create labels to display client & server info
   tmpGrid->addWidget(new QLabel("Network ", this), row, col++);
@@ -83,6 +86,41 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   tmpGrid->addWidget(m_serverLabel, row, col++);
   clientChanged(m_packet->clientAddr());
   serverPortLatched(m_packet->serverPort());
+
+  // second row of network info
+  row++; col = 1;
+  tmpGrid->addWidget(new QLabel("Device: ", this), row, col++);
+  QLabel* tmpLabel = new QLabel(this);
+  tmpLabel->setText(showeq_params->device);
+  tmpGrid->addWidget(tmpLabel, row, col++);
+  col++;
+  tmpGrid->addWidget(new QLabel("Realtime: ", this), row, col++);
+  tmpLabel = new QLabel(this);
+  tmpLabel->setText(QString::number(showeq_params->realtime));
+  tmpGrid->addWidget(tmpLabel, row, col++);
+  col++;
+  tmpGrid->addWidget(new QLabel("MAC: ", this), row, col++);
+  tmpLabel = new QLabel(this);
+  tmpLabel->setText(showeq_params->mac_address);
+  tmpGrid->addWidget(tmpLabel, row, col++);
+  row++; row++; col = 0;
+
+  // Decode
+  tmpGrid->addWidget(new QLabel("Decode ", this), row, col++);
+  tmpGrid->addWidget(new QLabel("Broken: ", this), row, col++);
+  tmpLabel = new QLabel(this);
+  tmpLabel->setText(QString::number(showeq_params->broken_decode));
+  tmpGrid->addWidget(tmpLabel, row, col++);
+  col++;
+  tmpGrid->addWidget(new QLabel("HAVE_LIBEQ: ", this), row, col++);
+  tmpLabel = new QLabel(this);
+  tmpLabel->setText(QString::number(HAVE_LIBEQ));
+  tmpGrid->addWidget(tmpLabel, row, col++);
+  col++;
+  tmpGrid->addWidget(new QLabel("Key: ", this), row, col++);
+  m_decodeKeyLabel = new QLabel(this);
+  m_decodeKeyLabel->setText(QString::number(m_packet->decodeKey(), 16));
+  tmpGrid->addWidget(m_decodeKeyLabel, row, col++);
   row++; row++; col = 0;
 
   if (showeq_params->playbackpackets)
@@ -125,6 +163,8 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 	   this, SLOT(numPacket(int)));
   connect (m_packet, SIGNAL(resetPacket(int)),
 	   this, SLOT(resetPacket(int)));
+  connect (m_packet, SIGNAL(keyChanged(void)),
+	   this, SLOT(keyChanged(void)));
 
   if (m_playbackSpeed)
   {
@@ -251,6 +291,11 @@ void NetDiag::numPacket(int num)
      tempStr.sprintf("0.0");
 
    m_packetAvg->setText(tempStr);
+}
+
+void NetDiag::keyChanged(void)
+{
+  m_decodeKeyLabel->setText(QString::number(m_packet->decodeKey(), 16));
 }
 
 QString NetDiag::print_addr(in_addr_t  addr)

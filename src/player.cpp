@@ -1044,7 +1044,7 @@ void EQPlayer::fillConTable()
 
 void EQPlayer::savePlayerState(void)
 {
-  QFile keyFile(LOGDIR "/lastPlayer.dat");
+  QFile keyFile(showeq_params->saveRestoreBaseFilename + "Player.dat");
   if (keyFile.open(IO_WriteOnly))
   {
     QDataStream d(&keyFile);
@@ -1127,7 +1127,8 @@ void EQPlayer::savePlayerState(void)
 
 void EQPlayer::restorePlayerState(void)
 {
-  QFile keyFile(LOGDIR "/lastPlayer.dat");
+  QString fileName = showeq_params->saveRestoreBaseFilename + "Player.dat";
+  QFile keyFile(fileName);
   if (keyFile.open(IO_ReadOnly))
   {
     int i;
@@ -1139,7 +1140,8 @@ void EQPlayer::restorePlayerState(void)
     if (testVal != sizeof(m_thePlayer))
     {
       fprintf(stderr, 
-	      "Failure loading " LOGDIR "/lastPlayer.dat: Bad player size!\n");
+	      "Failure loading %s: Bad player size!\n", 
+	      (const char*)fileName);
       reset();
       clear();
       return;
@@ -1149,7 +1151,8 @@ void EQPlayer::restorePlayerState(void)
     if (testVal != MAX_KNOWN_SKILLS)
     {
       fprintf(stderr, 
-	      "Failure loading " LOGDIR "/lastPlayer.dat: Bad known skills!\n");
+	      "Failure loading %s: Bad known skills!\n", 
+	      (const char*)fileName);
       reset();
       clear();
       return;
@@ -1159,7 +1162,8 @@ void EQPlayer::restorePlayerState(void)
     if (testVal != MAX_KNOWN_LANGS)
     {
       fprintf(stderr, 
-	      "Failure loading " LOGDIR "/lastPlayer.dat: Bad known langs!\n");
+	      "Failure loading %s: Bad known langs!\n", 
+	      (const char*)fileName);
       reset();
       clear();
       return;
@@ -1245,7 +1249,8 @@ void EQPlayer::restorePlayerState(void)
   else
   {
     fprintf(stderr,
-	    "Failure loading " LOGDIR "/lastPlayer.dat: Unable to open!\n");
+	    "Failure loading %s: Unable to open!\n", 
+	    (const char*)fileName);
     reset();
     clear();
   }

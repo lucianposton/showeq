@@ -316,6 +316,7 @@ int main (int argc, char **argv)
    showeq_params->restoreDecodeKey = false;
    showeq_params->restorePlayerState = false;
    showeq_params->restoreSpawns = false;
+   showeq_params->saveRestoreBaseFilename = pSEQPrefs->getPrefString("BaseFilename", section, LOGDIR "/last");
 
    /* Parse the commandline for commandline parameters */
    while ((opt = getopt_long( argc,

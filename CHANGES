@@ -1,6 +1,24 @@
 dohpaZ (17/03/02)
 ------------------
 Modifications:
+ + Made FOV distance configurable in map units (defaults to 200 units), and
+   also made FOV color and fill pattern style be configurable
+ + Added options to the map menu to allow the configuration of the 
+   FOV parameters as well as the base spawn DrawSize
+ + Cleaned up all the code that uses FOV, and pre-calculate the scale in 
+   Map::reAdjust()
+ + Minor map optimizations (pre-calculate common draw size derivatives)
+ + Added more information to the Network Diagnostics dialog
+ + Added the ability to configure the base filename of save/restore session
+   data files.  This is useful for those running multiple instances of ShowEQ
+   at once, in which case you don't wan't all your session snapshots using
+   the same snapshot files...
+ + Added "BaseFilename" key to the [SaveState] section of the configure file,
+   and added an example to showeq.conf.dist
+
+dohpaZ (17/03/02)
+------------------
+Modifications:
  + Added the ability to save/restore the decode key, player state and/or
    the spawns to allow the recover of a session after a crash.  
  + Added [SaveState] section to showeq.conf.dist with examples of how to 

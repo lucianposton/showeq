@@ -75,7 +75,8 @@ EQDecode::EQDecode (QObject *parent = 0, const char *name = 0)
   // restore the decodeKey if the user requested it
   if (showeq_params->restoreDecodeKey)
   {
-    QFile keyFile(LOGDIR "/lastKey.dat");
+    QString fileName = showeq_params->saveRestoreBaseFilename + "Key.dat";
+    QFile keyFile(fileName);
     if (keyFile.open(IO_ReadOnly))
     {
       QDataStream d(&keyFile);
@@ -83,6 +84,9 @@ EQDecode::EQDecode (QObject *parent = 0, const char *name = 0)
 
       fprintf(stderr, "Restored KEY: 0x%08x\n", m_decodeKey);
     }
+    else
+      fprintf(stderr, "Failure loading %s: Unable to open!\n",
+	      (const char*)fileName);
   }
 #endif
 }
@@ -265,7 +269,7 @@ EQDecode::FoundKey ()
 
   if (showeq_params->saveDecodeKey)
   {
-    QFile keyFile(LOGDIR "/lastKey.dat");
+    QFile keyFile(showeq_params->saveRestoreBaseFilename + "Key.dat");
     if (keyFile.open(IO_WriteOnly))
     {
       QDataStream d(&keyFile);

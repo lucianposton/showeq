@@ -541,6 +541,9 @@ class EQPacket : public QObject
    uint16_t serverPort               (void);
    uint8_t  session_tracking_enabled (void);
    int      playbackSpeed            (void);
+   uint32_t decodeKey                (void);
+   int      currentCacheSize         (void);
+   uint16_t serverSeqExp             (void);
 
    void InitializeOpCodeMonitor (void);
    
@@ -672,7 +675,10 @@ class EQPacket : public QObject
 
    // Spell signals
    void interruptSpellCast(const badCastStruct *);
- 
+
+   // forwarded signals
+   void keyChanged(void);
+
  private:
    /* The player object, keeps track player's level, race and class.
       Will soon track all player stats. */
@@ -741,6 +747,21 @@ inline uint16_t EQPacket::serverPort(void)
 inline uint8_t EQPacket::session_tracking_enabled(void)
 {
   return m_session_tracking_enabled;
+}
+
+inline uint32_t EQPacket::decodeKey(void)
+{ 
+  return m_decode->decodeKey(); 
+}
+
+inline int EQPacket::currentCacheSize()
+{
+  return m_serverCache.size();
+}
+
+inline uint16_t EQPacket::serverSeqExp()
+{
+  return m_serverArqSeqExp;
 }
 
 //----------------------------------------------------------------------

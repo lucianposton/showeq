@@ -490,10 +490,11 @@ QObject (parent, name)
 				showeq_params->realtime, IP_ADDRESS_TYPE );
    }
 
-#if HAVE_LIBEQ
    // Create the decoder object
    m_decode = new EQDecode (this, "decode");
-#endif
+   
+   connect(m_decode, SIGNAL(keyChanged(void)),
+	   this, SIGNAL(keyChanged(void)));
 
    m_busy_decoding     = false;
    m_serverArqSeqFound = false;

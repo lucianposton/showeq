@@ -1243,7 +1243,7 @@ void SpawnShell::refilterSpawnsRuntime(itemType type)
 
 void SpawnShell::saveSpawns(void)
 {
-  QFile keyFile(LOGDIR "/lastSpawns.dat");
+  QFile keyFile(showeq_params->saveRestoreBaseFilename + "Spawns.dat");
   if (keyFile.open(IO_WriteOnly))
   {
     QDataStream d(&keyFile);
@@ -1286,7 +1286,8 @@ void SpawnShell::saveSpawns(void)
 
 void SpawnShell::restoreSpawns(void)
 {
-  QFile keyFile(LOGDIR "/lastSpawns.dat");
+  QString fileName = showeq_params->saveRestoreBaseFilename + "Spawns.dat";
+  QFile keyFile(fileName);
   if (keyFile.open(IO_ReadOnly))
   {
     size_t i;
@@ -1302,7 +1303,8 @@ void SpawnShell::restoreSpawns(void)
     if (testVal != sizeof(spawnStruct))
     {
       fprintf(stderr, 
-	      "Failure loading " LOGDIR "/lastPlayer.dat: Bad spawnStruct size!\n");
+	      "Failure loading %s: Bad spawnStruct size!\n",
+	      (const char*)fileName);
       return;
     }
 
@@ -1348,6 +1350,7 @@ void SpawnShell::restoreSpawns(void)
   else
   {
     fprintf(stderr,
-	    "Failure loading " LOGDIR "/lastSpawns.dat: Unable to open!\n");
+	    "Failure loading %s: Unable to open!\n",
+	    (const char*)fileName);
   }
 }

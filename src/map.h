@@ -207,14 +207,19 @@ class MapMenu : public QPopupMenu
 #ifdef DEBUG
   void toggle_debugInfo(int itemId);
 #endif
+  void select_mapOptimization(int itemId);
   void select_gridTickColor(int itemId);
   void select_gridLineColor(int itemId);
   void select_backgroundColor(int itemId);
   void select_font(int itemId);
-
+  void select_fovColor(int itemId);
+  void select_fovStyle(int itemId);
  protected:
   // pointer to the Map this menu controls
   Map* m_map;
+
+  QSpinBox* m_fovSpinBox;
+  QSpinBox* m_drawSizeSpinBox;
 
   int m_id_followMenu;
   int m_id_followMenu_Player;
@@ -261,6 +266,26 @@ class MapMenu : public QPopupMenu
   int m_id_gridLineColor;
   int m_id_backgroundColor;
   int m_id_font;
+  int m_id_drawSize;
+  int m_id_drawSizeMenu;
+  int m_id_FOV;
+  int m_id_FOVDistance;
+  int m_id_FOVColor;
+  int m_id_FOVNoBrush;
+  int m_id_FOVSolidPattern;
+  int m_id_FOVDense1Pattern;
+  int m_id_FOVDense2Pattern;
+  int m_id_FOVDense3Pattern;
+  int m_id_FOVDense4Pattern;
+  int m_id_FOVDense5Pattern;
+  int m_id_FOVDense6Pattern;
+  int m_id_FOVDense7Pattern;
+  int m_id_FOVHorPattern;
+  int m_id_FOVVerPattern;
+  int m_id_FOVCrossPattern;
+  int m_id_FOVBDiagPattern;
+  int m_id_FOVFDiagPattern;
+  int m_id_FOVDiagCrossPattern;
 };
 
 //----------------------------------------------------------------------
@@ -297,6 +322,9 @@ class Map :public QWidget
   FollowMode followMode() const { return m_followMode; }
   int frameRate() const { return m_frameRate; }
   int drawSize() const { return m_drawSize; }
+  uint16_t fovDistance() const { return m_fovDistance; }
+  int fovStyle() const { return m_fovStyle; }
+  const QColor& fovColor() const { return m_fovColor; }
   bool showPlayer() const { return m_showPlayer; }
   bool showPlayerBackground() const { return m_showPlayerBackground; }
   bool showPlayerView() const { return m_showPlayerView; }
@@ -384,6 +412,9 @@ class Map :public QWidget
   void setShowFiltered(bool val);
   void setFrameRate(int val);
   void setDrawSize(int val);
+  void setFOVDistance(int val);
+  void setFOVStyle(int val);
+  void setFOVColor(const QColor& color);
   void setShowMapLines(bool val);
   void setShowPlayer(bool val);
   void setShowPlayerBackground(bool val);
@@ -498,6 +529,15 @@ private:
 
    int m_frameRate;
    int m_drawSize;
+   int m_drawSizeWH; // 2 * m_drawSize
+   int m_marker1Size; // m_drawSize + 1
+   int m_marker1SizeWH; // 2 * m_marker1SizeWH
+   int m_marker2Size; // m_drawSize + 2
+   int m_marker2SizeWH; // 2 * m_marker1SizeWH
+   uint16_t m_fovDistance;
+   unsigned int m_scaledFOVDistance;
+   int m_fovStyle;
+   QColor m_fovColor;
    bool m_showMapLines;
    bool m_showMapLocations;
    bool m_showPlayer;

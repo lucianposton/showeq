@@ -60,6 +60,7 @@ class EQDecode : public QObject
   // overloaded event member for syncronization
   virtual bool event(QEvent*);
 
+  uint32_t decodeKey() { return m_decodeKey; }
  private:
   int InflatePacket(const uint8_t *pbDataIn, uint32_t cbDataInLen, 
 		    uint8_t* pbDataOut, uint32_t* pcbDataOutLen);

@@ -132,6 +132,7 @@ struct ShowEQParams
   bool           restoreDecodeKey;
   bool           restorePlayerState;
   bool           restoreSpawns;
+  QString        saveRestoreBaseFilename;
 };
  
 extern struct ShowEQParams *showeq_params;

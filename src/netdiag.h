@@ -32,6 +32,8 @@ class NetDiag : public QFrame
    void sessionTrackingChanged (uint8_t);
    void seqReceive             (int);
    void seqExpect              (int);
+   void keyChanged             (void);
+
  protected:
    QString print_addr(in_addr_t);
 
@@ -46,6 +48,7 @@ class NetDiag : public QFrame
   QLabel* m_clientLabel;
   QLabel* m_sessionLabel;
   QLabel* m_serverLabel;
+  QLabel* m_decodeKeyLabel;
 
   int  m_packetStartTime;
   int  m_initialcount;
