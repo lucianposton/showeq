@@ -1,0 +1,39 @@
+ShowEQ Version 4 Frequently Asked Questions
+
+FIXME: table of contents :)
+
+
+1) Hit points always say 65536, 0, 100, etc, what is wrong
+
+ShowEQ does not recieve hit point numbers from the client as it once did.  
+We now only recieve a percentage of hit points, and only when you are close
+to the mob.  Before you get close enough the the mob, HP will reflect 65536
+or 0, which tells you you need to get closer.
+
+
+2) Why wont ShowEQ show me the loot my mob will drop
+
+Loot is not sent to your client until after you right click on its corpse.
+There is no guaranteed way of determining loot.  However, if your mob will
+carry the item he drops, you can narrow the possiblity by checking the type
+of model armor/weapons he carries, although this may not reflect at all on
+what is actually dropped.
+
+
+3) My faction is broken!  It used to tell me my faction numbers when i 
+   conned someone, now i get a number like 4 or 1.  
+
+Faction, just like HP, is sent in a representative value, rather than real
+value.  You are now only sent a number that reflects your faction status. 
+ie, whether the client should print "scowls", "threatening", "dubious",
+"indifferent", "ally", etc.  No more counting how many more orcs to kill
+to get that kelethin faction up.
+
+
+4) What happened to experience?
+
+Just like HP and faction, we no longer are sent the actual value.  We are 
+sent a number between 0 and 330 that reflects directly on how the client
+should draw the experience bar.  We do however know what mob you killed
+and experience formulas, so what you see in the experience window now will
+be close estimates of the real exp you have.  

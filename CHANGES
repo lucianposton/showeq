@@ -1,3 +1,19 @@
+casey (03/01/02)
+---------------------
+
+ + date before month dating messes with my head :)
+
+Additions
+ + FAQ
+   - Frequently asked questions, its short, only 4 questions/answers that
+     apply to runtime issues.  If people take the time to read it before 
+     posting in the forums we can add build time issues and anything else
+     that may be helpful to people
+ + configure.in
+   - changed the libEQ search, looks for InitializeLibEQ, and if not found,
+     the error message has been modified to suggest the lib is either not
+     found or out of date.
+
 fee (03/01/02)
 ---------------------
 Mods:
