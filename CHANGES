@@ -1,3 +1,12 @@
+ratt 15 Feb 03
+-----------------------
+
++ Applied mverns patch to fix SEQ temporarily. Will break next patch,
+	use it in good health in the mean time.
++ Bumped revision to 4.3.6 for tracking purposes.
+
+Thanks Mvern!
+
 casey 01/17/2003
 -----------------------
   + applied quackrabbits patch #669753, fixes to some packet structs.
