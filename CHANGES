@@ -1,3 +1,13 @@
+dohpaZ (01/01/02)
+---------------------
+Happy New Year
+
+Modifications:
+ + Made the map check check that the followed player/spawn is visible more 
+   often.
+ + Updated INSTALL to warn people about using Qt 3.x.
+ + Applied patch #498257 "fix --with-qt-dir" from njk (yendor).
+
 dohpaZ (31/12/01)
 ---------------------
 Modifications:

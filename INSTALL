@@ -21,8 +21,8 @@ Below is a list of packages you will need in order to compile ShowEQ:
    Name:      Minimum:  Suggested:
    -----------------------------------
    *** 3rd party libraries ***
-   qt         2.3.2     (Must be compiled with -thread)
-   qt-devel   2.3.2     (Must be compiled with -thread)
+   qt         2.3.2     (Must be compiled with -thread) (don't use Qt 3.x yet!)
+   qt-devel   2.3.2     (Must be compiled with -thread) (don't use Qt 3.x yet!)
    libpcap    0.62
    gdbm       1.8.0
 
@@ -41,6 +41,8 @@ Below is a list of packages you will need in order to compile ShowEQ:
    -----------------------------------
    
 NOTE: Higher versions of these libraries should work fine...
+NOTE: Except for Qt 3.0.x, which currently has issues with ShowEQ.  Unless 
+you are looking to debug them, avoid it.
 
 
 INSTALL PROCESS:

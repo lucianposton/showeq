@@ -547,6 +547,9 @@ qt_incdirs=" $QTDIR/include                     \
              $x_includes			\
 	     $qt_incdirs"
 
+[[ "$ac_qt_includes" != "NO" ]]   &&   \
+qt_incdirs="$ac_qt_includes $qt_incdirs"
+
 qt_version_source="qglobal.h"
 
 

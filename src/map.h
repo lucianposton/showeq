@@ -341,6 +341,7 @@ class Map :public QWidget
   
   void selectSpawn(const Item* item);
   void delItem(const Item* item);
+  void changeItem(const Item* item, uint32_t changeType);
   void clearItems(void);
   
   void mapLoaded(void);

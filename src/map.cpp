@@ -1127,6 +1127,8 @@ Map::Map(MapMgr* mapMgr,
 	  this, SLOT(delItem(const Item*)));
   connect(m_spawnShell, SIGNAL(clearItems()),
 	  this, SLOT(clearItems()));
+  connect (m_spawnShell, SIGNAL(changeItem(const Item*, uint32_t)),
+	   this, SLOT(changeItem(const Item*, uint32_t)));
 
   //  if (m_mapMgr->mapData().mapLoaded() || showeq_params->fast_machine)
     m_timer->start(1000/m_frameRate, false);
@@ -2388,6 +2390,29 @@ void Map::paintMap (QPainter * p)
     // parameters player position to it.
     player->approximatePosition(m_animate, drawTime, playerPos);
     m_param.setPlayer(playerPos);
+
+    // make sure the player stays visible
+    if ((m_param.zoom() > 1) &&
+	((m_followMode == tFollowPlayer) &&
+	 (!inRect(m_param.screenBounds(), 
+		  playerPos.xPos(), playerPos.yPos()))))
+	  reAdjust();
+  }
+
+  // if following a spawn, and there is a spawn, make sure it's visible.
+  if ((m_followMode == tFollowSpawn) &&
+      (m_param.zoom() > 1) &&
+      (m_selectedItem != NULL) && 
+      (m_selectedItem->type() == tSpawn))
+  {
+    EQPoint location;
+    
+    ((const Spawn*)m_selectedItem)->approximatePosition(m_animate, 
+							drawTime, 
+							location);
+    
+    if (!inRect(m_param.screenBounds(), playerPos.xPos(), playerPos.yPos()))
+      reAdjust();
   }
 
   // retrieve the screen bounds
@@ -3550,6 +3575,32 @@ void Map::clearItems()
 
   // refresh the map
   refreshMap();
+}
+
+
+void Map::changeItem(const Item* item, uint32_t changeType)
+{
+  if (item == NULL)
+    return;
+
+  // only need to deal with position changes
+  if (changeType & tSpawnChangedPosition)
+  {
+    if (m_followMode == tFollowSpawn) 
+    {
+      // follow mode is follow spawn, check if this is the selected spawn
+      // and if so, reAdjust around it's position.
+      if (item == m_selectedItem)
+	reAdjust();
+    }
+    else if (m_followMode == tFollowPlayer)
+    {
+      // follow mode is follow player, check if this is the player spawn
+      // and if so, reAdjust around it's position.
+      if (item == (const Item*)m_spawnShell->playerSpawn())
+	reAdjust();
+    }
+  }
 }
 
 const Item* Map::closestSpawnToPoint(const QPoint& pt, 
