@@ -156,12 +156,13 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
   const char* player_classes[] = {"Warrior", "Cleric", "Paladin", "Ranger",
 				  "Shadow Knight", "Druid", "Monk", "Bard",
 				  "Rogue", "Shaman", "Necromancer", "Wizard",
-				  "Magician", "Enchanter", "Beastlord"
+				  "Magician", "Enchanter", "Beastlord",
+				  "Berserker"
   };
   const char* player_races[] = {"Human", "Barbarian", "Erudite", "Wood elf",
 				"High Elf", "Dark Elf", "Half Elf", "Dwarf",
 				"Troll", "Ogre", "Halfling", "Gnome", "Iksar",
-				"Vah Shir"
+				"Vah Shir", "Froglok"
   };
 
    // set the applications default font
@@ -1147,6 +1148,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
           m_charRaceMenu->setItemParameter(char_RaceID[i],128);
        else if(i == 13)
           m_charRaceMenu->setItemParameter(char_RaceID[i],130);
+       else if(i == 14)
+          m_charRaceMenu->setItemParameter(char_RaceID[i],330);
 
        if(m_charRaceMenu->itemParameter(char_RaceID[i]) == m_player->defaultRace())
           m_charRaceMenu->setItemChecked(char_RaceID[i], true);

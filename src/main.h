@@ -21,7 +21,7 @@ extern class XMLPreferences *pSEQPrefs;
 
 class EQItemDB;
 
-#include "../conf.h"
+#include "config.h"
 
 //----------------------------------------------------------------------
 // bogus structure that should die soon

@@ -12,7 +12,7 @@
 
 #include <qobject.h>
 
-#include "conf.h"
+#include "config.h"
 #include "everquest.h"
 #ifdef USE_DB3
 #include "db3conv.h"

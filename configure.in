@@ -1,11 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl $Id$ $Name$
 
-AC_PREREQ(2.54)
+AC_PREREQ(2.53)
 AC_INIT(src/main.cpp)
 AC_CANONICAL_SYSTEM
-AM_CONFIG_HEADER(conf.h)
-AM_INIT_AUTOMAKE(showeq, 5.0.0.14)
+AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(showeq, 5.0.0.15)
 AM_MAINTAINER_MODE
 
 dnl Use CCd/CXXd rather than CC/CXX otherwise it cache's the value
@@ -535,5 +535,5 @@ case $target_os in
 esac
 ])
 
-AC_OUTPUT([Makefile src/Makefile maps/Makefile conf/Makefile])
+AC_OUTPUT([Makefile src/Makefile conf/Makefile])
 SUCCESS

@@ -18,7 +18,7 @@
 
 #include <qfileinfo.h>
 
-#include "conf.h"
+#include "config.h"
 #include "util.h"
 #include "gdbmconv.h"
 #include "itemdb.h"

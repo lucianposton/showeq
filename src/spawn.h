@@ -426,11 +426,12 @@ class Drop : public Item
 // Item safe casts inlines
 inline const Spawn* spawnType(const Item* item)
 {
-  // if this is an item of spawn type, return the pointer to Spawn
-  if (item->type() == tSpawn)
-    return (const Spawn*)item;
-  else
+  // if this is an item of spawn type, return the pointer to Spawn, 
+  // return otherwise NULL
+  if (!item || (item->type() == tSpawn))
     return NULL; // otherwise NULL
+  else
+    return (const Spawn*)item;
 }
 
 inline Spawn* spawnType(Item* item)

@@ -124,7 +124,7 @@ class EQPacketFormatRaw
   uint8_t asqHigh() const { return m_data[10 + skip()]; }
   uint8_t asqLow() const { return m_data[11 + skip()]; }
   uint32_t crc32(uint16_t len) const 
-    { return eqntohuint32(&m_data[len - 2 - 4]); }
+    {   return (len >= 6) ? eqntohuint32(&m_data[len - 2 - 4]) : 0xDEADBEEF; }
 
   uint8_t* payload()
   {
@@ -249,13 +249,15 @@ class EQPacketFormat
   uint8_t asqLow() const { return m_postSkipData[11]; }
   uint32_t crc32() const
   { 
-    return eqntohuint32(&((uint8_t*)m_packet)[m_length - 4]);
+    // return CRC in the appropriate endianess or DEADBEEF if invalid
+    return (m_length >= 4) ? eqntohuint32(&((uint8_t*)m_packet)[m_length - 4]) : 0xDEADBEEF;
   }
   uint32_t calcCRC32() const
   {
     // calculate the CRC on the packet data, up to but not including the
-    // CRC32 stored at the end.
-    return ::calcCRC32((uint8_t*)m_packet, m_length - 4);
+    // CRC32 stored at the end or return different invalid packet value
+    // then crc32() above.
+    return (m_length >= 4) ? ::calcCRC32((uint8_t*)m_packet, m_length - 4) : 0xFEEDDEAD;
   }
 
   bool isValid() const { return m_isValid; }

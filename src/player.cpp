@@ -1116,17 +1116,12 @@ void Player::fillConTable()
     greenRange = -20;
     cyanRange = -15;
   }
-  else if (level() < 66)
-  { //57 - 65
+  else if (level() < 71)
+  { //57 - 70
     greenRange = -21;
     cyanRange = -16;
   }
-  else if (level() < 71)
-  { // 66 - 70
-    greenRange = -22;
-    cyanRange = -17;
-  }
-    
+
   uint8_t spawnLevel = 1; 
   uint8_t scale;
 

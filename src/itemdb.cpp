@@ -907,6 +907,7 @@ bool EQItemDB::SetEnabledDBTypes(int dbTypes)
   return true;
 }
 
+#if 0 // ZBTEMP
 static bool checkDestinationFile(const QString pfx, const QString fileName)
 {
  // Get information about the file, if there is one
@@ -959,6 +960,7 @@ static bool checkDestinationFile(const QString pfx, const QString fileName)
 
   return true;
 }
+#endif // ZBTEMP
 
 bool EQItemDB::Upgrade()
 {

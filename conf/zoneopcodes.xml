@@ -523,6 +523,7 @@
     <opcode id="01e7" name="OP_BazaarSearch" updated="05/26/04">
         <payload dir="client" typename="bazaarSearchQueryStruct" sizechecktype="none"/>
         <payload dir="server" typename="bazaarSearchResponseStruct" sizechecktype="modulus"/>
+        <payload dir="server" typename="utf8" sizechecktype="none"/>
         <comment>Bazaar search tool</comment>
     </opcode>
     <opcode id="01e8" name="OP_Trader" updated="05/26/04">

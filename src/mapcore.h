@@ -36,6 +36,7 @@
 #include <qpointarray.h>
 
 #include "point.h"
+#include "pointarray.h"
 #include "fixpt.h"
 
 ///////////////////////////////////////////

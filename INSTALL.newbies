@@ -1,26 +1,28 @@
 Document Version $Revision$ $Name$
 Last Updated: $Date$
 
-
 Following this file does not exempt you from reading and understanding the
 regular INSTALL file.  This should give you the knowledge you need to
 understand that file if you are new to linux and the development process.
 
-This does not cover the details of the RedHat 7.2 installation itself.
+This does not cover the details of the Fedora Core 2 installation itself.
 RedHat has lots of helpful advice on their web site, and USENET
 newsgroups are full of hints as well.
 
-For details on RedHat/Linux installation try:
+For details on Fedora/Linux installation try:
 
-http://www.redhat.com
-http://www.debian.com
+http://fedora.redhat.com
+http://www.mandrakelinux.com
+http://www.suse.com
 http://www.linuxnewbie.org
 http://www.linuxcentral.org
 http://www.linuxnews.org
+http://www.debian.com
+http://www.gentoo.org
 
 
 ------------------
-Redhat 7.2 install
+Fedora Core 2 install
 ------------------
 
 Important things to know:
@@ -30,14 +32,11 @@ Important things to know:
 Index:
 
 1.  Installation
-1.1 Downloading Red Hat 7.2
-1.2 Packet Selection
-1.3 Downloading qt-3.2.3
-1.4 Editting linux-g++-shared
-1.5 NOTE TO USERS WITH A HIGHER VERSION OF gcc
-1.6 Compiling QT
-1.7 Downloading latest version of ShowEQ
-1.8 Compiling ShowEQ
+1.1 Downloading Fedora Core 2
+1.2 Package Selection
+1.3 Downloading latest version of ShowEQ
+1.4 Compiling ShowEQ
+1.5 Installing the ShowEQ Maps
 
 2.  Running ShowEQ
 2.1 Start X Windows Environment
@@ -45,12 +44,10 @@ Index:
 2.3 Starting ShowEQ
 
 3.  Updating
-3.1 Updating ShowEQ from cvs
-3.2 Zone Specific Filter Files
+3.1 Zone Specific Filter Files
 
 4.  Usefull Information
 4.1 Getting Help
-4.2 Saving Space
 
 5.  Version History of this document
 
@@ -61,8 +58,8 @@ Index:
 
 1. Installation: 
 
-1.1 Downloading Red Hat 7.2
-    Download or buy RedHat 7.2, start the installation and choose what
+1.1 Downloading Fedora Core 2
+    Download Fedora Core 2, start the installation and choose what
     ever options you want, paying attention to a few small key steps
     outlined below. We will try and get all of the required rpms installed
     at installation to avoid more work later. During install, I always
@@ -75,7 +72,7 @@ Index:
 
 
 
-1.2 Packet Selection
+1.2 Package Selection
     The next important step is the package selection. you need to choose
     "select individual packages" and i personally choose "software
     development" and "Kernel development" in hopes that i have to pick
@@ -83,34 +80,35 @@ Index:
     need (some might already be selected). in "flat view" they are
     easier to find. they may not be required, but i was able to compile
     without installing any additional rpms when these were installed.
-    This should be the name as they appear in the redhat 7.2 install. 
+    This should be the name as they appear in the Fedora Core 2 install. 
 
 
-XFree86-devel 
-XFree86-libs 
-autoconf 
-automake 
-gcc3 
-gcc3-c++ 
-libpcap 
-libstdc++3 
-libstdc++3-devel 
+binutils
+gcc
+gcc-c++ 
 libgcc 
+libstdc++ 
+libstdc++-devel 
+libpcap 
 zlib 
 zlib-devel 
 gd 
 gd-devel 
 gdbm 
 gdbm-devel 
-pine **for pico 
-kernel-headers 
+glibc-kernheaders
 glibc-devel 
-cvs 
+xorg-x11-libs
+xorg-x11-libs-data
+xorg-x11-devel
+cvs
 patch 
 make 
 m4 
 libtool 
 libtool-libs 
+autoconf
+automake
 binutils 
 libpng 
 libpng-devel 
@@ -119,135 +117,41 @@ libjpeg-devel
 libmng 
 libmng-devel 
 freetype 
+tar
+bzip2
+wget
 
-
-Once Red Hat 7.2 is installed, you login as root with the password you
+Once Fedora Core 2 is installed, you login as root with the password you
 entered during the install. You will notice the command prompt: "[]#"
 
+1.3 Downloading latest version of ShowEQ
+    Now we need to get the latest version of showeq from the. this step
+    is pretty easy. I am going to assume we are downloading to /seq.
+    Download the latest '.tar.bz2' files from the ShowEQ and ShowEQ Maps
+    package from the ShowEQ Project's File List located at:
+    	http://sourceforge.net/project/showfiles.php?group_id=10131 
+    the '.tar.bz2' files will have names of 'showeq-<version>.tar.bz2' and
+    'showeq-maps-<version>.tar.bz2' where <version> is the number for the 
+    latest release.
+
+1.4 Compiling ShowEQ
+    Configuring and compiling ShowEQ 5:
+# cd /seq
+# tar -xjvf showeq-maps-<version>.tar.bz2
+# cd /seq/showeq-<version>
+# ./configure 
+# make 
+# make install 
 
 
-1.3 Downloading qt-3.2.3
-    Download qt-3.2.3 at ftp.trolltech.com and extract it to it's own
-    directory (and rename the directory).
-
-Code: 
-
-[]# cd /usr/lib/ 
-[]# wget --passive ftp ftp://ftp.trolltech.com/qt/source/qt-x11-free-3.2.3.tar.gz 
-[]# tar zxvf qt-x11-free-3.2.3.tar.gz 
-[]# mv qt-x11-free-3.2.3 qt-3.2.3
+1.5 Installing the ShowEQ Maps
+    Configure and install ShowEQ Maps:
+# cd /seq
+# tar -xjvf showeq-maps-<version>.tar.bz2
+# cd /seq/showeq-maps-<version>.tar.bz2
+# ./configure
+# make install
  
-
-
-1.4 Editting linux-g++-shared
-    edit the file "mkspecs/linux-g++/qmake.conf and change all
-    references to "gcc" to "gcc3" as well as "g++" to "g++3"
-    (lines 12, 27, 47, and 48). save your changes (ctrl-o, ctrl-x) 
-
-Code: 
-
-[]# pico -w /usr/lib/qt-3.2.3/mkspecs/linux-g++/qmake.conf
-
-
-
-1.5 NOTE TO USERS WITH A HIGHER VERSION OF gcc
-
-    This document assumes you have gcc3 and g++3 executable on your system
-    (as included in Red Hat 7.2). Depending on the distro (in other words:
-    anything other then Red Hat 7.2), which RPMs you used and the phase of
-    the moon, you may only have gcc<specified-version-number> or
-    g++<specified-version-number> executables.
-
-    Change everywhere in this document where it says gcc3 to gcc<version>
-    and g++3 to g++<version>
-
-    To see the version numbers for your installed compiler, please follow
-    the next steps:
-
-- Open a console and type "gcc" then press the <TAB> key once or twice.
-This will attempt to "auto complete" what you are typing. Pressing it
-twice should list all the options you have.
-
-Result:
-
-[]# gcc
-gcc  gcc-3.1
-[]#
-
-Do NOT use plain gcc, you need at least gcc3 or a higher version. In this
-example you'd use "gcc-3.1" and "g++-3.1" instead of the mentioned "gcc3"
-and "g++3"
-
-If you do not see any other versions of gcc then plain "gcc"on your
-system, then you did not install all specified packages as mentioned
-in step 1.2
-
-
-
-1.6 Compiling QT
-    "export QTDIR" and the "MOC" environmental and configure and compile
-	qt-3.2.3 with the -thread option. Optionally you can use "gmake -j2"
-	to possibly speed up compile. If you have 2 cpus then you can even
-	use use "gmake -j3"
- 
-** this compile will take a LONG time, possibly as few as 1 hour and as
-many as 6 depending on cpu speed. **
-
-Code: 
-
-[]# cd /usr/lib/qt-3.2.3
-[]# export QTDIR=/usr/lib/qt-3.2.3
-[]# export PATH=$QTDIR/bin:$PATH
-[]# export MANPATH=$QTDIR/man:$MANPATH
-[]# export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-[]# ./configure -thread 
-[]# gmake 
-[]# gmake install
- 
-
-You might find that adding the line "/usr/lib/qt-3.2.3/lib" to the file
-"/etc/ld.so.conf" then running "ldconfig" will help you. 
-
-Code: 
-
-[]# echo "/usr/lib/qt-3.2.3/lib" >> /etc/ld.so.conf 
-[]# ldconfig 
-
- 
-
-1.7 Downloading latest version of ShowEQ
-    now we need to get the latest version of showeq from cvs. this step
-    is pretty easy. Some people remove or copy their ENTIRE source tree
-    before re-compiling, but that's not realy necessary, so we leave
-    that upto you. I am going to assume we are downloading in /seq
-    and that showeq will end up in /seq/showeq. 
-
-Code: 
-
-[]# cd /seq 
-[]# cvs -d:pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq login 
-[]# cvs -z3 -d:pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq co showeq 
-[]# cd /seq/showeq 
-[]# cvs update -P 
-[]# cvs -d :pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq logout 
- 
-
-
-1.8 Compiling ShowEQ
-    configuring and compiling showeq v4.x
-
-Code: 
-
-[]# cd /seq/showeq/ 
-[]# export CC=gcc3
-[]# export CXX=g++3
-[]# export QTDIR=/usr/lib/qt-3.2.3 
-[]# make -f Makefile.dist 
-[]# ./configure 
-[]# make 
-[]# make install 
- 
-
 --------------
 
 2. Running ShowEQ 
@@ -266,8 +170,6 @@ Enter a password and re-enter the password to confirm
 
 Enter your accountname you just made and supply the password
 
-
-
 2.1 Start X Windows Environment
     running it! start up X.
 
@@ -282,10 +184,7 @@ Code:
 
 <enter your root password>
 
-
-
 2.3 Starting ShowEQ
-[]# export QTDIR=/usr/lib/qt-3.2.3 
 []# cd /usr/local/bin
 []# ./showeq eth0 --ip-address=10.0.0.10 
 
@@ -298,36 +197,12 @@ with the ip of your computer that is/will be playing everquest. if
 your showeq box is also your gateway, you might want to use "eth1"
 instead of "eth0". 
 
-
-
 --------------
 
 3. Updating
 
-3.1 Updating ShowEQ from cvs
-    There's an update out... but you don't want
-    to download the whole thing again? Try this. If it gets a couple
-    changes, read the CHANGES file and see whats up. Then compile it
-    if you want. 
 
-Code: 
-
-[]# cd /seq/showeq 
-[]# make distclean 
-[]# cvs -d:pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq login 
-[]# cvs -z3 update 
-[]# cvs -d:pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq logout 
-[]# export CC=gcc3
-[]# export CXX=g++3
-[]# export QTDIR=/usr/lib/qt-3.2.3 
-[]# make -f Makefile.dist
-[]# ./configure
-[]# make
-[]# make install 
-
-
-
-3.2 Zone Specific Filter Files: 
+3.1 Zone Specific Filter Files: 
     Is your filters.conf file getting really big? Taking 20min to
     parse the zone you just got into? You can get BlueAdept's zone
     specific filter files to help you out with that.
@@ -340,8 +215,6 @@ Code:
 
 There is no need to recompile ShowEQ after you downloaded a new set
 of filters.
-
-
 
 --------------
 
@@ -356,12 +229,6 @@ is custom on a board like that. This will prevent you from being
 dissappointed and should clarify a few things you might encounter.
 http://www.smoothwall.org/download/pdf/docs/0.9.9/doc.faq.pdf
 
-
-
-4.2 Saving Space
-    Is your qt-3.2.3 directory pretty big? want to reclaim some space?
-    delete the "tutorial" and "examples" directory! 
-
 Code: 
 
 []# rm -Rfv /usr/lib/qt-3.2.3/examples/ 
@@ -371,6 +238,10 @@ Code:
 --------------
 
 5. Version History of this document:
+
+Version 5.0.0.15
+- moved to Fedora Core 2, removed references to Qt, CVS, and Makefile.dist.
+  Still needs LOTS of work.
 
 Version 5.0.0.1
 - changed all references from qt-3.0.5 to qt-3.2.3

@@ -57,7 +57,7 @@ void BazaarLog::bazaarSearch(const uint8_t* data, size_t len, uint8_t dir)
 	merchant_name = merchant->name();
       QString csv;
       csv.sprintf("1^%d^%d^%d^%s^%s",
-		  time(NULL),resp.price,resp.count,
+		  int(time(NULL)),resp.price,resp.count,
 		  merchant_name, name);
       m_out << csv << endl;
     }

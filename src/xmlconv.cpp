@@ -12,10 +12,10 @@
  *
  */
 
-#include "xmlconv.h"
-
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
+
+#include "xmlconv.h"
 
 #include <qcolor.h>
 #include <qpen.h>

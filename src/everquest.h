@@ -19,7 +19,7 @@
 #ifndef EQSTRUCT_H
 #define EQSTRUCT_H
 
-#include "../conf.h"
+#include "config.h"
 
 #ifdef __FreeBSD__
 #include <sys/types.h>
@@ -135,8 +135,8 @@
 #define COMBAT_RIPOSTE					-3
 #define COMBAT_DODGE					-4
 
-#define PLAYER_CLASSES     15
-#define PLAYER_RACES       14
+#define PLAYER_CLASSES     16
+#define PLAYER_RACES       15
 
 /*
 ** Item Packet Type

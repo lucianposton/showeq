@@ -44,8 +44,9 @@ static int seqMessage(MessageType type, const char* format, va_list ap)
 int seqDebug(const char* format, ...)
 {
   va_list ap;
+  int ret;
   va_start(ap, format);
-  int ret = seqMessage(MT_Debug, format, ap);
+  ret = seqMessage(MT_Debug, format, ap);
   va_end(ap);
   return ret;
 }

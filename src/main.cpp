@@ -40,7 +40,7 @@
 #include "main.h"
 #include "packetcommon.h"
 #include "xmlpreferences.h"      // prefrence file class
-#include "conf.h"              // autoconf/configure definitions
+#include "config.h"              // autoconf/configure definitions
 #include "itemdb.h"
 #include "datalocationmgr.h"
 
@@ -433,9 +433,9 @@ int main (int argc, char **argv)
          {
             temp_int = atoi(optarg);
             
-            if (temp_int < 1 || temp_int > 60)
+            if (temp_int < 1 || temp_int > 70)
             {
-               printf ("Invalid default level.  Valid range is 1 - 60.\n");
+               printf ("Invalid default level.  Valid range is 1 - 70.\n");
                exit(0);
             }
 
@@ -453,7 +453,8 @@ int main (int argc, char **argv)
             if ((temp_int < 1 || temp_int > 12) && 
 		(temp_int != 128) &&
 		(temp_int != 130) &&
-		(temp_int != 26))
+		(temp_int != 26) &&
+		(temp_int != 330))
             {
                printf ("Invalid default race, please use showeq -h to list valid race options.\n");
                exit(0);
@@ -471,7 +472,7 @@ int main (int argc, char **argv)
          {
             temp_int = atoi(optarg);
             
-            if (temp_int < 1 || temp_int > 15)
+            if (temp_int < 1 || temp_int > 16)
             {
                printf ("Invalid default class, please use showeq -h to list valid class options.\n");
                exit(0);
@@ -811,19 +812,21 @@ void displayOptions(const char* progName)
   printf ("      --itemdb-enable                   Enable use of the item DB.\n");
   printf ("  -W, --dont-autodetectcharsettings     Don't auto-detect your character's\n");
   printf ("                                        Level/Race/Class.\n");
-  printf ("  -X, --default-level=##                Default player level. (1-60)\n");
+  printf ("  -X, --default-level=##                Default player level. (1-70)\n");
   printf ("  -Y, --default-race=##                 Default player race:");
   printf ("\n\t                                    HUM 1,  BAR 2,  ERU 3");
   printf ("\n\t                                    ELF 4,  HIE 5,  DEF 6");
   printf ("\n\t                                    HEF 7,  DWF 8,  TRL 9");
   printf ("\n\t                                    OGR 10, HFL 11, GNM 12");
-  printf ("\n\t                                    GNM 12, IKS 128\n");
+  printf ("\n\t                                    GNM 12, IKS 128,VAH 130");
+  printf ("\n\t                                    FRG 330\n");
   printf ("  -Z, --default-class=##                Default player class:");
   printf ("\n\t                                    WAR 1,  CLR 2,  PAL 3");
   printf ("\n\t                                    RNG 4,  SHD 5,  DRU 6");
   printf ("\n\t                                    MNK 7,  BRD 8,  ROG 9");
   printf ("\n\t                                    SHM 10, NEC 11, WIZ 12");
-  printf ("\n\t                                    MAG 13, ENC 14\n");
+  printf ("\n\t                                    MAG 13, ENC 14, BST 15");
+  printf ("\n\t                                    BER 16\n");
   
   printf ("                                                                   \n");
   printf ("                                                                   \n");

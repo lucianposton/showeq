@@ -151,7 +151,8 @@ void GuildShell::guildMemberList(const uint8_t* data, size_t len)
   QString player = gml.readText();
 
   // read the player count from the stream
-  uint32_t count = gml.readUInt32();
+  uint32_t count;
+  count = gml.readUInt32();
 
 #ifdef GUILDSHELL_DIAG
   seqDebug("Guild has %d members:", count);
