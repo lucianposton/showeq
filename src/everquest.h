@@ -537,7 +537,7 @@ struct groupMemberStruct
 */
 struct ClientZoneEntryStruct
 {
-/*0000*/ int8_t   opCode;                 // 0x2a
+/*0000*/ int8_t   opCode;                 // 0x29
 /*0001*/ int8_t   version;                // 0x20
 /*0002*/ int32_t  dwUnknown0002;          // ***Placeholder
 /*0006*/ char     name[20];               // Player firstname
@@ -548,20 +548,25 @@ struct ClientZoneEntryStruct
 
 /*
 ** Server Zone Entry struct
-** Length: 306 Octets
+** Length: 322 Octets
 ** OpCode: ZoneEntryCode (when direction == server)
 */
 struct ServerZoneEntryStruct
 {
-/*0000*/ int8_t   opCode;                 // 0x2a
+/*0000*/ int8_t   opCode;                 // 0x29
 /*0001*/ int8_t   version;                // 0x20
 /*0002*/ int8_t   unknown0002[5];         // ***Placeholder
 /*0007*/ char     name[30];               // Player first name
 /*0037*/ char     zoneShortName[15];      // Zone Short Name
-/*0052*/ int8_t   unknown0052[252];       // ***Placeholder  Andrew: Class, Race, and level appear to be in here.
-/*0304*/ uint8_t  deity;                  //Player's Deity
-/*0305*/ int8_t   unknown0305;            //**Placeholder
-/*0306*/ int8_t   unknown0306[16];        //**Placeholder
+/*0052*/ int8_t   unknown0052[107];       // ***Placeholder
+/*0159*/ uint8_t  class;                  // Player's Class
+/*0160*/ uint8_t  race;                   // Player's Race
+/*0161*/ uint8_t  unknown0161[2];         // ***Placeholder
+/*0163*/ uint8_t  level;                  // Player's Level
+/*0164*/ uint8_t  unknown0164[148];       // ***Placeholder, could be usefull things here
+/*0312*/ uint8_t  deity;                  // Player's Deity
+/*0313*/ int8_t   unknown0313;            // ***Placeholder
+/*0314*/ int8_t   unknown0314[8];         // ***Placeholder
 };
 
 /*
@@ -571,7 +576,7 @@ struct ServerZoneEntryStruct
 */
 struct deleteSpawnStruct
 {
-/*0000*/ int8_t   opCode;                 // 0x2b
+/*0000*/ int8_t   opCode;                 // 0x2a
 /*0001*/ int8_t   version;                // 0x20
 /*0002*/ uint16_t spawnId;                // Spawn ID to delete
 /*0004*/ uint8_t  unknown[2];             // ***Placeholder
