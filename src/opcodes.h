@@ -92,7 +92,7 @@
 
 #define CorpseLocCode               0xf014
 
-#define RemDropCode                 0x00d0
+#define RemDropCode 				0x00fe
 
 #define ActionCode                  0xf04d
 
@@ -102,7 +102,7 @@
 
 #define ManaDecrementCode           0xf175
 
-#define StartCastCode 				0x00C6
+#define StartCastCode 				0x00c6
 
 #define MemSpellCode                0xf178
 
