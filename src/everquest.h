@@ -717,7 +717,7 @@ struct ServerZoneEntryStruct
 /*0179*/ uint8_t  level;                  // Player's Level
 /*0180*/ uint8_t  unknown0180[160];       // ***Placeholder 
 /*0340*/ uint16_t deity;                  // Player's Deity
-/*0342*/ uint8_t  unknown0310[12];         // ***Placeholder
+/*0342*/ uint8_t  unknown0310[16];         // ***Placeholder
 };
 
 /*
@@ -1014,13 +1014,13 @@ struct makeDropStruct
 /*0010*/ uint16_t itemNr;                 // Item ID
 /*0012*/ uint8_t  unknown0012[2];         // ***Placeholder
 /*0014*/ uint16_t dropId;                 // DropID
-/*0016*/ uint8_t  unknown0016[10];        // ***Placeholder
-/*0026*/ float    y;                   // Y Position
+/*0016*/ uint8_t  unknown0016[130];        // ***Placeholder
+/*0026*/ float    z;                   // Z Position
 /*0030*/ float    x;                   // X Position
-/*0034*/ float    z;                   // Z Position
-/*0038*/ uint8_t  unknown0054[4];         // ***Placeholder
+/*0034*/ float    y;                   // Y Position
 /*0042*/ char     idFile[16];             // ACTOR ID
-/*0058*/ uint8_t  unknown0074[168];       // ***Placeholder
+/*0038*/ uint8_t  unknown0054[4];         // ***Placeholder
+/*0058*/ uint8_t  unknown0074[48];       // ***Placeholder
 };
 
 /*
@@ -1542,7 +1542,7 @@ struct zoneChangeStruct
 /*0002*/ char     charName[32];		// Character Name
 /*0034*/ uint8_t  unknown0050[32];	// *** Placeholder
 /*0066*/ uint32_t zoneId;               // zone Id
-/*0070*/ uint32_t unknown[8];              // unknown
+/*0070*/ uint8_t unknown[8];              // unknown
 };
 
 /*

@@ -1,7 +1,17 @@
-casey (10/21/02)
+casey (10/24/02)
 ----------------------
 
 added the following maps.
+  Poinnovation.map
+
+updated 3 structs and a bunch of opcodes.  I havent personally tested
+them, but they seem to be working for the people who are.  If you find
+differences, make a diff and post it to the patch section.
+
+casey (10/21/02)
+----------------------
+
+added the following maps (from HoiHoi).
   Hohonora.map
   Hohonorb.map
   Nightmareb.map
