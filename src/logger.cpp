@@ -892,7 +892,7 @@ PktLogger::logBookText(const bookTextStruct *book, uint32_t len, uint8_t dir)
 }
 
 void
-PktLogger::logRandom(const randomStruct *ran, uint32_t len, uint8_t dir)
+PktLogger::logRandom(const randomReqStruct *ran, uint32_t len, uint8_t dir)
 {
     if (!isLoggingRandom())
       return;
@@ -905,6 +905,25 @@ PktLogger::logRandom(const randomStruct *ran, uint32_t len, uint8_t dir)
 
     outputf("R %u %04d %d %.2X%.2X %u %u\n", timestamp, len, dir,
         ran->opCode, ran->version, ran->bottom, ran->top);
+
+    flush();
+}
+
+void
+PktLogger::logRandom(const randomStruct *ran, uint32_t len, uint8_t dir)
+{
+    if (!isLoggingRandom())
+      return;
+
+    unsigned int timestamp = (unsigned int) time(NULL);
+    
+    if (m_FP == NULL)
+        if (logOpen() != 0)
+            return;
+
+    outputf("R %u %04d %d %.2X%.2X %u %u %u %s\n", timestamp, len, dir,
+        ran->opCode, ran->version, ran->bottom, ran->top, 
+	    ran->result, ran->name);
 
     flush();
 }
@@ -1212,13 +1231,8 @@ PktLogger::logSkillInc(const skillIncStruct *skill, uint32_t len, uint8_t dir)
         if (logOpen() != 0)
             return;
 
-    outputf("R %u %04d %d %.2X%2.X %u ", timestamp, len, dir,
-        skill->opCode, skill->version, skill->skillId);
-
-    output(skill->unknown0004,2);
-    outputf(" %d ", skill->value);
-    output(skill->unknown0008,2);
-    outputf("\n");
+    outputf("R %u %04d %d %.2X%2.X %u %d\n", timestamp, len, dir,
+        skill->opCode, skill->version, skill->skillId, skill->value);
     flush();
     return;
 }

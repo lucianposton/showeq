@@ -51,18 +51,17 @@
 #define   UNKNOWN_ZONE_LOG_OPTION       18
 #define   PLAYBACK_SPEED_OPTION         19
 #define   SHOW_MAP_POINTS_OPTION        20
-#define   ENCRYPTED_LOG_FILE_OPTION     21
-#define   ENCRYPTED_LOG_OPTION          22
-#define   SYSTIME_SPAWNTIME_OPTION      23
-#define   SPAWNLOG_FILENAME_OPTION      24
-#define   DISABLE_SPAWNLOG_OPTION       25
-#define   NO_BANK_INFO                  26
-#define   ITEMDB_LORE_FILENAME_OPTION   27
-#define   ITEMDB_NAME_FILENAME_OPTION   28
-#define   ITEMDB_DATA_FILENAME_OPTION   29
-#define   ITEMDB_RAW_FILENAME_OPTION    30
-#define   ITEMDB_DATABASES_ENABLED      31
-#define   WORLD_LOG_FILENAME_OPTION     32
+#define   RAW_LOG_OPTION                21
+#define   SYSTIME_SPAWNTIME_OPTION      22
+#define   SPAWNLOG_FILENAME_OPTION      23
+#define   DISABLE_SPAWNLOG_OPTION       24
+#define   NO_BANK_INFO                  25
+#define   ITEMDB_LORE_FILENAME_OPTION   26
+#define   ITEMDB_NAME_FILENAME_OPTION   27
+#define   ITEMDB_DATA_FILENAME_OPTION   28
+#define   ITEMDB_RAW_FILENAME_OPTION    29
+#define   ITEMDB_DATABASES_ENABLED      30
+#define   WORLD_LOG_FILENAME_OPTION     31
 #define   ITEMDB_DISABLE                3
 #define   STATUS_FONT_SIZE              4
 #define   RESTORE_PLAYER_STATE          6
@@ -125,8 +124,7 @@ static struct option option_list[] = {
   {"log-all",                      no_argument,        NULL,  GLOBAL_LOG_OPTION},
   {"log-zone",                     no_argument,        NULL,  ZONE_LOG_OPTION},
   {"log-unknown-zone",             no_argument,        NULL,  UNKNOWN_ZONE_LOG_OPTION},
-  {"encrypted-log-filebase",       required_argument,  NULL,  ENCRYPTED_LOG_FILE_OPTION},
-  {"log-encrypted",                no_argument,        NULL,  ENCRYPTED_LOG_OPTION},
+  {"log-raw",                      no_argument,        NULL,  RAW_LOG_OPTION},
   {"systime-spawntime",            no_argument,        NULL,  SYSTIME_SPAWNTIME_OPTION},
   {"spawnlog-filename",            required_argument,  NULL,  SPAWNLOG_FILENAME_OPTION},
   {"disable-spawnlog",             no_argument,        NULL,  DISABLE_SPAWNLOG_OPTION},
@@ -280,14 +278,14 @@ int main (int argc, char **argv)
    section = "PacketLogging";
    showeq_params->logAllPackets = pSEQPrefs->getPrefBool("LogAllPackets", section, 0);
    showeq_params->logZonePackets = pSEQPrefs->getPrefBool("LogZonePackets", section, 0);
+   showeq_params->logWorldPackets = pSEQPrefs->getPrefBool("LogWorldPackets", section, 0);
    showeq_params->logUnknownZonePackets  = pSEQPrefs->getPrefBool("LogUnknownZonePackets", section,  0);
+   showeq_params->logRawPackets = pSEQPrefs->getPrefBool("LogRawPackets", section, 0);
    showeq_params->GlobalLogFilename = pSEQPrefs->getPrefString("GlobalLogFilename", section, LOGDIR "/global.log") ;
    showeq_params->ZoneLogFilename = pSEQPrefs->getPrefString("ZoneLogFilename", section, LOGDIR "/zone.log");
    showeq_params->WorldLogFilename = pSEQPrefs->getPrefString("WorldLogFilename", section, LOGDIR "/world.log");
    showeq_params->UnknownZoneLogFilename = pSEQPrefs->getPrefString("UnknownZoneLogFilename", section, LOGDIR "/unknownzone.log") ;
-   /* Different files for different kinds of encrypted data */
-   showeq_params->logEncrypted = pSEQPrefs->getPrefBool("LogEncrypted", section, 0);
-   showeq_params->EncryptedLogFilenameBase = pSEQPrefs->getPrefString("EncryptedLogFilenameBase", section, LOGDIR "/encrypted") ;
+   /* Different files for different kinds of raw data */
    showeq_params->PktLoggerMask = pSEQPrefs->getPrefString("PktLoggerMask", section, "");
    showeq_params->PktLoggerFilename = pSEQPrefs->getPrefString("PktLoggerFilename", section, LOGDIR "/packet.log") ;
 
@@ -654,21 +652,12 @@ int main (int argc, char **argv)
          }
 
 
-         /* Enable logging of encrypted packets... */
-         case ENCRYPTED_LOG_OPTION:
+         /* Enable logging of raw packets... */
+         case RAW_LOG_OPTION:
          {
-            showeq_params->logEncrypted = 1;
+            showeq_params->logRawPackets = 1;
             break;
          }
-
-         
-         /* Log encrypted packets to this file... */
-         case ENCRYPTED_LOG_FILE_OPTION:
-         {
-            showeq_params->EncryptedLogFilenameBase = optarg;
-            break;
-         }
-
 
          /* Display spawntime in UNIX time (time_t) instead of hh:mm format */
          case SYSTIME_SPAWNTIME_OPTION:
@@ -815,8 +804,7 @@ int main (int argc, char **argv)
       printf ("      --zone-log-filename=FILE          Use FILE for above packet logging\n");
       printf ("      --log-unknown-zone                Log only unrecognized zone data\n");
       printf ("      --unknown-zone-log-filename=FILE  Use FILE for above packet logging\n");
-      printf ("      --log-encrypted                   Log some unprocessed encrypted data\n");
-      printf ("      --encrypted-log-filebase=FILE     Use FILE as base for above logging\n");
+      printf ("      --log-raw                   Log some unprocessed raw data\n");
       printf ("      --disable-spawnlog                Disable spawn logging to spawnlog.txt\n");
       printf ("      --spawnlog-filename=FILE          Use FILE instead of spawnlog.txt\n");
       printf ("      --itemdb-lore-filename=FILE       Use FILE instead of itemlore\n");
@@ -861,26 +849,6 @@ int main (int argc, char **argv)
       a common filename base.   The types to log were found by following
       where pre_worked was a precondition for further analysis.
    */
-
-   /* NewSpawnCode */
-   showeq_params->NewSpawnCodeFilename = showeq_params->EncryptedLogFilenameBase + QString("_NewSpawnCode.log");
-   
-   
-   /* ZoneSpawnsCode */
-   showeq_params->ZoneSpawnsCodeFilename = showeq_params->EncryptedLogFilenameBase + QString("_ZoneSpawnsCode.log");
-  
-   /* CharProfileCode */
-   showeq_params->CharProfileCodeFilename = showeq_params->EncryptedLogFilenameBase + QString ("CharProfileCode.log");
-
-   if (showeq_params->logEncrypted)
-   {
-      printf("Logging CharProfileCode packets to: %s\n",
-	     (const char*)showeq_params->CharProfileCodeFilename);
-      printf("Logging ZoneSpawnsCode packets to: %s\n",
-	     (const char*)showeq_params->ZoneSpawnsCodeFilename);
-      printf("Logging NewSpawnCode packets to: %s\n",
-	     (const char*)showeq_params->NewSpawnCodeFilename);
-   }
 
    if (showeq_params->broken_decode)   
     printf( "***DECRYPTION DISABLED***\n\n"

@@ -82,12 +82,11 @@ struct ShowEQParams
   bool           logWorldPackets;
   bool           logZonePackets;
   bool           logUnknownZonePackets;
-  bool           logEncrypted;
+  bool           logRawPackets;
   QString        GlobalLogFilename;
   QString        WorldLogFilename;
   QString        ZoneLogFilename;
   QString        UnknownZoneLogFilename;
-  QString        EncryptedLogFilenameBase;
   QString        PktLoggerMask;
   QString        PktLoggerFilename;
   QString        CharProfileCodeFilename;

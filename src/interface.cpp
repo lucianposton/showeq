@@ -679,14 +679,16 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    QPopupMenu* pLogMenu = new QPopupMenu;
    m_netMenu->insertItem("Lo&g", pLogMenu);
    pLogMenu->setCheckable(true);
-   m_id_log_AllPackets = pLogMenu->insertItem("All Packets", this, SLOT(toggle_log_AllPackets()), Key_F5);
+   m_id_log_AllPackets  = pLogMenu->insertItem("All Packets", this, SLOT(toggle_log_AllPackets()), Key_F5);
    m_id_log_WorldData   = pLogMenu->insertItem("World Data", this, SLOT(toggle_log_WorldData()), Key_F6);
-   m_id_log_ZoneData   = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F7);
-   m_id_log_UnknownData= pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F8);
+   m_id_log_ZoneData    = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F7);
+   m_id_log_UnknownData = pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F8);
+   m_id_log_RawData     = pLogMenu->insertItem("Raw Data", this, SLOT(toggle_log_RawData()), Key_F8);
    menuBar()->setItemChecked (m_id_log_AllPackets , showeq_params->logAllPackets);
    menuBar()->setItemChecked (m_id_log_WorldData   ,showeq_params->logWorldPackets);
    menuBar()->setItemChecked (m_id_log_ZoneData   , showeq_params->logZonePackets);
    menuBar()->setItemChecked (m_id_log_UnknownData, showeq_params->logUnknownZonePackets);
+   menuBar()->setItemChecked (m_id_log_RawData, showeq_params->logRawPackets);
 
    // OpCode Monitor
    QPopupMenu* pOpCodeMenu = new QPopupMenu;
@@ -1227,10 +1229,16 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   this, SLOT(tradeBookIn(const tradeBookInStruct*)));
    connect(m_packet, SIGNAL(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)),
 	   this, SLOT(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(simpleMessage(const simpleMessageStruct*, uint32_t, uint8_t)),
+	   this, SLOT(simpleMessage(const simpleMessageStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(formattedMessage(const formattedMessageStruct*, uint32_t, uint8_t)),
 	   this, SLOT(formattedMessage(const formattedMessageStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(random(const randomReqStruct*, uint32_t, uint8_t)),
+	   this, SLOT(random(const randomReqStruct*)));
    connect(m_packet, SIGNAL(random(const randomStruct*, uint32_t, uint8_t)),
 	   this, SLOT(random(const randomStruct*)));
+   connect(m_packet, SIGNAL(logOut(const uint8_t*, uint32_t, uint8_t)),
+	   this, SLOT(logOut(const uint8_t*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(emoteText(const emoteTextStruct*, uint32_t, uint8_t)),
 	   this, SLOT(emoteText(const emoteTextStruct*)));
    connect(m_packet, SIGNAL(playerBook(const playerBookStruct*, uint32_t, uint8_t)),
@@ -1473,6 +1481,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	      m_pktLogger, SLOT(logTimeOfDay(const timeOfDayStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(bookText(const bookTextStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logBookText(const bookTextStruct*, uint32_t, uint8_t)));
+     connect (m_packet, SIGNAL(random(const randomReqStruct*, uint32_t, uint8_t)),
+	      m_pktLogger, SLOT(logRandom(const randomReqStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(random(const randomStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logRandom(const randomStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(emoteText(const emoteTextStruct*, uint32_t, uint8_t)),
@@ -2909,6 +2919,13 @@ void EQInterface::toggle_log_UnknownData (void)
   pSEQPrefs->setPrefBool("LogUnknownZonePackets", "PacketLogging", showeq_params->logUnknownZonePackets);
 }
 
+void EQInterface::toggle_log_RawData (void)
+{
+    showeq_params->logRawPackets = !showeq_params->logRawPackets;
+    menuBar()->setItemChecked (m_id_log_RawData, showeq_params->logRawPackets);
+  pSEQPrefs->setPrefBool("LogRawPackets", "PacketLogging", showeq_params->logRawPackets);
+}
+
 
 /* Check and uncheck View menu options */
 void
@@ -3845,6 +3862,30 @@ void EQInterface::channelMessage(const channelMessageStruct* cmsg, uint32_t, uin
   emit msgReceived(tempStr);
 }
 
+void EQInterface::simpleMessage(const simpleMessageStruct* smsg, uint32_t len, uint8_t dir)
+{
+  QString tempStr;
+
+  // avoid client chatter and do nothing if not viewing channel messages
+  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
+    return;
+
+  QString* formatStringRes = m_formattedMessageStrings.find(smsg->messageFormat);
+
+  if (formatStringRes == NULL)
+  {
+    tempStr.sprintf( "Formatted:Simple: %04x: %04x",
+		     smsg->messageFormat,
+		     smsg->color);
+  }
+  else
+  {
+    tempStr = QString("Formatted: ") + *formatStringRes;
+  }
+
+  emit msgReceived(tempStr);
+}
+
 void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t len, uint8_t dir)
 {
   QString tempStr;
@@ -3959,13 +4000,26 @@ void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t 
   emit msgReceived(tempStr);
 }
 
-void EQInterface::random(const randomStruct* randr)
+void EQInterface::random(const randomReqStruct* randr)
 {
   QString tempStr;
 
   tempStr.sprintf ( "RANDOM: Request random number between %d and %d\n",
 		    randr->bottom,
 		    randr->top);
+  
+  emit msgReceived(tempStr);
+}
+
+void EQInterface::random(const randomStruct* randr)
+{
+  QString tempStr;
+
+  tempStr.sprintf ("RANDOM: Random number %d rolled between %d and %d by %s\n",
+		   randr->result,
+		   randr->bottom,
+		   randr->top,
+		   randr->name);
   
   emit msgReceived(tempStr);
 }
@@ -4355,6 +4409,15 @@ void EQInterface::groupDelete(const groupDeleteStruct* gmem)
 {
   printf ("Group Delete: %s - %s\n", 
 	  gmem->membername, gmem->yourname);
+}
+
+void EQInterface::logOut(const uint8_t*, uint32_t, uint8_t)
+{
+#ifdef ZONE_ORDER_DIAG
+  QString tempStr;
+  tempStr = "Zone: LogoutCode: Client logged out of server";
+  emit msgReceived(tempStr);
+#endif
 }
 
 void EQInterface::zoneEntry(const ClientZoneEntryStruct* zsentry)

@@ -688,15 +688,15 @@ void SpawnShell::updateSpawnMaxHP(const SpawnUpdateStruct* su)
 void SpawnShell::updateNpcHP(const hpNpcUpdateStruct* hpupdate)
 {
 #ifdef SPAWNSHELL_DIAG
-   printf("SpawnShell::updateNpcHP(id=%d, hp=%d)\n", 
-	  hpupdate->spawnId, hpupdate->curHp);
+   printf("SpawnShell::updateNpcHP(id=%d, maxhp=%d hp=%d)\n", 
+	  hpupdate->spawnId, hpupdate->maxHP, hpupdate->curHP);
 #endif
    Item* item = m_spawns.find(hpupdate->spawnId);
    if (item != NULL)
    {
      Spawn* spawn = (Spawn*)item;
-     spawn->setHP(hpupdate->curHp);
-     spawn->setMaxHP(100);
+     spawn->setHP(hpupdate->curHP);
+     spawn->setMaxHP(hpupdate->maxHP);
      item->updateLastChanged();
      emit changeItem(item, tSpawnChangedHP);
    }

@@ -1,3 +1,10 @@
+dohpaZ (09/?/03)
+---------------------
++ Updated version to 4.3.11
++ More updates related to 08/26/03 patch new opcodes and structure changes
++ Added support for logging raw packets as well as decoded packets
++ Applied patch #799386 (Change con tables) from Elyon (elyon) to fix con levels
+
 dohpaZ (08/30/03)
 ---------------------
 + Updated version to 4.3.10

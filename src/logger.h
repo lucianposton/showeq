@@ -207,6 +207,7 @@ public:
     void logZoneSpawns(const zoneSpawnsStruct* spawns, uint32_t len, uint8_t dir);
     void logTimeOfDay(const timeOfDayStruct* tday, uint32_t len, uint8_t dir);
     void logBookText(const bookTextStruct* book, uint32_t len, uint8_t dir);
+    void logRandom(const randomReqStruct* ran, uint32_t len, uint8_t dir);
     void logRandom(const randomStruct* ran, uint32_t len, uint8_t dir);
     void logEmoteText(const emoteTextStruct* emote, uint32_t len, uint8_t dir);
     void logCorpseLoc(const corpseLocStruct* corpse, uint32_t len, uint8_t dir);

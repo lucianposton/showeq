@@ -573,6 +573,10 @@ class EQPacket : public QObject
    
    bool logMessage(const QString& filename,
 		   const QString& message);
+   bool EQPacket::logData ( const QString& filename,
+			    uint32_t       len,
+			    const uint8_t* data,
+			    const QString& prefix);
    bool logData(const QString& filename,
 		uint32_t       len,
 		const uint8_t* data,
@@ -665,7 +669,9 @@ class EQPacket : public QObject
    void tradeContainerIn(const tradeContainerInStruct* itemr, uint32_t, uint8_t);
    void tradeBookIn(const tradeBookInStruct* itemr, uint32_t, uint8_t);
    void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
+   void simpleMessage(const simpleMessageStruct* fmsg, uint32_t, uint8_t);
    void formattedMessage(const formattedMessageStruct* fmsg, uint32_t, uint8_t);
+   void random(const randomReqStruct* randr, uint32_t, uint8_t);
    void random(const randomStruct* randr, uint32_t, uint8_t);
    void emoteText(const emoteTextStruct* emotetext, uint32_t, uint8_t);
 #if 1 // ZBTEMP: dead signals as of 08/26/03 patch - cleanup later
@@ -693,7 +699,7 @@ class EQPacket : public QObject
    void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
    void summonedItem(const summonedItemStruct*, uint32_t, uint8_t);
    void summonedContainer(const summonedContainerStruct*, uint32_t, uint8_t);
- 
+   void logOut(const uint8_t*, uint32_t, uint8_t);
    void msgReceived(const QString &);
    void stsMessage(const QString &, int = 0);
 

@@ -568,6 +568,22 @@ struct emoteTextStruct
 };
 
 /*
+** Simple text messages
+** Length: Variable Text
+** OpCode: SimpleMessageCode
+*/
+
+struct simpleMessageStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x15
+/*0001*/ uint8_t  version;                // 0x20
+/*0002*/ uint32_t messageFormat;          // Indicates the message format
+/*0006*/ uint32_t color;                  // Message color
+/*0010*/ uint32_t unknown;                // ***Placeholder
+/*0014*/
+};
+
+/*
 ** Formatted text messages
 ** Length: Variable Text
 ** OpCode: emoteTextCode
@@ -578,8 +594,8 @@ struct formattedMessageStruct
 /*0000*/ uint8_t  opCode;                 // 0x15
 /*0001*/ uint8_t  version;                // 0x20
 /*0002*/ uint8_t  unknown0002[4];         // ***Placeholder
-/*0006*/ uint16_t messageFormat;          // Indicates the message format
-/*0008*/ uint8_t  unknown0004[6];         // ***Placeholder (arguments?)
+/*0006*/ uint32_t messageFormat;          // Indicates the message format
+/*0010*/ uint8_t  unknown0010[4];         // ***Placeholder (arguments?)
 /*0014*/ char     messages[0];            // messages(NULL delimited)
 /*0???*/ uint8_t  unknownXXXX[8];         // ***Placeholder
 };
@@ -721,10 +737,11 @@ struct ServerZoneEntryStruct
 /*342*/ uint32_t race;                   // Player's Race
 /*346*/ char     unknown346[28];
 /*374*/ uint32_t deity;                  // Player's Deity
-/*378*/ char     unknown378[8];
-/*386*/ uint32_t guildId;
-/*390*/ char     unknown390[8];
-}; // 398
+/*378*/ char     unknown378[4];
+/*382*/ uint32_t guildId;
+/*386*/ char     unknown390[12];
+/*398*/
+};
 
 /*
 ** Delete Spawn
@@ -759,12 +776,13 @@ struct charProfileStruct
 /*0118*/ uint32_t  level;              // Level of player (might be one byte)
 /*0122*/ uint8_t   unknown0122[20];    // *** Placeholder
 /*0142*/ uint32_t  deity;              // deity
-/*0146*/ uint32_t  guildID;
-/*0150*/ uint8_t   unknown0150[10];    // *** Placeholder
-/*0160*/ uint32_t  altexp;  	       // aaxp? (wrong?
-/*0162*/ uint8_t   unknown0162[426];   // *** Placeholder
+/*0146*/ uint32_t  guildID;            // guildID
+/*0150*/ uint32_t  birthdayTime;       // character birthday
+/*0154*/ uint32_t  lastSaveTime;       // character last save time
+/*0158*/ uint32_t  timePlayedMin;      // time character played
+/*0162*/ uint8_t   unknown0162[428];   // *** Placeholder
 /*0590*/ char 	   servername[64];     // length probably not right
-/*0654*/ uint8_t   unknown0654[4];     // *** Placeholder
+/*0654*/ uint32_t  altexp;  	       // aaxp? (wrong?
 /*0658*/ uint32_t  exp;                // Current Experience
 /*0662*/ uint32_t  points;             // Unspent Practice points
 /*0666*/ uint32_t  MANA;               // MANA
@@ -1154,9 +1172,9 @@ struct itemOnCorpseStruct
 struct staminaStruct {
 /*0000*/ uint8_t opCode;                   // 0x57
 /*0001*/ uint8_t version;                  // 0x21
-/*0002*/ int32_t food;                     // (low more hungry 127-0)
-/*0006*/ int32_t water;                    // (low more thirsty 127-0)
-/*0010*/ int32_t fatigue;                  // (high more fatigued 0-100)
+/*0002*/ uint32_t food;                     // (low more hungry 127-0)
+/*0006*/ uint32_t water;                    // (low more thirsty 127-0)
+/*0010*/ uint32_t fatigue;                  // (high more fatigued 0-100)
 };
 
 /*
@@ -1207,7 +1225,7 @@ struct newZoneStruct
 /*0002*/ char    name[64];                 // Character name
 /*0066*/ char    shortName[32];            // Zone Short Name
 /*0098*/ char    longName[180];            // Zone Long Name
-/*0278*/ uint8_t unknown0278[322];         // *** Placeholder
+/*0278*/ uint8_t unknown0278[312];         // *** Placeholder
 };
 
 /*
@@ -1396,6 +1414,21 @@ struct memSpellStruct
 };
 
 /*
+** Train Skill
+** Length: 10 Octets
+** OpCode: SkillTrainCode
+*/
+
+struct skillTrainStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x
+/*0001*/ uint8_t  version;                // 0x
+/*0002*/ int32_t  playerid;               // player doing the training
+/*0006*/ int32_t  type;                   // type of training?
+/*0010*/ uint32_t skillId;                // Id of skill
+};
+
+/*
 ** Skill Increment
 ** Length: 10 Octets
 ** OpCode: SkillIncCode
@@ -1405,10 +1438,8 @@ struct skillIncStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x89
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ uint16_t skillId;                // Id of skill
-/*0004*/ uint8_t  unknown0004[2];         // ***Placeholder
-/*0006*/ int16_t  value;                  // New value of skill
-/*0008*/ uint8_t  unknown0008[2];         // ***Placeholder
+/*0002*/ uint32_t skillId;                // Id of skill
+/*0006*/ int32_t  value;                  // New value of skill
 };
 
 /*
@@ -1455,8 +1486,9 @@ struct expUpdateStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x99
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ uint16_t exp;                    // experience value  x/330
-/*0004*/ uint16_t unknown0004;            // ***Place Holder
+/*0002*/ uint32_t exp;                    // experience value  x/330
+/*0006*/ uint32_t unknown0004;            // ***Place Holder
+/*0010*/
 };
 
 /*
@@ -1517,9 +1549,11 @@ struct SpawnUpdateStruct
 struct hpNpcUpdateStruct
 {
 /*0000*/ uint16_t opcode;
-/*0002*/ int8_t   curHp;
-/*0003*/ uint16_t spawnId;
-}; // 5
+/*0002*/ uint16_t spawnId;
+/*0004*/ uint16_t maxHP;
+/*0006*/ uint16_t curHP;
+/*0008*/ 
+}; 
 
 /*
 ** Inspecting Information
@@ -1550,8 +1584,8 @@ struct bookTextStruct
 {
 /*0000*/ uint8_t opCode;                   // 0xce
 /*0001*/ uint8_t version;                  // 0x20
-/*0002*/ uint8_t placeholder;
-/*0003*/ char    text[0];                  // Text of item reading
+/*0002*/ uint16_t placeholder;
+/*0004*/ char    text[0];                  // Text of item reading
 };
 
 /*
@@ -1594,12 +1628,28 @@ union
 ** Length: 10 Octets
 ** OpCode: RandomCode
 */
+struct randomReqStruct 
+{
+/*0000*/ uint8_t  opCode;                 // 0xe7
+/*0001*/ uint8_t  version;                // 0x21
+/*0002*/ uint32_t bottom;                 // Low number
+/*0006*/ uint32_t top;                    // High number
+};
+
+/*
+** Random Number Result
+** Length: 78 Octets
+** OpCode: RandomCode
+*/
 struct randomStruct 
 {
 /*0000*/ uint8_t  opCode;                 // 0xe7
 /*0001*/ uint8_t  version;                // 0x21
 /*0002*/ uint32_t bottom;                 // Low number
 /*0006*/ uint32_t top;                    // High number
+/*0010*/ uint32_t result;                 // result number
+/*0014*/ char     name[64];               // name rolled by
+/*0078*/
 };
 
 /*

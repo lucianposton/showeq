@@ -108,7 +108,9 @@ class EQInterface:public QMainWindow
    void tradeContainerIn(const tradeContainerInStruct* itemr);
    void tradeBookIn(const tradeBookInStruct* itemr);
    void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
+   void simpleMessage(const simpleMessageStruct* cmsg, uint32_t, uint8_t);
    void formattedMessage(const formattedMessageStruct* cmsg, uint32_t, uint8_t);
+   void random(const randomReqStruct* randr);
    void random(const randomStruct* randr);
    void emoteText(const emoteTextStruct* emotetext);
    void playerItem(const playerItemStruct* itemp);
@@ -130,6 +132,7 @@ class EQInterface:public QMainWindow
    void groupDelete(const groupDeleteStruct* gmem);
    void summonedItem(const summonedItemStruct*);
    void summonedContainer(const summonedContainerStruct*);
+   void logOut(const uint8_t*, uint32_t, uint8_t);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
    void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
@@ -161,6 +164,7 @@ class EQInterface:public QMainWindow
    void toggle_log_WorldData();
    void toggle_log_ZoneData();
    void toggle_log_UnknownData();
+   void toggle_log_RawData();
    void listSpawns(void);
    void listDrops(void);
    void listCoins(void);
@@ -360,6 +364,7 @@ class EQInterface:public QMainWindow
    int  m_id_log_WorldData;
    int  m_id_log_ZoneData;
    int  m_id_log_UnknownData;
+   int  m_id_log_RawData;
    int  m_id_opt_OptionsDlg;
    int  m_id_opt_Fast;
    int  m_id_opt_ResetMana;

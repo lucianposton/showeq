@@ -915,11 +915,7 @@ bool EQPacket::logMessage(const QString& filename,
 bool EQPacket::logData ( const QString& filename,
 			 uint32_t       len,
 			 const uint8_t* data,
-			 in_addr_t      saddr,
-			 in_addr_t      daddr,
-			 in_port_t      sport,
-			 in_port_t      dport
-			 )
+			 const QString& prefix)
 {
 #ifdef DEBUG_PACKET
    debug ("logData()");
@@ -927,7 +923,6 @@ bool EQPacket::logData ( const QString& filename,
 
    FILE *lh;
 
-   //printf("FilePath: %s\n", fname);
    lh = fopen ((const char*)filename, "a");
 
    if (lh == NULL)
@@ -940,19 +935,41 @@ bool EQPacket::logData ( const QString& filename,
    time_t now;
    now = time (NULL);
 
-   if (saddr)
-   {
-      fprintf (lh, "%s:%d->", (const char*)print_addr (saddr), sport);
-      fprintf (lh, "%s:%d ", (const char*)print_addr (daddr), dport);
-   }
+   if (!prefix.isEmpty())
+     fprintf(lh, "%s ", (const char*)prefix.utf8());
 
-   fprintf (lh, "(%d) %s", len, ctime (&now));
+   fprintf(lh, "(%d) %s", len, ctime (&now));
 
    fprintData(lh, len, data);
 
    fclose (lh);
 
    return true;
+}
+
+/* Logs packet data in a human-readable format */
+bool EQPacket::logData ( const QString& filename,
+			 uint32_t       len,
+			 const uint8_t* data,
+			 in_addr_t      saddr,
+			 in_addr_t      daddr,
+			 in_port_t      sport,
+			 in_port_t      dport
+			 )
+{
+#ifdef DEBUG_PACKET
+   debug ("logData()");
+#endif /* DEBUG_PACKET */
+
+   QString prefix;
+   if (saddr)
+   {
+     prefix.sprintf("%s:%d->%s:%d ",
+		    (const char*)QString(print_addr (saddr)), sport,
+		    (const char*)QString(print_addr (daddr)), dport);
+   }
+
+   return logData(filename, len, data, prefix);
 }
 
 /* This function decides the fate of the Everquest packet */
@@ -1656,24 +1673,46 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
   debug ("dispatchWorldData()");
 #endif /* DEBUG_PACKET */
   
+  //Logging 
+  if (showeq_params->logWorldPackets && showeq_params->logRawPackets)
+  {
+    QString msg("Raw:    -");
+    if (direction == DIR_SERVER)
+      msg += " Server->Client:";
+    else
+      msg += " Client->Server:";
+    
+    if (!logData (showeq_params->WorldLogFilename, len, data, msg))
+      emit toggle_log_WorldData(); //untoggle the GUI checkmark
+  }
+
   packetList pktlist = decodePacket(data, len);
   if (pktlist.size() == 0)
       return;
-  for (unsigned int packetNum = 0; packetNum < pktlist.size(); packetNum++) {
-      data = pktlist[packetNum].data;
-      len = pktlist[packetNum].len;
+  for (unsigned int packetNum = 0; packetNum < pktlist.size(); packetNum++) 
+  {
+    data = pktlist[packetNum].data;
+    len = pktlist[packetNum].len;
 
-      //Logging 
-      if (showeq_params->logWorldPackets)
-	  if (!logData (showeq_params->WorldLogFilename, len, data))
-	      emit toggle_log_WorldData(); //untoggle the GUI checkmark
+    //Logging 
+    if (showeq_params->logWorldPackets)
+    {
+      QString msg("Decoded -");
+      if (direction == DIR_SERVER)
+	msg += " Server->Client:";
+      else
+	msg += " Client->Server:";
       
-	  uint16_t opCode = *((uint16_t *)data);  
-      
-	  bool unk = true;
-      
-      switch (opCode)
-      {
+      if (!logData (showeq_params->WorldLogFilename, len, data, msg))
+	emit toggle_log_WorldData(); //untoggle the GUI checkmark
+    }
+
+    uint16_t opCode = *((uint16_t *)data);  
+    
+    bool unk = true;
+    
+    switch (opCode)
+    {
       case GuildListCode:
       {
 	  if (direction != DIR_SERVER)
@@ -1703,14 +1742,15 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
           unk = true;
           break;
       }
-      
-      }
-      if (m_viewUnknownData && unk)
-      {
-	  printUnknown(0, opCode, len, data, direction);
-      }
-      if (pktlist[packetNum].allocated) 
-	  delete[] pktlist[packetNum].data;
+    }
+
+    if (m_viewUnknownData && unk)
+    {
+      printUnknown(0, opCode, len, data, direction);
+    }
+
+    if (pktlist[packetNum].allocated) 
+      delete[] pktlist[packetNum].data;
 
   }
 
@@ -1748,7 +1788,7 @@ void EQPacket::printUnknown(unsigned int uiOpCodeIndex, uint16_t opCode, uint32_
 			 uiOpCodeIndex > 0 ? 
 			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
 			 "UNKNOWN", opCode, len,
-			 dir == 2 ? "Server --> Client" : "Client --> Server");
+			 dir == DIR_SERVER ? "Server --> Client" : "Client --> Server");
 	 printf("\n%s\n\t", (const char*)tmpStr);
 
 	 if ((uiOpCodeIndex > 0) && showeq_params->monitorOpCode_Log)
@@ -1763,7 +1803,7 @@ void EQPacket::printUnknown(unsigned int uiOpCodeIndex, uint16_t opCode, uint32_
 			 uiOpCodeIndex > 0 ? 
 			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
 			 "UNKNOWN", opCode, len, 
-			 dir == 2 ? "Server --> Client" : "Client --> Server", 
+			 dir == DIR_SERVER ? "Server --> Client" : "Client --> Server", 
 			 data[3] * 256 + data[2]);
 
 	 if ((uiOpCodeIndex > 0) && showeq_params->monitorOpCode_Log)
@@ -1817,6 +1857,19 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     debug ("dispatchZoneData()");
 #endif /* DEBUG_PACKET */
 
+    // Raw Logging 
+    if (showeq_params->logZonePackets && showeq_params->logRawPackets)
+    {
+      QString msg("Raw     -");
+      if (dir == DIR_SERVER)
+	msg += " Server->Client:";
+      else
+	msg += " Client->Server:";
+
+      if (!logData (showeq_params->ZoneLogFilename, len, data, msg))
+	emit toggle_log_ZoneData(); //untoggle the GUI checkmark
+    }
+
     QString  tempStr;
 
     bool unk = true;
@@ -1846,12 +1899,23 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	data = pktlist[packetNum].data;
 	len = pktlist[packetNum].len;
 
-	//Logging 
-	if (showeq_params->logZonePackets)
-	  if (!logData (showeq_params->ZoneLogFilename, len, data))
-	    emit toggle_log_ZoneData(); //untoggle the GUI checkmark
-
 	uint16_t opCode = *((uint16_t *)data);
+
+	//Logging 
+	if (showeq_params->logZonePackets && 
+	    ((opCode != PlayerPosCode) &&
+	     (opCode != MobUpdateCode) && 
+	     (opCode != SpawnUpdateCode)))
+	  {
+	    QString msg("Decoded -");
+	    if (dir == DIR_SERVER)
+	      msg += " Server->Client:";
+	    else
+	      msg += " Client->Server:";
+
+	    if (!logData (showeq_params->ZoneLogFilename, len, data, msg))
+	      emit toggle_log_ZoneData(); //untoggle the GUI checkmark
+	  }
 	
 	switch (opCode)
 	{
@@ -2042,6 +2106,15 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    break;
 	}
 
+	case SimpleMessageCode:
+	{
+	    unk = false;
+
+	    emit simpleMessage((const simpleMessageStruct*)data, len, dir);
+
+	    break;
+	}
+
 	case FormattedMessageCode:
 	{
 	    unk = false;
@@ -2103,8 +2176,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	{
 	    unk = false;
 
-	    emit bookText((const bookTextStruct*)data, len, dir);
-
 	    printf("BOOK: '%s'\n", ((const bookTextStruct *)data)->text);
 	    emit bookText((const bookTextStruct*)data, len, dir);
 
@@ -2113,12 +2184,18 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case RandomCode:
         {
-            if (dir != DIR_CLIENT)
-                break;
-
             unk = ! ValidatePayload(RandomCode, randomStruct);
 
 	    emit random((const randomStruct*)data, len, dir);
+
+            break;
+        }
+
+        case RandomReqCode:
+        {
+            unk = ! ValidatePayload(RandomReqCode, randomReqStruct);
+
+	    emit random((const randomReqStruct*)data, len, dir);
 
             break;
         }
@@ -2917,12 +2994,21 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    break;
 	}
 
-	case xBuyItemCode:  //unknown contents
+	case BuyItemCode:  //unknown contents
 	{
 	    //unk = ! ValidatePayload(xBuyItemCode, xBuyItemStruct);
 	    //emit xBuyItem((const xBuyItemStruct*)data, len, dir);
 	    //both the client command and the server acknowledgement when buying
 	    break;
+	}
+
+	case LogoutCode: // no contents
+	{
+	  unk = false;
+
+	  emit logOut(data, len, dir);
+
+	  break;
 	}
 
         case GuildMemberUpdate:

@@ -798,8 +798,9 @@ void Player::playerUpdate(const playerSelfPosStruct *pupdate, uint32_t, uint8_t 
   updateLastChanged();
   emit changeItem(this, tSpawnChangedPosition);
 
-  emit newSpeed((int)lrint(hypot( hypot( pdeltaX, pdeltaY), 
-				  pdeltaZ)));
+  emit newSpeed((int)lrint(hypot( hypot( (pupdate->deltaX*8), 
+					 (pupdate->deltaY*8)), 
+				  (pupdate->deltaZ*8))));
 
   static uint8_t count = 0;
 
@@ -1070,8 +1071,28 @@ void Player::fillConTable()
     greenRange = -20;
     cyanRange = -15;
   }
-  else if (level() > 59) // 60+
-  { // 57 - 60
+  else if (level() < 61)
+  { //57 - 60
+    greenRange = -26;
+    cyanRange = -21;
+  }
+  else if (level() == 61) // 61
+  {
+    greenRange = -24;
+    cyanRange = -19;
+  }
+  else if (level() == 62)
+  {
+    greenRange = -23;
+    cyanRange = -18;
+  }
+  else if (level() == 63)
+  {
+    greenRange = -22;
+    cyanRange = -17;
+  }
+  else if (level() < 66) //64 - 65
+  {
     greenRange = -21;
     cyanRange = -16;
   }
