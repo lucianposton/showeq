@@ -5,10 +5,6 @@ AM_CONFIG_HEADER(conf.h)
 AM_INIT_AUTOMAKE(showeq, 4.3.7)
 AM_MAINTAINER_MODE
 
-dnl Please remember to update this when the official libEQ.a gets updated...
-dnl (* this is list in case we have libEQ.a's for multiple platforms*)
-CURRENT_LIBEQMD5="f45cb14c6e0a4c55c3b60bc0959945d6"
-
 dnl Use CCd/CXXd rather than CC/CXX otherwise it cache's the value
 dnl and prevents the alternate search from working. Would be better
 dnl if there was someway to invalidate the cache entry. ??
@@ -218,96 +214,6 @@ AC_CHECK_HEADERS(deque,,AC_MSG_ERROR(cannot find deque, normally part of a c++ d
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 
-dnl locations to search for libEQ.a in
-LIBEQLOCS="`pwd` `pwd`/${srcdir} `pwd`/${srcdir}/src /usr/lib /usr/local/lib /opt/lib /lib"
-
-dnl libEQ.a error message
-LIBEQERRORMESSAGE="libEQ.a not found, out of date, or not compiled using a compatible compiler.  Be sure libEQ.a is already installed in one of the listed directories ($LIBEQLOCS), is a current version, and you are compiling with g++ 3.x."
-
-AC_DEFUN(CHECK_LIBEQ,[
-LIBEQMD5=`md5sum $1`
-ac_showeq_found_md5="NO"
-for j in "$CURRENT_LIBEQMD5"
-do
-  if echo "$LIBEQMD5" | grep -q "$j" ; then
-    ac_showeq_found_md5="YES"
-  fi
-done
-if [[ "$ac_showeq_found_md5" != "YES" ]]; then
-	AC_MSG_WARN([$1 has md5sum $LIBEQMD5 which doesn't match reference md5sum])
-fi
-AC_MSG_CHECKING([for initDecode in $1 ])
-ac_save_libs="$LIBS"
-ac_save_cxxflags="$CXXFLAGS"
-CXXFLAGS="$CXXFLAGS -I${srcdir}/src"
-LIBS="$1 -lz $LIBPTHREAD"
-AC_TRY_LINK(
-[
-#include <stdio.h>
-#undef HAVE_LIBEQ
-#define HAVE_LIBEQ 1
-#include "decode.h"
-unsigned short implicitlen(unsigned short) { return 0; }
-],
-[
-initDecode();
-],
-[ 
-$2=$1
-LIBS="$1 $ac_save_libs"
-AC_DEFINE(HAVE_LIBEQ)
-AC_MSG_RESULT(yes)
-],
-[
-$2=NO
-LIBS=$ac_save_libs
-AC_MSG_RESULT(no);
-]
-)
-CXXFLAGS="$ac_save_cxxflags"
-]
-)
-
-dnl ------------------------------------------------------------------------
-dnl Find libEQ.a
-dnl ------------------------------------------------------------------------
-dnl
-AC_DEFUN(AC_FIND_LIBEQ,
-[
-LIBEQ=NO
-for i in $1;
-do
-  AC_MSG_CHECKING([for libEQ.a in $i ])
-  if test -r "$i/libEQ.a"; then
-    AC_MSG_RESULT(yes)
-    CHECK_LIBEQ("$i/libEQ.a", LIBEQ)
-    if [[ "$LIBEQ" != "NO" ]]; then
-      break 
-    fi
-  else
-    AC_MSG_RESULT(no)
-  fi
-done
-
-dnl if not found, error out
-if [[ "$LIBEQ" == "NO" ]]; then
-  AC_MSG_ERROR($LIBEQERRORMESSAGE)
-fi
-])
-
-AC_MSG_CHECKING(whether to build with decryption)
-AC_ARG_ENABLE(decryption,
-	[  --disable-decryption    Do not build with libEQ.a],
-        [ case "${enableval}" in
-	no)     AC_MSG_RESULT(no)
-		;;
-	*)      AC_MSG_RESULT(yes)
-	        AC_FIND_LIBEQ($LIBEQLOCS)
-		;;
-	esac],
-	[ AC_MSG_RESULT(yes)
-	  AC_FIND_LIBEQ($LIBEQLOCS)
-        ] )
 	
 AC_ARG_ENABLE(cgi, 
 [  --enable-cgi=DIR        Compile CGIs and install in specified DIR],

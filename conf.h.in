@@ -12,9 +12,6 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the `EQ' library (-lEQ). */
-#undef HAVE_LIBEQ
-
 /* Define to 1 if you have the `gdbm' library (-lgdbm). */
 #undef HAVE_LIBGDBM
 

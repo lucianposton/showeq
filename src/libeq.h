@@ -8,7 +8,6 @@
 #ifndef _LIBEQ_H_
 #define _LIBEQ_H_
 
-#if HAVE_LIBEQ
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #else
@@ -39,9 +38,5 @@ extern "C"
 #ifdef  __cplusplus
 }
 #endif
-
-#else
-#warning "HAVE_LIBEQ=0"
-#endif // HAVE_LIBEQ
 
 #endif // _LIBEQ_H_
