@@ -1,0 +1,4 @@
+Copy the file 'showeq.conf.dist' to 'showeq.conf' and modify as you like.
+
+Whenever the 'showeq.conf.dist' file is modified, you should examine it
+and incorperate any changes you like into your copy (showeq.conf).

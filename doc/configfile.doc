@@ -1,0 +1,241 @@
+showeq configuration file
+
+
+Types:
+  String  - this is an ascii string.  If spaces are needed enclose in "Quotes"
+  Boolean - 0 = false, 1 = true
+  Int     - integer value
+
+
+options (listed by section)
+
+
+Network:
+
+  Device             - String: This is the network device to attach to.  
+                       Example: 'eth0'
+  IP                 - This is the name or IP address of the EQ client.  
+                       Example: '192.168.0.1'
+  RealTimeThread     - Boolean: If set this will capture network packets in 
+                       a realtime thread
+  NoPromiscuous      - Boolean: If set this will not use promisc mode on 
+                       your network interface
+
+Filters:
+
+  UseOldFilters      - Boolean: If set this will use the old filter method
+                       (for backward compatibility with people who don't 
+                        read docs or don't wish to move to the new filter 
+                        configuration)
+  SpawnFilterFile    - String: Filename to use for the spawn/alert filter 
+                       configuration
+  SpawnFilterAudio   - Boolean: If not set will simply play a 'bell' upon alert
+  SpawnAudioCommand  - String: Command executed when a spawn alert occurs
+  DeSpawnAudioCommand- String: Command executed when a despawn alert occurs
+  DeSpawnAlert       - Boolean: If set will alert on despawn as well as spawn
+  AlertInfo          - Boolean: If set will display additional info about 
+                       the spawn in the alert message
+
+Map:
+
+  Framerate          - Integer: Number of map repaints per second
+  FastMachine        - Boolean: If not set, map repaints are limitted
+  ShowDroppedItems   - Boolean: If set dropped items will be shown on map
+  ShowUnknownSpawns  - Boolean: If set unknown spawns will be shown on map
+                       (Unknown spaws primarily show while zoning before data
+                        regarding that spawn is received)
+  VelocityLines      - Boolean: If set will show velocity vectors on map
+
+VPacket:
+
+  Filename           - String: Filename used to read/write packets from in 
+                       an offline session
+  Record             - Boolean: If set packets will be recorded as they are 
+                       received to the above filename
+  Playback           - Playback: If set packets will be played back from the 
+                       above file instead of captured from the network
+  PlaybackRate       - Integer: Rate at which packets will be played back 
+                       in regards to their original received timestamps.  A
+                       value of 1 = 1X, 2 = 2X etc.  A Value of 0 will play 
+                       back as fast as possible (ignore timestamps)
+  CompressTime       - Integer: Milisecond time to use as a threshold for 
+                       timestamped playback.  If the delta time in a packet 
+                       exceeds this value in miliseconds the packet's timestamp
+                       will be ignored
+
+Interface:
+
+  Title              - String: If present the main window will be titled with
+                       this
+  UseWindowPos       - Boolean: If set the following parameters will be used 
+                       to save/restore window positions
+  WindowXOffset      - Integer: The X Offset resulting from your window 
+                       manager repositioning the window after decorating it
+                       with titlebar and frames.  This is to compensate for 
+                       the fact that window managers don't follow any rules. 
+                       For KDE this should be 0, other window managers may 
+                       vary.  To determine this value, increment this if 
+                       the main window is 'creeping left' each time you run.
+                       Decrement this if the window is 'creeping right'.
+  WindowYOffset      - Integer: The Y Offset resulting from your window 
+                       manager repositioning the window.  See above.
+  WindowX            - Integer: The X position to restore the main window
+  WindowY            - Integer: The Y position to restore the main window
+  WindowW            - Integer: The width to restore the main window to
+  WindowH            - Integer: The height to restore the main window to
+  Fontsize           - Integer: The pointsize to use for fonts in the main 
+                       window
+  SelectOnCon        - Boolean: If set using 'consider' on a spawn will cause 
+                       it to be selected in the spawn list and on the map
+  NetStats           - Boolean: If set a network statistics window will be 
+                       shown
+  RetardedCoords     - Boolean: If set coordinates will be displayed in 
+                       'zyx' format instead of 'xyz'
+  PvPTeamColoring    - Boolean: If set spawns will be highlighted on the map 
+                       and colored in the spawnlist according to their pvp 
+                       team affiliations
+  KeepSelected       - Boolean: If set the currently selected spawn in the 
+                       spawnlist will remain visible in the list
+  UseStdout          - Boolean: If set messages will be sent to stdout
+  ShowCompass        - Boolean: If set a compass will be shown in the main 
+                       window
+  ShowPlayerSkills   - Boolean: If set a table of the players skills will be 
+                       shown in the main window
+  ShowPlayerStats    - Boolean: If set a table of the players stats will be
+                       shown in the main window
+  ShowSpawnList      - Boolean: If set a list of spawns with details will be 
+                       shown in the main window
+  ShowMap            - Boolean: If set a map will be shown in the main window
+  ShowExpWindow      - Boolean: If set an experience tracking window will be 
+                       shown
+  SplitV_Size1       - Integer: width in pixels of widget in vertical splitter.
+                       The program will save this upon exit to maintain sizes. 
+  SplitV_Size2       - Integer: width in pixels of widget in vertical splitter.
+                       The program will save this upon exit to maintain sizes. 
+  SplitH_Size1       - Integer: width in pixels of widget in horiz splitter.
+                       The program will save this upon exit to maintain sizes. 
+  SplitH_Size2       - Integer: width in pixels of widget in horiz splitter.
+                       The program will save this upon exit to maintain sizes. 
+  SplitT_Size1       - Integer: width in pixels of widget in top splitter.
+                       The program will save this upon exit to maintain sizes. 
+  SplitT_Size2       - Integer: width in pixels of widget in top splitter.
+                       The program will save this upon exit to maintain sizes. 
+  SplitT_Size3       - Integer: width in pixels of widget in top splitter.
+                       The program will save this upon exit to maintain sizes. 
+
+
+Interface_Statusbar:
+
+  ShowExp            - Boolean: If set shows the players total experience in 
+                       the statusbar
+  ShowPacketCounter  - Boolean: If set shows a packet counter and avg pkts per 
+                       second in the statusbar
+  ShowSpawns         - Boolean: If set shows the total number of spawns in 
+                       the status bar
+  ShowStatus         - Boolean: If set shows general status in the status 
+                       bar
+  ShowZone           - Boolean: If set shows the zone name in the status bar 
+
+
+StatList:
+
+  SaveWidth          - Boolean: If set the following values will be saved 
+                       when the program exits normally
+  StatWidth          - Integer: Width in pixels of 'Stat' column 
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  ValueWidth         - Integer: Width in pixels of 'value' column 
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  MaxWidth           - Integer: Width in pixels of 'max' column 
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  PercentWidth       - Integer: Width in pixels of 'percent' column 
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+
+SkillList:
+
+  SaveWidth          - Boolean: If set the following values will be saved 
+                       when the program exits normally
+  SkillWidth         - Integer: Width in pixels of 'Skill' column 
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  ValueWidth         - Integer: Width in pixels of 'value' column 
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+
+SpawnList:
+
+  SaveWidth          - Boolean: If set the following values will be saved 
+                       when the program exits normally
+  NameWidth          - Integer: Width in pixels of 'name' column of spawnlist
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  LevelWidth         - Integer: Width in pixels of 'level' column of spawnlist
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  HPWidth            - Integer: Width in pixels of 'hp' column of spawnlist
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  MaxHPWidth         - Integer: Width in pixels of 'maxhp' column of spawnlist
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  CoordWidth         - Integer: Width in pixels of 'x/y/z' columns of spawnlist
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  IDWidth            - Integer: Width in pixels of 'id' column of spawnlist
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  DistWidth          - Integer: Width in pixels of 'dist' column of spawnlist
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  RaceWidth          - Integer: Width in pixels of 'race' column of spawnlist
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  ClassWidth         - Integer: Width in pixels of 'class' column of spawnlist
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  InfoWidth          - Integer: Width in pixels of 'info' column of spawnlist
+                       A value of 0 hides the column completely
+                       If this value is not set the column will autosize
+  CategoryX_Name     - String: Name of category in spawn list. X can be 1 to 25
+  CategoryX_Filter   - String: Regexp filter rule for placing spawns in 
+                       Category X.
+  CategoryX_FilterOut- String: Regexp filter rule for excluding spawns in 
+                       from Category X.
+  CategoryX_Color    - String: Color for category label.  This must be a 
+                       valid Qt color
+
+
+MessageBox1:
+
+  Title              - String:  Title to be shown for the message box
+  WindowX            - Integer: The X position of the window to be restored
+                       (Will only be used if 'Interface_UseWindowPos' is set 
+                       and will use WindowXOffset / WindowYOffset as well 
+                       from the Interface section)
+  WindowY            - Integer: The Y position of the window to be restored
+                       (see above)
+  WindowW            - Integer: The width of the window to be restored
+  WindowH            - Integer: The height of the window to be restored
+  HideControls       - Boolean: If set toggle controls for this message box 
+                       will be hidden upon creation.  You can toggle this 
+                       by right clicking on the message box while running
+  ShowMsgType        - Boolean: If set the message 'type' will be shown 
+                       preceeding the message  
+  Additive           - Boolean: If set the message filter will be 'additive'
+                       upon creation meaning that any message matching 
+                       filters (described by buttons below) will be shown.
+                       If clear all messages except for those matching filters 
+                       will be shown (subtractive)
+  Button1Name        - String: Name displayed on the first toggle button
+  Button1Filter      - String: regular expression to use for a filter for the 
+                       first toggle button
+  Button1Active      - Boolean: If set this toggle button is set upon creation
+                          
+  (Additional buttons can be defined by using the appropriate number in the 
+   identifier)
+
+(Additional Message Boxes can be defined by using the appropriate number in 
+ the section name)

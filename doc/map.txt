@@ -1,0 +1,17 @@
+<Sparr>  0:black:mistake color
+<Sparr>  1:blue:ocean
+<Sparr>  2:green:important non obstructive landscape change (steep hill)
+<Sparr>  3:cyan:?
+<Sparr>  4:red:path
+<Sparr>  5:magenta:?
+<Sparr>  6:brown:sand
+<Sparr>  7:white<aka lightgrey>:?
+<Sparr>  8:grey<aka brightblack darkgrey>:walls
+<Sparr>  9:lightblue:river/lake
+<Sparr> 10:lightgreen:friendly building
+<Sparr> 11:lightcyan:neutral building
+<Sparr> 12:lightred:lava
+<Sparr> 13:lightmagenta:hostile building
+<Sparr> 14:yellow:?
+<Sparr> 15:brightwhite:?
+

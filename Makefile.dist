@@ -1,0 +1,434 @@
+#!/bin/bash -=- Ignore this, it's here so that VIM will format colors correctly.
+default: all
+
+all:
+
+# Backup the users current binary and place it in BACKUP/ ...
+#
+# This fixes the annoying "Build such and such destroyed my working
+# copy of ShowEQ!" messages on the SEQ Dev forums :)
+	
+	@if [ -x "src/showeq" ] && ! [ -e ".no-backup" ]; then		      \
+	{								      \
+		mkdir -p "BACKUP";					      \
+									      \
+		echo "*!* BACKUP debug info *!*" > BACKUP/debug;	      \
+									      \
+		COMPRESSION="";						      \
+									      \
+		function compression_test () {				      \
+			shift;						      \
+			for i						      \
+			do						      \
+			RESULTANT=`$$1 --help >> BACKUP/debug 2>&1;           \
+				       cat "BACKUP/debug"   |	      	      \
+					    grep "$$1: command not found"`;   \
+									      \
+			if [ -z "$$RESULTANT" ]; then			      \
+			{						      \
+				COMPRESSION="$$1";		      	      \
+				return;			      	      	      \
+			} else {					      \
+				COMPRESSION="";			      	      \
+			} fi;						      \
+			shift;						      \
+			done;						      \
+		};							      \
+									      \
+		if ! [ -e ".no-backup" ]; then				      \
+		{							      \
+			echo "";					      \
+									      \
+			BACKUP_STAMP=`date -r src/showeq +%a-%b-%Y_%T`;	      \
+			mkdir -p "BACKUP/$$BACKUP_STAMP";		      \
+			cp "src/showeq" "BACKUP/$$BACKUP_STAMP/showeq";	      \
+									      \
+			compression_test [ "bzip2" "gzip" ]; 		      \
+									      \
+			if [ -n "$$COMPRESSION" ]; then			      \
+			{						      \
+				COMPRESSION_FAILED="";			      \
+									      \
+				echo -n "Compressing and archiving your cur"; \
+				echo -n "rent binary using ";	      	      \
+				echo -n "$$COMPRESSION...";                   \
+									      \
+				if [ "$$COMPRESSION" == "bzip2" ]; then	      \
+				{					      \
+					EXTENSION=".bz2";		      \
+				} else {				      \
+					EXTENSION=".gz";		      \
+				} fi;					      \
+									      \
+				FILE="BACKUP/$$BACKUP_STAMP/showeq";	      \
+									      \
+				echo -e "*!* $$COMPRESSION's status *!*" >    \
+					BACKUP/debug;			      \
+									      \
+				$$COMPRESSION "$$FILE" >> BACKUP/dbg 2>&1;    \
+									      \
+				if [ -n "`cat BACKUP/dbg`" ]; then  	      \
+				{					      \
+					echo `cat BACKUP/dbg` >> BACKUP/debug;\
+									      \
+					COMPRESSION_FAILED="TRUE";	      \
+				} fi;					      \
+									      \
+				echo "!*! $$COMPRESSION's status !*!" >>      \
+					BACKUP/debug;			      \
+									      \
+				rm -f "BACKUP/dbg";			      \
+									      \
+			} else {					      \
+				echo -n "Archiving your current binary....."; \
+				echo -n "..........................";	      \
+			} fi;						      \
+		} fi;							      \
+									      \
+		if ! [ -e "BACKUP/$$BACKUP_STAMP/showeq$$EXTENSION" ] ||      \
+		     [ -n "$$COMPRESSION_FAILED" ]; then		      \
+		{							      \
+			echo " failure!";				      \
+			echo -e "\n*!* Misc. debug data *!*" >> BACKUP/debug; \
+			echo "COMPRESSION: $$COMPRESSION"    >> BACKUP/debug; \
+			echo "EXTENSION..: $$EXTENSION"      >> BACKUP/debug; \
+			echo "TIME STAMP.: $$BACKUP_STAMP"   >> BACKUP/debug; \
+			echo "!*! Misc. debug data !*!"      >> BACKUP/debug; \
+			echo -ne "\n\t >>! ";				      \
+			echo -n "Please see 'BACKUP/debug' for more details"; \
+			echo -e " !<<\n\n";				      \
+			break;						      \
+		} else {						      \
+			rm -f "src/showeq";				      \
+									      \
+			echo " done!";					      \
+			echo "";					      \
+			echo "";					      \
+			echo "Your old ShowEQ binary is backed up as:";	      \
+			echo "";					      \
+			echo "    BACKUP/$$BACKUP_STAMP/showeq$$EXTENSION";   \
+			echo "";					      \
+			echo "";					      \
+			echo -n "NOTE: This feature may be disabled by using";\
+			echo " the command:";				      \
+			echo "      'make -f Makefile.dist no-backup'";	      \
+			echo "";					      \
+			echo -n "To disable it without using a special comma";\
+			echo "nd... Add an empty"; 			      \
+			echo -n "file called:  '.no-backup'  to this directo";\
+			echo "ry, WITH the dot.";			      \
+			echo "";					      \
+			echo "";					      \
+			echo "";					      \
+		} fi;							      \
+									      \
+		echo "!*! BACKUP debug info !*!" >> Makefile.dist.dbg;	      \
+	} fi;
+
+	@make -sf Makefile.dist no-backup
+
+
+no-backup:		
+
+	@echo "-:- `exec date` -:-" > Makefile.dist.dbg
+
+# Don't automatically assume that a maintainer-clean is necessary.
+# Only attempt to make a maintaner-clean IF the Makefile exists!
+# It's a matter of common sense really :)
+
+	@if [ -f "Makefile" ]; then					       \
+	{								       \
+		echo -ne "\nClearing all old Makefile data................" && \
+                echo -n  "..............";                                     \
+		echo -e "\n*!* make -skf Makefile maintainer-clean *!*"        \
+                        >> Makefile.dist.dbg;                                  \
+		make -skf Makefile maintainer-clean >> Makefile.dist.dbg 2>&1; \
+		echo "!*! make -skf Makefile maintainer-clean !*!"             \
+                     >> Makefile.dist.dbg;                                     \
+		echo " done!";						       \
+		echo "";						       \
+		echo "";						       \
+	} fi
+
+	@echo -n "Adding libtool support......................................"
+	@echo -e "\n*!* libtoolize --force --copy --automake *!*"              \
+                 >> Makefile.dist.dbg
+	@libtoolize --force --copy --automake >> Makefile.dist.dbg 2>&1
+	@echo "!*! libtoolize --force --copy --automake !*!"                   \
+              >> Makefile.dist.dbg
+	@echo " done!"
+
+	@echo -n "Generating aclocal.m4 from configure.in and acinclude.m4...."
+	@echo -e "\n*!* aclocal *!*" >> Makefile.dist.dbg
+	@aclocal >> Makefile.dist.dbg 2>&1
+	@echo "!*! aclocal !*!" >> Makefile.dist.dbg
+	@echo " done!"
+
+	@echo -e "\n*!* Autoheader version check *!*" >> Makefile.dist.dbg
+
+	@echo -ne "\nChecking Autoheader version...................." && \
+         echo -n  ".............";
+
+	@if [ "$$AUTOHEADER" ]; then                               	 \
+	{                                                                \
+		echo " done!";                                           \
+                                                                         \
+                echo "!*! Autoheader version check !*!"                  \
+                     >> Makefile.dist.dbg;                               \
+                                                                         \
+		echo "Using user defined \$$AUTOHEADER: '$$AUTOHEADER'"; \
+                                                                         \
+		echo -ne "\nGenerating configure template (config.h)" && \
+                echo -n  "....................";                         \
+                                                                         \
+		echo -e "\n*!* $$AUTOHEADER configure.in *!*"            \
+                        >> Makefile.dist.dbg                          && \
+		$$AUTOHEADER configure.in >> Makefile.dist.dbg 2>&1;	 \
+                                                                         \
+		echo " done!";						 \
+                                                                         \
+		echo "!*! $$AUTOHEADER configure.in !*!"                 \
+                     >> Makefile.dist.dbg;                               \
+                                                                         \
+	} else {                                                         \
+                                                                         \
+		ahver=`autoheader --version 2>> Makefile.dist.dbg |      \
+                       awk '{print $$3}'`;                               \
+                                                                         \
+                if [ "$$ahver" == "2.13" ]; then                         \
+                {                                                        \
+                        ah=`type -p autoheader2.50 2> /dev/null`;        \
+                                                                         \
+                        if [ "$$ah" ]; then                              \
+                        {                                                \
+                                ahver="2.50";                            \
+                        } else {                                         \
+                                ah="autoheader";                         \
+                        } fi;                                            \
+                                                                         \
+                        AUTOHEADER="$$ah";                               \
+                                                                         \
+                        echo " done!";                                   \
+                                                                         \
+                        echo "!*! Autoheader version check !*!"          \
+                             >> Makefile.dist.dbg;                       \
+                                                                         \
+                        echo -n ">> Using Autoheader version........" && \
+                        echo "......................... $$ahver!";       \
+                }                                                        \
+                                                                         \
+                elif [ "$$ahver" ]; then                                 \
+                {                                                        \
+                        AUTOHEADER="autoheader";                         \
+                                                                         \
+                        echo " done!";                                   \
+                                                                         \
+                        echo "!*! Autoheader version check !*!"          \
+                             >> Makefile.dist.dbg;                       \
+                                                                         \
+                        echo -n ">> Using Autoheader version........" && \
+                        echo "......................... $$ahver!";       \
+                } fi;                                                    \
+                                                                         \
+                echo -ne "\nGenerating configure template (config.h)" && \
+                echo -n  "....................";                         \
+                                                                         \
+		echo -e "\n*!* $$AUTOHEADER configure.in *!*"            \
+                        >> Makefile.dist.dbg                          && \
+                $$AUTOHEADER configure.in >> Makefile.dist.dbg 2>&1; 	 \
+                                                                         \
+		echo " done!";                           		 \
+                                                                         \
+		echo "!*! $$AUTOHEADER configure.in !*!"                 \
+                     >> Makefile.dist.dbg;                               \
+        } fi;                                                            \
+                                                                         \
+        if ! [ -s "aclocal.m4" ]; then                                   \
+        {                                                         	 \
+                echo "";                                                 \
+                echo "Autoheader has failed without warning!";           \
+                echo "";                                                 \
+                echo "PLEASE NOTE: Your version of Autoheader sucks!";   \
+                echo "UPGRADE NOW or face public humiliation...";        \
+                echo "";                                                 \
+                                                                         \
+		echo "FATAL ERROR: Autoheader is screwed up!!!"          \
+                     >> Makefile.dist.dbg;                               \
+                                                                         \
+                exit -1;                                                 \
+        } fi
+
+
+# Better safe than sorry... Do these one at a time rather than doing
+# them all at once. This fixes problems with older automake versions.
+
+	@echo -n "Generating Makefile.in from Makefile.am....................."
+	@echo -e "\n*!* automake ... *!*" >> Makefile.dist.dbg
+	@automake --add-missing --foreign --include-deps ./Makefile    \
+                  >> Makefile.dist.dbg 2>&1
+	@automake --add-missing --foreign --include-deps src/Makefile  \
+                  >> Makefile.dist.dbg 2>&1
+	@automake --add-missing --foreign --include-deps maps/Makefile \
+                  >> Makefile.dist.dbg 2>&1
+	@automake --add-missing --foreign --include-deps conf/Makefile \
+                  >> Makefile.dist.dbg 2>&1
+	@echo "!*! automake ... !*!" >> Makefile.dist.dbg
+	@echo " done!"
+
+
+# Autoconf is a major pain in the ASS!!!  First try using it without
+# specifying the output file, if that fails tell it off and give it
+# the -o switch.
+#
+#
+# Original script written by prox (for Debian UNSTABLE *ONLY*)...
+#
+# 
+# (10-16-2001) [Andon]:
+#  + Applied to *ALL* machines with the combination of Autoconf 2.13
+#    AND Autoconf 2.50...
+#
+
+	@echo -e "\n*!* Autoconf version check *!*" >> Makefile.dist.dbg
+
+	@echo -ne "\nChecking Autoconf version......................" && \
+         echo -n  ".............";
+
+	@if [ "$$AUTOCONF" ]; then					 \
+	{								 \
+		echo " done!";						 \
+                                                                         \
+                echo "!*! Autoconf version check !*!"                    \
+                     >> Makefile.dist.dbg;                               \
+                                                                         \
+		echo "Using user defined \$$AUTOCONF: '$$AUTOCONF'";     \
+                                                                         \
+                echo -ne "\nFinalizing Autoconf script (configure).." && \
+                echo -n  "....................";                         \
+                                                                         \
+		echo -e "\n*!* $$AUTOCONF *!*" >> Makefile.dist.dbg   && \
+		$$AUTOCONF >> Makefile.dist.dbg 2>&1;			 \
+                                                                         \
+                echo " done!";                                           \
+                                                                         \
+		echo "!*! $$AUTOCONF !*!" >> Makefile.dist.dbg;		 \
+									 \
+	} else {							 \
+									 \
+		acver=`autoconf --version 2>> Makefile.dist.dbg |        \
+                       awk '{print $$3}'`;		                 \
+                                                                         \
+		if [ "$$acver" == "2.13" ]; then                         \
+		{							 \
+                        ac=`type -p autoconf2.50 2> /dev/null`;          \
+                                                                         \
+                        if [ "$$ac" ]; then                              \
+                        {                                                \
+                                acver="2.50";                            \
+                        } else {                                         \
+                                ac="autoconf";                           \
+                        } fi;                                            \
+                                                                         \
+                        AUTOCONF="$$ac";                                 \
+                                                                         \
+                        echo " done!";                                   \
+                                                                         \
+                        echo "!*! Autoconf version check !*!"            \
+                             >> Makefile.dist.dbg;                       \
+                                                                         \
+                        echo -n ">> Using Autoconf version.........." && \
+                        echo "......................... $$acver!";       \
+                }                                                        \
+                                                                         \
+                elif [ "$$acver" ]; then                                 \
+                {                                                        \
+                        AUTOCONF="autoconf";                             \
+                                                                         \
+                        echo " done!";                                   \
+                                                                         \
+                        echo "!*! Autoconf version check !*!"            \
+                             >> Makefile.dist.dbg;                       \
+                                                                         \
+                        echo -n ">> Using Autoconf version.........." && \
+                        echo "......................... $$acver!";       \
+                } fi;                                                    \
+                                                                         \
+		echo -ne "\nFinalizing Autoconf script (configure).." && \
+                echo -n  "....................";                         \
+                                                                         \
+		echo -e "\n*!* $$AUTOCONF *!*" >> Makefile.dist.dbg   && \
+		$$AUTOCONF >> Makefile.dist.dbg 2>&1;                    \
+                                                                         \
+		echo "!*! $$AUTOCONF !*!" >> Makefile.dist.dbg;		 \
+	} fi;								 \
+									 \
+	if ! [ -s "configure" ]; then					 \
+	{								 \
+		echo -e "\n*!* $$AUTOCONF configure.in *!*"              \
+                         >> Makefile.dist.dbg                         && \
+		$$AUTOCONF configure.in >> Makefile.dist.dbg 2>&1;	 \
+                                                                         \
+		echo "!*! $$AUTOCONF configure.in !*!"                   \
+                     >> Makefile.dist.dbg;                               \
+	} fi; 								 \
+									 \
+	if ! [ -s "configure" ]; then					 \
+	{								 \
+		echo "";						 \
+		echo "Strange Autoconf config present...";		 \
+		echo "Consider upgrading.";				 \
+		echo "";						 \
+                                                                         \
+		echo -e "\n*!* $$AUTOCONF configure configure.in *!*"    \
+                        >> Makefile.dist.dbg                          && \
+                $$AUTOCONF -o configure configure.in                     \
+                        >> Makefile.dist.dbg 2>&1;		         \
+                                                                         \
+		echo "!*! $$AUTOCONF configure configure.in !*!"         \
+                     >> Makefile.dist.dbg; 	                         \
+	} fi;								 \
+									 \
+	if [ -s "configure" ]; then					 \
+	{					 			 \
+		echo " done!";						 \
+	} else {							 \
+		echo " failed!";					 \
+		echo "";						 \
+		echo "PLEASE NOTE: Your version of Autoconf sucks!";	 \
+		echo "UPGRADE NOW or face public humiliation...";	 \
+		echo "";						 \
+		echo "FATAL ERROR: Autoconf is screwed up!!!"            \
+                     >> Makefile.dist.dbg;                               \
+		exit -1;						 \
+	} fi
+
+
+
+# Some files, such as aclocal.m4, have no purpose once the autoconf
+# script has been generated.  It's a good idea to remove them...
+
+	@echo -n "Releasing temporary file handles............................"
+	@rm -f aclocal.m4
+	@echo " done!"
+
+
+
+# Pretty success message... Use of '&&' rather than ';' guarntees
+# that if one portion of the compile process fails, the successor
+# won't be executed.  Again, this is another case of common sense.
+
+	@echo "";                                           \
+         echo "";                                           \
+         echo "******************************************"; \
+         echo "Success!   Please type the following:";      \
+         echo "";                                           \
+         echo " ./configure && make";                       \
+         echo "";                                           \
+         echo "";                                           \
+         echo "This will configure and compile ShowEQ...";  \
+         echo "";                                           \
+         echo "If you are installing ShowEQ for the first"; \
+         echo "time, be sure to add '&& make install' to";  \
+         echo "the end of the compile process...";          \
+         echo "******************************************"; \
+         echo "";

@@ -1,0 +1,79 @@
+INSTALLATION OVERVIEW:
+----------------------
+ShowEQ originated on Redhat 6.1, however, it will compile and
+run on all newer Linux distro's. You will need the QT library
+from Troll Tech (http://www.troll.no) compiled with multi-threading 
+support enabled, as well as libpcap from the Lawrence Berkely National 
+Laboratory (www.tcpdump.org), also the GNU database library gdbm 
+(ftp.gnu.org), and pthread support (provided via glibc).  Also
+it can be configured to use Berkeley DB3 instead of gdbm.
+
+Additionally, the libEQ.a file (once included with ShowEQ) has been
+removed. You must download and install this file in your compiler's
+library path for ShowEQ to be able to decrypt the Everquest data stream.
+ShowEQ will work without this library, but only in 'broken decode' mode.
+
+
+PRE-REQUISITES:
+---------------
+Below is a list of packages you will need in order to compile ShowEQ:
+
+   Name:      Minimum:  Suggested:
+   -----------------------------------
+   *** 3rd party libraries ***
+   qt         2.3.2     (Must be compiled with -thread)
+   qt-devel   2.3.2     (Must be compiled with -thread)
+   libpcap    0.62
+   gdbm       1.8.0
+
+   *** Optional 3rd party libraries ***
+   db3        3.2.9  3.3   
+
+   *** C++ Compilation ***
+   glibc      2.2  2.2.4
+   libstdc++  3.0  3.0.2
+   gcc        3.0  3.0.2
+
+   *** GNU tools ***
+   libtool    1.3.4-3   Most recent...
+   autoconf   2.13-1    Most recent...
+   automake   1.4-6     Most recent...
+   -----------------------------------
+   
+NOTE: Higher versions of these libraries should work fine...
+
+
+INSTALL PROCESS:
+----------------
+First you must make the configure script, but after that
+the basic install is the same as any other GNU package:
+
+ make -f Makefile.dist
+ ./configure
+ make
+ make install
+
+This installs showeq in /usr/local/bin, and puts maps and logs in
+/usr/local/share/showeq. make install is important, the program will not
+find maps without it.
+
+If you want to make the CGI files, use
+ ./configure --enable-cgi=<path where cgi-bin files should reside>
+
+
+CONFIGURING AND USING:
+----------------------
+Please note that ShowEQ requires root privileges, otherwise the pcap library
+cannot be initialized and ShowEQ will fail to load... You should not use SEQ
+on a computer where root access presents a security issue.
+
+Configuration values are stored in the file showeq.conf.  This file will 
+be looked for in the local directory first, then the /usr/local/share/showeq 
+directory.  The contents of this file are layed out in a fairly readable form 
+and comments are provided in the distributed showeq.conf file.
+
+Filters for 'hiding' spawns from the spawnlist and map can be configured via 
+a file specified in the config file (typically 'filters.conf').  A sample 
+file has been included in the distribution which should be self explanatory. 
+Spawn Alert filters can also be configured here.  Improving the documentation
+of alerts and filters is an area where volunteers may help a lot.

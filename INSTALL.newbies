@@ -1,0 +1,125 @@
+Following this file does not exempt you from reading and understanding the
+regular INSTALL file.  This should give you the knowledge you need to
+understand that file if you are new to linux and the development process.
+
+This does not cover the details of the RedHat 7 installation itself.  RedHat
+has lots of helpful advice on their web site, and USENET newsgroups are full
+of hints as well.
+
+For details on RedHat/Linux installation try:
+
+http://www.redhat.com
+http://www.debian.com
+http://www.linuxnewbie.org
+http://www.linuxcentral.org
+http://www.linuxnews.org
+
+The INSTALL.newbies file is based on a post from "mmdeath" at 
+http://www.ethernalquest.org/ubb/Forum3/HTML/001044.html
+
+by cpphack
+Dec 17, 2000
+
+-=-
+ Updated for ShowEQ 3.x by Andon
+ Sep 06, 2001
+-=-
+
+------------------
+Redhat 7.0 install
+------------------
+1. During the installation choose Gnome Workstation.
+[This selection installs a number of common packages, but does NOT install
+everything you need to compile and run ShowEQ.  Those will be covered below.]
+
+2. Do NOT set Xwindows to control the logon.
+[Usually X doesn't work on the first try, so it's safer to use a text-based
+login until you are all set up and working.]
+
+3. After the installation is complete, ensure that you can PING 
+your Win9x, or Win2K workstation that you are running EQ on.
+[This will let you know that your IP address and netmask choices made
+during the install were correct.]
+
+Download these into /root for ease of following these instructions later.
+
+Also download the following ShowEQ files:
+   - showeq-(version).tar.gz or .bz2
+   - libEQ.a [No download sites available for this yet, check the 
+              SourceForge "help" forum for locations and current version.
+              http://sourceforge.net/forum/forum.php?forum_id=31633 ]
+
+4. Login as root, and stay in console mode (do not run Xwindows).
+
+5. This is a good time to read the real INSTALL file.  Check using
+"rpm -q -a | grep <rpm-name>" that you have installed everything that
+ShowEQ requires.  Some people recommend a reboot at this stage.
+
+6. Copy/FTP the showeq-?.?.?.tar.gz file to /root
+[You can get this from http://sourceforge.net/projects/seq or the latest
+CVS mirror copy (may be buggy) from http://www.krisp.com/snapshot.html.]
+
+7. Type the command: tar -jxvf showeq-?.?.?.tar.gz  or
+                     tar -jxvf showeq-?.?.?.tar.bz2
+
+[This is just like "unzip" in the Windows world, only UNIX uses tar/gzip
+or tar/bzip2 (newer/improved) instead.]
+
+8. Copy the libEQ.a file you downloaded into /usr/local/lib and
+verify that the "md5sum" command on this file displays the correct
+checksum value.  This may be obtained from 
+http://sourceforge.net/projects/seq in either the news area or the 
+help forum.  (Presently under the news heading "libEQ.a Download Sites".)
+
+If the MD5 checksum doesn't match, your browser probably mangled the file.  
+Don't use it until you get one whose MD5 checksum matches the correct value.
+At best it won't work, and at worst it could be a hacked version that will
+steal your account/password info.
+
+9. Type the command: cd showeq
+[This directory was created when the above compressed tar archive was
+uncompressed/extracted]
+
+10. Type the command: make -f Makefile.dist
+[You will use this every time you want to compile a new version, it takes care
+of automating everything for you.  It even backs up your old binary, so you
+have a working copy backed up]
+
+11. Assuming you had no errors, type: ./configure
+[This should run fine.  If it doesn't, check the requirements in the INSTALL
+file for any extra RPMs you may need to install.  Check for a possible warning
+message which indicates it couldn't find libEQ.a.]
+
+12. Type the command: make
+[Again, you should see no problems here.  If you do see problems, check the
+INSTALL file extra extra close to be sure you've installed the required RPMs
+before asking for help.]
+
+13. Type the command: make install
+[This copies the compiled program and maps to /usr/local/share/showeq]
+
+14. Type the command: cd /usr/local/share/showeq
+
+15. Type the command: cp /root/showeq/conf/showeq.conf.dist showeq.conf
+[This copies in the default ShowEQ configuration file.  You can change this
+around with a text editor later on if you want.]
+
+16. Type the command: cd /root
+[This is unnecessary but helps to avoid problems with X applications
+starting with a strange current directory.]
+
+17. startx
+- XWindows should start
+- If not, then you didn't configure it correctly. (This is NOT covered here)
+- Try the RedHat site for help if you can't get X to start
+
+18. When in XWindows, open a terminal window.
+[It's the screen-looking icon at the bottom next to Netscape.  
+Right-click -> New -> Terminal also brings up a window.]
+
+19. Type the command: cd /usr/local/bin
+
+20. Type the command: ./showeq -i eth0 192.168.0.2 
+- Replace 192.168.0.2 with the IP address of your Win9x/Win2K 
+  machine running EQ.
+- A ShowEQ window should start.

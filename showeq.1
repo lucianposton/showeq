@@ -1,0 +1,166 @@
+.TH "showeq" "1" "4 Oct 2000" "" "" 
+.SH "NAME" 
+showeq \- Realtime packet analyser for Everquest
+.SH "SYNOPSIS" 
+.PP 
+showeq [-i <device>] [-r] <client address> [OPTION]
+.PP 
+.SH "DESCRIPTION" 
+.PP 
+ShowEQ sits passively and waits for everquest packets to pass by
+on the ethernet card. It rebuilds the data stream and displays
+useful information about the data being sent between client and
+server\&.
+.PP 
+ShowEQ needs to have root access to be able to receive the packets,
+so make sure you run it as root\&.
+.PP 
+.SH "OPTIONS" 
+.PP 
+.IP "\fB-i <device>\fP" 
+Specify which network device to bind to
+.IP 
+.IP "\fB-b\fP" 
+Broken Decode option to skip spawn packet handling
+when Verant changes the coding.
+.IP 
+.IP "\fB-r\fP" 
+Set the network thread RealTime
+.IP 
+.IP "\fB-f <filename>\fP" 
+Sets spawn filter file
+.IP 
+.IP "\fB-s <filename>\fP" 
+Sets spawn alert file
+.IP 
+.IP "\fB-v\fP" 
+Draws velocity lines in map
+.IP 
+.IP "\fB-R\fP" 
+Spawn alert and filter uses regexp, not glob
+.IP 
+.IP "\fB-C\fP" 
+Spawn alert and filter is case sensitive
+.IP 
+.IP "\fB-a\fP" 
+Use ESD to play alert during spawn alert
+.IP 
+.IP "\fB-h\fP" 
+Shows usage
+.IP 
+.IP "\fB-j <filename>\fP" 
+playback packets from <filename>
+.IP 
+.IP "\fB-K\fP" 
+show unknown spawns based on position updates
+.IP 
+.IP "\fB-d\fP" 
+show despawns as well based on spawnlist
+.IP 
+.IP "\fB-p <pointsize>\fP" 
+set the font pointsize of the skill and spawn tables
+.IP 
+.IP "\fB-x\fP" 
+log spawns
+.IP 
+.IP "\fB-S\fP" 
+Select on consider
+.IP 
+.IP "\fB-A\fP" 
+enhanced spawn alerts - both regexp or glob
+.PP
+It tests a longer string containing: name/race/class/info\&.
+For instance you can filter for\&:
+.IP
+all orcs with 2H weapons:	*/*orc*/*/*2H*
+.IP
+all druids:				*/*/druid/*
+.IP 
+all wisps carying a GLS:		*wisp*/*/*/*gls*
+.IP 
+.IP "\fB-F\fP" 
+fast machine (repaints map on timer)
+.IP 
+
+.PP 
+.SH "DIAGNOSTICS" 
+.PP 
+Few and limited.
+.PP 
+.SH "FILES" 
+.PP 
+.IP showeq.conf
+.IP
+Persistant configuration file.  Gets updated each time you run.
+ShowEQ looks in the local directory first and then in 
+/usr/local/share/showeq/\&.
+.PP
+.IP /usr/local/share/showeq/
+Location of the map files\&.
+.PP
+.IP filters.conf
+.IP spawns.conf
+.IP
+Filters for "hiding" spawns from the spawnlist and map can be configured via 
+a file specified in the config file\&.  A sample 
+file has been included in the distribution which should be self explanatory. 
+Spawn Alert filters can also be configured here\&.
+.IP
+ShowEQ looks in the local directory first and then in 
+/usr/local/share/showeq/\&.
+.IP
+MOBs listed in filter.conf will not be shown, and mobs listed in spawns.conf
+will cause an alert to be triggered\&.
+.IP
+The files contain one mob name on each line. The name can be globbed
+(*orc*), or you can use regexp if you prefer (specify -R on the command
+line)\&.
+.PP 
+.SH "BUGS" 
+.PP 
+.IP -
+Not handling packet sequence wraps
+.IP
+ShowEQ currently always expects a packet SEQ number one higher
+than the last one processed. This does not work when the SEQ
+number wraps or changes (when it reaches 0xFFFF)\&.
+.IP -
+Embedded acks and packet header flags not always correct
+.IP
+ShowEQ only handles a set number of embedded acks and packet
+header flags. This sometimes causes it to strip the ack
+incorrectly and corrupt the data\&.
+.IP -
+Experience window does not list the spawn name of what gave you
+experience correctly\&.
+.IP
+This is caused by not having a clean way 
+to determine what gave you experience\&.
+.IP -
+Seg Faults occuring due to QListViewItems getting deleted at 
+impropper times\&.
+.IP
+Not sure exactly what is causing this\&.
+.IP -
+libEQ.a is not included as part of the source distribution.
+.PP 
+.PP 
+.SH "VERSION" 
+This man page is current for version 2\&.4 of ShowEQ
+.PP 
+.SH "CREDITS" 
+.PP 
+ShowEQ is distributed under the GNU public license\&.  See the file
+COPYING for details\&.
+.PP 
+A WEB and FTP ite is available at
+http://sourceforge\&.net/projects/seq/
+.PP 
+.PP 
+.SH "THANKS" 
+.PP 
+Contributers, in alpabetical order, include:
+Andrew, Andy, AStone, JCorey, JohnQ, Maerlyn, Mapfiend, Megaton, 
+Ratt, Razer, Steve, Xyzzy00, Wes, Whizzie Wiz\&.
+.PP 
+

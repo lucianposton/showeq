@@ -1,0 +1,30 @@
+The static library libEQ.a was once distributed with ShowEQ.  This created
+some confusion since the supposedly "Open Source" ShowEQ would only build
+correctly on x86 Linux.
+
+The configure script now checks for libEQ.a in your compiler's library path.
+If present, decryption support will be compiled into ShowEQ.  If absent,
+ShowEQ will function only in GPS (radar/map) mode with all mobs shown as 
+"unknown".
+
+The libEQ.a library may be downloaded from the following sites:
+
+ftp://smurfette.trifocus.net/pub/libeq
+http://www.krisp.com/snapshot.html
+
+*** WARNING ***
+
+It's possible people may try to build trojan horse versions of this library
+to capture account/password data.  (This would be tricky, but possible)
+
+YOU MUST VERIFY THE MD5 CHECKSUM (from the "md5sum" command) VERSUS A POSTING
+MADE ON SOURCEFORGE FROM Ratt, Zaphod or Casey.  DO NOT TRUST ANY MD5 CHECKSUM EXCEPT THIS
+ONE.
+
+It would be pretty easy to "forge" a message from one of us giving different
+md5sums and include it with the rest of ShowEQ don't trust any message
+included with this or any version of ShowEQ which claims to list
+accepted MD5 checksums.  You should also be mistrustful if we suddenly 
+redirect everyone to a new site with a new libEQ.a file with a 
+different checksum.  It probably means someone hacked one of our accounts.
+

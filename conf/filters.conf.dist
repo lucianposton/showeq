@@ -1,0 +1,76 @@
+# ShowEQ Filter file
+#
+# All entries are 'regular expressions' and may be optionally followed
+# by a level range.
+#
+# Note:  Sections end with a blank line.  Make sure the file ends with a blank
+#        line as well.  This file will be updated by the program with changes
+#        made while running
+#
+# If you make changes to this file while running ShowEQ, press F3 in ShowEQ
+# to reload and reapply all the filters.
+
+
+
+# [Hunt] is the section for spawns you are hunting.
+# Spawns appear with a large, dim circle.
+# See the examples section below for details.
+
+[Hunt]
+Name:[^:]giant[^:]:;26-28
+Name:burynai;26-29
+Race:[^:]*Guard[^:]*:
+Name:[^:]*will[^:]*:.*:Light:GLS:.*
+
+# [Caution] is the section for things you want to avoid.
+# Spawns appear with a flashing yellow circle on the map and will be 
+# underlined in the spawn list.
+# If the spawn gets with 500 ticks, a yellow line will point to it.
+# See the examples section below for details.
+
+[Caution]
+bonecharmer
+
+
+# [Danger] is the section for spawns that you really want to be nowhere near.
+# Spawns appear with a flashing red circle on the map and will be 
+# underlined in the spawn list.
+# If the spawn gets with 1000 ticks, a yellow line will point to it.
+# If the spawn gets with 500 ticks, a flashing red line will point to it.
+# See the examples section below for details.
+
+[Danger]
+Name:Vekis
+Name:Gorenaire
+Dragoon
+General
+
+# [Locate] is the section for rares you are searching for.
+# Spawns appear with a flashing white circle on the map and are italicized 
+# in the spawn list.
+# A solid white line points to it constantly.
+# See the examples section below for details.
+
+[Locate]
+Name:Quillimane
+Name:Grizzleknot
+
+# [Alert] is the section for spawns you wish whose presense you wish to be 
+# alerted to.  Alerted spawns will appear in bold in the spawn list.
+# Information will be displayed to the console window if Filters_AlertInfo is 1
+# A system beep will be dispatched if Filters_SpawnFilterAudio is set to 1
+# And the command specified by Filters_SpawnAudioCommand, 
+# Filters_DeathAudioCommand, and Filters_DeSpawnAudioCommand will be executed
+# upon spawn appearance, death, and despawning respectively.
+# See the examples section below for details.
+
+[Alert]
+Name:Emperor Crush
+
+# [Filtered] is the section for spawns that you don't care about and don't
+# wish to appear on the map.  They will appear grey in the spawn list.
+# See the examples section below for details.
+
+[Filtered]
+Name:orc pawn
+
