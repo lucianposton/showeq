@@ -1284,7 +1284,7 @@ void EQItemDB::playerBook(const playerBookStruct* bookp, uint32_t size, uint8_t)
   if ((size == sizeof(playerBookStruct)) || 
       (size == (sizeof(playerBookStruct) - sizeof(itemBookStruct) +
 		sizeof(itemItemStruct))))
-    AddItem(&bookp->book, ITEM_BOOK);
+    AddItem(&bookp->book, sizeof(bookp->book), ITEM_BOOK);
   else
     fprintf(stderr, "Ooops!!!! playerBook()\n");
 }
@@ -1294,7 +1294,7 @@ void EQItemDB::playerContainer(const playerContainerStruct* containp, uint32_t s
   if ((size == sizeof(playerContainerStruct)) ||
       (size == (sizeof(playerContainerStruct) - sizeof(itemContainerStruct) + 
 		sizeof(itemItemStruct))))
-    AddItem(&containp->container, ITEM_CONTAINER);
+    AddItem(&containp->container, sizeof(containp->container), ITEM_CONTAINER);
   else 
     fprintf(stderr, "Ooops!!!! plyaerContainer()\n");
 }

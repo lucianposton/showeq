@@ -1,6 +1,12 @@
 dohpaZ (06/06/02)
 ------------------
 Modifications:
+ + Minor bug fix for itemdb handling of playerBook and playerContainer
+ + Minor tweak to showitem.cgi to update coloring of the binary data
+
+dohpaZ (06/06/02)
+------------------
+Modifications:
  + version 4.2.8
  + Added the ability to remove all spawn points to the Spawn Point List context
    window.

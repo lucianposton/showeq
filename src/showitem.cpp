@@ -41,6 +41,7 @@ int main (int argc, char *argv[])
     "          span.head { color: black }\n"
     "          span.known1 { color: green }\n"
     "          span.known2 { color: blue }\n"
+    "          span.varies { color: purple }\n"
     "          span.unknown { color: red }\n"
     "          b.warning { color: red }\n"
     "      -->\n"
@@ -397,6 +398,7 @@ void printdata (QTextStream& out, int len, unsigned char *data)
   const char* redUnknown = "</SPAN><SPAN class=\"unknown\">";
   const char* green      = "</SPAN><SPAN class=\"known1\">";
   const char* blue       = "</SPAN><SPAN class=\"known2\">";
+  const char* varies    = "</SPAN><SPAN class=\"varies\">";
   const char* col = green;
   hex[0] = 0;
   asc[0] = 0;
@@ -421,170 +423,53 @@ void printdata (QTextStream& out, int len, unsigned char *data)
       //   BLUE and GREEN = known fields
       switch (c)
 	{
-	case 35:
+	case 64:
 	  col = blue;
-	  break;
-	case 95:
-	  col = green;
-	  break;
-	case 101:
-	  col = blue;
-	  break;
-	case 103:
-	  col = redUnknown;
-	  break;
-	case 125:
-	  col = blue;
-	  break;
-	case 126:
-	  col = green;
-	  break;
-	case 127:
-	  col = blue;
-	  break;
-	case 128:
-	  col = green;
-	  break;
-	case 129:
-	  col = redUnknown;
-	  break;
-	case 130:
-	  col = green;
-	  break;
-	case 132:
-	  col = blue;
-	  break;
-	case 134:
-	  col = green;
-	  break;
-	case 136:
-	  col = blue;
-	  break;
-	case 140:
-	  col = green;
 	  break;
 	case 144:
+	  col = green;
+	  break;
+	case 150:
 	  col = redUnknown;
 	  break;
-	case 172:
-	  col = green;
-	  break;
-	case 173:
-	  col = blue;
-	  break;
 	case 174:
-	  col = green;
+	  col = blue;
 	  break;
 	case 175:
-	  col = blue;
+	  col = green;
 	  break;
 	case 176:
-	  col = green;
+	  col = blue;
 	  break;
 	case 177:
-	  col = blue;
-	  break;
-	case 178:
 	  col = green;
 	  break;
-	case 179:
-	  col = blue;
+	case 178:
+	  col = redUnknown;
 	  break;
 	case 180:
 	  col = green;
 	  break;
-	case 181:
-	  col = blue;
-	  break;
 	case 182:
-	  col = green;
-	  break;
-	case 183:
 	  col = blue;
 	  break;
 	case 184:
 	  col = green;
 	  break;
-	case 185:
-	  col = blue;
-	  break;
 	case 186:
-	  col = green;
-	  break;
-	case 187:
 	  col = redUnknown;
 	  break;
-	case 189:
-	  col = green;
-	  break;
-	case 190:
+	case 188:
 	  col = blue;
-	  break;
-	case 191:
-	  col = green;
 	  break;
 	case 192:
-	  col = redUnknown;
-	  break;
-	case 193:
-	  col = green;
-	  break;
-	case 194:
-	  col = blue;
-	  break;
-	case 195:
 	  col = green;
 	  break;
 	case 196:
-	  col = blue;
-	  break;
-	case 197:
-	  col = green;
-	  break;
-	case 198:
 	  col = redUnknown;
 	  break;
-	case 200:
-	  col = blue;
-	  break;
-	case 204:
-	  col = redUnknown;
-	  break;
-	case 206:
-	  col = green;
-	  break;
-	case 208:
-	  col = blue;
-	  break;
-	case 210:
-	  col = redUnknown;
-	  break;
-	case 212:
-	  col = blue;
-	  break;
-	case 214:
-	  col = redUnknown;
-	  break;
-	case 215:
-	  col = blue;
-	  break;
-	case 216:
-	  col = green;
-	  break;
-	case 217:
-	  col = blue;
-	  break;
-	case 218:
-	  col = green;
-	  break;
-	case 219:
-	  col = redUnknown;
-	  break;
-	case 220:
-	  col = blue;
-	  break;
-	case 222:
-	  col = redUnknown;
+	case 228: // not gonna bother dealing with coloring the 3 variants
+	  col = varies;
 	  break;
 	}
       strcat (hex, col);

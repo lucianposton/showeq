@@ -62,8 +62,8 @@ class EQItemDB : public QObject, protected ITEMDBBASE
    // DB Access methods   
    // Add's items to the enabled databases
    bool AddItem(const itemStruct* item, 
-		uint32_t size = sizeof(itemStruct),
-		uint16_t flag = 0x0000, 
+		uint32_t size,
+		uint16_t flag, 
 		bool updated = true);
 
    // Delete's an item from the enabled databases
