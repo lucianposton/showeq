@@ -1,3 +1,10 @@
+ratt (07/Feb/02)
+-------------------
+
+Gave showeqitemdbtool the ability to export lists in
+CSV or LSV format making database importation a 
+little more friendly
+
 fee (05/02/02)
 -------------------
 
