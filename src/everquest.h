@@ -559,7 +559,7 @@ struct charProfileStruct
 /*5016*/ uint32_t  ldon_tak_points;    // Earned TAK points
 /*5020*/ uint8_t   unknown4352[20];    // *** Placeholder
 /*5040*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*5044*/ uint8_t   unknown4380[636];   // *** Placeholder
+/*5044*/ uint8_t   unknown4380[5356];   // *** Placeholder
 }; /* 5680 */
 
 
@@ -758,7 +758,7 @@ union {
 /*053*/ char    unknown053;
 /*054*/ char    name[64]; // name
 /*118*/ uint8_t haircolor; // hair color
-/*119*/ uint8_t light; // 0=visible,1=invisible
+/*119*/ uint8_t unknown119[1]; //was set to light but is wrong light 0=visible,1=invisible
 /*120*/ uint8_t invis;
 /*121*/ int8_t  maxHp; // max hp
 /*122*/ uint8_t pvp; // 0=Not pvp,1=pvp
@@ -776,7 +776,8 @@ union {
 /*141*/ int8_t	beardcolor;
 /*142*/ int8_t	hairstyle;
 /*143*/ int8_t	face;
-/*144*/ int8_t	unknown141[7]; 
+/*144*/ int8_t	unknown141[6];
+/*150*/ uint8_t light; // 0a is a burned out or lightstone 0b is a GLS and 0c is a fire beetle eye
 /*151*/ float   size; // Size
 /*155*/ uint8_t helm;
 /*156*/ float   runspeed; //
@@ -795,7 +796,7 @@ union {
 /*250*/ int8_t	unknown249[4]; 
 /*254*/ uint32_t petOwnerId;
 /*258*/ int16_t deity;
-/*260*/ uint8_t unknown260[7];
+/*260*/ uint8_t unknown260[31];
 /*267*/
 }; 
 

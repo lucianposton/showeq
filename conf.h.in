@@ -3,6 +3,9 @@
 /* Define to 1 if you have the <deque> header file. */
 #undef HAVE_DEQUE
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Define if libgd supports PNG */
 #undef HAVE_GD_IMAGEPNG
 
