@@ -3886,11 +3886,13 @@ void EQInterface::playerItem(const playerItemStruct* itemp)
   {
     QTextStream out(&bankfile);
     out << "Item: " << itemp->item.name;
-    if (itemp->item.stackable ==  1)
-      out << "x" << itemp->item.number;
-    out << ",(" << itemp->item.lore << "), Slot: " 
-	<< slotName << endl;
+    if (itemp->item.stackable ==  1) out << "x" << itemp->item.number;
+    out << ",(" << itemp->item.lore << "), Slot: " << slotName
+        << " (" << itemp->item.equipSlot << ")" << " (HP/Mana: "
+        << itemp->item.HP << " / " << itemp->item.MANA << ")"
+        << endl;
     }
+
 }
 
 void EQInterface::playerBook(const playerBookStruct* bookp)

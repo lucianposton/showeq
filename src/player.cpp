@@ -672,7 +672,7 @@ void Player::updateSpawnHP(const hpUpdateStruct *hpupdate)
     return;
 
   m_curHP = m_plusHP + hpupdate->curHp;
-  m_maxHP = m_plusHP + hpupdate->maxHp;
+  m_maxHP = hpupdate->maxHp;
 
   m_validHP = true;
 
