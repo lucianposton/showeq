@@ -150,7 +150,7 @@ int main (int argc, char **argv)
    printf ("All ShowEQ source code is Copyright (C) 2000, 2001, 2002 by the respective ShowEQ Developers\n");
    printf ("Binary distribution without source code and resale are explictily NOT authorized by ANY party.\n");
    printf ("If you have paid for this software in any way, shape, or form, the person selling the\n");
-   printf ("software is doing so in violation of licensing methods of this product.\n\n");
+   printf ("software is doing so in violation of the express wishes and intents of the authors of this product.\n\n");
    printf ("Please see http://seq.sourceforge.net for further information\n\n");
 
    /* Initialize the parameters with default values */
