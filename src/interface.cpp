@@ -674,9 +674,11 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_netMenu->insertItem("Lo&g", pLogMenu);
    pLogMenu->setCheckable(true);
    m_id_log_AllPackets = pLogMenu->insertItem("All Packets", this, SLOT(toggle_log_AllPackets()), Key_F5);
-   m_id_log_ZoneData   = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F6);
-   m_id_log_UnknownData= pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F7);
+   m_id_log_WorldData   = pLogMenu->insertItem("World Data", this, SLOT(toggle_log_WorldData()), Key_F6);
+   m_id_log_ZoneData   = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F7);
+   m_id_log_UnknownData= pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F8);
    menuBar()->setItemChecked (m_id_log_AllPackets , showeq_params->logAllPackets);
+   menuBar()->setItemChecked (m_id_log_WorldData   ,showeq_params->logWorldPackets);
    menuBar()->setItemChecked (m_id_log_ZoneData   , showeq_params->logZonePackets);
    menuBar()->setItemChecked (m_id_log_UnknownData, showeq_params->logUnknownZonePackets);
 
@@ -696,7 +698,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    pOpCodeMenu->insertItem("Log &Filename...", this,
 			  SLOT(select_opcode_file()));
    pOpCodeMenu->setItemChecked(x, showeq_params->monitorOpCode_Log);
-   m_id_view_UnknownData = m_netMenu->insertItem("View Unknown Data", this, SLOT(toggle_view_UnknownData()) , Key_F8);
+   m_id_view_UnknownData = m_netMenu->insertItem("View Unknown Data", this, SLOT(toggle_view_UnknownData()) , Key_F9);
    viewUnknownData = false;
    menuBar()->setItemChecked(m_id_view_UnknownData, viewUnknownData);
    m_netMenu->insertSeparator(-1);
@@ -1358,6 +1360,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // connect EQInterface slots to EQPacket signals
    connect (m_packet, SIGNAL(toggle_log_AllPackets()),
 	    this, SLOT(toggle_log_AllPackets()));
+   connect (m_packet, SIGNAL(toggle_log_WorldData()),  
+	    this, SLOT(toggle_log_WorldData()));
    connect (m_packet, SIGNAL(toggle_log_ZoneData()),  
 	    this, SLOT(toggle_log_ZoneData()));
    connect (m_packet, SIGNAL(toggle_log_UnknownData()),
@@ -1378,10 +1382,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
             this, SLOT(stsMessage(const QString &, int)));
    connect (m_spawnShell, SIGNAL(numSpawns(int)),
             this, SLOT(numSpawns(int)));
-   connect (m_packet, SIGNAL(numPacket(int)),
-            this, SLOT(numPacket(int)));
-   connect (m_packet, SIGNAL(resetPacket(int)),
-            this, SLOT(resetPacket(int)));
+   connect (m_packet, SIGNAL(numPacket(int, int)),
+            this, SLOT(numPacket(int, int)));
+   connect (m_packet, SIGNAL(resetPacket(int, int)),
+            this, SLOT(resetPacket(int, int)));
    
    if (m_expWindow != NULL)
    {
@@ -2836,6 +2840,13 @@ void EQInterface::toggle_log_AllPackets (void)
   pSEQPrefs->setPrefBool("LogAllPackets", "PacketLogging", showeq_params->logAllPackets);
 }
 
+void EQInterface::toggle_log_WorldData (void)
+{
+    showeq_params->logWorldPackets = !showeq_params->logWorldPackets;
+    menuBar()->setItemChecked (m_id_log_WorldData, showeq_params->logWorldPackets);
+  pSEQPrefs->setPrefBool("LogWorldPackets", "PacketLogging", showeq_params->logWorldPackets);
+}
+
 void EQInterface::toggle_log_ZoneData (void)
 {
     showeq_params->logZonePackets = !showeq_params->logZonePackets;
@@ -3455,16 +3466,20 @@ EQInterface::numSpawns(int num)
 }
 
 void 
-EQInterface::resetPacket(int num)
+EQInterface::resetPacket(int num, int stream)
 {
+  if(stream != (int)zone2client);
   // if passed 0 reset the average
   m_packetStartTime = mTime();
   m_initialcount = num;
 }
 
 void
-EQInterface::numPacket(int num)
+EQInterface::numPacket(int num, int stream)
 {
+
+  if(stream != (int)zone2client)
+    return;
   // start the timer of not started
   if (!m_packetStartTime)
     m_packetStartTime = mTime();

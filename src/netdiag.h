@@ -25,15 +25,16 @@ class NetDiag : public SEQWindow
   ~NetDiag();
 
  public slots:
-   void numPacket              (int);
-   void resetPacket            (int);
+   void numPacket              (int, int);
+   void resetPacket            (int, int);
    void clientChanged          (uint32_t);
    void clientPortLatched      (uint16_t);
    void serverPortLatched      (uint16_t);
    void sessionTrackingChanged (uint8_t);
-   void seqReceive             (int);
-   void seqExpect              (int);
+   void seqReceive             (int, int);
+   void seqExpect              (int, int);
    void keyChanged             (void);
+   void cacheSize              (int, int);
 
  protected:
    QString print_addr(in_addr_t);
@@ -41,18 +42,20 @@ class NetDiag : public SEQWindow
  private:
   EQPacket* m_packet;
   QSpinBox* m_playbackSpeed;
-  QLabel* m_packetTotal;
-  QLabel* m_packetRecent;
-  QLabel* m_packetAvg;
-  QLabel* m_seqExp;
-  QLabel* m_seqCur;
+  QLabel* m_packetTotal[MAXSTREAMS];
+  QLabel* m_packetRecent[MAXSTREAMS];
+  QLabel* m_packetAvg[MAXSTREAMS];
+  QLabel* m_seqExp[MAXSTREAMS];
+  QLabel* m_seqCur[MAXSTREAMS];
   QLabel* m_clientLabel;
   QLabel* m_sessionLabel;
-  QLabel* m_serverLabel;
+  QLabel* m_serverPortLabel;
+  QLabel* m_clientPortLabel;
   QLabel* m_decodeKeyLabel;
+  QLabel* cache[MAXSTREAMS];
 
-  int  m_packetStartTime;
-  int  m_initialcount;
+  int  m_packetStartTime[MAXSTREAMS];
+  int  m_initialcount[MAXSTREAMS];
 };
 
 #endif // EQNETDIAG_H

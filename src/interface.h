@@ -94,8 +94,8 @@ class EQInterface:public QMainWindow
    void msgReceived(const QString &);
    void stsMessage(const QString &, int timeout = 0);
    void numSpawns(int);
-   void numPacket(int);
-   void resetPacket(int);
+   void numPacket(int, int);
+   void resetPacket(int, int);
    void attack2Hand1(const attack2Struct *);
    void action2Message(const action2Struct *);
    void itemShop(const itemInShopStruct* items);
@@ -156,6 +156,7 @@ class EQInterface:public QMainWindow
    void saveSpawnPaths(void);
    void saveSpawnPath(QTextStream& out, const Item* item);
    void toggle_log_AllPackets();
+   void toggle_log_WorldData();
    void toggle_log_ZoneData();
    void toggle_log_UnknownData();
    void listSpawns(void);
@@ -345,6 +346,7 @@ class EQInterface:public QMainWindow
    int char_ClassID[PLAYER_CLASSES];
    int char_RaceID[PLAYER_RACES];
    int  m_id_log_AllPackets;
+   int  m_id_log_WorldData;
    int  m_id_log_ZoneData;
    int  m_id_log_UnknownData;
    int  m_id_opt_OptionsDlg;

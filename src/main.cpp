@@ -56,6 +56,7 @@
 #define   ITEMDB_DATA_FILENAME_OPTION   29
 #define   ITEMDB_RAW_FILENAME_OPTION    30
 #define   ITEMDB_DATABASES_ENABLED      31
+#define   WORLD_LOG_FILENAME_OPTION     32
 #define   ITEMDB_DISABLE                3
 #define   STATUS_FONT_SIZE              4
 #define   RESTORE_DECODE_KEY            5
@@ -113,6 +114,7 @@ static struct option option_list[] = {
   {"ip-address",                   required_argument,  NULL,  IPADDR_OPTION},
   {"mac-address",                  required_argument,  NULL,  MACADDR_OPTION},
   {"global-log-filename",          required_argument,  NULL,  GLOBAL_LOG_FILENAME_OPTION},
+  {"world-log-filename",           required_argument,  NULL,  WORLD_LOG_FILENAME_OPTION},
   {"zone-log-filename",            required_argument,  NULL,  ZONE_LOG_FILENAME_OPTION},
   {"unknown-zone-log-filename",    required_argument,  NULL,  UNKNOWN_LOG_FILENAME_OPTION},
   {"log-all",                      no_argument,        NULL,  GLOBAL_LOG_OPTION},
@@ -283,6 +285,7 @@ int main (int argc, char **argv)
    showeq_params->logUnknownZonePackets  = pSEQPrefs->getPrefBool("LogUnknownZonePackets", section,  0);
    showeq_params->GlobalLogFilename = pSEQPrefs->getPrefString("GlobalLogFilename", section, LOGDIR "/global.log") ;
    showeq_params->ZoneLogFilename = pSEQPrefs->getPrefString("ZoneLogFilename", section, LOGDIR "/zone.log");
+   showeq_params->WorldLogFilename = pSEQPrefs->getPrefString("WorldLogFilename", section, LOGDIR "/world.log");
    showeq_params->UnknownZoneLogFilename = pSEQPrefs->getPrefString("UnknownZoneLogFilename", section, LOGDIR "/unknownzone.log") ;
    /* Different files for different kinds of encrypted data */
    showeq_params->logEncrypted = pSEQPrefs->getPrefBool("LogEncrypted", section, 0);
@@ -601,6 +604,13 @@ int main (int argc, char **argv)
             break;
          }
 
+
+         /* Filename for logging world change packets */
+         case WORLD_LOG_FILENAME_OPTION:
+         {
+            showeq_params->WorldLogFilename = optarg;
+            break;
+         }
 
          /* Filename for logging zone change packets */
          case ZONE_LOG_FILENAME_OPTION:

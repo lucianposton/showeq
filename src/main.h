@@ -75,10 +75,12 @@ struct ShowEQParams
   bool           spawnlog_enabled;
   
   bool           logAllPackets;
+  bool           logWorldPackets;
   bool           logZonePackets;
   bool           logUnknownZonePackets;
   bool           logEncrypted;
   QString        GlobalLogFilename;
+  QString        WorldLogFilename;
   QString        ZoneLogFilename;
   QString        UnknownZoneLogFilename;
   QString        EncryptedLogFilenameBase;

@@ -43,7 +43,10 @@
 //#define PACKET_PROCESS_DIAG 3 // verbosity level 0-n
 
 // this define is used to diagnose cache handling (in decodePacket mostly)
-//#define PACKET_CACHE_DIAG 3 // verbosity level (0-n)
+// #define PACKET_CACHE_DIAG 3 // verbosity level (0-n)
+
+// diagnose structure size changes
+//#define PACKET_PROCESS_FRAG_DIAG
 
 // define this to be pedantic about what packets are acceptable (no CRC errors)
 #define PACKET_PEDANTIC 2
@@ -78,6 +81,9 @@ const in_port_t ChatServerPort = 5998;
 #ifdef PACKET_CACHE_DIAG
 static size_t maxServerCacheCount = 0;
 #endif
+
+// used to translate EQStreamID to a string for debug and reporting
+static const char* EQStreamStr[] = {"client-world", "world-client", "client-zone", "zone-client"};
 
 //----------------------------------------------------------------------
 // global variables
@@ -439,6 +445,25 @@ EQPacket::EQPacket (QObject * parent, const char *name)
     m_vPacket(NULL),
     m_timer(NULL)
 {
+
+   for (int a = 0; a < MAXSTREAMS + 1; a++)
+   {
+       m_serverCache[a] = new EQPacketMap;
+       m_fragmentData[a] = NULL;
+       m_serverArqSeqExp[a] = 0;
+       m_serverArqSeqFound[a] = FALSE;
+       m_fragmentDataSize[a] = 0;
+       m_fragmentDataAllocSize[a] = 0;
+       m_fragmentSeq[a] = 0;
+       m_fragmentCur[a] = 0;
+       m_packetCount[a] = 0;
+   }
+
+   m_session_tracking_enabled = showeq_params->session_tracking;
+   m_eqstreamid = unknown_stream;
+   m_clientPort = 0;
+   m_serverPort = 0;
+
    struct hostent *he;
    struct in_addr  ia;
    if (showeq_params->ip.isEmpty() && showeq_params->mac_address.isEmpty())
@@ -504,9 +529,11 @@ EQPacket::EQPacket (QObject * parent, const char *name)
 	   this, SIGNAL(finishedDecodeBatch(void)));
 
    m_busy_decoding     = false;
-   m_serverArqSeqFound = false;
-
-   m_serverArqSeqExp  = 0;
+   for (int i = 0; i < MAXSTREAMS + 1 ; i++)
+   {
+       m_serverArqSeqFound[i] = false;
+       m_serverArqSeqExp[i]  = 0;
+   }
    m_serverPort       = 0;
    m_clientPort       = 0;
 
@@ -539,8 +566,8 @@ EQPacket::EQPacket (QObject * parent, const char *name)
            // Must appear befire next call to getPrefString, which uses a static string
            printf("Recording packets to '%s' for future playback\n", filename);
 
-	   m_vPacket->setFlushPacket(pSEQPrefs->getPrefBool("FlushPackets", 
-							    section, true));
+           if (pSEQPrefs->getPrefString("FlushPackets", section))
+           m_vPacket->setFlushPacket(true);
        }
 
        else if (showeq_params->playbackpackets)
@@ -568,7 +595,6 @@ EQPacket::EQPacket (QObject * parent, const char *name)
    else
        m_serverArqSeqGiveUp = 32;
 
-   m_packetCount = 0;
 
 #if HAVE_LIBEQ
    if (showeq_params->broken_decode)
@@ -619,6 +645,8 @@ EQPacket::~EQPacket()
     // delete the timer
     delete m_timer;
   }
+
+  resetEQPacket();
 }
 
 void EQPacket::InitializeOpCodeMonitor (void)
@@ -761,10 +789,10 @@ void EQPacket::processPackets (void)
 
   /* Set flag that we are busy decoding */
   m_busy_decoding = true;
-
+  
   unsigned char buffer[1500]; 
   short size;
-
+  
   /* fetch them from pcap */
   while ((size = m_packetCapture->getPacket(buffer)))
   {
@@ -962,7 +990,6 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 
   EQUDPIPPacketFormat packet(buffer, size, false);
 
-  emit numPacket(++m_packetCount);
   
   if (showeq_params->logAllPackets)
   {
@@ -987,7 +1014,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
     return;
 
   /* discard pure ack/req packets and non valid flags*/
-  if (packet.flagsHi() < 0x08 || packet.flagsHi() > 0x46 || size < 10)
+  if (packet.flagsHi() < 0x02 || packet.flagsHi() > 0x46 || size < 10)
   {
 #if 0 // ZBTEMP: World Chat server experiments
     //if ((packet.getSourcePort() == WorldServerChatPort) ||
@@ -1033,43 +1060,28 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   }
 #endif
 
-  /* World Server  -> Client Packet */
-  if (packet.getSourcePort() == WorldServerGeneralPort)
+  /* Client Detection */
+  if (m_detectingClient && packet.getSourcePort() == WorldServerGeneralPort)
   {
-    /* unless we really start paying attention to World Servers, we should 
-       be able to safely ignore sequencing and arq */
-
-    if (m_detectingClient)
-    {
       showeq_params->ip = packet.getIPv4DestA();
       m_client_addr = packet.getIPv4DestN();
       m_detectingClient = false;
       emit clientChanged(m_client_addr);
-      printf("Client Detected: %s\n", 
-	     (const char*)showeq_params->ip);
-    }
-
-    dispatchWorldData (packet.payloadLength(), packet.payload(), DIR_SERVER);
-    return;
+      printf("Client Detected: %s\n", (const char*)showeq_params->ip);
   }
-  else if (packet.getDestPort() == WorldServerGeneralPort)
+  else if (m_detectingClient && packet.getDestPort() == WorldServerGeneralPort)
   {
-    /* unless we really start paying attention to World Servers, we should 
-       be able to safely ignore sequencing and arq */
-    if (m_detectingClient)
-    {
-      showeq_params->ip = packet.getIPv4SourceA();
-      m_client_addr = packet.getIPv4SourceN();
-      m_detectingClient = false;
-      emit clientChanged(m_client_addr);
-      printf("Client Detected: %s\n", 
-	     (const char*)showeq_params->ip);
-    }
-
-    dispatchWorldData (packet.payloadLength(), packet.payload(), DIR_CLIENT);
-    return;
+     showeq_params->ip = packet.getIPv4SourceA();
+     m_client_addr = packet.getIPv4SourceN();
+     m_detectingClient = false;
+     emit clientChanged(m_client_addr);
+     printf("Client Detected: %s\n", (const char*)showeq_params->ip);
   }
-  else if (packet.getSourcePort() == WorldServerChatPort)
+  /* end client detection */
+
+
+
+  if (packet.getSourcePort() == WorldServerChatPort)
   {
     dispatchWorldChatData(packet.payloadLength(), packet.payload(), DIR_SERVER);
 
@@ -1096,355 +1108,560 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
     return;
   }
 
-  // packet from the client
+
+  /* stream identification */
   if (packet.getIPv4SourceN() == m_client_addr)
   {
-    if ( packet.isSEQStart() && (m_session_tracking_enabled == 1))
-    {
-        m_session_tracking_enabled = 2;
+    if (packet.getDestPort() == WorldServerGeneralPort)
+       m_eqstreamid = client2world;
+    else 
+       m_eqstreamid = client2zone;
 
-	m_clientPort = packet.getSourcePort();
+    m_eqstreamdir = DIR_CLIENT;
+  }
+  else if (packet.getIPv4DestN() == m_client_addr)
+  {
+    if (packet.getSourcePort() == WorldServerGeneralPort)
+       m_eqstreamid = world2client;
+    else 
+       m_eqstreamid = zone2client;
+    
+    m_eqstreamdir = DIR_SERVER;
+  }
+  else 
+  {
+     m_eqstreamid = unknown_stream;
+     return;
+  } /* end stream identification*/
+
+  emit numPacket(++m_packetCount[m_eqstreamid], (int)m_eqstreamid);
+  
+  if (!packet.isARQ()) // process packets that don't have an arq sequence
+  { 
+     /* does not require sequencing, so straight to dispatch */
+     if ((m_eqstreamid == zone2client) || (m_eqstreamid == client2zone))
+     {
+        dispatchZoneData (packet.payloadLength(), packet.payload(), m_eqstreamdir);
+        return;
+     }
+     else
+     {
+       dispatchWorldData (packet.payloadLength(), packet.payload(), m_eqstreamdir);
+       return;
+     }
+  }
+  else if (packet.isARQ()) // process ARQ sequences
+  {
+     uint16_t serverArqSeq = packet.arq();
+     emit seqReceive(serverArqSeq, (int)m_eqstreamid);
+      
+     /* this conditions should only be met once per zone/world, New Sequence */
+     if (packet.isSEQStart() && !packet.isClosingLo() && m_session_tracking_enabled < 2)
+     {
+
+#ifdef PACKET_PROCESS_DIAG
+        printf("EQPacket: SEQStart found, setting arq seq, %04x  stream %s\n",
+               serverArqSeq, EQStreamStr[m_eqstreamid]);
+#endif
+
+        // hey, a SEQStart, use it's packet to set ARQ
+        m_serverArqSeqExp[m_eqstreamid] = serverArqSeq;
+        m_serverArqSeqFound[m_eqstreamid] = true;
+        emit seqExpect(m_serverArqSeqExp[m_eqstreamid], (int)m_eqstreamid);
+
+
+        if (m_eqstreamid == zone2client && m_session_tracking_enabled && !showeq_params->playbackpackets)
+        {
+           m_session_tracking_enabled = 2;
+
+	   m_serverPort = packet.getSourcePort();
+           m_clientPort = packet.getDestPort();
 	
-	if (!showeq_params->playbackpackets)
-	{
-	  if (showeq_params->mac_address.length() == 17)
-          {
-	    m_packetCapture->setFilter(showeq_params->device, 
-				       showeq_params->mac_address,
-				       showeq_params->realtime, 
-				       MAC_ADDRESS_TYPE, m_serverPort, 
-				       m_clientPort);
-	    printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
-		    (const char*)showeq_params->mac_address, 
-		    m_clientPort, m_serverPort);
-	  }
-	  else
-	  {
-	    m_packetCapture->setFilter(showeq_params->device, 
-				       showeq_params->ip,
-				       showeq_params->realtime, 
-				       IP_ADDRESS_TYPE, m_serverPort, 
-				       m_clientPort);
-	    printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
-		    (const char*)showeq_params->ip, 
-		    m_clientPort, m_serverPort);
-	  }
-	}
+	   if (!showeq_params->playbackpackets)
+           {
+	      if (showeq_params->mac_address.length() == 17)
+              {
+	         m_packetCapture->setFilter(showeq_params->device, 
+  				            showeq_params->mac_address,
+				            showeq_params->realtime, 
+				            MAC_ADDRESS_TYPE, 0, 
+				            m_clientPort);
+	         printf ("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d\n",
+		         (const char*)showeq_params->mac_address, 
+		         m_clientPort);
+	      }
+	      else
+	      {
+	         m_packetCapture->setFilter(showeq_params->device, 
+	     			            showeq_params->ip,
+				            showeq_params->realtime, 
+				            IP_ADDRESS_TYPE, 0, 
+				            m_clientPort);
+	         printf ("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d\n",
+	  	         (const char*)showeq_params->ip, 
+		         m_clientPort);
+	      }
+	   }
+        }
 
 	// notify that the client port has been latched
 	emit sessionTrackingChanged(m_session_tracking_enabled);
 	emit clientPortLatched(m_clientPort);
-    }
-    
-    // only dispatch packets with ASQ that aren't fragmented
-    if (packet.isASQ() && !packet.isFragment())
-    {
-      dispatchZoneData(packet.payloadLength(), 
-		       packet.payload(), DIR_CLIENT);
-      return;
-    }
-#if 0 // ZBTEMP: Floyd, you need packet caching and ordering to handle fragments
-    else
-	  dispatchZoneSplitData (packet, DIR_CLIENT);
-#endif
-    return;
-  }
-
-  // packet destined for client
-  else if (packet.getIPv4DestN() == m_client_addr)
-  {
-    if (packet.isClosingHi() && packet.isClosingLo())
-    {
-        m_serverArqSeqFound = false;
-	if(m_session_tracking_enabled)
-	{
-	  m_session_tracking_enabled = 1;
-	  emit sessionTrackingChanged(m_session_tracking_enabled);
-	}
-    }
-    // process packets that don't have an arq sequence
-    if (!packet.isARQ())
-    {
-      /* does not require sequencing, so straight to dispatch */
-      dispatchZoneData (packet.payloadLength(), 
-			packet.payload(), DIR_SERVER);
-      return;
-    }
-    else if (packet.isARQ()) // process ARQ sequences
-    {
-      uint16_t serverArqSeq = packet.arq();
-      emit seqReceive(serverArqSeq);
-      
-      /* this conditions should only be met once per zone, New Sequence */
-      if (!m_serverArqSeqFound)
-      {
-	if (packet.isSEQStart())
-	{
-	  // hey, a SEQStart, use it's packet to set 
+     }
+     else if (!m_serverArqSeqFound[m_eqstreamid] && m_session_tracking_enabled == 0 &&
+              !packet.isClosingHi() && !packet.isClosingLo() && m_eqstreamid == zone2client)
+     {
 #ifdef PACKET_PROCESS_DIAG
-	  printf("SEQ: SEQStart found, setting arq seq, %04x\n", serverArqSeq);
+        printf("SEQ: new sequence found, setting arq seq, %04x  stream %d\n", serverArqSeq, m_eqstreamid);
 #endif
-	  m_serverArqSeqExp = serverArqSeq;
-	  m_serverArqSeqFound = true;
-	  emit seqExpect(m_serverArqSeqExp);
-	}
-	else
-	{
-	  // the user must have started up with an EQ session already running
-	  // we hope... /shrug
-#ifdef PACKET_PROCESS_DIAG
-	  printf("SEQ: New sequence found, setting arq seq, %04x\n",
-		 serverArqSeq);
-#endif
-	  m_serverArqSeqExp = serverArqSeq;
-	  m_serverArqSeqFound = true;
-	  emit seqExpect(m_serverArqSeqExp);
-	}
-      }
-
-      // is this the currently expected sequence, if so, do something with it.
-      if (m_serverArqSeqExp == serverArqSeq)
-      {
-	m_serverArqSeqExp = serverArqSeq + 1;
-	emit seqExpect(m_serverArqSeqExp);
+        m_serverArqSeqExp[m_eqstreamid] = serverArqSeq;
+        m_serverArqSeqFound[m_eqstreamid] = true;
+        emit seqExpect(m_serverArqSeqExp[m_eqstreamid], (int)m_eqstreamid);
+     }
 
 #ifdef PACKET_PROCESS_DIAG
-	printf("SEQ: Found next arq in data stream, incrementing arq seq, %04x\n", 
-	       serverArqSeq);
+     if (m_eqstreamid == client2zone)
+        printf("client2zone diag: seqexp 0x%04x curseq 0x%04x\n", m_serverArqSeqExp[m_eqstreamid], serverArqSeq);
+#endif
+
+     // is this the currently expected sequence, if so, do something with it.
+     if (m_serverArqSeqExp[m_eqstreamid] == serverArqSeq)
+     {
+	m_serverArqSeqExp[m_eqstreamid] = serverArqSeq + 1;
+	emit seqExpect(m_serverArqSeqExp[m_eqstreamid], (int)m_eqstreamid);
+
+#ifdef PACKET_PROCESS_DIAG
+        printf("SEQ: Found next arq in data stream, incrementing arq seq, %04x\n", 
+               serverArqSeq);
+#endif
+
+        if (!packet.isASQ() && !packet.isFragment() && !packet.isClosingHi())
+        {
+           // seems to be a sort of ping from client to server, has ARQ
+           // but no ASQ, Flags look like 0x0201 (network byte order)
+#ifdef PACKET_PROCESS_DIAG
+           printf("SEQ: ARQ without ASQ from stream %s arq 0x%04x\n",
+                   EQStreamStr[m_eqstreamid], serverArqSeq);
+#endif
+        }
+
+        // since the servers do not care about client closing sequences, we won't either
+        // Hey clients have rights too, or not! 
+        else if (packet.isClosingHi() && packet.isClosingLo() && m_eqstreamid == zone2client)
+        {
+#ifdef PACKET_PROCESS_DIAG
+           printf("EQPacket: Closing HI & LO, arq %04x\n", packet.arq());  
+#endif
+           // reseting the pcap filter to a non-exclusive form allows us to beat 
+           // the race condition between timer and processing the zoneServerInfo
+           if(!showeq_params->playbackpackets) 
+             m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+                                        showeq_params->realtime, IP_ADDRESS_TYPE, 0, 0);
+	   printf ("EQPacket: SEQClosing detected, awaiting next zone session,  pcap filter: EQ Client %s\n",
+	  	   (const char*)showeq_params->ip);
+
+           if (m_session_tracking_enabled)
+              m_session_tracking_enabled = 1; 
+
+           // we'll be waiting for a new SEQStart for ALL streams
+           // it seems we only ever see a proper closing sequence from the zone server
+           // so reset all packet sequence caches 
+           resetEQPacket();
+
+           return;
+
+        }
+	
+        // if the packet is a fragment dispatch to split
+        else if (packet.isFragment())
+           dispatchSplitData (packet, m_eqstreamdir, m_eqstreamid);
+
+        else
+        {
+           if ((m_eqstreamid == zone2client) || (m_eqstreamid == client2zone))
+           {
+              dispatchZoneData (packet.payloadLength(), packet.payload(), m_eqstreamdir);
+           }
+           else
+           {
+	      dispatchWorldData (packet.payloadLength(), packet.payload(), m_eqstreamdir);
+           }
+        }
+     }
+     // it's a packet from the future, add it to the cache
+     else if ( ( (serverArqSeq > m_serverArqSeqExp[m_eqstreamid]) && 
+                 (serverArqSeq < (uint32_t(m_serverArqSeqExp[m_eqstreamid] + arqSeqWrapCutoff))) ) || 
+               (serverArqSeq < (int32_t(m_serverArqSeqExp[m_eqstreamid]) - arqSeqWrapCutoff)) ) 
+     {
+#ifdef PACKET_PROCESS_DIAG
+	printf("SEQ: out of order arq %04x stream %d, sending to cache, %04d\n", serverArqSeq, m_serverCache[m_eqstreamid]->size(), m_eqstreamid);
 #endif
 	
-	// if the packet isn't a fragment dispatch normally, otherwise to split
-	if (!packet.isFragment())
-	  dispatchZoneData (packet.payloadLength(),
-			    packet.payload(), DIR_SERVER);
-	else
-	  dispatchZoneSplitData (packet, DIR_SERVER);
-      }
-      // it's a packet from the future, add it to the cache
-      else if ((serverArqSeq > m_serverArqSeqExp) || 
-	       (serverArqSeq < (int32_t(m_serverArqSeqExp) - arqSeqWrapCutoff))) 
-      {
-#ifdef PACKET_PROCESS_DIAG
-	printf("SEQ: out of order arq %04x, sending to cache, %04d\n", serverArqSeq, m_serverCache.size());
-#endif
+          setCache(serverArqSeq, packet);
+     }
 	
-	// check if the entry already exists in the cache
-	EQPacketMap::iterator it = m_serverCache.find(serverArqSeq);
-	
-	if (it == m_serverCache.end())
-	{
-	  // entry doesn't exist, so insert an entry into the cache
+     // if the cache isn't empty, then check for the expected ARQ sequence
+     if (!m_serverCache[m_eqstreamid]->empty()) 
+        processCache();
+
+     return;
+  } /* end ARQ processing */
+
+  return;
+  
+} /* end decodePacket() */
+
+////////////////////////////////////////////////////
+// setCache 
+// adds current packet to specified cache
+// m_eqstreamid must be set by current packet
+//
+void EQPacket::setCache(uint16_t serverArqSeq, EQUDPIPPacketFormat& packet)
+{
+
+   // check if the entry already exists in the cache
+   EQPacketMap::iterator it = m_serverCache[m_eqstreamid]->find(serverArqSeq);
+
+   if (it == m_serverCache[m_eqstreamid]->end())
+   {
+   // entry doesn't exist, so insert an entry into the cache
+
 #ifdef PACKET_PROCESS_DIAG
-	  printf("SEQ: Insert arq (%04x) into cache\n", serverArqSeq);
+      printf("SEQ: Insert arq (%04x) stream %d into cache\n", serverArqSeq, m_eqstreamid);
 #endif
-	  m_serverCache.insert(EQPacketMap::value_type(serverArqSeq, new EQPacketFormat(packet, true)));
-	  emit cacheSize(m_serverCache.size());
-	}
-	else 
-	{
-	  // replacing an existing entry, make sure the new data is valid
-	  if (packet.isValid())
-	  {
+
+      m_serverCache[m_eqstreamid]->insert(EQPacketMap::value_type(serverArqSeq, new EQPacketFormat(packet, true)));
+      emit cacheSize(m_serverCache[m_eqstreamid]->size(), (int)m_eqstreamid);
+   }
+   else
+   {
+     // replacing an existing entry, make sure the new data is valid
+     if (packet.isValid())
+     {
+
 #ifdef PACKET_PROCESS_DIAG
-	    printf("SEQ: Update arq (%04x) in cache\n", serverArqSeq);
+        printf("SEQ: Update arq (%04x) stream %d in cache\n", serverArqSeq, m_eqstreamid);
 #endif
-	    *it->second = packet;
-	  }
+
+        *it->second = packet;
+     }
+
 #ifdef PACKET_PROCESS_DIAG
-	  else
-	    printf("SEQ: Not Updating arq (%04x) in cache, CRC error!\n",
-		   serverArqSeq);
+     else
+        printf("SEQ: Not Updating arq (%04x) stream %d into cache, CRC error!\n",
+               serverArqSeq, m_eqstreamid);
 #endif
-	}
+
+   }
 
 #ifdef PACKET_CACHE_DIAG
-	if (m_serverCache.size() > maxServerCacheCount)
-	  maxServerCacheCount = m_serverCache.size();
+   if (m_serverCache[m_eqstreamid]->size() > maxServerCacheCount)
+      maxServerCacheCount = m_serverCache[m_eqstreamid]->size();
 #endif // PACKET_CACHE_DIAG
-      }
-	
-      ////////////////////////////////////////////////////
-      // Cache processing
-      //
 
-      // if the cache isn't empty, then check for the expected ARQ sequence
-      if (!m_serverCache.empty())
-      {
-#if defined(PACKET_CACHE_DIAG)
-	printf("SEQ: START checking cache, arq %04x, cache count %04d\n", 
-	       m_serverArqSeqExp, m_serverCache.size());
-#endif
-	EQPacketMap::iterator it;
-	EQPacketMap::iterator eraseIt;
-	EQPacketFormat* pf;
-
-	// check if the cache has grown large enough that we should give up
-	// on seeing the current serverArqSeqExp
-	// this should really only kick in for people with pathetic
-	// network cards that missed the packet.
-	if (m_serverCache.size() >= m_serverArqSeqGiveUp)
-	{
-	  // ok, if the expected server arq sequence isn't here yet, give up
-
-	  // attempt to find the current expencted arq seq
-	  it = m_serverCache.find(m_serverArqSeqExp);
-
-	  // keep trying to find a new serverArqSeqExp if we haven't found a good
-	  // one yet... 
-	  while(it == m_serverCache.end())
-	  {
-#ifdef PACKET_CACHE_DIAG
-	    printf("SEQ: Giving up on finding arq %04x in cache, skipping!\n", 
-		   m_serverArqSeqExp);
-
-#endif
-	    // incremente the expected arq sequence number
-	    m_serverArqSeqExp++;
-	    emit seqExpect(m_serverArqSeqExp);
-
-	    // attempt to find the new current expencted arq seq
-	    it = m_serverCache.find(m_serverArqSeqExp);
-	  }
-	}
-	else
-	{
-	  // haven't given up yet, just try to find the current serverArqSeqExp
-
-	  // attempt to find the current expencted ARQ seq
-	  it = m_serverCache.find(m_serverArqSeqExp);
-	}
-
-
-	// iterate over cache until we reach the end or run out of 
-	// immediate followers
-	while (it != m_serverCache.end())
-	{
-	  // get the PacketFormat for the iterator
-	  pf = it->second;
-	
-	  // make sure this is the expected packet
-	  // (we might have incremented to the one after the one returned
-	  /// by find above).
-	  if (pf->arq() != m_serverArqSeqExp)
-	    break;
-
-#ifdef PACKET_CACHE_DIAG
-	  printf("SEQ: found next arq %04x in cache, cache count %04d\n",
-		 m_serverArqSeqExp, m_serverCache.size());
-#endif
-
-#if defined (PACKET_CACHE_DIAG) && (PACKET_CACHE_DIAG > 2)
-	  // validate the packet against a memory corruption
-	  if (!pf->isValid())
-	  {
-	    // Something's screwed up
-	    printf("SEQ: INVALID PACKET: Bad CRC32 in packet in cache with arq %04x!\n",
-		   pf->arq());
-	  }
-#endif
-
-	  // is it a fragment?
-	  if (!pf->isFragment())
-	  {
-	    // no, dispatch normally
-#ifdef PACKET_CACHE_DIAG
-	    printf("SEQ: Dispatching arq %04x with pkt[0] %02x and Opcode: %04x from cache, cache count %04d\n", 
-		   pf->arq(), pf->flagsHi(), eqntohuint16(pf->payload()),
-		   m_serverCache.size());
-#endif
-	  
-	    dispatchZoneData(pf->payloadLength(), 
-			     pf->payload(),  
-			     DIR_SERVER);
-	  }
-	  else
-	  {
-	    // yes, it's a fragment.  Dispatch to split
-#ifdef PACKET_CACHE_DIAG
-	    printf("SEQ: Dispatching to Split arq %04x with pkt[0] %02x from cache, cache count %04d\n", 
-		   pf->arq(), pf->flagsHi(), m_serverCache.size());
-#endif
-
-	    dispatchZoneSplitData(*pf, DIR_SERVER);
-	  }
-
-	  eraseIt = it;
-	  
-	  // increment the current position iterator
-	  it++;
-
-	  // erase the packet from the cache
-	  m_serverCache.erase(eraseIt);
-	  emit cacheSize(m_serverCache.size());
-
-#if defined (PACKET_CACHE_DIAG) && (PACKET_CACHE_DIAG > 2)
-	  // validate the packet against a memory corruption
-	  if (!pf->isValid())
-	  {
-	    // Something's screwed up
-	    printf("SEQ: INVALID PACKET: Bad CRC32 in packet in cache with arq %04x!\n",
-		   pf->arq());
-	  }
-#endif
-#ifdef PACKET_CACHE_DIAG
-	  printf("SEQ: REMOVING arq %04x from cache, cache count %04d\n", 
-		 pf->arq(), m_serverCache.size());
-#endif
-	  // delete the packet
-	  delete pf;
-	  
-	  // increment the expected arq number
-	  m_serverArqSeqExp++;
-	  emit seqExpect(m_serverArqSeqExp);
-
-	  if (m_serverArqSeqExp == 0)
-	    it = m_serverCache.begin();
-	}
-      
-#ifdef PACKET_CACHE_DIAG
-	printf("SEQ: FINISHED checking cache, arq %04x, cache count %04d\n", 
-	       m_serverArqSeqExp, m_serverCache.size());
-#endif
-      }
-    }
-    else
-      return; /* sanity */
-  }
 }
+
+
+////////////////////////////////////////////////////
+// Cache processing
+// m_eqstreamid must be set by current packet
+// 
+void EQPacket::processCache()
+{
+
+#if defined(PACKET_CACHE_DIAG)
+  printf("SEQ: START checking cache, arq %04x, stream %d , cache count %04d\n",
+         m_serverArqSeqExp[m_eqstreamid], m_eqstreamid, m_serverCache[m_eqstreamid]->size());
+#endif
+  EQPacketMap::iterator it;
+  EQPacketMap::iterator eraseIt;
+  EQPacketFormat* pf;
+
+  // check if the cache has grown large enough that we should give up
+  // on seeing the current serverArqSeqExp
+  // this should really only kick in for people with pathetic
+  // network cards that missed the packet.
+  if (m_serverCache[m_eqstreamid]->size() >= m_serverArqSeqGiveUp)
+  {
+     // ok, if the expected server arq sequence isn't here yet, give up
+
+     // attempt to find the current expencted arq seq
+     it = m_serverCache[m_eqstreamid]->find(m_serverArqSeqExp[m_eqstreamid]);
+
+     // keep trying to find a new serverArqSeqExp if we haven't found a good
+     // one yet...
+     while(it == m_serverCache[m_eqstreamid]->end())
+     {
+
+#ifdef PACKET_CACHE_DIAG
+        printf("SEQ: Giving up on finding arq %04x in cache stream %d, skipping!\n",
+               m_serverArqSeqExp[m_eqstreamid], m_eqstreamid);
+#endif
+
+        // incremente the expected arq sequence number
+        m_serverArqSeqExp[m_eqstreamid]++;
+        emit seqExpect(m_serverArqSeqExp[m_eqstreamid], (int)m_eqstreamid);
+
+        // attempt to find the new current expencted arq seq
+        it = m_serverCache[m_eqstreamid]->find(m_serverArqSeqExp[m_eqstreamid]);
+     }
+  }
+  else
+  {
+     // haven't given up yet, just try to find the current serverArqSeqExp
+
+     // attempt to find the current expected ARQ seq
+     it = m_serverCache[m_eqstreamid]->find(m_serverArqSeqExp[m_eqstreamid]);
+  }
+
+
+  // iterate over cache until we reach the end or run out of
+  // immediate followers
+  while (it != m_serverCache[m_eqstreamid]->end())
+  {
+     // get the PacketFormat for the iterator
+     pf = it->second;
+
+     // make sure this is the expected packet
+     // (we might have incremented to the one after the one returned
+     // by find above).
+     if (pf->arq() != m_serverArqSeqExp[m_eqstreamid])
+        break;
+
+#ifdef PACKET_CACHE_DIAG
+     printf("SEQ: found next arq %04x in cache stream %d, cache count %04d\n",
+            m_serverArqSeqExp[m_eqstreamid], m_eqstreamid, m_serverCache[m_eqstreamid]->size());
+#endif
+
+#if defined (PACKET_CACHE_DIAG) && (PACKET_CACHE_DIAG > 2)
+     // validate the packet against a memory corruption
+     if (!pf->isValid())
+     {
+        // Something's screwed up
+        printf("SEQ: INVALID PACKET: Bad CRC32 in packet in cache with arq %04x!\n",
+               pf->arq());
+     }
+#endif
+
+
+#if defined (PACKET_CACHE_DIAG) && (PACKET_CACHE_DIAG > 2)
+     printf("SEQ: Found next arq in cache, incrementing arq seq, %04x\n", 
+            pf->arq());
+#endif
+
+     // Duplicate ARQ processing functionality from decodePacket,
+     // should prolly be its own function processARQ() or some such beast
+
+     if (!pf->isASQ() && !pf->isFragment() && !pf->isClosingHi())
+     {
+        // seems to be a sort of ping from client to server, has ARQ
+        // but no ASQ, Flags look like 0x0201 (network byte order)
+#if defined (PACKET_CACHE_DIAG) && (PACKET_CACHE_DIAG > 2)
+        printf("SEQ: ARQ without ASQ from stream %s arq 0x%04x\n",
+               EQStreamStr[m_eqstreamid], pf->arq());
+#endif
+     }
+
+     // since the servers do not care about client closing sequences, we won't either
+     // Hey clients have rights too, or not! 
+     else if (pf->isClosingHi() && pf->isClosingLo() && m_eqstreamid == zone2client)
+     {
+#if defined (PACKET_CACHE_DIAG) && (PACKET_CACHE_DIAG > 2)
+        printf("EQPacket: Closing HI & LO, arq %04x\n", pf->arq());  
+#endif
+           
+        // reseting the pcap filter to a non-exclusive form allows us to beat 
+        // the race condition between timer and processing the zoneServerInfo
+        if(!showeq_params->playbackpackets) 
+          m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+                                     showeq_params->realtime, IP_ADDRESS_TYPE, 0, 0);
+	printf ("EQPacket: SEQClosing detected, awaiting next zone session,  pcap filter: EQ Client %s\n",
+                (const char*)showeq_params->ip);
+
+        if (m_session_tracking_enabled)
+            m_session_tracking_enabled = 1; 
+
+        // we'll be waiting for a new SEQStart for ALL streams
+        // it seems we only ever see a proper closing sequence from the zone server
+        // so reset all packet sequence caches 
+        resetEQPacket();
+
+        break;
+     }
+	
+     // if the packet isn't a fragment dispatch normally, otherwise to split
+     else if (pf->isFragment())
+     {
+        dispatchSplitData (*pf, m_eqstreamdir, m_eqstreamid);
+     }
+
+     else
+     {
+        if ((m_eqstreamid == zone2client) || (m_eqstreamid == client2zone))
+        {
+           dispatchZoneData (pf->payloadLength(), pf->payload(), m_eqstreamdir);
+        }
+        else
+        {
+	   dispatchWorldData (pf->payloadLength(), pf->payload(), m_eqstreamdir);
+        }
+     }
+
+     eraseIt = it;
+
+     // increment the current position iterator
+     it++;
+
+     // erase the packet from the cache
+     m_serverCache[m_eqstreamid]->erase(eraseIt);
+     emit cacheSize(m_serverCache[m_eqstreamid]->size(), (int)m_eqstreamid);
+
+#ifdef PACKET_CACHE_DIAG
+     printf("SEQ: REMOVING arq %04x from cache, cache count %04d\n",
+            pf->arq(), m_serverCache[m_eqstreamid]->size());
+#endif
+     // delete the packet
+     delete pf;
+
+     // increment the expected arq number
+     m_serverArqSeqExp[m_eqstreamid]++;
+     emit seqExpect(m_serverArqSeqExp[m_eqstreamid], (int)m_eqstreamid);
+
+     if (m_serverArqSeqExp[m_eqstreamid] == 0)
+        it = m_serverCache[m_eqstreamid]->begin();
+  }
+  
+
+#ifdef PACKET_CACHE_DIAG
+  printf("SEQ: FINISHED checking cache, arq %04x, cache count %04d\n",
+         m_serverArqSeqExp[m_eqstreamid], m_serverCache[m_eqstreamid]->size());
+#endif
+}
+
+////////////////////////////////////////////////////
+// cache reset
+//
+void EQPacket::resetCache(int stream)
+{
+    // first delete all the entries
+    EQPacketMap::iterator it = m_serverCache[stream]->begin();
+    EQPacketFormat* pf;
+    fprintf(stderr, "Clearing Cache[%s]: Count: %d\n", EQStreamStr[stream], m_serverCache[stream]->size());
+    while (it != m_serverCache[stream]->end())
+    {
+      pf = it->second;
+      delete pf;
+      it++;
+    }
+
+    // now clear the cache
+    printf ("Resetting sequence cache[%s]\n", EQStreamStr[stream]);
+    m_serverCache[stream]->clear();
+    emit cacheSize(0, stream);
+}
+
+
 
 /* Combines data from split packets */
-void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf, uint8_t dir)
+void EQPacket::dispatchSplitData (EQPacketFormat& pf, uint8_t dir, EQStreamID streamid)
 {
 #ifdef DEBUG_PACKET
-   debug ("dispatchZoneSplitData()");
+   debug ("dispatchSplitData()");
 #endif /* DEBUG_PACKET */
-   
+
+#ifdef PACKET_PROCESS_FRAG_DIAG
+   printf("dispatchSplitData(): pf.arq 0x%04x, pf.fragSeq 0x%04x, pf.fragCur 0x%04x, pf.fragTot 0x%04x\n", pf.arq(), pf.fragSeq(), pf.fragCur(), pf.fragTot());
+#endif /* PACKET_PROCESS_FRAG_DIAG */
+
+   // fragments with ASQ signify the beginning of a new series
+   // warn if previous series is incomplete
+   // clear and allocate space for the new series
    if (pf.isASQ())
    {
-      /* Clear data */
-      m_serverDataSize = 0;
-   }
+      if (m_fragmentData[streamid] != NULL)
+      {
+         if (!pf.fragSeq() == 0) // surpress WARNING for duplicate SEQStart/fragment start (e.g.0x3a)
+         {
+            printf("dispatchSplitData(): WARNING OpCode 0x%04x will not be processed due to loss\n",
+                   eqntohuint16(m_fragmentData[streamid]));
+            printf("dispatchSplitData(): recieved new fragment seq 0x%04x before completion of 0x%04x\n",
+                   pf.fragSeq(), m_fragmentSeq[streamid]);
+         }
 
-   if ((m_serverDataSize + pf.payloadLength()) > sizeof(m_serverData))
-     printf("\a\aWARNING: ServerDataSize(%d) > sizeof(serverData)(%d)\a\a\n",
-	    (m_serverDataSize + pf.payloadLength()), sizeof(m_serverData));
+	 delete [] m_fragmentData[streamid];
+	 m_fragmentData[streamid] = NULL;
+      }
 
-   // Add data
-   memcpy((void*)(m_serverData + m_serverDataSize), (void*)pf.payload(), 
-	  pf.payloadLength());
+      m_fragmentDataAllocSize[streamid] = (pf.fragTot() * pf.payloadLength());
+      m_fragmentSeq[streamid] = pf.fragSeq();
+      m_fragmentCur[streamid] = pf.fragCur();
+      m_fragmentDataSize[streamid] = 0;
+      m_fragmentData[streamid] = new uint8_t[m_fragmentDataAllocSize[streamid]]; // should be an over estimate
 
-   m_serverDataSize += pf.payloadLength();
-
-   /* Check if this is last part of data */
-   if (pf.fragCur() == (pf.fragTot() - 1))
-   {
-#ifdef PACKET_PROCESS_DIAG
-      printf("SEQ: seq complete, dispatching (opcode=%04x)\n", 
-	     eqntohuint16(m_serverData));
+#ifdef PACKET_PROCESS_FRAG_DIAG
+      printf("dispatchSplitData(): Allocating %d bytes for fragmentSeq %d, stream %d, OpCode 0x%04x\n",
+             (pf.fragTot() * pf.payloadLength()), pf.fragSeq(), streamid, eqntohuint16(m_fragmentData[streamid]));
 #endif
-      dispatchZoneData (m_serverDataSize, m_serverData, dir);
+   }
+   if (m_fragmentData[streamid] != NULL)
+   {
+      if (pf.fragSeq() != m_fragmentSeq[streamid] || pf.fragCur() != m_fragmentCur[streamid])
+      {
+         printf("dispatchSplitData(): WARNING OpCode 0x%04x will not be processed due to loss\n",
+             eqntohuint16(m_fragmentData[streamid])); 
+         printf("dispatchSplitData(): recieved Out-Of-Order fragment seq 0x%04x (0x%04x) expected 0x%04x\n",
+              pf.fragCur(), pf.fragSeq(), m_fragmentCur[streamid]);
+         return;
+      }
+      else if ((m_fragmentDataSize[streamid] + pf.payloadLength()) > m_fragmentDataAllocSize[streamid])
+      {
+         printf("dispatchSplitData(): WARNING OpCode 0x%04x will not be processed due to under allocation\n",
+             eqntohuint16(m_fragmentData[streamid])); 
+         printf("\a\aWARNING: FragmentDataSize(%d) > sizeof(fragmentData)(%d)\a\a\n",
+	     (m_fragmentDataSize[streamid] + pf.payloadLength()), m_fragmentDataAllocSize[streamid]);
+      
+         delete [] m_fragmentData[streamid];
+         m_fragmentData[streamid] = NULL;
+
+         return;
+      }
+      else
+      {
+         memcpy((void*)(m_fragmentData[streamid] + m_fragmentDataSize[streamid]), (void*)pf.payload(), pf.payloadLength());
+
+         m_fragmentDataSize[streamid] += pf.payloadLength();
+         m_fragmentCur[streamid] = pf.fragCur()+1;
+
+         /* Check if this is last part of data */
+         if (pf.fragCur() == (pf.fragTot() - 1))
+         {
+#ifdef PACKET_PROCESS_DIAG
+            printf("SEQ: seq complete, dispatching (opcode=%04x)\n", 
+                   eqntohuint16(m_fragmentData[streamid]));
+#endif
+            if (streamid == client2zone || streamid == zone2client) 
+               dispatchZoneData (m_fragmentDataSize[streamid], m_fragmentData[streamid], dir);
+            else
+               dispatchWorldData(m_fragmentDataSize[streamid], m_fragmentData[streamid], dir);
+
+            delete [] m_fragmentData[streamid];
+            m_fragmentData[streamid] = NULL;
+            m_fragmentSeq[streamid] = 0;
+            m_fragmentCur[streamid] = 0;
+            m_fragmentDataAllocSize[streamid] = 0;
+            m_fragmentDataSize[streamid] = 0;
+         }
+   
+         return;
+      }
+#ifdef PACKET_PROCESS_FRAG_DIAG
+      else
+         printf("dispatchSplitData(): recieved fragment component (fragSeq 0x%04x, fragCur 0x%04x) before fragment start\n",
+                pf.fragSeq(), pf.fragCur());
+#endif
    }
 }
+
 
 ///////////////////////////////////////////
 //EQPacket::dispatchWorldData  
@@ -1456,8 +1673,14 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
   debug ("dispatchWorldData()");
 #endif /* DEBUG_PACKET */
   
-  uint16_t opCode = eqntohuint16(data);
+    //Logging 
+  if (showeq_params->logWorldPackets)
+     if (!logData (showeq_params->WorldLogFilename, len, data))
+        emit toggle_log_WorldData(); //untoggle the GUI checkmark
 
+  //uint16_t opCode = eqntohuint16(data);
+
+#if 0
   if ((opCode == ZoneServerInfo) && (direction == DIR_SERVER))
   {
     //printf(" ZoneServerInfo 0x%04x, m_client_addr %d, sessionTrack = %d\n", 
@@ -1476,7 +1699,7 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
 				   showeq_params->mac_address,
 				   showeq_params->realtime, 
 				   MAC_ADDRESS_TYPE, zone_server_port, 0);
-	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
+	printf ("dispatchWorldData: ZoneServerInfo detected - Building new pcap filter: EQ Client %s, Zone Server port %d\n",
 		(const char*)showeq_params->mac_address, zone_server_port);
       }
       else
@@ -1484,36 +1707,18 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
 	m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
 				   showeq_params->realtime, IP_ADDRESS_TYPE,
 				   zone_server_port, 0);
-	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
+	printf ("dispatchWorldData: ZoneServerInfo detected - Building new pcap filter: EQ Client %s, Zone Server port %d\n",
 		(const char*)showeq_params->ip, zone_server_port);
       }
 
     // notify that the server port has been latched
     emit serverPortLatched(m_serverPort);
     
-    // we'll be waiting for a new SEQStart
-    m_serverArqSeqFound = false;
     
-    // clear out all the cache entries
-    
-    // first delete all the entries
-    EQPacketMap::iterator it = m_serverCache.begin();
-    EQPacketFormat* pf;
-    fprintf(stderr, "Clearing Cache: Count: %d\n", m_serverCache.size());
-    while (it != m_serverCache.end())
-    {
-      pf = it->second;
-      delete pf;
-      it++;
-    }
-    
-    // now clear the cache
-    printf ("Reseting sequence cache\n");
-    m_serverCache.clear();
-    emit cacheSize(0);
     return;
     }
   }
+#endif
 }
 
 ///////////////////////////////////////////
@@ -1562,7 +1767,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
     /* Update EQ Time every 50 packets so we don't overload the CPU */
     
-    if ( showeq_params->showEQTime && (m_packetCount % 50 == 0))
+    if ( showeq_params->showEQTime && (m_packetCount[m_eqstreamid] % 50 == 0))
     {
         char timeMessage[30];
         time_t timeCurrent = time(NULL);
@@ -2994,7 +3199,9 @@ void EQPacket::setPlayback(int speed)
 
     emit stsMessage(string, 5000);
 
-    emit resetPacket(m_packetCount);  // this resets the packet average
+    for(int a = 0; a < MAXSTREAMS; a++)
+        emit resetPacket(m_packetCount[a], a);  // this resets the packet average
+
     emit playbackSpeedChanged(speed);
   }
 }
@@ -3064,6 +3271,9 @@ void EQPacket::decPlayback(void)
 void EQPacket::dispatchDecodedCharProfile(const uint8_t* decodedData, 
 					  uint32_t decodedDataLen)
 {
+#if 0 // FEETEMP
+	    logData("/tmp/charprofile.log", decodedDataLen, decodedData);
+#endif
   ValidateDecodedPayload(CharProfileCode, charProfileStruct);
 
   emit backfillPlayer((const charProfileStruct*)decodedData, decodedDataLen, DIR_SERVER);
@@ -3072,6 +3282,9 @@ void EQPacket::dispatchDecodedCharProfile(const uint8_t* decodedData,
 void EQPacket::dispatchDecodedNewSpawn(const uint8_t* decodedData, 
 				       uint32_t decodedDataLen)
 {
+#if 0 // FEETEMP
+	    logData("/tmp/newspawn.log", decodedDataLen, decodedData);
+#endif
   ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
 
   emit backfillSpawn((newSpawnStruct*)decodedData, decodedDataLen, DIR_SERVER);
@@ -3080,6 +3293,9 @@ void EQPacket::dispatchDecodedNewSpawn(const uint8_t* decodedData,
 void EQPacket::dispatchDecodedZoneSpawns(const uint8_t* decodedData, 
 					 uint32_t decodedDataLen)
 {
+#if 0 // FEETEMP
+	    logData("/tmp/zonespawn.log", decodedDataLen, decodedData);
+#endif
   zoneSpawnsStruct* zdata = (struct zoneSpawnsStruct *)(decodedData);
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
   int zoneSpawnsStructHeaderData = 
@@ -3171,10 +3387,10 @@ void EQPacket::monitorIPClient(const QString& ip)
   inet_aton (showeq_params->ip, &ia);
   m_client_addr = ia.s_addr;
   emit clientChanged(m_client_addr);
-  printf("Listening for IP client: %s\n", (const char*)showeq_params->ip);
-  m_session_tracking_enabled = showeq_params->session_tracking;
-  emit sessionTrackingChanged(m_session_tracking_enabled);
 
+  resetEQPacket();
+
+  printf("Listening for IP client: %s\n", (const char*)showeq_params->ip);
   if (!showeq_params->playbackpackets)
     m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
 			       showeq_params->realtime, 
@@ -3189,10 +3405,11 @@ void EQPacket::monitorMACClient(const QString& mac)
   inet_aton (AUTOMATIC_CLIENT_IP, &ia);
   m_client_addr = ia.s_addr;
   emit clientChanged(m_client_addr);
+
+  resetEQPacket();
+
   printf("Listening for MAC client: %s\n", 
 	 (const char*)showeq_params->mac_address);
-  m_session_tracking_enabled = showeq_params->session_tracking;
-  emit sessionTrackingChanged(m_session_tracking_enabled);
 
   if (!showeq_params->playbackpackets)
     m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
@@ -3208,12 +3425,13 @@ void EQPacket::monitorNextClient()
   inet_aton (showeq_params->ip, &ia);
   m_client_addr = ia.s_addr;
   emit clientChanged(m_client_addr);
-  m_session_tracking_enabled = showeq_params->session_tracking;
-  emit sessionTrackingChanged(m_session_tracking_enabled);
+
+  resetEQPacket();
+
   printf("Listening for next client seen. (you must zone for this to work!)\n");
 
   if (!showeq_params->playbackpackets)
-    m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+    m_packetCapture->setFilter(showeq_params->device, NULL,
 			       showeq_params->realtime, 
 			       DEFAULT_ADDRESS_TYPE, 0, 0);
 }
@@ -3266,6 +3484,8 @@ void EQPacket::monitorDevice(const QString& dev)
 	     (const char*)showeq_params->ip);
     }
   }
+ 
+  resetEQPacket();
 
   // restart packet capture
   if (showeq_params->mac_address.length() == 17)
@@ -3295,6 +3515,49 @@ void EQPacket::setArqSeqGiveUp(int giveUp)
   else
     m_serverArqSeqGiveUp = 32;
 }
+
+void EQPacket::resetEQPacket()
+{
+   for (int a = 0; a < MAXSTREAMS; a++)
+   {
+       if (!m_serverCache[a]->empty()) 
+           resetCache(a);
+
+       if (m_fragmentData[a] != NULL);
+       {
+           delete [] m_fragmentData[a];
+           m_fragmentData[a] = NULL;
+       }
+
+       m_serverArqSeqExp[a] = 0;
+       m_serverArqSeqFound[a] = FALSE;
+       m_fragmentDataSize[a] = 0;
+       m_fragmentDataAllocSize[a] = 0;
+       m_fragmentSeq[a] = 0;
+       m_fragmentCur[a] = 0;
+
+       emit seqExpect(m_serverArqSeqExp[a], a);
+       emit seqReceive(0, a);
+       emit numPacket(0, a);
+   }
+
+   m_clientPort = 0;
+   m_serverPort = 0;
+
+   m_eqstreamid = unknown_stream;
+
+   m_session_tracking_enabled = showeq_params->session_tracking;
+   emit sessionTrackingChanged(m_session_tracking_enabled);
+   emit clientPortLatched(m_clientPort);
+
+}
+
+char* EQPacket::pcap_filter()
+{
+  return m_packetCapture->getFilter();
+}
+
+
    
 //----------------------------------------------------------------------
 // PacketCaptureThread
@@ -3326,19 +3589,19 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
       if (strcmp(host, AUTOMATIC_CLIENT_IP) == 0)
       {
           printf ("Filtering packets on device %s, searching for EQ client...\n", device);
-          sprintf (filter_buf, "(udp[0:2] > 1024 or udp[2:2] > 1024) and ether proto 0x0800");
+          sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800");
       }
       else
       {
           printf ("Filtering packets on device %s, IP host %s\n", device, host);
-          sprintf (filter_buf, "(udp[0:2] > 1024 or udp[2:2] > 1024) and host %s and ether proto 0x0800", host);
+          sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and host %s and ether proto 0x0800", host);
       }
    }
 
    else if (address_type == MAC_ADDRESS_TYPE)
    {
       printf ("Filtering packets on device %s, MAC host %s\n", device, host);
-      sprintf (filter_buf, "(udp[0:2] > 1024 or udp[2:2] > 1024) and ether host %s and ether proto 0x0800", host);
+      sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether host %s and ether proto 0x0800", host);
    }
 
    else
@@ -3347,8 +3610,24 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
       exit(0);
    }
 
+   /* A word about pcap_open_live() from the docs
+   ** to_ms specifies the read timeout in milliseconds.   The
+   ** read timeout is used to arrange that the read not necessarily
+   ** return immediately when a packet is seen, but that it wait
+   ** for  some amount of time to allow more packets to arrive and 
+   ** to read multiple packets from the OS kernel in one operation.
+   ** Not all  platforms  support  a read timeout; on platforms that
+   ** don't, the read timeout is ignored.
+   ** 
+   ** In Linux 2.4.x with the to_ms set to 0 we get packets immediatly,
+   ** and thats what we need in this application, so don't change it!! 
+   ** 
+   ** a race condition exists between this thread and the main thread 
+   ** any artificial delay in getting packets can cause filtering problems
+   ** and cause us to miss new stream when the player zones.
+   */
    // initialize the pcap object 
-   m_pcache_pcap = pcap_open_live((char *) device, 1500, true, 100, ebuf);
+   m_pcache_pcap = pcap_open_live((char *) device, 1500, true, 0, ebuf);
 
    if (!m_pcache_pcap)
    {
@@ -3458,7 +3737,7 @@ void PacketCaptureThread::setFilter (const char *device,
                                      const char *hostname,
                                      bool realtime,
                                      uint8_t address_type,
-                                     uint16_t zone_server_port,
+                                     uint16_t zone_port,
 				     uint16_t client_port
                                     )
 {
@@ -3468,17 +3747,19 @@ void PacketCaptureThread::setFilter (const char *device,
 
     /* Listen to World Server or the specified Zone Server */
     if (address_type == IP_ADDRESS_TYPE && client_port)   
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, hostname);
-    else if (address_type == IP_ADDRESS_TYPE && !client_port) 
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, hostname);
+    else if (address_type == IP_ADDRESS_TYPE && zone_port) 
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_port, zone_port, hostname);
     else if (address_type == MAC_ADDRESS_TYPE && client_port)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, hostname);
-    else if (address_type == MAC_ADDRESS_TYPE && !client_port)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, hostname);
+    else if (address_type == MAC_ADDRESS_TYPE && zone_port)
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_port, zone_port, hostname);
+    else if (hostname != NULL && !client_port && !zone_port)
+         sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and host %s", hostname);
     else
     {
-          printf ("Filtering packets on device %s, searching for EQ client...\n", device);
-          sprintf (filter_buf, "(udp[0:2] > 1024 or udp[2:2] > 1024) and ether proto 0x0800");
+         printf ("Filtering packets on device %s, searching for EQ client...\n", device);
+         sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800");
     }
 
     if (pcap_compile (m_pcache_pcap, &bpp, filter_buf, 1, 0) == -1)
@@ -3501,5 +3782,12 @@ void PacketCaptureThread::setFilter (const char *device,
        if (pthread_setschedparam (m_tid, SCHED_RR, &sp) != 0)
            fprintf (stderr, "Failed to set capture thread realtime.");
     }
+
+    strcpy(pcap_filter, filter_buf);
+}
+
+char* PacketCaptureThread::getFilter()
+{
+  return pcap_filter;
 }
 

@@ -1,3 +1,31 @@
+fee (floyd) (29/07/02)
+----------------------
+Modifications:
+ + version 4.2.13
+ + Complete overhaul of EQPacket members decodePacket
+   - now includes functionality for sequencing client and server data streams
+   - better sequence handling
+   - elimination of a race condition between pcap and main threads
+   - better session tracking
+     - should be same behavior as before, do not zone multiple clients 
+       simultaneously, if you LD you can reset session tracking by
+       clicking Monitor Next EQ Client or the other Monitor options.
+ + dispatchSplitZoneData has been replaced with dispatchSplitData
+   - dynamic allocation for fragment assembly
+   - improved error checking/handling
+ + new members processCache, setCache and resetCache
+   - based on zaphod's original design, extended to handle more data streams
+ + new member resetEQPacket
+   - called upon session Close or while setting a pcap filter vi Network menu
+   - resets all states, caches, etc in EQPacket
+ + Improved NetDiags to show all the new data from EQPacket
+ + pcap filter rework
+
+*** If you still experience packet loss, which results in failure to decode,
+*** set Network->Advanced->seq arq give up to a higher value! Recomend Broadband
+*** users set to 128+ and modem users to 256+.  Do not be afraid to crank this
+*** value to 512 or better if that is what it takes. 
+
 fee(floyd) (23/07/02)
 ------------------
 Bug Fix:

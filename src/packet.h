@@ -1,3 +1,4 @@
+
 /*
  * packet.h
  *
@@ -8,7 +9,8 @@
 #ifndef EQPACKET_H
 #define EQPACKET_H
 
-#define MAXSPAWNDATA        98304
+//#define MAXSPAWNDATA        98304
+#define MAXSTREAMS          4
 
 #include <stdint.h>
 
@@ -19,6 +21,7 @@
 #include <map>
 
 #include <qqueue.h>
+
 #include <qmap.h>
 #include <qobject.h>
 #include <qregexp.h>
@@ -196,6 +199,15 @@ enum EQPacketHeaderFlagsLo
   specAckRequest = 0x01
 };
 
+enum EQStreamID 
+{
+  unknown_stream = -1,
+  client2world = 0, 
+  world2client = 1,
+  client2zone = 2, 
+  zone2client = 3 
+};
+
 //----------------------------------------------------------------------
 // EQPacketFormatRaw
 
@@ -242,8 +254,9 @@ class EQPacketFormatRaw
 	    ((isARSP() || isSpecARQ()) ? 2 : 0));
 #else
     return ((uint8_t)m_flagsLo.m_skip + 
-	    (isARSP() ? 2 : 0) +
-	    (isSpecARQ() ? 4 : 0));
+	    (isARSP() ? 2 : 0)// +
+	    //(isSpecARQ() ? 4 : 0)
+);
 #endif
   }
 
@@ -523,15 +536,16 @@ class EQPacket : public QObject
    void stop(void);
    void setViewUnknownData(bool);
 
-   int packetCount(void);
+   char* pcap_filter();
+   int packetCount(int);
    uint32_t clientAddr(void);
    uint16_t clientPort(void);
    uint16_t serverPort(void);
    uint8_t session_tracking_enabled(void);
    int playbackSpeed(void);
    uint32_t decodeKey(void);
-   int currentCacheSize(void);
-   uint16_t serverSeqExp(void);
+   int currentCacheSize(int);
+   uint16_t serverSeqExp(int);
 
    void InitializeOpCodeMonitor(void);
    
@@ -571,11 +585,11 @@ class EQPacket : public QObject
 
  signals:
    // used for net_stats display
-   void cacheSize(int);
-   void seqReceive(int);
-   void seqExpect(int);
-   void numPacket(int);
-   void resetPacket(int);
+   void cacheSize(int, int);
+   void seqReceive(int, int);
+   void seqExpect(int, int);
+   void numPacket(int, int);
+   void resetPacket(int, int);
    void playbackSpeedChanged(int);
    void clientChanged(uint32_t);
    void clientPortLatched(uint16_t);
@@ -583,6 +597,13 @@ class EQPacket : public QObject
    void sessionTrackingChanged(uint8_t);
 
    void toggle_session_tracking(void);
+ 
+   // logging
+   void toggle_log_AllPackets(void);
+   void toggle_log_WorldData(void);
+   void toggle_log_ZoneData(void);
+   void toggle_log_UnknownData();
+                               
 
    // Player signals
    void setPlayerID(uint16_t);
@@ -657,10 +678,6 @@ class EQPacket : public QObject
    void msgReceived(const QString &);
    void stsMessage(const QString &, int = 0);
 
-   void toggle_log_AllPackets(void);
-   void toggle_log_ZoneData(void);
-   void toggle_log_UnknownData();
-                               
    // Decoder signals
    void resetDecoder(void);
    void backfillSpawn(const newSpawnStruct *, uint32_t, uint8_t);
@@ -691,8 +708,6 @@ class EQPacket : public QObject
    void unknownOpcode(const uint8_t*, uint32_t, uint8_t);
 
  private:
-   /* The player object, keeps track player's level, race and class.
-      Will soon track all player stats. */
       
    EQDecode            *m_decode;
    PacketCaptureThread *m_packetCapture;
@@ -700,37 +715,51 @@ class EQPacket : public QObject
    QString print_addr   (in_addr_t addr);
    
    QTimer         *m_timer;
-   int            m_packetCount;
+   int            m_packetCount[MAXSTREAMS];
    uint16_t       m_serverPort;
    uint16_t       m_clientPort;
    bool           m_busy_decoding;
-   bool           m_serverArqSeqFound;
    bool           m_viewUnknownData;
    bool           m_detectingClient;
-   uint16_t       m_serverArqSeqExp;
    uint16_t       m_serverArqSeqGiveUp;
-   EQPacketMap    m_serverCache;
-   unsigned char  m_serverData [MAXSPAWNDATA];
-   uint32_t       m_serverDataSize;
-   //   uint16_t       m_serverDataFragSeq;
    uint32_t       m_client_addr;
    uint8_t        m_session_tracking_enabled;
+
+   EQStreamID     m_eqstreamid;
+   uint8_t        m_eqstreamdir;
+   
+   EQPacketMap*   m_serverCache[MAXSTREAMS];
+   
+   uint16_t       m_serverArqSeqExp[MAXSTREAMS];
+   bool           m_serverArqSeqFound[MAXSTREAMS];
+
+   uint8_t *m_fragmentData[MAXSTREAMS];
+   uint16_t m_fragmentDataSize[MAXSTREAMS];
+   uint16_t m_fragmentDataAllocSize[MAXSTREAMS];
+   uint16_t m_fragmentSeq[MAXSTREAMS];
+   uint16_t m_fragmentCur[MAXSTREAMS];
+
+
+   void resetEQPacket();
+   void setCache(uint16_t serverArqSeq, EQUDPIPPacketFormat& packet);
+   void processCache();
+   void resetCache(int);
 
    struct eqTimeOfDay m_eqTime;
 
    int  getEQTimeOfDay (time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay);
    void decodePacket   (int size, unsigned char *buffer);
+   void dispatchSplitData (EQPacketFormat& pf, uint8_t dir, EQStreamID streamid);
+   void dispatchZoneData  (uint32_t len, uint8_t* data, uint8_t direction = 0);
    void dispatchWorldData (uint32_t len, uint8_t* data, uint8_t direction = 0);
    void dispatchWorldChatData (uint32_t len, uint8_t* data, uint8_t direction = 0);
-   void dispatchZoneData (uint32_t len, uint8_t* data, uint8_t direction = 0);
-   void dispatchZoneSplitData (EQPacketFormat& pf, uint8_t dir);
    void logRawData (const char   *filename, unsigned char *data, unsigned int len);
 
 };
 
-inline int EQPacket::packetCount(void)
+inline int EQPacket::packetCount(int stream)
 {
-  return m_packetCount;
+  return m_packetCount[stream];
 }
 
 inline uint32_t EQPacket::clientAddr(void)
@@ -758,14 +787,14 @@ inline uint32_t EQPacket::decodeKey(void)
   return m_decode->decodeKey(); 
 }
 
-inline int EQPacket::currentCacheSize()
+inline int EQPacket::currentCacheSize(int stream)
 {
-  return m_serverCache.size();
+  return m_serverCache[stream]->size();
 }
 
-inline uint16_t EQPacket::serverSeqExp()
+inline uint16_t EQPacket::serverSeqExp(int stream)
 {
-  return m_serverArqSeqExp;
+  return m_serverArqSeqExp[stream];
 }
 
 //----------------------------------------------------------------------
@@ -780,6 +809,7 @@ class PacketCaptureThread
          uint16_t getPacket (unsigned char *buff); 
          void setFilter (const char *device, const char *hostname, bool realtime,
                         uint8_t address_type, uint16_t zone_server_port, uint16_t client_port);
+	 char* getFilter();
          
  private:
          static void* loop(void *param);
@@ -791,11 +821,15 @@ class PacketCaptureThread
            ssize_t len;
            unsigned char data[0];
          };
-	 pthread_t m_tid;
-         pthread_mutex_t m_pcache_mutex;
          struct packetCache *m_pcache_first;
          struct packetCache *m_pcache_last;
+
+	 pthread_t m_tid;
+         pthread_mutex_t m_pcache_mutex;
+
          pcap_t *m_pcache_pcap;
 
+	 char pcap_filter[256];
 };
+
 #endif // EQPACKET_H
