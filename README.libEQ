@@ -11,7 +11,6 @@ The libEQ.a library may be downloaded from the following sites:
 
 ftp://azriel.trifocus.net/pub/libeq/{arch}/{os}/libEQ.a
 ftp://smurfette.trifocus.net/pub/libeq/{arch}/{os}/libEQ.a
-http://www.doomed.to/showeq/libEQ.a
 
 where:
   {arch} is typically i386
