@@ -7,7 +7,7 @@ AM_MAINTAINER_MODE
 
 dnl Please remember to update this when the official libEQ.a gets updated...
 dnl (* this is list in case we have libEQ.a's for multiple platforms*)
-CURRENT_LIBEQMD5="23249b5a6a04f2b900449d9c4aa0994a"
+CURRENT_LIBEQMD5="feeeecba3f8c4d1559b338e60747dbb0"
 
 dnl Use CCd/CXXd rather than CC/CXX otherwise it cache's the value
 dnl and prevents the alternate search from working. Would be better
