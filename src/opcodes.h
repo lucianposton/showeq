@@ -102,7 +102,7 @@
 
 #define ManaDecrementCode           0xf175
 
-#define StartCastCode               0x0065
+#define StartCastCode 				0x00C6
 
 #define MemSpellCode                0xf178
 
