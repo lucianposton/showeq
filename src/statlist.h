@@ -49,7 +49,7 @@ class StatList : public SEQListView
 
  private:
    // the player this skill list is monitoring
-   Player* m_pPlayer;
+   Player* m_player;
 
    QListViewItem* m_statList[LIST_MAXLIST]; 
 

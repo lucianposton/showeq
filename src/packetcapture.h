@@ -13,6 +13,10 @@
 
 #include <pthread.h>
 
+#ifdef __FreeBSD__
+#include <sys/ioccom.h>
+#endif
+
 extern "C" { // fix for bpf not being c++ happy
 #include <pcap.h>
 }

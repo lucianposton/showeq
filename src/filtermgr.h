@@ -30,10 +30,13 @@
 //----------------------------------------------------------------------
 // forward declarations
 class Filter;
+class Filters;
+class FilterTypes;
+class DataLocationMgr;
 
 //
-// ZBTEMP: predefined filters and filter flags will be migrated out
-// so that ShowEQ code can register the file based filters and there flags
+// ZBTEMP: predefined filters and filter mask will be migrated out
+// so that ShowEQ code can register the file based filters and there mask
 // at runtime ala the runtime Filter stuff
 //
 
@@ -59,9 +62,6 @@ class Filter;
 #define FILTER_FLAG_FILTERED		(1 << FILTERED_FILTER)
 #define FILTER_FLAG_TRACER		(1 << TRACER_FILTER)
 
-#define MAXSIZEOF_FILEFILTERS 16
-#define MAXSIZEOF_RUNTIMEFILTERS 16
-
 //----------------------------------------------------------------------
 // FilterMgr
 class FilterMgr : public QObject
@@ -69,17 +69,17 @@ class FilterMgr : public QObject
   Q_OBJECT
 
  public:
-  FilterMgr(const QString filterFile, bool spawnfilter_case);
+  FilterMgr(const DataLocationMgr* dataLocMgr, 
+	    const QString filterFile, bool spawnfilter_case);
   ~FilterMgr();
   
   const QString& filterFile(void) { return m_filterFile; }
   const QString& zoneFilterFile(void) { return m_zoneFilterFile; }
-  bool caseSensitive(void) { return m_isCaseSensitive; }
-  
+  bool caseSensitive(void) { return m_caseSensitive; }
   void setCaseSensitive(bool caseSensitive);
 
-  uint32_t filterFlags(const QString& filterString, int level) const;
-  QString filterString(uint32_t filterFlags) const;
+  uint32_t filterMask(const QString& filterString, uint8_t level) const;
+  QString filterString(uint32_t mask) const;
   QString filterName(uint8_t filter) const;
   bool addFilter(uint8_t filter, const QString& filterString);
   void remFilter(uint8_t filter, const QString& filterString);
@@ -90,8 +90,8 @@ class FilterMgr : public QObject
 			     uint8_t& flag,
 			     uint32_t& flagMask);
   void unregisterRuntimeFilter(uint8_t flag);
-  uint32_t runtimeFilterFlags(const QString& filterString, int level) const;
-  QString runtimeFilterString(uint32_t filterFlags) const;
+  uint32_t runtimeFilterMask(const QString& filterString, uint8_t level) const;
+  QString runtimeFilterString(uint32_t filterMask) const;
   bool runtimeFilterAddFilter(uint8_t flag, const QString& filter);
   void runtimeFilterRemFilter(uint8_t flag, const QString& filter);
   void runtimeFilterCommit(uint8_t flag);
@@ -113,17 +113,17 @@ class FilterMgr : public QObject
 
 
  private:
+  const DataLocationMgr* m_dataLocMgr;
+  FilterTypes* m_types;
   QString m_filterFile;
-  Filter* m_filters[SIZEOF_FILTERS];
+  Filters* m_filters;
   QString m_zoneFilterFile;
-  Filter* m_zoneFilters[SIZEOF_FILTERS];
+  Filters* m_zoneFilters;
 
-  uint16_t m_runtimeFiltersAllocated;
-  Filter* m_runtimeFilters[MAXSIZEOF_RUNTIMEFILTERS];
-  QString m_runtimeFilterNames[MAXSIZEOF_RUNTIMEFILTERS];
+  FilterTypes* m_runtimeTypes;
+  Filters* m_runtimeFilters;
 
-  int m_cFlags;
-  bool m_isCaseSensitive;
+  bool m_caseSensitive;
 };
 
 #endif // FILTERMGR_H
