@@ -813,18 +813,13 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
   setRace(zsentry->race);
   setGender(zsentry->gender);
   setGuildID(zsentry->guildId);
-  setPos((int16_t)lrintf(zsentry->x), 
-         (int16_t)lrintf(zsentry->y), 
-         (int16_t)lrintf(zsentry->z),
+  setPos(zsentry->x >> 3, 
+         zsentry->y >> 3, 
+         zsentry->z >> 3,
 	 showeq_params->walkpathrecord,
-	 showeq_params->walkpathlength
-        );
+	 showeq_params->walkpathlength);
   setDeltas(0,0,0);
-#if 1 // ZBTEMP
-  printf("Player::zoneBegin(): Pos (%f/%f/%f) Heading: %f\n",
-	 zsentry->x, zsentry->y, zsentry->z, zsentry->heading);
-#endif // ZBTEMP  
-  setHeading((int8_t)lrintf(zsentry->heading), 0);
+  setHeading(zsentry->heading, 0);
   m_validPos = true;
 
   m_headingDegrees = 360 - ((((int8_t)lrintf(zsentry->heading)) * 360) >> 11);

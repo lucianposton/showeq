@@ -387,21 +387,31 @@
     "Coffin",                 // 380
     "Weapon Rack",            // 381
     "Coffin",                 // 382
-    NULL,                     // 383
-    NULL,                     // 384
-    NULL,                     // 385
-    NULL,                     // 386
-    NULL,                     // 387
-    NULL,                     // 388
-    NULL,                     // 389
-    NULL,                     // 390
-    NULL,                     // 391
-    NULL,                     // 392
-    NULL,                     // 393
-    NULL,                     // 394
-    NULL,                     // 395
-    NULL,                     // 396
-    NULL,                     // 397
-    NULL,                     // 398
-    NULL,                     // 399
-    NULL,                     // 400
+    NULL,                     // 383 - unknown race
+    NULL,                     // 384 - unknown race
+    "Nihil",                  // 385
+    "Trusik",                 // 386
+    "Discord Golem",          // 387
+    "Hynid",                  // 388
+    "Turepta",                // 389
+    "Cragbeast",              // 390
+    "Stonemite",              // 391
+    "Ukun",                   // 392
+    "Discord Centaur",        // 393
+    "Ikaav",                  // 394
+    "Aneuk",                  // 395
+    "Kyv",                    // 396
+    "Noc",                    // 397
+    "Ra'Tuk",                 // 398
+    NULL,                     // 399 - unknown race
+    NULL,                     // 400 - 2 Headed Snake Man
+    NULL,                     // 401 - unknown race
+    "Mastruq",                // 402
+    NULL,                     // 403
+    "Thorn of the Tides",     // 404 - Boat?
+    NULL,                     // 405
+    NULL,                     // 406
+    NULL,                     // 407
+    NULL,                     // 408
+    NULL,                     // 409
+    NULL,                     // 410

@@ -32,6 +32,7 @@ class ZoneMgr : public QObject
   ZoneMgr(EQPacket* packet, QObject* parent = 0, const char* name =0);
 
   QString zoneNameFromID(uint16_t zoneId);
+  QString zoneLongNameFromID(uint16_t zoneId);
   bool isZoning() const { return m_zoning; }
   const QString& shortZoneName() const { return m_shortZoneName; }
   const QString& longZoneName() const { return m_longZoneName; }
@@ -43,6 +44,7 @@ class ZoneMgr : public QObject
 
  protected slots:
   void zoneEntry(const ClientZoneEntryStruct* zsentry, uint32_t, uint8_t);
+  void zonePlayer(const charProfileStruct* player);
   void zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t, uint8_t);
   void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
   void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);

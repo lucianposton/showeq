@@ -4489,7 +4489,6 @@ void EQInterface::zoneEntry(const ServerZoneEntryStruct* zsentry)
   QString tempStr;
 
   tempStr = "Zone: EntryCode: Server, Zone: ";
-  tempStr += m_zoneMgr->zoneNameFromID(zsentry->zoneId);
   emit msgReceived(tempStr);
 #endif
 }

@@ -78,3 +78,4 @@
     "Intimidation",            // 71
     "Berserking",              // 72
     "Taunt",                   // 73
+    "Frenzy",                  // 74

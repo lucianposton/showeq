@@ -26,6 +26,7 @@
 // constants
 static const char magicStr[5] = "zon2"; // magic is the size of uint32_t + a null
 static const uint32_t* magic = (uint32_t*)magicStr;
+const float defaultZoneExperienceMultiplier = 0.75;
 
 
 // Sequence of signals on initial entry into eq from character select screen
@@ -47,7 +48,7 @@ static const uint32_t* magic = (uint32_t*)magicStr;
 ZoneMgr::ZoneMgr(EQPacket* packet, QObject* parent, const char* name)
   : QObject(parent, name),
     m_zoning(false),
-    m_zone_exp_multiplier(0.75),
+    m_zone_exp_multiplier(defaultZoneExperienceMultiplier),
     m_zonePointCount(0),
     m_zonePoints(0)
 {
@@ -57,6 +58,8 @@ ZoneMgr::ZoneMgr(EQPacket* packet, QObject* parent, const char* name)
 
   connect(packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)),
 	  this, SLOT(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)));
+  connect(packet, SIGNAL(backfillPlayer(const charProfileStruct*, uint32_t, uint8_t)),
+	  this, SLOT(zonePlayer(const charProfileStruct*)));
   connect(packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
 	  this, SLOT(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)));
   connect(packet, SIGNAL(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)),
@@ -70,16 +73,37 @@ ZoneMgr::ZoneMgr(EQPacket* packet, QObject* parent, const char* name)
     restoreZoneState();
 }
 
+struct ZoneNames
+{
+  const char* shortName;
+  const char* longName;
+};
+
+static const ZoneNames zoneNames[] =
+{
+#include "zones.h"
+};
+
 QString ZoneMgr::zoneNameFromID(uint16_t zoneId)
 {
-   static const char* zoneNames[] =
-   {
-#include "zones.h"
-   };
+   const char* zoneName = NULL;
+   if (zoneId < (sizeof(zoneNames) / sizeof (ZoneNames)))
+       zoneName = zoneNames[zoneId].shortName;
+
+   if (zoneName != NULL)
+      return zoneName;
+
+   QString tmpStr;
+   tmpStr.sprintf("unk_zone_%d", zoneId);
+   return tmpStr;
+}
+
+QString ZoneMgr::zoneLongNameFromID(uint16_t zoneId)
+{
 
    const char* zoneName = NULL;
-   if (zoneId < (sizeof(zoneNames) / sizeof (char*)))
-       zoneName = zoneNames[zoneId];
+   if (zoneId < (sizeof(zoneNames) / sizeof (ZoneNames)))
+       zoneName = zoneNames[zoneId].longName;
 
    if (zoneName != NULL)
       return zoneName;
@@ -142,7 +166,7 @@ void ZoneMgr::zoneEntry(const ClientZoneEntryStruct* zsentry, uint32_t len, uint
 {
   m_shortZoneName = "unknown";
   m_longZoneName = "unknown";
-
+  m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
   m_zoning = false;
 
   emit zoneBegin();
@@ -152,10 +176,21 @@ void ZoneMgr::zoneEntry(const ClientZoneEntryStruct* zsentry, uint32_t len, uint
     saveZoneState();
 }
 
+void ZoneMgr::zonePlayer(const charProfileStruct* player)
+{
+  m_shortZoneName = zoneNameFromID(player->zoneId);
+  m_longZoneName = zoneLongNameFromID(player->zoneId);
+  m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
+  m_zoning = false;
+  emit zoneBegin(m_shortZoneName);
+
+  if (showeq_params->saveZoneState)
+    saveZoneState();
+}
+
+
 void ZoneMgr::zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t len, uint8_t dir)
 {
-  m_shortZoneName = zoneNameFromID(zsentry->zoneId);
-
   m_zoning = false;
   emit zoneBegin(m_shortZoneName);
   emit zoneBegin(zsentry, len, dir);
@@ -167,6 +202,7 @@ void ZoneMgr::zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t len, uint
 void ZoneMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t len, uint8_t dir)
 {
   m_shortZoneName = zoneNameFromID(zoneChange->zoneId);
+  m_longZoneName = zoneLongNameFromID(zoneChange->zoneId);
   m_zoning = true;
 
   if (dir == DIR_SERVER)
