@@ -15,6 +15,12 @@
 
 //#define DEBUG_PLAYER
 
+//----------------------------------------------------------------------
+// constants
+static const char magicStr[5] = "plr2"; // magic is the size of uint32_t + a null
+static const uint32_t* magic = (uint32_t*)magicStr;
+
+
 Player::Player (QObject* parent,
 		ZoneMgr* zoneMgr,
 		const char* name)
@@ -662,6 +668,9 @@ void Player::setLastKill(const QString& name, uint8_t level)
 
 void Player::zoneEntry(const ServerZoneEntryStruct* zsentry)
 {
+  if (name() != zsentry->name)
+    reset();
+
   clear();
   Spawn::setName(zsentry->name);
   setDeity(zsentry->deity);
@@ -669,6 +678,8 @@ void Player::zoneEntry(const ServerZoneEntryStruct* zsentry)
   setClassVal(zsentry->class_);
   setRace(zsentry->race);
 
+  setUseDefaults(false);
+  
   if (showeq_params->savePlayerState)
     savePlayerState();
 
@@ -1035,11 +1046,16 @@ void Player::savePlayerState(void)
 
     int i;
 
+    // write the magic string
+    d << *magic;
+
     // write a test value at the top of the file for a validity check
     size_t testVal = sizeof(charProfileStruct);
     d << testVal;
     d << MAX_KNOWN_SKILLS;
     d << MAX_KNOWN_LANGS;
+
+    d << m_zoneMgr->shortZoneName().lower();
 
     // write out the rest
     d << m_name;
@@ -1114,6 +1130,20 @@ void Player::restorePlayerState(void)
     size_t testVal;
     QDataStream d(&keyFile);
 
+    // check the magic string
+    uint32_t magicTest;
+    d >> magicTest;
+
+    if (magicTest != *magic)
+    {
+      fprintf(stderr, 
+	      "Failure loading %s: Bad magic string!\n",
+	      (const char*)fileName);
+      reset();
+      clear();
+      return;
+    }
+
     // check the test value at the top of the file
     d >> testVal;
     if (testVal != sizeof(charProfileStruct))
@@ -1146,6 +1176,17 @@ void Player::restorePlayerState(void)
       reset();
       clear();
       return;
+    }
+    
+    // attempt to validate that the info is from the current zone
+    QString zoneShortName;
+    d >> zoneShortName;
+    if (zoneShortName != m_zoneMgr->shortZoneName().lower())
+    {
+      fprintf(stderr,
+	      "\aWARNING: Restoring player state for potentially incorrect zone (%s != %s)!\n",
+	      (const char*)zoneShortName, 
+	      (const char*)m_zoneMgr->shortZoneName().lower());
     }
 
     // read in the rest

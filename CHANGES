@@ -1,3 +1,30 @@
+dohpaZ (08/06/02)
+------------------
+Modifications:
+ + version 4.2.9
+ + Applied patch #563579 "pvp teams update" by g0hst (g0hst)
+ + Added m_itemdb.cpp to BUILT_SOURCES in Makefile.am (this should make sure
+   it gets cleaned up when doing a make clean.
+ + Changed "CreateUnknownSpawns" option to default to true since too many 
+   couldn't figure out that this was required BEFORE "Show Unknown Spawns" 
+   would work (Can't show what isn't created).
+ + Corrected help displays option list --restore-zone-state should have 
+   been --restore-zone.
+ + Fixed saving of spawns.  Also made sure zone position was saved with the 
+   rest of the spawn info.  Also added a check that will attempt to verify
+   that restored spawns are for the expected zone.
+ + Added some more checks for the state/version of save/restore files to
+   SpawnShell, Player, and ZoneMgr.
+ + Make sure player information gets reset upon zone entry if the player
+   name is different.
+ + Updates spells.h again (with latest data).
+ + Added spells_en2spellsh.pl Perl 5 script that creates a spells.h file 
+   using data from spells_en.txt.
+ + Added the start of a little ROADMAP file that gives basic info about the 
+   structure of ShowEQ to help bring new developers up to speed.
+ + Added menu picks for race/deity PvP to the right-click context menus so that
+   it can be enabled/disabled on a per map basis.
+
 dohpaZ (06/06/02)
 ------------------
 Modifications:

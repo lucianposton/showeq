@@ -217,6 +217,8 @@ class MapMenu : public QPopupMenu
   void toggle_highlightConsideredSpawns(int itemId);
   void toggle_spawnNames(int itemId);
   void toggle_mapImage(int itemId);
+  void toggle_deityPvP(int itemId);
+  void toggle_racePvP(int itemId);
   void toggle_walkPath(int itemId);
 #ifdef DEBUG
   void toggle_debugInfo(int itemId);
@@ -276,6 +278,8 @@ class MapMenu : public QPopupMenu
   int m_id_highlightConsideredSpawns;
   int m_id_walkPath;
   int m_id_mapImage;
+  int m_id_deityPvP;
+  int m_id_racePvP;
 #ifdef DEBUG
   int m_id_debugInfo;
 #endif

@@ -19,6 +19,12 @@
 #include "packet.h"
 #include "main.h"
 
+//----------------------------------------------------------------------
+// constants
+static const char magicStr[5] = "zon2"; // magic is the size of uint32_t + a null
+static const uint32_t* magic = (uint32_t*)magicStr;
+
+
 // Sequence of signals on initial entry into eq from character select screen
 // EQPacket                              ZoneMgr                       isZoning
 // ----------                            -------                       --------
@@ -80,6 +86,9 @@ void ZoneMgr::saveZoneState(void)
   if (keyFile.open(IO_WriteOnly))
   {
     QDataStream d(&keyFile);
+    // write the magic string
+    d << *magic;
+
     d << m_longZoneName;
     d << m_shortZoneName;
   }
@@ -92,6 +101,19 @@ void ZoneMgr::restoreZoneState(void)
   if (keyFile.open(IO_ReadOnly))
   {
     QDataStream d(&keyFile);
+
+    // check the magic string
+    uint32_t magicTest;
+    d >> magicTest;
+
+    if (magicTest != *magic)
+    {
+      fprintf(stderr, 
+	      "Failure loading %s: Bad magic string!\n",
+	      (const char*)fileName);
+      return;
+    }
+
     d >> m_longZoneName;
     d >> m_shortZoneName;
 

@@ -663,8 +663,12 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
     subMenu->insertItem("Selections Walk Path", this, SLOT(toggle_walkPath(int)));
   m_id_mapImage =
     subMenu->insertItem("Map Image", this, SLOT(toggle_mapImage(int)));
+  m_id_deityPvP = 
+    subMenu->insertItem("Deity PvP", this, SLOT(toggle_deityPvP(int)));
+  m_id_racePvP = 
+    subMenu->insertItem("Race PvP", this, SLOT(toggle_racePvP(int)));
 #ifdef DEBUG
-  m_id_debugInfo = subMenu->insertItem("Show Debug Info", this, SLOT(toggle_debugInfo(int)));
+  m_id_debugInfo = subMenu->insertItem("Debug Info", this, SLOT(toggle_debugInfo(int)));
 #endif
   m_id_showSub = insertItem("Show", subMenu);
   
@@ -824,6 +828,8 @@ void MapMenu::init_Menu(void)
 		 m_map->highlightConsideredSpawns());
   setItemChecked(m_id_walkPath, m_map->walkPathShowSelect());
   setItemChecked(m_id_mapImage, m_map->showBackgroundImage());
+  setItemChecked(m_id_deityPvP, m_map->deityPvP());
+  setItemChecked(m_id_racePvP, m_map->racePvP());
 #ifdef DEBUG
   setItemChecked(m_id_debugInfo, m_map->showDebugInfo());
 #endif
@@ -919,6 +925,16 @@ void MapMenu::toggle_filtered(int itemId)
 void MapMenu::toggle_map(int itemId)
 {
   m_map->setShowLines(!m_map->showLines());
+}
+
+void MapMenu::toggle_deityPvP(int itemId)
+{
+  m_map->setDeityPvP(!m_map->deityPvP());
+}
+
+void MapMenu::toggle_racePvP(int itemId)
+{
+  m_map->setRacePvP(!m_map->racePvP());
 }
 
 void MapMenu::toggle_velocity(int itemId)

@@ -49,7 +49,7 @@ m_experiencelog.cpp m_combatlog.cpp m_msgdlg.cpp m_player.cpp m_decode.cpp m_ski
 m_statlist.cpp m_filtermgr.cpp m_category.cpp m_compassframe.cpp \
 m_group.cpp m_netdiag.cpp m_logger.cpp m_xmlpreferences.cpp m_seqwindow.cpp \
 m_seqlistview.cpp m_zonemgr.cpp m_spawnmonitor.cpp m_spawnpointlist.cpp \
-m_spawnlistcommon.cpp m_spawnlist2.cpp
+m_spawnlistcommon.cpp m_spawnlist2.cpp m_itemdb.cpp
 
 CLEANFILES=$(BUILT_SOURCES)
 

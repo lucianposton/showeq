@@ -125,6 +125,5 @@ struct ShowEQParams
 };
  
 extern struct ShowEQParams *showeq_params;
-extern class EQItemDB* pItemDB;
 
 #endif

@@ -277,6 +277,7 @@ Spawn::Spawn(QDataStream& d, uint16_t id)
   : Item(tSpawn, id)
 {
   // restore Spawn info
+  d.readRawBytes((char*)this, sizeof(EQPoint));
   d.readRawBytes((char*)&m_lastUpdate, 
 		 ((char*)this + sizeof(Item)) - (char*)&m_lastUpdate);
   d.readRawBytes((char*)&m_petOwnerID,
@@ -294,9 +295,6 @@ Spawn::Spawn(QDataStream& d, uint16_t id)
 
   // even if it had been considered, mark it as not
   setConsidered(false);
-
-  // clear other questionables...
-  setTypeflag(0);
 }
 
 Spawn::~Spawn()
@@ -607,6 +605,7 @@ void Spawn::calcRaceTeam()
   case 6:  // Dark Elf
   case 9:  // Troll
   case 10: // Ogre
+  case 128: // Iksar
     m_raceTeam = RTEAM_DARK;
     break;
     
@@ -846,6 +845,7 @@ void Spawn::saveSpawn(QDataStream& d)
   // write out the raw spawn structure, skipping over the QStrings,
   // and SpawnTrackList (which can't be persisted in this fashion),
   // and the data we don't wan't copied over (heading/delta info).
+  d.writeRawBytes((const char*)this, sizeof(EQPoint));
   d.writeRawBytes((const char*)&m_lastUpdate, 
 		  ((char*)this + sizeof(Item)) 
 		  - (char*)&m_lastUpdate);

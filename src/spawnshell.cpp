@@ -41,8 +41,8 @@
 
 //----------------------------------------------------------------------
 // constants
-const char magicStr[5] = "spn3"; // magic is the size of uint32_t + a null
-const uint32_t* magic = (uint32_t*)magicStr;
+static const char magicStr[5] = "spn4"; // magic is the size of uint32_t + a null
+static const uint32_t* magic = (uint32_t*)magicStr;
 
 //----------------------------------------------------------------------
 // Handy utility function
@@ -620,7 +620,7 @@ void SpawnShell::updateSpawn(uint16_t id,
 	 // found a match, ignore it
 	 m_deadSpawnID[i] = 0;
 
-	 printf("\a(%d) had been removed from the zone, but saw a position update on it, so assuming bogus update.\n", 
+	 printf("(%d) had been removed from the zone, but saw a position update on it, so assuming bogus update.\n", 
 		id);
 
 	 return;
@@ -928,6 +928,16 @@ void SpawnShell::backfillZoneSpawns(const zoneSpawnsStruct* zdata, uint32_t len)
 
   for (int j = 0; j < zoneSpawnsStructPayloadCount; j++)
     backfillSpawn(&zdata->spawn[j].spawn);
+
+  // if the spawns are to be saved, this is a good time to do it.
+  if (showeq_params->saveSpawns)
+  {
+    // stop the timer because saveSpawns will reset it.
+    m_timer->stop();
+
+    // save the spawns
+    saveSpawns();
+  }
 }
 
 void SpawnShell::backfillSpawn(const newSpawnStruct *ndata)
@@ -1085,6 +1095,9 @@ void SpawnShell::saveSpawns(void)
     size_t testVal = sizeof(spawnStruct);
     d << testVal;
 
+    // save the name of the current zone
+    d << m_zoneMgr->shortZoneName().lower();
+
     // save the spawns
     ItemMap& theMap = getMap(tSpawn);
 
@@ -1094,7 +1107,7 @@ void SpawnShell::saveSpawns(void)
 
     ItemIterator it(theMap);
     Spawn* spawn;
-    
+
     // iterate over all the items in the map
     for (; it.current(); ++it)
     {
@@ -1102,7 +1115,7 @@ void SpawnShell::saveSpawns(void)
       spawn = (Spawn*)it.current();
 
       // save the spawn id
-      d << it.currentKey();
+      d << spawn->id();
 
       // save the spawn
       spawn->saveSpawn(d);
@@ -1147,6 +1160,17 @@ void SpawnShell::restoreSpawns(void)
 	      "Failure loading %s: Bad spawnStruct size!\n",
 	      (const char*)fileName);
       return;
+    }
+
+    // attempt to validate that the info is from the current zone
+    QString zoneShortName;
+    d >> zoneShortName;
+    if (zoneShortName != m_zoneMgr->shortZoneName().lower())
+    {
+      fprintf(stderr,
+	      "\aWARNING: Restoring spawns for potentially incorrect zone (%s != %s)!\n",
+	      (const char*)zoneShortName, 
+	      (const char*)m_zoneMgr->shortZoneName().lower());
     }
 
     // read the expected number of elements

@@ -140,7 +140,7 @@ static struct option option_list[] = {
 
 /* Global parameters, so all parts of ShowEQ has access to it */
 struct ShowEQParams *showeq_params;
-XMLPreferences      *pSEQPrefs; 
+XMLPreferences      *pSEQPrefs = NULL; 
 
 int main (int argc, char **argv)
 {
@@ -160,7 +160,7 @@ int main (int argc, char **argv)
    printf ("Please see http://seq.sourceforge.net for further information\n\n");
 
    /* Create application instance */
-   QApplication::setStyle( new QWindowsStyle );
+   //   QApplication::setStyle( new QWindowsStyle );
    QApplication qapp (argc, argv);
 
    /* Initialize the parameters with default values */
@@ -222,7 +222,7 @@ int main (int argc, char **argv)
    showeq_params->showEQTime = pSEQPrefs->getPrefBool("ShowEQTime",section,false);
    section = "Misc";
    showeq_params->fast_machine = pSEQPrefs->getPrefBool("FastMachine", section, true);
-   showeq_params->createUnknownSpawns = pSEQPrefs->getPrefBool("CreateUnknownSpawns", section, false);
+   showeq_params->createUnknownSpawns = pSEQPrefs->getPrefBool("CreateUnknownSpawns", section, true);
 
    showeq_params->walkpathrecord = pSEQPrefs->getPrefBool("WalkPathRecording", section, false);
    showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 25);
@@ -850,7 +850,7 @@ int main (int argc, char **argv)
       printf ("                                        a previous session    \n");
       printf ("      --restore-player-state            Restores the player state\n");
       printf ("                                        from a previous session    \n");
-      printf ("      --restore-zone-state              Restores the zone state\n");
+      printf ("      --restore-zone                    Restores the zone state\n");
       printf ("                                        from a previous session    \n");
       printf ("      --restore-spawns                  Restores the spawns\n");
       printf ("                                        from a previous session    \n");
