@@ -444,8 +444,8 @@ struct ServerZoneEntryStruct
 /*0244*/ uint8_t unknown244[14];
 
 /*0258*/ int16_t deity;           // Player's Deity
-/*0262*/ uint8_t unknown260[7];
-}; /* 0267 */
+/*0262*/ uint8_t unknown260[31];
+}; /* 0291 */
 
 /*
 ** New Zone Code
@@ -573,8 +573,8 @@ struct charProfileStruct
 /*5016*/ uint32_t  ldon_tak_points;    // Earned TAK points
 /*5020*/ uint8_t   unknown4352[20];    // *** Placeholder
 /*5040*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*5044*/ uint8_t   unknown4380[5348];   // *** Placeholder
-}; /* 5680 */
+/*5044*/ uint8_t   unknown4380[5356];   // *** Placeholder
+}; /* 10400 */
 
 
 #if 1
