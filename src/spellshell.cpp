@@ -13,8 +13,6 @@
 #include "util.h"
 #include "spawnshell.h"
 
-#define SPELLTIMER 6
-
 SpellItem::SpellItem(SpawnShell* spawnShell, 
 		     uint16_t casterId,
 		     const startCastStruct *c)
@@ -213,7 +211,8 @@ SpellItem* SpellShell::InsertSpell(const startCastStruct *c)
          item = new SpellItem(m_spawnShell, m_player->getPlayerID(), c);
          m_spellList.append(item);
          if ((m_spellList.count() > 0) && (!m_timer->isActive()))
-            m_timer->start(1000 * SPELLTIMER);
+            m_timer->start(1000 *
+               pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
          emit addSpell(item);
 	 return item;
       }
@@ -263,14 +262,17 @@ void SpellShell::interruptSpellCast(const badCastStruct *icast)
    }
 }
 
-
 void SpellShell::selfFinishSpellCast(const memSpellStruct *b)
 {
   if (b->param2 != 3)
     return;
 
-   printf("selfFinishSpellCast - id=%d\n", b->spellId);
-   //   SpellItem *item = FindSpell(b->spellId, m_player->getPlayerID());
+   printf("selfFinishSpellCast - id=%d, by=%d\n", b->spellId, b->spawnId);
+   SpellItem *item = FindSpell(b->spellId, m_player->getPlayerID());
+   if (item) {
+      struct spellInfoStruct *info = spell_info(b->spellId);
+      item->setDuration(info->duration);
+   }
 }
 
 void SpellShell::spellMessage(QString &str)
@@ -313,7 +315,8 @@ void SpellShell::timeout()
    for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
       it != m_spellList.end(); it++) {
       if (*it) {
-         int d = (*it)->duration() - SPELLTIMER;
+         int d = (*it)->duration() -
+            pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6);
          // check if target have despawned
          /*
          if ( (d > 0) && (*it)->targetId() && (!m_spawnShell->findID(

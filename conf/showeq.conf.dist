@@ -291,6 +291,7 @@ TargetNameWidth   90
 CastTimeWidth     0
 RemainTimeWidth   63
 ColumnOrder       0:1:2:3:4:5:6:7
+SpellTimer        6
 
 #
 # SkillList options
