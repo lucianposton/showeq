@@ -291,9 +291,9 @@ void dumpspawn(const char *name, struct spawnStruct *spawns) {
   printf("***** %s ******\n", name);
   signednumprint(LONG_FORMAT,"heading",(long int) spawns->heading);
   signednumprint(LONG_FORMAT,"deltaHeading",(long int) spawns->deltaHeading);
-  signednumprint(LONG_FORMAT,"yPos",(long int) spawns->yPos);
-  signednumprint(LONG_FORMAT,"xPos",(long int) spawns->xPos);
-  signednumprint(LONG_FORMAT,"zPos",(long int) spawns->zPos);
+  signednumprint(LONG_FORMAT,"y",(long int) spawns->y);
+  signednumprint(LONG_FORMAT,"x",(long int) spawns->x);
+  signednumprint(LONG_FORMAT,"z",(long int) spawns->z);
   signednumprint(LONG_FORMAT,"deltaY",(long int) spawns->deltaY);
   signednumprint(LONG_FORMAT,"spacer1",(long int) spawns->spacer1);
   signednumprint(LONG_FORMAT,"deltaZ",(long int) spawns->deltaZ);

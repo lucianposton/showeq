@@ -31,7 +31,7 @@
 
 //----------------------------------------------------------------------
 // forward declarations
-class EQPlayer;
+class Player;
 
 ////////////////////////////////////////////
 //  CombatOffenseRecord definition
@@ -40,7 +40,7 @@ class CombatOffenseRecord
 {
 public:
 
-	CombatOffenseRecord(int iType, EQPlayer* p);
+	CombatOffenseRecord(int iType, Player* p);
 
 	int		getType() { return m_iType; };
 	int		getHits() { return m_iHits; };
@@ -54,7 +54,7 @@ public:
 
 private:
 	int			m_iType;
-	EQPlayer*	m_player;
+	Player*	m_player;
 
 	int 		m_iHits;
 	int			m_iMisses;
@@ -72,7 +72,7 @@ class CombatDefenseRecord
 {
 public:
 
-	CombatDefenseRecord(EQPlayer* p);
+	CombatDefenseRecord(Player* p);
 
 	int		getHits() { return m_iHits; };
 	int		getMisses() { return m_iMisses; };
@@ -89,7 +89,7 @@ public:
 	void	addHit(int iDamage);
 
 private:
-	EQPlayer*	m_player;
+	Player*	m_player;
 
 	int 		m_iHits;
 	int			m_iMisses;
@@ -111,7 +111,7 @@ class CombatMobRecord
 {
 public:
 
-	CombatMobRecord(int iID, int iStartTime, EQPlayer* p);
+	CombatMobRecord(int iID, int iStartTime, Player* p);
 
 	int		getID() { return m_iID; };
 	int		getDuration() { return (m_iLastTime - m_iStartTime); };
@@ -125,7 +125,7 @@ public:
 
 private:
 	int			m_iID;
-	EQPlayer*	m_player;
+	Player*	m_player;
 
 	int			m_iStartTime;
 	int			m_iLastTime;
@@ -144,7 +144,7 @@ class CombatWindow : public SEQWindow
 
 public:
 
-	CombatWindow(EQPlayer* player,
+	CombatWindow(Player* player,
 		     QWidget* parent = 0, const char* name = 0);
 	~CombatWindow();
 
@@ -172,7 +172,7 @@ private:
 
 
 private:
-	EQPlayer*	m_player;
+	Player*	m_player;
 
 	QWidget* 	m_widget_offense;
 	QWidget* 	m_widget_defense;

@@ -15,31 +15,24 @@
 
 //#define DEBUG_PLAYER
 
-
-// how many kills by others without receiving experience until 
-// the last kill is no longer considered valid
-const int staleKillCutoff = 5;
-
-EQPlayer::EQPlayer (QObject* parent,
-		    ZoneMgr* zoneMgr,
-		    const char* name,
-		    int level, 
-		    uint16_t race, 
-		    int class_, 
-		    int deity)
-  : QObject (parent, name),
+Player::Player (QObject* parent,
+		ZoneMgr* zoneMgr,
+		const char* name)
+  : QObject(parent, name),
+    Spawn(),
     m_zoneMgr(zoneMgr)
 {
 #ifdef DEBUG_PLAYER
-    debug("EQPlayer()");
+    debug("Player()");
 #endif
-    setLevel(level);
-    setRace(race);
-    setClassVal(class_);
-    setDeity(deity);
+    m_NPC = SPAWN_SELF;
     
     setDefaults();
     setUseDefaults(true);
+
+    // set the name to the default name
+    Spawn::setName(m_defaultName);
+
     // restore the player state if the user requested it...
     if (showeq_params->restorePlayerState)
       restorePlayerState();
@@ -50,40 +43,54 @@ EQPlayer::EQPlayer (QObject* parent,
     }
 }
 
-void EQPlayer::backfill(const charProfileStruct* player)
+Player::~Player()
+{
+}
+
+void Player::backfill(const charProfileStruct* player)
 {
   QString messag;
 
-  printf("EQPlayer::backfill():\n");
+  printf("Player::backfill():\n");
 
   
-  messag.sprintf("EQPlayer: Name: '%s' Last: '%s'\n", 
+  messag.sprintf("Player: Name: '%s' Last: '%s'\n", 
  		 player->name, player->lastName);
   emit msgReceived(messag);
   
-  messag.sprintf("EQPlayer: Level: %d\n", player->level);
+  messag.sprintf("Player: Level: %d\n", player->level);
   emit msgReceived(messag);
   
-  messag.sprintf("EQPlayer: PlayerMoney: P=%d G=%d S=%d C=%d\n",
+  messag.sprintf("Player: PlayerMoney: P=%d G=%d S=%d C=%d\n",
 		 player->platinum, player->gold, 
 		 player->silver, player->copper);
   emit msgReceived(messag);
   
-  messag.sprintf("EQPlayer: BankMoney: P=%d G=%d S=%d C=%d\n",
+  messag.sprintf("Player: BankMoney: P=%d G=%d S=%d C=%d\n",
 		 player->platinumBank, player->goldBank, 
 		 player->silverBank, player->copperBank);
   emit msgReceived(messag);
 
   // fill in base Spawn class
-  Spawn::backfill(player);
+  // set the characteristics that probably haven't changed.
+  setNPC(SPAWN_SELF);
+  setGender(player->gender);
+  setRace(player->race);
+  setClassVal(player->class_);
+  setLevel(player->level);
+
+  // save the raw name
+  setTypeflag(0);
+
+  Spawn::setName(player->name);
+  setLastName(player->lastName);
+
+  // if it's got a last name add it
+  if (level() < player->level)
+    setLevel(player->level);
 
   // Stats hanling
   setUseDefaults(false);
-  setPlayerName(player->name);
-  setPlayerLastName(player->lastName);
-  setLevel(player->level);
-  setRace(player->race);
-  setClassVal(player->class_);
   setDeity(player->deity);
 
   // update the con table
@@ -167,17 +174,21 @@ void EQPlayer::backfill(const charProfileStruct* player)
 
   }
 
-  messag = "EQPlayer: Exp =" + Commanate(player->exp);
-  emit msgReceived(messag);
-
-  messag = "EQPlayer: ExpAA =" + Commanate(player->altexp);
-  emit msgReceived(messag);
-
   if (showeq_params->savePlayerState)
     savePlayerState();
+
+  messag = "Player: Exp =" + Commanate(player->exp);
+  emit msgReceived(messag);
+
+  messag = "Player: ExpAA =" + Commanate(player->altexp);
+  emit msgReceived(messag);
+
+  updateLastChanged();
+
+  emit changeItem(this, tSpawnChangedALL);
 }
 
-void EQPlayer::clear()
+void Player::clear()
 {
   m_plusMana = 0; 
   m_plusHP = 0;
@@ -208,18 +219,18 @@ void EQPlayer::clear()
   m_headingDegrees = 360 - (m_heading * 360) / 256;
   
   setID(0);
+  setPoint(0,0,0);
 
-  if (showeq_params->savePlayerState)
-    savePlayerState();
+  updateLastChanged();
 }
 
-void EQPlayer::reset()
+void Player::reset()
 {
   setUseDefaults(true);
 
   m_currentAltExp = 0;
   m_currentExp = 0;
-  m_maxExp = calc_exp(getPlayerLevel(), getPlayerRace(), getPlayerClass());
+  m_maxExp = calc_exp(level(), race(), classVal());
 
   for (int a = 0; a < MAX_KNOWN_SKILLS; a++)
     m_playerSkills[a] = 255; // indicate an invalid value
@@ -241,11 +252,10 @@ void EQPlayer::reset()
   // update the con table
   fillConTable();
 
-  if (showeq_params->savePlayerState)
-    savePlayerState();
+  updateLastChanged();
 }
 
-void EQPlayer::wearItem(const playerItemStruct* itemp)
+void Player::wearItem(const playerItemStruct* itemp)
 {
   const itemStruct* item = &itemp->item;
 
@@ -309,8 +319,8 @@ void EQPlayer::wearItem(const playerItemStruct* itemp)
     {
       m_maxMana = calcMaxMana( m_maxINT,
 			       m_maxWIS,
-			       getPlayerClass(),
-			       getPlayerLevel()
+			       classVal(),
+			       level()
 			       )  +  m_plusMana;
       
       emit manaChanged(m_mana, m_maxMana);  /* Needs max mana */
@@ -323,7 +333,7 @@ void EQPlayer::wearItem(const playerItemStruct* itemp)
   }
 }
 
-void EQPlayer::removeItem(const itemStruct* item)
+void Player::removeItem(const itemStruct* item)
 {
   if ((item->equipSlot < 22) && !isItemBook(*item))
   {
@@ -385,8 +395,8 @@ void EQPlayer::removeItem(const itemStruct* item)
     {
       m_maxMana = calcMaxMana( m_maxINT,
 			     m_maxWIS,
-			     getPlayerClass(),
-			     getPlayerLevel()
+			     classVal(),
+			     level()
 			     )  +  m_plusMana;
     
       emit manaChanged(m_mana, m_maxMana);  /* Needs max mana */
@@ -399,7 +409,7 @@ void EQPlayer::removeItem(const itemStruct* item)
   }
 }
 
-void EQPlayer::increaseSkill(const skillIncStruct* skilli)
+void Player::increaseSkill(const skillIncStruct* skilli)
 {
   // save the new skill value
   m_playerSkills[skilli->skillId] = skilli->value;
@@ -419,7 +429,7 @@ void EQPlayer::increaseSkill(const skillIncStruct* skilli)
     savePlayerState();
 }
 
-void EQPlayer::manaChange(const manaDecrementStruct *mana)
+void Player::manaChange(const manaDecrementStruct *mana)
 {
   // update the players mana
   m_mana = mana->newMana;
@@ -433,7 +443,7 @@ void EQPlayer::manaChange(const manaDecrementStruct *mana)
     savePlayerState();
 }
 
-void EQPlayer::updateAltExp(const altExpUpdateStruct* altexp)
+void Player::updateAltExp(const altExpUpdateStruct* altexp)
 {
   QString totalAltExp;
   QString leftAltExp;
@@ -470,7 +480,7 @@ void EQPlayer::updateAltExp(const altExpUpdateStruct* altexp)
     savePlayerState();
 }
 
-void EQPlayer::updateExp(const expUpdateStruct* exp)
+void Player::updateExp(const expUpdateStruct* exp)
 {
   QString totalExp;
   QString incrementExp;
@@ -485,8 +495,8 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
   uint16_t fractexp;
 
   fractexp =  exp->exp;
-  minexp = calc_exp(getPlayerLevel() - 1, getPlayerRace(), getPlayerClass());
-  maxexp = calc_exp(getPlayerLevel(), getPlayerRace(), getPlayerClass());
+  minexp = calc_exp(level() - 1, race(), classVal());
+  maxexp = calc_exp(level(), race(), classVal());
   diffexp = maxexp - minexp;
   realexp = (diffexp / 330) * fractexp + minexp;
   incrementExp = Commanate(diffexp/330);
@@ -541,7 +551,7 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
     savePlayerState();
 }
 
-void EQPlayer::updateLevel(const levelUpUpdateStruct *levelup)
+void Player::updateLevel(const levelUpUpdateStruct *levelup)
 {
   QString totalExp;
   QString gainedExp;
@@ -553,8 +563,8 @@ void EQPlayer::updateLevel(const levelUpUpdateStruct *levelup)
   gainedExp = Commanate((uint32_t) (levelup->exp - m_currentExp));
   
   needKills = Commanate(((calc_exp( levelup->level,
-				    getPlayerRace  (),
-				    getPlayerClass ()
+				    race  (),
+				    classVal ()
 				    ) - levelup->exp
 			  )          /  ( levelup->exp > m_currentExp    ?
 					  levelup->exp - m_currentExp :
@@ -570,19 +580,19 @@ void EQPlayer::updateLevel(const levelUpUpdateStruct *levelup)
   m_defaultLevel = levelup->level;
   m_level  = levelup->level;
 
-  m_maxExp = calc_exp( getPlayerLevel (),
-		     getPlayerRace  (),
-		     getPlayerClass ()
+  m_maxExp = calc_exp( level (),
+		     race  (),
+		     classVal ()
 		     );
   
   emit expChangedInt( levelup->exp,
-		      calc_exp( getPlayerLevel () - 1,
-				getPlayerRace  (),
-				getPlayerClass ()
+		      calc_exp( level () - 1,
+				race  (),
+				classVal ()
 				),
-		      calc_exp( getPlayerLevel (),
-				getPlayerRace  (),
-				getPlayerClass ()
+		      calc_exp( level (),
+				race  (),
+				classVal ()
 				)
 		      );
   
@@ -596,10 +606,13 @@ void EQPlayer::updateLevel(const levelUpUpdateStruct *levelup)
   if (showeq_params->savePlayerState)
     savePlayerState();
 
+  updateLastChanged();
+
   emit levelChanged(m_level);
+  emit changeItem(this, tSpawnChangedLevel);
 }
 
-void EQPlayer::updateSpawnHP(const hpUpdateStruct *hpupdate)
+void Player::updateSpawnHP(const hpUpdateStruct *hpupdate)
 {
   if (hpupdate->spawnId != id())
     return;
@@ -609,13 +622,17 @@ void EQPlayer::updateSpawnHP(const hpUpdateStruct *hpupdate)
 
   m_validHP = true;
 
+  updateLastChanged();
+
+  emit changeItem(this, tSpawnChangedHP);
+
   emit hpChanged(m_curHP, m_maxHP);
 
   if (showeq_params->savePlayerState)
     savePlayerState();
 }
 
-void EQPlayer::updateStamina(const staminaStruct *stam)
+void Player::updateStamina(const staminaStruct *stam)
 {
   m_food = stam->food;
   m_water = stam->water;
@@ -635,7 +652,7 @@ void EQPlayer::updateStamina(const staminaStruct *stam)
     savePlayerState();
 }
 
-void EQPlayer::setLastKill(const QString& name, uint8_t level)
+void Player::setLastKill(const QString& name, uint8_t level)
 {
   // note the last spawn this player killed
   m_lastSpawnKilledName = name;
@@ -643,30 +660,32 @@ void EQPlayer::setLastKill(const QString& name, uint8_t level)
   m_freshKill = true;
 }
 
-void EQPlayer::zoneEntry(const ServerZoneEntryStruct* zsentry)
+void Player::zoneEntry(const ServerZoneEntryStruct* zsentry)
 {
   clear();
-  setPlayerName(zsentry->name);
+  Spawn::setName(zsentry->name);
   setDeity(zsentry->deity);
   setLevel(zsentry->level);
   setClassVal(zsentry->class_);
   setRace(zsentry->race);
 
+  if (showeq_params->savePlayerState)
+    savePlayerState();
+
   // update the con table
   fillConTable();
 
-  if (showeq_params->savePlayerState)
-    savePlayerState();
+  emit changeItem(this, tSpawnChangedALL);
 }
 
-void EQPlayer::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t dir)
+void Player::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t dir)
 {
   if ((dir != DIR_CLIENT) && (pupdate->spawnId != id()))
     return;
   else if (dir == DIR_CLIENT)
     setPlayerID(pupdate->spawnId);
  
-  setPos(pupdate->xPos, pupdate->yPos, pupdate->zPos,
+  setPos(pupdate->x, pupdate->y, pupdate->z,
 	 showeq_params->walkpathrecord,
 	 showeq_params->walkpathlength);
   setDeltas(pupdate->deltaX, pupdate->deltaY, 
@@ -681,6 +700,10 @@ void EQPlayer::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t di
   emit posChanged(x(), y(), z(), 
 		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
 
+  updateLastChanged();
+
+  emit changeItem(this, tSpawnChangedPosition);
+
   static uint8_t count = 0;
 
   // only save player position every 64 updates
@@ -692,7 +715,7 @@ void EQPlayer::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t di
   }
 }
 
-void EQPlayer::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
+void Player::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
 {
   if (dir == DIR_CLIENT)
     return;
@@ -703,28 +726,20 @@ void EQPlayer::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
 
 // setPlayer* only updates player*.  If you want to change and use the defaults you
 // must change showeq_params->default* and emit an checkDefaults signal.
-void EQPlayer::setPlayerName(const QString& newplayername)
-{
-    m_playerName = newplayername;
-}
-
-void EQPlayer::setPlayerLastName(const QString& newplayerlastname)
-{
-    m_playerLastName = newplayerlastname;
-}
-
-void EQPlayer::setPlayerID(uint16_t playerID)
+void Player::setPlayerID(uint16_t playerID)
 {
   if (id() != playerID)
   {
      printf("Your player's id is %i\n", playerID);
      setID(playerID);
      emit changedID(id());
+     updateLastChanged();
+     emit changeItem(this, tSpawnChangedALL);
   }
 }
 
 // Set our internal defaults equal to the showeq_params defaults.
-void EQPlayer::setDefaults(void)
+void Player::setDefaults(void)
 {
     m_defaultName     = showeq_params->defaultName;
     m_defaultLastName = showeq_params->defaultLastName;
@@ -734,7 +749,7 @@ void EQPlayer::setDefaults(void)
     m_defaultDeity    = showeq_params->defaultDeity;
 }
 
-bool EQPlayer::getStatValue(uint8_t stat,
+bool Player::getStatValue(uint8_t stat,
 			    uint32_t& curValue, 
 			    uint32_t& maxValue)
 {
@@ -824,7 +839,7 @@ bool EQPlayer::getStatValue(uint8_t stat,
 }
 
 
-void EQPlayer::fillConTable()
+void Player::fillConTable()
 {
 // keep around for historical giggles
 //
@@ -974,83 +989,44 @@ void EQPlayer::fillConTable()
   // level 0 is unknown, and thus gray
   m_conTable[0] = gray;
 }
-    
-#if 0  // this function no longer in use
-void calcPickConColor(int greenRange, int cyanRange, int levelDif, 
-		      QColor& color)
-{
-  // do the greens
-  if ( greenRange > levelDif )
-  {
-    if ( ( greenRange - 10 ) >= levelDif )
-      color = QColor( 0, 95, 0 );
-    else
-    {
-      int scale = greenRange - levelDif;
-      int greenval = 255 - ( scale * 16 );
-      color = QColor( 0, greenval, 0 );
-    }
-  }
-  else if ( cyanRange >= levelDif) // do the cyans
-  {
-    int middleValue = ( cyanRange + ( ( greenRange - cyanRange)  / 2 ) );
-    
-    if ( levelDif < middleValue ) // is cyan partially green?
-    {
-      int greenSteps = middleValue - greenRange - 1;
-      int greenValue = 207 + ( 48 / (greenSteps ? greenSteps : 1)) * ( middleValue - levelDif - 1 );
-      
-      color = QColor ( 0, greenValue, 191);
-    }
-    else // cyan must be partially blue then.
-    {
-      int blueSteps = cyanRange - middleValue;
-      int blueValue = 207 + ( 48 / (blueSteps ? blueSteps : 1)) * ( levelDif - middleValue );	
-      
-      color = QColor ( 0, 191, blueValue);
-    }	
-  }
-  else
-    // ok, now we know its blue
-  {
-    if ( ( greenRange / 2 ) < levelDif )
-    {
-      // white scale
-      int scalemax = (greenRange / 2 ) * -1;
-      int scale = ( levelDif + 1 ) * -1;
-      int colorval = 127 - ( scale * 127 / scalemax );
-      color = QColor( colorval, colorval, 255 );
-      // 127, 127, 255 --- 0, 0, 255
-    }
-    else if ( ( greenRange / 2 ) > levelDif )
-    {
-      // green scale
-      int scalemax = ( greenRange / 2 ) * -1;
-      int scale = levelDif - ( greenRange + 1 );
-      int greenval = 127 - ( scale * 127 / scalemax );
-      int blueval = 127 + ( scale * 127 / scalemax );
-      color = QColor( 0, greenval, blueval );
-      // 0, 127, 127 --- 0, 0, 255
-    }
-    else
-      color = QColor( 0, 0, 255 );
-  }
-}
-#endif
 
-uint16_t EQPlayer::race() const
+QString Player::name() const
+{
+  return (!showeq_params->AutoDetectCharSettings || m_useDefaults ?
+	m_defaultName : m_name);
+}
+
+QString Player::lastName() const
+{
+  return (!showeq_params->AutoDetectCharSettings || m_useDefaults ?
+	m_defaultLastName : m_lastName);
+}
+
+uint16_t Player::deity() const 
+{ 
+  return ((!showeq_params->AutoDetectCharSettings || m_useDefaults) ? 
+	  m_defaultDeity : m_deity); 
+}
+
+uint8_t Player::level() const 
+{ 
+  return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
+	  m_defaultLevel : m_level);
+}
+
+uint16_t Player::race() const
 {
   return ((!showeq_params->AutoDetectCharSettings || m_useDefaults) ? 
 	  m_defaultRace : m_race);
 }
 
-uint8_t EQPlayer::classVal() const
+uint8_t Player::classVal() const
 {
   return ((!showeq_params->AutoDetectCharSettings || m_useDefaults) ? 
 	  m_defaultClass : m_class);
 }
 
-void EQPlayer::savePlayerState(void)
+void Player::savePlayerState(void)
 {
   QFile keyFile(showeq_params->saveRestoreBaseFilename + "Player.dat");
   if (keyFile.open(IO_WriteOnly))
@@ -1066,15 +1042,15 @@ void EQPlayer::savePlayerState(void)
     d << MAX_KNOWN_LANGS;
 
     // write out the rest
-    d << m_playerName;
-    d << m_playerLastName;
+    d << m_name;
+    d << m_lastName;
     d << m_level;
     d << m_class;
     d << m_deity;
     d << m_ID;
-    d << m_xPos;
-    d << m_yPos;
-    d << m_zPos;
+    d << m_x;
+    d << m_y;
+    d << m_z;
     d << m_deltaX;
     d << m_deltaY;
     d << m_deltaZ;
@@ -1128,7 +1104,7 @@ void EQPlayer::savePlayerState(void)
   }
 }
 
-void EQPlayer::restorePlayerState(void)
+void Player::restorePlayerState(void)
 {
   QString fileName = showeq_params->saveRestoreBaseFilename + "Player.dat";
   QFile keyFile(fileName);
@@ -1173,15 +1149,15 @@ void EQPlayer::restorePlayerState(void)
     }
 
     // read in the rest
-    d >> m_playerName;
-    d >> m_playerLastName;
+    d >> m_name;
+    d >> m_lastName;
     d >> m_level;
     d >> m_class;
     d >> m_deity;
     d >> m_ID;
-    d >> m_xPos;
-    d >> m_yPos;
-    d >> m_zPos;
+    d >> m_x;
+    d >> m_y;
+    d >> m_z;
     d >> m_deltaX;
     d >> m_deltaY;
     d >> m_deltaZ;
@@ -1239,8 +1215,8 @@ void EQPlayer::restorePlayerState(void)
     fillConTable();
 
     fprintf(stderr, "Restored PLAYER: %s (%s)!\n",
-	    (const char*)m_playerName,
-	    (const char*)m_playerLastName);
+	    (const char*)m_name,
+	    (const char*)m_lastName);
   }
   else
   {

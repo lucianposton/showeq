@@ -45,7 +45,8 @@
 class FilterMgr;
 class ZoneMgr;
 class SpawnMonitor;
-class EQPlayer;
+class SpawnPoint;
+class Player;
 class SpawnShell;
 class Item;
 class Spawn;
@@ -111,7 +112,7 @@ class MapMgr : public QObject
    Q_OBJECT
 
  public:
-   MapMgr(SpawnShell* spawnShell, EQPlayer* player, ZoneMgr* zoneMgr, 
+   MapMgr(SpawnShell* spawnShell, Player* player, ZoneMgr* zoneMgr, 
 	  QWidget* dialogParent, 
 	  QObject* parent = 0, const char* name = "mapmgr");
    virtual ~MapMgr();
@@ -167,7 +168,7 @@ class MapMgr : public QObject
 
  private:
   SpawnShell* m_spawnShell;
-  EQPlayer* m_player;
+  Player* m_player;
   QWidget* m_dialogParent;
   CLineDlg *m_dlgLineProps;
   MapData m_mapData;
@@ -324,7 +325,7 @@ class Map :public QWidget
 
  public:
   Map (MapMgr* m_mapMgr,
-       EQPlayer* player, 
+       Player* player, 
        SpawnShell* spawnshell, 
        ZoneMgr* zoneMgr,
        SpawnMonitor* spawnMonitor,
@@ -407,14 +408,18 @@ class Map :public QWidget
   void savePrefs(void);
   
   void selectSpawn(const Item* item);
+
+  // SpawnShell handling
   void delItem(const Item* item);
   void changeItem(const Item* item, uint32_t changeType);
   void clearItems(void);
   
+  // MapMgr handling
   void mapLoaded(void);
   void mapUnloaded(void);
   void mapUpdated(void);
-  
+
+  // assorted
   void addLocation();
   void startLine();
   void addLinePoint();
@@ -500,7 +505,7 @@ class Map :public QWidget
   void dumpInfo(QTextStream& out);
   
  signals: 
-  void mouseLocation(int16_t xPos, int16_t yPos);
+  void mouseLocation(int16_t x, int16_t y);
   void spawnSelected(const Item* item);
   void zoomChanged(int zoom);
   void zoomDefaultChanged(int zoom);
@@ -512,7 +517,9 @@ class Map :public QWidget
 
 protected:
    const Item* closestSpawnToPoint(const QPoint& pt,
-					     uint32_t closestDistance) const;
+				   uint32_t& closestDistance) const;
+   const SpawnPoint* closestSpawnPointToPoint(const QPoint& pt,
+					      uint32_t& closestDistance) const;
    void paintEvent (QPaintEvent *);
    void mousePressEvent (QMouseEvent *);
    void mouseMoveEvent( QMouseEvent* );
@@ -565,7 +572,7 @@ private:
    bool m_flash;
 
    const Item* m_selectedItem;
-   EQPlayer* m_player;
+   Player* m_player;
    SpawnShell* m_spawnShell;
    ZoneMgr* m_zoneMgr;
    SpawnMonitor* m_spawnMonitor;
@@ -637,7 +644,7 @@ class MapFrame : public SEQWindow
  public:
    MapFrame(FilterMgr* filterMgr,
 	    MapMgr* mapMgr,
-	    EQPlayer* player, 
+	    Player* player, 
 	    SpawnShell* spawnshell,
 	    ZoneMgr* zoneMgr,
 	    SpawnMonitor* spawnMonitor,
@@ -654,7 +661,7 @@ class MapFrame : public SEQWindow
    void regexpok     (int ok);
    void setregexp    (const QString&);
    void filterConfirmed();
-   void mouseLocation(int16_t xPos, int16_t yPos);
+   void mouseLocation(int16_t x, int16_t y);
    void setPlayer (int16_t x, int16_t y, int16_t z, 
 		   int16_t Dx, int16_t Dy, int16_t Dz, int32_t degrees);
    virtual void savePrefs(void);

@@ -14,14 +14,14 @@
 
 //----------------------------------------------------------------------
 // forward declarations
-class EQPlayer;
+class Player;
 
 class GroupMgr: public QObject
 {
   Q_OBJECT
  public:
   GroupMgr(SpawnShell* spawnShell, 
-	   EQPlayer* player,  
+	   Player* player,  
 	   const char* name = NULL);
  
   const Spawn* memberByID( uint16_t id );
@@ -45,7 +45,7 @@ class GroupMgr: public QObject
  protected:
   QList<Spawn> m_group;
   SpawnShell* m_spawnShell;
-  EQPlayer* m_player;
+  Player* m_player;
 };
 
 #endif // _GROUP_H_

@@ -18,18 +18,18 @@
 #define SKILLCOL_NAME 0
 #define SKILLCOL_VALUE 1
 
-class EQSkillList : public SEQListView
+class SkillList : public SEQListView
 {
    Q_OBJECT
 
  public:
    // constructor
-   EQSkillList (EQPlayer* player,
+   SkillList (Player* player,
 		QWidget*  parent = 0, 
 		const char* name = 0); 
    
    // destructor
-   ~EQSkillList();
+   ~SkillList();
 
    bool showLanguages() { return m_showLanguages; }
 
@@ -45,7 +45,7 @@ class EQSkillList : public SEQListView
 
  private:
    // the player this skill list is monitoring
-   EQPlayer* m_pPlayer;
+   Player* m_pPlayer;
 
    // the list view items related to skills
    QListViewItem* m_skillList[MAX_KNOWN_SKILLS];
@@ -62,15 +62,15 @@ class SkillListWindow : public SEQWindow
   Q_OBJECT
 
  public:
-  SkillListWindow(EQPlayer* player, QWidget* parent = 0, const char* name = 0);
+  SkillListWindow(Player* player, QWidget* parent = 0, const char* name = 0);
   ~SkillListWindow();
-  EQSkillList* skillList() { return m_skillList; }
+  SkillList* skillList() { return m_skillList; }
 
  public slots:
   virtual void savePrefs(void);
 
  protected:
-  EQSkillList* m_skillList;
+  SkillList* m_skillList;
 };
 
 #endif // EQSKILLLIST_H

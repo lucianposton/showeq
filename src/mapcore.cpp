@@ -149,11 +149,11 @@ void MapParameters::reAdjust()
   // center on the target based on target
   if (m_targetPointSet)
   {
-    iZMaxX = m_targetPoint.xPos() + m_panOffsetX + m_zoomMapLength.width() / 2;
-    iZMinX = m_targetPoint.xPos() + m_panOffsetX - m_zoomMapLength.width() / 2;
+    iZMaxX = m_targetPoint.x() + m_panOffsetX + m_zoomMapLength.width() / 2;
+    iZMinX = m_targetPoint.x() + m_panOffsetX - m_zoomMapLength.width() / 2;
     
-    iZMaxY = m_targetPoint.yPos() + m_panOffsetY + m_zoomMapLength.height() / 2;
-    iZMinY = m_targetPoint.yPos() + m_panOffsetY - m_zoomMapLength.height() / 2;
+    iZMaxY = m_targetPoint.y() + m_panOffsetY + m_zoomMapLength.height() / 2;
+    iZMinY = m_targetPoint.y() + m_panOffsetY - m_zoomMapLength.height() / 2;
   }
   else
   {
@@ -203,8 +203,8 @@ void MapParameters::reAdjust()
 
 
   // adjust pre-calculate player offsets
-  m_curPlayerOffset.setX(calcXOffset(m_curPlayer.xPos()));
-  m_curPlayerOffset.setY(calcYOffset(m_curPlayer.yPos()));
+  m_curPlayerOffset.setX(calcXOffset(m_curPlayer.x()));
+  m_curPlayerOffset.setY(calcYOffset(m_curPlayer.y()));
 }
 
 QPixmap::Optimization MapParameters::pixmapOptimizationMethod()
@@ -239,11 +239,11 @@ void MapParameters::setPlayer(const MapPoint& pos)
   m_curPlayer = pos; 
 
   // re-calculate precomputed player head/floor room
-  m_playerHeadRoom = m_curPlayer.zPos() + m_headRoom;
-  m_playerFloorRoom = m_curPlayer.zPos() - m_floorRoom;
+  m_playerHeadRoom = m_curPlayer.z() + m_headRoom;
+  m_playerFloorRoom = m_curPlayer.z() - m_floorRoom;
 
-  m_curPlayerOffset.setX(calcXOffset(m_curPlayer.xPos()));
-  m_curPlayerOffset.setY(calcYOffset(m_curPlayer.yPos()));
+  m_curPlayerOffset.setX(calcXOffset(m_curPlayer.x()));
+  m_curPlayerOffset.setY(calcYOffset(m_curPlayer.y()));
 }
 
 void MapParameters::setHeadRoom(int16_t headRoom)
@@ -251,7 +251,7 @@ void MapParameters::setHeadRoom(int16_t headRoom)
   m_headRoom = headRoom; 
 
   // re-calculate precomputed player head/floor room
-  m_playerHeadRoom = m_curPlayer.zPos() + m_headRoom;
+  m_playerHeadRoom = m_curPlayer.z() + m_headRoom;
 }
 
 void MapParameters::setFloorRoom(int16_t floorRoom) 
@@ -259,7 +259,7 @@ void MapParameters::setFloorRoom(int16_t floorRoom)
   m_floorRoom = floorRoom; 
 
   // re-calculate precomputed player head/floor room
-  m_playerFloorRoom = m_curPlayer.zPos() - m_floorRoom;
+  m_playerFloorRoom = m_curPlayer.z() - m_floorRoom;
 }
 
 //----------------------------------------------------------------------
@@ -271,7 +271,7 @@ MapCommon::~MapCommon()
 //----------------------------------------------------------------------
 // MapLineL
 MapLineL::MapLineL()
-  : MapCommon(), m_zPos(0), m_heightSet(false)
+  : MapCommon(), m_z(0), m_heightSet(false)
 {
 }
 
@@ -280,7 +280,7 @@ MapLineL::MapLineL(const QString& name,
 		   uint32_t size)
   : MapCommon(name, color),
     QPointArray(size), 
-    m_zPos(0),
+    m_z(0),
     m_heightSet(false)
 {
 }
@@ -288,10 +288,10 @@ MapLineL::MapLineL(const QString& name,
 MapLineL::MapLineL(const QString& name, 
 		   const QString& color, 
 		   uint32_t size, 
-		   int16_t zPos)
+		   int16_t z)
   : MapCommon(name, color),
     QPointArray(size), 
-    m_zPos(zPos),
+    m_z(z),
     m_heightSet(true)
 {
 }
@@ -341,10 +341,10 @@ MapLocation::MapLocation(const QString& name,
 
 MapLocation::MapLocation(const QString& name, 
 			 const QString& color, 
-			 int16_t xPos, 
-			 int16_t yPos)
+			 int16_t x, 
+			 int16_t y)
   : MapCommon(name, color),
-    QPoint(xPos, yPos)
+    QPoint(x, y)
 {
 }
 
@@ -891,13 +891,13 @@ void MapData::saveMap() const
     {
       // if no height was set previously, or this one doesn't match the previously
       // set height, write out an H record
-      if ((!heightSet) || (lastHeightSet != currentLineL->zPos()))
+      if ((!heightSet) || (lastHeightSet != currentLineL->z()))
       {
 	// write out an H record.
-	fprintf(fh, "H,%i\n", currentLineL->zPos());
+	fprintf(fh, "H,%i\n", currentLineL->z());
 
 	// note the last height set, and that it was set
-	lastHeightSet = currentLineL->zPos();
+	lastHeightSet = currentLineL->z();
 	heightSet = true;
       }
     }
@@ -938,7 +938,7 @@ void MapData::saveMap() const
       MapPoint curMPoint = currentLineM->point(i);
 
       fprintf (fh, ",%d,%d,%d", 
-	       curMPoint.xPos(), curMPoint.yPos(), curMPoint.zPos());
+	       curMPoint.x(), curMPoint.y(), curMPoint.z());
     }
     // terminate the line
     fprintf (fh, "\n");
@@ -1379,7 +1379,7 @@ void MapData::paintDepthFilteredLines(MapParameters& param, QPainter& p) const
     // just check if height is set, and if so, check if it's within range
     if (currentLineL->heightSet() && 
 	!inRoom(param.playerHeadRoom(), param.playerFloorRoom(), 
-		currentLineL->zPos()))
+		currentLineL->z()))
       continue;  // outside of range, continue to the next line
     
     // get the number of points in the line
@@ -1527,8 +1527,8 @@ void MapData::paintFadedFloorsLines(MapParameters& param, QPainter& p) const
   
   double topm = 0 - 255.0 / (double)param.headRoom();
   double botm = 255.0 / (double)param.floorRoom();
-  double topb = 255 - (topm * playerPos.zPos());
-  double botb = 255 - (botm * playerPos.zPos());
+  double topb = 255 - (topm * playerPos.z());
+  double botb = 255 - (botm * playerPos.z());
   
   // first paint the L lines
   QListIterator<MapLineL> mlit(m_lLines);
@@ -1549,7 +1549,7 @@ void MapData::paintFadedFloorsLines(MapParameters& param, QPainter& p) const
     // get first point coordinates
     cur2DX = lData[0].x();
     cur2DY = lData[0].y();
-    cur2DZ = currentLineL->zPos();
+    cur2DZ = currentLineL->z();
     
     // color determination is different depending on if a height was set
     if (!currentLineL->heightSet())
@@ -1563,7 +1563,7 @@ void MapData::paintFadedFloorsLines(MapParameters& param, QPainter& p) const
     else
     {
       // calculate color to use for the line (since L type, only do this once)
-      if (currentLineL->zPos() > playerPos.zPos())
+      if (currentLineL->z() > playerPos.z())
 	useColor = (int)((cur2DZ * topm) + topb);
       else 
 	useColor = (int)((cur2DZ * botm) + botb);
@@ -1643,7 +1643,7 @@ void MapData::paintFadedFloorsLines(MapParameters& param, QPainter& p) const
 #endif
     
     // calculate starting color info for the line
-    if (curZ > playerPos.zPos()) 
+    if (curZ > playerPos.z()) 
       oldColor = (int)((curZ * topm) + topb);
     else 
       oldColor = (int)((curZ * botm) + botb);
@@ -1663,7 +1663,7 @@ void MapData::paintFadedFloorsLines(MapParameters& param, QPainter& p) const
       curZ = mData[i].z();
       
       // calculate the new color
-      if (curZ > playerPos.zPos()) 
+      if (curZ > playerPos.z()) 
 	newColor = (int)((curZ * topm) + topb);
       else 
 	newColor = (int)((curZ * botm) + botb);
@@ -1779,7 +1779,7 @@ bool MapCache::needRepaint(MapParameters& param)
       (m_lastParam.zoomMapLength() != param.zoomMapLength()) ||
       (m_lastParam.screenBounds() != param.screenBounds() ) ||
       ((param.mapLineStyle() == tMap_FadedFloors) && 
-       (m_lastParam.player().zPos() != param.player().zPos())) ||
+       (m_lastParam.player().z() != param.player().z())) ||
       ((param.mapLineStyle() == tMap_DepthFiltered) &&
        ((m_lastParam.playerHeadRoom() != param.playerHeadRoom()) ||
 	(m_lastParam.playerFloorRoom() != param.playerFloorRoom()))) ||

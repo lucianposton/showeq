@@ -209,6 +209,8 @@ EQDecode::FoundKey ()
   // Lock our mutex
   pthread_mutex_lock(&m_mutexQueue);
 
+  emit startDecodeBatch();
+
   // Decode our player packet queue
   for (i = 0; i < m_queuePlayerProfile.size(); i++)
   {
@@ -276,6 +278,8 @@ EQDecode::FoundKey ()
       d << m_decodeKey;
     }
   }
+  
+  emit finishedDecodeBatch();
 
   // Get outa here
   return;

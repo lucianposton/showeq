@@ -29,14 +29,14 @@
 //----------------------------------------------------------------------
 // forward declarations
 class GroupMgr;
-class EQPlayer;
+class Player;
 
 class ExperienceRecord 
 {
 public:
 
    ExperienceRecord( const QString &mob_name, int mob_level, long xp_gained,
-      time_t time, const QString &zone_name, EQPlayer* p, GroupMgr* g);
+      time_t time, const QString &zone_name, Player* p, GroupMgr* g);
 
    const QString &getMobName() const;
    int getMobLevel() const;
@@ -49,7 +49,7 @@ public:
    const QString &getZoneName() const;
 
 private:
-   EQPlayer* m_player;
+   Player* m_player;
    GroupMgr* m_group;
    QString m_zone_name;
    QString m_mob_name;
@@ -65,7 +65,7 @@ class ExperienceWindow : public SEQWindow
 
 public:
 
-   ExperienceWindow( EQPlayer* player, GroupMgr* g, 
+   ExperienceWindow( Player* player, GroupMgr* g, 
 		     QWidget* parent = 0, const char* name = 0 );
    ~ExperienceWindow();
 
@@ -94,7 +94,7 @@ private:
    void logexp(long xp_gained, int mob_level);
 
    // Need to grab xp totals from here
-   EQPlayer* m_player;
+   Player* m_player;
    GroupMgr* m_group;
 
    QVBoxLayout *m_layout;

@@ -422,6 +422,132 @@
   </property>
  </section>
 <!-- ============================================================= -->
+<!-- Spawn List 2 Options -->
+ <section name="SpawnList2" >
+  <property name="Caption" >
+   <string value="ShowEQ - Spawn List 2" />
+   <comment>Window caption when undocked</comment>
+  </property>
+  <property name="Font" >
+   <font family="adobe-helvetica" bold="false" strikeout="false" underline="false" pointsize="8" italic="false" />
+  </property>
+  <property name="SaveWidth" >
+   <bool value="true" />
+   <comment>Save column widths</comment>
+  </property>
+  <property name="KeepSelectedVisible" >
+   <bool value="true" />
+  </property>
+  <property name="KeepSorted" >
+   <bool value="false" />
+  </property>
+  <property name="ImmediateUpdate" >
+   <bool value="false" />
+  </property>
+  <property name="FPM" >
+   <int value="10" />
+  </property>
+  <property name="ShowRealName" >
+   <bool value="false" />
+   <comment>Display real eq name or formatted name</comment>
+  </property>
+  <property name="ShowName" >
+   <bool value="true" />
+  </property>
+  <property name="ShowLevel" >
+   <bool value="true" />
+  </property>
+  <property name="ShowHP" >
+   <bool value="false" />
+  </property>
+  <property name="ShowMaxHP" >
+   <bool value="false" />
+  </property>
+  <property name="ShowCoord1" >
+   <bool value="false" />
+  </property>
+  <property name="ShowCoord2" >
+   <bool value="false" />
+  </property>
+  <property name="ShowCoord3" >
+   <bool value="false" />
+  </property>
+  <property name="ShowID" >
+   <bool value="false" />
+  </property>
+  <property name="ShowDist" >
+   <bool value="true" />
+  </property>
+  <property name="ShowRace" >
+   <bool value="true" />
+  </property>
+  <property name="ShowClass" >
+   <bool value="true" />
+  </property>
+  <property name="ShowInfo" >
+   <bool value="true" />
+  </property>
+  <property name="ShowSpawnTime" >
+   <bool value="true" />
+  </property>
+  <property name="NameWidth" >
+   <int value="155" />
+   <comment></comment>
+  </property>
+  <property name="LevelWidth" >
+   <int value="25" />
+   <comment></comment>
+  </property>
+  <property name="HPWidth" >
+   <int value="35" />
+   <comment></comment>
+  </property>
+  <property name="MaxHPWidth" >
+   <int value="35" />
+   <comment></comment>
+  </property>
+  <property name="Coord1Width" >
+   <int value="30" />
+   <comment></comment>
+  </property>
+  <property name="Coord2Width" >
+   <int value="30" />
+   <comment></comment>
+  </property>
+  <property name="Coord3Width" >
+   <int value="30" />
+   <comment></comment>
+  </property>
+  <property name="IDWidth" >
+   <int value="30" />
+   <comment></comment>
+  </property>
+  <property name="DistWidth" >
+   <int value="35" />
+   <comment></comment>
+  </property>
+  <property name="RaceWidth" >
+   <int value="40" />
+   <comment></comment>
+  </property>
+  <property name="ClassWidth" >
+   <int value="40" />
+   <comment></comment>
+  </property>
+  <property name="InfoWidth" >
+   <int value="40" />
+   <comment></comment>
+  </property>
+  <property name="SpawnTimeWidth" >
+   <int value="40" />
+   <comment></comment>
+  </property>
+  <property name="ColumnOrder" >
+   <string value="0:1:2:3:4:5:6:7:8:9:10:11:12" />
+   <comment>Order of columns</comment>
+  </property>
+ </section>
+<!-- ============================================================= -->
 <!-- Map Manager Options -->
  <section name="MapMgr" >
   <property name="DefaultLineColor" >
@@ -2230,7 +2356,7 @@
    <comment>Keeps the selected spawn in view</comment>
   </property>
   <property name="UseStdout" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Print messages to stdout</comment>
   </property>
   <property name="ShowCompass" >
@@ -2246,8 +2372,12 @@
    <comment>Display Player Stats List</comment>
   </property>
   <property name="ShowSpawnList" >
-   <bool value="true" />
+   <bool value="false" />
    <comment>Display Spawn List</comment>
+  </property>
+  <property name="ShowSpawnList2" >
+   <bool value="true" />
+   <comment>Display New Spawn List</comment>
   </property>
   <property name="ShowSpawnPointList" >
    <bool value="false" />
@@ -2302,6 +2432,10 @@
    <comment>Dock Player Stats</comment>
   </property>
   <property name="DockedSpawnList" >
+   <bool value="true" />
+   <comment>Dock Spawn List</comment>
+  </property>
+  <property name="DockedSpawnList2" >
    <bool value="true" />
    <comment>Dock Spawn List</comment>
   </property>

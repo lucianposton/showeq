@@ -494,6 +494,10 @@ QObject (parent, name)
    
    connect(m_decode, SIGNAL(keyChanged(void)),
 	   this, SIGNAL(keyChanged(void)));
+   connect(m_decode, SIGNAL(startDecodeBatch(void)),
+	   this, SIGNAL(startDecodeBatch(void)));
+   connect(m_decode, SIGNAL(finishedDecodeBatch(void)),
+	   this, SIGNAL(finishedDecodeBatch(void)));
 
    m_busy_decoding     = false;
    m_serverArqSeqFound = false;

@@ -22,7 +22,7 @@ class CompassFrame : public SEQWindow
   Q_OBJECT
 
  public:
-  CompassFrame(EQPlayer* player, QWidget* parent = 0, const char* name = 0);
+  CompassFrame(Player* player, QWidget* parent = 0, const char* name = 0);
   virtual ~CompassFrame();
 
   Compass* compass() { return m_compass; }
@@ -33,9 +33,9 @@ class CompassFrame : public SEQWindow
   
  private:
   Compass* m_compass;
-  QLabel* m_xPos;
-  QLabel* m_yPos;
-  QLabel* m_zPos;
+  QLabel* m_x;
+  QLabel* m_y;
+  QLabel* m_z;
 };
 
 #endif // _COMPASSFRAME_H_

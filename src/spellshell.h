@@ -84,7 +84,7 @@ class SpellShell : public QObject
 {
    Q_OBJECT
    public:
-      SpellShell(EQPlayer* player, SpawnShell* spawnshell);
+      SpellShell(Player* player, SpawnShell* spawnshell);
       SpellItem* InsertSpell(const startCastStruct *c);
       void UpdateSpell(const startCastStruct *);
       //void UpdateSpell(struct beginCastStruct *);
@@ -109,7 +109,7 @@ class SpellShell : public QObject
       void timeout();
 
    private:
-      EQPlayer* m_player;
+      Player* m_player;
       SpawnShell* m_spawnShell;
       QValueList<SpellItem *> m_spellList, m_deleteList;
       QTimer *m_timer;

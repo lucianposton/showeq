@@ -10,7 +10,6 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include <qfont.h>
 #include <qstring.h>
 
 #include "everquest.h"
@@ -25,7 +24,8 @@
 //#define GENERATE_CRCTAB_H
 #endif
 
-struct spellInfoStruct {
+struct spellInfoStruct 
+{
    int duration;
    bool target;
 };
@@ -72,9 +72,6 @@ int  mTime(void);
 int calcMaxMana(int INT, int WIS, int daclass, int level);
 
 QString reformatMoney (unsigned int uiCopper);
-
-QFont stringToFont(const QString& fontDescription);
-QString fontToString(const QFont& font);
 
 void fprintData(FILE* fp,
 		uint32_t len,

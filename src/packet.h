@@ -584,7 +584,7 @@ class EQPacket : public QObject
 
    void toggle_session_tracking(void);
 
-   // EQPlayer signals
+   // Player signals
    void setPlayerID(uint16_t);
    void backfillPlayer(const charProfileStruct *, uint32_t, uint8_t);
    void increaseSkill(const skillIncStruct* skilli, uint32_t, uint8_t);
@@ -662,6 +662,8 @@ class EQPacket : public QObject
    void resetDecoder(void);
    void backfillSpawn(const newSpawnStruct *, uint32_t, uint8_t);
    void backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t);
+   void startDecodeBatch(void);
+   void finishedDecodeBatch(void);
 
    // Spell signals
    void interruptSpellCast(const badCastStruct *, uint32_t, uint8_t);

@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include <math.h>
+#include <time.h>
 
 #include <qlist.h>
 #include <qdatetime.h>
@@ -33,6 +34,7 @@ class SpawnShell;
 
 //----------------------------------------------------------------------
 // enumerated types
+// type of item
 enum itemType 
 { 
   tUnknown, 
@@ -40,10 +42,10 @@ enum itemType
   tDoors, 
   tDrop,
   tSpawn,
-  tPlayer,
-  tSpawnPoint
+  tPlayer
 };
 
+// slots that an item can be warn in
 enum itemWearSlot
 {
   tHead          = 0,
@@ -65,6 +67,24 @@ enum itemWearSlot
   tLastWeapon    = tSecondary,
   tLastCoreWearSlot = tSecondary,
 };
+
+// type of change done to item
+enum changeType
+{
+  tSpawnChangedNone = 0,
+  tSpawnChangedPosition = 1,
+  tSpawnChangedHP = 2,
+  tSpawnChangedWearing = 4,
+  tSpawnChangedFlags = 8,
+  tSpawnChangedLevel = 16,
+  tSpawnChangedNPC = 32,
+  tSpawnChangedFilter = 64,
+  tSpawnChangedRuntimeFilter = 128,
+  tSpawnChangedConsidered = 256,
+  tSpawnChangedName = 512,
+  tSpawnChangedALL = 1023, // sum of all previous change types 
+};
+
 
 //----------------------------------------------------------------------
 // type definitions
@@ -92,6 +112,7 @@ class Item : public EQPoint
   itemType type() const { return m_type; }
   uint16_t id() const { return m_ID; }
   QString realName() const { return m_name; }
+  time_t lastChanged() const { return m_lastChanged; }
   const QTime& lastUpdate() const { return m_lastUpdate; }
   QString lastUpdateStr() const 
     { return m_lastUpdate.toString(); }
@@ -100,11 +121,11 @@ class Item : public EQPoint
     { return m_spawnTime.toString(); }
   uint32_t filterFlags() const { return m_filterFlags; }
   uint32_t runtimeFilterFlags() const { return m_runtimeFilterFlags; }
-  QString name() const;
   uint8_t NPC() const { return m_NPC; }
   float displayZPos() const { return m_zDisplay; }
 
-  // virtual methods that provide reasonable default values
+  // virtual methods that provide reasonable default values/behaviour
+  virtual QString name() const;
   virtual QString transformedName() const;
   virtual uint16_t race() const;
   virtual QString raceString() const;
@@ -115,7 +136,7 @@ class Item : public EQPoint
   virtual QString dumpString() const;
 
   // set methods
-  void setPos(int16_t xPos, int16_t yPos, int16_t zPos);
+  void setPos(int16_t x, int16_t y, int16_t z);
 
   void setName(const QString& name)
     { m_name = name; }
@@ -123,6 +144,10 @@ class Item : public EQPoint
   void updateLast()
   {
     m_lastUpdate.restart();
+  }
+  void updateLastChanged()
+  {
+    m_lastChanged = time(NULL);
   }
 
   void setFilterFlags(uint32_t filterFlags) { m_filterFlags = filterFlags; }
@@ -140,6 +165,7 @@ class Item : public EQPoint
   // persisted info below
   QTime m_lastUpdate; 
   QTime m_spawnTime; 
+  time_t m_lastChanged;
   float m_zDisplay;
   uint16_t m_ID;
   uint8_t m_NPC;
@@ -157,7 +183,7 @@ class Spawn : public Item
 
   // create an unknown spawn using the data available.
   Spawn(uint16_t id, 
-	int16_t xPos, int16_t yPos, int16_t zPos,
+	int16_t x, int16_t y, int16_t z,
 	int16_t deltaX, int16_t deltaY, int16_t deltaZ,
 	int8_t heading, int8_t deltaHeading,
 	uint8_t animation);
@@ -168,9 +194,8 @@ class Spawn : public Item
 
   // save spawn to QDataStream
   void saveSpawn(QDataStream& d);
-
+  
   // spawn specific get methods
-  const QString& rawName() const { return m_rawName; }
   int16_t deltaX() const { return m_deltaX; }
   int16_t deltaY() const { return m_deltaY; }
   int16_t deltaZ() const { return m_deltaZ; }
@@ -180,12 +205,10 @@ class Spawn : public Item
   uint8_t animation() const { return m_animation; }
   uint16_t HP() const { return m_curHP; }
   uint16_t maxHP() const { return m_maxHP; }
-  uint8_t level() const { return m_level; }
   uint16_t petOwnerID() const { return m_petOwnerID; }
   uint8_t light() const { return m_light; }
   QString lightName() const;
   uint8_t gender() const { return m_gender; }
-  uint16_t deity() const { return m_deity; }
   QString deityName() const;
   int16_t deityTeam() const { return m_deityTeam; }
   int16_t raceTeam() const { return m_raceTeam; }
@@ -194,12 +217,18 @@ class Spawn : public Item
     { return m_equipment[wearingSlot]; }
   QString equipmentStr(uint8_t wearingSlot) const;
   uint8_t typeflag() const { return m_typeflag; }
+  QString typeString() const;
   const SpawnTrackList& trackList() const { return m_spawnTrackList; }
   SpawnTrackList& trackList() { return m_spawnTrackList; }
   QString cleanedName() const;
   bool approximatePosition(bool animating, 
 			   const QTime& curTime,
 			   EQPoint& newPos) const;
+
+  // spawn related methods that sub-classes may override
+  virtual QString lastName() const;
+  virtual uint8_t level() const;
+  virtual uint16_t deity() const;
 
   // virtual get method overloads
   virtual QString transformedName() const;
@@ -208,7 +237,6 @@ class Spawn : public Item
   virtual uint8_t classVal() const;
   virtual QString classString() const;
   virtual QString info() const;
-  virtual QString typeString() const;
   virtual QString filterString() const;
   virtual QString dumpString() const;
 
@@ -236,7 +264,7 @@ class Spawn : public Item
     { return (deityTeam() == spawn->deityTeam()); }
 
   // virtual set method overload
-  void setPos(int16_t xPos, int16_t Pos, int16_t zPos,
+  void setPos(int16_t x, int16_t Pos, int16_t z,
 	      bool walkpathrecord = false, size_t walkpathlength = 0);
 
   // update methods 
@@ -246,7 +274,6 @@ class Spawn : public Item
 
   // updates the data, careful not to overwrite existing correct data
   void backfill(const spawnStruct* s);
-  void backfill(const charProfileStruct* player);
 
   // change spawn state
   void killSpawn();
@@ -273,13 +300,16 @@ class Spawn : public Item
   void setNPC(uint8_t NPC) { m_NPC = NPC; }
   void setTypeflag(uint8_t typeflag) { m_typeflag = typeflag; }
   void setID(uint16_t id) { m_ID = id; }
-  
+  void setLastName(const QString& lastName)
+    { m_lastName = lastName; }
+
+
  protected:
   void calcRaceTeam();
   void calcDeityTeam();
 
   // spawn specific data
-  QString m_rawName;
+  QString m_lastName;
   SpawnTrackList m_spawnTrackList;
   int m_cookedDeltaXFixPt;
   int m_cookedDeltaYFixPt;

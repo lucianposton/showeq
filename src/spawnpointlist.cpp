@@ -15,6 +15,7 @@
 #include <time.h>
 
 #include <qinputdialog.h>
+#include <qmessagebox.h>
 #include <qfontdialog.h>
 #include <qpainter.h>
 #include <qlayout.h>
@@ -34,6 +35,10 @@ SpawnPointListItem::SpawnPointListItem(QListView* parent, const SpawnPoint* sp)
   update();
 }
 
+SpawnPointListItem::~SpawnPointListItem()
+{
+}
+
 void SpawnPointListItem::update()
 {
   QString tmpStr;
@@ -48,7 +53,8 @@ void SpawnPointListItem::update()
     setText(tSpawnPointCoord1, QString::number(m_spawnPoint->x()));
     setText(tSpawnPointCoord2, QString::number(m_spawnPoint->y()));
   }
-  setText(tSpawnPointCoord3, QString::number(m_spawnPoint->z()));
+  setText(tSpawnPointCoord3, 
+	  QString::number(m_spawnPoint->displayZPos(), 'f', 1));
 
   // construct and set the time remaining string
   if ( m_spawnPoint->m_diffTime == 0 || m_spawnPoint->m_deathTime == 0 )
@@ -118,10 +124,11 @@ SpawnPointList::SpawnPointList(SpawnMonitor* spawnMonitor,
 			       QWidget* parent, const char* name):
   SEQListView("SpawnPointList", parent, name),
   m_spawnMonitor(spawnMonitor),
-  m_menu(NULL)
+  m_menu(NULL),
+  m_aboutToPop(false)
 {
-  m_selected = NULL;
-  m_aboutToPop = false;
+  // get whether to keep the list sorted or not
+  m_keepSorted = pSEQPrefs->getPrefBool("KeepSorted", preferenceName(), false);
 
   // add all the columns
   if (showeq_params->retarded_coords)
@@ -153,8 +160,8 @@ SpawnPointList::SpawnPointList(SpawnMonitor* spawnMonitor,
   SpawnPoint*             sp;
   while ((sp = it.current()))
   {
-    ++it;
     new SpawnPointListItem(this, sp);
+    ++it;
   }
 
   // create the timer
@@ -166,6 +173,8 @@ SpawnPointList::SpawnPointList(SpawnMonitor* spawnMonitor,
 	  this, SLOT(newSpawnPoint(const SpawnPoint*)));
   connect(m_spawnMonitor, SIGNAL(clearSpawnPoints()),
 	  this, SLOT(clear()));
+  connect(m_spawnMonitor, SIGNAL(selectionChanged(const SpawnPoint*)),
+	  this, SLOT(handleSelChanged(const SpawnPoint*)));
   connect(this, SIGNAL(rightButtonClicked(QListViewItem*, const QPoint&, int)),
 	  this, SLOT(rightButtonClicked(QListViewItem*, const QPoint&, int)));
   connect(this, SIGNAL( selectionChanged(QListViewItem*)),
@@ -173,14 +182,51 @@ SpawnPointList::SpawnPointList(SpawnMonitor* spawnMonitor,
   m_timer->start(10000L);
 }
 
+void SpawnPointList::setKeepSorted(bool val)
+{
+  m_keepSorted = val;
+  pSEQPrefs->setPrefBool("KeepSorted", preferenceName(), 
+			 m_keepSorted);
+}
+
 void SpawnPointList::handleSelectItem(QListViewItem* item)
 {
   const SpawnPoint* sp = NULL;
   
   if ( item )
+  {
+    // get the spawn point associated with the list view item
     sp = ((SpawnPointListItem*)item)->spawnPoint();
 
-  m_selected = sp;
+    // set the selected spawn point
+    m_spawnMonitor->setSelected(sp);
+  }
+}
+
+void SpawnPointList::handleSelChanged(const SpawnPoint* sp)
+{
+  QListViewItemIterator it(this);
+
+  SpawnPointListItem* splitem;
+  
+  // keep iterating until we find a match
+  while (it.current())
+  {
+    splitem = (SpawnPointListItem*)it.current();
+
+    // is this the current item
+    if (splitem->spawnPoint() == sp)
+    {
+      // yes, set it as the selected item in the spawn list
+      setSelected(splitem, true);
+      
+      // ensure that the item is visible
+      ensureItemVisible(splitem);
+
+      break;
+    }
+    ++it;
+  }
 }
 
 void SpawnPointList::rightButtonClicked(QListViewItem* item, 
@@ -229,6 +275,49 @@ void SpawnPointList::renameItem(const SpawnPointListItem* item)
   }
 }
 
+void SpawnPointList::deleteItem(const SpawnPointListItem* item)
+{
+  if (item == NULL)
+    return;
+
+  // get the underlying spawn point
+  const SpawnPoint* sp = ((SpawnPointListItem*)item)->spawnPoint();
+
+
+  if (sp == NULL)
+    return;
+
+  // default to the existing name
+  QString def = sp->name();
+
+  // if there is no existing name, use the name of the last spawn
+  if (def.isEmpty())
+    def = sp->last();
+  
+  def.sprintf("%d/%d/%5.1f '%s'", 
+	      sp->x(), sp->y(), sp->displayZPos(), (const char*)def);
+  
+  // confirm that the user wants to delete the category
+  QMessageBox mb("Are you sure?",
+		 "Are you sure you wish to delete spawn point "
+		 + def + "?",
+		 QMessageBox::NoIcon,
+		 QMessageBox::Yes, 
+		 QMessageBox::No | QMessageBox::Default | QMessageBox::Escape,
+		 QMessageBox::NoButton,
+		 this);
+  
+  // if user chose eys, then delete the spawn point
+  if (mb.exec() == QMessageBox::Yes)
+  {
+    // remove the item from the spawn point list
+    delete item;
+    
+    // remove the item from the spawn monitor
+    m_spawnMonitor->deleteSpawnPoint(sp);
+  }
+}
+
 void SpawnPointList::refresh()
 {
   bool aboutToPop = false;
@@ -245,7 +334,8 @@ void SpawnPointList::refresh()
   }
 
   // make sure the list view is still sorted.
-  sort();
+  if (m_keepSorted)
+    sort();
 
   // iterate over all the spawn points and check how long till they pop
   QAsciiDictIterator<SpawnPoint> it(m_spawnMonitor->spawnPoints());
@@ -295,6 +385,8 @@ SpawnPointListMenu::SpawnPointListMenu(SpawnPointList* spawnPointList,
 {
   m_id_rename = insertItem("&Rename Spawn Point...",
 			   this, SLOT(rename_item(int)));
+  m_id_delete = insertItem("&Delete Spawn Point...",
+			   this, SLOT(delete_item(int)));
   
   QPopupMenu* listColMenu = new QPopupMenu;
   insertItem("Show &Column", listColMenu);
@@ -332,6 +424,9 @@ SpawnPointListMenu::SpawnPointListMenu(SpawnPointList* spawnPointList,
   insertItem("&Font...", this, SLOT(set_font(int)));
   insertItem("&Caption...", this, SLOT(set_caption(int)));
 
+  insertSeparator(-1);
+  x = insertItem("Keep Sorted", this, SLOT(toggle_keepSorted(int)));
+  setItemChecked(x, m_spawnPointList->keepSorted());
 
   connect(this, SIGNAL(aboutToShow()),
 	  this, SLOT(init_menu()));
@@ -349,6 +444,7 @@ void SpawnPointListMenu::setCurrentItem(const SpawnPointListItem* item)
 void SpawnPointListMenu::init_menu()
 {
   setItemEnabled(m_id_rename, (m_currentItem != NULL));
+  setItemEnabled(m_id_delete, (m_currentItem != NULL));
 
   // make sure the menu bar settings are correct
   for (int i = 0; i < tSpawnPointMaxCols; i++)
@@ -359,6 +455,11 @@ void SpawnPointListMenu::init_menu()
 void SpawnPointListMenu::rename_item(int id)
 {
   m_spawnPointList->renameItem(m_currentItem);
+}
+
+void SpawnPointListMenu::delete_item(int id)
+{
+  m_spawnPointList->deleteItem(m_currentItem);
 }
 
 void SpawnPointListMenu::toggle_col(int id)
@@ -403,6 +504,14 @@ void SpawnPointListMenu::set_caption(int id)
   // if the user entered a caption and clicked ok, set the windows caption
   if (ok)
     window->setCaption(caption);
+}
+
+
+void SpawnPointListMenu::toggle_keepSorted(int id)
+{
+  // toggle immediate update value
+  m_spawnPointList->setKeepSorted(!m_spawnPointList->keepSorted());
+  setItemChecked(id, m_spawnPointList->keepSorted());
 }
 
 SpawnPointWindow::SpawnPointWindow(SpawnMonitor* spawnMonitor, 

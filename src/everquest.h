@@ -322,9 +322,9 @@ struct spawnPositionUpdate
 /*0002*/ int8_t   animation;              // Animation spawn is currently using
 /*0003*/ int8_t   heading;                // Heading
 /*0004*/ int8_t   deltaHeading;           // Heading Change
-/*0005*/ int16_t  yPos;                   // New Y position of spawn
-/*0007*/ int16_t  xPos;                   // New X position of spawn
-/*0009*/ int16_t  zPos;                   // New Z position of spawn
+/*0005*/ int16_t  y;                   // New Y position of spawn
+/*0007*/ int16_t  x;                   // New X position of spawn
+/*0009*/ int16_t  z;                   // New Z position of spawn
 /*0011*/ signed   deltaY:10;              // Y Velocity
          unsigned spacer1:1;              // ***Placeholder
          signed   deltaZ:10;              // Z Velocity
@@ -347,9 +347,9 @@ struct spawnStruct
 /*0048*/ uint8_t  animation;              // Animation spawn is currently using
 /*0049*/ int8_t   heading;                // Current Heading 
 /*0050*/ int8_t   deltaHeading;           // Delta Heading 
-/*0051*/ int16_t  yPos;                   // Y Position 
-/*0053*/ int16_t  xPos;                   // X Position 
-/*0055*/ int16_t  zPos;                   // Z Position 
+/*0051*/ int16_t  y;                   // Y Position 
+/*0053*/ int16_t  x;                   // X Position 
+/*0055*/ int16_t  z;                   // Z Position 
 /*0057*/ signed   deltaY:10;              // Velocity Y 
          unsigned spacer1:1;              // Placeholder 
          signed   deltaZ:10;              // Velocity Z 
@@ -386,7 +386,7 @@ struct spawnStruct
 
 /*0092*/ uint16_t equipment[9];           // equipment
 /*0110*/ char     name[64];               // Name of spawn (len is 64 or less) 
-/*0174*/ char     lastname[20];           // Last Name of player 
+/*0174*/ char     lastName[20];           // Last Name of player 
 /*0194*/ uint8_t  unknown0194[8];         // ***Placeholder 
 /*0202*/ uint8_t  unknown0202[6];         // ***Placeholder 
 /*0208*/ uint16_t deity;                  // deity
@@ -421,9 +421,9 @@ struct doorStruct
 {
 /*0000*/ char    name[8];            // Filename of Door?
 /*0008*/ uint8_t unknown0008[8];     // ****Placeholder
-/*0016*/ float   yPos;               // y loc
-/*0020*/ float   xPos;               // x loc
-/*0024*/ float   zPos;               // z loc
+/*0016*/ float   y;               // y loc
+/*0020*/ float   x;               // x loc
+/*0024*/ float   z;               // z loc
 /*0028*/ uint8_t unknown0028[10];    // ***Placeholder
 /*0038*/ uint8_t doorId;             // door's id #
 /*0039*/ uint8_t size;               // guess..
@@ -473,9 +473,9 @@ struct dropCoinsStruct
 /*0028*/ uint8_t  unknown0028[22];        // ***Placeholder
 /*0050*/ uint32_t amount;                 // Total Dropped
 /*0054*/ uint8_t  unknown0054[4];         // ***Placeholder
-/*0058*/ float    yPos;                   // Y Position
-/*0062*/ float    xPos;                   // X Position
-/*0066*/ float    zPos;                   // Z Position
+/*0058*/ float    y;                   // Y Position
+/*0062*/ float    x;                   // X Position
+/*0066*/ float    z;                   // Z Position
 /*0070*/ uint8_t  unknown0070[12];        // blank space
 /*0082*/ int8_t   type[15];               // silver gold whatever
 /*0097*/ uint8_t  unknown0097[17];        // ***Placeholder
@@ -588,9 +588,9 @@ struct corpseLocStruct
 /*0001*/ uint8_t  version;                // 0x20
 /*0002*/ uint16_t spawnId;
 /*0004*/ uint16_t unknown0004;
-/*0006*/ float    xPos;
-/*0010*/ float    yPos;
-/*0014*/ float    zPos;
+/*0006*/ float    x;
+/*0010*/ float    y;
+/*0014*/ float    z;
 };
 
 /*
@@ -699,9 +699,9 @@ struct ServerZoneEntryStruct
 /*0071*/ uint8_t  unknown0037[3];         // unknown
 /*0074*/ uint32_t zoneId;                 // zone number
 /*0078*/ uint32_t unknown0078;
-/*0082*/ float    xPos;
-/*0086*/ float    yPos;
-/*0090*/ float    zPos;
+/*0082*/ float    x;
+/*0086*/ float    y;
+/*0090*/ float    z;
 /*0094*/ float    heading;
 /*0098*/ uint8_t  unknown0098[68];
 /*0166*/ uint16_t guildId;
@@ -784,9 +784,9 @@ struct charProfileStruct
 /*2376*/ uint8_t  unknown2376[496];      
 /*2872*/ uint8_t  unknown2872[32];
 /*2904*/ uint8_t  unknown2904[2];        
-/*2906*/ float    yPos;
-/*2910*/ float    xPos;
-/*2914*/ float    zPos;
+/*2906*/ float    y;
+/*2910*/ float    x;
+/*2914*/ float    z;
 /*2918*/ float    heading;
 /*2922*/ uint8_t  unknown2922[4];
 /*2926*/ uint32_t platinum;               // Platinum Pieces on player
@@ -1011,9 +1011,9 @@ struct makeDropStruct
 /*0012*/ uint8_t  unknown0012[2];         // ***Placeholder
 /*0014*/ uint16_t dropId;                 // DropID
 /*0016*/ uint8_t  unknown0016[10];        // ***Placeholder
-/*0026*/ float    yPos;                   // Y Position
-/*0030*/ float    xPos;                   // X Position
-/*0034*/ float    zPos;                   // Z Position
+/*0026*/ float    y;                   // Y Position
+/*0030*/ float    x;                   // X Position
+/*0034*/ float    z;                   // Z Position
 /*0038*/ uint8_t  unknown0054[4];         // ***Placeholder
 /*0042*/ char     idFile[16];             // ACTOR ID
 /*0058*/ uint8_t  unknown0074[168];       // ***Placeholder
@@ -1605,9 +1605,9 @@ struct playerPosStruct
 /*0004*/ uint8_t  unknown0004[1];         // ***Placeholder
 /*0005*/ int8_t   heading;                // Current heading of player
 /*0006*/ int8_t   deltaHeading;           // Heading Change
-/*0007*/ int16_t  yPos;                   // Players Y Position
-/*0009*/ int16_t  xPos;                   // Players X Position
-/*0011*/ int16_t  zPos;                   // Players Z Position
+/*0007*/ int16_t  y;                   // Players Y Position
+/*0009*/ int16_t  x;                   // Players X Position
+/*0011*/ int16_t  z;                   // Players Z Position
 /*0013*/ signed   deltaY:10;              // Y Velocity
          unsigned spacer1:1;              // ***Placeholder
          signed   deltaZ:10;              // Z Velocity

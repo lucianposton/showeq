@@ -25,7 +25,7 @@ SpawnPoint::SpawnPoint(uint16_t spawnID,
 		       const EQPoint& loc, 
 		       const QString& name, 
 		       time_t diffTime, uint32_t count)
-  : Item(tSpawnPoint, 0),
+  : EQPoint(loc),
     m_spawnTime(time(0)),
     m_deathTime(0),
     m_diffTime(diffTime),
@@ -34,7 +34,10 @@ SpawnPoint::SpawnPoint(uint16_t spawnID,
     m_last( QString::null ),
     m_lastID(spawnID)
 {
-  setPoint(loc);
+}
+
+SpawnPoint::~SpawnPoint()
+{
 }
 
 QString SpawnPoint::key( int x, int y, int z)
@@ -71,7 +74,8 @@ SpawnMonitor::SpawnMonitor(ZoneMgr* zoneMgr,
 : QObject( parent, name ),
   m_spawnShell(spawnShell),
   m_spawns( 613 ),
-  m_points( 211 )
+  m_points( 211 ),
+  m_selected(NULL)
 {
   m_spawns.setAutoDelete( true );
   m_points.setAutoDelete( true );
@@ -88,20 +92,49 @@ SpawnMonitor::SpawnMonitor(ZoneMgr* zoneMgr,
   m_modified = false;
 }
 
-void SpawnMonitor::setModified( SpawnPoint* changedSp )
+SpawnMonitor::~SpawnMonitor()
 {
-  m_modified = true;
 }
 
 void SpawnMonitor::setName(const SpawnPoint* csp, const QString& name)
 {
-  if (csp != NULL)
+  if (csp == NULL)
     return;
   
   SpawnPoint* sp = (SpawnPoint*)csp;
   sp->setName(name);
   setModified(sp);
 }
+
+void SpawnMonitor::setModified( SpawnPoint* changedSp )
+{
+  m_modified = true;
+}
+
+void SpawnMonitor::setSelected(const SpawnPoint* selected)
+{
+  // if it's already the selected one, then just return
+  if (m_selected == selected)
+    return;
+
+  m_selected = selected;
+
+  emit selectionChanged(m_selected);
+}
+
+void SpawnMonitor::deleteSpawnPoint(const SpawnPoint* sp)
+{
+  // if deleting the selected spawn point, change the selection to NUL
+  if (m_selected == sp)
+  {
+    m_selected = NULL;
+    emit selectionChanged(m_selected);
+  }
+
+  // remove the spawn point (will automatically delete it).
+  m_spawns.remove(sp->key());
+}
+
 void SpawnMonitor::newSpawn(const Item* item)
 {
 //	debug( "SpawnMonitor::handleNewSpawn" );
@@ -148,6 +181,9 @@ void SpawnMonitor::zoneEnd( const QString& newZoneName )
   if ( m_zoneName != lower )
   {
     m_zoneName = lower;
+    emit clearSpawnPoints();
+    m_spawns.clear();
+    m_points.clear();
     loadSpawnPoints();
   }
 }

@@ -80,15 +80,29 @@ static bool isValidName(const char* name, uint32_t len)
 // SpawnShell
 SpawnShell::SpawnShell(FilterMgr& filterMgr, 
 		       ZoneMgr* zoneMgr, 
-		       EQPlayer* player)
+		       Player* player)
   : QObject(NULL, "spawnshell"),
     m_zoneMgr(zoneMgr),
     m_player(player),
-    m_filterMgr(filterMgr)
+    m_filterMgr(filterMgr),
+    m_spawns(701),
+    m_drops(211),
+    m_coins(101),
+    m_doors(307),
+    m_players(2)
 {
    m_cntDeadSpawnIDs = 0;
    m_posDeadSpawnIDs = 0;
    memset((void*)&m_deadSpawnID[0], 0, sizeof(m_deadSpawnID));
+
+   m_spawns.setAutoDelete(true);
+   m_drops.setAutoDelete(true);
+   m_coins.setAutoDelete(true);
+   m_doors.setAutoDelete(true);
+   m_players.setAutoDelete(false); // we don't want this one to auto-delete
+
+   // bogus list
+   m_players.insert(0, m_player);
 
    // connect the FilterMgr's signals to SpawnShells slots
    connect(&m_filterMgr, SIGNAL(filtersChanged()),
@@ -101,6 +115,14 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
 	   this, SLOT(zoneBegin(const QString&)));
    connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
 	   this, SLOT(clear(void)));
+
+   // connect Player signals to SpawnShell signals
+   connect(m_player, SIGNAL(changeItem(const Item*, uint32_t)),
+	   this, SIGNAL(changeItem(const Item*, uint32_t)));
+
+   // connect Player signals to SpawnShell slots
+   connect(m_player, SIGNAL(changedID(uint16_t)),
+	   this, SLOT(playerChangedID(uint16_t)));
 
    // restore the spawn list if necessary
    if (showeq_params->restoreSpawns)
@@ -126,17 +148,7 @@ void SpawnShell::zoneBegin(const QString& shortZoneName)
 
 void SpawnShell::clearMap(ItemMap& map)
 {
-  ItemMap::iterator it;
-  Item* item;
-
-  it = map.begin();
-  while (it != map.end())
-  {
-    item = it->second;
-    map.erase(it);
-    it++;
-    delete item;
-  }
+  map.clear();
 }
 
 void SpawnShell::clear(void)
@@ -151,6 +163,14 @@ void SpawnShell::clear(void)
    clearMap(m_coins);
    clearMap(m_doors);
    clearMap(m_drops);
+
+   // clear the players list, reinsert the player
+   m_players.clear();
+   m_players.insert(0, m_player);
+
+   // emit an changeItem for the player
+   emit changeItem(m_player, tSpawnChangedALL);
+
    m_cntDeadSpawnIDs = 0;
    m_posDeadSpawnIDs = 0;
    memset((void*)&m_deadSpawnID[0], 0, sizeof(m_deadSpawnID));
@@ -158,22 +178,26 @@ void SpawnShell::clear(void)
 
 const Item* SpawnShell::findID(itemType type, int id)
 {
-   ItemMap& theMap = getMap(type);
-   ItemMap::iterator it;
+  const Item* item = NULL;
+  
+  if (type != tPlayer)
+    item = getMap(type).find(id);
 
-   it = theMap.find(id);
-   if (it != theMap.end())
-     return it->second;
+  if (item != NULL)
+    return item;
 
-   return NULL;
+  if ((type == tSpawn) && (id == m_player->id()))
+    item = m_player;
+
+  return item;
 }
 
 const Item* SpawnShell::findClosestItem(itemType type, 
-						  int16_t x, int16_t y,
-						  double& minDistance)
+					int16_t x, int16_t y,
+					double& minDistance)
 {
    ItemMap& theMap = getMap(type);
-   ItemMap::iterator it;
+   ItemIterator it(theMap);
    double distance;
    Item* item;
    Item* closest = NULL;
@@ -181,10 +205,10 @@ const Item* SpawnShell::findClosestItem(itemType type,
    // find closest spawn
 
    // iterate over all the items in the map
-   for (it = theMap.begin(); it != theMap.end(); it++)
+   for (; it.current(); ++it)
    {
      // get the item
-     item = it->second;
+     item = it.current();
      
      // calculate the distance from the specified point
      distance = item->calcDist(x, y);
@@ -202,21 +226,22 @@ const Item* SpawnShell::findClosestItem(itemType type,
    return closest;
 }
 
-const Spawn* SpawnShell::findSpawnByRawName(const QString& name)
+const Spawn* SpawnShell::findSpawnByName(const QString& name)
 {
-  ItemMap::iterator it;
+  ItemIterator it(m_spawns);
   const Spawn* spawn;
 
-  for (it = m_spawns.begin(); 
-       it != m_spawns.end();
-       it++)
+  for (; it.current(); ++it)
   {
     // the item and coerce it to the Spawn type
-    spawn = (const Spawn*)it->second;
+    spawn = (const Spawn*)it.current();
 
-    if (name == spawn->rawName())
+    if (name == spawn->name())
       return spawn;
   }
+
+  if (name == m_player->name())
+    return m_player;
 
   return NULL;
 }
@@ -227,24 +252,19 @@ void SpawnShell::deleteItem(itemType type, int id)
    printf ("SpawnShell::deleteItem()\n");
 #endif
    ItemMap& theMap = getMap(type);
-   ItemMap::iterator it;
 
-   it = theMap.find(id);
+   Item* item = theMap.find(id);
 
-   if (it != theMap.end())
+   if (item != NULL)
    {
-     Item* item = it->second;
-
      if (item->filterFlags() & FILTER_FLAG_ALERT)
        emit handleAlert(item, tDelSpawn);
      
      emit delItem(item);
-     item = it->second;
-     theMap.erase(it);
-     delete item;
+     theMap.remove(id);
 
      // send notifcation of new spawn count
-     emit numSpawns(m_spawns.size());
+     emit numSpawns(m_spawns.count());
    }
 }
 
@@ -328,11 +348,10 @@ bool SpawnShell::updateRuntimeFilterFlags(Spawn* spawn)
 
 void SpawnShell::dumpSpawns(itemType type, QTextStream& out)
 {
-   ItemMap& theMap = getMap(type);
-   ItemMap::iterator it;
+   ItemIterator it(getMap(type));
 
-   for (it = theMap.begin(); it != theMap.end(); it++)
-     out << it->second->dumpString() << endl;
+   for (; it.current(); ++it)
+     out << it.current()->dumpString() << endl;
 }
 
 // same-name slots, connecting to Packet signals
@@ -347,27 +366,25 @@ void SpawnShell::newGroundItem(const makeDropStruct *d)
 
   if (!d)
     return;
-  ItemMap::iterator it;
   
   // attempt to get the item name
   QString name;
   if (pItemDB != NULL)
     name = pItemDB->GetItemLoreName(d->itemNr);
   
-  Drop* item;
-  it = m_drops.find(d->dropId);
-  if (it != m_drops.end())
+  Drop* item = (Drop*)m_drops.find(d->dropId);
+  if (item != NULL)
   {
-    item = (Drop*)it->second;
     item->update(d, name);
     updateFilterFlags(item);
+    item->updateLastChanged();
     emit changeItem(item, tSpawnChangedALL);
   }
   else
   {
     item = new Drop(d, name);
     updateFilterFlags(item);
-    m_drops.insert(ItemMap::value_type(d->dropId, item));
+    m_drops.insert(d->dropId, item);
     emit addItem(item);
   }
 
@@ -400,21 +417,20 @@ void SpawnShell::newDoorSpawn(const doorStruct* d)
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::newDoorSpawn(doorStruct*)\n");
 #endif
-   ItemMap::iterator it;
-   Door* item;
-   it = m_doors.find(d->doorId);
-   if (it != m_doors.end())
+   Item* item = m_doors.find(d->doorId);
+   if (item != NULL)
    {
-     item = (Door*)it->second;
-     item->update(d);
-     updateFilterFlags(item);
-     emit changeItem(item, tSpawnChangedALL);
+     Door* door = (Door*)item;
+     door->update(d);
+     updateFilterFlags(door);
+     item->updateLastChanged();
+     emit changeItem(door, tSpawnChangedALL);
    }
    else
    {
-     item = new Door(d);
+     item = (Item*)new Door(d);
      updateFilterFlags(item);
-     m_doors.insert(ItemMap::value_type(d->doorId, item));
+     m_doors.insert(d->doorId, item);
      emit addItem(item);
    }
 
@@ -434,21 +450,21 @@ void SpawnShell::newCoinsItem(const dropCoinsStruct *c)
 
   if (!c)
     return;
-  ItemMap::iterator it;
-  Coin* item;
-  it = m_coins.find(c->dropId);
-  if (it != m_coins.end())
+
+  Item* item = m_coins.find(c->dropId);
+  if (item != NULL)
   {
-    item = (Coin*)it->second;
-    item->update(c);
+    Coin* coin = (Coin*)item;
+    coin->update(c);
     updateFilterFlags(item);
+    item->updateLastChanged();
     emit changeItem(item, tSpawnChangedALL);
   }
   else
   {
     item = new Coin(c);
     updateFilterFlags(item);
-    m_coins.insert(ItemMap::value_type(c->dropId, item));
+    m_coins.insert(c->dropId, item);
     emit addItem(item);
   }
   
@@ -509,15 +525,14 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      }
    }
    
-   ItemMap::iterator it;
-   Spawn* item;
-   it = m_spawns.find(s.spawnId);
-   if (it != m_spawns.end())
+   Item* item = m_spawns.find(s.spawnId);
+   if (item != NULL)
    {
-     item = (Spawn*)it->second;
-     item->update(&s);
+     Spawn* spawn = (Spawn*)item;
+     spawn->update(&s);
      updateFilterFlags(item);
      updateRuntimeFilterFlags(item);
+     item->updateLastChanged();
      emit changeItem(item, tSpawnChangedALL);
    }
    else
@@ -525,11 +540,11 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      item = new Spawn(&s);
      updateFilterFlags(item);
      updateRuntimeFilterFlags(item);
-     m_spawns.insert(ItemMap::value_type(s.spawnId, item));
+     m_spawns.insert(s.spawnId, item);
      emit addItem(item);
 
      // send notification of new spawn count
-     emit numSpawns(m_spawns.size());
+     emit numSpawns(m_spawns.count());
    }
 
    if (item->filterFlags() & FILTER_FLAG_ALERT)
@@ -546,9 +561,9 @@ void SpawnShell::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t 
       (pupdate->spawnId != m_player->id())) // PC Corpse Movement
   {
        updateSpawn(pupdate->spawnId,  
-                   pupdate->xPos,
-                   pupdate->yPos,
-                   pupdate->zPos,
+                   pupdate->x,
+                   pupdate->y,
+                   pupdate->z,
                    0, 0, 0,
                    pupdate->heading,
                    0, 0);
@@ -565,29 +580,29 @@ void SpawnShell::updateSpawn(uint16_t id,
    printf("SpawnShell::updateSpawn(id=%d, x=%d, y=%d, z=%d, xVel=%d, yVel=%d, zVel=%d)\n", id, x, y, z, xVel, yVel, zVel);
 #endif
 
-   Spawn* item;
-   ItemMap::iterator it = m_spawns.find(id);
+   Item* item = m_spawns.find(id);
 
-   if (it != m_spawns.end())
+   if (item != NULL)
    {
-     item = (Spawn*)it->second;
+     Spawn* spawn = (Spawn*)item;
 
-     item->setPos(x, y, z,
-		  showeq_params->walkpathrecord,
-		  showeq_params->walkpathlength);
-     item->setAnimation(animation);
+     spawn->setPos(x, y, z,
+		   showeq_params->walkpathrecord,
+		   showeq_params->walkpathlength);
+     spawn->setAnimation(animation);
      if ((animation != 0) && (animation != 66))
      {
-       item->setDeltas(xVel, yVel, zVel);
-       item->setHeading(heading, deltaHeading);
+       spawn->setDeltas(xVel, yVel, zVel);
+       spawn->setHeading(heading, deltaHeading);
      } 
     else
      {
-       item->setDeltas(0, 0, 0);
-       item->setHeading(heading, 0);
+       spawn->setDeltas(0, 0, 0);
+       spawn->setHeading(heading, 0);
      }
 
-     item->updateLast();
+     spawn->updateLast();
+     item->updateLastChanged();
      emit changeItem(item, tSpawnChangedPosition);
    }
    else if (showeq_params->createUnknownSpawns)
@@ -614,11 +629,11 @@ void SpawnShell::updateSpawn(uint16_t id,
 		      heading, deltaHeading, animation);
      updateFilterFlags(item);
      updateRuntimeFilterFlags(item);
-     m_spawns.insert(ItemMap::value_type(id, item));
+     m_spawns.insert(id, item);
      emit addItem(item);
 
      // send notification of new spawn count
-     emit numSpawns(m_spawns.size());
+     emit numSpawns(m_spawns.count());
    }
 }
 
@@ -638,9 +653,9 @@ void SpawnShell::updateSpawns(const mobUpdateStruct* updates)
      // drift when a mob stops moving. (or turns)
 
      updateSpawn(updates->spawnUpdate[a].spawnId,
-		 updates->spawnUpdate[a].xPos,
-		 updates->spawnUpdate[a].yPos,
-		 updates->spawnUpdate[a].zPos,
+		 updates->spawnUpdate[a].x,
+		 updates->spawnUpdate[a].y,
+		 updates->spawnUpdate[a].z,
 		 updates->spawnUpdate[a].deltaX,
 		 updates->spawnUpdate[a].deltaY,
 		 updates->spawnUpdate[a].deltaZ,
@@ -656,47 +671,50 @@ void SpawnShell::updateSpawnHP(const hpUpdateStruct* hpupdate)
    printf("SpawnShell::updateSpawnHp(id=%d, hp=%d, maxHp=%d)\n", 
 	  hpupdate->spawnId, hpupdate->curHp, hpupdate->maxHp);
 #endif
-   Spawn* item;
-   ItemMap::iterator it = m_spawns.find(hpupdate->spawnId);
-   if (it != m_spawns.end())
+   Item* item = m_spawns.find(hpupdate->spawnId);
+   if (item != NULL)
    {
-     item = (Spawn*)it->second;
-     item->setHP(hpupdate->curHp);
-     item->setMaxHP(hpupdate->maxHp);
-     updateFilterFlags(item);
-     updateRuntimeFilterFlags(item);
+     Spawn* spawn = (Spawn*)item;
+     spawn->setHP(hpupdate->curHp);
+     spawn->setMaxHP(hpupdate->maxHp);
+     item->updateLastChanged();
      emit changeItem(item, tSpawnChangedHP);
    }
 }
 
 void SpawnShell::spawnWearingUpdate(const wearChangeStruct *wearing)
 {
-   Spawn* item;
-   ItemMap::iterator it = m_spawns.find(wearing->spawnId);
-   if (it != m_spawns.end())
-   {
-     item = (Spawn*)it->second;
-     item->setEquipment(wearing->wearSlotId, wearing->newItemId);
-     updateFilterFlags(item);
-     updateRuntimeFilterFlags(item);
-     emit changeItem(item, tSpawnChangedWearing);
-   }
+  Item* item = m_spawns.find(wearing->spawnId);
+  if (item != NULL)
+  {
+    Spawn* spawn = (Spawn*)item;
+    spawn->setEquipment(wearing->wearSlotId, wearing->newItemId);
+    uint32_t changeType = tSpawnChangedWearing;
+    if (updateFilterFlags(item))
+      changeType |= tSpawnChangedFilter;
+    if (updateRuntimeFilterFlags(item))
+      changeType |= tSpawnChangedRuntimeFilter;
+    item->updateLastChanged();
+    emit changeItem(item, changeType);
+  }
 }
 
 void SpawnShell::consMessage(const considerStruct * con, uint32_t, uint8_t dir) 
 {
+  Item* item;
+  Spawn* spawn;
+
   if (dir == DIR_CLIENT)
   {
     if (con->playerid != con->targetid) 
     {
-      Spawn* item;
-      ItemMap::iterator it = m_spawns.find(con->targetid);
-      if (it != m_spawns.end())
+      item = m_spawns.find(con->targetid);
+      if (item != NULL)
       {
-	item = (Spawn*)it->second;
-	
+	spawn = (Spawn*)item;
+
 	// note that this spawn has been considered
-	item->setConsidered(true);
+	spawn->setConsidered(true);
 	
 	emit spawnConsidered(item);
       }
@@ -704,7 +722,6 @@ void SpawnShell::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
     return;
   }
 
-  Spawn* item;
   QString lvl("");
   QString hps("");
   QString cn("");
@@ -717,7 +734,7 @@ void SpawnShell::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
   if (con->playerid == con->targetid) 
   {
     // print it's deity
-    printf("\nDiety: %s\n", (const char*)m_player->deityName());
+    printf("Diety: %s\n", (const char*)m_player->deityName());
     
     // well, this is You
     msg += "YOU";
@@ -725,16 +742,14 @@ void SpawnShell::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
   else 
   {
     // find the spawn if it exists
-    ItemMap::iterator it = m_spawns.find(con->targetid);
+    item = m_spawns.find(con->targetid);
     
     // has the spawn been seen before?
-    if (it != m_spawns.end())
+    if (item != NULL)
     {
-      // yes, get the corresponding item
-      item = (Spawn*)it->second;
-
-
-      printf("\nDiety: %s\n", (const char*)item->deityName());
+      Spawn* spawn = (Spawn*)item;
+      // yes
+      printf("Diety: %s\n", (const char*)spawn->deityName());
 
       int changed = tSpawnChangedNone;
 
@@ -742,18 +757,18 @@ void SpawnShell::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
       /* but not when considering mobs. */
       if (con->maxHp || con->curHp)
       {
-         if (item->NPC() == SPAWN_NPC_UNKNOWN)
+         if (spawn->NPC() == SPAWN_NPC_UNKNOWN)
          {
-            item->setNPC(SPAWN_PLAYER);        // player
-            changed |= tSpawnChangedNPC;
+	   spawn->setNPC(SPAWN_PLAYER);        // player
+	   changed |= tSpawnChangedNPC;
          }
-         item->setMaxHP(con->maxHp);
-         item->setHP(con->curHp);
+         spawn->setMaxHP(con->maxHp);
+         spawn->setHP(con->curHp);
          changed |= tSpawnChangedHP;
       }
       else if (item->NPC() == SPAWN_NPC_UNKNOWN)
       {
-         item->setNPC(SPAWN_NPC);
+         spawn->setNPC(SPAWN_NPC);
          changed |= tSpawnChangedNPC;
       }
 
@@ -765,11 +780,12 @@ void SpawnShell::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
         if (updateRuntimeFilterFlags(item))
            changed |= tSpawnChangedRuntimeFilter;
 
+	item->updateLastChanged();
         emit changeItem(item, changed);
       }
 
       // note that this spawn has been considered
-      item->setConsidered(true);
+      spawn->setConsidered(true);
 
       emit spawnConsidered(item);
 
@@ -837,12 +853,6 @@ void SpawnShell::deleteSpawn(const deleteSpawnStruct* delspawn)
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::deleteSpawn(id=%d)\n", delspawn->spawnId);
 #endif
-   ItemMap::iterator it;
-   Spawn* item;
-   it = m_spawns.find(delspawn->spawnId);
-   if (it != m_spawns.end())
-     item = (Spawn*)it->second;
-
    if (m_posDeadSpawnIDs < MAX_DEAD_SPAWNIDS)
      m_posDeadSpawnIDs++;
    else
@@ -859,41 +869,23 @@ void SpawnShell::deleteSpawn(const deleteSpawnStruct* delspawn)
 void SpawnShell::killSpawn(const newCorpseStruct* deadspawn)
 {
 #ifdef SPAWNSHELL_DIAG
-   printf("SpawnShell::killSpawn(id=%d)\n", deadspawn->spawnId);
+   printf("SpawnShell::killSpawn(id=%d, kid=%d)\n", 
+	  deadspawn->spawnId, deadspawn->killerId);
 #endif
-#ifdef SPAWNSHELL_DIAG_STRUCTS
-   printf("newCorpseStruct: spawnId=%d", deadspawn->spawnId);
-   ItemMap::iterator tmpit = m_spawns.find(deadspawn->spawnId);
-   if (tmpit != m_spawns.end())
-       printf("(%s)", (const char*)tmpit->second->name());
-   printf(" killerId=%d", deadspawn->killerId);
-   tmpit = m_spawns.find(deadspawn->killerId);
-   if (tmpit != m_spawns.end())
-       printf("(%s)", (const char*)tmpit->second->name());
-   printf(" unknown0006={");
-   for (uint j = 0; j < sizeof(deadspawn->unknown0006); j++)
-     printf("%2.2hhx, ", deadspawn->unknown0006[j]);
-   printf("} spellId=%04x(%s) type=%d damage=%d\n",
-	  deadspawn->spellId, (const char*)spell_name(deadspawn->spellId),
-	  deadspawn->type, deadspawn->damage);
-#endif
+   Item* item;
+   Item* killer;
 
-   ItemMap::iterator it = m_spawns.find(deadspawn->spawnId);
-   if (it != m_spawns.end())
+   item = m_spawns.find(deadspawn->spawnId);
+   if (item != NULL)
    {
-     Spawn* item = (Spawn*)it->second;
-     Spawn* killer=NULL;
-
-     ItemMap::iterator kit = m_spawns.find(deadspawn->killerId);
-
-     if (kit != m_spawns.end())
-         killer = (Spawn*)kit->second;
+     Spawn* spawn = (Spawn*)item;
+     killer = m_spawns.find(deadspawn->killerId);
 
      // ZBTEMP: This is temporary until we can find a better way
      // set the last kill info on the player (do this before changing name)
-     m_player->setLastKill(item->name(), item->level());
+     m_player->setLastKill(spawn->name(), spawn->level());
 
-     item->killSpawn();
+     spawn->killSpawn();
      updateFilterFlags(item);
      updateRuntimeFilterFlags(item);
      emit killSpawn(item, killer, deadspawn->killerId);
@@ -905,22 +897,23 @@ void SpawnShell::killSpawn(const newCorpseStruct* deadspawn)
 
 void SpawnShell::corpseLoc(const corpseLocStruct* corpseLoc)
 {
-   ItemMap::iterator it = m_spawns.find(corpseLoc->spawnId);
-   if (it != m_spawns.end())
-   {
-     Spawn* item = (Spawn*)it->second;
+  Item* item = m_spawns.find(corpseLoc->spawnId);
+  if (item != NULL)
+  {
+    Spawn* spawn = (Spawn*)item;
 
-     // set the corpses location, and make sure it's not moving... 
-     item->setPos(int16_t(corpseLoc->xPos), int16_t(corpseLoc->yPos), 
-		  int16_t(corpseLoc->zPos),
+    // set the corpses location, and make sure it's not moving... 
+    spawn->setPos(int16_t(corpseLoc->x), int16_t(corpseLoc->y), 
+		  int16_t(corpseLoc->z),
 		  showeq_params->walkpathrecord,
 		  showeq_params->walkpathlength);
-     item->killSpawn();
-     item->updateLast();
-
-     // signal that the spawn has changed
-     emit killSpawn(item, NULL, 0);
-   }
+    spawn->killSpawn();
+    spawn->updateLast();
+    spawn->updateLastChanged();
+    
+    // signal that the spawn has changed
+    emit killSpawn(item, NULL, 0);
+  }
 }
 
 void SpawnShell::backfillZoneSpawns(const zoneSpawnsStruct* zdata, uint32_t len)
@@ -943,15 +936,9 @@ void SpawnShell::backfillSpawn(const newSpawnStruct *ndata)
 
 void SpawnShell::backfillSpawn(const spawnStruct *spawn)
 {
-  ItemMap::iterator it;
-
-  uint16_t spawnId;
-
-  spawnId = spawn->spawnId;
-
-  it = m_spawns.find(spawnId);
+  Item* item = m_spawns.find(spawn->spawnId);
   
-  if (it == m_spawns.end())
+  if (item == NULL)
   {
     // if it's not already in the list, then just add it.
     newSpawn(*spawn);
@@ -959,20 +946,33 @@ void SpawnShell::backfillSpawn(const spawnStruct *spawn)
     return;
   }
 
-  Spawn* item = (Spawn*)it->second;
+  Spawn* spawnItem = (Spawn*)item;
+
   // if we got the self item, then somethings screwy, so only update if
   // not the self spawn
-  if (!item->isSelf())
+  if (!spawnItem->isSelf())
   {
-    item->backfill(spawn);
-    updateFilterFlags(item);
-    updateRuntimeFilterFlags(item);
+    spawnItem->backfill(spawn);
+    updateFilterFlags(spawnItem);
+    updateRuntimeFilterFlags(spawnItem);
 
-    emit changeItem(item, tSpawnChangedALL);
+    spawnItem->updateLastChanged();
+    emit changeItem(spawnItem, tSpawnChangedALL);
     
-    if (item->filterFlags() & FILTER_FLAG_ALERT)
-      emit handleAlert(item, tFilledSpawn);
+    if (spawnItem->filterFlags() & FILTER_FLAG_ALERT)
+      emit handleAlert(spawnItem, tFilledSpawn);
   }
+}
+
+void SpawnShell::playerChangedID(uint16_t playerID)
+{
+  // remove the player from the list (if it had a 0 id)
+  m_players.take(0);
+
+  // re-insert the player into the list
+  m_players.replace(playerID, m_player);
+
+  emit changeItem(m_player, tSpawnChangedALL);
 }
 
 void SpawnShell::refilterSpawns()
@@ -986,34 +986,40 @@ void SpawnShell::refilterSpawns()
 void SpawnShell::refilterSpawns(itemType type)
 {
    ItemMap& theMap = getMap(type);
-   ItemMap::iterator it;
+   ItemIterator it(theMap);
 
    if (type == tSpawn)
    {
      Spawn* spawn;
      // iterate over all the items in the map
-     for (it = theMap.begin(); it != theMap.end(); it++)
+     for (; it.current(); ++it)
      {
        // get the item
-       spawn = (Spawn*)it->second;
+       spawn = (Spawn*)it.current();
        
        // update the flags, if they changed, send a notification
        if (updateFilterFlags(spawn))
+       {
+	 spawn->updateLastChanged();
 	 emit changeItem(spawn, tSpawnChangedFilter);
+       }
      }
    }
    else
    {
      Item* item;
      // iterate over all the items in the map
-     for (it = theMap.begin(); it != theMap.end(); it++)
+     for (; it.current(); ++it)
      {
        // get the item
-       item = it->second;
+       item = it.current();
        
        // update the flags, if they changed, send a notification
        if (updateFilterFlags(item))
+       {
+	 item->updateLastChanged();
 	 emit changeItem(item, tSpawnChangedFilter);
+       }
      }
    }
 }
@@ -1025,35 +1031,40 @@ void SpawnShell::refilterSpawnsRuntime()
 
 void SpawnShell::refilterSpawnsRuntime(itemType type)
 {
-   ItemMap& theMap = getMap(type);
-   ItemMap::iterator it;
+   ItemIterator it(getMap(type));
 
    if (type == tSpawn)
    {
      Spawn* spawn;
      // iterate over all the items in the map
-     for (it = theMap.begin(); it != theMap.end(); it++)
+     for (; it.current(); ++it)
      {
        // get the item
-       spawn = (Spawn*)it->second;
+       spawn = (Spawn*)it.current();
        
        // update the flags, if they changed, send a notification
        if (updateRuntimeFilterFlags(spawn))
+       {
+	 spawn->updateLastChanged();
 	 emit changeItem(spawn, tSpawnChangedRuntimeFilter);
+       }
      }
    }
    else
    {
      Item* item;
      // iterate over all the items in the map
-     for (it = theMap.begin(); it != theMap.end(); it++)
+     for (; it.current(); ++it)
      {
        // get the item
-       item = it->second;
+       item = it.current();
        
        // update the flags, if they changed, send a notification
        if (updateRuntimeFilterFlags(item))
+       {
+	 item->updateLastChanged();
 	 emit changeItem(item, tSpawnChangedRuntimeFilter);
+       }
      }
    }
 }
@@ -1076,20 +1087,20 @@ void SpawnShell::saveSpawns(void)
     ItemMap& theMap = getMap(tSpawn);
 
     // save the number of spawns
-    testVal = theMap.size();
+    testVal = theMap.count();
     d << testVal;
 
-    ItemMap::iterator it;
+    ItemIterator it(theMap);
     Spawn* spawn;
     
     // iterate over all the items in the map
-    for (it = theMap.begin(); it != theMap.end(); it++)
+    for (; it.current(); ++it)
     {
       // get the spawn
-      spawn = (Spawn*)it->second;
+      spawn = (Spawn*)it.current();
 
       // save the spawn id
-      d << it->first;
+      d << it.currentKey();
 
       // save the spawn
       spawn->saveSpawn(d);
@@ -1151,15 +1162,15 @@ void SpawnShell::restoreSpawns(void)
       // filter and add it to the list
       updateFilterFlags(item);
       updateRuntimeFilterFlags(item);
-      m_spawns.insert(ItemMap::value_type(id, item));
+      m_spawns.insert(id, item);
       emit addItem(item);
     }
 
-    emit numSpawns(m_spawns.size());
+    emit numSpawns(m_spawns.count());
 
     fprintf(stderr,
 	    "Restored SPAWNS: count=%d!\n",
-	    m_spawns.size());
+	    m_spawns.count());
   }
   else
   {

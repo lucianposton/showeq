@@ -25,7 +25,7 @@
 ////////////////////////////////////////////
 //  CombatOffenseRecord implementation
 ////////////////////////////////////////////
-CombatOffenseRecord::CombatOffenseRecord( int iType, EQPlayer* p) :
+CombatOffenseRecord::CombatOffenseRecord( int iType, Player* p) :
 	m_iType(iType),
 	m_player(p),
 	m_iHits(0),
@@ -58,7 +58,7 @@ void CombatOffenseRecord::addHit(int iDamage)
 ////////////////////////////////////////////
 //  CombatDefenseRecord implementation
 ////////////////////////////////////////////
-CombatDefenseRecord::CombatDefenseRecord(EQPlayer* p) :
+CombatDefenseRecord::CombatDefenseRecord(Player* p) :
 	m_player(p),
 	m_iHits(0),
 	m_iMisses(0),
@@ -138,7 +138,7 @@ void CombatDefenseRecord::addMiss(int iMissReason)
 ////////////////////////////////////////////
 //	CombatMobRecord implementation
 ////////////////////////////////////////////
-CombatMobRecord::CombatMobRecord(int iID, int iStartTime, EQPlayer* p) :
+CombatMobRecord::CombatMobRecord(int iID, int iStartTime, Player* p) :
 m_iID(iID),
 m_player(p),
 m_iStartTime(iStartTime),
@@ -178,7 +178,7 @@ double CombatMobRecord::getMobDPS()
 void CombatMobRecord::addHit(int iTarget, int iSource, int iDamage)
 {
 
-	int iPlayerID = m_player->getPlayerID();
+	int iPlayerID = m_player->id();
 
 	if(iSource == iPlayerID && iTarget == m_iID)
 	{
@@ -216,7 +216,7 @@ CombatWindow::~CombatWindow()
 	}
 }
 
-CombatWindow::CombatWindow(EQPlayer* player,
+CombatWindow::CombatWindow(Player* player,
 			   QWidget* parent, const char* name)
   : SEQWindow("Combat", "ShowEQ - Combat", parent, name),
     m_player(player),
@@ -691,7 +691,7 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 			iTargetID, iSourceID, iType, iSpell, iDamage);
 #endif
 
-	int iPlayerID = m_player->getPlayerID();
+	int iPlayerID = m_player->id();
 
 	//	The one case we won't handle (for now) is where the Target
 	//	and Source are the same.
@@ -776,7 +776,7 @@ void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage)
 #endif
 
 	int iTimeNow = mTime();
-	int iPlayerID = m_player->getPlayerID();
+	int iPlayerID = m_player->id();
 	int iMobID;
 
 	if(iPlayerID == iTargetID)

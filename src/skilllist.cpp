@@ -12,7 +12,7 @@
 #include "util.h"
 #include "main.h" // for pSEQPrefs & showeq_params
 
-EQSkillList::EQSkillList(EQPlayer* player,
+SkillList::SkillList(Player* player,
 			 QWidget* parent, 
 			 const char* name)
   : SEQListView("SkillList", parent, name), 
@@ -57,12 +57,12 @@ EQSkillList::EQSkillList(EQPlayer* player,
      addLanguages();
 }
 
-EQSkillList::~EQSkillList()
+SkillList::~SkillList()
 {
 }
 
 /* Called to add a skill to the skills list */
-void EQSkillList::addSkill (int skillId, int value)
+void SkillList::addSkill (int skillId, int value)
 {
   if (skillId >= MAX_KNOWN_SKILLS)
   {
@@ -95,7 +95,7 @@ void EQSkillList::addSkill (int skillId, int value)
 }
 
 /* Skill update */
-void EQSkillList::changeSkill (int skillId, int value)
+void SkillList::changeSkill (int skillId, int value)
 {
   if (skillId >= MAX_KNOWN_SKILLS)
   {
@@ -118,7 +118,7 @@ void EQSkillList::changeSkill (int skillId, int value)
 }
 
 /* Delete all skills when zoning */
-void EQSkillList::deleteSkills() 
+void SkillList::deleteSkills() 
 {
   for(int i=0; i < MAX_KNOWN_SKILLS; i++)
     if(m_skillList[i] != NULL) 
@@ -129,7 +129,7 @@ void EQSkillList::deleteSkills()
 }
 
 // Called to add a language to the skills list
-void EQSkillList::addLanguage (int langId, int value)
+void SkillList::addLanguage (int langId, int value)
 {
   // only add it if languages are being shown
   if (!m_showLanguages)
@@ -165,7 +165,7 @@ void EQSkillList::addLanguage (int langId, int value)
 }
 
 /* Language update */
-void EQSkillList::changeLanguage (int langId, int value)
+void SkillList::changeLanguage (int langId, int value)
 {
   // only change it if languages are being shown
   if (!m_showLanguages)
@@ -193,7 +193,7 @@ void EQSkillList::changeLanguage (int langId, int value)
 }
 
 /* Delete all skills when zoning */
-void EQSkillList::deleteLanguages() 
+void SkillList::deleteLanguages() 
 {
   for(int i=0; i < MAX_KNOWN_LANGS; i++)
     if(m_languageList[i] != NULL) 
@@ -203,7 +203,7 @@ void EQSkillList::deleteLanguages()
     }
 }
 
-void EQSkillList::addLanguages() 
+void SkillList::addLanguages() 
 {
   if (!m_showLanguages)
     return;
@@ -212,7 +212,7 @@ void EQSkillList::addLanguages()
     addLanguage(i, m_pPlayer->getLanguage(i));
 }
 
-void EQSkillList::showLanguages(bool show)
+void SkillList::showLanguages(bool show)
 {
   m_showLanguages = show;
 
@@ -226,14 +226,14 @@ void EQSkillList::showLanguages(bool show)
     deleteLanguages();
 }
 
-SkillListWindow::SkillListWindow(EQPlayer* player, 
+SkillListWindow::SkillListWindow(Player* player, 
 				 QWidget* parent, const char* name)
   : SEQWindow("SkillList", "ShowEQ - Skills", parent, name)
 {
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setAutoAdd(true);
   
-  m_skillList = new EQSkillList(player, this, name);
+  m_skillList = new SkillList(player, this, name);
 }
 
 SkillListWindow::~SkillListWindow()

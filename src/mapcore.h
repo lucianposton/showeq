@@ -411,19 +411,19 @@ class MapLineL : public MapCommon, public QPointArray
  public:
   MapLineL();
   MapLineL(const QString& name, const QString& color, uint32_t size);
-  MapLineL(const QString& name, const QString& color, uint32_t size, int16_t zPos);
+  MapLineL(const QString& name, const QString& color, uint32_t size, int16_t z);
   virtual ~MapLineL();
   
-  int16_t zPos() const { return m_zPos; }
+  int16_t z() const { return m_z; }
   bool heightSet() const { return m_heightSet; }
   const QRect& boundingRect() const { return m_bounds; }
 
-  void setZPos(uint16_t zPos)
-    {  m_zPos = zPos; m_heightSet = true; }
+  void setZPos(uint16_t z)
+    {  m_z = z; m_heightSet = true; }
   void calcBounds() { m_bounds = QPointArray::boundingRect(); }
 
  private:
-  int16_t m_zPos;
+  int16_t m_z;
   bool m_heightSet;
   QRect m_bounds;
 };
@@ -453,7 +453,7 @@ class MapLocation : public MapCommon, public QPoint
   MapLocation();
   MapLocation(const QString& name, const QString& color, const QPoint& point);
   MapLocation(const QString& name, const QString& color, 
-	      int16_t xPos, int16_t yPos);
+	      int16_t x, int16_t y);
   virtual ~MapLocation();
  private:
 };
@@ -508,8 +508,8 @@ class MapData
   bool isAggro(const QString& name, uint16_t* range) const;
 
   // make sure map is big enough, returns true if size modified
-  bool checkPos(int16_t xPos, int16_t yPos);
-  void quickCheckPos(int16_t xPos, int16_t yPos);
+  bool checkPos(int16_t x, int16_t y);
+  void quickCheckPos(int16_t x, int16_t y);
   void updateBounds();
 
   // map editing
@@ -557,32 +557,32 @@ class MapData
 };
 
 inline
-bool MapData::checkPos(int16_t xPos, int16_t yPos)
+bool MapData::checkPos(int16_t x, int16_t y)
 {
   bool flag = false;
 
 #if defined(MAP_DEBUG)
-  printf("in xPos: %i, in yPos: %i, max(%i,%i) Min(%i,%i)\n", xPos, yPos, m_maxX, m_maxY, m_minX, m_minY);
+  printf("in x: %i, in y: %i, max(%i,%i) Min(%i,%i)\n", x, y, m_maxX, m_maxY, m_minX, m_minY);
 #endif /* MAP_DEBUG */
 
-  if (xPos > m_maxX)
+  if (x > m_maxX)
   {
-    m_maxX = xPos;
+    m_maxX = x;
     flag = true;
   }
-  if (yPos > m_maxY)
+  if (y > m_maxY)
   {
-    m_maxY = yPos;
+    m_maxY = y;
     flag = true;
   }
-  if (xPos < m_minX)
+  if (x < m_minX)
   {
-    m_minX = xPos;
+    m_minX = x;
     flag = true;
   }
-  if (yPos < m_minY)
+  if (y < m_minY)
   {
-    m_minY = yPos;
+    m_minY = y;
     flag = true;
   }
 
@@ -594,18 +594,18 @@ bool MapData::checkPos(int16_t xPos, int16_t yPos)
 }
 
 inline
-void MapData::quickCheckPos(int16_t xPos, int16_t yPos)
+void MapData::quickCheckPos(int16_t x, int16_t y)
 {
   // quick, no-nonsense checking of the bounds, for batch use.
   // call updateBounds() after finished with the batch
-  if (xPos > m_maxX)
-    m_maxX = xPos;
-  if (yPos > m_maxY)
-    m_maxY = yPos;
-  if (xPos < m_minX)
-      m_minX = xPos;
-  if (yPos < m_minY)
-    m_minY = yPos;
+  if (x > m_maxX)
+    m_maxX = x;
+  if (y > m_maxY)
+    m_maxY = y;
+  if (x < m_minX)
+      m_minX = x;
+  if (y < m_minY)
+    m_minY = y;
 }
 
 inline
@@ -651,19 +651,19 @@ class MapCache
 //----------------------------------------------------------------------
 // assorted utility functions
 inline bool inRect(const QRect& rect, 
-		   const int16_t& xPos, 
-		   const int16_t& yPos)
+		   const int16_t& x, 
+		   const int16_t& y)
 {
-  return ((rect.left() <= xPos) && (rect.right() >= xPos) &&
-	  (rect.top() <= yPos) && (rect.bottom() >= yPos));
+  return ((rect.left() <= x) && (rect.right() >= x) &&
+	  (rect.top() <= y) && (rect.bottom() >= y));
 }
 
 inline bool inRoom(const int16_t& headRoom, 
 		   const int16_t& floorRoom, 
-		   const int16_t& zPos)
+		   const int16_t& z)
 {
-  return ((zPos <= headRoom) &&
-	  (zPos >= floorRoom));
+  return ((z <= headRoom) &&
+	  (z >= floorRoom));
 }
 
 #endif // _MAPCORE_H

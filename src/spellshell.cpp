@@ -150,7 +150,7 @@ const QString SpellItem::casterName() const
 //   return &m_cast;
 //}
 
-SpellShell::SpellShell(EQPlayer* player, SpawnShell* spawnshell)
+SpellShell::SpellShell(Player* player, SpawnShell* spawnshell)
   : QObject(NULL, "spellshell"),
   m_player(player), 
   m_spawnShell(spawnshell)
@@ -181,9 +181,9 @@ SpellItem* SpellShell::FindSpell(int spell_id, int caster_id, int target_id)
 void SpellShell::UpdateSpell(const startCastStruct *c)
 {
    if (c) {
-      SpellItem *item = FindSpell(c->spellId, m_player->getPlayerID(),
+      SpellItem *item = FindSpell(c->spellId, m_player->id(),
          c->targetId);
-      item->UpdateSpell(m_spawnShell, m_player->getPlayerID(), c);
+      item->UpdateSpell(m_spawnShell, m_player->id(), c);
       emit changeSpell(item);
    }
 }
@@ -202,13 +202,13 @@ void SpellShell::clear()
 SpellItem* SpellShell::InsertSpell(const startCastStruct *c)
 {
    if (c) {
-      SpellItem *item = FindSpell(c->spellId, m_player->getPlayerID(),
+      SpellItem *item = FindSpell(c->spellId, m_player->id(),
          c->targetId);
       if (item) { // exists
          UpdateSpell(c);
          return item;
       } else { // new spell
-         item = new SpellItem(m_spawnShell, m_player->getPlayerID(), c);
+         item = new SpellItem(m_spawnShell, m_player->id(), c);
          m_spellList.append(item);
          if ((m_spellList.count() > 0) && (!m_timer->isActive()))
             m_timer->start(1000 *
@@ -268,7 +268,7 @@ void SpellShell::selfFinishSpellCast(const memSpellStruct *b)
     return;
 
    printf("selfFinishSpellCast - id=%d, by=%d\n", b->spellId, b->spawnId);
-   SpellItem *item = FindSpell(b->spellId, m_player->getPlayerID(), b->spawnId);
+   SpellItem *item = FindSpell(b->spellId, m_player->id(), b->spawnId);
    if (item) {
       struct spellInfoStruct *info = spell_info(b->spellId);
       item->setDuration(info->duration);

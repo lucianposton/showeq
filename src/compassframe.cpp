@@ -11,7 +11,7 @@
 #include "main.h"
 #include "compassframe.h"
 
-CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
+CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
   : SEQWindow("Compass", "ShowEQ - Compass", parent, name)
 {
   QVBoxLayout* layout = new QVBoxLayout(this);
@@ -32,9 +32,9 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
       labelx->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
       
       // Create the xpos label
-      m_xPos = new QLabel("----",coordsbox);
-      m_xPos->setFixedHeight(m_xPos->sizeHint().height());
-      m_xPos->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+      m_x = new QLabel("----",coordsbox);
+      m_x->setFixedHeight(m_x->sizeHint().height());
+      m_x->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
     } 
     else 
     {
@@ -45,9 +45,9 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
       labely->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
       
       // Create the ypos label
-      m_yPos = new QLabel("----",coordsbox);
-      m_yPos->setFixedHeight(m_yPos->sizeHint().height());
-      m_yPos->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+      m_y = new QLabel("----",coordsbox);
+      m_y->setFixedHeight(m_y->sizeHint().height());
+      m_y->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
     }
    }
   
@@ -57,9 +57,9 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
   labelz->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
   
   // Create the zpos label
-  m_zPos = new QLabel("----",coordsbox);
-  m_zPos->setFixedHeight(m_zPos->sizeHint().height());      
-  m_zPos->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+  m_z = new QLabel("----",coordsbox);
+  m_z->setFixedHeight(m_z->sizeHint().height());      
+  m_z->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
 
   // connect
   connect(player, SIGNAL(posChanged(int16_t,int16_t,int16_t,
@@ -79,21 +79,21 @@ CompassFrame::~CompassFrame()
 void CompassFrame::selectSpawn(const Item* item)
 {
    if (item)
-     m_compass->setTargetPos(item->xPos(), item->yPos());
+     m_compass->setTargetPos(item->x(), item->y());
    else
      m_compass->clearTarget();
 }
 
-void CompassFrame::posChanged(int16_t xPos, int16_t yPos, int16_t zPos,
+void CompassFrame::posChanged(int16_t x, int16_t y, int16_t z,
 			      int16_t deltaX, int16_t deltaY, int16_t deltaZ,
 			      int32_t heading)
 {
   // set compass info
-  m_compass->setPos(xPos, yPos);
+  m_compass->setPos(x, y);
   m_compass->setHeading(heading);
 
   // set position labels
-  m_xPos->setText(QString::number(xPos));
-  m_yPos->setText(QString::number(yPos));
-  m_zPos->setText(QString::number(zPos));
+  m_x->setText(QString::number(x));
+  m_y->setText(QString::number(y));
+  m_z->setText(QString::number(z));
 }

@@ -43,6 +43,7 @@ class SpawnPointListItem: public QListViewItem
 {
 public:
   SpawnPointListItem(QListView* parent, const SpawnPoint* spawn);
+  virtual ~SpawnPointListItem();
 
   void update(void);
   virtual void paintCell(QPainter *p, const QColorGroup &cg, 
@@ -73,14 +74,17 @@ class SpawnPointListMenu : public QPopupMenu
  protected slots:
    void init_menu(void);
    void rename_item(int id);
+   void delete_item(int id);
    void toggle_col( int id );
    void set_font(int id);
    void set_caption(int id);
+   void toggle_keepSorted(int id);
 
  protected:
   SpawnPointList* m_spawnPointList;
   const SpawnPointListItem* m_currentItem;
   int m_id_rename;
+  int m_id_delete;
   int m_id_cols[tSpawnPointMaxCols];
 };
 
@@ -90,22 +94,27 @@ class SpawnPointList : public SEQListView
 
  public:
   SpawnPointList(SpawnMonitor* spawnMonitor, 
-		     QWidget* parent = 0, const char* name = 0);
+		 QWidget* parent = 0, const char* name = 0);
   SpawnPointListMenu* menu();
+  bool keepSorted() { return m_keepSorted; }
+  void setKeepSorted(bool val);
+
  public slots:
   void rightButtonClicked(QListViewItem*, const QPoint&, int);
   void renameItem(const SpawnPointListItem* item);
+  void deleteItem(const SpawnPointListItem* item);
   void refresh();
+  void handleSelectItem(QListViewItem* item);
   void newSpawnPoint(const SpawnPoint* sp);
   void clear();
-  void handleSelectItem(QListViewItem* item);
+  void handleSelChanged(const SpawnPoint* sp);
 
  protected:
   SpawnMonitor* m_spawnMonitor;
   SpawnPointListMenu* m_menu;
   QTimer* m_timer;
-  const SpawnPoint* m_selected;
   bool m_aboutToPop;
+  bool m_keepSorted;
 };
 
 class SpawnPointWindow : public SEQWindow

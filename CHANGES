@@ -1,3 +1,56 @@
+dohpaZ (31/05/02)
+------------------
+Modifications:
+ + version 4.2.7
+ + Applied patch # 561114 "3 new maps" by mrsuspicious (mrsuspicious)
+ + Added a KDevelop 2.0 project (showeq.kdevprj) for those who wish to use 
+   that IDE.
+ + Added Deity and Body type fields to the Spawn List.
+ + Cleaned up some class names EQPlayer => Player, EQStatList => StatList,
+   EQSkillList => SkillList.
+ + Renamed class CSpawnList to SpawnList.  Split SpawnList related classes 
+   into current SpawnList specific classes and those that could be reused 
+   in the new lighter weight SpawnList.
+ + Created Spawn List 2, a lighter weight less memory/CPU intensive
+   Spawn List.  Defaults set to minimize CPU usage.  Made it the spawn list
+   used by default.
+ + Assorted cleanups in SpawnList.
+ + Changed SpawnShell from using an stl::map to a Qt QIntDict for maintaining 
+   the Spawn/Coin/Drop/Door information.  This is mostly being done as a 
+   punt to fix the current primary crashing problem.  We'll see if this works
+   or the standing problem will continue to mock us...
+ + Modified SpawnShell::findID() method to return the Player object if the 
+   user requested type == tSpawn and the id happens to be the player id.   
+   Also, modified SpawnShell:findSpawnByRawName() to check and return the 
+   Player object if no other match was found and the player matches.
+ + Modified spawnshell to make the player appear more as a normal spawn.
+   It now appears in the spawn list again and a tooltip will now appear
+   for the player on the map again.
+ + Cleaned up the spawn monitor ipmlementation a little, SpawnPoint now 
+   inherits from EQPoint instead of Item (reduces memory footprint and 
+   unneeded functionality).
+ + Modified Spawn Point interaction with the map.  The currently selected 
+   spawn point will now be surrounded by a flashing blue square.  The spawn 
+   points now have tooltips and are selectable.  They also follow the spawn 
+   depth filtering settings.
+ + Added the ability to delete individual spawn points through the right-click
+   context menu of the Spawn Point List.
+ + Fixed the "smoothness" issue with the map following the player.
+ + Fixed renaming of Spawn Points.  Also fixed the displayed Z coordinate
+   of Spawn Points.
+ + Fixed map tooltip so that it now pays attention to spawn depth if 
+   spawn depth filtering is enabled.
+ + Normalized naming of x, y, and z coordinate members, methods, and variables.
+ + Further cleanup of the Spawn and Player classes.
+ + Improved performance of SpawnList under Qt 3.x.
+
+Notes:
+ + Use of Qt 3.x is currently unsupported.  But if you choose to use
+   Qt 3.0.[1-4] you should apply the following patch to it and rebuild it:
+   http://www.doomed.to/showeq/qt/qt-x11-free-3.0.4_qsignal.patch
+   Theoretically this patch should not be necessary with Qt 3.0.5 when it is
+   released.
+
 ratt (30 May 02)
 ------------------
 Fixed EQTime display (am/pm thing)
@@ -2903,12 +2956,12 @@ dev (Steve 05/30/2000)
 - Increased the maximum length of map lines to 16K bytes
 - Corrected exp multipliers for double hell levels (54 and 59)
 - Spawn log now logged when max hp are different than previous
-	(This is to catch the buffed guards)
+    (This is to catch the buffed guards)
 - Kunark Fish added to races
 - Listspawn generates complete HTML
 - Z coord added to status bar
 - Number of kills to level added to lower right status bar in []
-	(Same data in status bar doesn't stick around long enough)
+    (Same data in status bar doesn't stick around long enough)
 - Added more detail to TD, Nro and FoB maps
 
 dev (Steve 05/09/2000)
@@ -3260,13 +3313,13 @@ dev (JohnQ 2/11/2000)
 ----------------------
 - Added -A option for "enhanced spawn [A]lerts" when testing for match
   (both regexp or glob) it now tests a longer string containing:
-	name/race/class/info
+    name/race/class/info
   so, for instance you can filter for:
-	all orcs with 2H weapons:	*/*orc*/*/*2H*
-	all druids:			*/*/druid/*
-	and my favorite... 
-	all wisps carying a GLS:	*wisp*/*/*/*gls*
-	etc..
+    all orcs with 2H weapons:    */*orc*/*/*2H*
+    all druids:            */*/druid/*
+    and my favorite... 
+    all wisps carying a GLS:    *wisp*/*/*/*gls*
+    etc..
 - Made it so that dead bodies dont drift if they die while moving.. 
   I hate that
 - other minor bugfixes.. noone will notice but me and the people who 
@@ -3294,9 +3347,9 @@ dev (JohnQ 2/7/2000)
 dev (Steve 2/7/2000)
 --------------------
 - Added the TranformName function that changes names of the form:
-	"a_dwarf_skeleton" into "dwarf skeleton, a"
-	"an_ice_giant" into "ice giant, an"
-	"the_froglok_king" into "froglok king, the"
+    "a_dwarf_skeleton" into "dwarf skeleton, a"
+    "an_ice_giant" into "ice giant, an"
+    "the_froglok_king" into "froglok king, the"
 
 dev (Megaton 2/7/2000)
 ----------------------

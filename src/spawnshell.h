@@ -21,8 +21,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include <map>
-
+#include <qintdict.h>
 #include <qtimer.h>
 #include <qtextstream.h>
 
@@ -31,7 +30,7 @@
 
 //----------------------------------------------------------------------
 // forward declarations
-class EQPlayer;
+class Player;
 class ZoneMgr;
 class FilterMgr;
 class SpawnShell;
@@ -54,29 +53,11 @@ enum alertType
   tDelSpawn,
 };
 
-// type of change done to item
-enum changeType
-{
-  tSpawnChangedNone = 0,
-  tSpawnChangedPosition = 1,
-  tSpawnChangedHP = 2,
-  tSpawnChangedWearing = 4,
-  tSpawnChangedFlags = 8,
-  tSpawnChangedLevel = 16,
-  tSpawnChangedNPC = 32,
-  tSpawnChangedFilter = 64,
-  tSpawnChangedRuntimeFilter = 128,
-  tSpawnChangedConsidered = 256,
-  tSpawnChangedName = 512,
-  tSpawnChangedALL = 1023, // sum of all previous change types 
-};
-
-
 //----------------------------------------------------------------------
 // type definitions
-typedef std::map<uint16_t, Item* > ItemMap;
-typedef ItemMap::iterator ItemIterator;
-typedef ItemMap::const_iterator ItemConstIterator;
+typedef QIntDict<Item> ItemMap;
+typedef QIntDictIterator<Item> ItemIterator;
+typedef QIntDictIterator<Item> ItemConstIterator;
 
 //----------------------------------------------------------------------
 // SpawnShell
@@ -84,7 +65,7 @@ class SpawnShell : public QObject
 {
    Q_OBJECT
 public:
-   SpawnShell(FilterMgr& filterMgr, ZoneMgr* zoneMgr, EQPlayer* player);
+   SpawnShell(FilterMgr& filterMgr, ZoneMgr* zoneMgr, Player* player);
 
    const Item* findID(itemType type, int idSpawn);
    
@@ -92,7 +73,7 @@ public:
 			       int16_t x,
 			       int16_t y, 
 			       double& minDistance);
-   const Spawn* findSpawnByRawName(const QString& name);
+   const Spawn* findSpawnByName(const QString& name);
 
    void dumpSpawns(itemType type, QTextStream& out);
    FilterMgr* filterMgr(void) { return &m_filterMgr; }
@@ -145,6 +126,7 @@ public slots:
    void backfillSpawn(const newSpawnStruct* nspawn);
    void backfillSpawn(const spawnStruct* spawn);
    void backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t);
+   void playerChangedID(uint16_t playerID);
    void refilterSpawns();
    void refilterSpawnsRuntime();
    void saveSpawns(void);
@@ -165,7 +147,8 @@ public slots:
    
  private:
    ZoneMgr* m_zoneMgr;
-   EQPlayer* m_player;
+   Player* m_player;
+   FilterMgr& m_filterMgr;
 
    // track recently killed spawns
    uint16_t m_deadSpawnID[MAX_DEAD_SPAWNIDS];
@@ -177,12 +160,10 @@ public slots:
    ItemMap m_drops;
    ItemMap m_coins;
    ItemMap m_doors;
+   ItemMap m_players;
 
    // timer for saving spawns
    QTimer* m_timer;
-
-   // filter manager
-   FilterMgr& m_filterMgr;
 };
 
 inline
@@ -198,6 +179,8 @@ const ItemMap& SpawnShell::getConstMap(itemType type) const
     return m_drops;
   case tDoors:
     return m_doors;
+  case tPlayer:
+    return m_players;
   default:
     return m_spawns;
   }
@@ -216,6 +199,8 @@ ItemMap& SpawnShell::getMap(itemType type)
     return m_drops;
   case tDoors:
     return m_doors;
+  case tPlayer:
+    return m_players;
   default:
     return m_spawns;
   }

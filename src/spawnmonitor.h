@@ -46,14 +46,14 @@
 #include "zonemgr.h"
 #include "spawnshell.h"
 
-class SpawnPoint: public Item
+class SpawnPoint: public EQPoint
 {
 public:
   SpawnPoint(uint16_t spawnID, const EQPoint& loc, 
 	     const QString& name = "", time_t diffTime = 0, 
 	     uint32_t count = 1);
 
-  virtual ~SpawnPoint() { }
+  virtual ~SpawnPoint();
   
   unsigned char age() const;
   long secsLeft() const { return m_diffTime - ( time( 0 ) - m_deathTime ); }
@@ -69,7 +69,11 @@ public:
   int32_t count() const { return m_count; }
 
   Spawn* getSpawn() const;
-  
+  float displayZPos() const { return (float(z()) / 10.0); }
+  time_t spawnTime() const { return m_spawnTime; }
+  time_t deathTime() const { return m_deathTime; } 
+  time_t diffTime() const { return m_diffTime; }
+
   // protected:
   time_t m_spawnTime;
   time_t m_deathTime;
@@ -87,13 +91,17 @@ public:
   SpawnMonitor::SpawnMonitor(ZoneMgr* zoneMgr, SpawnShell* spawnShell, 
 			     QObject* parent = 0, 
 			     const char* name = "spawnmonitor" );
+  virtual ~SpawnMonitor();
  
   const QAsciiDict<SpawnPoint>& spawnPoints() { return m_points; }
   const QAsciiDict<SpawnPoint>& spawns() { return m_spawns; }
- 
+  const SpawnPoint* selected() { return m_selected; }
+
 public slots:
   void setName(const SpawnPoint* sp, const QString& name);
   void setModified( SpawnPoint* changedSp );
+  void setSelected(const SpawnPoint* sp);
+  void deleteSpawnPoint(const SpawnPoint* sp);
   void newSpawn(const Item* item );
   void killSpawn(const Item* item );
   void zoneChanged( const QString& newZoneName );
@@ -104,7 +112,8 @@ public slots:
 signals:
   void newSpawnPoint( const SpawnPoint* spawnPoint );
   void clearSpawnPoints();
- 
+  void selectionChanged(const SpawnPoint* selected);
+
 protected:
   void restartSpawnPoint( SpawnPoint* spawnPoint );
   void checkSpawnPoint(const Spawn* spawn );
@@ -113,6 +122,7 @@ protected:
   QString m_zoneName;
   QAsciiDict<SpawnPoint> m_spawns;
   QAsciiDict<SpawnPoint> m_points;
+  const SpawnPoint* m_selected;
   bool m_modified;
 };
 

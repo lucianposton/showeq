@@ -13,7 +13,7 @@
 //#define ENABLE_GROUPMGR 1
 
 GroupMgr::GroupMgr(SpawnShell* spawnShell, 
-		   EQPlayer* player,  
+		   Player* player,  
 		   const char* name)
   : QObject( NULL, name ),
     m_spawnShell(spawnShell),
@@ -56,7 +56,7 @@ void GroupMgr::handleGroupInfo( const groupMemberStruct* gmem )
     else
     {
       const Spawn* newMember = 
-	m_spawnShell->findSpawnByRawName(newName);
+	m_spawnShell->findSpawnByName(newName);
       
       if ( newMember )
       {
@@ -120,7 +120,7 @@ int GroupMgr::groupPercentBonus()
 
 unsigned long GroupMgr::totalLevels()
 {
-  unsigned long total = m_player->getPlayerLevel();
+  unsigned long total = m_player->level();
   
   const Spawn* member;
   for ( member = m_group.first(); member != NULL; member = m_group.next() )
@@ -146,7 +146,7 @@ const Spawn* GroupMgr::memberByName(const QString& name)
   const Spawn* member;
   for ( member = m_group.first(); member != NULL; member = m_group.next() )
   {
-    if (member->rawName() == name)
+    if (member->name() == name)
       return member;
   }
 

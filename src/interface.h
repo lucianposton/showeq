@@ -35,9 +35,10 @@
 
 //--------------------------------------------------
 // forward declarations
-class EQPlayer;
+class Player;
 class MapMgr;
 class SpawnListWindow;
+class SpawnListWindow2;
 class SpellListWindow;
 class SkillListWindow;
 class StatListWindow;
@@ -71,11 +72,11 @@ const int maxNumMaps = 5;
 
 // This is the base number where the map dock options appear in the
 // Docked menu
-const int mapDockBase = 6; 
+const int mapDockBase = 7; 
 
 // This is the base number where the map caption options appear in the
 // Window caption menu
-const int mapCaptionBase = 10; 
+const int mapCaptionBase = 11; 
 
 //--------------------------------------------------
 // EQInterface
@@ -219,6 +220,7 @@ class EQInterface:public QMainWindow
    void toggle_opt_RetardedCoords(int);
    void toggle_opt_SystimeSpawntime(int);
    void toggle_view_SpawnList();
+   void toggle_view_SpawnList2();
    void toggle_view_SpawnPointList();
    void toggle_view_SpellList();
    void toggle_view_PlayerStats();
@@ -267,6 +269,7 @@ class EQInterface:public QMainWindow
 		       const QString& audioCue);
    void showMap(int mapNum);
    void showSpawnList(void);
+   void showSpawnList2(void);
    void showSpawnPointList(void);
    void showStatList(void);
    void showSkillList(void);
@@ -275,12 +278,13 @@ class EQInterface:public QMainWindow
    void showNetDiag(void);
 
  public:
-   EQPlayer*  m_player;
+   Player* m_player;
    MapMgr* mapMgr(void) { return m_mapMgr; }
 
  private:
    MapMgr* m_mapMgr;
    SpawnListWindow* m_spawnList;
+   SpawnListWindow2* m_spawnList2;
    SpellListWindow* m_spellList;
    SkillListWindow* m_skillList;
    StatListWindow* m_statList;
@@ -343,6 +347,7 @@ class EQInterface:public QMainWindow
    int  m_id_view_ExpWindow;
    int  m_id_view_CombatWindow;
    int  m_id_view_SpawnList;
+   int  m_id_view_SpawnList2;
    int  m_id_view_SpawnPointList;
    int  m_id_view_PlayerStats;
    int  m_id_view_PlayerSkills;
@@ -355,7 +360,7 @@ class EQInterface:public QMainWindow
    int  m_id_view_PlayerSkills_Options;
    int  m_id_view_PlayerSkills_Languages;
    int  m_id_view_SpawnList_Options;
-   int  m_id_view_SpawnList_Cols[SPAWNCOL_MAXCOLS];
+   int  m_id_view_SpawnList_Cols[tSpawnColMaxCols];
    int  m_id_opt_ConSelect;
    int  m_id_opt_TarSelect;
    int  m_id_opt_KeepSelectedVisible;
@@ -379,6 +384,7 @@ class EQInterface:public QMainWindow
    bool m_isStatListDocked;
    bool m_isMapDocked[maxNumMaps];
    bool m_isSpawnListDocked;
+   bool m_isSpawnList2Docked;
    bool m_isSpawnPointListDocked;
    bool m_isSpellListDocked;
    bool m_isCompassDocked;

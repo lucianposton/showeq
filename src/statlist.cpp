@@ -18,7 +18,7 @@ static const char* statNames[] =
   "INT", "AGI", "WIS", "MR", "FR", "CR", "DR", "PR", "AC", "ExpAA", "RSV",
 };
 
-EQStatList::EQStatList(EQPlayer* player,
+StatList::StatList(Player* player,
                        QWidget* parent, 
                        const char* name)
   : SEQListView("StatList", parent, name),
@@ -65,11 +65,11 @@ EQStatList::EQStatList(EQPlayer* player,
    restoreColumns();
 }
 
-EQStatList::~EQStatList()
+StatList::~StatList()
 {
 }
 
-void EQStatList::expChanged  (int val, int min, int max) 
+void StatList::expChanged  (int val, int min, int max) 
 {
     if (!m_showStat[LIST_EXP])
       return;
@@ -84,7 +84,7 @@ void EQStatList::expChanged  (int val, int min, int max)
     m_statList[LIST_EXP]->setText (3, buf);
 }
 
-void EQStatList::expAltChanged  (int val, int min, int max) 
+void StatList::expAltChanged  (int val, int min, int max) 
 {
     if (!m_showStat[LIST_ALTEXP])
       return;
@@ -99,7 +99,7 @@ void EQStatList::expAltChanged  (int val, int min, int max)
     m_statList[LIST_ALTEXP]->setText (3, buf);
 }
 
-void EQStatList::statChanged (int stat, int val, int max)
+void StatList::statChanged (int stat, int val, int max)
 {
     if (stat < 0 || stat >= LIST_MAXLIST) 
         return;
@@ -120,7 +120,7 @@ void EQStatList::statChanged (int stat, int val, int max)
   m_statList[stat]->setText (3, buf);
 }
 
-void EQStatList::hpChanged(uint16_t val, uint16_t max)
+void StatList::hpChanged(uint16_t val, uint16_t max)
 {
   static int old = 0;
     if (!m_showStat[LIST_HP])
@@ -145,7 +145,7 @@ void EQStatList::hpChanged(uint16_t val, uint16_t max)
   }
 }
 
-void EQStatList::manaChanged (uint32_t val, uint32_t max)
+void StatList::manaChanged (uint32_t val, uint32_t max)
 {
   static uint32_t oldmana = 0;
   if (!m_showStat[LIST_MANA])
@@ -182,7 +182,7 @@ void EQStatList::manaChanged (uint32_t val, uint32_t max)
    }
 }
 
-void EQStatList::stamChanged (int Sval, int Smax, 
+void StatList::stamChanged (int Sval, int Smax, 
 			       int Fval, int Fmax,
 			       int Wval, int Wmax) 
 {
@@ -219,7 +219,7 @@ void EQStatList::stamChanged (int Sval, int Smax,
   }
 }
 
-void EQStatList::resetMaxMana(void)
+void StatList::resetMaxMana(void)
 {
   if (!m_showStat[LIST_MANA])
     return;
@@ -230,7 +230,7 @@ void EQStatList::resetMaxMana(void)
    m_statList[LIST_MANA]->setText (2, buf);
 }
 
-void EQStatList::enableStat(uint8_t stat, bool enabled)
+void StatList::enableStat(uint8_t stat, bool enabled)
 {
   // validate argument
   if (stat >= LIST_MAXLIST)
@@ -247,7 +247,7 @@ void EQStatList::enableStat(uint8_t stat, bool enabled)
   updateStat(stat);
 }
 
-void EQStatList::updateStat(uint8_t stat)
+void StatList::updateStat(uint8_t stat)
 {
   // validate argument
   if (stat >= LIST_MAXLIST)
@@ -297,9 +297,9 @@ void EQStatList::updateStat(uint8_t stat)
 	case LIST_EXP: 
 	  {
 	    // get the experiance needed for the previous level
-	    uint32_t minExp = calc_exp(m_pPlayer->getPlayerLevel() - 1,
-				       m_pPlayer->getPlayerRace(),
-				       m_pPlayer->getPlayerClass());
+	    uint32_t minExp = calc_exp(m_pPlayer->level() - 1,
+				       m_pPlayer->race(),
+				       m_pPlayer->classVal());
 
 	    valStr = Commanate(value - minExp);
 	    maxStr = Commanate(value - max);
@@ -339,14 +339,14 @@ void EQStatList::updateStat(uint8_t stat)
 }
 
 
-StatListWindow::StatListWindow(EQPlayer* player, 
+StatListWindow::StatListWindow(Player* player, 
 				 QWidget* parent, const char* name)
   : SEQWindow("StatList", "ShowEQ - Stats", parent, name)
 {
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setAutoAdd(true);
   
-  m_statList = new EQStatList(player, this, name);
+  m_statList = new StatList(player, this, name);
 }
 
 StatListWindow::~StatListWindow()

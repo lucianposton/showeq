@@ -21,18 +21,15 @@
 const int maxSpawnLevel = 100;
 
 //----------------------------------------------------------------------
-// EQPlayer
-class EQPlayer : public QObject, public Spawn
+// Player
+class Player : public QObject, public Spawn
 {
   Q_OBJECT 
 public:
-  EQPlayer (QObject* parent,
-	    ZoneMgr* zoneMgr,
-	    const char* name = "player",
-	    int level = 0, 
-	    uint16_t race = 1, 
-	    int class_ = 1, 
-	    int deity = DEITY_AGNOSTIC);
+  Player (QObject* parent,
+	  ZoneMgr* zoneMgr,
+	  const char* name = "player");
+  virtual ~Player();
 
  public slots:
    void backfill(const charProfileStruct* player); 
@@ -52,8 +49,6 @@ public:
    void playerUpdate(const playerPosStruct* pupdate, uint32_t, uint8_t);
    void consMessage(const considerStruct * con, uint32_t, uint8_t dir);
 
-   void setPlayerName(const QString& playerName);
-   void setPlayerLastName(const QString& playerLastName);
    void setPlayerID(uint16_t playerID);
    void checkDefaults(void) { setDefaults(); } // Update our default values
    void setUseDefaults (bool bdefaults) { m_useDefaults = bdefaults; }
@@ -61,29 +56,13 @@ public:
    void restorePlayerState(void);
 
  public:
+   virtual QString name() const;
+   virtual QString lastName() const;
+   virtual uint8_t level() const;
+   virtual uint16_t deity() const;
    virtual uint16_t race() const;
    virtual uint8_t classVal() const;
    
-   // old player stuff
-   QString getPlayerName(void) const 
-     { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ?
-	       m_defaultName : m_playerName);}
-   QString getPlayerLastName(void) const 
-     { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
-	       m_defaultLastName : m_playerLastName);}
-   uint8_t getPlayerLevel(void) const 
-     { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
-	       m_defaultLevel : m_level);}
-   uint16_t getPlayerRace(void) const 
-     { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
-	       m_defaultRace : m_race);}
-   uint8_t getPlayerClass(void) const 
-     { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
-	       m_defaultClass : m_class);}
-   uint16_t getPlayerDeity(void) const 
-     { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
-	       m_defaultDeity : m_deity);}
-
    // ZBTEMP: compatibility code
    uint16_t getPlayerID() const { return id(); }
    int16_t headingDegrees() const { return m_headingDegrees; }
@@ -163,9 +142,10 @@ public:
                                );
   void hpChanged(uint16_t, uint16_t);
   void changedID(uint16_t playerID);
-  void posChanged(int16_t xPos, int16_t yPos, int16_t zPos,
+  void posChanged(int16_t x, int16_t y, int16_t z,
 		  int16_t deltaX, int16_t deltaY, int16_t deltaZ,
 		  int32_t heading);
+  void changeItem(const Item* item, uint32_t changeType);
   void headingChanged(int32_t heading);
   void levelChanged(uint8_t level);
 
@@ -180,15 +160,11 @@ public:
    // We keep a second copy in case the player levels while playing.
    QString m_defaultName;
    QString m_defaultLastName;
-   int m_defaultLevel;
-   uint16_t m_defaultRace;
-   uint8_t m_defaultClass;
-   uint16_t m_defaultDeity;
-   // The actual values are set by info from EQPacket.
-   QString m_playerName;
-   QString m_playerLastName;
-   
    uint16_t m_mana;
+   uint16_t m_defaultRace;
+   uint16_t m_defaultDeity;
+   uint8_t m_defaultClass;
+   uint8_t m_defaultLevel;
    uint8_t m_playerSkills [MAX_KNOWN_SKILLS];
    uint8_t m_playerLanguages [MAX_KNOWN_LANGS];
 
@@ -241,7 +217,7 @@ public:
 };
 
 inline
-const QColor& EQPlayer::pickConColor(int otherSpawnLevel) const
+const QColor& Player::pickConColor(int otherSpawnLevel) const
 {
   return m_conTable[otherSpawnLevel];
 }

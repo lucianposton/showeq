@@ -22,9 +22,9 @@
 
 #include <qstring.h>
 #include <qcolor.h>
-#include <qdict.h>
+#include <qlist.h>
 
-// stuff needed for CFilterDlg
+// stuff needed for CategoryDlg
 #include <qdialog.h>
 #include <qlineedit.h>
 #include <qcombobox.h>
@@ -39,7 +39,7 @@
 class FilterItem;
 class Category;
 class CategoryMgr;
-class CFilterDlg;
+class CategoryDlg;
 
 // ------------------------------------------------------
 // Category
@@ -70,12 +70,13 @@ class Category
 };
 
 // ------------------------------------------------------
-// CFilterDlg
-class CFilterDlg : public QDialog
+// CategoryDlg
+class CategoryDlg : public QDialog
 {
   Q_OBJECT
  public:
-  CFilterDlg(QWidget *parent, QString name);
+  CategoryDlg(QWidget *parent, QString name);
+  virtual ~CategoryDlg();
 
  public slots:
   void select_color(void);
@@ -87,9 +88,9 @@ class CFilterDlg : public QDialog
   QButton* m_Color;
 };
 
-typedef QDict<Category> CategoryDict;
-typedef QDictIterator<Category> CategoryDictIterator;
-typedef QDictIterator<const Category> CategoryDictConstIterator;
+typedef QList<Category> CategoryList;
+typedef QListIterator<Category> CategoryListIterator;
+typedef QListIterator<const Category> CategoryListConstIterator;
 
 // ------------------------------------------------------
 // CategoryMgr
@@ -102,16 +103,16 @@ class CategoryMgr : public QObject
    CategoryMgr(QObject* parent = 0, const char* name = 0);
    virtual ~CategoryMgr();
 
-   const CategoryDict findCategories(const QString& filterString, int level) const;
-   const CategoryDict& getCategories(void) const 
+   const CategoryList findCategories(const QString& filterString, int level) const;
+   const CategoryList& getCategories(void) const 
      { return m_categories; }
    uint count() { return m_categories.count(); }
 
-   const Category* AddCategory(const QString& name, 
+   const Category* addCategory(const QString& name, 
 			       const QString& filter, 
 			       const QString& filterout, 
 			       QColor color = Qt::black);
-   void RemCategory(const Category* cat);
+   void remCategory(const Category* cat);
 
  public slots:
    void clearCategories(void);
@@ -127,7 +128,7 @@ class CategoryMgr : public QObject
    void loadedCategories(void);
 
  private:
-   CategoryDict m_categories;
+   CategoryList m_categories;
    bool m_changed;
 };
 

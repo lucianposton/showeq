@@ -11,7 +11,6 @@
 #include <sys/time.h>
 
 #include <qcolor.h>
-#include <qregexp.h> 
 #include <qfileinfo.h>
 #include <qdir.h>
 
@@ -667,72 +666,6 @@ QString reformatMoney (unsigned int uiCopper)
     qsMoney.sprintf("%s%s%d Copper", qsMoney.ascii(), bNeedComma ? ", " : "", uiCopper);
 
   return ( qsMoney );
-}
-
-QFont stringToFont(const QString& fontDescription)
-{
-  QFont defFont;
-
-  // start out with default settings in case the string is empty or bogus
-  QString family = defFont.family();
-  int pointSize = defFont.pointSize();
-  int weight = defFont.weight();
-  bool italic = defFont.italic();
-
-  int index = 0;
-  int oldIndex = 0;
-  bool ok;
-  int tmpInt;
-
-  index = fontDescription.find(';', oldIndex);
-  if (index != -1)
-  {
-    family = fontDescription.left(index);
-
-    oldIndex = index + 1;
-    index = fontDescription.find(';', oldIndex);
-    if (index != -1)
-    {
-      tmpInt = fontDescription.mid(oldIndex, index - oldIndex).toInt(&ok);
-
-      if (ok)
-	pointSize = tmpInt;
-
-      oldIndex = index + 1;
-      index = fontDescription.find(';', oldIndex);
-      if (index != -1)
-      {
-	tmpInt = fontDescription.mid(oldIndex, index - oldIndex).toInt(&ok);
-	
-	if (ok)
-	  weight = tmpInt;
-	
-	oldIndex = index + 1;
-	index = fontDescription.find(';', oldIndex);
-	if (index != -1)
-	{
-	  tmpInt = fontDescription.mid(oldIndex, index - oldIndex).toInt(&ok);
-	  
-	  if (ok)
-	    italic = (tmpInt != 0);
-	}
-      }
-    }
-  }
-  else if (!fontDescription.isEmpty()) // if it's not empty, it's just a font
-    family = fontDescription;
-    
-  // construct and return a font using the parameters
-  return QFont(family, pointSize, weight, italic);
-}
-
-QString fontToString(const QFont& font)
-{
-  // construct a string suitable for parsing with stringToFont()
-  return font.family()
-    + ";" + QString::number(font.pointSize())
-    + ";" + QString::number(font.weight())
-    + ";" + QString::number(font.italic());
 }
 
 // prints up the passed in data to the file pointer

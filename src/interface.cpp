@@ -35,6 +35,7 @@
 #include "netdiag.h"
 #include "spawnmonitor.h"
 #include "spawnpointlist.h"
+#include "spawnlist2.h"
 #include "logger.h"
 #include "category.h"
 #include "itemdb.h"
@@ -103,7 +104,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_zoneMgr = new ZoneMgr(m_packet, this, "zonemgr");
 
    // Create our player object
-   m_player = new EQPlayer(this, m_zoneMgr);
+   m_player = new Player(this, m_zoneMgr);
 
    // Create the filter manager
    m_filterMgr = new FilterMgr();
@@ -247,8 +248,16 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    //
    m_spawnList = NULL;
    m_isSpawnListDocked = pSEQPrefs->getPrefBool("DockedSpawnList", section, true);
-   if (pSEQPrefs->getPrefBool("ShowSpawnList", section, true))
+   if (pSEQPrefs->getPrefBool("ShowSpawnList", section, false))
      showSpawnList();
+
+   //
+   // Create the Spawn List2 listview (always exists, just hidden if not specified)
+   //
+   m_spawnList2 = NULL;
+   m_isSpawnList2Docked = pSEQPrefs->getPrefBool("DockedSpawnList2", section, true);
+   if (pSEQPrefs->getPrefBool("ShowSpawnList2", section, true))
+     showSpawnList2();
 
    //
    // Create the Spawn List listview (always exists, just hidden if not specified)
@@ -301,6 +310,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    pViewMenu->insertSeparator(-1);
    m_id_view_SpellList = pViewMenu->insertItem("Spell List", this, SLOT(toggle_view_SpellList()));
    m_id_view_SpawnList = pViewMenu->insertItem("Spawn List", this, SLOT(toggle_view_SpawnList()));
+   m_id_view_SpawnList2 = pViewMenu->insertItem("Spawn List 2", this, SLOT(toggle_view_SpawnList2()));
    m_id_view_SpawnPointList = pViewMenu->insertItem("Spawn Point List", this, SLOT(toggle_view_SpawnPointList()));
    m_id_view_PlayerStats = pViewMenu->insertItem("Player Stats", this, SLOT(toggle_view_PlayerStats()));
    m_id_view_PlayerSkills = pViewMenu->insertItem("Player Skills", this,SLOT(toggle_view_PlayerSkills()));
@@ -415,44 +425,44 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
     pViewMenu->setItemEnabled(m_id_view_SpawnList_Options, (m_spawnList != NULL));
     m_spawnListMenu->setCheckable(TRUE);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_NAME] = m_spawnListMenu->insertItem("&Name");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_NAME], SPAWNCOL_NAME);
+    m_id_view_SpawnList_Cols[tSpawnColName] = m_spawnListMenu->insertItem("&Name");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColName], tSpawnColName);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_LEVEL] = m_spawnListMenu->insertItem("&Level");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_LEVEL], SPAWNCOL_LEVEL);
+    m_id_view_SpawnList_Cols[tSpawnColLevel] = m_spawnListMenu->insertItem("&Level");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColLevel], tSpawnColLevel);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_HP] = m_spawnListMenu->insertItem("&HP");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_HP], SPAWNCOL_HP);
+    m_id_view_SpawnList_Cols[tSpawnColHP] = m_spawnListMenu->insertItem("&HP");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColHP], tSpawnColHP);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_MAXHP] = m_spawnListMenu->insertItem("&Max HP");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_MAXHP], SPAWNCOL_MAXHP);
+    m_id_view_SpawnList_Cols[tSpawnColMaxHP] = m_spawnListMenu->insertItem("&Max HP");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColMaxHP], tSpawnColMaxHP);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_XPOS] = m_spawnListMenu->insertItem("Coord &1");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_XPOS], SPAWNCOL_XPOS);
+    m_id_view_SpawnList_Cols[tSpawnColXPos] = m_spawnListMenu->insertItem("Coord &1");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColXPos], tSpawnColXPos);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_YPOS] = m_spawnListMenu->insertItem("Coord &2");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_YPOS], SPAWNCOL_YPOS);
+    m_id_view_SpawnList_Cols[tSpawnColYPos] = m_spawnListMenu->insertItem("Coord &2");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColYPos], tSpawnColYPos);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_ZPOS] = m_spawnListMenu->insertItem("Coord &3");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_ZPOS], SPAWNCOL_ZPOS);
+    m_id_view_SpawnList_Cols[tSpawnColZPos] = m_spawnListMenu->insertItem("Coord &3");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColZPos], tSpawnColZPos);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_ID] = m_spawnListMenu->insertItem("I&D");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_ID], SPAWNCOL_ID);
+    m_id_view_SpawnList_Cols[tSpawnColID] = m_spawnListMenu->insertItem("I&D");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColID], tSpawnColID);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_DIST] = m_spawnListMenu->insertItem("&Dist");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_DIST], SPAWNCOL_DIST);
+    m_id_view_SpawnList_Cols[tSpawnColDist] = m_spawnListMenu->insertItem("&Dist");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColDist], tSpawnColDist);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_RACE] = m_spawnListMenu->insertItem("&Race");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_RACE], SPAWNCOL_RACE);
+    m_id_view_SpawnList_Cols[tSpawnColRace] = m_spawnListMenu->insertItem("&Race");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColRace], tSpawnColRace);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_CLASS] = m_spawnListMenu->insertItem("&Class");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_CLASS], SPAWNCOL_CLASS);
+    m_id_view_SpawnList_Cols[tSpawnColClass] = m_spawnListMenu->insertItem("&Class");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColClass], tSpawnColClass);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_INFO] = m_spawnListMenu->insertItem("&Info");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_INFO], SPAWNCOL_INFO);
+    m_id_view_SpawnList_Cols[tSpawnColInfo] = m_spawnListMenu->insertItem("&Info");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColInfo], tSpawnColInfo);
 
-    m_id_view_SpawnList_Cols[SPAWNCOL_SPAWNTIME] = m_spawnListMenu->insertItem("Spawn &Time");
-    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_SPAWNTIME], SPAWNCOL_SPAWNTIME);
+    m_id_view_SpawnList_Cols[tSpawnColSpawnTime] = m_spawnListMenu->insertItem("Spawn &Time");
+    m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[tSpawnColSpawnTime], tSpawnColSpawnTime);
 
     connect (m_spawnListMenu, SIGNAL(activated(int)), 
 	     this, SLOT(toggle_view_SpawnListCol(int)));
@@ -467,6 +477,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
     
    x = m_dockedWinMenu->insertItem("Spawn &List");
    m_dockedWinMenu->setItemParameter(x, 0);
+   m_dockedWinMenu->setItemChecked(x, m_isSpawnListDocked);
+
+   x = m_dockedWinMenu->insertItem("Spawn &List 2");
+   m_dockedWinMenu->setItemParameter(x, 6);
    m_dockedWinMenu->setItemChecked(x, m_isSpawnListDocked);
     
    x = m_dockedWinMenu->insertItem("Spawn P&oint List");
@@ -795,6 +809,12 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    x = m_windowCaptionMenu->insertItem("Spawn &List...");
    m_windowCaptionMenu->setItemParameter(x, 0);
     
+   x = m_windowCaptionMenu->insertItem("Spawn List &2...");
+   m_windowCaptionMenu->setItemParameter(x, 10);
+    
+   x = m_windowCaptionMenu->insertItem("Spawn P&oint List...");
+   m_windowCaptionMenu->setItemParameter(x, 9);
+    
    x = m_windowCaptionMenu->insertItem("&Player Stats...");
    m_windowCaptionMenu->setItemParameter(x, 1);
     
@@ -844,6 +864,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
     
    x = windowFontMenu->insertItem("Spawn &List...");
    windowFontMenu->setItemParameter(x, 0);
+    
+   x = windowFontMenu->insertItem("Spawn List &2...");
+   windowFontMenu->setItemParameter(x, 10);
     
    x = windowFontMenu->insertItem("Spawn P&oint List...");
    windowFontMenu->setItemParameter(x, 9);
@@ -1214,7 +1237,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *, uint32_t, uint8_t)),
 	   m_spellShell, SLOT(interruptSpellCast(const badCastStruct *)));
 
-   // connect EQPlayer slots to EQPacket signals
+   // connect Player slots to EQPacket signals
    connect(m_packet, SIGNAL(backfillPlayer(const charProfileStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(backfill(const charProfileStruct*)));
    connect(m_packet, SIGNAL(increaseSkill(const skillIncStruct*, uint32_t, uint8_t)),
@@ -1270,7 +1293,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    connect (m_packet, SIGNAL(resetPacket(int)),
             this, SLOT(resetPacket(int)));
    
-   // connect ExperienceWindow slots to EQPlayer signals
+   // connect ExperienceWindow slots to Player signals
    connect (m_player, SIGNAL(expGained(const QString &, int, long, QString )),
 	    m_expWindow, SLOT(addExpRecord(const QString &, int, long,QString )));
 
@@ -1774,7 +1797,7 @@ void EQInterface::toggle_view_DockedWin( int id )
     // preference
     preference = "DockedCompass";
     break;
-  case 5: // Spawn List
+  case 5: // Spawn Point List
     // new parent is none, or the vertical splitter
     newParent = checked ? NULL : m_splitV;
 
@@ -1786,6 +1809,19 @@ void EQInterface::toggle_view_DockedWin( int id )
 
     // preference
     preference = "DockedSpawnPointList";
+    break;
+  case 6: // Spawn List 2
+    // new parent is none, or the vertical splitter
+    newParent = checked ? NULL : m_splitV;
+
+    // note the new setting
+    m_isSpawnList2Docked = !checked;
+
+    // reparent the Spawn List
+    widget = m_spawnList2;
+
+    // preference
+    preference = "DockedSpawnList2";
     break;
   default:
     // use default for maps since the number of them can be changed via a 
@@ -1894,6 +1930,11 @@ void EQInterface::set_interface_WindowCaption( int id )
     widget = m_spawnPointList;
 
     window = "Spawn Point List";
+  case 10: // Spawn List
+    widget = m_spawnList2;
+
+    window = "Spawn List 2";
+    break;
   default:
     // use default for maps since the number of them can be changed via a 
     // constant (maxNumMaps)
@@ -1988,6 +2029,11 @@ void EQInterface::set_interface_WindowFont( int id )
     title = "Spawn Point List";
 
     window = m_spawnPointList;
+  case 10: // Spawn List
+    title = "Spawn List 2";
+    
+    window = m_spawnList2;
+    break;
   default:
     // use default for maps since the number of them can be changed via a 
     // constant (maxNumMaps)
@@ -2687,7 +2733,6 @@ void EQInterface::toggle_view_CombatWindow (void)
 			 m_combatWindow->isVisible());
 }
 
-
 void
 EQInterface::toggle_view_SpawnList(void)
 {
@@ -2719,6 +2764,31 @@ EQInterface::toggle_view_SpawnList(void)
   }
 
   pSEQPrefs->setPrefBool("ShowSpawnList", "Interface", !wasVisible);
+}
+
+void
+EQInterface::toggle_view_SpawnList2(void)
+{
+  bool wasVisible = ((m_spawnList2 != NULL) && m_spawnList2->isVisible());
+
+  if (!wasVisible)
+    showSpawnList2();
+  else 
+  {
+    // save it's preferences
+    m_spawnList2->savePrefs();
+
+    // hide it
+    m_spawnList2->hide();
+
+    // delete the window
+    delete m_spawnList2;
+
+    // make sure to clear it's variable
+    m_spawnList2 = NULL;
+  }
+
+  pSEQPrefs->setPrefBool("ShowSpawnList2", "Interface", !wasVisible);
 }
 
 void
@@ -3759,7 +3829,7 @@ void EQInterface::beginCast(const beginCastStruct *bcast)
   
   tempStr = "";
 
-  if (bcast->spawnId == m_player->getPlayerID())
+  if (bcast->spawnId == m_player->id())
     tempStr = "You begin casting '";
   else
   {
@@ -4050,7 +4120,7 @@ void EQInterface::addItem(const Item* item)
     printf ("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
     printf ("LocateSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s",
 	    (const char*)item->name(), 
-	    item->yPos(), item->xPos(), item->displayZPos(),
+	    item->y(), item->x(), item->displayZPos(),
 	    (const char*)item->spawnTimeStr());
     printf ("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n\n");
     
@@ -4075,7 +4145,7 @@ void EQInterface::addItem(const Item* item)
   {
     printf ("CautionSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s\n", 
 	    (const char*)item->name(), 
-	    item->yPos(), item->xPos(), item->displayZPos(),
+	    item->y(), item->x(), item->displayZPos(),
 	    (const char*)item->spawnTimeStr());
     
     if (showeq_params->spawnfilter_logcautions)
@@ -4091,7 +4161,7 @@ void EQInterface::addItem(const Item* item)
   {
     printf ("HuntSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s\n", 
 	    (const char*)item->name(), 
-	    item->yPos(), item->xPos(), item->displayZPos(),
+	    item->y(), item->x(), item->displayZPos(),
 	    (const char*)item->spawnTimeStr());
     
     if (showeq_params->spawnfilter_loghunts)
@@ -4107,7 +4177,7 @@ void EQInterface::addItem(const Item* item)
   {
     printf ("DangerSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s", 
 	    (const char*)item->name(), 
-	    item->yPos(), item->xPos(), item->displayZPos(),
+	    item->y(), item->x(), item->displayZPos(),
 	    (const char*)item->spawnTimeStr());
     
     if (showeq_params->spawnfilter_logdangers)
@@ -4137,9 +4207,9 @@ void EQInterface::killSpawn(const Item* item)
   if (item == NULL)
     return;
 
-  if (item->id() == m_player->getPlayerID())
-    printf("Player died at y:%d, x:%d, z:%d\n", item->yPos(), item->xPos(),
-      item->zPos());
+  if (item->id() == m_player->id())
+    printf("Player died at y:%d, x:%d, z:%d\n", item->y(), item->x(),
+      item->z());
 
   if (m_selectedSpawn != item)
     return;
@@ -4207,13 +4277,13 @@ void EQInterface::handleAlert(const Item* item,
 	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%5.1f) LVL %d, HP %d/%d", 
 		     1900 + tp->tm_year, tp->tm_mon, tp->tm_mday,
 		     tp->tm_hour, tp->tm_min, tp->tm_sec,
-		     item->xPos(), item->yPos(), item->displayZPos(),
+		     item->x(), item->y(), item->displayZPos(),
 		     spawn->level(), spawn->HP(), spawn->maxHP());
       else
 	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%5.1f)", 
 		     1900 + tp->tm_year, tp->tm_mon, tp->tm_mday,
 		     tp->tm_hour, tp->tm_min, tp->tm_sec,
-		     item->xPos(), item->yPos(), item->displayZPos());
+		     item->x(), item->y(), item->displayZPos());
     }
     else
       temp.sprintf(" [%d-%d-%d %d:%d:%d]", 
@@ -4314,7 +4384,7 @@ void EQInterface::logFilteredSpawn(const Item* item, uint32_t flag)
     fprintf (rar, "%s %s spawned LOC %dy, %dx, %dz at %s", 
 	     (const char*)m_filterMgr->filterString(flag),
 	     (const char*)item->name(), 
-	     item->yPos(), item->xPos(), item->zPos(),
+	     item->y(), item->x(), item->z(),
 	     (const char*)item->spawnTimeStr());
     fclose(rar);
   }
@@ -4325,7 +4395,10 @@ void EQInterface::updateSelectedSpawnStatus(const Item* item)
   if (item == NULL)
     return;
 
-  const Spawn* spawn = spawnType(item);
+  const Spawn* spawn = NULL;
+
+  if ((item->type() == tSpawn) || (item->type() == tPlayer))
+    spawn = (const Spawn*)item;
 
   // construct a message for the status message display
   QString string("");
@@ -4341,12 +4414,12 @@ void EQInterface::updateSelectedSpawnStatus(const Item* item)
 		   (const char*)item->name());
 
   if (showeq_params->retarded_coords)
-    string += QString::number(item->yPos()) + "/" 
-      + QString::number(item->xPos()) + "/" 
+    string += QString::number(item->y()) + "/" 
+      + QString::number(item->x()) + "/" 
       + QString::number(item->displayZPos(), 'f', 1);
   else
-    string += QString::number(item->xPos()) + "/" 
-      + QString::number(item->yPos()) + "/" 
+    string += QString::number(item->x()) + "/" 
+      + QString::number(item->y()) + "/" 
       + QString::number(item->displayZPos(), 'f', 1);
 
   string += QString(" (") 
@@ -4375,6 +4448,9 @@ void EQInterface::rebuildSpawnList()
 {
   if (m_spawnList)
     m_spawnList->spawnList()->rebuildSpawnList();
+
+  if (m_spawnList2)
+    m_spawnList2->rebuildSpawnList();
 }
 
 void EQInterface::selectNext(void)
@@ -4557,6 +4633,9 @@ void EQInterface::init_view_menu()
   menuBar()->setItemChecked(m_id_view_SpawnList, 
 			    (m_spawnList != NULL) && 
 			    m_spawnList->isVisible());
+  menuBar()->setItemChecked(m_id_view_SpawnList2, 
+			    (m_spawnList2 != NULL) && 
+			    m_spawnList2->isVisible());
   menuBar()->setItemChecked(m_id_view_SpawnPointList, 
 			    (m_spawnPointList != NULL) &&
 			    m_spawnPointList->isVisible());
@@ -4588,17 +4667,17 @@ void EQInterface::init_view_menu()
    // set initial view options
   if (m_spawnList != NULL)
   {
-    CSpawnList* spawnList = m_spawnList->spawnList();
+    SEQListView* spawnList = m_spawnList->spawnList();
 
     // make sure the menu bar settings are correct
-    for (int i = 0; i < SPAWNCOL_MAXCOLS; i++)
+    for (int i = 0; i < tSpawnColMaxCols; i++)
       m_spawnListMenu->setItemChecked(m_id_view_SpawnList_Cols[i], 
 				      spawnList->columnVisible(i));
   }
 
   if (m_statList != NULL)
   {
-    EQStatList* statList = m_statList->statList();
+    StatList* statList = m_statList->statList();
     // make sure the menu items are checked
     for (int i = 0; i < LIST_MAXLIST; i++)
       m_statWinMenu->setItemChecked(m_id_view_PlayerStats_Stats[i], 
@@ -4858,10 +4937,10 @@ void EQInterface::showSpawnList(void)
   {
     if (m_isSpawnListDocked)
       m_spawnList = new SpawnListWindow (m_player, m_spawnShell, m_categoryMgr,
-				    m_splitV, "spawnlist");
+					 m_packet, m_splitV, "spawnlist");
     else
       m_spawnList = new SpawnListWindow(m_player, m_spawnShell, m_categoryMgr,
-				    NULL, "spawnlist");
+					m_packet, NULL, "spawnlist");
 
     // restore the size of the spawn list
     m_spawnList->restoreSize();
@@ -4887,6 +4966,46 @@ void EQInterface::showSpawnList(void)
 
   // make sure it's visible
   m_spawnList->show();
+}
+
+void EQInterface::showSpawnList2(void)
+{
+  // if it doesn't exist, create it.
+  if (m_spawnList2 == NULL)
+  {
+    if (m_isSpawnList2Docked)
+      m_spawnList2 = new SpawnListWindow2(m_player, m_spawnShell, 
+					  m_categoryMgr, m_packet, 
+					  m_splitV, "spawnlist");
+    else
+      m_spawnList2 = new SpawnListWindow2(m_player, m_spawnShell, 
+					  m_categoryMgr, m_packet, 
+					  NULL, "spawnlist");
+
+    // restore the size of the spawn list
+    m_spawnList2->restoreSize();
+
+    // only do this move stuff iff the spawn list isn't docked
+    // and the user set the option to do so.
+    if (!m_isSpawnList2Docked &&
+	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
+      m_spawnList2->restorePosition();
+
+     // connections from spawn list to interface
+     connect (m_spawnList2, SIGNAL(spawnSelected(const Item*)),
+	      this, SLOT(spawnSelected(const Item*)));
+
+     // connections from interface to spawn list
+     connect (this, SIGNAL(selectSpawn(const Item*)),
+	      m_spawnList2, SLOT(selectSpawn(const Item*)));
+     connect(this, SIGNAL(saveAllPrefs(void)),
+	     m_spawnList2, SLOT(savePrefs(void)));
+     connect(this, SIGNAL(restoreFonts(void)),
+	     m_spawnList2, SLOT(restoreFont(void)));
+  }
+
+  // make sure it's visible
+  m_spawnList2->show();
 }
 
 void EQInterface::showSpawnPointList(void)

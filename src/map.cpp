@@ -178,7 +178,7 @@ MapLabel::MapLabel( Map* map ): QLabel( 0, "mapLabel", WStyle_StaysOnTop +
 
 //----------------------------------------------------------------------
 // MapMgr
-MapMgr::MapMgr(SpawnShell* spawnShell, EQPlayer* player, ZoneMgr* zoneMgr,
+MapMgr::MapMgr(SpawnShell* spawnShell, Player* player, ZoneMgr* zoneMgr,
 	       QWidget* dialogParent, QObject* parent, const char* name)
   : QObject(parent, name),
     m_spawnShell(spawnShell),
@@ -329,21 +329,19 @@ void MapMgr::loadFileMap (const QString& fileName)
   m_mapData.loadMap(fileName);
 
   const ItemMap& itemMap = m_spawnShell->spawns();
-  ItemConstIterator it;
+  ItemConstIterator it(itemMap);
   const Item* item;
   uint16_t range;
 
   // iterate over the exixsting spawns to adjust the map size and find 
   // ones with aggro information
-  for (it = itemMap.begin();
-       it != itemMap.end(); 
-       ++it)
+  for (; it.current(); ++it)
   {
     // get the item from the list
-    item = it->second;
+    item = it.current();
 
     // Adjust X and Y for spawns on map
-    m_mapData.quickCheckPos(item->xPos(), item->yPos());
+    m_mapData.quickCheckPos(item->x(), item->y());
     
     if (m_mapData.isAggro(item->transformedName(), &range))
     {
@@ -381,7 +379,7 @@ void MapMgr::addItem(const Item* item)
     return;
 
   // make sure it fits on the map display
-  m_mapData.checkPos(item->xPos(), item->yPos());
+  m_mapData.checkPos(item->x(), item->y());
 
   uint16_t range;
   if (m_mapData.isAggro(item->transformedName(), &range))
@@ -419,7 +417,7 @@ void MapMgr::killSpawn(const Item* item)
     return;
 
   // make sure it fits on the map display
-  m_mapData.checkPos(item->xPos(), item->yPos());
+  m_mapData.checkPos(item->x(), item->y());
 
   // based on the principle of the dead can't aggro, let's remove it from
   // the spawn aggro dictionary (the undead are another matter... ;-)
@@ -438,7 +436,7 @@ void MapMgr::changeItem(const Item* item, uint32_t changeType)
   if (changeType & tSpawnChangedPosition)
   {
     // make sure it fits on the map display
-    if ( m_mapData.checkPos(item->xPos(), item->yPos()))
+    if ( m_mapData.checkPos(item->x(), item->y()))
       emit mapUpdated(); // signal if the map size has changed
   }
 }
@@ -654,7 +652,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_spawns = subMenu->insertItem("Spawns", this, SLOT(toggle_spawns(int)));
   m_id_unknownSpawns = subMenu->insertItem("Unknown Spawns", 
 					   this, SLOT(toggle_unknownSpawns(int)));
-  m_id_spawnPoints = subMenu->insertItem("Spawn Points", this, SLOT(toggle_spawnPoints(int)));
+  m_id_spawnPoints = subMenu->insertItem("Spawn Points", this, SLOT( toggle_spawnPoints(int) ));
   m_id_drops = subMenu->insertItem("Drops", this, SLOT(toggle_drops(int)));
   m_id_coins = subMenu->insertItem("Coins", this, SLOT(toggle_coins(int)));
   m_id_doors = subMenu->insertItem("Doors", this, SLOT(toggle_doors(int)));
@@ -1123,7 +1121,7 @@ void MapMenu::select_fovMode(int itemId)
 //----------------------------------------------------------------------
 // Map
 Map::Map(MapMgr* mapMgr, 
-	 EQPlayer* player, 
+	 Player* player, 
 	 SpawnShell* spawnshell, 
 	 ZoneMgr* zoneMgr,
 	 SpawnMonitor* spawnMonitor,
@@ -1408,7 +1406,7 @@ Map::Map(MapMgr* mapMgr,
   connect (m_spawnShell, SIGNAL(changeItem(const Item*, uint32_t)),
 	   this, SLOT(changeItem(const Item*, uint32_t)));
 
-    m_timer->start(1000/m_frameRate, false);
+  m_timer->start(1000/m_frameRate, false);
 
 #ifdef DEBUG  
   if (m_showDebugInfo)
@@ -1513,9 +1511,22 @@ void Map::mousePressEvent(QMouseEvent* me)
   else 
   {
     const Item* closestSpawn;
+    uint32_t dist = 15;
     // find the nearest spawn within a reasonable range
-    closestSpawn = closestSpawnToPoint(me->pos(), 15);
-    
+    closestSpawn = closestSpawnToPoint(me->pos(), dist);
+
+    // check for closest spawn point
+    const SpawnPoint* closestSP = closestSpawnPointToPoint(me->pos(), dist);
+
+    // only get a spawn point if the user clicked closer to it then a
+    // the closest spawn
+    if (closestSP != NULL)
+    {
+      m_spawnMonitor->setSelected(closestSP);
+
+      return;
+    }
+
     // make sure the user actually clicked vaguely near a spawn
     if (closestSpawn != NULL)
     {
@@ -1540,7 +1551,7 @@ void Map::zoomIn()
 #ifdef DEBUGMAP
    debug("Map::zoomIn()");
 #endif /* DEBUGMAP */
-   if (m_player->getPlayerID() != 1)
+   if (m_player->id() != 1)
    {
      if (m_param.zoomIn())
      {
@@ -1561,7 +1572,7 @@ void Map::zoomOut()
    debug("Map::zoomOut()");
 #endif /* DEBUGMAP */
 
-   if (m_player->getPlayerID() != 1)
+   if (m_player->id() != 1)
    {
      if (m_param.zoomOut())
      {
@@ -1780,7 +1791,7 @@ void Map::viewLock()
        }
        else
 	 location.setPoint(*m_selectedItem);
-       m_param.setPan(location.xPos(), location.yPos());
+       m_param.setPan(location.x(), location.y());
        emit panXChanged(m_param.panOffsetX());
        emit panYChanged(m_param.panOffsetY());
      }
@@ -1805,7 +1816,7 @@ void Map::viewLock()
 				   targetPoint);
        
        // set the current pan to it's position to avoid jarring the user
-       m_param.setPan(targetPoint.xPos(), targetPoint.yPos());
+       m_param.setPan(targetPoint.x(), targetPoint.y());
        emit panXChanged(m_param.panOffsetX());
        emit panYChanged(m_param.panOffsetY());
      }
@@ -1854,7 +1865,7 @@ void Map::setFollowMode(FollowMode mode)
 				   targetPoint);
        
        // set the current pan to it's position to avoid jarring the user
-       m_param.setPan(targetPoint.xPos(), targetPoint.yPos());
+       m_param.setPan(targetPoint.x(), targetPoint.y());
     }
     else if (m_followMode == tFollowSpawn)
     {
@@ -1871,7 +1882,7 @@ void Map::setFollowMode(FollowMode mode)
 	 }
 	 else
 	   location.setPoint(*m_selectedItem);
-	 m_param.setPan(location.xPos(), location.yPos());
+	 m_param.setPan(location.x(), location.y());
        }
        else
 	 m_param.clearPan();
@@ -2501,7 +2512,6 @@ void Map::dumpInfo(QTextStream& out)
   out << "ShowGridLines: " << m_param.showGridLines() << endl;
   out << "ShowGridTicks: " << m_param.showGridTicks() << endl;
   out << "ShowBackgroundImage: " << m_param.showBackgroundImage() << endl;
-  out << "Font: " << fontToString(m_param.font()) << endl;
   out << "GridResolution: " << m_param.gridResolution() << endl; 
   out << "GridTickColor: " << m_param.gridTickColor().name() << endl;
   out << "GridLineColor: " << m_param.gridLineColor().name() << endl;
@@ -2772,7 +2782,7 @@ void Map::paintMap (QPainter * p)
   if ((m_param.zoom() > 1) &&
       ((m_followMode == tFollowPlayer) &&
        (!inRect(m_param.screenBounds(), 
-		playerPos.xPos(), playerPos.yPos()))))
+		playerPos.x(), playerPos.y()))))
     reAdjust();
 
   // if following a spawn, and there is a spawn, make sure it's visible.
@@ -2787,7 +2797,7 @@ void Map::paintMap (QPainter * p)
 							drawTime, 
 							location);
     
-    if (!inRect(m_param.screenBounds(), playerPos.xPos(), playerPos.yPos()))
+    if (!inRect(m_param.screenBounds(), playerPos.x(), playerPos.y()))
       reAdjust();
   }
 
@@ -2803,6 +2813,18 @@ void Map::paintMap (QPainter * p)
   tmp.begin (&m_offscreen);
   tmp.setPen (NoPen);
   tmp.setFont (m_param.font());
+
+  // determine the flash state
+  if ((m_lastFlash.msecsTo(drawTime)) > 100)  // miliseconds between flashing
+  {
+    // invert flash value
+    m_flash = !m_flash;
+
+    // reset last flash time, only real diff between start() and restart() is 
+    // that restart returns the elapsed time since start() was called, 
+    // which we don't need
+    m_lastFlash.start(); 
+  }
 
   if ((!m_zoneMgr->isZoning()) && 
       (m_player->id() != 0))
@@ -2958,7 +2980,7 @@ void Map::paintDrops(MapParameters& param,
   printf("Paint the dropped items\n");
 #endif
   const ItemMap& itemMap = m_spawnShell->drops();
-  ItemConstIterator it;
+  ItemConstIterator it(itemMap);
   const Item* item;
   const QRect& screenBounds = m_param.screenBounds();
   int ixlOffset;
@@ -2968,22 +2990,20 @@ void Map::paintDrops(MapParameters& param,
   p.setPen(yellow);
 
   /* Paint the dropped items */
-  for (it = itemMap.begin();
-       it != itemMap.end(); 
-       ++it)
+  for (; it.current(); ++it)
   {
     // get the item from the list
-    item = it->second;
+    item = it.current();
 
     // make sure coin is within bounds
-    if (!inRect(screenBounds, item->xPos(), item->yPos()) ||
+    if (!inRect(screenBounds, item->x(), item->y()) ||
 	(m_spawnDepthFilter &&
-	 ((item->zPos() > m_param.playerHeadRoom()) ||
-	  (item->zPos() < m_param.playerFloorRoom()))))
+	 ((item->z() > m_param.playerHeadRoom()) ||
+	  (item->z() < m_param.playerFloorRoom()))))
       continue;
 
-    ixlOffset = param.calcXOffsetI(item->xPos());
-    iylOffset = param.calcYOffsetI(item->yPos());
+    ixlOffset = param.calcXOffsetI(item->x());
+    iylOffset = param.calcYOffsetI(item->y());
 
     //fixed size:
     p.drawLine(ixlOffset - m_drawSize,
@@ -3004,7 +3024,7 @@ void Map::paintCoins(MapParameters& param,
   printf("Paint the coin items\n");
 #endif
   const ItemMap& itemMap = m_spawnShell->coins();
-  ItemConstIterator it;
+  ItemConstIterator it(itemMap);
   const Item* item;
   const QRect& screenBounds = m_param.screenBounds();
   int ixlOffset;
@@ -3014,22 +3034,20 @@ void Map::paintCoins(MapParameters& param,
   p.setPen(magenta);
 
   /* Paint the coin items */
-  for (it = itemMap.begin();
-       it != itemMap.end(); 
-       ++it)
+  for (; it.current(); ++it)
   {
     // get the item from the list
-    item = it->second;
+    item = it.current();
 
     // make sure coin is within bounds
-    if (!inRect(screenBounds, item->xPos(), item->yPos()) ||
+    if (!inRect(screenBounds, item->x(), item->y()) ||
 	(m_spawnDepthFilter &&
-	 ((item->zPos() > m_param.playerHeadRoom()) ||
-	  (item->zPos() < m_param.playerFloorRoom()))))
+	 ((item->z() > m_param.playerHeadRoom()) ||
+	  (item->z() < m_param.playerFloorRoom()))))
       continue;
 
-    ixlOffset = param.calcXOffsetI(item->xPos());
-    iylOffset = param.calcYOffsetI(item->yPos());
+    ixlOffset = param.calcXOffsetI(item->x());
+    iylOffset = param.calcYOffsetI(item->y());
 
     //fixed size:
     p.drawLine(ixlOffset - m_drawSize,
@@ -3050,7 +3068,7 @@ void Map::paintDoors(MapParameters& param,
   printf("Paint the door items\n");
 #endif
   const ItemMap& itemMap = m_spawnShell->doors();
-  ItemConstIterator it;
+  ItemConstIterator it(itemMap);
   const Item* item;
   const QRect& screenBounds = m_param.screenBounds();
   int ixlOffset;
@@ -3060,22 +3078,20 @@ void Map::paintDoors(MapParameters& param,
   p.setPen(QColor (110, 60, 0));
 
   /* Paint the coin items */
-  for (it = itemMap.begin();
-       it != itemMap.end(); 
-       ++it)
+  for (; it.current(); ++it)
   {
     // get the item from the list
-    item = it->second;
+    item = it.current();
 
     // make sure doors are within bounds
-    if (!inRect(screenBounds, item->xPos(), item->yPos()) ||
+    if (!inRect(screenBounds, item->x(), item->y()) ||
 	(m_spawnDepthFilter &&
-	 ((item->zPos() > m_param.playerHeadRoom()) ||
-	  (item->zPos() < m_param.playerFloorRoom()))))
+	 ((item->z() > m_param.playerHeadRoom()) ||
+	  (item->z() < m_param.playerFloorRoom()))))
       continue;
 
-    ixlOffset = param.calcXOffsetI(item->xPos());
-    iylOffset = param.calcYOffsetI(item->yPos());
+    ixlOffset = param.calcXOffsetI(item->x());
+    iylOffset = param.calcYOffsetI(item->y());
 
     p.drawRect(ixlOffset,iylOffset, m_drawSize, m_drawSize);
   }
@@ -3089,7 +3105,7 @@ void Map::paintSpawns(MapParameters& param,
   printf("Paint the spawns\n");
 #endif
   const ItemMap& itemMap = m_spawnShell->spawns();
-  ItemConstIterator it;
+  ItemConstIterator it(itemMap);
   const Item* item;
   QPointArray  atri(3);
   uint32_t distance = UINT32_MAX;
@@ -3098,7 +3114,7 @@ void Map::paintSpawns(MapParameters& param,
   EQPoint spawnOffset;
   EQPoint location;
   QPen tmpPen;
-  uint8_t playerLevel = m_player->getPlayerLevel();
+  uint8_t playerLevel = m_player->level();
   int spawnOffsetXPos, spawnOffsetYPos;
   uint16_t range;
   int scaledRange;
@@ -3108,25 +3124,12 @@ void Map::paintSpawns(MapParameters& param,
   bool up2date = false;
 
   /* Paint the spawns */
-  if ((m_lastFlash.msecsTo(drawTime)) > 100)  // miliseconds between flashing
-  {
-    // invert flash value
-    m_flash = !m_flash;
-
-    // reset last flash time, only real diff between start() and restart() is 
-    // that restart returns the elapsed time since start() was called, 
-    // which we don't need
-    m_lastFlash.start(); 
-  }
-
   const Spawn* spawn;
   // iterate over all spawns in of the current type
-  for (it = itemMap.begin();
-       it != itemMap.end(); 
-       ++it)
+  for (; it.current(); ++it)
   {
     // get the item from the list
-    item = it->second;
+    item = it.current();
 
 #ifdef DEBUGMAP
     spawn = spawnType(item);
@@ -3148,8 +3151,8 @@ void Map::paintSpawns(MapParameters& param,
 
     // only paint if the spawn is not filtered or the m_showFiltered flag is on
     if (((!m_spawnDepthFilter || 
-	  ((item->zPos() <= m_param.playerHeadRoom()) && 
-	   (item->zPos() >= m_param.playerFloorRoom()))) &&
+	  ((item->z() <= m_param.playerHeadRoom()) && 
+	   (item->z() >= m_param.playerFloorRoom()))) &&
 	 ((!(filterFlags & FILTER_FLAG_FILTERED)) || m_showFiltered) &&
 	 (!spawn->isUnknown() || m_showUnknownSpawns)) ||
 	(item == m_selectedItem))
@@ -3159,12 +3162,12 @@ void Map::paintSpawns(MapParameters& param,
       up2date = spawn->approximatePosition(m_animate, drawTime, location);
 
       // check that the spawn is within the screen bounds
-      if (!inRect(screenBounds, location.xPos(), location.yPos()))
+      if (!inRect(screenBounds, location.x(), location.y()))
 	  continue; // not in bounds, next...
 
       // calculate the spawn's offset location
-      spawnOffsetXPos = m_param.calcXOffsetI(location.xPos());
-      spawnOffsetYPos = m_param.calcYOffsetI(location.yPos());
+      spawnOffsetXPos = m_param.calcXOffsetI(location.x());
+      spawnOffsetYPos = m_param.calcYOffsetI(location.y());
 
       //--------------------------------------------------
 #ifdef DEBUGMAP
@@ -3775,13 +3778,13 @@ void Map::paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
 
   if (m_selectedItem->type() == tSpawn)
     ((const Spawn*)m_selectedItem)->approximatePosition(m_animate, 
-								  drawTime, 
-								  location);
+							drawTime, 
+							location);
   else
     location.setPoint(*m_selectedItem);
 
-  int spawnXOffset = m_param.calcXOffsetI(location.xPos());
-  int spawnYOffset = m_param.calcYOffsetI(location.yPos());
+  int spawnXOffset = m_param.calcXOffsetI(location.x());
+  int spawnYOffset = m_param.calcYOffsetI(location.y());
 
   p.setPen(magenta);
   p.drawLine(m_param.playerXOffset(),
@@ -3792,22 +3795,26 @@ void Map::paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
 #ifdef DEBUGMAP
   printf("Draw the path of the selected spawn\n");
 #endif
-  const Spawn* spawn;
-  if (m_walkpathshowselect && (spawn = spawnType(m_selectedItem)))
+  if (m_walkpathshowselect)
   {
+    if ((m_selectedItem->type() != tSpawn) &&
+	(m_selectedItem->type() != tPlayer))
+      return;
+    
+    const Spawn* spawn = (const Spawn*)m_selectedItem;
     SpawnTrackListIterator trackIt(spawn->trackList());
     
     const SpawnTrackPoint* trackPoint = trackIt.current();
     if (trackPoint)
     {
       p.setPen (blue);
-      p.moveTo (m_param.calcXOffsetI(trackPoint->xPos()), 
-		m_param.calcYOffsetI(trackPoint->yPos()));
+      p.moveTo (m_param.calcXOffsetI(trackPoint->x()), 
+		m_param.calcYOffsetI(trackPoint->y()));
       
       while ((trackPoint = ++trackIt) != NULL)
       {
-	p.lineTo (m_param.calcXOffsetI (trackPoint->xPos()), 
-		  m_param.calcYOffsetI (trackPoint->yPos()));
+	p.lineTo (m_param.calcXOffsetI (trackPoint->x()), 
+		  m_param.calcYOffsetI (trackPoint->y()));
       }
       
       p.lineTo (spawnXOffset, spawnYOffset);
@@ -3817,18 +3824,32 @@ void Map::paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
 
 void Map::paintSpawnPoints( MapParameters& param, QPainter& p )
 {
+  const QRect& screenBounds = m_param.screenBounds();
+  
+  // get the spawn point count
   long count = m_spawnMonitor->spawnPoints().count();
   
   if (!count )
     return;
   
+  // get an iterator over the list of spawn points
   QAsciiDictIterator<SpawnPoint> it( m_spawnMonitor->spawnPoints() );
-  SpawnPoint* sp;
+  const SpawnPoint* sp;
+
+  // iterate over the list of spawn points
   while ((sp = it.current()))
   {
     ++it;
     
-    if ((sp->m_diffTime == 0) || (sp->m_deathTime == 0))
+    // make sure spawn point is within bounds
+    if (!inRect(screenBounds, sp->x(), sp->y()) ||
+	(m_spawnDepthFilter &&
+	 ((sp->z() > m_param.playerHeadRoom()) ||
+	  (sp->z() < m_param.playerFloorRoom()))))
+      continue;
+
+    // calculate the pen color
+    if ((sp->diffTime() == 0) || (sp->deathTime() == 0))
       p.setPen( darkGray );
     else
     {
@@ -3849,9 +3870,29 @@ void Map::paintSpawnPoints( MapParameters& param, QPainter& p )
     
     int x = m_param.calcXOffsetI(sp->x());
     int y = m_param.calcYOffsetI(sp->y());
-    
+
+    // draw a small x at the spot
     p.drawLine( x, y - m_marker0Size, x, y + m_marker0Size );
     p.drawLine( x - m_marker0Size, y, x + m_marker0Size, y );
+  }
+
+  // blue flashing square around selected spawn point
+  sp = m_spawnMonitor->selected();
+
+  if ((sp != NULL) && (m_flash))
+  {
+    // make sure spawn point is within bounds
+    if (!inRect(screenBounds, sp->x(), sp->y()) ||
+	(m_spawnDepthFilter &&
+	 ((sp->z() > m_param.playerHeadRoom()) ||
+	  (sp->z() < m_param.playerFloorRoom()))))
+      return;
+
+    p.setBrush(NoBrush);
+    p.setPen(blue);
+    p.drawRect(m_param.calcXOffsetI(sp->x()) - m_drawSize,
+	       m_param.calcYOffsetI(sp->y()) - m_drawSize, 
+	       m_drawSizeWH, m_drawSizeWH);
   }
 }
 
@@ -3938,7 +3979,7 @@ void Map::makeSpawnLine(const Item* item)
 	  trackPoint = ++trackIt, curPt++, total++)
      {
        fprintf (fh, ",%d,%d,%d", 
-		trackPoint->xPos(), trackPoint->yPos(), trackPoint->zPos());
+		trackPoint->x(), trackPoint->y(), trackPoint->z());
      }
 
      // close the line
@@ -3991,13 +4032,70 @@ void Map::mouseMoveEvent( QMouseEvent* event )
   if ( m_mapPanning && (m_param.zoom() > 1))
     return;
   
-  const Item* item = closestSpawnToPoint(event->pos(), 5);
-  
-  if (item != NULL)
+  uint32_t dist = 5;
+  // check for closest spawn
+  const Item* item = closestSpawnToPoint(event->pos(), dist);
+
+  // check for closest spawn point
+  const SpawnPoint* sp = closestSpawnPointToPoint(event->pos(), dist);
+
+  // spawn point was closer, display it's info
+  if (sp != NULL)
+  {
+    QString remaining;
+    if ( sp->diffTime() == 0 || sp->deathTime() == 0 )
+      remaining = "\277 ?";  
+    else
+    {
+      long secs = sp->secsLeft();
+    
+      if ( secs > 0 )
+	remaining.sprintf( "%2ld:%02ld", secs / 60, secs % 60  );
+      else
+	remaining = "now"; 
+    }
+
+    // construct and set the spawned string
+    QString spawned;
+    QDateTime dateTime;
+    dateTime.setTime_t(sp->spawnTime());
+    QDate createDate = dateTime.date();
+
+    // spawn time
+    if ( createDate != QDate::currentDate() )
+      spawned = createDate.dayName( createDate.dayOfWeek() ) + " ";
+    
+    spawned += dateTime.time().toString();
+    
+    QString string;
+    string.sprintf("SpawnPoint: %s\n"
+		   "%.3s/Z: %5d/%5d/%5.1f\n"
+		   "Last: %s\n"
+		   "Spawned: %s\t Remaining: %s\t Count: %d", 
+		   (const char*)sp->name(),
+		   showeq_params->retarded_coords ? "Y/X" : "X/Y",
+		   showeq_params->retarded_coords ? sp->y() : sp->x(),
+		   showeq_params->retarded_coords ? sp->x() : sp->y(),
+		   sp->displayZPos(),
+		   (const char*)sp->last(), 
+		   (const char*)spawned,
+		   (const char*)remaining,
+		   sp->count());
+
+    m_mapTip->setText( string  );
+    m_mapTip->adjustSize();
+    QPoint popPoint = mapToGlobal(event->pos());
+    m_mapTip->move(popPoint.x() + 15, popPoint.y() + 15);
+    m_mapTip->show();
+    m_mapTip->raise();        
+  }
+  else if (item != NULL)
   {
     QString string;
 
-    const Spawn* spawn = spawnType(item);
+    const Spawn* spawn = NULL;
+    if ((item->type() == tSpawn) || (item->type() == tPlayer))
+      spawn = (const Spawn*)item;
 
     if (spawn)
     {
@@ -4008,12 +4106,14 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       else
 	hp = QString::number(spawn->HP());
 
-      string.sprintf("%s\nLevel: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s", 
+      string.sprintf("%s\n"
+		     "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5.1f\n"
+		     "Race: %s\t Class: %s", 
 		     (const char*)spawn->transformedName(),
 		     spawn->level(), (const char*)hp,
 		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
-		     showeq_params->retarded_coords ? spawn->yPos() : spawn->xPos(),
-		     showeq_params->retarded_coords ? spawn->xPos() : spawn->yPos(),
+		     showeq_params->retarded_coords ? spawn->y() : spawn->x(),
+		     showeq_params->retarded_coords ? spawn->x() : spawn->y(),
 		     item->displayZPos(),
 		     (const char*)spawn->raceString(), 
 		     (const char*)spawn->classString());
@@ -4023,11 +4123,13 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       string += "\nEquipment: " + spawn->info();
     }
     else
-      string.sprintf("%s\n%.3s/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s", 
+      string.sprintf("%s\n"
+		     "%.3s/Z: %5d/%5d/%5.1f\n"
+		     "Race: %s\t Class: %s", 
 		     (const char*)item->transformedName(),
 		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
-		     showeq_params->retarded_coords ? item->yPos() : item->xPos(),
-		     showeq_params->retarded_coords ? item->xPos() : item->yPos(),
+		     showeq_params->retarded_coords ? item->y() : item->x(),
+		     showeq_params->retarded_coords ? item->x() : item->y(),
 		     item->displayZPos(),
 		     (const char*)item->raceString(), 
 		     (const char*)item->classString());
@@ -4119,58 +4221,45 @@ void Map::changeItem(const Item* item, uint32_t changeType)
 }
 
 const Item* Map::closestSpawnToPoint(const QPoint& pt, 
-					       uint32_t closestDistance) const
+				     uint32_t& closestDistance) const
 {
-  ItemConstIterator it;
-  const Spawn* spawn;
   const Item* closestItem = NULL;
 
   uint32_t distance;
   EQPoint location;
-
-  const ItemMap& itemMap = m_spawnShell->getConstMap(tSpawn);
-  
-  // iterate over all spawns in of the current type
-  for (it = itemMap.begin();
-       it != itemMap.end(); 
-       ++it)
-  {
-    // get the item from the list
-    spawn = (const Spawn*)it->second;
-    
-    spawn->approximatePosition(m_animate, QTime::currentTime(), location);
-    
-    EQPoint testPoint;
-    testPoint.setPoint(m_param.calcXOffsetI(location.xPos()), 
-		       m_param.calcYOffsetI(location.yPos()), 0);
-    
-    distance = testPoint.calcDist2DInt(pt);
-    
-    if (distance < closestDistance)
-    {
-      closestDistance = distance;
-      closestItem = (const Item*)spawn;
-    }
-  }
+  EQPoint testPoint;
 
   const Item* item;
-  itemType itemTypes[3] = { tDrop, tCoins, tDoors };
+  itemType itemTypes[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
   
-  for (int i = 0; i < 3; i++)
+  for (uint8_t i = 0; i < (sizeof(itemTypes) / sizeof(itemType)); i++)
   {
     const ItemMap& itemMap = m_spawnShell->getConstMap(itemTypes[i]);
+    ItemConstIterator it(itemMap);
 
     // iterate over all spawns in of the current type
-    for (it = itemMap.begin();
-	 it != itemMap.end(); 
-	 ++it)
+    for (; it.current(); ++it)
     {
       // get the item from the list
-      item = it->second;
+      item = it.current();
+    
+      if (m_spawnDepthFilter &&
+	  ((item->z() > m_param.playerHeadRoom()) ||
+	   (item->z() < m_param.playerFloorRoom())))
+	continue;
 
-      EQPoint testPoint;
-      testPoint.setPoint(m_param.calcXOffsetI(item->xPos()), 
-			 m_param.calcYOffsetI(item->yPos()), 0);
+      if ((item->type() == tSpawn) || (item->type() == tPlayer))
+      {
+	((const Spawn*)item)->approximatePosition(m_animate, 
+						  QTime::currentTime(), 
+						  location);
+
+	testPoint.setPoint(m_param.calcXOffsetI(location.x()), 
+			   m_param.calcYOffsetI(location.y()), 0);
+      }
+      else
+	testPoint.setPoint(m_param.calcXOffsetI(item->x()), 
+			   m_param.calcYOffsetI(item->y()), 0);
 
       distance = testPoint.calcDist2DInt(pt);
 
@@ -4183,6 +4272,41 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
   }
 
   return closestItem;
+}
+
+const SpawnPoint* Map::closestSpawnPointToPoint(const QPoint& pt, 
+						uint32_t& closestDistance) const
+{
+  const SpawnPoint* closestSP = NULL;
+
+  uint32_t distance;
+  EQPoint testPoint;
+
+  QAsciiDictIterator<SpawnPoint> it(m_spawnMonitor->spawnPoints());
+  SpawnPoint* sp;
+
+  while ((sp = it.current()))
+  {
+    ++it;
+
+    if (m_spawnDepthFilter &&
+	((sp->z() > m_param.playerHeadRoom()) ||
+	 (sp->z() < m_param.playerFloorRoom())))
+      continue;
+
+    testPoint.setPoint(m_param.calcXOffsetI(sp->x()), 
+		       m_param.calcYOffsetI(sp->y()), 0);
+
+    distance = testPoint.calcDist2DInt(pt);
+
+    if (distance < closestDistance)
+    {
+      closestDistance = distance;
+      closestSP = sp;
+    }
+  }
+
+  return closestSP;
 }
 
 void Map::mapUnloaded(void)
@@ -4246,7 +4370,7 @@ void Map::mapUpdated(void)
 // MapFrame
 MapFrame::MapFrame(FilterMgr* filterMgr,
 		   MapMgr* mapMgr,
-		   EQPlayer* player, 
+		   Player* player, 
 		   SpawnShell* spawnshell,
 		   ZoneMgr* zoneMgr,
 		   SpawnMonitor* spawnMonitor,
@@ -4548,10 +4672,10 @@ void MapFrame::regexpok(int ok)
   } 
 }
 
-void MapFrame::mouseLocation(int16_t xPos, int16_t yPos)
+void MapFrame::mouseLocation(int16_t x, int16_t y)
 {
   QString cursorPos;
-  cursorPos.sprintf(" %+5hd, %+5hd", yPos, xPos);
+  cursorPos.sprintf(" %+5hd, %+5hd", y, x);
   m_mouseLocation->setText(cursorPos);
 }
 

@@ -704,7 +704,7 @@ PktLogger::logSpawnStruct(const spawnStruct *spawn)
 {
     output(spawn->unknown0000, 49);
     outputf(" %d %d %d %d %d %d %u %d %u %d ", spawn->heading,
-        spawn->deltaHeading, spawn->yPos, spawn->xPos, spawn->zPos,
+        spawn->deltaHeading, spawn->y, spawn->x, spawn->z,
         spawn->deltaY, spawn->spacer1, spawn->deltaZ, spawn->spacer2,
         spawn->deltaZ);
 
@@ -943,7 +943,7 @@ PktLogger::logCorpseLoc(const corpseLocStruct *corpse, uint32_t len, uint8_t dir
        corpse->opCode, corpse->version, corpse->spawnId);
 
     output(&corpse->unknown0004,2);
-    outputf(" %f %f %f\n", corpse->xPos, corpse->yPos, corpse->zPos);
+    outputf(" %f %f %f\n", corpse->x, corpse->y, corpse->z);
     flush();
     return;
 }
@@ -1153,8 +1153,8 @@ PktLogger::logMobUpdate(const mobUpdateStruct *update, uint32_t len, uint8_t dir
         pos = &update->spawnUpdate[i];
         outputf("%u %d %d %d %d %d %d %d %u %d %u %d ",
             pos->spawnId, pos->animation, pos->heading,
-            pos->deltaHeading, pos->yPos, pos->xPos,
-            pos->zPos, pos->deltaY, pos->spacer1,
+            pos->deltaHeading, pos->y, pos->x,
+            pos->z, pos->deltaY, pos->spacer1,
             pos->deltaX, pos->spacer2, pos->deltaZ);
     }
     outputf("\n");
@@ -1467,7 +1467,7 @@ PktLogger::logPlayerPos(const playerPosStruct *pos, uint32_t len, uint8_t dir)
 
     output(pos->unknown0004,1);
     outputf(" %d %d %d %d %d %d %u %d %u %d\n", pos->heading, 
-        pos->deltaHeading, pos->yPos, pos->xPos, pos->zPos, pos->deltaY,
+        pos->deltaHeading, pos->y, pos->x, pos->z, pos->deltaY,
         pos->spacer1, pos->deltaZ, pos->spacer2, pos->deltaX);
 
     flush();
@@ -1608,7 +1608,7 @@ PktLogger::logMakeDrop(const makeDropStruct *item, uint32_t len, uint8_t dir)
     output(item->unknown0012,2);
     outputf(" %u ", item->dropId);
     output(item->unknown0016,26);
-    outputf(" %f %f %f ", item->yPos, item->xPos, item->zPos);
+    outputf(" %f %f %f ", item->y, item->x, item->z);
     output(item->unknown0054,4);
     outputf(" [%.16s] ", item->idFile);
     output(item->unknown0074,168);
@@ -1660,7 +1660,7 @@ PktLogger::logDropCoins(const dropCoinsStruct *coins, uint32_t len, uint8_t dir)
     output(coins->unknown0028,22);
     outputf(" %u ", coins->amount);
     output(coins->unknown0054,4);
-    outputf(" %f %f %f ", coins->yPos, coins->xPos, coins->zPos);
+    outputf(" %f %f %f ", coins->y, coins->x, coins->z);
     output(coins->unknown0070,12);
     outputf(" [%.15s] ", coins->type);
 
@@ -1998,8 +1998,8 @@ PktLogger::logDoorSpawns(const doorSpawnsStruct *doors, uint32_t len, uint8_t di
     {
         outputf("[%.8s] ", doors->doors[i].name);
         output(doors->doors[i].unknown0008,8);
-        outputf(" %f %f %f ",doors->doors[i].yPos,
-            doors->doors[i].xPos, doors->doors[i].zPos);
+        outputf(" %f %f %f ",doors->doors[i].y,
+            doors->doors[i].x, doors->doors[i].z);
         output(doors->doors[i].unknown0028,10);
         outputf(" %d %d ", doors->doors[i].doorId,
             doors->doors[i].size);
@@ -2159,7 +2159,7 @@ SpawnLogger::logTimeSync(const timeOfDayStruct *tday)
 
 void
 SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
-                          int xPos, int yPos, int zPos, time_t timeCurrent,
+                          int x, int y, int z, time_t timeCurrent,
                           const char *killedBy, int kid)
 {
     struct timeOfDayStruct eqDate;
@@ -2177,9 +2177,9 @@ SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
         name,
         id,
         level,
-        xPos,
-        yPos,
-        zPos,
+        x,
+        y,
+        z,
         current->tm_hour, current->tm_min, current->tm_sec,
         version,
         (const char*)zoneShortName,
@@ -2210,7 +2210,7 @@ void
 SpawnLogger::logZoneSpawn(const spawnStruct *spawn)
 {
     logSpawnInfo("z",spawn->name,spawn->spawnId,spawn->level,
-                 spawn->xPos, spawn->yPos, spawn->zPos, time(NULL), "", 0);
+                 spawn->x, spawn->y, spawn->z, time(NULL), "", 0);
 
     return;
 }
@@ -2220,7 +2220,7 @@ SpawnLogger::logZoneSpawn(const newSpawnStruct *nspawn)
 {
   const spawnStruct* spawn = &nspawn->spawn;
   logSpawnInfo("z",spawn->name,spawn->spawnId,spawn->level,
-	       spawn->xPos, spawn->yPos, spawn->zPos, time(NULL), "", 0);
+	       spawn->x, spawn->y, spawn->z, time(NULL), "", 0);
   
   return;
 }
@@ -2230,7 +2230,7 @@ SpawnLogger::logNewSpawn(const newSpawnStruct* nspawn)
 {
   const spawnStruct* spawn = &nspawn->spawn;
   logSpawnInfo("+",spawn->name,spawn->spawnId,spawn->level,
-	       spawn->xPos, spawn->yPos, spawn->zPos, time(NULL), "", 0);
+	       spawn->x, spawn->y, spawn->z, time(NULL), "", 0);
 
   return;
 }
@@ -2244,9 +2244,9 @@ SpawnLogger::logKilledSpawn(const Item *item, const Item* kitem, uint16_t kid)
   const Spawn* spawn = (const Spawn*)item;
   const Spawn* killer = (const Spawn*)kitem;
 
-  logSpawnInfo("x",(const char *) spawn->rawName(),spawn->id(), spawn->level(), 
+  logSpawnInfo("x",(const char *) spawn->name(),spawn->id(), spawn->level(), 
 	       spawn->x(), spawn->y(), spawn->z(), time(NULL),
-	       killer ? (const char*)killer->rawName() : "unknown",
+	       killer ? (const char*)killer->name() : "unknown",
 	       kid);
 
   return;
@@ -2260,7 +2260,7 @@ SpawnLogger::logDeleteSpawn(const Item *item)
 
   const Spawn* spawn = (const Spawn*)item;
 
-  logSpawnInfo("-",(const char *)spawn->rawName(),spawn->id(),spawn->level(),
+  logSpawnInfo("-",(const char *)spawn->name(),spawn->id(),spawn->level(),
 	       spawn->x(), spawn->y(), spawn->z(), time(NULL),"",0);
 
   return;

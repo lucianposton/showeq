@@ -49,6 +49,8 @@ class EQDecode : public QObject
   void dispatchDecodedCharProfile(const uint8_t* decodedData, uint32_t len);
   void dispatchDecodedNewSpawn(const uint8_t* decodedData, uint32_t len);
   void dispatchDecodedZoneSpawns(const uint8_t* decodedData, uint32_t len);
+  void startDecodeBatch(void);
+  void finishedDecodeBatch(void);
 
  public:
   int DecodePacket(const uint8_t *data, uint32_t len, 

@@ -295,7 +295,7 @@ public slots:
 
 private:
     void logSpawnInfo(const char *type, const char *name, int id, int level, 
-                      int xPos, int yPos, int zPos, time_t timeCurrent, 
+                      int x, int y, int z, time_t timeCurrent, 
                       const char *killer, int kid);
     int version;
     QString zoneShortName;

@@ -20,18 +20,18 @@
 #define STATCOL_MAXVALUE 2
 #define STATCOL_PERCENT 3
 
-class EQStatList : public SEQListView
+class StatList : public SEQListView
 {
    Q_OBJECT
 
  public:
    // constructor
-   EQStatList (EQPlayer* player,
+   StatList (Player* player,
 	       QWidget*  parent = 0, 
 	       const char* name = 0); 
    
    // destructor
-   ~EQStatList();
+   ~StatList();
 
    bool statShown(int stat) { return m_showStat[stat]; }
    
@@ -49,7 +49,7 @@ class EQStatList : public SEQListView
 
  private:
    // the player this skill list is monitoring
-   EQPlayer* m_pPlayer;
+   Player* m_pPlayer;
 
    QListViewItem* m_statList[LIST_MAXLIST]; 
 
@@ -62,15 +62,15 @@ class StatListWindow : public SEQWindow
   Q_OBJECT
 
  public:
-  StatListWindow(EQPlayer* player, QWidget* parent = 0, const char* name = 0);
+  StatListWindow(Player* player, QWidget* parent = 0, const char* name = 0);
   ~StatListWindow();
-  EQStatList* statList() { return m_statList; }
+  StatList* statList() { return m_statList; }
 
  public slots:
   virtual void savePrefs(void);
 
  protected:
-  EQStatList* m_statList;
+  StatList* m_statList;
 };
 
 #endif // EQSTATLIST_H

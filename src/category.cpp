@@ -72,12 +72,12 @@ bool Category::isFiltered(const QString& filterString, int level) const
 }
 
 // ------------------------------------------------------
-// CFilterDlg
-CFilterDlg::CFilterDlg(QWidget *parent, QString name)
+// CategoryDlg
+CategoryDlg::CategoryDlg(QWidget *parent, QString name)
  : QDialog(parent, name, TRUE)
 {
 #ifdef DEBUG
-   debug ("CFilterDlg()");
+   debug ("CategoryDlg()");
 #endif /* DEBUG */
    QFont labelFont;
    labelFont.setBold(true);
@@ -139,7 +139,11 @@ CFilterDlg::CFilterDlg(QWidget *parent, QString name)
    connect(cancel, SIGNAL(clicked()), SLOT(reject()));
 }
 
-void CFilterDlg::select_color(void)
+CategoryDlg::~CategoryDlg()
+{
+}
+
+void CategoryDlg::select_color(void)
 {
   QColor newColor = 
     QColorDialog::getColor(m_Color->backgroundColor(), this, "Category Color");
@@ -153,6 +157,7 @@ void CFilterDlg::select_color(void)
 CategoryMgr::CategoryMgr(QObject* parent, const char* name)
   : QObject(parent, name)
 {
+  m_categories.setAutoDelete(false);
   reloadCategories();
 }
 
@@ -160,31 +165,31 @@ CategoryMgr::~CategoryMgr()
 {
 }
 
-const CategoryDict CategoryMgr::findCategories(const QString& filterString, 
+const CategoryList CategoryMgr::findCategories(const QString& filterString, 
 					       int level) const
 {
-  CategoryDict tmpDict;
+  CategoryList tmpList;
   
   // iterate over all the categories looking for a match
-  CategoryDictIterator it(m_categories);
+  CategoryListIterator it(m_categories);
   for (Category* curCategory = it.toFirst(); 
        curCategory != NULL;
        curCategory = ++it)
   {
     // if it matches the category add it to the dictionary
     if (curCategory->isFiltered(filterString, level))
-      tmpDict.insert(curCategory->name(), curCategory);
+      tmpList.append(curCategory);
   }
 
-  return tmpDict;
+  return tmpList;
 }
 
-const Category* CategoryMgr::AddCategory(const QString& name, 
+const Category* CategoryMgr::addCategory(const QString& name, 
 					 const QString& filter, 
 					 const QString& filterout, 
 					 QColor color)
 {
-  //printf("AddCategory() '%s' - '%s':'%s'\n", name, filter, filterout?filterout:"null");
+  //printf("addCategory() '%s' - '%s':'%s'\n", name, filter, filterout?filterout:"null");
   
   // ZBTEMP: TODO, need to add check for duplicate category name
   m_changed = true;
@@ -192,7 +197,7 @@ const Category* CategoryMgr::AddCategory(const QString& name,
   {
     Category* newcat = new Category(name, filter, filterout, color);
     
-    m_categories.insert(newcat->name(), newcat);
+    m_categories.append(newcat);
     
     emit addCategory(newcat);
     
@@ -203,9 +208,9 @@ const Category* CategoryMgr::AddCategory(const QString& name,
   return NULL;
 }
 
-void CategoryMgr::RemCategory(const Category* cat)
+void CategoryMgr::remCategory(const Category* cat)
 {
-//printf("RemCategory()\n");
+//printf("remCategory()\n");
   m_changed = true;
 
   if (cat != NULL) 
@@ -214,7 +219,7 @@ void CategoryMgr::RemCategory(const Category* cat)
     emit delCategory(cat);
 
     // remove the category from the list
-    m_categories.remove(cat->name());
+    m_categories.remove(cat);
 
     // delete the category
     delete cat;
@@ -239,7 +244,7 @@ void CategoryMgr::addCategory(QWidget* parent)
 void CategoryMgr::editCategories(const Category* cat, QWidget* parent)
 {
   // Create the filter dialog
-  CFilterDlg* dlg = new CFilterDlg(parent, "FilterDlg");
+  CategoryDlg* dlg = new CategoryDlg(parent, "CategoryDlg");
 
   // editing an existing category?
   if (cat != NULL)
@@ -267,7 +272,7 @@ void CategoryMgr::editCategories(const Category* cat, QWidget* parent)
 
   // remove the old category
   if (cat != NULL)
-    RemCategory(cat);
+    remCategory(cat);
 
   // Add Category
   QString name = dlg->m_Name->text();
@@ -277,7 +282,7 @@ void CategoryMgr::editCategories(const Category* cat, QWidget* parent)
   //  name?name:"", color?color:"", filter?filter:"", filterout?filterout:""); 
 
   if (!name.isEmpty() && !filter.isEmpty())
-    AddCategory(name, 
+    addCategory(name, 
 		filter, 
 		dlg->m_FilterOut->text(), 
 		dlg->m_Color->backgroundColor());
@@ -317,7 +322,7 @@ void CategoryMgr::reloadCategories(void)
       {
 	Category* newcat = new Category(name, filter, filterout, color);
 	
-	m_categories.insert(newcat->name(), newcat);
+	m_categories.append(newcat);
       }
     }
   }
@@ -337,7 +342,7 @@ void CategoryMgr::savePrefs(void)
   QString section = "CategoryMgr";
   QString prefBaseName;
 
-  CategoryDictIterator it(m_categories);
+  CategoryListIterator it(m_categories);
   for (Category* curCategory = it.toFirst(); 
        curCategory != NULL;
        curCategory = ++it)

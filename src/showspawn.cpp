@@ -237,9 +237,9 @@ int main (int argc, char *argv[])
     out << "Race: " << spawn.raceString() << "<BR>\n";
     out << "Class: " << spawn.classString() << "<BR>\n";
     out << "Found in Zone: " << dbSpawn.zoneName << "<BR>\n";
-    out << "Position: " <<  spawn.yPos() << ", " 
-	<< spawn.xPos() << ", "
-	<< spawn.zPos() << "<BR>\n";
+    out << "Position: " <<  spawn.y() << ", " 
+	<< spawn.x() << ", "
+	<< spawn.z() << "<BR>\n";
     out << "Mob ID: " << spawn.id() << "<BR>\n";
     out << "<B>Packet data:</B>\n";
     out <<"<PRE>\n";
