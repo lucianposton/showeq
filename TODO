@@ -1,8 +1,22 @@
+Version: $Id$
+
 To Do list
 ----------
 A full "to do" list is maintained on SourceForge 
 (http://sourceforge.net/projects/seq) under the "Tasks" heading.
 
-+ Add GUI support for deleting categories from the category manager
-+ Add GUI support for deleting message boxes
-+ Add GUI support for deleting buttons from message boxes
++ Packet handling
+ + Add support for an EQPacketSession concept that will support one SEQ 
+   process to monitor N EQ clients.
+ + Organized packet capture display with the ability to filter in/out different
+   packets. 
+ + More general packet cleanup.
++ Move all non-GUI related stuff out of EQInterface
++ Improved filtering system
++ Map
+ + Support display of zone safepoint (from zone packet)
+ + Support map editing
+ + Support simple map optimization
++ Support for LoY guild information capture/display.
++ Seperate UI from data storage/handling in Combat Window and Experience Window
++ Create new and improved item db support.

@@ -42,6 +42,12 @@ class PacketLog : public SEQLogger
 		uint8_t        dir,
 		uint16_t       opcode,
 		const QString& origPrefix = QString()); 
+  void logData (const uint8_t* data,
+		size_t len,
+		uint8_t dir,
+		uint16_t opcode, 
+		const EQPacketOPCode* opcodeEntry,
+		const QString& origPrefix = QString()); 
   void logData(const EQUDPIPPacketFormat& packet);
   void printData(const uint8_t* data, size_t len, uint8_t dir,
 		 uint16_t opcode, const QString& origPrefix = QString());
@@ -51,7 +57,7 @@ class PacketLog : public SEQLogger
   EQPacket& m_packet;
 };
 
-/////////////////////////////////////
+//----------------------------------------------------------------------
 // PacketStreamLog
 class PacketStreamLog : public PacketLog
 {
@@ -67,7 +73,7 @@ class PacketStreamLog : public PacketLog
    void rawStreamPacket(const uint8_t* data, size_t len, uint8_t dir, 
 			uint16_t opcode);
    void decodedStreamPacket(const uint8_t* data, size_t len, uint8_t dir, 
-			    uint16_t opcode);
+			    uint16_t opcode, const EQPacketOPCode* opcodeEntry);
 
  protected:
    bool m_raw;
@@ -83,7 +89,7 @@ inline void PacketStreamLog::setRaw(bool val)
   m_raw = val;
 }
 
-/////////////////////////////////////
+//----------------------------------------------------------------------
 // UnknownPacketLog
 class UnknownPacketLog : public PacketLog
 {
@@ -97,7 +103,8 @@ class UnknownPacketLog : public PacketLog
 
  public slots:
    void packet(const uint8_t* data, size_t len, uint8_t dir, 
-	       uint16_t opcode, bool unknown);
+	       uint16_t opcode, const EQPacketOPCode* opcodeEntry,
+	       bool unknown);
 
  protected:
   bool m_view;
@@ -113,7 +120,7 @@ inline void UnknownPacketLog::setView(bool val)
   m_view = val;
 }
 
-/////////////////////////////////////
+//----------------------------------------------------------------------
 // OPCodeMonitorPacketLog
 class OPCodeMonitorPacketLog : public PacketLog
 {
@@ -130,7 +137,8 @@ class OPCodeMonitorPacketLog : public PacketLog
 
  public slots:
   void packet(const uint8_t* data, size_t len, uint8_t dir, 
-	      uint16_t opcode, bool unknown);
+	      uint16_t opcode, const EQPacketOPCode* opcodeEntry, 
+	      bool unknown);
 
  protected:
 #define OPCODE_SLOTS 15

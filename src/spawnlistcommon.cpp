@@ -10,14 +10,6 @@
  * Date   - 3/16/00
  */
 
-#include <string.h>
-
-#include <qfontdialog.h>
-#include <qinputdialog.h>
-#include <qmessagebox.h>
-#include <qfont.h>
-#include <qpainter.h>
-
 #include "seqwindow.h"
 #include "seqlistview.h"
 #include "spawnlistcommon.h"
@@ -26,6 +18,15 @@
 #include "spawnshell.h"
 #include "main.h"
 #include "player.h"
+#include "diagnosticmessages.h"
+
+#include <string.h>
+
+#include <qfontdialog.h>
+#include <qinputdialog.h>
+#include <qmessagebox.h>
+#include <qfont.h>
+#include <qpainter.h>
 
 SpawnListItem::SpawnListItem(QListViewItem *parent) : QListViewItem(parent)
 {
@@ -229,7 +230,7 @@ int SpawnListItem::compare(QListViewItem *i, int col, bool ascending) const
 
 void SpawnListItem::update(Player* player, uint32_t changeType)
 {
-//   printf ("SpawnListItem::update()\n");
+//   seqDebug("SpawnListItem::update()\n");
    QString buff;
    const Spawn* spawn = NULL;
 

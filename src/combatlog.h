@@ -87,6 +87,7 @@ public:
 	int		getTotalDamage() { return m_iTotalDamage; };
 	int		getTotalAttacks() { return m_iTotalAttacks; };
 
+	void    clear(void);
 	void	addMiss(int iMissReason);
 	void	addHit(int iDamage);
 
@@ -166,6 +167,7 @@ public slots:
 	void resetDPS();
 	void clearMob();
 	void clearOffense();
+	void clear(void);
 
 private:
 
