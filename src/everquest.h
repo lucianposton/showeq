@@ -326,7 +326,7 @@ struct spawnPositionUpdate
 
 /* 
 ** Generic Spawn Struct 
-** Length: 253 Octets 
+** Length: 255 Octets 
 ** Used in: 
 **   spawnZoneStruct
 **   dbSpawnStruct
@@ -334,54 +334,55 @@ struct spawnPositionUpdate
 **   newSpawnStruct
 */ 
 
-struct spawnStruct
-{
-/*0000*/ int32_t race;			 // race
-/*0004*/ char unknown0174[4];
-/*0008*/ uint8_t class_;		 // class
-/*0009*/ uint16_t level;
-/*0011*/ char unknown0113[1];
-/*0012*/ int8_t curHp;
-/*0013*/ char unknown0114[2];
-/*0015*/ uint8_t NPC;			 // 0=player,1=npc,2=pc corpse,3=npc corpse,4=???,5=unknown spawn,10=self
-/*0016*/ char unknown0112[6];
-/*0022*/ int32_t maxHp;			 // max hp
-/*0026*/ uint8_t gender;		 // 0=male, 1=female, 2=other
-/*0027*/ char unknown0173[4];
-/*0031*/ signed   deltaX:13;
-/*0033*/ signed   x:19;
-/*0035*/ signed   y:19;
-/*0037*/ signed   deltaY:13;
-/*0039*/ signed   z:19;
-/*0041*/ signed   deltaZ:13;
-/*0043*/ uint16_t petOwnerId;
-/*0045*/ uint16_t spawnId;		 // Id of spawn
-/*0047*/ char unknown0003[3];
-/*0050*/ char lastName[20];		 // lastname
-/*0070*/ int32_t guildID;		 // GuildID
-/*0074*/ uint32_t typeflag;		 // Bodytype
-/*0078*/ int32_t equipment[9];		 // 0=helm, 1=chest, 2=arm, 3=bracer
-                                         // 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2
-/*0114*/ char unknown0206[4];
-/*0118*/ char name[64];			 // name
-/*0182*/ int32_t dyergb[7];              // armor dye colors
-/*0210*/ char unknown0000;
-/*0211*/ uint8_t light;                  
-/*0212*/ char unknown0162[2];
-/*0214*/ unsigned animation:10;
-/*0216*/ unsigned heading:12;
-/*0217*/ signed   deltaHeading:10;
-/*0218*/ char unknown0216[14];
-/*0232*/ char unknown0244[2];
-/*0234*/ char unknown0248[2];
-/*0236*/ int16_t deity;			 // deity
-/*0238*/ char unknown0252[3];
-/*0241*/ char unknown0002[12];
-}; // 253
+struct spawnStruct 
+{ 
+/*000*/ int32_t race; // race 
+/*004*/ char unknown004[4]; 
+/*008*/ uint8_t class_; // class 
+/*009*/ uint16_t level; 
+/*011*/ char unknown011[1]; 
+/*012*/ int8_t curHp; 
+/*013*/ char unknown013[2]; 
+/*015*/ uint8_t NPC; // 0=player,1=npc,2=pc corpse,3=npc corpse,4=???,5=unknown spawn,10=self 
+/*016*/ char unknown016[6]; 
+/*022*/ int32_t maxHp; // max hp 
+/*026*/ uint8_t gender; // 0=male, 1=female, 2=other 
+/*027*/ unsigned heading:12; 
+signed deltaHeading:10; 
+unsigned animation:10; 
+signed deltaX:13; 
+/*xxx*/ signed x:19; 
+/*xxx*/ signed y:19; 
+signed deltaY:13; 
+signed deltaZ:13; 
+/*031*/ signed z:19; 
+/*043*/ char unknown043[2]; 
+/*045*/ uint16_t spawnId; // Id of spawn 
+/*047*/ char unknown047[3]; 
+/*050*/ char lastName[20]; // lastname 
+/*070*/ char unknown070[8]; 
+/*078*/ int32_t equipment[9]; // 0=helm, 1=chest, 2=arm, 3=bracer 
+// 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2 
+/*114*/ char unknown114[4]; 
+/*118*/ char name[64]; // name 
+/*182*/ int32_t dyergb[7]; // armor dye colors 
+/*210*/ char unknown210; 
+/*211*/ uint8_t light; 
+/*212*/ char unknown212[20]; 
+/*232*/ int32_t guildID; // GuildID 
+/*236*/ char unknown236[1]; 
+/*237*/ uint32_t typeflag; // Bodytype 
+/*241*/ char unknown241[4]; 
+/*245*/ uint16_t petOwnerId; 
+/*247*/ char unknown247[2]; 
+/*249*/ int16_t deity; // deity 
+/*251*/ char unknown251[2]; 
+}; // 253 bytes 
+
 
 /* 
 ** Zone Spawn Struct 
-** Length: 253 Octets 
+** Length: 176 Octets 
 ** Used in: 
 **    zoneSpawnStruct
 **
@@ -503,7 +504,7 @@ struct removeCoinsStruct
 /*
 ** Compressed Item In Shop
 ** Length: variable
-** OpCode: cItemInShop
+** OpCode cItemInShop
 */
 
 struct cItemInShopStruct
@@ -1654,15 +1655,15 @@ struct playerPosStruct
 {
 /*0000*/ uint16_t opCode;
 /*0002*/ uint16_t spawnId;
-/*0003*/ unsigned heading:12;
+         unsigned heading:12;
 /*0004*/ unsigned animation:10;
-/*0005*/ signed   deltaHeading:10;
-/*0006*/ signed   deltaX:13;
-/*0007*/ signed   x:19;
-/*0008*/ signed   y:19;
-/*0009*/ signed   deltaY:13;
-/*0010*/ signed   z:19;
-/*0011*/ signed   deltaZ:13;
+         signed   deltaHeading:10;
+         signed   deltaX:13;
+/*0194*/ signed   x:19;
+/*0198*/ signed   y:19;
+         signed   deltaY:13;
+         signed   deltaZ:13;
+/*0202*/ signed   z:19;
 };
 
 /*
@@ -1929,3 +1930,4 @@ struct keyStruct
 //. .7...6....,X....D4.M.\.....P.v..>..W....
 //123456789012345678901234567890123456789012
 //000000000111111111122222222223333333333444
+
