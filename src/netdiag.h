@@ -9,6 +9,10 @@
 #ifndef EQNETDIAG_H
 #define EQNETDIAG_H
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#include <sys/socket.h>
+#endif
 #include <netinet/in.h>
 
 #include <qwidget.h>

@@ -36,6 +36,10 @@
 // forward declarations
 class SpawnShell;
 
+struct spawnStruct;
+struct makeDropStruct;
+struct doorStruct;
+
 //----------------------------------------------------------------------
 // enumerated types
 // type of item
@@ -375,8 +379,15 @@ class Door : public Item
   virtual QString raceString() const;
   virtual QString classString() const;
 
+  uint32_t zonePoint() const { return m_zonePoint; }
+  
   // update methods
   void update(const doorStruct* d);
+
+  void setZonePoint(uint32_t zonePoint) { m_zonePoint = zonePoint; }
+    
+ protected:
+  uint32_t m_zonePoint;
 };
 
 //----------------------------------------------------------------------
