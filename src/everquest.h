@@ -1017,7 +1017,7 @@ struct emoteTextStruct
 
 /*
 ** Channel Message received or sent
-** Length: 71 Octets + Variable Length + 4 Octets
+** Length: 148 Octets + Variable Length + 4 Octets
 ** OpCode: ChannelMessageCode
 */
 
@@ -1027,9 +1027,9 @@ struct channelMessageStruct
 /*0064*/ char     sender[64];             // The senders name 
 /*0128*/ uint32_t language;               // Language
 /*0132*/ uint32_t chanNum;                // Channel
-/*0136*/ int8_t   unknown0136[4];        // ***Placeholder
-/*0140*/ uint32_t skillInLanguage;        // senders skill in language
-/*0144*/ char     message[0];             // Variable length message
+/*0136*/ int8_t   unknown0136[8];        // ***Placeholder
+/*0144*/ uint32_t skillInLanguage;        // senders skill in language
+/*0148*/ char     message[0];             // Variable length message
 };
 
 /*
