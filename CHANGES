@@ -1,3 +1,8 @@
+cwebster (26/03/02)
+-------------------
+Bugfix:
+ + added logger.h to EXTRA_DIST in the automake template
+
 dohpaZ (20/03/02)
 ------------------
 Modifications:
