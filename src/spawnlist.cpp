@@ -234,7 +234,7 @@ void SpawnListItem::setShellItem(const Item *item)
 CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
 		       CategoryMgr* categoryMgr,
 		       QWidget *parent, const char* name)
-  : QListView(parent, name)
+  : QListView(parent, name), m_menu(NULL)
 {
    bDebug = FALSE;
    m_player = player;
@@ -244,9 +244,7 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
    QString section = "SpawnList";
 
    setRootIsDecorated(true);
-#if QT_VERSION >= 210
    setShowSortIndicator(true);
-#endif
    setCaption(pSEQPrefs->getPrefString("Caption", section,
 				       "ShowEQ - Spawn List"));
 
@@ -370,6 +368,14 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
    // connect a QListView signal to ourselves
    connect(this, SIGNAL(selectionChanged(QListViewItem*)),
 	   this, SLOT(selChanged(QListViewItem*)));
+
+   connect (this, SIGNAL(mouseButtonPressed(int, QListViewItem*, const QPoint&, int)),
+            this, SLOT(myMousePressEvent(int, QListViewItem*, const QPoint&, int)));
+
+   connect (this, SIGNAL(doubleClicked(QListViewItem*)),
+            this, SLOT(myMouseDoubleClickEvent(QListViewItem*)));
+
+#if 0 //FEETMP it goes bye bye
    connect (this, SIGNAL(rightButtonPressed( QListViewItem *,
 					     const QPoint&, int )),
 	    this, SLOT(rightBtnPressed(QListViewItem*,
@@ -378,6 +384,7 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
 					     const QPoint&, int )),
 	    this, SLOT(rightBtnReleased(QListViewItem*,
 					const QPoint&, int)) );
+#endif
 
    // connect CSpawnList slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(addItem(const Item *)),
@@ -1543,6 +1550,45 @@ void CSpawnList::selChanged(QListViewItem* litem)
     emit spawnSelected(item);
 }
 
+void CSpawnList::myMousePressEvent(int button, QListViewItem* litem,
+		                   const QPoint &point, int col)
+{
+  // Left Mouse Button Events
+  if (button  == LeftButton && litem != NULL)
+  {
+      setSelected(litem, TRUE);
+  }
+
+  // Right Mouse Button Events
+  if (button == RightButton)
+  {
+     //press right button to display popup menu or edit category
+     const Category* cat = getCategory((SpawnListItem*)litem);
+
+     if (cat)
+     {
+       // edit the category
+       m_categoryMgr->editCategories(cat, this);
+       return;
+     }
+     //else
+//	  menu()->popup((point));
+  }
+}
+
+void CSpawnList::myMouseDoubleClickEvent(QListViewItem* litem)
+{
+   //print spawn info to console
+  if (litem == NULL)
+    return;
+
+  const Item* item = ((SpawnListItem*)litem)->item();
+  if (item != NULL)
+    printf("%s\n",(const char*)item->filterString());
+}
+
+  
+#if 0 //FEETMP  on its way to the door 
 //
 // rightButtonPressed
 //
@@ -1581,6 +1627,7 @@ void CSpawnList::rightBtnReleased(QListViewItem *item,
 {
   emit keepUpdated(false);
 }
+#endif
 
 QString CSpawnList::filterString(const Item* item, int flags)
 {
@@ -1629,4 +1676,28 @@ const Category* CSpawnList::getCategory(SpawnListItem *item)
   }
   
   return NULL;
+}
+
+SpawnListMenu* CSpawnList::menu()
+{
+  printf("CSpawnList::menu()\n");
+  if (m_menu != NULL)
+      return m_menu;
+
+      m_menu = new SpawnListMenu(this, this, "spawnlist menu");
+  printf("CSpawnList::menu() - m_menu returned\n");
+
+      return m_menu;
+}
+
+SpawnListMenu::SpawnListMenu(CSpawnList* spawnlist,
+		             QWidget* parent = 0, const char* name = 0)
+                             : m_spawnlist(spawnlist)
+{
+
+
+}
+
+SpawnListMenu::~SpawnListMenu()
+{
 }

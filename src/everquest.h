@@ -1216,7 +1216,7 @@ struct hpUpdateStruct
 
 /*
 ** Inspecting Information
-** Length: 1046 Octets
+** Length: 1042 Octets
 ** OpCode: InspectDataCode
 */
 
@@ -1224,13 +1224,13 @@ struct inspectDataStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0xb6
 /*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint8_t  unknown0002[40];        // ***Placeholder
-/*0042*/ char     itemNames[21][32];      // 21 items with names 
+/*0002*/ uint8_t  unknown0002[36];        // ***Placeholder
+/*0038*/ char     itemNames[21][32];      // 21 items with names 
                                           //    32 characters long.
-/*0714*/ int16_t  icons[21];              // Icon Information
-/*0756*/ uint8_t  unknown0756[2];         // ***Placeholder
-/*0758*/ char     mytext[200];            // Player Defined Text Info
-/*0958*/ uint8_t  unknown0958[88];        // ***Placeholder
+/*0710*/ int16_t  icons[21];              // Icon Information
+/*0752*/ uint8_t  unknown0756[2];         // ***Placeholder
+/*0754*/ char     mytext[200];            // Player Defined Text Info
+/*0954*/ uint8_t  unknown0958[88];        // ***Placeholder
 };
 
 /*

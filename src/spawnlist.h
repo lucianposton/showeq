@@ -31,6 +31,7 @@
 #include <qvaluelist.h>
 #include <qlistview.h>
 #include <qptrdict.h>
+#include <qtextstream.h>
 
 // these are all used for the CFilterDlg
 #include <regex.h>
@@ -43,6 +44,7 @@
 #include <qhbox.h>
 #include <qvbox.h>
 #include <qpushbutton.h>
+#include <qpopupmenu.h>
 
 #include "everquest.h"
 #include "player.h"
@@ -65,6 +67,27 @@
 #define SPAWNCOL_INFO  11
 #define SPAWNCOL_SPAWNTIME 12
 #define SPAWNCOL_MAXCOLS 13
+
+//--------------------------------------------------
+// forward declarations
+class CSpawnList;
+class SpawnListItem;
+
+//--------------------------------------------------
+// SpawnListMenu
+class SpawnListMenu : public QPopupMenu
+{
+   Q_OBJECT
+
+ public:
+  SpawnListMenu(CSpawnList* spawnlist, QWidget* parent = 0, const char* name = 0);
+  virtual ~SpawnListMenu();
+
+ protected:
+  CSpawnList* m_spawnlist;
+
+};
+
 
 //--------------------------------------------------
 // SpawnListItem
@@ -112,7 +135,8 @@ public:
 	      CategoryMgr* categoryMgr,
 	      QWidget *parent = 0, const char * name = 0);
 
-public:
+   const QString& preferenceName() { return m_preferenceName; }
+
    SpawnListItem* Selected();
    void DeleteItem(const Item* item);
    SpawnListItem* Find(QListViewItemIterator& it, 
@@ -135,6 +159,8 @@ public:
    QColor pickSpawnColor(const Item *item, QColor def = Qt::black);
    const Category* getCategory(SpawnListItem *);
    bool debug() { return bDebug; };
+
+   SpawnListMenu* menu();
 
 signals:
    void listUpdated();   // flags in spawns have changed
@@ -168,12 +194,17 @@ public slots:
    
 private slots:
    void selChanged(QListViewItem*);
-   void rightBtnPressed(QListViewItem* litem, 
-			const QPoint &point, 
-			int col);
-   void rightBtnReleased(QListViewItem *item,
-			 const QPoint &point, 
-			 int col);
+
+//#if 0
+//   void rightBtnPressed(QListViewItem* litem, 
+//			const QPoint &point, 
+//			int col);
+//   void rightBtnReleased(QListViewItem *item,
+//			 const QPoint &point, 
+//			 int col);
+//#endif
+   void myMousePressEvent (int button, QListViewItem *litem, const QPoint &point, int col);
+   void myMouseDoubleClickEvent(QListViewItem *litem);
 
 private:
    void setSelectedQueit(QListViewItem* item, bool selected);
@@ -189,6 +220,9 @@ private:
    // category pointer used as keys to look up the associated SpawnListItem
    QPtrDict<SpawnListItem> m_categoryListItems;
    bool     bDebug;
+
+   QString m_preferenceName;
+   SpawnListMenu* m_menu;
 };
 
 #endif // SPAWNLIST_H

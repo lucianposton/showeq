@@ -1,3 +1,18 @@
+fee    (09/04/02)
+------------------
+ + made spawnlist, stats and skill windows dynamic again. If you choose not
+   to have these windows visible they will no longer be taking up memory. 
+   This is a regression of an earlier change
+ + inspectStruct is now correct
+ + moved some things around in dispatchZoneData, should save a few cpu cycles
+ + added some code for a future modification to spawnlist.cpp. The options 
+   available under the View menu for the spawnlist, skill and stat lists
+   will eventually be available on a popup by right clicking inside the 
+   desired widget. Mouse events may also change for these widgets. Right-
+   clicking on a spawnlist category and single-left clicking will remain 
+   the same. Double-Left-Click will now dump the selected spawn's info to
+   the console. Single-right-clicking will bring up the popup(coming soon).
+
 dohpaZ (08/04/02)
 ------------------
 Modifications:

@@ -1391,8 +1391,6 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
 #ifdef DEBUG_PACKET
   debug ("dispatchWorldData()");
 #endif /* DEBUG_PACKET */
-  if (len < 10)
-    return;
   
   uint16_t opCode = eqntohuint16(data);
 
@@ -1489,15 +1487,8 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     uint32_t decodedDataLen = 65536;
     uint8_t  decodedData[decodedDataLen];
 
-    if (len < 0)
-        return;
-
-    /* pre-process the packets */
-    decoded = m_decode->DecodePacket(data, len, decodedData,
-                                     &decodedDataLen, showeq_params->ip);
-
     uint16_t opCode = eqntohuint16(data); // data[1] | (data[0] << 8);
-
+    
     //Logging 
     if (showeq_params->logZonePackets)
         if (!logData (showeq_params->ZoneLogFilename, len, data))
@@ -1532,9 +1523,15 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         case CPlayerItemsCode:
         {
 	    unk = false;
-
+	    
+            // decode/decompress the payload
+            decoded = m_decode->DecodePacket(data, len, decodedData,
+                                     &decodedDataLen, showeq_params->ip);
 	    if (!decoded)
+            {
+                printf("EQPacket: could not decompress CPlayerItemsCode 0x%x\n", opCode);
 	        break;
+            }
 
             cPlayerItemsStruct *citems;
             citems = (cPlayerItemsStruct *)(decodedData);
@@ -1586,6 +1583,15 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    break;
         } /* end CPlayerItemCode */
 
+        case PlayerItemCode:
+        {
+            unk = ! ValidatePayload(PlayerItemCode, playerItemStruct);
+
+            emit wearItem((const playerItemStruct*)data, len, dir);
+
+            break;
+        }
+
         case ItemInShopCode:
         {
             unk = ! ValidatePayload(ItemInShopCode, itemInShopStruct);
@@ -1631,15 +1637,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             break;
         } /* end ItemTradeCode */
         
-        case PlayerItemCode:
-        {
-            unk = ! ValidatePayload(PlayerItemCode, playerItemStruct);
-
-            emit wearItem((const playerItemStruct*)data, len, dir);
-
-            break;
-        }
-
         case SummonedItemCode:
         {
             unk = ! ValidatePayload(SummonedItemCode, summonedItemStruct);
@@ -1659,6 +1656,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             unk = false; // move above if to prevent duplicate logging
                          // not sure if its placement was intentional before.
+	    
+            // decode/decompress the payload
+            decoded = m_decode->DecodePacket(data, len, decodedData,
+                                     &decodedDataLen, showeq_params->ip);
 
             if (decoded && !showeq_params->broken_decode)
             {
@@ -1714,6 +1715,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             if (showeq_params->logEncrypted)
                 logData(showeq_params->NewSpawnCodeFilename, len, data);
+	    
+            // decode/decompress the payload
+            decoded = m_decode->DecodePacket(data, len, decodedData,
+                                     &decodedDataLen, showeq_params->ip);
 
             //printf("NewSpawn received:\n");
 
@@ -1739,6 +1744,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
   
             unk = false; // move above break to prevent duplicate logging
                          // not sure if its placement was intentional before.
+	    
+            // decode/decompress the payload
+            decoded = m_decode->DecodePacket(data, len, decodedData,
+                                     &decodedDataLen, showeq_params->ip);
 
             if (!decoded || showeq_params->broken_decode)
                 break;
@@ -1835,7 +1844,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case InspectDataCode:
         {
-            unk = false;
+            unk = ! ValidatePayload(InspectDataCode, inspectDataStruct);
 
             emit inspectData((const inspectDataStruct *)data, len, dir);
 
@@ -2376,7 +2385,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         case CDoorSpawnsCode:
         {
             unk = false;
-
+	    
+            // decode/decompress the payload
+            decoded = m_decode->DecodePacket(data, len, decodedData,
+                                     &decodedDataLen, showeq_params->ip);
             if (!decoded)
                break;
 
