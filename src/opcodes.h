@@ -73,11 +73,11 @@
 
 #define TradeBookInCode             0x3440
 
-#define cConCorpseCode              0x3422
+#define cConCorpseCode              0x3442
 
 #define xBuyItemCode                0x3540
 
-#define sSpellFizzleRegainCode      0x3522
+#define sSpellFizzleRegainCode      0x3542
 
 #define CharProfileCode             0x3640
 
@@ -101,7 +101,7 @@
 
 #define sDoneLootingCode            0x4421
 
-#define CloseVendorCode             0x4521
+#define CloseVendorCode             0x4541
 
 #define CastOnCode                  0x4640
 
@@ -173,7 +173,7 @@
 
 #define DoorSpawnCode               0x9520
 
-#define LevelUpUpdateCode           0x9821
+#define LevelUpUpdateCode           0x9841
 
 #define ExpUpdateCode               0x9941
 
@@ -181,7 +181,7 @@
 
 #define MobUpdateCode               0x9f40
 
-#define sLootItemCode               0xa020
+#define sLootItemCode               0xa040
 
 #define Attack2Code                 0xa140
 
@@ -193,13 +193,13 @@
 
 #define InspectDataCode             0xb640
 
-#define BookTextCode                0xce20
+#define BookTextCode                0xce40
 
 #define xTradeSpellBookSlotsCode    0xce41
 
 #define BadCastCode                 0xd321
 
-#define TradeItemOutCode            0xdf20
+#define TradeItemOutCode            0xdf40
 
 #define RandomCode                  0xe741
 
@@ -215,6 +215,6 @@
 
 #define CDoorSpawnsCode             0xf741
 
-#define cChatFiltersCode            0xff21
+#define cChatFiltersCode            0xff41
 
 #endif // OPCODES_H

@@ -1016,13 +1016,14 @@ struct makeDropStruct
 /*0010*/ uint16_t itemNr;                 // Item ID
 /*0012*/ uint8_t  unknown0012[2];         // ***Placeholder
 /*0014*/ uint16_t dropId;                 // DropID
-/*0016*/ uint8_t  unknown0016[130];        // ***Placeholder
-/*0026*/ float    z;                   // Z Position
-/*0030*/ float    x;                   // X Position
-/*0034*/ float    y;                   // Y Position
-/*0042*/ char     idFile[16];             // ACTOR ID
-/*0038*/ uint8_t  unknown0054[4];         // ***Placeholder
-/*0058*/ uint8_t  unknown0074[48];       // ***Placeholder
+/*0016*/ uint8_t  unknown0146[130];       // ***Placeholder
+/*0146*/ float    z;                      // Z Position
+/*0150*/ float    x;                      // X Position
+/*0154*/ float    y;                      // Y Position
+/*0158*/ char     idFile[16];             // ACTOR ID
+/*0174*/ uint8_t  unknown0054[4];         // ***Placeholder
+/*0178*/ uint8_t  unknown0074[48];        // ***Placeholder
+/*0226*/
 };
 
 /*

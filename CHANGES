@@ -1,3 +1,8 @@
+fee (floyd) 10/26/2002
+----------------------
+ + bug fix: tweaked spawnshell to track ground spanws more accuratly
+ + updated makeDropStruct to fit current packet (resolves the map scaling)
+
 fee (floyd) 10/25/2002
 ----------------------
  + Version 4.3.0

@@ -330,13 +330,16 @@ void SpawnShell::dumpSpawns(itemType type, QTextStream& out)
 }
 
 // same-name slots, connecting to Packet signals
-void SpawnShell::newGroundItem(const makeDropStruct *d)
+void SpawnShell::newGroundItem(const makeDropStruct *d, uint32_t, uint8_t dir)
 {
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::newGroundItem(makeDropStruct *)\n");
 #endif
   // if zoning, then don't do anything
   if (m_zoneMgr->isZoning())
+    return;
+
+  if (dir != DIR_SERVER)
     return;
 
   if (!d)
@@ -367,11 +370,19 @@ void SpawnShell::newGroundItem(const makeDropStruct *d)
     emit handleAlert(item, tNewSpawn);
 }
 
-void SpawnShell::removeGroundItem(const remDropStruct *d)
+void SpawnShell::removeGroundItem(const remDropStruct *d, uint32_t, uint8_t dir)
 {
 #ifdef SPAWNSHELL_DIAG
   printf("SpawnShell::removeGroundItem(remDropStruct *)\n");
 #endif
+
+  // if zoning, then don't do anything
+  if (m_zoneMgr->isZoning())
+    return;
+
+  if (dir != DIR_SERVER)
+    return;
+
   if (d)
     deleteItem(tDrop, d->dropId);
 }

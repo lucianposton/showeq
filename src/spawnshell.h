@@ -105,8 +105,8 @@ public slots:
    void clear();
 
    // slots to receive from EQPacket...
-   void newGroundItem(const makeDropStruct*);
-   void removeGroundItem(const remDropStruct*);
+   void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
+   void removeGroundItem(const remDropStruct*, uint32_t, uint8_t);
    void newCoinsItem(const dropCoinsStruct*);
    void compressedDoorSpawn (const cDoorSpawnsStruct* c);
    void newDoorSpawn(const doorStruct* d);

@@ -1298,9 +1298,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
    // connect the SpawnShell slots to Packet signals
    connect(m_packet, SIGNAL(newGroundItem(const makeDropStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(newGroundItem(const makeDropStruct *)));
+	   m_spawnShell, SLOT(newGroundItem(const makeDropStruct *, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(removeGroundItem(const remDropStruct *, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(removeGroundItem(const remDropStruct *)));
+	   m_spawnShell, SLOT(removeGroundItem(const remDropStruct *, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(newCoinsItem(const dropCoinsStruct *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(newCoinsItem(const dropCoinsStruct *)));
    connect(m_packet, SIGNAL(removeCoinsItem(const removeCoinsStruct *, uint32_t, uint8_t)),
@@ -4188,10 +4188,12 @@ void EQInterface::newGroundItem(const makeDropStruct* adrop, uint32_t, uint8_t d
   else
     tempStr = "";
   
-  if (tempStr != "")
+  //if (tempStr != "")
+  if (tempStr)
   {
     tempStr.prepend("Item: Drop: You have dropped your '");
     tempStr.append("' on the ground!");
+    tempStr.append(" location %1, %2, %3").arg(adrop->y).arg(adrop->x).arg(adrop->z);
   }
   else
     tempStr = QString("Item: Drop: You have dropped your *UNKNOWN ITEM* (ID: %1)  on the ground!\nNOTE:\tIn order for ShowEQ to know the name of the item you dropped it is suggested that you pickup and drop the item again...").arg(adrop->itemNr);
