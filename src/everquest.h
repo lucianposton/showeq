@@ -1092,7 +1092,7 @@ struct wearChangeStruct
 /*0001*/ uint8_t  version;                // 0x20
 /*0002*/ uint16_t spawnId;                // SpawnID
 /*0004*/ uint8_t  wearSlotId;             // Slot ID
-/*0005*/ uint8_t  unknown0005;            // unknown
+/*0005*/ uint8_t  unknown0005[1];            // unknown
 /*0006*/ uint16_t newItemId;              // Item ID see weaponsX.h or util.cpp
 /*0008*/ uint8_t  unknown0008[2];         // unknown
 /*0010*/ uint32_t color;                  // color
