@@ -2232,7 +2232,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             if (WearChangeVer != opCodeVersion)
                 break;
 
-            unk = true; //! ValidatePayload(WearChangeCode, wearChangeStruct);
+            unk = ! ValidatePayload(WearChangeCode, wearChangeStruct);
 
             emit spawnWearingUpdate ((const wearChangeStruct*)data);
 
