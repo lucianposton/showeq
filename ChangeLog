@@ -3,6 +3,7 @@ Version: $Id$ $Name$
 dohpaZ (11/7/04)
 ------------------------
 + Updated version to 5.0.0.16
++ Tweaked acinclude.m4 to improve x86_64 behaviour.
 
 dohpaZ (11/6/04)
 ------------------------

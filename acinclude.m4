@@ -763,6 +763,30 @@ qt_libdirs=" $QTDIR/lib			\
              $x_libraries		\
              $qt_libdirs"
 
+case $host_cpu in
+powerpc64 | s390x | sparc64 | x86_64)
+qt_libdirs=" $QTDIR/lib64			\
+             $QTLIB			\
+	     /usr/local/qt3/lib64	\
+             /usr/local/qt/lib64	\
+             /usr/local/qt*/lib64	\
+	     /usr/qt/3/lib64		\
+	     /usr/qt/*/lib64		\
+	     /usr/lib/qt3/lib64		\
+             /usr/lib/qt/lib64		\
+	     /usr/lib/qt*/lib64		\
+             /usr/lib64			\
+	     /usr/X11R6/lib/X11/qt3/lib64 \
+             /usr/X11R6/lib/X11/qt/lib64  \
+             /usr/X11R6/lib/X11/qt*/lib64 \
+	     /usr/X11R6/lib/qt3/lib64	\
+             /usr/X11R6/lib/qt/lib64	\
+	     /usr/X11R6/lib/qt*/lib64	\
+             /usr/src/qt-*/lib64	\
+             $qt_libdirs"
+;;
+esac
+
 [[ "$ac_qt_libraries" != "NO" ]]   &&   \
 qt_libdirs="$ac_qt_libraries $qt_libdirs"
 
