@@ -1665,10 +1665,10 @@ struct timeOfDayStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0xf2
 /*0001*/ uint8_t  version;                // 0x20
-/*0002*/ int8_t   hour;                   // Hour (1-24)
-/*0003*/ int8_t   minute;                 // Minute (0-59)
-/*0004*/ int8_t   day;                    // Day (1-28)
-/*0005*/ int8_t   month;                  // Month (1-12)
+/*0002*/ uint8_t  hour;                   // Hour (1-24)
+/*0003*/ uint8_t  minute;                 // Minute (0-59)
+/*0004*/ uint8_t  day;                    // Day (1-28)
+/*0005*/ uint8_t  month;                  // Month (1-12)
 /*0006*/ uint16_t year;                   // Year
 /*0008*/ uint16_t unknown0016;            // Placeholder
 };
