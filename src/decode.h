@@ -44,7 +44,7 @@ typedef std::vector<packetbuff> packetList;
 
 void initDecode();
 void stopDecode();
-packetList decodePacket(uint8_t *data, uint32_t len);
+packetList decodePacket(uint8_t *data, uint32_t len, uint8_t dir);
 uint16_t implicitlen (uint16_t opcode);
 
 #endif	// EQDECODE_H

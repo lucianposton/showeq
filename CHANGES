@@ -1,3 +1,15 @@
+dohpaZ (09/10/03)
+---------------------
++ Updated version to 4.3.12
++ Applied patch #802406 "Patch for Combat Window" from UnGod (belith)
++ Applied patch 802938 "Some Updates to races.h" from llaffer
++ Fixed a couple bugs in libEQ.cpp
++ Fixed packet.cpp to use BUFSIZ instead of 1500 for pcap snaplen
++ Updated to 09/09/03 patch - structure changes and new opcodes (some nods
+  to Talorn).
++ Updates zones.h to include the new LDoN zones.
++ Generated an up to date spells.h from the LDoN spells_en.txt file.
+
 dohpaZ (09/8/03)
 ---------------------
 + Updated version to 4.3.11

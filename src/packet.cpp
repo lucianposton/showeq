@@ -766,7 +766,7 @@ void EQPacket::processPackets (void)
   /* Set flag that we are busy decoding */
   m_busy_decoding = true;
   
-  unsigned char buffer[1500]; 
+  unsigned char buffer[BUFSIZ]; 
   short size;
   
   /* fetch them from pcap */
@@ -1686,7 +1686,7 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
       emit toggle_log_WorldData(); //untoggle the GUI checkmark
   }
 
-  packetList pktlist = decodePacket(data, len);
+  packetList pktlist = decodePacket(data, len, direction);
   if (pktlist.size() == 0)
       return;
   for (unsigned int packetNum = 0; packetNum < pktlist.size(); packetNum++) 
@@ -1892,7 +1892,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
        emit eqTimeChangedStr(QString (timeMessage));
     }
 
-    packetList pktlist = decodePacket(data, len);
+    packetList pktlist = decodePacket(data, len, dir);
     if (pktlist.size() == 0)
 	return;
     for (unsigned int packetNum = 0; packetNum < pktlist.size(); packetNum++) {
@@ -2284,6 +2284,15 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
 	    break;
         }
+
+	case SpellFadeCode:
+	{
+	     unk = false;
+
+	     emit spellFaded((const spellFadedStruct*)data, len, dir);
+
+	     break;
+	}
 
         case MobUpdateCode:
         {
@@ -3008,9 +3017,17 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	  break;
 	}
 
-        case GuildMemberUpdate:
+        case GuildMemberListCode:
+	{
 	    unk = false;
    	    break;
+	}
+
+        case GuildMemberUpdateCode:
+	{
+	    unk = false;
+   	    break;
+	}
 	
         default:
         {
@@ -3503,7 +3520,7 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
    ** and cause us to miss new stream when the player zones.
    */
    // initialize the pcap object 
-   m_pcache_pcap = pcap_open_live((char *) device, 1500, true, 0, ebuf);
+   m_pcache_pcap = pcap_open_live((char *) device, BUFSIZ, true, 0, ebuf);
 #ifdef __FreeBSD__
    // if we're on FreeBSD, we need to call ioctl on the file descriptor
    // with BIOCIMMEDIATE to get the kernel Berkeley Packet Filter device

@@ -20,6 +20,8 @@
 #ifndef EQSTRUCT_H
 #define EQSTRUCT_H
 
+#include "../conf.h"
+
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #else
@@ -382,8 +384,8 @@ struct spawnStruct
 /*245*/ uint16_t petOwnerId;
 /*247*/ char     unknown247[2];
 /*249*/ int16_t  deity;           // deity
-/*251*/ char     unknown251[6];
-}; // 257 bytes
+/*251*/ char     unknown251[7];
+}; // 258 bytes
 
 /* 
 ** Zone Spawn Struct 
@@ -725,22 +727,22 @@ struct ServerZoneEntryStruct
 /*082*/ float	 x;
 /*086*/ float    heading;
 /*090*/ float	 z;
-/*094*/ char     unknown094[132];
-/*226*/ uint32_t zoneId;
-/*230*/ char     unknown230[24];
-/*254*/ char     lastName[20];
-/*274*/ char     unknown274[48];
-/*322*/ uint16_t level;                  // Player's Level
-/*324*/ char     unknown324[4];
-/*328*/ uint8_t  class_;                 // Player's Class
-/*329*/ char     unknown329[13];
-/*342*/ uint32_t race;                   // Player's Race
-/*346*/ char     unknown346[28];
-/*374*/ uint32_t deity;                  // Player's Deity
-/*378*/ char     unknown378[4];
-/*382*/ uint32_t guildId;
-/*386*/ char     unknown390[12];
-/*398*/
+/*094*/ char     unknown094[188];
+/*282*/ uint32_t zoneId;
+/*286*/ char     unknown230[24];
+/*310*/ char     lastName[20];
+/*330*/ char     unknown330[48];
+/*378*/ uint16_t level;                  // Player's Level
+/*380*/ char     unknown380[4];
+/*384*/ uint8_t  class_;                 // Player's Class
+/*385*/ char     unknown385[13];
+/*398*/ uint32_t race;                   // Player's Race
+/*402*/ char     unknown402[28];
+/*430*/ uint32_t deity;                  // Player's Deity
+/*434*/ char     unknown434[4];
+/*438*/ uint32_t guildId;
+/*442*/ char     unknown442[12];
+/*454*/
 };
 
 /*
@@ -1085,11 +1087,12 @@ struct newCorpseStruct
 /*0001*/ uint8_t  version;                // 0x00
 /*0002*/ uint32_t spawnId;                // Id of spawn that died
 /*0006*/ uint32_t killerId;               // Killer
-/*0010*/ uint8_t  unknown0006[8];         // ***Placeholder
+/*0010*/ uint8_t  unknown0010[8];         // ***Placeholder
 /*0018*/ uint32_t spellId;                // ID of Spell
 /*0022*/ int8_t   type;                   // Spell, Bash, Hit, etc...
-/*0023*/ uint32_t damage;                 // Damage
-/*0027*/ uint8_t  unknown0016[7];         // ***Placeholder
+/*0023*/ uint8_t  unknown0023[3];         // ***Placeholder
+/*0024*/ uint32_t damage;                 // Damage
+/*0028*/ uint8_t  unknown0028[4];         // ***Placeholder
 }; //34
 
 /*
@@ -1380,6 +1383,20 @@ struct spMesgStruct
 /*0001*/ uint8_t version;                 // 0x21
 /*0002*/ int32_t msgType;                 // Type of message
 /*0006*/ char    message[0];              // Message, followed by four Octets?
+};
+
+/*
+** Spell Fade Struct
+** Length: 10 Octets
+** OpCode: BeginCastCode
+*/
+struct spellFadedStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x82
+/*0001*/ uint8_t  version;                // 0x21
+/*0002*/ uint8_t  unknown[4];             //*** Placeholder
+/*0004*/ char     message[0];             // fade message
+/*0???*/ uint8_t  unkXXX[3];              //*** Placeholder
 };
 
 /*

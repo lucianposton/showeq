@@ -658,7 +658,7 @@ void SpawnShell::updateSpawns(const spawnPositionUpdate* updates)
   if (m_zoneMgr->isZoning())
     return;
 if (updates->spawnId==2803)
-	printf("heading=%d  u3=%d  unused2=%d\n",updates->heading,updates->u3,updates->unused2);
+	printf("heading=%d  u3=%lld  unused2=%d\n",updates->heading,updates->u3,updates->unused2);
 
  updateSpawn(updates->spawnId, 
 	     updates->x >> 3, updates->y >> 3, updates->z >> 3,

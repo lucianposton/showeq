@@ -17,27 +17,34 @@
 #include "decode.h"
 #include "opcodes.h"
 
-int64_t decode_key = 0;
-bool valid_key = false;
+int64_t decode_key[DIR_SERVER+1] = {0, 0, 0};
+bool valid_key[DIR_SERVER+1] = { false, false, false };
 
-uint8_t* decodeOpCode (uint8_t *data, uint32_t *len);
+uint8_t* decodeOpCode (uint8_t *data, uint32_t *len, uint8_t dir);
 
-void initDecode() {
-    valid_key = true;
-    decode_key = 0;
+void initDecode() 
+{
+  for (uint8_t i = 0 ; i <= DIR_SERVER; i++)
+  {
+    valid_key[i] = true;
+    decode_key[i] = 0;
+  }
 }
 
-void stopDecode() {
-    valid_key = false;
+void stopDecode() 
+{
+  for (uint8_t i = 0 ; i <= DIR_SERVER; i++)
+    valid_key[i] = false;
 }
 
-packetList decodePacket(uint8_t *data, uint32_t len) {
+packetList decodePacket(uint8_t *data, uint32_t len, uint8_t dir) 
+{
     packetList results;
     
     uint16_t opCode = *((uint16_t *)data);
     
     if (opCode & FLAG_CRYPTO || opCode & FLAG_COMP) {
-	data = decodeOpCode (data, &len);
+	data = decodeOpCode (data, &len, dir);
 	if (data == NULL)
 	    return results;
 	opCode = *((uint16_t *)data);
@@ -140,7 +147,7 @@ packetList decodePacket(uint8_t *data, uint32_t len) {
     return results;
 }
 
-uint8_t* decodeOpCode (uint8_t *data, uint32_t *len)
+uint8_t* decodeOpCode (uint8_t *data, uint32_t *len, uint8_t dir)
 {
     uint16_t opCode = *(uint16_t *)data;
     bool s_encrypt = opCode & FLAG_CRYPTO;
@@ -148,17 +155,15 @@ uint8_t* decodeOpCode (uint8_t *data, uint32_t *len)
 
     if (s_encrypt)
     {
-        if (!valid_key)
+        if (!valid_key[dir])
 	    return NULL;
 	    
-//	printf ("decoding 0x%04x with 0x%08x\n", opCode, decode_key);
+//	printf ("decoding 0x%04x with 0x%08x\n", opCode, decode_key[dir]);
 	
-	int64_t offset = (decode_key % 5) + 7;
-	*((int64_t *)(data+offset)) ^= decode_key;
-	decode_key ^= *((int64_t *)(data+offset));
-	decode_key += *len - 2;
-	opCode &= ~FLAG_CRYPTO;
-	memcpy (data, &opCode, 2);
+	int64_t offset = (decode_key[dir] % 5) + 7;
+	*((int64_t *)(data+offset)) ^= decode_key[dir];
+	decode_key[dir] ^= *((int64_t *)(data+offset));
+	decode_key[dir] += *len - 2;
     }
 
     if (compressed)
@@ -170,15 +175,19 @@ uint8_t* decodeOpCode (uint8_t *data, uint32_t *len)
 	retval = uncompress (decompressed+2, (uLongf*)&dcomplen, &data[2], (*len)-2);
 	if (retval != 0)
 	{
-	    if (s_encrypt)
+	    if (s_encrypt) 
+	    {
 		printf("Lost sync, relog or zone to reset\n");
-	        valid_key = false;
+	        valid_key[dir] = false;
+	    }
 
-	    printf ("uncompress failed on 0x%04x: %s\nno further attempts will be made until zone.", opCode, zError (retval));
+	    printf ("uncompress failed on 0x%04x: %s\nno further attempts will be made until zone for direction %d.\n", opCode, zError (retval), dir);
 	    return NULL;
 	}
 //	printf ("clean uncompress on 0x%04x: %s\n", opCode, zError (retval));
 	opCode &= ~FLAG_COMP;
+	if (s_encrypt) 
+	  opCode &= ~FLAG_CRYPTO;
 	memcpy (decompressed, &opCode, 2);
 	data = decompressed;
 	*len = dcomplen+2;

@@ -117,17 +117,17 @@
     "LegChopper",           // 0x6e
     NULL,                   // 0x6f - Unknown Weapon
     NULL,                   // 0x70 - Unknown Weapon
-    NULL,                   // 0x71 - Unknown Weapon
+    "Ta'Nak",               // 0x71
     NULL,                   // 0x72 - Unknown Weapon
     "Mallet",               // 0x73
     NULL,                   // 0x74 - Unknown Weapon
-    NULL,                   // 0x75 - Unknown Weapon
+    "Re'Stek",              // 0x75
     "Envy",                 // 0x76
     "LupineDagger",         // 0x77
     "BlackTranslucentBlade",// 0x78
     "WhiteTranslucentBlade",// 0x79
     "Velium2hStaff",        // 0x7a
-    NULL,                   // 0x7b - Unknown Weapon
+    "Ch'Ror",               // 0x7b
     NULL,                   // 0x7c - Unknown Weapon
     "SarnakSkullStaff",     // 0x7d
     "WoodStaff",            // 0x7e

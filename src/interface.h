@@ -100,6 +100,7 @@ class EQInterface:public QMainWindow
    void resetPacket(int, int);
    void attack2Hand1(const attack2Struct *);
    void action2Message(const action2Struct *);
+   void combatKillSpawn(const newCorpseStruct *);
    void itemShop(const itemInShopStruct* items);
    void moneyOnCorpse(const moneyOnCorpseStruct* money);
    void itemPlayerReceived(const itemOnCorpseStruct* itemc);
@@ -120,6 +121,7 @@ class EQInterface:public QMainWindow
    void spMessage(const spMesgStruct* spmsg);
    void handleSpell(const memSpellStruct* mem, uint32_t, uint8_t);
    void beginCast(const beginCastStruct* bcast);
+   void spellFaded(const spellFadedStruct* sf);
    void interruptSpellCast(const badCastStruct *icast);
    void startCast(const startCastStruct* cast);
    void systemMessage(const sysMsgStruct* smsg);

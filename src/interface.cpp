@@ -1211,6 +1211,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   this, SLOT(attack2Hand1(const attack2Struct*)));
    connect(m_packet, SIGNAL(action2Message(const action2Struct*, uint32_t, uint8_t)),
            this, SLOT(action2Message(const action2Struct*)));
+   connect(m_packet, SIGNAL(killSpawn(const newCorpseStruct*, uint32_t, uint8_t)),
+	   this, SLOT(combatKillSpawn(const newCorpseStruct*)));
    connect(m_packet, SIGNAL(playerItem(const playerItemStruct*, uint32_t, uint8_t)),
 	   this, SLOT(playerItem(const playerItemStruct*)));
    connect(m_packet, SIGNAL(itemShop(const itemInShopStruct*, uint32_t, uint8_t)),
@@ -1255,6 +1257,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   this, SLOT(handleSpell(const memSpellStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(beginCast(const beginCastStruct*, uint32_t, uint8_t)),
 	   this, SLOT(beginCast(const beginCastStruct*)));
+   connect(m_packet, SIGNAL(spellFaded(const spellFadedStruct*, uint32_t, uint8_t)),
+	   this, SLOT(spellFaded(const spellFadedStruct*)));
    connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *, uint32_t, uint8_t)),
 	   this, SLOT(interruptSpellCast(const badCastStruct *)));
    connect(m_packet, SIGNAL(startCast(const startCastStruct*, uint32_t, uint8_t)),
@@ -3596,6 +3600,22 @@ void EQInterface::action2Message(const action2Struct *action2)
 		(target != NULL) ? target->name() : QString("Unknown"), (source != NULL) ? source->name() : QString("Unknown"));
 }
 
+// belith - combatKillSpawn, fix for the combat window
+//          this displays a killing shot on a mob in combat records
+void EQInterface::combatKillSpawn(const newCorpseStruct *deadspawn)
+{
+	// only show my kills
+	if (deadspawn && deadspawn->killerId == m_player->id())
+	{
+		const Item* target = m_spawnShell->findID(tSpawn, deadspawn->spawnId);
+		const Item* source = m_spawnShell->findID(tSpawn, deadspawn->killerId);
+		emit combatSignal(deadspawn->spawnId, deadspawn->killerId,
+			(deadspawn->type == -25) ? 231 : deadspawn->type,
+			deadspawn->spellId, deadspawn->damage,
+			(target != NULL) ? target->name() : QString("Unknown"),
+			(source != NULL) ? source->name() : QString("Unknown"));
+	}
+}
 
 void EQInterface::itemShop(const itemInShopStruct* items)
 {
@@ -4294,6 +4314,19 @@ void EQInterface::beginCast(const beginCastStruct *bcast)
 		   (const char*)spell_name(bcast->spellId), casttime,
 		   casttime == 1 ? "" : "s"
 		   );
+  emit msgReceived(tempStr);
+}
+
+void EQInterface::spellFaded(const spellFadedStruct *sf)
+{
+  QString tempStr;
+
+  if (!showeq_params->showSpellMsgs)
+    return;
+  
+  tempStr.sprintf( "SPELL: Faded: %s", 
+		   sf->message);
+
   emit msgReceived(tempStr);
 }
 

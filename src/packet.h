@@ -9,7 +9,6 @@
 #ifndef EQPACKET_H
 #define EQPACKET_H
 
-//#define MAXSPAWNDATA        98304
 #define MAXSTREAMS          4
 
 #ifdef __FreeBSD__
@@ -684,6 +683,7 @@ class EQPacket : public QObject
    void handleSpell(const memSpellStruct* mem, uint32_t, uint8_t);
    void beginCast(const beginCastStruct* bcast, uint32_t, uint8_t);
    void startCast(const startCastStruct* cast, uint32_t, uint8_t);
+   void spellFaded(const spellFadedStruct* cast, uint32_t, uint8_t);
    void systemMessage(const sysMsgStruct* smsg, uint32_t, uint8_t);
    void moneyUpdate(const moneyUpdateStruct* money, uint32_t, uint8_t);
    void moneyThing(const moneyThingStruct* money, uint32_t, uint8_t);

@@ -335,5 +335,25 @@
     "A Tower",                // 328
     NULL,                     // 329
     "Froglok",                // 330
-
-
+    "Troll",                  // 331
+    "Troll",                  // 332
+    NULL,                     // 333
+    NULL,                     // 334
+    NULL,                     // 335
+    NULL,                     // 336
+    NULL,                     // 337
+    "Gnome",                  // 338
+    "Dark Elf",               // 339
+    "Ogre",                   // 340
+    "Human",                  // 341
+    "Erudite",                // 342
+    NULL,                     // 343
+    "Zombie",                 // 344
+    "Luggald",                // 345
+    "Luggald",                // 346
+    "Luggald",                // 347
+    "Drogmor",                // 348
+    NULL,                     // 349
+    NULL,                     // 350
+    "Dark Elf",               // 351
+    "Dark Elf",               // 352

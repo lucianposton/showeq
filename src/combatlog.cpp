@@ -26,8 +26,9 @@
 ////////////////////////////////////////////
 //  CombatOffenseRecord implementation
 ////////////////////////////////////////////
-CombatOffenseRecord::CombatOffenseRecord( int iType, Player* p) :
+CombatOffenseRecord::CombatOffenseRecord( int iType, Player* p, int iSpell) :
 	m_iType(iType),
+	m_iSpell(iSpell),
 	m_player(p),
 	m_iHits(0),
 	m_iMisses(0),
@@ -511,6 +512,7 @@ void CombatWindow::updateOffense()
 	for(pRecord = m_combat_offense_list.first(); pRecord != 0; pRecord = m_combat_offense_list.next())
 	{
 		int iType = pRecord->getType();
+		int iSpell = pRecord->getSpell();
 		int iHits = pRecord->getHits();
 		int iMisses = pRecord->getMisses();
 		int iMinDamage = pRecord->getMinDamage();
@@ -521,7 +523,45 @@ void CombatWindow::updateOffense()
 		double dRatio = (double)iHits / (double)iMisses;
 
 		QString s_type;
-		s_type.sprintf("%s(%d)", (const char*)skill_name(iType), iType);
+		// Belith -- Damage shields are strange!
+		switch(iType)
+		{
+			case 0:		// 1H Blunt
+			case 1:		// 1H Slashing
+			case 2:		// 2H Blunt
+			case 3:		// 2H Slashing
+			case 28:	// Hand To Hand
+			case 36:	// Piercing
+			case 7:		// Archery
+			case 8:		// Backstab
+			case 10:	// Bash
+			case 21:	// Dragon Punch
+			case 23:	// Eagle Strike
+			case 26:	// Flying Kick
+			case 30:	// Kick
+			case 38:	// Round Kick
+			case 51:	// Throwing
+			case 52:	// Tiger Claw
+			{
+				// this is a normal skill
+				s_type.sprintf("%s(%d)", (const char*)skill_name(iType), iType);
+				break;
+			}
+			case 231:       // Non Melee Damage
+			{
+				s_type.sprintf("Spell: %s(%d)", (const char*)spell_name(iSpell), iSpell);
+				break;
+			}
+			default:        // Damage Shield?
+			{
+				// 245 Mark of Retribution
+				// 248 Flameshield of Ro? (45pt) (mage)
+				// -11 Killing Blow with MoR
+				// -8  Killing Blow with Ro? (45pt) (mage)
+				s_type.sprintf("Damage Shield: (%d)", iType);
+				break;
+			}
+		}
 		QString s_hits;
 		s_hits.setNum(iHits);
 		QString s_misses;
@@ -718,10 +758,13 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 	}
 	else if(iSourceID == iPlayerID && iTargetID != iPlayerID)
 	{
-		addOffenseRecord(iType, iDamage);
+		addOffenseRecord(iType, iDamage, iSpell);
 		updateOffense();
-		addMobRecord(iTargetID, iSourceID, iDamage, tName, sName);
-		updateMob();
+		// Belith -- Lets not add buffs, etc
+		if ((iType == 231 && iDamage > 0) || iType != 231) {
+			addMobRecord(iTargetID, iSourceID, iDamage, tName, sName);
+			updateMob();
+		}
 
 		if(iDamage > 0)
 			updateDPS(iDamage);
@@ -732,7 +775,7 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 #endif
 }
 
-void CombatWindow::addOffenseRecord(int iType, int iDamage)
+void CombatWindow::addOffenseRecord(int iType, int iDamage, int iSpell)
 {
 
 #ifdef DEBUGCOMBAT
@@ -745,7 +788,14 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage)
 
 	for(pRecord = m_combat_offense_list.first(); pRecord != 0; pRecord = m_combat_offense_list.next())
 	{
-		if(pRecord->getType() == iType)
+		// Belith -- Lets match spells up as well
+		if(pRecord->getType() == iType && pRecord->getType() != 231)
+		{
+			bFoundRecord = true;
+			break;
+		}
+		if(pRecord->getType() == iType && pRecord->getType() == 231
+			&& pRecord->getSpell() == iSpell)
 		{
 			bFoundRecord = true;
 			break;
@@ -754,15 +804,18 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage)
 
 	if(!bFoundRecord)
 	{
-		pRecord = new CombatOffenseRecord(iType, m_player);
-		m_combat_offense_list.append(pRecord);
+		// Belith -- Again lets skip buffs, etc
+		if ((iDamage > 0 && iType == 231) || iType != 231) {
+			pRecord = new CombatOffenseRecord(iType, m_player, iSpell);
+			m_combat_offense_list.append(pRecord);
+		}
 	}
 
 	if(iDamage > 0)
 	{
 		pRecord->addHit(iDamage);
 	}
-	else
+	else if (iType != 231)
 	{
 		pRecord->addMiss(iDamage);
 	}

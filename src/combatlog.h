@@ -40,9 +40,10 @@ class CombatOffenseRecord
 {
 public:
 
-	CombatOffenseRecord(int iType, Player* p);
+	CombatOffenseRecord(int iType, Player* p, int iSpell);
 
 	int		getType() { return m_iType; };
+	int		getSpell() { return m_iSpell; };
 	int		getHits() { return m_iHits; };
 	int		getMisses() { return m_iMisses; };
 	int		getMinDamage() { return m_iMinDamage; };
@@ -54,6 +55,7 @@ public:
 
 private:
 	int			m_iType;
+	int			m_iSpell;
 	Player*	m_player;
 
 	int 		m_iHits;
@@ -172,7 +174,7 @@ private:
 	QWidget* initDefenseWidget();
 	QWidget* initMobWidget();
 
-	void addOffenseRecord(int iType, int iDamage);
+	void addOffenseRecord(int iType, int iDamage, int iSpell);
 	void addDefenseRecord(int iDamage);
 	void addMobRecord(int iTargetID, int iSourceID, int iDamage, QString tName, QString sName);
 
