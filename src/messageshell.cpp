@@ -337,12 +337,18 @@ void MessageShell::inspectData(const uint8_t* data)
 
   for (int inp = 0; inp < 21; inp ++)
   {
-    tempStr.sprintf("He has %s (icn:%i)", inspt->itemNames[inp], inspt->icons[inp]);
-    m_messages->addMessage(MT_Inspect, tempStr);
+    if (strnlen(inspt->itemNames[inp], 64) > 0)
+    {
+      tempStr.sprintf("He has %s (icn:%i)", inspt->itemNames[inp], inspt->icons[inp]);
+      m_messages->addMessage(MT_Inspect, tempStr);
+    }
   }
 
-  tempStr.sprintf("His info: %s", inspt->mytext);
-  m_messages->addMessage(MT_Inspect, tempStr);
+  if (strnlen(inspt->mytext, 200) > 0)
+  {
+    tempStr.sprintf("His info: %s", inspt->mytext);
+    m_messages->addMessage(MT_Inspect, tempStr);
+  }
 }
 
 void MessageShell::logOut(const uint8_t*, size_t, uint8_t)
@@ -686,8 +692,16 @@ void MessageShell::player(const uint8_t* data)
   message = "ExpAA: " + Commanate(player->altexp);
   m_messages->addMessage(MT_Player, message);
 
+  message.sprintf("Group: %s %s %s %s %s %s", player->groupMembers[0],
+    player->groupMembers[1],
+    player->groupMembers[2],
+    player->groupMembers[3],
+    player->groupMembers[4],
+    player->groupMembers[5]);
+  m_messages->addMessage(MT_Player, message);
+
   int buffnumber;
-  for (buffnumber=0;buffnumber<15;buffnumber++)
+  for (buffnumber=0;buffnumber<20;buffnumber++)
   {
     if (player->buffs[buffnumber].spellid && player->buffs[buffnumber].duration)
     {
@@ -697,6 +711,19 @@ void MessageShell::player(const uint8_t* data)
       m_messages->addMessage(MT_Player, message);
     }
   }
+
+  message = "LDoN Earned Guk Points: " + Commanate(player->ldon_guk_points);
+  m_messages->addMessage(MT_Player, message);
+  message = "LDoN Earned Mira Points: " + Commanate(player->ldon_mir_points);
+  m_messages->addMessage(MT_Player, message);
+  message = "LDoN Earned MMC Points: " + Commanate(player->ldon_mmc_points);
+  m_messages->addMessage(MT_Player, message);
+  message = "LDoN Earned Ruj Points: " + Commanate(player->ldon_ruj_points);
+  m_messages->addMessage(MT_Player, message);
+  message = "LDoN Earned Tak Points: " + Commanate(player->ldon_tak_points);
+  m_messages->addMessage(MT_Player, message);
+  message = "LDoN Unspent Points: " + Commanate(player->ldon_avail_points);
+  m_messages->addMessage(MT_Player, message);
 }
 
 void MessageShell::increaseSkill(const uint8_t* data)
@@ -717,6 +744,17 @@ void MessageShell::updateLevel(const uint8_t* data)
   m_messages->addMessage(MT_Player, tempStr);
 }
   
+void MessageShell::consent(const uint8_t* data, size_t, uint8_t dir)
+{
+  const consentResponseStruct* consent = (const consentResponseStruct*)data;
+
+  m_messages->addMessage(MT_General, 
+      QString("Consent: %1 %4 permission to drag %2's corpse in %3")
+	  		 .arg(QString::fromUtf8(consent->consentee))
+			 .arg(QString::fromUtf8(consent->consenter))
+             .arg(QString::fromUtf8(consent->corpseZoneName))
+             .arg((consent->allow == 1 ? "granted" : "denied")));
+}
 
 
 void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t dir) 

@@ -26,7 +26,7 @@ typedef uint32_t in_addr_t;
 #include <netinet/in.h>
 
 class EQUDPIPPacketFormat;
-class EQPacketFormat;
+class EQProtocolPacket;
 class EQPacketOPCodeDB;
 class EQPacketOPCode;
 
@@ -48,7 +48,7 @@ class EQPacketOPCode;
 // is the expected arq.  This results in the check for followers to only 
 // taking amortized constant time (as opposed to the O(log N) of map::find()
 // or constant average time of the hash find methods.
-typedef std::map<uint16_t, EQPacketFormat* > EQPacketMap;
+typedef std::map<uint16_t, EQProtocolPacket* > EQPacketMap;
 
 //----------------------------------------------------------------------
 // EQPacketStream
@@ -74,6 +74,10 @@ class EQPacketStream : public QObject
   bool connect2(const QString& opcodeName, 
 		const char* payload,  EQSizeCheckType szt, 
 		const QObject* receiver, const char* member);
+  void receiveSessionKey(uint32_t sessionId, EQStreamID streamid, 
+    uint32_t sessionKey);
+  uint16_t calculateCRC(EQProtocolPacket& packet);
+  uint32_t getSessionKey() const { return m_sessionKey; }
   
  public slots:
   void handlePacket(EQUDPIPPacketFormat& pf);
@@ -92,8 +96,10 @@ class EQPacketStream : public QObject
 
   // this signals a change in the session tracking state
   void sessionTrackingChanged(uint8_t);
-  
   void lockOnClient(in_port_t serverPort, in_port_t clientPort);
+
+  // Signal a new session key being received
+  void sessionKey(uint32_t sessionId, EQStreamID streadid, uint32_t sessionKey);
 		    
   // used for net_stats display
   void cacheSize(int, int);
@@ -104,14 +110,9 @@ class EQPacketStream : public QObject
 
  protected:
   void resetCache();
-  void setCache(uint16_t serverArqSeq, EQPacketFormat& packet);
+  void setCache(uint16_t serverArqSeq, EQProtocolPacket& packet);
   void processCache();
-  void processFragment(EQPacketFormat& pf);
-  void initDecode();
-  void stopDecode();
-  uint8_t* decodeOpCode(uint8_t *data, size_t *len, uint16_t& opCode);
-  void decodePacket(uint8_t *data, size_t len, uint16_t opCode);
-  void processPayload(uint8_t* data, size_t len);
+  void processPacket(EQProtocolPacket& packet, bool subpacket);
   void dispatchPacket(const uint8_t* data, size_t len,
 		      uint16_t opCode, const EQPacketOPCode* opcodeEntry);
 
@@ -132,6 +133,11 @@ class EQPacketStream : public QObject
   
   // Fragment handling
   EQPacketFragmentSequence m_fragment;
+
+  // Session info
+  uint32_t m_sessionId;
+  uint32_t m_sessionKey;
+  uint32_t m_maxLength;
 
   // encryption
   int64_t m_decodeKey;

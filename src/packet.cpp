@@ -38,10 +38,12 @@
 
 // The following defines are used to diagnose packet handling behavior
 // this define is used to diagnose packet processing (in dispatchPacket mostly)
-//#define PACKET_PROCESS_DIAG 3 // verbosity level 0-n
+//#define PACKET_PROCESS_DIAG 3 
+// verbosity level 0-n
 
 // this define is used to diagnose cache handling (in dispatchPacket mostly)
-//#define PACKET_CACHE_DIAG 3 // verbosity level (0-n)
+//#define PACKET_CACHE_DIAG 3 
+// verbosity level (0-n)
 
 // diagnose opcode DB issues
 //#define  PACKET_OPCODEDB_DIAG 1
@@ -52,7 +54,7 @@
 // Packet version is a unique number that should be bumped every time packet
 // structure (ie. encryption) changes.  It is checked by the VPacket feature
 // (currently the date of the last packet structure change)
-#define PACKETVERSION  40100
+#define PACKETVERSION  40101
 
 //----------------------------------------------------------------------
 // constants
@@ -81,7 +83,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 		   QString ip,
 		   QString mac_address,
 		   bool realtime,
-		   bool session_tracking,
+		   bool sessionTrackingFlag,
 		   bool recordPackets,
 		   bool playbackPackets,
 		   int8_t playbackSpeed, 
@@ -96,7 +98,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     m_ip(ip),
     m_mac(mac_address),
     m_realtime(realtime),
-    m_session_tracking(session_tracking),
+    m_session_tracking(sessionTrackingFlag),
     m_recordPackets(recordPackets),
     m_playbackPackets(playbackPackets),
     m_playbackSpeed(playbackSpeed)
@@ -164,6 +166,10 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 	  SIGNAL(numPacket(int, int)),
 	  this,
 	  SIGNAL(numPacket(int, int)));
+  connect(m_client2WorldStream, 
+	  SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
+	  this,
+	  SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
   
   // Setup world -> client stream
   m_world2ClientStream = new EQPacketStream(world2client, DIR_Server,
@@ -194,6 +200,14 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 	  SIGNAL(numPacket(int, int)),
 	  this,
 	  SIGNAL(numPacket(int, int)));
+  connect(m_world2ClientStream, 
+	  SIGNAL(sessionTrackingChanged(uint8_t)),
+	  this,
+	  SIGNAL(sessionTrackingChanged(uint8_t)));
+  connect(m_world2ClientStream, 
+	  SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
+	  this,
+	  SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
 
   // Setup client -> zone stream
   m_client2ZoneStream = new EQPacketStream(client2zone, DIR_Client,
@@ -227,6 +241,18 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 	  SIGNAL(numPacket(int, int)),
 	  this,
 	  SIGNAL(numPacket(int, int)));
+  connect(m_client2ZoneStream, 
+	  SIGNAL(sessionTrackingChanged(uint8_t)),
+	  this,
+	  SIGNAL(sessionTrackingChanged(uint8_t)));
+  connect(m_client2ZoneStream, 
+	  SIGNAL(closing()),
+	  this,
+	  SLOT(closeStream()));
+  connect(m_client2ZoneStream, 
+	  SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
+	  this,
+	  SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
 
   // Setup zone -> client stream
   m_zone2ClientStream = new EQPacketStream(zone2client, DIR_Server,
@@ -273,6 +299,10 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 	  SIGNAL(closing()),
 	  this,
 	  SLOT(closeStream()));
+  connect(m_zone2ClientStream, 
+	  SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
+	  this,
+	  SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
 
   // Initialize convenient streams array
   m_streams[client2world] = m_client2WorldStream;
@@ -334,6 +364,9 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 			     m_realtime, IP_ADDRESS_TYPE );
     emit filterChanged();
   }
+
+  // Flag session tracking properly on streams
+  session_tracking(sessionTrackingFlag);
 
   // if running setuid root, then give up root access, since the PacketCapture
   // is the only thing that needed it.
@@ -555,59 +588,22 @@ void EQPacket::processPlaybackPackets (void)
 void EQPacket::dispatchPacket(int size, unsigned char *buffer)
 {
 #ifdef DEBUG_PACKET
-  debug ("dispatchPacket()");
+  debug ("EQPacket::dispatchPacket()");
 #endif /* DEBUG_PACKET */
   /* Setup variables */
 
   // Create an object to parse the packet
   EQUDPIPPacketFormat packet(buffer, size, false);
 
-  // signal a new packet
+  dispatchPacket(packet);
+
+  // signal a new packet. This has to be at the end so that the session is
+  // filled in if possible, so that it can report on crc errors properly
   emit newPacket(packet);
-  
-  /* Chat and Login Server Packets, Discard for now */
-  if ((packet.getDestPort() == ChatServerPort) ||
-      (packet.getSourcePort() == ChatServerPort))
-    return;
+}
 
-  if ((packet.getDestPort() == WorldServerChatPort) ||
-      (packet.getSourcePort() == WorldServerChatPort))
-    return;
-
-  if (((packet.getDestPort() >= LoginServerMinPort) &&
-       (packet.getDestPort() <= LoginServerMaxPort)) ||
-      (packet.getSourcePort() >= LoginServerMinPort) &&
-      (packet.getSourcePort() <= LoginServerMaxPort))
-    return;
-
-#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-  seqDebug("%s", (const char*)packet.headerFlags((PACKET_PROCESS_DIAG < 3)));
-#endif
-  
-  if (!packet.isValid())
-  {
-    seqWarn("INVALID PACKET: Bad CRC32 [%s:%d -> %s:%d] seq %04x len %d crc32 (%08x != %08x)",
-	   (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
-	   (const char*)packet.getIPv4DestA(), packet.getDestPort(),
-	   packet.seq(), 
-	   packet.getRawPacketLength(),
-	   packet.crc32(), packet.calcCRC32());
-    return;
-  }
-
-  /* discard pure ack/req packets and non valid flags*/
-  if (packet.flagsHi() < 0x02 || packet.flagsHi() > 0x46 || size < 10)
-  {
-#if defined(PACKET_PROCESS_DIAG)
-    seqDebug("discarding packet %s:%d ==>%s:%d flagsHi=%d size=%d",
-	   (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
-	   (const char*)packet.getIPv4DestA(), packet.getDestPort(),
-	   packet.flagsHi(), size);
-    seqDebug("%s", (const char*)packet.headerFlags(false));
-#endif
-    return;    
-  }
-
+void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
+{
   /* Client Detection */
   if (m_detectingClient && packet.getSourcePort() == WorldServerGeneralPort)
   {
@@ -625,38 +621,91 @@ void EQPacket::dispatchPacket(int size, unsigned char *buffer)
     emit clientChanged(m_client_addr);
     seqInfo("Client Detected: %s", (const char*)m_ip);
   }
+
   /* end client detection */
+  /* Find the stream we are sending this to */
+  EQPacketStream* stream;
 
-
-
-  if (packet.getSourcePort() == WorldServerChatPort)
-  {
-    dispatchWorldChatData(packet.payloadLength(), packet.payload(), DIR_Server);
-    
+  /* Chat and Login Server Packets, Discard for now */
+  if ((packet.getDestPort() == ChatServerPort) ||
+      (packet.getSourcePort() == ChatServerPort))
     return;
-  }
-  else if (packet.getDestPort() == WorldServerChatPort)
-  {
-    dispatchWorldChatData(packet.payloadLength(), packet.payload(), DIR_Client);
-    
-    return;
-  }
 
-  /* stream identification */
+  if ((packet.getDestPort() == WorldServerChatPort) ||
+      (packet.getSourcePort() == WorldServerChatPort))
+    return;
+
+  if (((packet.getDestPort() >= LoginServerMinPort) &&
+       (packet.getDestPort() <= LoginServerMaxPort)) ||
+      (packet.getSourcePort() >= LoginServerMinPort) &&
+      (packet.getSourcePort() <= LoginServerMaxPort))
+    return;
+
   if (packet.getIPv4SourceN() == m_client_addr)
   {
     if (packet.getDestPort() == WorldServerGeneralPort)
-      m_client2WorldStream->handlePacket(packet);
+      stream = m_client2WorldStream;
     else 
-      m_client2ZoneStream->handlePacket(packet);
+      stream = m_client2ZoneStream;
   }
   else if (packet.getIPv4DestN() == m_client_addr)
   {
     if (packet.getSourcePort() == WorldServerGeneralPort)
-      m_world2ClientStream->handlePacket(packet);
+      stream = m_world2ClientStream;
     else 
-      m_zone2ClientStream->handlePacket(packet);
+      stream = m_zone2ClientStream;
   }
+  else
+  {
+    return;
+  }
+
+  // Fill in the session id of the packet in case people need it and only
+  // have the packet. This is crappy, but logging doesn't have access to
+  // the stream the packet came from.
+  packet.setSessionKey(stream->getSessionKey());
+
+#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
+  seqDebug("%s", (const char*)packet.headerFlags((PACKET_PROCESS_DIAG < 3)));
+#endif
+
+  // Check CRC. Have to ask the stream to do it, since the packet doesn't know
+  // it's sessionKey yet.
+  if (packet.hasCRC())
+  {
+    uint16_t calcedCRC = stream->calculateCRC(packet);
+  
+    if (calcedCRC != packet.crc() && packet.getSessionKey() != 0)
+    {
+      seqWarn("INVALID PACKET: Bad CRC [%s:%d -> %s:%d] netOp %04x seq %04x len %d crc (%04x != %04x)",
+	     (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
+	     (const char*)packet.getIPv4DestA(), packet.getDestPort(),
+             packet.getNetOpCode(),
+	     packet.arqSeq(), 
+	     packet.getUDPPayloadLength(),
+	     packet.crc(), calcedCRC);
+      return;
+    }
+  }
+
+  /* discard pure ack/req packets */
+  if (packet.getNetOpCode() == OP_KeepAlive ||
+      packet.getNetOpCode() == OP_SessionStatRequest ||
+      packet.getNetOpCode() == OP_SessionStatResponse ||
+      packet.getNetOpCode() == OP_Resend ||
+      packet.getNetOpCode() == OP_Ack)
+  {
+#if defined(PACKET_PROCESS_DIAG)
+    seqDebug("discarding packet %s:%d ==>%s:%d netopcode=%04x size=%d",
+	   (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
+	   (const char*)packet.getIPv4DestA(), packet.getDestPort(),
+	   packet.getNetOpCode(), size);
+#endif
+    return;    
+  }
+
+  // Send it to the stream handler.
+  stream->handlePacket(packet);
 
   return;
 } /* end dispatchPacket() */
@@ -719,6 +768,15 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
   }
   
   emit clientPortLatched(m_clientPort);
+}
+
+void EQPacket::dispatchSessionKey(uint32_t sessionId, EQStreamID streamid,
+  uint32_t sessionKey)
+{
+  m_client2WorldStream->receiveSessionKey(sessionId, streamid, sessionKey);
+  m_world2ClientStream->receiveSessionKey(sessionId, streamid, sessionKey);
+  m_client2ZoneStream->receiveSessionKey(sessionId, streamid, sessionKey);
+  m_zone2ClientStream->receiveSessionKey(sessionId, streamid, sessionKey);
 }
 
 ///////////////////////////////////////////

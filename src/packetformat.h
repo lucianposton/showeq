@@ -42,269 +42,134 @@ typedef uint32_t in_addr_t;
 // Forward declarations
 class QString;
 
-//----------------------------------------------------------------------
-// enumerated types
-enum EQPacketHeaderFlagsHi
-{
-  seqEnd = 0x80,
-  closingHi = 0x40,
-  seqStart = 0x20,
-  asq = 0x10,
-  fragment = 0x08,
-  closingLo = 0x04,
-  ackRequest = 0x02,
-};
+// Net Op Codes in net order. Underneath, there are actually channels
+// 0-3, where 0x0900 is OP_Packet on channel 0, 0x0a00 is OP_Packet on
+// channel 1, 0x0b00 is OP_Packet on channel 2, etc. and the same
+// with OP_Oversized for 0x0d00-0x1000. Only channel 0 seems used.
+static const uint16_t OP_SessionRequest     = 0x0100;
+static const uint16_t OP_SessionResponse    = 0x0200;
+static const uint16_t OP_Combined           = 0x0300;
+static const uint16_t OP_SessionDisconnect  = 0x0500;
+static const uint16_t OP_KeepAlive          = 0x0600;
+static const uint16_t OP_SessionStatRequest = 0x0700;
+static const uint16_t OP_SessionStatResponse= 0x0800;
+static const uint16_t OP_Packet             = 0x0900;
+static const uint16_t OP_Oversized          = 0x0d00;
+static const uint16_t OP_Resend             = 0x1100;
+static const uint16_t OP_Ack                = 0x1500;
+static const uint16_t OP_AppCombined        = 0x1900;
 
-enum EQPacketHeaderFlagsLo
-{
-  ackResponse = 0x04,
-  specAckRequest = 0x01
-};
-
-//----------------------------------------------------------------------
-// EQPacketFormatRaw
-
-// Why EQPacketFormatRaw, because the EQPacket name was taken... ;-)
-// (/thank Xylor for the format of the packets)
-// (/thank fee for helping me to understand the format)
-// Some simplifying assumptions based on observed packet behavior
-// that are used to optimize access
-// 1) the arq bit is always set when the fragment bit is set
-// 2) the arq is always after 2 bytes past the embedded ack/req data.
-// 3) the fragment stuff is always 4 bytes after the embedded ack/req data
-//    based on 1).
-// 
-#pragma pack(1)
-class EQPacketFormatRaw
-{
- public:
-  // accessors to check for individual flasg
-  bool isARQ() const { return m_flagsHi.m_arq; }
-  bool isClosingLo() const { return m_flagsHi.m_closingLo; }
-  bool isFragment() const { return m_flagsHi.m_fragment; }
-  bool isASQ() const { return m_flagsHi.m_asq; }
-  bool isSEQStart() const { return m_flagsHi.m_seqStart; }
-  bool isClosingHi() const { return m_flagsHi.m_closingHi; }
-  bool isSEQEnd() const { return m_flagsHi.m_seqEnd; }
-  bool isARSP() const { return m_flagsLo.m_arsp; }
-  bool isSpecARQ() const { return m_flagsLo.m_specARQ; }
-  bool isNAK() const { return m_flagsLo.m_nak; }
-
-  // Check flag against the EQPacketHeaderFlag{Hi, Lo} values
-  bool checkFlagHi(uint8_t mask) const
-    { return ((m_flagsHiVal & mask) != 0); }
-  bool checkFlagLo(uint8_t mask) const
-    { return ((m_flagsLoVal & mask) != 0); }
-
-  // accessors to return the flag values
-  uint8_t flagsHi() const { return m_flagsHiVal; }
-  uint8_t flagsLo() const { return m_flagsLoVal; }
-
-  // number of uint8_t's to skip when examining packets
-  uint8_t skip() const
-  {
-    return ((uint8_t)m_flagsLo.m_skip + 
-	    (isARSP() ? 2 : 0) + 
-	    (isNAK() ? 2 : 0));
-  }
-
-  // The following accessors are only valid if the corresponding
-  // flag is set.
-  uint16_t seq() const { return eqntohuint16(&m_data[0]); }
-  uint16_t arsp() const { return eqntohuint16(&m_data[2]); }
-  uint16_t nak() const { return  eqntohuint16(&m_data[4]); }
-  uint16_t arq() const 
-    { return eqntohuint16(&m_data[2 + skip()]); }
-  uint16_t fragSeq() const
-    { return eqntohuint16(&m_data[4 + skip()]); }
-  uint16_t fragCur() const
-    { return eqntohuint16(&m_data[6 + skip()]); }
-  uint16_t fragTot() const
-    { return eqntohuint16(&m_data[8 + skip()]); }
-  uint8_t asqHigh() const { return m_data[10 + skip()]; }
-  uint8_t asqLow() const { return m_data[11 + skip()]; }
-  uint32_t crc32(uint16_t len) const 
-    {   return (len >= 6) ? eqntohuint32(&m_data[len - 2 - 4]) : 0xDEADBEEF; }
-
-  uint8_t* payload()
-  {
-    return m_data + // m_data is already passed the flag bytes
-      (skip() // skip arsp, specARQ data
-       + (isASQ() ? 1 : 0) // skip asqHigh
-       + (isARQ() ? 2 : 0) // skip arq
-       + ((isASQ() && isARQ()) ? 1 : 0) // skip asqLow
-       + (isFragment() ? 6 : 0) // skip fragment data
-       + 2 // seq
-       );
-  }
-
-  QString headerFlags(const QString& prefix = "",
-		      bool brief = false) const;
-
- private:
-  union 
-  {
-    struct 
-    { 
-      unsigned int m_unknown1:1;       // 0x01 = ?
-      unsigned int m_arq:1;            // 0x02 = arq
-      unsigned int m_closingLo:1;      // 0x04 = closingLo
-      unsigned int m_fragment:1;       // 0x08 = fragment
-      unsigned int m_asq:1;            // 0x10 = asq
-      unsigned int m_seqStart:1;       // 0x20 = seqStart
-      unsigned int m_closingHi:1;      // 0x40 = closingHi
-      unsigned int m_seqEnd:1;         // 0x80 = seqEnd
-    } m_flagsHi;
-    uint8_t m_flagsHiVal;
-  };
-  union
-  {
-    struct
-    {
-      unsigned int m_specARQ:1;        // 0x01 = speckARQ
-      unsigned int m_unknown1:1;       // 0x02 = ?
-      unsigned int m_arsp:1;           // 0x04 = ARSP
-      unsigned int m_nak:1;            // 0x08 = NAK?
-      unsigned int m_skip:4;           // amount of data to skip
-    } m_flagsLo;
-    uint8_t m_flagsLoVal;
-  };
-  uint8_t m_data[];
-};
-#pragma pack()
+// Detect app opcode vs net opcode by the 2nd byte. 0x00 = net opcode.
+#define IS_APP_OPCODE(uint16) (((uint16) & 0x00ff) != 0x0000)
+#define IS_NET_OPCODE(uint16) (((uint16) & 0x00ff) == 0x0000)
 
 //----------------------------------------------------------------------
-// EQPacketFormat
-class EQPacketFormat
+// EQProtocolPacket
+// A wrapper around a byte array which is the wire data for an
+// specific protocol packet. Protocol packets have an owning EQUDPIPPacket
+// which has the udp/ip packet info. They may not necessaryily directly be
+// the payload of the udp/ip packet, since one udp/ip packet may be
+// multiple protocol packets, combined together.
+class EQProtocolPacket
 {
  public:
   // constructors
-  EQPacketFormat()
-    : m_packet(NULL), m_length(0), 
-    m_postSkipData(NULL), m_postSkipDataLength(0), 
-    m_payload(NULL), m_payloadLength(0),
-    m_arq(0), m_ownCopy(false), m_isValid(false)
+  EQProtocolPacket()
+    : m_packet(NULL), 
+      m_length(0), 
+      m_payload(NULL), 
+      m_payloadLength(0),
+      m_arqSeq(0), 
+      m_ownCopy(false), 
+      m_isValid(false),
+      m_subpacket(false)
     {  }
     
-  EQPacketFormat(uint8_t* data, 
-		 uint16_t length,
-		 bool copy = false)
-  { 
-    init((EQPacketFormatRaw*)data, length, copy);
-  }
-
-  EQPacketFormat(EQPacketFormatRaw* packet, 
-		 uint16_t length,
-		 bool copy = false)
+  EQProtocolPacket(uint8_t* packet, uint16_t length, 
+    bool copy=false, bool subpacket=false)
   {
-    init(packet, length, copy);
+    init(packet, length, copy, subpacket);
   }
 
-  EQPacketFormat(EQPacketFormat& packet, bool copy = false);
+  EQProtocolPacket(EQProtocolPacket& packet, bool copy = false);
 
   // destructor
-  ~EQPacketFormat();
+  ~EQProtocolPacket();
 
   // operators
-  EQPacketFormat& operator=(const EQPacketFormat& packet);
+  EQProtocolPacket& operator=(const EQProtocolPacket& packet);
 
-  // accessors to check for individual flags
-  bool isARQ() const { return m_packet->isARQ(); }
-  bool isClosingLo() const { return m_packet->isClosingLo(); }
-  bool isFragment() const { return m_packet->isFragment(); }
-  bool isASQ() const { return m_packet->isASQ(); }
-  bool isSEQStart() const { return m_packet->isSEQStart(); }
-  bool isClosingHi() const { return m_packet->isClosingHi(); }
-  bool isSEQEnd() const { return m_packet->isSEQEnd(); }
-  bool isARSP() const { return m_packet->isARSP(); }
-  bool isNAK() const { return m_packet->isNAK(); }
-  bool isSpecARQ() const
-    { return m_packet->isSpecARQ(); }
+  uint16_t getNetOpCode() const { return m_netOp; }
 
-  // Check flag against the EQPacketHeaderFlag{Hi, Lo} values
-  bool checkFlagHi(uint8_t mask) const
-    { return m_packet->checkFlagHi(mask); }
-  bool checkFlagLo(uint8_t mask) const
-    { return m_packet->checkFlagLo(mask); }
-
-  // accessors to return the flag values
-  uint8_t flagsHi() const { return m_packet->flagsHi(); }
-  uint8_t flagsLo() const { return m_packet->flagsLo(); }
-
-  uint8_t skip() const { return m_packet->skip(); }
-
-  uint16_t seq() const { return m_packet->seq(); }
-
-  // The following accessors are only valid if the corresponding
-  // flag is set.
-  uint16_t arsp() const { return m_packet->arsp(); }
-  uint16_t arq() const { return m_arq; }
-  uint16_t fragSeq() const 
-    { return eqntohuint16(&m_postSkipData[4]); }
-  uint16_t fragCur() const 
-    { return eqntohuint16(&m_postSkipData[6]); }
-  uint16_t fragTot() const 
-    { return eqntohuint16(&m_postSkipData[8]); }
-  uint8_t asqHigh() const { return m_postSkipData[10]; }
-  uint8_t asqLow() const { return m_postSkipData[11]; }
-  uint32_t crc32() const
-  { 
-    // return CRC in the appropriate endianess or DEADBEEF if invalid
-    return (m_length >= 4) ? eqntohuint32(&((uint8_t*)m_packet)[m_length - 4]) : 0xDEADBEEF;
-  }
-  uint32_t calcCRC32() const
+  bool hasArqSeq() const
   {
-    // calculate the CRC on the packet data, up to but not including the
-    // CRC32 stored at the end or return different invalid packet value
-    // then crc32() above.
-    return (m_length >= 4) ? ::calcCRC32((uint8_t*)m_packet, m_length - 4) : 0xFEEDDEAD;
+    return getNetOpCode() == OP_Packet || getNetOpCode() == OP_Oversized;
+  }
+  uint16_t arqSeq() const { return m_arqSeq; }
+
+  bool hasCRC() const
+  {
+    // Subpackets don't have CRC, the outer packet does.
+    if (m_subpacket) return false;
+
+    switch (m_netOp)
+    {
+      case OP_SessionStatRequest:
+      case OP_SessionStatResponse:
+      case OP_Combined:
+      case OP_Packet:
+      case OP_Oversized:
+      case OP_AppCombined:
+        return true;
+      default :
+        return IS_APP_OPCODE(m_netOp);
+    }
+  }
+  uint16_t crc() const
+  { 
+    // return CRC in the appropriate endianess or DEAD if invalid
+    return (m_length >= 2) ? eqntohuint16(&m_packet[m_length - 2]) : 0xDEAD;
   }
 
-  bool isValid() const { return m_isValid; }
-  bool validate();
+  bool isSubpacket() const { return m_subpacket; }
 
   uint8_t* payload() const { return m_payload; }
   uint16_t payloadLength() const { return m_payloadLength; }
-
-  const EQPacketFormatRaw* getRawPacket() const { return m_packet; }
-  uint16_t getRawPacketLength() const { return m_length; }
-
-  QString headerFlags(const QString& prefix = "",
-		      bool brief = false) const;
+  uint8_t* rawPayload() const { return m_packet; }
+  uint16_t rawPayloadLength() const { return m_length; }
 
  protected:
   void init();
-  void init(EQPacketFormatRaw* packet, 
-	    uint16_t length,
-	    bool copy = false);
+  void init(uint8_t* packet, uint16_t length, 
+    bool copy=false, bool subpacket=false);
+
+  QString headerFlags(const QString& prefix, bool brief = false) const;
   
  private:
-  EQPacketFormatRaw* m_packet;
+  uint8_t* m_packet; // raw packet
   uint16_t m_length;
-  uint8_t* m_postSkipData;
-  uint16_t m_postSkipDataLength;
-  uint8_t* m_payload;
+  uint16_t m_netOp;
+  uint8_t* m_payload; // packet without netop, crc. Mem owned by m_packet.
   uint16_t m_payloadLength;
-  uint16_t m_arq; // local copy to speed up comparisons
+  uint16_t m_arqSeq; // local copy to speed up comparisons
   bool m_ownCopy;
   bool m_isValid;
+  bool m_subpacket;
 };
 
-inline bool operator<(const EQPacketFormat& p1,
-	       const EQPacketFormat& p2)
+inline bool operator<(const EQProtocolPacket& p1, const EQProtocolPacket& p2)
 { 
-  return p1.arq() < p2.arq(); 
+  return p1.arqSeq() < p2.arqSeq(); 
 }
 
-inline bool operator==(const EQPacketFormat& p1,
-		const EQPacketFormat& p2)
+inline bool operator==(const EQProtocolPacket& p1, const EQProtocolPacket& p2)
 {
-  return p1.arq() == p2.arq(); 
+  return p1.arqSeq() == p2.arqSeq(); 
 }
 
 //----------------------------------------------------------------------
 // EQUDPIPPacketFormat
-class EQUDPIPPacketFormat : public EQPacketFormat
+class EQUDPIPPacketFormat : public EQProtocolPacket
 {
  public:
   // constructors
@@ -326,7 +191,8 @@ class EQUDPIPPacketFormat : public EQPacketFormat
   in_port_t getSourcePortN() const { return m_udp->uh_sport; }
   in_port_t getDestPort() const { return ntohs(m_udp->uh_dport); }
   in_port_t getDestPortN() const { return m_udp->uh_dport; }
-  uint8_t * getUDPPayload() const { return m_rawpayload; }
+  uint8_t* getUDPPayload() const { return m_rawpayload; }
+  uint32_t getUDPPayloadLength() const { return m_rawpayloadSize; }
 
   // IP accessors
   uint8_t getIPVersion() const { return (uint8_t)m_ip->ip_v; }
@@ -351,6 +217,9 @@ class EQUDPIPPacketFormat : public EQPacketFormat
 
   QString headerFlags(bool brief = false) const;
 
+  uint32_t getSessionKey() const { return m_sessionKey; }
+  void setSessionKey(uint32_t sessionKey) { m_sessionKey = sessionKey; }
+
  protected:
   void init(uint8_t* data);
   
@@ -360,6 +229,8 @@ class EQUDPIPPacketFormat : public EQPacketFormat
   struct udphdr *m_udp;
   bool m_ownCopy;
   uint8_t* m_rawpayload;
+  uint32_t m_rawpayloadSize;
+  uint32_t m_sessionKey;
 };
 
 #endif // _PACKETFORMAT_H_

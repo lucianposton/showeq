@@ -374,7 +374,7 @@ void Player::player(const uint8_t* data)
   //Added by Halcyon
   int buffnumber;
   const struct spellBuff *buff;
-  for (buffnumber=0;buffnumber<15;buffnumber++)
+  for (buffnumber=0;buffnumber<20;buffnumber++)
   {
     if (player->buffs[buffnumber].spellid && player->buffs[buffnumber].duration)
     {
@@ -851,9 +851,9 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
   updateLastChanged();
   emit changeItem(this, tSpawnChangedPosition);
 
-  emit newSpeed(hypot( hypot( (pupdate->deltaX*8), 
-			      (pupdate->deltaY*8)), 
-		       (pupdate->deltaZ*8)));
+  emit newSpeed((int)lrint(hypot( hypot( (pupdate->deltaX*80), 
+					 (pupdate->deltaY*80)), 
+				  (pupdate->deltaZ*80))));
 
   static uint8_t count = 0;
 
@@ -1063,8 +1063,8 @@ void Player::fillConTable()
   }
   else if (level() < 23) 
   { // 
-    greenRange = -7;
-    cyanRange = -5;
+    greenRange = -8;
+    cyanRange = -6;
   }
   else if (level() < 27) 
   { //

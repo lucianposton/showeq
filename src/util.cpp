@@ -963,4 +963,25 @@ uint32_t calcCRC32(const uint8_t* p,
   return crc ^ 0xFFFFFFFF;
 }
 
+//////////////////////////////////////////////////////////////////
+// Seeded CRC16 needed by the packet layer.
+uint16_t calcCRC16(uint8_t* p, uint32_t length, uint32_t seed)
+{
+#include "crctab.h"
+   unsigned long crc = 0L ^ 0xffffffff;
+
+   // CRC each byte of the seed
+   crc = crc >> 8 ^ crctab[(seed       ^ crc) & 0xFF];
+   crc = crc >> 8 ^ crctab[(seed >> 8  ^ crc) & 0xFF];
+   crc = crc >> 8 ^ crctab[(seed >> 16 ^ crc) & 0xFF];
+   crc = crc >> 8 ^ crctab[(seed >> 24 ^ crc) & 0xFF];
+
+   // Then crc the buffer
+   while(length--)
+   {                
+      crc = crc >> 8 ^ crctab[(*(p++) ^ crc) & 0xFF];
+   } 
+
+   return crc ^ 0xffffffffL; 
+}
 

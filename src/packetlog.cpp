@@ -35,6 +35,9 @@ inline QString opCodeToString(uint16_t opCode)
   QString tempStr;
   tempStr.sprintf("[OPCode: %#.04x]", opCode);
 
+  // Flags are gone? Combined and implicit don't make sense anymore and
+  // nothing is compressed or encrypted at this point...
+  /*
   if (opCode & FLAG_DECODE)
   {
     tempStr += " ";
@@ -47,6 +50,7 @@ inline QString opCodeToString(uint16_t opCode)
     if (opCode & FLAG_IMPLICIT)
       tempStr += "[FLAG_IMPLICIT]";
   }
+  */
 
   return tempStr;
 }
@@ -225,33 +229,33 @@ void PacketLog::logData(const EQUDPIPPacketFormat& packet)
   m_out << QDateTime::currentDateTime().toString(m_timeDateFormat)
       << " [" << sourceStr << ":" << QString::number(packet.getSourcePort())
       << "->" << destStr << ":" << QString::number(packet.getDestPort()) 
-      << "] [Size: " << QString::number(packet.getRawPacketLength()) << "]"
+      << "] [Size: " << QString::number(packet.getUDPPayloadLength()) << "]"
       << endl;
 
-  if (packet.isValid())
-  {
-    const EQPacketFormatRaw* raw = packet.getRawPacket();
-    if (raw)
-      m_out << raw->headerFlags(QString(), false) << endl;
+  uint16_t calcedCRC;
 
-    if (packet.payloadLength() >= 2)
-    {
-      QString tempStr;
-      uint16_t opcode = *(uint16_t*)(packet.payload());
-      m_out << opCodeToString(opcode) << endl;
-    }
+  if (! packet.hasCRC() || 
+    packet.crc() == (calcedCRC = ::calcCRC16(
+      packet.rawPayload(), packet.rawPayloadLength()-2, 
+        packet.getSessionKey())))
+  {
+    m_out << packet.headerFlags(false) << endl;
   }
   else
-    m_out << "[BAD CRC32 (" << QString::number(packet.calcCRC32(), 16) 
-	  << " != " << QString::number(packet.crc32()) 
-	  << ")! Possibly non-EQ packet?! ]" << endl;
+  {
+    m_out << "[BAD CRC (" << QString::number(calcedCRC, 16) 
+	  << " != " << QString::number(packet.crc(), 16) 
+	  << ")! Sessions crossed or unitialized or non-EQ packet! ]" << endl;
+    m_out << "[SessionKey: " << QString::number(packet.getSessionKey(), 16) <<
+      "]" << endl;
+  }
 
   flush();
 
   // make sure there is a len before attempting to output it
-  if (packet.getRawPacketLength())
-    outputData(packet.getRawPacketLength(), 
-	      (const uint8_t*)packet.getRawPacket());
+  if (packet.payloadLength())
+    outputData(packet.getUDPPayloadLength(), 
+	      (const uint8_t*)packet.getUDPPayload());
   else
     m_out << endl;
 

@@ -11,116 +11,52 @@
 /* Implementation of packet format classes class */
 
 #include "packetformat.h"
+#include "diagnosticmessages.h"
 
 //----------------------------------------------------------------------
-// EQPacketFormatRaw class methods
-QString EQPacketFormatRaw::headerFlags(const QString& prefix, 
-				       bool brief) const
-{
-  QString tmp;
-  if (!prefix.isEmpty())
-  {
-    if (brief)
-      tmp = prefix + ": ";
-    else
-      tmp = prefix + "[Hdr (" + QString::number(flagsHi(), 16) + ", "
-	+ QString::number(flagsLo(), 16) + "): ";
-  }
-  else if (!brief)
-    tmp = "[Hdr (" + QString::number(flagsHi(), 16) + ", "
-	+ QString::number(flagsLo(), 16) + "): ";
-
-  if (isARQ())
-    tmp += "ARQ, ";
-  if (isClosingLo())
-    tmp += "closingLo, ";
-  if (isFragment())
-    tmp += "Fragment, ";
-  if (isASQ())
-    tmp += "ASQ, ";
-  if (isSEQStart())
-    tmp += "SEQStart, ";
-  if (isClosingHi())
-    tmp += "closingHi, ";
-  if (isSEQEnd())
-    tmp += "SEQEnd, ";
-  if (isARSP())
-    tmp += "ARSP, ";
-  if (isNAK())
-    tmp += "NAK, ";
-  if (isSpecARQ())
-    tmp += "SpecARQ, ";
-  if (m_flagsHi.m_unknown1)
-    tmp += "HiUnknown1, ";
-
-  if (skip() != 0)
-    tmp += QString("Skip: ") + QString::number(skip(), 16) + ", ";
-  
-  tmp += QString("seq: ") + QString::number(seq(), 16);
-
-  tmp += "] ";
-
-  if (!brief)
-  {
-    if (isARQ())
-      tmp += QString("[ARQ: ") + QString::number(arq(), 16) + "] ";
-    
-    if (isFragment())
-    {
-      tmp += QString("[FragSeq: ") + QString::number(fragSeq(), 16)
-	+ ", FragCur: " + QString::number(fragCur(), 16)
-	+ ", FragTot: " + QString::number(fragTot(), 16) + "] ";
-    }
-  }
-
-  return tmp;
-}
-
-//----------------------------------------------------------------------
-// EQPacketFormat class methods
-EQPacketFormat::EQPacketFormat(EQPacketFormat& packet, bool copy)
-  : m_ownCopy(copy),
-    m_isValid(packet.m_isValid)
+// EQProtocolPacket class methods
+EQProtocolPacket::EQProtocolPacket(EQProtocolPacket& packet, bool copy)
+  : m_ownCopy(copy)
 {
   if (!copy)
   {
     // just copy all their values
     m_packet = packet.m_packet;
     m_length = packet.m_length;
-    m_postSkipData = packet.m_postSkipData;
-    m_postSkipDataLength = packet.m_postSkipDataLength;
     m_payload = packet.m_payload;
     m_payloadLength = packet.m_payloadLength;
-    m_arq = packet.m_arq;
+    m_arqSeq = packet.m_arqSeq;
+    m_subpacket = packet.m_subpacket;
   }
   else
   {
-    init(packet.m_packet, packet.m_length, copy);
+    init(packet.m_packet, packet.m_length, copy, packet.m_subpacket);
   }
 }
 
-EQPacketFormat::~EQPacketFormat()
+EQProtocolPacket::~EQProtocolPacket()
 {
   if (m_ownCopy)
     delete [] (uint8_t*)m_packet;
 }
 
-EQPacketFormat& EQPacketFormat::operator=(const EQPacketFormat& packet)
+EQProtocolPacket& EQProtocolPacket::operator=(const EQProtocolPacket& packet)
 {
   // if this was a deep copy, delete the existing data
   if (m_ownCopy)
     delete [] (uint8_t*)m_packet;
 
   // initialize as deep as this object previously was
-  init(packet.m_packet, packet.m_length, m_ownCopy);
+  init(packet.m_packet, packet.m_length, m_ownCopy, packet.m_subpacket);
 
   return *this;
 }
 
-void EQPacketFormat::init(EQPacketFormatRaw* packet,
-			  uint16_t length,
-			  bool copy)
+void EQProtocolPacket::init(uint8_t* packet, uint16_t length, 
+  bool copy, bool subpacket)
 {
+  m_subpacket = subpacket;
+
   if (!copy)
   {
     // the data is someone elses memory
@@ -138,8 +74,7 @@ void EQPacketFormat::init(EQPacketFormatRaw* packet,
     m_ownCopy = true;
 
     // allocate memory for the copy
-    // NOTE: We should use an allocater for this instead of normal new
-    m_packet = (EQPacketFormatRaw*)new uint8_t[length];
+    m_packet = new uint8_t[length];
 
     // copy the data
     memcpy((void*)m_packet, (void*)packet, length);
@@ -152,73 +87,38 @@ void EQPacketFormat::init(EQPacketFormatRaw* packet,
   init();
 }
 
-void EQPacketFormat::init()
+void EQProtocolPacket::init()
 {
-  // finish initialization iff the packet has a valid CRC32
-  if (validate())
-  {
-    m_postSkipData = ((uint8_t*)m_packet) + m_packet->skip() + 2;
+  // Get the net op code. Leave in network order.
+  m_netOp = *(uint16_t*)(m_packet);
+
+  // get the location of the payload
+  m_payload = &m_packet[2];
     
-    // calculate the length of the rest of the data
-    m_postSkipDataLength = m_length - (m_postSkipData - ((uint8_t*)m_packet));
+  // calculate the length of the payload (len - net op - crc)
+  m_payloadLength = m_length - 2 - (hasCRC() ? 2 : 0);
     
-    // get the location of the payload
-    m_payload = m_packet->payload();
-    
-    // calculate the lenght of the payload (length - diff - len(checkSum))
-    m_payloadLength = m_length - (m_payload - ((uint8_t*)m_packet)) - 4; 
-    
-    // make a local copy of the arq to speed up comparisons
-    m_arq = eqntohuint16(&m_postSkipData[2]);
-  }
-  else 
-  {
-    m_postSkipData = 0;
-    m_postSkipDataLength = 0;
-    m_payload = 0;
-    m_payloadLength = 0;
-    m_arq = 0;
-  }
+  // make a local copy of the arq to speed up comparisons
+  m_arqSeq = eqntohuint16(m_payload);
 }
 
-bool EQPacketFormat::validate()
-{ 
-  m_isValid = ((m_packet != NULL) && 
-	       ((m_length >= 4) && (crc32() == calcCRC32()))); 
-  return m_isValid;
-}
-
-QString EQPacketFormat::headerFlags(const QString& prefix, 
-				    bool brief) const
+QString EQProtocolPacket::headerFlags(const QString& prefix, bool brief) const
 {
   QString tmp;
 
-  if (m_isValid)
+  if (brief)
   {
-    if (brief)
-      tmp = prefix + ": ";
-    else
-      tmp = prefix + " Hdr (" + QString::number(flagsHi(), 16) + ", "
-	+ QString::number(flagsLo(), 16) + "): ";
-    
-    tmp += m_packet->headerFlags("", true);
-    
-    if (!brief)
-    {
-      if (isARQ())
-	tmp += QString("arq: ") + QString::number(arq(), 16) + ", ";
-      
-      if (isFragment())
-	tmp += QString("FragSeq: ") + QString::number(fragSeq(), 16)
-	  + ", FragCur: " + QString::number(fragCur(), 16)
-	  + ", FragTot: " + QString::number(fragTot(), 16) + ", ";
-
-      tmp += QString("Opcode: ") 
-	+ QString::number(eqntohuint16(payload()), 16);
-    }
+    tmp = prefix + ": ";
   }
   else
-      tmp = prefix + ": INVALID CRC32! Possible non-EQ packet?!";
+  {
+    tmp = prefix + " NetOpCode: " + QString::number(getNetOpCode(), 16);
+
+    if (hasArqSeq())
+    {
+      tmp += (", Seq: " + QString::number(arqSeq()));
+    }
+  }
 
   return tmp;
 }
@@ -244,6 +144,9 @@ EQUDPIPPacketFormat::EQUDPIPPacketFormat(uint8_t* data,
   // note whether or not this object ownw the memory
   m_ownCopy = copy;
 
+  // No session yet
+  m_sessionKey = 0;
+
   // initialize the object
   init(ipdata);
 }
@@ -253,6 +156,7 @@ EQUDPIPPacketFormat::EQUDPIPPacketFormat(EQUDPIPPacketFormat& packet,
 {
   // note whether or not this object ownw the memory
   m_ownCopy = copy;
+  m_sessionKey = packet.getSessionKey();
 
   if (copy)
   {
@@ -332,9 +236,10 @@ void EQUDPIPPacketFormat::init(uint8_t* data)
   length  -= sizeof  (struct udphdr);
   data += (sizeof (struct udphdr));
   m_rawpayload = data;
+  m_rawpayloadSize = length;
 
-  // initialize underlying EQPacketFormat with the UDP payload
-  EQPacketFormat::init((EQPacketFormatRaw*)data, length, false);
+  // initialize underlying EQProtocolPacket with the UDP payload
+  EQProtocolPacket::init(data, length, false);
 }
 
 QString EQUDPIPPacketFormat::headerFlags(bool brief) const
@@ -344,5 +249,5 @@ QString EQUDPIPPacketFormat::headerFlags(bool brief) const
 	      (const char*)getIPv4SourceA(), getSourcePort(),
 	      (const char*)getIPv4DestA(), getDestPort());
 
-  return EQPacketFormat::headerFlags(tmp, brief);
+  return EQProtocolPacket::headerFlags(tmp, brief);
 }

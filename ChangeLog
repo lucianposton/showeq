@@ -1,4 +1,17 @@
 Version: $Id$ $Name$
+
+purple (02/08/05)
+-----------------------
++ Updated version to 5.0.0.17
++ Updated net layer to support EQ's new net protocol
++ First pass at new zoneopcodes.xml and worldopcodes.xml. Most things work.
++ Cleaned up everquest.h offset comments and fixed a couple struct changes
++ Edge case cleanup for con colors in player.cpp (uRit1u2CBBA)
++ More significant digits on runspeed (uRit1u2CBBA)
++ OP_SimpleMessage now is sizechecktype="match" since it's not variable length
++ Added struct for consenting with message in message shell
++ Added struct for environmental damage
++ Regenerated staticspells.h from latest spells_en.txt
 	
 dohpaZ (11/7/04)
 ------------------------

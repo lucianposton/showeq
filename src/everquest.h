@@ -286,6 +286,46 @@ struct opCodeStruct
   }
 };
 
+/**
+ * Session request on a stream. This is sent by the client to initiate
+ * a session with the zone or world server.
+ * 
+ * Size: 12 Octets
+ */
+struct SessionRequestStruct
+{
+/*0000*/ uint32_t unknown0000;
+/*0004*/ uint32_t sessionId;
+/*0008*/ uint32_t maxLength;
+/*0012*/
+};
+
+/**
+ * Session response on a stream. This is the server replying to a session
+ * request with session information.
+ *
+ * Size: 19 Octets
+ */
+struct SessionResponseStruct
+{
+/*0000*/ uint32_t sessionId;
+/*0004*/ uint32_t key;
+/*0008*/ uint16_t unknown0008;
+/*0010*/ uint8_t unknown0010;
+/*0011*/ uint32_t maxLength;
+/*0015*/ uint32_t unknown0015;
+};
+
+/**
+ * Session disconnect on a stream. This is the server telling the client to
+ * close a stream.
+ *
+ * Size: 8 Octets
+ */
+struct SessionDisconnectStruct
+{
+/*0000*/ uint8_t unknown[8];
+};
 
 /* 
  * Used in charProfileStruct
@@ -315,13 +355,13 @@ struct Color_Struct
 
 struct spellBuff
 {
-/*0000*/  int32_t     spellid;            // Spell
-/*0004*/  int32_t     duration;           // Time remaining in ticks
-/*0008*/  int32_t     effect;             // holds the dmg absorb amount on runes
-/*0012*/  uint8_t     unknown0012;        //
-/*0013*/  int8_t      level;              // Level of person who cast buff
-/*0014*/  uint8_t     unknown0014;        //
-/*0015*/  uint8_t     unknown0015;        //
+/*0000*/  uint8_t     unknown0012;        //
+/*0001*/  int8_t      level;              // Level of person who cast buff
+/*0002*/  uint8_t     unknown0014;        //
+/*0003*/  uint8_t     unknown0015;        //
+/*0004*/  int32_t     spellid;            // Spell
+/*0008*/  int32_t     duration;           // Time remaining in ticks
+/*0012*/  int32_t     effect;             // holds the dmg absorb amount on runes
 /*0016*/
 };
 
@@ -338,7 +378,7 @@ struct AA_Array
 
 /*
 ** Type:   Zone Change Request (before hand)
-** Length: 70 Octets
+** Length: 76 Octets
 ** OpCode: ZoneChangeCode
 */
 struct zoneChangeStruct
@@ -458,11 +498,11 @@ struct newZoneStruct
 /*0000*/ char    name[64];                 // Character name
 /*0064*/ char    shortName[32];            // Zone Short Name
 /*0096*/ char    longName[278];            // Zone Long Name
-/*0310*/ uint8_t ztype;                    // Zone type
-/*0311*/ uint8_t fog_red[4];               // Zone fog (red)
-/*0315*/ uint8_t fog_green[4];             // Zone fog (green)
-/*0319*/ uint8_t fog_blue[4];              // Zone fog (blue)
-/*0374*/ uint8_t unknown0374[87];          // *** Placeholder
+/*0374*/ uint8_t ztype;                    // Zone type
+/*0375*/ uint8_t fog_red[4];               // Zone fog (red)
+/*0379*/ uint8_t fog_green[4];             // Zone fog (green)
+/*0383*/ uint8_t fog_blue[4];              // Zone fog (blue)
+/*0387*/ uint8_t unknown0374[87];          // *** Placeholder
 /*0474*/ uint8_t sky;                      // Zone sky
 /*0475*/ uint8_t unknown0475[13];          // *** Placeholder
 /*0488*/ float   zone_exp_multiplier;      // Experience Multiplier
@@ -473,13 +513,14 @@ struct newZoneStruct
 /*0508*/ float   underworld;               // Underworld
 /*0512*/ float   minclip;                  // Minimum view distance
 /*0516*/ float   maxclip;                  // Maximum view distance
-/*0520*/ uint8_t unknown0520[160];         // *** Placeholder
-/*0676*/
+/*0520*/ uint8_t unknown0520[168];         // *** Placeholder
+/*0688*/
 };
+
 
 /*
 ** Player Profile
-** Length: 11416 Octets
+** Length: 18288 Octets
 ** OpCode: CharProfileCode
 */
 struct charProfileStruct
@@ -504,10 +545,10 @@ struct charProfileStruct
 /*0236*/ uint32_t  timePlayedMin;      // time character played
 /*0240*/ uint8_t   pvp;                // 1=pvp, 0=not pvp
 /*0241*/ uint8_t   level1;             // Level of Player
-/*0242*/ uint8_t   anon;	           // 2=roleplay, 1=anon, 0=not anon     
-/*0243*/ uint8_t   unknown243;         // *** Placeholder Possibly fatigue Sta bar % depleted (ie. 30 = 70% sta)
-/*0244*/ int8_t    gm;                 // 1=gm, 0=not gm (wrong shows one of my chars as a gm)
-/*0245*/ uint8_t   unknown0245[51];    // *** Placeholder
+/*0242*/ uint8_t   anon;               // 2=roleplay, 1=anon, 0=not anon     
+/*0243*/ uint8_t   unknown243;         // *** Placeholder
+/*0244*/ int8_t    guildstatus;        // 0=member, 1=officer, 2=guildleader
+/*0245*/ uint8_t   unknown0245[55];    // *** Placeholder
 /*0296*/ uint8_t   haircolor;          // Player hair color
 /*0297*/ uint8_t   beardcolor;         // Player beard color
 /*0298*/ uint8_t   eyecolor1;          // Player left eye color
@@ -520,10 +561,9 @@ struct charProfileStruct
 /*0392*/ Color_Struct item_tint[9];    // RR GG BB 00
 /*0428*/ AA_Array  aa_array[122];      // Length may not be right
 /*0672*/ uint8_t   unknown0672[716];   // ?? pet data? 7-14
-/*1388*/ char 	   servername[32];     // server the char was created on
-/*1420*/ char 	   title[32];          // title before the characters name
+/*1392*/ char      servername[32];     // server the char was created on
+/*1420*/ char      title[32];          // title before the characters name
 /*1452*/ uint8_t   unknown1452[36];    // unknown
-/*1488*/ uint32_t  altexp1;  	       // aaxp? (wrong?) might be AC Will look into it.
 /*1492*/ uint32_t  exp;                // Current Experience
 /*1496*/ uint32_t  unknown1496;        // *** Placeholder
 /*1500*/ uint32_t  points;             // Unspent Practice points
@@ -567,25 +607,24 @@ struct charProfileStruct
 /*3832*/ uint32_t  skills[75];         // List of skills (MAX_KNOWN_SKILLS)
 /*4132*/ uint8_t   unknown4132[408];   // *** Placeholder
 /*4540*/ uint32_t  zoneId;             // see zones.h
-/*4420*/ uint32_t  zoneInstance;       // 
-/*4548*/ spellBuff buffs[15];          // Buffs currently on the player
-/*4788*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
-/*5172*/ uint8_t   unknown5172[744];   // *** Placeholder
+/*4544 uint32_t  zoneInstance;       // Used to be here... */
+/*4544*/ spellBuff buffs[20];          // Buffs currently on the player
+/*4864*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
+/*5248*/ uint8_t   unknown5248[668];   // *** Placeholder
 /*5916*/ uint32_t  ldon_guk_points;    // Earned GUK points
 /*5920*/ uint32_t  ldon_mir_points;    // Earned MIR points
 /*5924*/ uint32_t  ldon_mmc_points;    // Earned MMC points
 /*5928*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
 /*5932*/ uint32_t  ldon_tak_points;    // Earned TAK points
-/*5936*/ uint8_t   unknown5936[24];    // *** Placeholder
-/*5960*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*5964*/ uint8_t   unknown5964[424];   // *** Placeholder
+/*5936*/ uint32_t  ldon_avail_points;  // Available LDON points
+/*5940*/ uint8_t   unknown5940[448];   // *** Placeholder
 /*6388*/ uint8_t   unknown6388[84];    // *** Placeholder
-/*6472*/ uint32_t  endurance;          // Current endurance
-/*6476*/ uint8_t   unknown6476[4888];  // *** Placeholder 
-/*11364*/ uint16_t altexp;             // Total aaxp points
-/*11366*/ uint8_t  unknown11366[50];   // *** Placeholder
-}; /* 11416 */
-
+/*6472*/ uint8_t   unknown6472[176];   // *** Placeholder
+/*6648*/ uint32_t  endurance;          // Current endurance
+/*6652*/ uint8_t   unknown6652[4888];  // *** Placeholder 
+/*11540*/ uint16_t altexp;             // Total aaxp points
+/*11542*/ uint8_t  unknown11542[6874]; // *** Placeholder
+}; /* 18416 */
 
 #if 1
 struct playerAAStruct {
@@ -835,21 +874,22 @@ union {
 struct doorStruct
 {
 /*0000*/ char     name[16];        // Filename of Door?
-/*0016*/ float    y;               // y loc
-/*0020*/ float    x;               // x loc
-/*0024*/ float    z;               // z loc
-/*0028*/ float    heading;         // heading
-/*0032*/ uint8_t  unknown0028[7]; // ***Placeholder
-/*0039*/ int8_t   auto_return;
-/*0040*/ uint8_t  initialState;
-/*0041*/ uint8_t  unknown041[3];
-/*0044*/ uint8_t  doorId;          // door's id #
-/*0045*/ uint8_t  opentype;       
-/*0046*/ uint8_t  size;           // size of door
-/*0047*/ uint8_t holdstateforever;
-/*0048*/ uint32_t zonePoint;
-/*0052*/ uint8_t  unknown052[12]; // ***Placeholder
-/*0064*/
+/*0016*/ uint8_t  unknown016[16]; // ***Placeholder
+/*0032*/ float    y;               // y loc
+/*0036*/ float    x;               // x loc
+/*0040*/ float    z;               // z loc
+/*0044*/ float    heading;         // heading
+/*0048*/ uint8_t  unknown0028[7]; // ***Placeholder
+/*0055*/ int8_t   auto_return;
+/*0056*/ uint8_t  initialState;
+/*0057*/ uint8_t  unknown041[3];
+/*0060*/ uint8_t  doorId;          // door's id #
+/*0061*/ uint8_t  opentype;       
+/*0062*/ uint8_t  size;           // size of door
+/*0063*/ uint8_t holdstateforever;
+/*0064*/ uint32_t zonePoint;
+/*0068*/ uint8_t  unknown068[12]; // ***Placeholder
+/*0080*/
 }; 
 
 /*
@@ -1058,14 +1098,14 @@ struct formattedMessageStruct
 
 /*
 ** Simple text messages
-** Length: Variable Text
+** Length: 12 Octets
 ** OpCode: SimpleMessageCode
 */
 
 struct simpleMessageStruct
 {
 /*0000*/ uint32_t  messageFormat;          // Indicates the message format
-/*0005*/ ChatColor messageColor;                  // Message color
+/*0004*/ ChatColor messageColor;                  // Message color
 /*0008*/ uint32_t  unknown;                // ***Placeholder
 /*0012*/
 };
@@ -1113,6 +1153,30 @@ struct corpseLocStruct
 /*0004*/ float    x;
 /*0008*/ float    y;
 /*0012*/ float    z;
+};
+
+/*
+** Consent request
+** Length: Variable by length of the name of the consentee
+*/
+
+struct consentRequestStruct
+{
+/*0000*/ char consentee[0];        // Name of player who was consented
+};
+
+/*
+** Consent Response
+** Length: 193 Octets
+*/
+
+struct consentResponseStruct
+{
+/*0000*/ char consentee[64];        // Name of player who was consented
+/*0064*/ char consenter[64];        // Name of player who consented
+/*0128*/ uint8_t allow;             // 00 = deny, 01 = allow
+/*0129*/ char corpseZoneName[64];   // Zone where the corpse is
+/*0193*/
 };
 
 /*
@@ -1213,7 +1277,7 @@ struct deleteSpawnStruct
 
 /*
 ** Remove Drop Item On Ground
-** Length: 10 Octets
+** Length: 8 Octets
 ** OpCode: RemDropCode
 */
 
@@ -1227,7 +1291,7 @@ struct remDropStruct
 
 /*
 ** Consider Struct
-** Length: 30 Octets
+** Length: 28 Octets
 ** OpCode: considerCode
 */
 
@@ -1246,7 +1310,7 @@ struct considerStruct
 
 /*
 ** Spell Casted On
-** Length: 38 Octets
+** Length: 36 Octets
 ** OpCode: castOnCode
 */
 
@@ -1263,7 +1327,7 @@ struct castOnStruct
 
 /*
 ** Spawn Death Blow
-** Length: 18 Octets
+** Length: 32 Octets
 ** OpCode: NewCorpseCode
 */
 
@@ -1281,9 +1345,24 @@ struct newCorpseStruct
 /*0032*/
 };
 
+/**
+** Environmental damage (lava, falls)
+** Length: 31 Octets
+*/
+
+struct environmentDamageStruct
+{
+/*0000*/ uint32_t spawnId;          // Who is taking the damage
+/*0004*/ uint8_t unknown0004[2];
+/*0006*/ uint32_t damage;           // how much damage?
+/*0010*/ uint8_t unknown0010[12];
+/*0022*/ uint8_t type;              // Damage type. FC = fall. FA = lava.
+/*0023*/ uint8_t unknown0023[8];
+};
+
 /*
 ** Money Loot
-** Length: 22 Octets
+** Length: 20 Octets
 ** OpCode: MoneyOnCorpseCode
 */
 
@@ -1299,7 +1378,7 @@ struct moneyOnCorpseStruct
 
 /*
 ** Stamina
-** Length: 14 Octets
+** Length: 12 Octets
 ** OpCode: staminaCode
 */
 
@@ -1313,7 +1392,7 @@ struct staminaStruct
 
 /*
 ** Battle Code
-** Length: 34 Octets
+** Length: 23 Octets
 ** OpCode: ActionCode
 */
 
@@ -1357,7 +1436,7 @@ struct clientTargetStruct
 
 /*
 ** Info sent when you start to cast a spell
-** Length: 18 Octets
+** Length: 20 Octets
 ** OpCode: StartCastCode
 */
 
@@ -1373,7 +1452,7 @@ struct startCastStruct
 
 /*
 ** New Mana Amount
-** Length: 10 Octets
+** Length: 16 Octets
 ** OpCode: manaDecrementCode
 */
 
@@ -1388,7 +1467,7 @@ struct manaDecrementStruct
 
 /*
 ** Special Message
-** Length: 6 Octets + Variable Text Length
+** Length: 4 Octets + Variable Text Length
 ** OpCode: SPMesgCode
 */
 struct spMesgStruct
@@ -1411,7 +1490,7 @@ struct spellFadedStruct
 
 /*
 ** Spell Action Struct
-** Length: 10 Octets
+** Length: 8 Octets
 ** OpCode: BeginCastCode
 */
 struct beginCastStruct
@@ -1425,7 +1504,7 @@ struct beginCastStruct
 
 /*
 ** Spell Action Struct
-** Length: 14 Octets
+** Length: 16 Octets
 ** OpCode: MemSpellCode
 */
 
@@ -1440,7 +1519,7 @@ struct memSpellStruct
 
 /*
 ** Train Skill
-** Length: 10 Octets
+** Length: 12 Octets
 ** OpCode: SkillTrainCode
 */
 
@@ -1454,7 +1533,7 @@ struct skillTrainStruct
 
 /*
 ** Skill Increment
-** Length: 10 Octets
+** Length: 8 Octets
 ** OpCode: SkillIncCode
 */
 
@@ -1468,7 +1547,7 @@ struct skillIncStruct
 /*
 ** When somebody changes what they're wearing
 **      or give a pet a weapon (model changes)
-** Length: 18 Octets
+** Length: 14 Octets
 ** Opcode: WearChangeCode
 */
 
@@ -1511,7 +1590,7 @@ struct expUpdateStruct
 
 /*
 ** Alternate Experience Update
-** Length: 14 Octets
+** Length: 12 Octets
 ** OpCode: AltExpUpdateCode
 */
 struct altExpUpdateStruct
@@ -1525,7 +1604,7 @@ struct altExpUpdateStruct
 
 /*
 ** Player Spawn Update
-** Length: 10 Octets
+** Length: 9 Octets
 ** OpCode: SpawnUpdateCode
 */
 
@@ -1541,21 +1620,21 @@ struct SpawnUpdateStruct
 
 /*
 ** NPC Hp Update
-** Length: 5 Octets
+** Length: 6 Octets
 ** Opcode NpcHpUpdateCode
 */
 
 struct hpNpcUpdateStruct
 {
-/*0002*/ uint16_t spawnId;
-/*0004*/ int16_t maxHP;
-/*0006*/ int16_t curHP;
-/*0008*/ 
+/*0000*/ uint16_t spawnId;
+/*0002*/ int16_t maxHP;
+/*0004*/ int16_t curHP;
+/*0006*/ 
 }; 
 
 /*
 ** Inspecting Information
-** Length: 1746 Octets
+** Length: 1792 Octets
 ** OpCode: InspectDataCode
 */
 
@@ -1665,7 +1744,7 @@ struct playerSelfPosStruct
 
 /*
 ** Spawn Appearance
-** Length: 10 Octets
+** Length: 8 Octets
 ** OpCode: spawnAppearanceCode
 */
 
@@ -1851,6 +1930,19 @@ struct GuildMemberUpdate
 /*076*/
 };
 
+/*
+** Bazaar trader on/off struct
+** Length: 8 Octets
+**
+*/
+struct bazaarTraderRequest
+{
+/*000*/ uint32_t spawnId;       // Spawn id of person turning trader on/off
+/*004*/ uint8_t mode;           // 0=off, 1=on
+/*005*/ uint8_t uknown005[3];   // 
+/*008*/
+};
+
 struct bazaarSearchQueryStruct 
 {
   uint32_t mark;
@@ -1900,10 +1992,9 @@ struct guildListStruct
 
 /*
 ** Guild List (from world server)
-** Length: 49158 Octets
-** OpCode: GuildListCode 0x9221
+** Length: 96064 Octets
 */
-#define MAXGUILDS 512
+#define MAXGUILDS 1500
 struct worldGuildListStruct
 {
 /*000*/ guildListStruct dummy;

@@ -101,6 +101,8 @@ class EQPacket : public QObject
    void session_tracking(bool enable);
    void setArqSeqGiveUp(uint16_t giveUp);
    void setRealtime(bool val);
+   void dispatchSessionKey(uint32_t sessionId, EQStreamID streamid,
+      uint32_t sessionKey);
 
  protected slots:
    void closeStream();
@@ -169,6 +171,7 @@ class EQPacket : public QObject
    EQPacketOPCodeDB* m_zoneOPCodeDB;
 
    void dispatchPacket   (int size, unsigned char *buffer);
+   void dispatchPacket(EQUDPIPPacketFormat& packet);
  protected slots:
    void resetEQPacket();
    void dispatchWorldChatData (size_t len, uint8_t* data, uint8_t direction = 0);

@@ -17,10 +17,7 @@
 //----------------------------------------------------------------------
 // Macros
 
-//#define DEBUG_PACKET
-//#undef DEBUG_PACKET
-
-// diagnose structure size changes
+// diagnose fragmentation problems
 //#define PACKET_PROCESS_FRAG_DIAG
 
 //----------------------------------------------------------------------
@@ -31,11 +28,9 @@
 EQPacketFragmentSequence::EQPacketFragmentSequence()
   : m_streamid(unknown_stream),
     m_data(0),
+    m_totalLength(0),
     m_dataSize(0),
-    m_dataAllocSize(0),
-    m_seq(0),
-    m_current(0),
-    m_total(0)
+    m_dataAllocSize(0)
 {
 }
 
@@ -44,11 +39,9 @@ EQPacketFragmentSequence::EQPacketFragmentSequence()
 EQPacketFragmentSequence::EQPacketFragmentSequence(EQStreamID streamid)
   : m_streamid(streamid),
     m_data(0),
+    m_totalLength(0),
     m_dataSize(0),
-    m_dataAllocSize(0),
-    m_seq(0),
-    m_current(0),
-    m_total(0)
+    m_dataAllocSize(0)
 {
 }
 
@@ -64,103 +57,78 @@ EQPacketFragmentSequence::~EQPacketFragmentSequence()
 // Reset the fragment sequence
 void EQPacketFragmentSequence::reset()
 {
+#ifdef PACKET_PROCESS_FRAG_DIAG
+   debug ("EQPacketFragmentSequence::reset() stream %d (complete fragment? %s)",
+     m_streamid, (isComplete() ? "yes" : "no"));
+#endif
   m_dataSize = 0;
-  m_seq = 0;
-  m_current = 0;
-  m_total = 0;
+  m_totalLength = 0;
 }
 
 ////////////////////////////////////////////////////
 // Add a fragment to the sequence
-void EQPacketFragmentSequence::addFragment(EQPacketFormat& pf)
+void EQPacketFragmentSequence::addFragment(EQProtocolPacket& packet)
 {
-#ifdef DEBUG_PACKET
-   debug ("EQPacketFragmentSequence::addFragment()");
-#endif /* DEBUG_PACKET */
-
 #ifdef PACKET_PROCESS_FRAG_DIAG
-   seqDebug("EQPacketFragmentSequence::addFragment(): pf.arq 0x%04x, pf.fragSeq 0x%04x, pf.fragCur 0x%04x, pf.fragTot 0x%04x", pf.arq(), pf.fragSeq(), pf.fragCur(), pf.fragTot());
-#endif /* PACKET_PROCESS_FRAG_DIAG */
-
-   // fragments with ASQ signify the beginning of a new series
-   // warn if previous series is incomplete
-   // clear and allocate space for the new series
-   if (pf.isASQ())
-   {
-      if (m_dataSize)
-      {
-         if (!pf.fragSeq() == 0) // surpress WARNING for duplicate SEQStart/fragment start (e.g.0x3a)
-         {
-	   seqWarn("EQPacketFragmentSequence::addFragment(): WARNING OpCode 0x%04x will not be processed due to loss",
-                   eqntohuint16(m_data));
-	   seqWarn("EQPacketFragmentSequence::addFragment(): recieved new fragment seq 0x%04x before completion of 0x%04x",
-                   pf.fragSeq(), m_seq);
-         }
-      }
-
-      size_t needs = (pf.fragTot() * pf.payloadLength());
-      if (needs > m_dataAllocSize)
-      {
-	delete [] m_data;
-	m_dataAllocSize = needs;
-	m_data = new uint8_t[m_dataAllocSize]; // should be an over estimate
-      }
-
-      m_dataSize = 0;
-      m_seq = pf.fragSeq();
-      m_current = pf.fragCur();
-      m_total = pf.fragTot();
-      
-
-#ifdef PACKET_PROCESS_FRAG_DIAG
-      seqDebug("EQPacketFragmentSequence::addFragment(): Allocating %d bytes for fragmentSeq %d, stream %d, OpCode 0x%04x",
-             (pf.fragTot() * pf.payloadLength()), pf.fragSeq(), m_streamid, eqntohuint16(m_data));
+   debug ("EQPacketFragmentSequence::addFragment() stream %d", m_streamid);
 #endif
-   }
 
-   if (m_data != NULL)
+   // If dataSize isn't filled in, this is first fragment. Need to alloc.
+   if (m_dataSize == 0)
    {
-      if (pf.fragSeq() != m_seq || pf.fragCur() != m_current)
+      // Buffer length is on the wire past the sequence number.
+      m_totalLength = eqntohuint32(&(packet.payload()[2]));
+
+      if (m_totalLength == 0)
       {
-	seqWarn("EQPacketFragmentSequence::addFragment: WARNING OpCode 0x%04x will not be processed due to loss",
-             eqntohuint16(m_data)); 
-	seqWarn("EQPacketFragmentSequence::addFragment(): recieved Out-Of-Order fragment seq 0x%04x (0x%04x) expected 0x%04x",
-              pf.fragCur(), pf.fragSeq(), m_current);
-         return;
+         seqWarn("Oversized packet fragment requested buffer of size 0 on stream %d OpCode %04x seq %04x",
+           m_streamid, *(uint16_t*)(&packet.payload()[6]), packet.arqSeq());
       }
-      else if ((m_dataSize + pf.payloadLength()) > m_dataAllocSize)
+      else if (m_totalLength > m_dataAllocSize)
       {
-	// theoretically should never get here, but...
-	// calculate needed size
-	size_t needs = m_dataSize + pf.payloadLength();
+        // Buffer isn't big enough. Enlargen it.
+        if (m_data)
+        {
+          delete[] m_data;
+        }
+        m_dataAllocSize = m_totalLength;
+        m_data = new uint8_t[m_dataAllocSize];
 
-	// allocate new buffer
-	uint8_t* newData = new uint8_t[needs];
-
-	// copy old data
-	memcpy((void*)newData, (void*)m_data, m_dataSize);
-
-	// delete old data
-	delete [] m_data;
-
-	m_dataAllocSize = needs;
-	m_data = newData;
-      }
-      else
-      {
-         memcpy((void*)(m_data + m_dataSize), (void*)pf.payload(), pf.payloadLength());
-
-         m_dataSize += pf.payloadLength();
-         m_current = pf.fragCur()+1;
-
-         return;
-      }
 #ifdef PACKET_PROCESS_FRAG_DIAG
+        seqDebug("EQPacketFragmentSequence::addFragment(): Allocating %d bytes for seq %04x, stream %d, OpCode 0x%04x",
+          m_dataAllocSize, packet.arqSeq(), m_streamid, 
+           *(uint16_t*)(&packet.payload()[6]));
+#endif
+      }
+      
+      // Now put in this fragment. Payload starts after seq, unknown, 
+      // and alloc size.
+#ifdef PACKET_PROCESS_FRAG_DIAG
+      seqDebug("EQPacketFragmentSequence::addFragment(): Putting initial %d byte fragment into buffer for seq %04x, stream %d, OpCode 0x%04x",
+             packet.payloadLength() - 6, packet.arqSeq(), m_streamid, 
+             *(uint16_t*)(&packet.payload()[6]));
+#endif
+      memcpy(m_data, &packet.payload()[6], packet.payloadLength()-6);
+      m_dataSize = packet.payloadLength() - 6;
    }
    else
    {
-     seqWarn("EQPacketFragmentSequence::addFragment(): recieved fragment component (fragSeq 0x%04x, fragCur 0x%04x) before fragment start",
-	    pf.fragSeq(), pf.fragCur());
+      // Add this fragment to the buffer. Payload starts immediately after seq.
+#ifdef PACKET_PROCESS_FRAG_DIAG
+      seqDebug("EQPacketFragmentSequence::addFragment(): Putting %d byte fragment into buffer for seq %04x, stream %d, OpCode 0x%04x",
+             packet.payloadLength() - 2, packet.arqSeq(), m_streamid, 
+             *(uint16_t*)(m_data));
 #endif
+      
+      if (m_data + m_dataSize + packet.payloadLength() - 2 > m_data + m_dataAllocSize)
+      {
+        seqFatal("!!!! EQPacketFragmentSequence::addFragment(): buffer overflow adding in new fragment to buffer with seq %04x on stream %d, opcode %04x. Buffer is size %d and has been filled up to %d, but tried to add %d more!",
+          packet.arqSeq(), m_streamid, *(uint16_t*)(m_data),
+          m_dataAllocSize, m_dataSize, packet.payloadLength() - 2);
+      }
+
+      memcpy(m_data + m_dataSize, 
+         &packet.payload()[2], packet.payloadLength() - 2);
+      m_dataSize += (packet.payloadLength() - 2);
    }
 }

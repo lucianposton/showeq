@@ -5,9 +5,6 @@
  * http://seq.sf.net/
  */
 
-#ifndef _CRCTAB_H_
-#define _CRCTAB_H_
-
 static uint32_t crctab[256] =
 {
   0x0,
@@ -64,4 +61,3 @@ static uint32_t crctab[256] =
   0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5a05df1b, 0x2d02ef8d,
 };
 
-#endif // _CRCTAB_H_

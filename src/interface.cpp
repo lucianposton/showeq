@@ -1788,7 +1788,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			m_messageShell,
 			SLOT(formattedMessage(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_SimpleMessage", SP_Zone, DIR_Server,
-			"simpleMessageStruct", SZC_None,
+			"simpleMessageStruct", SZC_Match,
 			m_messageShell,
 			SLOT(simpleMessage(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_SpecialMesg", SP_Zone, DIR_Server,
@@ -1805,6 +1805,12 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_RandomReply", SP_Zone, DIR_Server,
 			"randomStruct", SZC_Match,
 			m_messageShell, SLOT(random(const uint8_t*)));
+     m_packet->connect2("OP_ConsentResponse", SP_Zone, DIR_Server,
+			"consentResponseStruct", SZC_Match,
+			m_messageShell, SLOT(consent(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_DenyResponse", SP_Zone, DIR_Server,
+			"consentResponseStruct", SZC_Match,
+			m_messageShell, SLOT(consent(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_Emote", SP_Zone, DIR_Server|DIR_Client,
 			"emoteTextStruct", SZC_None,
 			m_messageShell, SLOT(emoteText(const uint8_t*)));
@@ -1993,6 +1999,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_WearChange", SP_Zone, DIR_Server|DIR_Client,
 		      "SpawnUpdateStruct", SZC_Match,
 		      m_spawnShell, SLOT(updateSpawnInfo(const uint8_t*)));
+   m_packet->connect2("OP_InitialHPUpdate", SP_Zone, DIR_Server|DIR_Client,
+		      "hpNpcUpdateStruct", SZC_Match,
+		      m_spawnShell, SLOT(updateNpcHP(const uint8_t*)));
    m_packet->connect2("OP_HPUpdate", SP_Zone, DIR_Server|DIR_Client,
 		      "hpNpcUpdateStruct", SZC_Match,
 		      m_spawnShell, SLOT(updateNpcHP(const uint8_t*)));
@@ -2044,7 +2053,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 		      "actionStruct", SZC_Match,
 		      m_spellShell, SLOT(action(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_SimpleMessage", SP_Zone, DIR_Server,
-		      "simpleMessageStruct", SZC_None,
+		      "simpleMessageStruct", SZC_Match,
 		      m_spellShell,
 		      SLOT(simpleMessage(const uint8_t*, size_t, uint8_t)));
 
@@ -2068,6 +2077,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_LevelUpdate", SP_Zone, DIR_Server,
 		      "levelUpUpdateStruct", SZC_Match,
 		      m_player, SLOT(updateLevel(const uint8_t*)));
+   m_packet->connect2("OP_InitialHPUpdate", SP_Zone, DIR_Server|DIR_Client,
+		      "hpNpcUpdateStruct", SZC_Match,
+		      m_player, SLOT(updateNpcHP(const uint8_t*)));
    m_packet->connect2("OP_HPUpdate", SP_Zone, DIR_Server|DIR_Client,
 		      "hpNpcUpdateStruct", SZC_Match,
 		      m_player, SLOT(updateNpcHP(const uint8_t*)));

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 # spells_en2spellsh.pl
 # ShowEQ Distributed under GPL

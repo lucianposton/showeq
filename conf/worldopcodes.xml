@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE seqopcodes SYSTEM "seqopcodes.dtd">
 <seqopcodes>
+    <!-- OLD OPCODES - these need updating still post 1/26/2005 
+
+
     <opcode id="0018" name="OP_AckPacket" updated="02/10/04">
         <comment>Appears to be generic ack at the presentation level</comment>
-    </opcode>
-    <opcode id="005d" name="OP_GuildList" updated="07/14/04">
-        <comment>old GuildListCode</comment>
-        <payload dir="server" typename="worldGuildListStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="00e3" name="OP_ExpansionInfo" updated="02/10/04">
         <comment>Which expansions user has</comment>
     </opcode>
     <opcode id="00ec" name="OP_DeleteCharacter" updated="02/10/04">
         <comment>Delete character @ char select</comment>
-    </opcode>
-    <opcode id="0102" name="OP_SendCharInfo" updated="07/14/04">
-        <comment>Send all chars visible @ char select</comment>
     </opcode>
     <opcode id="0106" name="OP_CharacterCreate" updated="02/10/04">
         <comment>Create character @ char select</comment>
@@ -35,21 +31,11 @@
     <opcode id="0196" name="OP_ApproveWorld" updated="02/10/04">
         <comment></comment>
     </opcode>
-    <opcode id="01b3" name="OP_MOTD" updated="02/10/04">
-        <comment>old MOTDCode Server message of the day</comment>
-        <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
-    </opcode>
     <opcode id="0241" name="OP_SendLoginInfo" updated="02/10/04">
         <comment></comment>
     </opcode>
     <opcode id="0264" name="OP_EnterWorld" updated="02/10/04">
         <comment>Server approval for client to enter world</comment>
-    </opcode>
-    <opcode id="0267" name="OP_ZoneServerInfo" updated="02/10/04">
-        <comment>old ZoneServerInfo</comment>
-    </opcode>
-    <opcode id="026c" name="OP_SetChatServer" updated="02/10/04">
-        <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
     <opcode id="02a5" name="OP_UserCompInfo" updated="02/10/04">
         <comment>User submitted computer information</comment>
@@ -59,5 +45,27 @@
     </opcode>
     <opcode id="02db" name="OP_LoginComplete" updated="02/10/04">
         <comment></comment>
+    </opcode>
+-->
+
+
+
+
+    <opcode id="1560" name="OP_ZoneServerInfo" updated="01/26/05">
+        <comment>old ZoneServerInfo</comment>
+    </opcode>
+    <opcode id="2628" name="OP_SendCharInfo" updated="01/26/05">
+        <comment>Send all chars visible @ char select</comment>
+    </opcode>
+    <opcode id="4b97" name="OP_MOTD" updated="01/26/05">
+        <comment>old MOTDCode Server message of the day</comment>
+        <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
+    </opcode>
+    <opcode id="5dd9" name="OP_GuildList" updated="01/26/05">
+        <comment>old GuildListCode</comment>
+        <payload dir="server" typename="worldGuildListStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="7e66" name="OP_SetChatServer" updated="01/26/05">
+        <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
 </seqopcodes>

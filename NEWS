@@ -1,3 +1,14 @@
+
+This is a terse description of the features added to 5.0.0.17 since the 
+release of 5.0.0.16.
+
+1. New network code to support live EverQuest servers after 1/26/2005 patch
+
+2. Updated zoneopcodes.xml and worldopcodes.xml after all opcodes changed
+   with the 1/26/2005 patch
+
+--
+
 This is a terse description of the features added to 5.0.0.15 since the 
 release of 5.0.0.14.
 
