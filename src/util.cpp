@@ -395,8 +395,7 @@ print_skill (uint8_t skill)
     case 0x01:  // 0x01 (01)  - Generic 2H Slash
       return "2H Slash";
     case 0x02:  // 0x02 (02)  - Generic Piecing
-    case 0x23:  // 0x23 (35)  - As per Runed Othmir Spear/Grimy Lance
-      return "Piercing";
+      return "1H Piercing";
     case 0x03:  // 0x03 (03)  - Generic 1H Blunt
       return "1H Blunt";
     case 0x04:  // 0x04 (04)  - Generic 2H Blunt
