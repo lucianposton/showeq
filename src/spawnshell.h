@@ -29,6 +29,7 @@
 #include "filtermgr.h"
 #include "spawn.h"
 #include "player.h"
+#include "logger.h"
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -97,7 +98,6 @@ public:
 
    void dumpSpawns(itemType type, QTextStream& out);
    FilterMgr* filterMgr(void) { return &m_filterMgr; }
-
    const ItemMap& getConstMap(itemType type) const;
    const ItemMap& spawns(void) const;
    const ItemMap& drops(void) const;
@@ -127,6 +127,8 @@ public slots:
    void newDoorSpawn(const doorStruct* d);
    void removeCoinsItem(const removeCoinsStruct*);
    void zoneSpawns(const zoneSpawnsStruct* zspawns, int len);
+   void timeOfDay(const timeOfDayStruct *tday);
+   void zoneEntry(const ServerZoneEntryStruct *zone);
    void newSpawn(const newSpawnStruct* spawn);
    void newSpawn(const spawnStruct& s);
    void playerUpdate(const playerPosStruct *pupdate, bool client);
@@ -183,6 +185,8 @@ public slots:
 
    // filter manager
    FilterMgr& m_filterMgr;
+
+   SpawnLogger *m_spawnlogger;
 };
 
 inline

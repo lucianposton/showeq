@@ -84,6 +84,8 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr, EQPlayer* player)
    m_posDeadSpawnIDs = 0;
    memset((void*)m_deadSpawnID, 0, sizeof(m_deadSpawnID));
 
+   m_spawnlogger = new SpawnLogger(showeq_params->SpawnLogFilename);
+
    // connect the FilterMgr's signals to SpawnShells slots
    connect(&m_filterMgr, SIGNAL(filtersChanged()),
 	   this, SLOT(refilterSpawns()));
@@ -94,6 +96,19 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr, EQPlayer* player)
    connect(m_player, SIGNAL(setID(uint16_t)),
 	   this, SLOT(setPlayerID(uint16_t)));
 }
+
+void
+SpawnShell::timeOfDay(const timeOfDayStruct *tday)
+{
+    m_spawnlogger->logTimeSync(tday);
+}
+
+void 
+SpawnShell::zoneEntry(const ServerZoneEntryStruct* zsentry) 
+{
+    m_spawnlogger->logNewZone((const char *)zsentry->zoneShortName);
+    clear();
+}     
 
 void SpawnShell::clearMap(ItemMap& map)
 {
@@ -436,13 +451,15 @@ void SpawnShell::zoneSpawns(const zoneSpawnsStruct* zspawns, int len)
 
   for (int i = 0; i < spawndatasize; i++)
   {
+    m_spawnlogger->logZoneSpawn(&zspawns->spawn[i].spawn);
     newSpawn(zspawns->spawn[i].spawn);
   }
 }
 
 void SpawnShell::newSpawn(const newSpawnStruct* spawn)
 {
-  newSpawn(spawn->spawn);
+    m_spawnlogger->logNewSpawn(&spawn->spawn);
+    newSpawn(spawn->spawn);
 }
 
 void SpawnShell::newSpawn(const spawnStruct& s)
@@ -859,6 +876,15 @@ void SpawnShell::deleteSpawn(const deleteSpawnStruct* delspawn)
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::deleteSpawn(id=%d)\n", delspawn->spawnId);
 #endif
+   ItemMap::iterator it;
+   Spawn* item;
+   it = m_spawns.find(delspawn->spawnId);
+   if (it != m_spawns.end())
+   {
+     item = (Spawn*)it->second;
+     m_spawnlogger->logDeleteSpawn(item);
+   }
+
    if (m_posDeadSpawnIDs < MAX_DEAD_SPAWNIDS)
      m_posDeadSpawnIDs++;
    else
@@ -898,6 +924,14 @@ void SpawnShell::killSpawn(const newCorpseStruct* deadspawn)
    if (it != m_spawns.end())
    {
      Spawn* item = (Spawn*)it->second;
+     Spawn* killer=NULL;
+
+     ItemMap::iterator kit = m_spawns.find(deadspawn->killerId);
+
+     if (kit != m_spawns.end())
+         killer = (Spawn*)kit->second;
+
+     m_spawnlogger->logKilledSpawn(item,(killer)?killer->rawName():"unknown",deadspawn->killerId);
 
      // ZBTEMP: This is temporary until we can find a better way
      // set the last kill info on the player (do this before changing name)
@@ -1024,6 +1058,7 @@ void SpawnShell::backfillSpawn(const spawnStruct *spawn)
   uint16_t spawnId;
 
   spawnId = spawn->spawnId;
+  m_spawnlogger->logZoneSpawn(spawn);
 
   it = m_spawns.find(spawnId);
   

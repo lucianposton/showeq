@@ -372,9 +372,7 @@ QMainWindow (parent, name)
 
    // connect the SpawnShell slots to Packet signals
    connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*)),
-	   m_spawnShell, SLOT(clear(void)));
-   //connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*)),
-   //	   m_spawnShell, SLOT(clear(void)));
+	   m_spawnShell, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
    connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, bool)),
 	   m_spawnShell, SLOT(clear(void)));
    connect(m_packet, SIGNAL(newGroundItem(const makeDropStruct*, bool)),
@@ -389,6 +387,8 @@ QMainWindow (parent, name)
            m_spawnShell, SLOT(compressedDoorSpawn(const cDoorSpawnsStruct*)));
    connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*)),
 	   m_spawnShell, SLOT(newSpawn(const newSpawnStruct*)));
+   connect(m_packet, SIGNAL(timeOfDay(const timeOfDayStruct *)),
+	   m_spawnShell, SLOT(timeOfDay(const timeOfDayStruct *)));
    connect(m_packet, SIGNAL(updateSpawns(const mobUpdateStruct *)),
 	   m_spawnShell, SLOT(updateSpawns(const mobUpdateStruct *)));
    connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct *)),

@@ -5,6 +5,27 @@
  *  http://www.sourceforge.net/projects/seq
  */
 
+#ifndef SEQLOGGER_H
+#define SEQLOGGER_H
+
+#include "spawn.h"
+#include "util.h"
+
+class SEQLogger
+{
+public:
+    SEQLogger(const char *fname);
+    SEQLogger(FILE *fp);
+protected:
+    int logOpen(void);
+    int outputf(const char *fmt, ...);
+    int output(const void *data, int length);
+    void flush() { fflush(FP); }
+    FILE *FP;
+    char *filename;
+    int errOpen;
+};
+
 #define ZoneServerInfoMask 0x00000001 /* mask 1 */
 #define DropCoinsMask      0x00000002
 #define ChannelMessageMask 0x00000004
@@ -77,8 +98,8 @@
 #define NewSpawnMask        0x00000008
 #define UnknownOpcodeMask   0x00000010
 
-class PktLogger {
-
+class PktLogger: public SEQLogger 
+{
 public:
     int  isLoggingZoneServerInfo()  { return( mask1 & ZoneServerInfoMask );  }
     int  isLoggingCPlayerItems()    { return( mask2 & CPlayerItemsMask );    }
@@ -227,9 +248,6 @@ public:
     void logUnknownOpcode(void *data,int len,int dir);
 
 private:
-    int logOpen(void);
-    int outputf(const char *fmt, ...);
-    int output(const void *data, int length);
     void logItemHeader(const itemStruct *item);
     void logBookItem(const itemStruct *item);
     void logNormalItem(const itemStruct *item);
@@ -238,12 +256,31 @@ private:
     void logItem(const itemStruct *item);
     void logProcessMaskString(const char *maskstr, unsigned *m1, unsigned *m2, unsigned *m3);
     void logSpawnStruct(const spawnStruct *spawn);
-    void flush() { fflush(FP); }
-    FILE *FP;
-    char *filename;
-    int pktLogErr;
     unsigned int mask1;
     unsigned int mask2;
     unsigned int mask3;
     unsigned zoneTimestamp;
 };
+
+class SpawnLogger: public SEQLogger 
+{
+public:
+    SpawnLogger(const char *filename);
+    SpawnLogger(FILE *fp);
+    void logTimeSync(const timeOfDayStruct *tday);
+    void logZoneSpawn(const spawnStruct *spawn);
+    void logNewSpawn(const spawnStruct *spawn);
+    void logKilledSpawn(const Spawn *spawn,const char *killer,int kid);
+    void logDeleteSpawn(const Spawn *spawn);
+    void logNewZone(const char *zone);
+
+private:
+    void logSpawnInfo(const char *type, const char *name, int id, int level, 
+                      int xPos, int yPos, int zPos, time_t timeCurrent, 
+                      const char *killer, int kid);
+    int version;
+    char zoneShortName[16];
+    EQTime *l_time;
+};
+
+#endif

@@ -13,8 +13,80 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <time.h>
+#include <qstring.h>
+#include <qlist.h>
 #include "everquest.h"
+#include "spawn.h"
 #include "logger.h"
+#include "util.h"
+
+SEQLogger::SEQLogger(FILE *fp)
+{
+    FP = fp;
+    filename = NULL;
+    errOpen = 0;
+}
+
+SEQLogger::SEQLogger(const char *fname)
+{
+    FP = NULL;
+    filename = strdup(fname);
+    errOpen = 0;
+}
+
+int
+SEQLogger::logOpen()
+{
+    if (FP != NULL)
+        return(0);
+
+    FP = fopen(filename,"a");
+
+    if (FP == NULL)
+    { 
+        if (errOpen == 0)
+        {
+            fprintf(stderr,"Error opening %s: %s (will keep trying)\n",
+               filename, strerror(errno));
+            errOpen = 1;
+        }
+
+        return(-1);
+    }
+ 
+    errOpen = 0;
+
+    return(0);
+}
+
+int
+SEQLogger::outputf(const char *fmt, ...)
+{
+    va_list args;
+    int count;
+
+    if (FP == NULL)
+        return(0);
+
+    va_start(args, fmt);
+    count = vfprintf(FP, fmt, args);
+    va_end(args);
+    return(count);
+}
+
+int
+SEQLogger::output(const void *data, int length)
+{
+    int i;
+    int count = 0;
+    unsigned char *ptr = (unsigned char *) data;
+
+    for(i = 0; i < length; i++,ptr++)
+        count += outputf("%.2X", *ptr);
+
+    return(count);
+}
+
 
 void
 PktLogger::logProcessMaskString(const char *maskstr, unsigned *m1, unsigned *m2, unsigned *m3)
@@ -73,102 +145,29 @@ PktLogger::logProcessMaskString(const char *maskstr, unsigned *m1, unsigned *m2,
    }
 }
 
-PktLogger::PktLogger(FILE *fp, unsigned m1, unsigned m2, unsigned m3)
+
+PktLogger::PktLogger(FILE *fp, unsigned m1, unsigned m2, unsigned m3):SEQLogger(fp)
 {
-    FP = fp;
-    filename = NULL;
-    pktLogErr = 0;
     mask1 = m1;
     mask2 = m2;
     mask3 = m3;
 }
 
-PktLogger::PktLogger(FILE *fp, const char *maskstr)
+PktLogger::PktLogger(FILE *fp, const char *maskstr):SEQLogger(fp)
 {
-    FP = fp;
-    filename = NULL;
-    pktLogErr = 0;
     logProcessMaskString(maskstr,&mask1,&mask2,&mask3);
 }
 
-PktLogger::PktLogger(const char *fname, unsigned m1, unsigned m2, unsigned m3)
+PktLogger::PktLogger(const char *fname, unsigned m1, unsigned m2, unsigned m3):SEQLogger(fname)
 {
-    filename = strdup(fname);
-    pktLogErr = 0;
-    FP = NULL;
     mask1 = m1;
     mask2 = m2;
     mask3 = m3;
 }
 
-PktLogger::PktLogger(const char *fname, const char *maskstr)
+PktLogger::PktLogger(const char *fname, const char *maskstr):SEQLogger(fname)
 {
-    filename = strdup(fname);
-    pktLogErr = 0;
-    FP = NULL;
     logProcessMaskString(maskstr,&mask1,&mask2,&mask3);
-}
-
-
-/*
-    int pktLogOpen()
-
-    Attempt to open the filename specified in the configuration
-    file for PktLoggerFilename.  If we are unable to open the
-    file we print an error once. Every log attempt will try to
-    open the file if isn't open, so there will be a system slowdown
-    if logging is enable and the file can't be created. This is
-    intentional, but subject to change.
-*/
-
-int
-PktLogger::logOpen()
-{
-    if (FP != NULL)
-        return(0);
-
-    FP = fopen(filename,"a");
-
-    if (FP == NULL)
-    { 
-        if (pktLogErr == 0)
-        {
-            fprintf(stderr,"Error opening %s: %s (will keep trying)\n",
-               filename, strerror(errno));
-            pktLogErr = 1;
-        }
-
-        return(-1);
-    }
- 
-    pktLogErr = 0;
-
-    return(0);
-}
-
-int
-PktLogger::outputf(const char *fmt, ...)
-{
-    va_list args;
-    int count;
-
-    va_start(args, fmt);
-    count = vfprintf(FP, fmt, args);
-    va_end(args);
-    return(count);
-}
-
-int
-PktLogger::output(const void *data, int length)
-{
-    int i;
-    int count = 0;
-    unsigned char *ptr = (unsigned char *) data;
-
-    for(i = 0; i < length; i++,ptr++)
-        count += outputf("%.2X", *ptr);
-
-    return(count);
 }
 
 void
@@ -264,6 +263,10 @@ PktLogger::logNormalItem(const itemStruct *item)
 void
 PktLogger::logItem(const itemStruct *item)
 {
+    if (FP == NULL)
+        if (logOpen() != 0)
+            return;
+
     if (item->flag == 0x7669) /* book */
         logBookItem(item);
     else if (item->flag == 0x5400) /* container */   
@@ -283,7 +286,7 @@ PktLogger::logZoneServerInfo(const void *data, int len, int dir)
     if (FP == NULL)
         if (logOpen() != 0)
             return;
- 
+
     outputf("R %u %04d %d %.2X%2.X ", timestamp, len, dir, 
         op->code, op->version);
 
@@ -1847,4 +1850,118 @@ PktLogger::logUnknownOpcode(void *data, int len, int dir)
     flush();
     return;
 }
+
+
+SpawnLogger::SpawnLogger(const char *fname):SEQLogger(fname)
+{
+    version = 3;
+    strcpy(zoneShortName,"unknown");
+    l_time = new EQTime();
+    return;
+}
+
+SpawnLogger::SpawnLogger(FILE *fp):SEQLogger(fp)
+{
+    version = 3;
+    strcpy(zoneShortName,"unknown");
+    l_time = new EQTime();
+    return;
+}
+
+void
+SpawnLogger::logTimeSync(const timeOfDayStruct *tday)
+{
+    l_time->setepoch(time(NULL),tday);
+}
+
+void
+SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
+                          int xPos, int yPos, int zPos, time_t timeCurrent,
+                          const char *killedBy, int kid)
+{
+    struct timeOfDayStruct eqDate;
+    struct tm* current;
+
+    if (FP == NULL)
+        if (logOpen() != 0)
+            return;
+
+    eqDate  = l_time->eqdate(timeCurrent);
+    current = localtime(&timeCurrent);
+
+    outputf("%s:%s(%d):%d:%d,%d,%d:%02d.%02d.%02d:%d:%s:%02d.%02d.%02d.%02d.%04d:%s(%d)\n",
+        type,
+        name,
+        id,
+        level,
+        xPos,
+        yPos,
+        zPos,
+        current->tm_hour, current->tm_min, current->tm_sec,
+        version,
+        zoneShortName,
+        eqDate.hour,
+        eqDate.minute,
+        eqDate.month,
+        eqDate.day,
+        eqDate.year,
+        killedBy,
+        kid
+    );
+
+    flush();
+
+    return;
+}
+
+void
+SpawnLogger::logZoneSpawn(const spawnStruct *spawn)
+{
+    logSpawnInfo("z",spawn->name,spawn->spawnId,spawn->level,
+                 spawn->xPos, spawn->yPos, spawn->zPos, time(NULL), "", 0);
+
+    return;
+}
+
+void
+SpawnLogger::logNewSpawn(const spawnStruct *spawn)
+{
+    logSpawnInfo("+",spawn->name,spawn->spawnId,spawn->level,
+                 spawn->xPos, spawn->yPos, spawn->zPos, time(NULL), "", 0);
+
+    return;
+}
+
+void
+SpawnLogger::logKilledSpawn(const Spawn *spawn, const char *killedBy, int kid)
+{
+    logSpawnInfo("x",(const char *) spawn->rawName(),spawn->id(), spawn->level(), 
+                 spawn->x(), spawn->y(), spawn->z(), time(NULL),killedBy,kid);
+
+    return;
+}
+
+void
+SpawnLogger::logDeleteSpawn(const Spawn *spawn)
+{
+    logSpawnInfo("-",(const char *)spawn->rawName(),spawn->id(),spawn->level(),
+                 spawn->x(), spawn->y(), spawn->z(), time(NULL),"",0);
+
+    return;
+}
+
+void
+SpawnLogger::logNewZone(const char *zonename)
+{
+    if (FP == NULL)
+        if (logOpen() != 0)
+            return;
+
+    outputf("----------\nNEW ZONE: %s\n----------\n",zonename);
+    outputf(" :name(spawnID):Level:Xpos:Ypos:Zpos:H.m.s:Ver:Zone:eqHour.eqMinute.eqMonth.eqDay.eqYear:killedBy(spawnID)\n");
+    flush();
+    strncpy(zoneShortName,zonename,15);
+    zoneShortName[15] = 0;
+}
+
 

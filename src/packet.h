@@ -622,6 +622,7 @@ class EQPacket : public QObject
    void newZone                (char *, char *, bool);
    void zoneChanged            (void);
    void eqTimeChangedStr       (const QString &);
+   void timeOfDay              (const timeOfDayStruct *tday);
 
    void itemShop(const itemInShopStruct* items);
    void moneyOnCorpse(const moneyOnCorpseStruct* money);

@@ -67,10 +67,6 @@ const int16_t arqSeqWrapCutoff = 1024;
 // an arq sequenced packet, and just move on...
 const int16_t arqSeqGiveUp = 256;
 
-// Increment this when changing spawnlogout format so parsers know to expect
-//   something different. cpphack 
-const int spawnlog_version = 2;
-
 //----------------------------------------------------------------------
 // static variables
 #ifdef PACKET_CACHE_DIAG
@@ -79,7 +75,6 @@ static size_t maxServerCacheCount = 0;
 
 //----------------------------------------------------------------------
 // global variables
-FILE* spawnlogout;
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -444,18 +439,6 @@ QObject (parent, name)
    {
       printf ("No address specified\n");
       exit(0);
-   }
-
-   if (showeq_params->spawnlog_enabled)
-   {
-     /* Append to any existing log */
-
-     if ((spawnlogout = fopen(showeq_params->SpawnLogFilename,"a")) == NULL)
-     {
-        printf("Error opening %s: %s (spawn logging disabled)\n",
-               showeq_params->SpawnLogFilename, strerror(errno));
-        showeq_params->spawnlog_enabled = false;
-     }
    }
 
    m_logger = new PktLogger(showeq_params->PktLoggerFilename,
@@ -1753,7 +1736,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
                     tday->day,
                     tday->year
                  );
-
+            emit timeOfDay(tday);
             break;
         }
 
@@ -2143,7 +2126,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             unk = ! ValidatePayload(ZoneEntryCode, ServerZoneEntryStruct);
 
             emit zoneEntry((const ServerZoneEntryStruct*)data);
-	      
+
             // server considers us in the other zone now
 	      
             m_zoning = false;
@@ -3088,6 +3071,8 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
        fprintf(stderr, "Make sure you are running ShowEQ as root.\n");
      exit(0);
    }
+
+   setuid(getuid()); // give up root access if running suid root
 
    if (pcap_compile(m_pcache_pcap, &bpp, filter_buf, 1, 0) == -1)
    {
