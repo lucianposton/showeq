@@ -153,6 +153,7 @@ int main (int argc, char **argv)
         
    /* Print the version number */
    printf ("ShowEQ %s, released under the GPL.\n", VERSION);
+   printf ("  SINS 0.5, released under the GPL.\n");
    printf ("All ShowEQ source code is Copyright (C) 2000, 2001, 2002 by the respective ShowEQ Developers\n");
    printf ("Binary distribution without source code and resale are explictily NOT authorized by ANY party.\n");
    printf ("If you have paid for this software in any way, shape, or form, the person selling the\n");
