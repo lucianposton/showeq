@@ -539,8 +539,8 @@ EQPacket::EQPacket (QObject * parent, const char *name)
            // Must appear befire next call to getPrefString, which uses a static string
            printf("Recording packets to '%s' for future playback\n", filename);
 
-           if (pSEQPrefs->getPrefString("FlushPackets", section))
-           m_vPacket->setFlushPacket(true);
+	   m_vPacket->setFlushPacket(pSEQPrefs->getPrefBool("FlushPackets", 
+							    section, true));
        }
 
        else if (showeq_params->playbackpackets)
@@ -1533,7 +1533,7 @@ void EQPacket::dispatchWorldChatData (uint32_t len, uint8_t *data,
   switch (opCode)
   {
   default:
-    printf ("%04x - %d (%s)\n", opCode, len, 
+    printf ("%04x - %d (%s)\n", opCode, len,
 	    ((dir == DIR_SERVER) ? 
 	     "WorldChatServer --> Client" : "Client --> WorldChatServer"));
   }
@@ -2588,7 +2588,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         case BindWoundCode:
         {
             unk = false;
-            
+
 	    emit bindWound((bindWoundStruct*)data, len, dir);
 
             break;
@@ -2682,18 +2682,186 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
         }
 
+	case cRunToggleCode:
+	{
+	    //unk = ! ValidatePayload(cRunToggleCode, cRunToggleStruct);
+	    //emit cRunToggle((const cRunToggleStruct*)data, len, dir);
+	    unk = false;
+	    break;
+	}
+
+	case cJumpCode:
+	{
+	    //no data
+	    unk = false;
+	    break;
+	}
+
+	case cChatFiltersCode:
+	{
+	    //unk = ! ValidatePayload(cChatFiltersCode, cChatFiltersStruct);
+	    //emit cChatFilters((const cChatFiltersStruct*)data, len, dir);
+	    unk = false;
+	    break;
+	}
+
+	case cOpenSpellBookCode:
+	{
+	    //unk = ! ValidatePayload(cOpenSpellBookCode, cOpenSpellBookStruct);
+	    //emit cOpenSpellBook((const cOpenSpellBookStruct*)data, len, dir);
+	    unk = false;
+	    break;
+	}
+
+	case xTradeSpellBookSlotsCode:
+	{
+	    //unk = ! ValidatePayload(xTradeSpellBookSlotsCode, xTradeSpellBookSlotsStruct);
+	    //emit xTradeSpellBookSlots((const xTradeSpellBookSlotsStruct*)data, len, dir);
+	    unk = false;
+	    break;
+	}
+
+	case sSpellFizzleRegainCode:  //unknown contents, also comes when you Forage
+	{
+	    //unk = ! ValidatePayload(sSpellFizzleRegainCode, sSpellFizzleRegainStruct);
+	    //emit sSpellFizzleRegain((const sSpellFizzleRegainStruct*)data, len, dir);
+	    break;
+	}
+
+	case sSpellInterruptedCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(sSpellInterruptedCode, sSpellInterruptedStruct);
+	    //emit sSpellInterrupted((const sSpellInterruptedStruct*)data, len, dir);
+	    break;
+	}
+
+	case cStartCampingCode:
+	{
+	    //no data
+	    unk = false;
+	    break;
+	}
+
+	case cSenseHeadingCode:
+	{
+	    //no data
+	    unk = false;
+	    break;
+	}
+
+	case cForageCode:
+	{
+	    //no data
+	    unk = false;
+	    break;
+	}
+
+	case cHideCode:
+	{
+	    //no data
+	    unk = false;
+	    break;
+	}
+
+	case cSneakCode:
+	{
+	    //no data
+	    unk = false;
+	    break;
+	}
+
+	case cTrackCode:
+	{
+	    //no data
+	    unk = false;
+	    break;
+	}
+
+	case cConCorpseCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(cConCorpseCode, cConCorpseStruct);
+	    //emit cConCorpse((const cConCorpseStruct*)data, len, dir);
+	    break;
+	}
+
+	case sLootItemCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(sLootItemCode, sLootItemStruct);
+	    //emit sLootItem((const sLootItemStruct*)data, len, dir);
+	    break;
+	}
+
+	case cCursorItemCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(cCursorItemCode, cCursorItemStruct);
+	    //emit cCursorItem((const cCursorItemStruct*)data, len, dir);
+	    //this one is when an item (dis)appears under the cursor for many reasons
+	    break;
+	}
+
+	case xBuffDropCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(xBuffDropCode, xBuffDropStruct);
+	    //emit xBuffDrop((const xBuffDropStruct*)data, len, dir);
+	    //this is the server 'buff fading' AND the client 'cancel buff'
+	    break;
+	}
+
+	case cLootCorpseCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(cLootCorpseCode, cLootCorpseStruct);
+	    //emit cLootCorpse((const cLootCorpseStruct*)data, len, dir);
+	    break;
+	}
+
+	case cDoneLootingCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(cDoneLootingCode, cDoneLootingStruct);
+	    //emit cDoneLooting((const cDoneLootingStruct*)data, len, dir);
+	    break;
+	}
+
+	case sDoneLootingCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(sDoneLootingCode, sDoneLootingStruct);
+	    //emit sDoneLooting((const sDoneLootingStruct*)data, len, dir);
+	    break;
+	}
+
+	case cWhoAllCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(cWhoAllCode, cWhoAllStruct);
+	    //emit cWhoAll((const cWhoAllStruct*)data, len, dir);
+	    break;
+	}
+
+	case sWhoAllOutputCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(sWhoAllOutputCode, sWhoAllOutputStruct);
+	    //emit sWhoAllOutput((const sWhoAllOutputStruct*)data, len, dir);
+	    break;
+	}
+
+	case xBuyItemCode:  //unknown contents
+	{
+	    //unk = ! ValidatePayload(xBuyItemCode, xBuyItemStruct);
+	    //emit xBuyItem((const xBuyItemStruct*)data, len, dir);
+	    //both the client command and the server acknowledgement when buying
+	    break;
+	}
+
         default:
         {
         }
     } /* end switch(opCode) */
-       
+
     if (unk)
       emit unknownOpcode(data, len, dir);
 
     if (showeq_params->logUnknownZonePackets && unk)
     {
       QString tmpStr;
-      tmpStr.sprintf ("%04x - %d (%s)\n", opCode, len, 
+      tmpStr.sprintf ("%04x - %d (%s)\n", opCode, len,
 		      ((dir == DIR_SERVER) ? 
 		       "Server --> Client" : "Client --> Server"));
 
@@ -2730,10 +2898,11 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
      QString tmpStr;
        if (len == 2)
        {
-	 tmpStr.sprintf ("%s: %02x version %02x len %i", 
+	 tmpStr.sprintf ("%s: %02x version %02x len %i [%s]", 
 			 uiOpCodeIndex > 0 ? 
 			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
-			 "UNKNOWN", data[0], data[1], len);
+			 "UNKNOWN", data[0], data[1], len,
+			 dir == 2 ? "Server --> Client" : "Client --> Server");
 	 printf("\n%s\n\t", (const char*)tmpStr);
 
 	 if ((uiOpCodeIndex > 0) && showeq_params->monitorOpCode_Log)
@@ -2757,7 +2926,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	   logData(showeq_params->monitorOpCode_Filename, len, data);
 	 }
 
-	 printf("\n%s\n\t", (const char*)tmpStr);
+	 printf("\n%s\n", (const char*)tmpStr);
 	 for (uint32_t a = 0; a < len; a ++)
          {
 	   if ((data[a] >= 32) && (data[a] <= 126))
@@ -2780,7 +2949,15 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	     printf ("%c", data[a]);
 	 }
 
-	 printf ("\n\n"); /* Adding an extra line break makes it easier
+         printf("\n");
+
+         
+	 for (uint32_t a = 0; a < len; a ++)
+         {
+	     printf ("%02X", data[a]);
+	 }
+
+         printf("\n\n"); /* Adding an extra line break makes it easier
 			     for people trying to decode the OpCodes to
 			     tell where the raw data ends and the next
 			     message begins...  -Andon */

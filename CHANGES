@@ -1,6 +1,41 @@
 dohpaZ (13/06/02)
 ------------------
 Modifications:
+ + version 4.2.12
+ + Applied patch # 569708 "bugfix for filter.cpp" by mydor
+ + Applied patch # 570621 "Update to saving of player inventory"
+ + Applied patch from Sparr (new opcodes, packet structures, races, 
+ + Added Source Navigator 5.0 project showeq.proj.
+ + Changed FlushPackets VPacket setting to default to true.
+ + Changed maximum value on the "Walk Path Length" spinbox to be 1024.  Please
+   remember that the walk path option can use a lot of memory.
+ + Added the ability to show the walk paths of all NPCs, available from the
+   "NPC Walk Paths" option of the "Show" sub-menu of the maps right-click
+   context menu.
+ + Fixed a bug where if there wasn't a template filter file an empty one with
+   a section named "[Spawn]" would be created instead of using the proper
+   filter section name.
+ + Added "Save Selected Spans Path" and "Save NPC Spawn Paths" items to the 
+   "File" menu.  They will respectively save the currently selected spawns
+   or all spawns walk paths to a file <MAPDIR>/<Short Zone Name>_mobpath.map.
+ + Fixed a file format handling bug in drawmap.cgi.  No longer pretend to use
+   extra fields on the first line of the map file.
+ + Added book information to player inventory.
+ + Optimized slot_to_name() function. Fixed bug generating names for slots
+   in containers in the general and bank slots.  Moved it in with the other 
+   utility functions in util.cpp.
+ + "No Bank" should only effect the display of bank items, made it so the 
+   bank info gets dumped irregardless of its setting.
+ + Workaround for Qt 3.0.[1-4] bug involving slots that take an int argument
+   with the string "int" in the name being unable to recieve events from
+   menus (just renamed them all).  Qt 3.0.x now officially supported (and is
+   about as supported as it will be until ShowEQ 5, whenever that is).  This
+   also makes it so that RedHat 7.3 (and possibly Mandrake 8.2) users can 
+   compile out of the box using "./configure --enable-old-compiler"
+
+dohpaZ (13/06/02)
+------------------
+Modifications:
  + version 4.2.11
  + Made the Map tooltips behave better: No longer always on top, parented by 
    map, tries to make sure entire tip is visible (borrowed logic from 

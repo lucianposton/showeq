@@ -244,5 +244,60 @@
     "Recuso",                 // 237
     "Vah Shir King",          // 238
     "Vah Shir Guard",         // 239
-    "UNKNOWN RACE",           // 240 - Unknown Race (Literally)
+
+    "Lujein",	              // 240
+    "Naiad",	              // 241
+    "Nymph",	              // 242
+    "Ent",		      // 243
+    "Wrinnfly",	              // 244
+    "Tarew Marr",	      // 245
+    "Solusek Ro",	      // 246
+    "Clockwork Golem",	      // 247
+    "Clockwork Brain",	      // 248
+    "Spectral Banshee",	      // 249
+    "Guard of Justice",	      // 250
+    NULL,	              // 251
+    "Disease Boss",	      // 252
+    "Solusek Ro Guard",	      // 253
+    "Bertoxxulous",	      // 254
+    "New Tribunal",	      // 255
+    "Terris Thule",	      // 256
+    "Vegerog",	              // 257
+    "Crocodile",	      // 258
+    "Bat",	              // 259
+    "Slarghilug",	      // 260
+    "Tranquilion",	      // 261
+    "Tin Soldier",	      // 262
+    "Nightmare Wraith",	      // 263
+    "Malarian",	              // 264
+    "Knight of Pestilence",   // 265
+    "Lepertoloth",	      // 266
+    "Bubonian Boss",	      // 267
+    "Bubonian Underling",     // 268
+    "Pusling",	              // 269
+    "Water Mephit",	      // 270
+    "Stormrider",	      // 271
+    "Junk Beast",	      // 272
+    "Broken Clockwork",	      // 273
+    "Giant Clockwork",	      // 274
+    "Clockwork Beetle",	      // 275
+    "Nightmare Goblin",	      // 276
+    "Karana",	              // 277
+    "Blood Raven",	      // 278
+    "Nightmare Gargoyle",     // 279
+    "Mouths of Insanity",     // 280
+    "Skeletal Horse",	      // 281
+    "Saryn",	              // 282
+    "Fennin Ro",	      // 283
+    "Tormentor",	      // 284
+    "Necromancer Priest",     // 285
+    "Nightmare",	      // 286
+    "New Rallos Zek",	      // 287
+    "Tallon Zek",	      // 288
+    "Vallon Zek",	      // 289
+    "Air Mephit",	      // 290
+    "Earth Mephit",	      // 291
+    "Fire Mephit",	      // 292
+    "Nightmare Mephit",	      // 293
+    "UNKNOWN RACE",           // Unknown Race (Literally)
 

@@ -37,7 +37,7 @@
 
 #define CorpseLocCode               0x2120
 
-#define AltExpUpdateCode            0x2322 
+#define AltExpUpdateCode            0x2322
 
 #define GroupInfoCode               0x2640
 
@@ -168,5 +168,29 @@
 #define CPlayerItemsCode            0xf621
 
 #define CDoorSpawnsCode             0xf721
+
+#define cRunToggleCode 0x1f20
+#define cJumpCode 0x2020
+#define cChatFiltersCode 0xff21
+#define cOpenSpellBookCode 0x5821
+#define xTradeSpellBookSlotsCode 0xce21
+#define sSpellFizzleRegainCode 0x3522
+#define sSpellInterruptedCode 0x4122
+#define cStartCampingCode 0x0722
+#define cSenseHeadingCode 0x8721
+#define cForageCode 0x9420
+#define cHideCode 0x8621
+#define cSneakCode 0x8521
+#define cTrackCode 0x8421
+#define cConCorpseCode 0x3422
+#define sLootItemCode 0xa020
+#define cCursorItemCode 0x2c21
+#define xBuffDropCode 0x3221
+#define cLootCorpseCode 0x4e20
+#define cDoneLootingCode 0x4f20
+#define sDoneLootingCode 0x4421
+#define cWhoAllCode 0xf420
+#define sWhoAllOutputCode 0x0b40
+#define xBuyItemCode 0x3520
 
 #endif // OPCODES_H

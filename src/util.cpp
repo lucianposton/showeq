@@ -506,66 +506,142 @@ print_faction (int32_t faction)
   }
 }
 
+// function to convert slotnr to name of slot
+QString slot_to_name(int16_t slotnr)
+{
+  QString slotname;
+  int bag, slot;
+
+  if (slotnr <= 29)
+  {
+    static const char* topSlotNames[] =
+    {
+      "Unknown0",
+      "Ear1",
+      "Head",
+      "Face",
+      "Ear2",
+      "Neck",
+      "Shoulder",
+      "Arms",
+      "Back",
+      "Wrist1",
+      "Wrist2",
+      "Ranged",
+      "Hands",
+      "Melee1",
+      "Melee2",
+      "Finger1",
+      "Finger2",
+      "Chest",
+      "Legs",
+      "Feet",
+      "Waist",
+      "Ammo",
+      "General1",
+      "General2",
+      "General3",
+      "General4",
+      "General5",
+      "General6",
+      "General7",
+      "General8",
+    };
+
+    // get slot name
+    slotname = topSlotNames[slotnr];
+
+  } else if (slotnr >= 2000 && slotnr <= 2007)
+  {
+    static const char* bankSlotNames[] =
+    {
+      "Bank1",
+      "Bank2",
+      "Bank3",
+      "Bank4",
+      "Bank5",
+      "Bank6",
+      "Bank7",
+      "Bank8",
+    };
+
+    // get slot name
+    slotname = bankSlotNames[slotnr - 2000];
+  } else if (slotnr >= 250 && slotnr <= 329)
+  {
+    bag = slotnr / 10 - 24;
+    slot = slotnr % 10 + 1;
+    slotname = QString("General") + QString::number(bag) + QString("->Pos") + QString::number(slot);
+  } else if (slotnr >= 2030 && slotnr <= 2109)
+  {
+    bag = slotnr / 10 - 202;
+    slot = slotnr % 10 + 1;
+    slotname = QString("Bank") + QString::number(bag) + QString("->Pos") + QString::number(slot);
+  }
+
+  return slotname;
+}
+
 uint32_t calc_exp (int level, uint16_t race, uint8_t class_)
 {
 
-	float exp=level*level*level;
-	if (level<30)       exp*=10;
-	else if (level<50)	exp*=(10.0 + ((level - 29) * 0.2));
-	else if (level<51)	exp*=14;
-	else if (level<52)	exp*=15;
-	else if (level<53)	exp*=16;
-	else if (level<54)	exp*=17;
-	else if (level<55)	exp*=19;
-	else if (level<56)	exp*=21;
-	else if (level<57)	exp*=23;
-	else if (level<58)	exp*=25;
-	else if (level<59)	exp*=27;
-	else                exp*=30;
+  float exp=level*level*level;
 
-	// Do the race mod
+  if (level<30)       exp*=10;
+  else if (level<50)	exp*=(10.0 + ((level - 29) * 0.2));
+  else if (level<51)	exp*=14;
+  else if (level<52)	exp*=15;
+  else if (level<53)	exp*=16;
+  else if (level<54)	exp*=17;
+  else if (level<55)	exp*=19;
+  else if (level<56)	exp*=21;
+  else if (level<57)	exp*=23;
+  else if (level<58)	exp*=25;
+  else if (level<59)	exp*=27;
+  else                exp*=30;
+  
+  // Do the race mod
+  
+  switch (race)
+  {
+  case 1 :   exp*=10;   break; // human
+  case 2 :   exp*=10.5; break; // barbarian
+  case 3 :   exp*=10;   break; // erudite
+  case 4 :   exp*=10;   break; // wood elf
+  case 5 :   exp*=10;   break; // high elf
+  case 6 :   exp*=10;   break; // dark elf
+  case 7 :   exp*=10;   break; // half elf
+  case 8 :   exp*=10;   break; // dwarf
+  case 9 :   exp*=12;   break; // troll
+  case 10 :  exp*=11.5; break; // ogre
+  case 11 :  exp*=9.5;  break; // halfling
+  case 12 :  exp*=10;   break; // gnome
+  case 128 : exp*=12;   break; // iksar
+  default :  exp*=10;
+  }
 
-	switch (race)
-	{
-	case 1 :   exp*=10;   break; // human
-	case 2 :   exp*=10.5; break; // barbarian
-	case 3 :   exp*=10;   break; // erudite
-	case 4 :   exp*=10;   break; // wood elf
-	case 5 :   exp*=10;   break; // high elf
-	case 6 :   exp*=10;   break; // dark elf
-	case 7 :   exp*=10;   break; // half elf
-	case 8 :   exp*=10;   break; // dwarf
-	case 9 :   exp*=12;   break; // troll
-	case 10 :  exp*=11.5; break; // ogre
-	case 11 :  exp*=9.5;  break; // halfling
-	case 12 :  exp*=10;   break; // gnome
-	case 128 : exp*=12;   break; // iksar
-	default :  exp*=10;
-	}
-
-	// Do the class mod
-
-	switch (class_)
-	{
-	case 1 :  exp*=9;    break; // warrior
-	case 2 :  exp*=10;   break; // cleric
-	case 3 :  exp*=14;   break; // paladin
-	case 4 :  exp*=14;   break; // ranger
-	case 5 :  exp*=14;   break; // shadowknight
-	case 6 :  exp*=10;   break; // druid
-	case 7 :  exp*=12;   break; // monk
-	case 8 :  exp*=14;   break; // bard
-	case 9 :  exp*=9.05; break; // rogue
-	case 10 : exp*=10;   break; // shaman
-	case 11 : exp*=11;   break; // necromancer
-	case 12 : exp*=11;   break; // wizard
-	case 13 : exp*=11;   break; // magician
-	case 14 : exp*=11;   break; // enchanter
-	default : exp*=10;
-	}
-
-
-	return (unsigned long)(exp);
+  // Do the class mod
+  
+  switch (class_)
+  {
+  case 1 :  exp*=9;    break; // warrior
+  case 2 :  exp*=10;   break; // cleric
+  case 3 :  exp*=14;   break; // paladin
+  case 4 :  exp*=14;   break; // ranger
+  case 5 :  exp*=14;   break; // shadowknight
+  case 6 :  exp*=10;   break; // druid
+  case 7 :  exp*=12;   break; // monk
+  case 8 :  exp*=14;   break; // bard
+  case 9 :  exp*=9.05; break; // rogue
+  case 10 : exp*=10;   break; // shaman
+  case 11 : exp*=11;   break; // necromancer
+  case 12 : exp*=11;   break; // wizard
+  case 13 : exp*=11;   break; // magician
+  case 14 : exp*=11;   break; // enchanter
+  default : exp*=10;
+  }
+  
+  return (unsigned long)(exp);
 }
 
 //

@@ -131,7 +131,7 @@
    <comment>Rate to playback; 0 = fast as possible, 1=1x, 2=2x, etc.</comment>
   </property>
   <property name="FlushPackets" >
-   <bool value="false" />
+   <bool value="true" />
    <comment>Flush recorded packets to disk after each packet (useful for diagnosing crash problems)</comment>
   </property>
   <property name="CompressTime" >

@@ -211,7 +211,7 @@ class MapMenu : public QPopupMenu
   void toggle_gridTicks(int itemId);
   void toggle_locations(int itemId);
   void toggle_spawns(int itemId);
-  void toggle_spawnPoints(int itemId);
+  void toggle_spawnPnts(int itemId);
   void toggle_unknownSpawns(int itemId);
   void toggle_drops(int itemId);
   void toggle_coins(int itemId);
@@ -222,6 +222,7 @@ class MapMenu : public QPopupMenu
   void toggle_deityPvP(int itemId);
   void toggle_racePvP(int itemId);
   void toggle_walkPath(int itemId);
+  void toggle_npcWalkPaths(int itemId);
 #ifdef DEBUG
   void toggle_debugInfo(int itemId);
 #endif
@@ -279,6 +280,7 @@ class MapMenu : public QPopupMenu
   int m_id_spawnNames;
   int m_id_highlightConsideredSpawns;
   int m_id_walkPath;
+  int m_id_npcWalkPaths;
   int m_id_mapImage;
   int m_id_deityPvP;
   int m_id_racePvP;
@@ -386,6 +388,7 @@ class Map :public QWidget
   bool highlightConsideredSpawns() const { return m_highlightConsideredSpawns; }
   bool showTooltips() const { return m_showTooltips; }
   bool walkPathShowSelect() const { return m_walkpathshowselect; }
+  bool showNPCWalkPaths() const { return m_showNPCWalkPaths; }
   bool deityPvP() const { return m_deityPvP; }
   bool racePvP() const { return m_racePvP; }
   
@@ -412,6 +415,7 @@ class Map :public QWidget
   
  public slots:   
   void savePrefs(void);
+  void saveMapImage(void);
   
   void selectSpawn(const Item* item);
 
@@ -433,9 +437,6 @@ class Map :public QWidget
   void addPathPoint();
   void showLineDlg(void);
 
-  void makeSpawnLine(const Item* item);
-  void makeSelectedSpawnLine();
- 
   void zoomIn();
   void zoomOut();
   void increaseGridResolution	(void);
@@ -483,6 +484,7 @@ class Map :public QWidget
   void setHighlightConsideredSpawns(bool val);
   void setShowTooltips(bool val);
   void setWalkPathShowSelect(bool val);
+  void setShowNPCWalkPaths(bool val);
   void setDeityPvP(bool val);
   void setRacePvP(bool val);
   
@@ -624,6 +626,7 @@ private:
    bool m_highlightConsideredSpawns;
    bool m_showTooltips;
    bool m_walkpathshowselect;
+   bool m_showNPCWalkPaths;
    bool m_deityPvP;
    bool m_racePvP;
 };

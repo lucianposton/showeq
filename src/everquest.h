@@ -148,7 +148,7 @@ struct opCode
 {
   uint8_t code;
   uint8_t version;
-	
+
   // kinda silly -- this is required for us to be able to stuff them in a QValueList
   bool operator== ( const struct opCode t ) const
   {
@@ -341,7 +341,7 @@ struct spawnPositionUpdate
 **   petStruct
 **   newSpawnStruct
 */ 
-struct spawnStruct 
+struct spawnStruct
 { 
 /*0000*/ uint8_t  unknown0000[48];        // Placeholder 
 /*0048*/ uint8_t  animation;              // Animation spawn is currently using
@@ -1806,6 +1806,60 @@ struct memorizeSlotStruct
                                             // (offset of spell in spdat.eff)
 /*0008*/ uint8_t  unknown0008[6];           // ***Placeholder 00,00,01,00,00,00
 };
+
+struct cRunToggleStruct
+{
+/*0000*/ uint8_t  opCode;
+/*0001*/ uint8_t  version;
+/*0002*/ uint32_t status;                   //01=run  00=walk
+};
+
+struct cChatFiltersStruct
+{
+/*0000*/ uint8_t  opCode;
+/*0001*/ uint8_t  version;
+/*0002*/ uint32_t DamageShields;   //00=on  01=off
+         uint32_t NPCSpells;       //00=on  01=off
+          uint32_t PCSpells;        //00=all 01=off 02=grp
+          uint32_t BardSongs;       //00=all 01=me  02=grp 03=off
+          uint32_t Unused;
+          uint32_t GuildChat;       //00=off 01=on
+          uint32_t Socials;         //00=off 01=on
+          uint32_t GroupChat;       //00=off 01=on
+          uint32_t Shouts;          //00=off 01=on
+          uint32_t Auctions;        //00=off 01=on
+          uint32_t OOC;             //00=off 01=on
+          uint32_t MyMisses;        //00=off 01=on
+          uint32_t OthersMisses;    //00=off 01=on
+          uint32_t OthersHits;      //00=off 01=on
+          uint32_t AttackerMisses;  //00=off 01=on
+          uint32_t CriticalSpells;  //00=all 01=me  02=off
+          uint32_t CriticalMelee;   //00=all 01=me  02=off
+};
+
+struct cOpenSpellBookStruct
+{
+/*0000*/ uint8_t  opCode;
+/*0001*/ uint8_t  version;
+          uint32_t status; //01=open 00=close
+};
+
+struct xTradeSpellBookSlotsStruct
+{
+/*0000*/ uint8_t  opCode;
+/*0001*/ uint8_t  version;
+          uint32_t slot1;
+	  uint32_t slot2;
+};
+
+/*
+struct #
+{
+  0000 uint8_t  opCode;
+  0001 uint8_t  version;
+
+}
+*/
 
 // Restore structure packing to default
 #pragma pack()

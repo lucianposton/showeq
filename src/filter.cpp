@@ -287,13 +287,12 @@ Filter::changeFilterFile(const QString& newfile)
 bool
 Filter::loadFilters(void)
 {
-#ifdef DEBUG_FILTER
-   printf("loadFilter()\n");
-#endif /* DEBUG_FILTER */
-
    FILE* in;
    char msg[MAXLEN + 1];
    char* p;
+#ifdef DEBUG_FILTER
+   printf("loadFilter()\n");
+#endif /* DEBUG_FILTER */
 
    // Free any current list
    m_filterItems.clear();
@@ -313,7 +312,10 @@ Filter::loadFilters(void)
        in = fopen ((const char*)m_file, "a");
        if (in != 0)
        {
-	 fputs ("[Spawn]\n", in);
+	 if (!m_type.isEmpty())
+	   fprintf(in, "[%s]\n", (const char*)m_type);
+	 else
+	   fputs ("[Spawn]\n", in);
 	 fclose(in);
        }
      }
@@ -375,7 +377,7 @@ Filter::loadFilters(void)
      printf("Loaded %d filters from section '%s' in file '%s'\n", 
 	    m_filterItems.count(), (const char*)m_type, (const char*)m_file);
    else 
-     printf("Loaded %d filters from section '%s' in file '%s'\n", 
+     printf("Loaded %d filters from file '%s'\n", 
 	    m_filterItems.count(), (const char*)m_file);
 #endif
 
@@ -387,11 +389,10 @@ Filter::loadFilters(void)
 bool
 Filter::isFiltered(const QString& filterString, int level)
 {
+  FilterItem *re;
 #ifdef DEBUG_FILTER
 // printf("isFiltered(%s)\n", string);
 #endif /* DEBUG_FILTER */
-
-  FilterItem *re;
 
   // iterate over the filters checking for a match
   FilterListIterator it(m_filterItems);
@@ -675,7 +676,7 @@ Filter::addFilter(const QString& filterPattern)
   m_filterItems.append(re);
 
 #ifdef DEBUG_FILTER
-printf("Added Filter '%s'\n", filterPattern);
+printf("Added Filter '%s'\n", (const char*)filterPattern);
 #endif
 
  return re->valid(); 

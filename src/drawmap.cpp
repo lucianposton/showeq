@@ -205,8 +205,8 @@ int lookupColor(const QString colorname)
 void loadFileMap (const char *filename)
 {
   FILE * fh;
-  char line[4096];
-  char tempstr[4096];
+  char line[16384];
+  char tempstr[16384];
   char* tmpStr;
   int fileLines = 0;
   int globHeight = 0;
@@ -241,51 +241,9 @@ void loadFileMap (const char *filename)
       return;
     }
     strcpy (zoneShort, tmpStr);	// Zone short name
-    tmpStr = strtok (NULL, ",");
-    if (tmpStr == NULL)
-    {
-      fprintf(stderr, "Map '%s' appears to be seriously messed up! No Screen Center X!\n", filename);
-      return;
-    }
-    screenCenterX = atoi (tmpStr);
-    tmpStr = strtok (NULL, ",");
-    if (tmpStr == NULL)
-    {
-      fprintf(stderr, "Map '%s' appears to be seriously messed up! No Screen Center Y!\n", filename);
-      return;
-    }
-    screenCenterY = atoi (tmpStr);
-    tmpStr = strtok (NULL, ",");
-    if (tmpStr == NULL)
-    {
-      fprintf(stderr, "Map '%s' appears to be seriously messed up! No Screen Length X!\n", filename);
-      return;
-    }
-    screenLengthX = atoi (tmpStr);
-    tmpStr = strtok (NULL, ",");
-    if (tmpStr == NULL)
-    {
-      fprintf(stderr, "Map '%s' appears to be seriously messed up! No Screen Length Y!\n", filename);
-      return;
-    }
-    screenLengthY = atoi (tmpStr);
-    tmpStr = strtok (NULL, ",");
-    if (tmpStr == NULL)
-    {
-      fprintf(stderr, "Map '%s' appears to be seriously messed up! No Map Length X!\n", filename);
-      return;
-    }
-    mapLengthX = atoi (tmpStr);
-    tmpStr = strtok (NULL, ",");
-    if (tmpStr == NULL)
-    {
-      fprintf(stderr, "Map '%s' appears to be seriously messed up! No Map Length Y!\n", filename);
-      return;
-    }
-    mapLengthY = atoi (tmpStr);
     fileLines++;
 
-    while (fgets (line, 4095, fh))
+    while (fgets (line, 16383, fh))
     {
       fileLines++;
       strcpy (tempstr, strtok (line, ","));

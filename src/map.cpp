@@ -31,6 +31,8 @@
 #include <qcolordialog.h>
 #include <qfontdialog.h>
 #include <qtimer.h>
+#include <qstrlist.h>
+#include <qimage.h>
 
 #if 1 // ZBTEMP: Until we setup a better way to enter location name/color
 #include <qinputdialog.h>
@@ -693,15 +695,17 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_spawns = subMenu->insertItem("Spawns", this, SLOT(toggle_spawns(int)));
   m_id_unknownSpawns = subMenu->insertItem("Unknown Spawns", 
 					   this, SLOT(toggle_unknownSpawns(int)));
-  m_id_spawnPoints = subMenu->insertItem("Spawn Points", this, SLOT( toggle_spawnPoints(int) ));
+  m_id_spawnPoints = subMenu->insertItem("Spawn Points", this, SLOT( toggle_spawnPnts(int) ));
   m_id_drops = subMenu->insertItem("Drops", this, SLOT(toggle_drops(int)));
   m_id_coins = subMenu->insertItem("Coins", this, SLOT(toggle_coins(int)));
   m_id_doors = subMenu->insertItem("Doors", this, SLOT(toggle_doors(int)));
-  m_id_spawnNames = subMenu->insertItem("SpawnNames", this, SLOT(toggle_spawnNames(int)));
+  m_id_spawnNames = subMenu->insertItem("Spawn Names", this, SLOT(toggle_spawnNames(int)));
   m_id_highlightConsideredSpawns =
     subMenu->insertItem("Highlight Considered Spawns", this, SLOT(toggle_highlightConsideredSpawns(int)));
   m_id_walkPath =
     subMenu->insertItem("Selections Walk Path", this, SLOT(toggle_walkPath(int)));
+  m_id_npcWalkPaths =
+    subMenu->insertItem("NPC Walk Paths", this, SLOT(toggle_npcWalkPaths(int)));
   m_id_mapImage =
     subMenu->insertItem("Map Image", this, SLOT(toggle_mapImage(int)));
   m_id_deityPvP = 
@@ -822,6 +826,8 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
 				 this, 
 				 SLOT(toggle_cacheChanges()));
 
+  insertItem("Save Map Image...",
+	     m_map, SLOT(saveMapImage()));
 
   connect(this, SIGNAL(aboutToShow()),
 	  this, SLOT(init_Menu()));
@@ -868,6 +874,7 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_highlightConsideredSpawns, 
 		 m_map->highlightConsideredSpawns());
   setItemChecked(m_id_walkPath, m_map->walkPathShowSelect());
+  setItemChecked(m_id_npcWalkPaths, m_map->showNPCWalkPaths());
   setItemChecked(m_id_mapImage, m_map->showBackgroundImage());
   setItemChecked(m_id_deityPvP, m_map->deityPvP());
   setItemChecked(m_id_racePvP, m_map->racePvP());
@@ -1023,7 +1030,7 @@ void MapMenu::toggle_spawns(int itemId)
   m_map->setShowSpawns(!m_map->showSpawns());
 }
 
-void MapMenu::toggle_spawnPoints(int itemId)
+void MapMenu::toggle_spawnPnts(int itemId)
 {
   m_map->setShowSpawnPoints(!m_map->showSpawnPoints());
 }
@@ -1061,6 +1068,11 @@ void MapMenu::toggle_highlightConsideredSpawns(int itemId)
 void MapMenu::toggle_walkPath(int itemId)
 {
   m_map->setWalkPathShowSelect(!m_map->walkPathShowSelect());
+}
+
+void MapMenu::toggle_npcWalkPaths(int itemId)
+{
+  m_map->setShowNPCWalkPaths(!m_map->showNPCWalkPaths());
 }
 
 void MapMenu::toggle_mapImage(int itemId)
@@ -1270,7 +1282,10 @@ Map::Map(MapMgr* mapMgr,
   m_showTooltips = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "WalkPathShowSelect";
-  m_walkpathshowselect = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
+  m_walkpathshowselect = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
+
+  tmpPrefString = "ShowNPCWalkPaths";
+  m_showNPCWalkPaths = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
   tmpPrefString = "ShowFiltered";
   m_showFiltered = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
@@ -2278,6 +2293,17 @@ void Map::setWalkPathShowSelect(bool val)
 
   QString tmpPrefString = "WalkPathShowSelect";
   pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_walkpathshowselect);
+  
+  if(!m_cacheChanges)
+    refreshMap ();
+}
+
+void Map::setShowNPCWalkPaths(bool val) 
+{ 
+  m_showNPCWalkPaths = val; 
+
+  QString tmpPrefString = "ShowNPCWalkPaths";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showNPCWalkPaths);
   
   if(!m_cacheChanges)
     refreshMap ();
@@ -3330,6 +3356,28 @@ void Map::paintSpawns(MapParameters& param,
 			sizeWH, 
 			sizeWH);
 	}
+
+	// if enabled show the spawns walk path
+	if (m_showNPCWalkPaths)
+	{
+	  SpawnTrackListIterator trackIt(spawn->trackList());
+    
+	  const SpawnTrackPoint* trackPoint = trackIt.current();
+	  if (trackPoint)
+	  {
+	    p.setPen (blue);
+	    p.moveTo (m_param.calcXOffsetI(trackPoint->x()), 
+		      m_param.calcYOffsetI(trackPoint->y()));
+      
+	    while ((trackPoint = ++trackIt) != NULL)
+	    {
+	      p.lineTo (m_param.calcXOffsetI (trackPoint->x()), 
+			m_param.calcYOffsetI (trackPoint->y()));
+	    }
+      
+	    p.lineTo (spawnOffsetXPos, spawnOffsetYPos);
+	  }
+	}
       }
       else if (spawn->isOtherPlayer())
       {
@@ -3990,63 +4038,6 @@ void Map::paintEvent (QPaintEvent * e)
    p.end ();
 }
 
-
-void Map::makeSelectedSpawnLine()
-{
-  makeSpawnLine(m_selectedItem);
-}
-
-void Map::makeSpawnLine(const Item* item)
-{
-  if (item == NULL)
-    return;
-
-  const Spawn* spawn = spawnType(item);
-
-  if (spawn == NULL)
-    return;
-
-   printf("Map::makeSpawnLine(id=%d)\n", spawn->id());
-   const SpawnTrackList& trackList = spawn->trackList();
-   SpawnTrackListIterator trackIt(spawn->trackList());
-   int cnt = trackList.count();
-
-   if (cnt == 0)
-     return;
-
-   char dapath[256];
-   sprintf(dapath,"%s/%s_mobpath.map", MAPDIR, 
-	   (const char*)m_zoneMgr->shortZoneName());
-   FILE *fh = fopen(dapath,"a");
-   if (!fh) return;
-
-   const SpawnTrackPoint* trackPoint;
-   int curPt;
-   int total = 0;
-   while (total < cnt)
-   {
-     // start the line, up to 255 points in the line
-     fprintf (fh, "M,%s,%s,%d", 
-	      (const char*)spawn->realName(), "blue", 
-	      (((cnt - total) > 255) ? 255 : 0));
-
-     //iterate over the track, writing out the points (up to 255 points)
-     for (trackPoint = trackIt.current(), curPt = 0;
-	  trackPoint && (curPt < 255);
-	  trackPoint = ++trackIt, curPt++, total++)
-     {
-       fprintf (fh, ",%d,%d,%d", 
-		trackPoint->x(), trackPoint->y(), trackPoint->z());
-     }
-
-     // close the line
-     fprintf (fh, "\n");
-   }
-   fflush(fh);
-   fclose(fh);
-}
-
-
 void Map::mouseMoveEvent( QMouseEvent* event )
 {
   // We're moving the map around, only try to move if we are in zoom mode
@@ -4415,6 +4406,29 @@ void Map::mapUpdated(void)
   
   if(!m_cacheChanges)
     refreshMap();
+}
+
+
+void Map::saveMapImage(void)
+{
+  QStrList formats(QImageIO::outputFormats());
+  QString filters;
+  for (char* tmp =formats.first(); tmp != 0; tmp = formats.next())
+    filters += QString(tmp) + QString(" (*.") + QString(tmp) + ")\n";
+  
+  QFileDialog fileDlg(QString::null, filters, this, "saveMapImage", true);
+  fileDlg.setCaption("Save Map Image Filename");
+  fileDlg.setMode(QFileDialog::AnyFile);
+
+  if (fileDlg.exec() != QDialog::Accepted)
+    return;
+
+  QString filter = fileDlg.selectedFilter();
+  QString filename = fileDlg.selectedFile();
+
+  if (!filename.isEmpty())
+    m_offscreen.save(filename, 
+		     filter.left(filter.find(' ')));
 }
 
 //----------------------------------------------------------------------

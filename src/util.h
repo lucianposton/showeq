@@ -66,6 +66,7 @@ QString print_slot (uint32_t slots);
 QString print_material (uint8_t material);
 QString print_skill (uint8_t skill);
 QString print_faction (int32_t faction);
+QString slot_to_name(int16_t slotnr);
 
 uint32_t calc_exp (int level, uint16_t race, uint8_t class_);
 

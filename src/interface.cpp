@@ -323,6 +323,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    pFileMenu->insertItem("Create MessageBox", this, SLOT(createMessageBox()), Key_F11);
    pFileMenu->insertItem("Select Next", this, SLOT(selectNext()), CTRL+Key_Right);
    pFileMenu->insertItem("Select Prev", this, SLOT(selectPrev()), CTRL+Key_Left);
+   pFileMenu->insertItem("Save Selected Spawns Path", 
+			 this, SLOT(saveSelectedSpawnPath(void)));
+   pFileMenu->insertItem("Save NPC Spawn Paths",
+			 this, SLOT(saveSpawnPaths(void)));
    if (showeq_params->playbackpackets)
    {
      pFileMenu->insertItem("Inc Playback Speed", m_packet, SLOT(incPlayback()), CTRL+Key_X);
@@ -582,7 +586,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    menuBar()->setItemChecked (x, showeq_params->walkpathrecord);
 
    QPopupMenu* subMenu = new QPopupMenu;
-   QSpinBox* walkPathLengthSpinBox = new QSpinBox(0, 128, 1, subMenu);
+   QSpinBox* walkPathLengthSpinBox = new QSpinBox(0, 1024, 1, subMenu);
    walkPathLengthSpinBox->setValue(showeq_params->walkpathlength);
    connect(walkPathLengthSpinBox, SIGNAL(valueChanged(int)),
 	   this, SLOT(set_opt_WalkPathLength(int)));
@@ -899,17 +903,17 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    }
     
    connect (m_windowCaptionMenu, SIGNAL(activated(int)), 
-	    this, SLOT(set_interface_WindowCaption(int)));
+	    this, SLOT(set_main_WindowCaption(int)));
 
    // Interface -> Window Font
    QPopupMenu* windowFontMenu = new QPopupMenu;
    pInterfaceMenu->insertItem( "&Font", windowFontMenu);
     
    windowFontMenu->insertItem( "&Applicatoin Default...", 
-			       this, SLOT(set_interface_Font(int)));
+			       this, SLOT(set_main_Font(int)));
 
    windowFontMenu->insertItem( "Main Window Status Font...", 
-			      this, SLOT(set_interface_statusbar_Font(int)));
+			      this, SLOT(set_main_statusbar_Font(int)));
    //   x = windowFontMenu->insertItem("&Main Window");
    //   windowFontMenu->setItemParameter(x, 5);
     
@@ -955,7 +959,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    }
 
    connect (windowFontMenu, SIGNAL(activated(int)), 
-	    this, SLOT(set_interface_WindowFont(int)));
+	    this, SLOT(set_main_WindowFont(int)));
 
 
    // Interface -> Status Bar
@@ -994,30 +998,30 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 							   "Interface_StatusBar", false));
     
    connect (statusBarMenu, SIGNAL(activated(int)), 
-	    this, SLOT(toggle_interface_statusbar_Window(int)));
+	    this, SLOT(toggle_main_statusbar_Window(int)));
 
 
    x = pInterfaceMenu->insertItem("Save Window Sizes & Positions", 
-				  this, SLOT(toggle_interface_SavePosition(int)));
+				  this, SLOT(toggle_main_SavePosition(int)));
    menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("SavePosition", 
 							"Interface",
 							true));
    x = pInterfaceMenu->insertItem("Restore Window Positions", 
-				  this, SLOT(toggle_interface_UseWindowPos(int)));
+				  this, SLOT(toggle_main_UseWindowPos(int)));
    menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("UseWindowPos", 
 							"Interface",
 							true));
    x = pInterfaceMenu->insertItem("Use Stdout", 
-				  this, SLOT(toggle_interface_UseStdout(int)));
+				  this, SLOT(toggle_main_UseStdout(int)));
    menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("UseStdout", 
 							"Interface",
 							true));
    x = pInterfaceMenu->insertItem("No Bank", 
-				  this, SLOT(toggle_interface_NoBank(int)));
+				  this, SLOT(toggle_main_NoBank(int)));
    menuBar()->setItemChecked (x, showeq_params->no_bank); 
 
    pInterfaceMenu->insertItem( "Formatted Messages File...", 
-			       this, SLOT(select_interface_FormatFile(int)));
+			       this, SLOT(select_main_FormatFile(int)));
 
    // Debug menu
    //pDebugMenu = new QPopupMenu;
@@ -2034,7 +2038,7 @@ void EQInterface::toggle_view_DockedWin( int id )
   }
 }
 
-void EQInterface::set_interface_WindowCaption( int id )
+void EQInterface::set_main_WindowCaption( int id )
 {
   QWidget* widget = NULL;
   int winnum;
@@ -2129,7 +2133,7 @@ void EQInterface::set_interface_WindowCaption( int id )
 }
 
 
-void EQInterface::set_interface_WindowFont( int id )
+void EQInterface::set_main_WindowFont( int id )
 {
   int winnum;
 
@@ -2227,7 +2231,7 @@ void EQInterface::set_interface_WindowFont( int id )
   }
 }
 
-void EQInterface::set_interface_Font(int id)
+void EQInterface::set_main_Font(int id)
 {
   QString name = "ShowEQ - Application Font";
   bool ok = false;
@@ -2253,7 +2257,7 @@ void EQInterface::set_interface_Font(int id)
 }
 
 
-void EQInterface::select_interface_FormatFile(int id)
+void EQInterface::select_main_FormatFile(int id)
 {
   QString formatFile = pSEQPrefs->getPrefString("FormatFile", "Interface", 
 						    LOGDIR "/eqstr_en.txt");
@@ -2272,7 +2276,7 @@ void EQInterface::select_interface_FormatFile(int id)
   }
 }
 
-void EQInterface::toggle_interface_statusbar_Window(int id)
+void EQInterface::toggle_main_statusbar_Window(int id)
 {
   QWidget* window = NULL;
   QString preference;
@@ -2337,7 +2341,7 @@ void EQInterface::toggle_interface_statusbar_Window(int id)
   pSEQPrefs->setPrefBool(preference, "Interface_StatusBar", show);
 }
 
-void EQInterface::set_interface_statusbar_Font(int id)
+void EQInterface::set_main_statusbar_Font(int id)
 {
   QString name = "ShowEQ - Status Font";
   bool ok = false;
@@ -2367,7 +2371,7 @@ void EQInterface::set_interface_statusbar_Font(int id)
 }
 
 void
-EQInterface::toggle_interface_SavePosition (int id)
+EQInterface::toggle_main_SavePosition (int id)
 {
     pSEQPrefs->setPrefBool("SavePosition", "Interface", 
 			   !pSEQPrefs->getPrefBool("SavePosition", 
@@ -2377,7 +2381,7 @@ EQInterface::toggle_interface_SavePosition (int id)
 }
 
 void
-EQInterface::toggle_interface_UseWindowPos (int id)
+EQInterface::toggle_main_UseWindowPos (int id)
 {
     pSEQPrefs->setPrefBool("UseWindowPos", "Interface", 
 			   !pSEQPrefs->getPrefBool("UseWindowPos", 
@@ -2387,7 +2391,7 @@ EQInterface::toggle_interface_UseWindowPos (int id)
 }
 
 void
-EQInterface::toggle_interface_UseStdout (int id)
+EQInterface::toggle_main_UseStdout (int id)
 {
     pSEQPrefs->setPrefBool("UseStdout", "Interface", 
 			   !pSEQPrefs->getPrefBool("UseStdout", 
@@ -2397,7 +2401,7 @@ EQInterface::toggle_interface_UseStdout (int id)
 }
 
 void
-EQInterface::toggle_interface_NoBank (int id)
+EQInterface::toggle_main_NoBank (int id)
 {
   showeq_params->no_bank = !showeq_params->no_bank;
   pSEQPrefs->setPrefBool("NoBank", "Interface", showeq_params->no_bank);
@@ -3826,12 +3830,13 @@ void EQInterface::emoteText(const emoteTextStruct* emotetext)
 void EQInterface::playerItem(const playerItemStruct* itemp)
 {
   QString tempStr;
+  QString slotName = slot_to_name(itemp->item.equipSlot);
 
   if (!showeq_params->no_bank)
   {
     tempStr = QString("Item: ") + itemp->item.lore
       + "(" + QString::number(itemp->item.itemNr)
-      + "), Slot: " + QString::number(itemp->item.equipSlot)
+      + "), Slot: " + slotName
       + ", Value: " + reformatMoney(itemp->item.cost);
     
     emit msgReceived(tempStr);
@@ -3841,35 +3846,49 @@ void EQInterface::playerItem(const playerItemStruct* itemp)
   if (bankfile.open(IO_Append | IO_WriteOnly))
   {
     QTextStream out(&bankfile);
-    out << "Item: " << itemp->item.lore << ", Slot: " << itemp->item.equipSlot 
-	<< endl;
-  }
+    out << "Item: " << itemp->item.name;
+    if (itemp->item.stackable ==  1)
+      out << "x" << itemp->item.number;
+    out << ",(" << itemp->item.lore << "), Slot: " 
+	<< slotName << endl;
+    }
 }
 
 void EQInterface::playerBook(const playerBookStruct* bookp)
 {
   QString tempStr;
+  QString slotName = slot_to_name(bookp->item.equipSlot);
 
   if (!showeq_params->no_bank)
   {
     tempStr = QString("Item: Book: ") + bookp->item.name
       + ", " + bookp->item.lore
-      + ", " + bookp->book.file
+      + ", File" + bookp->book.file
+      + ", Slot: " + slotName
       + ", Value: " + reformatMoney(bookp->item.cost);
-    
     emit msgReceived(tempStr);
+  }
+    
+  QFile bankfile(QString("/tmp/bankfile.") + QString::number(getpid()));
+  if (bankfile.open(IO_Append | IO_WriteOnly))
+  {
+    QTextStream out(&bankfile);
+    out << "Item: Book:" << bookp->item.name;
+    out << ",(" << bookp->item.lore << "), Slot: " 
+	<< slotName << endl;
   }
 }
 
 void EQInterface::playerContainer(const playerContainerStruct *containp)
 {
   QString tempStr;
+  QString slotName = slot_to_name(containp->item.equipSlot);
 
   if (!showeq_params->no_bank)
   {
     tempStr = QString("Item: Container: ") + containp->item.lore
       + "(" + QString::number(containp->item.itemNr)
-      + "), Slot: " + QString::number(containp->item.equipSlot)
+      + "), Slot: " + slotName
       + ", Value: " + reformatMoney(containp->item.cost);
     
     emit msgReceived(tempStr);
@@ -3881,9 +3900,21 @@ void EQInterface::playerContainer(const playerContainerStruct *containp)
       + ", Weight Reduction: " 
       + QString::number(containp->container.weightReduction)
       + "%";
-    
     emit msgReceived(tempStr);
-  }
+  }    
+
+  QFile bankfile(QString("/tmp/bankfile.") + QString::number(getpid()));
+  if (bankfile.open(IO_Append | IO_WriteOnly))
+  {
+    QTextStream out(&bankfile);
+    out << "Item: Container: " << containp->item.name 
+	<< ",(" << containp->item.lore << "), Slot: " 
+	<< slotName
+	<< ", Slots: " << containp->container.numSlots
+	<< ", Size Capacity: " << size_name(containp->container.sizeCapacity) 
+	<< ", Weight Reduction: " << containp->container.weightReduction 
+	<< "%: " << endl;
+   }
 }
 
 void EQInterface::inspectData(const inspectDataStruct *inspt)
@@ -4668,6 +4699,85 @@ void EQInterface::selectPrev(void)
 {
   if (m_spawnList)
     m_spawnList->spawnList()->selectPrev();
+}
+
+void EQInterface::saveSelectedSpawnPath(void)
+{
+  QString fileName;
+  fileName.sprintf(MAPDIR "/%s_mobpath.map", 
+		   (const char*)m_zoneMgr->shortZoneName());
+
+  QFile mobPathFile(fileName);
+  if (mobPathFile.open(IO_Append | IO_WriteOnly))
+  {
+    QTextStream out(&mobPathFile);
+    // append the selected spawns path to the end
+    saveSpawnPath(out, m_selectedSpawn);
+
+    fprintf(stderr, "Finished appending '%s'!\n", (const char*)fileName);
+  }
+}
+
+void EQInterface::saveSpawnPaths(void)
+{
+  QString fileName;
+  fileName.sprintf(MAPDIR "/%s_mobpath.map", 
+		   (const char*)m_zoneMgr->shortZoneName());
+
+  QFile mobPathFile(fileName);
+  if (mobPathFile.open(IO_Truncate | IO_WriteOnly))
+  {
+    QTextStream out(&mobPathFile);
+    // map header line
+    out << m_zoneMgr->longZoneName() << ","
+	<< m_zoneMgr->shortZoneName() << ",0,0" << endl;
+
+    // iterate over the spawns adding their paths to the file
+    ItemConstIterator it(m_spawnShell->getConstMap(tSpawn));
+    const Item* item;
+    for (item = it.current(); item != NULL; item = ++it)
+    {
+      if ((item->NPC() == SPAWN_NPC) || 
+	  (item->NPC() == SPAWN_NPC_CORPSE) ||
+	  (item->NPC() == SPAWN_NPC_UNKNOWN))
+	saveSpawnPath(out, it.current());
+    }
+
+    fprintf(stderr, "Finished writing '%s'!\n", (const char*)fileName);
+  }
+}
+
+void EQInterface::saveSpawnPath(QTextStream& out, const Item* item)
+{
+  if (item == NULL)
+    return;
+
+  const Spawn* spawn = spawnType(item);
+
+  if (spawn == NULL)
+    return;
+
+   const SpawnTrackList& trackList = spawn->trackList();
+   SpawnTrackListIterator trackIt(spawn->trackList());
+   int cnt = trackList.count();
+
+   // only make a line if there is more then one point
+   if (cnt < 2)
+     return;
+
+   const SpawnTrackPoint* trackPoint;
+   
+   out << "M," << spawn->realName() << ",blue," << trackList.count();
+   //iterate over the track, writing out the points (up to 255 points)
+   for (trackPoint = trackIt.current();
+	trackPoint;
+	trackPoint = ++trackIt)
+     {
+       out << "," << trackPoint->x() 
+	   << "," <<  trackPoint->y()
+	   << "," << trackPoint->z();
+     }
+   out << endl;
 }
 
 void EQInterface::toggle_net_real_time_thread(int id)
