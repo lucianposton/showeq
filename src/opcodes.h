@@ -21,7 +21,7 @@
 
 #define ClientHashCode              0x3941
 
-#define GuildListCode               0x0f00
+#define GuildListCode               0x005c
 
 /***********************/
 /* Zone Server OpCodes */
@@ -77,7 +77,7 @@
 
 #define GuildMemberUpdate           0x02a0
 
-#define NpcHpUpdateCode             0x0263
+#define NpcHpUpdateCode             0x0999
 
 //#define SpawnUpdateCode             0x014a
 #define SpawnUpdateCode             0x015a

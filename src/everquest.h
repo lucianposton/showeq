@@ -1374,7 +1374,7 @@ struct manaDecrementStruct
 /*0000*/ uint8_t opCode;                   // 0x7f
 /*0001*/ uint8_t version;		   // 0x21
 /*0002*/ int32_t newMana;                  // New Mana AMount
-/*0004*/ int32_t spellID;                  // Last Spell Cast
+/*0004*/ int32_t spellId;                  // Last Spell Cast
 };
 
 /*
@@ -1874,7 +1874,7 @@ struct xBuffDropStruct
 /*0001*/ uint8_t  version;
 /*0002*/ uint16_t spawnid;
 /*0004*/ uint8_t  unknown0004[4]; 
-/*0008*/ uint16_t spellid;
+/*0008*/ uint16_t spellId;
 /*0010*/ uint8_t  unknown0010[8];
 /*0018*/ uint16_t spellslot;
 /*0020*/ uint8_t  unknown0020[2];
