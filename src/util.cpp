@@ -407,6 +407,59 @@ print_skill (uint8_t skill)
     case 0x07:  // 0x07 (07)  - As per Throwing Spear (Small thrown stuff)
     case 0x13:  // 0x13 (19)  - As per Shurien (Large thrown stuff)
       return "Throwing";
+	case 0x0C:  // 0x0C (12)  - Lockpicks
+	  return "Lockpick";
+	case 0x0E:  // 0x0E (14)  - Food
+	  return "Food";
+	case 0x0F:  // 0x0F (15)  - Drink
+	  return "Drink";
+	case 0x10:  // 0x10 (16)  - Light Source
+	  return "Light Source";
+	case 0x11:  // 0x11 (17)  - Tradeskill items
+	  return "Tradeskill Item";
+	case 0x12:  // 0x12 (18)  - Bandages
+	  return "Bandages";
+	case 0x14:  // 0x14 (20)  - Spell/Song
+	  return "Spell/Song";
+	case 0x15:  // 0x15 (21)  - Potion
+	  return "Potion";
+	case 0x17:  // 0x17 (23)  - Wind Instrument
+	  return "Wind Instrument";
+	case 0x18:  // 0x18 (24)  - String Instrument
+	  return "String Instrument";
+	case 0x19:  // 0x19 (25)  - Brass Instrument
+	  return "Brass Instrument";
+	case 0x1A:  // 0x1A (26)  - Percussion Instrument
+	  return "Percussion Instrument";
+	case 0x1D:  // 0x1d (29)  - Misc Jewelry
+	  return "Jewelry Misc";
+	case 0x1E:  // 0x1E (30)  - Jeweled Skull
+	  return "Jeweled Skull";
+	case 0x1F:  // 0x1F (31)  - Tome
+	  return "Tome";
+	case 0x20:  // 0x20 (32)  - Quest Note
+	  return "Quest Note";
+	case 0x21:  // 0x21 (33)  - Key
+	  return "Key";
+	case 0x22:  // 0x22 (34)  - Coins
+	  return "Coins";
+	case 0x23:  // 0x23 (35)  - 2H Piercing
+	  return "2H Piercing";
+	case 0x24:  // 0x24 (36)  - Fishing Pole
+	  return "Fishing Pole";
+	case 0x25:  // 0x25 (37)  - Bait
+	  return "Bait";
+	case 0x26:  // 0x26 (38)  - Alcohol
+	  return "Alcohol";
+	case 0x27:  // 0x27 (39)  - Quest Key
+	  return "Quest Key";
+	case 0x28:  // 0x28 (40)  - Compass
+	  return "Compass";
+	case 0x2A:  // 0x2A (42)  - Poison
+	  return "Poison";
+	case 0x2D:  // 0x2D (45)  - Hand to Hand Weapons
+	  return "Hand to Hand Weapon";
+
     }
 
   QString skill_name;
