@@ -21,11 +21,11 @@
 #define GuildListCode               0x9221
 
 /* Zone Server OpCodes */
-#define DropCoinsCode               0x0720
+#define DropCoinsCode               0x0740
 
 #define ChannelMessageCode          0x0741
 
-#define cStartCampingCode           0x0722
+#define cStartCampingCode           0x0742
 
 #define RemoveCoinsCode             0x0820
 
@@ -41,9 +41,9 @@
 
 #define PlayerAACode                0x1522
 
-#define cRunToggleCode              0x1f20
+#define cRunToggleCode              0x1f40
 
-#define cJumpCode                   0x2020
+#define cJumpCode                   0x2040
 
 #define CorpseLocCode               0x2120
 
@@ -63,15 +63,15 @@
 
 #define MakeDropCode                0x2c40
 
-#define CharInfo                    0x2e20
+#define CharInfo                    0x2e40
 
 #define TradeContainerInCode        0x3040
 
-#define TradeItemInCode             0x3120
+#define TradeItemInCode             0x3140
 
 #define xBuffDropCode               0x3241
 
-#define TradeBookInCode             0x3420
+#define TradeBookInCode             0x3440
 
 #define cConCorpseCode              0x3422
 
@@ -91,13 +91,13 @@
 
 #define GroupDeclineCode            0x4140
 
-#define sSpellInterruptedCode       0x4122
+#define sSpellInterruptedCode       0x4142
 
 #define GroupAcceptCode             0x3d20
 
 #define CloseGMCode                 0x4321
 
-#define GroupDeleteCode             0x4440
+#define GroupDeleteCode             0x4420
 
 #define sDoneLootingCode            0x4421
 
