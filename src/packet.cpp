@@ -1902,10 +1902,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	uint16_t opCode = *((uint16_t *)data);
 
 	//Logging 
-	if (showeq_params->logZonePackets && 
-	    ((opCode != PlayerPosCode) &&
-	     (opCode != MobUpdateCode) && 
-	     (opCode != SpawnUpdateCode)))
+	if (showeq_params->logZonePackets)
 	  {
 	    QString msg("Decoded -");
 	    if (dir == DIR_SERVER)
