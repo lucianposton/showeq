@@ -33,6 +33,7 @@
 
 #include "interface.h"
 #include "main.h"
+#include "packetcommon.h"
 #include "xmlpreferences.h"      // prefrence file class
 #include "conf.h"              // autoconf/configure definitions
 #include "itemdb.h"
@@ -226,10 +227,6 @@ int main (int argc, char **argv)
    showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 25);
    /* Tells SEQ whether or not to display casting messages (Turn this off if you're on a big raid) */
    showeq_params->showSpellMsgs = pSEQPrefs->getPrefBool("ShowSpellMessages", section, true);
-   /* Spawn logging preferences */
-   showeq_params->SpawnLogFilename = pSEQPrefs->getPrefString("SpawnLogFilename", section, LOGDIR "/spawnlog.txt");
-   showeq_params->logSpawns = pSEQPrefs->getPrefBool("LogSpawns", section, false);
-/* Decoder override for coping with encryption changes */
 
    section = "Filters";
    showeq_params->filterfile = pSEQPrefs->getPrefString("FilterFile", section, LOGDIR "/filters.conf");
@@ -260,29 +257,6 @@ int main (int argc, char **argv)
    section = "SpawnList";
    showeq_params->showRealName = pSEQPrefs->getPrefBool("ShowRealName", section, false);
 
-   /* OpCode monitoring preferences */
-   section = "OpCodeMonitoring";
-   showeq_params->monitorOpCode_Usage = 
-     pSEQPrefs->getPrefBool("Enable", section, false);   /*  Disabled  */
-   showeq_params->monitorOpCode_List = 
-     pSEQPrefs->getPrefString("OpCodeList", section, "");  /*    NONE    */
-   showeq_params->monitorOpCode_Log = 
-     pSEQPrefs->getPrefBool("Log", section, false);
-   showeq_params->monitorOpCode_Filename =
-     pSEQPrefs->getPrefString("LogFilename", section, 
-			      LOGDIR "/opcodemonitor.log");
-
-   /* Packet logging preferences */
-   section = "PacketLogging";
-   showeq_params->logAllPackets = pSEQPrefs->getPrefBool("LogAllPackets", section, 0);
-   showeq_params->logZonePackets = pSEQPrefs->getPrefBool("LogZonePackets", section, 0);
-   showeq_params->logWorldPackets = pSEQPrefs->getPrefBool("LogWorldPackets", section, 0);
-   showeq_params->logUnknownZonePackets  = pSEQPrefs->getPrefBool("LogUnknownZonePackets", section,  0);
-   showeq_params->logRawPackets = pSEQPrefs->getPrefBool("LogRawPackets", section, 0);
-   showeq_params->GlobalLogFilename = pSEQPrefs->getPrefString("GlobalLogFilename", section, LOGDIR "/global.log") ;
-   showeq_params->ZoneLogFilename = pSEQPrefs->getPrefString("ZoneLogFilename", section, LOGDIR "/zone.log");
-   showeq_params->WorldLogFilename = pSEQPrefs->getPrefString("WorldLogFilename", section, LOGDIR "/world.log");
-   showeq_params->UnknownZoneLogFilename = pSEQPrefs->getPrefString("UnknownZoneLogFilename", section, LOGDIR "/unknownzone.log") ;
    /* Different files for different kinds of raw data */
 
    // item database parameters
@@ -349,7 +323,8 @@ int main (int argc, char **argv)
          case 'j':
          {            
             if (optarg)
-               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, XMLPreferences::Runtime);
+               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, 
+					XMLPreferences::Runtime);
 
             showeq_params->playbackpackets = 1;
             showeq_params->recordpackets   = 0;
@@ -361,7 +336,8 @@ int main (int argc, char **argv)
          case 'g':
          {
             if (optarg)
-               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, XMLPreferences::Runtime);
+               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, 
+					XMLPreferences::Runtime);
 
             showeq_params->recordpackets   = 1;
             showeq_params->playbackpackets = 0;
@@ -482,8 +458,9 @@ int main (int argc, char **argv)
          /* Log spawns! */
          case 'x':
          {
-            showeq_params->logSpawns = true;
-            break;
+	   pSEQPrefs->setPrefBool("LogSpawns", "Misc", true, 
+				  XMLPreferences::Runtime);
+	   break;
          }
 
 
@@ -570,55 +547,63 @@ int main (int argc, char **argv)
          /* Filename for logging all packets */
          case GLOBAL_LOG_FILENAME_OPTION:
          {
-            showeq_params->GlobalLogFilename = optarg;
-            break;
+	   pSEQPrefs->setPrefString("GlobalLogFilename", "PacketLogging", 
+				    optarg, XMLPreferences::Runtime);
+	   break;
          }
 
 
          /* Filename for logging world change packets */
          case WORLD_LOG_FILENAME_OPTION:
          {
-            showeq_params->WorldLogFilename = optarg;
-            break;
+	   pSEQPrefs->setPrefString("WorldLogFilename", "PacketLogging", 
+				    optarg, XMLPreferences::Runtime);
+	   break;
          }
 
          /* Filename for logging zone change packets */
          case ZONE_LOG_FILENAME_OPTION:
          {
-            showeq_params->ZoneLogFilename = optarg;
-            break;
+	   pSEQPrefs->setPrefString("ZoneLogFilename", "PacketLogging", 
+				    optarg, XMLPreferences::Runtime);
+	   break;
          }
 
 
          /* Filename for logging unknown zone change packets */
          case UNKNOWN_LOG_FILENAME_OPTION:
          {
-            showeq_params->UnknownZoneLogFilename = optarg;
-            break;
+	   pSEQPrefs->setPrefString("UnknownZoneLogFilename", 
+				    "PacketLogging", optarg, 
+				    XMLPreferences::Runtime);
+	   break;
          }
 
 
          /* Log everything */
          case GLOBAL_LOG_OPTION:
          {
-            showeq_params->logAllPackets = 1;
-            break;
+	   pSEQPrefs->setPrefBool("LogAllPackets", "PacketLogging", true,
+				  XMLPreferences::Runtime);
+	   break;
          }
 
 
          /* Log all zone change packets */
          case ZONE_LOG_OPTION:
          {
-            showeq_params->logZonePackets = 1;
-            break;
+	   pSEQPrefs->setPrefBool("LogZonePackets", "PacketLogging", true,
+				  XMLPreferences::Runtime);
+	   break;
          }
 
 
          /* Log only unfamiliar zone change packets */
          case UNKNOWN_ZONE_LOG_OPTION:
          {
-            showeq_params->logUnknownZonePackets = 1;
-            break;
+	   pSEQPrefs->setPrefBool("LogUnknownZonePackets", "PacketLogging", true,
+				  XMLPreferences::Runtime);
+	   break;
          }
 
 
@@ -632,8 +617,9 @@ int main (int argc, char **argv)
          /* Enable logging of raw packets... */
          case RAW_LOG_OPTION:
          {
-            showeq_params->logRawPackets = 1;
-            break;
+	   pSEQPrefs->setPrefBool("LogRawPackets", "PacketLogging", true,
+				  XMLPreferences::Runtime);
+	   break;
          }
 
          /* Display spawntime in UNIX time (time_t) instead of hh:mm format */
@@ -645,8 +631,9 @@ int main (int argc, char **argv)
 
          case SPAWNLOG_FILENAME_OPTION:
          {
-            showeq_params->SpawnLogFilename = optarg;
-            break;
+	   pSEQPrefs->setPrefString("SpawnLogFilename", "Misc", optarg,
+				  XMLPreferences::Runtime);
+	   break;
          }
 
          case NO_BANK_INFO:
@@ -747,25 +734,6 @@ int main (int argc, char **argv)
             
             "(There should be a more detailed message above)\n"
           );
-
-   /* Verify OpCode Monitor settings... */
-   if (showeq_params->monitorOpCode_Usage)
-   {
-     if (!(showeq_params->monitorOpCode_List.isEmpty()))
-         printf( "\nOpCode monitoring ENABLED...\n"
-                 "Using list:\t%s\n\n",
-                 
-                 (const char*)showeq_params->monitorOpCode_List
-               );
-
-      else
-      {
-         showeq_params->monitorOpCode_Usage = false;
-         printf( "\nOpCode monitoring COULD NOT BE ENABLED!\n"
-                 ">> Please check your ShowEQ.xml file for a list entry under [OpCodeMonitoring]\n\n"
-               );
-      }
-   }
 
    int ret;
 

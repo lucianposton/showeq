@@ -26,7 +26,7 @@
 # For spawns that aren't drops/coins the string has the following added to the 
 # end of the string:
 #    Light:<Light>:Deity:<Deity Name>:RTeam:<RTeam>:DTeam:<DTeam>:Type:<Type>:
-#
+#    [GM:]
 # Where:
 #    <Name> is the creatures transformed/pretty name, with numbers removed,
 #           underscores ("_") replaced with spaces, and articles (a, an, the)
@@ -70,7 +70,9 @@
 #            -1 = Evil
 #            2 = Other
 #    <Type> is the spawns body type (as it appears in "typenames.h")
-#           
+#    [GM:] is GM is tacked on the end if the spawn is a GM
+#
+
 
 # [Hunt] is the section for spawns you are hunting.
 # Spawns appear with a large, dim circle.

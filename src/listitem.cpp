@@ -386,13 +386,13 @@ int main (int argc, char *argv[])
       buff += "NO-Rent ";
     if (entry->GetMagic()==1)
       buff += "MAGIC ";
-    if (loreString[0] == '*')
+    if (entry->GetLoreFlag())
       buff += "LORE";
-    else if (loreString[0] == '&')
+    else if (entry->GetSummonedFlag())
       buff += "SUMMONED";
-    else if (loreString[0] == '#')
+    else if (entry->GetArtifactFlag())
       buff += "ARTIFACT";
-    else if (loreString[0] == '~')
+    else if (entry->GetPendingLoreFlag())
       buff += "PENDING-LORE";
 
     if (buff.isEmpty())

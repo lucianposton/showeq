@@ -56,6 +56,7 @@ public:
    void updateExp(const expUpdateStruct* exp);
    void updateAltExp(const altExpUpdateStruct* altexp);
    void updateLevel(const levelUpUpdateStruct* levelup);
+   void updateNpcHP(const hpNpcUpdateStruct* hpupdate);
    void updateSpawnMaxHP(const SpawnUpdateStruct* su);
    void updateStamina(const staminaStruct* stam);
    void setLastKill(const QString& name, uint8_t level);
@@ -164,7 +165,7 @@ public:
                                  int,
                                  int
                                );
-  void hpChanged(uint16_t, uint16_t);
+  void hpChanged(int16_t, int16_t);
   void changedID(uint16_t playerID);
   void posChanged(int16_t x, int16_t y, int16_t z,
 		  int16_t deltaX, int16_t deltaY, int16_t deltaZ,

@@ -153,6 +153,7 @@ void Player::backfill(const charProfileStruct* player)
   setRace(player->race);
   setClassVal(player->class_);
   setLevel(player->level);
+  m_curHP = player->curHp;
 
   // save the raw name
   setTypeflag(1);
@@ -171,6 +172,10 @@ void Player::backfill(const charProfileStruct* player)
 
   emit getPlayerGuildTag();
 
+#if 1 // ZBTEMP
+  printf("charProfile(%f/%f/%f - %f)\n",
+	 player->x, player->y, player->z, player->heading);
+#endif
   setPos((int16_t)lrintf(player->x), 
          (int16_t)lrintf(player->y), 
          (int16_t)lrintf(player->z),
@@ -181,6 +186,8 @@ void Player::backfill(const charProfileStruct* player)
 #if 1 // ZBTEMP
   printf("Player::backfill(): Pos (%f/%f/%f) Heading: %f\n",
 	 player->x, player->y, player->z, player->heading);
+  printf("Player::backfill(bind): Pos (%f/%f/%f) Heading: %f\n",
+	 player->bind_x, player->bind_y, player->bind_z, player->bind_heading);
 #endif // ZBTEMP  
   setHeading((int8_t)lrintf(player->heading), 0);
   m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
@@ -677,6 +684,10 @@ void Player::updateLevel(const levelUpUpdateStruct *levelup)
   QString needKills;
   QString tempStr;
 
+  tempStr.sprintf("Player: NewLevel: %d\n", levelup->level);
+  emit msgReceived(tempStr);
+  emit stsMessage(tempStr);
+  
   totalExp = Commanate(levelup->exp);
   gainedExp = Commanate((uint32_t) (levelup->exp - m_currentExp));
   
@@ -730,6 +741,27 @@ void Player::updateLevel(const levelUpUpdateStruct *levelup)
   emit changeItem(this, tSpawnChangedLevel);
 }
 
+void Player::updateNpcHP(const hpNpcUpdateStruct* hpupdate)
+{
+  if (hpupdate->spawnId != id())
+    return;
+
+  m_curHP = hpupdate->curHP;
+  m_maxHP = hpupdate->maxHP;
+
+  m_validHP = true;
+
+  updateLastChanged();
+
+  emit changeItem(this, tSpawnChangedHP);
+
+  emit hpChanged(m_curHP, m_maxHP);
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
+}
+
+/* depreciated? */
 void Player::updateSpawnMaxHP(const SpawnUpdateStruct *su)
 {
   if (su->spawnId != id())

@@ -9,52 +9,42 @@
 #define SEQLOGGER_H
 
 #include <qobject.h>
+#include <qfile.h>
+#include <qtextstream.h>
 
-#include "spawn.h"
-#include "util.h"
-
+#ifdef __FreeBSD__ 
+// since they are incapable of following standards
+#include <sys/types.h>
+#else
+#include <stdint.h>
+#endif
 class SEQLogger : public QObject
 {
    Q_OBJECT
 
-public:
-    SEQLogger(const QString& fname, QObject* parent=0, const char* name="SEQLogger");
-    SEQLogger(FILE *fp, QObject* parent=0, const char* name="SEQLogger");
-protected:
-    int logOpen(void);
-    int outputf(const char *fmt, ...);
-    int output(const void *data, int length);
-    void flush() { fflush(m_FP); }
-    FILE* m_FP;
-    QString m_filename;
-    int m_errOpen;
+ public:
+   SEQLogger(const QString& fname, 
+	     QObject* parent=0, const char* name="SEQLogger");
+   SEQLogger(FILE *fp, QObject* parent=0, const char* name="SEQLogger");
+   bool open(void);
+   bool isOpen(void);
+   int outputf(const char *fmt, ...);
+   int output(const void *data, int length);
+   void flush();
+   void outputData(uint32_t len,
+		   const uint8_t* data);
+   
+ protected:
+   FILE* m_fp;
+   QFile m_file;
+   QTextStream m_out;
+   QString m_filename;
+   bool m_errOpen;
 };
 
-class SpawnLogger: public SEQLogger 
+inline bool SEQLogger::isOpen() 
 {
-   Q_OBJECT
-
-public:
-    SpawnLogger(const QString& filename);
-    SpawnLogger(FILE *fp);
-
-public slots:
-    void logTimeSync(const timeOfDayStruct *tday);
-    void logNewZone(const QString& zone);
-    void logZoneSpawn(const newSpawnStruct* nspawn);
-    void logZoneSpawn(const spawnStruct *spawn);
-    void logZoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len);
-    void logNewSpawn(const newSpawnStruct* spawn);
-    void logKilledSpawn(const Item* item, const Item* kitem, uint16_t kid);
-    void logDeleteSpawn(const Item *spawn);
-
-private:
-    void logSpawnInfo(const char *type, const char *name, int id, int level, 
-                      int x, int y, int z, time_t timeCurrent, 
-                      const char *killer, int kid, int guildid);
-    int version;
-    QString zoneShortName;
-    EQTime *l_time;
-};
+  return (m_fp != 0);
+}
 
 #endif

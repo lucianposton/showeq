@@ -12,227 +12,131 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <time.h>
 #include <qstring.h>
 #include <qlist.h>
-#include "everquest.h"
-#include "spawn.h"
+
 #include "logger.h"
-#include "util.h"
 
 SEQLogger::SEQLogger(FILE *fp, QObject* parent, const char* name)
   : QObject(parent, name)
 {
-    m_FP = fp;
-    m_errOpen = 0;
+    m_fp = fp;
+    m_errOpen = false;
 }
 
 SEQLogger::SEQLogger(const QString& fname, QObject* parent, const char* name)
   : QObject(parent, name)
 {
-    m_FP = NULL;
+    m_fp = NULL;
     m_filename = fname;
-    m_errOpen = 0;
+    m_errOpen = false;
 }
 
-int
-SEQLogger::logOpen()
+bool SEQLogger::open()
 {
-    if (m_FP != NULL)
-        return(0);
-
-    m_FP = fopen((const char*)m_filename,"a");
-
-    if (m_FP == NULL)
-    { 
-        if (m_errOpen == 0)
-        {
-            fprintf(stderr,"Error opening %s: %s (will keep trying)\n",
-		    (const char*)m_filename, strerror(errno));
-            m_errOpen = 1;
-        }
-
-        return(-1);
-    }
- 
-    m_errOpen = 0;
-
-    return(0);
-}
-
-int
-SEQLogger::outputf(const char *fmt, ...)
-{
-    va_list args;
-    int count;
-
-    if (m_FP == NULL)
-        return(0);
-
-    va_start(args, fmt);
-    count = vfprintf(m_FP, fmt, args);
-    va_end(args);
-    return(count);
-}
-
-int
-SEQLogger::output(const void* data, int length)
-{
-    int i;
-    int count = 0;
-    unsigned char *ptr = (unsigned char *) data;
-
-    for(i = 0; i < length; i++,ptr++)
-        count += outputf("%.2X", *ptr);
-
-    return(count);
-}
-
-SpawnLogger::SpawnLogger(const QString& fname)
-  : SEQLogger(fname, NULL, "SpawnLogger")
-{
-    version = 3;
-    zoneShortName = "unknown";
-    l_time = new EQTime();
-    return;
-}
-
-SpawnLogger::SpawnLogger(FILE *fp)
-  : SEQLogger(fp, NULL, "SpawnLogger")
-{
-    version = 3;
-    zoneShortName = "unknown";
-    l_time = new EQTime();
-    return;
-}
-
-void
-SpawnLogger::logTimeSync(const timeOfDayStruct *tday)
-{
-    l_time->setepoch(time(NULL),tday);
-}
-
-void
-SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
-                          int x, int y, int z, time_t timeCurrent,
-                          const char *killedBy, int kid, int guildid)
-{
-    struct timeOfDayStruct eqDate;
-    struct tm* current;
-
-    if (m_FP == NULL)
-        if (logOpen() != 0)
-            return;
-
-    eqDate  = l_time->eqdate(timeCurrent);
-    current = localtime(&timeCurrent);
-
-    outputf("%s:%s(%d):%d:%d,%d,%d:%02d.%02d.%02d:%d:%s:%02d.%02d.%02d.%02d.%04d:%s(%d):%d\n",
-        type,
-        name,
-        id,
-        level,
-        x,
-        y,
-        z,
-        current->tm_hour, current->tm_min, current->tm_sec,
-        version,
-        (const char*)zoneShortName,
-        eqDate.hour,
-        eqDate.minute,
-        eqDate.month,
-        eqDate.day,
-        eqDate.year,
-        killedBy,
-        kid,
-        guildid
-    );
-
-    flush();
-
-    return;
-}
-
-void 
-SpawnLogger::logZoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len)
-{
-  int spawndatasize = len / sizeof(spawnStruct);
-
-  for (int i = 0; i < spawndatasize; i++)
-    logZoneSpawn(&zspawns->spawn[i].spawn);
-}
-
-void
-SpawnLogger::logZoneSpawn(const spawnStruct *spawn)
-{
-    logSpawnInfo("z",spawn->name,spawn->spawnId,spawn->level,
-                 spawn->x, spawn->y, spawn->z, time(NULL), "", 0, spawn->guildID);
-
-    return;
-}
-
-void
-SpawnLogger::logZoneSpawn(const newSpawnStruct *nspawn)
-{
-  const spawnStruct* spawn = &nspawn->spawn;
-  logSpawnInfo("z",spawn->name,spawn->spawnId,spawn->level,
-	       spawn->x, spawn->y, spawn->z, time(NULL), "", 0, spawn->guildID);
+  if (m_fp)
+    return true;
   
-  return;
+  m_fp = fopen((const char*)m_filename,"a");
+  
+  if (!m_fp)
+  { 
+    if (!m_errOpen)
+    {
+      ::fprintf(stderr, "Error opening %s: %s (will keep trying)\n",
+		(const char*)m_filename, strerror(errno));
+      m_errOpen = true;
+    }
+    
+    return false;
+  }
+ 
+  m_errOpen = false;
+
+  if (!m_file.open(IO_Append | IO_WriteOnly, m_fp))
+    return false;
+  
+  m_out.setDevice(&m_file);
+  
+  return true;
 }
 
-void
-SpawnLogger::logNewSpawn(const newSpawnStruct* nspawn)
-{
-  const spawnStruct* spawn = &nspawn->spawn;
-  logSpawnInfo("+",spawn->name,spawn->spawnId,spawn->level,
-	       spawn->x, spawn->y, spawn->z, time(NULL), "", 0, spawn->guildID);
-
-  return;
+void SEQLogger::flush()
+{ 
+  m_file.flush();
 }
 
-void
-SpawnLogger::logKilledSpawn(const Item *item, const Item* kitem, uint16_t kid)
+
+int SEQLogger::outputf(const char *fmt, ...)
 {
-  if (item == NULL)
+  va_list args;
+  int count;
+  
+  if (!m_fp)
+    return 0;
+  
+  va_start(args, fmt);
+  count = vfprintf(m_fp, fmt, args);
+  va_end(args);
+  
+  return count;
+}
+
+int SEQLogger::output(const void* data, int length)
+{
+  int i;
+  int count = 0;
+  unsigned char *ptr = (unsigned char *) data;
+  
+  for(i = 0; i < length; i++,ptr++)
+    count += printf("%.2X", *ptr);
+  
+  return count;
+}
+
+// prints up the passed in data to the file pointer
+void SEQLogger::outputData(uint32_t len,
+			  const uint8_t* data)
+{
+  if (!m_fp)
     return;
 
-  const Spawn* spawn = (const Spawn*)item;
-  const Spawn* killer = (const Spawn*)kitem;
-
-  logSpawnInfo("x",(const char *) spawn->name(),spawn->id(), spawn->level(), 
-	       spawn->x(), spawn->y(), spawn->z(), time(NULL),
-	       killer ? (const char*)killer->name() : "unknown",
-	       kid, spawn->GuildID());
-
-  return;
+  char hex[128];
+  char asc[128];
+  char tmp[32];
+  
+  hex[0] = 0;
+  asc[0] = 0;
+  unsigned int c;
+  
+  for (c = 0; c < len; c ++)
+  {
+    if ((!(c % 16)) && c)
+    {
+      fprintf (m_fp, "%03d | %s | %s \n", c - 16, hex, asc);
+      hex[0] = 0;
+      asc[0] = 0;
+    }
+    
+    sprintf (tmp, "%02x ", data[c]);
+    strcat (hex, tmp);
+    
+    if ((data[c] >= 32) && (data[c] <= 126))
+      sprintf (tmp, "%c", data[c]);
+    
+    else
+      strcpy (tmp, ".");
+    
+    strcat (asc, tmp);
+    
+  }
+  
+  if (c % 16)
+    c = c - (c % 16);
+  
+  else
+    c -= 16;
+  
+  fprintf (m_fp, "%03d | %-48s | %s \n\n", c, hex, asc);
 }
-
-void
-SpawnLogger::logDeleteSpawn(const Item *item)
-{
-  if (item->type() != tSpawn)
-    return;
-
-  const Spawn* spawn = (const Spawn*)item;
-
-  logSpawnInfo("-",(const char *)spawn->name(),spawn->id(),spawn->level(),
-	       spawn->x(), spawn->y(), spawn->z(), time(NULL),"",0, spawn->GuildID());
-
-  return;
-}
-
-void
-SpawnLogger::logNewZone(const QString& zonename)
-{
-    if (m_FP == NULL)
-        if (logOpen() != 0)
-            return;
-
-    outputf("----------\nNEW ZONE: %s\n----------\n", (const char*)zonename);
-    outputf(" :name(spawnID):Level:Xpos:Ypos:Zpos:H.m.s:Ver:Zone:eqHour.eqMinute.eqMonth.eqDay.eqYear:killedBy(spawnID)\n");
-    flush();
-    zoneShortName = zonename;
-}
-
 

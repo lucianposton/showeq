@@ -198,6 +198,10 @@ class EQItemDBEntry
    uint32_t GetUniqueItemNr() { return m_itemNr; }
    QString GetName() { return m_itemName; }
    QString GetLoreName() { return m_itemLore; }
+   uint8_t GetLoreFlag();
+   uint8_t GetPendingLoreFlag();
+   uint8_t GetSummonedFlag();
+   uint8_t GetArtifactFlag();
    QString GetIdFile();
    int16_t GetFlag();
    ItemType GetItemType();

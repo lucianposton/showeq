@@ -17,19 +17,21 @@
 /************************/
 /* World Server OpCodes */
 
-#define OP_AckPacket                0x000d // 09/09/03 Appears to be generic ack at the presentation level
+#define OP_AckPacket                0x000d // 10/09/03 Appears to be generic ack at the presentation level
 
 #define OP_GuildList                0x0058 // 10/09/03 - old GuildListCode
 
 #define OP_ExpansionInfo            0x00d8 // 10/09/03 Which expansions user has
 
-#define OP_DeleteCharacter          0x00e3 // 09/09/03 Delete character @ char select
+#define OP_DeleteCharacter          0x00e1 // 10/09/03?Delete character @ char select
 
 #define OP_SendCharInfo             0x00f9 // 10/09/03 Send all chars visible @ char select
 
 #define OP_CharacterCreate          0x00fb // 10/09/03 Create character @ char select
 
 #define OP_ApproveName              0x011c // 10/09/03 Approving new character name @ char creation
+
+#define OP_RandomNameGenerator      0x1290 // 10/09/03 Returns a random name
 
 #define OP_World_Client_CRC1	    0x0151 // 10/09/03 Contains a snippet of spell data
 
@@ -39,7 +41,7 @@
 
 #define OP_ApproveWorld             0x0193 // 10/09/03
 
-#define OP_MOTD                     0x01ae // 10/09/03 - old MOTDCode
+#define OP_MOTD                     0x01ae // 10/09/03 - old MOTDCode Server message of the day
 
 #define OP_SendLoginInfo            0x0238 // 10/09/03
 
@@ -48,6 +50,8 @@
 #define OP_ZoneServerInfo           0x024b // 10/09/03 - old ZoneServerInfo
 
 #define OP_SetChatServer            0x0250 // 10/09/03 Chatserver? IP,Port,servername.Charname,password(?)
+
+#define OP_GetName                  0x0290
 
 /***********************/
 /* Zone Server OpCodes */
@@ -68,7 +72,7 @@
 
 #define OP_TradeAcceptClick         0x0028 // 10/09/03
 
-#define OP_TradeCancelClick         0x0029 // 10/09/03 
+#define OP_CancelTrade              0x0029 // 10/09/03 
 
 #define OP_TradeRequestAck          0x0032 // 10/09/03 Trade request recipient is acknowledging they are able to trade
 
@@ -76,7 +80,7 @@
 
 #define OP_TradeSkillCombine        0x003d // 10/09/03
  
-#define OP_GMFind                   0x0044 // 09/09/03 GM /find	- ?
+#define OP_GMFind                   0x0042 // 10/09/03 GM /find	- ?
 
 #define OP_WhoAllRequest            0x0051 // 10/09/03 - old WhoAllReqCode
 
@@ -84,9 +88,9 @@
 
 #define OP_SkillUpdate              0x005f // 10/09/03 - old SkillIncCode
 
-#define OP_ShopTakeMoney            0x0060 // 10/09/03 - old BuyItemCode
+#define OP_ShopPlayerBuy            0x0060 // 10/09/03 - old BuyItemCode
 
-#define OP_Petition                 0x0062 // 10/09/03?
+#define OP_Petition                 0x0063 // 10/09/03
 
 #define OP_PetitionUpdate           0x0064 // 10/09/03? Updates the Petitions in the Que
 
@@ -98,15 +102,17 @@
 
 #define OP_ShopEnd                  0x0067 // 10/09/03 - old CloseVendorCode
 
-#define OP_GMBecomeNPC              0x0071 // 10/09/03? GM /becomenpc - Become an NPC
+#define OP_PetitionCheckIn          0x006e // 09/09/03 Petition Checkin
 
-#define OP_PetitionCheckout         0x0073 // 09/09/03 Petition Checkout
+#define OP_GMBecomeNPC              0x006f // 10/09/03 GM /becomenpc - Become an NPC
 
-#define OP_LevelUpdate              0x0072 // 10/09/03 - old LevelUpUpdateCode
+#define OP_PetitionCheckout         0x0070 // 10/09/03?Petition Checkout
 
-#define OP_ExpUpdate                0x0075 // 10/09/03 - old ExpUpdateCode
+#define OP_LevelUpdate              0x0073 // 10/09/03 - old LevelUpUpdateCode
 
-#define OP_PetitionCheckIn          0x007a // 09/09/03 Petition Checkin
+#define OP_ExpUpdate                0x0074 // 10/09/03 - old ExpUpdateCode
+
+#define OP_PetitionRefresh          0x0080 // 10/09/03 
 
 #define OP_RandomReply              0x0082 // 10/09/03 - old RandomCode
 
@@ -114,13 +120,15 @@
 
 #define OP_SetRunMode               0x0087 // 10/09/03 - old cRunToggleCode
 
-#define OP_PetitionDelete           0x008d // 09/09/03 Client Petition Delete Request
+#define OP_PetitionDelete           0x008b // 10/09/03?Client Petition Delete Request
 
-#define OP_GMSearchCorpse           0x0094 // 10/09/03? GM /searchcorpse - Search all zones for named corpse
+#define OP_GMSearchCorpse           0x0092 // 10/09/03 GM /searchcorpse - Search all zones for named corpse
 
 #define OP_GuildPeace               0x0096 // 10/09/03 /guildpeace
 
-#define OP_Hide                     0x009a // 09/09/03
+#define OP_Sneak                    0x0098 // 10/10/03 Clicked sneak
+
+#define OP_Hide                     0x0099 // 10/09/03
 
 #define OP_SaveOnZoneReq            0x009c // 10/09/03
 
@@ -128,9 +136,9 @@
 
 #define OP_GuildLeader              0x00a3 // 09/09/03 /guildleader
 
-#define OP_BoardBoat                0x00b8 // 09/09/03
+#define OP_BoardBoat                0x00b6 // 10/09/03?
 
-#define OP_LeaveBoat                0x00b9 // 09/09/03
+#define OP_LeaveBoat                0x00b7 // 10/09/03?
 
 #define OP_CastSpell                0x00b9 // 10/09/03 - old StartCastCode
 
@@ -140,15 +148,17 @@
 
 #define OP_SenseHeading             0x00be // 10/09/03 - old cSenseHeadingCode
 
+#define OP_SenseTraps               0x00bf // 10/10/03 Clicked sense traps
+
 #define OP_Jump                     0x00ce // 10/09/03 - old cJumpCode?
 
-#define OP_CorpseLocResponse        0x00d3 // 10/09/03 - old CorpseLocCode:
+#define OP_CorpseLocResponse        0x00cf // 10/09/03 - old CorpseLocCode:
 
-#define OP_GMInquire                0x00d8 // 09/09/03 GM /inquire - Search soulmark data
+#define OP_GMInquire                0x00d0 // 10/09/03 GM /inquire - Search soulmark data
 
-#define OP_GMSoulmark               0x00d4 // 09/09/03 GM /praise /warn - Add soulmark comment to user file
+#define OP_GMSoulmark               0x00d2 // 10/09/03 GM /praise /warn - Add soulmark comment to user file
 
-#define OP_GMHideMe                 0x00d6 // 09/09/03 GM /hideme - Remove self from spawn lists and make invis
+#define OP_GMHideMe                 0x00d4 // 10/09/03 GM /hideme - Remove self from spawn lists and make invis
 
 #define OP_CastBuff                 0x00d9 // 10/09/03 - old ActionCode
 
@@ -156,9 +166,9 @@
 
 #define OP_ReqNewZone               0x00e3 // 10/09/03 Client requesting NewZone_Struct
 
-#define OP_EnvDamage                0x00e1 // 09/09/03
+#define OP_EnvDamage                0x00df // 10/09/03
 
-#define OP_SafePoint                0x00e8 // 09/09/03
+#define OP_SafePoint                0x00e6 // 10/09/03
 
 #define OP_Emote                    0x00e9 // 10/09/03 - old EmoteTextCode
 
@@ -178,11 +188,11 @@
 
 #define OP_Death                    0x00fc // 10/09/03 - old NewCorpseCode
 
-#define OP_GMKill                   0x0102 // 09/09/03 GM /kill - Insta kill mob/pc
+#define OP_GMKill                   0x0100 // 09/09/03 GM /kill - Insta kill mob/pc
 
-#define OP_GMKick                   0x010c // 10/09/03? GM /kick - Boot player
+#define OP_GMKick                   0x0101 // 10/09/03? GM /kick - Boot player
 
-#define OP_GMGoto                   0x010d // 10/09/03? GM /goto - Transport to another loc
+#define OP_GMGoto                   0x0102 // 10/09/03? GM /goto - Transport to another loc
 
 #define OP_LootRequest              0x0110 // 10/09/03 - old cLootCorpseCode
 
@@ -190,17 +200,17 @@
 
 #define OP_MoneyOnCorpse            0x0112 // 10/09/03 - old MoneyOnCorpseCode
 
-#define OP_ClickDoor                0x011e // 10/09/03 - old DoorClickCode
+#define OP_Door                     0x011e // 10/09/03 - old DoorClickCode
 
 #define OP_MoveDoor                 0x011f // 10/09/03 - old DoorOpenCode
 
+#define OP_Illusion                 0x0122 // 10/09/03 - old IllusionCode
+
 #define OP_WearChange               0x0123 // 10/09/03 - old SpawnUpdateCode
 
-#define OP_Illusion                 0x0126 // 10/09/03 - old IllusionCode
+#define OP_Forage                   0x0125 // 10/09/03 - old ForageCode
 
-#define OP_Forage                   0x0127 // 09/09/03 - old ForageCode
-
-#define OP_Adventure                0x02d7 // 09/09/03 /adventure
+#define OP_Adventure                0x02d5 // 10/09/03 /adventure
 
 #define OP_GMTraining               0x012d // 10/09/03 - old OpenGMCode
 
@@ -226,7 +236,7 @@
 
 #define OP_Consider                 0x0153 // 10/09/03 - old ConsiderCode
 
-#define OP_Feedback                 0x015a // 09/09/03 /feedback
+#define OP_Feedback                 0x0158 // 10/09/03?/feedback
 
 #define OP_Consume                  0x015e // 10/09/03 - old ConsumeCode
 
@@ -242,7 +252,7 @@
 
 #define OP_GMTrainSkill             0x016c // 10/09/03 - old SkillTrainCode
 
-#define OP_ConfirmDelete            0x016f // 09/09/03 Client sends this to server to confirm op_deletespawn
+#define OP_ConfirmDelete            0x016d // 10/09/03?Client sends this to server to confirm op_deletespawn
 
 #define OP_GMEndTrainingResponse    0x016f // 10/09/03 - old CloseGMCode
 
@@ -254,29 +264,31 @@
 
 #define OP_AutoAttack2              0x017c // 10/09/03
 
-#define OP_Surname                  0x0185 // 09/09/03
+#define OP_Surname                  0x017e // 10/09/03
+
+#define OP_DisarmTraps              0x0184 // 10/10/03 Clicked disarm traps
 
 #define OP_SwapSpell                0x018d // 10/09/03 - old TradeSpellBookSlotsCode
+
+#define OP_YellForHelp              0x0190 // 10/09/03?
 
 #define OP_RandomReq                0x0195 // 10/09/03 - old RandomReqCode
 
 #define OP_SetDataRate              0x0196 // 10/09/03 - Client sending datarate.txt value
 
-#define OP_GMDelCorpse              0x0199 // 09/09/03 /delcorpse
+#define OP_GMDelCorpse              0x0197 // 09/09/03 /delcorpse
 
-#define OP_YellForHelp              0x019a // 10/09/03 
+#define OP_PetCommands              0x01a8 // 09/09/03
 
-#define OP_PetCommands              0x01aa // 09/09/03
-
-#define OP_GMApproval               0x01ae // 09/09/03 GM /approval - Name approval duty?
+#define OP_GMApproval               0x01ac // 09/09/03 GM /approval - Name approval duty?
 
 #define OP_LFGResponse              0x01ad // 10/09/03
 
 #define OP_ItemPlayerPacket         0x01b5 // 10/09/03 - old ItemCode
 
-#define OP_GMToggle                 0x01b1 // 09/09/03 GM /toggle - Toggle ability to receive tells from other PC's
+#define OP_GMToggle                 0x01af // 10/09/03 GM /toggle - Toggle ability to receive tells from other PC's
 
-#define OP_GMEmoteZone              0x01b5 // 09/09/03 GM /emotezone - Send zonewide emote
+#define OP_GMEmoteZone              0x01b3 // 10/09/03 GM /emotezone - Send zonewide emote
 
 #define OP_SpawnDoor                0x01b6 // 10/09/03 - old DoorSpawnsCode
 
@@ -284,15 +296,15 @@
 
 #define OP_TargetCommand            0x01be // 10/09/03 Target user
 
-#define OP_ReqZoneObjects           0x01bf // 09/09/03 Client requesting zone objects
+#define OP_ReqZoneObjects           0x01bd // 10/09/03 Client requesting zone objects
 
-#define OP_GuildMOTD                0x01c1 // 10/09/03 - GuildMOTD
+#define OP_GuildMOTD                0x01c2 // 10/09/03 - GuildMOTD
 
 #define OP_Camp                     0x01c5 // 10/09/03 - old cStartCampingCode
 
 #define OP_BecomeTrader             0x01ca // 10/09/03 
 
-#define OP_TraderBuy                0x01ce // 09/09/03 buy from a trader in bazaar
+#define OP_TraderBuy                0x01cc // 09/09/03 buy from a trader in bazaar
 
 #define OP_FaceChange               0x01cd // 10/09/03 /face
 
@@ -302,31 +314,35 @@
 
 #define OP_FormattedMessage         0x01db // 10/09/03 - old FormattedMessageCode
 
-#define OP_Report                   0x01e3 // 09/09/03
+#define OP_Report                   0x01e1 // 09/09/03
 
 #define OP_Bazaar                   0x01ec // 10/09/03 /bazaar - search - old BazaarSearchCode 
 
 #define OP_Trader                   0x01ed // 10/09/03 /trader
 
-#define OP_AAAction                 0x01ee // 09/09/03 Used for changing percent, buying? and activating skills
+#define OP_AAAction                 0x01ec // 10/09/03? Used for changing percent, buying? and activating skills
 
-#define OP_TraderShop               0x01f0 // 09/09/03 - old OpenTraderCode
+#define OP_TraderShop               0x01ee // 09/09/03 - old OpenTraderCode right-click on a trader in bazaar
 
-#define OP_ViewPetition             0x01f1 // 09/09/03 Player /viewpetition
+#define OP_ViewPetition             0x01ef // 10/09/03 Player /viewpetition
 
-#define OP_DeletePetition           0x01f2 // 09/09/03 Player /deletepetition
+#define OP_DeletePetition           0x01f0 // 10/09/03 Player /deletepetition
 
 #define OP_ItemLinkResponse         0x01f8 // 10/09/03 - old ItemInfoCode
 
 #define OP_NewSpawn                 0x01ff // 10/09/03 - old NewSpawnCode
 
-#define OP_SpecialMesg              0x0205 // 09/09/03 Communicate textual info to client
+#define OP_SpecialMesg              0x0203 // 10/09/03?Communicate textual info to client
 
 #define OP_WhoAllResponse           0x0210 // 10/09/03 - old sWhoAllOutputCode
 
+#define OP_UpdateAA                 0x0212 // 10/09/03?
+
+#define OP_RespondAA                0x0213 // 10/09/03?
+
 #define OP_MobHealth                0x0215 // 10/09/03 health sent when a player clicks on the mob
 
-#define OP_GMZoneRequest2           0x0222 // 09/09/03 /zone 2
+#define OP_GMZoneRequest2           0x0220 // 10/09/03?/zone 2
 
 #define OP_ZoneEntry                0x0222 // 10/09/03 - old ZoneEntryCode
 
@@ -350,9 +366,11 @@
 
 #define OP_LFPGetMatchesResponse    0x025c // 10/09/03
 
-#define OP_HPUpdate                 0x022b // 10/09/03 - old NpcHpUpdateCode
+#define OP_HPUpdate                 0x022b // 10/09/03 - old NpcHpUpdateCode Update HP % of a PC or NPC
 
-#define OP_Bug                      0x022f // 09/09/03 /bug
+#define OP_Bug                      0x022d // 09/09/03? /bug
+
+#define OP_Track                    0x029c // 10/10/03 Clicked Track
 
 #define OP_GMSummon                 0x0279 // 10/09/03 GM /summon - Summon PC to self
 
@@ -362,9 +380,9 @@
 
 #define OP_OpenObject               0x0284 // 10/09/03
 
-#define OP_PetitionResolve          0x029b // 09/09/03 Client Petition Resolve Request
+#define OP_PetitionResolve          0x028f // 10/09/03?Client Petition Resolve Request
 
-#define OP_SummonCorpse             0x029c // 09/09/03 /summoncorpse
+#define OP_SummonCorpse             0x029a // 10/09/03?/summoncorpse
 
 #define OP_ItemPacket               0x02c3 // 10/09/03 - old ItemCode
 

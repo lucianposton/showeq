@@ -16,6 +16,7 @@
 
 #include <qfile.h>
 #include <qdatastream.h>
+#include <qregexp.h>
 
 #include "zonemgr.h"
 #include "packet.h"
@@ -44,7 +45,11 @@ static const uint32_t* magic = (uint32_t*)magicStr;
 // zoneNew(newZoneStruct)                zoneEnd(shortName, longName)  false
 //
 ZoneMgr::ZoneMgr(EQPacket* packet, QObject* parent, const char* name)
-  : QObject(parent, name)
+  : QObject(parent, name),
+    m_zoning(false),
+    m_zone_exp_multiplier(0.75),
+    m_zonePointCount(0),
+    m_zonePoints(0)
 {
   m_shortZoneName = "unknown";
   m_longZoneName = "unknown";
@@ -58,6 +63,8 @@ ZoneMgr::ZoneMgr(EQPacket* packet, QObject* parent, const char* name)
 	  this, SLOT(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)));
   connect(packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
 	  this, SLOT(zoneNew(const newZoneStruct*, uint32_t, uint8_t)));
+  connect(packet, SIGNAL(zonePoints(const zonePointsStruct*, uint32_t, uint8_t)),
+	  this, SLOT(zonePoints(const zonePointsStruct*, uint32_t, uint8_t)));
 
   if (showeq_params->restoreZoneState)
     restoreZoneState();
@@ -207,5 +214,21 @@ void ZoneMgr::zoneNew(const newZoneStruct* zoneNew, uint32_t len, uint8_t dir)
 
   if (showeq_params->saveZoneState)
     saveZoneState();
+}
+
+void ZoneMgr::zonePoints(const zonePointsStruct* zp, uint32_t len, uint8_t)
+{
+  // note the zone point count
+  m_zonePointCount = zp->count;
+
+  // delete the previous zone point set
+  if (m_zonePoints)
+    delete [] m_zonePoints;
+  
+  // allocate storage for zone points
+  m_zonePoints = new zonePointStruct[m_zonePointCount];
+
+  // copy the zone point information
+  memcpy((void*)m_zonePoints, zp, sizeof(zonePointStruct) * m_zonePointCount);
 }
 

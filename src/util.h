@@ -28,23 +28,6 @@
 //#define GENERATE_CRCTAB_H
 #endif
 
-typedef unsigned int eqtime_t;
-
-class EQTime
-{
-public:
-    EQTime(void);
-
-    eqtime_t        eptime(const timeOfDayStruct *date);
-    void            setepoch(time_t now, const timeOfDayStruct *date);
-    timeOfDayStruct epdate(eqtime_t et);
-    eqtime_t        eqtime(time_t rt);
-    timeOfDayStruct eqdate(time_t rt);
-
-private:
-    time_t epoch;
-};
-
 char *print_addr (unsigned long addr);
 
 QString Commanate (uint32_t number);

@@ -58,7 +58,6 @@ class Filter;
 #define FILTER_FLAG_ALERT		(1 << ALERT_FILTER)
 #define FILTER_FLAG_FILTERED		(1 << FILTERED_FILTER)
 #define FILTER_FLAG_TRACER		(1 << TRACER_FILTER)
-#define FILTER_FLAG_CONSIDERED	        (1 << (SIZEOF_FILTERS + 0))
 
 #define MAXSIZEOF_FILEFILTERS 16
 #define MAXSIZEOF_RUNTIMEFILTERS 16
@@ -70,15 +69,23 @@ class FilterMgr : public QObject
   Q_OBJECT
 
  public:
-  FilterMgr();
+  FilterMgr(const QString filterFile, bool spawnfilter_case);
   ~FilterMgr();
   
+  const QString& filterFile(void) { return m_filterFile; }
+  const QString& zoneFilterFile(void) { return m_zoneFilterFile; }
+  bool caseSensitive(void) { return m_isCaseSensitive; }
+  
+  void setCaseSensitive(bool caseSensitive);
+
   uint32_t filterFlags(const QString& filterString, int level) const;
   QString filterString(uint32_t filterFlags) const;
   QString filterName(uint8_t filter) const;
-  const QString& filterFile(void) { return m_filterFile; }
   bool addFilter(uint8_t filter, const QString& filterString);
   void remFilter(uint8_t filter, const QString& filterString);
+  bool addZoneFilter(uint8_t filter, const QString& filterString);
+  void remZoneFilter(uint8_t filter, const QString& filterString);
+
   bool registerRuntimeFilter(const QString& name, 
 			     uint8_t& flag,
 			     uint32_t& flagMask);
@@ -96,7 +103,10 @@ class FilterMgr : public QObject
   void saveAsFilters(const QString& shortZoneName);
   void listFilters(void);
   void loadZone(const QString& zoneShortName);
-  
+  void loadZoneFilters(void);
+  void listZoneFilters(void);
+  void saveZoneFilters(void);
+
  signals:
   void filtersChanged();
   void runtimeFiltersChanged(uint8_t flag);
@@ -105,11 +115,15 @@ class FilterMgr : public QObject
  private:
   QString m_filterFile;
   Filter* m_filters[SIZEOF_FILTERS];
-  int m_cFlags;
+  QString m_zoneFilterFile;
+  Filter* m_zoneFilters[SIZEOF_FILTERS];
 
   uint16_t m_runtimeFiltersAllocated;
   Filter* m_runtimeFilters[MAXSIZEOF_RUNTIMEFILTERS];
   QString m_runtimeFilterNames[MAXSIZEOF_RUNTIMEFILTERS];
+
+  int m_cFlags;
+  bool m_isCaseSensitive;
 };
 
 #endif // FILTERMGR_H

@@ -261,8 +261,16 @@ void Spells::loadSpells(const QString& spellsFileName)
     // construct a regex to deal with either style line termination
     QRegExp lineTerm("[\r\n]{1,2}");
 
+    uint16_t unicodeIndicator = *(uint16_t*)textData.data();
+    QString text;
+    if ((unicodeIndicator != 0xfffe) && (unicodeIndicator != 0xfeff))
+      text = textData;
+    else
+      text = QString::fromUcs2((uint16_t*)textData.data());
+
     // split the file into at the line termination
-    QStringList lines = QStringList::split(lineTerm, textData, false);
+    QStringList lines = QStringList::split(lineTerm,
+					   text, false);
 
     Spell* newSpell;
 

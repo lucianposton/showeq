@@ -141,26 +141,107 @@
 #define PLAYER_CLASSES     15
 #define PLAYER_RACES       14
 
+/*
+** Item Packet Type
+*/
 enum ItemPacketType
 {
   ItemPacketViewLink		= 0x00,
   ItemPacketMerchant		= 0x64,
   ItemPacketLoot		= 0x66,
   ItemPacketTrade		= 0x67,
-  ItemPacketCharInventory	= 0x69,
   ItemPacketSummonItem		= 0x6a,
   ItemPacketWorldContainer       = 0x6b
 };
 
 /*
 ** Item types
-**
 */
 enum ItemType
 {
-	ItemTypeCommon		= 0,
-	ItemTypeContainer	= 1,
-	ItemTypeBook		= 2
+  ItemTypeCommon		= 0,
+  ItemTypeContainer	= 1,
+  ItemTypeBook		= 2
+};
+
+/*
+** Chat Colors
+*/
+enum ChatColor
+{
+  CC_Default               = 0,
+  CC_DarkGrey              = 1,
+  CC_DarkGreen             = 2,
+  CC_DarkBlue              = 3,
+  CC_Purple                = 5,
+  CC_LightGrey             = 6,
+  CC_User_Say              = 256,
+  CC_User_Tell             = 257,
+  CC_User_Group            = 258,
+  CC_User_Guild            = 259,
+  CC_User_OOC              = 260,
+  CC_User_Auction          = 261,
+  CC_User_Shout            = 262,
+  CC_User_Emote            = 263,
+  CC_User_Spells           = 264,
+  CC_User_YouHitOther      = 265,
+  CC_User_OtherHitYou      = 266,
+  CC_User_YouMissOther     = 267,
+  CC_User_OtherMissYou     = 268,
+  CC_User_Duels            = 269,
+  CC_User_Skills           = 270,
+  CC_User_Disciplines      = 271,
+  CC_User_Default          = 273,
+  CC_User_MerchantOffer    = 275,
+  CC_User_MerchantExchange = 276,
+  CC_User_YourDeath        = 277,
+  CC_User_OtherDeath       = 278,
+  CC_User_OtherHitOther    = 279,
+  CC_User_OtherMissOther   = 280,
+  CC_User_Who              = 281,
+  CC_User_Yell             = 282,
+  CC_User_NonMelee         = 283,
+  CC_User_SpellWornOff     = 284,
+  CC_User_MoneySplit       = 285,
+  CC_User_Loot             = 286,
+  CC_User_Random           = 287,
+  CC_User_OtherSpells      = 288,
+  CC_User_SpellFailure     = 289,
+  CC_User_ChatChannel      = 290,
+  CC_User_Chat1            = 291,
+  CC_User_Chat2            = 292,
+  CC_User_Chat3            = 293,
+  CC_User_Chat4            = 294,
+  CC_User_Chat5            = 295,
+  CC_User_Chat6            = 296,
+  CC_User_Chat7            = 297,
+  CC_User_Chat8            = 298,
+  CC_User_Chat9            = 299,
+  CC_User_Chat10           = 300,
+  CC_User_MeleeCrit        = 301,
+  CC_User_SpellCrit        = 302,
+  CC_User_TooFarAway       = 303,
+  CC_User_NPCRampage       = 304,
+  CC_User_NPCFurry         = 305,
+  CC_User_NPCEnrage        = 306,
+  CC_User_EchoSay          = 307,
+  CC_User_EchoTell         = 308,
+  CC_User_EchoGroup        = 309,
+  CC_User_EchoGuild        = 310,
+  CC_User_EchoOOC          = 311,
+  CC_User_EchoAuction      = 312,
+  CC_User_EchoShout        = 313,
+  CC_User_EchoEmote        = 314,
+  CC_User_EchoChat1        = 315,
+  CC_User_EchoChat2        = 316,
+  CC_User_EchoChat3        = 317,
+  CC_User_EchoChat4        = 318,
+  CC_User_EchoChat5        = 319,
+  CC_User_EchoChat6        = 320,
+  CC_User_EchoChat7        = 321,
+  CC_User_EchoChat8        = 322,
+  CC_User_EchoChat9        = 323,
+  CC_User_EchoChat10       = 324,
 };
 
 /*
@@ -229,361 +310,28 @@ struct spellBuff
 /*0016*/  
 };
 
-/*
-** Item Packet Struct - Works on a variety of item operations
-** Packet Types: See ItemPacketType enum
-** Length: Variable
-** OpCode: ItemCode
-*/
-struct itemPacketStruct
-{
-/*000*/	ItemPacketType	packetType;       // See ItemPacketType for more info.
-/*004*/	char		serializedItem[0];
-/*xx*/
-};
-
-/*
-** Item Info Request Struct 
-** OpCode: ItemInfoCode
-*/
-struct itemInfoReqStruct
-{
-/*000*/ uint32_t itemNr;                  // ItemNr 
-/*005*/ uint32_t requestSeq;              // Request sequence number
-/*008*/ char     name[64];                // Item name
-/*072*/
-};
-
-/*
-** Item Info Response Struct
-** Length: Variable
-** OpCode: ItemInfoCode
-*/
-struct itemInfoStruct
-{
-/*000*/	uint32_t	requestSeq;       // Corresponds to sequence # in req
-/*004*/	char		serializedItem[0];
-/*xxx*/
-};
-
-/*
-** Simple Spawn Update
-** Length: 14 Octets
-** OpCode: MobUpdateCode
-*/
-
-struct spawnPositionUpdate 
-{
-/*0000*/ int16_t  spawnId;
-/*0002*/ int64_t  y:19, z:19, x:19, u3:7;
-         unsigned heading:12;
-         signed unused2:4;
-/*0010*/
-};
-
-
 /* 
-** Generic Spawn Struct 
-** Length: 255 Octets 
-** Used in: 
-**   spawnZoneStruct
-**   dbSpawnStruct
-**   petStruct
-**   newSpawnStruct
-*/ 
-
-struct spawnStruct
+ * Used in charProfileStruct
+ * Size: 2 octets
+ */
+struct AA_Array
 {
-/*000*/ int32_t  race;             // race
-/*004*/ int8_t   eyecolor1;        // left eye color
-/*005*/ int8_t   eyecolor2;        // right eye color
-/*006*/ union
-        {
-	  /*006*/ int8_t  face;             // face style
-	  /*006*/ int8_t  woad;             // Barbarian-only WOAD
-        };
-/*007*/ int8_t   aa_title;         // 0=none,1=general,2=archetype,3=class
-/*008*/ uint8_t  class_;		  // class
-/*009*/ uint8_t  level;
-/*010*/ char     unknown010[2];   // *** Placeholder
-/*012*/ int8_t   curHp;
-/*013*/ uint8_t  afk;             // 0=not afk, 1=afk
-/*014*/ union
-        {
-	  /*014*/ uint8_t equip_chest2;
-	  /*014*/ uint8_t mount_color; // drogmor: 0=white,1=black,2=green,3=red
-	                               // horse: 0=brown,1=white,2=black,3=tan
-        }; 
-/*015*/ uint8_t  NPC;             // 0=player,1=npc,2=pc corpse,3=npc corpse,
-                                  // 4=???,5=unknown spawn,10=self
-/*016*/ uint8_t  beard;           // beard style
-/*017*/ uint8_t  beardcolor;      // beard color
-/*018*/ uint8_t  hairstyle;       // hair style
-/*019*/ uint8_t  haircolor;       // hair color
-/*020*/ uint8_t  invis;           // 0=visible,1=invisible
-/*021*/ uint8_t  unknown021;      // *** Placeholder
-/*022*/ int8_t   maxHp;           // max hp
-/*023*/ uint8_t  pvp;             // 0=Not pvp,1=pvp
-/*024*/ uint8_t  light;           // Light intensity
-/*025*/ uint8_t  unknown025;      // *** Placeholder
-/*026*/ uint8_t  lfg;             // 0=Not lfg,1=lfg
-/*027*/ uint16_t heading;         // spawn heading
-/*029*/ uint8_t  deltaHeading;    // change in heading
-/*030*/ uint8_t  animation;       // animation id
-/*031*/ signed   deltaX:13;
-        signed   x:19;
-/*035*/ signed   y:19;
-        signed   deltaZ:13;
-/*039*/ signed   deltaY:13;
-        signed   z:19;
-/*043*/ uint8_t  anon;            // 0=normal,1=anon,2=roleplaying
-/*044*/ uint8_t  gender;          // 0=male,1=female,2=other
-/*045*/ uint16_t spawnId;         // Id of spawn
-/*047*/ char     unknown047[3];
-/*050*/ char     lastName[32];    // lastname
-/*082*/ int32_t  equipment[9];	  // 0=helm, 1=chest, 2=arm, 3=bracer
-                                  // 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2
-/*118*/ char     name[64];        // name
-/*182*/ int32_t  dye_rgb[7];      // armor dye colors
-/*210*/ uint8_t  unknown210[8];
-/*218*/ float    size;            // Size
-/*222*/ uint8_t  unknown222[5];
-/*227*/ uint8_t  gm;              // 0=not GM,1=GM
-/*228*/ uint8_t  unknown228[4];   // *** Placeholder
-/*232*/ uint32_t guildID;         // GuildID
-/*236*/ uint8_t  linkdead;        // 0=Not LD, 1=LD
-/*237*/ uint32_t bodytype;        // Bodytype
-/*241*/ int8_t   guild_rank;      // 0=member,1=officer,2=leader
-/*242*/ uint8_t  unknown242[3];
-/*245*/ uint32_t petOwnerId;      // If pet, the pet owner spawn id
-/*249*/ int16_t  deity;           // deity
-/*251*/ char     unknown251[7];
-/*258*/
-};
-
-/* 
-** Zone Spawn Struct 
-** Length: 176 Octets 
-** Used in: 
-**    zoneSpawnStruct
-**
-*/ 
-
-struct spawnZoneStruct
-{
-/*0000*/ spawnStruct spawn;
+/*000*/ uint8_t AA;
+/*001*/ uint8_t value;
 };
 
 /*
-** Generic Door Struct
-** Length: 52 Octets
-** Used in: 
-**    cDoorSpawnsStruct(f721)
-**
+** Type:   Zone Change Request (before hand)
+** Length: 70 Octets
+** OpCode: ZoneChangeCode
 */
-
-struct doorStruct
+struct zoneChangeStruct
 {
-/*0000*/ char     name[16];        // Filename of Door?
-/*0016*/ float    y;               // y loc
-/*0020*/ float    x;               // x loc
-/*0024*/ float    z;               // z loc
-/*0028*/ float    heading;         // heading
-/*0032*/ uint8_t  unknown0028[7]; // ***Placeholder
-/*0039*/ int8_t   auto_return;
-/*0040*/ uint8_t  initialState;
-/*0041*/ uint16_t holdstateforever;
-/*0043*/ uint8_t  unknown043;
-/*0044*/ uint8_t  doorId;          // door's id #
-/*0045*/ uint8_t  opentypee;       
-/*0046*/ uint8_t  unknown046; 
-/*0047*/ uint8_t  size;           // size of door
-/*0048*/ uint8_t  unknown040[8]; // ***Placeholder
-/*0056*/
-}; 
-
-/*
-**                 ShowEQ Specific Structures
-*/
-
-/*
-** DB spawn struct (adds zone spawn was in)
-*/
-
-struct dbSpawnStruct
-{
-/*0000*/ struct spawnStruct spawn;      // Spawn Information
-/*0258*/ char   zoneName[40];           // Zone Information
-};
-
-/*
-** Pet spawn struct (pets pet and owner in one struct)
-*/
-
-struct petStruct
-{
-/*0000*/ struct spawnStruct owner;      // Pet Owner Information
-/*0258*/ struct spawnStruct pet;        // Pet Infromation
-};
-
-/*
-** Channel Message received or sent
-** Length: 71 Octets + Variable Length + 4 Octets
-** OpCode: ChannelMessageCode
-*/
-
-struct channelMessageStruct
-{
-/*0000*/ char     target[64];             // the target characters name
-/*0064*/ char     sender[64];             // The senders name 
-/*0128*/ uint8_t  language;               // Language
-/*0129*/ uint8_t  unknown0129[3];         // ***Placeholder
-/*0132*/ uint8_t  chanNum;                // Channel
-/*0133*/ int8_t   unknown0133[11];            // ***Placeholder
-/*0144*/ char     message[0];             // Variable length message
-};
-
-/*
-** Compressed Item In Shop
-** Length: variable
-** OpCode cItemInShop
-*/
-
-struct cItemInShopStruct
-{
-/*0000*/ uint16_t count;                  // number of items in shop
-/*0003*/ uint8_t  compressedData[0];      // All the packets compressed together
-};
-
-/*
-** Server System Message
-** Length: Variable Length
-** OpCode: SysMsgCode
-*/
-
-struct sysMsgStruct
-{
-/*0000*/ char     message[0];             // Variable length message
-};
-
-/*
-** Emote text
-** Length: Variable Text
-** OpCode: emoteTextCode
-*/
-
-struct emoteTextStruct
-{
-/*0000*/ uint8_t  unknown0002[2];         // ***Placeholder
-/*0002*/ char     text[0];                // Emote `Text
-};
-
-/*
-** Simple text messages
-** Length: Variable Text
-** OpCode: SimpleMessageCode
-*/
-
-struct simpleMessageStruct
-{
-/*0000*/ uint32_t messageFormat;          // Indicates the message format
-/*0005*/ uint32_t color;                  // Message color
-/*0008*/ uint32_t unknown;                // ***Placeholder
-/*0012*/
-};
-
-/*
-** Formatted text messages
-** Length: Variable Text
-** OpCode: emoteTextCode
-*/
-
-struct formattedMessageStruct
-{
-/*0000*/ uint8_t  unknown0002[4];         // ***Placeholder
-/*0004*/ uint32_t messageFormat;          // Indicates the message format
-/*0008*/ uint8_t  unknown0010[4];         // ***Placeholder (arguments?)
-/*0012*/ char     messages[0];            // messages(NULL delimited)
-/*0???*/ uint8_t  unknownXXXX[8];         // ***Placeholder
-};
-
-/*
-** Corpse location
-** Length: 18 Octets
-** OpCode: corpseLocCode
-*/
-
-struct corpseLocStruct
-{
-/*0000*/ uint32_t spawnId;
-/*0004*/ float    x;
-/*0008*/ float    y;
-/*0012*/ float    z;
-};
-
-/*
-** Grouping Infromation
-** Length: 138 Octets
-** OpCode: groupinfoCode
-*/
-
-struct groupInfoStruct
-{
-/*0000*/ uint8_t  unknown0002[4];
-/*0004*/ char     yourname[64];           // Player Name
-/*0068*/ char     membername[64];         // Goup Member Name
-/*0132*/ uint8_t  unknown0130[4];        // ***Placeholder
-};
-typedef struct groupInfoStruct groupMemberStruct; // new form
-
-/*
-** Grouping Invite
-** Length 195 Octets
-** Opcode GroupInviteCode
-*/
-
-struct groupInviteStruct
-{
-/*0000*/ char     yourname[64];           // Player Name
-/*0064*/ char     membername[64];         // Invited Member Name
-/*0128*/ uint8_t  unknown0130[65];        // ***Placeholder
-};
-
-/*
-** Grouping Invite Answer - Decline
-** Length 131 Octets
-** Opcode GroupDeclineCode
-*/
-
-struct groupDeclineStruct
-{
-/*0000*/ char     yourname[64];           // Player Name
-/*0064*/ char     membername[64];         // Invited Member Name
-/*0128*/ uint8_t  reason;                 // Already in Group = 1, Declined Invite = 3
-};
-
-/*
-** Grouping Invite Answer - Accept 
-** Length 130 Octets
-** Opcode GroupAcceptCode
-*/
-
-struct groupAcceptStruct
-{
-/*0000*/ char     yourname[64];           // Player Name
-/*0064*/ char     membername[64];         // Invited Member Name
-};
-
-/*
-** Grouping Removal
-** Length 130 Octets
-** Opcode GroupDeleteCode
-*/
-
-struct groupDeleteStruct
-{
-/*0000*/ char     yourname[64];           // Player Name
-/*0064*/ char     membername[64];         // Invited Member Name
+/*0000*/ char     name[64];		// Character Name
+/*0064*/ uint16_t zoneId;               // zone Id
+/*0066*/ uint16_t zoneInstance;         // zone Instance
+/*0068*/ uint8_t unknown[8];            // unknown
+/*0076*/
 };
 
 /*
@@ -591,7 +339,6 @@ struct groupDeleteStruct
 ** Length: 70 Octets
 ** OpCode: ZoneEntryCode (when direction == client)
 */
-
 struct ClientZoneEntryStruct
 {
 /*0000*/ uint32_t unknown0000;            // ***Placeholder
@@ -605,7 +352,6 @@ struct ClientZoneEntryStruct
 ** Length: 390 Octets
 ** OpCode: ZoneEntryCode (when direction == server)
 */
-
 struct ServerZoneEntryStruct
 {
 /*0000*/ uint32_t checksum;      // some kind of checksum
@@ -696,24 +442,32 @@ struct ServerZoneEntryStruct
 };
 
 /*
-** Delete Spawn
-** Length: 4 Octets
-** OpCode: DeleteSpawnCode
+** New Zone Code
+** Length: 590 Octets
+** OpCode: NewZoneCode
 */
-
-struct deleteSpawnStruct
+struct newZoneStruct
 {
-/*0000*/ uint32_t spawnId;                // Spawn ID to delete
-};
-
-/* 
- * Used in charProfileStruct
- * Size: 2 octets
- */
-struct AA_Array
-{
-/*000*/ uint8_t AA;
-/*001*/ uint8_t value;
+/*0000*/ char    name[64];                 // Character name
+/*0064*/ char    shortName[32];            // Zone Short Name
+/*0096*/ char    longName[278];            // Zone Long Name
+/*0310*/ uint8_t ztype;                    // Zone type
+/*0311*/ uint8_t fog_red[4];               // Zone fog (red)
+/*0315*/ uint8_t fog_green[4];             // Zone fog (green)
+/*0319*/ uint8_t fog_blue[4];              // Zone fog (blue)
+/*0374*/ uint8_t unknown0374[87];          // *** Placeholder
+/*0474*/ uint8_t sky;                      // Zone sky
+/*0475*/ uint8_t unknown0475[13];          // *** Placeholder
+/*0488*/ float   zone_exp_multiplier;      // Experience Multiplier
+/*0492*/ float   safe_y;                   // Zone Safe Y
+/*0496*/ float   safe_x;                   // Zone Safe X
+/*0500*/ float   safe_z;                   // Zone Safe Z
+/*0504*/ float   unknown0504;              // *** Placeholder
+/*0508*/ float   underworld;               // Underworld
+/*0512*/ float   minclip;                  // Minimum view distance
+/*0516*/ float   maxclip;                  // Maximum view distance
+/*0520*/ uint8_t unknown0520[68];          // *** Placeholder
+/*0588*/
 };
 
 /*
@@ -721,7 +475,6 @@ struct AA_Array
 ** Length: 8454 Octets
 ** OpCode: CharProfileCode
 */
-
 struct charProfileStruct
 {
 /*0000*/ uint32_t  checksum;           // 
@@ -736,7 +489,7 @@ struct charProfileStruct
 /*0124*/ float     bind_x;             // Bind loc x coord
 /*0128*/ float	   bind_y;             // Bind loc y coord
 /*0132*/ float	   bind_z;             // Bind loc z coord
-/*0136*/ uint8_t   unknown0136[4];     // *** PLaceholder
+/*0136*/ float     bind_heading;       // *** PLaceholder
 /*0140*/ uint32_t  deity;              // deity
 /*0144*/ uint32_t  guildID;            // guildID
 /*0148*/ uint32_t  birthdayTime;       // character birthday
@@ -983,25 +736,459 @@ struct playerAAStruct {
 };
 #endif
 
+/* 
+** Generic Spawn Struct 
+** Length: 255 Octets 
+** Used in: 
+**   spawnZoneStruct
+**   dbSpawnStruct
+**   petStruct
+**   newSpawnStruct
+*/ 
+struct spawnStruct
+{
+/*000*/ int32_t  race;             // race
+/*004*/ int8_t   eyecolor1;        // left eye color
+/*005*/ int8_t   eyecolor2;        // right eye color
+/*006*/ union
+        {
+	  /*006*/ int8_t  face;             // face style
+	  /*006*/ int8_t  woad;             // Barbarian-only WOAD
+        };
+/*007*/ int8_t   aa_title;         // 0=none,1=general,2=archetype,3=class
+/*008*/ uint8_t  class_;		  // class
+/*009*/ uint8_t  level;
+/*010*/ char     unknown010[2];   // *** Placeholder
+/*012*/ int8_t   curHp;
+/*013*/ uint8_t  afk;             // 0=not afk, 1=afk
+/*014*/ union
+        {
+	  /*014*/ uint8_t equip_chest2;
+	  /*014*/ uint8_t mount_color; // drogmor: 0=white,1=black,2=green,3=red
+	                               // horse: 0=brown,1=white,2=black,3=tan
+        }; 
+/*015*/ uint8_t  NPC;             // 0=player,1=npc,2=pc corpse,3=npc corpse,
+                                  // 4=???,5=unknown spawn,10=self
+/*016*/ uint8_t  beard;           // beard style
+/*017*/ uint8_t  beardcolor;      // beard color
+/*018*/ uint8_t  hairstyle;       // hair style
+/*019*/ uint8_t  haircolor;       // hair color
+/*020*/ uint8_t  invis;           // 0=visible,1=invisible
+/*021*/ uint8_t  unknown021;      // *** Placeholder
+/*022*/ int8_t   maxHp;           // max hp
+/*023*/ uint8_t  pvp;             // 0=Not pvp,1=pvp
+/*024*/ uint8_t  light;           // Light intensity
+/*025*/ uint8_t  unknown025;      // *** Placeholder
+/*026*/ uint8_t  lfg;             // 0=Not lfg,1=lfg
+/*027*/ uint16_t heading;         // spawn heading
+/*029*/ uint8_t  deltaHeading;    // change in heading
+/*030*/ uint8_t  animation;       // animation id
+/*031*/ signed   deltaX:13;
+        signed   x:19;
+/*035*/ signed   y:19;
+        signed   deltaZ:13;
+/*039*/ signed   deltaY:13;
+        signed   z:19;
+/*043*/ uint8_t  anon;            // 0=normal,1=anon,2=roleplaying
+/*044*/ uint8_t  gender;          // 0=male,1=female,2=other
+/*045*/ uint16_t spawnId;         // Id of spawn
+/*047*/ char     unknown047[3];
+/*050*/ char     lastName[32];    // lastname
+/*082*/ int32_t  equipment[9];	  // 0=helm, 1=chest, 2=arm, 3=bracer
+                                  // 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2
+/*118*/ char     name[64];        // name
+/*182*/ int32_t  dye_rgb[7];      // armor dye colors
+/*210*/ uint8_t  unknown210[8];
+/*218*/ float    size;            // Size
+/*222*/ uint8_t  unknown222[5];
+/*227*/ uint8_t  gm;              // 0=not GM,1=GM
+/*228*/ uint8_t  unknown228[4];   // *** Placeholder
+/*232*/ uint32_t guildID;         // GuildID
+/*236*/ uint8_t  linkdead;        // 0=Not LD, 1=LD
+/*237*/ uint32_t bodytype;        // Bodytype
+/*241*/ int8_t   guild_rank;      // 0=member,1=officer,2=leader
+/*242*/ uint8_t  unknown242[3];
+/*245*/ uint32_t petOwnerId;      // If pet, the pet owner spawn id
+/*249*/ int16_t  deity;           // deity
+/*251*/ char     unknown251[7];
+/*258*/
+};
+
+/*
+** Zone Spawns
+** Length: 6Octets + Variable Length Spawn Data
+** OpCode: ZoneSpawnsCode
+*/
+struct zoneSpawnsStruct
+{
+/*0000*/ struct spawnStruct spawn[0];    // Variable number of spawns
+};
+
+/*
+** Generic Door Struct
+** Length: 52 Octets
+** Used in: 
+**    cDoorSpawnsStruct(f721)
+**
+*/
+struct doorStruct
+{
+/*0000*/ char     name[16];        // Filename of Door?
+/*0016*/ float    y;               // y loc
+/*0020*/ float    x;               // x loc
+/*0024*/ float    z;               // z loc
+/*0028*/ float    heading;         // heading
+/*0032*/ uint8_t  unknown0028[7]; // ***Placeholder
+/*0039*/ int8_t   auto_return;
+/*0040*/ uint8_t  initialState;
+/*0041*/ uint16_t holdstateforever;
+/*0043*/ uint8_t  unknown043;
+/*0044*/ uint8_t  doorId;          // door's id #
+/*0045*/ uint8_t  opentypee;       
+/*0046*/ uint8_t  unknown046; 
+/*0047*/ uint8_t  size;           // size of door
+/*0048*/ uint8_t  unknown040[8]; // ***Placeholder
+/*0056*/
+}; 
 
 /*
 ** Drop Item On Ground
-** Length: 94 Octets
+** Length: 92 Octets
 ** OpCode: MakeDropCode
 */
-
 struct makeDropStruct
 {
-/*0000*/ uint8_t  unknown0000[8];         // ***Placeholder
-/*0008*/ uint32_t itemNr;                 // Item ID? (wrong)
+/*0000*/ uint32_t prevObject;             // Previous object in the linked list
+/*0004*/ uint32_t nextObject;             // Next object in the linked list
+/*0008*/ uint32_t unknown0008;            // ***Placeholder
 /*0012*/ uint32_t dropId;                 // DropID
-/*0014*/ uint8_t  unknown0018[16];        // ***Placeholder
+/*0016*/ uint32_t zoneId;                 // ZoneID
+/*0014*/ uint8_t  unknown0014[8];         // ***Placeholder
+/*0028*/ float    heading;                // Heading
 /*0032*/ float    z;                      // Z Position
 /*0036*/ float    x;                      // X Position
 /*0040*/ float    y;                      // Y Position
 /*0044*/ char     idFile[16];             // ACTOR ID
-/*0060*/ uint8_t  unknown0062[32];        // ***Placeholder
+/*0060*/ uint32_t unknown0060[5];         // ***Placeholder
+/*0080*/ uint32_t dropType;               // drop type
+/*0084*/ uint32_t unknown0084;            // ***Placeholder
+/*0088*/ uint32_t userSpawnID;            // spawn id of the person using
 /*0092*/
+};
+
+/*
+** ZonePoint
+** Length: 24 Octets
+** Sent as part of zonePointsStruct
+*/
+
+struct zonePointStruct
+{
+  /*0000*/ uint32_t zoneTrigger;
+  /*0004*/ float    y;
+  /*0008*/ float    x;
+  /*0012*/ float    z;
+  /*0016*/ float    heading;
+  /*0020*/ uint16_t zoneId;
+  /*0022*/ uint16_t zoneInstance;
+  /*0024*/
+};
+
+/*
+** ZonePointsStruct
+** Length: Variable
+** OPCode: OP_SendZonePoints
+*/
+struct zonePointsStruct
+{
+  /*0000*/ uint32_t        count;
+  /*0004*/ zonePointStruct zonePoints[0]; 
+  /*0xxx*/ uint8_t         unknown0xxx[24];
+  /*0yyy*/
+};
+
+/*
+** Time of Day
+** Length: 8 Octets
+** OpCode: TimeOfDayCode
+*/
+struct timeOfDayStruct
+{
+/*0000*/ uint8_t  hour;                   // Hour (1-24)
+/*0001*/ uint8_t  minute;                 // Minute (0-59)
+/*0002*/ uint8_t  day;                    // Day (1-28)
+/*0003*/ uint8_t  month;                  // Month (1-12)
+/*0004*/ uint16_t year;                   // Year
+/*0006*/ uint16_t unknown0016;            // Placeholder
+/*0008*/
+};
+
+/*
+** Item Packet Struct - Works on a variety of item operations
+** Packet Types: See ItemPacketType enum
+** Length: Variable
+** OpCode: ItemCode
+*/
+struct itemPacketStruct
+{
+/*000*/	ItemPacketType	packetType;       // See ItemPacketType for more info.
+/*004*/	char		serializedItem[0];
+/*xx*/
+};
+
+/*
+** Item Info Request Struct 
+** OpCode: ItemInfoCode
+*/
+struct itemInfoReqStruct
+{
+/*000*/ uint32_t itemNr;                  // ItemNr 
+/*005*/ uint32_t requestSeq;              // Request sequence number
+/*008*/ char     name[64];                // Item name
+/*072*/
+};
+
+/*
+** Item Info Response Struct
+** Length: Variable
+** OpCode: ItemInfoCode
+*/
+struct itemInfoStruct
+{
+/*000*/	uint32_t	requestSeq;       // Corresponds to sequence # in req
+/*004*/	char		serializedItem[0];
+/*xxx*/
+};
+
+/*
+** Simple Spawn Update
+** Length: 14 Octets
+** OpCode: MobUpdateCode
+*/
+
+struct spawnPositionUpdate 
+{
+/*0000*/ int16_t  spawnId;
+/*0002*/ int64_t  y:19, z:19, x:19, u3:7;
+         unsigned heading:12;
+         signed unused2:4;
+/*0010*/
+};
+
+
+/*
+**                 ShowEQ Specific Structures
+*/
+
+/*
+** DB spawn struct (adds zone spawn was in)
+*/
+
+struct dbSpawnStruct
+{
+/*0000*/ struct spawnStruct spawn;      // Spawn Information
+/*0258*/ char   zoneName[40];           // Zone Information
+};
+
+/*
+** Pet spawn struct (pets pet and owner in one struct)
+*/
+
+struct petStruct
+{
+/*0000*/ struct spawnStruct owner;      // Pet Owner Information
+/*0258*/ struct spawnStruct pet;        // Pet Infromation
+};
+
+/*
+** Server System Message
+** Length: Variable Length
+** OpCode: SysMsgCode
+*/
+
+struct sysMsgStruct
+{
+/*0000*/ char     message[0];             // Variable length message
+};
+
+/*
+** Emote text
+** Length: Variable Text
+** OpCode: emoteTextCode
+*/
+
+struct emoteTextStruct
+{
+/*0000*/ uint8_t  unknown0002[2];         // ***Placeholder
+/*0002*/ char     text[0];                // Emote `Text
+};
+
+/*
+** Channel Message received or sent
+** Length: 71 Octets + Variable Length + 4 Octets
+** OpCode: ChannelMessageCode
+*/
+
+struct channelMessageStruct
+{
+/*0000*/ char     target[64];             // the target characters name
+/*0064*/ char     sender[64];             // The senders name 
+/*0128*/ uint8_t  language;               // Language
+/*0129*/ uint8_t  unknown0129[3];         // ***Placeholder
+/*0132*/ uint8_t  chanNum;                // Channel
+/*0133*/ int8_t   unknown0133[11];            // ***Placeholder
+/*0144*/ char     message[0];             // Variable length message
+};
+
+/*
+** Formatted text messages
+** Length: Variable Text
+** OpCode: emoteTextCode
+*/
+
+struct formattedMessageStruct
+{
+/*0000*/ uint8_t  unknown0002[4];         // ***Placeholder
+/*0004*/ uint32_t messageFormat;          // Indicates the message format
+/*0008*/ uint8_t  unknown0010[4];         // ***Placeholder (arguments?)
+/*0012*/ char     messages[0];            // messages(NULL delimited)
+/*0???*/ uint8_t  unknownXXXX[8];         // ***Placeholder
+};
+
+/*
+** Simple text messages
+** Length: Variable Text
+** OpCode: SimpleMessageCode
+*/
+
+struct simpleMessageStruct
+{
+/*0000*/ uint32_t messageFormat;          // Indicates the message format
+/*0005*/ uint32_t color;                  // Message color
+/*0008*/ uint32_t unknown;                // ***Placeholder
+/*0012*/
+};
+
+/*
+** Special Message Struct
+** Length: Variable Text
+** OPCode: OP_SpecialMesg
+*/
+
+struct specialMessageStruct
+{
+  /*0000*/ uint8_t   unknown0000[3];  // message style?
+  /*0003*/ ChatColor messageColor;    // message color
+  /*0007*/ uint16_t  target;          // message target
+  /*0009*/ uint16_t  padding;         // padding
+  /*0011*/ char      source[0];       // message text
+  /*0xxx*/ uint32_t  unknown0xxx[3];  //***Placeholder
+  /*0yyy*/ char      message[0];      // message text
+};
+
+/*
+** Guild MOTD Struct
+** Length: Variable Text
+** OPCode: OP_GuildMOTD
+*/
+struct guildMOTDStruct
+{
+  /*0000*/ uint32_t unknown0000;      //***Placeholder
+  /*0004*/ char     target[64];       // motd target
+  /*0068*/ char     sender[64];       // motd "sender" (who set it)
+  /*0132*/ uint32_t unknown0132;      //***Placeholder
+  /*0136*/ char     message[0];
+};
+
+/*
+** Corpse location
+** Length: 18 Octets
+** OpCode: corpseLocCode
+*/
+
+struct corpseLocStruct
+{
+/*0000*/ uint32_t spawnId;
+/*0004*/ float    x;
+/*0008*/ float    y;
+/*0012*/ float    z;
+};
+
+/*
+** Grouping Infromation
+** Length: 138 Octets
+** OpCode: groupinfoCode
+*/
+
+struct groupInfoStruct
+{
+/*0000*/ uint8_t  unknown0002[4];
+/*0004*/ char     yourname[64];           // Player Name
+/*0068*/ char     membername[64];         // Goup Member Name
+/*0132*/ uint8_t  unknown0130[4];        // ***Placeholder
+};
+typedef struct groupInfoStruct groupMemberStruct; // new form
+
+/*
+** Grouping Invite
+** Length 195 Octets
+** Opcode GroupInviteCode
+*/
+
+struct groupInviteStruct
+{
+/*0000*/ char     yourname[64];           // Player Name
+/*0064*/ char     membername[64];         // Invited Member Name
+/*0128*/ uint8_t  unknown0130[65];        // ***Placeholder
+};
+
+/*
+** Grouping Invite Answer - Decline
+** Length 131 Octets
+** Opcode GroupDeclineCode
+*/
+
+struct groupDeclineStruct
+{
+/*0000*/ char     yourname[64];           // Player Name
+/*0064*/ char     membername[64];         // Invited Member Name
+/*0128*/ uint8_t  reason;                 // Already in Group = 1, Declined Invite = 3
+};
+
+/*
+** Grouping Invite Answer - Accept 
+** Length 130 Octets
+** Opcode GroupAcceptCode
+*/
+
+struct groupAcceptStruct
+{
+/*0000*/ char     yourname[64];           // Player Name
+/*0064*/ char     membername[64];         // Invited Member Name
+};
+
+/*
+** Grouping Removal
+** Length 130 Octets
+** Opcode GroupDeleteCode
+*/
+
+struct groupDeleteStruct
+{
+/*0000*/ char     yourname[64];           // Player Name
+/*0064*/ char     membername[64];         // Invited Member Name
+};
+
+
+/*
+** Delete Spawn
+** Length: 4 Octets
+** OpCode: DeleteSpawnCode
+*/
+
+struct deleteSpawnStruct
+{
+/*0000*/ uint32_t spawnId;                // Spawn ID to delete
 };
 
 /*
@@ -1148,47 +1335,6 @@ struct actionStruct
 };
 
 /*
-** New Zone Code
-** Length: 590 Octets
-** OpCode: NewZoneCode
-*/
-
-struct newZoneStruct
-{
-/*0000*/ char    name[64];                 // Character name
-/*0064*/ char    shortName[32];            // Zone Short Name
-/*0096*/ char    longName[278];            // Zone Long Name
-/*0310*/ uint8_t ztype;                    // Zone type
-/*0311*/ uint8_t fog_red[4];               // Zone fog (red)
-/*0315*/ uint8_t fog_green[4];             // Zone fog (green)
-/*0319*/ uint8_t fog_blue[4];              // Zone fog (blue)
-/*0374*/ uint8_t unknown0374[87];          // *** Placeholder
-/*0474*/ uint8_t sky;                      // Zone sky
-/*0475*/ uint8_t unknown0475[13];          // *** Placeholder
-/*0488*/ float   zone_exp_multiplier;      // Experience Multiplier
-/*0492*/ float   safe_y;                   // Zone Safe Y
-/*0496*/ float   safe_x;                   // Zone Safe X
-/*0500*/ float   safe_z;                   // Zone Safe Z
-/*0504*/ float   unknown0504;              // *** Placeholder
-/*0508*/ float   underworld;               // Underworld
-/*0512*/ float   minclip;                  // Minimum view distance
-/*0516*/ float   maxclip;                  // Maximum view distance
-/*0520*/ uint8_t unknown0520[68];          // *** Placeholder
-/*0588*/
-};
-
-/*
-** Zone Spawns
-** Length: 6Octets + Variable Length Spawn Data
-** OpCode: ZoneSpawnsCode
-*/
-
-struct zoneSpawnsStruct
-{
-/*0000*/ struct spawnZoneStruct spawn[0];    // Variable number of spawns
-};
-
-/*
 ** client changes target struct
 ** Length: 4 Octets
 ** OpCode: clientTargetCode
@@ -1327,7 +1473,7 @@ struct wearChangeStruct
 
 /*
 ** Level Update
-** Length: 14 Octets
+** Length: 12 Octets
 ** OpCode: LevelUpUpdateCode
 */
 
@@ -1341,7 +1487,7 @@ struct levelUpUpdateStruct
 
 /*
 ** Experience Update
-** Length: 6 Octets
+** Length: 8 Octets
 ** OpCode: ExpUpdateCode
 */
 
@@ -1364,21 +1510,6 @@ struct altExpUpdateStruct
 /*0008*/ uint8_t  percent;                // percentage in integer form
 /*0009*/ uint8_t  unknown0009[3];            // ***Place Holder
 /*0012*/
-};
-
-/*
-** Type:   Zone Change Request (before hand)
-** Length: 70 Octets
-** OpCode: ZoneChangeCode
-*/
-
-struct zoneChangeStruct
-{
-/*0000*/ char     name[64];		// Character Name
-/*0064*/ uint16_t zoneId;               // zone Id
-/*0066*/ uint16_t zoneInstance;         // zone Instance
-/*0068*/ uint8_t unknown[8];            // unknown
-/*0076*/
 };
 
 /*
@@ -1406,8 +1537,8 @@ struct SpawnUpdateStruct
 struct hpNpcUpdateStruct
 {
 /*0002*/ uint16_t spawnId;
-/*0004*/ uint16_t maxHP;
-/*0006*/ uint16_t curHP;
+/*0004*/ int16_t maxHP;
+/*0006*/ int16_t curHP;
 /*0008*/ 
 }; 
 
@@ -1476,23 +1607,6 @@ struct randomStruct
 /*0008*/ uint32_t result;                 // result number
 /*0012*/ char     name[64];               // name rolled by
 /*0076*/
-};
-
-/*
-** Time of Day
-** Length: 8 Octets
-** OpCode: TimeOfDayCode
-*/
-
-struct timeOfDayStruct
-{
-/*0000*/ uint8_t  hour;                   // Hour (1-24)
-/*0001*/ uint8_t  minute;                 // Minute (0-59)
-/*0002*/ uint8_t  day;                    // Day (1-28)
-/*0003*/ uint8_t  month;                  // Month (1-12)
-/*0004*/ uint16_t year;                   // Year
-/*0006*/ uint16_t unknown0016;            // Placeholder
-/*0008*/
 };
 
 /*
@@ -1729,6 +1843,21 @@ struct buffStruct
 /*0028*/
 };
 
+/*
+** Guild Member Update structure 
+** Length: 76 octets
+**
+*/
+
+struct GuildMemberUpdate
+{
+/*000*/ uint32_t type;          // update type (0xe3 seems to update zone and last on time)
+/*004*/ char     name[64];      // member name
+/*068*/ uint16_t zoneId;        // zone id 
+/*070*/ uint16_t zoneInstance;  // zone instance
+/*072*/ uint32_t lastOn;        // time the player was last on.
+/*076*/
+};
 
 /*******************************/
 /* World Server Structs        */

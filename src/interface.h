@@ -51,7 +51,7 @@ class SpawnShell;
 class SpellShell;
 class GroupMgr;
 class SpawnMonitor;
-class SpawnLogger;
+class SpawnLog;
 class Item;
 class CompassFrame;
 class MapFrame;
@@ -61,6 +61,11 @@ class NetDiag;
 class MsgDialog;
 class GuildMgr;
 class Spells;
+class DateTimeMgr;
+class PacketLog;
+class PacketStreamLog;
+class UnknownPacketLog;
+class OPCodeMonitorPacketLog;
 
 //--------------------------------------------------
 // typedefs
@@ -104,11 +109,15 @@ class EQInterface:public QMainWindow
    void moneyOnCorpse(const moneyOnCorpseStruct* money);
    void item(const itemPacketStruct* item);
    void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
-   void simpleMessage(const simpleMessageStruct* cmsg, uint32_t, uint8_t);
    void formattedMessage(const formattedMessageStruct* cmsg, uint32_t, uint8_t);
+   void simpleMessage(const simpleMessageStruct* cmsg, uint32_t, uint8_t);
+   void specialMessage(const specialMessageStruct* smsg, uint32_t, uint8_t);
+   void guildMOTD(const guildMOTDStruct* gmotd, uint32_t, uint8_t);
    void random(const randomReqStruct* randr);
    void random(const randomStruct* randr);
    void emoteText(const emoteTextStruct* emotetext);
+   void updatedDateTime(const QDateTime&);
+   void syncDateTime(const QDateTime&);
    void inspectData(const inspectDataStruct* inspt);
    void spMessage(const spMesgStruct* spmsg);
    void handleSpell(const memSpellStruct* mem, uint32_t, uint8_t);
@@ -172,6 +181,7 @@ class EQInterface:public QMainWindow
    void dumpGuildInfo(void);
    void dumpSpellBook(void);
    void launch_editor_filters(void);
+   void launch_editor_zoneFilters(void);
    void toggleAutoDetectCharSettings(int id);
    void SetDefaultCharacterClass(int id);
    void SetDefaultCharacterRace(int id);
@@ -184,6 +194,7 @@ class EQInterface:public QMainWindow
    void selectTheme(int id);
    void toggle_opcode_monitoring (int id);
    void set_opcode_monitored_list (void);
+   void toggle_opcode_view(int id);
    void toggle_opcode_log(int id);
    void select_opcode_file(void);
    void toggle_net_session_tracking(void);
@@ -272,7 +283,7 @@ class EQInterface:public QMainWindow
    void init_view_menu();
 
  protected:
-   bool getMonitorOpCodeList(const QString& title, const QString& defaultList);
+   bool getMonitorOpCodeList(const QString& title, QString& opcodeList);
    int setTheme(int id);
    void loadFormatStrings();
    void resizeEvent (QResizeEvent *);
@@ -290,7 +301,12 @@ class EQInterface:public QMainWindow
    void showSpellList(void);
    void showCompass(void);
    void showNetDiag(void);
-   void createSpawnLogger(void);
+   void createSpawnLog(void);
+   void createGlobalLog(void);
+   void createWorldLog(void);
+   void createZoneLog(void);
+   void createUnknownZoneLog(void);
+   void createOPCodeMonitorLog(const QString&);
 
  public:
    Player* m_player;
@@ -314,7 +330,17 @@ class EQInterface:public QMainWindow
    GroupMgr* m_groupMgr;
    SpawnMonitor* m_spawnMonitor;
    EQItemDB* m_itemDB;
-   SpawnLogger *m_spawnLogger;
+   GuildMgr* m_guildmgr;
+   DateTimeMgr* m_dateTimeMgr;
+
+   SpawnLog *m_spawnLogger;
+
+   PacketLog* m_globalLog;
+   PacketStreamLog* m_worldLog;
+   PacketStreamLog* m_zoneLog;
+   UnknownPacketLog* m_unknownZoneLog;
+   OPCodeMonitorPacketLog* m_opcodeMonitorLog;
+
    const Item* m_selectedSpawn;
    
    QPopupMenu* m_netMenu;
@@ -350,11 +376,7 @@ class EQInterface:public QMainWindow
 
    QList<MsgDialog>  m_msgDialogList;   
 
-   GuildMgr* m_guildmgr;
-
    QIntDict<QString> m_formattedMessageStrings;
-
-   bool viewUnknownData;
 
    int char_ClassID[PLAYER_CLASSES];
    int char_RaceID[PLAYER_RACES];

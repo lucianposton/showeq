@@ -1015,69 +1015,6 @@ uint32_t calcCRC32(const uint8_t* p,
   return crc ^ 0xFFFFFFFF;
 }
 
-EQTime::EQTime()
-{
-    epoch = 686510748; // if eq time is computed directly from
-                       // real time then this value will always
-                       // close to correct. But we reset it when
-                       // we get a time sync packet anyway.
-}
-
-eqtime_t
-EQTime::eptime(const timeOfDayStruct *date)
-{
-    // convert to epoch relative time (minutes since epoch)
-    // epoch = 1 AM, Jan 1, 3000
-
-    return( ((date->year-3000) * 483840) + ((date->month-1) * 40320) +
-            ((date->day-1) * 1440) + ((date->hour-1) * 60) + date->minute );
-}
-
-void
-EQTime::setepoch(time_t rt, const timeOfDayStruct *date)
-{
-    // 1 EQ Minute = 3 Seconds
-    //  so eqtime * 3 = number of seconds since eqepoch
-
-    epoch = rt - (eptime(date) * 3);
-    fprintf(stderr,"EQ EPOCH OCCURRED AT %u SECONDS POST UNIX EPOCH\n",
-            (unsigned int)epoch);
-    return;
-}
-
-timeOfDayStruct
-EQTime::epdate(eqtime_t et)
-{
-    timeOfDayStruct date;
-
-    date.year = 3000 + (et / 483840);
-    et %= 483840;
-
-    date.month = 1+(et / 40320);
-    et %= 40320;
-
-    date.day = 1+(et / 1440);
-    et %= 1440;
-
-    date.hour = 1+(et / 60);
-    et %= 60;
-
-    date.minute = et;
-
-    return(date);
-}
-
-eqtime_t
-EQTime::eqtime(time_t rt)
-{
-    return( (rt - epoch) / 3 );
-}
-
-timeOfDayStruct
-EQTime::eqdate(time_t rt)
-{
-    return(epdate(eqtime(rt)));
-}
 
 bool findFile( QString& filename )
 {

@@ -113,6 +113,7 @@ class SpawnListMenu : public QPopupMenu
    void init_Menu(void);
    void toggle_spawnListCol( int id );
    void add_filter(int id);
+   void add_zoneFilter(int id);
    void add_category(int id);
    void edit_category(int id);
    void delete_category(int id);
@@ -128,6 +129,7 @@ class SpawnListMenu : public QPopupMenu
   const Category* m_currentCategory;
   const Item* m_currentItem;
   int m_id_filterMenu;
+  int m_id_zoneFilterMenu;
   int m_id_spawnList_Cols[tSpawnColMaxCols];
   int m_id_edit_category;
   int m_id_delete_category;

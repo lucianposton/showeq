@@ -431,7 +431,7 @@ void SpawnShell::zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len)
   int spawndatasize = len / sizeof(spawnStruct);
 
   for (int i = 0; i < spawndatasize; i++)
-    newSpawn(zspawns->spawn[i].spawn);
+    newSpawn(zspawns->spawn[i]);
 }
 
 void SpawnShell::newSpawn(const newSpawnStruct* spawn)

@@ -37,8 +37,6 @@ class EQItemDB;
 #define SPAWNFILE        LOGDIR "/spawn.db"
 #endif
 
-#define AUTOMATIC_CLIENT_IP "127.0.0.0"
-
 struct ShowEQParams
 {
   QString        device;
@@ -67,28 +65,13 @@ struct ShowEQParams
   bool           broken_decode;
   bool           walkpathrecord;
   uint32_t       walkpathlength;
-  bool           logSpawns;
   bool           spawnfilter_loglocates;
   bool           spawnfilter_logcautions;
   bool           spawnfilter_logdangers;
   bool           spawnfilter_loghunts;
   bool           systime_spawntime;
   bool           showRealName;
-  QString        SpawnLogFilename;
   
-  bool           logAllPackets;
-  bool           logWorldPackets;
-  bool           logZonePackets;
-  bool           logUnknownZonePackets;
-  bool           logRawPackets;
-  QString        GlobalLogFilename;
-  QString        WorldLogFilename;
-  QString        ZoneLogFilename;
-  QString        UnknownZoneLogFilename;
-  QString        CharProfileCodeFilename;
-  QString        NewSpawnCodeFilename;
-  QString        ZoneSpawnsCodeFilename;
- 
   bool           AutoDetectCharSettings;
   QString        defaultName;
   QString        defaultLastName;
@@ -101,11 +84,6 @@ struct ShowEQParams
   bool           no_bank;
   bool           showEQTime;
 
-  // OpCode monitoring Variables
-  bool           monitorOpCode_Usage;
-  QString        monitorOpCode_List;
-  bool           monitorOpCode_Log;
-  QString        monitorOpCode_Filename;
   int            ItemDBTypes;
   QString        ItemLoreDBFilename;
   QString        ItemNameDBFilename;

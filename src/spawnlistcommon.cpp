@@ -244,9 +244,14 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      else
        buff = item()->name();
 
-     if ((spawn != NULL) && !spawn->lastName().isEmpty())
-       buff.sprintf("%s (%s)", 
-		    (const char*)buff, (const char*)spawn->lastName());
+     if (spawn != NULL) 
+     {
+       if (!spawn->lastName().isEmpty())
+	 buff.sprintf("%s (%s)", 
+		      (const char*)buff, (const char*)spawn->lastName());
+       if (spawn->gm())
+	 buff += " *GM* ";
+     }
 
      setText(tSpawnColName, buff);
    }
@@ -534,6 +539,26 @@ SpawnListMenu::SpawnListMenu(SEQListView* spawnlist,
   connect (filterMenu, SIGNAL(activated(int)), 
 	   this, SLOT(add_filter(int)));
 
+  QPopupMenu* zoneFilterMenu = new QPopupMenu;
+  m_id_zoneFilterMenu = insertItem("Add &Zone Filter", zoneFilterMenu);
+  setItemEnabled(m_id_zoneFilterMenu, false);
+  x = zoneFilterMenu->insertItem("&Hunt...");
+  zoneFilterMenu->setItemParameter(x, HUNT_FILTER);
+  x = zoneFilterMenu->insertItem("&Caution...");
+  zoneFilterMenu->setItemParameter(x, CAUTION_FILTER);
+  x = zoneFilterMenu->insertItem("&Danger...");
+  zoneFilterMenu->setItemParameter(x, DANGER_FILTER);
+  x = zoneFilterMenu->insertItem("&Locate...");
+  zoneFilterMenu->setItemParameter(x, LOCATE_FILTER);
+  x = zoneFilterMenu->insertItem("&Alert...");
+  zoneFilterMenu->setItemParameter(x, ALERT_FILTER);
+  x = zoneFilterMenu->insertItem("&Filtered...");
+  zoneFilterMenu->setItemParameter(x, FILTERED_FILTER);
+  x = zoneFilterMenu->insertItem("&Tracer...");
+  zoneFilterMenu->setItemParameter(x, TRACER_FILTER);
+  connect (zoneFilterMenu, SIGNAL(activated(int)), 
+	   this, SLOT(add_zoneFilter(int)));
+
   insertSeparator(-1);
 
   x = insertItem("&Add Category...", this, SLOT(add_category(int)));
@@ -593,13 +618,22 @@ void SpawnListMenu::setCurrentItem(const Item* item)
 
   // enable/disable item depending on if there is one
   setItemEnabled(m_id_filterMenu, (item != NULL));
+  setItemEnabled(m_id_zoneFilterMenu, (item != NULL));
 
   if (item != NULL)
+  {
     changeItem(m_id_filterMenu,
 	       "Add '" + item->name() + "' &Filter");
+    changeItem(m_id_zoneFilterMenu,
+	       "Add '" + item->name() + "' &Zone Filter");
+  }
   else
+  {
     changeItem(m_id_filterMenu,
 	       "Add &Filter");
+    changeItem(m_id_zoneFilterMenu,
+	       "Add &Zone Filter");
+  }
 }
 
 void SpawnListMenu::toggle_spawnListCol(int id)
@@ -635,6 +669,29 @@ void SpawnListMenu::add_filter(int id)
   // if the user clicked ok, add the filter
   if (ok)
     m_filterMgr->addFilter(filter, filterString);
+}
+
+void SpawnListMenu::add_zoneFilter(int id)
+{
+  if (m_currentItem == NULL)
+    return;
+
+  int filter = itemParameter(id);
+  QString filterName = m_filterMgr->filterName(filter);
+  QString filterString = m_currentItem->filterString();
+
+  // get the user edited filter string, based on the items filterString
+  bool ok = false;
+  filterString = 
+    QInputDialog::getText(filterName + " Filter",
+			  "Enter the filter string:",
+			  QLineEdit::Normal,
+			  filterString, &ok, m_spawnlist);
+
+
+  // if the user clicked ok, add the filter
+  if (ok)
+    m_filterMgr->addZoneFilter(filter, filterString);
 }
 
 void SpawnListMenu::add_category(int id)

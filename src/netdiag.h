@@ -9,14 +9,22 @@
 #ifndef EQNETDIAG_H
 #define EQNETDIAG_H
 
+#include <netinet/in.h>
+
 #include <qwidget.h>
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qspinbox.h>
 
+#include "packetcommon.h"
 #include "seqwindow.h"
-#include "packet.h"
 
+//----------------------------------------------------------------------
+// forward declarations
+class EQPacket;
+
+//----------------------------------------------------------------------
+// NetDiag window class
 class NetDiag : public SEQWindow
 {
   Q_OBJECT 
@@ -27,10 +35,11 @@ class NetDiag : public SEQWindow
  public slots:
    void numPacket              (int, int);
    void resetPacket            (int, int);
-   void clientChanged          (uint32_t);
-   void clientPortLatched      (uint16_t);
-   void serverPortLatched      (uint16_t);
+   void clientChanged          (in_addr_t);
+   void clientPortLatched      (in_port_t);
+   void serverPortLatched      (in_port_t);
    void sessionTrackingChanged (uint8_t);
+   void filterChanged          ();
    void seqReceive             (int, int);
    void seqExpect              (int, int);
    void cacheSize              (int, int);
@@ -50,7 +59,8 @@ class NetDiag : public SEQWindow
   QLabel* m_sessionLabel;
   QLabel* m_serverPortLabel;
   QLabel* m_clientPortLabel;
-  QLabel* cache[MAXSTREAMS];
+  QLabel* m_cache[MAXSTREAMS];
+  QLabel* m_filterLabel;
 
   int  m_packetStartTime[MAXSTREAMS];
   int  m_initialcount[MAXSTREAMS];

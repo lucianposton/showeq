@@ -37,10 +37,13 @@
 #include "spawnpointlist.h"
 #include "spawnlist2.h"
 #include "logger.h"
+#include "spawnlog.h"
+#include "packetlog.h"
 #include "category.h"
 #include "itemdb.h"
 #include "guild.h"
 #include "spells.h"
+#include "datetimemgr.h"
 
 #include <qfont.h>
 #include <qapplication.h>
@@ -88,14 +91,20 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
     m_groupMgr(NULL),
     m_spawnMonitor(NULL),
     m_itemDB(NULL),
+    m_guildmgr(NULL),
+    m_dateTimeMgr(NULL),
     m_spawnLogger(NULL),
+    m_globalLog(0),
+    m_worldLog(0),
+    m_zoneLog(0),
+    m_unknownZoneLog(0),
+    m_opcodeMonitorLog(0),
     m_selectedSpawn(NULL),
     m_compass(NULL),
     m_expWindow(NULL),
     m_combatWindow(NULL),
     m_netDiag(NULL),
-    m_guildmgr(NULL),
-    m_formattedMessageStrings(2099) // increase if eqstr_us.txt gets longer
+    m_formattedMessageStrings(8009) // increase if eqstr_us.txt gets longer
 {
   for (int l = 0; l < maxNumMaps; l++)
     m_map[l] = NULL;
@@ -132,6 +141,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // Create the packet object
    m_packet = new EQPacket (this, "packet");
 
+   // Create the date/time manager
+   m_dateTimeMgr = new DateTimeMgr(this, "datetimemgr");
+
    // Create the Zone Manager
    m_zoneMgr = new ZoneMgr(m_packet, this, "zonemgr");
 
@@ -155,7 +167,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    }
 
    // Create the filter manager
-   m_filterMgr = new FilterMgr();
+   m_filterMgr = new FilterMgr(showeq_params->filterfile,
+			       showeq_params->spawnfilter_case);
 
    // if there is a short zone name already, try to load its filters
    QString shortZoneName = m_zoneMgr->shortZoneName();
@@ -183,9 +196,28 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // Create the Group Manager
    m_groupMgr = new GroupMgr(m_spawnShell, m_player, "groupmgr");
 
+   // Create log objects as necessary
+   if (pSEQPrefs->getPrefBool("LogAllPackets", "PacketLogging", false))
+     createGlobalLog();
+
+   if (pSEQPrefs->getPrefBool("LogZonePackets", "PacketLogging", false))
+     createZoneLog();
+
+   if (pSEQPrefs->getPrefBool("LogWorldPackets", "PacketLogging", false))
+     createWorldLog();
+
+   if (pSEQPrefs->getPrefBool("LogUnknownZonePackets", "PacketLogging", false))
+     createUnknownZoneLog();
+
+   section = "OpCodeMonitoring";
+   if (pSEQPrefs->getPrefBool("Enable", section, false))
+     createOPCodeMonitorLog(pSEQPrefs->getPrefString("OpCodeList", section, ""));
+
    // if the user wants spawns logged, create the spawn logger
-   if (showeq_params->logSpawns)
-     createSpawnLogger();
+   if (pSEQPrefs->getPrefBool("LogSpawns", "Misc", false))
+     createSpawnLog();
+
+   section = "Interface";
 
    // Initialize the experience window;
    m_expWindow = new ExperienceWindow(m_player, m_groupMgr);
@@ -193,7 +225,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_expWindow->restoreSize();
 
    // move window to new position
-   if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
+   if (pSEQPrefs->getPrefBool("UseWindowPos", section, true))
      m_expWindow->restorePosition();
    
    if (pSEQPrefs->getPrefBool("ShowExpWindow", section, false))
@@ -607,7 +639,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    menuBar()->setItemChecked (m_id_opt_ConSelect, showeq_params->con_select);
    menuBar()->setItemChecked (m_id_opt_TarSelect, showeq_params->tar_select);
    menuBar()->setItemChecked (m_id_opt_KeepSelectedVisible, showeq_params->keep_selected_visible);
-   menuBar()->setItemChecked (m_id_opt_LogSpawns, showeq_params->logSpawns);
+   menuBar()->setItemChecked (m_id_opt_LogSpawns, (m_spawnLogger != 0));
    menuBar()->setItemChecked (m_id_opt_PvPTeams, showeq_params->pvp);
    menuBar()->setItemChecked (m_id_opt_PvPDeity, showeq_params->deitypvp);
 
@@ -675,6 +707,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_netMenu->setItemChecked(x, showeq_params->broken_decode);
 
    m_netMenu->insertSeparator(-1);
+
    // Log menu
    QPopupMenu* pLogMenu = new QPopupMenu;
    m_netMenu->insertItem("Lo&g", pLogMenu);
@@ -683,17 +716,28 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_id_log_WorldData   = pLogMenu->insertItem("World Data", this, SLOT(toggle_log_WorldData()), Key_F6);
    m_id_log_ZoneData    = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F7);
    m_id_log_UnknownData = pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F8);
-   m_id_log_RawData     = pLogMenu->insertItem("Raw Data", this, SLOT(toggle_log_RawData()), Key_F9);
+   m_id_view_UnknownData = pLogMenu->insertItem("View Unknown Data", this, 
+						 SLOT(toggle_view_UnknownData()) , 
+						 Key_F9);
+   m_id_log_RawData     = pLogMenu->insertItem("Raw Data", this, SLOT(toggle_log_RawData()), Key_F10);
    if (m_itemDB)			      
    {
      m_id_log_Items  = pLogMenu->insertItem("Item Data", this, SLOT(toggle_log_ItemData()));
      m_id_log_ItemPackets   = pLogMenu->insertItem("Item Packet Data", this, SLOT(toggle_log_ItemPacketData()));
    }
-   menuBar()->setItemChecked (m_id_log_AllPackets , showeq_params->logAllPackets);
-   menuBar()->setItemChecked (m_id_log_WorldData   ,showeq_params->logWorldPackets);
-   menuBar()->setItemChecked (m_id_log_ZoneData   , showeq_params->logZonePackets);
-   menuBar()->setItemChecked (m_id_log_UnknownData, showeq_params->logUnknownZonePackets);
-   menuBar()->setItemChecked (m_id_log_RawData, showeq_params->logRawPackets);
+   menuBar()->setItemChecked (m_id_log_AllPackets, (m_globalLog != 0));
+   menuBar()->setItemChecked (m_id_log_WorldData, (m_worldLog != 0));
+   menuBar()->setItemChecked (m_id_log_ZoneData, (m_zoneLog != 0));
+   menuBar()->setItemChecked (m_id_log_UnknownData, (m_unknownZoneLog != 0));
+   menuBar()->setItemChecked(m_id_view_UnknownData,
+			     pSEQPrefs->getPrefBool("ViewUnknown", 
+						    "PacketLogging", 
+						    false));
+   menuBar()->setItemChecked (m_id_log_RawData,
+			      pSEQPrefs->getPrefBool("LogRawPackets", 
+						     "PacketLogging",
+						     false));
+
    if (m_itemDB)			      
    {
      menuBar()->setItemChecked (m_id_log_Items, m_itemDB->GetItemLogging());
@@ -703,22 +747,25 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // OpCode Monitor
    QPopupMenu* pOpCodeMenu = new QPopupMenu;
    m_netMenu->insertItem("OpCode Monitor", pOpCodeMenu);
-   if (showeq_params->monitorOpCode_Usage == true)
-       pOpCodeMenu->insertItem("Disable &OpCode Monitoring", this,
+   x = pOpCodeMenu->insertItem("&OpCode Monitoring", this,
 			      SLOT(toggle_opcode_monitoring(int)), CTRL+ALT+Key_O);
-   else
-       pOpCodeMenu->insertItem("Enable &OpCode Monitoring...", this,
-			      SLOT(toggle_opcode_monitoring(int)), CTRL+ALT+Key_O);
+   
+   pOpCodeMenu->setItemChecked(x, (m_opcodeMonitorLog != 0));
    pOpCodeMenu->insertItem("&Reload Monitored OpCode List..", this,
 			  SLOT(set_opcode_monitored_list()), CTRL+ALT+Key_R);
+  section = "OpCodeMonitoring";
+   x =pOpCodeMenu->insertItem("&View Monitored OpCode Matches", this,
+			      SLOT(toggle_opcode_view(int)));
+   pOpCodeMenu->setItemChecked(x, pSEQPrefs->getPrefBool("View", 
+							 section,
+							 false));
    x =pOpCodeMenu->insertItem("&Log Monitored OpCode Matches", this,
 			      SLOT(toggle_opcode_log(int)));
+   pOpCodeMenu->setItemChecked(x, pSEQPrefs->getPrefBool("Log", 
+							 section,
+							 false));
    pOpCodeMenu->insertItem("Log &Filename...", this,
 			  SLOT(select_opcode_file()));
-   pOpCodeMenu->setItemChecked(x, showeq_params->monitorOpCode_Log);
-   m_id_view_UnknownData = m_netMenu->insertItem("View Unknown Data", this, SLOT(toggle_view_UnknownData()) , Key_F10);
-   viewUnknownData = false;
-   menuBar()->setItemChecked(m_id_view_UnknownData, viewUnknownData);
    m_netMenu->insertSeparator(-1);
 
    // Advanced menu
@@ -792,11 +839,15 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    if (!shortZoneName.isEmpty())
       filterMenu->insertItem("Save &Zone Filter", this, SLOT(save_as_filter_file()));
    filterMenu->insertItem("&Edit Filters", this, SLOT(launch_editor_filters()));
-   filterMenu->insertItem("Select Fil&ter Fi&le", this, SLOT(select_filter_file()));
+   filterMenu->insertItem("Select Fil&ter File", this, SLOT(select_filter_file()));
+
+   filterMenu->insertItem("Reload &Zone Filters", m_filterMgr, SLOT(loadZoneFilters()), Key_F3);
+   filterMenu->insertItem("S&ave Zone Filters", m_filterMgr, SLOT(saveZoneFilters()), Key_F4);
+   filterMenu->insertItem("Edit Zone Fi&lters", this, SLOT(launch_editor_zoneFilters()));
 
    filterMenu->insertItem("Re&filter Spawns", m_spawnShell, SLOT(refilterSpawns()));
    x = filterMenu->insertItem("&Is Case Sensitive", this, SLOT(toggle_filter_Case(int)));
-   filterMenu->setItemChecked(x, showeq_params->spawnfilter_case);
+   filterMenu->setItemChecked(x, m_filterMgr->caseSensitive());
    x = filterMenu->insertItem("&Display Alert Info", this, SLOT(toggle_filter_AlertInfo(int)));
    filterMenu->setItemChecked(x, 
 			      pSEQPrefs->getPrefBool("AlertInfo", "Filters"));
@@ -1063,6 +1114,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    pDebugMenu->insertItem("Dump Guild Info", this , SLOT(dumpGuildInfo()));
    pDebugMenu->insertItem("Dump SpellBook Info", this , SLOT(dumpSpellBook()));
    pDebugMenu->insertItem("List &Filters", m_filterMgr, SLOT(listFilters()), ALT+CTRL+Key_F);
+   pDebugMenu->insertItem("List &Zone Filters", m_filterMgr, SLOT(listZoneFilters()));
 
    // Tools menu
    QPopupMenu* pToolsMenu = new QPopupMenu;
@@ -1117,7 +1169,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
    //EQTime widget
      m_stsbarEQTime = new QLabel(statusBar(), "EQTime");
-     m_stsbarEQTime->setText("EQTime [UNKNOWN]");
+     m_stsbarEQTime->setText("EQTime");
      statusBar()->addWidget(m_stsbarEQTime, 1);
 
    // Run Speed widget
@@ -1174,12 +1226,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
       statusBar()->hide();
 
 
-//////////////////
-// ToolTips
-
-   // The first call to tooTipGroup() makes it exist
-   // toolTipGroup()->addWidget();
-
 /////////////////
 // interface connections
    // connect EQInterface slots to its own signals
@@ -1216,6 +1262,20 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	     m_groupMgr, SLOT(delItem(const Item*)));
    }
 
+   if (m_dateTimeMgr)
+   {
+     // connect DateTimeMgr slots to EQPacket signals
+     connect(m_packet, SIGNAL(timeOfDay(const timeOfDayStruct*, uint32_t, uint8_t)),
+	     m_dateTimeMgr, SLOT(timeOfDay(const timeOfDayStruct*)));
+
+     // connect interface slots to DateTimeMgr signals
+     connect(m_dateTimeMgr, SIGNAL(updatedDateTime(const QDateTime&)),
+	     this, SLOT(updatedDateTime(const QDateTime&)));
+
+     connect(m_dateTimeMgr, SIGNAL(syncDateTime(const QDateTime&)),
+	     this, SLOT(syncDateTime(const QDateTime&)));
+   }
+
    // connect interface slots to Packet signals
    connect(m_packet, SIGNAL(clientTarget(const clientTargetStruct*, uint32_t, uint8_t)),
 	   this, SLOT(clientTarget(const clientTargetStruct*)));
@@ -1229,10 +1289,14 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   this, SLOT(moneyOnCorpse(const moneyOnCorpseStruct*)));
    connect(m_packet, SIGNAL(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)),
 	   this, SLOT(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(simpleMessage(const simpleMessageStruct*, uint32_t, uint8_t)),
-	   this, SLOT(simpleMessage(const simpleMessageStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(formattedMessage(const formattedMessageStruct*, uint32_t, uint8_t)),
 	   this, SLOT(formattedMessage(const formattedMessageStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(simpleMessage(const simpleMessageStruct*, uint32_t, uint8_t)),
+	   this, SLOT(simpleMessage(const simpleMessageStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(specialMessage(const specialMessageStruct*, uint32_t, uint8_t)),
+	   this, SLOT(specialMessage(const specialMessageStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(guildMOTD(const guildMOTDStruct*, uint32_t, uint8_t)),
+	   this, SLOT(guildMOTD(const guildMOTDStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(item(const itemPacketStruct*, uint32_t, uint8_t)),
 	   this, SLOT(item(const itemPacketStruct*)));
    connect(m_packet, SIGNAL(random(const randomReqStruct*, uint32_t, uint8_t)),
@@ -1377,6 +1441,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_player, SLOT(updateExp(const expUpdateStruct*)));
    connect(m_packet, SIGNAL(updateLevel(const levelUpUpdateStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(updateLevel(const levelUpUpdateStruct*)));
+   connect(m_packet, SIGNAL(updateNpcHP(const hpNpcUpdateStruct*, uint32_t, uint8_t)),
+	   m_player, SLOT(updateNpcHP(const hpNpcUpdateStruct*)));
    connect(m_packet, SIGNAL(updateSpawnMaxHP(const SpawnUpdateStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(updateSpawnMaxHP(const SpawnUpdateStruct*)));
    connect(m_packet, SIGNAL(updateStamina(const staminaStruct*, uint32_t, uint8_t)),
@@ -1386,16 +1452,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    connect(m_packet, SIGNAL(tradeSpellBookSlots(const tradeSpellBookSlotsStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(tradeSpellBookSlots(const tradeSpellBookSlotsStruct*, uint32_t, uint8_t)));
 
-   // connect EQInterface slots to EQPacket signals
-   connect (m_packet, SIGNAL(toggle_log_AllPackets()),
-	    this, SLOT(toggle_log_AllPackets()));
-   connect (m_packet, SIGNAL(toggle_log_WorldData()),  
-	    this, SLOT(toggle_log_WorldData()));
-   connect (m_packet, SIGNAL(toggle_log_ZoneData()),  
-	    this, SLOT(toggle_log_ZoneData()));
-   connect (m_packet, SIGNAL(toggle_log_UnknownData()),
-	    this, SLOT(toggle_log_UnknownData()));
-
    // interface statusbar slots
    connect (this, SIGNAL(newZoneName(const QString&)),
             m_stsbarZone, SLOT(setText(const QString&)));
@@ -1403,8 +1459,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
             m_stsbarExp, SLOT(setText(const QString&)));
    connect (m_player, SIGNAL(expAltChangedStr(const QString&)),
             m_stsbarExpAA, SLOT(setText(const QString&)));
-   connect (m_packet, SIGNAL(eqTimeChangedStr(const QString&)),
-            m_stsbarEQTime, SLOT(setText(const QString&)));
    connect (m_packet, SIGNAL(stsMessage(const QString &, int)),
             this, SLOT(stsMessage(const QString &, int)));
    connect (m_player, SIGNAL(stsMessage(const QString &, int)),
@@ -2391,7 +2445,8 @@ void EQInterface::loadFormatStrings()
     QRegExp lineTerm("[\r\n]{1,2}");
 
     // split the data into lines at the line termination
-    QStringList lines = QStringList::split(lineTerm, textData, false);
+    QStringList lines = QStringList::split(lineTerm, 
+					   QString::fromUtf8(textData), false);
 
     // start iterating over the lines
     QStringList::Iterator it = lines.begin();
@@ -2401,6 +2456,7 @@ void EQInterface::loadFormatStrings()
     int spc;
     uint32_t formatId;
     QString formatString;
+    uint32_t maxFormatId = 0;
 
     // next skip over the count, etc...
     ++it;
@@ -2413,11 +2469,22 @@ void EQInterface::loadFormatStrings()
 
       // convert the beginnign of the string to a ULong
       formatId = (*it).left(spc).toULong();
+      
+      if (formatId > maxFormatId) 
+	maxFormatId = formatId;
 
       // insert the format string into the dictionary.
-      m_formattedMessageStrings.insert(formatId, new QString((*it).mid(spc+1)));
-    }
+      m_formattedMessageStrings.insert(formatId, new QString((*it).mid(spc+1)));    }
+
+    fprintf(stderr,
+	    "Loaded %d message strings from '%s' maxFormat=%d\n",
+	    m_formattedMessageStrings.count(), formatFileName.latin1(),
+	    maxFormatId);
   }
+  else
+    fprintf(stderr,
+	    "EQInterface::loadFormatStrings(): Failed to open '%s'\n",
+	    formatFileName.latin1());
 }
 
 /* Capture resize events and reset the geometry */
@@ -2448,10 +2515,10 @@ EQInterface::save_as_filter_file(void)
 
 void EQInterface::toggle_filter_Case(int id)
 {
-  showeq_params->spawnfilter_case = !showeq_params->spawnfilter_case;
-  menuBar()->setItemChecked(id, showeq_params->spawnfilter_case);
+  m_filterMgr->setCaseSensitive(!m_filterMgr->caseSensitive());
+  menuBar()->setItemChecked(id, m_filterMgr->caseSensitive());
   pSEQPrefs->setPrefBool("IsCaseSensitive", "Filters", 
-			 showeq_params->spawnfilter_case);
+			 m_filterMgr->caseSensitive());
 }
 
 void EQInterface::toggle_filter_AlertInfo(int id)
@@ -2729,6 +2796,14 @@ EQInterface::launch_editor_filters(void)
 }
 
 void
+EQInterface::launch_editor_zoneFilters(void)
+{
+  EditorWindow * ew = new EditorWindow(m_filterMgr->zoneFilterFile());
+  ew->setCaption(m_filterMgr->zoneFilterFile());
+  ew->show();
+}
+
+void
 EQInterface::toggle_opt_ConSelect (void)
 {
   showeq_params->con_select = !(showeq_params->con_select);
@@ -2764,37 +2839,77 @@ EQInterface::toggle_opt_KeepSelectedVisible (void)
 /* Check and uncheck Log menu options & set EQPacket logging flags */
 void EQInterface::toggle_log_AllPackets (void)
 {
-    showeq_params->logAllPackets = !showeq_params->logAllPackets;
-    menuBar()->setItemChecked (m_id_log_AllPackets, showeq_params->logAllPackets);
-  pSEQPrefs->setPrefBool("LogAllPackets", "PacketLogging", showeq_params->logAllPackets);
+  if (m_globalLog)
+  {
+    delete m_globalLog;
+    m_globalLog = 0;
+  }
+  else
+    createGlobalLog();
+
+  bool state = (m_globalLog != 0);
+  menuBar()->setItemChecked (m_id_log_AllPackets, state);
+  pSEQPrefs->setPrefBool("LogAllPackets", "PacketLogging", state);
 }
 
 void EQInterface::toggle_log_WorldData (void)
 {
-    showeq_params->logWorldPackets = !showeq_params->logWorldPackets;
-    menuBar()->setItemChecked (m_id_log_WorldData, showeq_params->logWorldPackets);
-  pSEQPrefs->setPrefBool("LogWorldPackets", "PacketLogging", showeq_params->logWorldPackets);
+  if (m_worldLog)
+  {
+    delete m_worldLog;
+    m_worldLog = 0;
+  }
+  else
+    createWorldLog();
+
+  bool state = (m_worldLog != 0);
+  menuBar()->setItemChecked (m_id_log_WorldData, state);
+  pSEQPrefs->setPrefBool("LogWorldPackets", "PacketLogging", state);
 }
 
 void EQInterface::toggle_log_ZoneData (void)
 {
-    showeq_params->logZonePackets = !showeq_params->logZonePackets;
-    menuBar()->setItemChecked (m_id_log_ZoneData, showeq_params->logZonePackets);
-  pSEQPrefs->setPrefBool("LogZonePackets", "PacketLogging", showeq_params->logZonePackets);
+  if (m_zoneLog)
+  {
+    delete m_zoneLog;
+    m_zoneLog = 0;
+  }
+  else
+    createZoneLog();
+
+  bool state = (m_zoneLog != 0);
+  menuBar()->setItemChecked (m_id_log_ZoneData, state);
+  pSEQPrefs->setPrefBool("LogZonePackets", "PacketLogging", state);
 }
 
 void EQInterface::toggle_log_UnknownData (void)
 {
-    showeq_params->logUnknownZonePackets = !showeq_params->logUnknownZonePackets;
-    menuBar()->setItemChecked (m_id_log_UnknownData, showeq_params->logUnknownZonePackets);
-  pSEQPrefs->setPrefBool("LogUnknownZonePackets", "PacketLogging", showeq_params->logUnknownZonePackets);
+  if (m_unknownZoneLog)
+  {
+    delete m_unknownZoneLog;
+    m_unknownZoneLog = 0;
+  }
+  else
+    createUnknownZoneLog();
+
+  bool state = (m_unknownZoneLog != 0);
+  menuBar()->setItemChecked (m_id_log_UnknownData, state);
+  pSEQPrefs->setPrefBool("LogUnknownZonePackets", "PacketLogging", state);
 }
 
 void EQInterface::toggle_log_RawData (void)
 {
-    showeq_params->logRawPackets = !showeq_params->logRawPackets;
-    menuBar()->setItemChecked (m_id_log_RawData, showeq_params->logRawPackets);
-  pSEQPrefs->setPrefBool("LogRawPackets", "PacketLogging", showeq_params->logRawPackets);
+  bool state = !pSEQPrefs->getPrefBool("LogRawPackets", "PacketLogging",
+				       false);
+
+  if (m_worldLog)
+    m_worldLog->setRaw(state);
+  
+  if (m_zoneLog)
+    m_zoneLog->setRaw(state);
+
+  menuBar()->setItemChecked(m_id_log_RawData, state);
+  pSEQPrefs->setPrefBool("LogRawPackets", "PacketLogging", state);
 }
 
 void EQInterface::toggle_log_ItemData (void)
@@ -2835,9 +2950,14 @@ EQInterface::toggle_view_ChannelMsgs (void)
 void
 EQInterface::toggle_view_UnknownData (void)
 {
-    viewUnknownData = !viewUnknownData;
-    menuBar()->setItemChecked (m_id_view_UnknownData, viewUnknownData);
-    m_packet->setViewUnknownData (viewUnknownData);
+  bool state = !pSEQPrefs->getPrefBool("ViewUnknown", "PacketLogging", 
+				       false);
+
+  if (m_unknownZoneLog)
+    m_unknownZoneLog->setView(state);
+
+  menuBar()->setItemChecked (m_id_view_UnknownData, state);
+  pSEQPrefs->setPrefBool("ViewUnknown", "PacketLogging", state);
 }
 
 void EQInterface::toggle_view_ExpWindow (void)
@@ -3112,7 +3232,7 @@ EQInterface::toggle_view_NetDiag(void)
 
 bool 
 EQInterface::getMonitorOpCodeList(const QString& title, 
-				  const QString& defaultList)
+				  QString& opCodeList)
 {
   bool ok = false;
   QString newMonitorOpCode_List = 
@@ -3143,18 +3263,11 @@ EQInterface::getMonitorOpCodeList(const QString& title,
 			  "(i.e. 7F21:Mana Changed:3:1, 7E21:Unknown Spell Event(OUT):1,\n"
 			  "      7E21:Unknown Spell Event(IN):2 )\n",
 			  QLineEdit::Normal,
-			  defaultList,
+			  opCodeList,
 			  &ok, this);
 
   if (ok)
-  {
-    // set the list of monitored opcodes
-    showeq_params->monitorOpCode_List = newMonitorOpCode_List;
-
-    // set the monitored opcode list in the preferences for future sessions
-    pSEQPrefs->setPrefString("OpCodeList", "OpCodeMonitoring",
-			     showeq_params->monitorOpCode_List);
-  }
+    opCodeList = newMonitorOpCode_List;
 
   return ok;
 }
@@ -3162,61 +3275,91 @@ EQInterface::getMonitorOpCodeList(const QString& title,
 void
 EQInterface::toggle_opcode_monitoring(int id)
 {
-  if(!showeq_params->monitorOpCode_Usage)
+  if(m_opcodeMonitorLog == 0)
   {
+    QString section = "OpCodeMonitoring";
+    QString opCodeList = pSEQPrefs->getPrefString("OpCodeList", section, "");
     bool ok = getMonitorOpCodeList("ShowEQ - Enable OpCode Monitor",
-				   showeq_params->monitorOpCode_List);
+				   opCodeList);
 
-    if (ok && !showeq_params->monitorOpCode_List.isEmpty())
+    if (ok && !opCodeList.isEmpty())
     {
-      // have to enable before initializing
-      showeq_params->monitorOpCode_Usage = true;
-      m_packet->InitializeOpCodeMonitor();
+      createOPCodeMonitorLog(opCodeList);
+
+      // set the list of monitored opcodes
+      pSEQPrefs->setPrefString("OpCodeList", section, opCodeList);
+      
 
       printf("OpCode monitoring is now ENABLED...\nUsing list:\t%s\n", 
-	     (const char*)showeq_params->monitorOpCode_List);
-      
-      menuBar()->changeItem( id, "Disable &OpCode Monitoring" );
+	     (const char*)opCodeList);
     }
   }
   else
   {
-    showeq_params->monitorOpCode_Usage = false;
+    delete m_opcodeMonitorLog;
+    m_opcodeMonitorLog = 0;
 
     printf("OpCode monitoring has been DISABLED...\n");
-
-    menuBar()->changeItem( id, "Enable &OpCode Monitoring..." );
   }
 
-  pSEQPrefs->setPrefBool ("Enable", "OpCodeMonitoring", 
-			  showeq_params->monitorOpCode_Usage);
+  bool state = (m_opcodeMonitorLog != 0);
+  menuBar()->setItemChecked(id, state);
+  pSEQPrefs->setPrefBool("Enable", "OpCodeMonitoring", state);
 }
 
 void EQInterface::set_opcode_monitored_list(void)
 {
+  QString section = "OpCodeMonitoring";
+  QString opCodeList = pSEQPrefs->getPrefString("OpCodeList", section, "");
   bool ok = getMonitorOpCodeList("ShowEQ - Reload OpCode Monitor", 
-				 showeq_params->monitorOpCode_List);
-  if (ok)
-    m_packet->InitializeOpCodeMonitor();
-  printf("The monitored OpCode list has been reloaded...\nUsing list:\t%s\n", 
-	 (const char*)showeq_params->monitorOpCode_List);
+				 opCodeList);
+
+  if (ok && m_opcodeMonitorLog)
+  {
+    m_opcodeMonitorLog->init(opCodeList);
+    
+    printf("The monitored OpCode list has been reloaded...\nUsing list:\t%s\n", 
+	   (const char*)opCodeList);
+    
+    // set the list of monitored opcodes
+    pSEQPrefs->setPrefString("OpCodeList", section, opCodeList);
+  }
 }
 
 
 void EQInterface::toggle_opcode_log(int id)
 {
-  showeq_params->monitorOpCode_Log = !showeq_params->monitorOpCode_Log;
-  menuBar()->setItemChecked (id, showeq_params->monitorOpCode_Log);
-  pSEQPrefs->setPrefBool("Log", "OpCodeMonitoring", 
-			 showeq_params->monitorOpCode_Log);
+  QString section = "OpCodeMonitoring";
+  bool state = !pSEQPrefs->getPrefBool("Log", section, false);
+
+  if (m_opcodeMonitorLog)
+    m_opcodeMonitorLog->setLog(state);
+
+  menuBar()->setItemChecked (id, state);
+  pSEQPrefs->setPrefBool("Log", section, state);
+}
+
+void EQInterface::toggle_opcode_view(int id)
+{
+  QString section = "OpCodeMonitoring";
+  bool state = !pSEQPrefs->getPrefBool("View", section, false);
+
+  if (m_opcodeMonitorLog)
+    m_opcodeMonitorLog->setView(state);
+
+  menuBar()->setItemChecked (id, state);
+  pSEQPrefs->setPrefBool("View", section, state);
 }
 
 
 void
 EQInterface::select_opcode_file(void)
 {
+  QString section = "OpCodeMonitoring";
   QString logFile = 
-    QFileDialog::getSaveFileName(showeq_params->monitorOpCode_Filename,
+    QFileDialog::getSaveFileName(pSEQPrefs->getPrefString("LogFilename",
+							  section,
+							  LOGDIR "/opcodemonitor.log"),
 				 "*.log",
 				 this,
 				 "ShowEQ - OpCode Log File");
@@ -3224,11 +3367,8 @@ EQInterface::select_opcode_file(void)
   if (!logFile.isEmpty())
   {
     // set log filename
-    showeq_params->monitorOpCode_Filename = logFile;
-
-    // set preference
-    pSEQPrefs->setPrefString("LogFilename", "OpCodeMonitoring",
-			     showeq_params->monitorOpCode_Filename);
+    pSEQPrefs->setPrefString("LogFilename", section,
+			     logFile);
   }
 }
 
@@ -3241,10 +3381,10 @@ void EQInterface::resetMaxMana(void)
 void
 EQInterface::toggle_opt_LogSpawns (void)
 {
-    showeq_params->logSpawns = !(showeq_params->logSpawns);
+  bool state = (m_spawnLogger == 0);
 
-    if (showeq_params->logSpawns)
-      createSpawnLogger();
+    if (state)
+      createSpawnLog();
     else
     {
       // delete the spawn logger
@@ -3254,8 +3394,8 @@ EQInterface::toggle_opt_LogSpawns (void)
       m_spawnLogger = NULL;
     }
 
-    menuBar()->setItemChecked (m_id_opt_LogSpawns, showeq_params->logSpawns);
-    pSEQPrefs->setPrefBool("LogSpawns", "Interface", showeq_params->pvp);
+    menuBar()->setItemChecked (m_id_opt_LogSpawns, state);
+    pSEQPrefs->setPrefBool("LogSpawns", "Misc", state);
 }
 
 void
@@ -3667,30 +3807,6 @@ void EQInterface::channelMessage(const channelMessageStruct* cmsg, uint32_t, uin
   emit msgReceived(tempStr);
 }
 
-void EQInterface::simpleMessage(const simpleMessageStruct* smsg, uint32_t len, uint8_t dir)
-{
-  QString tempStr;
-
-  // avoid client chatter and do nothing if not viewing channel messages
-  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
-    return;
-
-  QString* formatStringRes = m_formattedMessageStrings.find(smsg->messageFormat);
-
-  if (formatStringRes == NULL)
-  {
-    tempStr.sprintf( "Formatted:Simple: %04x: %04x",
-		     smsg->messageFormat,
-		     smsg->color);
-  }
-  else
-  {
-    tempStr = QString("Formatted: ") + *formatStringRes;
-  }
-
-  emit msgReceived(tempStr);
-}
-
 void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t len, uint8_t dir)
 {
   QString tempStr;
@@ -3708,9 +3824,9 @@ void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t 
 
   if (formatStringRes == NULL)
   {
-    tempStr.sprintf( "Formatted: %04x: %s",
-		     fmsg->messageFormat,
-		     fmsg->messages);
+    tempStr.sprintf( "Formatted: %04x: ",
+		     fmsg->messageFormat);
+    tempStr += QString::fromUtf8(fmsg->messages);
 
     int totalArgsLen = strlen(fmsg->messages) + 1;
     
@@ -3718,7 +3834,7 @@ void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t 
     while (totalArgsLen < messagesLen)
     {
       curMsg = fmsg->messages + totalArgsLen;
-      tempStr += QString(", ") + curMsg;
+      tempStr += QString(", ") + QString::fromUtf8(curMsg);
       totalArgsLen += strlen(curMsg) + 1;
     }
   }
@@ -3734,7 +3850,7 @@ void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t 
     {
       curArg = fmsg->messages + totalArgsLen;
       // insert argument into the argument list
-      argList.push_back(QString(curArg));
+      argList.push_back(QString::fromUtf8(curArg));
       totalArgsLen += strlen(curArg) + 1;
     }
 
@@ -3805,13 +3921,76 @@ void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t 
   emit msgReceived(tempStr);
 }
 
+void EQInterface::simpleMessage(const simpleMessageStruct* smsg, uint32_t len, uint8_t dir)
+{
+  QString tempStr;
+
+  // avoid client chatter and do nothing if not viewing channel messages
+  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
+    return;
+
+  QString* formatStringRes = m_formattedMessageStrings.find(smsg->messageFormat);
+
+  if (formatStringRes == NULL)
+  {
+    tempStr.sprintf( "Formatted:Simple: %04x: %04x",
+		     smsg->messageFormat,
+		     smsg->color);
+  }
+  else
+  {
+    tempStr = QString("Formatted: ") + *formatStringRes;
+  }
+
+  emit msgReceived(tempStr);
+}
+
+void EQInterface::specialMessage(const specialMessageStruct* smsg, uint32_t, uint8_t dir)
+{
+  // avoid client chatter and do nothing if not viewing channel messages
+  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
+    return;
+
+  const Item* target = NULL;
+  
+  if (smsg->target)
+    target = m_spawnShell->findID(tSpawn, smsg->target);
+
+  // calculate the message position
+  const char* message = smsg->source + strlen(smsg->source) + 1 
+    + sizeof(smsg->unknown0xxx);
+  
+  if (target)
+    emit msgReceived(QString("Formatted:Special: '%1' -> '%2' - %3")
+		     .arg(smsg->source)
+		     .arg(target->name())
+		     .arg(message));
+  else
+    emit msgReceived(QString("Formatted:Special: '%1' - %2")
+		     .arg(smsg->source)
+		     .arg(message));
+}
+
+void EQInterface::guildMOTD(const guildMOTDStruct* gmotd, uint32_t, uint8_t dir)
+{
+  // avoid client chatter and do nothing if not viewing channel messages
+  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
+    return;
+
+  emit msgReceived(QString("Guild:MOTD: %1 - %2")
+		   .arg(QString::fromUtf8(gmotd->sender))
+		   .arg(QString::fromUtf8(gmotd->message)));
+
+  ;
+}
+
 void EQInterface::random(const randomReqStruct* randr)
 {
   QString tempStr;
 
-  tempStr.sprintf ( "RANDOM: Request random number between %d and %d\n",
-		    randr->bottom,
-		    randr->top);
+  tempStr.sprintf("RANDOM: Request random number between %d and %d\n",
+		  randr->bottom,
+		  randr->top);
   
   emit msgReceived(tempStr);
 }
@@ -3820,11 +3999,11 @@ void EQInterface::random(const randomStruct* randr)
 {
   QString tempStr;
 
-  tempStr.sprintf ("RANDOM: Random number %d rolled between %d and %d by %s\n",
-		   randr->result,
-		   randr->bottom,
-		   randr->top,
-		   randr->name);
+  tempStr.sprintf("RANDOM: Random number %d rolled between %d and %d by %s\n",
+		  randr->result,
+		  randr->bottom,
+		  randr->top,
+		  randr->name);
   
   emit msgReceived(tempStr);
 }
@@ -3839,6 +4018,21 @@ void EQInterface::emoteText(const emoteTextStruct* emotetext)
   tempStr.sprintf("Emote: %s", emotetext->text);
 
   emit msgReceived(tempStr);
+}
+
+void EQInterface::updatedDateTime(const QDateTime& dt)
+{
+  
+  m_stsbarEQTime->setText(dt.toString(pSEQPrefs->getPrefString("DateTimeFormat", "Interface", "ddd MMM dd,yyyy - hh:mm ap")));
+}
+
+void EQInterface::syncDateTime(const QDateTime& dt)
+{
+  QString dateString = dt.toString(pSEQPrefs->getPrefString("DateTimeFormat", "Interface", "ddd MMM dd,yyyy - hh:mm ap"));
+
+  emit msgReceived(QString("EQTime: ") + dateString);
+
+  m_stsbarEQTime->setText(dateString);
 }
 
 void EQInterface::item(const itemPacketStruct* item)
@@ -4190,6 +4384,7 @@ void EQInterface::systemMessage(const sysMsgStruct* smsg)
 
 void EQInterface::newGroundItem(const makeDropStruct* adrop, uint32_t len, uint8_t dir)
 {
+#if 0 // ZBTEMP
   QString tempStr;
 
   if (dir != DIR_CLIENT)
@@ -4219,12 +4414,13 @@ void EQInterface::newGroundItem(const makeDropStruct* adrop, uint32_t len, uint8
     tempStr = QString("Item: Drop: You have dropped your *UNKNOWN ITEM* (ID: %1)  on the ground!\nNOTE:\tIn order for ShowEQ to know the name of the item you dropped it is suggested that you pickup and drop the item again...").arg(adrop->itemNr);
   
   emit msgReceived(tempStr);
+#endif
 }
 
 void EQInterface::worldMOTD(const worldMOTDStruct* motd)
 { 
   QString tempStr = "Formatted:MOTD: ";
-  tempStr.append(motd->message);
+  tempStr.append(QString::fromUtf8(motd->message));
 
   emit msgReceived(tempStr);
 }
@@ -4721,13 +4917,13 @@ void EQInterface::updateSelectedSpawnStatus(const Item* item)
   if (spawn != NULL)
     string.sprintf("%d: %s:%d (%d/%d) Pos:", // "%d/%d/%d (%d) %s %s Item:%s", 
 		   item->id(),
-		   (const char*)item->name(), 
+		   (const char*)item->name().utf8(),
 		   spawn->level(), spawn->HP(),
 		   spawn->maxHP());
   else
     string.sprintf("%d: %s: Pos:", // "%d/%d/%d (%d) %s %s Item:%s", 
 		   item->id(),
-		   (const char*)item->name());
+		   (const char*)item->name().utf8());
 
   if (showeq_params->retarded_coords)
     string += QString::number(item->y()) + "/" 
@@ -4848,7 +5044,7 @@ void EQInterface::saveSpawnPath(QTextStream& out, const Item* item)
    const SpawnTrackPoint* trackPoint;
    
    out << "M," << spawn->realName() << ",blue," << trackList.count();
-   //iterate over the track, writing out the points (up to 255 points)
+   //iterate over the track, writing out the points
    for (trackPoint = trackIt.current();
 	trackPoint;
 	trackPoint = ++trackIt)
@@ -5596,38 +5792,130 @@ void EQInterface::showNetDiag()
   m_netDiag->show();
 }
 
-void EQInterface::createSpawnLogger(void)
+void EQInterface::createSpawnLog(void)
 {
   // if the spawnLogger already exists, then nothing to do... 
   if (m_spawnLogger)
     return;
 
    // create the spawn logger
-   m_spawnLogger = new SpawnLogger(showeq_params->SpawnLogFilename);
-
-   // get the current EQ time && Initialize SpawnLogger with it
-   struct timeOfDayStruct eqTime;
-   if (m_packet->getEQTimeOfDay(time(NULL), &eqTime))
-     m_spawnLogger->logTimeSync(&eqTime);
+   m_spawnLogger = new SpawnLog(m_dateTimeMgr, 
+				pSEQPrefs->getPrefString("SpawnLogFilename",
+							 "Misc", 
+							 LOGDIR "/spawnlog.txt"));
 
    // initialize it with the current state
    QString shortZoneName = m_zoneMgr->shortZoneName();
    if (!shortZoneName.isEmpty())
      m_spawnLogger->logNewZone(shortZoneName);
 
-   // Connect SpawnLogger slots to EQPacket signals
-   connect(m_packet, SIGNAL(timeOfDay(const timeOfDayStruct *, uint32_t, uint8_t)),
-	   m_spawnLogger, SLOT(logTimeSync(const timeOfDayStruct *)));
+   // Connect SpawnLog slots to ZoneMgr signals
    connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
 	   m_spawnLogger, SLOT(logNewZone(const QString&)));
+
+   // Connect SpawnLog slots to EQPacket signals
    connect(m_packet, SIGNAL(zoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)),
 	   m_spawnLogger, SLOT(logZoneSpawns(const zoneSpawnsStruct*, uint32_t)));
    connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*, uint32_t, uint8_t)),
 	   m_spawnLogger, SLOT(logNewSpawn(const newSpawnStruct*)));
    
-   // Connect SpawnLogger slots to SpawnShell signals
+   // Connect SpawnLog slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(delItem(const Item*)),
 	   m_spawnLogger, SLOT(logDeleteSpawn(const Item *)));
    connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
 	   m_spawnLogger, SLOT(logKilledSpawn(const Item *, const Item*, uint16_t)));
+}
+
+void EQInterface::createGlobalLog(void)
+{
+  if (m_globalLog)
+    return;
+  
+  m_globalLog = new PacketLog(*m_packet, 
+			      pSEQPrefs->getPrefString("GlobalLogFilename",
+						       "PacketLogging",
+						       LOGDIR "/global.log"),
+			      this, "GlobalLog");
+
+  connect(m_packet, SIGNAL(newPacket(const EQUDPIPPacketFormat&)),
+	  m_globalLog, SLOT(logData(const EQUDPIPPacketFormat&)));
+}
+
+void EQInterface::createWorldLog(void)
+{
+  if (m_worldLog)
+    return;
+  
+  m_worldLog = new PacketStreamLog(*m_packet, 
+				   pSEQPrefs->getPrefString("WorldLogFilename",
+							    "PacketLogging",
+							    LOGDIR "/world.log"),
+			      this, "WorldLog");
+
+  m_worldLog->setRaw(pSEQPrefs->getPrefBool("LogRawPackets", "PacketLogging",
+					   false));
+
+  connect(m_packet, SIGNAL(rawWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
+	  m_worldLog, SLOT(rawStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
+  connect(m_packet, SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
+	  m_worldLog, SLOT(decodedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
+}
+
+void EQInterface::createZoneLog(void)
+{
+  if (m_zoneLog)
+    return;
+  
+  m_zoneLog = new PacketStreamLog(*m_packet, 
+				   pSEQPrefs->getPrefString("ZoneLogFilename",
+							    "PacketLogging",
+							    LOGDIR "/zone.log"),
+			      this, "ZoneLog");
+
+  m_zoneLog->setRaw(pSEQPrefs->getPrefBool("LogRawPackets", "PacketLogging",
+					   false));
+
+  connect(m_packet, SIGNAL(rawZonePacket(const uint8_t*, size_t, uint8_t, uint16_t)),
+	  m_zoneLog, SLOT(rawStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
+  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t)),
+	  m_zoneLog, SLOT(decodedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
+}
+
+void EQInterface::createUnknownZoneLog(void)
+{
+  if (m_unknownZoneLog)
+    return;
+  
+  QString section = "PacketLogging";
+  m_unknownZoneLog = new UnknownPacketLog(*m_packet, 
+					  pSEQPrefs->getPrefString("UnknownZoneLogFilename",
+								   section,
+								   LOGDIR "/unknownzone.log"),
+			      this, "ZoneLog");
+
+  m_unknownZoneLog->setView(pSEQPrefs->getPrefBool("ViewUnknown", section, 
+						   false));
+
+  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, bool)),
+	  m_unknownZoneLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, bool)));
+}
+
+void EQInterface::createOPCodeMonitorLog(const QString& opCodeList)
+{
+  if (m_opcodeMonitorLog)
+    return;
+  
+  QString section = "OpCodeMonitoring";
+  m_opcodeMonitorLog = new OPCodeMonitorPacketLog(*m_packet, 
+						  pSEQPrefs->getPrefString("LogFilename", 
+									   section, 
+									   LOGDIR "/opcodemonitor.log"),
+						  this, "OpCodeMonitorLog");
+  
+  m_opcodeMonitorLog->init(opCodeList);
+  m_opcodeMonitorLog->setLog(pSEQPrefs->getPrefBool("Log", section, false));
+  m_opcodeMonitorLog->setView(pSEQPrefs->getPrefBool("View", section, false));
+  
+  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, bool)),
+	  m_opcodeMonitorLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, bool)));
 }

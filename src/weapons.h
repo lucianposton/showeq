@@ -170,7 +170,7 @@
     "RedJeweledSword",      // 0xa3
     "BlueJeweledSword",     // 0xa4
     NULL,                   // 0xa5 - Unknown Weapon
-    NULL,                   // 0xa6 - Unknown Weapon
+    "ShissarEmperorsSword", // 0xa6
     "JeweledDirk",          // 0xa7
     "VeliumSword",          // 0xa8
     NULL,                   // 0xa9 - Unknown Weapon

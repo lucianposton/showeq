@@ -183,7 +183,7 @@ QString Item::filterString() const
 {
   QString buff;
   buff.sprintf("Name:%s:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d",
-	       (const char*)transformedName(),
+	       (const char*)transformedName().utf8(),
 	       (const char*)raceString(),
 	       (const char*)classString(),
 	       NPC(), x(), y(), z());
@@ -236,6 +236,7 @@ Spawn::Spawn()
   setGuildTag(NULL);
   setLevel(0);
   setTypeflag(0);
+  setGM(0);
   for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
 
@@ -289,6 +290,7 @@ Spawn::Spawn(uint16_t id,
   for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
   setTypeflag(0);
+  setGM(0);
   setConsidered(false);
 
   // turn on auto delete for the track list
@@ -339,6 +341,7 @@ Spawn::Spawn(Spawn& s, uint16_t id)
     setEquipment(i, s.equipment(i));
   setEquipment(tUnknown1, 0);
   setTypeflag(s.typeflag());
+  setGM(s.gm());
   setNPC(s.NPC());
   setAnimation(s.animation());
   setDeltas(s.deltaX(), s.deltaY(), s.deltaZ());
@@ -383,6 +386,7 @@ void Spawn::update(const spawnStruct* s)
   setEquipment(tUnknown1, 0);
 
   setTypeflag(s->bodytype);
+  setGM(s->gm);
 
   // If it is a corpse with Unknown (NPC) religion.
   if ((s->NPC == SPAWN_PC_CORPSE) && (s->deity == DEITY_UNKNOWN))
@@ -841,7 +845,7 @@ QString Spawn::filterString() const
   QString buff;
   buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
 	       "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:",
-	       (const char*)transformedName(),
+	       (const char*)transformedName().utf8(),
 	       level(),
 	       (const char*)raceString(),
 	       (const char*)classString(),
@@ -852,8 +856,12 @@ QString Spawn::filterString() const
 	       raceTeam(), 
 	       deityTeam(),
 	       (const char*)typeString(),
-	       (const char*)lastName(),
-               (const char*)GuildTag());
+	       (const char*)lastName().utf8(),
+               (const char*)GuildTag().utf8());
+
+  if (gm())
+    buff += QString("GM:") + QString::number(gm()) + ":";
+
   return buff;
 }
 
@@ -987,10 +995,10 @@ void Drop::update(const makeDropStruct* d, const QString& name)
   setPos((int16_t)d->x, 
 	 (int16_t)d->y, 
 	 (int16_t)d->z);
-  setHeading(0);
+  setHeading((int8_t)lrintf(d->heading));
 
   // set the drop specific info
-  setItemNr(d->itemNr);
+  //setItemNr(d->itemNr);
   setIdFile(d->idFile);
   
   // calculate the drop name

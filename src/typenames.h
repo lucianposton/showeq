@@ -11,14 +11,14 @@
     "Giant",			// 4
     "Golem",			// 5
     NULL,			// 6
-    NULL,			// 7
+    "Shissar",			// 7
     "UndeadPet",		// 8
     "BaneGiant",		// 9
     NULL,			// 10
     "Untargetable",		// 11
-    NULL,			// 12
+    "Vampyre",			// 12
     NULL,			// 13
-    "Greater Akheva",			// 14
+    "Greater Akheva",		// 14
     NULL,			// 15
     "Seru",			// 16
     NULL,			// 17
@@ -27,7 +27,7 @@
     NULL,			// 20
     "Animal",			// 21
     "Insect",			// 22
-    NULL,			// 23
+    "ExtraPlanar",		// 23
     "Summoned",			// 24
     "Plant",			// 25
     "Dragonkin",		// 26

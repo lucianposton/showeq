@@ -58,8 +58,8 @@ StatList::StatList(Player* player,
 	    this, SLOT(stamChanged(int,int,int,int,int,int)));
    connect (m_pPlayer, SIGNAL(manaChanged(uint32_t,uint32_t)),
 	    this, SLOT(manaChanged(uint32_t,uint32_t)));
-   connect (m_pPlayer, SIGNAL(hpChanged(uint16_t, uint16_t)), 
-	    this, SLOT(hpChanged(uint16_t, uint16_t)));
+   connect (m_pPlayer, SIGNAL(hpChanged(int16_t, int16_t)), 
+	    this, SLOT(hpChanged(int16_t, int16_t)));
 
    // restore the columns
    restoreColumns();
@@ -120,7 +120,7 @@ void StatList::statChanged (int stat, int val, int max)
   m_statList[stat]->setText (3, buf);
 }
 
-void StatList::hpChanged(uint16_t val, uint16_t max)
+void StatList::hpChanged(int16_t val, int16_t max)
 {
   static int old = 0;
     if (!m_showStat[LIST_HP])

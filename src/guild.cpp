@@ -99,7 +99,7 @@ void GuildMgr::readGuildList()
         // Commented out until verified that this needs to actually be 
 		// removed. -- Ratt 
 		// if (strlen(gl.guildName) > 0)
-            m_guildMap.push_back(gl.guildName);
+            m_guildMap.push_back(QString::fromUtf8(gl.guildName));
      }
      
     guildsfile.close();

@@ -141,125 +141,144 @@ struct EQItemDBEntryData_3 : public EQItemDBEntryData
 
   // public data members - fields numbered by where they occur in the
   //  '|' delimited data
-  /*006*/ ItemType m_itemType;            // item type
-  /*007*/ // name - stored after the structure
-  /*008*/ // lore name - stored after name after the structure
-  /*009*/ char     m_idfile[6];           // Not sure what this is used for, eg: IT63
-  /*010*/ uint32_t m_itemNr;
-  /*011*/ uint8_t  m_weight;              // Weight of item
-  /*012*/ int8_t   m_norent;              // Norent flag 1=normal, 0=no rent, -1=spell?
-  /*013*/ int8_t   m_nodrop;              // Nodrop flag 1=normal, 0=nodrop, -1=??
-  /*014*/ uint8_t  m_size;                // Size of item
-  /*015*/ uint32_t m_equipableSlots;      // Slots where this item goes
-  /*016*/ int32_t  m_cost;                // Item cost in copper
-  /*017*/ uint16_t  m_iconNr;             // Icon Number
-  /*018*/ int32_t  m_unknown018;
-  /*019*/ uint32_t m_unknown019;
-  /*020*/ uint32_t m_unknown020;
-  /*021*/ bool     m_tradeskills;         // Tradeskill item?
-  /*022*/ int8_t   m_CR;                  // Cold Resistance
-  /*023*/ int8_t   m_DR;                  // Disease Resistance
-  /*024*/ int8_t   m_PR;                  // Poison Resistance
-  /*025*/ int8_t   m_MR;                  // Magic Resistance
-  /*026*/ int8_t   m_FR;                  // Fire Resistance
-  /*027*/ int8_t   m_STR;                 // Strength
-  /*028*/ int8_t   m_STA;                 // Stamina
-  /*029*/ int8_t   m_AGI;                 // Agility
-  /*030*/ int8_t   m_DEX;                 // Dexterity
-  /*031*/ int8_t   m_CHA;                 // Charisma
-  /*032*/ int8_t   m_INT;                 // Intelligence
-  /*033*/ int8_t   m_WIS;                 // Wisdom
-  /*034*/ int8_t   m_HP;                  // Hitpoints
-  /*035*/ int8_t   m_MANA;                // Mana
-  /*036*/ int8_t   m_AC;                  // Armor Class
-  /*037*/ uint32_t m_deity;
-  /*038*/ uint16_t m_skillModId;          // ID of skill that item modifies
-  /*039*/ int8_t   m_skillModPercent;     // Percent that item modifies the skill
-  /*040*/ int32_t  m_baneDmg;             // Bane Damage
-  /*041*/ uint32_t m_baneDmgRace;         // Bane Damage Race
-  /*042*/ uint32_t m_baneDmgBody;         // Bane Damage Body 1=Humanoid,2=Lycanthrope,
+  /*005*/ ItemType m_itemType;            // item type
+  /*006*/ // name - stored after the structure
+  /*007*/ // lore name - stored after name after the structure
+  /*008*/ char     m_idfile[6];           // Not sure what this is used for, eg: IT63
+  /*009*/ uint32_t m_itemNr;
+  /*010*/ uint8_t  m_weight;              // Weight of item
+  /*011*/ int8_t   m_norent;              // Norent flag 1=normal, 0=no rent, -1=spell?
+  /*012*/ int8_t   m_nodrop;              // Nodrop flag 1=normal, 0=nodrop, -1=??
+  /*013*/ uint8_t  m_size;                // Size of item
+  /*014*/ uint32_t m_equipableSlots;      // Slots where this item goes
+  /*015*/ int32_t  m_cost;                // Item cost in copper
+  /*016*/ uint16_t  m_iconNr;             // Icon Number
+  /*017*/ int32_t  m_unknown018;
+  /*018*/ uint32_t m_unknown019;
+  /*019*/ uint32_t m_unknown020;
+  /*020*/ bool     m_tradeskills;         // Tradeskill item?
+  /*021*/ int8_t   m_CR;                  // Cold Resistance
+  /*022*/ int8_t   m_DR;                  // Disease Resistance
+  /*023*/ int8_t   m_PR;                  // Poison Resistance
+  /*024*/ int8_t   m_MR;                  // Magic Resistance
+  /*025*/ int8_t   m_FR;                  // Fire Resistance
+  /*026*/ int8_t   m_STR;                 // Strength
+  /*027*/ int8_t   m_STA;                 // Stamina
+  /*028*/ int8_t   m_AGI;                 // Agility
+  /*029*/ int8_t   m_DEX;                 // Dexterity
+  /*030*/ int8_t   m_CHA;                 // Charisma
+  /*031*/ int8_t   m_INT;                 // Intelligence
+  /*032*/ int8_t   m_WIS;                 // Wisdom
+  /*033*/ int8_t   m_HP;                  // Hitpoints
+  /*034*/ int8_t   m_MANA;                // Mana
+  /*035*/ int8_t   m_AC;                  // Armor Class
+  /*036*/ uint32_t m_deity;
+  /*037*/ uint16_t m_skillModId;          // ID of skill that item modifies
+  /*038*/ int8_t   m_skillModPercent;     // Percent that item modifies the skill
+  /*039*/ int32_t  m_baneDmg;             // Bane Damage
+  /*040*/ uint32_t m_baneDmgRace;         // Bane Damage Race
+  /*041*/ uint32_t m_baneDmgBody;         // Bane Damage Body 1=Humanoid,2=Lycanthrope,
                                           // 3=Undead,4=Giant,5=Construct,6=Extraplanar,
                                           // 7=Magical
-  /*043*/ int8_t   m_magic;               // Magic flag, 1(0001)=magic
-  /*044*/ int32_t  m_castTime;
-  /*045*/ union 
+  /*042*/ int8_t   m_magic;               // Magic flag, 1(0001)=magic
+  /*043*/ int32_t  m_castTime;
+  /*043*/ union 
   {
-    /*045*/ uint8_t  m_level;            // Casting level
-    /*045*/ uint8_t  m_haste;             // Haste % 
+    /*044*/ uint8_t  m_level;            // Casting level
+    /*044*/ uint8_t  m_haste;             // Haste % 
   };
-  /*046*/ uint8_t  m_requiredLevel;       // Required Level to use item
-  /*047*/ uint32_t m_bardSkillType;       // Bard Skill Type
-  /*048*/ int32_t  m_bardSkillAmount;     // Bard Skill Amount
-  /*049*/ uint8_t  m_light;               // Light effect of this item
-  /*050*/ int8_t   m_delay;               // Weapon Delay
-  /*051*/ uint8_t  m_recommendedLevel;    // Recommended level to use item
-  /*052*/ uint8_t  m_recommendedSkill;    // Recommended skill to use item (primary skill)
-  /*053*/ uint8_t  m_elemDmgType;         // Elemental Damage Type (1=magic, 2=fire)
-  /*054*/ uint8_t  m_elemDmg;             // Elemental Damage
-  /*055*/ int8_t m_effectType;            // 0=no, 1=click anywhere w/o class check,
+  /*045*/ uint8_t  m_requiredLevel;       // Required Level to use item
+  /*046*/ uint32_t m_bardSkillType;       // Bard Skill Type
+  /*047*/ int32_t  m_bardSkillAmount;     // Bard Skill Amount
+  /*048*/ uint8_t  m_light;               // Light effect of this item
+  /*049*/ int8_t   m_delay;               // Weapon Delay
+  /*050*/ uint8_t  m_recommendedLevel;    // Recommended level to use item
+  /*051*/ uint8_t  m_recommendedSkill;    // Recommended skill to use item (primary skill)
+  /*052*/ uint8_t  m_elemDmgType;         // Elemental Damage Type (1=magic, 2=fire)
+  /*053*/ uint8_t  m_elemDmg;             // Elemental Damage
+  /*054*/ int8_t m_effectType;            // 0=no, 1=click anywhere w/o class check,
                                           // 2=latent, 3=click anywhere EXPENDABLE,
                                           // 4=click worn, 5=click anywhere with
                                           // class check
-  /*056*/ uint8_t  m_range;               // Range of weapon
-  /*057*/ int8_t   m_damage;              // Weapon Damage
-  /*058*/ uint32_t m_color;               // Amounts of RGB in original color
-  /*059*/ uint32_t  m_classes;            // Classes that can use this item
-  /*060*/ uint32_t  m_races;              // Races that can use this item
-  /*061*/ uint32_t m_unknown061;
-  /*062*/ uint16_t  m_spellId;            // SpellID of special effect
-  /*063*/ int8_t   m_charges;             // number of charges of item effect (-1 = inf)
-  /*064*/ uint8_t  m_skill;               // Skill of this weapon
-  /*065*/ uint8_t  m_material;            // Material?
-  /*066*/ int32_t  m_sellRate;            // Item sell rate
-  /*067*/ uint32_t m_unknown067;
-  /*068*/ union 
+  /*055*/ uint8_t  m_range;               // Range of weapon
+  /*056*/ int8_t   m_damage;              // Weapon Damage
+  /*057*/ uint32_t m_color;               // Amounts of RGB in original color
+  /*058*/ uint32_t  m_classes;            // Classes that can use this item
+  /*059*/ uint32_t  m_races;              // Races that can use this item
+  /*060*/ uint32_t m_unknown061;
+  /*061*/ uint16_t  m_spellId;            // SpellID of special effect
+  /*062*/ int8_t   m_charges;             // number of charges of item effect (-1 = inf)
+  /*063*/ uint8_t  m_skill;               // Skill of this weapon
+  /*064*/ uint8_t  m_material;            // Material?
+  /*065*/ int32_t  m_sellRate;            // Item sell rate
+  /*066*/ uint32_t m_unknown067;
+  /*067*/ union 
   {
-    /*068*/ uint32_t m_fullfillment;      // Food fulfilment (How long it lasts)
-    /*068*/ int16_t  m_clickyCastTime;    // Cast Time for clicky effects, in milliseconds
+    /*067*/ uint32_t m_fullfillment;      // Food fulfilment (How long it lasts)
+    /*067*/ int16_t  m_clickyCastTime;    // Cast Time for clicky effects, in milliseconds
   };
-  /*069*/ uint32_t m_unknown069;
-  /*070*/ uint32_t m_unknown070;
-  /*071*/ int32_t  m_focusId;		// Focus Effect Id
-  /*072*/ int8_t   m_combatEffects;	// PoP: Combat Effects +
-  /*073*/ int8_t   m_shielding;		// PoP: Shielding %
-  /*074*/ int8_t   m_stunResist;	// PoP: Stun Resist %
-  /*075*/ int8_t   m_strikeThrough;	// PoP: Strike Through %
-  /*076*/ uint32_t m_unknown076;
-  /*077*/ uint32_t m_unknown077;
-  /*078*/ int8_t   m_spellShield;	// PoP: Spell Shield %
-  /*079*/ int8_t   m_avoidance;		// PoP: Avoidance +
-  /*080*/ int8_t   m_accuracy;		// PoP: Accuracy +
-  /*081*/ uint32_t m_unknown081;
-  /*082*/ int32_t  m_factionMod1;	// Faction Mod 1
-  /*083*/ int32_t  m_factionMod2;	// Faction Mod 2
-  /*084*/ int32_t  m_factionMod3;	// Faction Mod 3
-  /*085*/ int32_t  m_factionMod4;	// Faction Mod 4
-  /*086*/ int32_t  m_factionAmt1;	// Faction Amt 1
-  /*087*/ int32_t  m_factionAmt2;	// Faction Amt 2
-  /*088*/ int32_t  m_factionAmt3;	// Faction Amt 3
-  /*089*/ int32_t  m_factionAmt4;	// Faction Amt 4
-  /*090*/ char	   m_charmFile[32];	// file name of the charm
-  /*091*/ uint32_t m_unknown091;
-  /*092*/ uint8_t  m_augSlot1Type;	// LDoN: Augment Slot 1 Type
-  /*093*/ uint8_t  m_augSlot2Type;	// LDoN: Augment Slot 2 Type
-  /*094*/ uint8_t  m_augSlot3Type;	// LDoN: Augment Slot 3 Type
-  /*095*/ uint8_t  m_augSlot4Type;	// LDoN: Augment Slot 4 Type
-  /*096*/ uint8_t  m_augSlot5Type;	// LDoN: Augment Slot 5 Type
-  /*097*/ uint32_t m_ldonTheme;
-  /*098*/ uint32_t m_ldonPrice;
-  /*099*/ uint32_t m_ldonSold;
-  /*100*/ uint8_t  m_packType;		// 0:Small Bag, 1:Large Bag, 2:Quiver, 3:Belt Pouch ... there are 50 types
-  /*101*/ uint8_t  m_numSlots;          // number of slots
-  /*102*/ uint8_t  m_weightReduction;   // percentage weight reduction
-  /*103*/ uint8_t  m_sizeCapacity;      // Maximum size item container can hold
-  /*104*/ uint8_t  m_bookType;		// 0=rolled up note, 1=book
-  /*105*/ uint32_t m_unknown105;
-  /*106*/ char	   m_bookFile[16];	// file name of the book
-  /*107*/ uint32_t m_unknown107;
-  /*108*/ uint32_t m_unknown108;
+  /*068*/ uint32_t m_unknown069;
+  /*069*/ uint32_t m_unknown070;
+  /*070*/ int32_t  m_focusId;		// Focus Effect Id
+  /*071*/ int8_t   m_combatEffects;	// PoP: Combat Effects +
+  /*072*/ int8_t   m_shielding;		// PoP: Shielding %
+  /*073*/ int8_t   m_stunResist;	// PoP: Stun Resist %
+  /*074*/ int8_t   m_strikeThrough;	// PoP: Strike Through %
+  /*075*/ uint32_t m_unknown076;
+  /*076*/ uint32_t m_unknown077;
+  /*077*/ int8_t   m_spellShield;	// PoP: Spell Shield %
+  /*078*/ int8_t   m_avoidance;		// PoP: Avoidance +
+  /*079*/ int8_t   m_accuracy;		// PoP: Accuracy +
+  /*080*/ uint32_t m_unknown081;
+  /*081*/ int32_t  m_factionMod1;	// Faction Mod 1
+  /*082*/ int32_t  m_factionMod2;	// Faction Mod 2
+  /*083*/ int32_t  m_factionMod3;	// Faction Mod 3
+  /*084*/ int32_t  m_factionMod4;	// Faction Mod 4
+  /*085*/ int32_t  m_factionAmt1;	// Faction Amt 1
+  /*086*/ int32_t  m_factionAmt2;	// Faction Amt 2
+  /*087*/ int32_t  m_factionAmt3;	// Faction Amt 3
+  /*088*/ int32_t  m_factionAmt4;	// Faction Amt 4
+  /*089*/ char	   m_charmFile[32];	// file name of the charm
+  /*090*/ uint32_t m_unknown091;
+  /*091*/ uint8_t  m_augSlot1Type;	// LDoN: Augment Slot 1 Type
+  /*092*/ uint8_t  m_augSlot2Type;	// LDoN: Augment Slot 2 Type
+  /*093*/ uint8_t  m_augSlot3Type;	// LDoN: Augment Slot 3 Type
+  /*094*/ uint8_t  m_augSlot4Type;	// LDoN: Augment Slot 4 Type
+  /*095*/ uint8_t  m_augSlot5Type;	// LDoN: Augment Slot 5 Type
+  /*096*/ uint32_t m_ldonTheme;
+  /*097*/ uint32_t m_ldonPrice;
+  /*098*/ uint32_t m_ldonSold;
+  /*099*/ uint8_t  m_packType;		// 0:Small Bag, 1:Large Bag, 2:Quiver, 3:Belt Pouch ... there are 50 types
+  /*100*/ uint8_t  m_numSlots;          // number of slots
+  /*101*/ uint8_t  m_weightReduction;   // percentage weight reduction
+  /*102*/ uint8_t  m_sizeCapacity;      // Maximum size item container can hold
+  /*103*/ uint8_t  m_bookType;		// 0=rolled up note, 1=book
+  /*104*/ uint32_t m_unknown105;
+  /*105*/ char	   m_bookFile[16];	// file name of the book
+  /*106*/ uint32_t m_unknown107;
+  /*107*/ uint32_t m_unknown108;
 };
 
-typedef EQItemDBEntryData_3 EQItemDBEntryData_Current;
+struct EQItemDBEntryData_4 : public EQItemDBEntryData_3
+{
+ public:
+  // public member functions
+  // initialize the DBEntryData using the serialized item info
+  const char* Init(const char* serializedItem, ItemType itemType);
+
+  // initialize the DBEntryData using Datum from a database
+  void Init(const Datum& data);
+
+  // initialize the DBEntryData with empty/default values
+  void Init();
+
+  uint8_t m_loreFlag;
+  uint8_t m_pendingLoreFlag;
+  uint8_t m_artifactFlag;
+  uint8_t m_summonedFlag;
+};
+
+typedef EQItemDBEntryData_4 EQItemDBEntryData_Current;
 
 ////////////////////////////////////////////////////////////////////
 // Life is easier if new versions can inherit from the immediate
@@ -267,7 +286,7 @@ typedef EQItemDBEntryData_3 EQItemDBEntryData_Current;
 // the EQItemDBEntry class accessor methods and in the 
 // EQItemDBEntryData child classes.  Therefore next one should be:
 //  
-// struct EQItemDBEntryData_4 : public EQItemDBEntryData_3
+// struct EQItemDBEntryData_5 : public EQItemDBEntryData_4
 //
 
 struct EQItemDBEntryRawData_1 : public EQItemDBEntryData
@@ -552,8 +571,13 @@ const char* EQItemDBEntryData_3::Init(const char* serializedItem,
    strncpy(&m_bookFile[0], tmpString.latin1(), sizeof(m_bookFile)); 
    m_charmFile[15] = '\0';
    m_unknown107 = getField(field, curPos).toULong();
-   m_unknown108 = getLastField(field, curPos).toULong();
-   
+   m_unknown108 = getField(field, curPos).toULong();
+   // ZBTEMP: add processing for these fields
+   getField(field, curPos);
+   getField(field, curPos);
+   getField(field, curPos);
+   getLastField(field, curPos);
+
    return curPos;
 }
 
@@ -596,6 +620,196 @@ void EQItemDBEntryData_3::Init(const Datum& data)
   
    // note the size of the entry
    m_entrySize = sizeof(EQItemDBEntryData_3);
+}
+
+const char* EQItemDBEntryData_4::Init(const char* serializedItem, 
+				      ItemType itemType)
+{
+  QString field;
+  field.setLength(64);
+  const char* curPos = serializedItem; 
+
+   // Start with a clean slate
+   memset((void*)this, '\0', sizeof(*this)); 
+
+   // Set the structure format version information
+   m_entryFormatVersion = 4; 
+  
+   // note the size of the entry
+   m_entrySize = sizeof(EQItemDBEntryData_4);
+
+   // note the time this was updated
+   time(&m_updated);
+
+   m_itemType = itemType; // 006
+
+   QString tmpString;
+
+   // now start copying data as appropriate
+   tmpString = getField(field, curPos); // get ID - 009
+   strncpy(&m_idfile[0], tmpString.latin1(), sizeof(m_idfile)); 
+   m_itemNr = getField(field, curPos).toULong();  // 010
+   m_weight = uint8_t(getField(field, curPos).toUShort()); // 011
+   m_norent = uint8_t(getField(field, curPos).toUShort());         
+   m_nodrop = uint8_t(getField(field, curPos).toUShort());         
+   m_size = uint8_t(getField(field, curPos).toUShort());           
+   m_equipableSlots = getField(field, curPos).toULong(); 
+   m_cost = getField(field, curPos).toLong();           
+   m_iconNr = getField(field, curPos).toUShort();        
+   m_unknown018 = getField(field, curPos).toLong();
+   m_unknown019 = getField(field, curPos).toULong();
+   m_unknown020 = getField(field, curPos).toULong();
+   m_tradeskills = (getField(field, curPos).toUShort() != 0);    
+   m_CR = int8_t(getField(field, curPos).toShort());             
+   m_DR = int8_t(getField(field, curPos).toShort());             
+   m_PR = int8_t(getField(field, curPos).toShort());             
+   m_MR = int8_t(getField(field, curPos).toShort());             
+   m_FR = int8_t(getField(field, curPos).toShort());             
+   m_STR = int8_t(getField(field, curPos).toShort());            
+   m_STA = int8_t(getField(field, curPos).toShort());            
+   m_AGI = int8_t(getField(field, curPos).toShort());            
+   m_DEX = int8_t(getField(field, curPos).toShort());            
+   m_CHA = int8_t(getField(field, curPos).toShort());            
+   m_INT = int8_t(getField(field, curPos).toShort());            
+   m_WIS = int8_t(getField(field, curPos).toShort());            
+   m_HP = int8_t(getField(field, curPos).toShort());             
+   m_MANA = int8_t(getField(field, curPos).toShort());           
+   m_AC = int8_t(getField(field, curPos).toShort());             
+   m_deity = getField(field, curPos).toULong();
+   m_skillModId = getField(field, curPos).toUShort();     
+   m_skillModPercent = int8_t(getField(field, curPos).toShort());
+   m_baneDmg = getField(field, curPos).toLong();        
+   m_baneDmgRace = getField(field, curPos).toULong();    
+   m_baneDmgBody = getField(field, curPos).toULong();  
+   
+   
+   m_magic = int8_t(getField(field, curPos).toShort());          
+   m_castTime = getField(field, curPos).toLong();
+   
+   m_level = uint8_t(getField(field, curPos).toUShort());       
+   //m_haste;        
+   
+   m_requiredLevel = uint8_t(getField(field, curPos).toUShort());  
+   m_bardSkillType = getField(field, curPos).toULong();  
+   m_bardSkillAmount = getField(field, curPos).toLong();
+   m_light = uint8_t(getField(field, curPos).toUShort());          
+   m_delay = int8_t(getField(field, curPos).toShort());          
+   m_recommendedLevel = uint8_t(getField(field, curPos).toUShort());
+   m_recommendedSkill = uint8_t(getField(field, curPos).toUShort());
+   m_elemDmgType = uint8_t(getField(field, curPos).toUShort());    
+   m_elemDmg = uint8_t(getField(field, curPos).toUShort());        
+   m_effectType = int8_t(getField(field, curPos).toShort());       
+   
+   
+   
+   m_range = uint8_t(getField(field, curPos).toUShort());          
+   m_damage = int8_t(getField(field, curPos).toShort());         
+   m_color = getField(field, curPos).toULong();          
+   m_classes = getField(field, curPos).toULong();       
+   m_races = getField(field, curPos).toULong();         
+   m_unknown061 = getField(field, curPos).toULong();
+   m_spellId = getField(field, curPos).toUShort();      
+   m_charges = int8_t(getField(field, curPos).toShort());        
+   m_skill = uint8_t(getField(field, curPos).toUShort());          
+   m_material = uint8_t(getField(field, curPos).toUShort());       
+   m_sellRate = getField(field, curPos).toULong();       
+   m_unknown067 = getField(field, curPos).toULong();
+   
+   
+   m_fullfillment = getField(field, curPos).toULong(); 
+   //m_clickyCastTime;     
+   
+   m_unknown069 = getField(field, curPos).toULong();
+   m_unknown070 = getField(field, curPos).toULong();
+   m_focusId = getField(field, curPos).toLong();
+   m_combatEffects = int8_t(getField(field, curPos).toShort());
+   m_shielding = int8_t(getField(field, curPos).toShort());
+   m_stunResist = int8_t(getField(field, curPos).toShort());
+   m_strikeThrough = int8_t(getField(field, curPos).toShort());
+   m_unknown076 = getField(field, curPos).toULong();
+   m_unknown077 = getField(field, curPos).toULong();
+   m_spellShield = int8_t(getField(field, curPos).toShort());
+   m_avoidance = int8_t(getField(field, curPos).toShort());
+   m_accuracy = int8_t(getField(field, curPos).toShort());
+   m_unknown081 = getField(field, curPos).toULong();
+   m_factionMod1 = getField(field, curPos).toLong();
+   m_factionMod2 = getField(field, curPos).toLong();
+   m_factionMod3 = getField(field, curPos).toLong();
+   m_factionMod4 = getField(field, curPos).toLong();
+   m_factionAmt1 = getField(field, curPos).toLong();
+   m_factionAmt2 = getField(field, curPos).toLong();
+   m_factionAmt3 = getField(field, curPos).toLong();
+   m_factionAmt4 = getField(field, curPos).toLong();
+   tmpString = getField(field, curPos);
+   strncpy(&m_charmFile[0], tmpString.latin1(), sizeof(m_charmFile)); 
+   m_charmFile[31] = '\0';
+   m_unknown091 = getField(field, curPos).toULong();
+   m_augSlot1Type = uint8_t(getField(field, curPos).toUShort());
+   m_augSlot2Type = uint8_t(getField(field, curPos).toUShort());
+   m_augSlot3Type = uint8_t(getField(field, curPos).toUShort());
+   m_augSlot4Type = uint8_t(getField(field, curPos).toUShort());
+   m_augSlot5Type = uint8_t(getField(field, curPos).toUShort());
+   m_ldonTheme = getField(field, curPos).toULong();
+   m_ldonPrice = getField(field, curPos).toULong();
+   m_ldonSold = getField(field, curPos).toULong();
+   m_packType = uint8_t(getField(field, curPos).toUShort());
+   m_numSlots = uint8_t(getField(field, curPos).toUShort()); 
+   m_sizeCapacity = uint8_t(getField(field, curPos).toUShort());   
+   m_weightReduction = uint8_t(getField(field, curPos).toUShort());
+   m_bookType = uint8_t(getField(field, curPos).toUShort());
+   m_unknown105 = getField(field, curPos).toULong();
+   tmpString = getField(field, curPos);
+   strncpy(&m_bookFile[0], tmpString.latin1(), sizeof(m_bookFile)); 
+   m_charmFile[15] = '\0';
+   m_unknown107 = getField(field, curPos).toULong();
+   m_unknown108 = getField(field, curPos).toULong();
+   m_loreFlag = uint8_t(getField(field, curPos).toUShort());
+   m_pendingLoreFlag = uint8_t(getField(field, curPos).toUShort());
+   m_artifactFlag = uint8_t(getField(field, curPos).toUShort());
+   m_summonedFlag = uint8_t(getLastField(field, curPos).toUShort());
+
+   return curPos;
+}
+
+void EQItemDBEntryData_4::Init()
+{
+   // Start with a clean slate
+   memset((void*)this, '\0', sizeof(*this));
+
+   // Set the structure format version information
+   m_entryFormatVersion = 4; 
+  
+   // note the size of the entry
+   m_entrySize = sizeof(EQItemDBEntryData_4);
+
+   // note the time this was updated
+   time(&m_updated);
+
+   m_nodrop            = -1;
+   m_norent            = -1;
+   m_spellId          = ITEM_SPELLID_NOSPELL;
+}
+
+void EQItemDBEntryData_4::Init(const Datum& data)
+{
+   // Start with a clean slate
+   memset((void*)this, '\0', sizeof(*this));
+
+   // Set the structure format version information
+   m_entryFormatVersion = 4; 
+
+   // by default copy the entire structure from the data
+   size_t copySize = ((EQItemDBEntryData*)data.data)->m_entrySize;
+
+   // but not if it's bigger then us...
+   if (copySize > sizeof(EQItemDBEntryData_4))
+     copySize = sizeof(EQItemDBEntryData_4);
+
+   // now copy the entire other structure into ourselves
+   memcpy((void*)this, data.data, copySize);
+  
+   // note the size of the entry
+   m_entrySize = sizeof(EQItemDBEntryData_4);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -1213,6 +1427,7 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
   getField(field, curPos); fieldCount++; // 3 - equipped slot;
   getField(field, curPos); fieldCount++; // 4 - bazaar trader price
   getField(field, curPos); fieldCount++;
+  getField(field, curPos); fieldCount++;
 
   // skip over optional backslash and leading quote.
   if (*curPos == '\\')
@@ -1375,61 +1590,6 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
 
   return result;
 }
-
-#if 0 // ZBTEMP
-bool EQItemDB::AddItem(const itemStruct* item, 
-		       uint32_t size,
-		       uint16_t flag, 
-		       bool update)
-{
-  Datum key, data;
-  bool result, result2;
-
-  key.size = sizeof(item->itemNr);
-  key.data = (void*)&item->itemNr;
-
-  // calculate the size of the lore string
-  size_t loreSize = strlen(item->lore) + 1;
-
-  // calculate the size of the name string
-  size_t nameSize = strlen(item->name) + 1;
-
-  // calculate the size necessary for storage
-  data.size = sizeof(EQItemDBEntryData_Current) + loreSize + nameSize;
-
-  // allocate the storage buffer
-  unsigned char databuffer[data.size];
-
-  // initialize the EQItemDBEntryData_Current portion
-  ((EQItemDBEntryData_Current*)databuffer)->Init(item, flag);
-
-  // add lore string after EQItemDBEntryData_Current
-  strncpy((char*)(databuffer + sizeof(EQItemDBEntryData_Current)),
-	  item->lore, loreSize);
-
-  // add name string after lore string
-  strncpy((char*)(databuffer + sizeof(EQItemDBEntryData_Current) + loreSize),
-	  item->name, nameSize);
-
-  data.data = (void*)databuffer;
-
-  result = Insert(m_ItemDataDB, key, data, update);
-
-  // only add if database is enabled and no entry exists
-  if (m_dbTypesEnabled & RAW_DATA_DB)
-  {
-    // setup datum to insert
-    data.size = size;
-    data.data = (void*)item;
-
-    result2 = Insert(m_ItemRawDataDB, key, data, update);
-
-    if (!result2)
-      result = result2;
-  }
-  return result;
-}
-#endif // ZBTEMP
 
 bool EQItemDB::DeleteItem(uint32_t itemNr)
 {
@@ -1641,10 +1801,7 @@ bool EQItemDB::ReorganizeDatabase(void)
   bool result, result2;
 
   // Reorganize Item Data database if enabled
-  result2 = Reorganize(m_ItemDataDB);
-    
-  if (!result2)
-    result = result2;
+  result = Reorganize(m_ItemDataDB);
 
   // Reorganize Item Raw Data database if enabled
   if (m_dbTypesEnabled & RAW_DATA_DB)
@@ -1717,9 +1874,6 @@ void EQItemDB::item(const itemPacketStruct* item, uint32_t size, uint8_t)
       QString typeStr;
       switch (item->packetType)
       {
-      case ItemPacketCharInventory:
-	typeStr = "CharInventory";
-	break;
       case ItemPacketViewLink:
 	typeStr = "ViewLink";
 	break;
@@ -1741,9 +1895,11 @@ void EQItemDB::item(const itemPacketStruct* item, uint32_t size, uint8_t)
       default:
 	typeStr.setNum(item->packetType, 16);
       }
-    
-      fprintf(lh, "Type(%s) %s%s\n\n", 
-	      typeStr.latin1(), ctime(&now),  item->serializedItem);
+      
+      
+      fprintf(lh, "[Type:%s] [Fields:%d] %s%s\n\n", 
+	      typeStr.latin1(), QString(item->serializedItem).contains('|'),
+	      ctime(&now),  item->serializedItem);
       
       fclose(lh);
     }
@@ -1754,31 +1910,43 @@ void EQItemDB::item(const itemPacketStruct* item, uint32_t size, uint8_t)
 
 void EQItemDB::playerItem(const char* serializedItem, uint32_t size, uint8_t)
 {
+  FILE *lh = 0;
+  time_t now;
+  const char* ctimeStr;
+
   if (m_logItemPackets)
   {
-    time_t now;
     now = time (NULL);
+    ctimeStr = ctime(&now);
     
-    FILE *lh;
     const char* filename = LOGDIR "/itempackets.log";
     lh = fopen (filename, "a");
     
-    if (lh == NULL)
+    if (!lh)
     {
       fprintf(stderr, "\aUnable to open file: [%s]\n", 
 	      (const char*)filename);
       return;
     }
-    else
-    {
-      fprintf(lh, "Type(CharInventory) %s%s\n\n", 
-	      ctime(&now),  serializedItem);
-      
-      fclose(lh);
-    }
   } 
 
-  AddItem(serializedItem); 
+  const char* currentItem = serializedItem;
+  const char* endItems = serializedItem + size;
+  int i = 0;
+  while (currentItem < endItems)
+  {
+    if (lh)
+      fprintf(lh, "[Type:CharInventory] [Pos:%d] [Fields:%d] %s%s\n\n", 
+	      i, QString(currentItem).contains('|'),
+	      ctimeStr,  currentItem);
+
+    AddItem(currentItem);
+    currentItem += strlen(currentItem) + 1;
+    i++;
+  }
+
+  if (lh)
+    fclose(lh);
 }
 
 void EQItemDB::itemInfo(const itemInfoStruct* item, uint32_t size, uint8_t)
@@ -1792,7 +1960,7 @@ void EQItemDB::itemInfo(const itemInfoStruct* item, uint32_t size, uint8_t)
     const char* filename = LOGDIR "/itempackets.log";
     lh = fopen (filename, "a");
     
-    if (lh == NULL)
+    if (!lh)
     {
       fprintf(stderr, "\aUnable to open file: [%s]\n", 
 	      (const char*)filename);
@@ -1800,7 +1968,8 @@ void EQItemDB::itemInfo(const itemInfoStruct* item, uint32_t size, uint8_t)
     }
     else
     {
-      fprintf(lh, "Type(ItemInfo) %s%s\n\n", 
+      fprintf(lh, "[Type:ItemInfo] [Fields:%d] %s%s\n\n", 
+	      QString(item->serializedItem).contains('|'),
 	      ctime(&now),  item->serializedItem);
       
       fclose(lh);
@@ -2041,6 +2210,38 @@ uint16_t EQItemDBEntry::GetEntryFormatVersion()
 int16_t EQItemDBEntry::GetFlag() 
 { 
   return (int16_t)((EQItemDBEntryData_3*)m_itemEntryData)->m_itemType; 
+}
+
+uint8_t EQItemDBEntry::GetLoreFlag()
+{
+  if (((EQItemDBEntryData*)m_itemEntryData)->m_entryFormatVersion == 4)
+    return ((EQItemDBEntryData_4*)m_itemEntryData)->m_loreFlag; 
+  else
+    return (m_itemLore[0] == '*');
+}
+
+uint8_t EQItemDBEntry::GetPendingLoreFlag()
+{
+  if (((EQItemDBEntryData*)m_itemEntryData)->m_entryFormatVersion == 4)
+    return ((EQItemDBEntryData_4*)m_itemEntryData)->m_pendingLoreFlag; 
+  else
+    return (m_itemLore[0] == '~');
+}
+
+uint8_t EQItemDBEntry::GetSummonedFlag()
+{
+  if (((EQItemDBEntryData*)m_itemEntryData)->m_entryFormatVersion == 4)
+    return ((EQItemDBEntryData_4*)m_itemEntryData)->m_summonedFlag; 
+  else
+    return (m_itemLore[0] == '&');
+}
+
+uint8_t EQItemDBEntry::GetArtifactFlag()
+{
+  if (((EQItemDBEntryData*)m_itemEntryData)->m_entryFormatVersion == 4)
+    return ((EQItemDBEntryData_4*)m_itemEntryData)->m_artifactFlag; 
+  else
+    return (m_itemLore[0] == '#');
 }
 
 ItemType EQItemDBEntry::GetItemType() 

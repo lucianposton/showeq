@@ -2083,6 +2083,10 @@
    <bool value="false" />
    <comment>Log unknown packets to unknown zone log file</comment>
   </property>
+  <property name="ViewUnknown">
+   <bool value="false" />
+   <comment>view unknown packets</comment>
+  </property>
   <property name="LogEncrypted" >
    <bool value="false" />
    <comment>log encrypted packets to encrypted log file</comment>
@@ -2580,8 +2584,11 @@ If any argument is left blank, it is filled in with its default...
   <property name="Log" >
    <bool value="false" />
   </property>
+  <property name="View" >
+   <bool value="false" />
+  </property>
   <property name="LogFilename" >
-   <string value="/sources/local/share/showeq/opcodemonitor.log" />
+   <string value="/usr/local/share/showeq/opcodemonitor.log" />
   </property>
  </section>
 <!-- ============================================================= -->

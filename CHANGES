@@ -1,3 +1,34 @@
+dohpaZ (10/24/03)
+---------------------
++ Updated version to 4.3.17
++ More opcode and structure fixes for 10/09/03 patch.  This includes ones that
+  appear to made the Combat Window and Experience Window not work.  It also
+  includes the fix for the zoom out to oblivion bug.
++ Assorted bug fixes
++ Integrated patch# 824478 "HP Changed fix (and compile error fix)" 
+  from belith (UnGod)
++ Integrated patch# 824942 "utf8 support for spawn names" from suseuser7341
++ Added handling for OP_SpecialMesg and OP_GuildMOTD, and initial support for
+  OP_SendZonePoints.
++ Added DateTimeMgr to manage EQ Time keeping (and removed the other places
+  where EQTime was being tracked).
++ Some cleanup and optimization of SEQLogger.
++ Some cleanup and optimization of SpawnLog (formerly SpawnLogger). Also, 
+  updated it use DateTimeMgr.
++ Moved packet logging out of EQPacket and cleaned it up.
++ Major refactoring and cleanup of packet handling (stage 1).
++ Modified the FilterMgr to support both global and zone specific filters.
++ Made change filter case sensitivity take place during the next time
+  the filters are loaded.  No longer have to restart ShowEQ for it to take
+  effect.
++ Added a few body type names to typenames.h.
++ Added a weapon to weapons.h.
++ Fixed filter, spell and eqstr loading to deal with Unicode strings UTF8 or
+  UCS2 as necessary.
++ Fixed several additional functions to support UTF8 encoding.
++ Updated item support to work with the 10/09/03 format changes.
++ Assorted minor cleanup and optimization.
+
 dohpaZ (10/09/03)
 ---------------------
 + Updated version to 4.3.16

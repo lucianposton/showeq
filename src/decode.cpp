@@ -5,7 +5,6 @@
  * http://seq.sourceforge.net/
  */
 
-#include "main.h"
 #include "decode.h"
 
 uint16_t implicitlen (uint16_t opcode)

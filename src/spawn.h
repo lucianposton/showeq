@@ -147,6 +147,9 @@ class Item : public EQPoint
   void setPos(int16_t x, int16_t y, int16_t z);
   void setHeading(int8_t heading) { m_heading = heading; }
 
+  void setName(const char *name)
+    { m_name = QString::fromUtf8(name); }
+
   void setName(const QString& name)
     { m_name = name; }
 
@@ -213,8 +216,8 @@ class Spawn : public Item
   int16_t deltaZ() const { return m_deltaZ; }
   int8_t deltaHeading() const { return m_deltaHeading; }
   uint8_t animation() const { return m_animation; }
-  uint16_t HP() const { return m_curHP; }
-  uint16_t maxHP() const { return m_maxHP; }
+  int16_t HP() const { return m_curHP; }
+  int16_t maxHP() const { return m_maxHP; }
   uint16_t GuildID() const { return m_GuildID; }
   QString GuildTag() const { return m_GuildTag; }
   uint16_t petOwnerID() const { return m_petOwnerID; }
@@ -230,6 +233,7 @@ class Spawn : public Item
     { return m_equipment[wearingSlot]; }
   QString equipmentStr(uint8_t wearingSlot) const;
   uint8_t typeflag() const { return m_typeflag; }
+  uint8_t gm() const {return m_gm; }
   QString typeString() const;
   const SpawnTrackList& trackList() const { return m_spawnTrackList; }
   SpawnTrackList& trackList() { return m_spawnTrackList; }
@@ -304,8 +308,8 @@ class Spawn : public Item
   void setConsidered(bool considered) { m_considered = considered; }
   void setRace(uint16_t race) { m_race = race; calcRaceTeam(); }
   void setClassVal(uint8_t classVal) { m_class = classVal; }
-  void setHP(uint16_t HP) { m_curHP = HP; }
-  void setMaxHP(uint16_t maxHP) { m_maxHP = maxHP; }
+  void setHP(int16_t HP) { m_curHP = HP; }
+  void setMaxHP(int16_t maxHP) { m_maxHP = maxHP; }
   void setGuildID(uint16_t GuildID) { m_GuildID = GuildID; }
   void setGuildTag(QString GuildTag) { m_GuildTag = GuildTag; }
   void setLevel(uint8_t level) { m_level = level; }
@@ -313,7 +317,11 @@ class Spawn : public Item
     { if (wearSlot < tNumWearSlots) { m_equipment[wearSlot] = itemID; } }
   void setNPC(uint8_t NPC) { m_NPC = NPC; }
   void setTypeflag(uint8_t typeflag) { m_typeflag = typeflag; }
+  void setGM(uint8_t gm) { m_gm = gm; }
   void setID(uint16_t id) { m_ID = id; }
+  void setLastName(const char * lastName)
+    { m_lastName = QString::fromUtf8(lastName); }
+
   void setLastName(const QString& lastName)
     { m_lastName = lastName; }
 
@@ -335,21 +343,22 @@ class Spawn : public Item
 
   // persisted info below
   uint16_t m_petOwnerID;
-  uint16_t m_curHP;
-  uint16_t m_maxHP;
+  int16_t m_curHP;
+  int16_t m_maxHP;
   uint16_t m_GuildID;
   QString m_GuildTag;
   uint16_t m_deity;
   int16_t m_deityTeam;
   uint16_t m_equipment[tNumWearSlots];
-  uint8_t m_level;
   uint16_t m_race;
   int16_t m_raceTeam;
+  uint8_t m_level;
   uint8_t m_gender;
   uint8_t m_class;
   uint8_t m_light;
   uint8_t m_typeflag;
   uint8_t m_animation;
+  uint8_t m_gm;
   bool m_considered;
 };
 
@@ -368,7 +377,6 @@ class Door : public Item
 
   // update methods
   void update(const doorStruct* d);
-
 };
 
 //----------------------------------------------------------------------

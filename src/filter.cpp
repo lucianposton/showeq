@@ -132,7 +132,7 @@ FilterItem::FilterItem(const QString& filterPattern, int cflags)
 #endif
 
   // compile the regular expression
-  switch (regcomp(&m_regexp, (const char*)regexString, cflags))
+  switch (regcomp(&m_regexp, (const char*)regexString.utf8(), cflags))
   {
     case 0:	// no error
       m_valid = true;
@@ -209,7 +209,7 @@ bool FilterItem::isFiltered(const QString& filterString, int level)
 {
   regmatch_t match[1];
   // check the main filter string
-  if (!regexec(&m_regexp, (const char*)filterString, 1, 
+  if (!regexec(&m_regexp, (const char*)filterString.utf8(), 1, 
 	       match, 0))
   {
     // is there is a level range component to this filter
@@ -236,10 +236,11 @@ bool FilterItem::isFiltered(const QString& filterString, int level)
 /* Filter Class - Sets up regex filter */
 Filter::Filter(int cFlags)
 {
+  // set new cFlags
   m_cFlags = cFlags;
 
+  // reload filters so change can take effect
   loadFilters();
-
 } // end Filter()
 
 /* Filter Class - Sets up regex filter */
@@ -271,6 +272,11 @@ Filter::~Filter(void)
 
 } // end ~Filter()
 
+void Filter::setCFlags(int cFlags)
+{
+  m_cFlags = cFlags;
+}
+
 void
 Filter::changeFilterFile(const QString& newfile)
 {
@@ -289,6 +295,7 @@ Filter::loadFilters(void)
 {
    FILE* in;
    char msg[MAXLEN + 1];
+   QString msgu;
    char* p;
 #ifdef DEBUG_FILTER
    printf("loadFilter()\n");
@@ -361,10 +368,10 @@ Filter::loadFilters(void)
 	 }
 	 
 	 if (m_type == sType)
-	   addFilter(msg);
+	   addFilter(QString::fromUtf8(msg));
        } 
        else if (msg[0])
-	 addFilter(msg);
+	 addFilter(QString::fromUtf8(msg));
      }
 
      if (sType)
@@ -488,9 +495,9 @@ Filter::saveFilters(void)
 	      for (re = it.toFirst(); re != NULL; re = ++it)
 	      {
 #ifdef DEBUG_FILTER
-		printf("OUT: '%s'\n", (const char*)re->name());
+		printf("OUT: '%s'\n", (const char*)re->name().utf8());
 #endif
-		fprintf(out, "%s\n", (const char*)re->name());
+		fprintf(out, "%s\n", (const char*)re->name().utf8());
 	      }
 	      done = true;
 	      start = false;
@@ -548,7 +555,7 @@ Filter::saveFilters(void)
 	    for (re = it.toFirst(); re != NULL; re = ++it)
 	    {
 	      // if we found a match, output it
-	      if (re->name() ==  msg)
+	      if (re->name() ==  QString::fromUtf8(msg))
 	      {
 #ifdef DEBUG_FILTER
 		printf("OUT: '%s'\n", msg);
@@ -592,9 +599,9 @@ Filter::saveFilters(void)
       for (re = it.toFirst(); re != NULL; re = ++it)
       {
 #ifdef DEBUG_FILTER
-	printf("OUT: '%s'\n", (const char*)re->name());
+	printf("OUT: '%s'\n", (const char*)re->name().utf8());
 #endif
-	fprintf(out, "%s\n", (const char*)re->name());
+	fprintf(out, "%s\n", (const char*)re->name().utf8());
       }
     }
     if (fflush (out))
@@ -723,5 +730,5 @@ Filter::listFilters(void)
 
   FilterListIterator it(m_filterItems);
   for (re = it.toFirst(); re != NULL; re = ++it)
-    printf("'%s'\n", (const char*)re->name());
+    printf("'%s'\n", (const char*)re->name().utf8());
 }

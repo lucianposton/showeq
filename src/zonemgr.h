@@ -46,6 +46,7 @@ class ZoneMgr : public QObject
   void zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t, uint8_t);
   void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
   void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
+  void zonePoints(const zonePointsStruct* zp, uint32_t, uint8_t);
 
  signals:
   void zoneBegin();
@@ -61,6 +62,8 @@ class ZoneMgr : public QObject
   QString m_shortZoneName;
   bool m_zoning;
   float m_zone_exp_multiplier;
+  size_t m_zonePointCount;
+  zonePointStruct* m_zonePoints;
 };
 
 #endif // ZONEMGR

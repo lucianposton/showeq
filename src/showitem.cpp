@@ -225,13 +225,13 @@ int main (int argc, char *argv[])
       out << " NO-RENT";
     if (entry->GetMagic() == 1)
       out << " MAGIC";
-    if (loreString[0] == '*')
+    if (entry->GetLoreFlag())
       out << " LORE";
-    else if (loreString[0] == '&')
+    else if (entry->GetSummonedFlag())
       out << " SUMMONED";
-    else if (loreString[0] == '#')
+    else if (entry->GetArtifactFlag())
       out << " ARTIFACT";
-    else if (loreString[0] == '~')
+    else if (entry->GetPendingLoreFlag())
       out << " PENDING-LORE";
 
     out << "<BR>\n";

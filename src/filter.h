@@ -75,6 +75,7 @@ public:
    void remFilter(const QString& filterPattern); 
    void listFilters(void);
    void changeFilterFile(const QString&);
+   void setCFlags(int cFlags);
 
 private:
    FilterItem* findFilter(const QString& filterPattern);

@@ -12,6 +12,8 @@
 
 #include "main.h"
 #include "netdiag.h"
+#include "packet.h"
+#include "util.h"
 
 NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   : SEQWindow("NetDiag", "ShowEQ - Network Diagnostics", parent, name),
@@ -74,9 +76,9 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   tmpGrid->addWidget(tmpLabel, row, col++);
   row++; col = 1;
   tmpGrid->addWidget(new QLabel("Filter: ", this), row, col++);
-  tmpLabel = new QLabel(this);
-  tmpLabel->setText(m_packet->pcapFilter());
-  tmpGrid->addWidget(tmpLabel, row, col++);
+  m_filterLabel = new QLabel(this);
+  m_filterLabel->setText(m_packet->pcapFilter());
+  tmpGrid->addWidget(m_filterLabel, row, col++);
   
   // stream specific statistics
   row++; row++; col = 0;
@@ -107,9 +109,9 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
      // network status
      tmpGrid->addWidget(new QLabel("Status ", this), row, col++);
      tmpGrid->addWidget(new QLabel("Cached: ", this), row, col++);
-     cache[a] = new QLabel(this, "cached");
-     cache[a]->setNum(m_packet->currentCacheSize(a));
-     tmpGrid->addWidget(cache[a], row, col++);
+     m_cache[a] = new QLabel(this, "cached");
+     m_cache[a]->setNum((int)m_packet->currentCacheSize(a));
+     tmpGrid->addWidget(m_cache[a], row, col++);
      col++;
      tmpGrid->addWidget(new QLabel("SeqExp: ", this), row, col++);
      m_seqExp[a] = new QLabel(this, "seqexp");
@@ -151,18 +153,20 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 	   this, SLOT(seqExpect(int, int)));
   connect (m_packet, SIGNAL(seqReceive (int, int)), 
 	   this, SLOT(seqReceive(int, int)));
-  connect (m_packet, SIGNAL(clientChanged(uint32_t)),
-	   this, SLOT(clientChanged(uint32_t)));
-  connect (m_packet, SIGNAL(clientPortLatched(uint16_t)),
-	   this, SLOT(clientPortLatched(uint16_t)));
-  connect (m_packet, SIGNAL(serverPortLatched(uint16_t)),
-	   this, SLOT(serverPortLatched(uint16_t)));
+  connect (m_packet, SIGNAL(clientChanged(in_addr_t)),
+	   this, SLOT(clientChanged(in_addr_t)));
+  connect (m_packet, SIGNAL(clientPortLatched(in_port_t)),
+	   this, SLOT(clientPortLatched(in_port_t)));
+  connect (m_packet, SIGNAL(serverPortLatched(in_port_t)),
+	   this, SLOT(serverPortLatched(in_port_t)));
   connect (m_packet, SIGNAL(sessionTrackingChanged(uint8_t)),
 	   this, SLOT(sessionTrackingChanged(uint8_t)));
   connect (m_packet, SIGNAL(numPacket(int, int)),
 	   this, SLOT(numPacket(int, int)));
   connect (m_packet, SIGNAL(resetPacket(int, int)),
 	   this, SLOT(resetPacket(int, int)));
+  connect (m_packet, SIGNAL(filterChanged()),
+	   this, SLOT(filterChanged()));
 
   if (m_playbackSpeed)
   {
@@ -252,6 +256,11 @@ void NetDiag::sessionTrackingChanged(uint8_t sessionTrackState)
   }
 }
 
+void NetDiag::filterChanged()
+{
+  m_filterLabel->setText(m_packet->pcapFilter());
+}
+
 void NetDiag::resetPacket(int num, int stream)
 {
   // if passed 0 reset the average
@@ -293,8 +302,7 @@ void NetDiag::numPacket(int num, int stream)
 
 void NetDiag::cacheSize(int size, int stream)
 {
-  cache[stream]->setNum(size);
-  
+  m_cache[stream]->setNum(size);
 }
 
 QString NetDiag::print_addr(in_addr_t  addr)
