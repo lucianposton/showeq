@@ -5,6 +5,8 @@
  *  http://seq.sourceforge.net/
  */
 
+#include <qheader.h>
+
 #include "player.h"
 #include "statlist.h"
 #include "util.h"
@@ -34,7 +36,6 @@ EQStatList::EQStatList(EQPlayer* player,
    setShowSortIndicator(TRUE);
 #endif
    setRootIsDecorated(false);
-   setAllColumnsShowFocus(true);
    setCaption(pSEQPrefs->getPrefString("Caption", section, 
 				       "ShowEQ - Stats"));
 
@@ -53,34 +54,50 @@ EQStatList::EQStatList(EQPlayer* player,
      updateStat(nloop, pSEQPrefs->getPrefBool(statPrefName, section, 0));
    }
 
+   // Restore column order
+   QString tStr = pSEQPrefs->getPrefString("ColumnOrder", section, "N/A");
+   if (tStr != "N/A") {
+      int i = 0;
+      while (!tStr.isEmpty()) {
+         int toIndex;
+         if (tStr.find(':') != -1) {
+            toIndex = tStr.left(tStr.find(':')).toInt();
+            tStr = tStr.right(tStr.length() - tStr.find(':') - 1);
+         } else {
+            toIndex = tStr.toInt();
+            tStr = "";
+         }
+         header()->moveSection(toIndex, i++);
+      }
+   }
    // StatList column sizes
    if (pSEQPrefs->isPreference("StatWidth", section))
    {
      i = pSEQPrefs->getPrefInt("StatWidth", section, 
-			       columnWidth(0));
-     setColumnWidthMode(0, QListView::Manual);
-     setColumnWidth(0, i);
+			       columnWidth(STATCOL_NAME));
+     setColumnWidthMode(STATCOL_NAME, QListView::Manual);
+     setColumnWidth(STATCOL_NAME, i);
    }
    if (pSEQPrefs->isPreference("ValueWidth", section))
    {
      i = pSEQPrefs->getPrefInt("ValueWidth", section, 
-			       columnWidth(1));
-     setColumnWidthMode(1, QListView::Manual);
-     setColumnWidth(1, i);
+			       columnWidth(STATCOL_VALUE));
+     setColumnWidthMode(STATCOL_VALUE, QListView::Manual);
+     setColumnWidth(STATCOL_VALUE, i);
    }
    if (pSEQPrefs->isPreference("MaxWidth", section))
    {
      i = pSEQPrefs->getPrefInt("MaxWidth", section, 
-			       columnWidth(2));
-     setColumnWidthMode(2, QListView::Manual);
-     setColumnWidth(2, i);
+			       columnWidth(STATCOL_MAXVALUE));
+     setColumnWidthMode(STATCOL_MAXVALUE, QListView::Manual);
+     setColumnWidth(STATCOL_MAXVALUE, i);
    }
    if (pSEQPrefs->isPreference("PercentWidth", section))
    {
      i = pSEQPrefs->getPrefInt("PercentWidth", section, 
-			       columnWidth(3));
-     setColumnWidthMode(3, QListView::Manual);
-     setColumnWidth(3, i);
+			       columnWidth(STATCOL_PERCENT));
+     setColumnWidthMode(STATCOL_PERCENT, QListView::Manual);
+     setColumnWidth(STATCOL_PERCENT, i);
    }
 
    connect (m_pPlayer, SIGNAL(statChanged(int,int,int)), 
@@ -110,14 +127,23 @@ void EQStatList::savePrefs(void)
     if (pSEQPrefs->getPrefBool("SaveWidth", section, 1))
     {
       pSEQPrefs->setPrefInt("StatWidth", section, 
-			      columnWidth(0));
+			      columnWidth(STATCOL_NAME));
       pSEQPrefs->setPrefInt("ValueWidth", section, 
-			      columnWidth(1));
+			      columnWidth(STATCOL_VALUE));
       pSEQPrefs->setPrefInt("MaxWidth", section, 
-			      columnWidth(2));
+			      columnWidth(STATCOL_MAXVALUE));
       pSEQPrefs->setPrefInt("PercentWidth", section, 
-			      columnWidth(3));
+			      columnWidth(STATCOL_PERCENT));
     }
+    // Save column order
+    char tempStr[256], tempStr2[256];
+    if (header()->count() > 0)
+      sprintf(tempStr, "%d", header()->mapToSection(0));
+    for(int i=1; i<header()->count(); i++) {
+      sprintf(tempStr2, ":%d", header()->mapToSection(i));
+      strcat(tempStr, tempStr2);
+    }
+    pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
 
     QString statPrefName;
     for (int nloop = 0; nloop < LIST_MAXLIST; nloop++)

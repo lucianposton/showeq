@@ -28,6 +28,7 @@
 
 #include <qpainter.h>
 #include <qfont.h>
+#include <qheader.h>
 
 #include "spawnlist.h"
 #include "util.h"
@@ -38,7 +39,6 @@
 //----------------------------------------------------------------------
 SpawnListItem::SpawnListItem(QListViewItem *parent) : QListViewItem(parent)
 {
-  m_btextSet = false;
   m_textColor = Qt::black;
   m_item = NULL;
   m_npc = 0;
@@ -48,7 +48,6 @@ SpawnListItem::SpawnListItem(QListViewItem *parent) : QListViewItem(parent)
 
 SpawnListItem::SpawnListItem(QListView *parent) : QListViewItem(parent)
 {
-  m_btextSet = false;
   m_textColor = Qt::black; 
   m_item = NULL;
   m_npc = 0;
@@ -268,85 +267,101 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
    addColumn ("Class");
    addColumn ("Info");
    addColumn ("SpawnTime");
-//   setMinimumWidth(200);
    setAllColumnsShowFocus(TRUE);
 
-   // SpawnList column sizes
    QString section = "SpawnList";
+   // Restore column order
+   QString tStr = pSEQPrefs->getPrefString("ColumnOrder", section, "N/A");
+   if (tStr != "N/A") {
+      int i = 0;
+      while (!tStr.isEmpty()) {
+         int toIndex;
+         if (tStr.find(':') != -1) {
+            toIndex = tStr.left(tStr.find(':')).toInt();
+            tStr = tStr.right(tStr.length() - tStr.find(':') - 1);
+         } else {
+            toIndex = tStr.toInt();
+            tStr = "";
+         }
+         header()->moveSection(toIndex, i++);
+      }
+   }
+
+   // SpawnList column sizes
    int x;
    if (pSEQPrefs->isPreference("NameWidth", section)) 
    {
-      x = pSEQPrefs->getPrefInt("NameWidth", section, columnWidth(0));
+      x = pSEQPrefs->getPrefInt("NameWidth", section, columnWidth(SPAWNCOL_NAME));
       setColumnWidthMode(SPAWNCOL_NAME, QListView::Manual);
       setColumnWidth(SPAWNCOL_NAME, x);
    }
    if (pSEQPrefs->isPreference("LevelWidth", section)) 
    {
-      x = pSEQPrefs->getPrefInt("LevelWidth", section, columnWidth(1));
+      x = pSEQPrefs->getPrefInt("LevelWidth", section, columnWidth(SPAWNCOL_LEVEL));
       setColumnWidth(SPAWNCOL_LEVEL, x);
       setColumnWidthMode(SPAWNCOL_LEVEL, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("HPWidth", section)) 
    {
-      x = pSEQPrefs->getPrefInt("HPWidth", section, columnWidth(2));
+      x = pSEQPrefs->getPrefInt("HPWidth", section, columnWidth(SPAWNCOL_HP));
       setColumnWidth(SPAWNCOL_HP, x);
       setColumnWidthMode(SPAWNCOL_HP, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("MaxHPWidth", section)) {
-      x = pSEQPrefs->getPrefInt("MaxHPWidth", section, columnWidth(3));
+      x = pSEQPrefs->getPrefInt("MaxHPWidth", section, columnWidth(SPAWNCOL_MAXHP));
       setColumnWidth(SPAWNCOL_MAXHP, x);
       setColumnWidthMode(SPAWNCOL_MAXHP, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("Coord1Width", section)) 
    {
-      x = pSEQPrefs->getPrefInt("Coord1Width", section, columnWidth(4));
+      x = pSEQPrefs->getPrefInt("Coord1Width", section, columnWidth(SPAWNCOL_XPOS));
       setColumnWidth(SPAWNCOL_XPOS, x);
       setColumnWidthMode(SPAWNCOL_XPOS, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("Coord2Width", section)) 
    {
-      x = pSEQPrefs->getPrefInt("Coord2Width", section, columnWidth(5));
+      x = pSEQPrefs->getPrefInt("Coord2Width", section, columnWidth(SPAWNCOL_YPOS));
       setColumnWidth(SPAWNCOL_YPOS, x);
       setColumnWidthMode(SPAWNCOL_YPOS, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("Coord3Width", section)) 
    {
-      x = pSEQPrefs->getPrefInt("Coord3Width", section, columnWidth(6));
+      x = pSEQPrefs->getPrefInt("Coord3Width", section, columnWidth(SPAWNCOL_ZPOS));
       setColumnWidth(SPAWNCOL_ZPOS, x);
       setColumnWidthMode(SPAWNCOL_ZPOS, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("IDWidth", section)) 
    {
-      x = pSEQPrefs->getPrefInt("IDWidth", section, columnWidth(7));
+      x = pSEQPrefs->getPrefInt("IDWidth", section, columnWidth(SPAWNCOL_ID));
       setColumnWidth(SPAWNCOL_ID, x);
       setColumnWidthMode(SPAWNCOL_ID, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("DistWidth", section)) 
    {
-      x = pSEQPrefs->getPrefInt("DistWidth", section, columnWidth(8));
+      x = pSEQPrefs->getPrefInt("DistWidth", section, columnWidth(SPAWNCOL_DIST));
       setColumnWidth(SPAWNCOL_DIST, x);
       setColumnWidthMode(SPAWNCOL_DIST, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("RaceWidth", section)) 
    {
-      x = pSEQPrefs->getPrefInt("RaceWidth", section, columnWidth(9));
+      x = pSEQPrefs->getPrefInt("RaceWidth", section, columnWidth(SPAWNCOL_RACE));
       setColumnWidth(SPAWNCOL_RACE, x);
       setColumnWidthMode(SPAWNCOL_RACE, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("ClassWidth", section)) 
    {
-      x = pSEQPrefs->getPrefInt("ClassWidth", section, columnWidth(10));
+      x = pSEQPrefs->getPrefInt("ClassWidth", section, columnWidth(SPAWNCOL_CLASS));
       setColumnWidth(SPAWNCOL_CLASS, x);
       setColumnWidthMode(SPAWNCOL_CLASS, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("InfoWidth", section)) {
-      x = pSEQPrefs->getPrefInt("InfoWidth", section, columnWidth(11));
+      x = pSEQPrefs->getPrefInt("InfoWidth", section, columnWidth(SPAWNCOL_INFO));
       setColumnWidth(SPAWNCOL_INFO, x);
       setColumnWidthMode(SPAWNCOL_INFO, QListView::Manual);
    }
    if (pSEQPrefs->isPreference("SpawnTimeWidth", section)) 
    {
-      x = pSEQPrefs->getPrefInt("SpawnTimeWidth", section, columnWidth(12));
+      x = pSEQPrefs->getPrefInt("SpawnTimeWidth", section, columnWidth(SPAWNCOL_SPAWNTIME));
       setColumnWidth(SPAWNCOL_SPAWNTIME, x);
       setColumnWidthMode(SPAWNCOL_SPAWNTIME, QListView::Manual);
    }
@@ -405,18 +420,40 @@ void CSpawnList::savePrefs()
   QString section = "SpawnList";
   if (pSEQPrefs->getPrefBool("SaveWidth", section, 1)) 
   {
-    pSEQPrefs->setPrefInt("NameWidth", section, columnWidth(0));
-    pSEQPrefs->setPrefInt("LevelWidth", section, columnWidth(1));
-    pSEQPrefs->setPrefInt("HPWidth", section, columnWidth(2));
-    pSEQPrefs->setPrefInt("MaxHPWidth", section, columnWidth(3));
-    pSEQPrefs->setPrefInt("Coord1Width", section, columnWidth(4));
-    pSEQPrefs->setPrefInt("Coord2Width", section, columnWidth(5));
-    pSEQPrefs->setPrefInt("Coord3Width", section, columnWidth(6));
-    pSEQPrefs->setPrefInt("IDWidth", section, columnWidth(7));
-    pSEQPrefs->setPrefInt("DistWidth", section, columnWidth(8));
-    pSEQPrefs->setPrefInt("RaceWidth", section, columnWidth(9));
-    pSEQPrefs->setPrefInt("ClassWidth", section, columnWidth(10));
-    pSEQPrefs->setPrefInt("InfoWidth", section, columnWidth(11));
+    pSEQPrefs->setPrefInt("NameWidth", section,
+      columnWidth(SPAWNCOL_NAME));
+    pSEQPrefs->setPrefInt("LevelWidth", section,
+      columnWidth(SPAWNCOL_LEVEL));
+    pSEQPrefs->setPrefInt("HPWidth", section,
+      columnWidth(SPAWNCOL_HP));
+    pSEQPrefs->setPrefInt("MaxHPWidth", section,
+      columnWidth(SPAWNCOL_MAXHP));
+    pSEQPrefs->setPrefInt("Coord1Width", section,
+      columnWidth(SPAWNCOL_XPOS));
+    pSEQPrefs->setPrefInt("Coord2Width", section,
+      columnWidth(SPAWNCOL_YPOS));
+    pSEQPrefs->setPrefInt("Coord3Width", section,
+      columnWidth(SPAWNCOL_ZPOS));
+    pSEQPrefs->setPrefInt("IDWidth", section,
+      columnWidth(SPAWNCOL_ID));
+    pSEQPrefs->setPrefInt("DistWidth", section,
+      columnWidth(SPAWNCOL_DIST));
+    pSEQPrefs->setPrefInt("RaceWidth", section,
+      columnWidth(SPAWNCOL_RACE));
+    pSEQPrefs->setPrefInt("ClassWidth", section,
+      columnWidth(SPAWNCOL_CLASS));
+    pSEQPrefs->setPrefInt("InfoWidth", section,
+      columnWidth(SPAWNCOL_INFO));
+    pSEQPrefs->setPrefInt("SpawnTimeWidth", section,
+      columnWidth(SPAWNCOL_SPAWNTIME));
+    char tempStr[256], tempStr2[256];
+    if (header()->count() > 0)
+      sprintf(tempStr, "%d", header()->mapToSection(0));
+    for(int i=1; i<header()->count(); i++) {
+      sprintf(tempStr2, ":%d", header()->mapToSection(i));
+      strcat(tempStr, tempStr2);
+    }
+    pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
   }
 }
 

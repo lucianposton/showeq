@@ -1,3 +1,10 @@
+cjd1 (23/01/02)
+--------------------
+
+Additions
+ + Window geometry is saved better, see new entries in conf/showeq.conf.
+ + QListView columns orders are preserved, drag/drop them to rearrange.
+
 fee (21/01/02)
 --------------------
 

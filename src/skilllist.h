@@ -13,6 +13,9 @@
 
 #include "player.h"
 
+#define SKILLCOL_NAME 0
+#define SKILLCOL_VALUE 1
+
 class EQSkillList : public QListView
 {
    Q_OBJECT

@@ -5,6 +5,8 @@
  *  http://seq.sourceforge.net/
  */
 
+#include <qheader.h>
+
 #include "player.h"
 #include "skilllist.h"
 #include "util.h"
@@ -41,19 +43,36 @@ EQSkillList::EQSkillList(EQPlayer* player,
 
   // get preferences
 
+  // column order
+  QString tStr = pSEQPrefs->getPrefString("ColumnOrder", section, "N/A");
+  if (tStr != "N/A") {
+    int i = 0;
+    while (!tStr.isEmpty()) {
+      int toIndex;
+      if (tStr.find(':') != -1) {
+        toIndex = tStr.left(tStr.find(':')).toInt();
+        tStr = tStr.right(tStr.length() - tStr.find(':') - 1);
+      } else {
+        toIndex = tStr.toInt();
+        tStr = "";
+      }
+      header()->moveSection(toIndex, i++);
+    }
+  }
+
   // column sizes
   if (pSEQPrefs->isPreference("SkillWidth", section))
   {
-    i = pSEQPrefs->getPrefInt("SkillWidth", section, columnWidth(0));
-    setColumnWidthMode(0, QListView::Manual);
-    setColumnWidth(0, i);
+    i = pSEQPrefs->getPrefInt("SkillWidth", section, columnWidth(SKILLCOL_NAME));
+    setColumnWidthMode(SKILLCOL_NAME, QListView::Manual);
+    setColumnWidth(SKILLCOL_NAME, i);
   }
 
   if (pSEQPrefs->isPreference("ValueWidth", section))
   {
-    i = pSEQPrefs->getPrefInt("ValueWidth", section, columnWidth(1));
-    setColumnWidthMode(1, QListView::Manual);
-    setColumnWidth(1, i);
+    i = pSEQPrefs->getPrefInt("ValueWidth", section, columnWidth(SKILLCOL_VALUE));
+    setColumnWidthMode(SKILLCOL_VALUE, QListView::Manual);
+    setColumnWidth(SKILLCOL_VALUE, i);
   }
 
   // connect to player signals
@@ -256,5 +275,13 @@ void EQSkillList::savePrefs(void)
     {
       pSEQPrefs->setPrefInt("ShowLanguages", section, m_showLanguages);
     }
+    char tempStr[256], tempStr2[256];
+    if (header()->count() > 0)
+      sprintf(tempStr, "%d", header()->mapToSection(0));
+    for(int i=1; i<header()->count(); i++) {
+      sprintf(tempStr2, ":%d", header()->mapToSection(i));
+      strcat(tempStr, tempStr2);
+    }
+    pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
   }
 }

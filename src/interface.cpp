@@ -1661,6 +1661,7 @@ void EQInterface::SetDefaultCharacterClass(int id)
 void
 EQInterface::savePrefs(void)
 {
+   printf("==> EQInterface::savePrefs()\n");
    if( isVisible() ) {
      QString section = "Interface";
       char tempStr[256];
@@ -1672,16 +1673,38 @@ EQInterface::savePrefs(void)
       // save experience window location
       if(m_expWindow) {
          QPoint p = m_expWindow->pos();
+         QSize s = m_expWindow->size();
 
-         //Save X position
-         if (pSEQPrefs->isPreference("WindowX", "Experience"))
+         if (pSEQPrefs->getPrefBool("SavePosition", "Experience", false)) {
+            //Save X position
             pSEQPrefs->setPrefInt("WindowX", "Experience", p.x());
-
-         //Save Y position
-         if (pSEQPrefs->isPreference("WindowY", "Experience"))
+            //Save Y position
             pSEQPrefs->setPrefInt("WindowY", "Experience", p.y());
+            //Save Width
+            pSEQPrefs->setPrefInt("WindowW", "Experience", s.width());
+            //Save Height
+            pSEQPrefs->setPrefInt("WindowH", "Experience", s.height());
+            printf("Saving Exp Window: %d, %d  %d x %d\n", p.x(), p.y(), s.width(), s.height());
+         }
       }
 		
+      if (m_spawnList) {
+         if ((m_spawnList->isVisible()) && (!m_isSpawnListDocked) &&
+             (pSEQPrefs->getPrefBool("SavePosition", "SpawnList", false))) {
+            QPoint p = m_spawnList->pos();
+            QSize s = m_spawnList->size();
+            //Save X position
+            pSEQPrefs->setPrefInt("WindowX", "SpawnList", p.x());
+            //Save Y position
+            pSEQPrefs->setPrefInt("WindowY", "SpawnList", p.y());
+            //Save Width
+            pSEQPrefs->setPrefInt("WindowW", "SpawnList", s.width());
+            //Save Height
+            pSEQPrefs->setPrefInt("WindowH", "SpawnList", s.height());
+            printf("Saving Spawn Window: %d, %d  %d x %d\n", p.x(), p.y(), s.width(), s.height());
+         }
+      }
+
       // save message dialog geometries
       MsgDialog* diag;
       int i = 0;
@@ -2063,18 +2086,23 @@ EQInterface::toggle_view_ExpWindow (void)
        m_expWindow->show();
        // set exp window location
        if(m_expWindow){
-	   int x, y;
+	   int x, y, w, h;
 	   QPoint p = m_expWindow->pos();
+           QSize s = m_expWindow->size();
 	
 	   // get X position
-	   x = pSEQPrefs->getPrefInt("WindowX", "Experience",
-				     p.x());
+	   x = pSEQPrefs->getPrefInt("WindowX", "Experience", p.x());
 	   // get Y position
-	   y = pSEQPrefs->getPrefInt("WindowY", "Experience",
-				     p.y());
+	   y = pSEQPrefs->getPrefInt("WindowY", "Experience", p.y());
+           // get width
+           w = pSEQPrefs->getPrefInt("WindowW", "Experience", s.width() );
+           // get height
+           h = pSEQPrefs->getPrefInt("WindowH", "Experience", s.height() );
 	   // move window to new position
-	   if(pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0))
+	   if(pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) {
+               m_expWindow->resize(w, h);
 	       m_expWindow->move(x, y);
+           }
        }
     }
     else
@@ -2097,6 +2125,25 @@ EQInterface::toggle_view_SpawnList(void)
       pSpawnListMenu->setItemChecked(m_id_view_SpawnList_Cols[i], 
 				     m_spawnList->columnWidth(i) != 0);
 
+    // only do this move stuff iff the spawn list isn't docked
+    // and the user set the option to do so.
+    if (!m_isSpawnListDocked &&
+	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
+    {
+      // Set window location
+      int x, y, w, h;
+      QPoint p = m_spawnList->pos();
+      QSize s = m_spawnList->size();
+      x = pSEQPrefs->getPrefInt("WindowX", "SpawnList", p.x());
+      y = pSEQPrefs->getPrefInt("WindowY", "SpawnList", p.y());
+      w = pSEQPrefs->getPrefInt("WindowW", "SpawnList", s.width());
+      h = pSEQPrefs->getPrefInt("WindowH", "SpawnList", s.height());
+      printf("=> Restoring SpawnList geometry - %d, %d - %d x %d\n", x, y, w, h);
+
+      // Move window to new position
+      m_spawnList->resize(w, h);
+      m_spawnList->move(x, y);
+    }
     // enable it's options sub-menu
     menuBar()->setItemEnabled(m_id_view_SpawnList_Options, true);
   }
@@ -3852,6 +3899,25 @@ void EQInterface::showSpawnList(void)
       m_spawnList = new CSpawnList (m_player, m_spawnShell, m_categoryMgr,
 				    NULL, "spawnlist");
 
+    // only do this move stuff iff the spawn list isn't docked
+    // and the user set the option to do so.
+    if (!m_isSpawnListDocked &&
+	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
+    {
+      // Set window location
+      int x, y, w, h;
+      QPoint p = m_spawnList->pos();
+      QSize s = m_spawnList->size();
+      x = pSEQPrefs->getPrefInt("WindowX", "SpawnList", p.x());
+      y = pSEQPrefs->getPrefInt("WindowY", "SpawnList", p.y());
+      w = pSEQPrefs->getPrefInt("WindowW", "SpawnList", s.width());
+      h = pSEQPrefs->getPrefInt("WindowH", "SpawnList", s.height());
+      printf("=> Restoring SpawnList geometry - %d, %d - %d x %d\n", x, y, w, h);
+
+      // Move window to new position
+      m_spawnList->resize(w, h);
+      m_spawnList->move(x, y);
+    }
      // connectsion from spawn list to interface
      connect (m_spawnList, SIGNAL(spawnSelected(const Item*)),
 	      this, SLOT(spawnSelected(const Item*)));

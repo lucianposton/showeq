@@ -80,7 +80,7 @@ public:
 
    const QColor textColor()  { return m_textColor; }
    void setTextColor(const QColor &color)  
-                             { m_textColor = QColor(color); m_btextSet = TRUE; }
+                             { m_textColor = QColor(color); }
    const Item*    item() { return m_item; }
    uint32_t filterFlags() { return m_filterFlags; }
    uint32_t runtimeFilterFlags() { return m_runtimeFilterFlags; }
@@ -95,7 +95,6 @@ public:
    int m_npc;
 private:
    QColor m_textColor;
-   bool m_btextSet;
    uint32_t m_filterFlags;
    uint32_t m_runtimeFilterFlags;    
 

@@ -10,19 +10,19 @@
  * Date - 9/7/2001
  */
 
+#include <qheader.h>
+
 #include "spelllist.h"
 #include "main.h"
 
 SpellListItem::SpellListItem(QListViewItem *parent) : QListViewItem(parent)
 {
-   m_btextSet = false;
    m_textColor = Qt::black;
    m_item = NULL;
 }
 
 SpellListItem::SpellListItem(QListView *parent) : QListViewItem(parent)
 {
-   m_btextSet = false;
    m_textColor = Qt::black;
    m_item = NULL;
 }
@@ -35,7 +35,6 @@ const QColor SpellListItem::textColor()
 void SpellListItem::setTextColor(const QColor& color)
 {
    m_textColor = color;
-   m_btextSet = true;
 }
 
 void SpellListItem::update()
@@ -96,6 +95,23 @@ SpellList::SpellList(QWidget *parent, const char *name)
    setCaption("ShowEQ - Spells");
 
    QString section = "SpellList";
+   // Restore column order
+   QString tStr = pSEQPrefs->getPrefString("ColumnOrder", section, "N/A");
+   if (tStr != "N/A") {
+      int i = 0;
+      while (!tStr.isEmpty()) {
+         int toIndex;
+         if (tStr.find(':') != -1) {
+            toIndex = tStr.left(tStr.find(':')).toInt();
+            tStr = tStr.right(tStr.length() - tStr.find(':') - 1);
+         } else {
+            toIndex = tStr.toInt();
+            tStr = "";
+         }
+         header()->moveSection(toIndex, i++);
+      }
+   }
+
    char tempStr[256];
    int x;
    sprintf(tempStr, "SpellIDWidth");
@@ -415,6 +431,16 @@ void SpellList::savePrefs(void)
     pSEQPrefs->setPrefInt(tempStr, section,
 			    columnWidth(SPELLCOL_DURATION));
     
+    // Save column order
+    char tempStr[256], tempStr2[256];
+    if (header()->count() > 0)
+      sprintf(tempStr, "%d", header()->mapToSection(0));
+    for(int i=1; i<header()->count(); i++) {
+      sprintf(tempStr2, ":%d", header()->mapToSection(i));
+      strcat(tempStr, tempStr2);
+    }
+    pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
+
     // Save window position
     QPoint p = pos();
     pSEQPrefs->setPrefInt("WindowX", section, p.x());

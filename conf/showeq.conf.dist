@@ -223,6 +223,7 @@ DockedMap4	0	# dock Map 4
 DockedMap5	0	# dock Map 5
 
 [Experience]
+SavePosition      1    # if set and undocked, save window x, y, width, height
 WindowX 0              # modified when saved
 WindowY 0              # modified when saved
 
@@ -268,6 +269,7 @@ showSTR 	0      # 1 = Display STR in the stats window
 showWIS 	0      # 1 = Display WIS in the stats window
 showWatr	1      # 1 = Display Water value in the stats window
 showStam        0      # 1 = Display Stamina value in the stats window
+ColumnOrder     0:1:2:3
 
 #
 # SpellList options
@@ -282,6 +284,7 @@ TargetIDWidth     0
 TargetNameWidth   90
 CastTimeWidth     0
 RemainTimeWidth   63
+ColumnOrder       0:1:2:3:4:5:6:7
 
 #
 # SkillList options
@@ -293,6 +296,7 @@ ValueWidth        35   # pixel width of skill value column
 SaveShowLanguages 1    # Save show languages setting upon exit
 ShowLanguages     1    # skill list includes language skills
 Caption           "ShowEQ - Skills" # skill list window caption when undocked
+ColumnOrder       0:1
 
 #
 # SpawnList options
@@ -300,6 +304,7 @@ Caption           "ShowEQ - Skills" # skill list window caption when undocked
 # Note:  The default values shown work well for a 10point font
 #
 [SpawnList]
+SavePosition      1    # if set and undocked, save window x, y, width, height
 SaveWidth         0    # if set the following values will be saved upon exit
 NameWidth         155  # comment out any of these values to make them autosize
 LevelWidth        25
@@ -315,6 +320,7 @@ ClassWidth        40
 InfoWidth         40   
 SpawnTimeWidth    40   
 ShowRealName      0    # Display real eq name or formatted name in spawnlist
+ColumnOrder       0:1:2:3:4:5:6:7:8:9:10:11:12
 
 [CategoryMgr]
 Category1_Name    All  # category for all spawns but filtered

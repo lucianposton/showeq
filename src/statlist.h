@@ -13,6 +13,11 @@
 
 #include "player.h"
 
+#define STATCOL_NAME 0
+#define STATCOL_VALUE 1
+#define STATCOL_MAXVALUE 2
+#define STATCOL_PERCENT 3
+
 class EQStatList : public QListView
 {
    Q_OBJECT
