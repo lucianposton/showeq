@@ -32,10 +32,13 @@
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qpopupmenu.h>
+#include <qlist.h>
 
 class MyButton;  // button for use in MsgDialog
 class CButDlg;   // dialog for editing a button
 class MyEdit;
+
+typedef QList<MyButton> MyButtonList;
 
 //////////////////////////////////////////////////////////////////////
 //                        MsgDialog                                 //
@@ -64,11 +67,12 @@ class MyEdit;
 // to send to the dialog, you can use the constructor to send a stringlist
 //
 //class MsgDialog: public QDialog 
-class MsgDialog: public QWidget
+class MsgDialog : public QWidget
 {
    Q_OBJECT
 public:
-   MsgDialog(QWidget *parent, const char *name, QStringList &list);
+   MsgDialog(QWidget *parent, const char *name, 
+	     const QString& prefName, QStringList &list);
 
    bool isAdditive()               { return m_bAdditiveFilter; }
    int  indentMargin()             { return m_nIndent; }
@@ -84,6 +88,8 @@ public slots:
    void setButton(MyButton* but, bool active);
    void showControls(bool);
    void showMsgType(bool);
+   void load();
+   void savePrefs();
 
 private slots:
    void editButton(MyButton *);         // popup button edit dialog
@@ -121,7 +127,7 @@ private:
    int                m_nShown;          // num of messages shown
    int                m_nEditItem;
 
-//   QMultiLineEdit *   m_pEdit;
+   QString            m_preferenceName;
    MyEdit*            m_pEdit;
    QStringList*       m_pStringList;
    QStringList        m_filterList;
@@ -137,6 +143,7 @@ private:
    QLabel*            m_pStatusBarFilter;
    QPopupMenu*        m_pMenu;
    MyButton*          m_pButtonOver;
+   MyButtonList       m_buttonList;
 };
 
 

@@ -72,14 +72,18 @@ class Category
 // CFilterDlg
 class CFilterDlg : public QDialog
 {
-   Q_OBJECT
+  Q_OBJECT
  public:
-   CFilterDlg(QWidget *parent, QString name);
+  CFilterDlg(QWidget *parent, QString name);
 
-   QLineEdit *m_Name;
-   QLineEdit *m_Filter;
-   QLineEdit *m_FilterOut;
-   QComboBox *m_Color;
+ public slots:
+  void select_color(void);
+
+ public:
+  QLineEdit* m_Name;
+  QLineEdit* m_Filter;
+  QLineEdit* m_FilterOut;
+  QButton* m_Color;
 };
 
 typedef QDict<Category> CategoryDict;
@@ -92,6 +96,8 @@ class CategoryMgr : public QObject
 {
    Q_OBJECT
  public:
+   enum { tMaxNumCategories = 32 };
+
    CategoryMgr(QObject* parent = 0, const char* name = 0);
    virtual ~CategoryMgr();
 
@@ -111,6 +117,7 @@ class CategoryMgr : public QObject
    void addCategory(QWidget* parent = 0);
    void editCategories(const Category* cat, QWidget* parent = 0);
    void reloadCategories(void);
+   void savePrefs(void);
 
  signals:
    void addCategory(const Category* cat);
@@ -120,6 +127,7 @@ class CategoryMgr : public QObject
 
  private:
    CategoryDict m_categories;
+   bool m_changed;
 };
 
 #endif // _CATEGORY_H_

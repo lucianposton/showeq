@@ -70,6 +70,7 @@
 #include <qlineedit.h>
 
 #include "msgdlg.h"
+#include "main.h"
 
 //#define DEBUGMSG
 
@@ -79,9 +80,10 @@
 //
 // Constructor
 //                                                                  
-MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
-// : QDialog(parent, name)
- : QWidget(parent, name)
+MsgDialog::MsgDialog(QWidget *parent, const char *name, 
+		     const QString& preferenceName, QStringList &list)
+  : QWidget(parent, name),
+    m_preferenceName(preferenceName)
 {
 #ifdef DEBUGMSG
   qDebug("MsgDialog() '%s' List passed by ref with %d elements", 
@@ -197,7 +199,10 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
    m_pMenu->insertItem("&Toggle Controls", this, SLOT(toggleControls()));
    connect(m_pMenu, SIGNAL (aboutToShow(void)), 
               this, SLOT (menuAboutToShow(void)));
-  
+
+   // load the preferences
+   load();
+
    // refresh the messages 
    refresh();
   
@@ -429,6 +434,8 @@ MsgDialog::setAdditive(bool bAdd)
 #endif
    m_bAdditiveFilter = bAdd;
    m_pAdditiveCheckBox->setChecked(m_bAdditiveFilter);
+
+   pSEQPrefs->setPrefBool("Additive", m_preferenceName, m_bAdditiveFilter);
    refresh();
 }
 
@@ -537,15 +544,15 @@ MsgDialog::newButton(const QString &name, const QString &filter,
 
   // setup signals        
   connect(but, SIGNAL (editButton(MyButton *)),
-               this, SLOT (editButton(MyButton *)));
+	  this, SLOT (editButton(MyButton *)));
   connect(but, SIGNAL (addFilter(const QString &)),
-               this, SLOT (addFilter(const QString &)));
+	  this, SLOT (addFilter(const QString &)));
   connect(but, SIGNAL (delFilter(const QString &)),
-               this, SLOT (delFilter(const QString &)));
+	  this, SLOT (delFilter(const QString &)));
   connect(but, SIGNAL (toggled(bool)),
-               but, SLOT (toggled(bool)));
+	  but, SLOT (toggled(bool)));
   connect(but, SIGNAL (setButton(MyButton*, bool)),
-               this, SLOT (setButton(MyButton*, bool)));
+	  this, SLOT (setButton(MyButton*, bool)));
 
   // setup Color
   but->setColor(color);
@@ -554,6 +561,9 @@ MsgDialog::newButton(const QString &name, const QString &filter,
   m_nButtons++;
   m_pButtonsLayout->addWidget(but);
   but->show();
+
+  // add the button to the button list
+  m_buttonList.append(but);
 
   // re-apply the filter if we are active
   if (but->isChecked())
@@ -574,16 +584,21 @@ MsgDialog::toggleControls(void)
       m_pButtonsPanel->hide();
    else
       m_pButtonsPanel->show();
+
+  pSEQPrefs->setPrefBool("HideControls", m_preferenceName, 
+			 !m_pButtonsPanel->isVisible());
 }
 
 
 void
 MsgDialog::showControls(bool bShow)
 {
-   if (bShow)
-      m_pButtonsPanel->show();
-   else
-      m_pButtonsPanel->hide();
+  if (bShow)
+    m_pButtonsPanel->show();
+  else
+    m_pButtonsPanel->hide();
+  
+  pSEQPrefs->setPrefBool("HideControls", m_preferenceName, !bShow);
 }
 
 
@@ -656,9 +671,96 @@ MsgDialog::showMsgType(bool bshow)
      
   if (m_pMsgTypeCheckBox)
     m_pMsgTypeCheckBox->setChecked(m_bShowType);
+  
+  pSEQPrefs->setPrefBool("ShowMsgType", m_preferenceName, m_bShowType);
   refresh();
 }
 
+void 
+MsgDialog::load()
+{
+  QString tempStr;
+  QString caption = pSEQPrefs->getPrefString("Caption", m_preferenceName,
+					     m_preferenceName);
+  QWidget::setCaption(caption);
+  
+  // set Additive mode
+  m_bAdditiveFilter = pSEQPrefs->getPrefBool("Additive", m_preferenceName);
+  m_pAdditiveCheckBox->setChecked(m_bAdditiveFilter);
+  
+  // set control mode
+  if (pSEQPrefs->getPrefBool("HideControls", m_preferenceName))
+    m_pButtonsPanel->hide();
+  else
+    m_pButtonsPanel->show();
+  
+  // set Msg Type mode
+  m_bShowType = pSEQPrefs->getPrefBool("ShowMsgType", m_preferenceName);
+  if (m_pMsgTypeCheckBox)
+    m_pMsgTypeCheckBox->setChecked(m_bShowType);
+  
+  int j = 0;
+  // Configure buttons
+  for(j = 1; j < 15; j++)
+  {
+    // attempt to pull button description from the preferences
+    tempStr.sprintf("Button%dName", j);
+    QString buttonname(pSEQPrefs->getPrefString(tempStr, m_preferenceName));
+    tempStr.sprintf("Button%dFilter", j);
+    QString buttonfilter(pSEQPrefs->getPrefString(tempStr, m_preferenceName));
+    tempStr.sprintf("Button%dColor", j);
+    QColor buttoncolor(pSEQPrefs->getPrefColor(tempStr, m_preferenceName, 
+					       QColor("black")));
+    tempStr.sprintf("Button%dActive", j);
+    
+    // if we have a name and filter string
+    if (!buttonname.isEmpty() && !buttonfilter.isEmpty())
+    {
+      // Add the button
+      addButton(buttonname, buttonfilter,
+		buttoncolor, 
+		pSEQPrefs->getPrefBool(tempStr, m_preferenceName));
+    }
+    else
+    {
+      if (!buttonname.isEmpty() || !buttonfilter.isEmpty())
+	fprintf(stderr, "Error: Incomplete definition of Button '%s'\n",
+		       (const char*)caption);
+    }
+  } // end for buttons
+}
+
+void MsgDialog::savePrefs()
+{
+  QString tempStr;
+  MyButton* but;
+  int j = 1;
+  for (but = m_buttonList.first(); but != NULL; but = m_buttonList.next())
+  {
+    tempStr.sprintf("Button%dName", j);
+    pSEQPrefs->setPrefString(tempStr, m_preferenceName, but->name());
+    tempStr.sprintf("Button%dFilter", j);
+    pSEQPrefs->setPrefString(tempStr, m_preferenceName, but->filter());
+    tempStr.sprintf("Button%dColor", j);
+    pSEQPrefs->setPrefColor(tempStr, m_preferenceName, but->color());
+    tempStr.sprintf("Button%dActive", j);
+    pSEQPrefs->setPrefBool(tempStr, m_preferenceName, but->isChecked());
+    j++;
+  }
+
+  while (j < 15)
+  {
+    tempStr.sprintf("Button%dName", j);
+    pSEQPrefs->setPrefString(tempStr, m_preferenceName, "");
+    tempStr.sprintf("Button%dFilter", j);
+    pSEQPrefs->setPrefString(tempStr, m_preferenceName, "");
+    tempStr.sprintf("Button%dColor", j);
+    pSEQPrefs->setPrefColor(tempStr, m_preferenceName, "");
+    tempStr.sprintf("Button%dActive", j);
+    pSEQPrefs->setPrefBool(tempStr, m_preferenceName, "");
+    j++;
+  }
+}
 
 //
 // addButton - add a button
@@ -668,7 +770,7 @@ MsgDialog::showMsgType(bool bshow)
 //
 void
 MsgDialog::addButton(const QString &name, const QString &filter,
-           const QColor &color, bool bAct)
+		     const QColor &color, bool bAct)
 {
 #ifdef DEBUGMSG
   qDebug("addButton() '%s', '%s', '%s' %s", name.ascii(), filter.ascii(),

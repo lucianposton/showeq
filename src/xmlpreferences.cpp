@@ -623,6 +623,44 @@ QString XMLPreferences::getPrefComment(const QString& inName, const QString& inS
  return QString("");
 }
 
+bool XMLPreferences::isSection(const QString& inSection, 
+			       Persistence pers)
+{
+  PreferenceDict* sectionDict;
+
+  if (pers & Runtime)
+  {
+    // see if the section exists in the dictionary
+    sectionDict = m_runtimeSections.find(inSection);
+
+    // if so, then see if the preference exists
+    if (sectionDict != NULL)
+      return true;
+  }
+
+  if (pers & User)
+  {
+    // see if the section exists in the dictionary
+    sectionDict = m_userSections.find(inSection);
+    
+    // if so, then see if the preference exists
+    if (sectionDict != NULL)
+      return true;
+  }
+
+  if (pers & Defaults)
+  {
+    // see if the section exists in the defaults dictionary
+    sectionDict = m_defaultsSections.find(inSection);
+    
+    // if so, then see if the preferences exists
+    if (sectionDict != NULL)
+      return true;
+  }
+
+  return false;
+}
+			       
 bool XMLPreferences::isPreference(const QString& inName, 
 				  const QString& inSection,
 				  Persistence pers)

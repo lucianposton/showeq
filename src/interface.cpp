@@ -989,6 +989,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    connect(this, SIGNAL(saveAllPrefs(void)),
 	   m_mapMgr, SLOT(savePrefs(void)));
 
+   // connect CategoryMgr slots to interface signals
+   connect(this, SIGNAL(saveAllPrefs(void)),
+	   m_categoryMgr, SLOT(savePrefs(void)));
+
    // connect GroupMgr slots to EQPacket signals
    connect(m_packet, SIGNAL(groupInfo(const groupMemberStruct*, uint32_t, uint8_t)),
 	   m_groupMgr, SLOT(handleGroupInfo(const groupMemberStruct*)));
@@ -1358,7 +1362,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // Create message boxes defined in config preferences
    QString title;
    int i = 0;
-   int j = 0;
    MsgDialog* pMsgDlg;
    QString msgSection;
    bool haveMsgDialogs = false;
@@ -1366,70 +1369,34 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    {
       // attempt to pull a button title from the preferences
      msgSection.sprintf("MessageBox%d", i);
-     if (pSEQPrefs->isPreference("Caption", msgSection))
+     if (pSEQPrefs->isSection(msgSection))
      {
        haveMsgDialogs = true;
-       title = pSEQPrefs->getPrefString("Caption", msgSection);
-        pMsgDlg = new MsgDialog(parentWidget(), title, m_StringList);
-        m_msgDialogList.append(pMsgDlg);
+       pMsgDlg = new MsgDialog(parentWidget(), msgSection, msgSection, 
+			       m_StringList);
+       m_msgDialogList.append(pMsgDlg);
 
-        // connect signal for new messages
-        connect (this, SIGNAL (newMessage(int)),
-           pMsgDlg, SLOT (newMessage(int)));
-	connect (pMsgDlg, SIGNAL(toggle_view_ChannelMsgs()),
-            this, SLOT(toggle_view_ChannelMsgs()));
+       // connect signal for new messages
+       connect (this, SIGNAL (newMessage(int)),
+		pMsgDlg, SLOT (newMessage(int)));
+       connect (this, SIGNAL(saveAllPrefs()),
+		pMsgDlg, SLOT(savePrefs()));
+       connect (pMsgDlg, SIGNAL(toggle_view_ChannelMsgs()),
+		this, SLOT(toggle_view_ChannelMsgs()));
 
-        // set Additive mode
-        pMsgDlg->setAdditive(pSEQPrefs->getPrefBool("Additive", msgSection));
-
-        // set control mode
-        pMsgDlg->showControls(!pSEQPrefs->getPrefBool("HideControls", msgSection));
-
-        // set Msg Type mode
-        pMsgDlg->showMsgType(pSEQPrefs->getPrefBool("ShowMsgType", msgSection));
-
-        // Configure buttons
-        for(j = 1; j < 15; j++)
-        {
-          // attempt to pull button description from the preferences
-          tempStr.sprintf("Button%dName", j);
-          QString buttonname(pSEQPrefs->getPrefString(tempStr, msgSection));
-          tempStr.sprintf("Button%dFilter", j);
-          QString buttonfilter(pSEQPrefs->getPrefString(tempStr, msgSection));
-          tempStr.sprintf("Button%dColor", j);
-	  QColor buttoncolor(pSEQPrefs->getPrefColor(tempStr, msgSection, 
-						     QColor("black")));
-          tempStr.sprintf("Button%dActive", j);
-
-          // if we have a name and filter string
-          if (!buttonname.isEmpty() && !buttonfilter.isEmpty())
-          {
-            // Add the button
-            pMsgDlg->addButton(buttonname, buttonfilter,
-                  buttoncolor, pSEQPrefs->getPrefBool(tempStr, msgSection));
-          }
-          else
-          {
-             if (!buttonname.isEmpty() || !buttonfilter.isEmpty())
-             {
-               fprintf(stderr, "Error: Incomplete definition of Button '%s'\n",
-		       (const char*)title);
-             }
-          }
-
-        } // end for buttons
-
-        // set Geometry
-        QSize s = pSEQPrefs->getPrefSize("WindowSize", msgSection, 
-					 pMsgDlg->size());
-        pMsgDlg->resize(s);
-        if (pSEQPrefs->getPrefBool("UseWindowPos", section, true))
-	{
-	  QPoint p = pSEQPrefs->getPrefPoint("WindowPos", msgSection, 
-					     pMsgDlg->pos());
-          pMsgDlg->move(p);
-	}
-      } // end if dialog config section found
+       // set Geometry
+       QSize s = pSEQPrefs->getPrefSize("WindowSize", msgSection, 
+					size());
+       pMsgDlg->resize(s);
+       if (pSEQPrefs->getPrefBool("UseWindowPos", section, true))
+       {
+	 QPoint p = pSEQPrefs->getPrefPoint("WindowPos", msgSection, 
+					    pos());
+	 pMsgDlg->move(p);
+       }
+     } // end if dialog config section found
+     else 
+       break;
    } // for all message boxes defined in pref file
 
    m_viewChannelMsgs = pSEQPrefs->getPrefBool("ShowChannel", section, 
@@ -1463,9 +1430,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    QSize s;
    QPoint p;
 
-
-   //  Add Category filters to spanwlist from config
-   reloadCategories();
 
    // interface components
 
@@ -2191,25 +2155,22 @@ EQInterface::savePrefs(void)
 
       // save message dialog geometries
       MsgDialog* diag;
-      int i = 0;
+      int i = 1;
 
       QString msgSection;
-      for (diag=m_msgDialogList.first(); diag != 0; diag=m_msgDialogList.next() )
+      for (diag=m_msgDialogList.first(); 
+	   diag != 0; 
+	   diag=m_msgDialogList.next() )
       {
-         // determine the message box number from the config file
-         for(i=1; i<15; i++) {
-	   msgSection.sprintf("MessageBox%d", i);
-	   if (!strcmp(pSEQPrefs->getPrefString("Caption", msgSection, ""), diag->name()) )
-               break;
-         }
+	msgSection.sprintf("MessageBox%d", i++);
 
-	 if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
-	 {
-	   pSEQPrefs->setPrefPoint("WindowPos", msgSection, 
-				 diag->pos());
-	   pSEQPrefs->setPrefSize("WindowSize", msgSection, 
-				  diag->size());
-	 }
+	if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
+	{
+	  pSEQPrefs->setPrefPoint("WindowPos", msgSection, 
+				  diag->pos());
+	  pSEQPrefs->setPrefSize("WindowSize", msgSection, 
+				 diag->size());
+	}
       }
 
       section = "Interface";
@@ -2348,7 +2309,7 @@ void EQInterface::toggle_filter_Audio(int id)
 {
   showeq_params->spawnfilter_audio = !showeq_params->spawnfilter_audio;
   menuBar()->setItemChecked(id, showeq_params->spawnfilter_audio);
-  pSEQPrefs->setPrefBool("IsCaseSensitive", "Filters", 
+  pSEQPrefs->setPrefBool("Audio", "Filters", 
 			 showeq_params->spawnfilter_audio);
 }
 
@@ -3095,12 +3056,15 @@ EQInterface::toggle_opt_SystimeSpawntime (int id)
 void
 EQInterface::createMessageBox(void)
 {
+  QString msgSection;
+  msgSection.sprintf("MessageBox%d", m_msgDialogList.count() + 1);
   MsgDialog* pMsgDlg = new MsgDialog(parentWidget(), 
-                                "MessageBox", m_StringList);
+				     msgSection, msgSection, m_StringList);
   m_msgDialogList.append(pMsgDlg);
 
   // connect signal for new messages
   connect (this, SIGNAL (newMessage(int)), pMsgDlg, SLOT (newMessage(int)));
+  connect (this, SIGNAL(saveAllPrefs()), pMsgDlg, SLOT(savePrefs()));
 
   pMsgDlg->show();
 }

@@ -1201,6 +1201,12 @@ void CSpawnList::addCategory(const Category* cat)
   // associate the new spawn list item with the category
   m_categoryListItems.insert((void*)cat, litem);
 
+  // set color
+  litem->setTextColor(cat->color());
+  
+  // update count
+  litem->updateTitle(cat->name());
+
   // populate the category
   populateCategory(cat);
 }

@@ -76,6 +76,9 @@ class XMLPreferences
   // retrieves the comment associated with the preference
   QString getPrefComment(const QString& inName, const QString& inSection);
 
+  // checks if a section exists
+  bool isSection(const QString& inSection, Persistence pers = Any);
+
   // checks if a preference exists
   bool isPreference(const QString& inName, const QString& inSection,
 		    Persistence pers = Any);

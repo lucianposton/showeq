@@ -1,6 +1,19 @@
 dohpaZ (14/05/02)
 ------------------
 Modifications:
+ + version 4.2.3
+ + Added support for persisting the category manager
+ + Added support for persisting MessageBoxes.
+ + Changed the category manager to edit colors using QColorDialog
+ + Modifed spawn list so that it used the color of new/changed categories
+ + Fixed a bug where we were trying to assemble client fragment packets
+   despite not caching them nor ordering them.
+ + Fixed a bug where toggling the audio option for filters was changing the
+   "IsCaseSensitive" preference instead of the "Audio" preference
+
+dohpaZ (14/05/02)
+------------------
+Modifications:
  + version 4.2.2
  + Changed how fonts are set and configured.  Ended the Helvetica tyranny 
    (where no matter what font you set over half the GUI would still use 

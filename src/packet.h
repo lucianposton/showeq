@@ -8,8 +8,6 @@
 #ifndef EQPACKET_H
 #define EQPACKET_H
 
-#define MAXPACKETCACHECOUNT 256
-#define MAXPACKETCACHESIZE  640
 #define MAXSPAWNDATA        98304
 
 #include <stdint.h>
@@ -60,14 +58,16 @@ typedef uint32_t in_addr_t;
 extern "C" { // fix for bpf not being c++ happy
 #include <pcap.h>
 }
-/* Used in the packet capture filter setup.  If address_type is
-   MAC_ADDRESS_TYPE, then we use the hostname string as a MAC address
-   for the filter. cpphack
-*/
-#define DEFAULT_ADDRESS_TYPE   10   /* These were chosen arbitrarily */
-#define IP_ADDRESS_TYPE        11 
-#define MAC_ADDRESS_TYPE       12
 
+//----------------------------------------------------------------------
+// forward declarations
+
+// Used in the packet capture filter setup.  If address_type is
+//   MAC_ADDRESS_TYPE, then we use the hostname string as a MAC address
+// for the filter. cpphack
+const uint8_t DEFAULT_ADDRESS_TYPE = 10;   /* These were chosen arbitrarily */
+const uint8_t IP_ADDRESS_TYPE = 11;
+const uint8_t MAC_ADDRESS_TYPE =  12;
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -708,6 +708,7 @@ class EQPacket : public QObject
    EQPacketMap    m_serverCache;
    unsigned char  m_serverData [MAXSPAWNDATA];
    uint32_t       m_serverDataSize;
+   //   uint16_t       m_serverDataFragSeq;
    uint32_t       m_client_addr;
    uint8_t        m_session_tracking_enabled;
 

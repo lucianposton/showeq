@@ -1076,8 +1076,10 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 		       packet.payload(), DIR_CLIENT);
       return;
     }
+#if 0 // ZBTEMP: Floyd, you need packet caching and ordering to handle fragments
     else
 	  dispatchZoneSplitData (packet, DIR_CLIENT);
+#endif
     return;
   }
 
@@ -1349,6 +1351,7 @@ void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf, uint8_t dir)
 #ifdef DEBUG_PACKET
    debug ("dispatchZoneSplitData()");
 #endif /* DEBUG_PACKET */
+   
    if (pf.isASQ())
    {
       /* Clear data */
