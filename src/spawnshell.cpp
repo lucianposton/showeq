@@ -88,7 +88,7 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr, EQPlayer* player)
    m_playerSpawn = NULL;
    m_cntDeadSpawnIDs = 0;
    m_posDeadSpawnIDs = 0;
-   memset((void*)m_deadSpawnID, 0, sizeof(m_deadSpawnID));
+   memset((void*)&m_deadSpawnID[0], 0, sizeof(m_deadSpawnID));
 
    m_spawnlogger = new SpawnLogger(showeq_params->SpawnLogFilename);
 
@@ -155,6 +155,10 @@ void SpawnShell::clear(void)
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::clear()\n");
 #endif
+#if 1 // ZBTEMP: 
+   printf("Clearing spawn information.\n");
+#endif
+
    emit clearItems();
 
    clearMap(m_spawns);
@@ -166,7 +170,7 @@ void SpawnShell::clear(void)
    m_playerSpawn = NULL;
    m_cntDeadSpawnIDs = 0;
    m_posDeadSpawnIDs = 0;
-   memset((void*)m_deadSpawnID, 0, sizeof(m_deadSpawnID));
+   memset((void*)&m_deadSpawnID[0], 0, sizeof(m_deadSpawnID));
 } // end clear
 
 const Item* SpawnShell::findID(itemType type, int id)
@@ -510,6 +514,7 @@ void SpawnShell::newSpawn(const spawnStruct& s)
 
      // not the player, so check if it's a recently deleted spawn
      for (int i =0; i < m_cntDeadSpawnIDs; i++)
+     {
        if ((m_deadSpawnID[i] != 0) && (m_deadSpawnID[i] == spawnId))
        {
 	 // found a match, remove it from the deleted spawn list
@@ -522,6 +527,7 @@ void SpawnShell::newSpawn(const spawnStruct& s)
 	 // and stop the attempt to add the spawn.
 	 return;
        }
+     }
    }
    
    ItemMap::iterator it;
@@ -658,6 +664,22 @@ void SpawnShell::updateSpawn(uint16_t id,
    }
    else if (showeq_params->showUnknownSpawns)
    {
+     // not the player, so check if it's a recently deleted spawn
+     for (int i =0; i < m_cntDeadSpawnIDs; i++)
+     {
+       // check dead spawn list for spawnID, if it was deleted, shouldn't
+       // see new position updates, so therefore this is probably 
+       // for a new spawn (spawn ID being reused)
+       if ((m_deadSpawnID[i] != 0) && (m_deadSpawnID[i] == id))
+       {
+	 // found a match, ignore it
+	 m_deadSpawnID[i] = 0;
+
+	 printf("\a(%d) had been removed from the zone, but saw a position update on it, so assuming new.\n", 
+		id);
+       }
+     }
+
      item = new Spawn(id, x, y, z, xVel, yVel, zVel, 
 		      heading, deltaHeading, animation);
      updateFilterFlags(item);

@@ -455,7 +455,7 @@ void Spawn::update(const spawnStruct* s)
   setHP(s->curHp);
   setMaxHP(s->maxHp);
   setLevel(s->level);
-  for (int i = 0; i < tLastCoreWearSlot; i++)
+  for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s->equipment[i]);
   setEquipment(tUnknown1, 0);
 
@@ -677,6 +677,8 @@ QString Spawn::equipmentStr(uint8_t wearingSlot) const
     return print_material(equipment(wearingSlot));
   else if (wearingSlot <= tLastWeapon)
     return print_weapon(equipment(wearingSlot));
+  else if (wearingSlot < tNumWearSlots)
+    return print_material(equipment(wearingSlot));
   else
     return "";
 }
@@ -866,7 +868,7 @@ QString Spawn::className() const
 QString Spawn::info() const
 {
   // Head, Chest, Arms, Waist, Gloves, Legs, Feet, Primary, Secondary
-  static const char* locs[]={"H","C","A","W","G","L","F","1","2"};
+  static const char* locs[]={"H","C","A","W","G","L","F","1","2", "B"};
   int i;
   QString temp = "";
   
@@ -877,12 +879,22 @@ QString Spawn::info() const
   // Worn stuff
   for (i = tFirstMaterial; i <= tLastMaterial ; i++)
     if (equipment(i))
-      temp += QString(locs[i]) + print_material(equipment(i)) + " ";
-
-  // Worn weapons
+      temp += QString(locs[i]) + ":" + print_material(equipment(i)) + " ";
+ 
+ // Worn weapons
   for (i = tFirstWeapon; i <= tLastWeapon; i++)
     if (equipment(i))
-      temp += QString(locs[i]) + print_weapon(equipment(i)) + " ";
+      temp += QString(locs[i]) + ":" +  + print_weapon(equipment(i)) + " ";
+
+  // Worn stuff -- Current best quess is that this may be material?
+  i = tUnknown1;
+  if (equipment(i))
+    temp += QString(locs[i]) + ":" + print_material(equipment(i)) + " "; 
+
+#if 1 // print also as slot U1 (Unknown1) until we're positive
+  if (equipment(i))
+    temp += QString("U1:U") + QString::number(equipment(i), 16) + " ";
+#endif
 
   return temp;
 }

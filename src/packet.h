@@ -238,8 +238,14 @@ class EQPacketFormatRaw
   // number of uint8_t's to skip when examining packets
   uint8_t skip() const
   {
+#if 0 // ZBTEMP
     return ((uint8_t)m_flagsLo.m_skip + 
 	    ((isARSP() || isSpecARQ()) ? 2 : 0));
+#else
+    return ((uint8_t)m_flagsLo.m_skip + 
+	    (isARSP() ? 2 : 0) +
+	    (isSpecARQ() ? 4 : 0));
+#endif
   }
 
   // The following accessors are only valid if the corresponding
@@ -708,6 +714,7 @@ class EQPacket : public QObject
    int  getEQTimeOfDay (time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay);
    void decodePacket   (int size, unsigned char *buffer);
    void dispatchWorldData (uint32_t len, uint8_t* data, uint8_t direction = 0);
+   void dispatchWorldChatData (uint32_t len, uint8_t* data, uint8_t direction = 0);
    void dispatchZoneData (uint32_t len, uint8_t* data, uint8_t direction = 0);
    void dispatchZoneSplitData (EQPacketFormat& pf, uint8_t dir);
    void logRawData (const char   *filename, unsigned char *data, unsigned int len);

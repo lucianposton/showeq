@@ -66,6 +66,12 @@ const int16_t arqSeqWrapCutoff = 1024;
 // an arq sequenced packet, and just move on...
 const int16_t arqSeqGiveUp = 256;
 
+
+const in_port_t WorldServerGeneralPort = 9000;
+const in_port_t WorldServerChatPort = 9876;
+const in_port_t LoginServerMinPort = 15000;
+const in_port_t ChatServerPort = 5998;
+
 //----------------------------------------------------------------------
 // static variables
 #ifdef PACKET_CACHE_DIAG
@@ -912,14 +918,36 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   }
 
   /* Chat and Login Server Packets, Discard for now */
-  if ((packet.getDestPort() == 5999) || (packet.getSourcePort() == 5999))
+  if ((packet.getDestPort() == ChatServerPort) ||
+      (packet.getSourcePort() == ChatServerPort))
     return;
-  if ((packet.getDestPort() >= 15000) || (packet.getSourcePort() >= 15000))
+  if ((packet.getDestPort() >= LoginServerMinPort) || 
+      (packet.getSourcePort() >= LoginServerMinPort))
     return;
 
   /* discard pure ack/req packets and non valid flags*/
   if (packet.flagsHi() < 0x08 || packet.flagsHi() > 0x46 || size < 10)
+  {
+#if 0 // ZBTEMP: World Chat server experiments
+    //if ((packet.getSourcePort() == WorldServerChatPort) ||
+    //	(packet.getDestPort() == WorldServerChatPort))
+    {
+      printf("discarding packet %s:%d ==>%s:%d flagsHi=%d size=%d\n",
+	     (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
+	     (const char*)packet.getIPv4DestA(), packet.getDestPort(),
+	     packet.flagsHi(), size);
+      printf("%s\n", (const char*)packet.headerFlags(false));
+      uint32_t crc = packet.calcCRC32();
+      if (crc != packet.crc32())
+      printf("\tCRC: Warning Packet seq = %d CRC (%08x) != calculated CRC (%08x)!\n",
+	     packet.seq(), packet.crc32(), crc);
+      else
+	printf("\tCRC: Valid CRC seq=%d CRC(%08x) == calculated CRC (%08x)!\n",
+	       packet.seq(), packet.crc32(), crc);
+    }
+#endif
     return;    
+  }
 
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
   printf("%s\n", (const char*)packet.headerFlags((PACKET_PROCESS_DIAG < 3)));
@@ -945,7 +973,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 #endif
 
   /* World Server  -> Client Packet */
-  if (packet.getSourcePort() == 9000)
+  if (packet.getSourcePort() == WorldServerGeneralPort)
   {
     /* unless we really start paying attention to World Servers, we should 
        be able to safely ignore sequencing and arq */
@@ -963,7 +991,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
     dispatchWorldData (packet.payloadLength(), packet.payload(), DIR_SERVER);
     return;
   }
-  else if (packet.getDestPort() == 9000)
+  else if (packet.getDestPort() == WorldServerGeneralPort)
   {
     /* unless we really start paying attention to World Servers, we should 
        be able to safely ignore sequencing and arq */
@@ -978,6 +1006,32 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
     }
 
     dispatchWorldData (packet.payloadLength(), packet.payload(), DIR_CLIENT);
+    return;
+  }
+  else if (packet.getSourcePort() == WorldServerChatPort)
+  {
+    dispatchWorldChatData(packet.payloadLength(), packet.payload(), DIR_SERVER);
+
+#if 1 // ZBTEMP
+    logData ("/tmp/WorldChatData.log", 
+	     packet.payloadLength(), 
+	     (const uint8_t*)packet.payload(), 
+	     packet.getIPv4SourceN(), packet.getIPv4DestN(), 
+	     packet.getSourcePort(), packet.getDestPort());
+#endif
+    return;
+  }
+  else if (packet.getDestPort() == WorldServerChatPort)
+  {
+    dispatchWorldChatData(packet.payloadLength(), packet.payload(), DIR_CLIENT);
+
+#if 1 // ZBTEMP
+    logData ("/tmp/WorldChatData.log", 
+	     packet.payloadLength(), 
+	     (const uint8_t*)packet.payload(), 
+	     packet.getIPv4SourceN(), packet.getIPv4DestN(), 
+	     packet.getSourcePort(), packet.getDestPort());
+#endif
     return;
   }
 
@@ -1397,6 +1451,29 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
     emit cacheSize(0);
     return;
     }
+  }
+}
+
+///////////////////////////////////////////
+//EQPacket::dispatchWorldChatData  
+// note this dispatch gets just the payload
+void EQPacket::dispatchWorldChatData (uint32_t len, uint8_t *data, 
+				      uint8_t dir)
+{
+#ifdef DEBUG_PACKET
+  debug ("dispatchWorldChatData()");
+#endif /* DEBUG_PACKET */
+  if (len < 10)
+    return;
+  
+  uint16_t opCode = eqntohuint16(data);
+
+  switch (opCode)
+  {
+  default:
+    printf ("%04x - %d (%s)\n", opCode, len, 
+	    ((dir == DIR_SERVER) ? 
+	     "WorldChatServer --> Client" : "Client --> WorldChatServer"));
   }
 }
 
@@ -2809,13 +2886,13 @@ void PacketCaptureThread::setFilter (const char *device,
 
     /* Listen to World Server or the specified Zone Server */
     if (address_type == IP_ADDRESS_TYPE && client_port)   
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, hostname);
     else if (address_type == IP_ADDRESS_TYPE && !client_port) 
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
     else if (address_type == MAC_ADDRESS_TYPE && client_port)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, hostname);
     else if (address_type == MAC_ADDRESS_TYPE && !client_port)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
     else
     {
           printf ("Filtering packets on device %s, searching for EQ client...\n", device);

@@ -1,3 +1,16 @@
+dohpaZ (03/04/02)
+------------------
+Modifications:
+ + Minor bug fix in equipment handling (should clear up spurious unknown
+   weapons.
+ + Support displaying Unknown1 possibly slot in info display, think it may
+   be back slot so using letter B and that it is a material, this could well
+   be an incorrect assumption.  Also put a colon ":" between slot designator 
+   and slot content
+ + Additional logic for managing dead spawn ID's in SpawnShell
+ + Initial tentative modifications to handle world chat server data (still
+   not functional, but it's a start).
+
 fee    (01/04/02)
 ------------------
 Modifications:
