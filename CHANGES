@@ -1,3 +1,24 @@
+dohpaZ (18/03/02)
+------------------
+Modifications:
+ + Map optimizations.  Switched from using {QPixmap, QWidget}::drawPixmap() to 
+   bitBlt() for copying pixmap data around and to screen.  Also, cache 
+   the item->filterFlags() value on the stack for slightly faster access.
+   The bitBlt optimization MAY help those seeing lockups.
+ + Changed default spawn save frequency, and updated showeq.conf.dist to 
+   reflect the new default (saves spawns every 60 seconds).
+ + Optimized how spawn information was saved and added a magic number to the
+   beginning of it's file
+ + Added FOV Mode selection to the map, with three options: 
+   Distance Based (default), Scaled Classic, and Classic.  This controls the
+   style of player background/field of view display
+   + "Distance Based" where its size is based on an actual distance 
+     along a horizontal plane from the player.
+   + "Scaled Classic" where its size is based on the classic formula 
+     a simple scale applied to compensate for zoom.
+   + "Classic" where the size uses the old, meaningless, non-scaled classic
+     formula.
+
 dohpaZ (17/03/02)
 ------------------
 Modifications:

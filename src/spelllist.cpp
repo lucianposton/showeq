@@ -11,6 +11,7 @@
  */
 
 #include <qheader.h>
+#include <qpainter.h>
 
 #include "spelllist.h"
 #include "main.h"

@@ -41,6 +41,8 @@
 
 //----------------------------------------------------------------------
 // constants
+const char magicStr[5] = "spn1"; // magic is the size of uint32_t + a null
+const uint32_t* magic = (uint32_t*)magicStr;
 
 //----------------------------------------------------------------------
 // Handy utility function
@@ -1250,6 +1252,9 @@ void SpawnShell::saveSpawns(void)
 
     uint8_t flag;
 
+    // write the magic string
+    d << *magic;
+
     // write a test value at the top of the file for a validity check
     size_t testVal = sizeof(spawnStruct);
     d << testVal;
@@ -1297,6 +1302,18 @@ void SpawnShell::restoreSpawns(void)
     Spawn* item;
 
     QDataStream d(&keyFile);
+
+    // check the magic string
+    uint32_t magicTest;
+    d >> magicTest;
+
+    if (magicTest != *magic)
+    {
+      fprintf(stderr, 
+	      "Failure loading %s: Bad magic string!\n",
+	      (const char*)fileName);
+      return;
+    }
 
     // check the test value at the top of the file
     d >> testVal;

@@ -112,10 +112,12 @@ class Item : public EQPoint
 
   // common item data
   QString m_name;
-  QTime m_lastUpdate; 
-  QTime m_spawnTime; 
   uint32_t m_filterFlags;
   uint32_t m_runtimeFilterFlags;
+
+  // persisted info below
+  QTime m_lastUpdate; 
+  QTime m_spawnTime; 
   float m_zDisplay;
   uint16_t m_ID;
   uint8_t m_NPC;
@@ -268,25 +270,27 @@ class Spawn : public Item
   int m_cookedDeltaXFixPt;
   int m_cookedDeltaYFixPt;
   int m_cookedDeltaZFixPt;
-  uint16_t m_petOwnerID;
   int16_t m_deltaX;
   int16_t m_deltaY;
   int16_t m_deltaZ;
-  uint16_t m_curHP;
-  uint16_t m_maxHP;
   int8_t m_heading;
   int8_t m_deltaHeading;
+
+  // persisted info below
+  uint16_t m_petOwnerID;
+  uint16_t m_curHP;
+  uint16_t m_maxHP;
+  uint16_t m_deity;
+  int16_t m_deityTeam;
+  uint16_t m_equipment[9];
   uint8_t m_level;
   uint8_t m_race;
   int8_t m_raceTeam;
-  uint16_t m_deity;
-  int16_t m_deityTeam;
   uint8_t m_gender;
   uint8_t m_class;
   uint8_t m_light;
-  uint16_t m_equipment[9];
-  bool m_considered;
   int8_t m_typeflag;
+  bool m_considered;
 };
 
 

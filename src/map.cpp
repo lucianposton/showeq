@@ -681,7 +681,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
 
   subMenu = new QPopupMenu;
   QHBox* tmpHBox = new QHBox(subMenu);
-  new QLabel("Distance:", tmpHBox);
+  m_fovSpinBoxLabel = new QLabel("Distance:", tmpHBox);
   m_fovSpinBox = new QSpinBox(20, 1200, 20, tmpHBox, "FOV");
   m_fovSpinBox->setValue(m_map->fovDistance());
   connect(m_fovSpinBox, SIGNAL(valueChanged(int)),
@@ -689,7 +689,9 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   m_id_FOVDistance = subMenu->insertItem(tmpHBox);
   m_id_FOVColor = subMenu->insertItem("Color...",
 				      this, SLOT(select_fovColor(int)));
-  QPopupMenu* subSubMenu = new QPopupMenu;
+  QPopupMenu* subSubMenu;
+
+  subSubMenu = new QPopupMenu;
   subMenu->setCheckable(true);
   m_id_FOVNoBrush = subSubMenu->insertItem("No Background");
   subSubMenu->setItemParameter(m_id_FOVNoBrush, Qt::NoBrush); 
@@ -723,8 +725,20 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   subSubMenu->setItemParameter(m_id_FOVDiagCrossPattern, Qt::DiagCrossPattern); 
   connect(subSubMenu, SIGNAL(activated(int)),
 	  this, SLOT(select_fovStyle(int)));
-
   subMenu->insertItem("FOV Style", subSubMenu);
+
+  subSubMenu = new QPopupMenu;
+  subMenu->setCheckable(true);
+  m_id_FOVDistanceBased = subSubMenu->insertItem("Distance Based");
+  subSubMenu->setItemParameter(m_id_FOVDistanceBased, tFOVDistanceBased); 
+  m_id_FOVScaledClassic = subSubMenu->insertItem("Scaled Classic");
+  subSubMenu->setItemParameter(m_id_FOVScaledClassic, tFOVScaledClassic); 
+  m_id_FOVClassic = subSubMenu->insertItem("Classic");
+  subSubMenu->setItemParameter(m_id_FOVClassic, tFOVClassic); 
+  connect(subSubMenu, SIGNAL(activated(int)),
+	  this, SLOT(select_fovMode(int)));
+  subMenu->insertItem("FOV Mode", subSubMenu);
+
   m_id_FOV = insertItem("Player FOV", subMenu);
 
   connect(this, SIGNAL(aboutToShow()),
@@ -782,6 +796,8 @@ void MapMenu::init_Menu(void)
 
   m_drawSizeSpinBox->setValue(m_map->drawSize());
 
+  m_fovSpinBox->setValue(m_map->fovDistance());
+
   int fovStyle = m_map->fovStyle();
   setItemChecked(m_id_FOVNoBrush, (fovStyle == Qt::NoBrush));
   setItemChecked(m_id_FOVSolidPattern, (fovStyle == Qt::SolidPattern));
@@ -799,9 +815,37 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_FOVFDiagPattern, (fovStyle == Qt::FDiagPattern));
   setItemChecked(m_id_FOVDiagCrossPattern, (fovStyle == Qt::DiagCrossPattern));
 
-  m_fovSpinBox->setValue(m_map->fovDistance());
+  init_fovMenu();
 }
 
+void MapMenu::init_fovMenu(void)
+{
+  FOVMode fovMode = m_map->fovMode();
+
+  // calculate new base FOV Distance
+  int newFOVDistMin = 20;
+  int newFOVDistMax = 1200;
+  int newFOVDistInc = 20;
+  if (fovMode != tFOVDistanceBased)
+  {
+    newFOVDistMin = 5;
+    newFOVDistMax = 120;
+    newFOVDistInc = 1;
+    
+    m_fovSpinBoxLabel->setText("Base Radius:");
+  }
+  else 
+    m_fovSpinBoxLabel->setText("Distance:");
+
+  int fovDistance = m_map->fovDistance();
+  m_fovSpinBox->setRange(newFOVDistMin, newFOVDistMax);
+  m_fovSpinBox->setLineStep(newFOVDistInc);
+  m_fovSpinBox->setValue(fovDistance);
+
+  setItemChecked(m_id_FOVDistanceBased, (fovMode == tFOVDistanceBased));
+  setItemChecked(m_id_FOVScaledClassic, (fovMode == tFOVScaledClassic));
+  setItemChecked(m_id_FOVClassic, (fovMode == tFOVClassic));
+}
 void MapMenu::select_follow(int itemId)
 {
   // set the selected follow mode
@@ -966,10 +1010,6 @@ void MapMenu::select_font(int itemId)
   QFont newFont;
   newFont = QFontDialog::getFont(&ok, m_map->font(), m_map, (const char*)name);
 
-#if 1 // ZBTEMP: Test
-  printf("New Font Key: %s\n", (const char*)newFont.key());
-#endif
-
   if (ok)
     m_map->setFont(newFont);
 }
@@ -988,6 +1028,30 @@ void MapMenu::select_fovColor(int itemId)
 void MapMenu::select_fovStyle(int itemId)
 {
   m_map->setFOVStyle(itemParameter(itemId));
+}
+
+void MapMenu::select_fovMode(int itemId)
+{
+  FOVMode oldFOVMode = m_map->fovMode();
+  FOVMode newFOVMode = (FOVMode)itemParameter(itemId);
+
+  if (oldFOVMode != newFOVMode)
+  {
+    // set the new FOV Mode
+    uint16_t newFOVDistance = 0;
+    if ((newFOVMode != tFOVDistanceBased) && 
+	(oldFOVMode == tFOVDistanceBased))
+      newFOVDistance = 40;
+    else if (newFOVMode == tFOVDistanceBased)
+      newFOVDistance = 200;
+
+    m_map->setFOVMode(newFOVMode);
+
+    if (newFOVDistance != 0)
+      m_map->setFOVDistance(newFOVDistance);
+
+    init_fovMenu();
+  }
 }
 
 //----------------------------------------------------------------------
@@ -1076,8 +1140,17 @@ Map::Map(MapMgr* mapMgr,
   setDrawSize(3); // in case the user gave a ridiculous size
   setDrawSize(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 3));
 
+  tmpPrefString = "FOVMode";
+  m_fovMode = (FOVMode)pSEQPrefs->getPrefInt(tmpPrefString, prefString, 
+					     tFOVDistanceBased);
+
+  int fovDistDefault = 200;
+  if (m_fovMode != tFOVDistanceBased)
+    fovDistDefault = 40;
+
   tmpPrefString = "FOVDistance";
-  m_fovDistance = pSEQPrefs->getPrefInt(tmpPrefString, prefString, 200);
+  m_fovDistance = pSEQPrefs->getPrefInt(tmpPrefString, prefString, 
+					fovDistDefault);
 
   tmpPrefString = "FOVStyle";
   m_fovStyle = pSEQPrefs->getPrefInt(tmpPrefString, prefString, QBrush::Dense7Pattern);
@@ -1311,13 +1384,16 @@ void Map::savePrefs(void)
   tmpPrefString = "DrawSize";
   pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_drawSize);
 
-  tmpPrefString = "fovDistance";
+  tmpPrefString = "FOVMode";
+  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_fovMode );
+
+  tmpPrefString = "FOVDistance";
   pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_fovDistance);
 
-  tmpPrefString = "fovStyle";
+  tmpPrefString = "FOVStyle";
   pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_fovStyle);
 
-  tmpPrefString = "fovColor";
+  tmpPrefString = "FOVColor";
   pSEQPrefs->setPrefString(tmpPrefString, prefString, m_fovColor.name());
 
   tmpPrefString = "MapLineStyle";
@@ -1909,6 +1985,14 @@ void Map::setFOVStyle(int val)
   m_fovStyle = val;
 }
 
+void Map::setFOVMode(FOVMode mode)
+{
+  if ((mode < tFOVDistanceBased) || (mode > tFOVClassic))
+    return;
+
+  m_fovMode = mode;
+}
+
 void Map::setFOVColor(const QColor& color)
 {
   m_fovColor = color;
@@ -2260,6 +2344,7 @@ void Map::dumpInfo(QTextStream& out)
   out << "DrawSize: " << m_drawSize << endl;
   out << "FOVDistance: " << m_fovDistance << endl;
   out << "FOVStyle: " << m_fovStyle << endl;
+  out << "FOVMode: " << m_fovMode << endl;
   out << "FOVColor: " << m_fovColor.name() << endl;
 
   out << endl;
@@ -2404,10 +2489,21 @@ void Map::reAdjust ()
     break;
   }
 
-  // scaled FOV Distance (m_fovDistance * scale)
-  m_scaledFOVDistance = fixPtMulII(m_param.ratioIFixPt(), 
-				   MapParameters::qFormat,
-				   m_fovDistance);
+  switch (m_fovMode)
+  {
+  case tFOVDistanceBased:
+    // scaled FOV Distance (m_fovDistance * scale)
+    m_scaledFOVDistance = fixPtMulII(m_param.ratioIFixPt(), 
+				     MapParameters::qFormat,
+				     m_fovDistance);
+    break;
+  case tFOVScaledClassic:
+    m_scaledFOVDistance = m_fovDistance * m_param.zoom();
+    break;
+  case tFOVClassic:
+    m_scaledFOVDistance = m_fovDistance;
+    break;
+  }
 }
 
 void Map::addLocation(void)
@@ -2589,15 +2685,18 @@ void Map::paintMap (QPainter * p)
   // retrieve the screen bounds
   const QRect& screenBounds = m_param.screenBounds();
 
+  // copy the background
+  const QPixmap& tmpPix = m_mapCache.getMapImage(m_param);
+  bitBlt(&m_offscreen, 0, 0,
+	 &tmpPix, 0, 0, tmpPix.width(), tmpPix.height(),
+	 CopyROP, true);
+
   //Now, if we're animating, allow player to walk off. Grr, centering issue.
 
   /* Begin painting */
   tmp.begin (&m_offscreen);
   tmp.setPen (NoPen);
   tmp.setFont (QFont("Helvetica", 8, QFont::Normal));
-
-  // draw the background
-  tmp.drawPixmap(0, 0, m_mapCache.getMapImage(m_param));
 
   if ((player != NULL) && 
       (inRect(screenBounds, playerPos.xPos(), playerPos.yPos())))
@@ -2663,7 +2762,9 @@ void Map::paintMap (QPainter * p)
    tmp.end ();
    
    // draw to the widget
-   p->drawPixmap (0, 0, m_offscreen);
+  bitBlt(this, 0, 0,
+	 &m_offscreen, 0, 0, m_offscreen.width(), m_offscreen.height(),
+	 CopyROP, true);
 }
 
 void Map::paintPlayerBackground(MapParameters& param, QPainter& p)
@@ -2890,6 +2991,7 @@ void Map::paintSpawns(MapParameters& param,
   uint16_t range;
   int scaledRange;
   int sizeWH;
+  uint32_t filterFlags;
   const QRect& screenBounds = m_param.screenBounds();
   bool up2date = false;
 
@@ -2933,12 +3035,14 @@ void Map::paintSpawns(MapParameters& param,
     spawn = (const Spawn*)item;
 #endif
 
+    filterFlags = item->filterFlags();
+
     // only paint if the spawn is not filtered or the m_showFiltered flag is on
     if ((!m_spawnDepthFilter || 
 	 (item == m_selectedItem) ||
          ((item->zPos() <= m_param.playerHeadRoom()) && 
 	  (item->zPos() >= m_param.playerFloorRoom()))) &&
-	((!(item->filterFlags() & FILTER_FLAG_FILTERED)) || m_showFiltered))
+	((!(filterFlags & FILTER_FLAG_FILTERED)) || m_showFiltered))
 	 
     {
       // get the approximate position of the spawn
@@ -2999,7 +3103,7 @@ void Map::paintSpawns(MapParameters& param,
       // handle regular NPC's first, since they are generally the most common
       if (spawn->isNPC())
       {
-	if (!(spawn->filterFlags() & FILTER_FLAG_FILTERED))
+	if (!(filterFlags & FILTER_FLAG_FILTERED))
 	{
 	  // set pen to black
 	  p.setPen(black);
@@ -3059,7 +3163,7 @@ void Map::paintSpawns(MapParameters& param,
 	{
 	  if(m_flash && (spawn->runtimeFilterFlags() & m_runtimeFilterFlagMask))
 	    p.setPen(white);
-	  else if ((spawn->filterFlags() & FILTER_FLAG_FILTERED))
+	  else if ((filterFlags & FILTER_FLAG_FILTERED))
 	    p.setPen(gray);
 	  else
 	    p.setPen(magenta);
@@ -3073,7 +3177,7 @@ void Map::paintSpawns(MapParameters& param,
 	  // don't do anything else for out of data PC data.
 	  continue;
 	}
-	if (!(spawn->filterFlags() & FILTER_FLAG_FILTERED))
+	if (!(filterFlags & FILTER_FLAG_FILTERED))
 	{
 	  // set pen to magenta
 	  p.setPen(magenta);
@@ -3202,7 +3306,7 @@ void Map::paintSpawns(MapParameters& param,
       {
 	if(m_flash && (spawn->runtimeFilterFlags() & m_runtimeFilterFlagMask))
 	  p.setPen(white);
-	else if ((spawn->filterFlags() & FILTER_FLAG_FILTERED))
+	else if ((filterFlags & FILTER_FLAG_FILTERED))
 	  p.setPen(gray);
 	else
 	  p.setPen(cyan);
@@ -3222,7 +3326,7 @@ void Map::paintSpawns(MapParameters& param,
       {
 	if(m_flash && (spawn->runtimeFilterFlags() & m_runtimeFilterFlagMask))
 	  tmpPen = white;
-	else if ((spawn->filterFlags() & FILTER_FLAG_FILTERED))
+	else if ((filterFlags & FILTER_FLAG_FILTERED))
 	  tmpPen = gray;
 	else
 	  tmpPen = yellow;
@@ -3256,9 +3360,9 @@ void Map::paintSpawns(MapParameters& param,
       }
 
       // only bother checking for specific flags if any are set...
-      if (spawn->filterFlags() != 0)
+      if (filterFlags != 0)
       {
-	if (spawn->filterFlags() & FILTER_FLAG_DANGER)
+	if (filterFlags & FILTER_FLAG_DANGER)
 	{
 	  distance = location.calcDist2DInt(param.player());
 	  p.setPen(red);
@@ -3285,7 +3389,7 @@ void Map::paintSpawns(MapParameters& param,
 			spawnOffsetXPos, spawnOffsetYPos);
 	  }
 	}
-	else if (spawn->filterFlags() & FILTER_FLAG_CAUTION)
+	else if (filterFlags & FILTER_FLAG_CAUTION)
 	{
 	  distance = location.calcDist2DInt(param.player());
 	  p.setPen(yellow);
@@ -3301,7 +3405,7 @@ void Map::paintSpawns(MapParameters& param,
 			spawnOffsetXPos, spawnOffsetYPos);
 	  }
 	}
-	else if (spawn->filterFlags() & FILTER_FLAG_HUNT)
+	else if (filterFlags & FILTER_FLAG_HUNT)
 	{
 	  p.setPen(gray);
 	  p.setBrush(NoBrush);
@@ -3310,7 +3414,7 @@ void Map::paintSpawns(MapParameters& param,
 			   spawnOffsetYPos - m_marker1Size, 
 			   m_marker1SizeWH, m_marker1SizeWH);
 	}
-	else if (spawn->filterFlags() & FILTER_FLAG_LOCATE)
+	else if (filterFlags & FILTER_FLAG_LOCATE)
 	{
 	  p.setPen(white);
 	  p.setBrush(NoBrush);
@@ -3323,7 +3427,7 @@ void Map::paintSpawns(MapParameters& param,
 		     m_param.playerYOffset(),
 		     spawnOffsetXPos, spawnOffsetYPos);
 	}
-	else if (spawn->filterFlags() & FILTER_FLAG_TRACER)
+	else if (filterFlags & FILTER_FLAG_TRACER)
         {
 	  p.setBrush(NoBrush);
 	  p.setPen(yellow);

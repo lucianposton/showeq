@@ -401,26 +401,12 @@ Spawn::Spawn(QDataStream& d, uint16_t id)
   : Item(tSpawn, id)
 {
   // restore Spawn info
+  d.readRawBytes((char*)&m_lastUpdate, 
+		 ((char*)this + sizeof(Item)) - (char*)&m_lastUpdate);
+  d.readRawBytes((char*)&m_petOwnerID,
+		 ((char*)this + sizeof(Spawn)) - (char*)&m_petOwnerID);
   d >> m_name;
-  d >> m_NPC;
-  d >> m_xPos;
-  d >> m_yPos;
-  d >> m_zPos;
-  d >> m_lastUpdate;
-  d >> m_spawnTime;
   d >> m_rawName;
-  d >> m_petOwnerID;
-  d >> m_curHP;
-  d >> m_maxHP;
-  d >> m_level;
-  d >> m_race;
-  d >> m_deity;
-  d >> m_gender;
-  d >> m_class;
-  d >> m_light;
-
-  for (int i = 0; i < 9; i++)
-    d >> m_equipment[i];
 
   // calculate race/deity team info
   calcRaceTeam();
@@ -965,26 +951,16 @@ bool Spawn::approximatePosition(bool animating,
 void Spawn::saveSpawn(QDataStream& d)
 {
   // dump spawn info
+  // write out the raw spawn structure, skipping over the QStrings,
+  // and SpawnTrackList (which can't be persisted in this fashion),
+  // and the data we don't wan't copied over (heading/delta info).
+  d.writeRawBytes((const char*)&m_lastUpdate, 
+		  ((char*)this + sizeof(Item)) 
+		  - (char*)&m_lastUpdate);
+  d.writeRawBytes((const char*)&m_petOwnerID,
+		  ((char*)this + sizeof(Spawn)) - (char*)&m_petOwnerID);
   d << m_name;
-  d << m_NPC;
-  d << m_xPos;
-  d << m_yPos;
-  d << m_zPos;
-  d << m_lastUpdate;
-  d << m_spawnTime;
   d << m_rawName;
-  d << m_petOwnerID;
-  d << m_curHP;
-  d << m_maxHP;
-  d << m_level;
-  d << m_race;
-  d << m_deity;
-  d << m_gender;
-  d << m_class;
-  d << m_light;
-
-  for (int i = 0; i < 9; i++)
-    d << m_equipment[i];
 }
 
 //----------------------------------------------------------------------

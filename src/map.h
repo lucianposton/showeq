@@ -57,6 +57,13 @@ enum FollowMode
   tFollowNone = 2,
 };
 
+enum FOVMode
+{
+  tFOVDistanceBased = 0,
+  tFOVScaledClassic = 1,
+  tFOVClassic = 2
+};
+
 //----------------------------------------------------------------------
 // constants
 const int maxFrameTimes = 40;
@@ -180,6 +187,7 @@ class MapMenu : public QPopupMenu
 
  protected slots:
   void init_Menu(void);
+  void init_fovMenu(void);
 
   void select_follow(int itemId);
   void select_mapLine(int itemId);
@@ -214,10 +222,13 @@ class MapMenu : public QPopupMenu
   void select_font(int itemId);
   void select_fovColor(int itemId);
   void select_fovStyle(int itemId);
+  void select_fovMode(int itemId);
+
  protected:
   // pointer to the Map this menu controls
   Map* m_map;
 
+  QLabel* m_fovSpinBoxLabel;
   QSpinBox* m_fovSpinBox;
   QSpinBox* m_drawSizeSpinBox;
 
@@ -286,6 +297,9 @@ class MapMenu : public QPopupMenu
   int m_id_FOVBDiagPattern;
   int m_id_FOVFDiagPattern;
   int m_id_FOVDiagCrossPattern;
+  int m_id_FOVDistanceBased;
+  int m_id_FOVScaledClassic;
+  int m_id_FOVClassic;
 };
 
 //----------------------------------------------------------------------
@@ -325,6 +339,7 @@ class Map :public QWidget
   uint16_t fovDistance() const { return m_fovDistance; }
   int fovStyle() const { return m_fovStyle; }
   const QColor& fovColor() const { return m_fovColor; }
+  FOVMode fovMode() const { return m_fovMode; }
   bool showPlayer() const { return m_showPlayer; }
   bool showPlayerBackground() const { return m_showPlayerBackground; }
   bool showPlayerView() const { return m_showPlayerView; }
@@ -415,6 +430,7 @@ class Map :public QWidget
   void setFOVDistance(int val);
   void setFOVStyle(int val);
   void setFOVColor(const QColor& color);
+  void setFOVMode(FOVMode mode);
   void setShowMapLines(bool val);
   void setShowPlayer(bool val);
   void setShowPlayerBackground(bool val);
@@ -537,6 +553,7 @@ private:
    uint16_t m_fovDistance;
    unsigned int m_scaledFOVDistance;
    int m_fovStyle;
+   FOVMode m_fovMode;
    QColor m_fovColor;
    bool m_showMapLines;
    bool m_showMapLocations;

@@ -244,7 +244,7 @@ int main (int argc, char **argv)
 #endif
 
    section = "Map";
-   showeq_params->fast_machine = pSEQPrefs->getPrefBool("FastMachine", section, 0);
+   showeq_params->fast_machine = pSEQPrefs->getPrefBool("FastMachine", section, 1);
    showeq_params->showUnknownSpawns = pSEQPrefs->getPrefBool("ShowUnknownSpawns", section, 0);
 
    section = "Filters";
@@ -312,7 +312,7 @@ int main (int argc, char **argv)
      pSEQPrefs->getPrefBool("PlayerState", section, 1);
    showeq_params->saveSpawns = pSEQPrefs->getPrefBool("Spawns", section, 1);
    showeq_params->saveSpawnsFrequency = 
-     pSEQPrefs->getPrefInt("SpawnsFrequency", section, 10 * 1000);
+     pSEQPrefs->getPrefInt("SpawnsFrequency", section, 60 * 1000);
    showeq_params->restoreDecodeKey = false;
    showeq_params->restorePlayerState = false;
    showeq_params->restoreSpawns = false;
