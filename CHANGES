@@ -1,3 +1,12 @@
+Ratt 21/Apr/03
+----------------
+
++ Applied Spawnlist2 widget patch
++ Applied update to FreeBSD patch
++ Applied Combat window patch
++ INSTALL.newbies updated
++ Other small misc things
+
 bbobcat 04/19/2003
  + struct update to realign skill values (again)
 
