@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+BonkersBobcat (05/06/09)
+------------------------
++ Updated version to 5.0.0.10
++ Updated zoneopcodes.xml to kmsith's latest version
++ Added an include to bazaarlog.cpp 
+
 BonkersBobcat (05/27/04)
 ------------------------
 + Updated version to 5.0.0.9

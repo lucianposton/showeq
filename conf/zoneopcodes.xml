@@ -218,18 +218,18 @@
     <opcode id="00de" name="OP_GMHideMe" updated="05/26/04">
         <comment>GM /hideme - Remove self from spawn lists and make invis</comment>
     </opcode>
-    <opcode id="00e3" name="OP_Action2" implicitlen="23" updated="05/26/04">
+    <opcode id="00e2" name="OP_Action2" implicitlen="23" updated="05/26/04">
         <comment>old ActionCode</comment>
         <payload dir="both" typename="action2Struct" sizechecktype="match"/>
     </opcode>
-    <opcode id="00e9" name="OP_EnvDamage" updated="05/26/04">
+    <opcode id="00e8" name="OP_EnvDamage" updated="05/26/04">
         <comment></comment>
     </opcode>
-    <opcode id="00ec" name="OP_NewZone" updated="05/26/04">
+    <opcode id="00eb" name="OP_NewZone" updated="05/26/04">
         <comment>old NewZoneCode</comment>
         <payload dir="server" typename="newZoneStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="00ed" name="OP_ReqNewZone" updated="05/26/04">
+    <opcode id="00ec" name="OP_ReqNewZone" updated="05/26/04">
         <comment>Client requesting NewZone_Struct</comment>
     </opcode>
     <opcode id="00ef" name="OP_SafePoint" updated="05/26/04">

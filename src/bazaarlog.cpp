@@ -8,6 +8,7 @@
  */
 
 #include <qdatetime.h>
+#include <ctype.h>
 
 #include "bazaarlog.h"
 #include "spawnshell.h"
