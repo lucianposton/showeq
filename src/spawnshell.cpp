@@ -519,10 +519,17 @@ void SpawnShell::newSpawn(const spawnStruct& s)
 
 void SpawnShell::playerUpdate(const playerPosStruct *pupdate, bool client)
 {
-  if (!client && (pupdate->spawnId != m_playerId))
-    return;
-
-  if (m_playerSpawn != NULL)
+  if (!client && (pupdate->spawnId != m_playerId)) // PC Corpse Movement
+  {
+       updateSpawn(pupdate->spawnId,  
+                   pupdate->xPos,
+                   pupdate->yPos,
+                   pupdate->zPos,
+                   0, 0, 0,
+                   pupdate->heading,
+                   0);
+  }
+  else if (m_playerSpawn != NULL)
   {
     m_playerSpawn->setPos(pupdate->xPos, pupdate->yPos, pupdate->zPos,
 			  showeq_params->walkpathrecord,
@@ -582,6 +589,7 @@ void SpawnShell::updateSpawn(uint16_t id,
 
    Spawn* item;
    ItemMap::iterator it = m_spawns.find(id);
+
    if (it != m_spawns.end())
    {
      item = (Spawn*)it->second;

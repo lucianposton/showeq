@@ -77,6 +77,7 @@ PktLogger::PktLogger(FILE *fp, unsigned m1, unsigned m2, unsigned m3)
 {
     FP = fp;
     filename = NULL;
+    pktLogErr = 0;
     mask1 = m1;
     mask2 = m2;
     mask3 = m3;
@@ -86,12 +87,14 @@ PktLogger::PktLogger(FILE *fp, const char *maskstr)
 {
     FP = fp;
     filename = NULL;
+    pktLogErr = 0;
     logProcessMaskString(maskstr,&mask1,&mask2,&mask3);
 }
 
 PktLogger::PktLogger(const char *fname, unsigned m1, unsigned m2, unsigned m3)
 {
     filename = strdup(fname);
+    pktLogErr = 0;
     FP = NULL;
     mask1 = m1;
     mask2 = m2;
@@ -101,6 +104,7 @@ PktLogger::PktLogger(const char *fname, unsigned m1, unsigned m2, unsigned m3)
 PktLogger::PktLogger(const char *fname, const char *maskstr)
 {
     filename = strdup(fname);
+    pktLogErr = 0;
     FP = NULL;
     logProcessMaskString(maskstr,&mask1,&mask2,&mask3);
 }
@@ -125,11 +129,15 @@ PktLogger::logOpen()
 
     FP = fopen(filename,"a");
 
-    if ((FP == NULL) && (pktLogErr != 0))
-    {
-        fprintf(stderr,"Error opening %s: %s (will keep trying)\n",
-           filename, strerror(errno));
-        pktLogErr = 1;
+    if (FP == NULL)
+    { 
+        if (pktLogErr == 0)
+        {
+            fprintf(stderr,"Error opening %s: %s (will keep trying)\n",
+               filename, strerror(errno));
+            pktLogErr = 1;
+        }
+
         return(-1);
     }
  
@@ -578,6 +586,8 @@ PktLogger::logNewCorpse(const newCorpseStruct *s, int len, int dir)
     output(&s->unknown0013, 1);
     outputf(" %u ", s->damage);
     output(s->unknown0016, 2);
+    outputf(" ");
+    output(s->unknown0018, 4);
     outputf("\n");
     flush();
     return;

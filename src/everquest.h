@@ -799,6 +799,7 @@ struct newCorpseStruct
 /*0013*/ uint8_t  unknown0013;            // ***Placeholder
 /*0014*/ uint16_t damage;                 // Damage
 /*0016*/ uint8_t  unknown0016[2];         // ***Placeholder
+/*0018*/ uint8_t  unknown0018[4];         // ***Placeholder
 };
 
 /*
