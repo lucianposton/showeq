@@ -1,6 +1,6 @@
 Version: $Id$ $Name$
 
-dohpaZ (12/?/03)
+dohpaZ (12/13/03)
 ---------------------
 + Updated version to 5.0.0.2
 + Updated the default ArqSeqGiveUp to 512 since with the current encryption
