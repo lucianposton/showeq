@@ -3793,7 +3793,7 @@ void EQInterface::channelMessage(const channelMessageStruct* cmsg, uint32_t, uin
     break;
 
   case 15:
-    tmpStr.sprintf("Raid");
+    tempStr.sprintf("Raid");
     target = true;
     break;
 
