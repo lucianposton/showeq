@@ -129,5 +129,7 @@ struct ShowEQParams
 extern struct ShowEQParams *showeq_params;
 extern struct ShowEQShell *pSEQShell;
 extern class EQItemDB* pItemDB;
+
+int keyPref(QString pref, QString section, QString def);
   
 #endif

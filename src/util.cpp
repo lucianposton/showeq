@@ -16,6 +16,7 @@
 
 #include "itemdb.h"
 #include "util.h"
+#include "main.h"
 
 /*
  * Generate comma separated string from long int
@@ -955,7 +956,6 @@ uint32_t calcCRC32(uint8_t* p,
   // return the crc after performing the step
   return crc ^ 0xFFFFFFFF;
 }
-
 
 EQTime::EQTime()
 {

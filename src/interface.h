@@ -43,6 +43,7 @@
 #include "skilllist.h"
 #include "statlist.h"
 #include "group.h"
+#include "netdiag.h"
 
 //--------------------------------------------------
 // typedefs
@@ -74,6 +75,7 @@ class EQInterface:public QMainWindow
    void stsMessage(const QString &, int timeout = 0);
    void numSpawns(int);
    void numPacket(int);
+   void resetPacket(int);
    void attack2Hand1(const attack2Struct *);
    void action2Message(const action2Struct *);
    void itemShop(const itemInShopStruct* items);
@@ -178,6 +180,7 @@ class EQInterface:public QMainWindow
    void toggle_view_Compass();
    void toggle_view_PlayerSkills();
    void toggle_view_Map(int id);
+   void toggle_view_NetDiag();
    void resetMaxMana();
    void createMessageBox();
    void select_filter_file();
@@ -195,6 +198,7 @@ class EQInterface:public QMainWindow
    void showSpawnList(void);
    void showSpellList(void);
    void showCompass(void);
+   void showNetDiag(void);
 
  public:
    EQPlayer*  m_player;
@@ -225,17 +229,14 @@ class EQInterface:public QMainWindow
    QPopupMenu* pCharClassMenu;
    QPopupMenu* pCharRaceMenu;
 
-#if 1 // ZBTEMP: Migrate compass to own frame
    CompassFrame* m_compass;
-#else
-   QVBox*     m_compass;
-#endif
    MapFrame*  m_map[maxNumMaps];
    QSplitter* m_splitV;
    QSplitter* m_splitH;
    QSplitter* m_splitT;
    ExperienceWindow* m_expWindow;
    CombatWindow* m_combatWindow;
+   NetDiag* m_netDiag;
    QLabel* m_stsbarSpawns;
    QLabel* m_stsbarStatus;
    QLabel* m_stsbarZone;
@@ -266,6 +267,7 @@ class EQInterface:public QMainWindow
    int  m_id_view_PlayerSkills;
    int  m_id_view_Compass;
    int  m_id_view_Map[maxNumMaps];
+   int  m_id_view_NetDiag;
    int  m_id_view_SpellList;
    int  m_id_view_PlayerStats_Options;
    int  m_id_view_PlayerStats_Stats[LIST_MAXLIST];
@@ -279,18 +281,14 @@ class EQInterface:public QMainWindow
    int  m_id_opt_LogSpawns;
    int  m_id_opt_PvPTeams;
    int  m_id_opt_PvPDeity;
-   int  m_lPacketStartTime;
    int  m_id_net_sessiontrack;
+   int  m_packetStartTime;
+   int  m_initialcount;
 
    MenuIDList IDList_StyleMenu;
 
    QStringList m_StringList;
    QDialog *dialogbox;
-#if 0 // ZBTEMP: Migrate compass to own frame
-   QLabel* m_xPos;
-   QLabel* m_yPos;
-   QLabel* m_zPos;
-#endif
    bool m_viewChannelMsgs;
 
    bool m_isSkillListDocked;

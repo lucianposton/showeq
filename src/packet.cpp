@@ -500,8 +500,8 @@ QObject (parent, name)
    m_zoning            = false; //start in non zoning state
 
    m_serverArqSeqExp  = 0;
-   m_serverAddr       = 0;
    m_serverPort       = 0;
+   m_clientPort       = 0;
 
    /* Initialize the time of day structure */
    memset( &m_eqTime, 0x00, sizeof(struct eqTimeOfDay) );
@@ -561,7 +561,7 @@ QObject (parent, name)
    else
        m_serverArqSeqGiveUp = 32;
 
-   m_nPacket = 0;
+   m_packetCount = 0;
 
 #if HAVE_LIBEQ
    if (showeq_params->broken_decode)
@@ -900,7 +900,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 
   EQUDPIPPacketFormat packet(buffer, size, false);
 
-  emit numPacket(++m_nPacket);
+  emit numPacket(++m_packetCount);
   
   if (showeq_params->logAllPackets)
   {
@@ -961,6 +961,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
       showeq_params->ip = strdup ((const char*)packet.getIPv4DestA());
       m_client_addr = packet.getIPv4DestN();
       m_detectingClient = false;
+      emit clientChanged(m_client_addr);
       printf("Client Detected: %s\n", showeq_params->ip);
     }
 
@@ -977,6 +978,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
       showeq_params->ip = strdup ((const char*)packet.getIPv4SourceA());
       m_client_addr = packet.getIPv4SourceN();
       m_detectingClient = false;
+      emit clientChanged(m_client_addr);
       printf("Client Detected: %s\n", showeq_params->ip);
     }
 
@@ -987,26 +989,39 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   // packet from the client
   if (packet.getIPv4SourceN() == m_client_addr)
   {
-    if ( packet.isSEQStart() && !showeq_params->playbackpackets  && session_tracking_enabled == 1)
+    if ( packet.isSEQStart() && (m_session_tracking_enabled == 1))
     {
-        session_tracking_enabled = 2;
-        if (strlen(showeq_params->mac_address) == 17)
-        {
-	   m_packetCapture->setFilter(showeq_params->device, 
-                                   showeq_params->mac_address,
-				   showeq_params->realtime, 
-				   MAC_ADDRESS_TYPE, m_serverPort, packet.getSourcePort());
-           printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
-		showeq_params->mac_address, packet.getSourcePort(), m_serverPort);
-         }
-         else
-         {
-           m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
-				   showeq_params->realtime, IP_ADDRESS_TYPE,
-				   m_serverPort, packet.getSourcePort());
-           printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
-                   showeq_params->ip, packet.getSourcePort(), m_serverPort);
-         }
+        m_session_tracking_enabled = 2;
+
+	m_clientPort = packet.getSourcePort();
+	
+	if (!showeq_params->playbackpackets)
+	{
+	  if (strlen(showeq_params->mac_address) == 17)
+          {
+	    m_packetCapture->setFilter(showeq_params->device, 
+				       showeq_params->mac_address,
+				       showeq_params->realtime, 
+				       MAC_ADDRESS_TYPE, m_serverPort, 
+				       m_clientPort);
+	    printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
+		    showeq_params->mac_address, m_clientPort, m_serverPort);
+	  }
+	  else
+	  {
+	    m_packetCapture->setFilter(showeq_params->device, 
+				       showeq_params->ip,
+				       showeq_params->realtime, 
+				       IP_ADDRESS_TYPE, m_serverPort, 
+				       m_clientPort);
+	    printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
+		    showeq_params->ip, m_clientPort, m_serverPort);
+	  }
+	}
+
+	// notify that the client port has been latched
+	emit sessionTrackingChanged(m_session_tracking_enabled);
+	emit clientPortLatched(m_clientPort);
     }
     
     // only dispatch packets with ASQ that aren't fragmented
@@ -1025,9 +1040,10 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
     if (packet.isClosingHi() && packet.isClosingLo())
     {
         m_serverArqSeqFound = false;
-	if(session_tracking_enabled)
+	if(m_session_tracking_enabled)
 	{
-	   session_tracking_enabled = 1;
+	  m_session_tracking_enabled = 1;
+	  emit sessionTrackingChanged(m_session_tracking_enabled);
 	}
     }
     // process packets that don't have an arq sequence
@@ -1327,9 +1343,10 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
   
   uint16_t opCode = eqntohuint16(data);
 
-  printf(" ZoneServerInfo 0x%04x, m_client_addr %d, sessionTrack = %d\n", opCode, m_client_addr, session_tracking_enabled);
   if ((opCode == ZoneServerInfo) && (direction == DIR_SERVER))
   {
+    printf(" ZoneServerInfo 0x%04x, m_client_addr %d, sessionTrack = %d\n", 
+	   opCode, m_client_addr, m_session_tracking_enabled);
     uint16_t zone_server_port = eqntohuint16(data + 130);
     m_serverPort = zone_server_port;
     
@@ -1337,7 +1354,7 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
         m_logger->logZoneServerInfo(data,len,direction);
 
     // only reset packet filter if this is a live session
-    if (!showeq_params->playbackpackets && session_tracking_enabled < 2)
+    if (!showeq_params->playbackpackets && (m_session_tracking_enabled < 2))
     {
       if (strlen(showeq_params->mac_address) == 17)
       {
@@ -1356,32 +1373,33 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
 	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
                  showeq_params->ip, zone_server_port);
       }
-    
-    
-      // we'll be waiting for a new SEQStart
-      m_serverArqSeqFound = false;
-      
-      // clear out all the cache entries
-    
-      // first delete all the entries
-      EQPacketMap::iterator it = m_serverCache.begin();
-      EQPacketFormat* pf;
-      fprintf(stderr, "Clearing Cache: Count: %d\n", m_serverCache.size());
-      while (it != m_serverCache.end())
-      {
-        pf = it->second;
-        delete pf;
-        it++;
-      }
-    
-      // now clear the cache
-      printf ("Reseting sequence cache\n");
-      m_serverCache.clear();
-      emit cacheSize(0);
-      return;
     }
+
+    // notify that the server port has been latched
+    emit serverPortLatched(m_serverPort);
+    
+    // we'll be waiting for a new SEQStart
+    m_serverArqSeqFound = false;
+    
+    // clear out all the cache entries
+    
+    // first delete all the entries
+    EQPacketMap::iterator it = m_serverCache.begin();
+    EQPacketFormat* pf;
+    fprintf(stderr, "Clearing Cache: Count: %d\n", m_serverCache.size());
+    while (it != m_serverCache.end())
+    {
+      pf = it->second;
+      delete pf;
+      it++;
+    }
+    
+    // now clear the cache
+    printf ("Reseting sequence cache\n");
+    m_serverCache.clear();
+    emit cacheSize(0);
+    return;
   }
-   return;
 }
 
 void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data, 
@@ -1414,7 +1432,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
     /* Update EQ Time every 50 packets so we don't overload the CPU */
     
-    if ( showeq_params->showEQTime && (m_nPacket % 50 == 0))
+    if ( showeq_params->showEQTime && (m_packetCount % 50 == 0))
     {
         char timeMessage[30];
         time_t timeCurrent = time(NULL);
@@ -2795,6 +2813,35 @@ void EQPacket::setViewUnknownData (bool flag)
   m_viewUnknownData = flag;
 }
 
+int EQPacket::playbackSpeed(void)
+{
+  return m_vPacket->playbackSpeed();
+}
+
+void EQPacket::setPlayback(int speed)
+{
+  if (m_vPacket)
+  {
+    m_vPacket->setPlaybackSpeed(speed);
+
+    QString string("");
+
+    if (speed == 0)
+      string.sprintf("Playback speed set Fast as possible");
+
+    else if (speed < 0)
+       string.sprintf("Playback paused (']' to resume)");
+
+    else
+       string.sprintf("Playback speed set to %d", speed);
+
+    emit stsMessage(string, 5000);
+
+    emit resetPacket(m_packetCount);  // this resets the packet average
+    emit playbackSpeedChanged(speed);
+  }
+}
+
 void EQPacket::incPlayback(void)
 {
   if (m_vPacket)
@@ -2822,18 +2869,7 @@ void EQPacket::incPlayback(void)
          break;
     }
 
-    emit numPacket(0);  // this resets the packet average
-    m_vPacket->setPlaybackSpeed(x);
-
-    QString string("");
-
-    if (x > 0)
-      string.sprintf("Playback speed set to %d", x);
-
-    else
-      string.sprintf("Playback speed set Fast as possible");
-
-    emit stsMessage(string, 5000);
+    setPlayback(x);
   }
 }
 
@@ -2864,21 +2900,7 @@ void EQPacket::decPlayback(void)
          break;
     }
 
-    emit numPacket(0);  // this resets the packet average
-    m_vPacket->setPlaybackSpeed(x);
-
-    QString string("");
-
-    if (x == 0)
-      string.sprintf("Playback speed set Fast as possible");
-
-    else if (x < 0)
-       string.sprintf("Playback paused (']' to resume)");
-
-    else
-       string.sprintf("Playback speed set to %d", x);
-
-    emit stsMessage(string, 5000);
+    setPlayback(x);
   }
 }
 
@@ -3002,16 +3024,6 @@ char* getTime(char* pchTime)
    return pchTime;
 }
 
-EQPlayer *EQPacket::getplayer(void)
-{
-   return m_player;
-}
-
-long EQPacket::getclientaddr(void)
-{
-   return m_client_addr;
-}
-
 void EQPacket::monitorNextClient()
 {
   m_detectingClient = true;
@@ -3020,6 +3032,7 @@ void EQPacket::monitorNextClient()
   struct in_addr  ia;
   inet_aton (showeq_params->ip, &ia);
   m_client_addr = ia.s_addr;
+  emit clientChanged(m_client_addr);
   printf("Listening for next client seen. (you must zone for this to work!)\n");
 
   emit (toggle_session_tracking());
@@ -3031,7 +3044,8 @@ void EQPacket::monitorNextClient()
 
 void EQPacket::session_tracking()
 {
-   session_tracking_enabled = showeq_params->session_tracking;
+   m_session_tracking_enabled = showeq_params->session_tracking;
+   emit sessionTrackingChanged(m_session_tracking_enabled);
 }
    
 //----------------------------------------------------------------------

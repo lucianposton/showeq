@@ -9,8 +9,11 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/* Define if you have the <deque.h> header file.  */
-#undef HAVE_DEQUE_H
+/* Define if you have the <deque> header file.  */
+#undef HAVE_DEQUE
+
+/* Define if you have the <dlfcn.h> header file.  */
+#undef HAVE_DLFCN_H
 
 /* Define if you have the EQ library (-lEQ).  */
 #undef HAVE_LIBEQ
@@ -20,9 +23,6 @@
 
 /* Define if you have the pcap library (-lpcap).  */
 #undef HAVE_LIBPCAP
-
-/* Define if you have the pthread library (-lpthread).  */
-#undef HAVE_LIBPTHREAD
 
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ

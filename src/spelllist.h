@@ -35,8 +35,9 @@ class SpellListItem : public QListViewItem
    public:
       SpellListItem(QListViewItem *parent);
       SpellListItem(QListView *parent = NULL);
-      //virtual void paintCell( QPainter *p, const QColorGroup &cg,
-      //                        int column, int width, int alignment );
+	//Worried - added paintCell to enable color changes
+      virtual void paintCell( QPainter *p, const QColorGroup &cg,
+                              int column, int width, int alignment );
       const QColor textColor();
       void setTextColor(const QColor &color);
       void update();

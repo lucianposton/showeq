@@ -244,6 +244,7 @@ ShowSpawns        1    # show num of spawns in status bar
 ShowStatus        1    # show general status in status bar
 ShowZone          1    # show zone name in status bar
 ShowEQTime        1    # show EQ time in the status bar
+StatusBarActive   1    # Make sure status bar is active
 
 #
 # StatList options

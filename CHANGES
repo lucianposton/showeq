@@ -1,3 +1,24 @@
+dohpaZ (13/03/02)
+------------------
+Patches Applied:
+ + #514219 "Container Item Struct modifications" by countzer0 (Steven Kordik)
+ + #516830 "Spell timer coloring" by worried (John Bar)
+ + #517655 "door struct fix (take 2)" by mvern (Wyvern)
+ + #526644 "ToolTips Coordinate Fix" by darkgrue (Dark Grue)
+
+Modifications:
+ + Minor itemdb cleanup, removed dead code
+ + Minor modification to patch #516830 results:
+   + Added check for duration > 120 to make sure it's black
+   + Modified to "else if" format for performance
+ + Minor tweaks to EQPacket to support directly setting/getting playback speed
+ + Added Network Diagnostics dialog netdialog.{cpp,h} to make certain network
+   diagnostics more visible, and to allow more direct control of the playback
+   of recorded files.
+ + Made the status bar default to visible if any of it's widgets are visible
+ + Updated showeq.conf.dist to add the missing StatusBarActive option to
+   Interface_StatusBar
+
 fee (22/02/02)
 ------------------
 

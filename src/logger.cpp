@@ -234,16 +234,12 @@ void
 PktLogger::logContainerItem(const itemStruct *item)
 {
     logItemHeader(item);
-    logItemCommons(item);
-    output(&item->common.container.unknown0212,1);
-    outputf(" %d ", item->common.container.numSlots);
-    output(&item->common.container.unknown0214,1);
-    outputf(" %d ", item->common.container.sizeCapacity);
-    outputf("%d ", item->common.container.weightReduction);
-    outputf("%d %d ", item->common.level, item->common.charges);
-    output(&item->common.unknown0219, 1);
-    outputf(" %d ", item->common.spellId);
-    output(item->common.unknown0222, 70);
+    output(&item->container.unknown0191,41);
+    outputf(" %d ", item->container.numSlots);
+    output(&item->container.unknown0214,1);
+    outputf(" %d ", item->container.sizeCapacity);
+    outputf("%d ", item->container.weightReduction);
+    output(&item->common.unknown0192, 75);
 }   
     
 void
@@ -251,8 +247,8 @@ PktLogger::logNormalItem(const itemStruct *item)
 {
     logItemHeader(item);
     logItemCommons(item);
-    outputf(" %d ", item->common.normal.races);
-    output(item->common.normal.unknown0214, 3);
+    outputf(" %d ", item->common.races);
+    output(item->common.unknown0214, 3);
     outputf(" %d %d ", item->common.level, item->common.charges);
     output(&item->common.unknown0219, 1);
     outputf(" %d ", item->common.spellId);
@@ -1792,10 +1788,10 @@ PktLogger::logDoorSpawns(const doorSpawnsStruct *doors, int len, int dir)
         output(doors->doors[i].unknown0008,8);
         outputf(" %f %f %f ",doors->doors[i].yPos,
             doors->doors[i].xPos, doors->doors[i].zPos);
-        output(doors->doors[i].unknown0032,12);
+        output(doors->doors[i].unknown0028,10);
         outputf(" %d %d ", doors->doors[i].doorId,
             doors->doors[i].size);
-        output(doors->doors[i].unknown0042,6);
+        output(doors->doors[i].unknown0040,4);
         outputf(" ");
     }
 

@@ -535,7 +535,13 @@ class EQPacket : public QObject
    QObject        *m_parent;
 
    EQPlayer *getplayer               (void);   
-   long getclientaddr                (void);
+   int      packetCount              (void);
+   uint32_t clientAddr               (void);
+   uint16_t clientPort               (void);
+   uint16_t serverPort               (void);
+   uint8_t  session_tracking_enabled (void);
+   int      playbackSpeed            (void);
+
    void InitializeOpCodeMonitor (void);
    
    bool            m_bOpCodeMonitorInitialized;
@@ -557,6 +563,7 @@ class EQPacket : public QObject
    void processPlaybackPackets (void);
    void incPlayback        (void);
    void decPlayback        (void);
+   void setPlayback        (int);
    void monitorNextClient();   
    void session_tracking();
 
@@ -585,10 +592,16 @@ class EQPacket : public QObject
    void clrGroup               (void);
 
    // used for net_stats display
-   void cacheSize             (int);
+   void cacheSize              (int);
    void seqReceive             (int);
    void seqExpect              (int);
    void numPacket              (int);
+   void resetPacket            (int);
+   void playbackSpeedChanged   (int);
+   void clientChanged          (uint32_t);
+   void clientPortLatched      (uint16_t);
+   void serverPortLatched      (uint16_t);
+   void sessionTrackingChanged (uint8_t);
 
    void toggle_session_tracking (void);
 
@@ -672,9 +685,9 @@ class EQPacket : public QObject
    QString print_addr   (in_addr_t addr);
    
    QTimer         *m_timer;
-   int            m_nPacket;
-   int            m_serverAddr;
-   int            m_serverPort;
+   int            m_packetCount;
+   uint16_t       m_serverPort;
+   uint16_t       m_clientPort;
    bool           m_busy_decoding;
    bool           m_zoning;
    bool           m_serverArqSeqFound;
@@ -685,9 +698,8 @@ class EQPacket : public QObject
    EQPacketMap    m_serverCache;
    unsigned char  m_serverData [MAXSPAWNDATA];
    uint32_t       m_serverDataSize;
-   unsigned long  m_client_addr;
-   uint8_t        session_tracking_enabled;
-   uint16_t       m_clientPort;
+   uint32_t       m_client_addr;
+   uint8_t        m_session_tracking_enabled;
 
    struct eqTimeOfDay m_eqTime;
 
@@ -699,6 +711,37 @@ class EQPacket : public QObject
    void logRawData (const char   *filename, unsigned char *data, unsigned int len);
 
 };
+
+
+inline EQPlayer *EQPacket::getplayer(void)
+{
+   return m_player;
+}
+
+inline int EQPacket::packetCount(void)
+{
+  return m_packetCount;
+}
+
+inline uint32_t EQPacket::clientAddr(void)
+{
+   return m_client_addr;
+}
+
+inline uint16_t EQPacket::clientPort(void)
+{
+  return m_clientPort;
+}
+
+inline uint16_t EQPacket::serverPort(void)
+{
+  return m_serverPort;
+}
+
+inline uint8_t EQPacket::session_tracking_enabled(void)
+{
+  return m_session_tracking_enabled;
+}
 
 //----------------------------------------------------------------------
 // PacketCaptureThread

@@ -27,6 +27,25 @@ SpellListItem::SpellListItem(QListView *parent) : QListViewItem(parent)
    m_item = NULL;
 }
 
+
+//Added in by Worried to make color change by time remaining work
+// paintCell 
+//
+// overridden from base class in order to change color and style attributes
+//
+void SpellListItem::paintCell( QPainter *p, const QColorGroup &cg,
+                               int column, int width, int alignment )
+{
+  QColorGroup newCg( cg );
+  
+  newCg.setColor( QColorGroup::Text, m_textColor);
+  
+  QFont font = this->listView()->font();
+  p->setFont(font);
+  
+  QListViewItem::paintCell( p, newCg, column, width, alignment );
+}
+
 const QColor SpellListItem::textColor()
 {
    return m_textColor;
@@ -39,6 +58,20 @@ void SpellListItem::setTextColor(const QColor& color)
 
 void SpellListItem::update()
 {
+   //color change by Worried
+   //change spell colors according to time remaining
+
+  if (m_item->duration() > 120)
+    this->setTextColor(Qt::black);
+  else if (m_item->duration() <= 120 and m_item->duration() > 60)
+    this->setTextColor(QColor(128,54,193));
+  else if (m_item->duration() <= 60 and m_item->duration() > 30)
+    this->setTextColor(Qt::blue);
+  else if (m_item->duration() <= 30 and m_item->duration() > 12)
+    this->setTextColor(Qt::magenta);
+  else if (m_item->duration() <= 12)
+    this->setTextColor(Qt::red);
+
    setText(SPELLCOL_SPELLID, QString("%1").arg(m_item->spellId()));
    setText(SPELLCOL_SPELLNAME, m_item->spellName());
    setText(SPELLCOL_CASTERID, QString("%1").arg(m_item->casterId()));

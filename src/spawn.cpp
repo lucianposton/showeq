@@ -322,7 +322,8 @@ Spawn::Spawn(uint16_t id,
   m_spawnTrackList.setAutoDelete(true);
 }
 
-Spawn::Spawn(const charProfileStruct* player) : Item(tSpawn, 0)
+Spawn::Spawn(const charProfileStruct* player) 
+  : Item(tSpawn, 0)
 {
   // set what's known 
   setNPC(SPAWN_SELF);

@@ -58,7 +58,11 @@ QMainWindow (parent, name)
                                  "Troll", "Ogre", "Assling", "Gnome", "Iksar",
                                  "Vah Shir"
                                 };
-   
+
+   // initialize packet count
+   m_initialcount = 0;
+   m_packetStartTime = 0;
+
    // Create our player object
    m_player = new EQPlayer();
 
@@ -196,6 +200,13 @@ QMainWindow (parent, name)
    else
        m_spawnList->hide();
 
+   //
+   // Create the Net Statistics window as required
+   // 
+   m_netDiag = NULL;
+   if (showeq_params->net_stats)
+     showNetDiag();
+
 /////////////////////
 // QMenuBar
 
@@ -218,6 +229,11 @@ QMainWindow (parent, name)
    pFileMenu->insertItem("Create MessageBox", this, SLOT(createMessageBox()), Key_F11);
    pFileMenu->insertItem("Select Next", this, SLOT(selectNext()), CTRL+Key_Right);
    pFileMenu->insertItem("Select Prev", this, SLOT(selectPrev()), CTRL+Key_Left);
+   if (showeq_params->playbackpackets)
+   {
+     pFileMenu->insertItem("Inc Playback Speed", m_packet, SLOT(incPlayback()), CTRL+Key_X);
+     pFileMenu->insertItem("Dec Playback Speed", m_packet, SLOT(decPlayback()), CTRL+Key_Z);
+   }
    pFileMenu->insertItem("&Quit", qApp, SLOT(quit()));
 
    // Debug menu
@@ -270,6 +286,7 @@ QMainWindow (parent, name)
         pViewMenu->setItemParameter(m_id_view_Map[i], i);
         menuBar()->setItemChecked(m_id_view_Map[i], (m_map[i] != NULL));
    }
+   m_id_view_NetDiag = pViewMenu->insertItem("Network Diagnostics", this, SLOT(toggle_view_NetDiag()));
 
    pViewMenu->insertSeparator(-1);
 
@@ -489,6 +506,7 @@ QMainWindow (parent, name)
    menuBar()->setItemChecked(m_id_view_Compass, (m_compass != NULL));
    for (int i = 0; i < maxNumMaps; i++)
         menuBar()->setItemChecked(m_id_view_Map[i], (m_map[i] != NULL));
+   menuBar()->setItemChecked(m_id_view_NetDiag, (m_netDiag != NULL));
    
    // set initial view options
    if (pSEQPrefs->getPrefBool("ShowExpWindow", section, 0))
@@ -635,7 +653,7 @@ QMainWindow (parent, name)
 // QStatusBar creation
    
    QString statusBarSection = "Interface_StatusBar";
-   int sts_widget_count = 7; //total number of widgets available to statusbar
+   int sts_widget_count = 0; // total number of widgets visible on status bar
 
    //Status widget
      m_stsbarStatus = new QLabel(statusBar(), "Status");
@@ -679,7 +697,6 @@ QMainWindow (parent, name)
      m_stsbarPkt->setText("Pkt 0");
      m_stsbarPkt->setFixedHeight(showeq_params->statusfontsize + 6);
      statusBar()->addWidget(m_stsbarPkt, 1);
-     m_lPacketStartTime = 0;
 
    //EQTime widget
      m_stsbarEQTime = new QLabel(statusBar(), "EQTime");
@@ -689,48 +706,42 @@ QMainWindow (parent, name)
      statusBar()->addWidget(m_stsbarEQTime, 1);
 
    if (!pSEQPrefs->getPrefBool("ShowStatus", statusBarSection, 0))
-   {
-	m_stsbarStatus->hide();
-	sts_widget_count -= 1;
-   }
+     m_stsbarStatus->hide();
+   else
+     sts_widget_count++;
   
    if (!pSEQPrefs->getPrefBool("ShowZone", statusBarSection, 0))
-   {
-	m_stsbarZone->hide();
-	sts_widget_count -= 1;
-   }
+     m_stsbarZone->hide();
+   else
+     sts_widget_count++;
 
    if (!pSEQPrefs->getPrefBool("ShowSpawns", statusBarSection, 0))
-   {
-	m_stsbarSpawns->hide();
-	sts_widget_count -= 1;
-   }
+     m_stsbarSpawns->hide();
+   else
+     sts_widget_count++;
 
    if (!pSEQPrefs->getPrefBool("ShowExp", statusBarSection, 0))
-   {
-	m_stsbarExp->hide();
-	sts_widget_count -= 1;
-   }
+     m_stsbarExp->hide();
+   else
+     sts_widget_count++;
 
    if (!pSEQPrefs->getPrefBool("ShowExpAA", statusBarSection, 0))
-   {
-	m_stsbarExpAA->hide();
-	sts_widget_count -= 1;
-   }
+     m_stsbarExpAA->hide();
+   else
+     sts_widget_count++;
 
    if (!pSEQPrefs->getPrefBool("ShowPacketCounter", statusBarSection, 0))
-   {
-	m_stsbarPkt->hide();
-	sts_widget_count -= 1;
-   }
+     m_stsbarPkt->hide();
+   else
+     sts_widget_count++;
 
    if (!pSEQPrefs->getPrefBool("ShowEQTime", statusBarSection, 0))
-   {
-	m_stsbarEQTime->hide();
-	sts_widget_count -= 1;
-   }
+     m_stsbarEQTime->hide();
+   else
+     sts_widget_count++;
+
    //hide the statusbar if no visible widgets
-   if (!sts_widget_count || !pSEQPrefs->getPrefBool("StatusBarActive", statusBarSection, 0))
+   if (!sts_widget_count || !pSEQPrefs->getPrefBool("StatusBarActive", statusBarSection, 1))
       statusBar()->hide();
 
 
@@ -962,6 +973,8 @@ QMainWindow (parent, name)
             this, SLOT(numSpawns(int)));
    connect (m_packet, SIGNAL(numPacket(int)),
             this, SLOT(numPacket(int)));
+   connect (m_packet, SIGNAL(resetPacket(int)),
+            this, SLOT(resetPacket(int)));
    
    // connect ExperienceWindow slots to EQPlayer signals
    connect (m_player, SIGNAL(expGained(const QString &, int, long, QString )),
@@ -2014,7 +2027,6 @@ EQInterface::toggle_view_Compass(void)
   }
 }
 
-
 void EQInterface::toggle_view_Map(int id)
 {
   int mapNum = menuBar()->itemParameter(id);
@@ -2039,6 +2051,28 @@ void EQInterface::toggle_view_Map(int id)
 
     // make sure to clear it's variable
     m_map[mapNum] = NULL;
+  }
+}
+
+void
+EQInterface::toggle_view_NetDiag(void)
+{
+  bool wasVisible = ((m_netDiag != NULL) && (m_netDiag->isVisible()));
+
+  menuBar()->setItemChecked (m_id_view_NetDiag, !wasVisible);
+
+  if (!wasVisible)
+    showNetDiag();
+  else
+  {
+    // if it's not visible, hide it
+    m_netDiag->hide();
+
+    // then delete it
+    delete m_netDiag;
+
+    // make sure to clear it's variable
+    m_netDiag = NULL;
   }
 }
 
@@ -2196,22 +2230,20 @@ EQInterface::numSpawns(int num)
    m_stsbarSpawns->setText(tempStr);
 }
 
+void 
+EQInterface::resetPacket(int num)
+{
+  // if passed 0 reset the average
+  m_packetStartTime = mTime();
+  m_initialcount = num;
+}
+
 void
 EQInterface::numPacket(int num)
 {
-  static int initialcount = 0;
-
-  // if passed 0 reset the average
-  if (num == 0)
-  {
-    m_lPacketStartTime = mTime();
-    initialcount = num;
-    return;
-  }
-
   // start the timer of not started
-  if (!m_lPacketStartTime)
-    m_lPacketStartTime = mTime();
+  if (!m_packetStartTime)
+    m_packetStartTime = mTime();
 
   // only update once per sec
   static int lastupdate = 0;
@@ -2221,8 +2253,8 @@ EQInterface::numPacket(int num)
   
 
    QString tempStr;
-   int delta = mTime() - m_lPacketStartTime;
-   num -=initialcount;
+   int delta = mTime() - m_packetStartTime;
+   num -= m_initialcount;
    if (num && delta)
      tempStr.sprintf("Pkt: %d (%2.1f)", num, (float) (num<<10) / (float) delta);
    else   
@@ -2258,11 +2290,11 @@ void EQInterface::itemShop(const itemInShopStruct* items)
   if (items->itemType == 1)
   {
     tempStr = QString("Item Shop: Container: Slots: ") 
-      + QString::number(items->item.common.container.numSlots)
+      + QString::number(items->item.container.numSlots)
       + ", Size Capacity: " 
-      + size_name(items->item.common.container.sizeCapacity)
+      + size_name(items->item.container.sizeCapacity)
       + ", Weight Reduction: "
-      + QString::number(items->item.common.container.weightReduction)
+      + QString::number(items->item.container.weightReduction)
       + "%";
     
     emit msgReceived(tempStr);
@@ -2522,11 +2554,11 @@ void EQInterface::playerContainer(const playerContainerStruct *containp)
     emit msgReceived(tempStr);
     
     tempStr = QString("Item: Container: Slots: ") 
-      + QString::number(containp->item.common.container.numSlots)
+      + QString::number(containp->item.container.numSlots)
       + ", Size Capacity: " 
-      + size_name(containp->item.common.container.sizeCapacity)
+      + size_name(containp->item.container.sizeCapacity)
       + ", Weight Reduction: " 
-      + QString::number(containp->item.common.container.weightReduction)
+      + QString::number(containp->item.container.weightReduction)
       + "%";
     
     emit msgReceived(tempStr);
@@ -3572,3 +3604,11 @@ void EQInterface::showCompass(void)
   m_compass->show();
 }
 
+void EQInterface::showNetDiag()
+{
+  if (m_netDiag == NULL)
+    m_netDiag = new NetDiag(m_packet, NULL, "NetDiag");
+
+  // make sure it's visible
+  m_netDiag->show();
+}

@@ -328,7 +328,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    if (newlogfp != NULL)
    {   
       EQPlayer* eqplayer = m_packet->getplayer();
-      long client_addr = m_packet->getclientaddr();
+      long client_addr = m_packet->clientAddr();
 
       // append a new record entry
       fprintf(newlogfp, 

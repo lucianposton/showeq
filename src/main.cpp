@@ -17,6 +17,8 @@
 #include <qwindowsstyle.h>
 #include <getopt.h>            // for long GNU-style options
 
+#include <qaccel.h>
+
 #include "interface.h"
 #include "main.h"
 #include "preferences.h"      // prefrence file class
@@ -961,4 +963,20 @@ int main (int argc, char **argv)
 //   delete pSEQPrefs;
 
    return ret;
+}
+
+//----------------------------------------------------------------------
+// Key Preference
+int keyPref(QString pref, QString section, QString def)
+{
+  // get the key string
+  QString keyString = pSEQPrefs->getPrefString(pref, section, def);
+
+  // get the key code
+  int key = QAccel::stringToKey(keyString);
+  
+  // fix the key code (deal with Qt brain death)
+  key &= ~Qt::UNICODE_ACCEL;
+
+  return key;
 }

@@ -56,23 +56,6 @@
 // constants
 const int panAmmt = 8;
 
-//----------------------------------------------------------------------
-// utility functions
-int keyPref(QString pref, QString section, QString def)
-{
-  // get the key string
-  QString keyString = pSEQPrefs->getPrefString(pref, section, def);
-
-  // get the key code
-  int key = QAccel::stringToKey(keyString);
-  
-  // fix the key code (deal with Qt brain death)
-  key &= ~Qt::UNICODE_ACCEL;
-
-  return key;
-}
-
-
 // CLineDlg
 CLineDlg::CLineDlg(QWidget *parent, QString name, MapMgr *mapMgr) 
   : QDialog(parent, name, FALSE)
@@ -3584,18 +3567,24 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       else
 	hp = QString::number(spawn->HP());
 
-      string.sprintf("%s\nLevel: %2d\tHP: %s\t Y/X/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s\nEquipment: %s", 
+      string.sprintf("%s\nLevel: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s\nEquipment: %s", 
 		     (const char*)spawn->transformedName(),
 		     spawn->level(), (const char*)hp,
-		     spawn->xPos(), spawn->yPos(), item->displayZPos(),
+		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
+		     showeq_params->retarded_coords ? spawn->yPos() : spawn->xPos(),
+		     showeq_params->retarded_coords ? spawn->xPos() : spawn->yPos(),
+		     item->displayZPos(),
 		     (const char*)spawn->raceName(), 
 		     (const char*)spawn->className(),
 		     (const char*)spawn->info());
     }
     else
-      string.sprintf("%s\nY/X/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s", 
+      string.sprintf("%s\n%.3s/Z: %5d/%5d/%5.1f\nRace: %s\t Class: %s", 
 		     (const char*)item->transformedName(),
-		     item->xPos(), item->yPos(), item->displayZPos(),
+		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
+		     showeq_params->retarded_coords ? item->yPos() : item->xPos(),
+		     showeq_params->retarded_coords ? item->xPos() : item->yPos(),
+		     item->displayZPos(),
 		     (const char*)item->raceName(), 
 		     (const char*)item->className());
 

@@ -111,7 +111,7 @@
 #define ITEM_NORMAL7                    0x0034
 #define ITEM_NORMAL8                    0x0039
 #define ITEM_CONTAINER                  0x7900
-#define ITEM_CONTAINER_PLAIN            0x5450
+#define ITEM_CONTAINER_PLAIN            0x7953
 #define ITEM_BOOK                       0x7379
 
 // Item spellId no spell value
@@ -191,9 +191,9 @@ struct itemStruct
   // 0x0036 - Normal Item (all scribed spells, Velium proc weapons, and misc.)
   // 0x315f - Normal Item
   // 0x3336 - Normal Item
-  // 0x5400 - Container (Combine, Player made, Weight Reducing, etc...)
-  // 0x5450 - Container, plain ordinary newbie containers
-  // 0x7669 - Book item 
+  // 0x7900 - Container (Combine, Player made, Weight Reducing, etc...)
+  // 0x7953 - Container, plain ordinary newbie containers
+  // 0x7379 - Book item 
 /*0103*/ uint8_t   unknown0103[22]; // Placeholder
 /*0125*/ uint8_t   weight;          // Weight of item
 /*0126*/ int8_t    nosave;          // Nosave flag 1=normal, 0=nosave, -1=spell?
@@ -249,27 +249,8 @@ struct itemStruct
       /*0206*/ uint16_t spellId0;         // SpellID of special effect
       /*0208*/ uint16_t classes;          // Classes that can use this item
       /*0210*/ uint8_t  unknown0210[2];   // ***Placeholder
-
-      union // 0212-0216 have different meanings depending on flags
-      {
-        // note, each of the following 2 structures must be kept of equal size
-
-        struct // normal non-containers
-        {
 	  /*0212*/ uint16_t races;            // Races that can use this item
 	  /*0214*/ int8_t   unknown0214[3];   // ***Placeholder
-        } normal;
-
-        struct // containers flag == 0x5400 or 0x5450
-        {
-	  /*0212*/ int8_t   unknown0212;      // ***Placeholder
-	  /*0213*/ uint8_t  numSlots;         // number of slots in container
-	  /*0214*/ int8_t   unknown0214;      // ***Placeholder
-	  /*0215*/ int8_t   sizeCapacity;     // Max size item it can hold
-	  /*0216*/ uint8_t  weightReduction;  // % weight reduction of container
-        } container;
-      };
-
       /*0217*/ uint8_t  level;             // Casting level
 
       union // 0218 has different meanings depending on an unknown indicator
@@ -282,13 +263,21 @@ struct itemStruct
       /*0220*/ uint16_t spellId;           // spellId of special effect
       /*0222*/ uint8_t  unknown0222[70];   // ***Placeholder
     } common;
-
-    struct // Book Structure (flag == 0x7669)
+    struct // Book Structure (flag == 0x7379)
     {
       /*0172*/ uint8_t  unknown0172[3];      // ***Placeholder
       /*0175*/ char     file[15];            // Filename of book text on server
       /*0190*/ uint8_t  unknown0190[102];    // ***Placeholder
     } book;
+    struct // Container Structure (flag == 0x7900 || flag == 0x7953
+    {
+      /*0172*/ int8_t   unknown0191[41];     // ***Placeholder
+      /*0213*/ uint8_t  numSlots;            // number of slots in container
+      /*0214*/ int8_t   unknown0214;         // ***Placeholder
+      /*0215*/ int8_t   sizeCapacity;        // Maximum size item container can hold
+      /*0216*/ uint8_t  weightReduction;     // % weight reduction of container
+      /*0217*/ uint8_t  unknown0192[75];     // ***Placeholder
+    } container;
   };
 };
 
@@ -401,10 +390,10 @@ struct doorStruct
 /*0016*/ float   yPos;               // y loc
 /*0020*/ float   xPos;               // x loc
 /*0024*/ float   zPos;               // z loc
-/*0028*/ uint8_t unknown0032[2];     // ***Placeholder
-/*0030*/ uint8_t doorId;             // door's id #
-/*0031*/ uint8_t size;               // guess..
-/*0032*/ uint8_t unknown0042[12];    // ***Placeholder
+/*0028*/ uint8_t unknown0028[10];    // ***Placeholder
+/*0038*/ uint8_t doorId;             // door's id #
+/*0039*/ uint8_t size;               // guess..
+/*0040*/ uint8_t unknown0040[4];     // ***Placeholder
 };
 
 /*

@@ -1104,94 +1104,91 @@ dumpItemLabeled(EQItemDB* itemDB,
 	loreString = itemDB->GetItemLoreName(itemNr);
 	hasEntry = itemDB->GetItemData(itemNr, &entry);
 
-	fprintf (fh, "itemNr:%d:", itemNr);
+	fprintf (fh, "itemNr|%d|", itemNr);
 	if (!nameString.isEmpty())
-		fprintf (fh, "Name:%s:", (const char*)nameString);
+		fprintf (fh, "Name|%s|", (const char*)nameString);
 
 	if (hasEntry)
 	{
 		if (loreString[0] == '*')
 		{
-			fprintf (fh, "Lore:%s:", (const char*)loreString);
-			fprintf (fh, "LORE:1:");
+			fprintf (fh, "Lore|%s|", (const char*)loreString);
+			fprintf (fh, "LORE|1|");
 		}
-		fprintf (fh, "Weight:%.1f:", (entry->GetWeight())/10.0);
-		fprintf (fh, "Flag:%#06x:", entry->GetFlag());
-		fprintf (fh, "Size:%d:", entry->GetSize());
-		fprintf (fh, "Slot:%d:", entry->GetSlots());
-		fprintf (fh, "Icon:%d:", entry->GetIconNr());
+		fprintf (fh, "Weight|%.1f|", (entry->GetWeight())/10.0);
+		fprintf (fh, "Flag|%#06x|", entry->GetFlag());
+		fprintf (fh, "Size|%d|", entry->GetSize());
+		fprintf (fh, "Slot|%d|", entry->GetSlots());
+		fprintf (fh, "Icon|%d|", entry->GetIconNr());
 		if (entry->GetNoDrop() == 0)
-			fprintf (fh, "NODROP:1:");
+			fprintf (fh, "NODROP|1|");
 		if (entry->GetNoSave() == 0)
-			fprintf (fh, "NORENT:1:");
+			fprintf (fh, "NORENT|1|");
 
-		if (entry->IsBook() == 0)
+		if (entry->IsBook() == 0 && entry->IsContainer() == 0)
 		{
 			if (entry->GetMagic() == 1)
-				fprintf (fh, "MAGIC:1:");
+				fprintf (fh, "MAGIC|1|");
 			if (entry->GetLight())
-				fprintf (fh, "Light:%d:", entry->GetLight());
+				fprintf (fh, "Light|%d|", entry->GetLight());
 			if (entry->GetSTR())
-				fprintf (fh, "Str:%d:", entry->GetSTR());
+				fprintf (fh, "Str|%d|", entry->GetSTR());
 			if (entry->GetSTA())
-				fprintf (fh, "Sta:%d:", entry->GetSTA());
+				fprintf (fh, "Sta|%d|", entry->GetSTA());
 			if (entry->GetCHA())
-				fprintf (fh, "Cha:%d:", entry->GetCHA());
+				fprintf (fh, "Cha|%d|", entry->GetCHA());
 			if (entry->GetDEX())
-				fprintf (fh, "Dex:%d:", entry->GetDEX());
+				fprintf (fh, "Dex|%d|", entry->GetDEX());
 			if (entry->GetINT())
-				fprintf (fh, "Int:%d:", entry->GetINT());
+				fprintf (fh, "Int|%d|", entry->GetINT());
 			if (entry->GetAGI())
-				fprintf (fh, "Agi:%d:", entry->GetAGI());
+				fprintf (fh, "Agi|%d|", entry->GetAGI());
 			if (entry->GetWIS())
-				fprintf (fh, "Wis:%d:", entry->GetWIS());
+				fprintf (fh, "Wis|%d|", entry->GetWIS());
 			if (entry->GetMR())
-				fprintf (fh, "SvM:%d:", entry->GetMR());
+				fprintf (fh, "SvM|%d|", entry->GetMR());
 			if (entry->GetFR())
-				fprintf (fh, "SvF:%d:", entry->GetFR());
+				fprintf (fh, "SvF|%d|", entry->GetFR());
 			if (entry->GetCR())
-				fprintf (fh, "SvC:%d:", entry->GetCR());
+				fprintf (fh, "SvC|%d|", entry->GetCR());
 			if (entry->GetDR())
-				fprintf (fh, "SvD:%d:", entry->GetDR());
+				fprintf (fh, "SvD|%d|", entry->GetDR());
 			if (entry->GetPR())
-				fprintf (fh, "SvP:%d:", entry->GetPR());
+				fprintf (fh, "SvP|%d|", entry->GetPR());
 			if (entry->GetHP())
-				fprintf (fh, "HP:%d:", entry->GetHP());
+				fprintf (fh, "HP|%d|", entry->GetHP());
 			if (entry->GetMana())
-				fprintf (fh, "Mana:%d:", entry->GetMana());
+				fprintf (fh, "Mana|%d|", entry->GetMana());
 			if (entry->GetAC())
-				fprintf (fh, "AC:%d:", entry->GetAC());
+				fprintf (fh, "AC|%d|", entry->GetAC());
 			if (entry->GetDelay())
-				fprintf (fh, "Del:%d:", entry->GetDelay());
+				fprintf (fh, "Del|%d|", entry->GetDelay());
 			if (entry->GetDamage())
 			{
-				fprintf (fh, "Dam:%d:", entry->GetDamage());
-				fprintf (fh, "Skill:%d:", entry->GetSkill());
+				fprintf (fh, "Dam|%d|", entry->GetDamage());
+				fprintf (fh, "Skill|%d|", entry->GetSkill());
 			}
 			if (entry->GetRange())
-				fprintf (fh, "Range:%d:", entry->GetRange());
+				fprintf (fh, "Range|%d|", entry->GetRange());
 			if (entry->GetSpellId0() != ITEM_SPELLID_NOSPELL && entry->GetSpellId0() != 0)
 			{
-				fprintf (fh, "Effect:%d:", entry->GetSpellId0());
+				fprintf (fh, "Effect|%d|", entry->GetSpellId0());
 				if (entry->GetLevel())
-					fprintf (fh, "EffLvl:%d:", entry->GetLevel());
+					fprintf (fh, "EffLvl|%d|", entry->GetLevel());
 				if (entry->GetCharges())
-					fprintf (fh, "EffChg:%d:", entry->GetCharges());
+					fprintf (fh, "EffChg|%d|", entry->GetCharges());
 			}
-			fprintf (fh, "Class:%d:", entry->GetClasses());
+			fprintf (fh, "Class|%d|", entry->GetClasses());
+			fprintf (fh, "Race|%d|", entry->GetRaces());
+			}
 			if (entry->IsContainer())
 			{
 				if (entry->GetNumSlots())
-					fprintf (fh, "ConSlot:%d:", entry->GetNumSlots());
+				fprintf (fh, "ConSlot|%d|", entry->GetNumSlots());
 				if (entry->GetSizeCapacity())
-					fprintf (fh, "ConCap:%d:", entry->GetSizeCapacity());
+				fprintf (fh, "ConCap|%d|", entry->GetSizeCapacity());
 				if (entry->GetWeightReduction())
-					fprintf (fh, "ConWr:%d:", entry->GetWeightReduction());
-			} else
-			{
-				// Race only if not a container
-				fprintf (fh, "Race:%d:", entry->GetRaces());
-			}
+				fprintf (fh, "ConWr|%d|", entry->GetWeightReduction());
 		}
 		fprintf (fh, "\n");
 
