@@ -46,6 +46,9 @@
 #define corpseLocVer                3
 #define corpseLocCode               0x2120
 
+#define AltExpUpdateVer             3
+#define AltExpUpdateCode            0x2322 
+
 #define groupinfoVer                3
 #define groupinfoCode               0x2640
 

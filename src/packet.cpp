@@ -1941,6 +1941,18 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
            break;
       }
 
+      case AltExpUpdateCode:
+      {
+           if (AltExpUpdateVer != opCodeVersion)
+               break;
+
+           unk = ! ValidatePayload(AltExpUpdateCode, expAltUpdateStruct);
+
+           //emit updateAltExp((const expAltUpdateStruct*)data);
+
+           break;
+      }
+
 
       case LevelUpUpdateCode:
       {

@@ -29,6 +29,7 @@ EQPlayer::EQPlayer (int level = 0,
     m_playerRace  = race;
     m_playerClass = class_;
     m_playerDeity = deity;
+    m_lastExp     = 0;
     
     setDefaults();
     setUseDefaults(true);
@@ -38,12 +39,16 @@ EQPlayer::EQPlayer (int level = 0,
 
 void EQPlayer::backfill(const playerProfileStruct* player)
 {
+  uint32_t realexp;
+  uint32_t minexp;
+  uint32_t diffexp;
+
   QString messag;
   
   printf("EQPlayer::backfill():\n");
   
   messag.sprintf("Zone: Name='%s' Last='%s'\n", 
-		 player->name, player->lastName);
+ 		 player->name, player->lastName);
   emit msgReceived(messag);
   
   messag.sprintf("Zone: Level: %d\n", player->level);
@@ -57,6 +62,9 @@ void EQPlayer::backfill(const playerProfileStruct* player)
   messag.sprintf("Zone: BankMoney: P=%d G=%d S=%d C=%d\n",
 		 player->platinumBank, player->goldBank, 
 		 player->silverBank, player->copperBank);
+  emit msgReceived(messag);
+
+  messag = "Exp: " + Commanate(player->exp);
   emit msgReceived(messag);
   
   memcpy(&m_thePlayer, player, sizeof(playerProfileStruct));
@@ -72,7 +80,6 @@ void EQPlayer::backfill(const playerProfileStruct* player)
   setPlayerRace(player->race);
   setPlayerClass(player->class_);
   
-  messag = "Exp: " + Commanate(player->exp);
   
   // Due to the delayed decode, we must reset
   // maxplayer on zone and accumulate all totals.
@@ -101,19 +108,22 @@ void EQPlayer::backfill(const playerProfileStruct* player)
   emit manaChanged(m_thePlayer.MANA, m_maxMana);  // need max mana
 
   uint32_t playerExp = player->exp;
-
-  if (playerExp > m_currentExp)
-    m_currentExp = playerExp;
-  else
-    playerExp = m_currentExp;
   
-  m_maxExp = calc_exp(m_playerLevel,m_playerRace,m_playerClass);
+  m_maxExp = calc_exp(m_playerLevel, m_playerRace, m_playerClass);
+  minexp  = calc_exp(m_playerLevel-1, m_playerRace, m_playerClass);
+  diffexp = m_maxExp - minexp;
+  realexp = m_lastExp * diffexp / 330 + minexp;
+
+  if (playerExp < realexp)
+      m_currentExp = realexp;
+  else
+      m_currentExp = playerExp;
 
   emit expChangedStr (messag);
   emit expChangedInt ( playerExp,
                        calc_exp(m_playerLevel-1, m_playerRace, m_playerClass),
                        calc_exp(m_playerLevel,   m_playerRace, m_playerClass)
-		       );
+		     );
   
   // Merge in our new skills...
   for (int a = 0; a < MAX_KNOWN_SKILLS; a++)
@@ -181,6 +191,7 @@ void EQPlayer::reset()
   setUseDefaults(true);
 
   m_currentExp = 0;
+  m_lastExp = 0;
   m_maxExp = calc_exp(getPlayerLevel(), 
 		    getPlayerRace(), 
 		    getPlayerClass());
@@ -385,59 +396,36 @@ void EQPlayer::manaChange(const manaDecrementStruct *mana)
 void EQPlayer::updateExp(const expUpdateStruct* exp)
 {
   QString totalExp;
-  QString gainedExp;
+  QString incrementExp;
   QString leftExp;
   QString needKills;
   QString tempStr;
+  QString tempStr2;
   uint32_t realexp;
   uint32_t minexp;
   uint32_t maxexp;
   uint32_t diffexp;
-  minexp=calc_exp(getPlayerLevel () - 1, getPlayerRace  (), getPlayerClass () );
-  maxexp=calc_exp(getPlayerLevel (), getPlayerRace  (), getPlayerClass () );
-  diffexp=maxexp-minexp;
-  
-  realexp =exp->exp * diffexp / 330 + minexp;
-  
+
+  m_lastExp = (exp->exp_L | (exp->exp_H << 8)); 
+
+  minexp = calc_exp(getPlayerLevel() - 1, getPlayerRace(), getPlayerClass());
+  maxexp = calc_exp(getPlayerLevel(), getPlayerRace(), getPlayerClass());
+  diffexp = maxexp - minexp;
+  realexp = m_lastExp * diffexp / 330 + minexp;
+  incrementExp = Commanate(diffexp/330);
   if (m_currentExp > 0)
   {
-    totalExp  = Commanate(realexp);
-    gainedExp = Commanate((uint32_t) (realexp - m_currentExp));
+    if (m_currentExp > realexp)
+        realexp = m_currentExp;
 
-    needKills = Commanate((( calc_exp( getPlayerLevel (),
-				       getPlayerRace  (),
-				       getPlayerClass ()
-				       )  - realexp
-			     )           /   ( realexp > m_currentExp    ?
-					       realexp - m_currentExp :
-					       1
-					       )
-			   )            + 1
-			  );
+    totalExp  = Commanate(realexp - minexp);
+    needKills = Commanate((maxexp - realexp) / (realexp > m_currentExp ? realexp - m_currentExp : 1) + 1);
+    leftExp = Commanate(diffexp - realexp);
     
-    leftExp = Commanate((( calc_exp( getPlayerLevel (),
-				     getPlayerRace  (),
-				     getPlayerClass ()
-				     )
-			   ) - ( calc_exp(
-					  getPlayerLevel ()              - 1,
-					  getPlayerRace  (),
-					  getPlayerClass ()
-					  )
-				 )
-			 )  - ( realexp - ( calc_exp( getPlayerLevel () - 1,
-						       getPlayerRace  (),
-						       getPlayerClass ()
-						       )
-					     )
-				)
-			);
-    
-    tempStr = QString("Exp: %1 (%2) [%3]").arg(totalExp).arg(gainedExp).arg(needKills);
+    tempStr = QString("Exp: %1 (%2/330)").arg(totalExp).arg(tempStr2.sprintf("%u",m_lastExp));
     emit expChangedStr (tempStr);
     
-    tempStr = QString("Exp: %1 (%2)(%3) left %4").arg(totalExp).arg(gainedExp).arg(needKills).arg(leftExp);
-    
+    tempStr = QString("Exp: %1 (%2/330) left %3 - 1/330 = %4").arg(totalExp).arg(tempStr2.sprintf("%u",m_lastExp)).arg(leftExp).arg(incrementExp);
     emit msgReceived(tempStr);
 
     if (m_freshKill)

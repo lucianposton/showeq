@@ -503,7 +503,7 @@ struct emoteTextStruct
 
 /*
 ** Corpse location
-** Length: Variable Text
+** Length: 18 Octets
 ** OpCode: corpseLocCode
 */
 struct corpseLocStruct
@@ -1023,14 +1023,32 @@ struct levelUpStruct
 
 /*
 ** Experience Update
-** Length: 14 Octets
+** Length: 6 Octets
 ** OpCode: ExpUpdateCode
 */
 struct expUpdateStruct
 {
 /*0000*/ int8_t   opCode;                 // 0x99
 /*0001*/ int8_t   version;                // 0x21
-/*0002*/ uint32_t exp;                    // Current experience value
+/*0002*/ uint8_t  exp_L;                  // experience value low
+/*0003*/ uint8_t  exp_H;                  // experience value high
+/*0004*/ uint16_t unknown0004;            // ***Place Holder
+};
+
+/*
+** Alternate Experience Update
+** Length: 10 Octets
+** OpCode: AltExpUpdateCode
+*/
+struct expAltUpdateStruct
+{
+/*0000*/ int8_t   opCode;                 // 0x99
+/*0001*/ int8_t   version;                // 0x21
+/*0002*/ uint8_t  exp_L;                  // experience value low
+/*0003*/ uint8_t  exp_H;                  // experience value high
+/*0004*/ uint32_t unknown0004;            // ***Place Holder
+/*0008*/ uint8_t  unknown0008;            // ***Place Holder
+/*0009*/ uint8_t  unknown0009;            // ***Place Holder
 };
 
 /*

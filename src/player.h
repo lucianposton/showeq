@@ -226,6 +226,7 @@ public:
    // ExperienceWindow needs this
    uint32_t m_currentExp;
    uint32_t m_maxExp;
+   uint16_t m_lastExp;
 
    // con color table
    QColor m_conTable[maxSpawnLevel];
