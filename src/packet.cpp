@@ -13,6 +13,9 @@
 #include <unistd.h>
 #include <netdb.h>
 
+#ifdef __FreeBSD__
+#include "packet.h"
+#endif
 #include <netinet/if_ether.h>
 
 #include <qtimer.h>
@@ -540,10 +543,10 @@ void EQPacket::dispatchPacket(int size, unsigned char *buffer)
       (packet.getSourcePort() == ChatServerPort))
     return;
 
-  if ( ((packet.getDestPort() >= LoginServerMinPort) ||
-     (packet.getSourcePort() >= LoginServerMinPort)) &&
-     ((packet.getDestPort() <= LoginServerMaxPort) ||
-     (packet.getSourcePort() <= LoginServerMaxPort)) )
+  if (((packet.getDestPort() >= LoginServerMinPort) &&
+       (packet.getDestPort() <= LoginServerMaxPort)) ||
+      (packet.getSourcePort() >= LoginServerMinPort) &&
+      (packet.getSourcePort() <= LoginServerMaxPort))
     return;
 
   /* discard pure ack/req packets and non valid flags*/

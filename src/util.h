@@ -10,6 +10,9 @@
 
 #ifdef __FreeBSD__
 #include <sys/types.h>
+long int lrint(double x);
+long int lrintf(float x);
+long int lroundf(float x);
 #else
 #include <stdint.h>
 #endif

@@ -15,7 +15,11 @@
 #ifndef SPELLS_H_
 #define SPELLS_H_
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 #include <qstringlist.h>
 #include <qstring.h>
 

@@ -1,3 +1,14 @@
+dohpaZ (11/11/03)
+---------------------
++ Updated version to 4.3.18
++ OPCode and structure fixes for 11/05/03 patch.
++ Fixed spawnlog's zone spawn and new spawn position recording and updated
+  the spawn log format version to 4.
++ Fix to support people running EQ under winex.
++ Fixed the duplicate accelerator bug.  Shift+F3 is now "Reload Zone Filters",
+  and Shift+F4 is now "Save Zone Filters". 
++ Integrated patch# 832080 "freebsd-stable compile 10/24/03" from jonseq
+
 dohpaZ (10/24/03)
 ---------------------
 + Updated version to 4.3.17.1

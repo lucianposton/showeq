@@ -567,8 +567,8 @@ struct charProfileStruct
 /*4348*/ uint32_t  ldon_tak_points;    // Earned Deepest Guk points
 /*4352*/ uint8_t   unknown4354[24];    // *** Placeholder
 /*4376*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*4380*/ uint8_t   unknown4382[4];     // *** Placeholder
-/*4384*/	
+/*4380*/ uint8_t   unknown4380[268];   // *** Placeholder
+/*4644*/	
 };
 
 

@@ -841,8 +841,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    filterMenu->insertItem("&Edit Filters", this, SLOT(launch_editor_filters()));
    filterMenu->insertItem("Select Fil&ter File", this, SLOT(select_filter_file()));
 
-   filterMenu->insertItem("Reload &Zone Filters", m_filterMgr, SLOT(loadZoneFilters()), Key_F3);
-   filterMenu->insertItem("S&ave Zone Filters", m_filterMgr, SLOT(saveZoneFilters()), Key_F4);
+   filterMenu->insertItem("Reload &Zone Filters", m_filterMgr, SLOT(loadZoneFilters()), SHIFT+Key_F3);
+   filterMenu->insertItem("S&ave Zone Filters", m_filterMgr, SLOT(saveZoneFilters()), SHIFT+Key_F4);
    filterMenu->insertItem("Edit Zone Fi&lters", this, SLOT(launch_editor_zoneFilters()));
 
    filterMenu->insertItem("Re&filter Spawns", m_spawnShell, SLOT(refilterSpawns()));

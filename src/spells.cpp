@@ -14,6 +14,7 @@
 
 #include "spells.h"
 #include "everquest.h"
+#include "util.h"
 
 #include <stdio.h>
 #include <math.h>

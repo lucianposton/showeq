@@ -14,6 +14,7 @@
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in_systm.h>
 #include <netinet/in.h>
 #if !defined(__BYTE_ORDER)
 #if defined(BYTE_ORDER)

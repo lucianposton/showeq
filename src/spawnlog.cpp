@@ -17,7 +17,7 @@ SpawnLog::SpawnLog(DateTimeMgr* dateTimeMgr, const QString& fname)
   : SEQLogger(fname, NULL, "SpawnLog"),
     m_dateTimeMgr(dateTimeMgr)
 {
-    version = 3;
+    version = 4;
     zoneShortName = "unknown";
 }
 
@@ -25,7 +25,7 @@ SpawnLog::SpawnLog(DateTimeMgr* dateTimeMgr, FILE *fp)
   : SEQLogger(fp, NULL, "SpawnLog"),
     m_dateTimeMgr(dateTimeMgr)
 {
-    version = 3;
+    version = 4;
     zoneShortName = "unknown";
 }
 
@@ -97,7 +97,7 @@ SpawnLog::logZoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len)
   {
     const spawnStruct& spawn = zspawns->spawn[i];
     logSpawnInfo("z",spawn.name,spawn.spawnId,spawn.level,
-                 spawn.x, spawn.y, spawn.z, 
+                 (spawn.x >> 3), (spawn.y >> 3), (spawn.z >> 3), 
 		 eqDate, time, "", 0, spawn.guildID);
   }
 }
@@ -107,7 +107,7 @@ SpawnLog::logNewSpawn(const newSpawnStruct* nspawn)
 {
   const spawnStruct& spawn = nspawn->spawn;
   logSpawnInfo("+",spawn.name,spawn.spawnId,spawn.level,
-	       spawn.x, spawn.y, spawn.z, "", 0, spawn.guildID);
+	       (spawn.x >> 3), (spawn.y >> 3), (spawn.z >> 3), "", 0, spawn.guildID);
 }
 
 void

@@ -17,6 +17,29 @@
 #include "util.h"
 #include "main.h"
 
+#ifdef __FreeBSD__
+long int lroundf(float x)
+  //closest int away from 0
+{
+  if (x < 0)
+    return -lrint(-x);
+  else
+    return lrint(x);
+}
+
+long int lrint(double x)
+{
+  long int l=(long int)(x+.5);
+  return l;
+}
+
+long int lrintf(float x)
+{
+  return lrint(x);
+}
+#endif
+
+
 struct spellInfoStruct 
 {
   const char* name;

@@ -11,35 +11,35 @@ uint16_t implicitlen (uint16_t opcode)
 {
   switch (opcode) 
   {
-  case 0x0017:
+  case 0x0019:
     return 0x08; // 8
-  case 0x0022:
+  case 0x0024:
     return 0x12; // 18
-  case 0x0039:
+  case 0x003b:
     return 0x0c; // 12
-  case 0x00ba:
+  case 0x00bc:
     return 0x08; // 8
-  case 0x00d9:
+  case 0x00db:
     return 0x17; // 23
-  case 0x00ea:
+  case 0x00ec:
     return 0x04; // 4
-  case 0x00f7:
+  case 0x00f9:
     return 0x88; // 136
-  case 0x00f8:
+  case 0x00fa:
     return 0x1f; // 31
-  case 0x0123:
+  case 0x0125:
     return 0x09; // 9
-  case 0x0132:
+  case 0x0134:
     return 0x04; // 4
-  case 0x0138:
+  case 0x013a:
     return 0x08; // 8
-  case 0x0215:
+  case 0x0217:
     return 0x03; // 3
-  case 0x0216:
+  case 0x0218:
     return 0x03; // 3
-  case 0x022b:
+  case 0x022d:
     return 0x06; // 6
-  case 0x022c:
+  case 0x022e:
     return 0x06; // 6
   default:
     return 0;
