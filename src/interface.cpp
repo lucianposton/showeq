@@ -586,7 +586,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    menuBar()->setItemChecked (x, showeq_params->walkpathrecord);
 
    QPopupMenu* subMenu = new QPopupMenu;
-   QSpinBox* walkPathLengthSpinBox = new QSpinBox(0, 1024, 1, subMenu);
+   QSpinBox* walkPathLengthSpinBox = new QSpinBox(0, 8192, 1, subMenu);
    walkPathLengthSpinBox->setValue(showeq_params->walkpathlength);
    connect(walkPathLengthSpinBox, SIGNAL(valueChanged(int)),
 	   this, SLOT(set_opt_WalkPathLength(int)));

@@ -1,4 +1,4 @@
-dohpaZ (13/06/02)
+dohpaZ (22/06/02)
 ------------------
 Modifications:
  + version 4.2.12
@@ -7,7 +7,7 @@ Modifications:
  + Applied patch from Sparr (new opcodes, packet structures, races, 
  + Added Source Navigator 5.0 project showeq.proj.
  + Changed FlushPackets VPacket setting to default to true.
- + Changed maximum value on the "Walk Path Length" spinbox to be 1024.  Please
+ + Changed maximum value on the "Walk Path Length" spinbox to be 8192.  Please
    remember that the walk path option can use a lot of memory.
  + Added the ability to show the walk paths of all NPCs, available from the
    "NPC Walk Paths" option of the "Show" sub-menu of the maps right-click
