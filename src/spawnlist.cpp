@@ -241,11 +241,13 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
    m_spawnShell = spawnShell;
    m_categoryMgr = categoryMgr;
 
+   QString section = "SpawnList";
+
    setRootIsDecorated(true);
 #if QT_VERSION >= 210
    setShowSortIndicator(true);
 #endif
-   setCaption(pSEQPrefs->getPrefString("SpawnList_Caption", 
+   setCaption(pSEQPrefs->getPrefString("Caption", section,
 				       "ShowEQ - Spawn List"));
 
    setFont(QFont("Helvetica", showeq_params->fontsize));
@@ -269,7 +271,6 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
    addColumn ("SpawnTime");
    setAllColumnsShowFocus(TRUE);
 
-   QString section = "SpawnList";
    // Restore column order
    QString tStr = pSEQPrefs->getPrefString("ColumnOrder", section, "N/A");
    if (tStr != "N/A") {

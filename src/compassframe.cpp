@@ -13,7 +13,9 @@
 CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
   : QVBox(parent, name)
 {
-  setCaption(pSEQPrefs->getPrefString("Compass_Caption", 
+  QString section = "Compass";
+
+  setCaption(pSEQPrefs->getPrefString("Caption", section,
 				      "ShowEQ - Compass"));
   
   m_compass = new Compass (this, "compass");

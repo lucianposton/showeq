@@ -1270,7 +1270,7 @@ struct tradeItemOutStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0xdf
 /*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint8_t  unknown0002[6];         // ***Placeholder
+/*0002*/ uint8_t  unknown0002[4];         // ***Placeholder
 /*0008*/ int8_t   itemtype;               // Type of item
 /*0009*/ struct itemStruct item;          // Refer to itemStruct for members
 /*0253*/ uint8_t  unknown0253[5];         // ***Placeholder
