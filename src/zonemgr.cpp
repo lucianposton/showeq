@@ -150,7 +150,6 @@ void ZoneMgr::zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t len, uint
   m_shortZoneName = zoneNameFromID(zsentry->zoneId);
 
   m_zoning = false;
-
   emit zoneBegin(m_shortZoneName);
   emit zoneBegin(zsentry, len, dir);
 
@@ -165,8 +164,7 @@ void ZoneMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t len, uint8
 
   if (dir == DIR_SERVER)
     emit zoneChanged(m_shortZoneName);
- 
-  emit zoneChanged(zoneChange, len, dir);
+    emit zoneChanged(zoneChange, len, dir);
 
   if (showeq_params->saveZoneState)
     saveZoneState();

@@ -569,8 +569,13 @@ void SpawnShell::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t 
        int16_t x = pupdate->x / 8;
        int16_t z = pupdate->z / 8;
 
-       updateSpawn(pupdate->spawnId, x, y, z, 0, 0, 0,
-                   pupdate->heading, 0, 0);
+       int16_t dy = pupdate->deltaY / 4;
+       int16_t dx = pupdate->deltaX / 4;
+       int16_t dz = pupdate->deltaZ / 4;
+       updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,
+                   pupdate->heading, pupdate->deltaHeading,pupdate->animation);
+	if (pupdate->spawnId==1193)
+		  printf("Spawn(%d) moved by dx=%d  dy=%d  dz=%d heading=%d delhead=%d  animation=%d\n",pupdate->spawnId,dx,dy,dz,pupdate->heading,pupdate->deltaHeading,pupdate->animation);
   }
 }
 
@@ -652,6 +657,8 @@ void SpawnShell::updateSpawns(const spawnPositionUpdate* updates)
   // if zoning, then don't do anything
   if (m_zoneMgr->isZoning())
     return;
+if (updates->spawnId==2803)
+	printf("heading=%d  u3=%d  unused2=%d\n",updates->heading,updates->u3,updates->unused2);
 
   updateSpawn(updates->spawnId, updates->x / 8, updates->y / 8, updates->z / 8,
 		 0,0,0,updates->heading,0,0);

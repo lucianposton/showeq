@@ -263,7 +263,7 @@ struct itemItemStruct : public itemStruct
   };
 
 /*0299*/ int8_t   effectType;       // 0 = no effect, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check
-/*0300*/ uint16_t spellId;          // spellId of special effect
+/*0300*/ uint32_t spellId;          // spellId of special effect
 /*0304*/ uint8_t  unknown0282[12];  // ***Placeholder
 /*0316*/ uint32_t castTime;         // Cast time of clicky item in miliseconds
 /*0320*/ uint8_t  unknown0296[16];  // ***Placeholder
@@ -334,50 +334,49 @@ struct spawnPositionUpdate
 **   newSpawnStruct
 */ 
 
-struct spawnStruct 
-{ 
-/*000*/ int32_t race; // race 
-/*004*/ char unknown004[4]; 
-/*008*/ uint8_t class_; // class 
-/*009*/ uint16_t level; 
-/*011*/ char unknown011[1]; 
-/*012*/ int8_t curHp; 
-/*013*/ char unknown013[2]; 
-/*015*/ uint8_t NPC; // 0=player,1=npc,2=pc corpse,3=npc corpse,4=???,5=unknown spawn,10=self 
-/*016*/ char unknown016[6]; 
-/*022*/ int32_t maxHp; // max hp 
-/*026*/ uint8_t gender; // 0=male, 1=female, 2=other 
-/*027*/ unsigned heading:12; 
-signed deltaHeading:10; 
-unsigned animation:10; 
-signed deltaX:13; 
-/*xxx*/ signed x:19; 
-/*xxx*/ signed y:19; 
-signed deltaY:13; 
-signed deltaZ:13; 
-/*031*/ signed z:19; 
-/*043*/ char unknown043[2]; 
-/*045*/ uint16_t spawnId; // Id of spawn 
-/*047*/ char unknown047[3]; 
-/*050*/ char lastName[20]; // lastname 
-/*070*/ char unknown070[12]; 
-/*082*/ int32_t equipment[9]; // 0=helm, 1=chest, 2=arm, 3=bracer 
-// 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2 
-/*118*/ char name[64]; // name 
-/*182*/ int32_t dyergb[7]; // armor dye colors 
-/*210*/ char unknown210; 
-/*211*/ uint8_t light; 
-/*212*/ char unknown212[20]; 
-/*232*/ int32_t guildID; // GuildID 
-/*236*/ char unknown236[1]; 
-/*237*/ uint32_t typeflag; // Bodytype 
-/*241*/ char unknown241[4]; 
-/*245*/ uint16_t petOwnerId; 
-/*247*/ char unknown247[2]; 
-/*249*/ int16_t deity; // deity 
-/*251*/ char unknown251[2]; 
+struct spawnStruct
+{
+/*000*/ int32_t race;			 // race
+/*004*/ char unknown004[4];
+/*008*/ uint8_t class_;		 // class
+/*009*/ uint16_t level;
+/*011*/ char unknown011[1];
+/*012*/ int8_t curHp;
+/*013*/ char unknown013[2];
+/*015*/ uint8_t NPC;			 // 0=player,1=npc,2=pc corpse,3=npc corpse,4=???,5=unknown spawn,10=self
+/*016*/ char unknown016[6];
+/*022*/ int32_t maxHp;			 // max hp
+/*026*/ uint8_t gender;		 // 0=male, 1=female, 2=other
+/*027*/ unsigned heading:12;
+        signed   deltaHeading:10;
+        unsigned animation:10;
+        signed   deltaX:13;
+/*xxx*/ signed   x:19;
+/*xxx*/ signed   y:19;
+        signed   deltaZ:13;
+        signed   deltaY:13;
+/*031*/ signed   z:19;
+/*043*/ char unknown043[2];
+/*045*/ uint16_t spawnId;		 // Id of spawn
+/*047*/ char unknown047[3];
+/*050*/ char lastName[20];		 // lastname
+/*070*/ char unknown070[12];
+/*082*/ int32_t equipment[9];		 // 0=helm, 1=chest, 2=arm, 3=bracer
+                                        // 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2
+/*118*/ char name[64];			 // name
+/*182*/ int32_t dyergb[7];              // armor dye colors
+/*210*/ char unknown210;
+/*211*/ uint8_t light;                  
+/*212*/ char unknown212[20];
+/*232*/ int32_t guildID;		 // GuildID
+/*236*/ char unknown236[1];
+/*237*/ uint32_t typeflag;		 // Bodytype
+/*241*/ char unknown241[4];
+/*245*/ uint16_t petOwnerId;
+/*247*/ char unknown247[2];
+/*249*/ int16_t deity;			 // deity
+/*251*/ char unknown251[2];
 }; // 253 bytes
-
 
 /* 
 ** Zone Spawn Struct 
@@ -1093,10 +1092,10 @@ struct newCorpseStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x42
 /*0001*/ uint8_t  version;                // 0x00
-/*0002*/ uint16_t spawnId;                // Id of spawn that died
+/*0002*/ uint32_t spawnId;                // Id of spawn that died
 /*0006*/ uint32_t killerId;               // Killer
 /*0010*/ uint8_t  unknown0006[8];         // ***Placeholder
-/*0018*/ uint16_t spellId;                // ID of Spell
+/*0018*/ uint32_t spellId;                // ID of Spell
 /*0022*/ int8_t   type;                   // Spell, Bash, Hit, etc...
 /*0023*/ uint32_t damage;                 // Damage
 /*0027*/ uint8_t  unknown0016[7];         // ***Placeholder
@@ -1358,7 +1357,7 @@ struct startCastStruct
 /*0000*/ uint8_t  opCode;                 // 0x7e
 /*0001*/ uint8_t  version;                // 0x21
 /*0002*/ int32_t  unknown0002;            // ***Placeholder
-/*0006*/ uint16_t spellId;                // Spell ID
+/*0006*/ uint32_t spellId;                // Spell ID
 /*0010*/ int32_t  unknown0010;            // ***Placeholder
 /*0014*/ uint32_t targetId;               // The current selected target
 /*0018*/ uint32_t unknown0018;            // ***Placeholder 
@@ -1375,7 +1374,7 @@ struct manaDecrementStruct
 /*0000*/ uint8_t opCode;                   // 0x7f
 /*0001*/ uint8_t version;		   // 0x21
 /*0002*/ int32_t newMana;                  // New Mana AMount
-/*0004*/ int16_t spellId;                  // Last Spell Cast
+/*0004*/ int32_t spellID;                  // Last Spell Cast
 };
 
 /*
@@ -1400,8 +1399,8 @@ struct beginCastStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x82
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ uint16_t spawnId;                // Id of who is casting
-/*0004*/ uint16_t spellId;                // Id of spell
+/*0002*/ uint32_t spawnId;                // Id of who is casting
+/*0004*/ uint32_t spellId;                // Id of spell
 /*0006*/ int16_t  param1;                 // Paramater 1
 /*0008*/ int16_t  param2;                 // Paramater 2
 };
@@ -1416,8 +1415,8 @@ struct memSpellStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x82
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ uint16_t spawnId;                // Id of who is casting
-/*0006*/ uint16_t spellId;                // Id of spell
+/*0002*/ uint32_t spawnId;                // Id of who is casting
+/*0006*/ uint32_t spellId;                // Id of spell
 /*0010*/ int16_t  param1;                 // Paramater 1
 /*0012*/ int16_t  param2;                 // Paramater 2
 };
@@ -1449,7 +1448,7 @@ struct wearChangeStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x92
 /*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint16_t spawnId;                // SpawnID
+/*0002*/ uint32_t spawnId;                // SpawnID
 /*0004*/ uint8_t  wearSlotId;             // Slot ID
 /*0005*/ uint8_t  unknown0005[3];            // unknown
 /*0006*/ uint16_t newItemId;              // Item ID see weaponsX.h or util.cpp
@@ -1588,7 +1587,7 @@ struct badCastStruct
 {
 /*0000*/ uint8_t  opCode;                   // 0xd3
 /*0001*/ uint8_t  version;                  // 0x21
-/*0002*/ uint16_t spawnId;                  // Id of who is casting
+/*0002*/ uint32_t spawnId;                  // Id of who is casting
 /*0006*/ char     message[0];               // Text Message
 };
 
@@ -1655,13 +1654,13 @@ struct playerPosStruct
 /*0000*/ uint16_t opCode;
 /*0002*/ uint16_t spawnId;
          unsigned heading:12;
-/*0004*/ unsigned animation:10;
          signed   deltaHeading:10;
+/*0004*/ unsigned animation:10;
          signed   deltaX:13;
 /*0194*/ signed   x:19;
 /*0198*/ signed   y:19;
-         signed   deltaY:13;
          signed   deltaZ:13;
+         signed   deltaY:13;
 /*0202*/ signed   z:19;
 };
 
@@ -1875,7 +1874,7 @@ struct xBuffDropStruct
 /*0001*/ uint8_t  version;
 /*0002*/ uint16_t spawnid;
 /*0004*/ uint8_t  unknown0004[4]; 
-/*0008*/ uint16_t spellId;
+/*0008*/ uint16_t spellid;
 /*0010*/ uint8_t  unknown0010[8];
 /*0018*/ uint16_t spellslot;
 /*0020*/ uint8_t  unknown0020[2];
@@ -1929,4 +1928,3 @@ struct keyStruct
 //. .7...6....,X....D4.M.\.....P.v..>..W....
 //123456789012345678901234567890123456789012
 //000000000111111111122222222223333333333444
-

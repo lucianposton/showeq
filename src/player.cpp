@@ -780,10 +780,11 @@ void Player::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t dir)
   int16_t py = pupdate->y / 8;
   int16_t px = pupdate->x / 8;
   int16_t pz = pupdate->z / 8;
-  int16_t pdeltaX = pupdate->deltaX / 64;
-  int16_t pdeltaY = pupdate->deltaY / 64;
-  int16_t pdeltaZ = pupdate->deltaZ / 64;
- 
+  int16_t pdeltaX = pupdate->deltaX / 4;
+  int16_t pdeltaY = pupdate->deltaY / 4;
+  int16_t pdeltaZ = pupdate->deltaZ / 4;
+
+
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);
   setDeltas(pdeltaX, pdeltaY, pdeltaZ);
   setHeading(pupdate->heading, pupdate->deltaHeading);

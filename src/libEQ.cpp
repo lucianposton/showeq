@@ -5,7 +5,6 @@
  *  http://seq.sourceforge.net/
  */
 
-
 #include <stdio.h>
 #include <zlib.h>
 #include <string.h>
@@ -152,7 +151,7 @@ uint8_t* decodeOpCode (uint8_t *data, uint32_t *len)
         if (!valid_key)
 	    return NULL;
 	    
-	printf ("decoding 0x%04x with 0x%08x\n", opCode, decode_key);
+//	printf ("decoding 0x%04x with 0x%08x\n", opCode, decode_key);
 	
 	int64_t offset = (decode_key % 5) + 7;
 	*((int64_t *)(data+offset)) ^= decode_key;
@@ -175,10 +174,10 @@ uint8_t* decodeOpCode (uint8_t *data, uint32_t *len)
 		printf("Lost sync, relog or zone to reset\n");
 	        valid_key = false;
 
-	    printf ("uncompress failed on 0x%04x: %s\n", opCode, zError (retval));
+	    printf ("uncompress failed on 0x%04x: %s\nno further attempts will be made until zone.", opCode, zError (retval));
 	    return NULL;
 	}
-	printf ("clean uncompress on 0x%04x: %s\n", opCode, zError (retval));
+//	printf ("clean uncompress on 0x%04x: %s\n", opCode, zError (retval));
 	opCode &= ~FLAG_COMP;
 	memcpy (decompressed, &opCode, 2);
 	data = decompressed;
@@ -187,4 +186,3 @@ uint8_t* decodeOpCode (uint8_t *data, uint32_t *len)
 
     return data;
 }
-
