@@ -567,8 +567,8 @@ struct charProfileStruct
 /*4348*/ uint32_t  ldon_tak_points;    // Earned Deepest Guk points
 /*4352*/ uint8_t   unknown4354[24];    // *** Placeholder
 /*4376*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*4380*/ uint8_t   unknown4380[268];   // *** Placeholder
-/*4644*/	
+/*4380*/ uint8_t unknown4380[540];     // *** Placeholder
+/*4920*/
 };
 
 
@@ -747,72 +747,66 @@ struct playerAAStruct {
 */ 
 struct spawnStruct
 {
-/*000*/ int32_t  race;             // race
-/*004*/ int8_t   eyecolor1;        // left eye color
-/*005*/ int8_t   eyecolor2;        // right eye color
-/*006*/ union
-        {
-	  /*006*/ int8_t  face;             // face style
-	  /*006*/ int8_t  woad;             // Barbarian-only WOAD
-        };
-/*007*/ int8_t   aa_title;         // 0=none,1=general,2=archetype,3=class
-/*008*/ uint8_t  class_;		  // class
-/*009*/ uint8_t  level;
-/*010*/ char     unknown010[2];   // *** Placeholder
-/*012*/ int8_t   curHp;
-/*013*/ uint8_t  afk;             // 0=not afk, 1=afk
-/*014*/ union
-        {
-	  /*014*/ uint8_t equip_chest2;
-	  /*014*/ uint8_t mount_color; // drogmor: 0=white,1=black,2=green,3=red
-	                               // horse: 0=brown,1=white,2=black,3=tan
-        }; 
-/*015*/ uint8_t  NPC;             // 0=player,1=npc,2=pc corpse,3=npc corpse,
-                                  // 4=???,5=unknown spawn,10=self
-/*016*/ uint8_t  beard;           // beard style
-/*017*/ uint8_t  beardcolor;      // beard color
-/*018*/ uint8_t  hairstyle;       // hair style
-/*019*/ uint8_t  haircolor;       // hair color
-/*020*/ uint8_t  invis;           // 0=visible,1=invisible
-/*021*/ uint8_t  unknown021;      // *** Placeholder
-/*022*/ int8_t   maxHp;           // max hp
-/*023*/ uint8_t  pvp;             // 0=Not pvp,1=pvp
-/*024*/ uint8_t  light;           // Light intensity
-/*025*/ uint8_t  unknown025;      // *** Placeholder
-/*026*/ uint8_t  lfg;             // 0=Not lfg,1=lfg
-/*027*/ uint16_t heading;         // spawn heading
-/*029*/ uint8_t  deltaHeading;    // change in heading
-/*030*/ uint8_t  animation;       // animation id
-/*031*/ signed   deltaX:13;
-        signed   x:19;
-/*035*/ signed   y:19;
-        signed   deltaZ:13;
-/*039*/ signed   deltaY:13;
-        signed   z:19;
-/*043*/ uint8_t  anon;            // 0=normal,1=anon,2=roleplaying
-/*044*/ uint8_t  gender;          // 0=male,1=female,2=other
-/*045*/ uint16_t spawnId;         // Id of spawn
-/*047*/ char     unknown047[3];
-/*050*/ char     lastName[32];    // lastname
-/*082*/ int32_t  equipment[9];	  // 0=helm, 1=chest, 2=arm, 3=bracer
-                                  // 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2
-/*118*/ char     name[64];        // name
-/*182*/ int32_t  dye_rgb[7];      // armor dye colors
-/*210*/ uint8_t  unknown210[8];
-/*218*/ float    size;            // Size
-/*222*/ uint8_t  unknown222[5];
-/*227*/ uint8_t  gm;              // 0=not GM,1=GM
-/*228*/ uint8_t  unknown228[4];   // *** Placeholder
-/*232*/ uint32_t guildID;         // GuildID
-/*236*/ uint8_t  linkdead;        // 0=Not LD, 1=LD
-/*237*/ uint32_t bodytype;        // Bodytype
-/*241*/ int8_t   guild_rank;      // 0=member,1=officer,2=leader
-/*242*/ uint8_t  unknown242[3];
-/*245*/ uint32_t petOwnerId;      // If pet, the pet owner spawn id
-/*249*/ int16_t  deity;           // deity
-/*251*/ char     unknown251[7];
-/*258*/
+/*000*/ uint8_t NPC; // 0=player,1=npc,2=pc corpse,3=npc corpse,a
+/*001*/	int8_t  eyecolor1;			// Player left eye color
+/*002*/	int8_t  eyecolor2;			// Player right eye color
+/*003*/	int8_t  aa_title; // 0=none, 1=general, 2=archtype, 3=class
+/*004*/	int32_t dye_rgb[7]; 			// armor dye colors
+/*032*/ int8_t  unknown001[11]; 
+/*043*/ uint8_t class_;
+/*044*/ char unknown044[2]; // *** Placeholder
+/*046*/ int8_t curHp;
+/*047*/	int8_t afk; // 0=not afk, 1=afk
+union {
+/*048*/	int8_t equip_chest2;// Second place in packet for chest texture (usually 0xFF in live packets)
+// Not sure why there are 2 of them, but it effects chest texture!
+/*048*/	int8_t mount_color;// drogmor: 0=white, 1=black, 2=green, 3=red
+// horse: 0=brown, 1=white, 2=black, 3=tan
 };
+/*049*/ int32_t race; // race
+/*053*/ char    unknown053;
+/*054*/ char    name[64]; // name
+/*118*/ uint8_t haircolor; // hair color
+/*119*/ uint8_t light; // 0=visible,1=invisible
+/*120*/ uint8_t invis;
+/*121*/ int8_t  maxHp; // max hp
+/*122*/ uint8_t pvp; // 0=Not pvp,1=pvp
+/*123*/ uint8_t level;
+/*124*/ uint8_t lfg; // 0=Not lfg,1=lfg
+/*125*/ uint16_t heading; // spawn heading
+/*127*/ uint8_t  deltaHeading; // change in heading
+/*128*/ uint8_t animation; // animation id
+/*129*/ signed  deltaX:13;
+        signed  x:19;
+/*133*/ signed  y:19;
+        signed  deltaZ:13;
+/*137*/ signed  deltaY:13;
+        signed  z:19;
+/*141*/ int8_t	beardcolor;
+/*142*/ int8_t	hairstyle;
+/*143*/ int8_t	face;
+/*144*/ int8_t	unknown141[7]; 
+/*151*/ float   size; // Size
+/*155*/ uint8_t helm;
+/*156*/ float   runspeed; //
+/*160*/ uint8_t gm; // 0=not GM,1=GM
+/*161*/ float   walkspeed; //
+/*165*/ uint32_t guildID; // GuildID
+/*169*/ uint8_t anon; // 0=normal,1=anon,2=roleplaying
+/*170*/ uint8_t gender; // 0=male,1=female,2=other
+/*171*/ uint16_t spawnId; // Id of spawn
+/*173*/ char    unknown173[3];
+/*176*/ char    lastName[32]; // lastname
+/*208*/ int32_t equipment[9];
+/*244*/ uint8_t linkdead; // 0=Not LD, 1=LD
+/*245*/ uint32_t bodytype; // Bodytype
+/*249*/	int8_t	guild_rank;
+/*250*/ int8_t	unknown249[4]; 
+/*254*/ uint32_t petOwnerId;
+/*258*/ int16_t deity;
+/*260*/ uint8_t unknown260[7];
+/*267*/
+}; 
 
 /*
 ** Zone Spawns
@@ -1371,8 +1365,9 @@ struct startCastStruct
 struct manaDecrementStruct
 {
 /*0000*/ int32_t newMana;                  // New Mana AMount
-/*0004*/ int32_t spellId;                  // Last Spell Cast
-/*0008*/
+/*0004*/ int32_t unknown;
+/*0008*/ int32_t spellId;                  // Last Spell Cast
+/*0012*/
 };
 
 /*
@@ -1610,27 +1605,17 @@ struct randomStruct
 };
 
 /*
-** Player Position Update Base
-** Length: 8 Octets
+** Player Position Update
+** Length: 18 Octets
 ** OpCode: PlayerPosCode
 */
-struct playerPosStruct
+
+struct playerSpawnPosStruct
 {
 /*0000*/ uint16_t spawnId;
 /*0002*/ unsigned heading:12;
          signed   deltaHeading:10;
          unsigned animation:10;
-/*0006*/
-};
-
-/*
-** Player Position Update
-** Length: 20 Octets
-** OpCode: PlayerPosCode
-*/
-
-struct playerSpawnPosStruct : public playerPosStruct
-{
 /*0006*/ signed   deltaX:13;
          signed   x:19;
 /*0010*/ signed   y:19;
@@ -1642,21 +1627,24 @@ struct playerSpawnPosStruct : public playerPosStruct
 
 /*
 ** Self Position Update
-** Length: 32 Octets
+** Length: 30 Octets
 ** OpCode: PlayerPosCode
 */
 
-struct playerSelfPosStruct : public playerPosStruct
+struct playerSelfPosStruct
 {
-/*0006*/ float    y;
-/*0010*/ float    x;
-/*0014*/ float    z;
-/*0018*/ float    deltaY;
-/*0022*/ float    deltaX;
-/*0026*/ float    deltaZ;
+/*0000*/ uint16_t spawnId;
+/*0002*/ float z;
+/*0006*/ float y;
+/*0010*/ float deltaY;
+/*0014*/ float x;
+/*0018*/ float deltaX;
+/*0022*/ float deltaZ;
+/*0026*/ unsigned heading:12;
+         signed deltaHeading:10;
+         unsigned animation:10;
 /*0030*/
 };
-
 
 /*
 ** Spawn Appearance
@@ -1889,6 +1877,33 @@ struct worldMOTDStruct
 {
   /*002*/ char    message[0];
   /*???*/ uint8_t unknownXXX[3];
+};
+
+struct bazaarSearchQueryStruct 
+{
+  uint32_t mark;
+  uint32_t type;
+  char unknownXXX0[20]; // Value seems to always be the same
+  char searchstring[64];
+  uint32_t unknownXXX1;
+};
+
+struct bazaarSearchResponseStruct 
+{
+  uint32_t mark;
+  uint32_t count;
+  uint32_t item_id;
+  uint32_t player_id;
+  uint32_t price;
+  uint32_t status; // XXX Still poorly understood. 0=simple search
+  char item_name[64]; // nul-padded name with appended "(count)"
+};
+
+union bazaarSearchStruct
+{
+  uint32_t mark;
+  struct bazaarSearchQueryStruct query;
+  struct bazaarSearchResponseStruct response[];
 };
 
 // Restore structure packing to default
