@@ -1,3 +1,8 @@
+casey 10/26/2002
+----------------------
+ + src/interface.cpp
+   + applied baelang's patch to fix transposed strings in player_classes[]
+
 fee (floyd) 10/26/2002
 ----------------------
  + bug fix: tweaked spawnshell to track ground spanws more accuratly

@@ -102,7 +102,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    QString tempStr;
    QString section = "Interface";
 
-   const char* player_classes[] = {"Warrior", "Cleric", "Ranger", "Paladin",
+   const char* player_classes[] = {"Warrior", "Cleric", "Paladin", "Ranger",
                                    "Shadow Knight", "Druid", "Monk", "Bard",
                                    "Rogue", "Shaman", "Necromancer", "Wizard",
                                    "Magician", "Enchanter", "Beastlord"
