@@ -1,3 +1,14 @@
+fee (floyd)  11/11/2002
+-----------------------
++ ShowEQ 4.3.3
+ + Bug Fixes
+   - updated EQDecode to be more sane about accepting user keys
+     in conjunction with a new libEQ (ddaac48baaa3e9b015984a366748ed72)
+
+ + Features
+   - HotKeys  F12 to load key from file
+   - HotKeys  CTRL+F12 to bring up key dialog
+    
 ratt 10 Nov 2002
 ----------------------
 

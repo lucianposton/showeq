@@ -9,7 +9,6 @@
 #define EQDECODE_H
 
 #include <stdint.h>
-#include <pthread.h>
 #include <deque>
 
 #include <qobject.h>
@@ -71,9 +70,6 @@ class EQDecode : public QObject
  private:
   int InflatePacket(const uint8_t *pbDataIn, uint32_t cbDataInLen, 
 		    uint8_t* pbDataOut, uint32_t* pcbDataOutLen);
-  pthread_t m_locateThread;
-  bool m_locateActive;
-  pthread_mutex_t m_mutexQueue;
   EQPktQueue m_queuePlayerProfile;
   EQPktQueue m_queueZoneSpawns;
   EQPktQueue m_queueSpawns;

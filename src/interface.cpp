@@ -728,7 +728,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // Decoder Menu
    m_decoderMenu = new QPopupMenu;
    menuBar()->insertItem("&Decoder", m_decoderMenu);
-   m_decoderMenu->insertItem("Input Session Key", this, SLOT(set_decoder_key()));
+   m_decoderMenu->insertItem("Input Session Key", this, SLOT(set_decoder_key()), CTRL+Key_F12);
    m_decoderMenu->insertItem("Load Session Key", this, SLOT(load_decoder_key()), Key_F12);
    m_decoderMenu->insertItem("Key Filename...", this, 
 			      SLOT(set_opt_enc_BaseFilename(void)));

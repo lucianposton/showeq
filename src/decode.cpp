@@ -6,13 +6,10 @@
  */
 
 #include <stdio.h>
-#include <pthread.h>
 #include <zlib.h>
-
 #include <string.h>
 
 #include <qapplication.h>
-
 #include <qfile.h>
 #include <qdatastream.h>
 
@@ -22,25 +19,8 @@
 #include "libeq.h"
 
 //#define DIAG_DECODE_ZLIB_ERROR
-
 //#define PKTBUF_LEN	65535
-
-#if 0
-void *
-ThreadFunc (void *param)
-{
-  EQDecode *decoder;
-
-  // Point to the decoder object
-  decoder = (EQDecode *)param;
-
-  // Do our voodoo
-  decoder->LocateKey();
-
-  // Get outa here
-  return(NULL);
-}
-#endif
+#define UNKKEY     0xffffffffffffffff
 
 EQDecode::EQDecode (QObject *parent, const char *name)
 : QObject (parent, name)
@@ -61,13 +41,7 @@ EQDecode::EQDecode (QObject *parent, const char *name)
            parent, SLOT(dispatchDecodedZoneSpawns(const uint8_t*, uint32_t)));
 
   // Our key is unknown
-  m_decodeKey = 0xffffffffffffffff;
-
-  // We're not locating keys
-  m_locateActive = false;
-
-  // Create our queue mutex
-  pthread_mutex_init (&m_mutexQueue, NULL);
+  m_decodeKey = UNKKEY;
 
 #if HAVE_LIBEQ
   // Initialize LIBEQ
@@ -98,20 +72,6 @@ EQDecode::ResetDecoder (void)
 {
   EQPktRec *pkt;
   uint i;
-
-  // Kill our search thread if active
-  if (m_locateActive)
-  {
-    // Request cancellation and wait for it if successful
-    if (pthread_cancel(m_locateThread) == 0)
-      pthread_join(m_locateThread, NULL);
-
-    // Unlock our mutex (in case thread left it locked)
-    pthread_mutex_unlock(&m_mutexQueue);
-  }
-
-  // NOTE: Since we know the locate thread is not running and since we are
-  //       the main thread, we don't need to use the mutex to clear the queues.
 
   // Clear our player packet queue
   for (i = 0; i < m_queuePlayerProfile.size(); i++)
@@ -144,56 +104,14 @@ EQDecode::ResetDecoder (void)
   m_queueSpawns.clear();
 
   // Set our key to zero
-  m_decodeKey = 0xffffffffffffffff;
+  m_decodeKey = UNKKEY;
 
   // Let anyone interested know we changed it
   emit keyChanged();
-
-  // We're no longer looking
-  m_locateActive = false;
 }
 
-void
-EQDecode::LocateKey ()
-{
-  return;
 
-#if 0
-  unsigned int i;
-  EQPktRec *player, *spawn;
-
-  // Grab our player packet
-  player = m_queuePlayerProfile[0];
-
-#if HAVE_LIBEQ
-  // Find a shiny new key
-  i = 0;
-  while (m_locateActive && !m_decodeKey && (i < m_queueSpawns.size()))
-  {
-    spawn = m_queueSpawns[i];
-    m_decodeKey = FindKey(player->data, player->len, spawn->data, spawn->len);
-    i++;
-  }
-#else
-  m_decodeKey = 0;
-#endif
-
-  // Bail if we didn't find a key at all
-  if (!m_decodeKey)
-  {
-    m_locateActive = false;
-    return;
-  }
-
-  printf("LocateKey(): FOUND KEY: 0x%016llx\n", m_decodeKey);
-
-  // post the FoundKeyEvent to the main/GUI thread to be handled their
-  QApplication::postEvent(this, new FoundKeyEvent());
-#endif
-}
-
-void
-EQDecode::FoundKey ()
+void EQDecode::FoundKey ()
 {
   unsigned int i;
   EQPktRec *pkt;
@@ -209,12 +127,6 @@ EQDecode::FoundKey ()
   printf("Decrypting and dispatching with key: 0x%016llx\n", m_decodeKey);
   emit keyChanged();
 
-  // Check to see if we've been cancelled
-  pthread_testcancel();
-
-  // Lock our mutex
-  pthread_mutex_lock(&m_mutexQueue);
-
   emit startDecodeBatch();
 
   // Decode our player packet queue
@@ -229,8 +141,8 @@ EQDecode::FoundKey ()
       emit dispatchDecodedCharProfile(decodedData, decodedDataLen);
     else
     {
+      m_decodeKey = UNKKEY;
       printf("Warning: Failed to decrypt queued Player Profile packet: %d.\n", i);
-      free(pkt);
       return;
     }
 #endif
@@ -251,8 +163,12 @@ EQDecode::FoundKey ()
 		      NULL, 0, NULL, 0))
       emit dispatchDecodedZoneSpawns(decodedData, decodedDataLen);
     else
-#endif
+    {
+      m_decodeKey = UNKKEY;
       printf("Warning: Failed to decrypt queued Zone Spawns packet: %d.\n", i);
+      return;
+    }
+#endif
     free(pkt);
   }
 
@@ -268,19 +184,19 @@ EQDecode::FoundKey ()
     if (ProcessPacket(pkt->data, pkt->len, 
 		      decodedData, &decodedDataLen, &m_decodeKey, "",
 		      NULL, 0, NULL, 0))
-    emit dispatchDecodedNewSpawn(decodedData, decodedDataLen);
+       emit dispatchDecodedNewSpawn(decodedData, decodedDataLen);
+    else
+    {
+      m_decodeKey = UNKKEY;
+      printf("Warning: Failed to decrypt queued New Spawns packet: %d.\n", i);
+      return;
+    }
+#endif
     free(pkt);
   }
-#endif
 
   // Empty the queue
   m_queueSpawns.clear();
-
-  // Unlock our mutex
-  pthread_mutex_unlock(&m_mutexQueue);
-
-  // Let them know we're done
-  m_locateActive = false;
 
   if (showeq_params->saveDecodeKey)
   {
@@ -359,11 +275,6 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
   else
      player = NULL;
 
-  // Lock our mutex so the queues can't unwind before this packet is in
-  // NOTE: We only need to lock when the queue's are being used
-  if (m_locateActive)
-     pthread_mutex_lock(&m_mutexQueue);
- 
   prevKey = m_decodeKey;
 
   // Try processing the packet first
@@ -382,14 +293,6 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
 
   if (result && player) // only the end if there is a player
   {
-    // Release our mutex
-    if (m_locateActive)
-    {
-       if (pthread_cancel(m_locateThread) == 0)
-          pthread_join(m_locateThread, NULL);
-
-       pthread_mutex_unlock(&m_mutexQueue);
-    }
     // Check to see if we found a key
     if ( prevKey != m_decodeKey)
     {
@@ -408,6 +311,8 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
     // also note that the restored decode key is no longer being used
     showeq_params->restoreDecodeKey = false;
   }
+  else if (result)
+    return result;
 
   // Queue it up...  Allocate storage for our encrypted packet
   pktrec = (EQPktRec *)malloc(sizeof(EQPktRec) + len);
@@ -417,8 +322,6 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
   {
     printf("Warning: Couldn't allocate memory to queue encrypted packet.\n");
     // Release our mutex
-    if (m_locateActive)
-      pthread_mutex_unlock(&m_mutexQueue);
     return(result);
   }
 
@@ -442,32 +345,8 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
       break;
   }
 
-  // Release the mutex and return if the locate thread is already running
-  if (m_locateActive)
-  {
-    pthread_mutex_unlock(&m_mutexQueue);
-    return(result);
-  }
-
-#if 0
-  // Start the locate thread if we have player/spawn packets available
-  if (m_queuePlayerProfile.size() && m_queueSpawns.size())
-  {
-    // Tell everyone we're active and do it BEFORE creating the thread
-    // whose initialization depends on it being non-zero
-    m_locateActive = true;
-
-    // Create the thread with standard scheduling parameters
-    pthread_create(&m_locateThread, NULL, ThreadFunc, this);
-
-    // And don't retain any results
-    pthread_detach(m_locateThread); 
-  }
-#endif
-
   // Get outa here...
- 
- return(result);
+  return(result);
 }
 
 bool EQDecode::event(QEvent * e)
@@ -535,7 +414,7 @@ void EQDecode::setHash(uint8_t* data, uint32_t len)
 
 void EQDecode::theKey(uint64_t key)
 {
-  if (m_decodeKey == key || key == 0xffffffffffffffff)
+  if (m_decodeKey == key || key == UNKKEY)
       return;
 
   m_decodeKey = key;
