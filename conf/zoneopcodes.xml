@@ -554,7 +554,7 @@
         <payload dir="server" typename="itemInfoStruct" sizechecktype="none"/>
         <payload dir="client" typename="itemInfoReqStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="0217" name="OP_NewSpawn" updated="05/26/04">
+    <opcode id="0218" name="OP_NewSpawn" updated="07/14/04">
         <comment>old NewSpawnCode</comment>
         <payload dir="server" typename="spawnStruct" sizechecktype="match"/>
     </opcode>
@@ -574,42 +574,42 @@
     <opcode id="0221" name="OP_UpdateAA" updated="05/26/04">
         <comment></comment>
     </opcode>
-    <opcode id="022d" name="OP_MobHealth" implicitlen="3" updated="05/26/04">
+    <opcode id="022e" name="OP_MobHealth" implicitlen="3" updated="07/14/04">
         <comment>health sent when a player clicks on the mob</comment>
     </opcode>
-    <opcode id="022e" name="OP_SendHPTarget" implicitlen="3" updated="05/26/04">
+    <opcode id="022f" name="OP_SendHPTarget" implicitlen="3" updated="07/14/04">
         <comment></comment>
     </opcode>
     <opcode id="0225" name="OP_GMZoneRequest2" updated="05/26/04">
         <comment>/zone 2</comment>
     </opcode>
-    <opcode id="023a" name="OP_ZoneEntry" updated="05/26/04">
+    <opcode id="023b" name="OP_ZoneEntry" updated="07/14/04">
         <comment>old ZoneEntryCode</comment>
         <payload dir="client" typename="ClientZoneEntryStruct" sizechecktype="match"/>
         <payload dir="server" typename="ServerZoneEntryStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0243" name="OP_HPUpdate" implicitlen="6" updated="05/26/04">
+    <opcode id="0244" name="OP_HPUpdate" implicitlen="6" updated="07/14/04">
         <comment>old NpcHpUpdateCode Update HP % of a PC or NPC</comment>
         <payload dir="both" typename="hpNpcUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0244" name="?" implicitlen="6" updated="05/26/04">
+    <opcode id="0245" name="?" implicitlen="6" updated="07/14/04">
         <comment>Unknown, but has implicit length</comment>
     </opcode>
-    <opcode id="0245" name="OP_Bug" updated="05/26/04">
+    <opcode id="0246" name="OP_Bug" updated="07/14/04">
         <comment>/bug</comment>
     </opcode>
-    <opcode id="0246" name="OP_SendZonePoints" updated="05/26/04">
+    <opcode id="0247" name="OP_SendZonePoints" updated="07/14/04">
         <comment>Coords in a zone that will port you to another zone</comment>
         <payload dir="server" typename="zonePointsStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="0247" name="OP_InspectRequest" updated="05/26/04">
+    <opcode id="0248" name="OP_InspectRequest" updated="07/14/04">
         <comment>old InspectRequestCode</comment>
     </opcode>
-    <opcode id="0248" name="OP_InspectAnswer" updated="05/26/04">
+    <opcode id="0249" name="OP_InspectAnswer" updated="07/14/04">
         <comment>old InspectDataCode</comment>
         <payload dir="server" typename="inspectDataStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0249" name="OP_GroupUpdate" updated="05/26/04">
+    <opcode id="0250" name="OP_GroupUpdate" updated="07/14/04">
         <payload dir="server" typename="groupUpdateStruct" sizechecktype="match"/>
         <payload dir="server" typename="groupFullUpdateStruct" sizechecktype="match"/>
         <comment></comment>
@@ -678,11 +678,11 @@
     <opcode id="028e" name="OP_GMEmoteZone" updated="05/26/04">
         <comment>GM /emotezone - Send zonewide emote</comment>
     </opcode>
-    <opcode id="0290" name="OP_ItemPlayerPacket" updated="05/26/04">
+    <opcode id="0291" name="OP_ItemPlayerPacket" updated="07/14/04">
         <comment>old ItemCode</comment>
         <payload dir="server" typename="char" sizechecktype="none"/>
     </opcode>
-    <opcode id="0291" name="OP_SpawnDoor" updated="05/26/04">
+    <opcode id="0292" name="OP_SpawnDoor" updated="07/14/04">
         <comment>old DoorSpawnsCode</comment>
         <payload dir="server" typename="doorStruct" sizechecktype="modulus"/>
     </opcode>
