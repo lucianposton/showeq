@@ -14,6 +14,7 @@
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in_systm.h>
 #include <netinet/in.h>
 #if !defined(__BYTE_ORDER)
 #if defined(BYTE_ORDER)
@@ -48,6 +49,14 @@ enum EQStreamID
   zone2client = 3,
   MAXSTREAMS = 4,
 };
+
+// direction the data is coming from
+enum EQDir
+{
+  DIR_Client = 0x01,
+  DIR_Server = 0x02,
+};
+
 
 //----------------------------------------------------------------------
 // Useful inline functions
