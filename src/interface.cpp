@@ -109,6 +109,8 @@ QMainWindow (parent, name)
 	   this, SLOT(attack1Hand1(const attack1Struct *)));
    connect(m_packet, SIGNAL(attack2Hand1(const attack2Struct *)), 
 	    this, SLOT(attack2Hand1(const attack2Struct *)));
+   connect(m_packet, SIGNAL(action2Message(const action2Struct *)),
+        this, SLOT(action2Message(const action2Struct *)));
    connect(m_packet, SIGNAL(wearItem(const playerItemStruct*)),
 	   this, SLOT(wearItem(const playerItemStruct*)));
    connect(m_packet, SIGNAL(itemShop(const itemInShopStruct*)),
@@ -477,6 +479,9 @@ QMainWindow (parent, name)
    // Initialize the experience window;
    m_expWindow = new ExperienceWindow( m_packet, m_groupMgr );
 
+   // Initialize the combat window
+   m_combatWindow = new CombatWindow(m_packet);
+
    // Make the file menu
    QPopupMenu* pFileMenu = new QPopupMenu;
    pFileMenu->insertItem("&Open Map", m_mapMgr, SLOT(loadMap()), Key_F1);
@@ -574,6 +579,8 @@ QMainWindow (parent, name)
                    this, SLOT(toggle_view_UnknownData()) , Key_F8);
    m_id_view_ExpWindow = pViewMenu->insertItem("Experience Window",
                    this, SLOT(toggle_view_ExpWindow()) );
+   m_id_view_CombatWindow = pViewMenu->insertItem("Combat Window",
+   				   this, SLOT(toggle_view_CombatWindow()) );
    pViewMenu->insertSeparator(-1);
    m_id_view_SpellList = pViewMenu->insertItem("SpellList",
                    this, SLOT(toggle_view_SpellList()) );
@@ -908,9 +915,11 @@ QMainWindow (parent, name)
    m_viewChannelMsgs = true;
    viewUnknownData = false;
    viewExpWindow = false;
+   viewCombatWindow = false;
    menuBar()->setItemChecked (m_id_view_ChannelMsgs, m_viewChannelMsgs);
    menuBar()->setItemChecked (m_id_view_UnknownData, viewUnknownData);
    menuBar()->setItemChecked (m_id_view_ExpWindow, viewExpWindow);
+   menuBar()->setItemChecked (m_id_view_CombatWindow, viewCombatWindow);
 
    // only check for non-NULL for the following options, because they 
    // are only non-NULL if they are to be visible, and isVisble() 
@@ -1237,6 +1246,13 @@ QMainWindow (parent, name)
    connect (m_player, SIGNAL(expGained(const QString &, int, long, QString )),
 	    m_expWindow, SLOT(addExpRecord(const QString &, int, long,QString )));
 
+   // connect CombatWindow slots to the signals
+   connect(this, SIGNAL(combatSignal(int, int, int, int, int)),
+        m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int)));
+
+   connect(m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
+   	   m_combatWindow, SLOT(resetDPS()));
+
    if (m_stsbarStatus)
    {
      connect (m_packet, SIGNAL(stsMessage(const QString &, int)),
@@ -1255,6 +1271,8 @@ QMainWindow (parent, name)
    // set initial view options
    if (pSEQPrefs->getPrefBool("ShowExpWindow", section, 0))
       toggle_view_ExpWindow();
+   if (pSEQPrefs->getPrefBool("ShowCombatWindow", section, 0))
+   	  toggle_view_CombatWindow();
    if (pSEQPrefs->getPrefBool("ShowSpellList", section, 1))
       toggle_view_SpellList();
 
@@ -1687,6 +1705,24 @@ EQInterface::savePrefs(void)
             printf("Saving Exp Window: %d, %d  %d x %d\n", p.x(), p.y(), s.width(), s.height());
          }
       }
+
+      // save combat window location
+      if (m_combatWindow) {
+          QPoint p = m_combatWindow->pos();
+          QSize s = m_combatWindow->size();
+
+          if (pSEQPrefs->getPrefBool("SavePosition", "Combat", false)) {
+             //Save X position
+             pSEQPrefs->setPrefInt("WindowX", "Combat", p.x());
+             //Save Y position
+             pSEQPrefs->setPrefInt("WindowY", "Combat", p.y());
+             //Save Width
+             pSEQPrefs->setPrefInt("WindowW", "Combat", s.width());
+             //Save Height
+             pSEQPrefs->setPrefInt("WindowH", "Combat", s.height());
+             printf("Saving Combat Window: %d, %d  %d x %d\n", p.x(), p.y(), s.width(), s.height());
+          }
+      }
 		
       if (m_spawnList) {
          if ((m_spawnList->isVisible()) && (!m_isSpawnListDocked) &&
@@ -2109,6 +2145,43 @@ EQInterface::toggle_view_ExpWindow (void)
        m_expWindow->hide();
 
 }
+
+void
+EQInterface::toggle_view_CombatWindow (void)
+{
+	//printf("toggle_view_CombatWindow: starting...\n");
+
+    viewCombatWindow = !viewCombatWindow;
+    menuBar()->setItemChecked (m_id_view_CombatWindow, viewCombatWindow);
+    if (viewCombatWindow)
+    {
+       m_combatWindow->show();
+       // set exp window location
+       if(m_combatWindow){
+	   int x, y, w, h;
+	   QPoint p = m_combatWindow->pos();
+           QSize s = m_combatWindow->size();
+
+	   // get X position
+	   x = pSEQPrefs->getPrefInt("WindowX", "Combat", p.x());
+	   // get Y position
+	   y = pSEQPrefs->getPrefInt("WindowY", "Combat", p.y());
+           // get width
+           w = pSEQPrefs->getPrefInt("WindowW", "Combat", s.width() );
+           // get height
+           h = pSEQPrefs->getPrefInt("WindowH", "Combat", s.height() );
+	   // move window to new position
+	   if(pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) {
+               m_combatWindow->resize(w, h);
+	       m_combatWindow->move(x, y);
+           }
+       }
+    }
+    else
+       m_combatWindow->hide();
+
+}
+
 
 void
 EQInterface::toggle_view_SpawnList(void)
@@ -2586,6 +2659,36 @@ printf("Attack2: '%s' hit by %d damage (%d:%d:%d:%d:%d:%d)\n",
     }
   }
 }
+
+void EQInterface::action2Message(const action2Struct *action2)
+{
+
+	emit combatSignal(action2->target, action2->source, action2->type, action2->spell, action2->damage);
+
+#if 0
+	QString temp("");
+
+	temp.sprintf("ActionCode: target=%d, source=%d, type=%d, [7]=%.2X, spell=%d, damage = %d, ",
+	   action2->target,
+	   action2->source,
+	   action2->type,
+	   action2->unknown0007,
+	   action2->spell,
+	   action2->damage);
+
+	for(int i = 0; i < 16; i++)
+  	{
+		QString temp2("");
+		temp2.sprintf("[%d]=%.2X, ", i+14, action2->unknown0014[i]);
+
+		temp += temp2;
+	}
+
+	emit msgReceived(temp);
+#endif
+
+}
+
 
 void EQInterface::itemShop(const itemInShopStruct* items)
 {

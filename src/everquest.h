@@ -117,6 +117,13 @@
 // Item spellId no spell value
 #define ITEM_SPELLID_NOSPELL            0xffff
 
+//Combat Flags
+#define COMBAT_MISS						0
+#define COMBAT_BLOCK					-1
+#define COMBAT_PARRY					-2
+#define COMBAT_RIPOSTE					-3
+#define COMBAT_DODGE					-4
+
 /*
 ** Compiler override to ensure
 ** byte aligned structures
@@ -858,6 +865,20 @@ struct staminaStruct {
 ** Length: 30 Octets
 ** OpCode: ActionCode
 */
+
+struct action2Struct
+{
+  /*0000*/ uint8_t  opCode;               // 0x58
+  /*0001*/ uint8_t  version;              // 0x20
+  /*0002*/ uint16_t target;               // Target ID
+  /*0004*/ uint16_t source;               // Source ID
+  /*0006*/ uint8_t  type;                 // Bash, kick, cast, etc.
+  /*0007*/ uint8_t  unknown0007;          // ***Placeholder
+  /*0008*/ int16_t  spell;                // SpellID
+  /*0010*/ int32_t  damage;               // Amount of Damage
+  /*0014*/ uint8_t  unknown0014[16];      // ***Placeholder
+};
+
 
 struct actionStruct
 {

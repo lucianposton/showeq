@@ -196,6 +196,7 @@ ShowSpawnList   1      # show the spawn list
 ShowRegEx	1      # show the map's RegEx filter tool...
 ShowCursorPos	1      # show the position of the cursor (ingame co-ord)
 ShowExpWindow   0      # show the experience window 
+ShowCombatWindow 1     # show the combat window
 ShowSpellList   1      # show the spell list
 SystimeSpawntime 0     # 1 = Display time in unix time (seconds since 1970)
 SplitVSize1    135    # modified when saved
@@ -223,6 +224,11 @@ DockedMap4	0	# dock Map 4
 DockedMap5	0	# dock Map 5
 
 [Experience]
+SavePosition      1    # if set and undocked, save window x, y, width, height
+WindowX 0              # modified when saved
+WindowY 0              # modified when saved
+
+[Combat]
 SavePosition      1    # if set and undocked, save window x, y, width, height
 WindowX 0              # modified when saved
 WindowY 0              # modified when saved

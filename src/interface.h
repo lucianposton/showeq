@@ -32,6 +32,7 @@
 #include "compassframe.h"
 #include "map.h"
 #include "experiencelog.h"
+#include "combatlog.h"
 #include "msgdlg.h"
 #include "filtermgr.h"
 #include "spawnshell.h"
@@ -73,6 +74,7 @@ class EQInterface:public QMainWindow
    void numPacket(int);
    void attack1Hand1(const attack1Struct *);
    void attack2Hand1(const attack2Struct *);
+   void action2Message(const action2Struct *);
    void itemShop(const itemInShopStruct* items);
    void moneyOnCorpse(const moneyOnCorpseStruct* money);
    void itemPlayerReceived(const tradeItemInStruct* itemc);
@@ -158,11 +160,14 @@ class EQInterface:public QMainWindow
    void backfillPlayer(charProfileStruct *);
    void backfillSpawn(spawnStruct *);
 
+   void combatSignal(int, int, int, int, int);
+
  private slots:
    void toggle_opt_Fast();
    void toggle_view_UnknownData();
    void toggle_view_ChannelMsgs();
    void toggle_view_ExpWindow();
+   void toggle_view_CombatWindow();
    void toggle_opt_ConSelect();
    void toggle_opt_TarSelect();
    void toggle_opt_KeepSelectedVisible();
@@ -226,6 +231,7 @@ class EQInterface:public QMainWindow
    QSplitter* m_splitH;
    QSplitter* m_splitT;
    ExperienceWindow* m_expWindow;
+   CombatWindow* m_combatWindow;
    QLabel* m_stsbarSpawns;
    QLabel* m_stsbarStatus;
    QLabel* m_stsbarZone;
@@ -239,6 +245,7 @@ class EQInterface:public QMainWindow
 
    bool viewUnknownData;
    bool viewExpWindow;
+   bool viewCombatWindow;
 
    int  m_id_log_AllPackets;
    int  m_id_log_ZoneData;
@@ -249,6 +256,7 @@ class EQInterface:public QMainWindow
    int  m_id_view_UnknownData;
    int  m_id_view_ChannelMsgs;
    int  m_id_view_ExpWindow;
+   int  m_id_view_CombatWindow;
    int  m_id_view_SpawnList;
    int  m_id_view_PlayerStats;
    int  m_id_view_PlayerSkills;

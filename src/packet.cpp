@@ -2198,6 +2198,8 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             unk = false;
 
+            emit action2Message ((const action2Struct *)data);
+
 #if 0
             struct actionStruct* action;
             action = (struct actionStruct*)(data);

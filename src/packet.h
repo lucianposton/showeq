@@ -597,6 +597,7 @@ class EQPacket : public QObject
    void attack1Hand1           (const attack1Struct*);
 #endif
    void attack2Hand1           (const attack2Struct*);
+   void action2Message         (const action2Struct*);
 
    
    void consRequest            (const considerStruct*);
