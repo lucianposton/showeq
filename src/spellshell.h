@@ -1,8 +1,11 @@
 /*
- * spawnshell.h
+ * spellshell.h
  *
  * ShowEQ Distributed under GPL
  * http://sourceforge.net/projects/seq/
+ * 
+ * Portions Copyright 2003 Zaphod (dohpaz@users.sourceforge.net). 
+ * 
  */
 
 /*
@@ -163,7 +166,6 @@ class SpellShell : public QObject
  public:
   SpellShell(Player* player, SpawnShell* spawnshell, Spells* spells);
   void DeleteSpell(const SpellItem*);
-  void clear();
   
  signals:
   void addSpell(const SpellItem *); // done
@@ -172,13 +174,15 @@ class SpellShell : public QObject
   void clearSpells(); // done
   
  public slots:
+  void clear();
+
   // slots received from EQPacket...
-  void selfStartSpellCast(const startCastStruct *);
+  void selfStartSpellCast(const uint8_t*);
   void buffLoad(const spellBuff*);
-  void buff(const buffStruct*, uint32_t, uint8_t);
-  void action(const actionStruct*, uint32_t, uint8_t);
-  void interruptSpellCast(const badCastStruct *);
-  void selfFinishSpellCast(const memSpellStruct *);
+  void buff(const uint8_t*, size_t, uint8_t);
+  void action(const uint8_t*, size_t, uint8_t);
+  void interruptSpellCast(const uint8_t*);
+  void selfFinishSpellCast(const uint8_t*);
   void spellMessage(QString&);
   void timeout();
 

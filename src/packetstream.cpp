@@ -9,12 +9,15 @@
  */
 
 /* Implementation of EQPacketStream class */
-#include <zlib.h>
-
-#include <stdio.h>
 #include "decode.h"
 #include "packetstream.h"
 #include "packetformat.h"
+#include "packetinfo.h"
+#include "diagnosticmessages.h"
+
+#include <zlib.h>
+
+#include <stdio.h>
 
 //----------------------------------------------------------------------
 // Macros
@@ -28,6 +31,12 @@
 
 // this define is used to diagnose decompression/decoding 
 //#define PACKET_DECODE_DIAG
+
+// this define is used to debug packet info 
+//#define PACKET_INFO_DIAG
+
+// diagnose structure size changes
+#define PACKET_PAYLOAD_SIZE_DIAG 1
 
 // used to translate EQStreamID to a string for debug and reporting
 static const char* const EQStreamStr[] = {"client-world", "world-client", "client-zone", "zone-client"};
@@ -46,8 +55,11 @@ const int16_t arqSeqWrapCutoff = 1024;
 // Constructor
 EQPacketStream::EQPacketStream(EQStreamID streamid, uint8_t dir, 
 			       uint16_t arqSeqGiveUp,
+			       EQPacketOPCodeDB& opcodeDB, 
 			       QObject* parent, const char* name)
   : QObject(parent, name),
+    m_opcodeDB(opcodeDB),
+    m_dispatchers(61),  // prime number that should be plenty large
     m_streamid(streamid),
     m_dir(dir),
     m_packetCount(0),
@@ -60,6 +72,7 @@ EQPacketStream::EQPacketStream(EQStreamID streamid, uint8_t dir,
     m_decodeKey(0),
     m_validKey(true)
 {
+  m_dispatchers.setAutoDelete(true);
 }
 
 ////////////////////////////////////////////////////
@@ -69,10 +82,78 @@ EQPacketStream::~EQPacketStream()
   reset();
 
 #ifdef PACKET_CACHE_DIAG
-  printf("EQPacketStream: Maximum Packet Cache Used on stream %s: %d\n", 
+  printf("EQPacketStream: Maximum Packet Cache Used on stream %s: %d", 
 	 EQStreamStr[m_streamid], maxServerCacheCount);
 #endif
  
+}
+
+////////////////////////////////////////////////////
+// setup connection
+bool EQPacketStream::connect2(const QString& opcodeName, 
+			      const char* payloadType,  EQSizeCheckType szt, 
+			      const QObject* receiver, const char* member)
+{
+  const EQPacketOPCode* opcode = m_opcodeDB.find(opcodeName);
+  if (!opcode)
+  {
+    seqDebug("connect2: Unknown opcode '%s' with payload type '%s'",
+	     (const char*)opcodeName, payloadType);
+    seqDebug("\tfor receiver '%s' of type '%s' to member '%s'",
+	     receiver->name(), receiver->className(), member);
+    return false;
+  }
+
+  EQPacketPayload* payload;
+
+  // try to find a matching payload for this opcode
+  EQPayloadListIterator pit(*opcode);
+  while ((payload = pit.current()) != 0)
+  {
+    // if all the parameters match, then use this payload
+    if ((payload->dir() & m_dir) && 
+	(payload->typeName() == payloadType) && 
+	(payload->sizeCheckType() == szt))
+      break;
+
+    ++pit;
+  }
+
+  // if no payload found, create one and issue a warning
+  if (!payload)
+  {
+    seqDebug("connect2: Warning! opcode '%s' has no matching payload.",
+	     (const char*)opcodeName);
+    seqDebug("\tdir '%d' payload '%s' szt '%d'",
+	    m_dir, payloadType, szt);
+    seqDebug("\tfor receiver '%s' of type '%s' to member '%s'",
+	    receiver->name(), receiver->className(), member);
+
+    return false;
+  }
+
+  // attempt to find an existing dispatch
+  EQPacketDispatch* dispatch = m_dispatchers.find((void*)payload);
+
+  // if no existing dispatch was found, create one
+  if (!dispatch)
+  {
+    // construct a name for the dispatch
+    QCString dispatchName(256);
+    dispatchName.sprintf("PacketDispatch:%s:%s:%d:%s:%d",
+			 (const char*)name(), (const char*)opcodeName,
+			 payload->dir(), (const char*)payload->typeName(), 
+			 payload->sizeCheckType());
+
+    // create new dispatch object
+    dispatch = new EQPacketDispatch(this, dispatchName);
+
+    // insert dispatcher into dispatcher dictionary
+    m_dispatchers.insert((void*)payload, dispatch);
+  }
+
+  // attempt to connect the dispatch object to the receiver
+  return dispatch->connect(receiver, member);
 }
 
 ////////////////////////////////////////////////////
@@ -94,7 +175,7 @@ void EQPacketStream::resetCache()
     EQPacketMap::iterator it = m_cache.begin();
     EQPacketFormat* pf;
 #ifdef PACKET_CACHE_DIAG
-    fprintf(stderr, "Clearing Cache[%s]: Count: %d\n", EQStreamStr[m_streamid], m_cache.size());
+    seqDebug("Clearing Cache[%s]: Count: %d", EQStreamStr[m_streamid], m_cache.size());
 #endif 
     while (it != m_cache.end())
     {
@@ -105,7 +186,7 @@ void EQPacketStream::resetCache()
 
     // now clear the cache
 #ifdef PACKET_CACHE_DIAG
-    printf ("Resetting sequence cache[%s]\n", EQStreamStr[m_streamid]);
+    seqDebug("Resetting sequence cache[%s]", EQStreamStr[m_streamid]);
 #endif
     m_cache.clear();
     emit cacheSize(0, m_streamid);
@@ -124,7 +205,7 @@ void EQPacketStream::setCache(uint16_t serverArqSeq, EQPacketFormat& packet)
    // entry doesn't exist, so insert an entry into the cache
 
 #ifdef PACKET_PROCESS_DIAG
-      printf("SEQ: Insert arq (%04x) stream %d into cache\n", serverArqSeq, m_streamid);
+      seqDebug("SEQ: Insert arq (%04x) stream %d into cache", serverArqSeq, m_streamid);
 #endif
 
       m_cache.insert(EQPacketMap::value_type(serverArqSeq, new EQPacketFormat(packet, true)));
@@ -137,7 +218,7 @@ void EQPacketStream::setCache(uint16_t serverArqSeq, EQPacketFormat& packet)
      {
 
 #ifdef PACKET_PROCESS_DIAG
-        printf("SEQ: Update arq (%04x) stream %d in cache\n", serverArqSeq, m_streamid);
+        seqDebug("SEQ: Update arq (%04x) stream %d in cache", serverArqSeq, m_streamid);
 #endif
 
         *it->second = packet;
@@ -145,7 +226,7 @@ void EQPacketStream::setCache(uint16_t serverArqSeq, EQPacketFormat& packet)
 
 #ifdef PACKET_PROCESS_DIAG
      else
-        printf("SEQ: Not Updating arq (%04x) stream %d into cache, CRC error!\n",
+        seqDebug("SEQ: Not Updating arq (%04x) stream %d into cache, CRC error!",
                serverArqSeq, m_streamid);
 #endif
 
@@ -162,7 +243,7 @@ void EQPacketStream::setCache(uint16_t serverArqSeq, EQPacketFormat& packet)
 void EQPacketStream::processCache()
 {
 #if defined(PACKET_CACHE_DIAG)
-  printf("SEQ: START checking stream %s cache, arq %04x, cache count %04d\n",
+  seqDebug("SEQ: START checking stream %s cache, arq %04x, cache count %04d",
          EQStreamStr[m_streamid], m_arqSeqExp, m_cache.size());
 #endif
   EQPacketMap::iterator it;
@@ -184,7 +265,7 @@ void EQPacketStream::processCache()
     // one yet...
     while(it == m_cache.end())
     {
-      printf("SEQ: Giving up on finding arq %04x in stream %s cache, skipping!\n",
+      seqDebug("SEQ: Giving up on finding arq %04x in stream %s cache, skipping!",
 	     m_arqSeqExp, EQStreamStr[m_streamid]);
       
       // incremente the expected arq sequence number
@@ -218,7 +299,7 @@ void EQPacketStream::processCache()
       break;
     
 #ifdef PACKET_CACHE_DIAG
-    printf("SEQ: found next arq %04x in stream %s cache, cache count %04d\n",
+    seqDebug("SEQ: found next arq %04x in stream %s cache, cache count %04d",
 	   m_arqSeqExp, EQStreamStr[m_streamid], m_cache.size());
 #endif
     
@@ -227,14 +308,14 @@ void EQPacketStream::processCache()
     if (!pf->isValid())
     {
       // Something's screwed up
-      printf("SEQ: INVALID PACKET: Bad CRC32 in packet in stream %s cache with arq %04x!\n",
+      seqDebug("SEQ: INVALID PACKET: Bad CRC32 in packet in stream %s cache with arq %04x!",
 	     EQStreamStr[m_streamid], pf->arq());
     }
 #endif
     
     
 #if defined (PACKET_CACHE_DIAG) && (PACKET_CACHE_DIAG > 2)
-    printf("SEQ: Found next arq in stream %s cache, incrementing arq seq, %04x\n", 
+    seqDebug("SEQ: Found next arq in stream %s cache, incrementing arq seq, %04x", 
 	   EQStreamStr[m_streamid], pf->arq());
 #endif
     
@@ -246,7 +327,7 @@ void EQPacketStream::processCache()
       // seems to be a sort of ping from client to server, has ARQ
       // but no ASQ, Flags look like 0x0201 (network byte order)
 #if defined (PACKET_CACHE_DIAG) && (PACKET_CACHE_DIAG > 2)
-      printf("SEQ: ARQ without ASQ from stream %s arq 0x%04x\n",
+      seqDebug("SEQ: ARQ without ASQ from stream %s arq 0x%04x",
 	     EQStreamStr[m_streamid], pf->arq());
 #endif
     } // since the servers do not care about client closing sequences, we won't either
@@ -254,7 +335,7 @@ void EQPacketStream::processCache()
 	     (m_streamid == zone2client))
       {
 #if defined (PACKET_CACHE_DIAG) && (PACKET_CACHE_DIAG > 2)
-	printf("EQPacketStream: Closing HI & LO, stream %s arq %04x\n", 
+	seqDebug("EQPacketStream: Closing HI & LO, stream %s arq %04x", 
 	       EQStreamStr[m_streamid], pf->arq());  
 #endif
 	if (m_session_tracking_enabled)
@@ -279,7 +360,7 @@ void EQPacketStream::processCache()
     emit cacheSize(m_cache.size(), (int)m_streamid);
     
 #ifdef PACKET_CACHE_DIAG
-    printf("SEQ: REMOVING arq %04x from stream %s cache, cache count %04d\n",
+    seqDebug("SEQ: REMOVING arq %04x from stream %s cache, cache count %04d",
 	   pf->arq(), EQStreamStr[m_streamid], m_cache.size());
 #endif
     // delete the packet
@@ -294,7 +375,7 @@ void EQPacketStream::processCache()
   }
   
 #ifdef PACKET_CACHE_DIAG
-  printf("SEQ: FINISHED checking stream %s cache, arq %04x, cache count %04d\n",
+  seqDebug("SEQ: FINISHED checking stream %s cache, arq %04x, cache count %04d",
          EQStreamStr[m_streamid], m_arqSeqExp, m_cache.size());
 #endif
 }
@@ -346,7 +427,7 @@ uint8_t* EQPacketStream::decodeOpCode(uint8_t *data, size_t *len,
       return NULL;
     
 #ifdef PACKET_DECODE_DIAG
-    printf("decoding 0x%04x with 0x%08llx on stream %s\n", opCode, m_decodeKey, EQStreamStr[m_streamid]);
+    seqDebug("decoding 0x%04x with 0x%08llx on stream %s", opCode, m_decodeKey, EQStreamStr[m_streamid]);
 #endif
     
     int64_t offset = (m_decodeKey % 5) + 5;
@@ -366,17 +447,17 @@ uint8_t* EQPacketStream::decodeOpCode(uint8_t *data, size_t *len,
     {
       if (s_encrypt) 
       {
-	printf("Lost sync, relog or zone to reset\n");
+	seqWarn("Lost sync, relog or zone to reset");
 	m_validKey = false;
       }
       
-      printf("uncompress failed on 0x%04x: %d - %s\nno further attempts will be made until zone on stream %s.\n", 
+      seqWarn("uncompress failed on 0x%04x: %d - %s\nno further attempts will be made until zone on stream %s.", 
 	      opCode, retval, zError(retval), EQStreamStr[m_streamid]);
       return NULL;
     }
     
 #ifdef PACKET_DECODE_DIAG
-    printf ("clean uncompress of 0x%04fx on stream %s: %s\n", opCode, zError (retval), EQStreamStr[m_streamid]);
+    seqDebug ("clean uncompress of 0x%04fx on stream %s: %s", opCode, zError (retval), EQStreamStr[m_streamid]);
 #endif 
 
     opCode &= ~FLAG_COMP;
@@ -399,7 +480,9 @@ void EQPacketStream::decodePacket(uint8_t *data, size_t len, uint16_t opCode)
     if (data == NULL)
       return;
   }
-    
+
+  const EQPacketOPCode* opcodeEntry = 0;
+
   // this works, but could really use a cleanup - mvern
   while (len > 2) 
   {
@@ -417,15 +500,29 @@ void EQPacketStream::decodePacket(uint8_t *data, size_t len, uint16_t opCode)
       }
 
 #ifdef PACKET_DECODE_DIAG
-      printf("unrolling on %s: 0x%04x\n", EQStreamStr[m_streamid], opCode);
+      seqDebug("unrolling on %s: 0x%04x", EQStreamStr[m_streamid], opCode);
 #endif
       opCode = opCode & ~FLAG_COMBINED;
       
       while (count > 0) 
       {
-	uint16_t size;
+	uint16_t size = 0;
+
+	opcodeEntry = m_opcodeDB.find(opCode);
+
+	if (opcodeEntry)
+	{
+	  size = opcodeEntry->implicitLen();
+#ifdef PACKET_DECODE_DIAG // ZBTEMP
+	  seqDebug("opcode %04x implicitlen %d",
+		  opCode, size);
+#endif
+	}
+#ifdef PACKET_DECODE_DIAG
+	else 
+	  seqDebug("No opcodeEntry for %04x", opCode);
+#endif 
 	
-	size = implicitlen(opCode);
 	if (size == 0) 
 	{ // Not an implicit length opcode
 	  if (dptr[0] == 0xff) 
@@ -444,22 +541,21 @@ void EQPacketStream::decodePacket(uint8_t *data, size_t len, uint16_t opCode)
 	  }
 	}
 #ifdef PACKET_DECODE_DIAG
-	printf ("size on %s: %d\n", EQStreamStr[m_streamid], size);
+	seqDebug ("size on %s: %d", EQStreamStr[m_streamid], size);
 #endif
 		
 	if (size > left) 
 	{
-	  printf("error on %s: size > left (size=%d, left=%d, opcode=0x%04x)\n", 
-		 EQStreamStr[m_streamid], size, left, opCode);
+	  seqWarn("error on %s: size > left (size=%d, left=%d, opcode=0x%04x)", 
+		     EQStreamStr[m_streamid], size, left, opCode);
 	  return;
 	}
 	
 #ifdef PACKET_DECODE_DIAG
-	printf("sending from %s: 0x%04x, %d\n", 
+	seqDebug("sending from %s: 0x%04x, %d", 
 	       EQStreamStr[m_streamid], opCode, size);
 #endif
-	emit decodedPacket(dptr, size, m_dir, opCode);
-	emit dispatchData(dptr, size, m_dir, opCode);
+	dispatchPacket(dptr, size, opCode, opcodeEntry);
 	
 	// next
 	dptr += size;
@@ -473,7 +569,7 @@ void EQPacketStream::decodePacket(uint8_t *data, size_t len, uint16_t opCode)
 	  left--;
 	  repeatop = false;
 #ifdef PACKET_DECODE_DIAG
-	  printf ("repeating %d times on %s\n",
+	  seqDebug ("repeating %d times on %s",
 		  count, EQStreamStr[m_streamid]);
 #endif
 	}
@@ -486,7 +582,7 @@ void EQPacketStream::decodePacket(uint8_t *data, size_t len, uint16_t opCode)
 	left -= 2;
 
 #ifdef PACKET_DECODE_DIAG
-	printf("doing leftover from %s: 0x%04x, %d\n", 
+	seqDebug("doing leftover from %s: 0x%04x, %d", 
 	       EQStreamStr[m_streamid], opCode, left);
 #endif
 	if (opCode & FLAG_COMBINED)
@@ -498,11 +594,10 @@ void EQPacketStream::decodePacket(uint8_t *data, size_t len, uint16_t opCode)
 	else 
 	{
 #ifdef PACKET_DECODE_DIAG
-	  printf("sending from %s: 0x%04x, %d\n", 
+	  seqDebug("sending from %s: 0x%04x, %d", 
 		 EQStreamStr[m_streamid], opCode, size);
 #endif
-	  emit decodedPacket(dptr, left, m_dir, opCode);
-	  emit dispatchData(dptr, left, m_dir, opCode);
+	  dispatchPacket(dptr, left, opCode, m_opcodeDB.find(opCode));
 	}
       }
 
@@ -513,11 +608,10 @@ void EQPacketStream::decodePacket(uint8_t *data, size_t len, uint16_t opCode)
   }
   
 #ifdef PACKET_DECODE_DIAG
-  printf ("sending from %s: 0x%04x, %d\n",
+  seqDebug ("sending from %s: 0x%04x, %d",
 	  EQStreamStr[m_streamid], opCode, size);
 #endif
-  emit decodedPacket(data, len, m_dir, opCode);
-  emit dispatchData(data, len, m_dir, opCode);
+  dispatchPacket(data, len, opCode, m_opcodeDB.find(opCode));
 }
 
 ////////////////////////////////////////////////////
@@ -534,10 +628,85 @@ void EQPacketStream::processPayload(uint8_t* data, size_t len)
   if (opCode & FLAG_DECODE)
     decodePacket(data, len, opCode);
   else
+    dispatchPacket(data, len, opCode, m_opcodeDB.find(opCode));
+}
+
+void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len, 
+				    uint16_t opCode, 
+				    const EQPacketOPCode* opcodeEntry)
+{
+  emit decodedPacket(data, len, m_dir, opCode, opcodeEntry);
+
+  bool unknown = true;
+
+  // unless there is an opcode entry, there is nothing to dispatch...
+  if (opcodeEntry)
   {
-    emit decodedPacket(data, len, m_dir, opCode);
-    emit dispatchData(data, len, m_dir, opCode);
+    EQPacketPayload* payload;
+    EQPacketDispatch* dispatch;
+
+#ifdef PACKET_INFO_DIAG
+    seqDebug(
+	    "dispatchPacket: attempting to dispatch opcode %#04x '%s'",
+	    opcodeEntry->opcode(), (const char*)opcodeEntry->name());
+#endif
+
+    // iterate over the payloads in the opcode entry, and dispatch matches
+    EQPayloadListIterator pit(*opcodeEntry);
+    bool found = false;
+    while ((payload = pit.current()) != 0)
+    {
+      // see if this packet matches
+      if (payload->match(data, len, m_dir))
+      {
+	found = true;
+	unknown = false; // 
+
+#ifdef PACKET_INFO_DIAG
+	seqDebug(
+		"\tmatched payload, find dispatcher in dict (%d/%d)",
+		m_dispatchers.count(), m_dispatchers.size());
+#endif
+
+	// find the dispather for the payload
+	dispatch = m_dispatchers.find((void*)payload);
+	
+	// if found, dispatch
+	if (dispatch)
+	{
+#ifdef PACKET_INFO_DIAG
+	  seqDebug("\tactivating signal...");
+#endif
+	  dispatch->activate(data, len, m_dir);
+	}
+      }
+
+      // go to next possible payload
+      ++pit;
+    }
+
+ #ifdef PACKET_PAYLOAD_SIZE_DIAG
+    if (!found && !opcodeEntry->isEmpty())
+    {
+      seqWarn("Warning: %s  (%#04x) (dataLen: %d) doesn't match:",
+	      (const char*)opcodeEntry->name(), opcodeEntry->opcode(), len);
+      while ((payload = pit.current()) != 0)
+      {
+	if (payload->dir() & m_dir)
+        {
+	  if (payload->sizeCheckType() == SZC_Match)
+	    seqWarn("\tsizeof(%s):%d", 
+		       (const char*)payload->typeName(), payload->typeSize());
+	  else if (payload->sizeCheckType() == SZC_Modulus)
+	    seqWarn("\tmodulus of sizeof(%s):%d", 
+		       (const char*)payload->typeName(), payload->typeSize());
+	}
+      }      
+    }
+#endif // PACKET_PAYLOAD_SIZE_DIAG
   }
+
+  emit decodedPacket(data, len, m_dir, opCode, opcodeEntry, unknown);
 }
 
 ////////////////////////////////////////////////////
@@ -565,7 +734,7 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
 	 (m_session_tracking_enabled < 2))
      {
 #ifdef PACKET_PROCESS_DIAG
-       printf("EQPacket: SEQStart found, setting arq seq, %04x  stream %s\n",
+       seqDebug("EQPacket: SEQStart found, setting arq seq, %04x  stream %s",
 	      arqSeq, EQStreamStr[m_streamid]);
 #endif
 
@@ -592,7 +761,7 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
 	      (m_streamid == zone2client))
      {
 #ifdef PACKET_PROCESS_DIAG
-       printf("SEQ: new sequence found, setting arq seq, %04x  stream %s\n",
+       seqDebug("SEQ: new sequence found, setting arq seq, %04x  stream %s",
 	      arqSeq, EQStreamStr[m_streamid]);
 #endif
        m_arqSeqExp = arqSeq;
@@ -606,7 +775,7 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
        emit seqExpect(m_arqSeqExp, (int)m_streamid);
        
 #ifdef PACKET_PROCESS_DIAG
-       printf("SEQ: Found next arq in data stream %s, incrementing arq seq, %04x\n", 
+       seqDebug("SEQ: Found next arq in data stream %s, incrementing arq seq, %04x", 
 	      EQStreamStr[m_streamid], arqSeq);
 #endif
 
@@ -615,7 +784,7 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
 	 // seems to be a sort of ping from client to server, has ARQ
 	 // but no ASQ, Flags look like 0x0201 (network byte order)
 #ifdef PACKET_PROCESS_DIAG
-	 printf("SEQ: ARQ without ASQ from stream %s arq 0x%04x\n",
+	 seqDebug("SEQ: ARQ without ASQ from stream %s arq 0x%04x",
 		EQStreamStr[m_streamid], arqSeq);
 #endif
        }
@@ -641,7 +810,7 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
                (arqSeq < (int32_t(m_arqSeqExp) - arqSeqWrapCutoff)) ) 
      {
 #ifdef PACKET_PROCESS_DIAG
-       printf("SEQ: out of order arq %04x stream %s, sending to cache, %04d\n",
+       seqDebug("SEQ: out of order arq %04x stream %s, sending to cache, %04d",
 	      arqSeq, EQStreamStr[m_streamid], m_cache.size());
 #endif
        

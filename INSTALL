@@ -1,3 +1,5 @@
+Version: $Id$ $Name$
+
 INSTALLATION OVERVIEW:
 ----------------------
 ShowEQ originated on Redhat 6.1, however, it will compile and
@@ -18,8 +20,8 @@ Below is a list of packages you will need in order to compile ShowEQ:
    Name:      Minimum:  Suggested:
    -----------------------------------
    *** 3rd party libraries ***
-   qt         3.0.5     (Must be compiled with -thread) 
-   qt-devel   3.0.5     (Must be compiled with -thread) 
+   qt         3.1     (Must be compiled with -thread) 
+   qt-devel   3.1     (Must be compiled with -thread) 
    libpcap    0.62
    gdbm       1.8.0
 

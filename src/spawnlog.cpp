@@ -17,7 +17,7 @@ SpawnLog::SpawnLog(DateTimeMgr* dateTimeMgr, const QString& fname)
   : SEQLogger(fname, NULL, "SpawnLog"),
     m_dateTimeMgr(dateTimeMgr)
 {
-    version = 3;
+    version = 4;
     zoneShortName = "unknown";
 }
 
@@ -25,7 +25,7 @@ SpawnLog::SpawnLog(DateTimeMgr* dateTimeMgr, FILE *fp)
   : SEQLogger(fp, NULL, "SpawnLog"),
     m_dateTimeMgr(dateTimeMgr)
 {
-    version = 3;
+    version = 4;
     zoneShortName = "unknown";
 }
 
@@ -82,8 +82,9 @@ SpawnLog::logSpawnInfo(const char *type, const char *name, int id, int level,
 }
 
 void 
-SpawnLog::logZoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len)
+SpawnLog::logZoneSpawns(const uint8_t* data, size_t len)
 {
+  const spawnStruct* zspawns = (const spawnStruct*)data;
   int spawndatasize = len / sizeof(spawnStruct);
   
   const QDateTime& eqDate = m_dateTimeMgr->updatedDateTime();
@@ -95,19 +96,20 @@ SpawnLog::logZoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len)
   
   for (int i = 0; i < spawndatasize; i++)
   {
-    const spawnStruct& spawn = zspawns->spawn[i];
+    const spawnStruct& spawn = zspawns[i];
     logSpawnInfo("z",spawn.name,spawn.spawnId,spawn.level,
-                 spawn.x, spawn.y, spawn.z, 
+                 (spawn.x >> 3), (spawn.y >> 3), (spawn.z >> 3), 
 		 eqDate, time, "", 0, spawn.guildID);
   }
 }
 
 void
-SpawnLog::logNewSpawn(const newSpawnStruct* nspawn)
+SpawnLog::logNewSpawn(const uint8_t* data)
 {
-  const spawnStruct& spawn = nspawn->spawn;
+  const spawnStruct& spawn = *(const spawnStruct*)data;
   logSpawnInfo("+",spawn.name,spawn.spawnId,spawn.level,
-	       spawn.x, spawn.y, spawn.z, "", 0, spawn.guildID);
+	       (spawn.x >> 3), (spawn.y >> 3), (spawn.z >> 3), 
+	       "", 0, spawn.guildID);
 }
 
 void

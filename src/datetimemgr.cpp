@@ -40,8 +40,10 @@ void DateTimeMgr::setUpdateFrequency(int seconds)
   }
 }
 
-void DateTimeMgr::timeOfDay(const timeOfDayStruct* tday)
+void DateTimeMgr::timeOfDay(const uint8_t* data)
 {
+  const timeOfDayStruct* tday = (const timeOfDayStruct*)data;
+
 #if (QT_VERSION > 0x030100)
   m_refDateTime = QDateTime::currentDateTime(Qt::UTC);
 #else
@@ -61,6 +63,9 @@ void DateTimeMgr::timeOfDay(const timeOfDayStruct* tday)
 
 void DateTimeMgr::update()
 {
+  if (!m_eqDateTime.isValid())
+    return;
+
 #if (QT_VERSION > 0x030100)
   const QDateTime& current = QDateTime::currentDateTime(Qt::UTC);
 #else

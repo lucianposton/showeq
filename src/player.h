@@ -44,33 +44,36 @@ public:
   virtual ~Player();
 
  public slots:
-   void backfill(const charProfileStruct* player); 
    void clear();
    void reset();
-#if 0 // ZBTEMP
-   //void wearItem(const playerItemStruct* itemp);
-   //void removeItem(const itemItemStruct* item);
-#endif // ZBTEMP
-   void increaseSkill(const skillIncStruct* skilli);
-   void manaChange(const manaDecrementStruct* mana);
-   void updateExp(const expUpdateStruct* exp);
-   void updateAltExp(const altExpUpdateStruct* altexp);
-   void updateLevel(const levelUpUpdateStruct* levelup);
-   void updateNpcHP(const hpNpcUpdateStruct* hpupdate);
-   void updateSpawnMaxHP(const SpawnUpdateStruct* su);
-   void updateStamina(const staminaStruct* stam);
+   void setUseAutoDetectedSettings(bool enable);
+   void setDefaultName(const QString&);
+   void setDefaultLastname(const QString&);
+   void setDefaultLevel(uint8_t);
+   void setDefaultRace(uint16_t);
+   void setDefaultClass(uint8_t);
+   void setDefaultDeity(uint16_t);
+
+   void player(const uint8_t* player); 
+   void increaseSkill(const uint8_t* skilli);
+   void manaChange(const uint8_t* mana);
+   void updateExp(const uint8_t* exp);
+   void updateAltExp(const uint8_t* altexp);
+   void updateLevel(const uint8_t* levelup);
+   void updateNpcHP(const uint8_t* hpupdate);
+   void updateSpawnInfo(const uint8_t* su);
+   void updateStamina(const uint8_t* stam);
    void setLastKill(const QString& name, uint8_t level);
    void zoneChanged(void);
    void zoneBegin(const ServerZoneEntryStruct* zsentry);
-   void playerUpdate(const playerSelfPosStruct* pupdate, uint32_t, uint8_t);
-   void consMessage(const considerStruct * con, uint32_t, uint8_t dir);
-   void tradeSpellBookSlots(const tradeSpellBookSlotsStruct*, uint32_t, uint8_t);
+   void playerUpdateSelf(const uint8_t* pupdate, size_t, uint8_t);
+   void consMessage(const uint8_t* con, size_t, uint8_t dir);
+   void tradeSpellBookSlots(const uint8_t*, size_t, uint8_t);
 
    void setPlayerID(uint16_t playerID);
-   void checkDefaults(void) { setDefaults(); } // Update our default values
-   void setUseDefaults (bool bdefaults) { m_useDefaults = bdefaults; }
    void savePlayerState(void);
    void restorePlayerState(void);
+   void setUseDefaults(bool bdefaults) { m_useDefaults = bdefaults; }
 
  public:
    virtual QString name() const;
@@ -79,7 +82,15 @@ public:
    virtual uint16_t deity() const;
    virtual uint16_t race() const;
    virtual uint8_t classVal() const;
-   
+
+   bool useAutoDetectedSettings() const { return m_useAutoDetectedSettings; }
+   QString defaultName() const { return m_defaultName; }
+   QString defaultLastName() const { return m_defaultLastName; }
+   uint8_t defaultLevel() const { return m_defaultLevel; }
+   uint16_t defaultDeity() const { return m_defaultDeity; }
+   uint16_t defaultRace() const { return m_defaultRace; }
+   uint8_t defaultClass() const { return m_defaultClass; }
+
    // ZBTEMP: compatibility code
    uint16_t getPlayerID() const { return id(); }
    int16_t headingDegrees() const { return m_headingDegrees; }
@@ -113,16 +124,11 @@ public:
    bool getStatValue(uint8_t stat,
 		     uint32_t& curValue, 
 		     uint32_t& maxValue);
-   void setDefaults(void);
 
  signals:
-
+   void newPlayer(void);
    void buffLoad(const spellBuff*); 
    void newSpeed               (int speed);
-   void msgReceived            (const QString &);
-   void stsMessage             ( const QString &,
-                                 int              = 0
-                               );
    void statChanged            ( int statNum,
                                  int val,
                                  int max
@@ -143,9 +149,18 @@ public:
                                );
    void deleteLanguages();
 
-   void expAltChangedStr       (const QString &);
+   void setExp(uint32_t totalExp, uint32_t totalTick,
+	       uint32_t minExpLevel, uint32_t maxExpLevel, 
+	       uint32_t tickExpLevel);
+
+   void newExp(uint32_t newExp, uint32_t totalExp, uint32_t totalTick,
+	       uint32_t minExpLevel, uint32_t maxExpLevel, 
+	       uint32_t tickExpLevel);
+   void setAltExp(uint32_t totalExp,
+		  uint32_t maxExp, uint32_t tickExp, uint32_t aapoints);
+   void newAltExp(uint32_t newExp, uint32_t totalExp, uint32_t totalTick, 
+		  uint32_t maxExp, uint32_t tickExp, uint32_t aapoints);
    void expAltChangedInt       (int, int, int);
-   void expChangedStr          (const QString &);
    void expChangedInt          (int, int, int);
                                
    void expGained              ( const QString &,
@@ -191,8 +206,8 @@ public:
    uint16_t m_defaultDeity;
    uint8_t m_defaultClass;
    uint8_t m_defaultLevel;
-   uint8_t m_playerSkills [MAX_KNOWN_SKILLS];
-   uint8_t m_playerLanguages [MAX_KNOWN_LANGS];
+   uint8_t m_playerSkills[MAX_KNOWN_SKILLS];
+   uint8_t m_playerLanguages[MAX_KNOWN_LANGS];
 
    uint16_t m_plusMana;
    uint16_t m_plusHP;
@@ -214,7 +229,9 @@ public:
    uint32_t m_currentAltExp;
    uint16_t m_currentAApts;
    uint32_t m_currentExp;
+   uint32_t m_minExp;
    uint32_t m_maxExp;
+   uint32_t m_tickExp;
 
    uint32_t m_spellBookSlots[MAX_SPELLBOOK_SLOTS];
 
@@ -235,10 +252,13 @@ public:
    uint16_t m_lastSpellOnId;
    
    int16_t m_headingDegrees;
-   // Wether or not we use defaults, determined by wether or not we could decode the zone
-   // loading data.  Used alongside showeq_params->forceDefaults
+   // Wether or not we use defaults, determined by wether or not we could 
+   // decode the zone loading data.  
    bool m_useDefaults;
    
+   // Whether or not to use auto-detected character settings
+   bool m_useAutoDetectedSettings;
+
    // which things are valid
    bool m_validStam;
    bool m_validMana;
