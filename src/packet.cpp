@@ -1692,7 +1692,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
             unk = false;
 
-#if 1 // ZBTEMP
+#if 0 // ZBTEMP
 	    logData("/tmp/channelMessages.log", len, data);
 #endif
 
