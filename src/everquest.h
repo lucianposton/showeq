@@ -551,16 +551,16 @@ struct charProfileStruct
 /*3702*/ uint16_t  zoneInstance;       // 
 /*3704*/ spellBuff buffs[15];          // Buffs currently on the player
 /*3944*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
-/*4328*/ uint8_t   unknown4328[668];   // *** Placeholder
-/*4996*/ uint32_t  ldon_guk_points;    // Earned GUK points
-/*5000*/ uint32_t  ldon_mir_points;    // Earned MIR points
-/*5004*/ uint32_t  ldon_mmc_points;    // Earned MMC points
-/*5008*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
-/*5012*/ uint32_t  ldon_tak_points;    // Earned TAK points
-/*5016*/ uint8_t   unknown4352[20];    // *** Placeholder
-/*5036*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*5040*/ uint8_t   unknown4380[632];   // *** Placeholder
-}; /* 5672 */
+/*4328*/ uint8_t   unknown4328[672];   // *** Placeholder
+/*5000*/ uint32_t  ldon_guk_points;    // Earned GUK points
+/*5004*/ uint32_t  ldon_mir_points;    // Earned MIR points
+/*5008*/ uint32_t  ldon_mmc_points;    // Earned MMC points
+/*5012*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
+/*5016*/ uint32_t  ldon_tak_points;    // Earned TAK points
+/*5020*/ uint8_t   unknown4352[20];    // *** Placeholder
+/*5040*/ uint32_t  ldon_avail_points;  // Available LDON points
+/*5044*/ uint8_t   unknown4380[636];   // *** Placeholder
+}; /* 5680 */
 
 
 #if 0

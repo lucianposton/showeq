@@ -1,3 +1,9 @@
+dohpaZ (02/19/04)
+---------------------
++ Updated version to 4.3.21
++ Updated to work with 02/18/04 EQLive
++ Patch to fix QCursor issue.
+
 dohpaZ (02/17/04)
 ---------------------
 + Updated version to 4.3.20
