@@ -2613,16 +2613,6 @@ void Map::paintSpawns(MapParameters& param,
 		      spawnOffsetYPos - spawn->deltaY());
       }
 
-	// if its an invisible man then set the color to orange
-	//  orange = 255,160,0
-	//  brown = 165,42,42
-	//  purple = 160,32,240
-
-      if (item->race() == 127)
-	{
-	  p.setBrush (QColor (255,160,0));
-	}
-
       //
       // Misc decorations
       //

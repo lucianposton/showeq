@@ -1443,16 +1443,6 @@ QColor CSpawnList::pickSpawnColor(const Item* item, QColor def)
   if (spawn == NULL)
     return def;
 
-   // if its an invisible man then set the color to purple
-   //  orange = 255,160,0
-   //  brown = 165, 42, 42
-   //  purple = 160, 32, 240
-
-   if (item->race() == 127)
-   {
-     return (QColor(160,32,240));
-   }
-
    // color by pvp team
    if (showeq_params->pvp) 
    {
