@@ -42,7 +42,6 @@ class SpawnShell;
 enum spawnItemType 
 { 
   tUnknown, 
-  tCoins, 
   tDoors, 
   tDrop,
   tSpawn,
@@ -356,38 +355,6 @@ class Spawn : public Item
 
 
 //----------------------------------------------------------------------
-// Coin
-class Coin : public Item
-{
- public:
-  // constructor/destructor
-  Coin(const dropCoinsStruct* c);
-  virtual ~Coin();
-
-  // coin specific get methods
-  uint32_t amount() const { return m_amount; }
-  uint8_t coinType() const { return m_coinType; }
-
-  // virtual get method overloads
-  virtual QString raceString() const;
-  virtual QString classString() const;
-
-  // update methods
-  void update(const dropCoinsStruct* c);
-
-  // coin specific set methods
-  void setAmount(uint32_t amount)
-    { m_amount = amount; }
-  void setCoinType(uint8_t type)
-    { m_coinType = type; }
-
- protected:
-  // coin specific data
-  uint32_t m_amount;
-  uint8_t m_coinType;
-};
-
-//----------------------------------------------------------------------
 // Door
 class Door : public Item
 {
@@ -456,24 +423,6 @@ inline Spawn* spawnType(Item* item)
     return NULL; // otherwise NULL
 }
 
-
-inline const Coin* coinType(const Item* item)
-{
-  // if this is an item of coin type, return the pointer to Coin
-  if (item->type() == tCoins)
-    return (const Coin*)item;
-  else
-    return NULL; // otherwise NULL
-}
-
-inline Coin* coinType(Item* item)
-{
-  // if this is an item of coin type, return the pointer to Coin
-  if (item->type() == tCoins)
-    return (Coin*)item;
-  else
-    return NULL; // otherwise NULL
-}
 
 inline const Door* doorType(const Item* item)
 {

@@ -93,7 +93,6 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
     m_guildMgr(guildMgr),
     m_spawns(701),
     m_drops(211),
-    m_coins(101),
     m_doors(307),
     m_players(2)
 {
@@ -105,7 +104,6 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
    // these should auto delete
    m_spawns.setAutoDelete(true);
    m_drops.setAutoDelete(true);
-   m_coins.setAutoDelete(true);
    m_doors.setAutoDelete(true);
 
    // we don't want this one to auto-delete
@@ -165,7 +163,6 @@ void SpawnShell::clear(void)
    emit clearItems();
 
    m_spawns.clear();
-   m_coins.clear();
    m_doors.clear();
    m_drops.clear();
 
@@ -425,49 +422,6 @@ void SpawnShell::newDoorSpawn(const doorStruct* d, uint32_t len, uint8_t dir)
 
    if (item->filterFlags() & FILTER_FLAG_ALERT)
      emit handleAlert(item, tNewSpawn);
-}
-
-
-void SpawnShell::newCoinsItem(const dropCoinsStruct *c)
-{
-#ifdef SPAWNSHELL_DIAG
-   printf("SpawnShell::newCoinsItem(dropCoinsStruct*)\n");
-#endif
-  // if zoning, then don't do anything
-  if (m_zoneMgr->isZoning())
-    return;
-
-  if (!c)
-    return;
-
-  Item* item = m_coins.find(c->dropId);
-  if (item != NULL)
-  {
-    Coin* coin = (Coin*)item;
-    coin->update(c);
-    updateFilterFlags(item);
-    item->updateLastChanged();
-    emit changeItem(item, tSpawnChangedALL);
-  }
-  else
-  {
-    item = new Coin(c);
-    updateFilterFlags(item);
-    m_coins.insert(c->dropId, item);
-    emit addItem(item);
-  }
-  
-  if (item->filterFlags() & FILTER_FLAG_ALERT)
-    emit handleAlert(item, tNewSpawn);
-}
-
-void SpawnShell::removeCoinsItem(const removeCoinsStruct *c)
-{
-#ifdef SPAWNSHELL_DIAG
-   printf("SpawnShell::removeCoinsItem(removeCoinsStruc *)\n");
-#endif
-   if (c)
-      deleteItem(tDrop, c->dropId);
 }
 
 void SpawnShell::zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len)
@@ -967,7 +921,6 @@ void SpawnShell::refilterSpawns()
 {
   refilterSpawns(tSpawn);
   refilterSpawns(tDrop);
-  refilterSpawns(tCoins);
   refilterSpawns(tDoors);
 }
 
@@ -1016,7 +969,6 @@ void SpawnShell::refilterSpawnsRuntime()
 {
   refilterSpawnsRuntime(tSpawn);
   refilterSpawnsRuntime(tDrop);
-  refilterSpawnsRuntime(tCoins);
   refilterSpawnsRuntime(tDoors);
 }
 

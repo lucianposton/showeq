@@ -125,21 +125,25 @@ class EQInterface:public QMainWindow
    void groupAccept(const groupAcceptStruct* gmem);
    void groupDelete(const groupDeleteStruct* gmem);
    void logOut(const uint8_t*, uint32_t, uint8_t);
+   void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
+   void clientTarget(const clientTargetStruct* cts);
+   void worldMOTD(const worldMOTDStruct* motd);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
    void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
+   void zoneChanged(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
+
    void zoneBegin(const QString& shortZoneName);
    void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
    void zoneChanged(const QString& shortZoneName);
-   void zoneChanged(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
-   void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
-   void clientTarget(const clientTargetStruct* cts);
+
    void spawnSelected(const Item* item);
    void spawnConsidered(const Item* item);
    void addItem(const Item* item);
    void delItem(const Item* item);
    void killSpawn(const Item* item);
    void changeItem(const Item* item);
+
    void handleAlert(const Item* item, alertType type);
    void updateSelectedSpawnStatus(const Item* item);
 
@@ -157,13 +161,13 @@ class EQInterface:public QMainWindow
    void toggle_log_ZoneData();
    void toggle_log_UnknownData();
    void toggle_log_RawData();
+   void toggle_log_ItemData();
+   void toggle_log_ItemPacketData();
    void listSpawns(void);
    void listDrops(void);
-   void listCoins(void);
    void listMapInfo(void);
    void dumpSpawns(void);
    void dumpDrops(void);
-   void dumpCoins(void);
    void dumpMapInfo(void);
    void dumpGuildInfo(void);
    void dumpSpellBook(void);
@@ -358,6 +362,8 @@ class EQInterface:public QMainWindow
    int  m_id_log_ZoneData;
    int  m_id_log_UnknownData;
    int  m_id_log_RawData;
+   int  m_id_log_Items;
+   int  m_id_log_ItemPackets;
    int  m_id_opt_OptionsDlg;
    int  m_id_opt_Fast;
    int  m_id_opt_ResetMana;

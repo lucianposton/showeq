@@ -1112,7 +1112,6 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
 					   this, SLOT(toggle_unknownSpawns(int)));
   m_id_spawnPoints = subMenu->insertItem("Spawn Points", this, SLOT( toggle_spawnPnts(int) ));
   m_id_drops = subMenu->insertItem("Drops", this, SLOT(toggle_drops(int)));
-  m_id_coins = subMenu->insertItem("Coins", this, SLOT(toggle_coins(int)));
   m_id_doors = subMenu->insertItem("Doors", this, SLOT(toggle_doors(int)));
   m_id_spawnNames = subMenu->insertItem("Spawn Names", this, SLOT(toggle_spawnNames(int)));
   m_id_highlightConsideredSpawns =
@@ -1284,7 +1283,6 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_spawnPoints, m_map->showSpawnPoints());
   setItemChecked(m_id_unknownSpawns, m_map->showUnknownSpawns());
   setItemChecked(m_id_drops, m_map->showDrops());
-  setItemChecked(m_id_coins, m_map->showCoins());
   setItemChecked(m_id_doors, m_map->showDoors());
   setItemChecked(m_id_spawnNames, m_map->showSpawnNames());
   setItemChecked(m_id_highlightConsideredSpawns, 
@@ -1464,11 +1462,6 @@ void MapMenu::toggle_unknownSpawns(int itemId)
 void MapMenu::toggle_drops(int itemId)
 {
   m_map->setShowDrops(!m_map->showDrops());
-}
-
-void MapMenu::toggle_coins(int itemId)
-{
-  m_map->setShowCoins(!m_map->showCoins());
 }
 
 void MapMenu::toggle_doors(int itemId)
@@ -1679,9 +1672,6 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "ShowDroppedItems";
   m_showDrops = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
-
-  tmpPrefString = "ShowDroppedCoins";
-  m_showCoins = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
   tmpPrefString = "ShowDoors";
   m_showDoors = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
@@ -2599,17 +2589,6 @@ void Map::setShowDrops(bool val)
     refreshMap ();
 }
 
-void Map::setShowCoins(bool val) 
-{ 
-  m_showCoins = val; 
-
-  QString tmpPrefString = "ShowDroppedCoins";
-  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showCoins);
-  
-  if(!m_cacheChanges)
-    refreshMap ();
-}
-
 void Map::setShowDoors(bool val) 
 { 
   m_showDoors = val; 
@@ -3012,7 +2991,6 @@ void Map::dumpInfo(QTextStream& out)
   out << "ShowPlayerBackground: " << m_showPlayerBackground << endl;
   out << "ShowPlayerView: " << m_showPlayerView << endl;
   out << "ShowDroppedItems: " << m_showDrops << endl;
-  out << "ShowDroppedCoins: " << m_showCoins << endl;
   out << "ShowDoors: " << m_showDoors << endl;
   out << "ShowSpawns: " << m_showSpawns << endl;
   out << "ShowSpawnNames: " << m_showSpawnNames << endl;
@@ -3367,9 +3345,6 @@ void Map::paintMap (QPainter * p)
   if (m_showDrops)
     paintDrops(m_param, tmp);
 
-  if (m_showCoins)
-    paintCoins(m_param, tmp);
-
   if (m_showDoors)
     paintDoors(m_param, tmp);
 
@@ -3521,7 +3496,7 @@ void Map::paintDrops(MapParameters& param,
     // get the item from the list
     item = it.current();
 
-    // make sure coin is within bounds
+    // make sure drop is within bounds
     if (!inRect(screenBounds, item->x(), item->y()) ||
 	(m_spawnDepthFilter &&
 	 ((item->z() > m_param.playerHeadRoom()) ||
@@ -3543,50 +3518,6 @@ void Map::paintDrops(MapParameters& param,
   }
 }
 
-void Map::paintCoins(MapParameters& param,
-		     QPainter& p)
-{
-#ifdef DEBUGMAP
-  printf("Paint the coin items\n");
-#endif
-  const ItemMap& itemMap = m_spawnShell->coins();
-  ItemConstIterator it(itemMap);
-  const Item* item;
-  const QRect& screenBounds = m_param.screenBounds();
-  int ixlOffset;
-  int iylOffset;
-
-  // coins only come in one color
-  p.setPen(magenta);
-
-  /* Paint the coin items */
-  for (; it.current(); ++it)
-  {
-    // get the item from the list
-    item = it.current();
-
-    // make sure coin is within bounds
-    if (!inRect(screenBounds, item->x(), item->y()) ||
-	(m_spawnDepthFilter &&
-	 ((item->z() > m_param.playerHeadRoom()) ||
-	  (item->z() < m_param.playerFloorRoom()))))
-      continue;
-
-    ixlOffset = param.calcXOffsetI(item->x());
-    iylOffset = param.calcYOffsetI(item->y());
-
-    //fixed size:
-    p.drawLine(ixlOffset - m_drawSize,
-		 iylOffset - m_drawSize,
-		 ixlOffset + m_drawSize,
-		 iylOffset + m_drawSize);
-    p.drawLine(ixlOffset - m_drawSize, 
-		 iylOffset + m_drawSize,
-		 ixlOffset + m_drawSize,
-		 iylOffset - m_drawSize);
-  }
-}		     
-
 void Map::paintDoors(MapParameters& param,
 		     QPainter& p)
 {
@@ -3600,10 +3531,10 @@ void Map::paintDoors(MapParameters& param,
   int ixlOffset;
   int iylOffset;
 
-  // coins only come in one color
+  // doors only come in one color
   p.setPen(QColor (110, 60, 0));
 
-  /* Paint the coin items */
+  /* Paint the door items */
   for (; it.current(); ++it)
   {
     // get the item from the list
@@ -4640,10 +4571,27 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       else
 	hp = QString::number(spawn->HP());
 
-      string.sprintf("%s  %s\n"
+      QString lastName = spawn->lastName();
+      if (!lastName.isEmpty())
+      {
+	// if the spawn isn't a player enclose the name in parenthesis
+	if (!spawn->isPlayer())
+	{
+	  lastName.prepend("(");
+	  lastName.append(") ");
+	}
+	else
+	  lastName.append(" ");
+      }
+      else 
+	lastName = "";
+
+      string.sprintf("%s %s%s\n"
 		     "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5d\n"
 		     "Race: %s\t Class: %s", 
-		     (const char*)spawn->transformedName(),(const char*)guild,
+		     spawn->transformedName().latin1(),
+		     lastName.latin1(),
+		     guild.latin1(),
 		     spawn->level(), (const char*)hp,
 		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
 		     showeq_params->retarded_coords ? spawn->y() : spawn->x(),
@@ -4763,8 +4711,8 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
   EQPoint testPoint;
 
   const Item* item;
-  spawnItemType itemTypes[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
-  const bool* showType[] = { &m_showSpawns, &m_showDrops, &m_showCoins, 
+  spawnItemType itemTypes[] = { tSpawn, tDrop, tDoors, tPlayer };
+  const bool* showType[] = { &m_showSpawns, &m_showDrops, 
 			     &m_showDoors, &m_showPlayer };
   
   for (uint8_t i = 0; i < (sizeof(itemTypes) / sizeof(spawnItemType)); i++)

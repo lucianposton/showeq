@@ -872,7 +872,7 @@ void SpawnList::populateCategory(const Category* cat)
   setUpdatesEnabled(false);
 
   // types of items to populate category with
-  spawnItemType types[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer};
+  spawnItemType types[] = { tSpawn, tDrop, tDoors, tPlayer};
 
   int flags = 0;
   const ItemMap& itemMap = m_spawnShell->spawns();
@@ -930,7 +930,7 @@ void SpawnList::populateCategory(const Category* cat)
 void SpawnList::populateSpawns(void)
 {
   // types of items to populate category with
-  spawnItemType types[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
+  spawnItemType types[] = { tSpawn, tDrop, tDoors, tPlayer };
 
   int flags = 0;
   const Item* item;

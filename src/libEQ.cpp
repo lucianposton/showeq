@@ -158,7 +158,7 @@ uint8_t* decodeOpCode (uint8_t *data, uint32_t *len, uint8_t dir)
         if (!valid_key[dir])
 	    return NULL;
 	    
-//	printf ("decoding 0x%04x with 0x%08x\n", opCode, decode_key[dir]);
+	//printf ("decoding 0x%04x with 0x%08llx in direction %d\n", opCode, decode_key[dir], dir);
 	
 	int64_t offset = (decode_key[dir] % 5) + 7;
 	*((int64_t *)(data+offset)) ^= decode_key[dir];

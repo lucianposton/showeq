@@ -100,7 +100,7 @@ public slots:
    void setSelectedQuiet(QListViewItem* item, bool selected);
    void populateSpawns(void);
    void populateCategory(const Category* cat);
-   void displayCount(int);
+   void updateCount(void);
    // data sources
    Player *m_player;
    CategoryMgr* m_categoryMgr;
@@ -134,9 +134,6 @@ public slots:
    bool m_immediateUpdate;
    bool m_keepSorted;
    bool m_keepSelectedVisible;
-
-   // Spawn Counter
-   int m_spawnCount;
 };
 
 #endif // SPAWNLIST2_H

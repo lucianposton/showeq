@@ -1,3 +1,37 @@
+dohpaZ (10/01/03)
+---------------------
++ Updated version to 4.3.14.
++ Tuned spell duration formulae.
++ Added menu items to enable/disable item logging (now disabled by default)
++ Integrated curio's clearing of the selected spawn point fix.
++ Integrated patch #814819 "Prevent Mounts in spawn points" by monster69 (code 
+  by UnGod/Belith).
++ Cleaned up some compile warnings.
++ Made spells_en.txt and eqstr_en.txt string loading more forgiving about line
+  termination
++ Made the interface.cpp stdout spell notifications prefer the new spell data.
++ Added more world server opcodes, and added handling for the MOTD.
++ Fixed a bug in spellshell that was occasionally showing other targets for
+  self only spells.
++ Made ItemDB more robust in the face of items that don't parse properly
++ Fixed an incorrect field assignment in ItemDB.
++ Changed logging in EQPacket:
+  + Seperated out the opcode (and the decode flags) from the payload data 
+  + Global logging now logs a lot more information to make it easier to debug.
++ Removed the opCode information from the beginning of all the packet 
+  structures.  It is really a part of the protocol layer and shouldn't be in
+  the structures (been meaning to do this for a long long time).
++ Brought some more structures up to date in everquest.h, renumbered all the 
+  byte offsets to match the structures current setup.
++ Removed legacy coin drop support (if they haven't come back by now...)
++ Fixed Z coordinate of drops to match the rest of the spawns
++ Added support for spells being cast on you (useful for all classes, 
+  especially melee) and for others updating buffs you'd cast (useful in raids)
+  to SpellShell.
++ Added last name to the map spawn tooltip, with parens around it on NPCs.
++ Improved SpawnList2 count display by making it not be fixed width and by
+   actually display the number of items in the spawn list.
+
 dohpaZ (09/28/03)
 ---------------------
 + Updated version to 4.3.13

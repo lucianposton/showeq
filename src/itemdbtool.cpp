@@ -825,6 +825,7 @@ int exportRawRecord(EQItemDB* itemDB,
 		 uint32_t itemNr)
 {
   int result = 0;
+#if 0 // ZBTEMP
   FILE* outfile;
   int count = 0;
   size_t itemsize;
@@ -953,6 +954,7 @@ int exportRawRecord(EQItemDB* itemDB,
   fprintf(stderr, "%s: Wrote %d itemItemStruct's (%d bytes each) to file '%s'.\n",
 	  progname, count, sizeof(itemItemStruct), filename);
 
+#endif // ZBTEMP
   return result;
 }
 

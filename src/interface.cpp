@@ -148,7 +148,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
      m_itemDB->SetDBFile(EQItemDB::DATA_DB, showeq_params->ItemDataDBFilename);
      m_itemDB->SetDBFile(EQItemDB::RAW_DATA_DB, showeq_params->ItemRawDataDBFileName);
      m_itemDB->SetEnabledDBTypes(showeq_params->ItemDBTypes);
-
+     m_itemDB->SetItemLogging(pSEQPrefs->getPrefBool("ItemLogging", "ItemDB", false));
+     m_itemDB->SetItemPacketLogging(pSEQPrefs->getPrefBool("ItemPackingLogging", "ItemDB", false));
      // Make sure the databases are upgraded to the current format
      m_itemDB->Upgrade();
    }
@@ -682,11 +683,21 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_id_log_ZoneData    = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F7);
    m_id_log_UnknownData = pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F8);
    m_id_log_RawData     = pLogMenu->insertItem("Raw Data", this, SLOT(toggle_log_RawData()), Key_F8);
+   if (m_itemDB)			      
+   {
+     m_id_log_Items  = pLogMenu->insertItem("Item Data", this, SLOT(toggle_log_ItemData()));
+     m_id_log_ItemPackets   = pLogMenu->insertItem("Item Packet Data", this, SLOT(toggle_log_ItemPacketData()));
+   }
    menuBar()->setItemChecked (m_id_log_AllPackets , showeq_params->logAllPackets);
    menuBar()->setItemChecked (m_id_log_WorldData   ,showeq_params->logWorldPackets);
    menuBar()->setItemChecked (m_id_log_ZoneData   , showeq_params->logZonePackets);
    menuBar()->setItemChecked (m_id_log_UnknownData, showeq_params->logUnknownZonePackets);
    menuBar()->setItemChecked (m_id_log_RawData, showeq_params->logRawPackets);
+   if (m_itemDB)			      
+   {
+     menuBar()->setItemChecked (m_id_log_Items, m_itemDB->GetItemLogging());
+     menuBar()->setItemChecked (m_id_log_ItemPackets, m_itemDB->GetItemPacketLogging());
+   }
 
    // OpCode Monitor
    QPopupMenu* pOpCodeMenu = new QPopupMenu;
@@ -1043,12 +1054,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    menuBar()->insertItem("&Debug", pDebugMenu);
    pDebugMenu->insertItem("List &Spawns", this, SLOT(listSpawns()), ALT+CTRL+Key_S);
    pDebugMenu->insertItem("List &Drops", this, SLOT(listDrops()), ALT+CTRL+Key_D);
-   pDebugMenu->insertItem("List &Coins", this, SLOT(listCoins()), ALT+CTRL+Key_C);
    pDebugMenu->insertItem("List &Map Info", this, SLOT(listMapInfo()), ALT+CTRL+Key_M);
    pDebugMenu->insertItem("List Guild Info", m_guildmgr, SLOT(listGuildInfo()));
    pDebugMenu->insertItem("Dump &Spawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_S);
    pDebugMenu->insertItem("Dump &Drops", this, SLOT(dumpDrops()), ALT+SHIFT+CTRL+Key_D);
-   pDebugMenu->insertItem("Dump &Coins", this, SLOT(dumpCoins()), ALT+SHIFT+CTRL+Key_C);
    pDebugMenu->insertItem("Dump Map &Info", this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
    pDebugMenu->insertItem("Dump Guild Info", this , SLOT(dumpGuildInfo()));
    pDebugMenu->insertItem("Dump SpellBook Info", this , SLOT(dumpSpellBook()));
@@ -1262,6 +1271,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   this, SLOT(groupDelete(const groupDeleteStruct*)));
    connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
 	   this, SLOT(zoneNew(const newZoneStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(worldMOTD(const worldMOTDStruct*, uint32_t, uint8_t)),
+	   this, SLOT(worldMOTD(const worldMOTDStruct*)));
+
    connect(m_packet, SIGNAL(toggle_session_tracking()),
 	   this, SLOT(toggle_net_session_tracking()));
    
@@ -1339,6 +1351,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_spellShell, SLOT(interruptSpellCast(const badCastStruct *)));
    connect(m_packet, SIGNAL(buffDrop(const buffDropStruct *, uint32_t, uint8_t)),
 	   m_spellShell, SLOT(buffDrop(const buffDropStruct *, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(action(const actionStruct *, uint32_t, uint8_t)),
+	   m_spellShell, SLOT(action(const actionStruct *, uint32_t, uint8_t)));
 
    // connect Player slots to EQPacket signals
    connect(m_packet, SIGNAL(backfillPlayer(const charProfileStruct*, uint32_t, uint8_t)),
@@ -2386,8 +2400,11 @@ void EQInterface::loadFormatStrings()
     // read in the entire file
     formatFile.readBlock(textData.data(), textData.size());
 
-    // split the data into lines at CR LF
-    QStringList lines = QStringList::split(QString("\r\n"), textData, false);
+    // construct a regex to deal with either style line termination
+    QRegExp lineTerm("[\r\n]{1,2}");
+
+    // split the data into lines at the line termination
+    QStringList lines = QStringList::split(lineTerm, textData, false);
 
     // start iterating over the lines
     QStringList::Iterator it = lines.begin();
@@ -2566,7 +2583,7 @@ void EQInterface::listSpawns (void)
   // open the output data stream
   QTextStream out(stdout, IO_WriteOnly);
   
-   // dump the coin spawns 
+   // dump the spawns 
   m_spawnShell->dumpSpawns(tSpawn, out);
 }
 
@@ -2579,21 +2596,8 @@ void EQInterface::listDrops (void)
   // open the output data stream
   QTextStream out(stdout, IO_WriteOnly);
 
-  // dump the coin spawns 
+  // dump the drops
   m_spawnShell->dumpSpawns(tDrop, out);
-}
-
-void EQInterface::listCoins (void)
-{
-#ifdef DEBUG
-  debug ("listCoins()");
-#endif /* DEBUG */
-
-  // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
-
-  // dump the coin spawns 
-  m_spawnShell->dumpSpawns(tCoins, out);
 }
 
 void EQInterface::listMapInfo(void)
@@ -2629,7 +2633,7 @@ void EQInterface::dumpSpawns (void)
   file.open(IO_WriteOnly);
   QTextStream out(&file);
   
-  // dump the coin spawns 
+  // dump the spawns 
   m_spawnShell->dumpSpawns(tSpawn, out);
 }
 
@@ -2640,29 +2644,13 @@ void EQInterface::dumpDrops (void)
 #endif /* DEBUG */
   
   // open the output data stream
-  QFile file(pSEQPrefs->getPrefString("DumpSpawnsFilename", "Interface",
+  QFile file(pSEQPrefs->getPrefString("DumpDropsFilename", "Interface",
 				      LOGDIR "/dumpdrops.txt"));
   file.open(IO_WriteOnly);
   QTextStream out(&file);
 
-  // dump the coin spawns 
+  // dump the drops
   m_spawnShell->dumpSpawns(tDrop, out);
-}
-
-void EQInterface::dumpCoins (void)
-{
-#ifdef DEBUG
-  debug ("dumpCoins()");
-#endif /* DEBUG */
-
-  // open the output data stream
-  QFile file(pSEQPrefs->getPrefString("DumpSpawnsFilename", "Interface",
-				      LOGDIR "/dumpcoins.txt"));
-  file.open(IO_WriteOnly);
-  QTextStream out(&file);
-
-  // dump the coin spawns 
-  m_spawnShell->dumpSpawns(tCoins, out);
 }
 
 void EQInterface::dumpMapInfo(void)
@@ -2724,11 +2712,24 @@ void EQInterface::dumpSpellBook(void)
 
     const Spell* spell = m_spells->spell(spellid);
 
+    QString spellName;
 
-    txt.sprintf("%.3d %.2d %.2d %#4.04x %02d\t", 
-		i, ((i / 8) + 1), ((i % 8) + 1), 
-		spellid, spell->level(playerClass));
-    out << txt << spell_name(m_player->getSpellBookSlot(i)) << endl;
+    if (spell)
+    {
+      txt.sprintf("%.3d %.2d %.2d %#4.04x %02d\t%s", 
+		  i, ((i / 8) + 1), ((i % 8) + 1), 
+		  spellid, spell->level(playerClass),
+		  spell->name().latin1());
+    }
+    else
+    {
+      txt.sprintf("%.3d %.2d %.2d %#4.04x   \t%s", 
+		  i, ((i / 8) + 1), ((i % 8) + 1), 
+		  spellid, 
+		  spell_name(spellid).latin1());
+    }
+
+    out << txt << endl;
   }
 }
 
@@ -2807,6 +2808,20 @@ void EQInterface::toggle_log_RawData (void)
     showeq_params->logRawPackets = !showeq_params->logRawPackets;
     menuBar()->setItemChecked (m_id_log_RawData, showeq_params->logRawPackets);
   pSEQPrefs->setPrefBool("LogRawPackets", "PacketLogging", showeq_params->logRawPackets);
+}
+
+void EQInterface::toggle_log_ItemData (void)
+{
+  m_itemDB->SetItemLogging(!m_itemDB->GetItemLogging());
+  menuBar()->setItemChecked (m_id_log_Items, m_itemDB->GetItemLogging());
+  pSEQPrefs->setPrefBool("ItemLogging", "ItemDB", m_itemDB->GetItemLogging());
+}
+
+void EQInterface::toggle_log_ItemPacketData (void)
+{
+  m_itemDB->SetItemPacketLogging(!m_itemDB->GetItemPacketLogging());
+  menuBar()->setItemChecked (m_id_log_ItemPackets, m_itemDB->GetItemPacketLogging());
+  pSEQPrefs->setPrefBool("ItemPacketLogging", "ItemDB", m_itemDB->GetItemPacketLogging());
 }
 
 
@@ -4044,16 +4059,24 @@ void EQInterface::handleSpell(const memSpellStruct* mem, uint32_t, uint8_t dir)
   
   if (!tempStr.isEmpty())
   {
+    QString spellName;
+    const Spell* spell = m_spells->spell(mem->spellId);
+    
+    if (spell)
+      spellName = spell->name();
+    else
+      spellName = spell_name(mem->spellId);
+
     if (mem->param1 != 3)
       tempStr.sprintf("SPELL: %s%s', slot %d.", 
 		      tempStr.ascii(), 
-		      (const char*)spell_name (mem->spellId), 
+		      (const char*)spellName, 
 		      mem->slotId);
     else 
     {
       tempStr.sprintf("SPELL: %s%s'.", 
 		      tempStr.ascii(), 
-		      (const char*)spell_name (mem->spellId));
+		      (const char*)spellName);
     }
 
     emit msgReceived(tempStr);
@@ -4083,8 +4106,18 @@ void EQInterface::beginCast(const beginCastStruct *bcast)
     tempStr += " has begun casting '";
   }
   float casttime = ((float)bcast->param1 / 1000);
-  tempStr.sprintf( "SPELL: %s%s' - Casting time is %g Second%s", tempStr.ascii(),
-		   (const char*)spell_name(bcast->spellId), casttime,
+  
+  QString spellName;
+  const Spell* spell = m_spells->spell(bcast->spellId);
+  
+  if (spell)
+    spellName = spell->name();
+  else
+    spellName = spell_name(bcast->spellId);
+  
+  tempStr.sprintf( "SPELL: %s%s' - Casting time is %g Second%s", 
+		   tempStr.ascii(),
+		   (const char*)spellName, casttime,
 		   casttime == 1 ? "" : "s"
 		   );
   emit msgReceived(tempStr);
@@ -4117,8 +4150,16 @@ void EQInterface::interruptSpellCast(const badCastStruct *icast)
 
 void EQInterface::startCast(const startCastStruct* cast)
 {
+  QString spellName;
+  const Spell* spell = m_spells->spell(cast->spellId);
+  
+  if (spell)
+    spellName = spell->name();
+  else
+    spellName = spell_name(cast->spellId);
+
   printf("SPELL: You begin casting %s.  Current Target is ", 
-	 (const char*)spell_name(cast->spellId) );
+	 (const char*)spellName);
   
   const Item* item = m_spawnShell->findID(tSpawn, cast->targetId);
 
@@ -4147,11 +4188,14 @@ void EQInterface::systemMessage(const sysMsgStruct* smsg)
   emit msgReceived(tempStr);
 }
 
-void EQInterface::newGroundItem(const makeDropStruct* adrop, uint32_t, uint8_t dir)
+void EQInterface::newGroundItem(const makeDropStruct* adrop, uint32_t len, uint8_t dir)
 {
   QString tempStr;
 
   if (dir != DIR_CLIENT)
+    return;
+
+  if (len == 0)
     return;
 
   /* If the packet is outbound  ( Client --> Server ) then it
@@ -4174,6 +4218,14 @@ void EQInterface::newGroundItem(const makeDropStruct* adrop, uint32_t, uint8_t d
   else
     tempStr = QString("Item: Drop: You have dropped your *UNKNOWN ITEM* (ID: %1)  on the ground!\nNOTE:\tIn order for ShowEQ to know the name of the item you dropped it is suggested that you pickup and drop the item again...").arg(adrop->itemNr);
   
+  emit msgReceived(tempStr);
+}
+
+void EQInterface::worldMOTD(const worldMOTDStruct* motd)
+{ 
+  QString tempStr = "Formatted:MOTD: ";
+  tempStr.append(motd->message);
+
   emit msgReceived(tempStr);
 }
 

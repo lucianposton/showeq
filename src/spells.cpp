@@ -16,13 +16,19 @@
 #include "everquest.h"
 
 #include <stdio.h>
+#include <math.h>
 
 #include <qdatetime.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qfile.h>
-#include <qtextstream.h>
 #include <qptrqueue.h>
+#include <qregexp.h>
+
+static inline int16_t min(const int16_t& __a,  const int16_t& __b)
+{
+  if (__b < __a) return __b; return __a;
+}
 
 // Spell item ^ delmited fields
 // 0   - SpellID
@@ -153,7 +159,7 @@ Spell::Spell(const QString& spells_enLine)
   m_name = spells_enLine.section(sep, 1, 1, flags);
   m_buffDurationFormula = spells_enLine.section(sep, 16, 16, flags).toUShort();
   m_buffDurationArgument = spells_enLine.section(sep, 17, 17, flags).toUShort();
-  m_targetType = uint8_t(spells_enLine.section(sep, 85, 85, flags).toUShort());
+  m_targetType = uint8_t(spells_enLine.section(sep, 86, 86, flags).toUShort());
 
 #if 0 // ZBTEMP
   fprintf(stderr, "Spell: %d  Fields: %d\n", m_spell, 
@@ -167,38 +173,39 @@ Spell::~Spell()
 
 int16_t Spell::calcDuration(uint8_t level) const
 {
+  using namespace std;
   switch(m_buffDurationFormula)
   {
   case 0:
     return 0;
   case 1:
   case 6:
-    return level / 2;
-  case 2:
-    return level / 2 + 1;
+    return min(lroundf(float(level) / 2), m_buffDurationArgument);
   case 3:
   case 4:
   case 11:
   case 12:
     return m_buffDurationArgument;
+  case 2:
+    return min(lroundf(float(level) * 0.6), m_buffDurationArgument);
   case 5:
     return 3;
   case 7:
-    return level * 10;
-  case 8: 
-    return level * 10 + 10;
+    return min(level, m_buffDurationArgument);
+  case 8:
+    return min(level + 10, m_buffDurationArgument);
   case 9:
-    return level * 2 + 10;
+    return min(level * 2 + 10, m_buffDurationArgument);
   case 10:
-    return level * 3 + 10;
-  case 3600:
-    return 3600;
+    return min(level * 3 + 10, m_buffDurationArgument);
   case 50:
     return 65535; // as close to permanent as I can get
+  case 3600:
+    return 3600;
   default:
     fprintf(stderr, "Spell::calcDuration(): Unknown formula for spell %.04x\n",
 	    m_spell);
-    return 0;
+    return m_buffDurationArgument;
   }
 }
 
@@ -251,8 +258,11 @@ void Spells::loadSpells(const QString& spellsFileName)
     // read the file as one big chunk
     spellsFile.readBlock(textData.data(), textData.size());
 
-    // split the file into CR LF terminated lines
-    QStringList lines = QStringList::split(QString("\r\n"), textData, false);
+    // construct a regex to deal with either style line termination
+    QRegExp lineTerm("[\r\n]{1,2}");
+
+    // split the file into at the line termination
+    QStringList lines = QStringList::split(lineTerm, textData, false);
 
     Spell* newSpell;
 
@@ -270,7 +280,7 @@ void Spells::loadSpells(const QString& spellsFileName)
     }
 
     fprintf(stderr, 
-	    "Loaded %d spells from '%s' maxSpell=%.04x\n",
+	    "Loaded %d spells from '%s' maxSpell=%#.04x\n",
 	    spellQueue.count(), spellsFileName.latin1(), m_maxSpell);
 
     // allocate the spell array 

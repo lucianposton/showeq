@@ -54,18 +54,16 @@ class EQItemDB : public QObject, protected ITEMDBBASE
    int GetEnabledDBTypes();
    bool SetEnabledDBTypes(int dbTypes);
 
+   // Enables/Disables logging
+   bool GetItemPacketLogging(void) { return m_logItemPackets; }
+   void SetItemPacketLogging(bool b) { m_logItemPackets = b; }
+   bool GetItemLogging(void) { return m_logItems; }
+   void SetItemLogging(bool b) { m_logItems = b; }
+
    // Upgrade existing data to new format
    bool Upgrade();
 
    // DB Access methods   
-#if 0 // ZBTEMP
-   // Add's items to the enabled databases
-   bool AddItem(const itemStruct* item, 
-		uint32_t size,
-		uint16_t flag, 
-		bool updated = true);
-#endif // ZBTEMP
-
    bool AddItem(const char* serializedItem, int level = 0);
 
    // Delete's an item from the enabled databases

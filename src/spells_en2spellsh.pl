@@ -27,9 +27,6 @@ $outfile = "/tmp/staticspells.h";
 $spellIdField = 0;
 $nameField = 1;
 
-# Target type ID
-$targetSelf = 0x06;
-
 unless (open(SPELLSEN, "<$infile")) 
 {
     die "Can't open $infile: $!\n";
@@ -76,6 +73,10 @@ while($line = <SPELLSEN>)
 				 $spellId,
 				 $spellName);
 
+    $formulas{$fields[16]} .= $spellId . "," . $fields[17] . "," . $spellName . ";";
+    $records[$spellId] .= "// durationFormula=" . $fields[16] 
+	. " durationArgument=" . $fields[17];
+
     $maxSpellId = $spellId if ($spellId > $maxSpellId);
 }
 
@@ -97,3 +98,15 @@ print SPELLSH "// \n";
 printf SPELLSH "// Max SpellId: 0x%04x = %5d\n", $maxSpellId, $maxSpellId;
 print SPELLSH "// Number of Spells: ", $#records - $emptyCount, "\n";
 print SPELLSH "// Empty Entries: ", $emptyCount, "\n";
+
+print "Formula\tSpellId\tName\tArgument\n";
+
+foreach $formula (sort keys %formulas)
+{
+    @spells = split(m/;/, $formulas{$formula});
+    foreach $spell (@spells)
+    {
+	@spellInfo = split(m/,/, $spell);
+	print $formula, "\t", $spellInfo[0], "\t", $spellInfo[2], "\t", $spellInfo[1], "\n";
+    }
+}

@@ -20,11 +20,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <time.h>
-
-#include <netdb.h>
-#include <qtimer.h>
 #include <string.h>
+#include <netdb.h>
+
+#include <qtimer.h>
+#include <qfile.h>
 #include <qtextstream.h>
+#include <qdatetime.h>
+
 #include "everquest.h"
 #include "packet.h"
 #include "util.h"
@@ -129,9 +132,12 @@ QString EQPacketFormatRaw::headerFlags(const QString& prefix,
     if (brief)
       tmp = prefix + ": ";
     else
-      tmp = prefix + " Hdr (" + QString::number(flagsHi(), 16) + ", "
+      tmp = prefix + "[Hdr (" + QString::number(flagsHi(), 16) + ", "
 	+ QString::number(flagsLo(), 16) + "): ";
   }
+  else if (!brief)
+    tmp = "[Hdr (" + QString::number(flagsHi(), 16) + ", "
+	+ QString::number(flagsLo(), 16) + "): ";
 
   if (isARQ())
     tmp += "ARQ, ";
@@ -153,22 +159,26 @@ QString EQPacketFormatRaw::headerFlags(const QString& prefix,
     tmp += "NAK, ";
   if (isSpecARQ())
     tmp += "SpecARQ, ";
+  if (m_flagsHi.m_unknown1)
+    tmp += "HiUnknown1, ";
 
-  tmp += QString("seq: ") + QString::number(seq(), 16) + ", ";
+  if (skip() != 0)
+    tmp += QString("Skip: ") + QString::number(skip(), 16) + ", ";
+  
+  tmp += QString("seq: ") + QString::number(seq(), 16);
+
+  tmp += "] ";
 
   if (!brief)
   {
-    if (skip() != 0)
-      tmp += QString("Skip: ") + QString::number(skip()) + ", ";
-
     if (isARQ())
-      tmp += QString("arq: ") + QString::number(arq(), 16) + ", ";
+      tmp += QString("[ARQ: ") + QString::number(arq(), 16) + "] ";
     
     if (isFragment())
     {
-      tmp += QString("FragSeq: ") + QString::number(fragSeq(), 16)
+      tmp += QString("[FragSeq: ") + QString::number(fragSeq(), 16)
 	+ ", FragCur: " + QString::number(fragCur(), 16)
-	+ ", FragTot: " + QString::number(fragTot(), 16) + ", ";
+	+ ", FragTot: " + QString::number(fragTot(), 16) + "] ";
     }
   }
 
@@ -286,9 +296,6 @@ QString EQPacketFormat::headerFlags(const QString& prefix,
 
   if (!brief)
   {
-    if (skip() != 0)
-      tmp += QString("Skip: ") + QString::number(skip()) + ", ";
-    
     if (isARQ())
       tmp += QString("arq: ") + QString::number(arq(), 16) + ", ";
     
@@ -440,6 +447,7 @@ EQPacket::EQPacket (QObject * parent, const char *name)
     m_timer(NULL),
     m_busy_decoding(false)
 {
+  m_timeDateFormat = "MMM dd yyyy hh:mm:ss:zzz";
 
    for (int a = 0; a < MAXSTREAMS + 1; a++)
    {
@@ -940,24 +948,180 @@ bool EQPacket::logData ( const QString& filename,
    if (!prefix.isEmpty())
      fprintf(lh, "%s ", (const char*)prefix.utf8());
 
-   fprintf(lh, "(%d) %s", len, ctime (&now));
+   fprintf(lh, "[Size: %d] %s", len, ctime (&now));
 
-   fprintData(lh, len, data);
+   // make sure there is a len before attempting to print it
+   if (len)
+     fprintData(lh, len, data);
+   else
+     fprintf(lh, "\n");
 
    fclose (lh);
 
    return true;
 }
 
+inline QString opCodeToString(uint16_t opCode)
+{
+  QString tempStr;
+  tempStr.sprintf("[OPCode: %#.04x]", opCode);
+
+  if (opCode & FLAG_DECODE)
+  {
+    tempStr += " ";
+    if (opCode & FLAG_COMP)
+      tempStr += "[FLAG_COMP]";
+    if (opCode & FLAG_COMBINED)
+      tempStr += "[FLAG_COMBINED]";
+    if (opCode & FLAG_CRYPTO)
+      tempStr += "[FLAG_CRYPTO]";
+    if (opCode & FLAG_IMPLICIT)
+      tempStr += "[FLAG_IMPLICIT]";
+  }
+
+  return tempStr;
+}
+
 /* Logs packet data in a human-readable format */
 bool EQPacket::logData ( const QString& filename,
 			 uint32_t       len,
 			 const uint8_t* data,
-			 in_addr_t      saddr,
-			 in_addr_t      daddr,
-			 in_port_t      sport,
-			 in_port_t      dport
-			 )
+			 uint8_t        dir,
+			 uint16_t       opcode,
+			 const QString& origPrefix)
+{
+  FILE *lh;
+
+  lh = fopen ((const char*)filename, "a");
+
+  if (lh == NULL)
+  {
+    fprintf(stderr, "\aUnable to open file: [%s]\n", 
+	    (const char*)filename);
+    return false;
+  }
+
+  QFile logFile;
+  if (!logFile.open(IO_Append | IO_WriteOnly, lh))
+  {
+    fclose(lh);
+    return false;
+  }
+
+  QTextStream out(&logFile);
+
+  // timestamp
+  out << QDateTime::currentDateTime().toString(m_timeDateFormat) << " ";
+
+  // append direction and opcode information
+  if (!origPrefix.isEmpty())
+    out << origPrefix << " ";
+  
+  // data direction and size
+  out << ((dir == DIR_SERVER) ? "[Server->Client] " : "[Client->Server] ")
+      << "[Size: " << QString::number(len) << "]" << endl;
+
+  // print opcode info
+  out << opCodeToString(opcode) << endl;
+
+  // make sure there is a len before attempting to print it
+  if (len)
+    fprintData(lh, len, data);
+  else
+    out << endl;
+
+  fclose (lh);
+
+  return true;
+}
+
+bool EQPacket::logData(const QString& filename,
+		       const EQUDPIPPacketFormat& packet)
+{
+  FILE *lh;
+
+  lh = fopen ((const char*)filename, "a");
+
+  if (lh == NULL)
+  {
+    fprintf(stderr, "\aUnable to open file: [%s]\n", 
+	    (const char*)filename);
+    return false;
+  }
+
+  QFile logFile;
+  if (!logFile.open(IO_Append | IO_WriteOnly, lh))
+  {
+    fclose(lh);
+    return false;
+  }
+
+  QTextStream out(&logFile);
+
+  QString sourceStr, destStr;
+  if (packet.getIPv4SourceN() == m_client_addr)
+    sourceStr = "client";
+  else
+    sourceStr = packet.getIPv4SourceA();
+
+  if (packet.getIPv4DestN() == m_client_addr)
+    destStr = "client";
+  else
+    destStr = packet.getIPv4DestA();
+  
+  out << QDateTime::currentDateTime().toString(m_timeDateFormat)
+      << " [" << sourceStr << ":" << QString::number(packet.getSourcePort())
+      << "->" << destStr << ":" << QString::number(packet.getDestPort()) 
+      << "] [Size: " << QString::number(packet.getRawPacketLength()) << "]"
+      << endl;
+
+  const EQPacketFormatRaw* raw = packet.getRawPacket();
+  if (raw)
+  {
+    out << raw->headerFlags(QString(), false) << endl;
+  }
+
+  if (packet.payloadLength() >= 2)
+  {
+    QString tempStr;
+    uint16_t opCode = eqntohuint16(packet.payload());
+    out << opCodeToString(opCode) << endl;
+
+    logFile.flush();
+  }
+
+#ifdef PACKET_PEDANTIC
+  uint32_t crc32 = packet.calcCRC32();
+  if (crc32 != packet.crc32())
+  {
+    out << "[BAD CRC32 (" << QString::number(crc32, 16) 
+	<< " != " << QString::number(packet.crc32()) << ") ]" << endl;
+  }
+#endif
+
+  logFile.flush();
+
+  // make sure there is a len before attempting to print it
+  if (packet.getRawPacketLength())
+    fprintData(lh, packet.getRawPacketLength(), 
+	       (const uint8_t*)packet.getRawPacket());
+  else
+    out << endl;
+
+  fclose(lh);
+
+  return true;
+}
+
+/* Logs packet data in a human-readable format */
+bool EQPacket::logData( const QString& filename,
+			uint32_t       len,
+			const uint8_t* data,
+			in_addr_t      saddr,
+			in_addr_t      daddr,
+			in_port_t      sport,
+			in_port_t      dport
+			)
 {
 #ifdef DEBUG_PACKET
    debug ("logData()");
@@ -988,6 +1152,15 @@ void EQPacket::dispatchPacket (int size, unsigned char *buffer)
   
   if (showeq_params->logAllPackets)
   {
+#if 1
+    if (!logData(showeq_params->GlobalLogFilename, 
+		 packet))
+    {
+      /* Problem writing to logs, untoggle the GUI checkmark to
+	 show that logging is disabled. */
+      emit toggle_log_AllPackets();
+    }
+#else
     if (!logData(showeq_params->GlobalLogFilename, 
 		 packet.getRawPacketLength(), 
 		 (const uint8_t*)packet.getRawPacket(), 
@@ -998,6 +1171,7 @@ void EQPacket::dispatchPacket (int size, unsigned char *buffer)
 	 show that logging is disabled. */
       emit toggle_log_AllPackets();
     }
+#endif
   }
 
   /* Chat and Login Server Packets, Discard for now */
@@ -1136,6 +1310,10 @@ void EQPacket::dispatchPacket (int size, unsigned char *buffer)
   
   if (!packet.isARQ()) // process packets that don't have an arq sequence
   { 
+    // we only handle packets with opcodes
+    if (packet.payloadLength() < 2)
+      return;
+
      /* does not require sequencing, so straight to dispatch */
      if ((m_eqstreamid == zone2client) || (m_eqstreamid == client2zone))
      {
@@ -1278,7 +1456,7 @@ void EQPacket::dispatchPacket (int size, unsigned char *buffer)
         else if (packet.isFragment())
            dispatchSplitData (packet, m_eqstreamdir, m_eqstreamid);
 
-        else
+        else if (packet.payloadLength() >= 2) // has to have an opcode
         {
            if ((m_eqstreamid == zone2client) || (m_eqstreamid == client2zone))
            {
@@ -1290,6 +1468,7 @@ void EQPacket::dispatchPacket (int size, unsigned char *buffer)
            }
         }
      }
+
      // it's a packet from the future, add it to the cache
      else if ( ( (serverArqSeq > m_serverArqSeqExp[m_eqstreamid]) && 
                  (serverArqSeq < (uint32_t(m_serverArqSeqExp[m_eqstreamid] + arqSeqWrapCutoff))) ) || 
@@ -1674,42 +1853,44 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
   debug ("dispatchWorldData()");
 #endif /* DEBUG_PACKET */
   
+  // we only process packets with an opcode, so need to be at least 2 bytes 
+  // long
+  if (len < 2)
+    return;
+
+  uint16_t opCode;
+
   //Logging 
   if (showeq_params->logWorldPackets && showeq_params->logRawPackets)
   {
-    QString msg("Raw:    -");
-    if (direction == DIR_SERVER)
-      msg += " Server->Client:";
-    else
-      msg += " Client->Server:";
-    
-    if (!logData (showeq_params->WorldLogFilename, len, data, msg))
+    opCode = *((uint16_t *)data);  
+
+    if (!logData (showeq_params->WorldLogFilename, len-2, data+2, 
+		  direction, opCode, "[Raw]"))
       emit toggle_log_WorldData(); //untoggle the GUI checkmark
   }
 
   packetList pktlist = decodePacket(data, len, direction);
   if (pktlist.size() == 0)
       return;
+
   for (unsigned int packetNum = 0; packetNum < pktlist.size(); packetNum++) 
   {
     data = pktlist[packetNum].data;
     len = pktlist[packetNum].len;
 
+    opCode = *((uint16_t *)data);  
+    data += 2;
+    len -= 2;
+
     //Logging 
     if (showeq_params->logWorldPackets)
     {
-      QString msg("Decoded -");
-      if (direction == DIR_SERVER)
-	msg += " Server->Client:";
-      else
-	msg += " Client->Server:";
-      
-      if (!logData (showeq_params->WorldLogFilename, len, data, msg))
+      if (!logData (showeq_params->WorldLogFilename, len, data, 
+		    direction, opCode, "[Decoded]"))
 	emit toggle_log_WorldData(); //untoggle the GUI checkmark
     }
 
-    uint16_t opCode = *((uint16_t *)data);  
-    
     bool unk = true;
     
     switch (opCode)
@@ -1719,25 +1900,27 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
 	  if (direction != DIR_SERVER)
               break;
 	  
-	  unk = ! ValidatePayload(GuildListCode, rawWorldGuildListStruct);
+	  unk = ! ValidatePayload(GuildListCode, worldGuildListStruct);
 	  if (unk)
 	      break;
 	  
-	  emit worldGuildList((const char*)data+2, len-2);
+	  emit worldGuildList((const char*)data, len);
 	  
 	  break;
       } /* end GuildListCode */
-      
-      case ClientHashCode:
+
+      case MOTDCode:
       {
-	  if (direction != DIR_CLIENT)
-              break;
-	  
-	  
+	if (direction != DIR_SERVER)
 	  break;
-      }
-      
-      
+	
+	unk = false;
+	
+	emit worldMOTD((const worldMOTDStruct*)data, len, direction);
+
+	break;
+      } 
+
       default:
       {
           unk = true;
@@ -1785,7 +1968,7 @@ void EQPacket::printUnknown(unsigned int uiOpCodeIndex, uint16_t opCode, uint32_
      QString tmpStr;
        if (len == 2)
        {
-	 tmpStr.sprintf ("%s: %04x len %i [%s]", 
+	 tmpStr.sprintf ("%s: %#.04x len %i [%s]", 
 			 uiOpCodeIndex > 0 ? 
 			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
 			 "UNKNOWN", opCode, len,
@@ -1800,7 +1983,7 @@ void EQPacket::printUnknown(unsigned int uiOpCodeIndex, uint16_t opCode, uint32_
        }
        else
        {
-	 tmpStr.sprintf ("%s: %04x len %02d [%s] ID:%i", 
+	 tmpStr.sprintf ("%s: %#.04x len %02d [%s] ID:%i", 
 			 uiOpCodeIndex > 0 ? 
 			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
 			 "UNKNOWN", opCode, len, 
@@ -1858,16 +2041,20 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     debug ("dispatchZoneData()");
 #endif /* DEBUG_PACKET */
 
+  // we only process packets with an opcode, so need to be at least 2 bytes 
+  // long
+  if (len < 2)
+    return;
+
+    uint16_t opCode;
+
     // Raw Logging 
     if (showeq_params->logZonePackets && showeq_params->logRawPackets)
     {
-      QString msg("Raw     -");
-      if (dir == DIR_SERVER)
-	msg += " Server->Client:";
-      else
-	msg += " Client->Server:";
+      opCode = *((uint16_t *)data);
 
-      if (!logData (showeq_params->ZoneLogFilename, len, data, msg))
+      if (!logData(showeq_params->ZoneLogFilename, len-2, data+2, 
+		    dir, opCode, "[Raw]"))
 	emit toggle_log_ZoneData(); //untoggle the GUI checkmark
     }
 
@@ -1896,22 +2083,20 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     packetList pktlist = decodePacket(data, len, dir);
     if (pktlist.size() == 0)
 	return;
+
     for (unsigned int packetNum = 0; packetNum < pktlist.size(); packetNum++) {
 	data = pktlist[packetNum].data;
 	len = pktlist[packetNum].len;
 
-	uint16_t opCode = *((uint16_t *)data);
+	opCode = *((uint16_t *)data);  
+	data += 2;
+	len -= 2;
 
 	//Logging 
 	if (showeq_params->logZonePackets)
 	  {
-	    QString msg("Decoded -");
-	    if (dir == DIR_SERVER)
-	      msg += " Server->Client:";
-	    else
-	      msg += " Client->Server:";
-
-	    if (!logData (showeq_params->ZoneLogFilename, len, data, msg))
+	    if (!logData(showeq_params->ZoneLogFilename, len, data, 
+			  dir, opCode, "[Decoded]"))
 	      emit toggle_log_ZoneData(); //untoggle the GUI checkmark
 	  }
 	
@@ -2175,7 +2360,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	{
 	    unk = ! ValidatePayload(NewSpawnCode, newSpawnStruct);
 
-	    //logData ("/tmp/newspawn.log", len, data);
+	    //logData ("/tmp/newspawn.log", len, data, dir, opCode);
 	    emit newSpawn((const newSpawnStruct*)data, len, dir);
 
 	    break;
@@ -2417,7 +2602,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	   
 	    ValidatePayload(CharProfileCode, charProfileStruct);
 
-	    //logData ("/tmp/charprofile.log", len, data);
+	    //logData ("/tmp/charprofile.log", len, data, dir, opCode);
 	    emit backfillPlayer((const charProfileStruct*)data, len, DIR_SERVER);
 
 	    break;
@@ -2429,7 +2614,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    // not sure if its placement was intentional before.
 	    
 	    emit zoneSpawns((const zoneSpawnsStruct*)data, len, dir);
-	    //logData ("/tmp/zonespawn.log", len, data);
+	    //logData ("/tmp/zonespawn.log", len, data, dir, opCode);
 
 	    break;
 	}
@@ -2470,6 +2655,15 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             break;
         }
 
+	case OP_Action:
+	{
+	  unk = ! ValidatePayload(OP_Action, actionStruct);
+
+	  emit action((const actionStruct*)data, len, dir);
+
+	  break;
+	}
+
         case ActionCode:
         {
             unk = false;
@@ -2508,12 +2702,24 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case MakeDropCode:
         {
-            unk = ! ValidatePayload(MakeDropCode, makeDropStruct);
-	    
-	    if (!unk)
-	      emit newGroundItem((const makeDropStruct*)data, len, dir);
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+	  if ((len != sizeof(makeDropStruct)) &&
+	      (len != 0))
+	  {
+	    fprintf(stderr, "WARNING: MakeDropCode (%04x) (dataLen: %d != sizeof(makeDropStruct):%d or 0)\n",
+		    MakeDropCode, len, 
+		    sizeof(makeDropStruct));
+	    unk = true;
+	  }
+	  else
+	    unk = false;
+#else
+	  unk = false;
+#endif
 
-            break;
+	  emit newGroundItem((const makeDropStruct*)data, len, dir);
+
+	  break;
         }
 
         case RemDropCode:
@@ -2631,11 +2837,11 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
             // verify size
 
-            if ((len - 2) % sizeof(doorStruct) != 0)
+            if (len % sizeof(doorStruct) != 0)
             {
 	        printf("WARNING: DoorSpawnCode (dataLen:%d "
                        "%% sizeof(doorStruct):%d) != 0!\n", 
-                       len - 2, sizeof(doorStruct));
+                       len, sizeof(doorStruct));
 
 	        unk = true;
 		break;
@@ -2884,20 +3090,13 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	} /* end switch(opCode) */
 
 	if (unk)
-	    emit unknownOpcode(data, len, dir);
+	  emit unknownOpcode(data, len, dir);
 
 	if (showeq_params->logUnknownZonePackets && unk)
 	{
-	    QString tmpStr;
-	    tmpStr.sprintf ("%04x - %d (%s)\n", opCode, len,
-			    ((dir == DIR_SERVER) ? 
-			     "Server --> Client" : "Client --> Server"));
-
-	    if (!logMessage(showeq_params->UnknownZoneLogFilename, tmpStr))
-		emit toggle_log_UnknownData(); //untoggle the GUI checkmark
-
-	    if (!logData (showeq_params->UnknownZoneLogFilename, len, data))
-		emit toggle_log_UnknownData(); //untoggle the GUI checkmark
+	  if (!logData(showeq_params->UnknownZoneLogFilename, len, data,
+		       dir, opCode, QString()))
+	    emit toggle_log_UnknownData(); //untoggle the GUI checkmark
 	}
 
 	unsigned int uiOpCodeIndex = 0;

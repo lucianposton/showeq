@@ -152,6 +152,7 @@ void SpawnMonitor::clear(void)
   emit clearSpawnPoints();
   m_spawns.clear();
   m_points.clear();
+  m_selected = NULL;
 }
 
 void SpawnMonitor::deleteSpawnPoint(const SpawnPoint* sp)
@@ -224,7 +225,7 @@ void SpawnMonitor::restartSpawnPoint( SpawnPoint* sp )
 void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
 {
   // ignore everything but mobs
-  if ( ( spawn->NPC() != SPAWN_NPC ) || ( spawn->petOwnerID() != 0 ) )
+  if ( ( spawn->NPC() != SPAWN_NPC ) || ( spawn->petOwnerID() != 0 ) || (spawn->level() == 30 && spawn->race() == 216) )
     return;
   
   QString		key = SpawnPoint::key( *spawn );

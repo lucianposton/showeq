@@ -90,7 +90,6 @@ public:
    const ItemMap& getConstMap(spawnItemType type) const;
    const ItemMap& spawns(void) const;
    const ItemMap& drops(void) const;
-   const ItemMap& coins(void) const;
    const ItemMap& doors(void) const;
 signals:
    void addItem(const Item* item);
@@ -111,10 +110,7 @@ public slots:
    // slots to receive from EQPacket...
    void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
    void removeGroundItem(const remDropStruct*, uint32_t, uint8_t);
-   void newCoinsItem(const dropCoinsStruct*);
-   //   void compressedDoorSpawn (const cDoorSpawnsStruct* c);
    void newDoorSpawn(const doorStruct* d, uint32_t len, uint8_t dir);
-   void removeCoinsItem(const removeCoinsStruct*);
    void zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len);
    void newSpawn(const newSpawnStruct* spawn);
    void newSpawn(const spawnStruct& s);
@@ -164,7 +160,6 @@ public slots:
    // maps to keep track of the different types of spawns
    ItemMap m_spawns;
    ItemMap m_drops;
-   ItemMap m_coins;
    ItemMap m_doors;
    ItemMap m_players;
 
@@ -179,8 +174,6 @@ const ItemMap& SpawnShell::getConstMap(spawnItemType type) const
   {
   case tSpawn:
     return m_spawns;
-  case tCoins:
-    return m_coins;
   case tDrop:
     return m_drops;
   case tDoors:
@@ -199,8 +192,6 @@ ItemMap& SpawnShell::getMap(spawnItemType type)
   {
   case tSpawn:
     return m_spawns;
-  case tCoins:
-    return m_coins;
   case tDrop:
     return m_drops;
   case tDoors:
@@ -222,12 +213,6 @@ inline
 const ItemMap& SpawnShell::drops(void) const
 {
   return m_drops;
-}
-
-inline
-const ItemMap& SpawnShell::coins(void) const
-{
-  return m_coins; 
 }
 
 inline

@@ -25,8 +25,6 @@ static char* itemdbid = "@(#) $Id$";
 // define the current version number for data in database
 #define CURRENT_ITEM_FORMAT_VERSION 2
 
-#define ITEM_PARSE_DIAG 1
-
 // forward declarations
 QString& getField(QString& field, const char*& curPos);
 QString& getLastField(QString& field, const char*& curPos);
@@ -231,15 +229,15 @@ struct EQItemDBEntryData_3 : public EQItemDBEntryData
   /*078*/ int8_t   m_spellShield;	// PoP: Spell Shield %
   /*079*/ int8_t   m_avoidance;		// PoP: Avoidance +
   /*080*/ int8_t   m_accuracy;		// PoP: Accuracy +
-  /*081*/ int32_t  m_factionMod1;	// Faction Mod 1
-  /*082*/ int32_t  m_factionMod2;	// Faction Mod 2
-  /*083*/ int32_t  m_factionMod3;	// Faction Mod 3
-  /*084*/ int32_t  m_factionMod4;	// Faction Mod 4
-  /*085*/ int32_t  m_factionAmt1;	// Faction Amt 1
-  /*086*/ int32_t  m_factionAmt2;	// Faction Amt 2
-  /*087*/ int32_t  m_factionAmt3;	// Faction Amt 3
-  /*088*/ int32_t  m_factionAmt4;	// Faction Amt 4
-  /*089*/ uint32_t m_unknown089;
+  /*081*/ uint32_t m_unknown081;
+  /*082*/ int32_t  m_factionMod1;	// Faction Mod 1
+  /*083*/ int32_t  m_factionMod2;	// Faction Mod 2
+  /*084*/ int32_t  m_factionMod3;	// Faction Mod 3
+  /*085*/ int32_t  m_factionMod4;	// Faction Mod 4
+  /*086*/ int32_t  m_factionAmt1;	// Faction Amt 1
+  /*087*/ int32_t  m_factionAmt2;	// Faction Amt 2
+  /*088*/ int32_t  m_factionAmt3;	// Faction Amt 3
+  /*089*/ int32_t  m_factionAmt4;	// Faction Amt 4
   /*090*/ char	   m_charmFile[32];	// file name of the charm
   /*091*/ uint32_t m_unknown091;
   /*092*/ uint8_t  m_augSlot1Type;	// LDoN: Augment Slot 1 Type
@@ -523,6 +521,7 @@ const char* EQItemDBEntryData_3::Init(const char* serializedItem,
    m_spellShield = int8_t(getField(field, curPos).toShort());
    m_avoidance = int8_t(getField(field, curPos).toShort());
    m_accuracy = int8_t(getField(field, curPos).toShort());
+   m_unknown081 = getField(field, curPos).toULong();
    m_factionMod1 = getField(field, curPos).toLong();
    m_factionMod2 = getField(field, curPos).toLong();
    m_factionMod3 = getField(field, curPos).toLong();
@@ -531,7 +530,6 @@ const char* EQItemDBEntryData_3::Init(const char* serializedItem,
    m_factionAmt2 = getField(field, curPos).toLong();
    m_factionAmt3 = getField(field, curPos).toLong();
    m_factionAmt4 = getField(field, curPos).toLong();
-   m_unknown089 = getField(field, curPos).toULong();
    tmpString = getField(field, curPos);
    strncpy(&m_charmFile[0], tmpString.latin1(), sizeof(m_charmFile)); 
    m_charmFile[31] = '\0';
@@ -624,8 +622,8 @@ EQItemDB::EQItemDB()
 {
   // What types of item data is saved
   m_dbTypesEnabled = (DATA_DB|RAW_DATA_DB);
-  m_logItems = true;
-  m_logItemPackets = true;
+  m_logItems = false;
+  m_logItemPackets = false;
 
   // construct item data file names
   m_ItemDataDB = LOGDIR "/itemdata2";
@@ -1212,7 +1210,7 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
   // right now we'll skip over initial instance variables
   getField(field, curPos); fieldCount++; // 1 - charges
   getField(field, curPos); fieldCount++;
-  getField(field, curPos); fieldCount++; // 3 - Charges;
+  getField(field, curPos); fieldCount++; // 3 - equipped slot;
   getField(field, curPos); fieldCount++;
   getField(field, curPos); fieldCount++;
 
@@ -1233,8 +1231,8 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
   
   // iterate over the data
   Datum key, data;
-  bool result = false, result2;
-  uint32_t itemNr = -1;
+  bool result = true;
+  uint32_t itemNr = 0xffffffff;
 
   // doing this just to add a scope level
   {
@@ -1275,7 +1273,7 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
     key.size = sizeof(itemNr);
     key.data = (void*)&itemNr;
     
-    result = Insert(m_ItemDataDB, key, data, true);
+    Insert(m_ItemDataDB, key, data, true);
   }
     
   // calculate the size of the core item data
@@ -1307,20 +1305,18 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
     data.data = (void*)databuffer2;
 
     // Insert the data into the DB
-    result2 = Insert(m_ItemRawDataDB, key, data, true);
-
-    if (!result2)
-      result = result2;
+    Insert(m_ItemRawDataDB, key, data, true);
   }
 
-#ifdef ITEM_PARSE_DIAG
   if (*curPos != '|')
+  {
     fprintf(stderr, "Level: %d: Expected '|' but found '%c' at pos %d field %d\n",
 	    level, *curPos, (curPos - begPos), fieldCount);
-#endif // ITEM_PARSE_DIAG
+    return false; // unknown state, so return false just to be safe
+  }
 
   curPos++;
-
+  
   // iterate over items contained within the item
   for (int i = 0; i < 10; i++)
   {
@@ -1340,14 +1336,23 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
       }
       *subPos = '\0';
 
-      AddItem(subItem, level + 1);
+      result = AddItem(subItem, level + 1);
       delete subItem;
-#ifdef ITEM_PARSE_DIAG
+
+      if (!result)
+      {
+	fprintf(stderr, "Level: %d: AddItem() Failed. Stopped processing sub-items at pos %d field %d container slot %d for safety!\n",
+		level, (curPos - begPos), fieldCount, i);
+	return false; // unknown state, so return false just to be safe
+      }
+
       if (*curPos != '"')
+      {
 	fprintf(stderr, 
 		"Level: %d: Expected '\"' but found '%c' at pos %d field %d\n",
 		level, *curPos, (curPos - begPos), fieldCount);
-#endif // ITEM_PARSE_DIAG
+	return false; // unknown state, so return false just to be safe
+      }
 
       // skip closing quote "
       curPos++; 
@@ -1356,12 +1361,13 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
     // increment field count
     fieldCount++;
 
-#ifdef ITEM_PARSE_DIAG    
     if ((*curPos != '|') && (*curPos != '\0'))
+    {
       fprintf(stderr, 
 	      "Level: %d: Expected '|' or '\\0' but found '%c' at pos %d field %d\n",
 	      level, *curPos, (curPos - begPos), fieldCount);
-#endif // ITEM_PARSE_DIAG
+      return false; // unknown state, so return false just to be safe
+    }
 
     // skip field seperator
     curPos++; 

@@ -227,7 +227,6 @@ class MapMenu : public QPopupMenu
   void toggle_spawnPnts(int itemId);
   void toggle_unknownSpawns(int itemId);
   void toggle_drops(int itemId);
-  void toggle_coins(int itemId);
   void toggle_doors(int itemId);
   void toggle_highlightConsideredSpawns(int itemId);
   void toggle_spawnNames(int itemId);
@@ -289,7 +288,6 @@ class MapMenu : public QPopupMenu
   int m_id_spawnPoints;
   int m_id_unknownSpawns;
   int m_id_drops;
-  int m_id_coins;
   int m_id_doors;
   int m_id_spawnNames;
   int m_id_highlightConsideredSpawns;
@@ -388,7 +386,6 @@ class Map :public QWidget
   bool showSpawnPoints() const { return m_showSpawnPoints; }
   bool showUnknownSpawns() const { return m_showUnknownSpawns; }
   bool showDrops() const { return m_showDrops; }
-  bool showCoins() const { return m_showCoins; }
   bool showDoors() const { return m_showDoors; }
   bool showSpawnNames() const { return m_showSpawnNames; }
   bool showFiltered() const { return m_showFiltered; }
@@ -488,7 +485,6 @@ class Map :public QWidget
   void setShowSpawnPoints(bool val);
   void setShowUnknownSpawns(bool val);
   void setShowDrops(bool val);
-  void setShowCoins(bool val);
   void setShowDoors(bool val);
   void setShowSpawnNames(bool val);
   void setShowVelocityLines(bool val);
@@ -556,7 +552,6 @@ protected:
    void paintPlayerView(MapParameters& param, QPainter& p);
    void paintPlayer(MapParameters& param, QPainter& p);
    void paintDrops(MapParameters& param, QPainter& p);
-   void paintCoins(MapParameters& param, QPainter& p);
    void paintDoors(MapParameters& param, QPainter& p);
    void paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
 				   const QTime& drawTime);
@@ -628,7 +623,6 @@ private:
    bool m_showPlayerView;
    bool m_showHeading;
    bool m_showDrops;
-   bool m_showCoins;
    bool m_showDoors;
    bool m_showSpawns;
    bool m_showSpawnPoints;

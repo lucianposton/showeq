@@ -22,13 +22,36 @@
 /************************/
 /* World Server OpCodes */
 
-#define ZoneServerInfo              0x0480
-
-#define ClientHashCode              0x3941
+#define OP_AckPacket                0x000d // 09/09/03 Appears to be generic ack at the presentation level
 
 #define GuildListCode               0x0059 // 09/09/03
 
+#define OP_ExpansionInfo            0x00da // 09/09/03 Which expansions user has
+
+#define OP_DeleteCharacter          0x00e3 // 09/09/03 Delete character @ char select
+
+#define OP_SendCharInfo             0x00fb // 09/09/03 Send all chars visible @ char select
+
+#define OP_CharacterCreate          0x00fd // 09/09/03 Create character @ char select
+
+#define OP_ApproveName              0x011e // 09/09/03 Approving new character name @ char creation
+
 #define MOTDCode                    0x01b0 // 09/09/03
+
+#define OP_World_Client_CRC1	    0x0153 // 09/09/03 Contains a snippet of spell data
+#define OP_World_Client_CRC2        0x0157 // 09/09/03 Second client verification packet
+
+#define OP_LogServer                0x017f
+
+#define OP_ApproveWorld             0x0195
+
+#define OP_SendLoginInfo            0x023a
+
+#define OP_EnterWorld               0x024a // 09/09/03 Server approval for client to enter world
+
+#define ZoneServerInfo              0x024d // 09/09/03
+
+#define OP_SetChatServer            0x0252 // 09/09/03 Chatserver? IP,Port,servername.Charname,password(?)
 
 /***********************/
 /* Zone Server OpCodes */

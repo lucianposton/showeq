@@ -946,7 +946,7 @@ void diagFileReadFail(QString filename)
 }
 
 
-uint32_t calcCRC32(uint8_t* p,
+uint32_t calcCRC32(const uint8_t* p,
 		   uint32_t length)
 {
 #ifdef RUNTIME_CRCTAB

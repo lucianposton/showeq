@@ -412,7 +412,7 @@ class EQPacketFormat
   { 
     return eqntohuint32(&m_postSkipData[m_postSkipDataLength - 4]);
   }
-  uint32_t calcCRC32() 
+  uint32_t calcCRC32() const
   {
     // calculate the CRC on the packet data, up to but not including the
     // CRC32 stored at the end.
@@ -524,7 +524,6 @@ class EQUDPIPPacketFormat : public EQPacketFormat
 
   QString headerFlags(bool brief = false) const;
 
-
  protected:
   void init(uint8_t* data);
   
@@ -569,11 +568,19 @@ class EQPacket : public QObject
    
    bool logMessage(const QString& filename,
 		   const QString& message);
-   bool EQPacket::logData ( const QString& filename,
-			    uint32_t       len,
-			    const uint8_t* data,
-			    const QString& prefix);
+   bool logData ( const QString& filename,
+		  uint32_t       len,
+		  const uint8_t* data,
+		  const QString& prefix);
+   bool logData ( const QString& filename,
+		  uint32_t       len,
+		  const uint8_t* data,
+		  uint8_t        dir,
+		  uint16_t       opcode,
+		  const QString& origPrefix); 
    bool logData(const QString& filename,
+		const EQUDPIPPacketFormat& packet);
+  bool logData(const QString& filename,
 		uint32_t       len,
 		const uint8_t* data,
 		in_addr_t      saddr = 0,
@@ -629,6 +636,7 @@ class EQPacket : public QObject
    void updateLevel(const levelUpUpdateStruct* levelup, uint32_t, uint8_t);
    void updateStamina(const staminaStruct* stam, uint32_t, uint8_t);
 
+   void action(const actionStruct*, uint32_t, uint8_t);
    void attack2Hand1(const attack2Struct*, uint32_t, uint8_t);
    void action2Message(const action2Struct*, uint32_t, uint8_t);
    
@@ -708,16 +716,19 @@ class EQPacket : public QObject
    void bindWound(const bindWoundStruct*, uint32_t, uint8_t);
    void unknownOpcode(const uint8_t*, uint32_t, uint8_t);
 
-   void worldGuildList(const char*, uint32_t);
    void updateNpcHP(const hpNpcUpdateStruct* hpupdate, uint32_t, uint8_t);
    void tradeSpellBookSlots(const tradeSpellBookSlotsStruct*, uint32_t, uint8_t);
+
+   // World server signals
+   void worldGuildList(const char*, uint32_t);
+   void worldMOTD(const worldMOTDStruct*, uint32_t, uint8_t);
 
  private:
       
    PacketCaptureThread *m_packetCapture;
    VPacket             *m_vPacket;
    QString print_addr   (in_addr_t addr);
-   
+   QString        m_timeDateFormat;
    QTimer         *m_timer;
    int            m_packetCount[MAXSTREAMS];
    uint16_t       m_serverPort;

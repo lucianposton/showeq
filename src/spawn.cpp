@@ -918,42 +918,6 @@ void Spawn::saveSpawn(QDataStream& d)
 }
 
 //----------------------------------------------------------------------
-// Coin
-Coin::Coin(const dropCoinsStruct* c)
-  : Item(tCoins, c->dropId)
-{
-  m_NPC = SPAWN_COINS;
-
-  update(c);
-}
-
-Coin::~Coin()
-{
-}
-
-void Coin::update(const dropCoinsStruct* c)
-{
-  QString temp;
-  setPos((int16_t)(c->x), 
-	 (int16_t)(c->y), 
-	 (int16_t)(c->z * 10.0));
-  setAmount(c->amount);
-  setCoinType(c->type[0]);
-  m_name.sprintf("Coints: %c %d", c->type[0], c->amount);
-  updateLast();
-}
-
-QString Coin::raceString() const
-{
-  return "Coins";
-}
-
-QString Coin::classString() const
-{
-  return "Thing";
-}
-
-//----------------------------------------------------------------------
 // Door
 Door::Door(const doorStruct* d)
   : Item(tDoors, d->doorId)
@@ -1010,8 +974,8 @@ void Drop::update(const makeDropStruct* d, const QString& name)
   // set the position
   setPos((int16_t)d->x, 
 	 (int16_t)d->y, 
-	 (int16_t)d->z * 10);
-  setHeading((int8_t)lrintf(d->heading));
+	 (int16_t)d->z);
+  setHeading(0);
 
   // set the drop specific info
   setItemNr(d->itemNr);
