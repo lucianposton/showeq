@@ -4,8 +4,8 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2003 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Copyright 2000-2004 by the respective ShowEQ Developers
+ *  Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
  */
 
 #ifndef _PACKETFORMAT_H_
@@ -183,7 +183,7 @@ class EQPacketFormat
     : m_packet(NULL), m_length(0), 
     m_postSkipData(NULL), m_postSkipDataLength(0), 
     m_payload(NULL), m_payloadLength(0),
-    m_arq(0), m_ownCopy(false)
+    m_arq(0), m_ownCopy(false), m_isValid(false)
     {  }
     
   EQPacketFormat(uint8_t* data, 
@@ -249,7 +249,7 @@ class EQPacketFormat
   uint8_t asqLow() const { return m_postSkipData[11]; }
   uint32_t crc32() const
   { 
-    return eqntohuint32(&m_postSkipData[m_postSkipDataLength - 4]);
+    return eqntohuint32(&((uint8_t*)m_packet)[m_length - 4]);
   }
   uint32_t calcCRC32() const
   {
@@ -258,7 +258,8 @@ class EQPacketFormat
     return ::calcCRC32((uint8_t*)m_packet, m_length - 4);
   }
 
-  bool isValid() { return crc32() == calcCRC32(); }
+  bool isValid() const { return m_isValid; }
+  bool validate();
 
   uint8_t* payload() const { return m_payload; }
   uint16_t payloadLength() const { return m_payloadLength; }
@@ -284,6 +285,7 @@ class EQPacketFormat
   uint16_t m_payloadLength;
   uint16_t m_arq; // local copy to speed up comparisons
   bool m_ownCopy;
+  bool m_isValid;
 };
 
 inline bool operator<(const EQPacketFormat& p1,

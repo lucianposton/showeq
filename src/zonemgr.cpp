@@ -14,19 +14,21 @@
  *
  */
 
-#include <qfile.h>
-#include <qdatastream.h>
-#include <qregexp.h>
-
 #include "zonemgr.h"
 #include "packet.h"
 #include "main.h"
+#include "everquest.h"
+#include "diagnosticmessages.h"
+
+#include <qfile.h>
+#include <qdatastream.h>
+#include <qregexp.h>
 
 //----------------------------------------------------------------------
 // constants
 static const char magicStr[5] = "zon2"; // magic is the size of uint32_t + a null
 static const uint32_t* magic = (uint32_t*)magicStr;
-
+const float defaultZoneExperienceMultiplier = 0.75;
 
 // Sequence of signals on initial entry into eq from character select screen
 // EQPacket                              ZoneMgr                       isZoning
@@ -44,10 +46,10 @@ static const uint32_t* magic = (uint32_t*)magicStr;
 // zoneEntry(ServerZoneEntryStruct)      zoneBegin(shortName)          false
 // zoneNew(newZoneStruct)                zoneEnd(shortName, longName)  false
 //
-ZoneMgr::ZoneMgr(EQPacket* packet, QObject* parent, const char* name)
+ZoneMgr::ZoneMgr(QObject* parent, const char* name)
   : QObject(parent, name),
     m_zoning(false),
-    m_zone_exp_multiplier(0.75),
+    m_zone_exp_multiplier(defaultZoneExperienceMultiplier),
     m_zonePointCount(0),
     m_zonePoints(0)
 {
@@ -55,31 +57,27 @@ ZoneMgr::ZoneMgr(EQPacket* packet, QObject* parent, const char* name)
   m_longZoneName = "unknown";
   m_zoning = false;
 
-  connect(packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)),
-	  this, SLOT(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)));
-  connect(packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
-	  this, SLOT(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)));
-  connect(packet, SIGNAL(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)),
-	  this, SLOT(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)));
-  connect(packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
-	  this, SLOT(zoneNew(const newZoneStruct*, uint32_t, uint8_t)));
-  connect(packet, SIGNAL(zonePoints(const zonePointsStruct*, uint32_t, uint8_t)),
-	  this, SLOT(zonePoints(const zonePointsStruct*, uint32_t, uint8_t)));
-
   if (showeq_params->restoreZoneState)
     restoreZoneState();
 }
 
+struct ZoneNames
+{
+  const char* shortName;
+  const char* longName;
+};
+
+static const ZoneNames zoneNames[] =
+{
+#include "zones.h"
+};
+
 QString ZoneMgr::zoneNameFromID(uint16_t zoneId)
 {
-   static const char* zoneNames[] =
-   {
-#include "zones.h"
-   };
 
    const char* zoneName = NULL;
-   if (zoneId < (sizeof(zoneNames) / sizeof (char*)))
-       zoneName = zoneNames[zoneId];
+   if (zoneId < (sizeof(zoneNames) / sizeof (ZoneNames)))
+       zoneName = zoneNames[zoneId].shortName;
 
    if (zoneName != NULL)
       return zoneName;
@@ -87,6 +85,33 @@ QString ZoneMgr::zoneNameFromID(uint16_t zoneId)
    QString tmpStr;
    tmpStr.sprintf("unk_zone_%d", zoneId);
    return tmpStr;
+}
+
+QString ZoneMgr::zoneLongNameFromID(uint16_t zoneId)
+{
+
+   const char* zoneName = NULL;
+   if (zoneId < (sizeof(zoneNames) / sizeof (ZoneNames)))
+       zoneName = zoneNames[zoneId].longName;
+
+   if (zoneName != NULL)
+      return zoneName;
+
+   QString tmpStr;
+   tmpStr.sprintf("unk_zone_%d", zoneId);
+   return tmpStr;
+}
+
+const zonePointStruct* ZoneMgr::zonePoint(uint32_t zoneTrigger)
+{
+  if (!m_zonePoints)
+    return 0;
+
+  for (size_t i = 0; i < m_zonePointCount; i++)
+    if (m_zonePoints[i].zoneTrigger == zoneTrigger)
+      return &m_zonePoints[i];
+
+  return 0;
 }
 
 void ZoneMgr::saveZoneState(void)
@@ -117,8 +142,7 @@ void ZoneMgr::restoreZoneState(void)
 
     if (magicTest != *magic)
     {
-      fprintf(stderr, 
-	      "Failure loading %s: Bad magic string!\n",
+      seqWarn("Failure loading %s: Bad magic string!",
 	      (const char*)fileName);
       return;
     }
@@ -126,23 +150,24 @@ void ZoneMgr::restoreZoneState(void)
     d >> m_longZoneName;
     d >> m_shortZoneName;
 
-    fprintf(stderr, "Restored Zone: %s (%s)!\n",
+    seqInfo("Restored Zone: %s (%s)!",
 	    (const char*)m_shortZoneName,
 	    (const char*)m_longZoneName);
   }
   else
   {
-    fprintf(stderr,
-	    "Failure loading %s: Unable to open!\n", 
+    seqWarn("Failure loading %s: Unable to open!", 
 	    (const char*)fileName);
   }
 }
 
-void ZoneMgr::zoneEntry(const ClientZoneEntryStruct* zsentry, uint32_t len, uint8_t dir)
+void ZoneMgr::zoneEntryClient(const uint8_t* data, size_t len, uint8_t dir)
 {
+  const ClientZoneEntryStruct* zsentry = (const ClientZoneEntryStruct*)data;
+
   m_shortZoneName = "unknown";
   m_longZoneName = "unknown";
-
+  m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
   m_zoning = false;
 
   emit zoneBegin();
@@ -152,10 +177,23 @@ void ZoneMgr::zoneEntry(const ClientZoneEntryStruct* zsentry, uint32_t len, uint
     saveZoneState();
 }
 
-void ZoneMgr::zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t len, uint8_t dir)
+void ZoneMgr::zonePlayer(const uint8_t* data)
 {
-  m_shortZoneName = zoneNameFromID(zsentry->zoneId);
+  const charProfileStruct* player = (const charProfileStruct*)data;
+  m_shortZoneName = zoneNameFromID(player->zoneId);
+  m_longZoneName = zoneLongNameFromID(player->zoneId);
+  m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
+  m_zoning = false;
+  emit zoneBegin(m_shortZoneName);
 
+  if (showeq_params->saveZoneState)
+    saveZoneState();
+}
+
+void ZoneMgr::zoneEntryServer(const uint8_t* data, size_t len, uint8_t dir)
+{
+  const ServerZoneEntryStruct* zsentry = (const ServerZoneEntryStruct*)data;
+  m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
   m_zoning = false;
   emit zoneBegin(m_shortZoneName);
   emit zoneBegin(zsentry, len, dir);
@@ -164,12 +202,15 @@ void ZoneMgr::zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t len, uint
     saveZoneState();
 }
 
-void ZoneMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t len, uint8_t dir)
+void ZoneMgr::zoneChange(const uint8_t* data, size_t len, uint8_t dir)
 {
+  const zoneChangeStruct* zoneChange = (const zoneChangeStruct*)data;
   m_shortZoneName = zoneNameFromID(zoneChange->zoneId);
+  m_longZoneName = zoneLongNameFromID(zoneChange->zoneId);
+  m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
   m_zoning = true;
 
-  if (dir == DIR_SERVER)
+  if (dir == DIR_Server)
     emit zoneChanged(m_shortZoneName);
     emit zoneChanged(zoneChange, len, dir);
 
@@ -177,8 +218,11 @@ void ZoneMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t len, uint8
     saveZoneState();
 }
 
-void ZoneMgr::zoneNew(const newZoneStruct* zoneNew, uint32_t len, uint8_t dir)
+void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
 {
+  const newZoneStruct* zoneNew = (const newZoneStruct*)data;
+  m_safePoint.setPoint(lrintf(zoneNew->safe_x), lrintf(zoneNew->safe_y),
+		       lrintf(zoneNew->safe_z));
   m_zone_exp_multiplier = zoneNew->zone_exp_multiplier;
 
   // ZBNOTE: Apparently these come in with the localized names, which means we 
@@ -200,13 +244,13 @@ void ZoneMgr::zoneNew(const newZoneStruct* zoneNew, uint32_t len, uint8_t dir)
   m_zoning = false;
 
 #if 1 // ZBTEMP
-  printf("Welcome to lovely downtown '%s' with an experience multiplier of %f\n",
+  seqDebug("Welcome to lovely downtown '%s' with an experience multiplier of %f",
 	 zoneNew->longName, zoneNew->zone_exp_multiplier);
-  printf("Safe Point (%f, %f, %f)\n", 
+  seqDebug("Safe Point (%f, %f, %f)", 
 	 zoneNew->safe_x, zoneNew->safe_y, zoneNew->safe_z);
 #endif // ZBTEMP
   
-  // fprintf(stderr,"zoneNew: m_short(%s) m_long(%s)\n",
+  // seqDebug("zoneNew: m_short(%s) m_long(%s)",
   //    (const char*)m_shortZoneName,
   //    (const char*)m_longZoneName);
   
@@ -216,8 +260,9 @@ void ZoneMgr::zoneNew(const newZoneStruct* zoneNew, uint32_t len, uint8_t dir)
     saveZoneState();
 }
 
-void ZoneMgr::zonePoints(const zonePointsStruct* zp, uint32_t len, uint8_t)
+void ZoneMgr::zonePoints(const uint8_t* data, size_t len, uint8_t)
 {
+  const zonePointsStruct* zp = (const zonePointsStruct*)data;
   // note the zone point count
   m_zonePointCount = zp->count;
 
@@ -229,6 +274,7 @@ void ZoneMgr::zonePoints(const zonePointsStruct* zp, uint32_t len, uint8_t)
   m_zonePoints = new zonePointStruct[m_zonePointCount];
 
   // copy the zone point information
-  memcpy((void*)m_zonePoints, zp, sizeof(zonePointStruct) * m_zonePointCount);
+  memcpy((void*)m_zonePoints, zp->zonePoints, 
+	 sizeof(zonePointStruct) * m_zonePointCount);
 }
 

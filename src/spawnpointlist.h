@@ -96,6 +96,7 @@ class SpawnPointList : public SEQListView
   SpawnPointList(SpawnMonitor* spawnMonitor, 
 		 QWidget* parent = 0, const char* name = 0);
   SpawnPointListMenu* menu();
+
   bool keepSorted() { return m_keepSorted; }
   void setKeepSorted(bool val);
 
@@ -126,6 +127,8 @@ class SpawnPointWindow : public SEQWindow
   SpawnPointWindow(SpawnMonitor* spawnMonitor, 
 		   QWidget* parent = 0, const char* name = 0);
   ~SpawnPointWindow();
+  virtual QPopupMenu* menu();
+
   SpawnPointList* spawnPointList() { return m_spawnPointList; }
 
  public slots:

@@ -4,7 +4,7 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  *
- * Copyright 2002 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ * Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
  *
  * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
  * for use under the terms of the GNU General Public License, 

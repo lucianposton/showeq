@@ -23,7 +23,7 @@
 #include <qsplitter.h>
 #include <qvaluelist.h>
 #include <qtimer.h>
-#include <qlist.h>
+#include <qptrlist.h>
 #include <qmessagebox.h>
 #include <qtabdialog.h>
 #include <qspinbox.h>
@@ -52,13 +52,14 @@ class SpellShell;
 class GroupMgr;
 class SpawnMonitor;
 class SpawnLog;
+class FilteredSpawnLog;
+class FilterNotifications;
 class Item;
 class CompassFrame;
 class MapFrame;
 class ExperienceWindow;
 class CombatWindow;
 class NetDiag;
-class MsgDialog;
 class GuildMgr;
 class Spells;
 class DateTimeMgr;
@@ -66,6 +67,16 @@ class PacketLog;
 class PacketStreamLog;
 class UnknownPacketLog;
 class OPCodeMonitorPacketLog;
+class DataLocationMgr;
+class EQStr;
+class MessageFilters;
+class Messages;
+class MessageShell;
+class MessageWindow;
+class Terminal;
+class MessageFilterDialog;
+class GuildShell;
+class GuildListWindow;
 
 //--------------------------------------------------
 // typedefs
@@ -78,11 +89,18 @@ const int maxNumMaps = 5;
 
 // This is the base number where the map dock options appear in the
 // Docked menu
-const int mapDockBase = 7; 
+const int mapDockBase = 11; 
 
 // This is the base number where the map caption options appear in the
 // Window caption menu
 const int mapCaptionBase = 11; 
+
+// maximum number of message windows
+const int maxNumMessageWindows = 10;
+
+// This is the base number where the message window dock options appear
+// in the Docked menu
+const int messageWindowDockBase = 16;
 
 //--------------------------------------------------
 // EQInterface
@@ -91,56 +109,36 @@ class EQInterface:public QMainWindow
    Q_OBJECT
 
  public:
-   EQInterface (QWidget * parent = 0, const char *name = 0);
+   EQInterface(DataLocationMgr* dlm, 
+	       QWidget * parent = 0, const char *name = 0);
    ~EQInterface();
 
    QFont appFont;
 
  public slots:
-   void msgReceived(const QString &);
    void stsMessage(const QString &, int timeout = 0);
    void numSpawns(int);
+   void setExp(uint32_t totalExp, uint32_t totalTick,
+	       uint32_t minExpLevel, uint32_t maxExpLevel, 
+	       uint32_t tickExpLevel);
+   void newExp(uint32_t newExp, uint32_t totalExp, 
+	       uint32_t totalTick,
+	       uint32_t minExpLevel, uint32_t maxExpLevel, 
+	       uint32_t tickExpLevel);
+   void setAltExp(uint32_t totalExp,
+		  uint32_t maxExp, uint32_t tickExp, uint32_t aapoints);
+   void newAltExp(uint32_t newExp, uint32_t totalExp, uint32_t totalTick, 
+		  uint32_t maxExp, uint32_t tickExp, uint32_t aapoints);
+   void levelChanged(uint8_t level);
    void newSpeed(int);
    void numPacket(int, int);
    void resetPacket(int, int);
-   void attack2Hand1(const attack2Struct *);
-   void action2Message(const action2Struct *);
-   void combatKillSpawn(const newCorpseStruct *);
-   void moneyOnCorpse(const moneyOnCorpseStruct* money);
-   void item(const itemPacketStruct* item);
-   void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
-   void formattedMessage(const formattedMessageStruct* cmsg, uint32_t, uint8_t);
-   void simpleMessage(const simpleMessageStruct* cmsg, uint32_t, uint8_t);
-   void specialMessage(const specialMessageStruct* smsg, uint32_t, uint8_t);
-   void guildMOTD(const guildMOTDStruct* gmotd, uint32_t, uint8_t);
-   void random(const randomReqStruct* randr);
-   void random(const randomStruct* randr);
-   void emoteText(const emoteTextStruct* emotetext);
+   void attack2Hand1(const uint8_t*);
+   void action2Message(const uint8_t *);
+   void combatKillSpawn(const uint8_t*);
    void updatedDateTime(const QDateTime&);
    void syncDateTime(const QDateTime&);
-   void inspectData(const inspectDataStruct* inspt);
-   void spMessage(const spMesgStruct* spmsg);
-   void handleSpell(const memSpellStruct* mem, uint32_t, uint8_t);
-   void beginCast(const beginCastStruct* bcast);
-   void spellFaded(const spellFadedStruct* sf);
-   void interruptSpellCast(const badCastStruct *icast);
-   void startCast(const startCastStruct* cast);
-   void systemMessage(const sysMsgStruct* smsg);
-   void moneyUpdate(const moneyUpdateStruct* money);
-   void moneyThing(const moneyThingStruct* money);
-   void groupInfo(const groupMemberStruct* gmem);
-   void groupInvite(const groupInviteStruct* gmem);
-   void groupDecline(const groupDeclineStruct* gmem);
-   void groupAccept(const groupAcceptStruct* gmem);
-   void groupDelete(const groupDeleteStruct* gmem);
-   void logOut(const uint8_t*, uint32_t, uint8_t);
-   void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
-   void clientTarget(const clientTargetStruct* cts);
-   void worldMOTD(const worldMOTDStruct* motd);
-   void zoneEntry(const ClientZoneEntryStruct* zsentry);
-   void zoneEntry(const ServerZoneEntryStruct* zsentry);
-   void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
-   void zoneChanged(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
+   void clientTarget(const uint8_t* cts);
 
    void zoneBegin(const QString& shortZoneName);
    void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
@@ -153,10 +151,11 @@ class EQInterface:public QMainWindow
    void killSpawn(const Item* item);
    void changeItem(const Item* item);
 
-   void handleAlert(const Item* item, alertType type);
    void updateSelectedSpawnStatus(const Item* item);
 
    void savePrefs(void);
+   void saveDockAreaPrefs(QDockArea* a, Dock edge);
+
    void addCategory(void);
    void reloadCategories(void);
    void rebuildSpawnList();
@@ -175,14 +174,19 @@ class EQInterface:public QMainWindow
    void listSpawns(void);
    void listDrops(void);
    void listMapInfo(void);
+   void listInterfaceInfo(void);
+   void listGroup(void);
+   void listGuild(void);
    void dumpSpawns(void);
    void dumpDrops(void);
    void dumpMapInfo(void);
    void dumpGuildInfo(void);
    void dumpSpellBook(void);
+   void dumpGroup(void);
+   void dumpGuild(void);
    void launch_editor_filters(void);
    void launch_editor_zoneFilters(void);
-   void toggleAutoDetectCharSettings(int id);
+   void toggleAutoDetectPlayerSettings(int id);
    void SetDefaultCharacterClass(int id);
    void SetDefaultCharacterRace(int id);
    void SetDefaultCharacterLevel (int id);
@@ -190,6 +194,7 @@ class EQInterface:public QMainWindow
    void toggle_view_SkillWin(int id);
    void toggle_view_SpawnListCol( int id );
    void toggle_view_DockedWin( int id );
+   void toggle_view_DockableWin( int id );
    
    void selectTheme(int id);
    void toggle_opcode_monitoring (int id);
@@ -199,7 +204,6 @@ class EQInterface:public QMainWindow
    void select_opcode_file(void);
    void toggle_net_session_tracking(void);
    void toggle_net_real_time_thread(int id);
-   void toggle_net_broken_decode(int id);
    void set_net_monitor_next_client();
    void set_net_client_IP_address();
    void set_net_client_MAC_address();
@@ -207,10 +211,10 @@ class EQInterface:public QMainWindow
    void set_net_arq_giveup(int giveup);
    virtual void setCaption(const QString&);
    void restoreStatusFont();
+   void showMessageFilterDialog(void);
 
  signals:
    void guildList2text(QString);
-   void newMessage(int index);
    void loadFileMap();
    void selectSpawn(const Item* item);
    void saveAllPrefs(void);
@@ -227,7 +231,7 @@ class EQInterface:public QMainWindow
  private slots:
    void toggle_opt_Fast();
    void toggle_view_UnknownData();
-   void toggle_view_ChannelMsgs();
+   void toggle_view_ChannelMsgs(int id);
    void toggle_view_ExpWindow();
    void toggle_view_CombatWindow();
    void toggle_opt_ConSelect();
@@ -237,7 +241,6 @@ class EQInterface:public QMainWindow
    void toggle_opt_PvPTeams();
    void toggle_opt_PvPDeity();
    void toggle_opt_CreateUnknownSpawns(int);
-   void toggle_opt_ShowSpellMessages(int);
    void toggle_opt_WalkPathRecord(int);
    void set_opt_WalkPathLength(int);
    void toggle_opt_RetardedCoords(int);
@@ -252,13 +255,14 @@ class EQInterface:public QMainWindow
    void toggle_view_PlayerSkills();
    void toggle_view_Map(int id);
    void toggle_view_NetDiag();
+   void toggle_view_GuildList();
    void resetMaxMana();
-   void createMessageBox();
    void select_filter_file();
    void save_as_filter_file();
    void toggle_filter_Case(int id);
    void toggle_filter_AlertInfo(int id);
-   void toggle_filter_Audio(int id);
+   void toggle_filter_UseSystemBeep(int id);
+   void toggle_filter_UseCommands(int id);
    void toggle_filter_Log(int id);
    void set_filter_AudioCommand(int id);
    void toggle_view_menubar();
@@ -272,8 +276,6 @@ class EQInterface:public QMainWindow
    void set_main_statusbar_Font(int id);
    void toggle_main_SavePosition(int id);
    void toggle_main_UseWindowPos(int id);
-   void toggle_main_UseStdout(int id);
-   void toggle_main_NoBank(int id);
    void toggle_opt_save_PlayerState(int id);
    void toggle_opt_save_ZoneState(int id);
    void toggle_opt_save_Spawns(int id);
@@ -282,17 +284,26 @@ class EQInterface:public QMainWindow
    void opt_clearChannelMsgs(int id);
    void init_view_menu();
 
+   void toggleTypeFilter(int);
+   void disableAllTypeFilters();
+   void enableAllTypeFilters();
+   void toggleShowUserFilter(int);
+   void disableAllShowUserFilters();
+   void enableAllShowUserFilters();
+   void toggleHideUserFilter(int);
+   void disableAllHideUserFilters();
+   void enableAllHideUserFilters();
+   void toggleDisplayType(int);
+   void toggleDisplayTime(int);
+   void toggleEQDisplayTime(int);
+   void toggleUseColor(int);
+
  protected:
    bool getMonitorOpCodeList(const QString& title, QString& opcodeList);
    int setTheme(int id);
    void loadFormatStrings();
-   void resizeEvent (QResizeEvent *);
-   void logFilteredSpawn(const Item* item, uint32_t flag);
-   void makeNoise( const Item* item, char* szAudioCmd, char* szSoundType);
-   void doAlertCommand(const Item* item, 
-		       const QString& command,
-		       const QString& audioCue);
    void showMap(int mapNum);
+   void showMessageWindow(int winNum);
    void showSpawnList(void);
    void showSpawnList2(void);
    void showSpawnPointList(void);
@@ -301,18 +312,24 @@ class EQInterface:public QMainWindow
    void showSpellList(void);
    void showCompass(void);
    void showNetDiag(void);
+   void showGuildList(void);
+   void createFilteredSpawnLog(void);
    void createSpawnLog(void);
    void createGlobalLog(void);
    void createWorldLog(void);
    void createZoneLog(void);
    void createUnknownZoneLog(void);
    void createOPCodeMonitorLog(const QString&);
+   void insertWindowMenu(SEQWindow* window);
+   void removeWindowMenu(SEQWindow* window);
+   void setDockEnabled(QDockWindow* dw, bool enable);
 
  public:
    Player* m_player;
    MapMgr* mapMgr(void) { return m_mapMgr; }
 
  private:
+   DataLocationMgr* m_dataLocationMgr;
    MapMgr* m_mapMgr;
    SpawnListWindow* m_spawnList;
    SpawnListWindow2* m_spawnList2;
@@ -330,9 +347,16 @@ class EQInterface:public QMainWindow
    GroupMgr* m_groupMgr;
    SpawnMonitor* m_spawnMonitor;
    EQItemDB* m_itemDB;
-   GuildMgr* m_guildmgr;
+   GuildMgr* m_guildmgr; 
+   GuildShell* m_guildShell;
    DateTimeMgr* m_dateTimeMgr;
-
+   EQStr* m_eqStrings;
+   MessageFilters* m_messageFilters;
+   Messages* m_messages;
+   MessageShell* m_messageShell;
+   Terminal* m_terminal;
+   FilteredSpawnLog* m_filteredSpawnLog;
+   FilterNotifications* m_filterNotifications;
    SpawnLog *m_spawnLogger;
 
    PacketLog* m_globalLog;
@@ -349,21 +373,28 @@ class EQInterface:public QMainWindow
    QPopupMenu* m_skillWinMenu;
    QPopupMenu* m_spawnListMenu;
    QPopupMenu* m_dockedWinMenu;
+   QPopupMenu* m_dockableWinMenu;
    QPopupMenu* m_windowCaptionMenu;
    QPopupMenu* m_charMenu;
    QPopupMenu* m_charLevelMenu;
    QSpinBox* m_levelSpinBox;
    QPopupMenu* m_charClassMenu;
    QPopupMenu* m_charRaceMenu;
+   QPopupMenu* m_terminalMenu;
+   QPopupMenu* m_terminalTypeFilterMenu;
+   QPopupMenu* m_terminalShowUserFilterMenu;
+   QPopupMenu* m_terminalHideUserFilterMenu;
+   QPopupMenu* m_windowMenu;
 
    CompassFrame* m_compass;
+   MessageWindow* m_messageWindow[maxNumMessageWindows];
    MapFrame*  m_map[maxNumMaps];
-   QSplitter* m_splitV;
-   QSplitter* m_splitH;
-   QSplitter* m_splitT;
    ExperienceWindow* m_expWindow;
    CombatWindow* m_combatWindow;
    NetDiag* m_netDiag;
+   MessageFilterDialog* m_messageFilterDialog;
+   GuildListWindow* m_guildListWindow;
+
    QLabel* m_stsbarSpawns;
    QLabel* m_stsbarStatus;
    QLabel* m_stsbarZone;
@@ -373,8 +404,8 @@ class EQInterface:public QMainWindow
    QLabel* m_stsbarPkt;
    QLabel* m_stsbarEQTime;
    QLabel* m_stsbarSpeed;
-
-   QList<MsgDialog>  m_msgDialogList;   
+   // ZEM code
+   QLabel* m_stsbarZEM;
 
    QIntDict<QString> m_formattedMessageStrings;
 
@@ -391,7 +422,6 @@ class EQInterface:public QMainWindow
    int  m_id_opt_Fast;
    int  m_id_opt_ResetMana;
    int  m_id_view_UnknownData;
-   int  m_id_view_ChannelMsgs;
    int  m_id_view_ExpWindow;
    int  m_id_view_CombatWindow;
    int  m_id_view_SpawnList;
@@ -401,7 +431,9 @@ class EQInterface:public QMainWindow
    int  m_id_view_PlayerSkills;
    int  m_id_view_Compass;
    int  m_id_view_Map[maxNumMaps];
+   int  m_id_view_MessageWindow[maxNumMessageWindows];
    int  m_id_view_NetDiag;
+   int  m_id_view_GuildListWindow;
    int  m_id_view_SpellList;
    int  m_id_view_PlayerStats_Options;
    int  m_id_view_PlayerStats_Stats[LIST_MAXLIST];
@@ -424,18 +456,18 @@ class EQInterface:public QMainWindow
    QStringList m_StringList;
    QDialog *dialogbox;
 
-   bool m_viewChannelMsgs;
-
    bool m_isSkillListDocked;
    bool m_isStatListDocked;
    bool m_isMapDocked[maxNumMaps];
+   bool m_isMessageWindowDocked[maxNumMessageWindows];
    bool m_isSpawnListDocked;
    bool m_isSpawnList2Docked;
    bool m_isSpawnPointListDocked;
    bool m_isSpellListDocked;
    bool m_isCompassDocked;
 
-   
+   bool m_selectOnConsider;
+   bool m_selectOnTarget;
 };
 
 #endif // EQINT_H
