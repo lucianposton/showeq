@@ -819,7 +819,7 @@ void SpawnShell::deleteSpawn(const deleteSpawnStruct* delspawn)
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::deleteSpawn(id=%d)\n", delspawn->spawnId);
 #endif
-   if (m_posDeadSpawnIDs < MAX_DEAD_SPAWNIDS)
+   if (m_posDeadSpawnIDs < (MAX_DEAD_SPAWNIDS - 1))
      m_posDeadSpawnIDs++;
    else
      m_posDeadSpawnIDs = 0;
