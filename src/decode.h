@@ -8,7 +8,11 @@
 #ifndef EQDECODE_H
 #define EQDECODE_H
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 #include <deque>
 #include <vector>
 //#include <qobject.h>

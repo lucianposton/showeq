@@ -3534,7 +3534,20 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
    */
    // initialize the pcap object 
    m_pcache_pcap = pcap_open_live((char *) device, 1500, true, 0, ebuf);
-
+#ifdef __FreeBSD__
+   // if we're on FreeBSD, we need to call ioctl on the file descriptor
+   // with BIOCIMMEDIATE to get the kernel Berkeley Packet Filter device
+   // to return packets to us immediately, rather than holding them in
+   // it's internal buffer... if we don't do this, we end up getting 32K
+   // worth of packets all at once, at long intervals -- if someone
+   // knows a less hacky way of doing this, I'd love to hear about it.
+   // the problem here is that libpcap doesn't expose an API to do this
+   // in any way
+   int fd = *((int*)m_pcache_pcap);
+   int temp = 1;
+   if ( ioctl( fd, BIOCIMMEDIATE, &temp ) < 0 )
+     fprintf( stderr, "PCAP couldn't set immediate mode on BSD\n" );
+#endif
    if (!m_pcache_pcap)
    {
      fprintf(stderr, "pcap_error:pcap_open_live(%s): %s\n", device, ebuf);

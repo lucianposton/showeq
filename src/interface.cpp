@@ -5176,15 +5176,21 @@ int EQInterface::setTheme(int id)
     case 1: // platinum
     {
       QPalette p( QColor( 239, 239, 239 ) );
-      //qApp->setStyle( (QStyle *) new QPlatinumStyle );
+#if QT_VERSION >= 0x030000
       qApp->setStyle("platinum");
+#else
+      qApp->setStyle( (QStyle *) new QPlatinumStyle );
+#endif
       qApp->setPalette( p, TRUE );
     }
     break;
     case 2: // windows
     {
-      //qApp->setStyle( (QStyle *) new QWindowsStyle );
+#if QT_VERSION >= 0x030000
       qApp->setStyle("windows");
+#else
+      qApp->setStyle( (QStyle *) new QWindowsStyle );
+#endif
       qApp->setFont( OrigFont, TRUE );
       qApp->setPalette( OrigPalette, TRUE );
     }
@@ -5193,8 +5199,11 @@ int EQInterface::setTheme(int id)
     case 4: // cde polished
     {
       QPalette p( QColor( 75, 123, 130 ) );
-      //qApp->setStyle( (QStyle *) new QCDEStyle( theme == 3 ? TRUE : FALSE ) );
+#if QT_VERSION >= 0x030000
       qApp->setStyle("cde");
+#else
+      qApp->setStyle( (QStyle *) new QCDEStyle( theme == 3 ? TRUE : FALSE ) );
+#endif
       p.setColor( QPalette::Active, QColorGroup::Base, QColor( 55, 77, 78 ) );
       p.setColor( QPalette::Inactive, QColorGroup::Base, QColor( 55, 77, 78 ) );
       p.setColor( QPalette::Disabled, QColorGroup::Base, QColor( 55, 77, 78 ) );
@@ -5220,8 +5229,11 @@ int EQInterface::setTheme(int id)
     case 5: // motif
     {
       QPalette p( QColor( 192, 192, 192 ) );
-      //qApp->setStyle( (QStyle *) new QMotifStyle );
+#if QT_VERSION >= 0x030000
       qApp->setStyle("motif");
+#else
+      qApp->setStyle( (QStyle *) new QMotifStyle );
+#endif
       qApp->setPalette( p, TRUE );
       qApp->setFont( OrigFont, TRUE );
     }
@@ -5229,8 +5241,11 @@ int EQInterface::setTheme(int id)
     case 6: // SGI
     {
       //QPalette p( QColor( 192, 192, 192 ) );
-      //qApp->setStyle( (QStyle *) new QSGIStyle( FALSE ) );
+#if QT_VERSION >= 0x030000
       qApp->setStyle("sgi");
+#else
+      qApp->setStyle( (QStyle *) new QSGIStyle( FALSE ) );
+#endif
       qApp->setPalette( OrigPalette, TRUE );
       qApp->setFont( OrigFont, TRUE );
     }
@@ -5238,8 +5253,11 @@ int EQInterface::setTheme(int id)
     default: // system default
     {
       QPalette p( QColor( 192, 192, 192 ) );
-      //qApp->setStyle( (QStyle *) new QMotifStyle );
+#if QT_VERSION >= 0x030000
       qApp->setStyle("motif");
+#else
+      qApp->setStyle( (QStyle *) new QMotifStyle );
+#endif
       qApp->setPalette( p, TRUE );
       qApp->setFont( OrigFont, TRUE );
       theme = 2;

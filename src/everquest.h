@@ -20,7 +20,11 @@
 #ifndef EQSTRUCT_H
 #define EQSTRUCT_H
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 
 /*
 ** ShowEQ specific definitions

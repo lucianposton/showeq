@@ -9,7 +9,11 @@
 #define _LIBEQ_H_
 
 #if HAVE_LIBEQ
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 
 #ifdef  __cplusplus
 extern "C"

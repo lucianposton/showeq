@@ -13,7 +13,11 @@
 #ifndef SPAWNLISTCOMMON_H
 #define SPAWNLISTCOMMON_H
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 
 #include <qlistview.h>
 #include <qstring.h>

@@ -6,7 +6,11 @@
  */
 
 #define __STDC_LIMIT_MACROS
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 
 #include <dirent.h>
 #include <errno.h>

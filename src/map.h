@@ -8,6 +8,11 @@
 #ifndef EQMAP_H
 #define EQMAP_H
 
+#ifdef __FreeBSD__
+#include <limits.h>
+#define UINT32_MAX UINT_MAX
+#endif
+
 #include <qwidget.h>
 #include <qpixmap.h>
 #include <qsize.h>

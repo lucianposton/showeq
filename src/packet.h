@@ -12,7 +12,22 @@
 //#define MAXSPAWNDATA        98304
 #define MAXSTREAMS          4
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#if !defined(__BYTE_ORDER)
+#if defined(BYTE_ORDER)
+#define __BYTE_ORDER	BYTE_ORDER
+#define __LITTLE_ENDIAN	LITTLE_ENDIAN
+#define __BIG_ENDIAN	BIG_ENDIAN
+#else
+#error "BYTE_ORDER should be LITTLE_ENDIAN or BIG_ENDIAN (the latter is untested)"
+#endif
+#endif
+#else
 #include <stdint.h>
+#endif
 
 #ifdef __linux__
 #include <endian.h>

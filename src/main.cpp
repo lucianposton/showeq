@@ -15,7 +15,13 @@
 #include <qapplication.h>
 #include <sys/stat.h>
 #include <qwindowsstyle.h>
+#ifdef __GNU_LIBRARY__
 #include <getopt.h>            // for long GNU-style options
+#else
+#define __GNU_LIBRARY__
+#include <getopt.h>
+#undef __GNU_LIBRARY__
+#endif
 
 #include <qaccel.h>
 

@@ -15,7 +15,11 @@
 #ifndef __XMLPREFERENCE_H__
 #define __XMLPREFERENCE_H__
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 
 #include <qobject.h>
 #include <qstring.h>

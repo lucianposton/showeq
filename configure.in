@@ -225,11 +225,11 @@ dnl libEQ.a error message
 LIBEQERRORMESSAGE="libEQ.a not found, out of date, or not compiled using a compatible compiler.  Be sure libEQ.a is already installed in one of the listed directories ($LIBEQLOCS), is a current version, and you are compiling with g++ 3.x."
 
 AC_DEFUN(CHECK_LIBEQ,[
-LIBEQMD5=`md5sum $1 |cut -d' ' -f1`
+LIBEQMD5=`md5sum $1`
 ac_showeq_found_md5="NO"
 for j in "$CURRENT_LIBEQMD5"
 do
-  if [[ "$LIBEQMD5" == "$j" ]]; then
+  if echo "$LIBEQMD5" | grep -q "$j" ; then
     ac_showeq_found_md5="YES"
   fi
 done

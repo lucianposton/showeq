@@ -8,7 +8,11 @@
 #ifndef EQUTIL_H
 #define EQUTIL_H
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 #include <stdio.h>
 #include <qstring.h>
 

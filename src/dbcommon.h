@@ -21,7 +21,11 @@
 #ifndef DBCOMMON_H
 #define DBCOMMON_H
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 
 class Datum
 {

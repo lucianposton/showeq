@@ -15,6 +15,18 @@
 #include "player.h"
 #include "util.h"
 
+#ifdef __FreeBSD__
+long int lrint(double x)
+{
+  long int l=(x+.5);
+}
+
+long int lrintf(float x)
+{
+  return lrint(x);
+}
+#endif
+
 //#define DEBUG_PLAYER
 
 //----------------------------------------------------------------------

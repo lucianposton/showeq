@@ -1,3 +1,8 @@
+mvern 04/18/2003
+----------------
+ + applied jonseq's freebsd compatibility patch and fixes for qt2.
+     neither is officialy supported, so ymmv.
+
 mvern 04/17/2003
 ----------------
  + huge changes to decryption code, movement update handling, and a number

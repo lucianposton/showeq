@@ -17,7 +17,11 @@
 #ifndef __POINT_H_
 #define __POINT_H_
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 #include <math.h>
 #include <stdarg.h>
 

@@ -15,7 +15,11 @@
 #ifndef FILTERMGR_H
 #define FILTERMGR_H
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 
 #include <map>
 

@@ -8,7 +8,11 @@
 #ifndef _SHOWEQ_MAIN_H
 #define _SHOWEQ_MAIN_H
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#else
 #include <stdint.h>
+#endif
 #include <stdlib.h>
 #include <deque>
 
