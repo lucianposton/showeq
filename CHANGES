@@ -1,3 +1,15 @@
+fee (floyd) 11/01/2002
+----------------------
+ + ShowEQ 4.3.1
+ + created 2 methods for manual key input, see Decoder menu for options
+   - manual key input via a dialog, input is expect to be in the form
+     0xFFAAFFAA00110011  (little endian)
+   - ability to set a file to load the key from, see the seqdef.xml for the default name
+   - load from the named key file.
+
+ + updates in EQInterface and EQDecode classes to accomodate key entry
+ + everquest.h - various struct updates
+
 casey 10/31/2002
 ----------------------
  + added some code (and fee added the rest) to allow user input of crypt 

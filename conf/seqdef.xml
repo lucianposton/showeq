@@ -2523,6 +2523,14 @@
   </property>
  </section>
 <!-- ============================================================= -->
+<!-- Options to control Key loading from file -->
+ <section name="KeyFile" >
+  <property name="BaseFilename" >
+   <string value="/usr/local/share/showeq/keyfile.dat" />
+   <comment>Base filename used to construct the others, so for example the DecodeKey would be in /usr/local/share/showeq/keyfile.dat using the default location</comment>
+  </property>
+ </section>
+<!-- ============================================================= -->
 <!-- Experience Window Options -->
  <section name="Experience" >
   <property name="Title" >

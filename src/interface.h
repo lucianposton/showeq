@@ -206,6 +206,7 @@ class EQInterface:public QMainWindow
    void restoreFonts();
 
    // Decoder signals
+   void loadKey(void);
    void theKey(uint64_t);
    void backfillPlayer(charProfileStruct *);
    void backfillSpawn(spawnStruct *);
@@ -270,6 +271,8 @@ class EQInterface:public QMainWindow
    void opt_clearChannelMsgs(int id);
    void init_view_menu();
    void set_decoder_key();
+   void load_decoder_key();
+   void set_opt_enc_BaseFilename();
 
  protected:
    bool getMonitorOpCodeList(const QString& title, const QString& defaultList);

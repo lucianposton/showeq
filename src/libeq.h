@@ -16,10 +16,6 @@ extern "C"
 {
 #endif
 
-  // Function to determine the zone key given a spawn and player packet
-  //uint32_t FindKey(const uint8_t* player, uint32_t plen, 
-  //		   const uint8_t* spawn, uint32_t slen);
-  
   // Function to decode the packet given a pre-determined key
   int ProcessPacket(const uint8_t* data, uint32_t len,
 		    uint8_t* out, uint32_t* outlen,

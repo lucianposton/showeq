@@ -46,6 +46,7 @@ class EQDecode : public QObject
  public slots:
   void ResetDecoder (void);
   void theKey(uint64_t);
+  void loadKey(void);
 
  signals:
   void keyChanged (void);

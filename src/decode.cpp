@@ -228,8 +228,12 @@ EQDecode::FoundKey ()
 		      NULL, 0, NULL, 0))
       emit dispatchDecodedCharProfile(decodedData, decodedDataLen);
     else
-#endif
+    {
       printf("Warning: Failed to decrypt queued Player Profile packet: %d.\n", i);
+      free(pkt);
+      return;
+    }
+#endif
     free(pkt);
   }
 
@@ -261,8 +265,9 @@ EQDecode::FoundKey ()
   {
     pkt = (EQPktRec *)m_queueSpawns[i];
     decodedDataLen = PKTBUF_LEN;
-    DecodeSpawn(pkt->data, pkt->len, decodedData, &decodedDataLen, 
-		m_decodeKey);
+    if (ProcessPacket(pkt->data, pkt->len, 
+		      decodedData, &decodedDataLen, &m_decodeKey, "",
+		      NULL, 0, NULL, 0))
     emit dispatchDecodedNewSpawn(decodedData, decodedDataLen);
     free(pkt);
   }
@@ -531,5 +536,33 @@ void EQDecode::setHash(uint8_t* data, uint32_t len)
 void EQDecode::theKey(uint64_t key)
 {
       m_decodeKey = key;
-      FoundKey();
+  // post the FoundKeyEvent to the main/GUI thread to be handled their
+  QApplication::postEvent(this, new FoundKeyEvent());
 }
+
+void EQDecode::loadKey()
+{
+  uint32_t tkey1, tkey2;
+  uint64_t tkey64;
+
+  // restore the decodeKey if the user requested it
+    QString fileName = showeq_params->KeyBaseFilename;
+    QFile keyFile(fileName);
+    if (keyFile.open(IO_ReadOnly))
+    {
+      QDataStream d(&keyFile);
+      d.setByteOrder(QDataStream::LittleEndian);
+
+      d >> tkey1 >> tkey2;
+      tkey64 = tkey2;
+      m_decodeKey = (tkey64 <<32)| tkey1;
+
+      fprintf(stderr, "Loaded KEY: 0x%016llx\n", m_decodeKey);
+      // post the FoundKeyEvent to the main/GUI thread to be handled their
+      QApplication::postEvent(this, new FoundKeyEvent());
+    }
+    else
+      fprintf(stderr, "Failure loading %s: Unable to open!\n",
+	      (const char*)fileName);
+}
+

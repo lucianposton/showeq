@@ -529,6 +529,8 @@ EQPacket::EQPacket (QObject * parent, const char *name)
 	   this, SIGNAL(finishedDecodeBatch(void)));
    connect(parent, SIGNAL(theKey(uint64_t)),
            m_decode, SLOT(theKey(uint64_t)));
+   connect(parent, SIGNAL(loadKey()),
+           m_decode, SLOT(loadKey()));
 
    m_busy_decoding     = false;
    for (int i = 0; i < MAXSTREAMS + 1 ; i++)
@@ -2049,6 +2051,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
               // just call dispatchDecodedCharProfile (logged there as well)
 
               dispatchDecodedCharProfile(decodedData, decodedDataLen);
+              //logData ("/tmp/charprofile.log", decodedDataLen, decodedData);
            }
            else
               printf("EQPacket::dispatchZoneData():CharProfileCode:Not Decoded\n");
@@ -2107,6 +2110,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
               break;
 
            unk = ! ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
+              //logData ("/tmp/newspawn.log", decodedDataLen, decodedData);
 
            emit newSpawn((const newSpawnStruct*)decodedData, decodedDataLen, dir);
 
@@ -2132,6 +2136,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
            if (!decoded || showeq_params->broken_decode)
               break;
 
+              //logData ("/tmp/zonespawn.log", decodedDataLen, decodedData);
            emit zoneSpawns((const zoneSpawnsStruct*)decodedData, 
                            decodedDataLen, dir);
 

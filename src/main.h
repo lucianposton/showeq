@@ -124,6 +124,7 @@ struct ShowEQParams
   bool           restoreZoneState;
   bool           restoreSpawns;
   QString        saveRestoreBaseFilename;
+  QString        KeyBaseFilename;
 };
  
 extern struct ShowEQParams *showeq_params;

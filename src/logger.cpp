@@ -708,7 +708,7 @@ PktLogger::logENewSpawn(const newSpawnStruct *spawn, uint32_t len, uint8_t dir)
 void
 PktLogger::logSpawnStruct(const spawnStruct *spawn)
 {
-    output(spawn->unknown0000, 49);
+    //output(spawn->unknown0000, 49);
     outputf(" %d %d %d %d %d %d %u %d %u %d ", spawn->heading,
         spawn->deltaHeading, spawn->y, spawn->x, spawn->z,
         spawn->deltaY, spawn->spacer1, spawn->deltaZ, spawn->spacer2,

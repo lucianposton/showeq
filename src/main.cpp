@@ -318,6 +318,9 @@ int main (int argc, char **argv)
    showeq_params->restoreSpawns = false;
    showeq_params->saveRestoreBaseFilename = pSEQPrefs->getPrefString("BaseFilename", section, LOGDIR "/last");
 
+   section = "KeyFile";
+   showeq_params->KeyBaseFilename = pSEQPrefs->getPrefString("BaseFilename", section, LOGDIR "/keyfile.dat");
+
    /* Parse the commandline for commandline parameters */
    while ((opt = getopt_long( argc,
                               argv,

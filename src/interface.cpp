@@ -729,6 +729,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_decoderMenu = new QPopupMenu;
    menuBar()->insertItem("&Decoder", m_decoderMenu);
    m_decoderMenu->insertItem("Input Session Key", this, SLOT(set_decoder_key()));
+   m_decoderMenu->insertItem("Load Session Key", this, SLOT(load_decoder_key()));
+   m_decoderMenu->insertItem("Key Filename...", this, 
+			      SLOT(set_opt_enc_BaseFilename(void)));
    
    // Character Menu 
    m_charMenu = new QPopupMenu;
@@ -5567,3 +5570,26 @@ void EQInterface::set_decoder_key()
   else  // empty string or cancel hit
     return;
 }
+
+void EQInterface::load_decoder_key()
+{
+     emit loadKey();
+}
+
+void EQInterface::set_opt_enc_BaseFilename()
+{
+  QString fileName = 
+    QFileDialog::getSaveFileName(showeq_params->KeyBaseFilename, 
+				 QString::null, this, "KeyFilename",
+				 "Key Filename");
+  if (!fileName.isEmpty())
+  {
+    // set it to be the new base filename
+    showeq_params->KeyBaseFilename = fileName;
+    
+    // set preference to use for next session
+    pSEQPrefs->setPrefString("BaseFilename", "SaveState", 
+			     showeq_params->KeyBaseFilename);
+  }
+}
+
