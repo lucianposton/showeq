@@ -1,3 +1,9 @@
+fee (31/12/01)
+---------------------
+Mods:
+ + updated playerProfile, newZone and zoneEntry structs to mach current
+   data (these structs are still not 100% documented)
+
 dohpaZ (30/12/01)
 ---------------------
 Modifications:
