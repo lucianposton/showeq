@@ -721,7 +721,7 @@ void SpawnShell::spawnWearingUpdate(const wearChangeStruct *wearing)
    if (it != m_spawns.end())
    {
      item = (Spawn*)it->second;
-#if 1 // ZBTEMP: 
+#if 0 // ZBTEMP: 
      fprintf(stderr, "id=%d name=%s slotId=%d itemId=%d\n",
 	     wearing->spawnId, (const char*)item->name(),
 	     wearing->wearSlotId, wearing->newItemId);
@@ -731,7 +731,7 @@ void SpawnShell::spawnWearingUpdate(const wearChangeStruct *wearing)
      updateRuntimeFilterFlags(item);
      emit changeItem(item, tSpawnChangedWearing);
    }
-#if 1 // ZBTEMP: 
+#if 0 // ZBTEMP: 
    else
      fprintf(stderr, "id=%d slotId=%d itemId=%d\n",
 	     wearing->spawnId, 
