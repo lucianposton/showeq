@@ -101,6 +101,7 @@ class MapParameters
   int panOffsetX() const { return m_panOffsetX; }
   int panOffsetY() const { return m_panOffsetY; }
   int zoom() const { return m_zoom; }
+  int zoomDefault() const { return m_zoomDefault; }
   double ratio() const { return m_ratio; }
   double ratioX() const { return m_ratio; }
   double ratioY() const { return m_ratio; } 
@@ -139,6 +140,7 @@ class MapParameters
   void setGridResolution(int res);
   void increaseGridResolution(void);
   void decreaseGridResolution(void);
+  void setZoomDefault(int zoom);
   bool setZoom(int zoom);
   bool zoomIn();
   bool zoomOut();
@@ -180,6 +182,7 @@ class MapParameters
   QPoint m_screenCenter;
   QSize m_zoomMapLength;
   uint32_t m_zoom;
+  uint32_t m_zoomDefault;
   int m_panOffsetX;
   int m_panOffsetY;
   double m_ratio;
@@ -283,6 +286,14 @@ bool MapParameters::setZoom(int zoom)
   }
   
   return false;
+}
+
+inline 
+void MapParameters::setZoomDefault(int zoom)
+{
+  if ((zoom <= 32) &&
+      (zoom >= 1))
+    m_zoomDefault = zoom;
 }
 
 inline 

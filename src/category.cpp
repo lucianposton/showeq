@@ -16,6 +16,8 @@
 
 #include <stdio.h>
 
+#include<qcolordialog.h>
+
 // ZBTEMP: Temporarily use pSEQPrefs for data
 #include "main.h"
 
@@ -33,15 +35,12 @@ Category::Category(const QString& name,
   if (!filterout.isEmpty())
     m_filterout = filterout;
   m_color = color;
-  m_flags = 0;
   
   int cFlags = REG_EXTENDED | REG_ICASE;
 
   // allocate the filter item
-  if (filter != "Filtered")
-    m_filterItem = new FilterItem(filter, cFlags);
-  else
-    m_filterItem = NULL;
+  m_filterItem = new FilterItem(filter, cFlags);
+  m_filteredFilter = (filter.find(":Filtered:", 0, false) != -1);
 
   // allocate the filter out item
   if (m_filterout.isEmpty())
@@ -54,11 +53,6 @@ Category::~Category()
 {
   delete m_filterItem;
   delete m_filterOutItem;
-}
-
-bool Category::isFilteredFilter() const
-{
-  return (m_filterItem == NULL);
 }
 
 bool Category::isFiltered(const QString& filterString, int level) const
@@ -84,6 +78,8 @@ CFilterDlg::CFilterDlg(QWidget *parent, QString name)
 #ifdef DEBUG
    debug ("CFilterDlg()");
 #endif /* DEBUG */
+   QFont labelFont;
+   labelFont.setBold(true);
 
    QBoxLayout* topLayout = new QVBoxLayout(this);
    QBoxLayout* row4Layout = new QHBoxLayout(topLayout);
@@ -93,57 +89,42 @@ CFilterDlg::CFilterDlg(QWidget *parent, QString name)
    QBoxLayout* row0Layout = new QHBoxLayout(topLayout);
 
    QLabel *colorLabel = new QLabel ("Color", this);
-   colorLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   colorLabel->setFont(labelFont);
    colorLabel->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
-   row1Layout->addWidget(colorLabel);
+   row1Layout->addWidget(colorLabel, 0, AlignLeft);
 
-   m_Color = new QComboBox(FALSE, this, "Color");
-   m_Color->insertItem("black");
-   m_Color->insertItem("gray");
-   m_Color->insertItem("DarkBlue");
-   m_Color->insertItem("DarkGreen");
-   m_Color->insertItem("DarkCyan");
-   m_Color->insertItem("DarkRed");
-   m_Color->insertItem("DarkMagenta");
-   m_Color->insertItem("yellow4");
-   m_Color->insertItem("DarkGray");
-   m_Color->insertItem("white");
-   m_Color->insertItem("blue");
-   m_Color->insertItem("green");
-   m_Color->insertItem("cyan");
-   m_Color->insertItem("red");
-   m_Color->insertItem("magenta");
-   m_Color->insertItem("yellow");
-   m_Color->insertItem("white");
-
-   m_Color->setFont(QFont("Helvetica", 12));
-   row1Layout->addWidget(m_Color, 0, AlignLeft);
+   m_Color = new QPushButton(this, "color");
+   m_Color->setText("...");
+   m_Color->setFont(labelFont);
+   connect(m_Color, SIGNAL(clicked()),
+	   this, SLOT(select_color()));
+   row1Layout->addWidget(m_Color);
 
    QLabel *nameLabel = new QLabel ("Name", this);
-   nameLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   nameLabel->setFont(labelFont);
    nameLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
    row4Layout->addWidget(nameLabel);
 
    m_Name = new QLineEdit(this, "Name");
-   m_Name->setFont(QFont("Helvetica", 12, QFont::Bold));
+   m_Name->setFont(labelFont);
    row4Layout->addWidget(m_Name);
 
    QLabel *filterLabel = new QLabel ("Filter", this);
-   filterLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   filterLabel->setFont(labelFont);
    filterLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
    row3Layout->addWidget(filterLabel);
 
    m_Filter  = new QLineEdit(this, "Filter");
-   m_Filter->setFont(QFont("Helvetica", 12, QFont::Bold));
+   m_Filter->setFont(labelFont);
    row3Layout->addWidget(m_Filter);
 
    QLabel *filteroutLabel = new QLabel ("FilterOut", this);
-   filteroutLabel->setFont(QFont("Helvetica", 12, QFont::Bold));
+   filteroutLabel->setFont(labelFont);
    filteroutLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
    row2Layout->addWidget(filteroutLabel);
 
    m_FilterOut  = new QLineEdit(this, "FilterOut");
-   m_FilterOut->setFont(QFont("Helvetica", 12, QFont::Bold));
+   m_FilterOut->setFont(labelFont);
    row2Layout->addWidget(m_FilterOut);
 
    QPushButton *ok = new QPushButton("OK", this);
@@ -157,18 +138,29 @@ CFilterDlg::CFilterDlg(QWidget *parent, QString name)
    connect(cancel, SIGNAL(clicked()), SLOT(reject()));
 }
 
+void CFilterDlg::select_color(void)
+{
+  QColor newColor = 
+    QColorDialog::getColor(m_Color->backgroundColor(), this, "Category Color");
+
+  if (newColor.isValid())
+    m_Color->setPalette(QPalette(QColor(newColor)));
+}
+
 // ------------------------------------------------------
 // CategoryMgr
 CategoryMgr::CategoryMgr(QObject* parent, const char* name)
   : QObject(parent, name)
 {
+  reloadCategories();
 }
 
 CategoryMgr::~CategoryMgr()
 {
 }
 
-const CategoryDict CategoryMgr::findCategories(const QString& filterString, int level) const
+const CategoryDict CategoryMgr::findCategories(const QString& filterString, 
+					       int level) const
 {
   CategoryDict tmpDict;
   
@@ -191,28 +183,29 @@ const Category* CategoryMgr::AddCategory(const QString& name,
 					 const QString& filterout, 
 					 QColor color)
 {
-//printf("AddCategory() '%s' - '%s':'%s'\n", name, filter, filterout?filterout:"null");
-
+  //printf("AddCategory() '%s' - '%s':'%s'\n", name, filter, filterout?filterout:"null");
+  
   // ZBTEMP: TODO, need to add check for duplicate category name
-
-   if (!name.isEmpty() && !filter.isEmpty()) 
-   {
-     Category* newcat = new Category(name, filter, filterout, color);
-
-     m_categories.insert(newcat->name(), newcat);
-
-     emit addCategory(newcat);
-
-//printf("Added '%s'-'%s' '%s' %d\n", newcat->name, newcat->filter, newcat->listitem->text(0).ascii(), newcat->listitem);
+  m_changed = true;
+  if (!name.isEmpty() && !filter.isEmpty()) 
+  {
+    Category* newcat = new Category(name, filter, filterout, color);
+    
+    m_categories.insert(newcat->name(), newcat);
+    
+    emit addCategory(newcat);
+    
+    //printf("Added '%s'-'%s' '%s' %d\n", newcat->name, newcat->filter, newcat->listitem->text(0).ascii(), newcat->listitem);
      return newcat;
-   }
+  }
 
-   return NULL;
+  return NULL;
 }
 
 void CategoryMgr::RemCategory(const Category* cat)
 {
 //printf("RemCategory()\n");
+  m_changed = true;
 
   if (cat != NULL) 
   {
@@ -229,10 +222,11 @@ void CategoryMgr::RemCategory(const Category* cat)
 
 void CategoryMgr::clearCategories(void)
 {
-//printf("clearCategories()\n");
+  //printf("clearCategories()\n");
   emit clearedCategories();
 
   m_categories.clear();
+  m_changed = true;
 }
 
 void CategoryMgr::addCategory(QWidget* parent)
@@ -240,7 +234,6 @@ void CategoryMgr::addCategory(QWidget* parent)
   // not editing an existing, adding a new
   editCategories(NULL, parent);
 }
-
 
 void CategoryMgr::editCategories(const Category* cat, QWidget* parent)
 {
@@ -254,14 +247,17 @@ void CategoryMgr::editCategories(const Category* cat, QWidget* parent)
     dlg->m_Name->setText(cat->name());
     dlg->m_Filter->setText(cat->filter());
     dlg->m_FilterOut->setText(cat->filterout());
+    dlg->m_Color->setPalette(QPalette(QColor(cat->color())));
   }
   else
   {
-    dlg->m_Filter->setText("Filter");
+    dlg->m_Name->setText("");
+    dlg->m_Filter->setText(".");
     dlg->m_FilterOut->setText("");
-    dlg->m_Color->setCurrentItem(0);
+    dlg->m_Color->setPalette(QPalette(QColor("black")));
   }
 
+  // execute the dialog
   int res = dlg->exec();
 
   // if the dialog wasn't accepted, don't add/change a category
@@ -276,53 +272,93 @@ void CategoryMgr::editCategories(const Category* cat, QWidget* parent)
   QString name = dlg->m_Name->text();
   QString filter = dlg->m_Filter->text();
 
-//printf("Got name: '%s', filter '%s', filterout '%s', color '%s'\n",
-//  name?name:"", color?color:"", filter?filter:"", filterout?filterout:""); 
+  //printf("Got name: '%s', filter '%s', filterout '%s', color '%s'\n",
+  //  name?name:"", color?color:"", filter?filter:"", filterout?filterout:""); 
 
   if (!name.isEmpty() && !filter.isEmpty())
     AddCategory(name, 
 		filter, 
 		dlg->m_FilterOut->text(), 
-		QColor(dlg->m_Color->currentText()));
+		dlg->m_Color->backgroundColor());
   
   delete dlg;
 }
 
 void CategoryMgr::reloadCategories(void)
 {
-   clearCategories();
-
-   QString section = "CategoryMgr";
-   int i = 0;
-   char tempStr[256];
-   for(i = 1; i < 25; i++)
-   {
-      // attempt to pull a button title from the preferences
-      sprintf(tempStr, "Category%d_Name", i);
+  clearCategories();
+  m_changed = false;
+  
+  QString section = "CategoryMgr";
+  int i = 0;
+  QString prefBaseName;
+  QString tempStr;
+  for(i = 1; i <= tMaxNumCategories; i++)
+  {
+    prefBaseName.sprintf("Category%d_", i);
+    
+    // attempt to pull a button title from the preferences
+    tempStr = prefBaseName + "Name";
+    if (pSEQPrefs->isPreference(tempStr, section))
+    {
+      QString name = pSEQPrefs->getPrefString(tempStr, section);
+      QString filter =
+	pSEQPrefs->getPrefString(prefBaseName + "Filter", section);
+      QColor color = pSEQPrefs->getPrefColor(prefBaseName + "Color", 
+					     section, QColor("black"));
+      tempStr = prefBaseName + "FilterOut";
+      QString filterout;
       if (pSEQPrefs->isPreference(tempStr, section))
+	filterout = pSEQPrefs->getPrefString(tempStr, section);
+	
+      //printf("%d: Got '%s' '%s' '%s'\n", i, name, filter, color);
+      if (!name.isEmpty() && !filter.isEmpty())
       {
-        QString name = pSEQPrefs->getPrefString(tempStr, section);
-        sprintf(tempStr, "Category%d_Filter", i);
-        QString filter = pSEQPrefs->getPrefString(tempStr, section);
-        sprintf(tempStr, "Category%d_Color", i);
-        QString color = pSEQPrefs->getPrefString(tempStr, section);
-        sprintf(tempStr, "Category%d_FilterOut", i);
-        QString filterout;
-        if (pSEQPrefs->isPreference(tempStr, section))
-            filterout = pSEQPrefs->getPrefString(tempStr, section);
-
-//printf("%d: Got '%s' '%s' '%s'\n", i, name, filter, color);
-        if (!name.isEmpty() && !filter.isEmpty())
-        {
-	  Category* newcat = new Category(name, filter, filterout, color);
-
-	  m_categories.insert(newcat->name(), newcat);
-        }
+	Category* newcat = new Category(name, filter, filterout, color);
+	
+	m_categories.insert(newcat->name(), newcat);
       }
-   }
-
+    }
+  }
+  
    // signal that the categories have been loaded
    emit loadedCategories();
 
    printf("Categories Reloaded\n");
+}
+
+void CategoryMgr::savePrefs(void)
+{
+  if (!m_changed)
+    return;
+
+  int count = 1;
+  QString section = "CategoryMgr";
+  QString prefBaseName;
+
+  CategoryDictIterator it(m_categories);
+  for (Category* curCategory = it.toFirst(); 
+       curCategory != NULL;
+       curCategory = ++it)
+  {
+    prefBaseName.sprintf("Category%d_", count++);
+    pSEQPrefs->setPrefString(prefBaseName + "Name", section, 
+			     curCategory->name());
+    pSEQPrefs->setPrefString(prefBaseName + "Filter", section,
+			     curCategory->filter());
+    pSEQPrefs->setPrefString(prefBaseName + "FilterOut", section,
+			     curCategory->filterout());
+    pSEQPrefs->setPrefColor(prefBaseName + "Color", section,
+			    curCategory->color());
+  }
+
+  QColor black("black");
+  while (count <= tMaxNumCategories)
+  {
+    prefBaseName.sprintf("Category%d_", count++);
+    pSEQPrefs->setPrefString(prefBaseName + "Name", section, "");
+    pSEQPrefs->setPrefString(prefBaseName + "Filter", section, "");
+    pSEQPrefs->setPrefString(prefBaseName + "FilterOut", section, "");
+    pSEQPrefs->setPrefColor(prefBaseName + "Color", section, black);
+  }
 }

@@ -17,16 +17,18 @@
 #include <qwindowsstyle.h>
 #include <getopt.h>            // for long GNU-style options
 
+#include <qaccel.h>
+
 #include "interface.h"
 #include "main.h"
-#include "preferences.h"      // prefrence file class
+#include "xmlpreferences.h"      // prefrence file class
 #include "conf.h"              // autoconf/configure definitions
 #include "itemdb.h"
 
 /* **********************************
    defines used for option processing
    ********************************** */
-#define OPTION_LIST "i:rf:g::j:::s:aedo:RCp:ncFAKSVPNbtL:xWX:Y:Z:"
+#define OPTION_LIST "i:rf:g::j:::s:aeo:CncFAKSVPNbtL:xWX:Y:Z:"
 
 /* For long options without any short (single letter) equivalent, we'll
    assign single char nonprinting character equivalents, as is common
@@ -56,6 +58,10 @@
 #define   ITEMDB_DATABASES_ENABLED      31
 #define   ITEMDB_DISABLE                3
 #define   STATUS_FONT_SIZE              4
+#define   RESTORE_DECODE_KEY            5
+#define   RESTORE_PLAYER_STATE          6
+#define   RESTORE_SPAWNS                7
+#define   RESTORE_ALL                   8
 
 /* Note that ASCII 32 is a space, best to stop at 31 and pick up again
    at 128 or higher
@@ -75,22 +81,18 @@
 */
 
 static struct option option_list[] = {
-  {"despawn-alert",                no_argument,        NULL,  'd'},
   {"net-interface",                required_argument,  NULL,  'i'},
   {"realtime",                     no_argument,        NULL,  'r'},
   {"filter-file",                  required_argument,  NULL,  'f'},
   {"playback-filename",            optional_argument,  NULL,  'j'},
   {"playback-speed",               required_argument,  NULL,  PLAYBACK_SPEED_OPTION},
   {"record-filename",              optional_argument,  NULL,  'g'},
-  {"spawn-filename",               required_argument,  NULL,  's'},
   {"enlightenment-audio",          no_argument,        NULL,  'a'},
-  {"spawn-regex",                  no_argument,        NULL,  'R'},
   {"filter-case-sensitive",        no_argument,        NULL,  'C'},
-  {"font-size",                    required_argument,  NULL,  'p'},
-  {"status-font-size",             required_argument,  NULL,  STATUS_FONT_SIZE},
   {"use-retarded-coords",          no_argument,        NULL,  'c'},
   {"fast-machine",                 no_argument,        NULL,  'F'},
   {"spawn-alert",                  no_argument,        NULL,  'A'},
+  {"create-unknown-spawns",        no_argument,        NULL,  'K'},
   {"show-unknown-spawns",          no_argument,        NULL,  'K'},
   {"select-on-consider",           no_argument,        NULL,  'S'},
   {"select-on-target",             no_argument,        NULL,  'e'},
@@ -127,12 +129,16 @@ static struct option option_list[] = {
   {"itemdb-raw-data-filename",     required_argument,  NULL, ITEMDB_RAW_FILENAME_OPTION},
   {"itemdb-databases-enabled",     required_argument,  NULL, ITEMDB_DATABASES_ENABLED},
   {"itemdb-disable",               no_argument,        NULL, ITEMDB_DISABLE},
+  {"restore-decode-key",           no_argument,        NULL, RESTORE_DECODE_KEY},
+  {"restore-player-state",         no_argument,        NULL, RESTORE_PLAYER_STATE},
+  {"restore-spawns",               no_argument,        NULL, RESTORE_SPAWNS},
+  {"restore-all",                  no_argument,        NULL, RESTORE_ALL},
   {0,                              0,                  0,     0}
 };
 
 /* Global parameters, so all parts of ShowEQ has access to it */
 struct ShowEQParams *showeq_params;
-PreferenceFile      *pSEQPrefs; 
+XMLPreferences      *pSEQPrefs; 
 class EQItemDB* pItemDB;
 
 int main (int argc, char **argv)
@@ -143,16 +149,20 @@ int main (int argc, char **argv)
    
    bool          bOptionHelp = false;
         
-   struct stat  ss;
-
    /* Print the version number */
    printf ("ShowEQ %s, released under the GPL.\n", VERSION);
+   printf ("All ShowEQ source code is Copyright (C) 2000, 2001, 2002 by the respective ShowEQ Developers\n");
+   printf ("Binary distribution without source code and resale are explictily NOT authorized by ANY party.\n");
+   printf ("If you have paid for this software in any way, shape, or form, the person selling the\n");
+   printf ("software is doing so in violation of the express wishes and intents of the authors of this product.\n\n");
+   printf ("Please see http://seq.sourceforge.net for further information\n\n");
+
+   /* Create application instance */
+   QApplication::setStyle( new QWindowsStyle );
+   QApplication qapp (argc, argv);
 
    /* Initialize the parameters with default values */
-   char *configfile = "showeq.conf";
-   if (stat (LOGDIR "/showeq.conf", &ss) == 0)
-      configfile = LOGDIR "/showeq.conf";
-
+   char *configfile = LOGDIR "/showeq.xml";
 
    // scan command line arguments for a specified config file
    int i = 1;
@@ -166,78 +176,71 @@ int main (int argc, char **argv)
 
    /* NOTE: See preferencefile.cpp for info on how to use prefrences class */
    printf("Using config file '%s'\n", configfile);
-   pSEQPrefs = new PreferenceFile(configfile);
+   pSEQPrefs = new XMLPreferences(LOGDIR "/seqdef.xml", configfile);
 
    showeq_params = new ShowEQParams;
 
    QString section;
 
-   showeq_params->spawnfilter_spawnfile  = LOGDIR "/spawns.conf";
-   showeq_params->spawnfilter_filterfile = LOGDIR "/filters.conf";
-
    /* TODO: Add some sanity checks to the MAC address option.  cpphack */
    section = "Network";
-   showeq_params->device = strdup(pSEQPrefs->getPrefString("Device", section, "eth0"));
-   showeq_params->ip = strdup(pSEQPrefs->getPrefString("IP", section, "127.0.0.1"));
+   showeq_params->device = pSEQPrefs->getPrefString("Device", section, "eth0");
+   showeq_params->ip = strdup(pSEQPrefs->getPrefString("IP", section,
+						       AUTOMATIC_CLIENT_IP));
    showeq_params->mac_address = strdup(pSEQPrefs->getPrefString("MAC", section, "0"));
-   showeq_params->realtime = pSEQPrefs->getPrefBool("RealTimeThread", section,   0);
-   showeq_params->no_bank = pSEQPrefs->getPrefBool("NoBank", section, 0);
-   showeq_params->promisc = pSEQPrefs->getPrefBool("NoPromiscuous", section, 1);
+   showeq_params->realtime = pSEQPrefs->getPrefBool("RealTimeThread", section,   false);
+   showeq_params->promisc = pSEQPrefs->getPrefBool("NoPromiscuous", section, true);
    showeq_params->arqSeqGiveUp = pSEQPrefs->getPrefInt("ArqSeqGiveUp", section, 96);
-
-
-   section = "Interface";
-   /* Allow map depth filtering */
-   showeq_params->retarded_coords  = pSEQPrefs->getPrefBool("RetardedCoords", section, 0);
-   showeq_params->fontsize = pSEQPrefs->getPrefInt("FontSize", section, 8);
-   showeq_params->statusfontsize = pSEQPrefs->getPrefInt("StatusFontSize", section, 8);
-   showeq_params->con_select = pSEQPrefs->getPrefBool("SelectOnCon", section, 0);
-   showeq_params->tar_select = pSEQPrefs->getPrefBool("SelectOnTarget", section, 0);
-   showeq_params->sparr_messages = 0;
-   showeq_params->net_stats = pSEQPrefs->getPrefBool("NetStats", section, 0);
-   showeq_params->systime_spawntime = pSEQPrefs->getPrefBool("SystimeSpawntime", section, 0);
-   showeq_params->pvp = pSEQPrefs->getPrefBool("PvPTeamColoring", section, 0);
-   showeq_params->deitypvp = pSEQPrefs->getPrefBool("DeityPvPTeamColoring", section, 0);
-   showeq_params->keep_selected_visible = pSEQPrefs->getPrefBool("KeepSelected", section, 1);
-
-   showeq_params->spawnfilter_regexp = 0;
-
-   section = "Misc";
-   showeq_params->walkpathrecord = pSEQPrefs->getPrefBool("WalkPathRecording", section, 0);
-   showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 0);
-   showeq_params->logSpawns = pSEQPrefs->getPrefBool("LogSpawns", section, 0);
-   showeq_params->logItems = pSEQPrefs->getPrefBool("LogItems",  section, 0);
-   /* Tells SEQ whether or not to display casting messages (Turn this off if you're on a big raid) */
-   showeq_params->showSpellMsgs = pSEQPrefs->getPrefBool("ShowSpellMessages", section, 1);
-   /* Spawn logging preferences */
-   showeq_params->SpawnLogFilename = strdup(pSEQPrefs->getPrefString("SpawnLogFilename", section, LOGDIR "/spawnlog.txt"));
-   showeq_params->spawnlog_enabled = pSEQPrefs->getPrefBool("SpawnLogEnabled", section,  TRUE);
-/* Decoder override for coping with encryption changes */
+   showeq_params->session_tracking = pSEQPrefs->getPrefBool("SessionTracking", section, 0);
 #if HAVE_LIBEQ
    showeq_params->broken_decode = pSEQPrefs->getPrefBool("BrokenDecode", section, 0);
 
    if (showeq_params->broken_decode)
-      printf("Disabling decoder due to showeq.conf preferences\n");
+      printf("Disabling decoder due to showeq.xml preferences\n");
 #else
    /* Default to broken decoder if libEQ not present */
    showeq_params->broken_decode = 1;
    printf("Disabling decoder due to missing libEQ.a\n");
 #endif
 
-   section = "Map";
-   showeq_params->fast_machine = pSEQPrefs->getPrefBool("FastMachine", section, 0);
-   showeq_params->showUnknownSpawns = pSEQPrefs->getPrefBool("ShowUnknownSpawns", section, 0);
+   section = "Interface";
+   /* Allow map depth filtering */
+   showeq_params->retarded_coords  = pSEQPrefs->getPrefBool("RetardedCoords", section, 0);
+   showeq_params->con_select = pSEQPrefs->getPrefBool("SelectOnCon", section, false);
+   showeq_params->tar_select = pSEQPrefs->getPrefBool("SelectOnTarget", section, false);
+   showeq_params->net_stats = pSEQPrefs->getPrefBool("NetStats", section, false);
+   showeq_params->systime_spawntime = pSEQPrefs->getPrefBool("SystimeSpawntime", section, false);
+   showeq_params->pvp = pSEQPrefs->getPrefBool("PvPTeamColoring", section, false);
+   showeq_params->deitypvp = pSEQPrefs->getPrefBool("DeityPvPTeamColoring", section, false);
+   showeq_params->keep_selected_visible = pSEQPrefs->getPrefBool("KeepSelected", section, true);
+
+   showeq_params->no_bank = pSEQPrefs->getPrefBool("NoBank", section, true);
+
+   section = "Interface_StatusBar";
+   showeq_params->showEQTime = pSEQPrefs->getPrefBool("ShowEQTime",section,false);
+   section = "Misc";
+   showeq_params->fast_machine = pSEQPrefs->getPrefBool("FastMachine", section, true);
+   showeq_params->createUnknownSpawns = pSEQPrefs->getPrefBool("CreateUnknownSpawns", section, false);
+
+   showeq_params->walkpathrecord = pSEQPrefs->getPrefBool("WalkPathRecording", section, false);
+   showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 25);
+   showeq_params->logSpawns = pSEQPrefs->getPrefBool("LogSpawns", section, false);
+   showeq_params->logItems = pSEQPrefs->getPrefBool("LogItems",  section, false);
+   /* Tells SEQ whether or not to display casting messages (Turn this off if you're on a big raid) */
+   showeq_params->showSpellMsgs = pSEQPrefs->getPrefBool("ShowSpellMessages", section, true);
+   /* Spawn logging preferences */
+   showeq_params->SpawnLogFilename = pSEQPrefs->getPrefString("SpawnLogFilename", section, LOGDIR "/spawnlog.txt");
+   showeq_params->spawnlog_enabled = pSEQPrefs->getPrefBool("SpawnLogEnabled", section,  true);
+/* Decoder override for coping with encryption changes */
 
    section = "Filters";
-   showeq_params->filterfile = strdup (pSEQPrefs->getPrefString("FilterFile", section, LOGDIR "/filters.conf"));
-   showeq_params->spawnfilter_audio = pSEQPrefs->getPrefBool("SpawnFilterAudio", section, 0);
+   showeq_params->filterfile = pSEQPrefs->getPrefString("FilterFile", section, LOGDIR "/filters.conf");
+   showeq_params->spawnfilter_audio = pSEQPrefs->getPrefBool("Audio", section, false);
    showeq_params->spawnfilter_loglocates = pSEQPrefs->getPrefBool("LogLocates", section, 0);
    showeq_params->spawnfilter_logcautions = pSEQPrefs->getPrefBool("LogCautions", section, 0);
    showeq_params->spawnfilter_loghunts = pSEQPrefs->getPrefBool("LogHunts", section, 0);
    showeq_params->spawnfilter_logdangers = pSEQPrefs->getPrefBool("LogDangers", section, 0);
-   showeq_params->spawnfilter_case = pSEQPrefs->getPrefBool("SpawnFilterIsCaseSensitive", section, 0);
-   showeq_params->despawnalert = pSEQPrefs->getPrefBool("DeSpawnAlert", section, 0);
-   showeq_params->deathalert = pSEQPrefs->getPrefBool("DeathAlert", section, 0);
+   showeq_params->spawnfilter_case = pSEQPrefs->getPrefBool("IsCaseSensitive", section, 0);
    showeq_params->spawn_alert_plus_plus = pSEQPrefs->getPrefBool("AlertInfo", section, 0);
 
    /* Default Level / Race / Class preferences */
@@ -252,28 +255,31 @@ int main (int argc, char **argv)
 
    /* VPacket (Packet Recording / Playback) */
    section = "VPacket";
-   showeq_params->playbackpackets = pSEQPrefs->getPrefBool("Playback", section,  0);
-   showeq_params->recordpackets = pSEQPrefs->getPrefBool("Record", section, 0);
-   showeq_params->playbackspeed = pSEQPrefs->getPrefBool("PlaybackRate", section, 0);
-   showeq_params->showRealName = pSEQPrefs->getPrefBool("SpawnList_ShowRealName", section, 0);
-  
+   showeq_params->playbackpackets = pSEQPrefs->getPrefBool("Playback", section,  false);
+   showeq_params->recordpackets = pSEQPrefs->getPrefBool("Record", section, false);
+   showeq_params->playbackspeed = pSEQPrefs->getPrefBool("PlaybackRate", section, false);
+
+   section = "SpawnList";
+   showeq_params->showRealName = pSEQPrefs->getPrefBool("ShowRealName", section, false);
 
    /* OpCode monitoring preferences */
    section = "OpCode";
    showeq_params->monitorOpCode_Usage = pSEQPrefs->getPrefBool("OpCodeMonitoring_Enable", section, 0 );   /*  Disabled  */
-   showeq_params->monitorOpCode_List  = strdup(pSEQPrefs->getPrefString("OpCodeMonitoring_List", section, ""));  /*    NONE    */
+   showeq_params->monitorOpCode_List  = pSEQPrefs->getPrefString("OpCodeMonitoring_List", section, "");  /*    NONE    */
 
    /* Packet logging preferences */
    section = "PacketLogging";
    showeq_params->logAllPackets = pSEQPrefs->getPrefBool("LogAllPackets", section, 0);
    showeq_params->logZonePackets = pSEQPrefs->getPrefBool("LogZonePackets", section, 0);
    showeq_params->logUnknownZonePackets  = pSEQPrefs->getPrefBool("LogUnknownZonePackets", section,  0);
-   showeq_params->GlobalLogFilename = strdup(pSEQPrefs->getPrefString("GlobalLogFilename", section, "/usr/local/share/showeq/global.log"));
-   showeq_params->ZoneLogFilename = strdup(pSEQPrefs->getPrefString("ZoneLogFilename", section, "/usr/local/share/showeq/zone.log"));
-   showeq_params->UnknownZoneLogFilename = strdup(pSEQPrefs->getPrefString("UnknownZoneLogFilename", section, "/usr/local/share/showeq/unknownzone.log"));
+   showeq_params->GlobalLogFilename = pSEQPrefs->getPrefString("GlobalLogFilename", section, LOGDIR "/global.log") ;
+   showeq_params->ZoneLogFilename = pSEQPrefs->getPrefString("ZoneLogFilename", section, LOGDIR "/zone.log");
+   showeq_params->UnknownZoneLogFilename = pSEQPrefs->getPrefString("UnknownZoneLogFilename", section, LOGDIR "/unknownzone.log") ;
    /* Different files for different kinds of encrypted data */
    showeq_params->logEncrypted = pSEQPrefs->getPrefBool("LogEncrypted", section, 0);
-   showeq_params->EncryptedLogFilenameBase = strdup(pSEQPrefs->getPrefString("EncryptedLogFilenameBase", section, "/usr/local/share/showeq/encrypted"));
+   showeq_params->EncryptedLogFilenameBase = pSEQPrefs->getPrefString("EncryptedLogFilenameBase", section, LOGDIR "/encrypted") ;
+   showeq_params->PktLoggerMask = pSEQPrefs->getPrefString("PktLoggerMask", section, "");
+   showeq_params->PktLoggerFilename = pSEQPrefs->getPrefString("PktLoggerFilename", section, LOGDIR "/packet.log") ;
 
    // item database parameters
    section = "ItemDB";
@@ -284,11 +290,18 @@ int main (int argc, char **argv)
    showeq_params->ItemDBTypes = pSEQPrefs->getPrefInt("DatabasesEnabled", section, (EQItemDB::LORE_DB | EQItemDB::NAME_DB | EQItemDB::DATA_DB));
    showeq_params->ItemDBEnabled = pSEQPrefs->getPrefBool("Enabled", section, 1);
 
-   /* Read in Keymaps */
-   section = "KeyMap";
-   showeq_params->keymap[0] = strdup(pSEQPrefs->getPrefString("ZoomIn", section, "+"));
-   showeq_params->keymap[1] = strdup(pSEQPrefs->getPrefString("ZoomOut", section, "-"));
-
+   section = "SaveState";
+   showeq_params->saveDecodeKey = 
+     pSEQPrefs->getPrefBool("DecodeKey", section, 1);
+   showeq_params->savePlayerState = 
+     pSEQPrefs->getPrefBool("PlayerState", section, 1);
+   showeq_params->saveSpawns = pSEQPrefs->getPrefBool("Spawns", section, false);
+   showeq_params->saveSpawnsFrequency = 
+     pSEQPrefs->getPrefInt("SpawnsFrequency", section, (120 * 1000));
+   showeq_params->restoreDecodeKey = false;
+   showeq_params->restorePlayerState = false;
+   showeq_params->restoreSpawns = false;
+   showeq_params->saveRestoreBaseFilename = pSEQPrefs->getPrefString("BaseFilename", section, LOGDIR "/last");
 
    /* Parse the commandline for commandline parameters */
    while ((opt = getopt_long( argc,
@@ -302,12 +315,6 @@ int main (int argc, char **argv)
       switch (opt)
       {
          /* Set the request to use a despawn list based off the spawn alert list. */
-         case 'd':
-         {
-            showeq_params->despawnalert = 1;
-            break;
-         }
-
 
          /* Set the interface */
          case 'i':
@@ -329,7 +336,6 @@ int main (int argc, char **argv)
          case 'f':
          {
             showeq_params->filterfile             = optarg;
-            showeq_params->spawnfilter_filterfile = optarg;
             
             break;
          }
@@ -339,7 +345,7 @@ int main (int argc, char **argv)
          case 'j':
          {            
             if (optarg)
-               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, FALSE);
+               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, XMLPreferences::Runtime);
 
             showeq_params->playbackpackets = 1;
             showeq_params->recordpackets   = 0;
@@ -351,19 +357,11 @@ int main (int argc, char **argv)
          case 'g':
          {
             if (optarg)
-               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, FALSE);
+               pSEQPrefs->setPrefString("Filename", "VPacket", optarg, XMLPreferences::Runtime);
 
             showeq_params->recordpackets   = 1;
             showeq_params->playbackpackets = 0;
             
-            break;
-         }
-
-
-         /* Set the spawn alert file */
-         case 's':
-         {
-            showeq_params->spawnfilter_spawnfile = optarg;
             break;
          }
 
@@ -381,33 +379,10 @@ int main (int argc, char **argv)
          }
 
 
-         /* Use regular expressions for filter */
-         case 'R':
-         {
-            showeq_params->spawnfilter_regexp = 1;
-            break;
-         }
-
-
          /* Make filter case sensitive */
          case 'C':
          {
             showeq_params->spawnfilter_case = 1;
-            break;
-         }
-
-
-         /* Set point size of skills and spawn font */
-         case 'p':
-         {
-            showeq_params->fontsize = atoi(optarg);
-            break;
-         }
-
-         /* Set point size of status bar and top text (RegEx / Cursor position) */
-         case STATUS_FONT_SIZE:
-         {
-            showeq_params->statusfontsize = atoi(optarg);
             break;
          }
 
@@ -437,7 +412,7 @@ int main (int argc, char **argv)
          /* Show unknown spawns */
          case 'K':
          {
-            showeq_params->showUnknownSpawns = 1;
+            showeq_params->createUnknownSpawns = 1;
             break;
          }
 
@@ -594,7 +569,7 @@ int main (int argc, char **argv)
          /* IP address to track */
          case IPADDR_OPTION:
          {
-            showeq_params->ip = optarg;
+            showeq_params->ip = strdup(optarg);
             break;
          }
 
@@ -741,6 +716,30 @@ int main (int argc, char **argv)
 	   break;
 	 }
 
+         case RESTORE_DECODE_KEY:
+	 {
+	   showeq_params->restoreDecodeKey = true;
+	   break;
+	 }
+         case RESTORE_PLAYER_STATE:
+	 {
+	   showeq_params->restorePlayerState = true;
+	   break;
+	 }
+         case RESTORE_SPAWNS:
+	 {
+	   showeq_params->restoreSpawns = true;
+	   break;
+	 }
+         case RESTORE_ALL:
+	 {
+	   showeq_params->restoreDecodeKey = true;
+	   showeq_params->restorePlayerState = true;
+	   showeq_params->restoreSpawns = true;
+	   break;
+	 }
+
+
          /* Spit out the help */
          case 'h': /* Fall through */
          default:
@@ -751,48 +750,26 @@ int main (int argc, char **argv)
       }
    }
 
-
-#ifndef DEBUG
-   /*
-      This code blocks the use of QT command line parameters.  The useful ones (setting of
-      styles, etc) are taken care of via UI, but there are QT debugging parameters we can
-      use, so I've chosen to leave it in for release builds.
-   */
-   if (optind < (argc - 1))
-   {
-      /* If there were arguments we did not understand, print out the help */
-      bOptionHelp = true;
-   }
-#endif /* DEBUG */
-
    if (bOptionHelp)
    {
       /* The default help text */
       printf ("Usage:\n  %s [<options>] [<client IP address>]\n\n", argv[0]);
       
       printf ("  -h, --help                            Shows this help\n");
-      printf ("  -o CONFIGFILE                         Alternate showeq.conf pathname\n");
+      printf ("  -o CONFIGFILE                         Alternate showeq.xml pathname\n");
       printf ("      --version                         Prints ShowEQ version number\n");
       printf ("  -i, --net-interface=DEVICE            Specify which network device to bind to\n");
       printf ("  -r, --realtime                        Set the network thread realtime\n");
       printf ("  -f, --filter-file=FILENAME            Sets spawn filter file\n");
       printf ("  -s, --spawn-file=FILENAME             Sets spawn alert file\n");
-      printf ("  -d, --despawn-alert                   Enables de-spawn alert using spawn\n");
-      printf ("                                        alerts file\n");
-      printf ("  -R, --spawn-regex                     Spawn alert and filter uses regexp\n");
-      printf ("                                        as opposed to glob\n");
       printf ("  -C, --filter-case-sensitive           Spawn alert and filter is case sensitive\n");
       printf ("  -a, --enlightenment-audio             Use ESD to play alert during spawn alert\n");
-      printf ("  -p, --font-size=SIZE                  Sets the point size of the skill and\n");
-      printf ("                                        spawn table fonts\n");
-      printf ("      --status-font-size=SIZE           Set the point size of the status bar\n");
-      printf ("                                        fonts\n");
       printf ("  -c, --use-retarded-coords             Use \"retarded\" YXZ coordinates\n");
-      printf ("  -F, --fast-machine                    Fast machine - framerate based vs. \n");
-      printf ("                                        packet based updates\n");
+      printf ("  -F, --fast-machine                    Fast machine - perform more accurate vs. \n");
+      printf ("                                        less accurate calculations.\n");
       printf ("  -A, --spawn-alert                     Use name/race/class/light/equipment for \n");
       printf ("                                        spawn matching\n");
-      printf ("  -K, --show-unknown-spawns             Display unknown spawns\n");
+      printf ("  -K, --create-unknown-spawns           create unknown spawns\n");
       printf ("  -S, --select-on-consider              Select the spawn considered\n");
       printf ("  -e, --select-on-target                Select the spawn targetted\n");
       printf ("  -V, --no-keep-selected-visible        Don't force the listbox to keep selected\n");
@@ -848,6 +825,18 @@ int main (int argc, char **argv)
       printf ("\n\t                                    SHM 10, NEC 11, WIZ 12");
       printf ("\n\t                                    MAG 13, ENC 14\n");
       
+      printf ("                                                                   \n");
+      printf ("                                                                   \n");
+      printf (" The following four options should be used with extreme care!         \n");
+      printf ("      --restore-decode-key              Restores the decode key from\n");
+      printf ("                                        a previous session    \n");
+      printf ("      --restore-player-state            Restores the player state\n");
+      printf ("                                        from a previous session    \n");
+      printf ("      --restore-spawns                  Restores the spawns\n");
+      printf ("                                        from a previous session    \n");
+      printf ("      --restore-all                     Restores decode key, \n");
+      printf ("                                        player state, and spawns   \n");
+      printf ("                                        from a previous session    \n");
       exit (0);
    }
 
@@ -857,25 +846,14 @@ int main (int argc, char **argv)
    */
 
    /* NewSpawnCode */
-   showeq_params->NewSpawnCodeFilename = (char *) malloc( strlen(showeq_params->EncryptedLogFilenameBase)
-                                                          +      strlen("NewSpawnCode.log")       +     2
-                                                        );
-   sprintf(showeq_params->NewSpawnCodeFilename, "%s_%s", showeq_params->EncryptedLogFilenameBase, "NewSpawnCode.log");
+   showeq_params->NewSpawnCodeFilename = showeq_params->EncryptedLogFilenameBase + QString("_NewSpawnCode.log");
    
    
    /* ZoneSpawnsCode */
-   showeq_params->ZoneSpawnsCodeFilename = (char *) malloc( strlen(showeq_params->EncryptedLogFilenameBase)
-                                                            +    strlen("ZoneSpawnsCode.log")     +      2
-                                                          );
-   sprintf(showeq_params->ZoneSpawnsCodeFilename, "%s_%s", showeq_params->EncryptedLogFilenameBase, "ZoneSpawnsCode.log");
-   
+   showeq_params->ZoneSpawnsCodeFilename = showeq_params->EncryptedLogFilenameBase + QString("_ZoneSpawnsCode.log");
   
    /* CharProfileCode */
-   showeq_params->CharProfileCodeFilename = (char *) malloc( strlen(showeq_params->EncryptedLogFilenameBase)
-                                                             +   strlen("CharProfileCode.log")    +       2
-                                                           );
-   sprintf(showeq_params->CharProfileCodeFilename, "%s_%s", showeq_params->EncryptedLogFilenameBase, "CharProfileCode.log");
-   
+   showeq_params->CharProfileCodeFilename = showeq_params->EncryptedLogFilenameBase + QString ("CharProfileCode.log");
 
    if (showeq_params->ItemDBEnabled)
    {
@@ -898,9 +876,12 @@ int main (int argc, char **argv)
 
    if (showeq_params->logEncrypted)
    {
-      printf("Logging CharProfileCode packets to: %s\n",showeq_params->CharProfileCodeFilename);
-      printf("Logging ZoneSpawnsCode packets to: %s\n",showeq_params->ZoneSpawnsCodeFilename);
-      printf("Logging NewSpawnCode packets to: %s\n",showeq_params->NewSpawnCodeFilename);
+      printf("Logging CharProfileCode packets to: %s\n",
+	     (const char*)showeq_params->CharProfileCodeFilename);
+      printf("Logging ZoneSpawnsCode packets to: %s\n",
+	     (const char*)showeq_params->ZoneSpawnsCodeFilename);
+      printf("Logging NewSpawnCode packets to: %s\n",
+	     (const char*)showeq_params->NewSpawnCodeFilename);
    }
 
    if (showeq_params->broken_decode)   
@@ -915,48 +896,38 @@ int main (int argc, char **argv)
    /* Verify OpCode Monitor settings... */
    if (showeq_params->monitorOpCode_Usage)
    {
-      if (!((QString)showeq_params->monitorOpCode_List).isEmpty())
+     if (!(showeq_params->monitorOpCode_List.isEmpty()))
          printf( "\nOpCode monitoring ENABLED...\n"
                  "Using list:\t%s\n\n",
                  
-                 showeq_params->monitorOpCode_List
+                 (const char*)showeq_params->monitorOpCode_List
                );
 
       else
       {
          showeq_params->monitorOpCode_Usage = false;
          printf( "\nOpCode monitoring COULD NOT BE ENABLED!\n"
-                 ">> Please check your ShowEQ.conf file for a list entry under [OpCodeMonitoring]\n\n"
+                 ">> Please check your ShowEQ.xml file for a list entry under [OpCodeMonitoring]\n\n"
                );
       }
    }
 
-   /* Create application instance */
-   QApplication::setStyle( new QWindowsStyle );
-   QApplication qapp (argc, argv);
-
-   if (optind != argc)
-      showeq_params->ip = argv[optind];
-
    /* The main interface widget */
    EQInterface intf (0, "interface");
    qapp.setMainWidget (&intf);
-
-   /* Return */
+   
+   /* Start the main loop */
    int ret = qapp.exec ();
 
    // Shutdown the Item DB before any other cleanup
    if (pItemDB != NULL)
      pItemDB->Shutdown();
 
-   pSEQPrefs->save();
-   //   intf.savePrefs();
-
    // delete the ItemDB before application exit
    delete pItemDB;
 
    // Causes segv on exit all of a sudden.  why?  no changes to cprefs classes. -- cybertech
-//   delete pSEQPrefs;
+   delete pSEQPrefs;
 
    return ret;
 }

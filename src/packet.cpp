@@ -30,8 +30,7 @@
 #include "util.h"
 #include "main.h"
 #include "vpacket.h"
-#include "itemdb.h"
-
+#include "logger.h"
 
 //----------------------------------------------------------------------
 // Macros
@@ -47,7 +46,7 @@
 //#define PACKET_CACHE_DIAG 3 // verbosity level (0-n)
 
 // define this to be pedantic about what packets are acceptable (no CRC errors)
-//#define PACKET_PEDANTIC 2
+#define PACKET_PEDANTIC 2
 
 // diagnose structure size changes
 #define PACKET_PAYLOAD_SIZE_DIAG 1
@@ -68,9 +67,11 @@ const int16_t arqSeqWrapCutoff = 1024;
 // an arq sequenced packet, and just move on...
 const int16_t arqSeqGiveUp = 256;
 
-// Increment this when changing spawnlogout format so parsers know to expect
-//   something different. cpphack 
-const int spawnlog_version = 2;
+
+const in_port_t WorldServerGeneralPort = 9000;
+const in_port_t WorldServerChatPort = 9876;
+const in_port_t LoginServerMinPort = 15000;
+const in_port_t ChatServerPort = 5998;
 
 //----------------------------------------------------------------------
 // static variables
@@ -80,7 +81,6 @@ static size_t maxServerCacheCount = 0;
 
 //----------------------------------------------------------------------
 // global variables
-FILE* spawnlogout;
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -96,13 +96,14 @@ void searchForNum(unsigned char *data, int len, char *Name, char value){
 
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
 bool validatePayloadSize(int len, int size, uint16_t code,
+			 const char* clarifier,
 			 const char* codeName, const char* structName)
 {
   // verify size
   if (len != size)
   {
-    fprintf(stderr, "WARNING: %s (%04x) (dataLen:%d != sizeof(%s):%d)!\n",
-	   codeName, code, len, structName, size);
+    fprintf(stderr, "WARNING: %s%s (%04x) (dataLen:%d != sizeof(%s):%d)!\n",
+	    clarifier, codeName, code, len, structName, size);
     return false;
   }
   return true;
@@ -110,11 +111,11 @@ bool validatePayloadSize(int len, int size, uint16_t code,
 
 #define ValidatePayload(codeName, structName) \
   validatePayloadSize(len, sizeof( structName ), codeName, \
-		      #codeName , #structName )
+		      "", #codeName , #structName )
 
 #define ValidateDecodedPayload(codeName, structName) \
   validatePayloadSize(decodedDataLen, sizeof( structName ), codeName, \
-		      #codeName , #structName )
+		      "Decoded ", #codeName , #structName )
 #else
 #define ValidatePayload(code, struct) true
 #endif
@@ -308,7 +309,7 @@ QString EQPacketFormat::headerFlags(const QString& prefix,
 // EQUDPIPPacketFormat class methods
 EQUDPIPPacketFormat::EQUDPIPPacketFormat(uint8_t* data, 
 					 uint32_t length, 
-					 bool copy = false)
+					 bool copy)
 {
   uint8_t* ipdata;
   if (copy)
@@ -330,7 +331,7 @@ EQUDPIPPacketFormat::EQUDPIPPacketFormat(uint8_t* data,
 }
 
 EQUDPIPPacketFormat::EQUDPIPPacketFormat(EQUDPIPPacketFormat& packet,
-					 bool copy = false)
+					 bool copy)
 {
   // note whether or not this object ownw the memory
   m_ownCopy = copy;
@@ -431,77 +432,77 @@ QString EQUDPIPPacketFormat::headerFlags(bool brief) const
 // EQPacket class methods
 
 /* EQPacket Class - Sets up packet capturing */
-EQPacket::EQPacket (EQPlayer* pplayer, QObject * parent, const char *name):
+EQPacket::EQPacket (QObject * parent, const char *name):
 QObject (parent, name)
 {
    struct hostent *he;
    struct in_addr  ia;
 
-   m_player = pplayer;
-   m_parent = parent;
-
-   if (!showeq_params->ip && !showeq_params->mac_address)
+   if (showeq_params->ip.isEmpty() && showeq_params->mac_address.isEmpty())
    {
       printf ("No address specified\n");
       exit(0);
    }
 
-   if (showeq_params->spawnlog_enabled)
+   if (!showeq_params->ip.isEmpty())
    {
-     /* Append to any existing log */
-
-     if ((spawnlogout = fopen(showeq_params->SpawnLogFilename,"a")) == NULL)
-     {
-        printf("Error opening %s: %s\n (spawn logging disabled)",
-               showeq_params->SpawnLogFilename, strerror(errno));
-        showeq_params->spawnlog_enabled = false;
-     }
-   }
-
-   if (showeq_params->ip)
-   {
-      /* Substitute "special" IP which is interpreted in pcap.c
+      /* Substitute "special" IP which is interpreted 
          to set up a different filter for picking up new sessions */
 
-      if (strcasecmp(showeq_params->ip, "auto") == 0)
-          inet_aton ("127.0.0.0", &ia);
-
-      else if (inet_aton (showeq_params->ip, &ia) == 0)
-      {
-         he = gethostbyname(showeq_params->ip);
-         if (!he)
-         {
-            printf ("Invalid address; %s\n", showeq_params->ip);
-            exit (0);
-         }
-         memcpy (&ia, he->h_addr_list[0], he->h_length);
-      }
-      m_client_addr = ia.s_addr;
-      showeq_params->ip = strdup(inet_ntoa(ia));
+     if (showeq_params->ip == "auto")
+	inet_aton (AUTOMATIC_CLIENT_IP, &ia);
+     else if (inet_aton (showeq_params->ip, &ia) == 0)
+     {
+       he = gethostbyname(showeq_params->ip);
+       if (!he)
+       {
+	 printf ("Invalid address; %s\n", (const char*)showeq_params->ip);
+	 exit (0);
+       }
+       memcpy (&ia, he->h_addr_list[0], he->h_length);
+     }
+     m_client_addr = ia.s_addr;
+     showeq_params->ip = inet_ntoa(ia);
+     
+     if (showeq_params->ip ==  AUTOMATIC_CLIENT_IP)
+     {
+       m_detectingClient = true;
+       printf("Listening for first client seen.\n");
+     }
+     else
+     {
+       m_detectingClient = false;
+       printf("Listening for client: %s\n",
+	      (const char*)showeq_params->ip);
+     }
    }
 
    if (!showeq_params->playbackpackets)
    {
       // create the pcap object and initialize, either with MAC or IP
       m_packetCapture = new PacketCaptureThread();
-      if (strlen(showeq_params->mac_address) == 17)
-         m_packetCapture->start(showeq_params->device, showeq_params->mac_address, showeq_params->realtime, MAC_ADDRESS_TYPE );
+      if (showeq_params->mac_address.length() == 17)
+         m_packetCapture->start(showeq_params->device, 
+				showeq_params->mac_address, 
+				showeq_params->realtime, MAC_ADDRESS_TYPE );
       else
-         m_packetCapture->start(showeq_params->device, showeq_params->ip, showeq_params->realtime, IP_ADDRESS_TYPE );
+         m_packetCapture->start(showeq_params->device, showeq_params->ip, 
+				showeq_params->realtime, IP_ADDRESS_TYPE );
    }
 
-#if HAVE_LIBEQ
    // Create the decoder object
    m_decode = new EQDecode (this, "decode");
-#endif
+   
+   connect(m_decode, SIGNAL(keyChanged(void)),
+	   this, SIGNAL(keyChanged(void)));
 
    m_busy_decoding     = false;
    m_serverArqSeqFound = false;
    m_zoning            = false; //start in non zoning state
 
    m_serverArqSeqExp  = 0;
-   m_serverAddr       = 0;
    m_serverPort       = 0;
+   m_clientPort       = 0;
 
    /* Initialize the time of day structure */
    memset( &m_eqTime, 0x00, sizeof(struct eqTimeOfDay) );
@@ -561,7 +562,7 @@ QObject (parent, name)
    else
        m_serverArqSeqGiveUp = 32;
 
-   m_nPacket = 0;
+   m_packetCount = 0;
 
 #if HAVE_LIBEQ
    if (showeq_params->broken_decode)
@@ -608,9 +609,9 @@ void EQPacket::InitializeOpCodeMonitor (void)
 
     int            iCommaPos      = 0;
     int            iColonPos      = 0;
-    unsigned short usIterationID  = 0;
+    uint8_t        uiIterationID  = 0;
 
-    for (unsigned int uiIndex = 0; uiIndex < OPCODE_SLOTS && !qsMonitoredOpCodes.isEmpty(); uiIndex ++)
+    for (uint8_t uiIndex = 0; uiIndex < OPCODE_SLOTS && !qsMonitoredOpCodes.isEmpty(); uiIndex ++)
     {
       /* Initialize the variables with their default values */
       MonitoredOpCodeList      [uiIndex] [0] = 0; /* OpCode number (16-bit HEX) */
@@ -627,10 +628,10 @@ void EQPacket::InitializeOpCodeMonitor (void)
       qsMonitoredOpCodes.remove (0, iCommaPos + 1);
 
 
-      usIterationID = 0;
+      uiIterationID = 0;
 
 
-      unsigned short usColonCount = qsCommaBuffer.contains(":");
+      uint8_t uiColonCount = qsCommaBuffer.contains(":");
       iColonPos = qsCommaBuffer.find (":");
 
       if (iColonPos == -1)
@@ -639,18 +640,18 @@ void EQPacket::InitializeOpCodeMonitor (void)
       else
         qsColonBuffer = qsCommaBuffer.left (iColonPos);
 
-      while (usIterationID <= usColonCount)
+      while (uiIterationID <= uiColonCount)
       {
-        if (usIterationID == 0)
+        if (uiIterationID == 0)
           MonitoredOpCodeList [uiIndex] [0] = qsColonBuffer.toUInt (NULL, 16);
 
-        else if (usIterationID == 1)
+        else if (uiIterationID == 1)
           MonitoredOpCodeAliasList [uiIndex] = qsColonBuffer;
 
-        else if (usIterationID == 2)
+        else if (uiIterationID == 2)
           MonitoredOpCodeList [uiIndex] [1] = qsColonBuffer.toUInt (NULL, 10);
 
-        else if (usIterationID == 3)
+        else if (uiIterationID == 3)
           MonitoredOpCodeList [uiIndex] [2] = qsColonBuffer.toUInt (NULL, 10);
 
         qsCommaBuffer.remove (0, iColonPos + 1);
@@ -663,7 +664,7 @@ void EQPacket::InitializeOpCodeMonitor (void)
         else
             qsColonBuffer = qsCommaBuffer.left (iColonPos);
 
-        usIterationID ++;
+        uiIterationID ++;
       }
     }
     m_bOpCodeMonitorInitialized = true;
@@ -723,17 +724,10 @@ void EQPacket::processPackets (void)
 
   unsigned char buffer[1500]; 
   short size;
-  struct ether_header *ep;
 
   /* fetch them from pcap */
   while ((size = m_packetCapture->getPacket(buffer)))
   {
-    /* Get pointer to MAC layer header */
-    ep = (struct ether_header *) buffer;
-    /* If its not an IP packet, discard the packet */
-    //if (ntohs (ep->ether_type) != ETHERTYPE_IP)
-    //   continue;
-    
     /* Now.. we know the rest is an IP udp packet concerning the
      * host in question, because pcap takes care of that.
      */
@@ -847,13 +841,13 @@ void EQPacket::logRawData ( const char   *filename,
 }
 
 /* Logs packet data in a human-readable format */
-bool EQPacket::logData ( const char*    filename,
+bool EQPacket::logData ( const QString& filename,
 			 uint32_t       len,
 			 const uint8_t* data,
-			 in_addr_t      saddr    = 0,
-			 in_addr_t      daddr    = 0,
-			 in_port_t      sport    = 0,
-			 in_port_t      dport    = 0
+			 in_addr_t      saddr,
+			 in_addr_t      daddr,
+			 in_port_t      sport,
+			 in_port_t      dport
 			 )
 {
 #ifdef DEBUG_PACKET
@@ -863,11 +857,12 @@ bool EQPacket::logData ( const char*    filename,
    FILE *lh;
 
    //printf("FilePath: %s\n", fname);
-   lh = fopen (filename, "a");
+   lh = fopen ((const char*)filename, "a");
 
    if (lh == NULL)
    {
-      fprintf(stderr, "\aUnable to open file: [%s]\n", filename);
+      fprintf(stderr, "\aUnable to open file: [%s]\n", 
+	      (const char*)filename);
       return false;
    }
 
@@ -900,7 +895,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 
   EQUDPIPPacketFormat packet(buffer, size, false);
 
-  emit numPacket(++m_nPacket);
+  emit numPacket(++m_packetCount);
   
   if (showeq_params->logAllPackets)
   {
@@ -916,17 +911,37 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
     }
   }
 
-  /* Chat Server Packet, Discard for now */
-  if ((packet.getDestPort() == 5999) || (packet.getSourcePort() == 5999))
+  /* Chat and Login Server Packets, Discard for now */
+  if ((packet.getDestPort() == ChatServerPort) ||
+      (packet.getSourcePort() == ChatServerPort))
     return;
-
-   /* Client -> World Server Packet, Discard for now */
-  if (packet.getDestPort() == 9000)
+  if ((packet.getDestPort() >= LoginServerMinPort) || 
+      (packet.getSourcePort() >= LoginServerMinPort))
     return;
 
   /* discard pure ack/req packets and non valid flags*/
   if (packet.flagsHi() < 0x08 || packet.flagsHi() > 0x46 || size < 10)
+  {
+#if 0 // ZBTEMP: World Chat server experiments
+    //if ((packet.getSourcePort() == WorldServerChatPort) ||
+    //	(packet.getDestPort() == WorldServerChatPort))
+    {
+      printf("discarding packet %s:%d ==>%s:%d flagsHi=%d size=%d\n",
+	     (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
+	     (const char*)packet.getIPv4DestA(), packet.getDestPort(),
+	     packet.flagsHi(), size);
+      printf("%s\n", (const char*)packet.headerFlags(false));
+      uint32_t crc = packet.calcCRC32();
+      if (crc != packet.crc32())
+      printf("\tCRC: Warning Packet seq = %d CRC (%08x) != calculated CRC (%08x)!\n",
+	     packet.seq(), packet.crc32(), crc);
+      else
+	printf("\tCRC: Valid CRC seq=%d CRC(%08x) == calculated CRC (%08x)!\n",
+	       packet.seq(), packet.crc32(), crc);
+    }
+#endif
     return;    
+  }
 
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
   printf("%s\n", (const char*)packet.headerFlags((PACKET_PROCESS_DIAG < 3)));
@@ -952,18 +967,108 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 #endif
 
   /* World Server  -> Client Packet */
-  if (packet.getSourcePort() == 9000)
+  if (packet.getSourcePort() == WorldServerGeneralPort)
   {
     /* unless we really start paying attention to World Servers, we should 
        be able to safely ignore sequencing and arq */
 
-    dispatchWorldData (size, buffer, DIR_SERVER);
+    if (m_detectingClient)
+    {
+      showeq_params->ip = packet.getIPv4DestA();
+      m_client_addr = packet.getIPv4DestN();
+      m_detectingClient = false;
+      emit clientChanged(m_client_addr);
+      printf("Client Detected: %s\n", 
+	     (const char*)showeq_params->ip);
+    }
+
+    dispatchWorldData (packet.payloadLength(), packet.payload(), DIR_SERVER);
+    return;
+  }
+  else if (packet.getDestPort() == WorldServerGeneralPort)
+  {
+    /* unless we really start paying attention to World Servers, we should 
+       be able to safely ignore sequencing and arq */
+    if (m_detectingClient)
+    {
+      showeq_params->ip = packet.getIPv4SourceA();
+      m_client_addr = packet.getIPv4SourceN();
+      m_detectingClient = false;
+      emit clientChanged(m_client_addr);
+      printf("Client Detected: %s\n", 
+	     (const char*)showeq_params->ip);
+    }
+
+    dispatchWorldData (packet.payloadLength(), packet.payload(), DIR_CLIENT);
+    return;
+  }
+  else if (packet.getSourcePort() == WorldServerChatPort)
+  {
+    dispatchWorldChatData(packet.payloadLength(), packet.payload(), DIR_SERVER);
+
+#if 0 // ZBTEMP
+    logData ("/tmp/WorldChatData.log", 
+	     packet.payloadLength(), 
+	     (const uint8_t*)packet.payload(), 
+	     packet.getIPv4SourceN(), packet.getIPv4DestN(), 
+	     packet.getSourcePort(), packet.getDestPort());
+#endif
+    return;
+  }
+  else if (packet.getDestPort() == WorldServerChatPort)
+  {
+    dispatchWorldChatData(packet.payloadLength(), packet.payload(), DIR_CLIENT);
+
+#if 0 // ZBTEMP
+    logData ("/tmp/WorldChatData.log", 
+	     packet.payloadLength(), 
+	     (const uint8_t*)packet.payload(), 
+	     packet.getIPv4SourceN(), packet.getIPv4DestN(), 
+	     packet.getSourcePort(), packet.getDestPort());
+#endif
     return;
   }
 
   // packet from the client
   if (packet.getIPv4SourceN() == m_client_addr)
   {
+    if ( packet.isSEQStart() && (m_session_tracking_enabled == 1))
+    {
+        m_session_tracking_enabled = 2;
+
+	m_clientPort = packet.getSourcePort();
+	
+	if (!showeq_params->playbackpackets)
+	{
+	  if (showeq_params->mac_address.length() == 17)
+          {
+	    m_packetCapture->setFilter(showeq_params->device, 
+				       showeq_params->mac_address,
+				       showeq_params->realtime, 
+				       MAC_ADDRESS_TYPE, m_serverPort, 
+				       m_clientPort);
+	    printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
+		    (const char*)showeq_params->mac_address, 
+		    m_clientPort, m_serverPort);
+	  }
+	  else
+	  {
+	    m_packetCapture->setFilter(showeq_params->device, 
+				       showeq_params->ip,
+				       showeq_params->realtime, 
+				       IP_ADDRESS_TYPE, m_serverPort, 
+				       m_clientPort);
+	    printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
+		    (const char*)showeq_params->ip, 
+		    m_clientPort, m_serverPort);
+	  }
+	}
+
+	// notify that the client port has been latched
+	emit sessionTrackingChanged(m_session_tracking_enabled);
+	emit clientPortLatched(m_clientPort);
+    }
+    
     // only dispatch packets with ASQ that aren't fragmented
     if (packet.isASQ() && !packet.isFragment())
     {
@@ -971,12 +1076,25 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 		       packet.payload(), DIR_CLIENT);
       return;
     }
+#if 0 // ZBTEMP: Floyd, you need packet caching and ordering to handle fragments
+    else
+	  dispatchZoneSplitData (packet, DIR_CLIENT);
+#endif
     return;
   }
 
   // packet destined for client
   else if (packet.getIPv4DestN() == m_client_addr)
   {
+    if (packet.isClosingHi() && packet.isClosingLo())
+    {
+        m_serverArqSeqFound = false;
+	if(m_session_tracking_enabled)
+	{
+	  m_session_tracking_enabled = 1;
+	  emit sessionTrackingChanged(m_session_tracking_enabled);
+	}
+    }
     // process packets that don't have an arq sequence
     if (!packet.isARQ())
     {
@@ -1033,7 +1151,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 	  dispatchZoneData (packet.payloadLength(),
 			    packet.payload(), DIR_SERVER);
 	else
-	  dispatchZoneSplitData (packet);
+	  dispatchZoneSplitData (packet, DIR_SERVER);
       }
       // it's a packet from the future, add it to the cache
       else if ((serverArqSeq > m_serverArqSeqExp) || 
@@ -1180,7 +1298,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 		   pf->arq(), pf->flagsHi(), m_serverCache.size());
 #endif
 
-	    dispatchZoneSplitData(*pf);
+	    dispatchZoneSplitData(*pf, DIR_SERVER);
 	  }
 
 	  eraseIt = it;
@@ -1228,11 +1346,12 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 }
 
 /* Combines data from split packets */
-void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf)
+void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf, uint8_t dir)
 {
 #ifdef DEBUG_PACKET
    debug ("dispatchZoneSplitData()");
 #endif /* DEBUG_PACKET */
+   
    if (pf.isASQ())
    {
       /* Clear data */
@@ -1240,7 +1359,7 @@ void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf)
    }
 
    if ((m_serverDataSize + pf.payloadLength()) > sizeof(m_serverData))
-     printf("WARNING: ServerDataSize(%d) > sizeof(serverData)(%d)\n",
+     printf("\a\aWARNING: ServerDataSize(%d) > sizeof(serverData)(%d)\a\a\n",
 	    (m_serverDataSize + pf.payloadLength()), sizeof(m_serverData));
 
    // Add data
@@ -1256,1396 +1375,1122 @@ void EQPacket::dispatchZoneSplitData (EQPacketFormat& pf)
       printf("SEQ: seq complete, dispatching (opcode=%04x)\n", 
 	     eqntohuint16(m_serverData));
 #endif
-      dispatchZoneData (m_serverDataSize, m_serverData);
+      dispatchZoneData (m_serverDataSize, m_serverData, dir);
    }
 }
 
 ///////////////////////////////////////////
 //EQPacket::dispatchWorldData  
-// note this dispatch get a full IP packet NOT just the payload
-void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data, uint8_t direction = 0)
+// note this dispatch gets just the payload
+void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data, 
+				  uint8_t direction)
 {
 #ifdef DEBUG_PACKET
-   debug ("dispatchWorldData()");
+  debug ("dispatchWorldData()");
 #endif /* DEBUG_PACKET */
-   if (len < 0)
-       return;
+  
+  uint16_t opCode = eqntohuint16(data);
 
-   EQUDPIPPacketFormat pkt(data, len, false);
-   
-   uint16_t opCode = eqntohuint16(pkt.payload());
+  if ((opCode == ZoneServerInfo) && (direction == DIR_SERVER))
+  {
+    //printf(" ZoneServerInfo 0x%04x, m_client_addr %d, sessionTrack = %d\n", 
+    //	   opCode, m_client_addr, m_session_tracking_enabled);
+    uint16_t zone_server_port = eqntohuint16(data + 130);
+    m_serverPort = zone_server_port;
 
-   //printf(" ZoneServerInfo 0x%04x, ip_dest %d, m_client_addr %d,\n", opCode, pkt.getIPv4DestN(), m_client_addr);
-   if (opCode == ZoneServerInfo && pkt.getIPv4DestN() == m_client_addr) 
-   {   
-      if (strcmp(showeq_params->ip, "127.0.0.0") == 0) 
+    emit zoneServerInfo(data, len, direction);
+
+    // only reset packet filter if this is a live session
+    if (!showeq_params->playbackpackets && (m_session_tracking_enabled < 2))
+    {
+      if (showeq_params->mac_address.length() == 17)
       {
-         showeq_params->ip = strdup ((const char*)pkt.getIPv4DestA());
-         m_client_addr = pkt.getIPv4DestN();
+	m_packetCapture->setFilter(showeq_params->device, 
+				   showeq_params->mac_address,
+				   showeq_params->realtime, 
+				   MAC_ADDRESS_TYPE, zone_server_port, 0);
+	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
+		(const char*)showeq_params->mac_address, zone_server_port);
+      }
+      else
+      {
+	m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+				   showeq_params->realtime, IP_ADDRESS_TYPE,
+				   zone_server_port, 0);
+	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
+		(const char*)showeq_params->ip, zone_server_port);
       }
 
-     uint16_t zone_server_port = eqntohuint16(pkt.payload() + 130);
-     
-     // only reset packet filter if this is a live session
-     if (!showeq_params->playbackpackets)
-     {
-        if (strlen(showeq_params->mac_address) == 17)
-        {
-           m_packetCapture->setFilter(showeq_params->device, showeq_params->mac_address,
-		  showeq_params->realtime, MAC_ADDRESS_TYPE, zone_server_port);
-           printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
-	           showeq_params->mac_address, zone_server_port);
-        }
-        else
-        {
-	   m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
-                  showeq_params->realtime, IP_ADDRESS_TYPE, zone_server_port);
-           printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
-	           showeq_params->ip, zone_server_port);
-        }
-     }
+    // notify that the server port has been latched
+    emit serverPortLatched(m_serverPort);
+    
+    // we'll be waiting for a new SEQStart
+    m_serverArqSeqFound = false;
+    
+    // clear out all the cache entries
+    
+    // first delete all the entries
+    EQPacketMap::iterator it = m_serverCache.begin();
+    EQPacketFormat* pf;
+    fprintf(stderr, "Clearing Cache: Count: %d\n", m_serverCache.size());
+    while (it != m_serverCache.end())
+    {
+      pf = it->second;
+      delete pf;
+      it++;
+    }
+    
+    // now clear the cache
+    printf ("Reseting sequence cache\n");
+    m_serverCache.clear();
+    emit cacheSize(0);
+    return;
+    }
+  }
+}
 
-     // we'll be wainting for a new SEQStart
-     m_serverArqSeqFound = false;
+///////////////////////////////////////////
+//EQPacket::dispatchWorldChatData  
+// note this dispatch gets just the payload
+void EQPacket::dispatchWorldChatData (uint32_t len, uint8_t *data, 
+				      uint8_t dir)
+{
+#ifdef DEBUG_PACKET
+  debug ("dispatchWorldChatData()");
+#endif /* DEBUG_PACKET */
+  if (len < 10)
+    return;
+  
+  uint16_t opCode = eqntohuint16(data);
 
-     // clear out all the cache entries
-
-     // first delete all the entries
-     EQPacketMap::iterator it = m_serverCache.begin();
-     EQPacketFormat* pf;
-     fprintf(stderr, "Clearing Cache: Count: %d\n", m_serverCache.size());
-     while (it != m_serverCache.end())
-     {
-	pf = it->second;
-	delete pf;
-	it++;
-     }
-
-     // now clear the cache
-     printf ("Reseting sequence cache\n");
-     m_serverCache.clear();
-     emit cacheSize(0);
-     return;
-   }
-
-   return;
+  switch (opCode)
+  {
+  default:
+    printf ("%04x - %d (%s)\n", opCode, len, 
+	    ((dir == DIR_SERVER) ? 
+	     "WorldChatServer --> Client" : "Client --> WorldChatServer"));
+  }
 }
 
 void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data, 
-				 uint8_t direction = 0)
+				 uint8_t dir)
 {
 #ifdef DEBUG_PACKET
-      debug ("dispatchZoneData()");
+    debug ("dispatchZoneData()");
 #endif /* DEBUG_PACKET */
 
-   QString       totalExp;
-   QString       gainedExp;
-   QString       leftExp;
-   QString       needKills;
+    QString  tempStr;
+    int      decoded = 0;
+    uint32_t decodedDataLen = 65536;
+    uint8_t  decodedData[decodedDataLen];
 
-   QString tempStr     ("");
-   int decoded = 0;
-   uint32_t decodedDataLen = 65536;
-   uint8_t decodedData[decodedDataLen];
-
-   if(len < 0)
-      return;
-
-   /* pre-process the packets */
-   decoded = m_decode->DecodePacket(data, len, decodedData,
-                        &decodedDataLen, showeq_params->ip);
-
-   uint16_t opCode = eqntohuint16(data); // data[1] | (data[0] << 8);
-
-   //Logging 
-   if (showeq_params->logZonePackets)
-       if (!logData (showeq_params->ZoneLogFilename, len, data))
+    uint16_t opCode = eqntohuint16(data); // data[1] | (data[0] << 8);
+    
+    //Logging 
+    if (showeq_params->logZonePackets)
+        if (!logData (showeq_params->ZoneLogFilename, len, data))
             emit toggle_log_ZoneData(); //untoggle the GUI checkmark
 
-   bool unk = true;
+    bool unk = true;
 
-   /* Update EQ Time every 50 packets so we don't overload the CPU */
-   if (pSEQPrefs->getPrefBool("StatusBar_ShowEQTime", "Interface", 0) && 
-       (m_nPacket % 50 == 0))
-   {
-       char timeMessage[30];
-       time_t timeCurrent = time(NULL);
+    /* Update EQ Time every 50 packets so we don't overload the CPU */
+    
+    if ( showeq_params->showEQTime && (m_packetCount % 50 == 0))
+    {
+        char timeMessage[30];
+        time_t timeCurrent = time(NULL);
 
-       struct timeOfDayStruct eqTime;
-       getEQTimeOfDay( timeCurrent, &eqTime);
+        struct timeOfDayStruct eqTime;
+        getEQTimeOfDay( timeCurrent, &eqTime);
 
-       if (eqTime.hour >= 0 && eqTime.minute >= 0)
-       {
-           sprintf(timeMessage,"EQTime [%02d:%s%d %s]",
-                   (eqTime.hour % 12) == 0 ? 12 : (eqTime.hour % 12),
-                   (eqTime.minute < 10) ? "0" : "",
-                    eqTime.minute,
-                   (eqTime.hour >= 12) ? "pm" : "am"
-                  );
+        if (eqTime.hour >= 0 && eqTime.minute >= 0)
+        {
+            sprintf(timeMessage,"EQTime [%02d:%s%d %s]",
+                       (eqTime.hour % 12) == 0 ? 12 : (eqTime.hour % 12),
+                       (eqTime.minute < 10) ? "0" : "",
+                       (eqTime.minute),
+                       (eqTime.hour >= 12) ? "pm" : "am"
+                   );
+            emit eqTimeChangedStr(QString (timeMessage));
+        }
+    }
 
-           emit eqTimeChangedStr(QString (timeMessage));
-       }
-   }
+    switch (opCode)
+    {
+        case CPlayerItemsCode:
+        {
+	    unk = false;
 
-   switch (opCode)
-   {
-      case CompressedPlayerItemCode:
-      {
-           if (CompressedPlayerItemVer != opCodeVersion)
-              break;
-	
-	   unk = false;
+            // decode/decompress the payload
+            decoded = m_decode->DecodePacket(data, len, decodedData,
+                                     &decodedDataLen, showeq_params->ip);
+	    if (!decoded)
+            {
+                printf("EQPacket: could not decompress CPlayerItemsCode 0x%x\n", opCode);
+	        break;
+            }
 
-	   if (!decoded)
-	      break;
+            cPlayerItemsStruct *citems;
+            citems = (cPlayerItemsStruct *)(decodedData);
 
-           compressedPacket* compressed;
-           compressed = (compressedPacket*)(decodedData);
-	
-           // Make sure we do not divide by zero and there is something to process
-           if (compressed->count)
-           {
-              // Determine the size of a single structure in the compressed packet
-              int nPacketSize=((decodedDataLen - 4)/compressed->count);
+	    emit cPlayerItems(citems, decodedDataLen, dir);
 
-              // See if it is the size that we expect
-              int nVerifySize = sizeof(struct itemPlayerStruct);
+            // Make sure we do not divide by zero and there 
+            // is something to process
+           
+            if (citems->count)
+            {
+                // Determine the size of a single structure in 
+                // the compressed packet
+              
+                int nPacketSize=((decodedDataLen - 4)/citems->count);
+
+                // See if it is the size that we expect
+              
+                int nVerifySize = sizeof(playerItemStruct);
 	    
-              if (nVerifySize == nPacketSize)
-              {
-                 if (!showeq_params->no_bank)
-                 {
-                    tempStr = "Item: Dispatching compressed Items (count = " +
-                    QString::number(compressed->count) + ")";
+                if (nVerifySize == nPacketSize)
+                {
+                    if (!showeq_params->no_bank)
+                    {
+                        tempStr = "Item: Dispatching compressed Items " 
+                                  "(count = " +
+                                  QString::number(citems->count) + ")";
 
-                    emit msgReceived(tempStr);
+                        emit msgReceived(tempStr);
 	      
-                    for (int i=0; i < compressed->count; i++)
-                        dispatchZoneData( nPacketSize,
-                                          &compressed->compressedData[i*nPacketSize], 
-                                          direction
-                                        );
+                        for (int i=0; i < citems->count; i++)
+                            dispatchZoneData( nPacketSize,
+                                &citems->compressedData[i*nPacketSize], 
+                                dir);
 
-	            emit msgReceived(QString("Item: Finished dispatching"));
-	         }
-	         else
-	         {
-	           // Quietly dispatch the compressed data
-	           for ( int i=0; i<compressed->count; i++ )
-                       dispatchZoneData( nPacketSize, 
-                                         &compressed->compressedData[i*nPacketSize], 
-                                         direction
-                                       );
-	         }
-	      }
-           }
-	   break;
-      } /* end CompressedPlayerItemCode */
+	                emit msgReceived(QString("Item: Finished dispatching"));
+	             }
+	             else
+	             {
+	                 // Quietly dispatch the compressed data
+	           
+                         for ( int i=0; i<citems->count; i++ )
+                             dispatchZoneData( nPacketSize, 
+                                &citems->compressedData[i*nPacketSize], 
+                                dir);
+	             }
+	        }
+            }
+	    break;
+        } /* end CPlayerItemCode */
+
+        case PlayerItemCode:
+        {
+            unk = ! ValidatePayload(PlayerItemCode, playerItemStruct);
+
+            emit wearItem((const playerItemStruct*)data, len, dir);
+
+            break;
+        }
+
+        case ItemInShopCode:
+        {
+            unk = ! ValidatePayload(ItemInShopCode, itemInShopStruct);
+	    
+            emit itemShop((const itemInShopStruct*)data, len, dir);
+	    
+            break;
+        } /* end ItemInShopCode */
+
+        case MoneyOnCorpseCode:
+        {
+            unk = ! ValidatePayload(MoneyOnCorpseCode, moneyOnCorpseStruct);
+
+            emit moneyOnCorpse((const moneyOnCorpseStruct*)data, len, dir);
+
+            break;
+        } /* end MoneyOnCorpseCode */
+
+        case ItemOnCorpseCode:
+        {
+            unk = ! ValidatePayload(ItemOnCorpseCode, itemOnCorpseStruct);
+
+	    emit itemPlayerReceived((const itemOnCorpseStruct *)data, len, dir);
+
+            break;
+        } /* end ItemOnCorpseCode */
+
+        case TradeItemOutCode:
+        {
+            unk = ! ValidatePayload(TradeItemOutCode, tradeItemOutStruct);
+
+            emit tradeItemOut((const tradeItemOutStruct*)data, len, dir);
+
+            break;
+        } /* end tradeItemCode */
+
+        case TradeItemInCode:	// Item received by player
+        {
+            unk = ! ValidatePayload(TradeItemInCode, tradeItemInStruct);
+
+            emit tradeItemIn((const tradeItemInStruct*)data, len, dir);
+
+            break;
+        } /* end ItemTradeCode */
         
-
-      case ItemInShopCode:
-      {
-           if (ItemInShopVer != opCodeVersion)
-               break;
-
-           unk = ! ValidatePayload(ItemInShopCode, itemShopStruct);
-	    
-           emit itemShop((const itemShopStruct*)data);
-	    
-           break;
-      } /* end ItemInShopCode */
-
-
-      case MoneyOnCorpseCode:
-      {
-	   if (MoneyOnCorpseVer != opCodeVersion)
-              break;
-
-           unk = ! ValidatePayload(MoneyOnCorpseCode, moneyOnCorpseStruct);
-
-           emit moneyOnCorpse((const moneyOnCorpseStruct*)data);
-
-           break;
-      } /* end MoneyOnCorpseCode */
-
-
-      case ItemOnCorpseCode:
-      {
-           if (ItemOnCorpseVer != opCodeVersion)
-              break;
-
-           unk = ! ValidatePayload(ItemOnCorpseCode, itemReceivedPlayerStruct);
-
-	   emit itemPlayerReceived((const itemReceivedPlayerStruct*)data);
-
-           break;
-      } /* end ItemOnCorpseCode */
-
-
-      case tradeItemCode:
-      {
-           if (tradeItemVer != opCodeVersion)
-              break;
-
-           unk = ! ValidatePayload(tradeItemCode, tradeItemStruct);
-
-           emit tradeItemOut((const tradeItemStruct*)data);
-
-           break;
-      } /* end tradeItemCode */
-
-
-      case ItemTradeCode:	// Item received by player
-      {
-           if (ItemTradeVer != opCodeVersion)
-              break;
-
-           unk = ! ValidatePayload(ItemTradeCode, itemReceivedPlayerStruct);
-
-           emit tradeItemIn((const itemReceivedPlayerStruct*)data);
-
-           break;
-      } /* end ItemTradeCode */
-
-
-      case PlayerItemCode:
-      {
-           if (PlayerItemVer != opCodeVersion)
-              break;
-
-           unk = ! ValidatePayload(PlayerItemCode, itemPlayerStruct);
-
-           emit wearItem((const itemPlayerStruct*)data);
-
-           break;
-      }
-
-      case summonedItemCode:
-      {
-            if (summonedItemVer != opCodeVersion)
-               break;
-
-            unk = ! ValidatePayload(summonedItemCode, summonedItemStruct);
-	    
-	    emit summonedItem((const summonedItemStruct*)data);
+        case SummonedItemCode:
+        {
+            unk = ! ValidatePayload(SummonedItemCode, summonedItemStruct);
+	
+	    emit summonedItem((const summonedItemStruct*)data, len, dir);
 
             break;
-      }
+        }
 
-
-      case ZoneEntryCode:
-      {
-           if (ZoneEntryVer != opCodeVersion)
-              break;
-
-            // We're only interested in the server version
-            if (direction == DIR_SERVER)
-	    {
-	      unk = ! ValidatePayload(ZoneEntryCode, ServerZoneEntryStruct);
-
-	      emit zoneEntry((const ServerZoneEntryStruct*)data);
-	      
-	      // server considers us in the other zone now
-	      m_zoning = false;
-
-	      break;
-            }
-
-	    unk = ! ValidatePayload(ZoneEntryCode, ClientZoneEntryStruct);
-
-	    // server still doesn't know we're in other zone
-	    m_zoning = true;
-
-            // Zone entry request from client to server
-	    emit zoneEntry((const ClientZoneEntryStruct*)data);
-
-            emit resetDecoder();
-
-            break;
-      } /* end ZoneEntryCode */
-
-
-      case CharProfileCode:	// Character Profile server to client
-      {
-           if (CharProfileVer != opCodeVersion)
-               break;
-
-           /* This is an encrypted packet type, so log the raw packet for
+        case CharProfileCode:	// Character Profile server to client
+        {
+            /* This is an encrypted packet type, so log the raw packet for
                detailed analysis */
-           if (showeq_params->logEncrypted)
-               logData(showeq_params->CharProfileCodeFilename, len, data);
 
+            if (showeq_params->logEncrypted)
+	      logData(showeq_params->CharProfileCodeFilename, len, data);
 
-           if (decoded && !showeq_params->broken_decode)
-           {
-	      printf("EQPacket::dispatchZoneData():CharProfileCode:Decoded\n");
-               unk = false;
+            unk = false; // move above if to prevent duplicate logging
+                         // not sure if its placement was intentional before.
+	    
+            // decode/decompress the payload
+            decoded = m_decode->DecodePacket(data, len, decodedData,
+                                     &decodedDataLen, showeq_params->ip);
 
-	       // just call pkt_backfillPlayer
-	       pkt_backfillPlayer((struct playerProfileStruct *) (decodedData));
-           }
-           else
-           {
-	      printf("EQPacket::dispatchZoneData():CharProfileCode:Not Decoded\n");
-	      emit resetPlayer();
-           }
-
-           break;
-      }
-
-
-      case CorpseCode:
-      {
-           if (CorpseVer != opCodeVersion)
-               break;
-
-           unk = ! ValidatePayload(CorpseCode, spawnKilledStruct);
-
-           emit killSpawn((const spawnKilledStruct*) data);
-
-#if 0 // ZBTEMP: // Migrate prints to EQInterface, other to EQPlayer
-                         struct spawnKilledStruct *deadspawn;
-            deadspawn = (struct spawnKilledStruct *) (data);
-
-	    spawnStruct lastDeadSpawn;
-
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-	    // verify size
-	    if (len != sizeof(spawnKilledStruct))
-	    {
-	      printf("WARNING: CorpseCode (dataLen:%d != sizeof(spawnKilledStruct):%d)!\n",
-		     len, sizeof(spawnKilledStruct));
-	    }
-#endif
-
-            //printf("setting new dead spawn, id %d\n", deadspawn->spawnId);
-
-            if (m_Spawns.contains( deadspawn->spawnId ))
-               lastDeadSpawn = m_Spawns[ deadspawn->spawnId ];
-	    else
-	    {
-	      memset(&lastDeadSpawn, 0, sizeof(lastDeadSpawn));
-	      lastDeadSpawn.spawnId = deadspawn->spawnId;
-	      strcpy(lastDeadSpawn.name, "unknown");
-	    }
-
-            if (showeq_params->spawnlog_enabled)
+            if (decoded && !showeq_params->broken_decode)
             {
-               time_t timeCurrent = time(NULL);
-
-               struct timeOfDayStruct eqTime;
-               getEQTimeOfDay( timeCurrent, &eqTime );
-
-               fprintf( spawnlogout,
-                        "x:%s(%d):%d,%d,%d:%s:%d:%s:%02d.%02d.%02d.%02d.%04d\n",
-                        lastDeadSpawn.name,
-                        lastDeadSpawn.spawnId,
-                        m_Spawns[lastDeadSpawn.spawnId].xPos,
-                        m_Spawns[lastDeadSpawn.spawnId].yPos,
-                        m_Spawns[lastDeadSpawn.spawnId].zPos,
-                        getTime(pchTempBuf),
-                        spawnlog_version,
-                        m_currentZoneName.shortName,
-                        eqTime.hour,
-                        eqTime.minute,
-                        eqTime.month,
-                        eqTime.day,
-                        eqTime.year
-                      );
-
-               fflush(spawnlogout);
-            }
-
-            if (deadspawn->killerId == m_player->getPlayerID())
-	    {
-	      // note that this is the last kill by the player
-	      m_player->setLastKill(lastDeadSpawn);
-
-	      printf("%s(%d) killed by YOU(%i).\n", 
-		     lastDeadSpawn.name, lastDeadSpawn.spawnId, 
-		     deadspawn->killerId);
-	    }
-            else if (m_Spawns.contains( deadspawn->killerId ))
-            {
-               bool bGroupMate = false;
-
-               for(char ng = 0; ng < groupSize; ng ++)
-               {
-                  if (deadspawn->killerId == groupID[ng])
-                  {
-                     bGroupMate = true;
-                     break;
-                  }
-               }
-
-               if (bGroupMate == true)
-	       {
-		 // note that this is the last kill by the player's group
-		 m_player->setLastKill(lastDeadSpawn);
-
-		 printf("%s(%d) killed by your group mate, %s(%d).\n", 
-			lastDeadSpawn.name, lastDeadSpawn.spawnId, 
-			m_Spawns[ deadspawn->killerId ].name, 
-			deadspawn->killerId);
-	       }
-               else
-	       {
-		 // note that the last player kill is stale
-		 m_player->incStaleKillCount();
-		 
-		 printf("%s(%d) killed by %s(%d).\n", 
-			lastDeadSpawn.name, lastDeadSpawn.spawnId, 
-			m_Spawns[ deadspawn->killerId ].name, 
-			 deadspawn->killerId);
-	       }
+	        printf("EQPacket::dispatchZoneData():CharProfileCode:Decoded\n");
+	        // just call dispatchDecodedCharProfile (logged there as well)
+	       
+                dispatchDecodedCharProfile(decodedData, decodedDataLen);
             }
             else
-	    {
-	      // note that the last player kill is stale
-	      m_player->incStaleKillCount();
-		 
-	      printf("%s(%d) killed by unknown(%i).\n", 
-		     lastDeadSpawn.name, lastDeadSpawn.spawnId, 
-		     deadspawn->killerId);
-	    }
+	        printf("EQPacket::dispatchZoneData():CharProfileCode:Not Decoded\n");
+            break;
+        }
 
-            emit killSpawn (deadspawn->spawnId);
-#endif // ZBTEMP:
+        case NewCorpseCode:
+        {
+            unk = ! ValidatePayload(NewCorpseCode, newCorpseStruct);
 
-           break;
-      } /* end CorpseCode */
+            emit killSpawn((const newCorpseStruct*) data, len, dir);
 
+            break;
+        } /* end CorpseCode */
 
-      case DeleteSpawnCode:
-      {
-           if (DeleteSpawnVer != opCodeVersion)
-               break;
-
+        case DeleteSpawnCode:
+        {
             unk = ! ValidatePayload(DeleteSpawnCode, deleteSpawnStruct);
 
-            emit deleteSpawn((const deleteSpawnStruct*)data);
+            emit deleteSpawn((const deleteSpawnStruct*)data, len, dir);
 
-           break;
-      }
+            break;
+        }
 
+        case ChannelMessageCode:
+        {
+            unk = false;
 
-      case ChannelMessageCode:
-      {
-           if (ChannelMessageVer != opCodeVersion)
-               break;
+#if 0 // ZBTEMP
+	    logData("/tmp/channelMessages.log", len, data);
+#endif
 
-           unk = false;
+            emit channelMessage((const channelMessageStruct*)data, len, dir);
 
-           emit channelMessage((const channelMessageStruct*)data,
-                               (direction == DIR_CLIENT));
+            break;
+        }
 
-           break;
-      }
+        case FormattedMessageCode:
+        {
+            unk = false;
 
+            emit formattedMessage((const formattedMessageStruct*)data, len, dir);
 
-      case NewSpawnCode:
-      {
-           if (NewSpawnVer != opCodeVersion)
-               break;
+            break;
+        }
 
-           /* This is one of the encrypted packet types, so log it */
-           if (showeq_params->logEncrypted)
-               logData(showeq_params->NewSpawnCodeFilename, len, data);
+        case NewSpawnCode:
+        {
+            /* This is one of the encrypted packet types, so log it */
 
-           //printf("NewSpawn received\n");
-           if (!decoded || showeq_params->broken_decode)
-               break;
+            if (showeq_params->logEncrypted)
+                logData(showeq_params->NewSpawnCodeFilename, len, data);
+	    
+            // decode/decompress the payload
+            decoded = m_decode->DecodePacket(data, len, decodedData,
+                                     &decodedDataLen, showeq_params->ip);
 
-           unk = ! ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
+            //printf("NewSpawn received:\n");
 
-	   if (!m_zoning)
-	      emit newSpawn((const newSpawnStruct*)decodedData);
+            if (!decoded || showeq_params->broken_decode)
+                break;
 
-           break;
-      }
+            unk = ! ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
 
+	    if (!m_zoning)
+	        emit newSpawn((const newSpawnStruct*)decodedData, decodedDataLen, dir);
 
-      case ZoneSpawnsCode:
-      {
-           //printf ("ZONESPAWNS1: %d\n", len);
-           if (ZoneSpawnsVer != opCodeVersion)
-              break;
+            break;
+        }
 
-           /* This is one of the encrypted packet types, so log it */
-           if (showeq_params->logEncrypted)
-               logData(showeq_params->ZoneSpawnsCodeFilename, len, data);
+        case ZoneSpawnsCode:
+        {
+            // printf ("ZONESPAWNS1: %d\n", len);
 
-           if (!decoded || showeq_params->broken_decode)
-               break;
+            /* This is one of the encrypted packet types, so log it */
 
-           unk = false;
+            if (showeq_params->logEncrypted)
+                logData(showeq_params->ZoneSpawnsCodeFilename, len, data);
+  
+            unk = false; // move above break to prevent duplicate logging
+                         // not sure if its placement was intentional before.
+	    
+            // decode/decompress the payload
+            decoded = m_decode->DecodePacket(data, len, decodedData,
+                                     &decodedDataLen, showeq_params->ip);
 
-           emit zoneSpawns((const zoneSpawnsStruct*)decodedData, 
-			    decodedDataLen);
+            if (!decoded || showeq_params->broken_decode)
+                break;
 
-           break;
-      }
+            emit zoneSpawns((const zoneSpawnsStruct*)decodedData, 
+	                    decodedDataLen, dir);
 
+            break;
+        }
 
-      case TimeOfDayCode:
-      {
-           if (TimeOfDayVer != opCodeVersion)
-               break;
+        case TimeOfDayCode:
+        {
+            struct timeOfDayStruct *tday;
 
-           unk = ! ValidatePayload(TimeOfDayCode, timeOfDayStruct);
+            unk = ! ValidatePayload(TimeOfDayCode, timeOfDayStruct);
 
-                   struct timeOfDayStruct *tday;
-           tday = (struct timeOfDayStruct *) (data);
+            tday = (struct timeOfDayStruct *) data;
 
-           m_eqTime.zoneInTime.minute   = tday->minute;
-           m_eqTime.zoneInTime.hour     = tday->hour;
-           m_eqTime.zoneInTime.day      = tday->day;
-           m_eqTime.zoneInTime.month    = tday->month;
-           m_eqTime.zoneInTime.year     = tday->year;
+            m_eqTime.zoneInTime.minute   = tday->minute;
+            m_eqTime.zoneInTime.hour     = tday->hour;
+            m_eqTime.zoneInTime.day      = tday->day;
+            m_eqTime.zoneInTime.month    = tday->month;
+            m_eqTime.zoneInTime.year     = tday->year;
 
-           m_eqTime.packetReferenceTime = time(NULL);
+            m_eqTime.packetReferenceTime = time(NULL);
 
-           printf( "TIME: %02d:%02d %02d/%02d/%04d\n",
+            printf( "TIME: %02d:%02d %02d/%02d/%04d\n",
                     tday->hour,
                     tday->minute,
                     tday->month,
                     tday->day,
                     tday->year
                  );
+            emit timeOfDay(tday, len, dir);
+            break;
+        }
 
-           break;
-      }
-
-
-      case BookTextCode:
-      {
-            if (BookTextVer != opCodeVersion)
-               break;
-
+        case BookTextCode:
+        {
             unk = false;
 
-                        struct bookTextStruct *booktext;
-            booktext = (struct bookTextStruct *) (data);
+	    emit bookText((const bookTextStruct*)data, len, dir);
 
-            // printf ("BOOK: %s\n", booktext->text);
+            break;
+        }
 
-           break;
-      }
-
-
-      case RandomCode:
-      {
-            if (direction != DIR_CLIENT)
-               break;
-
-            if (RandomVer != opCodeVersion)
-               break;
+        case RandomCode:
+        {
+            if (dir != DIR_CLIENT)
+                break;
 
             unk = ! ValidatePayload(RandomCode, randomStruct);
 
-	    emit random((const randomStruct*)data);
+	    emit random((const randomStruct*)data, len, dir);
 
-           break;
-      }
+            break;
+        }
 
+        case EmoteTextCode:
+        {
+            unk = false;
 
-      case emoteTextCode:
-      {
-           if (emoteTextVer != opCodeVersion)
-               break;
+	    emit emoteText((const emoteTextStruct*)data, len, dir);
 
-           unk = false;
+            break;
+        }
 
-	   emit emoteText((const emoteTextStruct*)data);
+        case CorpseLocCode:
+        {
+	    unk = ! ValidatePayload(CorpseLocCode, corpseLocStruct);
+           
+	    emit corpseLoc((const corpseLocStruct*)data, len, dir);
 
-           break;
-      }
+            break;
+        }
+        
+        case PlayerBookCode:
+        {
+            unk = ! ValidatePayload(PlayerBookCode, playerBookStruct);
+ 
+            emit playerBook((const playerBookStruct*)data, len, dir);
 
+            break;
+        }
 
-      case corpseLocCode:
-      {
-	   if (corpseLocCode != opCodeVersion)
-	       break;
+        case PlayerContainerCode:
+        {
+            unk = ! ValidatePayload(PlayerContainerCode, playerContainerStruct);
 
-	   unk = ! ValidatePayload(corpseLocCode, corpseLocStruct);
+            emit playerContainer((const playerContainerStruct *)data, len, dir);
 
-	   emit corpseLoc((const corpseLocStruct*)data);
+            break;
+        }
 
-           break;
-      }
+        case InspectDataCode:
+        {
+            unk = ! ValidatePayload(InspectDataCode, inspectDataStruct);
 
-      case PlayerBookCode:
-      {
-           if (PlayerBookVer != opCodeVersion)
-               break;
+            emit inspectData((const inspectDataStruct *)data, len, dir);
 
-           unk = ! ValidatePayload(PlayerBookCode, bookPlayerStruct);
+            break;
+        }
 
-           emit playerBook((const bookPlayerStruct*)data);
+        case HPUpdateCode:
+        {
+            unk = ! ValidatePayload(HPUpdateCode, hpUpdateStruct);
 
-           break;
-      }
+            emit updateSpawnHP((const hpUpdateStruct*)data, len, dir);
 
+            break;
+        }
 
-      case PlayerContainerCode:
-      {
-           if (PlayerContainerVer != opCodeVersion)
-               break;
+        case SPMesgCode:
+        {
+            unk = false;
 
-           unk = ! ValidatePayload(PlayerContainerCode, containerPlayerStruct);
+            emit spMessage((const spMesgStruct *)data, len, dir);
 
-           emit playerContainer((const containerPlayerStruct *)data);
+            break;
+        }
 
-           break;
-      }
+        case MemSpellCode:
+        {
+            unk = ! ValidatePayload(MemSpellCode, memSpellStruct);
 
+            emit handleSpell((const memSpellStruct*)data, len, dir);
 
-      case InspectDataCode:
-      {
-           if (InspectDataVer != opCodeVersion)
-               break;
+            break;
+        }
 
-           unk = false;
+        case BeginCastCode:
+        {
+            unk = ! ValidatePayload(BeginCastCode, beginCastStruct);
 
-           emit inspectData((const inspectingStruct *)data);
+            emit beginCast((const beginCastStruct*)data, len, dir);
 
-           break;
-      }
+            break;
+        }
 
+        case StartCastCode:
+        {
+	    unk = ! ValidatePayload(StartCastCode, startCastStruct);
 
-      case HPUpdateCode:
-      {
-           if (HPUpdateVer != opCodeVersion)
-               break;
+	    emit startCast((const startCastStruct*)data, len, dir);
 
-           unk = ! ValidatePayload(HPUpdateCode, spawnHpUpdateStruct);
+	    break;
+        }
 
-           emit updateSpawnHP((const spawnHpUpdateStruct*)data);
-
-           break;
-      }
-
-
-      case SPMesgCode:
-      {
-           //struct spMesgStruct * spmsg1 = (struct spMesgStruct *) data;
-           //printf("Special (%d): '%s' (%ld)\n", opCodeVersion, spmsg1->message, spmsg1->msgType);
-           if (SPMesgVer != opCodeVersion)
-               break;
-
-           unk = false;
-
-           emit spMessage((const spMesgStruct *)data);
-
-           break;
-      }
-
-
-      case MemSpellCode:
-      {
-           if (MemSpellVer != opCodeVersion)
-               break;
-
-           unk = ! ValidatePayload(MemSpellCode, spellCastStruct);
-
-           emit handleSpell((const spellCastStruct*)data, (direction == DIR_CLIENT));
-
-           break;
-      }
-
-
-      case BeginCastCode:
-      {
-           if (BeginCastVer != opCodeVersion)
-               break;
-
-           unk = ! ValidatePayload(BeginCastCode, beginCastStruct);
-
-           emit beginCast((const beginCastStruct*)data, (direction == DIR_CLIENT));
-
-           break;
-      }
-
-
-      case StartCastCode:
-      {
-	   unk = ! ValidatePayload(StartCastCode, castStruct);
-
-	   emit startCast((const castStruct*)data);
-
-	   break;
-      }
-
-
-      case MobUpdateCode:
-      {
-           if (MobUpdateVer != opCodeVersion)
-               break;
-
-           unk = false;
+        case MobUpdateCode:
+        {
+            unk = false;
 
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
-                      struct spawnPositionUpdateStruct *updates;
-           updates = (struct spawnPositionUpdateStruct *) (data);
-           // verify size
-           int updateSize = (len - 6) / updates->numUpdates;
+            struct mobUpdateStruct *updates;
 
-           if (updateSize != sizeof(spawnPositionUpdate))
-           {
-	      printf("WARNING: MobUpdateCode (dataLen:%d != sizeof(spawnPositionUpdate):%d)!\n", updateSize, sizeof(spawnPositionUpdate));
+            updates = (mobUpdateStruct *) (data);
 
-	      unk = true;
-	   }
+            // verify size
+
+            int updateSize = (len - 6) / updates->numUpdates;
+
+            if (updateSize != sizeof(spawnPositionUpdate))
+            {
+                printf("WARNING: MobUpdateCode (dataLen:%d != "
+                       "sizeof(spawnPositionUpdate):%d)!\n", 
+                       updateSize, sizeof(spawnPositionUpdate));
+
+	        unk = true;
+	    }
 #endif
-
-	   if (!m_zoning)
-	       emit updateSpawns((const spawnPositionUpdateStruct *)data);
-
-           break;
-      }
-
-
-      case ExpUpdateCode:
-      {
-           if (ExpUpdateVer != opCodeVersion)
-               break;
-
-           unk = ! ValidatePayload(ExpUpdateCode, expUpdateStruct);
-
-           emit updateExp((const expUpdateStruct*)data);
-
-           break;
-      }
-
-
-      case LevelUpUpdateCode:
-      {
-           if (LevelUpUpdateVer != opCodeVersion)
-               break;
-
-           unk = ! ValidatePayload(LevelUpUpdateCode, levelUpStruct);
-
-           emit updateLevel((const levelUpStruct *)data);
-
-           break;
-      }
-
-
-      case SkillIncCode:
-      {
-            if (SkillIncVer != opCodeVersion)
-               break;
-
-            unk = ! ValidatePayload(SkillIncCode, skillIncreaseStruct);
-
-	    emit increaseSkill((const skillIncreaseStruct *)data);
-
-           break;
-      }
-
-
-      case DoorOpenCode:
-      {
-            if (DoorOpenVer != opCodeVersion)
-               break;
-
-            unk = false;
+	    if (!m_zoning)
+	        emit updateSpawns((const mobUpdateStruct *)data, len, dir);
 
             break;
-      }
+        }
 
+        case ExpUpdateCode:
+        {
+            unk = ! ValidatePayload(ExpUpdateCode, expUpdateStruct);
 
-      case IllusionCode:
-      {
-            if (IllusionVer != opCodeVersion)
-               break;
-
-            unk = false;
+            emit updateExp((const expUpdateStruct*)data, len, dir);
 
             break;
-      }
+        }
 
+        case AltExpUpdateCode:
+        {
+            unk = ! ValidatePayload(AltExpUpdateCode, altExpUpdateStruct);
 
-      case BadCastCode:
-      {
-            if (BadCastVer != opCodeVersion)
-               break;
+            emit updateAltExp((const altExpUpdateStruct*)data, len, dir);
 
-            unk = false; //! ValidatePayload(BadCastCode, interruptCastStruct);
+            break;
+        }
 
-            emit interruptSpellCast((const interruptCastStruct*)data);
+        case LevelUpUpdateCode:
+        {
+            unk = ! ValidatePayload(LevelUpUpdateCode, levelUpUpdateStruct);
 
-           break;
-      }
+            emit updateLevel((const levelUpUpdateStruct *)data, len, dir);
 
+            break;
+        }
 
-      case SysMsgCode:
-      {
-            if (SysMsgVer != opCodeVersion)
-               break;
+        case SkillIncCode:
+        {
+            unk = ! ValidatePayload(SkillIncCode, skillIncStruct);
 
+	    emit increaseSkill((const skillIncStruct *)data, len, dir);
+
+            break;
+        }
+
+        case DoorOpenCode:
+        {
             unk = false;
 
-	    emit systemMessage((const systemMessageStruct*)data);
+	    emit doorOpen(data, len, dir);
 
-           break;
-      }
+            break;
+        }
 
-         
-      case ZoneChangeCode:
-      {
-           if (ZoneChangeVer != opCodeVersion)
-               break;
+        case IllusionCode:
+        {
+            unk = false;
 
-           unk = ! ValidatePayload(ZoneChangeCode, zoneChangeStruct);
+	    emit illusion(data, len, dir);
 
-           // in the process of zoning, server hasn't switched yet.
-	   m_zoning = true;
+            break;
+        }
 
-	   emit zoneChange((const zoneChangeStruct*)data, 
-			    (direction == DIR_CLIENT));
+        case BadCastCode:
+        {
+            unk = false; //! ValidatePayload(BadCastCode, badCastStruct);
 
-                          struct zoneChangeStruct *pZoneChange;
-           pZoneChange = (struct zoneChangeStruct *) (data);
+            emit interruptSpellCast((const badCastStruct*)data, len, dir);
 
-           strcpy(m_currentZoneName.shortName, pZoneChange->zoneName);
+            break;
+        }
 
-           emit resetDecoder();
+        case SysMsgCode:
+        {
+            unk = false;
 
-           if (direction == DIR_SERVER)
-           {
+	    emit systemMessage((const sysMsgStruct*)data, len, dir);
+
+            break;
+        }
+
+        case ZoneChangeCode:
+        {
+            unk = ! ValidatePayload(ZoneChangeCode, zoneChangeStruct);
+
+            // in the process of zoning, server hasn't switched yet.
+
+            m_zoning = true;
+
+	    emit zoneChange((const zoneChangeStruct*)data, len, dir);
 #if HAVE_LIBEQ
-               // Reset the decoder
-               emit resetDecoder();
+            emit resetDecoder();
 #endif
-           }
+            break;
+        }
 
-           break;
-      }
-            
-      case NewZoneCode:
-      {
-           if (NewZoneVer != opCodeVersion)
-               break;
+        case ZoneEntryCode:
+        {
+            // We're only interested in the server version
 
-           unk = ! ValidatePayload(NewZoneCode, newZoneStruct);
+            if (dir == DIR_CLIENT)
+	    {
+	        unk = ! ValidatePayload(ZoneEntryCode, ClientZoneEntryStruct);
+	        emit zoneEntry((const ClientZoneEntryStruct*)data, len, dir);
+#if HAVE_LIBEQ
+                emit resetDecoder();
+#endif
+	        m_zoning = true;
+	        break;
+            }
 
-	    emit zoneNew((const newZoneStruct*)data,
-			 (direction == DIR_CLIENT));
+            unk = ! ValidatePayload(ZoneEntryCode, ServerZoneEntryStruct);
 
-                        struct newZoneStruct *pNewZone;
-            pNewZone = (struct newZoneStruct *) (data);
+            emit zoneEntry((const ServerZoneEntryStruct*)data, len, dir);
 
-            // Copy the zone name into member variables
-            strcpy(m_currentZoneName.longName,  pNewZone->longName);
-            strcpy(m_currentZoneName.shortName, pNewZone->shortName);
+            // server considers us in the other zone now
+	      
+            m_zoning = false;
 
-	    // note that we're no longer Zoning
-	    m_zoning = false;
+            break;
+        } /* end ZoneEntryCode */
+
+        case NewZoneCode:
+        {
+            unk = ! ValidatePayload(NewZoneCode, newZoneStruct);
+
+	    emit zoneNew((const newZoneStruct*)data, len, dir);
+
+	   // note that we're no longer Zoning
+	   m_zoning = false;
 	    
-            if (m_vPacket)
-               printf("New Zone at byte: %ld\n", m_vPacket->FilePos());
+           if (m_vPacket)
+              printf("New Zone at byte: %ld\n", m_vPacket->FilePos());
 
-           break;
-      }
+            break;
+        }
 
-
-      case PlayerPosCode:
-      {
-            if (PlayerPosVer != opCodeVersion)
-               break;
-
-            unk = ! ValidatePayload(PlayerPosCode, playerUpdateStruct);
-
-
-            //printf("PlayerPosCode!\n");
+        case PlayerPosCode:
+        {
+            unk = ! ValidatePayload(PlayerPosCode, playerPosStruct);
 
 	    if (!m_zoning)
-	      emit playerUpdate((const playerUpdateStruct*)data, 
-				(direction == DIR_CLIENT));
+	        emit playerUpdate((const playerPosStruct*)data, len, dir);
 
             break;
-      }
+        }
 
-
-      case WearChangeCode:
-      {
-            if (WearChangeVer != opCodeVersion)
-               break;
-
+        case WearChangeCode:
+        {
             unk = ! ValidatePayload(WearChangeCode, wearChangeStruct);
 
-            emit spawnWearingUpdate ((const wearChangeStruct*)data);
+            emit spawnWearingUpdate ((const wearChangeStruct*)data, len, dir);
 
             break;
-      }
+        }
 
+        case ActionCode:
+        {
+            unk = false;
 
-      case ActionCode:
-      {
-            if (ActionVer != opCodeVersion)
-               break;
+            emit action2Message ((const action2Struct *)data, len, dir);
+
+            break;
+        }
+
+        case CastOnCode:
+        {
+            unk = false;
+
+	    emit castOn((castOnStruct*)data, len, dir);
+
+            break;
+        }
+
+        case ManaDecrementCode:
+        {
+            unk = ! ValidatePayload(ManaDecrementCode, manaDecrementStruct);
+
+	    emit manaChange((struct manaDecrementStruct *)data, len, dir);
+
+            break;
+        }
+
+        case StaminaCode:
+        {
+            unk = ! ValidatePayload(StaminaCode, staminaStruct);
+
+	    emit updateStamina((const staminaStruct *)data, len, dir);
+
+            break;
+        }
+
+        case MakeDropCode:
+        {
+            unk = ! ValidatePayload(MakeDropCode, makeDropStruct);
+
+	    if (!m_zoning)
+                emit newGroundItem((const makeDropStruct*)data, len, dir);
+
+            break;
+        }
+
+        case RemDropCode:
+        {
+            unk = ! ValidatePayload(RemDropCode, remDropStruct);
+
+            emit removeGroundItem((const remDropStruct *)data, len, dir);
+
+            break;
+        }
+
+        case DropCoinsCode:
+        {
+            unk = ! ValidatePayload(DropCoinsCode, dropCoinsStruct);
+
+	    if (!m_zoning)
+                emit newCoinsItem((const dropCoinsStruct*)data, len, dir);
+
+            break;
+        }
+
+        case RemoveCoinsCode:
+        {
+            unk = ! ValidatePayload(RemoveCoinsCode, removeCoinsStruct);
+
+            emit removeCoinsItem ((const removeCoinsStruct *)data, len, dir);
+
+            break;
+        }
+
+        case OpenVendorCode:
+        {
+            unk = false;
+
+	    emit openVendor(data, len, dir);
+
+            break;
+        }
+
+        case CloseVendorCode:
+        {
+            unk = false;
+
+	    emit closeVendor(data, len, dir);
+
+            break;
+        }
+
+        case OpenGMCode:
+        {
+            unk = false;
+
+	    emit openGM(data, len, dir);
+
+            break;
+        }
+
+        case CloseGMCode:
+        {
+            unk = false;
+
+	    emit closeGM(data, len, dir);
+
+            break;
+        }
+
+        case SpawnAppearanceCode:
+        {
+            struct spawnAppearanceStruct * appearance;
 
             unk = false;
 
-                      struct actionStruct* action;
-            action = (struct actionStruct*)(data);
+	    emit spawnAppearance((const spawnAppearanceStruct*)data, len, dir);
 
-            /*
-            if( action->spell != -1 )
+            appearance = (struct spawnAppearanceStruct *) (data);
+            
+            switch (appearance->type)
             {
-               printf("%s(%d) casted %s on %s(%d) for (%d) points of damage\n", m_Spawns[action->source].name, action->source, (const char*)spell_name(action->spell), m_Spawns[action->target].name, action->target, action->damage );
-            }
-            */
-
-            break;
-      }
-
-
-      case castOnCode:
-      {
-            if (castOnVer != opCodeVersion)
-               break;
-
-            unk = false;
-
-            //      struct castOnStruct *
-            //      	caston;
-            //      caston = (struct castOnStruct *) (data);
-
-            break;
-      }
-
-
-      case manaDecrementCode:
-      {
-            if (manaDecrementVer != opCodeVersion)
-               break;
-
-            unk = ! ValidatePayload(manaDecrementCode, manaDecrementStruct);
-
-	    emit manaChange((struct manaDecrementStruct *)data);
-
-            break;
-      }
-
-
-      case staminaCode:
-      {
-            if(staminaVer != opCodeVersion)
-               break;
-
-            unk = ! ValidatePayload(staminaCode, staminaStruct);
-
-	    emit updateStamina((const staminaStruct *)data);
-
-            break;
-      }
-
-
-      case MakeDropCode:
-      {
-            if (MakeDropVer != opCodeVersion)
-               break;
-
-            unk = ! ValidatePayload(MakeDropCode, dropThingOnGround);
-
-	    if (!m_zoning)
-	      emit newGroundItem((const dropThingOnGround*)data, 
-				 (direction == DIR_CLIENT));
-
-            break;
-      }
-
-
-      case RemDropCode:
-      {
-            if (RemDropVer != opCodeVersion)
-               break;
-
-            unk = ! ValidatePayload(RemDropCode, removeThingOnGround);
-
-            emit removeGroundItem((const removeThingOnGround *)data);
-
-            break;
-      }
-
-
-      case dropCoinsCode:
-      {
-            if (dropCoinsVer != opCodeVersion)
-               break;
-
-            unk = ! ValidatePayload(dropCoinsCode, dropCoinsStruct);
-
-	    if (!m_zoning)
-	      emit newCoinsItem((const dropCoinsStruct*)data);
-
-            break;
-      }
-
-
-      case removeCoinsCode:
-      {
-            if (removeCoinsVer != opCodeVersion)
-               break;
-
-            unk = ! ValidatePayload(removeCoinsCode, removeCoinsStruct);
-
-                      struct  removeCoinsStruct * crdrop;
-            crdrop = (struct removeCoinsStruct *) (data);
-
-            emit removeCoinsItem ((const removeCoinsStruct *)crdrop);
-
-            break;
-      }
-
-
-      case openVendorCode:
-      {
-            if (openVendorVer != opCodeVersion)
-               break;
-
-            unk = false;
-
-            break;
-      }
-
-
-      case closeVendorCode:
-      {
-           if (closeVendorVer != opCodeVersion)
-               break;
-
-            unk = false;
-
-            break;
-      }
-
-
-      case openGMCode:
-      {
-           if (openGMVer != opCodeVersion)
-               break;
-
-            unk = false;
-
-            break;
-      }
-
-
-      case closeGMCode:
-      {
-            if (closeGMVer != opCodeVersion)
-               break;
-
-            unk = false;
-
-            break;
-      }
-
-
-      case spawnAppearanceCode:
-      {
-           if (spawnAppearanceVer != opCodeVersion)
-               break;
-
-           unk = false;
-
-                         struct spawnAppearance * appearance;
-           appearance = (struct spawnAppearance *) (data);
-
-           switch (appearance->type)
-           {
-               case 0x0003:
-               {
-                  /*
-                   ** Invisibility Flag
-                   ** 0x00 Visible
-                   ** 0x01 Invisible
+                case 0x0003:
+                {
+                    /*
+                     ** Invisibility Flag
+                     ** 0x00 Visible
+                     ** 0x01 Invisible
                     */
 
-                  /*
-                  if( m_Spawns.contains(appearance->spawnId) )
-                     printf("%s ",m_Spawns[appearance->spawnId].name);
+#if 0
+                    if( m_Spawns.contains(appearance->spawnId) )
+                        printf("%s ",m_Spawns[appearance->spawnId].name);
+                    else
+                        printf("spawn(%d) ", appearance->spawnId);
 
-                  else
-                     printf("spawn(%d) ", appearance->spawnId);
+                    if(appearance->paramter)
+                        printf("is now invisible\n");
+                    else
+                        printf("is now visible\n");
+#endif 
+                    break;
+                }
 
-                  if(appearance->paramter)
-                     printf("is now invisible\n");
-
-                  else
-                     printf("is now visible\n");
-                  */
-                  break;
-               }
-
-               case 0x000e:
-               {
-                  /*
-                   ** Shows how to display the other PCs and NPCs
-                   ** 0x64 Standing Up
-                   ** 0x6e Sitting Down
+                case 0x000e:
+                {
+                    /*
+                     ** Shows how to display the other PCs and NPCs
+                     ** 0x64 Standing Up
+                     ** 0x6e Sitting Down
                     */
-                  break;
-               }
+ 
+                    break;
+                }
 
-               case 0x0010:
-               {
-                  /*
-                   ** This seems to be where the client is
-                   ** assigned the players ID
+                case 0x0010:
+                {
+                    /*
+                     ** This seems to be where the client is
+                     ** assigned the players ID
                     */
 		 
-                  emit setPlayerID( appearance->paramter );
+                    emit setPlayerID( appearance->paramter );
 
-                  break;
-               }
+                    break;
+                }
 
-               case 0x0011:
-               {
-                  /*
-                   ** This contains the current HP of the player.
+                case 0x0011:
+                {
+                    /*
+                     ** This contains the current HP of the player.
+                    */
+#if 0
+                    printf("Your hp is now %d.\n", 
+                           (unsigned short)appearance->paramter );
+#endif
+                    break;
+                }
+
+                case 0x0013:
+                {
+                    /*
+                     ** Not really sure.  Levitation is one of the events 
+                     ** seen by this. 0x02 Levitating
                     */
 
-                  /*
-                  printf("Your hp is now %d.\n", (unsigned short)appearance->paramter );
-                  */
-                  break;
-               }
+#if 0
+                    if ( m_Spawns.contains(appearance->spawnId) )
+                        printf("%s ",m_Spawns[appearance->spawnId].name);
+                    else
+                        printf("spawn(%d) ", appearance->spawnId);
 
-               case 0x0013:
-               {
-                  /*
-                   ** Not really sure.  Levitation is one of the events seen by this.
-                   ** 0x02 Levitating
+                    if (appearance->paramter & 0x0002)
+                        printf("is now levitating\n");
+                    else
+                        printf("is no longer levitating\n");
+#endif
+ 
+                    break;
+                }
+
+                case 0x0015:
+                {
+                    /*
+                     ** Used for anonymous and roleplaying
+                     ** 0x01 Anonymous
+                     ** 0x02 Role Playing
                     */
 
-                  /*
-                  if( m_Spawns.contains(appearance->spawnId) )
-                     printf("%s ",m_Spawns[appearance->spawnId].name);
+#if 0
+                    if ( m_Spawns.contains(appearance->spawnId) )
+                        printf("%s ",m_Spawns[appearance->spawnId].name);
+                    else
+                        printf("spawn(%d) ", appearance->spawnId);
 
-                  else
-                     printf("spawn(%d) ", appearance->spawnId);
+                    if (appearance->paramter & 0x0002)
+                        printf("is now role playing\n");
+                    else if(appearance->paramter & 0x0001)
+                        printf("is now anonymous\n");
+                    else
+                        printf("is no longer role playing or anonymous\n");
+#endif
+ 
+                    break;
+                }
+                
+                default:
+                {
+#if 0
+                    printf("%0.4x.%0.4x: ",
+                           (unsigned short)appearance->type,
+                           (unsigned short)appearance->unknown0008);
 
-                  if(appearance->paramter & 0x0002)
-                     printf("is now levitating\n");
+                    if ( m_Spawns.contains(appearance->spawnId) )
+                        printf("%s: ",m_Spawns[appearance->spawnId].name);
+                    else
+                        printf("spawn(%d): ", appearance->spawnId);
 
-                  else
-                     printf("is no longer levitating\n");
-                  */
-                  break;
-               }
-
-               case 0x0015:
-               {
-                  /*
-                   ** Used for anonymous and roleplaying
-                   ** 0x01 Anonymous
-                   ** 0x02 Role Playing
-                    */
-
-                  /*
-                  if( m_Spawns.contains(appearance->spawnId) )
-                     printf("%s ",m_Spawns[appearance->spawnId].name);
-
-                  else
-                     printf("spawn(%d) ", appearance->spawnId);
-
-                  if(appearance->paramter & 0x0002)
-                     printf("is now role playing\n");
-
-                  else if(appearance->paramter & 0x0001)
-                     printf("is now anonymous\n");
-
-                  else
-                     printf("is no longer role playing or anonymous\n");
-                  */
-                  break;
-               }
-
-               default:
-               {
-                  /*
-                  printf("%0.4x.%0.4x: ",(unsigned short)appearance->type,(unsigned short)appearance->unknown0008);
-
-                  if( m_Spawns.contains(appearance->spawnId) )
-                     printf("%s: ",m_Spawns[appearance->spawnId].name);
-
-                  else
-                     printf("spawn(%d): ", appearance->spawnId);
-
-                  printf("%0.8x\n", (unsigned short)appearance->paramter );
-                  */
-                  break;
-               }
-           }
-           break;
-      }
-
-
-      case attack2Code:
-      {
-           if (attack2Ver != opCodeVersion)
-               break;
-
-            unk = false;
-
-            emit attack2Hand1 ((const attack2Struct *)data);
-
-           break;
-      }
-
-
-      case considerCode:
-      {
-           if(considerVer != opCodeVersion)
-               break;
-
-            unk = false;
-
-	    ValidatePayload(considerCode, considerStruct);
-
-            if (direction == DIR_CLIENT)
-	      emit consRequest((const considerStruct*)data);
-            else
-               emit consMessage((const considerStruct*)data);
+                    printf("%0.8x\n", (unsigned short)appearance->paramter );
+#endif
+  
+                    break;
+                }
+            }
 
             break;
-      }
+        }
+            
+        case Attack2Code:
+        {
+            unk = false;
 
+            emit attack2Hand1 ((const attack2Struct *)data, len, dir);
 
-      case newGuildInZoneCode:
-      {
-            if(newGuildInZoneVer != opCodeVersion)
-               break;
+            break;
+        }
 
+        case ConsiderCode:
+        {
+            unk = false;
+
+	    ValidatePayload(ConsiderCode, considerStruct);
+
+	    emit consMessage((const considerStruct*)data, len, dir);
+
+            break;
+        }
+
+        case NewGuildInZoneCode:
+        {
             unk = false;
 
             break;
-      }
+        }
 
-
-      case moneyUpdateCode:
-      {  
-           if(moneyUpdateVer != opCodeVersion)
-               break;
-
+        case MoneyUpdateCode:
+        {  
             unk = false;
 
-	    emit moneyUpdate((const moneyUpdateStruct*)data);
-
-           break;
-      }
-
-      case moneyThingCode:
-      {
-           if(moneyThingVer != opCodeVersion)
-               break;
-
-            unk = false;
-
-	    emit moneyThing((const moneyUpdateStruct*)data);
+	    emit moneyUpdate((const moneyUpdateStruct*)data, len, dir);
 
             break;
-      }
+        }
 
-
-      case clientTargetCode:
-      {
-           if(clientTargetVer != opCodeVersion)
-               break;
-
-           unk = ! ValidatePayload(clientTargetCode, clientTargetStruct);
-
-           emit clientTarget((const clientTargetStruct*) data);
-
-           break;
-      }
-
-
-      case bindWoundCode:
-      {
-           if(bindWoundVer != opCodeVersion)
-               break;
-
-            unk = false;
-            break;
-
-      }
-
-
-      case CompressedDoorSpawnCode:
-      {
-            if (DoorSpawnVer != opCodeVersion)
-               break;
-
+        case MoneyThingCode:
+        {
             unk = false;
 
-	    if (!decoded)
-	      break;
-
-	    emit compressedDoorSpawn((const compressedDoorStruct *)decodedData);
+	    emit moneyThing((const moneyThingStruct*)data, len, dir);
 
             break;
-      }
+        }
 
+        case ClientTargetCode:
+        {
+            unk = ! ValidatePayload(ClientTargetCode, clientTargetStruct);
 
-      case groupinfoCode:
-      {
-           if (groupinfoVer != opCodeVersion)
+            emit clientTarget((const clientTargetStruct*) data, len, dir);
+
+            break;
+        }
+
+        case BindWoundCode:
+        {
+            unk = false;
+            
+	    emit bindWound((bindWoundStruct*)data, len, dir);
+
+            break;
+        }
+
+        case CDoorSpawnsCode:
+        {
+            unk = false;
+	    
+            // decode/decompress the payload
+            decoded = m_decode->DecodePacket(data, len, decodedData,
+                                     &decodedDataLen, showeq_params->ip);
+            if (!decoded)
                break;
 
-           // Too much still unknown.
-           unk = ! ValidatePayload(groupinfoCode, groupMemberStruct);
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+            cDoorSpawnsStruct* compressed;
+            compressed = (cDoorSpawnsStruct *)(decodedData);
 
-	   emit groupInfo((const groupMemberStruct*)data);
+            // verify size
 
-	   break;
-      }
-   } /* end switch(opCode) */
+            int pSize = (decodedDataLen - 4) / compressed->count;
 
-   if (showeq_params->logUnknownZonePackets && unk)
-   {
-       printf ("%04x - %d\n", opCode, len);
+            if (pSize != sizeof(doorStruct))
+            {
+	        printf("WARNING: CompressedDoorSpawnCode (dataLen:%d "
+                       "!= sizeof(doorStruct):%d)!\n", 
+                       pSize, sizeof(doorStruct));
 
-       if (!logData (showeq_params->UnknownZoneLogFilename, len, data))
+	        unk = true;
+            }
+#endif
+
+            emit compressedDoorSpawn((const cDoorSpawnsStruct *)decodedData, len, dir);
+
+            break;
+        }
+
+        case GroupInfoCode:
+        {
+            // Too much still unknown.
+
+            unk = ! ValidatePayload(GroupInfoCode, groupMemberStruct);
+
+	    emit groupInfo((const groupMemberStruct*)data, len, dir);
+
+	    break;
+        }
+
+        case CharUpdateCode:
+        {
+        }
+
+        default:
+        {
+        }
+    } /* end switch(opCode) */
+       
+    if (unk)
+      emit unknownOpcode(data, len, dir);
+
+    if (showeq_params->logUnknownZonePackets && unk)
+    {
+        printf ("%04x - %d (%s)\n", opCode, len, 
+	       ((dir == DIR_SERVER) ? 
+		"Server --> Client" : "Client --> Server"));
+
+        if (!logData (showeq_params->UnknownZoneLogFilename, len, data))
             emit toggle_log_UnknownData(); //untoggle the GUI checkmark
-   }
+    }
 
-   unsigned int uiOpCodeIndex = 0;
+    unsigned int uiOpCodeIndex = 0;
 
-   if (showeq_params->monitorOpCode_Usage)
-   {
-      for (unsigned int uiIndex = 0; uiIndex < OPCODE_SLOTS && uiOpCodeIndex == 0; uiIndex ++)
-      {
-          if (opCode == MonitoredOpCodeList[ uiIndex ][ 0 ])
-          {
-              if ((MonitoredOpCodeList[ uiIndex ][ 1 ] == direction) || 
-                  (MonitoredOpCodeList[ uiIndex ][ 1 ] == 3))
-              {
-                  if (!unk && MonitoredOpCodeList[ uiIndex ][ 2 ] == 1 || unk)
-                      uiOpCodeIndex = uiIndex + 1;
-              }
-          }
-      }
+    if (showeq_params->monitorOpCode_Usage)
+    {
+        unsigned int uiIndex = 0;
+
+        for (; uiIndex < OPCODE_SLOTS && uiOpCodeIndex == 0; uiIndex ++)
+        {
+            if (opCode == MonitoredOpCodeList[ uiIndex ][ 0 ])
+            {
+                if ((MonitoredOpCodeList[ uiIndex ][ 1 ] == dir) || 
+                    (MonitoredOpCodeList[ uiIndex ][ 1 ] == 3))
+                {
+                    if (!unk && MonitoredOpCodeList[ uiIndex ][ 2 ] == 1 || unk)
+                        uiOpCodeIndex = uiIndex + 1;
+                }
+            }
+        }
    }
 
    if (m_viewUnknownData && unk || uiOpCodeIndex > 0)
    {
        if (len == 2)
-           printf ("\n%s: %02x version %02x len %i\n\t", uiOpCodeIndex > 0 ? MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : "UNKNOWN", data[0], data[1], len);
+           printf ("\n%s: %02x version %02x len %i\n\t", 
+               uiOpCodeIndex > 0 ? 
+                   MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
+                   "UNKNOWN", data[0], data[1], len);
        else
        {
-           printf ("\n%s: %02x version %02x len %02d [%s] ID:%i\n\t", uiOpCodeIndex > 0 ? MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : "UNKNOWN", data[0], data[1], len, direction == 2 ? "Server --> Client" : "Client --> Server", data[3] * 256 + data[2]);
+           printf ("\n%s: %02x version %02x len %02d [%s] ID:%i\n\t", 
+               uiOpCodeIndex > 0 ? 
+                   MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
+                   "UNKNOWN", data[0], data[1], len, 
+                   dir == 2 ? "Server --> Client" : "Client --> Server", 
+                   data[3] * 256 + data[2]);
 
            for (uint32_t a = 0; a < len; a ++)
            {
-                if ((data[a] >= 32) && (data[a] <= 126))
-                    printf ("%c", data[a]);
-                else
-                    printf (".");
+               if ((data[a] >= 32) && (data[a] <= 126))
+                   printf ("%c", data[a]);
+               else
+                   printf (".");
            }
 
            printf ("\n");
@@ -2654,13 +2499,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
            {
                if (data[a] < 32)
                   printf ("%c", data[a] + 95);
-
                else if (data[a] > 126)
                   printf ("%c", data[a] - 95);
-
                else if (data[a] > 221)
                   printf ("%c", data[a] - 190);
-
                else
                   printf ("%c", data[a]);
            }
@@ -2669,29 +2511,42 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
                                 for people trying to decode the OpCodes to
                                 tell where the raw data ends and the next
                                 message begins...  -Andon */
-       }
-   }
-}
-
-
-void EQPacket::setLogAllPackets (bool flag)
-{
-  showeq_params->logAllPackets = flag;
-}
-
-void EQPacket::setLogZoneData (bool flag)
-{
-  showeq_params->logZonePackets = flag;
-}
-
-void EQPacket::setLogUnknownData (bool flag)
-{
-   showeq_params->logUnknownZonePackets = flag;
+        }
+    }
 }
 
 void EQPacket::setViewUnknownData (bool flag)
 {
   m_viewUnknownData = flag;
+}
+
+int EQPacket::playbackSpeed(void)
+{
+  return m_vPacket->playbackSpeed();
+}
+
+void EQPacket::setPlayback(int speed)
+{
+  if (m_vPacket)
+  {
+    m_vPacket->setPlaybackSpeed(speed);
+
+    QString string("");
+
+    if (speed == 0)
+      string.sprintf("Playback speed set Fast as possible");
+
+    else if (speed < 0)
+       string.sprintf("Playback paused (']' to resume)");
+
+    else
+       string.sprintf("Playback speed set to %d", speed);
+
+    emit stsMessage(string, 5000);
+
+    emit resetPacket(m_packetCount);  // this resets the packet average
+    emit playbackSpeedChanged(speed);
+  }
 }
 
 void EQPacket::incPlayback(void)
@@ -2721,18 +2576,7 @@ void EQPacket::incPlayback(void)
          break;
     }
 
-    emit numPacket(0);  // this resets the packet average
-    m_vPacket->setPlaybackSpeed(x);
-
-    QString string("");
-
-    if (x > 0)
-      string.sprintf("Playback speed set to %d", x);
-
-    else
-      string.sprintf("Playback speed set Fast as possible");
-
-    emit stsMessage(string, 5000);
+    setPlayback(x);
   }
 }
 
@@ -2763,32 +2607,51 @@ void EQPacket::decPlayback(void)
          break;
     }
 
-    emit numPacket(0);  // this resets the packet average
-    m_vPacket->setPlaybackSpeed(x);
-
-    QString string("");
-
-    if (x == 0)
-      string.sprintf("Playback speed set Fast as possible");
-
-    else if (x < 0)
-       string.sprintf("Playback paused (']' to resume)");
-
-    else
-       string.sprintf("Playback speed set to %d", x);
-
-    emit stsMessage(string, 5000);
+    setPlayback(x);
   }
 }
 
-void EQPacket::pkt_backfillPlayer(const playerProfileStruct *player)
+void EQPacket::dispatchDecodedCharProfile(const uint8_t* decodedData, 
+					  uint32_t decodedDataLen)
 {
-  emit backfillPlayer (player);
+  ValidateDecodedPayload(CharProfileCode, charProfileStruct);
+
+  emit backfillPlayer((const charProfileStruct*)decodedData, decodedDataLen, DIR_SERVER);
 }
 
-void EQPacket::pkt_backfillSpawn(const spawnStruct *spawn)
+void EQPacket::dispatchDecodedNewSpawn(const uint8_t* decodedData, 
+				       uint32_t decodedDataLen)
 {
-  emit backfillSpawn(spawn);
+  ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
+
+  emit backfillSpawn((newSpawnStruct*)decodedData, decodedDataLen, DIR_SERVER);
+}
+
+void EQPacket::dispatchDecodedZoneSpawns(const uint8_t* decodedData, 
+					 uint32_t decodedDataLen)
+{
+  zoneSpawnsStruct* zdata = (struct zoneSpawnsStruct *)(decodedData);
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+  int zoneSpawnsStructHeaderData = 
+    ((uint8_t*)&zdata->spawn[0]) - decodedData;
+
+  int zoneSpawnsStructPayloadCount = 
+       (decodedDataLen - zoneSpawnsStructHeaderData) / sizeof(spawnZoneStruct);
+
+  // validate payload size, decodedDataLen - zoneSpawnsStructHeader should be
+  // an exact multiple of the size of spawnZoneStruct
+  int remainder = 
+    (decodedDataLen - zoneSpawnsStructHeaderData) % sizeof(spawnZoneStruct);
+  if (remainder != 0)
+  {
+    printf("WARNING: Decoded ZoneSpawnsCode ((decodedDataLen:%d - zoneSpawnsStructHeaderData:%d) does not evenly contain %d spawnZoneStruct's:%d (remainder: %d)!\n",
+	   decodedDataLen, zoneSpawnsStructHeaderData, 
+	   zoneSpawnsStructPayloadCount, sizeof(spawnZoneStruct),
+	   remainder);
+  }
+#endif
+
+  emit backfillZoneSpawns(zdata, decodedDataLen, DIR_SERVER);
 }
 
 int EQPacket::getEQTimeOfDay( time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay )
@@ -2851,20 +2714,136 @@ char* getTime(char* pchTime)
    return pchTime;
 }
 
-EQPlayer *EQPacket::getplayer(void)
+void EQPacket::monitorIPClient(const QString& ip)
 {
-   return m_player;
+  showeq_params->ip = ip;
+  struct in_addr  ia;
+  inet_aton (showeq_params->ip, &ia);
+  m_client_addr = ia.s_addr;
+  emit clientChanged(m_client_addr);
+  printf("Listening for IP client: %s\n", (const char*)showeq_params->ip);
+  m_session_tracking_enabled = showeq_params->session_tracking;
+  emit sessionTrackingChanged(m_session_tracking_enabled);
+
+  if (!showeq_params->playbackpackets)
+    m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+			       showeq_params->realtime, 
+			       IP_ADDRESS_TYPE, 0, 0);
 }
 
-long EQPacket::getclientaddr(void)
+void EQPacket::monitorMACClient(const QString& mac)
 {
-   return m_client_addr;
+  showeq_params->mac_address = mac;
+  m_detectingClient = true;
+  struct in_addr  ia;
+  inet_aton (AUTOMATIC_CLIENT_IP, &ia);
+  m_client_addr = ia.s_addr;
+  emit clientChanged(m_client_addr);
+  printf("Listening for MAC client: %s\n", 
+	 (const char*)showeq_params->mac_address);
+  m_session_tracking_enabled = showeq_params->session_tracking;
+  emit sessionTrackingChanged(m_session_tracking_enabled);
+
+  if (!showeq_params->playbackpackets)
+    m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+			       showeq_params->realtime, 
+			       IP_ADDRESS_TYPE, 0, 0);
 }
 
-void EQPacket::resetPcapFilter()
+void EQPacket::monitorNextClient()
 {
-   m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
-                showeq_params->realtime, DEFAULT_ADDRESS_TYPE, 0);
+  m_detectingClient = true;
+  showeq_params->ip = AUTOMATIC_CLIENT_IP;
+  struct in_addr  ia;
+  inet_aton (showeq_params->ip, &ia);
+  m_client_addr = ia.s_addr;
+  emit clientChanged(m_client_addr);
+  m_session_tracking_enabled = showeq_params->session_tracking;
+  emit sessionTrackingChanged(m_session_tracking_enabled);
+  printf("Listening for next client seen. (you must zone for this to work!)\n");
+
+  if (!showeq_params->playbackpackets)
+    m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+			       showeq_params->realtime, 
+			       DEFAULT_ADDRESS_TYPE, 0, 0);
+}
+
+void EQPacket::monitorDevice(const QString& dev)
+{
+  // set the device to use
+  showeq_params->device = dev;
+
+  // make sure we aren't playing back packets
+  if (showeq_params->playbackpackets)
+    return;
+
+  // stop the current packet capture
+  m_packetCapture->stop();
+
+  // setup for capture on new device
+  if (!showeq_params->ip.isEmpty())
+  {
+    struct hostent *he;
+    struct in_addr  ia;
+
+    /* Substitute "special" IP which is interpreted 
+       to set up a different filter for picking up new sessions */
+    
+    if (showeq_params->ip == "auto")
+      inet_aton (AUTOMATIC_CLIENT_IP, &ia);
+    else if (inet_aton (showeq_params->ip, &ia) == 0)
+    {
+      he = gethostbyname(showeq_params->ip);
+      if (!he)
+      {
+	printf ("Invalid address; %s\n", (const char*)showeq_params->ip);
+	exit (0);
+      }
+      memcpy (&ia, he->h_addr_list[0], he->h_length);
+    }
+    m_client_addr = ia.s_addr;
+    showeq_params->ip = inet_ntoa(ia);
+    
+    if (showeq_params->ip ==  AUTOMATIC_CLIENT_IP)
+    {
+      m_detectingClient = true;
+      printf("Listening for first client seen.\n");
+    }
+    else
+    {
+      m_detectingClient = false;
+      printf("Listening for client: %s\n",
+	     (const char*)showeq_params->ip);
+    }
+  }
+
+  // restart packet capture
+  if (showeq_params->mac_address.length() == 17)
+    m_packetCapture->start(showeq_params->device, 
+			   showeq_params->mac_address, 
+			   showeq_params->realtime, MAC_ADDRESS_TYPE );
+  else
+    m_packetCapture->start(showeq_params->device, showeq_params->ip, 
+			   showeq_params->realtime, IP_ADDRESS_TYPE );
+}
+
+void EQPacket::session_tracking()
+{
+   m_session_tracking_enabled = showeq_params->session_tracking;
+   emit sessionTrackingChanged(m_session_tracking_enabled);
+}
+
+void EQPacket::setArqSeqGiveUp(int giveUp)
+{
+  // a sanity check, if the user set it to below 32, they're prolly nuts
+  if (giveUp >= 32)
+    showeq_params->arqSeqGiveUp = giveUp;
+
+  // a sanity check, if the user set it to below 32, they're prolly nuts
+  if (showeq_params->arqSeqGiveUp >= 32)
+    m_serverArqSeqGiveUp = showeq_params->arqSeqGiveUp;
+  else
+    m_serverArqSeqGiveUp = 32;
 }
    
 //----------------------------------------------------------------------
@@ -2894,7 +2873,7 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
    // create pcap style filter expressions
    if (address_type == IP_ADDRESS_TYPE)
    {
-      if (strcmp(host, "127.0.0.0") == 0)
+      if (strcmp(host, AUTOMATIC_CLIENT_IP) == 0)
       {
           printf ("Filtering packets on device %s, searching for EQ client...\n", device);
           sprintf (filter_buf, "(udp[0:2] > 1024 or udp[2:2] > 1024) and ether proto 0x0800");
@@ -2919,13 +2898,17 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
    }
 
    // initialize the pcap object 
-   m_pcache_pcap = pcap_open_live((char *) device, 1500, true, 0, ebuf);
+   m_pcache_pcap = pcap_open_live((char *) device, 1500, true, 100, ebuf);
 
    if (!m_pcache_pcap)
    {
-      pcap_perror (m_pcache_pcap, "pcap_error:pcap_open_live"); 
-      exit(0);
+     fprintf(stderr, "pcap_error:pcap_open_live(%s): %s\n", device, ebuf);
+     if ((getuid() != 0) && (geteuid() != 0))
+       fprintf(stderr, "Make sure you are running ShowEQ as root.\n");
+     exit(0);
    }
+
+   setuid(getuid()); // give up root access if running suid root
 
    if (pcap_compile(m_pcache_pcap, &bpp, filter_buf, 1, 0) == -1)
    {
@@ -2951,6 +2934,12 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
       if (pthread_setschedparam (m_tid, SCHED_RR, &sp) != 0)
          fprintf (stderr, "Failed to set capture thread realtime.");
    }
+}
+
+void PacketCaptureThread::stop()
+{
+  // close the pcap session
+  pcap_close(m_pcache_pcap);
 }
 
 void* PacketCaptureThread::loop (void *param)
@@ -3019,7 +3008,8 @@ void PacketCaptureThread::setFilter (const char *device,
                                      const char *hostname,
                                      bool realtime,
                                      uint8_t address_type,
-                                     uint16_t zone_server_port
+                                     uint16_t zone_server_port,
+				     uint16_t client_port
                                     )
 {
     char filter_buf[256]; // pcap filter buffer 
@@ -3027,10 +3017,14 @@ void PacketCaptureThread::setFilter (const char *device,
     struct sched_param sp;
 
     /* Listen to World Server or the specified Zone Server */
-    if (address_type == IP_ADDRESS_TYPE) 
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
-    else if (address_type == MAC_ADDRESS_TYPE)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
+    if (address_type == IP_ADDRESS_TYPE && client_port)   
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, hostname);
+    else if (address_type == IP_ADDRESS_TYPE && !client_port) 
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
+    else if (address_type == MAC_ADDRESS_TYPE && client_port)
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, hostname);
+    else if (address_type == MAC_ADDRESS_TYPE && !client_port)
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
     else
     {
           printf ("Filtering packets on device %s, searching for EQ client...\n", device);

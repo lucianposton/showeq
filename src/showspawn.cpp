@@ -141,7 +141,7 @@ int main (int argc, char *argv[])
   out << "<TD><SELECT name=\"class\" size=\"1\">\n";
   out << "<OPTION value=\"0\"";
   if (searchClass == 0)
-    cout << " selected";
+    out << " selected";
   out << ">Any</OPTION>\n";
 
   // create a fake spawn to get class names
@@ -155,7 +155,7 @@ int main (int argc, char *argv[])
 
     out << "<OPTION value=\"" << i << "\"";
     if (searchClass == i)
-      cout << " selected";
+      out << " selected";
 
     // output the name corresponding to the class value
     out << ">" << fakeSpawn.className() << "</OPTION>\n";

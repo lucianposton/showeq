@@ -21,8 +21,6 @@ static char* itemdbid = "@(#) $Id$";
 
 #define UPGRADE_STATUS_UPDATE 100
 
-#define NEW_STORAGE
-
 // define the current version number for data in database
 #define CURRENT_ITEM_FORMAT_VERSION 1
 
@@ -152,7 +150,8 @@ void EQItemDBEntryData_1::Init(const struct itemStruct* item)
    m_cost           = item->cost;
 
    // none of the following fields are valid for book items
-   if (m_flag != ITEM_BOOK)
+   if ((m_flag != ITEM_BOOK) && (m_flag != ITEM_CONTAINER_PLAIN) &&
+	 (m_flag != ITEM_CONTAINER))
    {
      m_STR               = item->common.STR;
      m_STA               = item->common.STA;
@@ -178,31 +177,25 @@ void EQItemDBEntryData_1::Init(const struct itemStruct* item)
      m_material          = item->common.material;
      m_color             = item->common.color;
      m_classes           = item->common.classes;
-
-     // handle container vs. non-container special case
-     if ((m_flag == ITEM_CONTAINER_PLAIN) ||
-	 (m_flag == ITEM_CONTAINER))
-     {
-       m_spellId0        = ITEM_SPELLID_NOSPELL;
-       m_spellId         = ITEM_SPELLID_NOSPELL;
-       m_numSlots        = item->common.container.numSlots;
-       m_weightReduction = item->common.container.weightReduction;
-       m_sizeCapacity    = item->common.container.sizeCapacity;
-     }
-     else
-     {
-       m_races           = item->common.normal.races;
+     m_races             = item->common.races;
        m_spellId0        = item->common.spellId0;
        m_level0          = item->common.level0;
        m_level           = item->common.level;
        m_spellId         = item->common.spellId;
        m_charges         = item->common.charges;
      }
-   }
    else
    {
      m_spellId0          = ITEM_SPELLID_NOSPELL;
      m_spellId           = ITEM_SPELLID_NOSPELL;
+   }
+   // handle container vs. non-container special case
+   if ((m_flag == ITEM_CONTAINER_PLAIN) ||
+	 (m_flag == ITEM_CONTAINER))
+   {
+     m_numSlots        = item->container.numSlots;
+     m_weightReduction = item->container.weightReduction;
+     m_sizeCapacity    = item->container.sizeCapacity;
    }
 }
 
@@ -800,7 +793,6 @@ bool EQItemDB::AddItem(const itemStruct* item, bool update)
   key.size = sizeof(item->itemNr);
   key.data = (void*)&item->itemNr;
 
-#ifdef NEW_STORAGE
   // calculate the size of the lore string
   size_t loreSize = strlen(item->lore) + 1;
 
@@ -827,43 +819,6 @@ bool EQItemDB::AddItem(const itemStruct* item, bool update)
   data.data = (void*)databuffer;
 
   result = Insert(m_ItemDataDB, key, data, update);
-#else
-  // setup datum to insert
-  data.size = strlen(item->lore) + 1;
-  data.data = (void*)item->lore;
-
-  // insert into Lore database
-  result = Insert(m_ItemLoreDB, key, data, update);
-
-  // only add if database is enabled
-  if (m_dbTypesEnabled & NAME_DB)
-  {
-    // setup datum to insert
-    data.size = strlen(item->name) + 1;
-    data.data = (void*)item->name;
-
-    result2 = Insert(m_ItemNameDB, key, data, update);
-
-    if (!result2)
-      result = result2;
-  }
-
-  // only add if database is enabled
-  if (m_dbTypesEnabled & DATA_DB)
-  {
-    // Create an EQItemDBEntryData to store
-    EQItemDBEntryData_Current dbEntryData(item);
-
-    // setup datum to insert
-    data.size = sizeof(dbEntryData);
-    data.data = (void*)&dbEntryData;
-
-    result2 = Insert(m_ItemDataDB, key, data, update);
-
-    if (!result2)
-      result = result2;
-  }
-#endif
 
   // only add if database is enabled and no entry exists
   if (m_dbTypesEnabled & RAW_DATA_DB)
@@ -891,34 +846,8 @@ bool EQItemDB::DeleteItem(uint16_t itemNr)
   key.size = sizeof(itemNr);
   key.data = (void*)&itemNr;
   
-#ifdef NEW_STORAGE
   // delete data from ItemDataDB
     result = Delete(m_ItemDataDB, key);
-#else
-  // Delete from ItemLoreDB
-  if (IsEntryExist(m_ItemLoreDB, key))
-    result = Delete(m_ItemLoreDB, key);
-
-  // only add if database is enabled and
-  if ((m_dbTypesEnabled & NAME_DB) &&
-      IsEntryExist(m_ItemNameDB, key))
-  {
-    result2 = Delete(m_ItemNameDB, key);
-
-    if (!result2)
-      result = result2;
-  }
-
-  // only delete if database is enabled
-  if ((m_dbTypesEnabled & DATA_DB) &&
-      IsEntryExist(m_ItemDataDB, key))
-  {
-    result2 = Delete(m_ItemDataDB, key);
-
-    if (!result2)
-      result = result2;
-  }
-#endif
 
   // only delete if database is enabled
   if ((m_dbTypesEnabled & RAW_DATA_DB) &&
@@ -940,12 +869,8 @@ bool EQItemDB::ItemExist(uint16_t itemNr)
   key.size = sizeof(itemNr);
   key.data = (void*)&itemNr;
 
-#ifdef NEW_STORAGE
   // so does the item exist in the Item Lore database
   return IsEntryExist(m_ItemDataDB, key);
-#else
-  return IsEntryExist(m_ItemLoreDB, key);
-#endif
 }
 
 QString EQItemDB::GetItemName(uint16_t itemNr)
@@ -957,7 +882,6 @@ QString EQItemDB::GetItemName(uint16_t itemNr)
   key.size = sizeof(itemNr);
   key.data = (void*)&itemNr;
 
-#ifdef NEW_STORAGE
   // attempt to retrieve entry from the item name database
   if (GetEntry(m_ItemDataDB, key, data))
   {
@@ -973,19 +897,6 @@ QString EQItemDB::GetItemName(uint16_t itemNr)
     // release the database memory
     Release(data);
   }
-#else
-  // attempt to retrieve entry from the item name database
-  if (GetEntry(m_ItemNameDB, key, data))
-  {
-    // set the result
-    result = (const char*)data.data;
-
-    // release the database memory
-    Release(data);
-  }
-  else
-    result = ""; // set result to empty string for safety
-#endif
 
   return result;
 }
@@ -999,7 +910,6 @@ QString EQItemDB::GetItemLoreName(uint16_t itemNr)
   key.size = sizeof(itemNr);
   key.data = (void*)&itemNr;
 
-#ifdef NEW_STORAGE
   // attempt to retrieve entry from the item name database
   if (GetEntry(m_ItemDataDB, key, data))
   {
@@ -1010,19 +920,6 @@ QString EQItemDB::GetItemLoreName(uint16_t itemNr)
     // release the database memory
     Release(data);
   }
-#else
-  // attempt to retrieve entry from the lore name database
-  if (GetEntry(m_ItemLoreDB, key, data))
-  {
-    // set the result
-    result = (const char*)data.data;
-
-    // release the database memory
-    Release(data);
-  }
-  else
-    result = ""; // set result to empty string for safety
-#endif
 
   return result;
 }

@@ -18,6 +18,9 @@
 #include <qpopupmenu.h>
 #include <time.h>
 #include <sys/time.h>
+
+#include "seqwindow.h"
+#include "seqlistview.h"
 #include "spellshell.h"
 #include "everquest.h"
 
@@ -35,8 +38,9 @@ class SpellListItem : public QListViewItem
    public:
       SpellListItem(QListViewItem *parent);
       SpellListItem(QListView *parent = NULL);
-      //virtual void paintCell( QPainter *p, const QColorGroup &cg,
-      //                        int column, int width, int alignment );
+	//Worried - added paintCell to enable color changes
+      virtual void paintCell( QPainter *p, const QColorGroup &cg,
+                              int column, int width, int alignment );
       const QColor textColor();
       void setTextColor(const QColor &color);
       void update();
@@ -51,7 +55,7 @@ class SpellListItem : public QListViewItem
       QString m_category;
 };
 
-class SpellList : public QListView 
+class SpellList : public SEQListView 
 {
    Q_OBJECT
    public:
@@ -83,8 +87,6 @@ class SpellList : public QListView
       void rightButtonClicked(QListViewItem *, const QPoint&, int);
       void activated(int);
 
-      void savePrefs(void);
-
    private:
       void selectAndOpen(SpellListItem *);
       QValueList<QString> m_categoryList;
@@ -95,6 +97,22 @@ class SpellList : public QListView
       int mid_casterId, mid_casterName;
       int mid_targetId, mid_targetName;
       int mid_casttime, mid_duration;
+};
+
+class SpellListWindow : public SEQWindow
+{
+  Q_OBJECT
+
+ public:
+  SpellListWindow(QWidget* parent = 0, const char* name = 0);
+  ~SpellListWindow();
+  SpellList* spellList() { return m_spellList; }
+
+ public slots:
+  virtual void savePrefs(void);
+
+ protected:
+  SpellList* m_spellList;
 };
 
 #endif

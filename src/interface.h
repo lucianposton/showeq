@@ -27,11 +27,13 @@
 #include <qmessagebox.h>
 #include <qtabdialog.h>
 #include <qspinbox.h>
+#include <qintdict.h>
 
 #include "packet.h"
 #include "compassframe.h"
 #include "map.h"
 #include "experiencelog.h"
+#include "combatlog.h"
 #include "msgdlg.h"
 #include "filtermgr.h"
 #include "spawnshell.h"
@@ -42,6 +44,7 @@
 #include "skilllist.h"
 #include "statlist.h"
 #include "group.h"
+#include "netdiag.h"
 
 //--------------------------------------------------
 // typedefs
@@ -56,6 +59,10 @@ const int maxNumMaps = 5;
 // Docked menu
 const int mapDockBase = 5; 
 
+// This is the base number where the map caption options appear in the
+// Window caption menu
+const int mapCaptionBase = 9; 
+
 //--------------------------------------------------
 // EQInterface
 class EQInterface:public QMainWindow
@@ -66,40 +73,44 @@ class EQInterface:public QMainWindow
    EQInterface (QWidget * parent = 0, const char *name = 0);
    ~EQInterface();
 
+   QFont appFont;
+
  public slots:
    void msgReceived(const QString &);
    void stsMessage(const QString &, int timeout = 0);
    void numSpawns(int);
    void numPacket(int);
-   void attack1Hand1(const attack1Struct *);
+   void resetPacket(int);
    void attack2Hand1(const attack2Struct *);
-   void itemShop(const itemShopStruct* items);
+   void action2Message(const action2Struct *);
+   void itemShop(const itemInShopStruct* items);
    void moneyOnCorpse(const moneyOnCorpseStruct* money);
-   void itemPlayerReceived(const itemReceivedPlayerStruct* itemc);
-   void tradeItemOut(const tradeItemStruct* itemt);
-   void tradeItemIn(const itemReceivedPlayerStruct* itemr);
-   void wearItem(const itemPlayerStruct* itemp);
-   void channelMessage(const channelMessageStruct* cmsg, bool client);
+   void itemPlayerReceived(const itemOnCorpseStruct* itemc);
+   void tradeItemOut(const tradeItemOutStruct* itemt);
+   void tradeItemIn(const tradeItemInStruct* itemr);
+   void wearItem(const playerItemStruct* itemp);
+   void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
+   void formattedMessage(const formattedMessageStruct* cmsg, uint32_t, uint8_t);
    void random(const randomStruct* randr);
    void emoteText(const emoteTextStruct* emotetext);
-   void playerBook(const bookPlayerStruct* bookp);
-   void playerContainer(const containerPlayerStruct* containp);
-   void inspectData(const inspectingStruct* inspt);
+   void playerBook(const playerBookStruct* bookp);
+   void playerContainer(const playerContainerStruct* containp);
+   void inspectData(const inspectDataStruct* inspt);
    void spMessage(const spMesgStruct* spmsg);
-   void handleSpell(const spellCastStruct* mem, bool client);
+   void handleSpell(const memSpellStruct* mem, uint32_t, uint8_t);
    void beginCast(const beginCastStruct* bcast);
-   void interruptSpellCast(const interruptCastStruct *icast);
-   void startCast(const castStruct* cast);
-   void systemMessage(const systemMessageStruct* smsg);
+   void interruptSpellCast(const badCastStruct *icast);
+   void startCast(const startCastStruct* cast);
+   void systemMessage(const sysMsgStruct* smsg);
    void moneyUpdate(const moneyUpdateStruct* money);
-   void moneyThing(const moneyUpdateStruct* money);
+   void moneyThing(const moneyThingStruct* money);
    void groupInfo(const groupMemberStruct* gmem);
    void summonedItem(const summonedItemStruct*);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
-   void zoneChange(const zoneChangeStruct* zoneChange, bool client);
-   void zoneNew(const newZoneStruct* zoneNew, bool client);
-   void newGroundItem(const dropThingOnGround*, bool client);
+   void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
+   void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
+   void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
    void clientTarget(const clientTargetStruct* cts);
    void spawnSelected(const Item* item);
    void spawnConsidered(const Item* item);
@@ -128,7 +139,6 @@ class EQInterface:public QMainWindow
    void dumpCoins(void);
    void dumpMapInfo(void);
    void launch_editor_filters(void);
-   void launch_editor_spawns(void);
    void toggleAutoDetectCharSettings(int id);
    void SetDefaultCharacterClass(int id);
    void SetDefaultCharacterRace(int id);
@@ -138,13 +148,19 @@ class EQInterface:public QMainWindow
    void toggle_view_SpawnListCol( int id );
    void toggle_view_DockedWin( int id );
    
-   void SetDefaultCharacterLevel_COMPATABILITY (void);
-        void SetCharLevel                      (void);
-        void ResetCharLevel                    (void);
-   
    void selectTheme(int id);
    void ToggleOpCodeMonitoring (int id);
    void ReloadMonitoredOpCodeList (void);
+   void toggle_net_session_tracking(void);
+   void toggle_net_real_time_thread(int id);
+   void toggle_net_broken_decode(int id);
+   void set_net_monitor_next_client();
+   void set_net_client_IP_address();
+   void set_net_client_MAC_address();
+   void set_net_device();
+   void set_net_arq_giveup(int giveup);
+   virtual void setCaption(const QString&);
+   void restoreStatusFont();
 
  signals:
    void newMessage(int index);
@@ -153,49 +169,82 @@ class EQInterface:public QMainWindow
    void saveAllPrefs(void);
    void newZoneName (const QString &); 
    void spellMessage(QString&);
+   void restoreFonts();
 
    // Decoder signals
-   void backfillPlayer(playerProfileStruct *);
+   void backfillPlayer(charProfileStruct *);
    void backfillSpawn(spawnStruct *);
+
+   void combatSignal(int, int, int, int, int);
 
  private slots:
    void toggle_opt_Fast();
    void toggle_view_UnknownData();
    void toggle_view_ChannelMsgs();
    void toggle_view_ExpWindow();
+   void toggle_view_CombatWindow();
    void toggle_opt_ConSelect();
    void toggle_opt_TarSelect();
    void toggle_opt_KeepSelectedVisible();
-   void toggle_opt_SparrMessages();
    void toggle_opt_LogSpawns();
    void toggle_opt_PvPTeams();
    void toggle_opt_PvPDeity();
-
+   void toggle_opt_CreateUnknownSpawns(int);
+   void toggle_opt_ShowSpellMessages(int);
+   void toggle_opt_WalkPathRecord(int);
+   void set_opt_WalkPathLength(int);
+   void toggle_opt_RetardedCoords(int);
+   void toggle_opt_SystimeSpawntime(int);
    void toggle_view_SpawnList();
    void toggle_view_SpellList();
    void toggle_view_PlayerStats();
    void toggle_view_Compass();
    void toggle_view_PlayerSkills();
    void toggle_view_Map(int id);
-   void grabNextAddr (void);
-
+   void toggle_view_NetDiag();
    void resetMaxMana();
-
    void createMessageBox();
    void select_filter_file();
+   void toggle_filter_Case(int id);
+   void toggle_filter_AlertInfo(int id);
+   void toggle_filter_Audio(int id);
+   void toggle_filter_Log(int id);
+   void set_filter_AudioCommand(int id);
+   void toggle_view_menubar();
+   void toggle_view_statusbar();
+   void set_interface_WindowCaption(int id);
+   void set_interface_WindowFont(int id);
+   void set_interface_Font(int id);
+   void select_interface_FormatFile(int id);
+   void toggle_interface_statusbar_Window(int id);
+   void set_interface_statusbar_Font(int id);
+   void toggle_interface_SavePosition(int id);
+   void toggle_interface_UseWindowPos(int id);
+   void toggle_interface_UseStdout(int id);
+   void toggle_interface_NoBank(int id);
+   void toggle_opt_save_DecodeKey(int id);
+   void toggle_opt_save_PlayerState(int id);
+   void toggle_opt_save_Spawns(int id);
+   void set_opt_save_SpawnFrequency(int frequency);
+   void set_opt_save_BaseFilename();
+   void init_view_menu();
 
  protected:
+   int setTheme(int id);
+   void loadFormatStrings();
    void resizeEvent (QResizeEvent *);
    void logFilteredSpawn(const Item* item, uint32_t flag);
+   void makeNoise( const Item* item, char* szAudioCmd, char* szSoundType);
    void doAlertCommand(const Item* item, 
 		       const QString& command,
 		       const QString& audioCue);
    void showMap(int mapNum);
+   void showSpawnList(void);
    void showStatList(void);
    void showSkillList(void);
-   void showSpawnList(void);
    void showSpellList(void);
    void showCompass(void);
+   void showNetDiag(void);
 
  public:
    EQPlayer*  m_player;
@@ -203,41 +252,54 @@ class EQInterface:public QMainWindow
 
  private:
    MapMgr* m_mapMgr;
-   CSpawnList* m_spawnList;
-   SpellList* m_spellList;
-   EQSkillList* m_skillList;
-   EQStatList* m_statList;
+   SpawnListWindow* m_spawnList;
+   SpellListWindow* m_spellList;
+   SkillListWindow* m_skillList;
+   StatListWindow* m_statList;
    EQPacket*  m_packet;
    FilterMgr* m_filterMgr;
    CategoryMgr* m_categoryMgr;
    SpawnShell* m_spawnShell;
    SpellShell* m_spellShell;
    GroupMgr* m_groupMgr;
+   PktLogger* m_pktLogger;
    const Item* m_selectedSpawn;
 
-#if 1 // ZBTEMP: Migrate compass to own frame
+   QPopupMenu* m_netMenu;
+   QPopupMenu* m_statWinMenu;
+   QPopupMenu* m_skillWinMenu;
+   QPopupMenu* m_spawnListMenu;
+   QPopupMenu* m_dockedWinMenu;
+   QPopupMenu* m_windowCaptionMenu;
+   QPopupMenu* m_charMenu;
+   QPopupMenu* m_charLevelMenu;
+   QSpinBox* m_levelSpinBox;
+   QPopupMenu* m_charClassMenu;
+   QPopupMenu* m_charRaceMenu;
+
    CompassFrame* m_compass;
-#else
-   QVBox*     m_compass;
-#endif
    MapFrame*  m_map[maxNumMaps];
    QSplitter* m_splitV;
    QSplitter* m_splitH;
    QSplitter* m_splitT;
    ExperienceWindow* m_expWindow;
+   CombatWindow* m_combatWindow;
+   NetDiag* m_netDiag;
    QLabel* m_stsbarSpawns;
    QLabel* m_stsbarStatus;
    QLabel* m_stsbarZone;
    QLabel* m_stsbarID;
    QLabel* m_stsbarExp;
+   QLabel* m_stsbarExpAA;
    QLabel* m_stsbarPkt;
    QLabel* m_stsbarEQTime;
 
    QList<MsgDialog>  m_msgDialogList;   
 
    bool viewUnknownData;
-   bool viewExpWindow;
 
+   int char_ClassID[PLAYER_CLASSES];
+   int char_RaceID[PLAYER_RACES];
    int  m_id_log_AllPackets;
    int  m_id_log_ZoneData;
    int  m_id_log_UnknownData;
@@ -247,11 +309,13 @@ class EQInterface:public QMainWindow
    int  m_id_view_UnknownData;
    int  m_id_view_ChannelMsgs;
    int  m_id_view_ExpWindow;
+   int  m_id_view_CombatWindow;
    int  m_id_view_SpawnList;
    int  m_id_view_PlayerStats;
    int  m_id_view_PlayerSkills;
    int  m_id_view_Compass;
    int  m_id_view_Map[maxNumMaps];
+   int  m_id_view_NetDiag;
    int  m_id_view_SpellList;
    int  m_id_view_PlayerStats_Options;
    int  m_id_view_PlayerStats_Stats[LIST_MAXLIST];
@@ -262,25 +326,20 @@ class EQInterface:public QMainWindow
    int  m_id_opt_ConSelect;
    int  m_id_opt_TarSelect;
    int  m_id_opt_KeepSelectedVisible;
-   int  m_id_opt_SparrMessages;
    int  m_id_opt_LogSpawns;
    int  m_id_opt_PvPTeams;
    int  m_id_opt_PvPDeity;
-   int  m_lPacketStartTime;
+   int  m_id_net_sessiontrack;
+   int  m_packetStartTime;
+   int  m_initialcount;
 
    MenuIDList IDList_StyleMenu;
-   MenuIDList IDList_CharRaceMenu;
-   MenuIDList IDList_CharClassMenu;
-   MenuIDList IDList_StatWinMenu;
 
    QStringList m_StringList;
-   QSpinBox *levelSpinBox;
    QDialog *dialogbox;
-#if 0 // ZBTEMP: Migrate compass to own frame
-   QLabel* m_xPos;
-   QLabel* m_yPos;
-   QLabel* m_zPos;
-#endif
+
+   QIntDict<QString> m_formattedMessageStrings;
+
    bool m_viewChannelMsgs;
 
    bool m_isSkillListDocked;
@@ -289,6 +348,8 @@ class EQInterface:public QMainWindow
    bool m_isSpawnListDocked;
    bool m_isSpellListDocked;
    bool m_isCompassDocked;
+
+   
 };
 
 #endif // EQINT_H

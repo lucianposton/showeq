@@ -21,6 +21,8 @@
 #include <limits.h>
 #include <math.h>
 
+#include <qregexp.h>
+
 #include "spawnshell.h"
 #include "fixpt.h"
 #include "util.h"
@@ -43,7 +45,7 @@ const int animationCoefficientFixPt =
 
 //----------------------------------------------------------------------
 // Handy utility functions
-static 
+// static 
 QString print_weapon (uint16_t weapon)
 {
   // sparse array of weapon names, some are NULL
@@ -56,6 +58,18 @@ QString print_weapon (uint16_t weapon)
   static const char*  weaponnames27[] = 
   {
 #include "weapons27.h"
+  };
+
+  // sparse array of weapon names (in 0x28 range), some are NULL
+  static const char*  weaponnames28[] = 
+  {
+#include "weapons28.h"
+  };
+
+  // sparse array of weapon names (in 0x2b range), some are NULL
+  static const char*  weaponnames2b[] = 
+  {
+#include "weapons2b.h"
   };
 
   // assume no material name found
@@ -75,6 +89,18 @@ QString print_weapon (uint16_t weapon)
     // retrieve pointer to weapon name
     if (weaponLo < (sizeof(weaponnames27) / sizeof (char*)))
       weaponStr = weaponnames27[weaponLo];
+  }
+  else if (weaponHi == 0x28)
+  {
+    // retrieve pointer to weapon name
+    if (weaponLo < (sizeof(weaponnames28) / sizeof (char*)))
+      weaponStr = weaponnames28[weaponLo];
+  }
+  else if (weaponHi == 0x2b)
+  {
+    // retrieve pointer to weapon name
+    if (weaponLo < (sizeof(weaponnames2b) / sizeof (char*)))
+      weaponStr = weaponnames2b[weaponLo];
   }
 
   // if race name exists, then return it, otherwise return a number string
@@ -115,7 +141,7 @@ QString Item::transformedName() const
   return m_name;
 }
 
-uint8_t Item::race() const
+uint16_t Item::race() const
 {
   return 0;
 }
@@ -155,7 +181,11 @@ QString Item::dumpString() const
 
 void Item::setPos(int16_t xPos, int16_t yPos, int16_t zPos)
 {
+  // set the item position
   setPoint(xPos, yPos, zPos);
+
+  // set scale Z for display purposes
+  m_zDisplay = float(zPos) / 10.0;
 }
 
 //----------------------------------------------------------------------
@@ -170,6 +200,7 @@ Spawn::Spawn()
   Item::setPos(0, 0, 0);
   setDeltas(0, 0, 0);
   setHeading(0, 0);
+  setAnimation(0);
   setPetOwnerID(0);
   setLight(0);
   setGender(0);
@@ -179,7 +210,8 @@ Spawn::Spawn()
   setHP(0);
   setMaxHP(0);
   setLevel(0);
-  for (int i = 0; i < 9; i++)
+  setTypeflag(0);
+  for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
 
   // just clear the considred flag since data would be outdated
@@ -224,6 +256,7 @@ Spawn::Spawn(Spawn* item, uint16_t id)
   Item::setPos(item->xPos(), item->yPos(), item->zPos());
   setDeltas(item->deltaX(), item->deltaY(), item->deltaZ());
   setHeading(item->heading(), item->deltaHeading());
+  setAnimation(item->animation());
   setPetOwnerID(item->petOwnerID());
   setLight(item->light());
   setGender(item->gender());
@@ -233,8 +266,9 @@ Spawn::Spawn(Spawn* item, uint16_t id)
   setHP(item->HP());
   setMaxHP(item->maxHP());
   setLevel(item->level());
+  setTypeflag(item->typeflag());
   
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, item->equipment(i));
 
   setNPC(item->NPC());
@@ -256,8 +290,8 @@ Spawn::Spawn(Spawn* item, uint16_t id)
 Spawn::Spawn(uint16_t id, 
 	     const QString& name, 
 	     const QString& lastName,
-	     uint8_t race, uint8_t classVal,
-	     uint8_t level, uint8_t deity)
+	     uint16_t race, uint8_t classVal,
+	     uint8_t level, uint16_t deity)
   : Item(tSpawn, id)
 {
   // set what is known
@@ -279,9 +313,11 @@ Spawn::Spawn(uint16_t id,
   setPetOwnerID(0);
   setLight(0);
   setGender(0);
+  setTypeflag(0);
+  setAnimation(0);
   setHP(0);
   setMaxHP(0);
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
   setConsidered(false);
 
@@ -289,8 +325,7 @@ Spawn::Spawn(uint16_t id,
   m_spawnTrackList.setAutoDelete(true);
 }
 
-Spawn::Spawn(const playerProfileStruct* player, 
-	     uint8_t deity)
+Spawn::Spawn(const charProfileStruct* player) 
   : Item(tSpawn, 0)
 {
   // set what's known 
@@ -300,7 +335,7 @@ Spawn::Spawn(const playerProfileStruct* player,
   setClassVal(player->class_);
   setLevel(player->level);
   setGender(player->gender);
-  setDeity(deity);
+  setDeity(player->deity);
   
   // save the raw name
   m_rawName = player->name;
@@ -316,12 +351,14 @@ Spawn::Spawn(const playerProfileStruct* player,
   Item::setPos(0, 0, 0);
   setDeltas(0, 0, 0);
   setHeading(0, 0);
+  setAnimation(0);
   setPetOwnerID(0);
   setLight(0);
   setHP(0);
   setMaxHP(0);
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
+  setTypeflag(0);
   setConsidered(false);
 
   // turn on auto delete for the track list
@@ -332,7 +369,8 @@ Spawn::Spawn(const playerProfileStruct* player,
 Spawn::Spawn(uint16_t id, 
 	     int16_t xPos, int16_t yPos, int16_t zPos,
 	     int16_t deltaX, int16_t deltaY, int16_t deltaZ,
-	     int8_t heading, int8_t deltaHeading) 
+	     int8_t heading, int8_t deltaHeading,
+	     uint8_t animation) 
   : Item(tSpawn, id)
 {
   // apply the unknown mob values
@@ -344,6 +382,7 @@ Spawn::Spawn(uint16_t id,
   setPos(xPos, yPos, zPos);
   setDeltas(deltaX, deltaY, deltaZ);
   setHeading(heading, deltaHeading);
+  setAnimation(animation);
   
   // initialize what isn't to 0
   setPetOwnerID(0);
@@ -355,14 +394,40 @@ Spawn::Spawn(uint16_t id,
   setHP(0);
   setMaxHP(0);
   setLevel(0);
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
+  setTypeflag(0);
   setConsidered(false);
 
   // turn on auto delete for the track list
   m_spawnTrackList.setAutoDelete(true);
 }
 		  
+Spawn::Spawn(QDataStream& d, uint16_t id)
+  : Item(tSpawn, id)
+{
+  // restore Spawn info
+  d.readRawBytes((char*)&m_lastUpdate, 
+		 ((char*)this + sizeof(Item)) - (char*)&m_lastUpdate);
+  d.readRawBytes((char*)&m_petOwnerID,
+		 ((char*)this + sizeof(Spawn)) - (char*)&m_petOwnerID);
+  d >> m_name;
+  d >> m_rawName;
+
+  // calculate race/deity team info
+  calcRaceTeam();
+  calcDeityTeam();
+  
+  // don't trust old movement data (minimize walkoffs causing scaling)
+  setDeltas(0, 0, 0);
+  setHeading(0, 0);
+
+  // even if it had been considered, mark it as not
+  setConsidered(false);
+
+  // clear other questionables...
+  setTypeflag(0);
+}
 
 Spawn::~Spawn()
 {
@@ -383,15 +448,18 @@ void Spawn::update(const spawnStruct* s)
   setPos(s->xPos, s->yPos, s->zPos);
   setPetOwnerID(s->petOwnerId);
   setLight(s->light);
-  setGender(s->Gender);
+  setGender(s->gender);
   setDeity(s->deity);
   setRace(s->race);
   setClassVal(s->class_);
   setHP(s->curHp);
   setMaxHP(s->maxHp);
   setLevel(s->level);
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s->equipment[i]);
+  setEquipment(tUnknown1, 0);
+
+  setTypeflag(s->typeflag);
 
   // If it is a corpse with Unknown (NPC) religion.
   if ((s->NPC == SPAWN_PC_CORPSE) && (s->deity == DEITY_UNKNOWN))
@@ -399,8 +467,10 @@ void Spawn::update(const spawnStruct* s)
   else
     setNPC(s->NPC); // otherwise it is what it is
 
-  // only non corpses move
-  if (!isCorpse())
+  setAnimation(s->animation);
+
+  // only non corpses and things with animation != 66 move
+  if (!isCorpse() && (s->animation != 66))
   {
     setDeltas(s->deltaX, s->deltaY, s->deltaZ);
     setHeading(s->heading, s->deltaHeading);
@@ -424,12 +494,13 @@ void Spawn::backfill(const spawnStruct* s)
   int i;
 
   // set the characteristics that probably haven't changed.
-  setGender(s->Gender);
+  setGender(s->gender);
   setDeity(s->deity);
   setRace(s->race);
   setClassVal(s->class_);
 
   // don't know how we'd find out if this changed, but it may, currently 
+  setTypeflag(s->typeflag);
   // no-check
   setPetOwnerID(s->petOwnerId);
 
@@ -477,7 +548,7 @@ void Spawn::backfill(const spawnStruct* s)
   }
 
   // only change unknown equipment
-  for (i = 0; i < 9; i++)
+  for (i = 0; i <= tLastCoreWearSlot; i++)
     if (equipment(i) == 0)
       setEquipment(i, s->equipment[i]);
 
@@ -490,7 +561,7 @@ void Spawn::backfill(const spawnStruct* s)
     setLevel(s->level);
 }
 
-void Spawn::backfill(const playerProfileStruct* player)
+void Spawn::backfill(const charProfileStruct* player)
 {
   // set the characteristics that probably haven't changed.
   setNPC(SPAWN_SELF);
@@ -500,6 +571,7 @@ void Spawn::backfill(const playerProfileStruct* player)
   setLevel(player->level);
 
   // save the raw name
+  setTypeflag(0);
   m_rawName = player->name;
 
   // start with the first name
@@ -601,10 +673,12 @@ QString Spawn::lightName() const
 
 QString Spawn::equipmentStr(uint8_t wearingSlot) const
 {
-  if (wearingSlot < 7)
+  if (wearingSlot <= tLastMaterial)
     return print_material(equipment(wearingSlot));
-  else if (wearingSlot < wearingSlot)
+  else if (wearingSlot <= tLastWeapon)
     return print_weapon(equipment(wearingSlot));
+  else if (wearingSlot < tNumWearSlots)
+    return print_material(equipment(wearingSlot));
   else
     return "";
 }
@@ -642,6 +716,8 @@ QString Spawn::deityName() const
 
 void Spawn::calcDeityTeam()
 {
+  m_deityTeam = DTEAM_OTHER;
+
   switch(deity())
   {
     //Good
@@ -670,12 +746,12 @@ void Spawn::calcDeityTeam()
     m_deityTeam = DTEAM_EVIL;
     break;
   }
-
-  m_deityTeam = DTEAM_OTHER;
 }
 
 void Spawn::calcRaceTeam()
 {
+  m_raceTeam = RTEAM_OTHER;
+
   switch(race())
   {
   case 1: // Human
@@ -702,8 +778,6 @@ void Spawn::calcRaceTeam()
     m_raceTeam = RTEAM_SHORT;
     break;
   }
-
-  m_raceTeam = RTEAM_OTHER;
 }
 
 QString Spawn::cleanedName() const
@@ -744,7 +818,7 @@ QString Spawn::transformedName() const
   return temp;
 }
 
-uint8_t Spawn::race() const
+uint16_t Spawn::race() const
 {
   return m_race;
 }
@@ -793,7 +867,8 @@ QString Spawn::className() const
 
 QString Spawn::info() const
 {
-  static const char* locs[]={"H","C","A","W","G","L","F","1","2"};
+  // Head, Chest, Arms, Waist, Gloves, Legs, Feet, Primary, Secondary
+  static const char* locs[]={"H","C","A","W","G","L","F","1","2", "B"};
   int i;
   QString temp = "";
   
@@ -802,14 +877,24 @@ QString Spawn::info() const
     temp += QString("Light:") + lightName() + " ";
 
   // Worn stuff
-  for (i = 0; i < 7 ; i++)
+  for (i = tFirstMaterial; i <= tLastMaterial ; i++)
     if (equipment(i))
-      temp += QString(locs[i]) + print_material(equipment(i)) + " ";
+      temp += QString(locs[i]) + ":" + print_material(equipment(i)) + " ";
+ 
+ // Worn weapons
+  for (i = tFirstWeapon; i <= tLastWeapon; i++)
+    if (equipment(i))
+      temp += QString(locs[i]) + ":" +  + print_weapon(equipment(i)) + " ";
 
-  // Worn weapons
-  for (i = 7; i < 9; i++)
-    if (equipment(i))
-      temp += QString(locs[i]) + print_weapon(equipment(i)) + " ";
+  // Worn stuff -- Current best quess is that this may be material?
+  i = tUnknown1;
+  if (equipment(i))
+    temp += QString(locs[i]) + ":" + print_material(equipment(i)) + " "; 
+
+#if 1 // print also as slot U1 (Unknown1) until we're positive
+  if (equipment(i))
+    temp += QString("U1:U") + QString::number(equipment(i), 16) + " ";
+#endif
 
   return temp;
 }
@@ -818,8 +903,6 @@ QString Spawn::filterString() const
 {
   return QString("Name:") + transformedName() 
     + ":Level:" + QString::number(level())
-    + ":HP:" + QString::number(HP())
-    + ":MaxHP:" + QString::number(maxHP())
     + ":Race:" + raceName()
     + ":Class:" + className() 
     + ":NPC:" + QString::number((NPC() == 10) ? 0 : NPC())
@@ -871,17 +954,34 @@ bool Spawn::approximatePosition(bool animating,
       msec += 86400 * 1000;
     
     // if it's been over 90 seconds, then don't adjust position
-    if (msec < 90 * 1000)
+    if (msec < (90 * 1000))
     {
       newPos.addPoint(fixPtMulII(m_cookedDeltaXFixPt, qFormat, msec),
 		      fixPtMulII(m_cookedDeltaYFixPt, qFormat, msec),
 		      fixPtMulII(m_cookedDeltaZFixPt, qFormat, msec));
+
+      return true;
     }
     else
       return false;
   }
 
   return true;
+}
+
+void Spawn::saveSpawn(QDataStream& d)
+{
+  // dump spawn info
+  // write out the raw spawn structure, skipping over the QStrings,
+  // and SpawnTrackList (which can't be persisted in this fashion),
+  // and the data we don't wan't copied over (heading/delta info).
+  d.writeRawBytes((const char*)&m_lastUpdate, 
+		  ((char*)this + sizeof(Item)) 
+		  - (char*)&m_lastUpdate);
+  d.writeRawBytes((const char*)&m_petOwnerID,
+		  ((char*)this + sizeof(Spawn)) - (char*)&m_petOwnerID);
+  d << m_name;
+  d << m_rawName;
 }
 
 //----------------------------------------------------------------------
@@ -903,7 +1003,7 @@ void Coin::update(const dropCoinsStruct* c)
   QString temp;
   setPos((int16_t)(c->xPos), 
 	 (int16_t)(c->yPos), 
-	 (int16_t)(c->zPos));
+	 (int16_t)(c->zPos * 10.0));
   setAmount(c->amount);
   setCoinType(c->type[0]);
   m_name.sprintf("Coints: %c %d", c->type[0], c->amount);
@@ -921,8 +1021,42 @@ QString Coin::className() const
 }
 
 //----------------------------------------------------------------------
+// Door
+Door::Door(const doorStruct* d)
+  : Item(tDoors, d->doorId)
+{
+  m_NPC = SPAWN_DOOR;
+
+  update(d);
+}
+
+Door::~Door()
+{
+}
+
+void Door::update(const doorStruct* d)
+{
+  QString temp;
+  setPos((int16_t)(d->xPos), 
+	 (int16_t)(d->yPos), 
+	 (int16_t)(d->zPos * 10.0));
+  m_name.sprintf("Door: %s (%d) ", d->name, d->doorId);
+  updateLast();
+}
+
+QString Door::raceName() const
+{
+  return "Door";
+}
+
+QString Door::className() const
+{
+  return "Thing";
+}
+
+//----------------------------------------------------------------------
 // Drop
-Drop::Drop(const dropThingOnGround* d, const QString& name)
+Drop::Drop(const makeDropStruct* d, const QString& name)
   : Item(tDrop, d->dropId)
 {
   m_NPC = SPAWN_DROP;
@@ -934,7 +1068,7 @@ Drop::~Drop()
 {
 }
 
-void Drop::update(const dropThingOnGround* d, const QString& name)
+void Drop::update(const makeDropStruct* d, const QString& name)
 {
   int itemId;
   QString buff;
@@ -942,7 +1076,7 @@ void Drop::update(const dropThingOnGround* d, const QString& name)
   // set the position
   setPos((int16_t)d->xPos, 
 	 (int16_t)d->yPos, 
-	 (int16_t)d->zPos);
+	 (int16_t)d->zPos * 10);
 
   // set the drop specific info
   setItemNr(d->itemNr);

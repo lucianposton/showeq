@@ -8,13 +8,7 @@
 #ifndef EQPACKET_H
 #define EQPACKET_H
 
-#define MAXPACKETCACHECOUNT 256
-#define MAXPACKETCACHESIZE  640
-#define MAXSPAWNDATA        49152
-
-#define DIR_CLIENT 1
-#define DIR_SERVER 2
-
+#define MAXSPAWNDATA        98304
 
 #include <stdint.h>
 
@@ -29,7 +23,6 @@
 #include <qobject.h>
 #include <qregexp.h>
 #include "everquest.h"
-#include "player.h"
 #include "decode.h"
 #include "opcodes.h"
 #include "util.h"
@@ -65,14 +58,16 @@ typedef uint32_t in_addr_t;
 extern "C" { // fix for bpf not being c++ happy
 #include <pcap.h>
 }
-/* Used in the packet capture filter setup.  If address_type is
-   MAC_ADDRESS_TYPE, then we use the hostname string as a MAC address
-   for the filter. cpphack
-*/
-#define DEFAULT_ADDRESS_TYPE   10   /* These were chosen arbitrarily */
-#define IP_ADDRESS_TYPE        11 
-#define MAC_ADDRESS_TYPE       12
 
+//----------------------------------------------------------------------
+// forward declarations
+
+// Used in the packet capture filter setup.  If address_type is
+//   MAC_ADDRESS_TYPE, then we use the hostname string as a MAC address
+// for the filter. cpphack
+const uint8_t DEFAULT_ADDRESS_TYPE = 10;   /* These were chosen arbitrarily */
+const uint8_t IP_ADDRESS_TYPE = 11;
+const uint8_t MAC_ADDRESS_TYPE =  12;
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -90,14 +85,7 @@ class PacketCaptureThread;
 struct eqTimeOfDay
 {
   struct timeOfDayStruct zoneInTime;
-	        time_t          packetReferenceTime;
-};
-
-// The various zone names
-struct zoneName
-{
-   char shortName [30];
-   char longName  [30];
+         time_t          packetReferenceTime;
 };
 
 //----------------------------------------------------------------------
@@ -249,8 +237,14 @@ class EQPacketFormatRaw
   // number of uint8_t's to skip when examining packets
   uint8_t skip() const
   {
+#if 0 // ZBTEMP
     return ((uint8_t)m_flagsLo.m_skip + 
 	    ((isARSP() || isSpecARQ()) ? 2 : 0));
+#else
+    return ((uint8_t)m_flagsLo.m_skip + 
+	    (isARSP() ? 2 : 0) +
+	    (isSpecARQ() ? 4 : 0));
+#endif
   }
 
   // The following accessors are only valid if the corresponding
@@ -445,21 +439,14 @@ inline bool operator==(const EQPacketFormat& p1,
 // arent' appropriate for the packet cache for multiple reasons:
 // 1) They're iterators are based on key hash order and not key value
 // ordering, making certain algorithms more difficult and potentially 
-// time consuming.  2) The nature of the data is such that the data 
-// will have a tightly clustered set of keys, which is the worst case 
-// performance scenario for hash based collections.  Causing most of the
-// keys to end up in a small number of buckets.  This results in 
-// near linear time access as opposed to the constant average time that is 
-// typical for them on less clustered data sets. 3) To overcome problem
-// 2 would require a custom hashing function, which could be calculated, 
-// but is more work.  4) insertions into an STL map can be optimized 
+// time consuming. 2) insertions into an STL map can be optimized 
 // with the packet data's behavior using an iterator as a hint for 
 // insertion location to typically yield amortized constant time behavior.
-// 5) Another optimization possible with this data set using a mpa 
+// 3) Another optimization possible with this data set using a map 
 // is that after a matchintg arq is found in the map,  finding/checking 
 // for the next expected arq in the map only requires moving the iterator 
 // forward (using operator++()) once and checking if the next key in the list
-// is the expected arq.  This results in the check for follers to only 
+// is the expected arq.  This results in the check for followers to only 
 // taking amortized constant time (as opposed to the O(log N) of map::find()
 // or constant average time of the hash find methods.
 typedef std::map<uint16_t, EQPacketFormat* > EQPacketMap;
@@ -529,237 +516,247 @@ class EQPacket : public QObject
    Q_OBJECT 
  public:
    
-   EQPacket                   ( EQPlayer    *pplayer,
-				QObject     *parent  = 0,
-				const char *name    = 0
-                                );
-   ~EQPacket                    ();           
-   void start                   (int delay = 0);
-   void stop                    (void);
-   void setLogAllPackets        (bool);
-   void setLogZoneData          (bool);
-   void setLogUnknownData       (bool);
-   void setViewUnknownData      (bool);
+   EQPacket(QObject *parent = 0,
+            const char *name = 0);
+   ~EQPacket();           
+   void start(int delay = 0);
+   void stop(void);
+   void setViewUnknownData(bool);
 
- 
+   int packetCount(void);
+   uint32_t clientAddr(void);
+   uint16_t clientPort(void);
+   uint16_t serverPort(void);
+   uint8_t session_tracking_enabled(void);
+   int playbackSpeed(void);
+   uint32_t decodeKey(void);
+   int currentCacheSize(void);
+   uint16_t serverSeqExp(void);
+
+   void InitializeOpCodeMonitor(void);
+   
+   bool m_bOpCodeMonitorInitialized;
+   #define OPCODE_SLOTS 10
+   unsigned int MonitoredOpCodeList      [OPCODE_SLOTS][3];
+   QString MonitoredOpCodeAliasList [OPCODE_SLOTS];
+   
+   bool logData(const QString& filename,
+		uint32_t       len,
+		const uint8_t* data,
+		in_addr_t      saddr = 0,
+		in_addr_t      daddr = 0,
+		in_port_t      sport = 0,
+		in_port_t      dport = 0
+                );
+               
  public slots:
-   void processPackets     (void);
-   void processPlaybackPackets (void);
-   void incPlayback        (void);
-   void decPlayback        (void);
-   void resetPcapFilter();   
+   void processPackets(void);
+   void processPlaybackPackets(void);
+   void incPlayback(void);
+   void decPlayback(void);
+   void setPlayback(int);
+   void monitorIPClient(const QString& address);   
+   void monitorMACClient(const QString& address);   
+   void monitorNextClient();   
+   void monitorDevice(const QString& dev);   
+   void session_tracking();
+   void setArqSeqGiveUp(int giveUp);
 
    // Decoder slots
-   void pkt_backfillPlayer (const playerProfileStruct *);
-   void pkt_backfillSpawn  (const spawnStruct *);
- 
+   void dispatchDecodedCharProfile(const uint8_t* decodedData, uint32_t len);
+   void dispatchDecodedNewSpawn(const uint8_t* decodedData, uint32_t len);
+   void dispatchDecodedZoneSpawns(const uint8_t* decodedData, uint32_t len);
 
  signals:
-   void addGroup               ( char *,
-                                 int
-                               );
-   
-   void remGroup               ( char *,
-                                 int
-                               );
-                               
-   void clrGroup               (void);
-
    // used for net_stats display
-   void cacheSize             (int);
-   void seqReceive             (int);
-   void seqExpect              (int);
+   void cacheSize(int);
+   void seqReceive(int);
+   void seqExpect(int);
+   void numPacket(int);
+   void resetPacket(int);
+   void playbackSpeedChanged(int);
+   void clientChanged(uint32_t);
+   void clientPortLatched(uint16_t);
+   void serverPortLatched(uint16_t);
+   void sessionTrackingChanged(uint8_t);
 
-   void numPacket              (int);
+   void toggle_session_tracking(void);
 
-   void setPlayerName          (const QString&);
-   void setPlayerDeity         (uint8_t);
-   void playerUpdate           (const playerUpdateStruct* pupdate, bool client);
-   void setPlayerID            (uint16_t);
-   void updateLevel            (const levelUpStruct* levelup);
-   void resetPlayer            (void);
-   void wearItem               (const itemPlayerStruct* itemp);
-   void updateExp              (const expUpdateStruct* exp);
-   void increaseSkill          (const skillIncreaseStruct* skilli);
-   void manaChange(const manaDecrementStruct* mana);
-   void updateStamina(const staminaStruct* stam);
+   // EQPlayer signals
+   void setPlayerID(uint16_t);
+   void backfillPlayer(const charProfileStruct *, uint32_t, uint8_t);
+   void increaseSkill(const skillIncStruct* skilli, uint32_t, uint8_t);
+   void manaChange(const manaDecrementStruct* mana, uint32_t, uint8_t);
+   void playerUpdate(const playerPosStruct* pupdate, uint32_t, uint8_t);
+   void updateExp(const expUpdateStruct* exp, uint32_t, uint8_t);
+   void updateAltExp(const altExpUpdateStruct* altexp, uint32_t, uint8_t);
+   void updateLevel(const levelUpUpdateStruct* levelup, uint32_t, uint8_t);
+   void updateStamina(const staminaStruct* stam, uint32_t, uint8_t);
+   void wearItem(const playerItemStruct* itemp, uint32_t, uint8_t);
 
-#if 1 // ZBTEMP: Currently not emit'd
-   void attack1Hand1           (const attack1Struct*);
-#endif
-   void attack2Hand1           (const attack2Struct*);
-
+   void attack2Hand1(const attack2Struct*, uint32_t, uint8_t);
+   void action2Message(const action2Struct*, uint32_t, uint8_t);
    
-   void consRequest            (const considerStruct*);
-   void consMessage            (const considerStruct*);
+   void consMessage(const considerStruct*, uint32_t, uint8_t);
    
-   void clientTarget(const clientTargetStruct* target);
-   void compressedDoorSpawn(const compressedDoorStruct* target);
-   void spawnWearingUpdate     (const wearChangeStruct*);
+   void clientTarget(const clientTargetStruct* target, uint32_t, uint8_t);
+   void compressedDoorSpawn(const cDoorSpawnsStruct*, uint32_t, uint8_t);
+   void spawnWearingUpdate(const wearChangeStruct*, uint32_t, uint8_t);
 
-   void newGroundItem          (const dropThingOnGround*, bool client);
-   void removeGroundItem       (const removeThingOnGround*);
-   void newCoinsItem           (const dropCoinsStruct*);
-   void removeCoinsItem        (const removeCoinsStruct*);
+   void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
+   void removeGroundItem(const remDropStruct*, uint32_t, uint8_t);
+   void newCoinsItem(const dropCoinsStruct*, uint32_t, uint8_t);
+   void removeCoinsItem(const removeCoinsStruct*, uint32_t, uint8_t);
 
-   void updateSpawns           (const spawnPositionUpdateStruct* updates);
-   void updateSpawnHP          (const spawnHpUpdateStruct* hpupdate);
+   void updateSpawns(const mobUpdateStruct* updates, uint32_t, uint8_t);
+   void updateSpawnHP(const hpUpdateStruct* hpupdate, uint32_t, uint8_t);
 
-   void refreshMap             (void);
-   void newSpawn               (const newSpawnStruct* spawn);
-   void deleteSpawn            (const deleteSpawnStruct* delspawn);
-   void killSpawn              (const spawnKilledStruct* deadspawn);
-   void corpseLoc              (const corpseLocStruct*);
-   void newZone                ( char *,
-                                 char *,
-				 bool
-                               );
-                               
-   void zoneChanged            (void);
-   void eqTimeChangedStr       (const QString &);
+   void newSpawn(const newSpawnStruct* spawn, uint32_t, uint8_t);
+   void deleteSpawn(const deleteSpawnStruct* delspawn, uint32_t, uint8_t);
+   void killSpawn(const newCorpseStruct* deadspawn, uint32_t, uint8_t);
+   void corpseLoc(const corpseLocStruct*, uint32_t, uint8_t);
+   void eqTimeChangedStr(const QString &);
+   void timeOfDay(const timeOfDayStruct *tday, uint32_t, uint8_t);
 
-   void itemShop(const itemShopStruct* items);
-   void moneyOnCorpse(const moneyOnCorpseStruct* money);
-   void itemPlayerReceived(const itemReceivedPlayerStruct* itemc);
-   void tradeItemOut(const tradeItemStruct* itemt);
-   void tradeItemIn(const itemReceivedPlayerStruct* itemr);
-   void channelMessage(const channelMessageStruct* cmsg, bool client);
-   void random(const randomStruct* randr);
-   void emoteText(const emoteTextStruct* emotetext);
-   void playerBook(const bookPlayerStruct* bookp);
-   void playerContainer(const containerPlayerStruct* containp);
-   void inspectData(const inspectingStruct* inspt);
-   void spMessage(const spMesgStruct* spmsg);
-   void handleSpell(const spellCastStruct* mem, bool client);
-   void beginCast(const beginCastStruct* bcast, bool client);
-   void startCast(const castStruct* cast);
-   void systemMessage(const systemMessageStruct* smsg);
-   void moneyUpdate(const moneyUpdateStruct* money);
-   void moneyThing(const moneyUpdateStruct* money);
-   void groupInfo(const groupMemberStruct* gmem);
-   void zoneSpawns(const zoneSpawnsStruct* zspawns, int len);
-   void zoneEntry(const ServerZoneEntryStruct* zsentry);
-   void zoneEntry(const ClientZoneEntryStruct* zsentry);
-   void zoneChange(const zoneChangeStruct* zoneChange, bool client);
-   void zoneNew(const newZoneStruct* zoneNew, bool client);
-   void summonedItem(const summonedItemStruct*);
+   void itemShop(const itemInShopStruct* items, uint32_t, uint8_t);
+   void moneyOnCorpse(const moneyOnCorpseStruct* money, uint32_t, uint8_t);
+   void itemPlayerReceived(const itemOnCorpseStruct* itemc, uint32_t, uint8_t);
+   void tradeItemOut(const tradeItemOutStruct* itemt, uint32_t, uint8_t);
+   void tradeItemIn(const tradeItemInStruct* itemr, uint32_t, uint8_t);
+   void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
+   void formattedMessage(const formattedMessageStruct* fmsg, uint32_t, uint8_t);
+   void random(const randomStruct* randr, uint32_t, uint8_t);
+   void emoteText(const emoteTextStruct* emotetext, uint32_t, uint8_t);
+   void playerBook(const playerBookStruct* bookp, uint32_t, uint8_t);
+   void playerContainer(const playerContainerStruct* containp, uint32_t, uint8_t);
+   void inspectData(const inspectDataStruct* inspt, uint32_t, uint8_t);
+   void spMessage(const spMesgStruct* spmsg, uint32_t, uint8_t);
+   void handleSpell(const memSpellStruct* mem, uint32_t, uint8_t);
+   void beginCast(const beginCastStruct* bcast, uint32_t, uint8_t);
+   void startCast(const startCastStruct* cast, uint32_t, uint8_t);
+   void systemMessage(const sysMsgStruct* smsg, uint32_t, uint8_t);
+   void moneyUpdate(const moneyUpdateStruct* money, uint32_t, uint8_t);
+   void moneyThing(const moneyThingStruct* money, uint32_t, uint8_t);
+   void groupInfo(const groupMemberStruct* gmem, uint32_t, uint8_t);
+   void zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t, uint8_t);
+   void zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t, uint8_t);
+   void zoneEntry(const ClientZoneEntryStruct* zsentry, uint32_t, uint8_t);
+   void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
+   void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
+   void summonedItem(const summonedItemStruct*, uint32_t, uint8_t);
  
-   void msgReceived            (const QString &);
-   void stsMessage             (const QString &,
-                                 int              = 0
-                               );
-                               
-   void toggle_log_AllPackets  (void);
-   void toggle_log_ZoneData    (void);
-   void toggle_log_UnknownData (void);
+   void msgReceived(const QString &);
+   void stsMessage(const QString &, int = 0);
 
-   
+   void toggle_log_AllPackets(void);
+   void toggle_log_ZoneData(void);
+   void toggle_log_UnknownData();
+                               
    // Decoder signals
-   void resetDecoder           (void);
-   void backfillPlayer     (const playerProfileStruct *);
-   void backfillSpawn      (const spawnStruct *);
+   void resetDecoder(void);
+   void backfillSpawn(const newSpawnStruct *, uint32_t, uint8_t);
+   void backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t);
 
    // Spell signals
-   void interruptSpellCast(const interruptCastStruct *);
- 
- public:
+   void interruptSpellCast(const badCastStruct *, uint32_t, uint8_t);
 
-   QObject        *m_parent;
+   // forwarded signals
+   void keyChanged(void);
 
-   QString shortZoneName() { return m_currentZoneName.shortName; }
-   QString longZoneName() { return m_currentZoneName.longName; }
-   EQPlayer *getplayer               (void);   
-   long getclientaddr                (void);
-   void      InitializeOpCodeMonitor (void);
-   
-   bool            m_bOpCodeMonitorInitialized;
-   #define         OPCODE_SLOTS 10
-   unsigned int    MonitoredOpCodeList      [OPCODE_SLOTS][3];
-   QString         MonitoredOpCodeAliasList [OPCODE_SLOTS];
-   
+   // other signals
+   void zoneServerInfo(const uint8_t*, uint32_t, uint8_t);
+   void cPlayerItems(const cPlayerItemsStruct *, uint32_t, uint8_t);
+   void bookText(const bookTextStruct*, uint32_t, uint8_t);
+   void doorOpen(const uint8_t*, uint32_t, uint8_t);
+   void illusion(const uint8_t*, uint32_t, uint8_t);
+   void castOn(const castOnStruct*, uint32_t, uint8_t);
+   void openVendor(const uint8_t*, uint32_t, uint8_t);
+   void closeVendor(const uint8_t*, uint32_t, uint8_t);
+   void openGM(const uint8_t*, uint32_t, uint8_t);
+   void closeGM(const uint8_t*, uint32_t, uint8_t);
+   void spawnAppearance(const spawnAppearanceStruct*, uint32_t, uint8_t);
+   void newGuildInZone(const newGuildInZoneStruct*, uint32_t, uint8_t);
+   void bindWound(const bindWoundStruct*, uint32_t, uint8_t);
+   void unknownOpcode(const uint8_t*, uint32_t, uint8_t);
 
  private:
    /* The player object, keeps track player's level, race and class.
       Will soon track all player stats. */
       
-   EQPlayer      *m_player;
-   EQDecode      *m_decode;
+   EQDecode            *m_decode;
    PacketCaptureThread *m_packetCapture;
-
-   unsigned long  m_client_addr;
-
-   struct        zoneName            m_currentZoneName;
-                 
+   VPacket             *m_vPacket;
    QString print_addr   (in_addr_t addr);
    
-   void  decodePacket   ( int            size,
-                          unsigned char *buffer
-                        );
-   
-   int   getEQTimeOfDay ( time_t                   timeConvert,
-                          struct timeOfDayStruct *eqTimeOfDay
-                        );
-
- public:
-   bool logData ( const char*    filename,
-		  uint32_t       len,
-		  const uint8_t* data,
-		  in_addr_t       saddr    = 0,
-		  in_addr_t       daddr    = 0,
-		  in_port_t       sport    = 0,
-		  in_port_t      dport    = 0
-		  );
-               
-               
- private:
-   void logRawData        ( const char   *filename,
-                            unsigned char *data,
-                            unsigned int   len
-                          );
-
+   QTimer         *m_timer;
+   int            m_packetCount;
+   uint16_t       m_serverPort;
+   uint16_t       m_clientPort;
    bool           m_busy_decoding;
-   //   int            fd;
-   //   unsigned long  packetcount;
-   QTimer        *m_timer;
-   
-   
-   void dispatchWorldData     ( uint32_t       len,
-                                uint8_t*       data,
-                                uint8_t        direction = 0
-                              );
-
-   void dispatchZoneData      ( uint32_t       len,
-                                uint8_t*       data,
-                                uint8_t        direction = 0
-                              );
-
-
-   void dispatchZoneSplitData ( EQPacketFormat& pf );
-
-
    bool           m_zoning;
-
-   int            m_nPacket;
-
-   int            m_serverAddr;
-   int            m_serverPort;
    bool           m_serverArqSeqFound;
+   bool           m_viewUnknownData;
+   bool           m_detectingClient;
    uint16_t       m_serverArqSeqExp;
    uint16_t       m_serverArqSeqGiveUp;
-
    EQPacketMap    m_serverCache;
+   unsigned char  m_serverData [MAXSPAWNDATA];
+   uint32_t       m_serverDataSize;
+   //   uint16_t       m_serverDataFragSeq;
+   uint32_t       m_client_addr;
+   uint8_t        m_session_tracking_enabled;
 
-   unsigned char  m_serverData     [MAXSPAWNDATA];
-   uint32_t            m_serverDataSize;
-   
-   bool           m_viewUnknownData;
+   struct eqTimeOfDay m_eqTime;
 
-   VPacket        *m_vPacket;
-   
-   struct eqTimeOfDay         m_eqTime;
- 
- public:
+   int  getEQTimeOfDay (time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay);
+   void decodePacket   (int size, unsigned char *buffer);
+   void dispatchWorldData (uint32_t len, uint8_t* data, uint8_t direction = 0);
+   void dispatchWorldChatData (uint32_t len, uint8_t* data, uint8_t direction = 0);
+   void dispatchZoneData (uint32_t len, uint8_t* data, uint8_t direction = 0);
+   void dispatchZoneSplitData (EQPacketFormat& pf, uint8_t dir);
+   void logRawData (const char   *filename, unsigned char *data, unsigned int len);
+
 };
+
+inline int EQPacket::packetCount(void)
+{
+  return m_packetCount;
+}
+
+inline uint32_t EQPacket::clientAddr(void)
+{
+   return m_client_addr;
+}
+
+inline uint16_t EQPacket::clientPort(void)
+{
+  return m_clientPort;
+}
+
+inline uint16_t EQPacket::serverPort(void)
+{
+  return m_serverPort;
+}
+
+inline uint8_t EQPacket::session_tracking_enabled(void)
+{
+  return m_session_tracking_enabled;
+}
+
+inline uint32_t EQPacket::decodeKey(void)
+{ 
+  return m_decode->decodeKey(); 
+}
+
+inline int EQPacket::currentCacheSize()
+{
+  return m_serverCache.size();
+}
+
+inline uint16_t EQPacket::serverSeqExp()
+{
+  return m_serverArqSeqExp;
+}
 
 //----------------------------------------------------------------------
 // PacketCaptureThread
@@ -769,9 +766,10 @@ class PacketCaptureThread
          PacketCaptureThread();
          ~PacketCaptureThread();
          void start (const char *device, const char *host, bool realtime, uint8_t address_type);
+	 void stop ();
          uint16_t getPacket (unsigned char *buff); 
          void setFilter (const char *device, const char *hostname, bool realtime,
-                        uint8_t address_type, uint16_t zone_server_port);
+                        uint8_t address_type, uint16_t zone_server_port, uint16_t client_port);
          
  private:
          static void* loop(void *param);

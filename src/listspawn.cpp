@@ -5,6 +5,7 @@
 
 #include <qstring.h>
 #include <qtextstream.h>
+#include <qregexp.h>
 
 #include "cgiconv.h"
 #include "spawnshell.h"
@@ -131,17 +132,17 @@ int main (int argc, char *argv[])
   out << "<TD><SELECT name=\"class\" size=\"1\">\n";
   out << "<OPTION value=\"0\"";
   if (searchClass == 0)
-    cout << " selected";
+    out << " selected";
   out << ">Any</OPTION>\n";
 
-  Spawn fake(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  Spawn fake(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   // start at class value 1, and go until maximum known class value
   for (int i = 1; i <= 32; ++i)
   {
     fake.setClassVal(i);
     out << "<OPTION value=\"" << i << "\"";
     if (searchClass == i)
-      cout << " selected";
+      out << " selected";
     out << ">" << fake.className() << "</OPTION>\n";
   }
   out << "</SELECT></TD>\n";

@@ -5,6 +5,8 @@
  *  http://seq.sourceforge.net/
  */
 
+#include <qlayout.h>
+
 #include "player.h"
 #include "skilllist.h"
 #include "util.h"
@@ -13,7 +15,7 @@
 EQSkillList::EQSkillList(EQPlayer* player,
 			 QWidget* parent, 
 			 const char* name)
-  : QListView(parent, name), 
+  : SEQListView("SkillList", parent, name), 
   m_pPlayer(player)
 {
   int i;
@@ -25,36 +27,11 @@ EQSkillList::EQSkillList(EQPlayer* player,
   for (i = 0; i < MAX_KNOWN_LANGS; i++)
     m_languageList[i] = NULL;
 
-  QString section = "SkillList";
-#if QT_VERSION >= 210
-   setShowSortIndicator(TRUE);
-#endif
-   setRootIsDecorated(false);
-   setCaption(pSEQPrefs->getPrefString("Caption", section,
-				       "ShowEQ - Skills"));
-
-  // set font and add the columns
-  setFont(QFont("Helvetica", showeq_params->fontsize));
+  // add the columns
   addColumn("Skill");
   addColumn("Value");
-  setAllColumnsShowFocus(true);
 
-  // get preferences
-
-  // column sizes
-  if (pSEQPrefs->isPreference("SkillWidth", section))
-  {
-    i = pSEQPrefs->getPrefInt("SkillWidth", section, columnWidth(0));
-    setColumnWidthMode(0, QListView::Manual);
-    setColumnWidth(0, i);
-  }
-
-  if (pSEQPrefs->isPreference("ValueWidth", section))
-  {
-    i = pSEQPrefs->getPrefInt("ValueWidth", section, columnWidth(1));
-    setColumnWidthMode(1, QListView::Manual);
-    setColumnWidth(1, i);
-  }
+  restoreColumns();
 
   // connect to player signals
    connect (m_pPlayer, SIGNAL(addSkill(int,int)), 
@@ -74,7 +51,10 @@ EQSkillList::EQSkillList(EQPlayer* player,
      addSkill(i, m_pPlayer->getSkill(i));
 
    // show the languages or not according to the user preference
-   showLanguages(bool(pSEQPrefs->getPrefBool("ShowLanguages", section, 1)));
+   m_showLanguages = pSEQPrefs->getPrefBool("ShowLanguages", preferenceName(),
+					    true);
+   if (m_showLanguages)
+     addLanguages();
 }
 
 EQSkillList::~EQSkillList()
@@ -179,7 +159,7 @@ void EQSkillList::addLanguage (int langId, int value)
   // add it to the list
   if (!m_languageList[langId])
     m_languageList[langId] =
-      new QListViewItem (this, language_name (langId), str);
+      new QListViewItem (this, language_name(langId), str);
   else
       m_languageList[langId]->setText (1, str);
 }
@@ -191,7 +171,7 @@ void EQSkillList::changeLanguage (int langId, int value)
   if (!m_showLanguages)
     return;
 
-  if (langId >= MAX_KNOWN_LANGS)
+  if (langId > MAX_KNOWN_LANGS)
   {
     printf("Warning: langId (%d) is more than max langId (%d)\n", 
 	   langId, MAX_KNOWN_LANGS - 1);
@@ -223,38 +203,49 @@ void EQSkillList::deleteLanguages()
     }
 }
 
+void EQSkillList::addLanguages() 
+{
+  if (!m_showLanguages)
+    return;
+
+  for (int i = 0; i < MAX_KNOWN_LANGS; i++)
+    addLanguage(i, m_pPlayer->getLanguage(i));
+}
+
 void EQSkillList::showLanguages(bool show)
 {
   m_showLanguages = show;
 
+  // only save language visibility if the user has set for it
+  if (pSEQPrefs->getPrefBool("SaveShowLanguages", preferenceName(), true))
+    pSEQPrefs->setPrefBool("ShowLanguages", preferenceName(), m_showLanguages);
+
   if (m_showLanguages)
-    for (int i = 0; i < MAX_KNOWN_LANGS; i++)
-      addLanguage(i, m_pPlayer->getLanguage(i));
+    addLanguages();
   else
     deleteLanguages();
 }
 
-void EQSkillList::savePrefs(void)
+SkillListWindow::SkillListWindow(EQPlayer* player, 
+				 QWidget* parent, const char* name)
+  : SEQWindow("SkillList", "ShowEQ - Skills", parent, name)
 {
-  QString section = "SkillList";
-  // only save the preferences if visible
-  if (isVisible())
-  {
-    pSEQPrefs->setPrefString("Caption", section, caption());
+  QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setAutoAdd(true);
+  
+  m_skillList = new EQSkillList(player, this, name);
+}
 
-    // only save column widths if the user has set for it
-    if (pSEQPrefs->getPrefBool("SaveWidth", section, 1))
-    {
-      pSEQPrefs->setPrefInt("SkillWidth", section, 
-			      columnWidth(0));
-      pSEQPrefs->setPrefInt("ValueWidth", section, 
-			      columnWidth(1));
-    }
+SkillListWindow::~SkillListWindow()
+{
+  delete m_skillList;
+}
 
-    // only save language visibility if the user has set for it
-    if (pSEQPrefs->getPrefBool("SaveShowLanguages", section, 1))
-    {
-      pSEQPrefs->setPrefInt("ShowLanguages", section, m_showLanguages);
-    }
-  }
+void SkillListWindow::savePrefs(void)
+{
+  // save SEQWindow prefs
+  SEQWindow::savePrefs();
+
+  // make the listview save it's prefs
+  m_skillList->savePrefs();
 }

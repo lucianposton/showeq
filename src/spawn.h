@@ -18,12 +18,11 @@
 #define _SPAWN_H_
 
 #include <stdint.h>
-//#include <time.h>
-//#include <stdio.h>
-//#include <sys/time.h>
 #include <math.h>
 
+#include <qlist.h>
 #include <qdatetime.h>
+#include <qdatastream.h>
 
 #include "everquest.h"
 #include "point.h"
@@ -38,8 +37,31 @@ enum itemType
 { 
   tUnknown, 
   tCoins, 
-  tDrop, 
+  tDoors, 
+  tDrop,
   tSpawn 
+};
+
+enum itemWearSlot
+{
+  tHead          = 0,
+  tChest         = 1,
+  tArms          = 2,
+  tWaist         = 3,
+  tGloves        = 4,
+  tLegs          = 5,
+  tFeet          = 6,
+  tPrimary       = 7,
+  tSecondary     = 8,
+  tUnknown1      = 9,
+
+  // these are for bookeeping
+  tNumWearSlots  = 10,
+  tFirstMaterial = tHead,
+  tLastMaterial  = tFeet,
+  tFirstWeapon   = tPrimary,
+  tLastWeapon    = tSecondary,
+  tLastCoreWearSlot = tSecondary,
 };
 
 //----------------------------------------------------------------------
@@ -78,10 +100,11 @@ class Item : public EQPoint
   uint32_t runtimeFilterFlags() const { return m_runtimeFilterFlags; }
   QString name() const;
   uint8_t NPC() const { return m_NPC; }
+  float displayZPos() const { return m_zDisplay; }
 
   // virtual methods that provide reasonable default values
   virtual QString transformedName() const;
-  virtual uint8_t race() const;
+  virtual uint16_t race() const;
   virtual QString raceName() const;
   virtual uint8_t classVal() const;
   virtual QString className() const;
@@ -109,10 +132,13 @@ class Item : public EQPoint
 
   // common item data
   QString m_name;
-  QTime m_lastUpdate; 
-  QTime m_spawnTime; 
   uint32_t m_filterFlags;
   uint32_t m_runtimeFilterFlags;
+
+  // persisted info below
+  QTime m_lastUpdate; 
+  QTime m_spawnTime; 
+  float m_zDisplay;
   uint16_t m_ID;
   uint8_t m_NPC;
   itemType m_type;
@@ -127,24 +153,30 @@ class Spawn : public Item
   Spawn();
   Spawn(const spawnStruct* s);
   Spawn(uint16_t id, const spawnStruct* s);
-  Spawn(const playerProfileStruct* player,
-		  uint8_t deity);
+  Spawn(const charProfileStruct* player);
 
   Spawn(uint16_t id, 
-		  const QString& name, const QString& lastName, 
-		  uint8_t race, uint8_t classVal,
-		  uint8_t level, uint8_t deity = 0);
-		  
+	const QString& name, const QString& lastName, 
+	uint16_t race, uint8_t classVal,
+	uint8_t level, uint16_t deity = 0);
+  
   // create an unknown spawn using the data available.
   Spawn(uint16_t id, 
-		  int16_t xPos, int16_t yPos, int16_t zPos,
-		  int16_t deltaX, int16_t deltaY, int16_t deltaZ,
-		  int8_t heading, int8_t deltaHeading);
+	int16_t xPos, int16_t yPos, int16_t zPos,
+	int16_t deltaX, int16_t deltaY, int16_t deltaZ,
+	int8_t heading, int8_t deltaHeading,
+	uint8_t animation);
 
   // destructive copy constructor, clears the track list of the 
   // spawn being copied.
   Spawn(Spawn*, uint16_t id);
+
+  // restore spawn from QDataStream
+  Spawn(QDataStream&, uint16_t id);
   virtual ~Spawn();
+
+  // save spawn to QDataStream
+  void saveSpawn(QDataStream& d);
 
   // spawn specific get methods
   const QString& rawName() const { return m_rawName; }
@@ -154,6 +186,7 @@ class Spawn : public Item
   int8_t heading() const { return m_heading; }
   int16_t headingAngle() const { return 360 - (m_heading * 360) / 256; }
   int8_t deltaHeading() const { return m_deltaHeading; }
+  uint8_t animation() const { return m_animation; }
   uint16_t HP() const { return m_curHP; }
   uint16_t maxHP() const { return m_maxHP; }
   uint8_t level() const { return m_level; }
@@ -161,25 +194,25 @@ class Spawn : public Item
   uint8_t light() const { return m_light; }
   QString lightName() const;
   uint8_t gender() const { return m_gender; }
-  uint8_t deity() const { return m_deity; }
+  uint16_t deity() const { return m_deity; }
   QString deityName() const;
-  int8_t deityTeam() const { return m_deityTeam; }
-  int8_t raceTeam() const { return m_raceTeam; }
+  int16_t deityTeam() const { return m_deityTeam; }
+  int16_t raceTeam() const { return m_raceTeam; }
   bool considered() const { return m_considered; }
   uint16_t equipment(uint8_t wearingSlot) const 
     { return m_equipment[wearingSlot]; }
   QString equipmentStr(uint8_t wearingSlot) const;
+  int8_t typeflag() const { return m_typeflag; }
   const SpawnTrackList& trackList() const { return m_spawnTrackList; }
   SpawnTrackList& trackList() { return m_spawnTrackList; }
   QString cleanedName() const;
   bool approximatePosition(bool animating, 
 			   const QTime& curTime,
 			   EQPoint& newPos) const;
-  
 
   // virtual get method overloads
   virtual QString transformedName() const;
-  virtual uint8_t race() const;
+  virtual uint16_t race() const;
   virtual QString raceName() const;
   virtual uint8_t classVal() const;
   virtual QString className() const;
@@ -221,7 +254,7 @@ class Spawn : public Item
 
   // updates the data, careful not to overwrite existing correct data
   void backfill(const spawnStruct* s);
-  void backfill(const playerProfileStruct* player);
+  void backfill(const charProfileStruct* player);
 
   // change spawn state
   void killSpawn();
@@ -232,21 +265,23 @@ class Spawn : public Item
     { m_heading = heading; m_deltaHeading = deltaHeading; }
   void setHeading(int8_t heading) { m_heading = heading; }
   void setDeltaHeading(int8_t deltaHeading) { m_deltaHeading = deltaHeading; }
+  void setAnimation(uint8_t animation) { m_animation = animation; }
   void setPetOwnerID(uint16_t petOwnerID) { m_petOwnerID = petOwnerID; }
   void setLight(uint8_t light) { m_light = light; }
   void setGender(uint8_t gender) { m_gender = gender; }
-  void setDeity(uint8_t deity) { m_deity = deity; calcDeityTeam(); }
+  void setDeity(uint16_t deity) { m_deity = deity; calcDeityTeam(); }
   void setConsidered(bool considered) { m_considered = considered; }
-  void setRace(uint8_t race) { m_race = race; calcRaceTeam(); }
+  void setRace(uint16_t race) { m_race = race; calcRaceTeam(); }
   void setClassVal(uint8_t classVal) { m_class = classVal; }
   void setHP(uint16_t HP) { m_curHP = HP; }
   void setMaxHP(uint16_t maxHP) { m_maxHP = maxHP; }
   void setLevel(uint8_t level) { m_level = level; }
   void setEquipment(uint8_t wearSlot, uint16_t itemID)
-    { if (wearSlot < 9) { m_equipment[wearSlot] = itemID; } }
+    { if (wearSlot < tNumWearSlots) { m_equipment[wearSlot] = itemID; } }
   void setNPC(uint8_t NPC) { m_NPC = NPC; }
+  void setTypeflag(int8_t typeflag) { m_typeflag = typeflag; }
   void setID(uint16_t id) { m_ID = id; }
-
+  
  protected:
   void calcRaceTeam();
   void calcDeityTeam();
@@ -257,23 +292,27 @@ class Spawn : public Item
   int m_cookedDeltaXFixPt;
   int m_cookedDeltaYFixPt;
   int m_cookedDeltaZFixPt;
-  uint16_t m_petOwnerID;
   int16_t m_deltaX;
   int16_t m_deltaY;
   int16_t m_deltaZ;
-  uint16_t m_curHP;
-  uint16_t m_maxHP;
   int8_t m_heading;
   int8_t m_deltaHeading;
+
+  // persisted info below
+  uint16_t m_petOwnerID;
+  uint16_t m_curHP;
+  uint16_t m_maxHP;
+  uint16_t m_deity;
+  int16_t m_deityTeam;
+  uint16_t m_equipment[tNumWearSlots];
   uint8_t m_level;
-  uint8_t m_race;
-  int8_t m_raceTeam;
-  uint8_t m_deity;
-  int8_t m_deityTeam;
+  uint16_t m_race;
+  int16_t m_raceTeam;
   uint8_t m_gender;
   uint8_t m_class;
   uint8_t m_light;
-  uint16_t m_equipment[9];
+  int8_t m_typeflag;
+  uint8_t m_animation;
   bool m_considered;
 };
 
@@ -310,6 +349,22 @@ class Coin : public Item
   uint8_t m_coinType;
 };
 
+//----------------------------------------------------------------------
+// Door
+class Door : public Item
+{
+ public:
+  Door(const doorStruct* d);
+  virtual ~Door();
+
+  // virtual get method overloads
+  virtual QString raceName() const;
+  virtual QString className() const;
+
+  // update methods
+  void update(const doorStruct* d);
+
+};
 
 //----------------------------------------------------------------------
 // Drop
@@ -317,7 +372,7 @@ class Drop : public Item
 {
  public:
   // constructor/destructor
-  Drop(const dropThingOnGround* d, const QString& name);
+  Drop(const makeDropStruct* d, const QString& name);
   virtual ~Drop();
 
   // drop specific get methods
@@ -329,7 +384,7 @@ class Drop : public Item
   virtual QString className() const;
   
   // update methods
-  void update(const dropThingOnGround* d, const QString& name);
+  void update(const makeDropStruct* d, const QString& name);
 
   // drop specific set methods
   void setItemNr(uint16_t itemNr) 
@@ -378,6 +433,24 @@ inline Coin* coinType(Item* item)
   // if this is an item of coin type, return the pointer to Coin
   if (item->type() == tCoins)
     return (Coin*)item;
+  else
+    return NULL; // otherwise NULL
+}
+
+inline const Door* doorType(const Item* item)
+{
+  // if this is an item of door type, return the pointer to Door
+  if (item->type() == tDoors)
+    return (const Door*)item;
+  else
+    return NULL; // otherwise NULL
+}
+
+inline Door* doorType(Item* item)
+{
+  // if this is an item of door type, return the pointer to Door
+  if (item->type() == tDoors)
+    return (Door*)item;
   else
     return NULL; // otherwise NULL
 }

@@ -32,10 +32,15 @@
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qpopupmenu.h>
+#include <qlist.h>
+
+#include "seqwindow.h"
 
 class MyButton;  // button for use in MsgDialog
 class CButDlg;   // dialog for editing a button
 class MyEdit;
+
+typedef QList<MyButton> MyButtonList;
 
 //////////////////////////////////////////////////////////////////////
 //                        MsgDialog                                 //
@@ -63,12 +68,12 @@ class MyEdit;
 // If you wish to construct and have a list of strings already that you wish 
 // to send to the dialog, you can use the constructor to send a stringlist
 //
-//class MsgDialog: public QDialog 
-class MsgDialog: public QWidget
+class MsgDialog : public SEQWindow
 {
    Q_OBJECT
 public:
-   MsgDialog(QWidget *parent, const char *name, QStringList &list);
+   MsgDialog(QWidget *parent, const char *name, 
+	     const QString& prefName, QStringList &list);
 
    bool isAdditive()               { return m_bAdditiveFilter; }
    int  indentMargin()             { return m_nIndent; }
@@ -79,11 +84,13 @@ public slots:
    void setAdditive(bool bAdd);
    void setMargin(int nIndent);
    void addButton(const QString &name, const QString &filter,
-           const QString &color, bool bAct);
+           const QColor &color, bool bAct);
    void toggleControls(void);
    void setButton(MyButton* but, bool active);
    void showControls(bool);
    void showMsgType(bool);
+   void load();
+   virtual void savePrefs();
 
 private slots:
    void editButton(MyButton *);         // popup button edit dialog
@@ -97,16 +104,20 @@ private slots:
    // For the popupmenu
    void menuAboutToShow(void);
    void editButton(void);
+   void deleteButton(void);
    void addButton(void);
+
+signals:
+   void toggle_view_ChannelMsgs(void);
 
 private:
    void addMessage(QString &);
    bool eventFilter(QObject *, QEvent *);
    MyButton* newButton(const QString &name, const QString &filter,
-           const QString &color, bool bAct);
+           const QColor &color, bool bAct);
    void rightButtonPressed(void);
-   void appendWithWrap(QString &);
    void applyStyle(QString &);
+   void closeEvent( QCloseEvent *e);
 
    bool               m_bScrollLock;
    int                m_nButtons;        // num of buttons (needed for sizing)
@@ -117,8 +128,9 @@ private:
    bool               m_bShowType;
    int                m_nShown;          // num of messages shown
    int                m_nEditItem;
+   int                m_nDeleteItem;
 
-//   QMultiLineEdit *   m_pEdit;
+   QString            m_preferenceName;
    MyEdit*            m_pEdit;
    QStringList*       m_pStringList;
    QStringList        m_filterList;
@@ -134,6 +146,7 @@ private:
    QLabel*            m_pStatusBarFilter;
    QPopupMenu*        m_pMenu;
    MyButton*          m_pButtonOver;
+   MyButtonList       m_buttonList;
 };
 
 
@@ -154,11 +167,10 @@ public:
   const QColor&  color()                   { return m_color; }
 
 public slots:
-  void setFilter(const QString& string)  { m_filter = string; }
-  void setText(const QString& string)    { QButton::setText(string); }
-  void toggled(bool on)                  {  if (on) emit addFilter(m_filter);
-                                           else emit delFilter(m_filter); }
-  void setColor(const QColor& color)     { m_color = color; } 
+ void setFilter(const QString& string);
+ void setText(const QString& string);    
+ void toggled(bool on);
+ void setColor(const QColor& color);
 
 signals:
   void editButton(MyButton *);

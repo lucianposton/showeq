@@ -80,7 +80,7 @@
     "Kiln",                 // 0x49
     "PotteryWheel",         // 0x4a
     "WoodenCrook",          // 0x4b
-    NULL,                   // 0x4c - Unknown Weapon
+    "Vah Shir Sword",       // 0x4c 
     NULL,                   // 0x4d - Unknown Weapon
     NULL,                   // 0x4e - Unknown Weapon
     NULL,                   // 0x4f - Unknown Weapon
@@ -233,3 +233,31 @@
     "GreyShield",           // 0xe2
     NULL,                   // 0xe3 - Unknown Weapon
     "VeliumRoundShield",    // 0xe4
+    NULL,                   // 0xe5 - Unknown Weapon
+    "Vah Shir Shield",      // 0xe6
+    NULL,                   // 0xe7 - Unknown Weapon
+    NULL,                   // 0xe8 - Unknown Weapon
+    NULL,                   // 0xe9 - Unknown Weapon
+    NULL,                   // 0xea - Unknown Weapon
+    NULL,                   // 0xeb - Unknown Weapon
+    NULL,                   // 0xec - Unknown Weapon
+    NULL,                   // 0xed - Unknown Weapon
+    NULL,                   // 0xee - Unknown Weapon
+    NULL,                   // 0xef - Unknown Weapon
+    NULL,                   // 0xf0 - Unknown Weapon
+    NULL,                   // 0xf1 - Unknown Weapon
+    NULL,                   // 0xf2 - Unknown Weapon
+    NULL,                   // 0xf3 - Unknown Weapon
+    NULL,                   // 0xf4 - Unknown Weapon
+    NULL,                   // 0xf5 - Unknown Weapon
+    NULL,                   // 0xf6 - Unknown Weapon
+    NULL,                   // 0xf7 - Unknown Weapon
+    NULL,                   // 0xf8 - Unknown Weapon
+    NULL,                   // 0xf9 - Unknown Weapon
+    NULL,                   // 0xfa - Unknown Weapon
+    NULL,                   // 0xfb - Unknown Weapon
+    NULL,                   // 0xfc - Unknown Weapon
+    NULL,                   // 0xfd - Unknown Weapon
+    NULL,                   // 0xfe - Unknown Weapon
+    NULL,                   // 0xff - Unknown Weapon
+

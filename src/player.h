@@ -24,41 +24,45 @@ class EQPlayer : public QObject
 {
   Q_OBJECT 
 public:
-  EQPlayer (int level = 0, 
-	    int race = 1, 
+  EQPlayer (QObject* parent,
+	    const char* name = "player",
+	    int level = 0, 
+	    uint16_t race = 1, 
 	    int class_ = 1, 
 	    int deity = DEITY_AGNOSTIC);
 
  public slots:
-   void backfill(const playerProfileStruct* player); 
+   void backfill(const charProfileStruct* player); 
    void clear();
    void reset();
-   void wearItem(const itemPlayerStruct* itemp);
+   void wearItem(const playerItemStruct* itemp);
    void removeItem(const itemStruct* item);
-   void increaseSkill(const skillIncreaseStruct* skilli);
+   void increaseSkill(const skillIncStruct* skilli);
    void manaChange(const manaDecrementStruct* mana);
    void updateExp(const expUpdateStruct* exp);
-   void updateLevel(const levelUpStruct* levelup);
-   void updateSpawnHP(const spawnHpUpdateStruct* hpupdate);
+   void updateAltExp(const altExpUpdateStruct* altexp);
+   void updateLevel(const levelUpUpdateStruct* levelup);
+   void updateSpawnHP(const hpUpdateStruct* hpupdate);
    void updateStamina(const staminaStruct* stam);
-   void setLastKill(const spawnStruct& lastKill);
-   void incStaleKillCount();
+   void setLastKill(const QString& name, uint8_t level);
    void setLastSpell(uint16_t spellId);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
-   void zoneChange(const zoneChangeStruct* zoneChange, bool client);
-   void zoneNew(const newZoneStruct* zoneNew, bool client);
-   void playerUpdate(const playerUpdateStruct* pupdate, bool client);
+   void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
+   void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
+   void playerUpdate(const playerPosStruct* pupdate, uint32_t, uint8_t);
 
    void setPlayerName(const QString& playerName);
    void setPlayerLastName(const QString& playerLastName);
    void setPlayerLevel(uint8_t newlevel);
-   void setPlayerRace(uint8_t newrace);
+   void setPlayerRace(uint16_t newrace);
    void setPlayerClass(uint8_t newclass);
-   void setPlayerDeity(uint8_t newdeity);
+   void setPlayerDeity(uint16_t newdeity);
    void setPlayerID(uint16_t playerID);
    void checkDefaults(void) { setDefaults(); } // Update our default values
    void setUseDefaults (bool bdefaults) { m_useDefaults = bdefaults; }
+   void savePlayerState(void);
+   void restorePlayerState(void);
 
  public:
    QString getPlayerName(void) const 
@@ -70,13 +74,13 @@ public:
    uint8_t getPlayerLevel(void) const 
      { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
 	       m_defaultLevel : m_playerLevel);}
-   uint8_t getPlayerRace(void) const 
+   uint16_t getPlayerRace(void) const 
      { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
 	       m_defaultRace : m_playerRace);}
    uint8_t getPlayerClass(void) const 
      { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
 	       m_defaultClass : m_playerClass);}
-   uint8_t getPlayerDeity(void) const 
+   uint16_t getPlayerDeity(void) const 
      { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
 	       m_defaultDeity : m_playerDeity);}
    uint16_t getPlayerID() const { return m_playerID; }
@@ -143,11 +147,10 @@ public:
                                );
    void deleteLanguages();
 
+   void expAltChangedStr       (const QString &);
+   void expAltChangedInt       (int, int, int);
    void expChangedStr          (const QString &);
-   void expChangedInt          ( int,
-                                 int,
-                                 int
-                               );
+   void expChangedInt          (int, int, int);
                                
    void expGained              ( const QString &,
                                  int,
@@ -172,6 +175,7 @@ public:
 		  int16_t deltaX, int16_t deltaY, int16_t deltaZ,
 		  int32_t heading);
   void headingChanged(int32_t heading);
+  void levelChanged(uint8_t level);
 
  protected:
   void fillConTable();
@@ -182,16 +186,16 @@ public:
    QString m_defaultName;
    QString m_defaultLastName;
    int m_defaultLevel;
-   uint8_t m_defaultRace;
+   uint16_t m_defaultRace;
    uint8_t m_defaultClass;
-   uint8_t m_defaultDeity;
+   uint16_t m_defaultDeity;
    // The actual values are set by info from EQPacket.
    QString m_playerName;
    QString m_playerLastName;
    uint8_t m_playerLevel;
-   uint8_t m_playerRace;
+   uint16_t m_playerRace;
    uint8_t m_playerClass;
-   uint8_t m_playerDeity;
+   uint16_t m_playerDeity;
 
    uint16_t m_playerID;
    int16_t m_xPos;
@@ -202,7 +206,7 @@ public:
    uint16_t m_deltaZ;
    int16_t  m_heading;
 
-   struct playerProfileStruct m_thePlayer; 
+   charProfileStruct m_thePlayer; 
    uint8_t m_playerSkills [MAX_KNOWN_SKILLS];
    uint8_t m_playerLanguages [MAX_KNOWN_LANGS];
 
@@ -225,6 +229,8 @@ public:
    uint16_t m_fatigue;
 
    // ExperienceWindow needs this
+   uint32_t m_currentAltExp;
+   uint16_t m_currentAApts;
    uint32_t m_currentExp;
    uint32_t m_maxExp;
 
@@ -232,13 +238,11 @@ public:
    QColor m_conTable[maxSpawnLevel];
 
    // last spawn this player killed
-   spawnStruct m_lastSpawnPlayerKilled;
+   QString m_lastSpawnKilledName;
+   uint8_t m_lastSpawnKilledLevel;
 
    // is the kill information fresh
    bool m_freshKill;
-
-   // how old is the kill
-   int m_staleKillCount;
 
    // last spell cast on this player
    uint16_t m_lastSpellOnId;

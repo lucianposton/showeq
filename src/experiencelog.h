@@ -23,14 +23,17 @@
 # include <fcntl.h>
 # include <stdio.h>
 
+#include "seqwindow.h"
+#include "seqlistview.h"
 #include "packet.h"
+#include "group.h"
 
-class ExperienceRecord {
-
+class ExperienceRecord 
+{
 public:
 
    ExperienceRecord( const QString &mob_name, int mob_level, long xp_gained,
-      time_t time, const QString &zone_name, EQPacket *p );
+      time_t time, const QString &zone_name, EQPlayer* p, GroupMgr* g);
 
    const QString &getMobName() const;
    int getMobLevel() const;
@@ -43,8 +46,8 @@ public:
    const QString &getZoneName() const;
 
 private:
-   
-   EQPacket *m_packet;
+   EQPlayer* m_player;
+   GroupMgr* m_group;
    QString m_zone_name;
    QString m_mob_name;
    int m_mob_level;
@@ -53,17 +56,19 @@ private:
 
 };
 
-class ExperienceWindow : public QWidget {
-
+class ExperienceWindow : public SEQWindow
+{
    Q_OBJECT
 
 public:
 
-   ExperienceWindow( EQPacket *p );
+   ExperienceWindow( EQPlayer* player, GroupMgr* g, 
+		     QWidget* parent = 0, const char* name = 0 );
    ~ExperienceWindow();
 
 public slots:
 
+   virtual void savePrefs(void);
    void updateAverage( );
    void addExpRecord( const QString &mob_name, int mob_level, long xp_gained,
       QString zone_name );
@@ -86,11 +91,12 @@ private:
    void logexp(long xp_gained, int mob_level);
 
    // Need to grab xp totals from here
-   EQPacket *m_packet;
+   EQPlayer* m_player;
+   GroupMgr* m_group;
 
    QVBoxLayout *m_layout;
 
-   QListView *m_exp_listview;
+   SEQListView *m_exp_listview;
 
    QLabel *m_experience_rate_label;
    QLabel *m_total_received, *m_mob_count, *m_average_per_mob,
