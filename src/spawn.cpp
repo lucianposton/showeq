@@ -642,6 +642,8 @@ QString Spawn::deityName() const
 
 void Spawn::calcDeityTeam()
 {
+  m_deityTeam = DTEAM_OTHER;
+
   switch(deity())
   {
     //Good
@@ -670,12 +672,12 @@ void Spawn::calcDeityTeam()
     m_deityTeam = DTEAM_EVIL;
     break;
   }
-
-  m_deityTeam = DTEAM_OTHER;
 }
 
 void Spawn::calcRaceTeam()
 {
+  m_raceTeam = RTEAM_OTHER;
+
   switch(race())
   {
   case 1: // Human
@@ -702,8 +704,6 @@ void Spawn::calcRaceTeam()
     m_raceTeam = RTEAM_SHORT;
     break;
   }
-
-  m_raceTeam = RTEAM_OTHER;
 }
 
 QString Spawn::cleanedName() const
