@@ -1427,8 +1427,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    if (m_combatWindow != NULL)
    {
      // connect CombatWindow slots to the signals
-     connect (this, SIGNAL(combatSignal(int, int, int, int, int)),
-	      m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int)));
+     connect (this, SIGNAL(combatSignal(int, int, int, int, int, QString, QString)),
+	      m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int, QString, QString)));
      connect (m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
 	      m_combatWindow, SLOT(resetDPS()));
      connect(this, SIGNAL(restoreFonts(void)),
@@ -3568,7 +3568,10 @@ void EQInterface::attack2Hand1(const attack2Struct * atk2)
 
 void EQInterface::action2Message(const action2Struct *action2)
 {
-	emit combatSignal(action2->target, action2->source, action2->type, action2->spell, action2->damage);
+	const Item* target = m_spawnShell->findID(tSpawn, action2->target);
+	const Item* source = m_spawnShell->findID(tSpawn, action2->source);
+	emit combatSignal(action2->target, action2->source, action2->type, action2->spell, action2->damage, 
+		(target != NULL) ? target->name() : QString("Unknown"), (source != NULL) ? source->name() : QString("Unknown"));
 }
 
 

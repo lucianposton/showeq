@@ -211,7 +211,7 @@ class EQInterface:public QMainWindow
    void backfillPlayer(charProfileStruct *);
    void backfillSpawn(spawnStruct *);
 
-   void combatSignal(int, int, int, int, int);
+   void combatSignal(int, int, int, int, int, QString, QString);
 
  private slots:
    void toggle_opt_Fast();

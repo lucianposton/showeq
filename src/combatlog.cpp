@@ -12,6 +12,7 @@
 #include <qmessagebox.h>
 #include <qlayout.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "combatlog.h"
 #include "player.h"
@@ -255,6 +256,13 @@ void CombatWindow::initUI()
 	m_widget_mob = initMobWidget();
 	m_tab->addTab(m_widget_mob, "&Mobs");
 
+	m_clear_menu = new QPopupMenu(this);
+	m_clear_menu->insertItem("Clear Offense Stats", this, SLOT(clearOffense()));
+	m_clear_menu->insertItem("Clear Mob Stats", this, SLOT(clearMob()));
+
+	m_menu_bar = new QMenuBar(this);
+	m_menu_bar->insertItem("&Clear", m_clear_menu);
+
 	updateOffense();
 	updateDefense();
 	updateMob();
@@ -409,20 +417,22 @@ QWidget* CombatWindow::initMobWidget()
 	m_layout_mob->addWidget(listGBox);
 
 	m_listview_mob = new SEQListView(preferenceName(), listGBox);
-	m_listview_mob->addColumn("Name");
+	m_listview_mob->addColumn("Time");
 	m_listview_mob->setColumnAlignment(0, Qt::AlignRight);
-	m_listview_mob->addColumn("ID");
+	m_listview_mob->addColumn("Name");
 	m_listview_mob->setColumnAlignment(1, Qt::AlignRight);
-	m_listview_mob->addColumn("Duration");
+	m_listview_mob->addColumn("ID");
 	m_listview_mob->setColumnAlignment(2, Qt::AlignRight);
-	m_listview_mob->addColumn("Damage Given");
+	m_listview_mob->addColumn("Duration");
 	m_listview_mob->setColumnAlignment(3, Qt::AlignRight);
-	m_listview_mob->addColumn("DPS");
+	m_listview_mob->addColumn("Damage Given");
 	m_listview_mob->setColumnAlignment(4, Qt::AlignRight);
-	m_listview_mob->addColumn("Damage Taken");
+	m_listview_mob->addColumn("DPS");
 	m_listview_mob->setColumnAlignment(5, Qt::AlignRight);
-	m_listview_mob->addColumn("MOB DPS");
+	m_listview_mob->addColumn("Damage Taken");
 	m_listview_mob->setColumnAlignment(6, Qt::AlignRight);
+	m_listview_mob->addColumn("MOB DPS");
+	m_listview_mob->setColumnAlignment(7, Qt::AlignRight);
 
 	m_listview_mob->restoreColumns();
 
@@ -655,7 +665,10 @@ void CombatWindow::updateMob()
 		int iDamageTaken = pRecord->getDamageTaken();
 		double dMobDPS = pRecord->getMobDPS();
 
-		QString s_name = QString::number(iID);
+		char s_time[64];
+		time_t timev = pRecord->getTime();
+		strftime(s_time, 64, "%m/%d %H:%M:%S", localtime(&timev));
+		QString s_name = pRecord->getName();
 		QString s_id = QString::number(iID);
 		QString s_duration = QString::number(iDuration);
 		QString s_damagegiven = QString::number(iDamageGiven);
@@ -665,7 +678,7 @@ void CombatWindow::updateMob()
 
 
 		QListViewItem *pItem = new QListViewItem(m_listview_mob,
-			s_name, s_id, s_duration, s_damagegiven,
+			s_time, s_name, s_id, s_duration, s_damagegiven,
 			s_dps, s_iDamageTaken, s_mobdps);
 
 		m_listview_mob->insertItem(pItem);
@@ -683,7 +696,7 @@ void CombatWindow::updateMob()
 
 }
 
-void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage)
+void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage, QString tName, QString sName)
 {
 #ifdef DEBUGCOMBAT
 	printf("CombatWindow::addCombatRecord starting...\n");
@@ -700,14 +713,14 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 	{
 		addDefenseRecord(iDamage);
 		updateDefense();
-		addMobRecord(iTargetID, iSourceID, iDamage);
+		addMobRecord(iTargetID, iSourceID, iDamage, tName, sName);
 		updateMob();
 	}
 	else if(iSourceID == iPlayerID && iTargetID != iPlayerID)
 	{
 		addOffenseRecord(iType, iDamage);
 		updateOffense();
-		addMobRecord(iTargetID, iSourceID, iDamage);
+		addMobRecord(iTargetID, iSourceID, iDamage, tName, sName);
 		updateMob();
 
 		if(iDamage > 0)
@@ -769,7 +782,7 @@ void CombatWindow::addDefenseRecord(int iDamage)
 
 }
 
-void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage)
+void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage, QString tName, QString sName)
 {
 #ifdef DEBUGCOMBAT
 	printf("CombatWindow::addMobRecord starting...\n");
@@ -778,14 +791,17 @@ void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage)
 	int iTimeNow = mTime();
 	int iPlayerID = m_player->id();
 	int iMobID;
+	QString mobName;
 
 	if(iPlayerID == iTargetID)
 	{
 		iMobID = iSourceID;
+		mobName = sName;
 	}
 	else if(iPlayerID == iSourceID)
 	{
 		iMobID = iTargetID;
+		mobName = tName;
 	}
 	else
 	{
@@ -810,9 +826,10 @@ void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage)
 	if(!bFoundRecord)
 	{
 		pRecord = new CombatMobRecord(iMobID, iTimeNow, m_player);
+		pRecord->setName(mobName);
 		m_combat_mob_list.append(pRecord);
 	}
-
+	pRecord->setTime(time(0));
 	pRecord->addHit(iTargetID, iSourceID, iDamage);
 
 
@@ -864,3 +881,34 @@ void CombatWindow::resetDPS()
 	updateDPS(0);
 }
 
+void CombatWindow::clearMob()
+{
+	switch( QMessageBox::information( this, "ShowEQ",
+		"This function will clear all data listed on the mob "
+		"tab.  Do you want to continue?",
+		"&OK", "&Cancel", QString::null, 1, 1 ) )
+	{
+		case 0:
+			m_combat_mob_list.clear();
+			m_listview_mob->clear();
+			break;
+		default:
+			break;
+	}
+}
+
+void CombatWindow::clearOffense()
+{
+	switch( QMessageBox::information( this, "ShowEQ",
+		"This function will clear all data listed on the offense "
+		"tab.  Do you want to continue?",
+		"&OK", "&Cancel", QString::null, 1, 1 ) )
+	{
+		case 0:
+			m_combat_offense_list.clear();
+			m_listview_offense->clear();
+			break;
+		default:
+			break;
+	}
+}

@@ -27,6 +27,8 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
 {
   m_spawnListItemDict.setAutoDelete(false);
 
+  m_spawnCount = 0;
+
   // get whether to keep the list sorted or not
   m_keepSorted = pSEQPrefs->getPrefBool("KeepSorted", preferenceName(), false);
 
@@ -51,6 +53,13 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   hLayout->addWidget(m_categoryCombo, 0, AlignLeft);
   connect(m_categoryCombo, SIGNAL(activated(int)),
 	  this, SLOT(categorySelected(int)));
+
+  // Create the Spawn Counter
+  m_totalSpawns = new QLineEdit( this);
+  m_totalSpawns->setReadOnly( TRUE );
+  m_totalSpawns->setAlignment( AlignHCenter );
+  m_totalSpawns->setFixedWidth( 150 );
+  hLayout->addWidget(m_totalSpawns, 0, AlignLeft);  
 
   // setup spinbox to control frame rate (FPM)
   m_fpmSpinBox = new QSpinBox(5, 60, 1, this, "fpmSpinBox");
@@ -210,10 +219,27 @@ SpawnListMenu* SpawnListWindow2::menu()
   return m_menu;
 }
 
+void SpawnListWindow2::displayCount(int kount)
+{
+  QString stext;
+  stext = stext.setNum( kount );
+  stext.append( " Total " );    
+  stext.append( m_currentCategory->name() );
+  m_totalSpawns->setText( stext );
+}
+
 void SpawnListWindow2::addItem(const Item* item)
 {
   // just call change item (it will update/remove/add as appropriate)
   changeItem(item, tSpawnChangedALL);
+
+  // Increment Spawn counter
+  if ( m_currentCategory->isFiltered(filterString(item)))
+  {
+    m_spawnCount = m_spawnCount++;
+   // Display the spawn count
+   displayCount(m_spawnCount);   
+  }
 }
 
 void SpawnListWindow2::delItem(const Item* item)
@@ -234,6 +260,14 @@ void SpawnListWindow2::delItem(const Item* item)
 
   if (item == m_selectedItem)
     m_selectedItem = NULL;
+
+    // Decrement Spawn counter
+    if ( m_currentCategory->isFiltered(filterString(item)))
+    {
+      m_spawnCount = m_spawnCount--;
+      // Display the spawn count
+      displayCount(m_spawnCount);
+    }
 }
 
 void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
@@ -831,6 +865,9 @@ void SpawnListWindow2::populateSpawns(void)
   test.start();
 #endif
 
+   // Zero the count
+   m_spawnCount = 0;
+
   if (m_currentCategory == NULL)
     return;
 
@@ -870,7 +907,8 @@ void SpawnListWindow2::populateSpawns(void)
       {
 	// yes, add it
 	litem = new SpawnListItem(m_spawnList);
-
+  // Increment the spawn counter
+   m_spawnCount = m_spawnCount++;
 	// insert it into the dictionary
 	m_spawnListItemDict.insert((void*)item, litem);
 
@@ -894,7 +932,8 @@ void SpawnListWindow2::populateSpawns(void)
   // make sure the spawnlist is sorted
   if (m_keepSorted)
     m_spawnList->sort();
-
+   // Display the spawn count
+   displayCount(m_spawnCount);
   // make sure the selected item is selected
   if (m_selectedItem)
     selectSpawn(m_selectedItem);

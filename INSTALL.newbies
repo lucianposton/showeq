@@ -1,13 +1,9 @@
-Document Version 4.2.12
+Document Version 1.4
 
 Changes from previous version:
 
-- 1.5 NOTE TO USERS WITH A HIGHER VERSION OF gcc
-    Added section, renamed following sections
-- 3.2 Updating ShowEQ from cvs
-    Corrected two typos in the commands
-- Added Hard Breaks in document for better reading.
-
+- changed all references from qt-2.3.2 to qt-3.0.5 and
+	included the correct install sequence for QT 3.0.5
 
 Following this file does not exempt you from reading and understanding the
 regular INSTALL file.  This should give you the knowledge you need to
@@ -39,7 +35,7 @@ Index:
 1.  Installation
 1.1 Downloading Red Hat 7.2
 1.2 Packet Selection
-1.3 Downloading qt-2.3.2
+1.3 Downloading qt-3.0.5
 1.4 Editting linux-g++-shared
 1.5 NOTE TO USERS WITH A HIGHER VERSION OF gcc
 1.6 Compiling QT
@@ -135,26 +131,27 @@ entered during the install. You will notice the command prompt: "[]#"
 
 
 
-1.3 Downloading qt-2.3.2
-    Download qt-2.3.2 at ftp.trolltech.com and extract it to it's own
-    directory.
+1.3 Downloading qt-3.0.5
+    Download qt-3.0.5 at ftp.trolltech.com and extract it to it's own
+    directory (and rename the directory).
 
 Code: 
 
 []# cd /usr/lib/ 
-[]# wget --passive ftp ftp://ftp.trolltech.com/qt/source/qt-x11-2.3.2.tar.gz 
-[]# tar zxvf qt-x11-2.3.2.tar.gz 
+[]# wget --passive ftp ftp://ftp.trolltech.com/qt/source/qt-x11-free-3.0.5.tar.gz 
+[]# tar zxvf qt-x11-free-3.0.5.tar.gz 
+[]# mv qt-x11-free-3.0.5 qt-3.0.5
  
 
 
 1.4 Editting linux-g++-shared
-    edit the file "qt-src/configs/linux-g++-shared and change all
+    edit the file "mkspecs/linux-g++/qmake.conf and change all
     references to "gcc" to "gcc3" as well as "g++" to "g++3"
-    (lines 3, 4, 35, and 59). save your changes (ctrl-o, ctrl-x) 
+    (lines 12, 27, 47, and 48). save your changes (ctrl-o, ctrl-x) 
 
 Code: 
 
-[]# pico -w /usr/lib/qt-2.3.2/configs/linux-g++-shared 
+[]# pico -w /usr/lib/qt-3.0.5/mkspecs/linux-g++/qmake.conf
 
 
 
@@ -193,27 +190,32 @@ in step 1.2
 
 
 1.6 Compiling QT
-    "export QTDIR" and configure and compile qt-2.3.2 with the -thread
-    option. Optionally you can use "make -j2" to possibly speed up
-    compile. If you have 2 cpus then you can even use use "make -j3"
+    "export QTDIR" and the "MOC" environmental and configure and compile
+	qt-3.0.5 with the -thread option. Optionally you can use "gmake -j2"
+	to possibly speed up compile. If you have 2 cpus then you can even
+	use use "gmake -j3"
  
 ** this compile will take a LONG time, possibly as few as 1 hour and as
 many as 6 depending on cpu speed. **
 
 Code: 
 
-[]# cd /usr/lib/qt-2.3.2/ 
-[]# export QTDIR=/usr/lib/qt-2.3.2/ 
+[]# cd /usr/lib/qt-3.0.5
+[]# export QTDIR=/usr/lib/qt-3.0.5
+[]# export PATH=$QTDIR/bin:$PATH
+[]# export MANPATH=$QTDIR/man:$MANPATH
+[]# export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
 []# ./configure -thread 
-[]# make 
+[]# gmake 
+[]# gmake install
  
 
-You might find that adding the line "/usr/lib/qt-2.3.2/lib" to the file
+You might find that adding the line "/usr/lib/qt-3.0.5/lib" to the file
 "/etc/ld.so.conf" then running "ldconfig" will help you. 
 
 Code: 
 
-[]# echo "/usr/lib/qt-2.3.2/lib" >> /etc/ld.so.conf 
+[]# echo "/usr/lib/qt-3.0.5/lib" >> /etc/ld.so.conf 
 []# ldconfig 
 
  
@@ -255,7 +257,7 @@ Code:
 []# cd /seq/showeq/ 
 []# export CC=gcc3
 []# export CXX=g++3
-[]# export QTDIR=/usr/lib/qt-2.3.2 
+[]# export QTDIR=/usr/lib/qt-3.0.5 
 []# make -f Makefile.dist 
 []# ./configure 
 []# make 
@@ -299,13 +301,13 @@ Code:
 
 
 2.3 Starting ShowEQ
-[]# export QTDIR=/usr/lib/qt-2.3.2 
+[]# export QTDIR=/usr/lib/qt-3.0.5 
 []# cd /usr/local/bin
 []# ./showeq eth0 --ip-address=10.0.0.10 
 
 OR
 
-[]# showeq eth0 --ip-address=10.0.0.10 
+[]# showeq eth0 --ip-address=10.0.0.10
  
 Of course, for it to work you will need to replace my ip (10.0.0.10)
 with the ip of your computer that is/will be playing everquest. if
@@ -340,7 +342,7 @@ Code:
 []# cvs -d:pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq logout 
 []# export CC=gcc3
 []# export CXX=g++3
-[]# export QTDIR=/usr/lib/qt-2.3.2 
+[]# export QTDIR=/usr/lib/qt-3.0.5 
 []# make -f Makefile.dist
 []# ./configure
 []# make
@@ -380,18 +382,23 @@ http://www.smoothwall.org/download/pdf/docs/0.9.9/doc.faq.pdf
 
 
 4.2 Saving Space
-    Is your qt-2.3.2 directory pretty big? want to reclaim some space?
-    delete the "tutorials" and "examples" directory! 
+    Is your qt-3.0.5 directory pretty big? want to reclaim some space?
+    delete the "tutorial" and "examples" directory! 
 
 Code: 
 
-[]# rm -Rfv /usr/lib/qt-2.3.2/examples/ 
-[]# rm -Rfv /usr/lib/qt-2.3.2/tutorials/
+[]# rm -Rfv /usr/lib/qt-3.0.5/examples/ 
+[]# rm -Rfv /usr/lib/qt-3.0.5/tutorial/
 
 
 --------------
 
 5. Version History of this document:
+
+Version 1.4
+
+- changed all references from qt-2.3.2 to qt-3.0.5 and
+	included the correct install sequence for QT 3.0.5
 
 Version 4.2.12
 
@@ -464,3 +471,4 @@ http://seq.sourceforge.net/showthread.php?s=&threadid=400 by monkey679
 http://www.hackersquest.org/boards/viewtopic.php?t=274 also by monkey679
 http://seq.sourceforge.net/showthread.php?s=&threadid=985
 http://seq.sourceforge.net/showthread.php?s=&threadid=1485
+

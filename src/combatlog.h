@@ -118,11 +118,17 @@ public:
 	int		getDamageGiven() { return m_iDamageGiven; };
 	int		getDamageTaken() { return m_iDamageTaken; };
 
+	QString		getName() { return m_iName; };
+	void		setName(QString iName) { m_iName = iName; };
+
+	time_t		getTime() { return m_time; };
+	void		setTime(time_t iTime) { m_time = iTime; };
+
 	double	getDPS();
 	double	getMobDPS();
 
 	void	addHit(int iTarget, int iSource, int iDamage);
-
+	
 private:
 	int			m_iID;
 	Player*	m_player;
@@ -133,6 +139,9 @@ private:
 	double		m_dDPS;
 	int			m_iDamageTaken;
 	double		m_dMobDPS;
+
+	QString			m_iName;
+	time_t			m_time;
 };
 
 ////////////////////////////////////////////
@@ -151,8 +160,10 @@ public:
 public slots:
 
 	virtual void savePrefs(void);
-	void addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage);
+	void addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage, QString tName, QString sName);
 	void resetDPS();
+	void clearMob();
+	void clearOffense();
 
 private:
 
@@ -163,7 +174,7 @@ private:
 
 	void addOffenseRecord(int iType, int iDamage);
 	void addDefenseRecord(int iDamage);
-	void addMobRecord(int iTargetID, int iSourceID, int iDamage);
+	void addMobRecord(int iTargetID, int iSourceID, int iDamage, QString tName, QString sName);
 
 	void updateOffense();
 	void updateDefense();
@@ -215,6 +226,9 @@ private:
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	CombatDefenseRecord *m_combat_defense_record;
 	QList<CombatMobRecord> m_combat_mob_list;
+
+	QMenuBar	*m_menu_bar;
+	QPopupMenu	*m_clear_menu;
 
 	int		m_iCurrentDPSTotal;
 	int		m_iDPSStartTime;

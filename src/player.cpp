@@ -18,7 +18,8 @@
 #ifdef __FreeBSD__
 long int lrint(double x)
 {
-  long int l=(x+.5);
+  long int l=(long int)(x+.5);
+  return l;
 }
 
 long int lrintf(float x)
