@@ -183,11 +183,10 @@ QMainWindow (parent, name)
    if (pSEQPrefs->getPrefBool("ShowStatus", statusBarSection, 0))
    {
      m_stsbarStatus = new QLabel(statusBar(), "Status");
-     m_stsbarStatus->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+     m_stsbarStatus->setFrameStyle(QFrame::Sunken);
      m_stsbarStatus->setFont(QFont("Helvetica", showeq_params->statusfontsize));
-     m_stsbarStatus->setText("Initializing...");
-     m_stsbarStatus->setMinimumHeight(m_stsbarStatus->sizeHint().height());
      m_stsbarStatus->setText("");
+     m_stsbarStatus->setFixedHeight(showeq_params->statusfontsize + 6);
      m_stsbarStatus->setMinimumWidth(100);
      statusBar()->addWidget(m_stsbarStatus, 8);
    }
@@ -196,60 +195,60 @@ QMainWindow (parent, name)
    if (pSEQPrefs->getPrefBool("ShowZone", statusBarSection, 0))
    {
      m_stsbarZone = new QLabel(statusBar(), "Zone");
-     m_stsbarZone->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+     m_stsbarZone->setFrameStyle(QFrame::Sunken);
      m_stsbarZone->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarZone->setText("Zone: [unknown]");
-     m_stsbarZone->setMinimumHeight(m_stsbarZone->sizeHint().height());
-     statusBar()->addWidget(m_stsbarZone, 2, TRUE);
+     m_stsbarZone->setFixedHeight(showeq_params->statusfontsize + 6);
+     statusBar()->addWidget(m_stsbarZone, 2);
    }
    m_stsbarSpawns = 0;
    if (pSEQPrefs->getPrefBool("ShowSpawns", statusBarSection, 0))
    {
      m_stsbarSpawns = new QLabel(statusBar(), "Mobs");
-     m_stsbarSpawns->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+     m_stsbarSpawns->setFrameStyle(QFrame::Sunken);
      m_stsbarSpawns->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarSpawns->setText("Mobs:");
-     m_stsbarSpawns->setMinimumHeight(m_stsbarSpawns->sizeHint().height());
-     statusBar()->addWidget(m_stsbarSpawns, 1, TRUE);
+     m_stsbarSpawns->setFixedHeight(showeq_params->statusfontsize + 6);
+     statusBar()->addWidget(m_stsbarSpawns, 1);
    }
 
    m_stsbarExp = 0;
    if (pSEQPrefs->getPrefBool("ShowExp", statusBarSection, 0))
    {
      m_stsbarExp = new QLabel(statusBar(), "Exp");
-     m_stsbarExp->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+     m_stsbarExp->setFrameStyle(QFrame::Sunken);
      m_stsbarExp->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarExp->setText("Exp [unknown]");
-     m_stsbarExp->setMinimumHeight(m_stsbarExp->sizeHint().height());
-     statusBar()->addWidget(m_stsbarExp, 1, TRUE);
+     m_stsbarExp->setFixedHeight(showeq_params->statusfontsize + 6);
+     statusBar()->addWidget(m_stsbarExp, 1);
    }
 
    m_stsbarPkt = 0;
    if (pSEQPrefs->getPrefBool("ShowPacketCounter", statusBarSection, 0))
    {
      m_stsbarPkt = new QLabel(statusBar(), "Pkt");
-     m_stsbarPkt->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+     m_stsbarPkt->setFrameStyle(QFrame::Sunken);
      m_stsbarPkt->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarPkt->setText("Pkt 0");
-     m_stsbarPkt->setMinimumHeight(m_stsbarPkt->sizeHint().height());
-     statusBar()->addWidget(m_stsbarPkt, 1, TRUE);
+     m_stsbarPkt->setFixedHeight(showeq_params->statusfontsize + 6);
+     statusBar()->addWidget(m_stsbarPkt, 1);
      m_lPacketStartTime = 0;
    }
 
    m_stsbarEQTime = 0;
    if (pSEQPrefs->getPrefBool("ShowEQTime", statusBarSection, 0))
    {
-       m_stsbarEQTime = new QLabel(statusBar(), "EQTime");
-       m_stsbarEQTime->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-       m_stsbarEQTime->setFont(QFont("Helvetica", showeq_params->statusfontsize));
-       m_stsbarEQTime->setText("EQTime [UNKNOWN]");
-       m_stsbarEQTime->setMinimumHeight(m_stsbarEQTime->sizeHint().height());
-       statusBar()->addWidget(m_stsbarEQTime, 1, TRUE);
+     m_stsbarEQTime = new QLabel(statusBar(), "EQTime");
+     m_stsbarEQTime->setFrameStyle(QFrame::Sunken);
+     m_stsbarEQTime->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+     m_stsbarEQTime->setText("EQTime [UNKNOWN]");
+     m_stsbarEQTime->setFixedHeight(showeq_params->statusfontsize + 6);
+     statusBar()->addWidget(m_stsbarEQTime, 1);
    }
 
 
    // The first call to tooTipGroup() makes it exist
-//   toolTipGroup()->addWidget();
+   // toolTipGroup()->addWidget();
 
 
    //
@@ -1364,7 +1363,7 @@ QMainWindow (parent, name)
    for(;;) 
    {
       i++;
-      sprintf(tempStr, "SplitV_Size%d", i);
+      sprintf(tempStr, "SplitVSize%d", i);
       if (pSEQPrefs->isPreference(tempStr, section)) {
          x = pSEQPrefs->getPrefInt(tempStr, section);
          list.append(x);
@@ -1377,7 +1376,7 @@ QMainWindow (parent, name)
    for(;;) 
    {
       i++;
-      sprintf(tempStr, "SplitH_Size%d", i);
+      sprintf(tempStr, "SplitHSize%d", i);
       if (pSEQPrefs->isPreference(tempStr, section)) {
          x = pSEQPrefs->getPrefInt(tempStr, section);
          list.append(x);
@@ -1390,7 +1389,7 @@ QMainWindow (parent, name)
    for(;;) 
    {
       i++;
-      sprintf(tempStr, "SplitT_Size%d", i);
+      sprintf(tempStr, "SplitTSize%d", i);
       if (pSEQPrefs->isPreference(tempStr, section)) 
       {
          x = pSEQPrefs->getPrefInt(tempStr, section);

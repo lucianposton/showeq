@@ -1777,7 +1777,7 @@ case 0x0251:
 	sprintf (spellname, "Illusion: Ogre");
 	break;
 case 0x0252:
-	sprintf (spellname, "Illusion: Halfing");
+	sprintf (spellname, "Illusion: Halfling");
 	break;
 case 0x0253:
 	sprintf (spellname, "Illusion: Gnome");
@@ -2515,7 +2515,7 @@ case 0x0351:
 	sprintf (spellname, "ElementalMasteryBlast");
 	break;
 case 0x0352:
-	sprintf (spellname, "Call of Earth");
+	sprintf (spellname, "Call of Earth2");
 	break;
 case 0x0353:
 	sprintf (spellname, "Shardwurm Breath");
@@ -3500,6 +3500,42 @@ case 0x0564:
 	break;
 case 0x0565:
 	sprintf (spellname, "Lawrence's Uberity");
+	break;
+case 0x0566:
+	sprintf (spellname, "Summon Holy Ale of Brell");
+	break;
+case 0x0567:
+	sprintf (spellname, "Screech");
+	break;
+case 0x0569:
+	sprintf (spellname, "Al`Kabor's Expansive Mind");
+	break;
+case 0x056a:
+	sprintf (spellname, "Nildaar's Storm of Locusts");
+	break;
+case 0x056c:
+	sprintf (spellname, "Boneshear");
+	break;
+case 0x056d:
+	sprintf (spellname, "Knight's Blessing");
+	break;
+case 0x056e:
+	sprintf (spellname, "Prime Healers Blessing");
+	break;
+case 0x056f:
+	sprintf (spellname, "Dead Men Floating");
+	break;
+case 0x0570:
+	sprintf (spellname, "Lightning Call");
+	break;
+case 0x0571:
+	sprintf (spellname, "Gangrenous Touch of Zum`uul");
+	break;
+case 0x0572:
+	sprintf (spellname, "Maelstrom of Electricity");
+	break;
+case 0x0573:
+	sprintf (spellname, "Harvest Leaves");
 	break;
 case 0x0575:
 	sprintf (spellname, "Strength of Nature");
@@ -5343,4 +5379,1469 @@ case 0x07d9:
 case 0x07da:
 	sprintf (spellname, "Gathering of the Mind");
 	break;
+case 0x07db:
+	sprintf (spellname, "Essence Tap");
+	break;
+case 0x07dc:
+	sprintf (spellname, "Essence Drain");
+	break;
+case 0x07dd:
+	sprintf (spellname, "Kylie's Venom");
+	break;
+case 0x07de:
+	sprintf (spellname, "Incinerate Bones");
+	break;
+case 0x07df:
+	sprintf (spellname, "Conglaciation of Bone");
+	break;
+case 0x07e0:
+	sprintf (spellname, "Dementing Visions");
+	break;
+case 0x07e1:
+	sprintf (spellname, "Storm Strength");
+	break;
+case 0x07e2:
+	sprintf (spellname, "Aegis of Bathezid");
+	break;
+case 0x07e3:
+	sprintf (spellname, "Thunder Strike");
+	break;
+case 0x07e4:
+	sprintf (spellname, "Circle of Surefall Glade");
+	break;
+case 0x07e5:
+	sprintf (spellname, "Ring of Surefall Glade");
+	break;
+case 0x07e6:
+	sprintf (spellname, "Translocate: Iceclad");
+	break;
+case 0x07e7:
+	sprintf (spellname, "Translocate: Great Divide");
+	break;
+case 0x07e8:
+	sprintf (spellname, "Translocate: Wakening Lands");
+	break;
+case 0x07e9:
+	sprintf (spellname, "Translocate: Cobalt Scar");
+	break;
+case 0x07ea:
+	sprintf (spellname, "Great Divide Gate");
+	break;
+case 0x07eb:
+	sprintf (spellname, "Wakening Lands Gate");
+	break;
+case 0x07ec:
+	sprintf (spellname, "Cobalt Scar Gate");
+	break;
+case 0x07ed:
+	sprintf (spellname, "Ring of Great Divide");
+	break;
+case 0x07ee:
+	sprintf (spellname, "Ring of Wakening Lands");
+	break;
+case 0x07ef:
+	sprintf (spellname, "Ring of Cobalt Scar");
+	break;
+case 0x07f0:
+	sprintf (spellname, "Protection");
+	break;
+case 0x07f1:
+	sprintf (spellname, "Droga Gate");
+	break;
+case 0x07f2:
+	sprintf (spellname, "Recant Magic");
+	break;
+case 0x07f3:
+	sprintf (spellname, "Tentacle Sting");
+	break;
+case 0x07f4:
+	sprintf (spellname, "Rain of the Arch Mage");
+	break;
+case 0x07f5:
+	sprintf (spellname, "Imperceptibility");
+	break;
+case 0x07f6:
+	sprintf (spellname, "BetaAcrylia3");
+	break;
+case 0x07f7:
+	sprintf (spellname, "Shroud of Stealth");
+	break;
+case 0x07f8:
+	sprintf (spellname, "Winds of the Archmage");
+	break;
+case 0x07f9:
+	sprintf (spellname, "Aura of the Nurga");
+	break;
+case 0x07fa:
+	sprintf (spellname, "Hands of the Nurga");
+	break;
+case 0x07fb:
+	sprintf (spellname, "Kambooz's Touch");
+	break;
+case 0x07fc:
+	sprintf (spellname, "Mines of Nurga");
+	break;
+case 0x07fd:
+	sprintf (spellname, "Weakening Spray");
+	break;
+case 0x07fe:
+	sprintf (spellname, "Deathly Chants");
+	break;
+case 0x07ff:
+	sprintf (spellname, "Bone Grasp");
+	break;
+case 0x0800:
+	sprintf (spellname, "Ssraeshza's Command");
+	break;
+case 0x09c5:
+	sprintf (spellname, "Sanctuary");
+	break;
+case 0x09c6:
+	sprintf (spellname, "Celestial Remedy");
+	break;
+case 0x09c7:
+	sprintf (spellname, "Sermon of the Righteous");
+	break;
+case 0x09c8:
+	sprintf (spellname, "Sacred Word");
+	break;
+case 0x09c9:
+	sprintf (spellname, "Armor of the Faithful");
+	break;
+case 0x09ca:
+	sprintf (spellname, "Epitaph of Life");
+	break;
+case 0x09cb:
+	sprintf (spellname, "Mark of Retribution");
+	break;
+case 0x09cc:
+	sprintf (spellname, "Judgement");
+	break;
+case 0x09cd:
+	sprintf (spellname, "Blessed Armor of the Risen");
+	break;
+case 0x09ce:
+	sprintf (spellname, "Blessing of Aegolism");
+	break;
+case 0x09cf:
+	sprintf (spellname, "Protection of Wood");
+	break;
+case 0x09d0:
+	sprintf (spellname, "Protection of Rock");
+	break;
+case 0x09d1:
+	sprintf (spellname, "Protection of Steel");
+	break;
+case 0x09d2:
+	sprintf (spellname, "Protection of Diamond");
+	break;
+case 0x09d3:
+	sprintf (spellname, "Protection of Nature");
+	break;
+case 0x09d4:
+	sprintf (spellname, "Foliage Shield");
+	break;
+case 0x09d5:
+	sprintf (spellname, "Spirit of Eagle");
+	break;
+case 0x09d6:
+	sprintf (spellname, "Ro's Smoldering Disjunction");
+	break;
+case 0x09d7:
+	sprintf (spellname, "Circle of Seasons");
+	break;
+case 0x09d8:
+	sprintf (spellname, "Nature's Recovery");
+	break;
+case 0x09d9:
+	sprintf (spellname, "Talisman of the Beast");
+	break;
+case 0x09da:
+	sprintf (spellname, "Grow");
+	break;
+case 0x09db:
+	sprintf (spellname, "Form of the Bear");
+	break;
+case 0x09dc:
+	sprintf (spellname, "Spirit of Bih`Li");
+	break;
+case 0x09dd:
+	sprintf (spellname, "Harnessing of Spirit");
+	break;
+case 0x09de:
+	sprintf (spellname, "Disinfecting Aura");
+	break;
+case 0x09df:
+	sprintf (spellname, "Plague of Insects");
+	break;
+case 0x09e0:
+	sprintf (spellname, "Regrowth of Dar Khura");
+	break;
+case 0x09e1:
+	sprintf (spellname, "Talisman of Epuration");
+	break;
+case 0x09e2:
+	sprintf (spellname, "Khura's Focusing");
+	break;
+case 0x09e3:
+	sprintf (spellname, "Summon Elemental Defender");
+	break;
+case 0x09e4:
+	sprintf (spellname, "Summon Phantom Leather");
+	break;
+case 0x09e5:
+	sprintf (spellname, "Summon Phantom Chain");
+	break;
+case 0x09e6:
+	sprintf (spellname, "Summon Phantom Plate");
+	break;
+case 0x09e7:
+	sprintf (spellname, "Summon Elemental Blanket");
+	break;
+case 0x09e8:
+	sprintf (spellname, "Transon's Elemental Infusion");
+	break;
+case 0x09e9:
+	sprintf (spellname, "Veil of Elements");
+	break;
+case 0x09ea:
+	sprintf (spellname, "Rod of Mystical Transvergance");
+	break;
+case 0x09eb:
+	sprintf (spellname, "Transons Phantasmal Protection");
+	break;
+case 0x09ec:
+	sprintf (spellname, "Shock of Fiery Blades");
+	break;
+case 0x09ed:
+	sprintf (spellname, "Focus Death");
+	break;
+case 0x09ee:
+	sprintf (spellname, "Shackle of Bone");
+	break;
+case 0x09ef:
+	sprintf (spellname, "Eternities Torment");
+	break;
+case 0x09f0:
+	sprintf (spellname, "Shackle of Spirit");
+	break;
+case 0x09f1:
+	sprintf (spellname, "Insidious Retrogression");
+	break;
+case 0x09f2:
+	sprintf (spellname, "Degeneration");
+	break;
+case 0x09f3:
+	sprintf (spellname, "Succussion of Shadows");
+	break;
+case 0x09f4:
+	sprintf (spellname, "Crippling Claudication");
+	break;
+case 0x09f5:
+	sprintf (spellname, "Mind Wrack");
+	break;
+case 0x09f6:
+	sprintf (spellname, "Zevfeer's Theft of Vitae");
+	break;
+case 0x09f7:
+	sprintf (spellname, "O'keils Embers");
+	break;
+case 0x09f8:
+	sprintf (spellname, "Garrisons Mighty Mana Shock");
+	break;
+case 0x09f9:
+	sprintf (spellname, "Minor  Familiar");
+	break;
+case 0x09fa:
+	sprintf (spellname, "Elnerick Entombment of Ice");
+	break;
+case 0x09fb:
+	sprintf (spellname, "Lesser Familiar");
+	break;
+case 0x09fc:
+	sprintf (spellname, "Firetree's Familiar Augment");
+	break;
+case 0x09fd:
+	sprintf (spellname, "Familiar");
+	break;
+case 0x09fe:
+	sprintf (spellname, "Decession");
+	break;
+case 0x09ff:
+	sprintf (spellname, "Spellshield");
+	break;
+case 0x0a00:
+	sprintf (spellname, "Greater Familiar");
+	break;
+case 0x0a01:
+	sprintf (spellname, "Intellectual Advancement");
+	break;
+case 0x0a02:
+	sprintf (spellname, "Intellectual Superiority");
+	break;
+case 0x0a03:
+	sprintf (spellname, "Haunting Visage");
+	break;
+case 0x0a04:
+	sprintf (spellname, "Calming Visage");
+	break;
+case 0x0a05:
+	sprintf (spellname, "Illusion: Imp");
+	break;
+case 0x0a06:
+	sprintf (spellname, "Trickster's Augmentation");
+	break;
+case 0x0a07:
+	sprintf (spellname, "Beguiling Visage");
+	break;
+case 0x0a08:
+	sprintf (spellname, "Horrifying Visage");
+	break;
+case 0x0a09:
+	sprintf (spellname, "Glamorous Visage");
+	break;
+case 0x0a0a:
+	sprintf (spellname, "Koadic's Endless Intellect");
+	break;
+case 0x0a0b:
+	sprintf (spellname, "Despair");
+	break;
+case 0x0a0c:
+	sprintf (spellname, "Scream of Hate");
+	break;
+case 0x0a0d:
+	sprintf (spellname, "Scream of Pain");
+	break;
+case 0x0a0e:
+	sprintf (spellname, "Scream of Death");
+	break;
+case 0x0a0f:
+	sprintf (spellname, "Abduction of Strength");
+	break;
+case 0x0a10:
+	sprintf (spellname, "Mental Corruption");
+	break;
+case 0x0a11:
+	sprintf (spellname, "Torrent of Hate");
+	break;
+case 0x0a12:
+	sprintf (spellname, "Torrent of Pain");
+	break;
+case 0x0a13:
+	sprintf (spellname, "Torrent of Fatigue");
+	break;
+case 0x0a14:
+	sprintf (spellname, "Cloak of the Akheva");
+	break;
+case 0x0a15:
+	sprintf (spellname, "Cease");
+	break;
+case 0x0a16:
+	sprintf (spellname, "Desist");
+	break;
+case 0x0a17:
+	sprintf (spellname, "Instrument of Nife");
+	break;
+case 0x0a18:
+	sprintf (spellname, "Divine Vigor");
+	break;
+case 0x0a19:
+	sprintf (spellname, "Valor of Marr");
+	break;
+case 0x0a1a:
+	sprintf (spellname, "Thunder of Karana");
+	break;
+case 0x0a1b:
+	sprintf (spellname, "Quelious' Words of Tranquility");
+	break;
+case 0x0a1c:
+	sprintf (spellname, "Breath of Tunare");
+	break;
+case 0x0a1d:
+	sprintf (spellname, "Healing Wave of Prexus");
+	break;
+case 0x0a1e:
+	sprintf (spellname, "Brell's Mountainous Barrier");
+	break;
+case 0x0a1f:
+	sprintf (spellname, "Tangling Weeds");
+	break;
+case 0x0a20:
+	sprintf (spellname, "Hawk Eye");
+	break;
+case 0x0a21:
+	sprintf (spellname, "Riftwind's Protection");
+	break;
+case 0x0a22:
+	sprintf (spellname, "Nature's Precision");
+	break;
+case 0x0a23:
+	sprintf (spellname, "Force of Nature");
+	break;
+case 0x0a24:
+	sprintf (spellname, "Falcon Eye");
+	break;
+case 0x0a25:
+	sprintf (spellname, "Jolting Blades");
+	break;
+case 0x0a26:
+	sprintf (spellname, "Mark of the Predator");
+	break;
+case 0x0a27:
+	sprintf (spellname, "Eagle Eye");
+	break;
+case 0x0a28:
+	sprintf (spellname, "Warder's Protection");
+	break;
+case 0x0a29:
+	sprintf (spellname, "Magical Monologue");
+	break;
+case 0x0a2a:
+	sprintf (spellname, "Song of Sustenance");
+	break;
+case 0x0a2b:
+	sprintf (spellname, "Amplification");
+	break;
+case 0x0a2c:
+	sprintf (spellname, "Katta's Song of Sword Dancing");
+	break;
+case 0x0a2d:
+	sprintf (spellname, "Selo`s Accelerating Chorus");
+	break;
+case 0x0a2e:
+	sprintf (spellname, "Battlecry of the Vah Shir");
+	break;
+case 0x0a2f:
+	sprintf (spellname, "Elemental Chorus");
+	break;
+case 0x0a30:
+	sprintf (spellname, "Purifying Chorus");
+	break;
+case 0x0a31:
+	sprintf (spellname, "Chorus of Replenishment");
+	break;
+case 0x0a32:
+	sprintf (spellname, "Warsong of the Vah Shir");
+	break;
+case 0x0a33:
+	sprintf (spellname, "Sharik's Replenishing");
+	break;
+case 0x0a34:
+	sprintf (spellname, "Spirit of Sharik");
+	break;
+case 0x0a35:
+	sprintf (spellname, "Keshuval's Rejuvination");
+	break;
+case 0x0a36:
+	sprintf (spellname, "Spirit of Keshuval");
+	break;
+case 0x0a37:
+	sprintf (spellname, "Herikol's Soothing");
+	break;
+case 0x0a38:
+	sprintf (spellname, "Spirit of Herikol");
+	break;
+case 0x0a39:
+	sprintf (spellname, "Yekan's Recovery");
+	break;
+case 0x0a3a:
+	sprintf (spellname, "Spirit of Yekan");
+	break;
+case 0x0a3b:
+	sprintf (spellname, "Yekan's Quickening");
+	break;
+case 0x0a3c:
+	sprintf (spellname, "Vigor of Zehkes");
+	break;
+case 0x0a3d:
+	sprintf (spellname, "Spirit of Kashek");
+	break;
+case 0x0a3e:
+	sprintf (spellname, "Aid of Khurenz");
+	break;
+case 0x0a3f:
+	sprintf (spellname, "Spirit of Omakin");
+	break;
+case 0x0a40:
+	sprintf (spellname, "Sha's Restoration");
+	break;
+case 0x0a41:
+	sprintf (spellname, "Omakin's Alacrity");
+	break;
+case 0x0a42:
+	sprintf (spellname, "Spirit of Zehkes");
+	break;
+case 0x0a43:
+	sprintf (spellname, "Spirit of Khurenz");
+	break;
+case 0x0a44:
+	sprintf (spellname, "Sha's Ferocity");
+	break;
+case 0x0a45:
+	sprintf (spellname, "Spiritual Purity");
+	break;
+case 0x0a46:
+	sprintf (spellname, "Spiritual Strength");
+	break;
+case 0x0a47:
+	sprintf (spellname, "Spirit of Khati Sha");
+	break;
+case 0x0a48:
+	sprintf (spellname, "Summon Warder");
+	break;
+case 0x0a49:
+	sprintf (spellname, "Spirit of Khaliz");
+	break;
+case 0x0a4a:
+	sprintf (spellname, "Sha's Lethargy");
+	break;
+case 0x0a4b:
+	sprintf (spellname, "Spirit of Lightning");
+	break;
+case 0x0a4c:
+	sprintf (spellname, "Spirit of the Blizzard");
+	break;
+case 0x0a4d:
+	sprintf (spellname, "Spirit of Inferno");
+	break;
+case 0x0a4e:
+	sprintf (spellname, "Spirit of the Scorpion");
+	break;
+case 0x0a4f:
+	sprintf (spellname, "Spirit of Vermin");
+	break;
+case 0x0a50:
+	sprintf (spellname, "Spirit of Wind");
+	break;
+case 0x0a51:
+	sprintf (spellname, "Spirit of the Storm");
+	break;
+case 0x0a52:
+	sprintf (spellname, "Claw of Khati Sha");
+	break;
+case 0x0a53:
+	sprintf (spellname, "Fungal Restoration");
+	break;
+case 0x0a54:
+	sprintf (spellname, "Fungal Infusion");
+	break;
+case 0x0a55:
+	sprintf (spellname, "Thought Drain");
+	break;
+case 0x0a81:
+	sprintf (spellname, "Drain Blood2");
+	break;
+case 0x0a82:
+	sprintf (spellname, "Drain Blood3");
+	break;
+case 0x0a83:
+	sprintf (spellname, "Beta Riotous Health");
+	break;
+case 0x0a84:
+	sprintf (spellname, "Beta Visions of Grandeur");
+	break;
+case 0x0a85:
+	sprintf (spellname, "Beta Clarity II");
+	break;
+case 0x0a86:
+	sprintf (spellname, "Beta POTG");
+	break;
+case 0x0a87:
+	sprintf (spellname, "Beta Regrowth");
+	break;
+case 0x0a88:
+	sprintf (spellname, "Beta Focus of Spirit");
+	break;
+case 0x0a89:
+	sprintf (spellname, "Beta Complete Healing");
+	break;
+case 0x0a8a:
+	sprintf (spellname, "Beta AE Gain Mana");
+	break;
+case 0x0a8b:
+	sprintf (spellname, "Beta Aegolism");
+	break;
+case 0x0a8c:
+	sprintf (spellname, "Quicksand");
+	break;
+case 0x0a8d:
+	sprintf (spellname, "Rock Mites");
+	break;
+case 0x0a8e:
+	sprintf (spellname, "Smothering Sands");
+	break;
+case 0x0a8f:
+	sprintf (spellname, "Ritualistic Bloodlust");
+	break;
+case 0x0a90:
+	sprintf (spellname, "Entanglement");
+	break;
+case 0x0a91:
+	sprintf (spellname, "Drain Blood");
+	break;
+case 0x0a92:
+	sprintf (spellname, "Journey: Fay");
+	break;
+case 0x0a93:
+	sprintf (spellname, "Journey: Tox");
+	break;
+case 0x0a94:
+	sprintf (spellname, "Journey: North");
+	break;
+case 0x0a95:
+	sprintf (spellname, "Journey: Combine");
+	break;
+case 0x0a96:
+	sprintf (spellname, "Trickster's Torment");
+	break;
+case 0x0a97:
+	sprintf (spellname, "Proc Text1");
+	break;
+case 0x0a9c:
+	sprintf (spellname, "Mystical Transvergance");
+	break;
+case 0x0a9d:
+	sprintf (spellname, "MentalCorruptionEffect");
+	break;
+case 0x0a9e:
+	sprintf (spellname, "ScreamOfDeathEffect");
+	break;
+case 0x0a9f:
+	sprintf (spellname, "Rich's Test spell");
+	break;
+case 0x0aa0:
+	sprintf (spellname, "SOLEffect");
+	break;
+case 0x0aa1:
+	sprintf (spellname, "SOBEffect");
+	break;
+case 0x0aa2:
+	sprintf (spellname, "SOIEffect");
+	break;
+case 0x0aa3:
+	sprintf (spellname, "SOScEffect");
+	break;
+case 0x0aa4:
+	sprintf (spellname, "SOVEffect");
+	break;
+case 0x0aa5:
+	sprintf (spellname, "SOWEffect");
+	break;
+case 0x0aa6:
+	sprintf (spellname, "SOStEffect");
+	break;
+case 0x0aa7:
+	sprintf (spellname, "Vampyre Invis");
+	break;
+case 0x0aa8:
+	sprintf (spellname, "Portal Effect");
+	break;
+case 0x0aa9:
+	sprintf (spellname, "Condemnation of Nife");
+	break;
+case 0x0aac:
+	sprintf (spellname, "Molten Fist");
+	break;
+case 0x0aad:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0aae:
+	sprintf (spellname, "The Nexus");
+	break;
+case 0x0aaf:
+	sprintf (spellname, "Purifying Tonic");
+	break;
+case 0x0ab0:
+	sprintf (spellname, "MR2 Test1");
+	break;
+case 0x0ab1:
+	sprintf (spellname, "MR2 Test2");
+	break;
+case 0x0ab2:
+	sprintf (spellname, "Divine Resurrection");
+	break;
+case 0x0ab3:
+	sprintf (spellname, "Invisibility versus Undead");
+	break;
+case 0x0ab4:
+	sprintf (spellname, "Celestial Regeneration");
+	break;
+case 0x0ab5:
+	sprintf (spellname, "Sacred Barrier");
+	break;
+case 0x0ab6:
+	sprintf (spellname, "Cleansing Light");
+	break;
+case 0x0ab7:
+	sprintf (spellname, "Mana Regeneration");
+	break;
+case 0x0ab8:
+	sprintf (spellname, "Resistance Tonic");
+	break;
+case 0x0ab9:
+	sprintf (spellname, "Focused Mind");
+	break;
+case 0x0aba:
+	sprintf (spellname, "Dead Aim");
+	break;
+case 0x0abb:
+	sprintf (spellname, "Growth");
+	break;
+case 0x0abc:
+	sprintf (spellname, "Strong Root");
+	break;
+case 0x0abd:
+	sprintf (spellname, "Cannibalization");
+	break;
+case 0x0abe:
+	sprintf (spellname, "Rabid Bear");
+	break;
+case 0x0abf:
+	sprintf (spellname, "Manaburn");
+	break;
+case 0x0ac0:
+	sprintf (spellname, "Restore Companion");
+	break;
+case 0x0ac1:
+	sprintf (spellname, "Gather Mana");
+	break;
+case 0x0ac2:
+	sprintf (spellname, "Frenzied Burnout");
+	break;
+case 0x0ac3:
+	sprintf (spellname, "Lifeburn");
+	break;
+case 0x0ac4:
+	sprintf (spellname, "Words of the Undead King");
+	break;
+case 0x0ac5:
+	sprintf (spellname, "Wave of Revulsion");
+	break;
+case 0x0ac6:
+	sprintf (spellname, "Improved Familiar");
+	break;
+case 0x0ac7:
+	sprintf (spellname, "Undead Pact");
+	break;
+case 0x0ac8:
+	sprintf (spellname, "Servant of Nature");
+	break;
+case 0x0ac9:
+	sprintf (spellname, "Dominating Gaze");
+	break;
+case 0x0aca:
+	sprintf (spellname, "Disease Touch");
+	break;
+case 0x0acb:
+	sprintf (spellname, "Poison Touch");
+	break;
+case 0x0acc:
+	sprintf (spellname, "Summon Corpse");
+	break;
+case 0x0acd:
+	sprintf (spellname, "Camouflage");
+	break;
+case 0x0ace:
+	sprintf (spellname, "Life Curse");
+	break;
+case 0x0acf:
+	sprintf (spellname, "Dragon Force");
+	break;
+case 0x0ad0:
+	sprintf (spellname, "Grimling LT 30");
+	break;
+case 0x0ad1:
+	sprintf (spellname, "Spreading Crud");
+	break;
+case 0x0ad2:
+	sprintf (spellname, "Rain of Spores");
+	break;
+case 0x0ad3:
+	sprintf (spellname, "Exodus");
+	break;
+case 0x0ad4:
+	sprintf (spellname, "Transmute Flesh to Bone");
+	break;
+case 0x0ad5:
+	sprintf (spellname, "Sonic Feedback");
+	break;
+case 0x0ad6:
+	sprintf (spellname, "Harmful Touch");
+	break;
+case 0x0ad7:
+	sprintf (spellname, "Act of Valor");
+	break;
+case 0x0ad8:
+	sprintf (spellname, "Turn Undead");
+	break;
+case 0x0ad9:
+	sprintf (spellname, "Turn Undead");
+	break;
+case 0x0ada:
+	sprintf (spellname, "Turn Undead");
+	break;
+case 0x0adb:
+	sprintf (spellname, "Rebuke Summoned");
+	break;
+case 0x0adc:
+	sprintf (spellname, "Rebuke Summoned");
+	break;
+case 0x0add:
+	sprintf (spellname, "Rebuke Summoned");
+	break;
+case 0x0ade:
+	sprintf (spellname, "Holy Steed");
+	break;
+case 0x0adf:
+	sprintf (spellname, "Unholy Steed");
+	break;
+case 0x0ae0:
+	sprintf (spellname, "Tainted Bite");
+	break;
+case 0x0ae1:
+	sprintf (spellname, "Screech Immunity");
+	break;
+case 0x0ae2:
+	sprintf (spellname, "In Irons");
+	break;
+case 0x0ae3:
+	sprintf (spellname, "Rag`Zhezum's Deathly Embrace");
+	break;
+case 0x0ae4:
+	sprintf (spellname, "Breath of Rag'Mozdezh");
+	break;
+case 0x0ae5:
+	sprintf (spellname, "Air Elemental Form");
+	break;
+case 0x0ae6:
+	sprintf (spellname, "Air Elemental Form");
+	break;
+case 0x0ae7:
+	sprintf (spellname, "Air Elemental Form");
+	break;
+case 0x0ae8:
+	sprintf (spellname, "Earth Elemental Form");
+	break;
+case 0x0ae9:
+	sprintf (spellname, "Earth Elemental Form");
+	break;
+case 0x0aea:
+	sprintf (spellname, "Earth Elemental Form");
+	break;
+case 0x0aeb:
+	sprintf (spellname, "Fire Elemental Form");
+	break;
+case 0x0aec:
+	sprintf (spellname, "Fire Elemental Form");
+	break;
+case 0x0aed:
+	sprintf (spellname, "Fire Elemental Form");
+	break;
+case 0x0aee:
+	sprintf (spellname, "Water Elemental Form");
+	break;
+case 0x0aef:
+	sprintf (spellname, "Water Elemental Form");
+	break;
+case 0x0af0:
+	sprintf (spellname, "Water Elemental Form");
+	break;
+case 0x0af1:
+	sprintf (spellname, "Miner Plague");
+	break;
+case 0x0af2:
+	sprintf (spellname, "Flurry of Pebbles");
+	break;
+case 0x0af3:
+	sprintf (spellname, "Granite Crush");
+	break;
+case 0x0af4:
+	sprintf (spellname, "Boulder Smash");
+	break;
+case 0x0af5:
+	sprintf (spellname, "Sermon of Ssraeshza");
+	break;
+case 0x0af6:
+	sprintf (spellname, "Touch of Zebuxorux");
+	break;
+case 0x0af7:
+	sprintf (spellname, "FD Test");
+	break;
+case 0x0af8:
+	sprintf (spellname, "Kneel Test");
+	break;
+case 0x0af9:
+	sprintf (spellname, "Wave of Death");
+	break;
+case 0x0afa:
+	sprintf (spellname, "Glowing Glyphs");
+	break;
+case 0x0afb:
+	sprintf (spellname, "Abysmal Banishment");
+	break;
+case 0x0afc:
+	sprintf (spellname, "Pyrokinetic Hallucinations.");
+	break;
+case 0x0afd:
+	sprintf (spellname, "Mass Insanity");
+	break;
+case 0x0afe:
+	sprintf (spellname, "Caustic Mist");
+	break;
+case 0x0aff:
+	sprintf (spellname, "Shower of Blood");
+	break;
+case 0x0b00:
+	sprintf (spellname, "Storm Tremor");
+	break;
+case 0x0b01:
+	sprintf (spellname, "Thought Vortex");
+	break;
+case 0x0b02:
+	sprintf (spellname, "Shadow Fog");
+	break;
+case 0x0b03:
+	sprintf (spellname, "Madness");
+	break;
+case 0x0b04:
+	sprintf (spellname, "Worm Infestation");
+	break;
+case 0x0b05:
+	sprintf (spellname, "Harm Touch");
+	break;
+case 0x0b06:
+	sprintf (spellname, "Upheaval");
+	break;
+case 0x0b07:
+	sprintf (spellname, "Gravel Rain");
+	break;
+case 0x0b08:
+	sprintf (spellname, "Spire Strike");
+	break;
+case 0x0b09:
+	sprintf (spellname, "Applied Singularity");
+	break;
+case 0x0b0a:
+	sprintf (spellname, "Illusion: Vah Shir");
+	break;
+case 0x0b0b:
+	sprintf (spellname, "Golem Smash");
+	break;
+case 0x0b0c:
+	sprintf (spellname, "FrenzyNova");
+	break;
+case 0x0b0d:
+	sprintf (spellname, "Golem Smash2");
+	break;
+case 0x0b0e:
+	sprintf (spellname, "Annul Self");
+	break;
+case 0x0b0f:
+	sprintf (spellname, "Golem Coat");
+	break;
+case 0x0b10:
+	sprintf (spellname, "Tendrils of Madness");
+	break;
+case 0x0b11:
+	sprintf (spellname, "AdvisorNova");
+	break;
+case 0x0b12:
+	sprintf (spellname, "Blade Dance");
+	break;
+case 0x0b13:
+	sprintf (spellname, "BetaSsra");
+	break;
+case 0x0b14:
+	sprintf (spellname, "Grimling Comet");
+	break;
+case 0x0b15:
+	sprintf (spellname, "Grimling Death Chant");
+	break;
+case 0x0b16:
+	sprintf (spellname, "Grimling Possession");
+	break;
+case 0x0b17:
+	sprintf (spellname, "Grimling Mesmerize");
+	break;
+case 0x0b18:
+	sprintf (spellname, "Shrieker's Curse");
+	break;
+case 0x0b19:
+	sprintf (spellname, "Shrieker Slow");
+	break;
+case 0x0b1a:
+	sprintf (spellname, "Shrieker Stun");
+	break;
+case 0x0b1b:
+	sprintf (spellname, "Vampyre Regeneration");
+	break;
+case 0x0b1c:
+	sprintf (spellname, "Rockhopper Spit");
+	break;
+case 0x0b1d:
+	sprintf (spellname, "Lightcrawler Flash");
+	break;
+case 0x0b1e:
+	sprintf (spellname, "Itraer Vius Touch");
+	break;
+case 0x0b1f:
+	sprintf (spellname, "Wormcall");
+	break;
+case 0x0b20:
+	sprintf (spellname, "Concentration");
+	break;
+case 0x0b21:
+	sprintf (spellname, "Greater Concentration");
+	break;
+case 0x0b22:
+	sprintf (spellname, "Mystical Aptitude");
+	break;
+case 0x0b23:
+	sprintf (spellname, "Hawk's Eye Tonic");
+	break;
+case 0x0b24:
+	sprintf (spellname, "Mystical Infusion");
+	break;
+case 0x0b25:
+	sprintf (spellname, "Greater Mystical Infusion");
+	break;
+case 0x0b26:
+	sprintf (spellname, "Grow");
+	break;
+case 0x0b27:
+	sprintf (spellname, "Divine Endurance");
+	break;
+case 0x0b28:
+	sprintf (spellname, "Fungal Net");
+	break;
+case 0x0b29:
+	sprintf (spellname, "BetaAcrylia");
+	break;
+case 0x0b2a:
+	sprintf (spellname, "AcryliaKB");
+	break;
+case 0x0b2b:
+	sprintf (spellname, "Touch of Vinitras");
+	break;
+case 0x0b2c:
+	sprintf (spellname, "Shackles");
+	break;
+case 0x0b2d:
+	sprintf (spellname, "BetaAcrylia2");
+	break;
+case 0x0b2e:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b2f:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b30:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b31:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b32:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b33:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b34:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b35:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b36:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b37:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b38:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b39:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b3a:
+	sprintf (spellname, "Summon Holy Steed");
+	break;
+case 0x0b3b:
+	sprintf (spellname, "Summon Death Charger");
+	break;
+case 0x0b3c:
+	sprintf (spellname, "JoltingBladesEffect");
+	break;
+case 0x0b3d:
+	sprintf (spellname, "Moonfire");
+	break;
+case 0x0b3e:
+	sprintf (spellname, "Fireclaw");
+	break;
+case 0x0b3f:
+	sprintf (spellname, "Phantasmal Armor");
+	break;
+case 0x0b40:
+	sprintf (spellname, "Remove Greater Curse");
+	break;
+case 0x0b41:
+	sprintf (spellname, "Everlasting Breath");
+	break;
+case 0x0b42:
+	sprintf (spellname, "Firetree's Familiar Enhancemnt");
+	break;
+case 0x0b43:
+	sprintf (spellname, "Elnerick's Electrical Rending");
+	break;
+case 0x0b44:
+	sprintf (spellname, "Garrison's Superior Sundering");
+	break;
+case 0x0b45:
+	sprintf (spellname, "Funeral Pyre of Kelador");
+	break;
+case 0x0b46:
+	sprintf (spellname, "Acumen of Dar Khura");
+	break;
+case 0x0b47:
+	sprintf (spellname, "Mask of the Stalker");
+	break;
+case 0x0b48:
+	sprintf (spellname, "Spirit of Flame");
+	break;
+case 0x0b49:
+	sprintf (spellname, "SOIFffect");
+	break;
+case 0x0b4a:
+	sprintf (spellname, "Spirit of Snow");
+	break;
+case 0x0b4b:
+	sprintf (spellname, "SOSEffect");
+	break;
+case 0x0b4c:
+	sprintf (spellname, "Deathly Temptation");
+	break;
+case 0x0b4d:
+	sprintf (spellname, "Marzin's Mark");
+	break;
+case 0x0b4e:
+	sprintf (spellname, "Levitation");
+	break;
+case 0x0b4f:
+	sprintf (spellname, "Speed of the Brood");
+	break;
+case 0x0b50:
+	sprintf (spellname, "Transon's Elemental Renewal");
+	break;
+case 0x0b51:
+	sprintf (spellname, "Pebble Rain");
+	break;
+case 0x0b52:
+	sprintf (spellname, "Stone's Embrace");
+	break;
+case 0x0b53:
+	sprintf (spellname, "Feeblemind");
+	break;
+case 0x0b54:
+	sprintf (spellname, "Horror");
+	break;
+case 0x0b55:
+	sprintf (spellname, "Illumination");
+	break;
+case 0x0b56:
+	sprintf (spellname, "Shissar Broodling Poison");
+	break;
+case 0x0b57:
+	sprintf (spellname, "Breath of the Shissar");
+	break;
+case 0x0b58:
+	sprintf (spellname, "Serpentine Curse");
+	break;
+case 0x0b59:
+	sprintf (spellname, "Touch of the Mistress");
+	break;
+case 0x0b5a:
+	sprintf (spellname, "Soul Curse");
+	break;
+case 0x0b5b:
+	sprintf (spellname, "Spirit Curse");
+	break;
+case 0x0b5c:
+	sprintf (spellname, "Banshee Wail");
+	break;
+case 0x0b5d:
+	sprintf (spellname, "Soul Tap");
+	break;
+case 0x0b5e:
+	sprintf (spellname, "Call of Shadows");
+	break;
+case 0x0b5f:
+	sprintf (spellname, "Mana Shroud");
+	break;
+case 0x0b60:
+	sprintf (spellname, "Call of Darkness");
+	break;
+case 0x0b61:
+	sprintf (spellname, "Balance of Zebuxoruk");
+	break;
+case 0x0b62:
+	sprintf (spellname, "Entrapment");
+	break;
+case 0x0b63:
+	sprintf (spellname, "Summon Peridot");
+	break;
+case 0x0b64:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b65:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b66:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b67:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b68:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b69:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b6a:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b6b:
+	sprintf (spellname, "Summon Horse");
+	break;
+case 0x0b6c:
+	sprintf (spellname, "Curse of Xerkizh");
+	break;
+case 0x0b6d:
+	sprintf (spellname, "Curse of Rhag`Zadune");
+	break;
+case 0x0b6e:
+	sprintf (spellname, "Aura of Vinitras");
+	break;
+case 0x0b6f:
+	sprintf (spellname, "Storm Tremor2");
+	break;
+case 0x0b70:
+	sprintf (spellname, "Tangling Worms");
+	break;
+case 0x0b71:
+	sprintf (spellname, "Summon Hat Rim");
+	break;
+case 0x0b72:
+	sprintf (spellname, "Snake Bite");
+	break;
+case 0x0b73:
+	sprintf (spellname, "Arx Foris");
+	break;
+case 0x0b74:
+	sprintf (spellname, "Thought Horror Charm");
+	break;
+case 0x0b75:
+	sprintf (spellname, "Fungal Spore Cloud");
+	break;
+case 0x0b76:
+	sprintf (spellname, "Curse of Eternal Suffering");
+	break;
+case 0x0b77:
+	sprintf (spellname, "Journey: Luclin");
+	break;
+case 0x0b78:
+	sprintf (spellname, "Ervaj's Lost Composition");
+	break;
+case 0x0b79:
+	sprintf (spellname, "Harmonize");
+	break;
+case 0x0b7a:
+	sprintf (spellname, "Harmonize");
+	break;
+case 0x0b7b:
+	sprintf (spellname, "Harmonize");
+	break;
+case 0x0b7c:
+	sprintf (spellname, "Eugene's Memory Blur");
+	break;
+case 0x0b7d:
+	sprintf (spellname, "Savagery");
+	break;
+case 0x0b7e:
+	sprintf (spellname, "Sha's Advantage");
+	break;
+case 0x0b7f:
+	sprintf (spellname, "Translocate: Nexus");
+	break;
+case 0x0b80:
+	sprintf (spellname, "Nexus Portal");
+	break;
+case 0x0b81:
+	sprintf (spellname, "Nexus Gate");
+	break;
+case 0x0b82:
+	sprintf (spellname, "Remove Curse");
+	break;
+case 0x0b83:
+	sprintf (spellname, "Vas Ren Slow");
+	break;
+case 0x0b84:
+	sprintf (spellname, "Vas Ren Slow");
+	break;
+case 0x0b85:
+	sprintf (spellname, "Hinderance of the Vas Ren");
+	break;
+case 0x0b86:
+	sprintf (spellname, "Grol Baku Strike");
+	break;
+case 0x0b87:
+	sprintf (spellname, "Grol Baku Strike");
+	break;
+case 0x0b88:
+	sprintf (spellname, "Strike of the Grol Baku");
+	break;
+case 0x0b89:
+	sprintf (spellname, "Cral Ligi Attack");
+	break;
+case 0x0b8a:
+	sprintf (spellname, "Cral Ligi Attack");
+	break;
+case 0x0b8b:
+	sprintf (spellname, "Attack of the Cral Ligi");
+	break;
+case 0x0b8c:
+	sprintf (spellname, "Fire Blast");
+	break;
+case 0x0b8d:
+	sprintf (spellname, "Water Blast");
+	break;
+case 0x0b8e:
+	sprintf (spellname, "Earth Elemental Strike");
+	break;
+case 0x0b8f:
+	sprintf (spellname, "Earth Elemental Strike");
+	break;
+case 0x0b90:
+	sprintf (spellname, "Sun Revenant's Curse");
+	break;
+case 0x0b91:
+	sprintf (spellname, "Curse of the Revenant");
+	break;
+case 0x0b92:
+	sprintf (spellname, "Curse of Lord Wedazi");
+	break;
+case 0x0b93:
+	sprintf (spellname, "Group Primal Essence");
+	break;
+case 0x0b94:
+	sprintf (spellname, "Touch of the Plaguebringer");
+	break;
+case 0x0b95:
+	sprintf (spellname, "Desperation");
+	break;
+case 0x0b96:
+	sprintf (spellname, "Invigoration of Rytan");
+	break;
+case 0x0b97:
+	sprintf (spellname, "Disruptive Force");
+	break;
+case 0x0b98:
+	sprintf (spellname, "Sting the Imagination");
+	break;
+case 0x0b99:
+	sprintf (spellname, "Shadow Creep");
+	break;
+case 0x0b9a:
+	sprintf (spellname, "Koadic's Expansive Mind");
+	break;
+case 0x0b9b:
+	sprintf (spellname, "Marvelous Visions");
+	break;
+case 0x0b9c:
+	sprintf (spellname, "Serpent's Bite");
+	break;
+case 0x0b9d:
+	sprintf (spellname, "Ember Strike");
+	break;
+case 0x0b9e:
+	sprintf (spellname, "Shield of Auras");
+	break;
+case 0x0b9f:
+	sprintf (spellname, "Enlightening Barrier");
+	break;
+case 0x0ba0:
+	sprintf (spellname, "Smoldering Bullwark");
+	break;
+case 0x0ba1:
+	sprintf (spellname, "Boon of Recovery");
+	break;
+case 0x0ba2:
+	sprintf (spellname, "Koadic's Heightened Focus");
+	break;
+case 0x0ba3:
+	sprintf (spellname, "Flesh Rend");
+	break;
+case 0x0ba4:
+	sprintf (spellname, "Lunar Whispers");
+	break;
+case 0x0ba5:
+	sprintf (spellname, "Diminutive Stature");
+	break;
+case 0x0ba6:
+	sprintf (spellname, "Summon Ale");
+	break;
+case 0x0ba7:
+	sprintf (spellname, "The Emperor's Will");
+	break;
+case 0x0ba8:
+	sprintf (spellname, "Lotus Spines");
+	break;
+case 0x0ba9:
+	sprintf (spellname, "Wormspore Stick");
+	break;
+case 0x0baa:
+	sprintf (spellname, "Blessing of Ssraeshza");
+	break;
+case 0x0bab:
+	sprintf (spellname, "Aura of Scale");
+	break;
+case 0x0bac:
+	sprintf (spellname, "Wave of Toxicity");
+	break;
+case 0x0bad:
+	sprintf (spellname, "Needlite Fever");
+	break;
+case 0x0bae:
+	sprintf (spellname, "Chromatic Disruption");
+	break;
+case 0x0baf:
+	sprintf (spellname, "Deathly Ice");
+	break;
+case 0x0bb0:
+	sprintf (spellname, "Deathly Fire");
+	break;
+case 0x0bb1:
+	sprintf (spellname, "Deathly Spores");
+	break;
+case 0x0bb2:
+	sprintf (spellname, "Deathly Fever");
+	break;
+case 0x0bb3:
+	sprintf (spellname, "Deep Spores");
+	break;
+case 0x0bb4:
+	sprintf (spellname, "Claw of the Hunter");
+	break;
+case 0x0bb5:
+	sprintf (spellname, "Claw of the Beast");
+	break;
+case 0x0bb6:
+	sprintf (spellname, "Claw of the Savage Lord");
+	break;
+case 0x0bb7:
+	sprintf (spellname, "Claw of Bestial Fury");
+	break;
+
 /* File autogenerated from spdat.eff */ 
