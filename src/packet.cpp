@@ -1537,11 +1537,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         if (eqTime.hour >= 0 && eqTime.minute >= 0)
         {
-            sprintf(timeMessage,"EQTime [%02d:%s%d %s]",
+            sprintf(timeMessage,"EQTime [%02d:%02d %s]",
                        (eqTime.hour % 12) == 0 ? 12 : (eqTime.hour % 12),
-                       (eqTime.minute < 10) ? "0" : "",
                        (eqTime.minute),
-                       (eqTime.hour >= 12) ? "pm" : "am"
+                       (eqTime.hour >= 12 && eqTime.hour != 24) ? "pm" : "am"
                    );
             emit eqTimeChangedStr(QString (timeMessage));
         }
