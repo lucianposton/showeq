@@ -77,9 +77,17 @@ void SpellItem::update(uint16_t spellId, const Spell* spell, int duration,
      setDuration(duration);
 
      if (spell)
+     {
        setSpellName(spell->name());
+
+       if (spell->targetType() != 0x06)
+	 setTargetId(targetId);
+     }
      else
+     {
        setSpellName(spell_name(spellId));
+       setTargetId(targetId);
+     }
 
      setCasterId(casterId);
 
@@ -87,9 +95,6 @@ void SpellItem::update(uint16_t spellId, const Spell* spell, int duration,
        setCasterName(casterName);
      else
        setCasterName(QString("N/A"));
-
-     if (spell->targetType() != 0x06)
-       setTargetId(targetId);
 
      if (!targetName.isEmpty())
        setTargetName(targetName);
@@ -191,16 +196,16 @@ void SpellShell::selfStartSpellCast(const uint8_t* data)
   QString targetName;
   int duration = 0;
   const Spell* spell = m_spells->spell(c->spellId);
+  SpellItem *item;
   if (spell)
     duration = spell->calcDuration(m_player->level()) * 6;
 
-  SpellItem *item;
-  if (spell->targetType() != 6)
+  if (!spell || spell->targetType() != 6)
   {
     if (c->targetId && 
 	((s = m_spawnShell->findID(tSpawn, c->targetId))))
       targetName = s->name();
-
+    
     item = findSpell(c->spellId, c->targetId, targetName);
   }
   else
@@ -280,14 +285,14 @@ void SpellShell::buff(const uint8_t* data, size_t, uint8_t dir)
 
   // find the spell item
   SpellItem* item;
-  if (spell->targetType() != 6)
+  const Item* s;
+  QString targetName;
+  if (!spell || spell->targetType() != 6)
   {
-    const Item* s;
-    QString targetName;
     if (b->spawnid && 
 	((s = m_spawnShell->findID(tSpawn, b->spawnid))))
       targetName = s->name();
-
+    
     item = findSpell(b->spellid, b->spawnid, targetName);
   }
   else

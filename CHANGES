@@ -1,5 +1,14 @@
 Version: $Id$ $Name$
 
+dohpaZ (12/19/03)
+---------------------
++ Updated version to 5.0.0.3
++ Updated to work with 12/19/03 EQLive 
++ Fixed spell related crashes when using either an outdated spells_us.txt
+  or not using one.
++ Fixed uic configure problem caused by people running ./configure while su'd
+  to root.
+
 dohpaZ (12/13/03)
 ---------------------
 + Updated version to 5.0.0.2

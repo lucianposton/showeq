@@ -262,7 +262,7 @@ AC_DEFUN(AC_PATH_QT_UIC,
          UIC_ERROR_MESSAGE
        fi
 
-       output=`eval "$ac_cv_path_uic --help  2>&1 | sed -e '1q' | grep Qt"`
+       output=`eval "$ac_cv_path_uic --help  2>&1 | grep -i 'Qt user interface'"`
 
        echo "configure:__oline__: tried to call $ac_cv_path_uic --help 2>&1 | sed -e '1q' | grep Qt" >&AC_FD_CC
        echo "configure:__oline__: uic output: $output" >&AC_FD_CC
