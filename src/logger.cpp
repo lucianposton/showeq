@@ -1,3 +1,12 @@
+/*
+ * logger.cpp
+ *
+ * packet/data logging class
+ *
+ *  ShowEQ Distributed under GPL
+ *  http://www.sourceforge.net/projects/seq
+ */
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -60,7 +69,7 @@ PktLogger::logProcessMaskString(const char *maskstr, unsigned *m1, unsigned *m2,
        *m2 = mask2;
        *m3 = mask3;
 
-       fprintf(stderr,"mask1=%X, mask2=%X, mask3=%X\n",mask1,mask2,mask3);
+       fprintf(stderr,"Opcode Logging Mask: %X %X %X\n",mask3,mask2,mask1);
    }
 }
 
@@ -165,7 +174,7 @@ PktLogger::logItemHeader(const itemStruct *item)
     outputf(" %d %d %d ", item->weight, item->nosave, item->nodrop);
     outputf("%d ", item->size);
     output(&item->unknown0129, 1);
-    outputf("%d %d ", item->itemNr, item->iconNr);
+    outputf(" %d %d ", item->itemNr, item->iconNr);
     outputf("%d %d ", item->equipSlot, item->equipableSlots);
     outputf("%d ", item->cost);
     output(item->unknown0144, 28);
@@ -203,11 +212,9 @@ PktLogger::logItemCommons(const itemStruct *item)
     outputf(" %d %d ",
         item->common.range,item->common.skill);
     outputf("%d %d %d ", 
-        item->common.light, item->common.delay, item->common.damage);
-    outputf("%d %d %d ", 
         item->common.magic, item->common.level0, item->common.material);
     output(item->common.unknown0198, 2);
-    outputf(" %d  ", item->common.color);
+    outputf(" %d ", item->common.color);
     output(item->common.unknown0204, 2);
     outputf(" %d %d ", 
         item->common.spellId0, item->common.classes);
@@ -239,10 +246,11 @@ PktLogger::logNormalItem(const itemStruct *item)
     logItemCommons(item);
     outputf(" %d ", item->common.normal.races);
     output(item->common.normal.unknown0214, 3);
-    outputf(" %d %d", item->common.level, item->common.charges);
+    outputf(" %d %d ", item->common.level, item->common.charges);
     output(&item->common.unknown0219, 1);
     outputf(" %d ", item->common.spellId);
     output(item->common.unknown0222, 70);
+    outputf(" ");
 }
 
 void
@@ -1178,15 +1186,35 @@ void
 PktLogger::logSysMsg(const sysMsgStruct *msg, int len, int dir)
 {
     unsigned int timestamp = (unsigned int) time(NULL);
+    char *text;
 
     if (FP == NULL)
         if (logOpen() != 0)
             return;
 
+    // This one can have embedded newlines, so we need to encode
+    // them. I chose ASCII 201 which is a different symbol depending
+    // on your current character set. I will always embed it
+    // by value rather than symbol.
+
+    text = strdup(msg->message);
+
+    if (text != NULL)
+    {
+        char *i;
+ 
+        for(i=text;*i;i++)
+            if (*i == '\n') *i = 201;
+    }
+
     outputf("R %u %04d %d %.2X%2.X [%s]\n", timestamp, len, dir,
-        msg->opCode, msg->version, msg->message);
+        msg->opCode, msg->version, (text) ? text : msg->message);
 
     flush();
+
+    if (text != NULL)
+        free(text);
+
     return;
 }
 

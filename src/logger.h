@@ -1,3 +1,10 @@
+/*
+ * logger.h
+ *
+ *  ShowEQ Distributed under GPL
+ *  http://www.sourceforge.net/projects/seq
+ */
+
 #define ZoneServerInfoMask 0x00000001 /* mask 1 */
 #define DropCoinsMask      0x00000002
 #define ChannelMessageMask 0x00000004

@@ -208,6 +208,8 @@ int main (int argc, char **argv)
 
    showeq_params->spawnfilter_regexp = 0;
 
+   section = "Interface_StatusBar";
+   showeq_params->showEQTime = pSEQPrefs->getPrefBool("ShowEQTime",section,0);
    section = "Misc";
    showeq_params->walkpathrecord = pSEQPrefs->getPrefBool("WalkPathRecording", section, 0);
    showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 25);

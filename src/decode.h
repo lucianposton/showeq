@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #include <pthread.h>
-#include <deque.h>
+#include <deque>
 
 #include <qobject.h>
 #include <qevent.h>
@@ -24,7 +24,7 @@ typedef struct
   unsigned char data[0];
 } EQPktRec;
 
-typedef deque<EQPktRec *> EQPktQueue;
+typedef std::deque<EQPktRec *> EQPktQueue;
 
 class FoundKeyEvent : public QCustomEvent
 {

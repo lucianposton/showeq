@@ -3254,7 +3254,7 @@ void EQInterface::addItem(const Item* item)
   
   if (filterFlags & FILTER_FLAG_CAUTION)
   {
-    printf ("CautionSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s", 
+    printf ("CautionSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s\n", 
 	    (const char*)item->name(), 
 	    item->yPos(), item->xPos(), item->displayZPos(),
 	    (const char*)item->spawnTimeStr());
@@ -3270,7 +3270,7 @@ void EQInterface::addItem(const Item* item)
   
   if (filterFlags & FILTER_FLAG_HUNT)
   {
-    printf ("HuntSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s", 
+    printf ("HuntSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s\n", 
 	    (const char*)item->name(), 
 	    item->yPos(), item->xPos(), item->displayZPos(),
 	    (const char*)item->spawnTimeStr());

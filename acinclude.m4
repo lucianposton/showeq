@@ -584,10 +584,10 @@ qt_version_number=`cat $qt_incdir/$qt_version_source 2> configure.dbg |\
  qt_minor_version=`echo ${[qt_version_number%[0-9]*]}`
  qt_minor_version=`echo ${[qt_minor_version#[0-9]*]}`
    qt_major_build=`echo ${[qt_version_number#[0-9][0-9]*]}`
- qt_lib_major_ver="libqt.so.$qt_major_version"
+ qt_lib_major_ver="libqt-mt.so.$qt_major_version"
 
- qt_lib_minor_ver="libqt.so.$qt_major_version.$qt_minor_version"
- qt_lib_major_bld="libqt.so.$qt_major_version.$qt_minor_version.$qt_major_build"
+ qt_lib_minor_ver="libqt-mt.so.$qt_major_version.$qt_minor_version"
+ qt_lib_major_bld="libqt-mt.so.$qt_major_version.$qt_minor_version.$qt_major_build"
 
 if [[ -n "$qt_version_string" ]]; then
   echo -e "yes\n>> Found version.:\t$qt_version_string"

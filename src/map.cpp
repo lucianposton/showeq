@@ -29,6 +29,7 @@
 #include <qaccel.h>
 #include <qcolordialog.h>
 #include <qfontdialog.h>
+#include <qtimer.h>
 
 #if 1 // ZBTEMP: Until we setup a better way to enter location name/color
 #include <qinputdialog.h>
@@ -435,6 +436,7 @@ void MapMgr::addLocation(QWidget* parent, const MapPoint& point)
   bool ok;
   QString name = QInputDialog::getText("Location Name",
 				       "Please enter a location name",
+				       QLineEdit::Normal,
 				       QString::null, &ok, parent);
 
   // if the user clicked ok, and actually gave a name, add it

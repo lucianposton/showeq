@@ -21,6 +21,8 @@
 #include <limits.h>
 #include <math.h>
 
+#include <qregexp.h>
+
 #include "spawnshell.h"
 #include "fixpt.h"
 #include "util.h"

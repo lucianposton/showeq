@@ -1,3 +1,17 @@
+fee (21/01/02)
+--------------------
+
+Mods.
+ + Applied patch #500653, Fix for deque.h problems.
+ + Applied patch #500732, Fix for QT 3.0.1 and QT lib search.
+ + Applied patch #500538, Fix Quick Spawn Display Issue
+ + Applied patch #504970, PktLogger Pretty Printer Patch
+ + Applied patch #505115, fix eqTime display
+
+Thank you all for submitting these much needed patches. If I have not
+gotten to yours yet, please be patient. I evaluate each patch as I have
+time.  I promise I will get to it sooner or later. Keep up the good work!
+
 fee (17/01/02)
 --------------------
 

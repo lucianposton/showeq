@@ -50,13 +50,14 @@ HAVE_GCC3="YES";
 [
 AC_MSG_RESULT(no);
 HAVE_GCC3="NO";
-dnl AC_MSG_ERROR([You need at least GCC 3.0 or greater to compile ShowEQ])
+dnl AC_MSG_ERROR([You need at least GCC G++ 3.0 or greater to compile ShowEQ])
 ]
 )
 ]
 )
 
 AC_MSG_CHECKING(for supported compiler version)
+AC_LANG_CPLUSPLUS
 CHECK_COMPILER
 if test "$HAVE_GCC3" = "NO"; then
     unset CC
@@ -67,8 +68,9 @@ if test "$HAVE_GCC3" = "NO"; then
     CHECK_COMPILER
 fi
 if test "$HAVE_GCC3" = "NO"; then
-    AC_MSG_ERROR([You need at least GCC 3.0 or greater to compile ShowEQ])
+    AC_MSG_ERROR([You need at least GCC G++ 3.0 or greater to compile ShowEQ])
 fi
+AC_LANG_C
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -189,7 +191,7 @@ AC_CHECK_LIB(gdbm, gdbm_open,
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(deque.h,,AC_MSG_ERROR(cannot find deque.h, normally part of a c++ development package))
+AC_CHECK_HEADERS(deque,,AC_MSG_ERROR(cannot find deque, normally part of a c++ development package))
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T

@@ -1398,9 +1398,8 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     bool unk = true;
 
     /* Update EQ Time every 50 packets so we don't overload the CPU */
-   
-    if (pSEQPrefs->getPrefBool("StatusBar_ShowEQTime", "Interface", 0) && 
-       (m_nPacket % 50 == 0))
+    
+    if ( showeq_params->showEQTime && (m_nPacket % 50 == 0))
     {
         char timeMessage[30];
         time_t timeCurrent = time(NULL);
@@ -1416,7 +1415,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
                        (eqTime.minute),
                        (eqTime.hour >= 12) ? "pm" : "am"
                    );
-
             emit eqTimeChangedStr(QString (timeMessage));
         }
     }

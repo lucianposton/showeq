@@ -12,7 +12,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <deque.h> /* LEAVE THIS HERE, it fixes gcc 3.0+ compile bottlenecks.
+#include <deque> /* LEAVE THIS HERE, it fixes gcc 3.0+ compile bottlenecks.
                        -Andon */
 
 #include "preferences.h"
@@ -113,6 +113,7 @@ struct ShowEQParams
   
   bool           showSpellMsgs;
   bool           no_bank;
+  bool           showEQTime;
 
   // OpCode monitoring Variables
   bool           monitorOpCode_Usage;
