@@ -1,3 +1,7 @@
+fee (10/09/02)
+---------------------
+ + updated charProfile struct, includes correct offset for AAXP
+
 casey (08/29/02)
 ---------------------
  + Corrected the spelling of "Wizard" in interface.cpp
