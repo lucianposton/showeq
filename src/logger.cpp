@@ -322,11 +322,10 @@ PktLogger::logItemInShop(const itemInShopStruct *sitem, uint32_t len, uint8_t di
         if (logOpen() != 0)
             return;
 
-    outputf("R %u %04d %d %.2X%2.X ", timestamp, len, dir, 
-        sitem->opCode, sitem->version);
+    outputf("R %u %04d %d ", timestamp, len, dir);
 
-    outputf(" %d ", sitem->playerid);
-    outputf(" %d ", sitem->itemType);
+    //outputf(" %d ", sitem->playerid);
+    //outputf(" %d ", sitem->itemType);
 
     switch(sitem->itemType)
     {
@@ -341,7 +340,7 @@ PktLogger::logItemInShop(const itemInShopStruct *sitem, uint32_t len, uint8_t di
     }
 
     outputf(" ");
-    output(sitem->unknown0297, 6);
+    //output(sitem->unknown0297, 6);
 
     outputf("\n");
     flush();

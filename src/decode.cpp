@@ -23,7 +23,7 @@
 
 //#define DIAG_DECODE_ZLIB_ERROR
 
-#define PKTBUF_LEN	65535
+//#define PKTBUF_LEN	65535
 
 void *
 ThreadFunc (void *param)
@@ -223,7 +223,7 @@ EQDecode::FoundKey ()
     decodedDataLen = PKTBUF_LEN;
     if (ProcessPacket(pkt->data, pkt->len, 
 		      decodedData, &decodedDataLen, &m_decodeKey, "",
-		      NULL, 0))
+		      NULL, 0, NULL, 0))
       emit dispatchDecodedCharProfile(decodedData, decodedDataLen);
     else
 #endif
@@ -242,7 +242,7 @@ EQDecode::FoundKey ()
     decodedDataLen = PKTBUF_LEN;
     if (ProcessPacket(pkt->data, pkt->len, 
 		      decodedData, &decodedDataLen, &m_decodeKey, "",
-		      NULL, 0))
+		      NULL, 0, NULL, 0))
       emit dispatchDecodedZoneSpawns(decodedData, decodedDataLen);
     else
 #endif
@@ -303,7 +303,7 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
 
   // Get the opcode of the current packet
   // Check to see if it is a compressed packet
-  if ((opcode == CPlayerItemsCode) || (opcode == CDoorSpawnsCode))
+  if ((opcode == CPlayerItemsCode) || (opcode == CDoorSpawnsCode) || (opcode == cItemInShopCode))
   {
      uint8_t pbUncompressedData[PKTBUF_LEN-4];
      uint32_t nUncompressedLength;
@@ -364,11 +364,11 @@ int EQDecode::DecodePacket(const uint8_t* data, uint32_t len,
   if (player)
      result = ProcessPacket(data, len, 
 			    decodedData, decodedDataLen, 
-			    &m_decodeKey, cli, player->data, player->len);
+			    &m_decodeKey, cli, player->data, player->len, m_decodeHash, m_decodeHlen);
   else
      result = ProcessPacket(data, len, 
 			    decodedData, decodedDataLen, &m_decodeKey, cli,
-			    NULL, 0);
+			    NULL, 0, NULL, 0);
 #else
   result = 0;
 #endif
@@ -515,3 +515,12 @@ int EQDecode::InflatePacket(const uint8_t *pbDataIn, uint32_t cbDataInLen,
 		return 0;
 	}	
 }
+
+void EQDecode::setHash(uint8_t* data, uint32_t len)
+{
+      for (uint32_t i =0; i< len; i++)
+          m_decodeHash[i] = data[i];
+
+      m_decodeHlen = len;
+}
+

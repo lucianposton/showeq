@@ -9,7 +9,6 @@
 #define EQDECODE_H
 
 #include <stdint.h>
-
 #include <pthread.h>
 #include <deque>
 
@@ -17,6 +16,9 @@
 #include <qevent.h>
 
 #include "everquest.h"
+
+
+#define PKTBUF_LEN 65535
 
 typedef struct
 {
@@ -58,6 +60,7 @@ class EQDecode : public QObject
 		   const char *cli);
   void LocateKey ();
   void FoundKey ();
+  void setHash(uint8_t*, uint32_t);
 
   // overloaded event member for syncronization
   virtual bool event(QEvent*);
@@ -73,6 +76,8 @@ class EQDecode : public QObject
   EQPktQueue m_queueZoneSpawns;
   EQPktQueue m_queueSpawns;
   uint64_t m_decodeKey;
+  uint8_t m_decodeHash[PKTBUF_LEN];
+  uint32_t m_decodeHlen;
 };
 
 #endif	// EQDECODE_H

@@ -24,7 +24,7 @@ extern "C"
   int ProcessPacket(const uint8_t* data, uint32_t len,
 		    uint8_t* out, uint32_t* outlen,
 		    uint64_t* key, const char* cli,
-		    const uint8_t* player, uint32_t plen);
+		    const uint8_t* player, uint32_t plen, uint8_t* hash, uint32_t hlen);
   
   // Function to decode a spawn packet given a pre-determined key
   void DecodeSpawn (const uint8_t* spawn, uint32_t slen, 

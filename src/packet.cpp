@@ -609,6 +609,8 @@ EQPacket::~EQPacket()
 #ifdef PACKET_CACHE_DIAG
   printf("SEQ: Maximum Packet Cache Used: %d\n", maxServerCacheCount);
 #endif
+
+
   if (m_packetCapture != NULL)
   {
     // stop any packet capture 
@@ -616,15 +618,6 @@ EQPacket::~EQPacket()
 
     // delete the object
     delete m_packetCapture;
-  }
-
-  if (m_decode != NULL)
-  { 
-    // reset the decode object to stop it from doing whatever it is doing
-    m_decode->ResetDecoder();
-
-    // delete the decode
-    delete m_decode;
   }
 
   // try to close down VPacket cleanly
@@ -644,6 +637,15 @@ EQPacket::~EQPacket()
 
     // delete the timer
     delete m_timer;
+  }
+
+  if (m_decode != NULL)
+  { 
+    // reset the decode object to stop it from doing whatever it is doing
+    m_decode->ResetDecoder();
+
+    // delete the decode
+    delete m_decode;
   }
 
   resetEQPacket();
@@ -1686,8 +1688,6 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
   {
       case GuildListCode:
       {
-	   logData("/tmp/guildlist.log", len, data);
-
            if (direction != DIR_SERVER || len != sizeof(worldGuildListStruct)+2)
               break;
 
@@ -1697,6 +1697,17 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
 
            break;
       } /* end GuildListCode */
+
+      case ClientHashCode:
+      {
+           if (direction != DIR_CLIENT)
+              break;
+           
+           m_decode->setHash(data+2, len-2); 
+
+           break;
+      }
+          
 
       default:
       {
@@ -1858,53 +1869,43 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
            break;
        }
 
-       case ItemInShopCode:
+       case cItemInShopCode:
        {
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-           itemInShopStruct* items = (itemInShopStruct*)data;
-           switch (items->itemType)
+           // decode/decompress the payload
+           decoded = m_decode->DecodePacket(data, len, decodedData, &decodedDataLen, showeq_params->ip);
+
+           if (!decoded)
            {
-               case 0: // it is an item, use the regular method
-                   unk = ! ValidatePayload(ItemInShopCode, itemInShopStruct);
-                   break;
-               case 1: // it is a container
-               {
-                   size_t items_size = sizeof(itemInShopStruct) 
-                                       - sizeof(itemItemStruct) 
-                                  + sizeof(itemContainerStruct);
+              printf("EQPacket: could not decompress cItemInShopCode 0x%x\n", opCode);
+              break;
+           }
 
-                   if (items_size != len)
-                   {
-                      fprintf(stderr,
-                       "WARNING: ItemInShopCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
-                       ItemInShopCode, len, items_size);
-                      unk = true;
-                   }
-                   else
-                      unk = false;
-                      break;
-               }
-               case 2: // it is a book
-               {
-                   size_t items_size = sizeof(itemInShopStruct) 
-                                       - sizeof(itemItemStruct)
-                                       + sizeof(itemBookStruct);
+           cItemInShopStruct *citems;
+           citems = (cItemInShopStruct *)(decodedData);
 
-                   if (items_size != len)
-                   {
-                      fprintf(stderr, 
-                       "WARNING: ItemInShopeCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
-                       ItemInShopCode, len, items_size);
-                       unk = true;
-                   }
-                   else
-                      unk = false;
-                      break;
+           if (citems->count)
+           {
+               // Determine the size of a single structure in 
+               // the compressed packet
+ 
+               int nPacketSize=((decodedDataLen - 4)/citems->count);
+
+               // See if it is the size that we expect
+ 
+               int nVerifySize = sizeof(itemInShopStruct);
+    
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+               if (nVerifySize != nPacketSize)
+               {
+                  printf("WARNING: cItemInShopCode: packetSize:%d != "
+                  "sizeof(itemInShopStruct):%d!\n",
+                  nPacketSize, nVerifySize);
+                  unk = true;
                }
-           };
 #endif
-   
-           emit itemShop((const itemInShopStruct*)data, len, dir);
+               for (int i=0; i<citems->count; i++)
+                   emit itemShop((const itemInShopStruct*)&citems->compressedData[i*nPacketSize], nPacketSize, dir);
+         }
 
            break;
        } /* end ItemInShopCode */
@@ -2411,9 +2412,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             // in the process of zoning, server hasn't switched yet.
 
 	    emit zoneChange((const zoneChangeStruct*)data, len, dir);
-#if HAVE_LIBEQ
-            emit resetDecoder();
-#endif
             break;
         }
 
@@ -2425,9 +2423,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    {
 	        unk = ! ValidatePayload(ZoneEntryCode, ClientZoneEntryStruct);
 	        emit zoneEntry((const ClientZoneEntryStruct*)data, len, dir);
-#if HAVE_LIBEQ
-                emit resetDecoder();
-#endif
 	        break;
             }
 
@@ -3516,6 +3511,11 @@ void EQPacket::resetEQPacket()
    m_session_tracking_enabled = showeq_params->session_tracking;
    emit sessionTrackingChanged(m_session_tracking_enabled);
    emit clientPortLatched(m_clientPort);
+
+#if HAVE_LIBEQ
+  if (m_decode != NULL)
+     emit resetDecoder();
+#endif
 
 }
 

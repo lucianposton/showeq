@@ -18,7 +18,9 @@
 
 #define ZoneServerInfo              0x0480
 
-#define GuildListCode               0x9221
+#define GuildListCode               0x9241
+
+#define ClientHashCode              0x3941
 
 /* Zone Server OpCodes */
 #define DropCoinsCode               0x0740
@@ -33,7 +35,7 @@
 
 #define sWhoAllOutputCode           0x0b20
 
-#define ItemInShopCode              0x0c40
+#define cItemInShopCode             0x0c40
 
 #define SysMsgCode                  0x1420
 

@@ -1,3 +1,9 @@
+fee (floyd) 10/27/2002
+----------------------
+ + updated various PoP maps
+ + update to handled compressed item data for merchants
+ + update to EQDecode to handle new crypto
+
 casey 10/26/2002
 ----------------------
  + src/interface.cpp

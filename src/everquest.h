@@ -518,6 +518,22 @@ struct removeCoinsStruct
 /*0008*/ uint8_t  unknown0008[2];         // ***Placeholder
 };
 
+
+/*
+** Compressed Item In Shop
+** Length: variable
+** OpCode cItemInShop
+*/
+
+struct cItemInShopStruct
+{
+/*0000*/ uint8_t  opCode;                 // 
+/*0001*/ uint8_t  version;                // 
+/*0002*/ uint16_t count;                  // number of items in shop
+/*0004*/ uint8_t  compressedData[0];      // All the packets compressed together
+};
+
+
 /*
 ** Item In Shop
 ** Length: 255 Octets
@@ -526,17 +542,14 @@ struct removeCoinsStruct
 
 struct itemInShopStruct
 {
-/*0000*/ uint8_t  opCode;                 // 0x0c
-/*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint16_t playerid;               // player ID
-/*0004*/ int8_t   itemType;               // 0 - item, 1 - container, 2 - book
+/*0004*/ int16_t   itemType;               // 0 - item, 1 - container, 2 - book
 union
 {
   /*0005*/ struct itemItemStruct item;        // Refer to itemStruct for members
   /*0005*/ struct itemContainerStruct container;
   /*0005*/ struct itemBookStruct book;
 };
-/*0297*/ uint8_t  unknown0297[6];         // ***Placeholder
+/*0297*/ //uint8_t  unknown0297[6];         // ***Placeholder
 };
 
 /*

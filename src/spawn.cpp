@@ -603,6 +603,7 @@ void Spawn::calcRaceTeam()
   case 1: // Human
   case 2: // Barb
   case 3:  // Erudite
+  case 130: // Vah Shir
     m_raceTeam = RTEAM_HUMAN;
     break;
     
