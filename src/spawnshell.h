@@ -125,7 +125,6 @@ public slots:
    void refilterSpawnsRuntime();
    void saveSpawns(void);
    void restoreSpawns(void);
-   void setPlayerGuildTag(void);
 
  protected:
    void refilterSpawns(spawnItemType type);

@@ -155,6 +155,7 @@ void SpellShell::clear()
 {
    emit clearSpells();
 
+   m_lastPlayerSpell = 0;
    for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
          it != m_spellList.end(); it++)
       delete (*it);
@@ -173,6 +174,8 @@ void SpellShell::deleteSpell(SpellItem *item)
 {
    if (item) 
    {
+      if (m_lastPlayerSpell == item)
+	m_lastPlayerSpell = 0;
       m_spellList.remove(item);
       if (m_spellList.count() == 0)
          m_timer->stop();
@@ -297,6 +300,9 @@ void SpellShell::buff(const uint8_t* data, size_t, uint8_t dir)
   }
   else
     item = findSpell(b->spellid);
+
+  if (!item)
+    return;
 
   if (b->changetype == 0x01) // removing buff
     deleteSpell(item);
@@ -459,6 +465,10 @@ void SpellShell::killSpawn(const Item* deceased)
 {
   uint16_t id = deceased->id();
   SpellItem* spell;
+
+  if (m_lastPlayerSpell && (m_lastPlayerSpell->targetId() == id))
+    m_lastPlayerSpell = 0;
+
   QValueList<SpellItem*>::Iterator it = m_spellList.begin();
   while(it != m_spellList.end())
   {
@@ -497,6 +507,8 @@ void SpellShell::timeout()
     else 
     {
       seqInfo("SpellItem '%s' finished.", (*it)->spellName().latin1());
+      if (m_lastPlayerSpell == spell)
+	m_lastPlayerSpell = 0;
       emit delSpell(spell);
       it = m_spellList.remove(it);
       delete spell;

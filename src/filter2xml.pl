@@ -40,17 +40,22 @@ sub migrate
 
     print "Migrating '$source' to '$dest'\n";
 
+    # open source and destination files
     open(SOURCE_FILE, "<$source") || die "Can't find '$source' $SOURCE_FILE: $!\n";
     open(DEST_FILE, ">$dest") || die "Can't create '$dest' $DEST_FILE: $!\n";
 
+    # print the XML header
     print DEST_FILE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     print DEST_FILE "<!DOCTYPE seqfilters SYSTEM \"seqfilters.dtd\">\n";
     print DEST_FILE "<seqfilters>\n";
 
     $incomment = 0;
     $insection = 0;
+    
+    # iterate over the contents of the source file
     while ($line = <SOURCE_FILE>)
     {
+	# handle empty lines
 	if ($line =~ m/^\s*$/)
 	{
 	    next if (!$comments);
@@ -61,12 +66,14 @@ sub migrate
 	    }
 	    next;
 	}
-	
+
+	# handle escaping of XML unfriendly characters
 	$line =~ s/&/&amp;/g;
 	$line =~ s/</&lt;/g;
 	$line =~ s/>/&gt;/g;
 	$line =~ s/\"/&quot;/g;
 
+	# handle comments
 	if ($line =~ m/^\#/)
 	{
 	    next if (!$comments);
@@ -89,19 +96,27 @@ sub migrate
 	    $incomment = 0;
 	}
 	
+	# handle section breaks
 	if ($line =~ m/^\[/)
 	{
 	    print DEST_FILE "    </section>\n" if ($insection);
 	    $insection = 1;
-	    $line =~ s/^\[([^\]]+)\]$/    <section name="$1">/;
-	    print DEST_FILE $line;
+	    $line =~ s/^\[([^\]]+)\]\s*$/    <section name="$1">/;
+	    print DEST_FILE $line, "\n";
 	}
 	else 
 	{
+	    # min and max default to 0
 	    $min = 0;
 	    $max = 0;
-	    chop($line);
+	    
+            # fix line termination and errant trailing spaces
+	    $line =~ s/^(.*?)\s*$/$1/;
+	    
+	    # seperate 
 	    @line = split(m/;/, $line);
+
+	    # process level ranges
 	    if ($#line > 0)
 	    {
 		$range = $line[1];
@@ -121,9 +136,12 @@ sub migrate
 		    $max = $2;
 		}
 	    }
-	    
+
+	    # print out in the XML filter format
 	    print DEST_FILE "        <oldfilter>";
 	    print DEST_FILE "<regex>", $line[0], "</regex>" if ($line[0]);
+
+	    # handle outputting level ranges
 	    if ($min || $max)
 	    {
 		print DEST_FILE "<level";
@@ -131,10 +149,13 @@ sub migrate
 		print DEST_FILE " max=\"$max\"" if ($max);
 		print DEST_FILE "/>";
 	    }
+
+	    # close the filter entry
 	    print DEST_FILE "</oldfilter>\n"
 	}
     }
     
+    # close the section
     print DEST_FILE "    </section>\n" if ($insection);
     print DEST_FILE "</seqfilters>\n";
 }

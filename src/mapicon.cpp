@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  * 
- * Portions Copyright 2003 Zaphod (dohpaz@users.sourceforge.net). 
+ * Portions Copyright 2003-2004 Zaphod (dohpaz@users.sourceforge.net). 
  * 
  */
 
@@ -79,6 +79,7 @@ static const QString iconTypePrefBaseNames[] =
   "RuntimeFiltered",
   "SpawnPoint",
   "SpawnPointSelected",
+  "ZoneSafePoint",
 };
 
 static const QString iconTypeNames[] = 
@@ -113,6 +114,7 @@ static const QString iconTypeNames[] =
   "Runtime Filtered",
   "Spawn Point",
   "Selected Spawn Point",
+  "Zone Safe Point",
 };
 
 //----------------------------------------------------------------------
@@ -681,10 +683,15 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
 	      true, true, false, false);
   m_mapIcons[tIconTypeSpawnPointSelected]
     .setHighlight(QBrush(NoBrush), QPen(blue, 1, SolidLine, cap, join),
-		  tIconStyleCircle, tIconSizeLarge,
+		  tIconStyleCircle, tIconSizeTiny,
 		  true, false, false, false);
   m_mapIcons[tIconTypeSpawnPointSelected]
     .setLine0(true, QPen(blue));
+  m_mapIcons[tIconTypeZoneSafePoint]
+    .setImage(QBrush(), QPen(green, 1, SolidLine, cap, join),
+	      tIconStyleX, tIconSizeSmall,
+	      true, false, false, false);
+  m_mapIcons[tIconTypeZoneSafePoint].setShowName(true);
 
   // setup icon size maps
   m_mapIconSizes[tIconSizeNone] = &m_markerNSize; // none should never be drawn
@@ -858,10 +865,12 @@ void MapIcons::setIcon(int iconType, const MapIcon& icon)
   emit changed();
 }
 
+
 void MapIcons::paintIcon(MapParameters& param, 
 			 QPainter& p, 
 			 const MapIcon& mapIcon,
-			 const Item* item, 
+			 const Point3D<int16_t>& item, 
+			 const QString& itemName,
 			 const QPoint& point)
 {
   // Draw Line
@@ -878,9 +887,9 @@ void MapIcons::paintIcon(MapParameters& param,
   if (mapIcon.line1Distance() || mapIcon.line2Distance())
   {
     if (!showeq_params->fast_machine)
-      distance = item->calcDist2DInt(param.player());
+      distance = item.calcDist2DInt(param.player());
     else
-      distance = (int)item->calcDist(param.player());
+      distance = (int)item.calcDist(param.player());
 
     if (mapIcon.line1Distance() > distance)
     {
@@ -902,13 +911,11 @@ void MapIcons::paintIcon(MapParameters& param,
   // Draw Item Name
   if (mapIcon.showName())
   {
-    QString spawnNameText = item->name();
-    
     QFontMetrics fm(param.font());
-    int width = fm.width(spawnNameText);
+    int width = fm.width(itemName);
     p.setPen(gray);
     p.drawText(point.x() - (width / 2),
-	       point.y() + fm.height() + 1, spawnNameText);
+	       point.y() + fm.height() + 1, itemName);
   }
 
   // Draw Icon Image
@@ -936,6 +943,15 @@ void MapIcons::paintIcon(MapParameters& param,
 			   *m_mapIconSizes[mapIcon.highlightSize()],
 			   *m_mapIconSizesWH[mapIcon.highlightSize()]);
   }
+}
+
+void MapIcons::paintItemIcon(MapParameters& param, 
+			     QPainter& p, 
+			     const MapIcon& mapIcon,
+			     const Item* item, 
+			     const QPoint& point)
+{
+  paintIcon(param, p, mapIcon, *item, item->name(), point);
 }
 
 void MapIcons::paintSpawnIcon(MapParameters& param, 

@@ -4,8 +4,8 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2003 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Copyright 2000-2004 by the respective ShowEQ Developers
+ *  Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
  */
 
 #include <qdatetime.h>
@@ -83,9 +83,9 @@ void PacketLog::logMessage(const QString& message)
 }
 
 /* Logs packet data in a human-readable format */
-void PacketLog::logData (const uint8_t* data,
-			 size_t       len,
-			 const QString& prefix)
+void PacketLog::logData(const uint8_t* data,
+			size_t       len,
+			const QString& prefix)
 {
   if (!open())
     return;
@@ -228,23 +228,23 @@ void PacketLog::logData(const EQUDPIPPacketFormat& packet)
       << "] [Size: " << QString::number(packet.getRawPacketLength()) << "]"
       << endl;
 
-  const EQPacketFormatRaw* raw = packet.getRawPacket();
-  if (raw)
-    m_out << raw->headerFlags(QString(), false) << endl;
-
-  if (packet.payloadLength() >= 2)
+  if (packet.isValid())
   {
-    QString tempStr;
-    uint16_t opcode = *(uint16_t*)(packet.payload());
-    m_out << opCodeToString(opcode) << endl;
+    const EQPacketFormatRaw* raw = packet.getRawPacket();
+    if (raw)
+      m_out << raw->headerFlags(QString(), false) << endl;
 
-#ifdef PACKET_PEDANTIC
-    uint32_t crc32 = packet.calcCRC32();
-    if (crc32 != packet.crc32())
-      m_out << "[BAD CRC32 (" << QString::number(crc32, 16) 
-	    << " != " << QString::number(packet.crc32()) << ") ]" << endl;
-#endif
+    if (packet.payloadLength() >= 2)
+    {
+      QString tempStr;
+      uint16_t opcode = *(uint16_t*)(packet.payload());
+      m_out << opCodeToString(opcode) << endl;
+    }
   }
+  else
+    m_out << "[BAD CRC32 (" << QString::number(packet.calcCRC32(), 16) 
+	  << " != " << QString::number(packet.crc32()) 
+	  << ")! Possibly non-EQ packet?! ]" << endl;
 
   flush();
 
@@ -329,7 +329,7 @@ void PacketStreamLog::decodedStreamPacket(const uint8_t* data, size_t len,
 					  uint8_t dir, uint16_t opcode, 
 					  const EQPacketOPCode* opcodeEntry)
 {
-  if ((opcode != 0x0028) && (opcode != 0x003f) && (opcode != 0x025e))
+  //  if ((opcode != 0x0028) && (opcode != 0x003f) && (opcode != 0x025e))
     logData(data, len, dir, opcode, opcodeEntry, "[Decoded]");
 }
 

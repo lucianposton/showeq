@@ -12,9 +12,12 @@
 #include <qcolor.h>
 
 #include "everquest.h"
-#include "zonemgr.h"
-#include "main.h"
 #include "spawn.h"
+
+//----------------------------------------------------------------------
+// forward declarations
+class GuildMgr;
+class ZoneMgr;
 
 //----------------------------------------------------------------------
 // constants
@@ -40,6 +43,7 @@ class Player : public QObject, public Spawn
 public:
   Player (QObject* parent,
 	  ZoneMgr* zoneMgr,
+	  GuildMgr* guildMgr,
 	  const char* name = "player");
   virtual ~Player();
 
@@ -188,84 +192,84 @@ public:
   void changeItem(const Item* item, uint32_t changeType);
   void headingChanged(int32_t heading);
   void levelChanged(uint8_t level);
-  
-  void getPlayerGuildTag(void);
+  void guildChanged();
 
  protected:
   void fillConTable();
   
  private:
   ZoneMgr* m_zoneMgr;
+  GuildMgr* m_guildMgr;
+
+  // The default values are set either by info showeq_params.
+  // We keep a second copy in case the player levels while playing.
+  QString m_defaultName;
+  QString m_defaultLastName;
+  uint16_t m_mana;
+  uint16_t m_defaultRace;
+  uint16_t m_defaultDeity;
+  uint8_t m_defaultClass;
+  uint8_t m_defaultLevel;
+  uint8_t m_playerSkills[MAX_KNOWN_SKILLS];
+  uint8_t m_playerLanguages[MAX_KNOWN_LANGS];
   
-   // The default values are set either by info showeq_params.
-   // We keep a second copy in case the player levels while playing.
-   QString m_defaultName;
-   QString m_defaultLastName;
-   uint16_t m_mana;
-   uint16_t m_defaultRace;
-   uint16_t m_defaultDeity;
-   uint8_t m_defaultClass;
-   uint8_t m_defaultLevel;
-   uint8_t m_playerSkills[MAX_KNOWN_SKILLS];
-   uint8_t m_playerLanguages[MAX_KNOWN_LANGS];
-
-   uint16_t m_plusMana;
-   uint16_t m_plusHP;
-
-   uint16_t m_maxMana;
-   uint8_t m_maxSTR;
-   uint8_t m_maxSTA;
-   uint8_t m_maxCHA;
-   uint8_t m_maxDEX;
-   uint8_t m_maxINT;
-   uint8_t m_maxAGI;
-   uint8_t m_maxWIS;
-
-   uint16_t m_food;
-   uint16_t m_water;
-   uint16_t m_fatigue;
-
-   // ExperienceWindow needs this
-   uint32_t m_currentAltExp;
-   uint16_t m_currentAApts;
-   uint32_t m_currentExp;
-   uint32_t m_minExp;
-   uint32_t m_maxExp;
-   uint32_t m_tickExp;
-
-   uint32_t m_spellBookSlots[MAX_SPELLBOOK_SLOTS];
-
-   // con color bases
-   QColor m_conColorBases[tMaxColorLevels];
-
-   // con color table
-   QColor m_conTable[maxSpawnLevel];
-
-   // last spawn this player killed
-   QString m_lastSpawnKilledName;
-   uint8_t m_lastSpawnKilledLevel;
-
-   // is the kill information fresh
-   bool m_freshKill;
-
-   // last spell cast on this player
-   uint16_t m_lastSpellOnId;
-   
-   int16_t m_headingDegrees;
-   // Wether or not we use defaults, determined by wether or not we could 
-   // decode the zone loading data.  
-   bool m_useDefaults;
-   
-   // Whether or not to use auto-detected character settings
-   bool m_useAutoDetectedSettings;
-
-   // which things are valid
-   bool m_validStam;
-   bool m_validMana;
-   bool m_validHP;
-   bool m_validExp;
-   bool m_validAttributes;
-   bool m_validPos;
+  uint16_t m_plusMana;
+  uint16_t m_plusHP;
+  
+  uint16_t m_maxMana;
+  uint8_t m_maxSTR;
+  uint8_t m_maxSTA;
+  uint8_t m_maxCHA;
+  uint8_t m_maxDEX;
+  uint8_t m_maxINT;
+  uint8_t m_maxAGI;
+  uint8_t m_maxWIS;
+  
+  uint16_t m_food;
+  uint16_t m_water;
+  uint16_t m_fatigue;
+  
+  // ExperienceWindow needs this
+  uint32_t m_currentAltExp;
+  uint16_t m_currentAApts;
+  uint32_t m_currentExp;
+  uint32_t m_minExp;
+  uint32_t m_maxExp;
+  uint32_t m_tickExp;
+  
+  uint32_t m_spellBookSlots[MAX_SPELLBOOK_SLOTS];
+  
+  // con color bases
+  QColor m_conColorBases[tMaxColorLevels];
+  
+  // con color table
+  QColor m_conTable[maxSpawnLevel];
+  
+  // last spawn this player killed
+  QString m_lastSpawnKilledName;
+  uint8_t m_lastSpawnKilledLevel;
+  
+  // is the kill information fresh
+  bool m_freshKill;
+  
+  // last spell cast on this player
+  uint16_t m_lastSpellOnId;
+  
+  int16_t m_headingDegrees;
+  // Wether or not we use defaults, determined by wether or not we could 
+  // decode the zone loading data.  
+  bool m_useDefaults;
+  
+  // Whether or not to use auto-detected character settings
+  bool m_useAutoDetectedSettings;
+  
+  // which things are valid
+  bool m_validStam;
+  bool m_validMana;
+  bool m_validHP;
+  bool m_validExp;
+  bool m_validAttributes;
+  bool m_validPos;
 };
 
 inline

@@ -109,24 +109,6 @@ spawnItemType SpawnListItem::type()
    return item() ? item()->type() : tUnknown;
 }
 
-QString SpawnListItem::key(int column, bool ascending) const
-{
-//  if (m_item == NULL)
-//    return text(0);
-#if (QT_VERSION < 300) 
-  if ((column < tSpawnColHP) || (column > tSpawnColDist))
-     return text(column);
-
-  double num = text(column).toDouble();
-  QString textNum;
-  textNum.sprintf("%08.2f", num);
-  return textNum;
-#else
-  return text(column);
-#endif
-}
-
-#if (QT_VERSION > 0x030000)
 int SpawnListItem::compare(QListViewItem *i, int col, bool ascending) const
 {
   if (col == 0) // Name
@@ -226,7 +208,6 @@ int SpawnListItem::compare(QListViewItem *i, int col, bool ascending) const
   };
 
 }
-#endif
 
 void SpawnListItem::update(Player* player, uint32_t changeType)
 {
@@ -282,12 +263,12 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      {
        setText(tSpawnColDeity, spawn->deityName());
        setText(tSpawnColBodyType, spawn->typeString());
-       if (spawn->GuildID() < 512)
+       if (spawn->guildID() < 512)
        {  
-          if(spawn->GuildTag())
-            setText(tSpawnColGuildID, spawn->GuildTag());
+          if(spawn->guildTag())
+            setText(tSpawnColGuildID, spawn->guildTag());
           else
-            setText(tSpawnColGuildID, QString::number(spawn->GuildID()));
+            setText(tSpawnColGuildID, QString::number(spawn->guildID()));
        }
      }
    }

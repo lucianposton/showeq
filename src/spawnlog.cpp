@@ -124,7 +124,7 @@ SpawnLog::logKilledSpawn(const Item *item, const Item* kitem, uint16_t kid)
   logSpawnInfo("x",(const char *) spawn->name(),spawn->id(), spawn->level(), 
 	       spawn->x(), spawn->y(), spawn->z(), 
 	       killer ? (const char*)killer->name() : "unknown",
-	       kid, spawn->GuildID());
+	       kid, spawn->guildID());
 }
 
 void
@@ -136,7 +136,7 @@ SpawnLog::logDeleteSpawn(const Item *item)
   const Spawn* spawn = (const Spawn*)item;
   
   logSpawnInfo("-",(const char *)spawn->name(),spawn->id(),spawn->level(),
-	       spawn->x(), spawn->y(), spawn->z(), "",0, spawn->GuildID());
+	       spawn->x(), spawn->y(), spawn->z(), "",0, spawn->guildID());
 }
 
 void

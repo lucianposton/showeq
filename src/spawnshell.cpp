@@ -133,8 +133,6 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
    // connect Player signals to SpawnShell slots
    connect(m_player, SIGNAL(changedID(uint16_t)),
 	   this, SLOT(playerChangedID(uint16_t)));
-   connect(m_player, SIGNAL(getPlayerGuildTag()),
-	   this, SLOT(setPlayerGuildTag()));
 
    // restore the spawn list if necessary
    if (showeq_params->restoreSpawns)
@@ -480,8 +478,8 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      updateRuntimeFilterFlags(spawn);
      item->updateLastChanged();
 
-     if (spawn->GuildID() < MAXGUILDS)
-        spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->GuildID()));
+     if (spawn->guildID() < MAXGUILDS)
+        spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
      if (!showeq_params->fast_machine)
         item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
      else
@@ -497,8 +495,8 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      updateRuntimeFilterFlags(spawn);
      m_spawns.insert(s.spawnId, item);
 
-     if (spawn->GuildID() < MAXGUILDS)
-        spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->GuildID()));
+     if (spawn->guildID() < MAXGUILDS)
+        spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
      if (!showeq_params->fast_machine)
         item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
      else
@@ -844,11 +842,6 @@ void SpawnShell::playerChangedID(uint16_t playerID)
   m_players.replace(playerID, m_player);
 
   emit changeItem(m_player, tSpawnChangedALL);
-}
-
-void SpawnShell::setPlayerGuildTag()
-{
-    m_player->setGuildTag(m_guildMgr->guildIdToName(m_player->GuildID()));
 }
 
 void SpawnShell::refilterSpawns()

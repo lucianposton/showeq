@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  * 
- * Copyright 2003 Zaphod (dohpaz@users.sourceforge.net). 
+ * Copyright 2003-2004 Zaphod (dohpaz@users.sourceforge.net). 
  * 
  */
 
@@ -103,7 +103,8 @@ enum MapIconType
   tIconTypeRuntimeFiltered,
   tIconTypeSpawnPoint,
   tIconTypeSpawnPointSelected,
-  tIconTypeMax = tIconTypeSpawnPointSelected,
+  tIconTypeZoneSafePoint,
+  tIconTypeMax = tIconTypeZoneSafePoint,
 };
 
 //----------------------------------------------------------------------
@@ -302,8 +303,14 @@ class MapIcons : public QObject
   void paintIcon(MapParameters& param, 
  		 QPainter& p, 
  		 const MapIcon& mapIcon,
- 		 const Item* item, 
+		 const Point3D<int16_t>& item, 
+		 const QString& itemName,
  		 const QPoint& point);
+  void paintItemIcon(MapParameters& param, 
+		     QPainter& p, 
+		     const MapIcon& mapIcon,
+		     const Item* item, 
+		     const QPoint& point);
   void paintSpawnIcon(MapParameters& param, 
  		      QPainter& p, 
  		      const MapIcon& mapIcon,

@@ -11,7 +11,7 @@
     <opcode id="00e3" name="OP_ExpansionInfo" updated="12/18/03">
         <comment>Which expansions user has</comment>
     </opcode>
-    <opcode id="00e3" name="OP_DeleteCharacter" updated="11/05/03?">
+    <opcode id="00ec" name="OP_DeleteCharacter" updated="12/18/03">
         <comment>Delete character @ char select</comment>
     </opcode>
     <opcode id="0104" name="OP_SendCharInfo" updated="12/18/03">

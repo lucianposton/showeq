@@ -5,6 +5,7 @@
 #include "filtermgr.h"
 #include "player.h"
 #include "diagnosticmessages.h"
+#include "main.h"
 
 #include <qcombobox.h>
 #include <qspinbox.h>
@@ -42,7 +43,6 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   int fpm = pSEQPrefs->getPrefInt("FPM", preferenceName(), 10);
   m_delay = 60000L / fpm;
 
-  //QVBoxLayout* vLayout = new QVBoxLayout(this);
   QBoxLayout* vLayout = new QVBoxLayout(boxLayout());
   QHBoxLayout* hLayout= new QHBoxLayout(vLayout);
 

@@ -48,14 +48,14 @@
     <opcode id="0038" name="OP_TradeRequestAck" updated="12/18/03">
         <comment>Trade request recipient is acknowledging they are able to trade</comment>
     </opcode>
-    <opcode id="0039" name="OP_GuildPublicNote" updated="11/05/03">
+    <opcode id="003d" name="OP_GuildPublicNote" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="003f" name="OP_MobUpdate" implicitlen="12" updated="12/18/03">
         <comment>old MobUpdateCode</comment>
         <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
     </opcode>
-    <opcode id="0043" name="OP_TradeSkillCombine" updated="12/18/03?">
+    <opcode id="0043" name="OP_TradeSkillCombine" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="0048" name="OP_GMFind" updated="12/18/03">
@@ -66,6 +66,7 @@
     </opcode>
     <opcode id="005a" name="OP_GuildMemberList" updated="12/18/03">
         <comment></comment>
+        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
     <opcode id="0065" name="OP_SkillUpdate" updated="12/18/03">
         <comment>old SkillIncCode</comment>
@@ -74,7 +75,7 @@
     <opcode id="0066" name="OP_ShopPlayerBuy" updated="12/18/03">
         <comment>old BuyItemCode</comment>
     </opcode>
-    <opcode id="0065" name="OP_Petition" updated="11/05/03">
+    <opcode id="0069" name="OP_Petition" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="006a" name="OP_PetitionUpdate" updated="12/18/03?">
@@ -87,7 +88,7 @@
         <comment>old CharProfileCode</comment>
         <payload dir="server" typename="charProfileStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0069" name="OP_ShopEnd" updated="11/05/03">
+    <opcode id="006d" name="OP_ShopEnd" updated="12/18/03">
         <comment>old CloseVendorCode</comment>
         <payload dir="both" typename="unknown" sizechecktype="none"/>
     </opcode>
@@ -97,7 +98,7 @@
     <opcode id="0075" name="OP_GMBecomeNPC" updated="12/18/03">
         <comment>GM /becomenpc - Become an NPC</comment>
     </opcode>
-    <opcode id="0073" name="OP_PetitionCheckout" updated="11/05/03">
+    <opcode id="0077" name="OP_PetitionCheckout" updated="12/18/03">
         <comment>Petition Checkout</comment>
     </opcode>
     <opcode id="0079" name="OP_LevelUpdate" updated="12/18/03">
@@ -111,7 +112,7 @@
     <opcode id="007b" name="OP_Split" updated="12/18/03">
         <comment></comment>
     </opcode>
-    <opcode id="907b" name="OP_PetitionCheckIn" updated="11/05/03">
+    <opcode id="007f" name="OP_PetitionCheckIn" updated="12/18/03">
         <comment>Petition Checkin</comment>
     </opcode>
     <opcode id="0087" name="OP_ClientReady" updated="12/18/03">
@@ -127,40 +128,40 @@
     <opcode id="008d" name="OP_SetRunMode" updated="12/18/03">
         <comment>old cRunToggleCode</comment>
     </opcode>
-    <opcode id="008d" name="OP_PetitionUnCheckout" updated="11/05/03">
+    <opcode id="0091" name="OP_PetitionUnCheckout" updated="12/18/03">
         <comment></comment>
     </opcode>
-    <opcode id="008e" name="OP_PetitionDelete" updated="11/05/03">
+    <opcode id="0092" name="OP_PetitionDelete" updated="12/18/03">
         <comment>Client Petition Delete Request</comment>
     </opcode>
-    <opcode id="0094" name="OP_GMSearchCorpse" updated="11/05/03">
+    <opcode id="0098" name="OP_GMSearchCorpse" updated="12/18/03">
         <comment>GM /searchcorpse - Search all zones for named corpse</comment>
     </opcode>
-    <opcode id="0098" name="OP_GuildPeace" updated="11/05/03">
+    <opcode id="009b" name="fOP_GuildPeace" updated="12/18/03">
         <comment>/guildpeace</comment>
     </opcode>
-    <opcode id="009d" name="OP_Sneak" updated="12/18/03">
+    <opcode id="009e" name="OP_Sneak" updated="12/18/03">
         <comment>Clicked sneak</comment>
     </opcode>
     <opcode id="009f" name="OP_Hide" updated="12/18/03">
         <comment></comment>
     </opcode>
-    <opcode id="009e" name="OP_SaveOnZoneReq" updated="11/05/03">
+    <opcode id="00a2" name="OP_SaveOnZoneReq" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="00a4" name="OP_GMLastName" updated="12/18/03">
         <comment>GM /lastname - Change user lastname</comment>
     </opcode>
-    <opcode id="00a5" name="OP_GuildLeader" updated="12/18/03">
+    <opcode id="00a8" name="OP_GuildLeader" updated="12/18/03">
         <comment>/guildleader</comment>
     </opcode>
     <opcode id="00b7" name="OP_ApplyPoison" updated="11/05/03">
         <comment></comment>
     </opcode>
-    <opcode id="00b8" name="OP_BoardBoat" updated="11/05/03?">
+    <opcode id="00bc" name="OP_BoardBoat" updated="12/18/03">
         <comment></comment>
     </opcode>
-    <opcode id="00b9" name="OP_LeaveBoat" updated="11/05/03?">
+    <opcode id="00bd" name="OP_LeaveBoat" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="00bf" name="OP_CastSpell" updated="12/18/03">
@@ -175,15 +176,18 @@
         <comment>old SpellFadeCode</comment>
         <payload dir="both" typename="spellFadedStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="00c3" name="OP_MemorizeSpell" updated="12/18/03?">
+    <opcode id="00c3" name="OP_MemorizeSpell" updated="12/18/03">
         <comment>old MemSpellCode</comment>
         <payload dir="both" typename="memSpellStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="00c4" name="OP_SenseHeading" updated="12/18/03?">
+    <opcode id="00c2" name="OP_SenseHeading" updated="12/18/03">
         <comment>old cSenseHeadingCode</comment>
     </opcode> 
-    <opcode id="00cd" name="OP_GroupInvite2" updated="11/05/03">
+    <opcode id="00d6" name="OP_GroupInvite2" updated="12/18/03">
         <payload dir="both" typename="groupInviteStruct" sizechecktype="match"/>
+        <comment></comment>
+    </opcode>
+    <opcode id="00d9" name="OP_CancelInvite" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="00d9" name="OP_Jump" updated="12/18/03">
@@ -286,7 +290,7 @@
     <opcode id="012a" name="OP_Door" updated="12/18/03">
         <comment>old DoorClickCode</comment>
     </opcode>
-    <opcode id="0124" name="OP_Illusion" updated="11/05/03">
+    <opcode id="012d" name="OP_Illusion" updated="12/18/03">
         <comment>old IllusionCode</comment>
         <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
@@ -299,6 +303,9 @@
     </opcode>
     <opcode id="0130" name="OP_Forage" updated="12/18/03">
         <comment>old ForageCode</comment>
+    </opcode>
+    <opcode id="0134" name="OP_GuildRemove" updated="12/18/03">
+        <comment>/guildremove</comment>
     </opcode>
     <opcode id="013d" name="OP_GMTraining" updated="11/05/03">
         <comment>old OpenGMCode</comment>
@@ -317,9 +324,6 @@
     </opcode>
     <opcode id="0141" name="OP_LootItem" updated="12/18/03">
         <comment></comment>
-    </opcode>
-    <opcode id="0197" name="OP_GuildRemove" updated="12/18/03">
-        <comment>/guildremove</comment>
     </opcode>
     <opcode id="0142" name="OP_Animation" implicitlen="4" updated="12/18/03">
         <comment></comment>
@@ -347,28 +351,31 @@
     <opcode id="015a" name="OP_Feedback" updated="11/05/03?">
         <comment>/feedback</comment>
     </opcode>
-    <opcode id="015b" name="OP_TradeMoneyUpdate" updated="11/05/03">
+    <opcode id="0161" name="OP_Stamina" updated="11/05/03">
+        <comment>old StaminaCode</comment>
+        <payload dir="server" typename="staminaStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="0162" name="OP_Taunt" updated="12/18/03">
+        <comment>old ConsumeCode</comment>
+    </opcode>
+    <opcode id="0164" name="OP_TradeMoneyUpdate" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="016a" name="OP_Consume" updated="12/18/03">
         <comment>old ConsumeCode</comment>
     </opcode>
-    <opcode id="0161" name="OP_Stamina" updated="11/05/03">
-        <comment>old StaminaCode</comment>
-        <payload dir="server" typename="staminaStruct" sizechecktype="match"/>
-    </opcode>
     <opcode id="016c" name="OP_Logout" updated="12/18/03">
         <comment></comment>
         <payload dir="server" typename="none" sizechecktype="match"/>
     </opcode>
-    <opcode id="0165" name="OP_Stun" updated="11/05/03">
+    <opcode id="016e" name="OP_Stun" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="0172" name="OP_ZoneSpawns" updated="12/18/03">
         <comment>old ZoneSpawnsCode</comment>
         <payload dir="server" typename="spawnStruct" sizechecktype="modulus"/>
     </opcode>
-    <opcode id="916a" name="OP_CombatAbility" updated="11/05/03?">
+    <opcode id="0173" name="OP_CombatAbility" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="0174" name="OP_AutoAttack" updated="12/18/03">
@@ -381,7 +388,7 @@
     <opcode id="0177" name="OP_GMTrainSkill" updated="12/18/03">
         <comment>old SkillTrainCode</comment>
     </opcode>
-    <opcode id="016f" name="OP_ConfirmDelete" updated="11/05/03?">
+    <opcode id="0178" name="OP_ConfirmDelete" updated="12/18/03">
         <comment>Client sends this to server to confirm op_deletespawn</comment>
     </opcode>
     <opcode id="017a" name="OP_GMEndTrainingResponse" updated="12/18/03">
@@ -400,7 +407,7 @@
     <opcode id="0187" name="OP_AutoAttack2" updated="12/18/03">
         <comment></comment>
     </opcode>
-    <opcode id="0180" name="OP_Surname" updated="11/05/03">
+    <opcode id="0189" name="OP_Surname" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="0186" name="OP_DisarmTraps" updated="11/05/03">
@@ -426,13 +433,13 @@
     <opcode id="0199" name="OP_SetDataRate" updated="12/18/03">
         <comment>Client sending datarate.txt value</comment>
     </opcode>
-    <opcode id="01a2" name="OP_GMDelCorpse" updated="12/18/03?">
+    <opcode id="019a" name="OP_GMDelCorpse" updated="12/18/03">
         <comment>/delcorpse</comment>
     </opcode>
-    <opcode id="019a" name="OP_Sacrifice" updated="11/05/03">
+    <opcode id="919a" name="OP_Sacrifice" updated="11/05/03">
         <comment></comment>
     </opcode>
-    <opcode id="01ad" name="OP_PetCommands" updated="12/18/03">
+    <opcode id="01aa" name="OP_PetCommands" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="01b1" name="OP_GMApproval" updated="12/18/03">
@@ -457,7 +464,7 @@
     <opcode id="01bc" name="OP_ReqZoneObjects" updated="12/18/03">
         <comment>Client requesting zone objects</comment>
     </opcode>
-    <opcode id="01c0" name="OP_TargetCommand" updated="11/05/03">
+    <opcode id="01bb" name="OP_TargetCommand" updated="12/18/03">
         <comment>Target user</comment>
     </opcode>
     <opcode id="01c1" name="OP_GuildMOTD" updated="12/18/03">
@@ -476,11 +483,14 @@
     <opcode id="01ca" name="OP_SendAAStats" updated="12/18/03">
         <comment></comment>
     </opcode>
-    <opcode id="01ce" name="OP_TraderBuy" updated="09/09/03">
+    <opcode id="01cb" name="OP_TraderBuy" updated="12/18/03">
         <comment>buy from a trader in bazaar</comment>
     </opcode>
     <opcode id="01cc" name="OP_FaceChange" updated="12/18/03">
         <comment>/face</comment>
+    </opcode>
+    <opcode id="01d7" name="OP_Dye" updated="12/18/03">
+        <comment></comment>
     </opcode>
     <opcode id="01d8" name="OP_ConsiderCorpse" updated="12/18/03">
         <comment>old cConCorpseCode</comment>
@@ -496,7 +506,7 @@
     <opcode id="01e3" name="OP_Report" updated="09/09/03">
         <comment></comment>
     </opcode>
-    <opcode id="01e8" name="OP_RaidInvite" updated="11/05/03">
+    <opcode id="01e5" name="OP_RaidInvite" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="01e6" name="OP_RaidJoin" updated="12/18/03">
@@ -505,7 +515,7 @@
     <opcode id="01e9" name="OP_BazaarSearch" updated="12/18/03">
         <comment></comment>
     </opcode>
-    <opcode id="01ed" name="OP_Trader" updated="11/05/03">
+    <opcode id="01ea" name="OP_Trader" updated="12/18/03">
         <comment>/trader</comment>
     </opcode>
     <opcode id="01eb" name="OP_AAAction" updated="12/18/03">
@@ -517,7 +527,7 @@
     <opcode id="01ef" name="OP_IncreaseStats" updated="11/05/03">
         <comment></comment>
     </opcode>
-    <opcode id="01f0" name="OP_TraderShop" updated="09/09/03">
+    <opcode id="01ed" name="OP_TraderShop" updated="12/18/03">
         <comment>old OpenTraderCode right-click on a trader in bazaar</comment>
     </opcode>
     <opcode id="01f1" name="OP_ViewPetition" updated="11/05/03">
@@ -548,19 +558,19 @@
     <opcode id="0219" name="OP_WhoAllResponse" updated="12/18/03">
         <comment>old sWhoAllOutputCode</comment>
     </opcode>
-    <opcode id="0214" name="OP_UpdateAA" updated="11/05/03?">
+    <opcode id="0212" name="OP_UpdateAA" updated="12/18/03">
         <comment></comment>
     </opcode>
-    <opcode id="0215" name="OP_RespondAA" updated="11/05/03?">
+    <opcode id="01ec" name="OP_RespondAA" updated="12/18/03">
         <comment></comment>
     </opcode>
     <opcode id="021e" name="OP_MobHealth" implicitlen="3" updated="12/18/03">
         <comment>health sent when a player clicks on the mob</comment>
     </opcode>
-    <opcode id="021f" name="?" implicitlen="3" updated="12/18/03">
-        <comment>Unknown, but has implicit length</comment>
+    <opcode id="021f" name="OP_SendHPTarget" implicitlen="3" updated="12/18/03">
+        <comment></comment>
     </opcode>
-    <opcode id="0222" name="OP_GMZoneRequest2" updated="11/05/03?">
+    <opcode id="0229" name="OP_GMZoneRequest2" updated="12/18/03">
         <comment>/zone 2</comment>
     </opcode>
     <opcode id="022b" name="OP_ZoneEntry" updated="12/18/03">
@@ -602,11 +612,12 @@
         <payload dir="both" typename="groupInviteStruct" sizechecktype="match"/>
         <comment></comment>
     </opcode>
-    <opcode id="024e" name="OP_ZoneUnavail" updated="11/05/03">
+    <opcode id="0255" name="OP_ZoneUnavail" updated="12/28/03">
         <comment></comment>
     </opcode>
     <opcode id="025e" name="OP_GuildMemberUpdate" updated="12/18/03">
         <comment></comment>
+        <payload dir="server" typename="GuildMemberUpdate" sizechecktype="match"/>
     </opcode>
     <opcode id="0260" name="OP_LFGCommand" updated="12/18/03">
         <comment>old LFGReqCode</comment>
@@ -645,7 +656,7 @@
     <opcode id="028f" name="OP_OpenObject" updated="12/18/03">
         <comment></comment>
     </opcode>
-    <opcode id="029b" name="OP_PetitionResolve" updated="11/05/03">
+    <opcode id="02a4" name="OP_PetitionResolve" updated="12/18/03">
         <comment>Client Petition Resolve Request</comment>
     </opcode>
     <opcode id="0276" name="OP_Track" updated="12/18/03">
@@ -665,7 +676,7 @@
         <comment>old ItemCode</comment>
         <payload dir="server" typename="itemPacketStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="02d7" name="OP_Adventure" updated="11/05/03">
+    <opcode id="02e0" name="OP_Adventure" updated="12/18/03">
         <comment>/adventure</comment>
     </opcode>
 </seqopcodes>

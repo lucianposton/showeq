@@ -79,6 +79,22 @@ Commanate(uint32_t number)
    return newstring;
 } /* END Commanate */
 
+QString classString(uint8_t classVal)
+{
+  // a non-sparse array of class names
+  static const char*  classnames[] = 
+  {
+#include "classes.h"
+  };
+
+  // return class name from list if it's within range
+  if ((classVal < (sizeof(classnames) / sizeof (char*))) && 
+      (classnames[classVal] != NULL))
+    return classnames[classVal];
+  else
+    return QString::number(classVal);
+}
+
 QString
 spell_name (uint16_t spellId)
 {

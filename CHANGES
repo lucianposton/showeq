@@ -1,5 +1,28 @@
 Version: $Id$ $Name$
 
+dohpaZ (01/18/04)
+---------------------
++ Updated version to 5.0.0.4
++ More updates to work with 12/19/03 EQLive 
++ Fix border cases in SpellShell that would cause ShowEQ to crash.
++ Added a workaround for ISO/ANSI/IEC C++ and C conformance regressions
+  in gcc 3.3.
++ Minor fix in h2info.pl that fixes the comment and operation with certain
+  versions of perl.
++ Made packet handling more robust in the face of corrupt and non-EQ packets
+  that are captured.
++ Support display of a zone's safepoint from the zone packet on the map.
++ Added NetStream classes for handling network byte order data streams.
++ Cleaned up the textual dump of guild names
++ Added GuildShell to track the list of guild members.
++ Added support for LoY guild information capture/display.
++ Made filter2xml.pl more robust in the face of trailing spaces and Windows
+  line termination.
++ Integrated patch #861374 "Fix-three options aren't saved".
++ Integrated patch #864328 "Nedaria's Landing Map".
++ Integrated patch #864329 "Map: JaggedPine touchups".
++ Integrated patch #868227 "Restore light sources".
+
 dohpaZ (12/19/03)
 ---------------------
 + Updated version to 5.0.0.3
@@ -19,6 +42,7 @@ dohpaZ (12/13/03)
 + Removed some more cruft from ShowEQParams.
 + Minor tweak to map spawn color selection to deal with properly with traps,
   event-triggers, and timers.
+
 + Many SpellShell improvements
   + Made it delete expired spells faster (after up to 6 seconds of 0, 
     rather then 20).  

@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  * 
- * Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ * Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
  * 
  */
 
@@ -814,6 +814,8 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
     subMenu->insertItem("Deity PvP", this, SLOT(toggle_deityPvP(int)));
   m_id_racePvP = 
     subMenu->insertItem("Race PvP", this, SLOT(toggle_racePvP(int)));
+  m_id_zoneSafePoint = 
+    subMenu->insertItem("Zone Safe Point", this, SLOT(toggle_zoneSafePoint(int)));
 #ifdef DEBUG
   m_id_debugInfo = subMenu->insertItem("Debug Info", this, SLOT(toggle_debugInfo(int)));
 #endif
@@ -979,6 +981,7 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_mapImage, m_map->showBackgroundImage());
   setItemChecked(m_id_deityPvP, m_map->deityPvP());
   setItemChecked(m_id_racePvP, m_map->racePvP());
+  setItemChecked(m_id_zoneSafePoint, m_map->showZoneSafePoint());
 #ifdef DEBUG
   setItemChecked(m_id_debugInfo, m_map->showDebugInfo());
 #endif
@@ -1191,6 +1194,11 @@ void MapMenu::toggle_cacheAlwaysRepaint()
 void MapMenu::toggle_cacheChanges()
 {
   m_map->setCacheChanges(!m_map->cacheChanges());
+}
+
+void MapMenu::toggle_zoneSafePoint(int itemId)
+{
+  m_map->setShowZoneSafePoint(!m_map->showZoneSafePoint());
 }
 
 void MapMenu::select_mapOptimization(int itemId)
@@ -1481,6 +1489,9 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "RacePvP";
   m_racePvP = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
+
+  tmpPrefString = "ShowZoneSafePoint";
+  m_showZoneSafePoint = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   // Accelerators
   QAccel *accel = new QAccel(this);
@@ -2590,6 +2601,14 @@ void Map::setCacheAlwaysRepaint(bool val)
   pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_mapCache.alwaysRepaint());
 }
 
+void Map::setShowZoneSafePoint(bool val)
+{
+  m_showZoneSafePoint = val;
+
+  if(!m_cacheChanges)
+    refreshMap ();
+}
+
 void Map::dumpInfo(QTextStream& out)
 {
   out << "[" << preferenceName() << "]" << endl;
@@ -2988,6 +3007,16 @@ void Map::paintMap (QPainter * p)
   if (m_showDrops)
     paintDrops(m_param, tmp);
 
+  if (m_showZoneSafePoint)
+  {
+    const Point3D<int16_t>& safePoint = m_zoneMgr->safePoint();
+    m_mapIcons->paintIcon(m_param, tmp, 
+			  m_mapIcons->icon(tIconTypeZoneSafePoint),
+			  safePoint, QString("Safe Point"),
+			  QPoint(m_param.calcXOffsetI(safePoint.x()),
+				 m_param.calcYOffsetI(safePoint.y())));
+  }
+
   if (m_showDoors)
     paintDoors(m_param, tmp);
 
@@ -3169,9 +3198,9 @@ void Map::paintDrops(MapParameters& param,
       mapIcon.combine(m_mapIcons->icon(tIconTypeRuntimeFiltered));
     
     // paint the icon
-    m_mapIcons->paintIcon(param, p, mapIcon, item,
-			 QPoint(param.calcXOffsetI(item->x()),
-				param.calcYOffsetI(item->y())));
+    m_mapIcons->paintItemIcon(param, p, mapIcon, item,
+			      QPoint(param.calcXOffsetI(item->x()),
+				     param.calcYOffsetI(item->y())));
   }
 }
 
@@ -3226,9 +3255,9 @@ void Map::paintDoors(MapParameters& param,
       mapIcon.combine(m_mapIcons->icon(tIconTypeRuntimeFiltered));
 
     // paint the icon
-    m_mapIcons->paintIcon(param, p, mapIcon, item, 
-			 QPoint(param.calcXOffsetI(item->x()),
-				param.calcYOffsetI(item->y())));
+    m_mapIcons->paintItemIcon(param, p, mapIcon, item, 
+			      QPoint(param.calcXOffsetI(item->x()),
+				     param.calcYOffsetI(item->y())));
   }
 }		     
 
@@ -3619,10 +3648,10 @@ void Map::paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
 				     m_param.calcYOffsetI(m_selectedItem->y())));
   }
   else
-    m_mapIcons->paintIcon(param, p, m_mapIcons->icon(tIconTypeItemSelected), 
-			 m_selectedItem, 
-			 QPoint(param.calcXOffsetI(m_selectedItem->x()),
-				param.calcYOffsetI(m_selectedItem->y())));
+    m_mapIcons->paintItemIcon(param, p, m_mapIcons->icon(tIconTypeItemSelected), 
+			      m_selectedItem, 
+			      QPoint(param.calcXOffsetI(m_selectedItem->x()),
+				     param.calcYOffsetI(m_selectedItem->y())));
 }
 
 void Map::paintSelectedSpawnPointSpecials(MapParameters& param, 
@@ -3829,12 +3858,12 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     if (spawn)
     {
       QString guild;
-      if (spawn->GuildID() < 512)
+      if (spawn->guildID() < 512)
       {
-          if (spawn->GuildTag())
-            guild.sprintf("<%s>", (const char*)spawn->GuildTag());
-          else
-            guild = QString::number(spawn->GuildID());
+	if (!spawn->guildTag().isEmpty())
+	  guild.sprintf("<%s>", (const char*)spawn->guildTag());
+	else
+	  guild = QString::number(spawn->guildID());
       }
       else
           guild = " ";

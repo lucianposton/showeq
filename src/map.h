@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  * 
- * Portions Copyright 2003 Zaphod (dohpaz@users.sourceforge.net). 
+ * Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
  * 
  */
 
@@ -249,6 +249,7 @@ class MapMenu : public QPopupMenu
 #endif
   void toggle_cacheAlwaysRepaint();
   void toggle_cacheChanges();
+  void toggle_zoneSafePoint(int itemId);
   void select_mapOptimization(int itemId);
   void select_gridTickColor(int itemId);
   void select_gridLineColor(int itemId);
@@ -305,6 +306,7 @@ class MapMenu : public QPopupMenu
   int m_id_mapImage;
   int m_id_deityPvP;
   int m_id_racePvP;
+  int m_id_zoneSafePoint;
 #ifdef DEBUG
   int m_id_debugInfo;
 #endif
@@ -408,6 +410,7 @@ class Map :public QWidget
   bool walkPathShowSelect() const { return m_walkpathshowselect; }
   bool deityPvP() const { return m_deityPvP; }
   bool racePvP() const { return m_racePvP; }
+  bool showZoneSafePoint() const { return m_showZoneSafePoint; }
   
   MapLineStyle mapLineStyle() { return m_param.mapLineStyle(); }
   MapOptimizationMethod mapOptimization() { return m_param.mapOptimizationMethod(); }
@@ -524,6 +527,7 @@ class Map :public QWidget
   void setShowGridLines(bool val);
   void setShowGridTicks(bool val);
   void setCacheAlwaysRepaint(bool val);
+  void setShowZoneSafePoint(bool val);
 
   // dump debug info
   void dumpInfo(QTextStream& out);
@@ -641,6 +645,7 @@ private:
    bool m_walkpathshowselect;
    bool m_deityPvP;
    bool m_racePvP;
+   bool m_showZoneSafePoint;
 };
 
 //----------------------------------------------------------------------

@@ -33,6 +33,8 @@
 #include "category.h"
 #include "itemdb.h"
 #include "guild.h"
+#include "guildshell.h"
+#include "guildlist.h"
 #include "spells.h"
 #include "datetimemgr.h"
 #include "datalocationmgr.h"
@@ -106,6 +108,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
     m_spawnMonitor(0),
     m_itemDB(0),
     m_guildmgr(0),
+    m_guildShell(0),
     m_dateTimeMgr(0),
     m_eqStrings(0),
     m_messageFilters(0),
@@ -125,7 +128,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
     m_expWindow(0),
     m_combatWindow(0),
     m_netDiag(0),
-    m_messageFilterDialog(0)
+    m_messageFilterDialog(0),
+    m_guildListWindow(0)
 {
   // disable the dock menu
   setDockMenuEnabled(false);
@@ -237,8 +241,17 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    // Create the Zone Manager
    m_zoneMgr = new ZoneMgr(this, "zonemgr");
 
+   // Create GuildMgr object
+   fileName = pSEQPrefs->getPrefString("GuildsFile", "Interface",
+				       "guilds2.dat");
+   
+   fileInfo = m_dataLocationMgr->findWriteFile("tmp", fileName);
+
+   m_guildmgr = new GuildMgr(fileInfo.absFilePath(), 
+			     this, "guildmgr");
+
    // Create our player object
-   m_player = new Player(this, m_zoneMgr);
+   m_player = new Player(this, m_zoneMgr, m_guildmgr);
 
    section = "ItemDB";
    if (pSEQPrefs->getPrefBool("Enabled", section, false))
@@ -284,14 +297,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    if (!shortZoneName.isEmpty())
      m_filterMgr->loadZone(shortZoneName);
    
-   // Create GuildMgr object
-   fileName = pSEQPrefs->getPrefString("GuildsFile", "Interface",
-				       "guilds2.dat");
-   
-   fileInfo = m_dataLocationMgr->findWriteFile("tmp", fileName);
+   m_guildShell = new GuildShell(m_zoneMgr, this, "GuildShell");
 
-   m_guildmgr = new GuildMgr(fileInfo.absFilePath(), 
-			     this, "guildmgr");
    // Create the spawn shell
    m_spawnShell = new SpawnShell(*m_filterMgr, m_zoneMgr, m_player, m_guildmgr);
 
@@ -502,6 +509,11 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    if (pSEQPrefs->getPrefBool("ShowNetStats", section, false))
      showNetDiag();
 
+   //
+   // Create the Guild member List window as required
+   if (pSEQPrefs->getPrefBool("ShowGuildList", section, false))
+     showGuildList();
+
 /////////////////////
 // QMenuBar
 
@@ -578,6 +590,10 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
 
    m_id_view_NetDiag = pViewMenu->insertItem("Network Diagnostics", this, SLOT(toggle_view_NetDiag()));
+
+   m_id_view_GuildListWindow = 
+     pViewMenu->insertItem("Guild Member List", this, 
+			   SLOT(toggle_view_GuildList()));
 
    pViewMenu->insertSeparator(-1);
 
@@ -1381,12 +1397,14 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    pDebugMenu->insertItem("List &Map Info", this, SLOT(listMapInfo()), ALT+CTRL+Key_M);
    pDebugMenu->insertItem("List G&uild Info", m_guildmgr, SLOT(listGuildInfo()));
    pDebugMenu->insertItem("List &Group", this, SLOT(listGroup()), ALT+CTRL+Key_G);
+   pDebugMenu->insertItem("List Guild M&embers", this, SLOT(listGuild()), ALT+CTRL+Key_E);
    pDebugMenu->insertItem("Dump Spawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_P);
    pDebugMenu->insertItem("Dump Drops", this, SLOT(dumpDrops()), ALT+SHIFT+CTRL+Key_D);
    pDebugMenu->insertItem("Dump Map Info", this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
    pDebugMenu->insertItem("Dump Guild Info", this , SLOT(dumpGuildInfo()));
    pDebugMenu->insertItem("Dump SpellBook Info", this , SLOT(dumpSpellBook()));
    pDebugMenu->insertItem("Dump Group", this, SLOT(dumpGroup()), ALT+CTRL+SHIFT+Key_G);
+   pDebugMenu->insertItem("Dump Guild Members", this, SLOT(dumpGuild()), ALT+CTRL+SHIFT+Key_E);
    pDebugMenu->insertItem("List &Filters", m_filterMgr, SLOT(listFilters()), ALT+CTRL+Key_F);
    pDebugMenu->insertItem("List &Zone Filters", m_filterMgr, SLOT(listZoneFilters()));
 
@@ -1601,6 +1619,18 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
      connect(this, SIGNAL(guildList2text(QString)),
 	     m_guildmgr, SLOT(guildList2text(QString)));
+   }
+
+   if (m_guildShell)
+   {
+     m_packet->connect2("OP_GuildMemberList", SP_Zone, DIR_Server,
+			"uint8_t", SZC_None,
+			m_guildShell,
+			SLOT(guildMemberList(const uint8_t*, size_t)));
+     m_packet->connect2("OP_GuildMemberUpdate", SP_Zone, DIR_Server,
+			"GuildMemberUpdate", SZC_Match,
+			m_guildShell,
+			SLOT(guildMemberUpdate(const uint8_t*, size_t)));
    }
 
    if (m_messageShell)
@@ -3005,6 +3035,22 @@ void EQInterface::listGroup(void)
 }
 
 
+void EQInterface::listGuild(void)
+{
+#ifdef DEBUG
+  debug ("listGuild()");
+#endif /* DEBUG */
+  QString outText;
+
+  // open the output data stream
+  QTextStream out(&outText, IO_WriteOnly);
+
+  // dump the drops
+  m_guildShell->dumpMembers(out);
+
+  seqInfo((const char*)outText);
+}
+
 void EQInterface::dumpSpawns (void)
 {
 #ifdef DEBUG
@@ -3160,6 +3206,26 @@ void EQInterface::dumpGroup(void)
 
   // dump the drops
   m_groupMgr->dumpInfo(out);
+}
+
+void EQInterface::dumpGuild(void)
+{
+#ifdef DEBUG
+  debug ("dumpGuild()");
+#endif /* DEBUG */
+
+  QString logFile = pSEQPrefs->getPrefString("DumpGuildFilename", "Interface",
+					     "dumpguild.txt");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("dumps", logFile);
+
+  // open the output data stream
+  QFile file(logFileInfo.absFilePath());
+  file.open(IO_WriteOnly);
+  QTextStream out(&file);
+
+  // dump the drops
+  m_guildShell->dumpMembers(out);
 }
 
 void
@@ -3650,6 +3716,32 @@ EQInterface::toggle_view_NetDiag(void)
   pSEQPrefs->setPrefBool("ShowNetStats", "Interface", !wasVisible);
 }
 
+void
+EQInterface::toggle_view_GuildList(void)
+{
+  bool wasVisible = ((m_guildListWindow != 0) && 
+		     (m_guildListWindow->isVisible()));
+
+  if (!wasVisible)
+    showGuildList();
+  else
+  {
+    // if it's not visible, hide it
+    m_guildListWindow->hide();
+
+    // remove its window menu
+    removeWindowMenu(m_guildListWindow);
+
+    // then delete it
+    delete m_guildListWindow;
+
+    // make sure to clear it's variable
+    m_guildListWindow = 0;
+  }
+
+  pSEQPrefs->setPrefBool("ShowGuildList", "Interface", !wasVisible);
+}
+
 bool 
 EQInterface::getMonitorOpCodeList(const QString& title, 
 				  QString& opCodeList)
@@ -3862,7 +3954,7 @@ EQInterface::set_opt_WalkPathLength(int len)
   if ((len > 0) && (len <= 8192))
     showeq_params->walkpathlength = len;
 
-    pSEQPrefs->setPrefInt("WalkPathLength", "Misc", showeq_params->walkpathrecord);
+    pSEQPrefs->setPrefInt("WalkPathLength", "Misc", showeq_params->walkpathlength);
 }
 
 void
@@ -3870,7 +3962,7 @@ EQInterface::toggle_opt_RetardedCoords (int id)
 {
     showeq_params->retarded_coords = !showeq_params->retarded_coords;
     menuBar()->setItemChecked(id, showeq_params->retarded_coords);
-    pSEQPrefs->setPrefBool("RetardedCoords", "Interface", showeq_params->walkpathrecord);
+    pSEQPrefs->setPrefBool("RetardedCoords", "Interface", showeq_params->retarded_coords);
 }
 
 void
@@ -3878,7 +3970,7 @@ EQInterface::toggle_opt_SystimeSpawntime (int id)
 {
     showeq_params->systime_spawntime = !showeq_params->systime_spawntime;
     menuBar()->setItemChecked(id, showeq_params->systime_spawntime);
-    pSEQPrefs->setPrefBool("SystimeSpawntime", "Interface", showeq_params->walkpathrecord);
+    pSEQPrefs->setPrefBool("SystimeSpawntime", "Interface", showeq_params->systime_spawntime);
 }
 
 void 
@@ -4571,6 +4663,9 @@ void EQInterface::init_view_menu()
   menuBar()->setItemChecked(m_id_view_NetDiag, 
 			    (m_netDiag != 0) &&
 			    m_netDiag->isVisible());
+  menuBar()->setItemChecked(m_id_view_GuildListWindow, 
+			    (m_guildListWindow != 0) &&
+			    m_guildListWindow->isVisible());
   menuBar()->setItemChecked (m_id_view_SpellList, 
 			     (m_spellList != 0) &&
 			     m_spellList->isVisible());
@@ -5412,6 +5507,37 @@ void EQInterface::showNetDiag()
 
   // make sure it's visible
   m_netDiag->show();
+}
+
+void EQInterface::showGuildList(void)
+{
+  if (!m_guildListWindow)
+  {
+    m_guildListWindow = new GuildListWindow(m_player, m_guildShell, 
+					    0, "GuildList");
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					    m_guildListWindow->preferenceName(),
+					    Bottom);
+    addDockWindow(m_guildListWindow, edge, true);
+    m_guildListWindow->undock();
+
+    connect(this, SIGNAL(restoreFonts(void)),
+	    m_guildListWindow, SLOT(restoreFont(void)));
+    connect(this, SIGNAL(saveAllPrefs(void)),
+	    m_guildListWindow, SLOT(savePrefs(void)));
+
+    m_guildListWindow->restoreSize();
+    
+    // move window to new position
+    if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
+      m_guildListWindow->restorePosition(); 
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_guildListWindow);
+  }
+
+  // make sure it's visible
+  m_guildListWindow->show();
 }
 
 void EQInterface::createFilteredSpawnLog(void)

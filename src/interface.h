@@ -75,6 +75,8 @@ class MessageShell;
 class MessageWindow;
 class Terminal;
 class MessageFilterDialog;
+class GuildShell;
+class GuildListWindow;
 
 //--------------------------------------------------
 // typedefs
@@ -170,12 +172,14 @@ class EQInterface:public QMainWindow
    void listMapInfo(void);
    void listInterfaceInfo(void);
    void listGroup(void);
+   void listGuild(void);
    void dumpSpawns(void);
    void dumpDrops(void);
    void dumpMapInfo(void);
    void dumpGuildInfo(void);
    void dumpSpellBook(void);
    void dumpGroup(void);
+   void dumpGuild(void);
    void launch_editor_filters(void);
    void launch_editor_zoneFilters(void);
    void toggleAutoDetectPlayerSettings(int id);
@@ -246,6 +250,7 @@ class EQInterface:public QMainWindow
    void toggle_view_PlayerSkills();
    void toggle_view_Map(int id);
    void toggle_view_NetDiag();
+   void toggle_view_GuildList();
    void resetMaxMana();
    void select_filter_file();
    void save_as_filter_file();
@@ -302,6 +307,7 @@ class EQInterface:public QMainWindow
    void showSpellList(void);
    void showCompass(void);
    void showNetDiag(void);
+   void showGuildList(void);
    void createFilteredSpawnLog(void);
    void createSpawnLog(void);
    void createGlobalLog(void);
@@ -335,7 +341,8 @@ class EQInterface:public QMainWindow
    GroupMgr* m_groupMgr;
    SpawnMonitor* m_spawnMonitor;
    EQItemDB* m_itemDB;
-   GuildMgr* m_guildmgr;
+   GuildMgr* m_guildmgr; 
+   GuildShell* m_guildShell;
    DateTimeMgr* m_dateTimeMgr;
    EQStr* m_eqStrings;
    MessageFilters* m_messageFilters;
@@ -379,6 +386,7 @@ class EQInterface:public QMainWindow
    CombatWindow* m_combatWindow;
    NetDiag* m_netDiag;
    MessageFilterDialog* m_messageFilterDialog;
+   GuildListWindow* m_guildListWindow;
 
    QLabel* m_stsbarSpawns;
    QLabel* m_stsbarStatus;
@@ -418,6 +426,7 @@ class EQInterface:public QMainWindow
    int  m_id_view_Map[maxNumMaps];
    int  m_id_view_MessageWindow[maxNumMessageWindows];
    int  m_id_view_NetDiag;
+   int  m_id_view_GuildListWindow;
    int  m_id_view_SpellList;
    int  m_id_view_PlayerStats_Options;
    int  m_id_view_PlayerStats_Stats[LIST_MAXLIST];

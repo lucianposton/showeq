@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Copyright 2003-2004 Zaphod (dohpaz@users.sourceforge.net). 
  *
  */
 
@@ -22,10 +22,6 @@
 #include "packetcommon.h"
 #include "everquest.h"
 #include "diagnosticmessages.h"
-
-#if 1 // ZBTEMP
-#include "decode.h"
-#endif // ZBTEMP
 
 //----------------------------------------------------------------------
 // Macros

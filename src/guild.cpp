@@ -127,7 +127,7 @@ void GuildMgr::guildList2text(QString fn)
    for (unsigned int i =0 ; i < m_guildMap.size(); i++) 
    {
        if (m_guildMap[i])
-          guildtext << i << "\t" << m_guildMap[i] << "";
+          guildtext << i << "\t" << m_guildMap[i] << endl;
    }
 
    guildsfile.close();

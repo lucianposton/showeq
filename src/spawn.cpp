@@ -81,8 +81,8 @@ QString print_item (uint16_t item)
   // assume no material name found
   const char *itemStr = NULL;
 
-  uint8_t itemLo = item & 0x00ff;
-  uint8_t itemHi = (item & 0xff00) >> 8;
+  uint32_t itemLo = item & 0x00ff;
+  uint32_t itemHi = (item & 0xff00) >> 8;
 
   if (itemHi == 0x00)
   {
@@ -335,7 +335,7 @@ Spawn::Spawn(Spawn& s, uint16_t id)
   setClassVal(s.classVal());
   setHP(s.HP());
   setMaxHP(s.maxHP());
-  setGuildID(s.GuildID());
+  setGuildID(s.guildID());
   setLevel(s.level());
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s.equipment(i));
@@ -780,18 +780,7 @@ uint8_t Spawn::classVal() const
 
 QString Spawn::classString() const
 {
-  // a non-sparse array of class names
-  static const char*  classnames[] = 
-  {
-#include "classes.h"
-  };
-
-  // return class name from list if it's within range
-  if ((classVal() < (sizeof(classnames) / sizeof (char*))) && 
-      (classnames[classVal()] != NULL))
-    return classnames[classVal()];
-  else
-    return QString::number(classVal());
+  return ::classString(classVal());
 }
 
 QString Spawn::info() const
@@ -858,7 +847,7 @@ QString Spawn::filterString() const
 	       deityTeam(),
 	       (const char*)typeString(),
 	       (const char*)lastName().utf8(),
-               (const char*)GuildTag().utf8());
+               (const char*)guildTag().utf8());
 
   if (gm())
     buff += QString("GM:") + QString::number(gm()) + ":";
@@ -884,7 +873,7 @@ QString Spawn::dumpString() const
     + ":RTeam:" + QString::number(raceTeam())
     + ":DTeam:" + QString::number(deityTeam())
     + ":Type:" + typeString()
-    + ":Guild:" + GuildTag()
+    + ":Guild:" + guildTag()
     + ":FilterFlags:" + QString::number(filterFlags())
     + ":";
 }
@@ -1022,8 +1011,6 @@ void Drop::update(const makeDropStruct* d, const QString& name)
       buff.append(print_item(itemId));
     else 
       buff.append(d->idFile);
-
-    //    buff.append(QString(" (") + QString::number(d->itemNr) + ")");
   }
   else
     buff = QString("Drop: '") + name + "'";

@@ -317,7 +317,7 @@ struct spellBuff
 {
 /*0000*/  int8_t      slotid;             //
 /*0001*/  int8_t      level;              // Level of person who casted buff
-/*0002*/  int8_t      unknown0002[2];     //
+/*0002*/  uint16_t    effect;             //
 /*0004*/  uint16_t    spellid;            // Spell
 /*0006*/  int8_t      packing0006[2];     // Purely packing
 /*0008*/  int32_t     duration;           // Duration in ticks
@@ -782,8 +782,8 @@ union {
 /*053*/ char    unknown053;
 /*054*/ char    name[64]; // name
 /*118*/ uint8_t haircolor; // hair color
-/*119*/ uint8_t light; // 0=visible,1=invisible
-/*120*/ uint8_t invis;
+/*119*/ uint8_t unknown119; 
+/*120*/ uint8_t invis; // 0=visible,1=invisible
 /*121*/ int8_t  maxHp; // max hp
 /*122*/ uint8_t pvp; // 0=Not pvp,1=pvp
 /*123*/ uint8_t level;
@@ -800,7 +800,8 @@ union {
 /*141*/ int8_t	beardcolor;
 /*142*/ int8_t	hairstyle;
 /*143*/ int8_t	face;
-/*144*/ int8_t	unknown141[7]; 
+/*144*/ int8_t	unknown144[6]; 
+/*150*/ uint8_t light; // LightSource 0a=bo and ls, 0b=gls, 0c=fbe
 /*151*/ float   size; // Size
 /*155*/ uint8_t helm;
 /*156*/ float   runspeed; //

@@ -9,6 +9,9 @@
 #include "util.h"
 #include "packetcommon.h"
 #include "diagnosticmessages.h"
+#include "guild.h"
+#include "zonemgr.h"
+#include "main.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -39,10 +42,12 @@ static const char* conColorBasePrefNames[] =
 
 Player::Player (QObject* parent,
 		ZoneMgr* zoneMgr,
+		GuildMgr* guildMgr,
 		const char* name)
   : QObject(parent, name),
     Spawn(),
-    m_zoneMgr(zoneMgr)
+    m_zoneMgr(zoneMgr),
+    m_guildMgr(guildMgr)
 {
 #ifdef DEBUG_PLAYER
   debug("Player()");
@@ -260,8 +265,8 @@ void Player::player(const uint8_t* data)
   setUseDefaults(false);
   setDeity(player->deity);
   setGuildID(player->guildID);
-
-  emit getPlayerGuildTag();
+  setGuildTag(m_guildMgr->guildIdToName(guildID()));
+  emit guildChanged();
 
 #if 1 // ZBTEMP
   seqDebug("charProfile(%f/%f/%f - %f)",
@@ -787,6 +792,8 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
   setRace(zsentry->race);
   setGender(zsentry->gender);
   setGuildID(zsentry->guildId);
+  setGuildTag(m_guildMgr->guildIdToName(guildID()));
+  emit guildChanged();
   setPos((int16_t)lrintf(zsentry->x), 
          (int16_t)lrintf(zsentry->y), 
          (int16_t)lrintf(zsentry->z),

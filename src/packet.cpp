@@ -4,8 +4,8 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2003 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Copyright 2000-2004 by the respective ShowEQ Developers
+ *  Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
  */
 
 /* Implementation of Packet class */
@@ -570,11 +570,30 @@ void EQPacket::dispatchPacket(int size, unsigned char *buffer)
       (packet.getSourcePort() == ChatServerPort))
     return;
 
+  if ((packet.getDestPort() == WorldServerChatPort) ||
+      (packet.getSourcePort() == WorldServerChatPort))
+    return;
+
   if (((packet.getDestPort() >= LoginServerMinPort) &&
        (packet.getDestPort() <= LoginServerMaxPort)) ||
       (packet.getSourcePort() >= LoginServerMinPort) &&
       (packet.getSourcePort() <= LoginServerMaxPort))
     return;
+
+#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
+  seqDebug("%s", (const char*)packet.headerFlags((PACKET_PROCESS_DIAG < 3)));
+#endif
+  
+  if (!packet.isValid())
+  {
+    seqWarn("INVALID PACKET: Bad CRC32 [%s:%d -> %s:%d] seq %04x len %d crc32 (%08x != %08x)",
+	   (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
+	   (const char*)packet.getIPv4DestA(), packet.getDestPort(),
+	   packet.seq(), 
+	   packet.getRawPacketLength(),
+	   packet.crc32(), packet.calcCRC32());
+    return;
+  }
 
   /* discard pure ack/req packets and non valid flags*/
   if (packet.flagsHi() < 0x02 || packet.flagsHi() > 0x46 || size < 10)
@@ -587,25 +606,6 @@ void EQPacket::dispatchPacket(int size, unsigned char *buffer)
     seqDebug("%s", (const char*)packet.headerFlags(false));
 #endif
     return;    
-  }
-
-#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-  seqDebug("%s", (const char*)packet.headerFlags((PACKET_PROCESS_DIAG < 3)));
-  uint32_t crc = packet.calcCRC32();
-  if (crc != packet.crc32())
-    seqWarn("CRC: Warning Packet seq = %d CRC (%08x) != calculated CRC (%08x)!",
-	   packet.seq(), packet.crc32(), crc);
-#endif
-  
-  if (!packet.isValid())
-  {
-    seqWarn("INVALID PACKET: Bad CRC32 [%s:%d -> %s:%d] seq %04x len %d crc32 (%08x != %08x)",
-	   (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
-	   (const char*)packet.getIPv4DestA(), packet.getDestPort(),
-	   packet.seq(), 
-	   packet.payloadLength(),
-	   packet.crc32(), packet.calcCRC32());
-    return;
   }
 
   /* Client Detection */
