@@ -50,7 +50,7 @@ int main (int argc, char *argv[])
   bool doSearch = false;
 
   // should the item icons be displayed (default = false)
-  bool displayIcon = false;
+  bool displayIcon = true;
 
   // process any CGI data
   cgiconv.processCGIData();
@@ -342,8 +342,8 @@ int main (int argc, char *argv[])
     
     // only display icon number if we have that data
     if (displayIcon)
-      out << "<TD><IMG SRC=\"/i/" << entry->GetIconNr() 
-	  << ".gif\" alt=\"Icon: " << entry->GetIconNr() << "\"/></TD>";
+      out << "<TD><IMG SRC=\"/eq-icons/" << entry->GetIconNr() 
+	  << ".png\" alt=\"Icon: " << entry->GetIconNr() << "\"/></TD>";
     else
       out << "<TD>" << entry->GetIconNr() << "</TD>";
 
@@ -503,7 +503,7 @@ void displaySelectOption(QTextStream& out,
 {
   out << "<OPTION value=\"" << value << "\"";
   if (value == currentChk)
-    cout << " selected";
+    out << " selected";
   out << ">" << name << "</OPTION>\n";
 }
 

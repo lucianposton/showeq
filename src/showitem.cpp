@@ -116,9 +116,9 @@ int main (int argc, char *argv[])
   if (isNetscape4)
     out << "      <TABLE border cellspacing=0 cellpadding=2>\n";
   else
-    cout << "      <TABLE cellspacing=0 cellpadding=2>\n";
+    out << "      <TABLE cellspacing=0 cellpadding=2>\n";
 
-  cout <<
+  out <<
     "        <TR><TH>Item ID:</TH><TH>Binary Data</TH><TH>Icon</TH>"
     "<TD><INPUT type=\"reset\" value=\"Reset\"/></TD></TR>\n"
     "        <TR>\n";
@@ -184,8 +184,8 @@ int main (int argc, char *argv[])
     nameString = entry->GetName();
 
     if (displayIcon)
-      out << "<P><IMG src=\"/i/" << entry->GetIconNr() 
-	  << ".gif\" alt=\"Icon: " << entry->GetIconNr() << "\"/></P>";
+      out << "<P><IMG src=\"/eq-icons/" << entry->GetIconNr() 
+	  << ".png\" alt=\"Icon: " << entry->GetIconNr() << "\"/></P>";
 
     if (!nameString.isEmpty())
     {
@@ -370,7 +370,7 @@ void printdata (QTextStream& out, int len, unsigned char *data)
 	  tempStr.sprintf("<SPAN class=\"head\">%03d | "
 			  "%s</SPAN><SPAN class=\"head\"> | %s </SPAN>\n",
 			  c - 16, hex, asc);
-	  cout << tempStr;
+	  out << tempStr;
 	  hex[0] = 0;
 	  asc[0] = 0;
 	}
@@ -582,5 +582,5 @@ void printdata (QTextStream& out, int len, unsigned char *data)
 		  "%-48s</SPAN><SPAN class=\"head\"> | %s </SPAN>\n\n",
 		  c, hex, asc);
 
-  cout << tempStr;
+  out << tempStr;
 }
