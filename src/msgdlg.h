@@ -108,7 +108,6 @@ private:
    MyButton* newButton(const QString &name, const QString &filter,
            const QString &color, bool bAct);
    void rightButtonPressed(void);
-   void appendWithWrap(QString &);
    void applyStyle(QString &);
    void closeEvent( QCloseEvent *e);
 

@@ -269,6 +269,7 @@ class MapMenu : public QPopupMenu
 #ifdef DEBUG
   int m_id_debugInfo;
 #endif
+  int m_id_showSub;
   int m_id_mapOptimization;
   int m_id_mapOptimization_Memory;
   int m_id_mapOptimization_Normal;

@@ -606,49 +606,37 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
 
   m_id_spawnDepthFilter = insertItem("Spawn Depth Filter", 
 				     this, SLOT(toggle_spawnDepthFilter(int)));
-  m_id_tooltip = insertItem("Show Tooltips", 
-			    this, SLOT(toggle_tooltip(int)));;
-  m_id_filtered = insertItem("Show Filtered",
-			     this, SLOT(toggle_filtered(int)));
-  m_id_map = insertItem("Show Map Lines",
-			this, SLOT(toggle_map(int)));
-  m_id_velocity = insertItem("Show Velocity Lines",
-			     this, SLOT(toggle_velocity(int)));
-  m_id_animate = insertItem("Animate Spawns",
-			    this, SLOT(toggle_animate(int)));
-  m_id_player = insertItem("Show Player",
-			   this, SLOT(toggle_player(int)));
-  m_id_playerBackground = insertItem("Show Player Background", 
-				     this, SLOT(toggle_playerBackground(int)));
-  m_id_playerView = insertItem("Show Player View",
-			       this, SLOT(toggle_playerView(int)));
-  m_id_gridLines = insertItem("Show Grid Lines",
-			      this, SLOT(toggle_gridLines(int)));;
-  m_id_gridTicks = insertItem("Show Grid Ticks", 
-			      this, SLOT(toggle_gridTicks(int)));
-  m_id_locations = insertItem("Show Locations",
-			      this, SLOT(toggle_locations(int)));
-  m_id_spawns = insertItem("Show Spawns",
-			   this, SLOT(toggle_spawns(int)));
-  m_id_drops = insertItem("Show Drops",
-			  this, SLOT(toggle_drops(int)));
-  m_id_coins = insertItem("Show Coins",
-			  this, SLOT(toggle_coins(int)));
-  m_id_doors = insertItem("Show Doors",
-			  this, SLOT(toggle_doors(int)));
-  m_id_spawnNames = insertItem("Show SpawnNames",
-			       this, SLOT(toggle_spawnNames(int)));
+  
+  subMenu = new QPopupMenu(m_map);
+  subMenu->setCheckable(true);
+  
+  m_id_tooltip = subMenu->insertItem("Tooltips", this, SLOT(toggle_tooltip(int)));;
+  m_id_filtered = subMenu->insertItem("Filtered", this, SLOT(toggle_filtered(int)));
+  m_id_map = subMenu->insertItem("Map Lines", this, SLOT(toggle_map(int)));
+  m_id_velocity = subMenu->insertItem("Velocity Lines",	this, SLOT(toggle_velocity(int)));
+  m_id_animate = subMenu->insertItem("Animate Spawns", this, SLOT(toggle_animate(int)));
+  m_id_player = subMenu->insertItem("Player", this, SLOT(toggle_player(int)));
+  m_id_playerBackground = subMenu->insertItem("Player Background", this, SLOT(toggle_playerBackground(int)));
+  m_id_playerView = subMenu->insertItem("Player View", this, SLOT(toggle_playerView(int)));
+  m_id_gridLines = subMenu->insertItem("Grid Lines", this, SLOT(toggle_gridLines(int)));;
+  m_id_gridTicks = subMenu->insertItem("Grid Ticks", this, SLOT(toggle_gridTicks(int)));
+  m_id_locations = subMenu->insertItem("Locations", this, SLOT(toggle_locations(int)));
+  m_id_spawns = subMenu->insertItem("Spawns", this, SLOT(toggle_spawns(int)));
+  m_id_drops = subMenu->insertItem("Drops", this, SLOT(toggle_drops(int)));
+  m_id_coins = subMenu->insertItem("Coins", this, SLOT(toggle_coins(int)));
+  m_id_doors = subMenu->insertItem("Doors", this, SLOT(toggle_doors(int)));
+  m_id_spawnNames = subMenu->insertItem("SpawnNames", this, SLOT(toggle_spawnNames(int)));
   m_id_highlightConsideredSpawns =
-    insertItem("Highlight Considered Spawns",
-	       this, SLOT(toggle_highlightConsideredSpawns(int)));
-  m_id_walkPath = insertItem("Show Selections Walk Path",
-			     this, SLOT(toggle_walkPath(int)));
-  m_id_mapImage = insertItem("Show Map Image",
-			     this, SLOT(toggle_mapImage(int)));
+    subMenu->insertItem("Highlight Considered Spawns", this, SLOT(toggle_highlightConsideredSpawns(int)));
+  m_id_walkPath =
+    subMenu->insertItem("Selections Walk Path", this, SLOT(toggle_walkPath(int)));
+  m_id_mapImage =
+    subMenu->insertItem("Map Image", this, SLOT(toggle_mapImage(int)));
 #ifdef DEBUG
-  m_id_debugInfo = insertItem("Show Debug Info",
-			      this, SLOT(toggle_debugInfo(int)));
+  m_id_debugInfo = subMenu->insertItem("Show Debug Info", this, SLOT(toggle_debugInfo(int)));
 #endif
+  m_id_showSub = insertItem("Show", subMenu);
+  
 
   subMenu = new QPopupMenu;
   subMenu->setCheckable(true);
@@ -695,7 +683,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   subMenu->setCheckable(true);
   m_id_FOVNoBrush = subSubMenu->insertItem("No Background");
   subSubMenu->setItemParameter(m_id_FOVNoBrush, Qt::NoBrush); 
-  m_id_FOVSolidPattern = subSubMenu->insertItem("Solid (Not Recommended)");
+  m_id_FOVSolidPattern = subSubMenu->insertItem("Solid");
   subSubMenu->setItemParameter(m_id_FOVSolidPattern, Qt::SolidPattern); 
   m_id_FOVDense1Pattern = subSubMenu->insertItem("94% fill");
   subSubMenu->setItemParameter(m_id_FOVDense1Pattern, Qt::Dense1Pattern); 
@@ -1081,6 +1069,7 @@ Map::Map(MapMgr* mapMgr,
   QString prefString = Map::preferenceName();
   QString tmpPrefString;
   QString tmpDefault;
+  QString tmp;
 
   tmpPrefString = "Caption";
   tmpDefault = QString("ShowEQ - ") + prefString;
@@ -1156,8 +1145,10 @@ Map::Map(MapMgr* mapMgr,
   m_fovStyle = pSEQPrefs->getPrefInt(tmpPrefString, prefString, QBrush::Dense7Pattern);
 
   tmpPrefString = "FOVColor";
-  m_fovColor = QColor(pSEQPrefs->getPrefString(tmpPrefString, prefString, 
-					       "#505050"));
+  tmp = pSEQPrefs->getPrefString(tmpPrefString, prefString, "#505050");
+  if (tmp.isEmpty())
+    tmp = "#505050";
+  m_fovColor = QColor(tmp);
 
   // mainly for backwards compatibility
   tmpPrefString = "MapDepthFilter";
@@ -1199,13 +1190,22 @@ Map::Map(MapMgr* mapMgr,
   m_param.setFont(stringToFont(tmpFontString));
 
   tmpPrefString = "GridTickColor";
-  m_param.setGridTickColor(QColor(pSEQPrefs->getPrefString(tmpPrefString, prefString, "#E1C819")));
+  tmp = pSEQPrefs->getPrefString(tmpPrefString, prefString, "#E1C819");
+  if (tmp.isEmpty())
+    tmp = "#E1C819";
+  m_param.setGridTickColor(QColor(tmp));
 
   tmpPrefString = "GridLineColor";
-  m_param.setGridLineColor(QColor(pSEQPrefs->getPrefString(tmpPrefString, prefString, "#194819")));
+  tmp = pSEQPrefs->getPrefString(tmpPrefString, prefString, "#194819");
+  if (tmp.isEmpty())
+    tmp = "#194819";
+  m_param.setGridLineColor(QColor(tmp));
 
   tmpPrefString = "BackgroundColor";
-  m_param.setBackgroundColor(QColor(pSEQPrefs->getPrefString(tmpPrefString, prefString, "black")));
+  tmp = pSEQPrefs->getPrefString(tmpPrefString, prefString, "black");
+  if (tmp.isEmpty())
+    tmp = "black";
+  m_param.setBackgroundColor(QColor(tmp));
 
   tmpPrefString = "OverheadDepth";
   m_param.setHeadRoom(pSEQPrefs->getPrefInt(tmpPrefString, prefString, 75));
@@ -2776,6 +2776,7 @@ void Map::paintPlayerBackground(MapParameters& param, QPainter& p)
   tmpBrush.setColor(m_fovColor);
   tmpBrush.setStyle((Qt::BrushStyle)m_fovStyle);
   p.setBrush(tmpBrush);
+  if(m_fovStyle == Qt::SolidPattern) p.setRasterOp(Qt::OrROP);
 
   // sizeWH is 2 * centerOffset
   int sizeWH = m_scaledFOVDistance << 1; 
@@ -2784,6 +2785,9 @@ void Map::paintPlayerBackground(MapParameters& param, QPainter& p)
   p.drawEllipse (m_param.playerXOffset() - m_scaledFOVDistance, 
 		 m_param.playerYOffset() - m_scaledFOVDistance, 
 		 sizeWH, sizeWH);
+  
+  if(m_fovStyle == Qt::SolidPattern) p.setRasterOp(Qt::CopyROP);
+  
 }
 
 void Map::paintPlayerView(MapParameters& param, QPainter& p)

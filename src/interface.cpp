@@ -1164,7 +1164,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
         // connect signal for new messages
         connect (this, SIGNAL (newMessage(int)),
            pMsgDlg, SLOT (newMessage(int)));
-   connect (pMsgDlg, SIGNAL(toggle_view_ChannelMsgs()),
+	connect (pMsgDlg, SIGNAL(toggle_view_ChannelMsgs()),
             this, SLOT(toggle_view_ChannelMsgs()));
 
         // set Additive mode

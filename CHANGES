@@ -1,3 +1,10 @@
+dohpaZ (08/04/02)
+------------------
+Modifications:
+ + Applied patch #535167 "Mapmenu change" by CodeWarrior (seqcodewarrior)
+ + Bunch of fixes to the Channel Message dialog to fix some issues, both
+   in Qt 2.x and Qt 3.x 
+
 dohpaZ (03/04/02)
 ------------------
 Modifications:

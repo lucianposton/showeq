@@ -5,6 +5,7 @@
 
 #include <qstring.h>
 #include <qtextstream.h>
+#include <qregexp.h>
 
 #include "cgiconv.h"
 #include "spawnshell.h"

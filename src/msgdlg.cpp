@@ -12,6 +12,13 @@
  * Date   - 3/19/00
  */
 
+//
+// Notes: This REALLY needs to be cleaned up
+//  + Possibly use filter classes to do the filtering as oppossed to 
+//    constantly re-compiling the regex
+//  + Add ability for user to specify a filter like in the Map code
+//  + General cleanup
+
 /*
  * Todo: MyButton should be put inside of the MsgDialog class
  *       to avoid namespace collsions.  How to do this with Qt moc?
@@ -92,20 +99,6 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
    m_nEditItem = -1;
    m_bAdditiveFilter = FALSE;
 
-#if 0
-   m_pMsgTypeCheckBox = 0;
-   m_pButtonsPanel = 0;
-   m_pEdit = 0;
-   m_pStatusBar = 0;
-   m_pStatusBarLock = 0;
-   m_pStatusBarMsgcount = 0;
-   m_pStatusBarTotMsgcount = 0;
-   m_pStatusBarFilter = 0;
-   m_pButtonsLayout = 0;
-   m_pMenu = 0;
-   m_pStringList = 0;
-#endif
-
 //  Anyone want to explain to me why ShowEQ segfaults upon exit when I
 //  uncomment out the following line.  This baffles me.... it acts like 
 //  it causes something to get destroyed when it's not supposed to be
@@ -128,11 +121,12 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
    QBoxLayout *middleLayout = new QHBoxLayout(topLayout);
   
    // add the edit
-//   m_pEdit = new QMultiLineEdit(this, "edit"); 
    m_pEdit = new MyEdit(this, "edit"); 
    m_pEdit->setFrameStyle(QFrame::Panel | QFrame::Sunken);
    m_pEdit->setReadOnly(TRUE);
    m_pEdit->setFont(QFont("Helvetica", 10));
+   m_pEdit->setWordWrap(QMultiLineEdit::WidgetWidth);
+   m_pEdit->setWrapPolicy(QMultiLineEdit::AtWhiteSpace);
    middleLayout->addWidget(m_pEdit);
   
    // add a vertical box to hold the button layout and the stretch 
@@ -194,22 +188,6 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name, QStringList &list)
    m_pStatusBarLock->setFrameStyle(QFrame::Panel | QFrame::Sunken);
    statusLayout->addWidget(m_pStatusBarLock, 1);
   
-
-#if 0
-   // Add some default filter buttons
-   MyButton *but;
- 
-   for (int i = 0; i < 5; i++)
-   {
-      char temp[15];
-      sprintf(temp, "Empty%d", i);
-      QString name(temp);
-      QString filter(temp);
-      QString color("Black");
-      newButton(name, filter, color, FALSE);
-   } 
-#endif
-
    // Add an empty widget to fill the space and stretch when resized
    rightLayout->addStretch(10);
   
@@ -302,9 +280,11 @@ MsgDialog::newMessage(int index)
   // set index
   m_nIndex = index;
 
+#if QT_VERSION < 300 // only necessary for older Qt pre-3.0
   // keep at bottom
   if (m_pEdit && !m_bScrollLock)
     m_pEdit->pageDown(FALSE);
+#endif
 
 } // end newMessage
  
@@ -353,12 +333,11 @@ MsgDialog::addMessage(QString &string)
         if (index)
         {
            QString temp(string.right(string.length() - (index + 1)));
-           appendWithWrap(temp);
-//           appendWithWrap(QString(string.right(string.length() - index)));
+	   m_pEdit->append(temp);
         }
      }
      else 
-       appendWithWrap(string);
+       m_pEdit->append(string);
    }
 
 } // end addMessage()
@@ -405,102 +384,6 @@ MsgDialog::delFilter(const QString &filter)
 
 } // delFilter
 
-
-//
-// appendWithWrap(QString &message)  - append a msg to the current text
-//
-// Word wrap is performed to wrap messages and indent them according to
-// the indentation configured
-//
-void
-MsgDialog::appendWithWrap(QString &s)
-{
-  QFontMetrics fm( font() );
-  int i = 0;
-  int a = 0;
-  int lastSpace = 0;
-  int linew = 0;
-  int lastw = 0;
-  bool doBreak = FALSE;
-  bool bWrap = FALSE;
-  int indentw = 0;
-  QString indentStr("                                         ");
-
-  if (!m_pEdit) return;
-
-#ifdef DEBUGMSG
-//  qDebug("appendWithWrap() '%s'", s.ascii() );
-#endif
-  while( i<int(s.length()) ) 
-  {
-    doBreak = FALSE;
-    if ( s[i] != '\n' )
-    {
-      linew += fm.width( s[i] );
-      if (lastSpace > a)
-      {
-        if ( (linew + indentw + 10) >= m_pEdit->contentsRect().width())
-        {
-          doBreak = TRUE;
-          if (lastSpace > a)
-          {
-            i = lastSpace;
-            linew = lastw;
-          }
-          else
-            i = QMAX(a, i-1);
-        }
-      }
-    }
-//printf("doBreak %d, a %d, i %d\n", doBreak, a, i); 
-    if (doBreak)
-    {
-       QString newstring = s.mid(a, i - a);
-
-       linew = 0;
-       lastSpace = a;
-       if (bWrap)
-         newstring.insert(0,indentStr.left(m_nIndent));
-//printf("Adding '%s'\n", newstring.ascii());
-       if (m_bUseIndexing)
-       {
-          QString index("");
-          index.sprintf("%05d: ", m_nIndex);
-          newstring.insert(0, index);
-       }
-       m_pEdit->append(newstring);
-       bWrap = TRUE;
-       indentw = m_nIndent * fm.width(s[32]); 
-       a=i+1;
-    }
-
-    if (s[i].isSpace())
-    {
-       lastSpace = i;
-       lastw = linew;
-    }
-    if (lastSpace <= a)
-      lastw = linew;
-
-    i++;
-  }
-
-  // add remainder of line
-  QString newstring = s.mid(a, i - a);
-  if (bWrap)
-     newstring.insert(0,indentStr.left(m_nIndent));
-  if (m_bUseIndexing)
-  {
-     QString index("");
-     index.sprintf("%05d: ", m_nIndex);
-     newstring.insert(0, index);
-  }
-  m_pEdit->append(newstring);
-//printf("Adding '%s'\n", newstring.ascii());
-
-} // end appendWithWrap 
-
-
 //
 // eventFilter - filter events looking for a rightclick
 //
@@ -534,7 +417,7 @@ MsgDialog::eventFilter(QObject *o, QEvent *e)
         break;
    }
 
-   return FALSE;
+   return QWidget::eventFilter(o, e);
 
 } // end eventFilter
 
@@ -954,7 +837,7 @@ MyEdit::MyEdit( QWidget* parent, const char* name)
  : QMultiLineEdit(parent, name)
 {
    // install event filter to catch right clicks to add buttons 
-   installEventFilter(this);
+  installEventFilter(this);
 }
    
 
@@ -990,8 +873,8 @@ MyEdit::eventFilter(QObject *o, QEvent *e)
         break;
    }
 
-   return FALSE;
-
+  // the parent widget may have it's own event filter, pass the call on
+  return QMultiLineEdit::eventFilter(o, e);
 } // end eventFilter
 
 
