@@ -1,5 +1,6 @@
 fee (floyd) (10/03/02)
 ----------------------
+ + version 4.2.15
 New Features:
   GuildMgr Class
      captures guilds2.dat from worldserver

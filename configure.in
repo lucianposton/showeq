@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/main.cpp)
 AC_CANONICAL_SYSTEM
 AM_CONFIG_HEADER(conf.h)
-AM_INIT_AUTOMAKE(showeq, 4.2.14)
+AM_INIT_AUTOMAKE(showeq, 4.2.15)
 AM_MAINTAINER_MODE
 
 dnl Please remember to update this when the official libEQ.a gets updated...
