@@ -14,6 +14,7 @@
 #include <qhbox.h>
 #include <qvgroupbox.h>
 #include <qmessagebox.h>
+#include <qlayout.h>
 #include <stdio.h>
 
 #define DEBUGCOMBAT
@@ -215,20 +216,16 @@ CombatWindow::~CombatWindow()
 	}
 }
 
-CombatWindow::CombatWindow(EQPlayer* player)
-  : m_player(player),
-  m_iCurrentDPSTotal(0),
-  m_iDPSStartTime(0),
-  m_iDPSTimeLast(0),
-  m_dDPS(0.0),
-  m_dDPSLast(0.0)
+CombatWindow::CombatWindow(EQPlayer* player,
+			   QWidget* parent, const char* name)
+  : SEQWindow("Combat", "ShowEQ - Combat", parent, name),
+    m_player(player),
+    m_iCurrentDPSTotal(0),
+    m_iDPSStartTime(0),
+    m_iDPSTimeLast(0),
+    m_dDPS(0.0),
+    m_dDPSLast(0.0)
 {
-   QString section = "Combat";
-   QTabWidget::setCaption(pSEQPrefs->getPrefString("Caption", section, 
-						   "ShowEQ Combat"));
-
-   restoreFont();
-
   /* Hopefully this is only called once to set up the window,
      so this is a good place to initialize some things which
      otherwise won't be. */
@@ -245,15 +242,18 @@ void CombatWindow::initUI()
 #ifdef DEBUGCOMBAT
 	printf("CombatWindow::initUI: starting...\n");
 #endif
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setAutoAdd(true);
+	m_tab = new QTabWidget(this);
 
 	m_widget_offense = initOffenseWidget();
-	this->addTab(m_widget_offense, "&Offense");
+	m_tab->addTab(m_widget_offense, "&Offense");
 
 	m_widget_defense = initDefenseWidget();
-	this->addTab(m_widget_defense, "&Defense");
+	m_tab->addTab(m_widget_defense, "&Defense");
 
 	m_widget_mob = initMobWidget();
-	this->addTab(m_widget_mob, "&Mobs");
+	m_tab->addTab(m_widget_mob, "&Mobs");
 
 	updateOffense();
 	updateDefense();
@@ -266,14 +266,14 @@ void CombatWindow::initUI()
 
 QWidget* CombatWindow::initOffenseWidget()
 {
-	QWidget *pWidget = new QWidget(this);
+	QWidget *pWidget = new QWidget(m_tab);
 
 	m_layout_offense = new QVBoxLayout(pWidget);
 
 	QGroupBox *listGBox = new QVGroupBox(pWidget);
 	m_layout_offense->addWidget(listGBox);
 
-	m_listview_offense = new QListView(listGBox);
+	m_listview_offense = new SEQListView(preferenceName(), listGBox);
 	m_listview_offense->addColumn("Type");
 	m_listview_offense->setColumnAlignment(0, Qt::AlignRight);
 	m_listview_offense->addColumn("Hit");
@@ -290,6 +290,8 @@ QWidget* CombatWindow::initOffenseWidget()
 	m_listview_offense->setColumnAlignment(6, Qt::AlignRight);
 	m_listview_offense->addColumn("Total");
 	m_listview_offense->setColumnAlignment(7, Qt::AlignRight);
+
+	m_listview_offense->restoreColumns();
 
 	m_listview_offense->setMinimumSize(m_listview_offense->sizeHint().width(), 200);
 
@@ -325,7 +327,7 @@ QWidget* CombatWindow::initOffenseWidget()
 
 QWidget* CombatWindow::initDefenseWidget()
 {
-	QWidget *pWidget = new QWidget(this);
+	QWidget *pWidget = new QWidget(m_tab);
 	m_layout_defense = new QVBoxLayout(pWidget);
 
 	QGroupBox *avoidanceGBox = new QVGroupBox("Avoidance", pWidget);
@@ -399,14 +401,14 @@ QWidget* CombatWindow::initDefenseWidget()
 
 QWidget* CombatWindow::initMobWidget()
 {
-	QWidget *pWidget = new QWidget(this);
+	QWidget *pWidget = new QWidget(m_tab);
 
 	m_layout_mob = new QVBoxLayout(pWidget);
 
 	QGroupBox *listGBox = new QVGroupBox(pWidget);
 	m_layout_mob->addWidget(listGBox);
 
-	m_listview_mob = new QListView(listGBox);
+	m_listview_mob = new SEQListView(preferenceName(), listGBox);
 	m_listview_mob->addColumn("Name");
 	m_listview_mob->setColumnAlignment(0, Qt::AlignRight);
 	m_listview_mob->addColumn("ID");
@@ -421,6 +423,8 @@ QWidget* CombatWindow::initMobWidget()
 	m_listview_mob->setColumnAlignment(5, Qt::AlignRight);
 	m_listview_mob->addColumn("MOB DPS");
 	m_listview_mob->setColumnAlignment(6, Qt::AlignRight);
+
+	m_listview_mob->restoreColumns();
 
 	m_listview_mob->setMinimumSize(m_listview_mob->sizeHint().width(), 200);
 
@@ -449,35 +453,14 @@ QWidget* CombatWindow::initMobWidget()
 	return pWidget;
 }
 
-
-void CombatWindow::setCaption(const QString& text)
+void CombatWindow::savePrefs()
 {
-  // set the caption
-  QTabWidget::setCaption(text);
+  // save the SEQWindow's prefs
+  SEQWindow::savePrefs();
 
-  // set the preference
-  pSEQPrefs->setPrefString("Caption", "Combat", caption());
-}
-
-void CombatWindow::setWindowFont(const QFont& font)
-{
-  // set the font preference
-  pSEQPrefs->setPrefFont("Font", "Combat", font);
-
-  // restore the font to the preference
-  restoreFont();
-}
-
-void CombatWindow::restoreFont()
-{
-  QString section = "Combat";
-  // set the applications default font
-  if (pSEQPrefs->isPreference("Font", section))
-  {
-    // use the font specified in the preferences
-    QFont font = pSEQPrefs->getPrefFont("Font", section);
-    setFont( font);
-  }
+  // save the SEQListViews' prefs
+  m_listview_mob->savePrefs();
+  m_listview_offense->savePrefs();
 }
 
 void CombatWindow::updateOffense()

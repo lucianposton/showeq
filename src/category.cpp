@@ -35,15 +35,12 @@ Category::Category(const QString& name,
   if (!filterout.isEmpty())
     m_filterout = filterout;
   m_color = color;
-  m_flags = 0;
   
   int cFlags = REG_EXTENDED | REG_ICASE;
 
   // allocate the filter item
-  if (filter != "Filtered")
-    m_filterItem = new FilterItem(filter, cFlags);
-  else
-    m_filterItem = NULL;
+  m_filterItem = new FilterItem(filter, cFlags);
+  m_filteredFilter = (filter.find(":Filtered:", 0, false) != -1);
 
   // allocate the filter out item
   if (m_filterout.isEmpty())
@@ -56,11 +53,6 @@ Category::~Category()
 {
   delete m_filterItem;
   delete m_filterOutItem;
-}
-
-bool Category::isFilteredFilter() const
-{
-  return (m_filterItem == NULL);
 }
 
 bool Category::isFiltered(const QString& filterString, int level) const

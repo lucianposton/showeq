@@ -596,6 +596,8 @@ void EQPlayer::updateLevel(const levelUpUpdateStruct *levelup)
 
   if (showeq_params->savePlayerState)
     savePlayerState();
+
+  emit levelChanged(m_playerLevel);
 }
 
 void EQPlayer::updateSpawnHP(const hpUpdateStruct *hpupdate)

@@ -25,6 +25,7 @@
 #include <qpopupmenu.h>
 
 // includes required for MapFrame
+#include <qlayout.h>
 #include <qvbox.h>
 #include <qhbox.h>
 #include <qspinbox.h>
@@ -39,6 +40,7 @@
 #include "filtermgr.h"
 #include "player.h"
 #include "mapcore.h"
+#include "seqwindow.h"
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -615,7 +617,7 @@ class MapFilterLineEdit : public QLineEdit
 
 //----------------------------------------------------------------------
 // MapFrame
-class MapFrame : public QVBox
+class MapFrame : public SEQWindow
 {
    Q_OBJECT
 
@@ -632,7 +634,6 @@ class MapFrame : public QVBox
 
    Map* map() { return m_map; }
    const QString& mapPreferenceName() { return m_mapPreferenceName; }
-   QString preferenceName() { return mapPreferenceName() + "Frame"; }
 
  public slots:
    void regexpok     (int ok);
@@ -641,14 +642,10 @@ class MapFrame : public QVBox
    void mouseLocation(int16_t xPos, int16_t yPos);
    void setPlayer (int16_t x, int16_t y, int16_t z, 
 		   int16_t Dx, int16_t Dy, int16_t Dz, int32_t degrees);
-   void savePrefs(void);
-   void restoreSize();
-   void restorePosition();
-   void restoreFont();
+   virtual void savePrefs(void);
 
   // dump debug info
   void dumpInfo(QTextStream& out);
-  virtual void setCaption(const QString&);
 
  protected slots:
    void init_Menu(void);
@@ -662,7 +659,7 @@ class MapFrame : public QVBox
    void toggle_frameRate(int id);
    void toggle_pan(int id);
    void toggle_depthControls(int id);
-   void set_statusFont(int id);
+   void set_font(int id);
 
  private:
 
@@ -676,6 +673,7 @@ class MapFrame : public QVBox
 
    QString m_mapPreferenceName;
 
+   QVBoxLayout* m_vertical;
    QHBox* m_topControlBox;
    QHBox* m_zoomBox;
    QSpinBox* m_zoom;

@@ -81,9 +81,8 @@
 // Constructor
 //                                                                  
 MsgDialog::MsgDialog(QWidget *parent, const char *name, 
-		     const QString& preferenceName, QStringList &list)
-  : QWidget(parent, name),
-    m_preferenceName(preferenceName)
+		     const QString& prefName, QStringList &list)
+  : SEQWindow(prefName, name, parent, name)
 {
 #ifdef DEBUGMSG
   qDebug("MsgDialog() '%s' List passed by ref with %d elements", 
@@ -106,10 +105,6 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name,
 
    // use the shared list given to us
    m_pStringList = &list;
-
-
-   // set Title
-   setCaption(QString(name));
 
    // install event filter to catch right clicks to add buttons 
    installEventFilter(this);
@@ -433,7 +428,7 @@ MsgDialog::setAdditive(bool bAdd)
    m_bAdditiveFilter = bAdd;
    m_pAdditiveCheckBox->setChecked(m_bAdditiveFilter);
 
-   pSEQPrefs->setPrefBool("Additive", m_preferenceName, m_bAdditiveFilter);
+   pSEQPrefs->setPrefBool("Additive", preferenceName(), m_bAdditiveFilter);
    refresh();
 }
 
@@ -623,7 +618,7 @@ MsgDialog::toggleControls(void)
    else
       m_pButtonsPanel->show();
 
-  pSEQPrefs->setPrefBool("HideControls", m_preferenceName, 
+  pSEQPrefs->setPrefBool("HideControls", preferenceName(), 
 			 !m_pButtonsPanel->isVisible());
 }
 
@@ -636,7 +631,7 @@ MsgDialog::showControls(bool bShow)
   else
     m_pButtonsPanel->hide();
   
-  pSEQPrefs->setPrefBool("HideControls", m_preferenceName, !bShow);
+  pSEQPrefs->setPrefBool("HideControls", preferenceName(), !bShow);
 }
 
 
@@ -710,7 +705,7 @@ MsgDialog::showMsgType(bool bshow)
   if (m_pMsgTypeCheckBox)
     m_pMsgTypeCheckBox->setChecked(m_bShowType);
   
-  pSEQPrefs->setPrefBool("ShowMsgType", m_preferenceName, m_bShowType);
+  pSEQPrefs->setPrefBool("ShowMsgType", preferenceName(), m_bShowType);
   refresh();
 }
 
@@ -718,22 +713,19 @@ void
 MsgDialog::load()
 {
   QString tempStr;
-  QString caption = pSEQPrefs->getPrefString("Caption", m_preferenceName,
-					     m_preferenceName);
-  QWidget::setCaption(caption);
   
   // set Additive mode
-  m_bAdditiveFilter = pSEQPrefs->getPrefBool("Additive", m_preferenceName);
+  m_bAdditiveFilter = pSEQPrefs->getPrefBool("Additive", preferenceName());
   m_pAdditiveCheckBox->setChecked(m_bAdditiveFilter);
   
   // set control mode
-  if (pSEQPrefs->getPrefBool("HideControls", m_preferenceName))
+  if (pSEQPrefs->getPrefBool("HideControls", preferenceName()))
     m_pButtonsPanel->hide();
   else
     m_pButtonsPanel->show();
   
   // set Msg Type mode
-  m_bShowType = pSEQPrefs->getPrefBool("ShowMsgType", m_preferenceName);
+  m_bShowType = pSEQPrefs->getPrefBool("ShowMsgType", preferenceName());
   if (m_pMsgTypeCheckBox)
     m_pMsgTypeCheckBox->setChecked(m_bShowType);
   
@@ -743,11 +735,11 @@ MsgDialog::load()
   {
     // attempt to pull button description from the preferences
     tempStr.sprintf("Button%dName", j);
-    QString buttonname(pSEQPrefs->getPrefString(tempStr, m_preferenceName));
+    QString buttonname(pSEQPrefs->getPrefString(tempStr, preferenceName()));
     tempStr.sprintf("Button%dFilter", j);
-    QString buttonfilter(pSEQPrefs->getPrefString(tempStr, m_preferenceName));
+    QString buttonfilter(pSEQPrefs->getPrefString(tempStr, preferenceName()));
     tempStr.sprintf("Button%dColor", j);
-    QColor buttoncolor(pSEQPrefs->getPrefColor(tempStr, m_preferenceName, 
+    QColor buttoncolor(pSEQPrefs->getPrefColor(tempStr, preferenceName(), 
 					       QColor("black")));
     tempStr.sprintf("Button%dActive", j);
     
@@ -757,45 +749,47 @@ MsgDialog::load()
       // Add the button
       addButton(buttonname, buttonfilter,
 		buttoncolor, 
-		pSEQPrefs->getPrefBool(tempStr, m_preferenceName));
+		pSEQPrefs->getPrefBool(tempStr, preferenceName()));
     }
     else
     {
       if (!buttonname.isEmpty() || !buttonfilter.isEmpty())
 	fprintf(stderr, "Error: Incomplete definition of Button '%s'\n",
-		       (const char*)caption);
+		       (const char*)caption());
     }
   } // end for buttons
 }
 
 void MsgDialog::savePrefs()
 {
+  SEQWindow::savePrefs();
+
   QString tempStr;
   MyButton* but;
   int j = 1;
   for (but = m_buttonList.first(); but != NULL; but = m_buttonList.next())
   {
     tempStr.sprintf("Button%dName", j);
-    pSEQPrefs->setPrefString(tempStr, m_preferenceName, but->name());
+    pSEQPrefs->setPrefString(tempStr, preferenceName(), but->name());
     tempStr.sprintf("Button%dFilter", j);
-    pSEQPrefs->setPrefString(tempStr, m_preferenceName, but->filter());
+    pSEQPrefs->setPrefString(tempStr, preferenceName(), but->filter());
     tempStr.sprintf("Button%dColor", j);
-    pSEQPrefs->setPrefColor(tempStr, m_preferenceName, but->color());
+    pSEQPrefs->setPrefColor(tempStr, preferenceName(), but->color());
     tempStr.sprintf("Button%dActive", j);
-    pSEQPrefs->setPrefBool(tempStr, m_preferenceName, but->isChecked());
+    pSEQPrefs->setPrefBool(tempStr, preferenceName(), but->isChecked());
     j++;
   }
 
   while (j < 15)
   {
     tempStr.sprintf("Button%dName", j);
-    pSEQPrefs->setPrefString(tempStr, m_preferenceName, "");
+    pSEQPrefs->setPrefString(tempStr, preferenceName(), "");
     tempStr.sprintf("Button%dFilter", j);
-    pSEQPrefs->setPrefString(tempStr, m_preferenceName, "");
+    pSEQPrefs->setPrefString(tempStr, preferenceName(), "");
     tempStr.sprintf("Button%dColor", j);
-    pSEQPrefs->setPrefColor(tempStr, m_preferenceName, "");
+    pSEQPrefs->setPrefColor(tempStr, preferenceName(), "");
     tempStr.sprintf("Button%dActive", j);
-    pSEQPrefs->setPrefBool(tempStr, m_preferenceName, "");
+    pSEQPrefs->setPrefBool(tempStr, preferenceName(), "");
     j++;
   }
 }
@@ -945,7 +939,7 @@ CButDlg::CButDlg(QWidget *parent, QString name, MyButton *but)
    QBoxLayout *row1Layout = new QHBoxLayout(topLayout);
    QBoxLayout *row2Layout = new QHBoxLayout(topLayout);
 
-   QFont labelFont;
+   QFont labelFont(font());
    labelFont.setBold(true);
 
    QLabel *nameLabel = new QLabel ("Name", this);

@@ -50,12 +50,8 @@ class Category
   const QString& filter() const { return m_filter; }
   const QString& filterout() const { return m_filterout; }
   const QColor& color() const { return m_color; }
-  int flags() const { return m_flags; }
 
-  void setFlags(int flags) { m_flags = flags; }
-  void updateCount();
-
-  bool isFilteredFilter() const;
+  bool isFilteredFilter() const { return m_filteredFilter; };
   bool isFiltered(const QString& filterString, int level = 0) const;
 
  private:
@@ -65,7 +61,7 @@ class Category
   FilterItem* m_filterItem;
   FilterItem* m_filterOutItem;
   QColor m_color;
-   int m_flags;
+  bool m_filteredFilter;
 };
 
 // ------------------------------------------------------

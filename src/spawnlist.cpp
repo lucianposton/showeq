@@ -120,6 +120,20 @@ itemType SpawnListItem::type()
    return item() ? item()->type() : tUnknown;
 }
 
+QString SpawnListItem::key(int column, bool ascending) const
+{
+  if (m_item == NULL)
+    return text(0);
+    
+  if ((column < SPAWNCOL_LEVEL) || (column > SPAWNCOL_DIST))
+    return text(column);
+
+  double num = text(column).toDouble();
+  QString textNum;
+  textNum.sprintf("%08.2f", num);
+  return textNum;
+}
+
 void SpawnListItem::update(uint32_t changeType)
 {
 //   printf ("SpawnListItem::update()\n");
@@ -236,158 +250,47 @@ void SpawnListItem::setShellItem(const Item *item)
 CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
 		       CategoryMgr* categoryMgr,
 		       QWidget *parent, const char* name)
-  : QListView(parent, name), m_menu(NULL)
+  : SEQListView("SpawnList", parent, name), 
+  m_menu(NULL)
 {
    bDebug = FALSE;
    m_player = player;
    m_spawnShell = spawnShell;
    m_categoryMgr = categoryMgr;
 
-   QString section = "SpawnList";
-
    setRootIsDecorated(true);
-   setShowSortIndicator(true);
-   QListView::setCaption(pSEQPrefs->getPrefString("Caption", section,
-						  "ShowEQ - Spawn List"));
-
-   restoreFont();
 
    addColumn ("Name");
-   addColumn ("Lvl");
-   addColumn ("Hp");
+   addColumn ("Lvl", "Level");
+   addColumn ("Hp", "HP");
    addColumn ("MaxHP");
    if(showeq_params->retarded_coords) {
-     addColumn ("N/S");
-     addColumn ("E/W");
+     addColumn ("N/S", "Coord1");
+     addColumn ("E/W", "Coord2");
    } else {
-     addColumn ("X");
-     addColumn ("Y");
+     addColumn ("X", "Coord1");
+     addColumn ("Y", "Coord2");
    }
-   addColumn ("Z");
+   addColumn ("Z", "Coord3");
    addColumn ("ID");
    addColumn ("Dist");
    addColumn ("Race");
    addColumn ("Class");
    addColumn ("Info");
    addColumn ("SpawnTime");
-   setAllColumnsShowFocus(TRUE);
 
-   // Restore column order
-   QString tStr = pSEQPrefs->getPrefString("ColumnOrder", section, "N/A");
-   if (tStr != "N/A") {
-      int i = 0;
-      while (!tStr.isEmpty()) {
-         int toIndex;
-         if (tStr.find(':') != -1) {
-            toIndex = tStr.left(tStr.find(':')).toInt();
-            tStr = tStr.right(tStr.length() - tStr.find(':') - 1);
-         } else {
-            toIndex = tStr.toInt();
-            tStr = "";
-         }
-         header()->moveSection(toIndex, i++);
-      }
-   }
-
-   // SpawnList column sizes
-   int x;
-   if (pSEQPrefs->isPreference("NameWidth", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("NameWidth", section, columnWidth(SPAWNCOL_NAME));
-      setColumnWidthMode(SPAWNCOL_NAME, QListView::Manual);
-      setColumnWidth(SPAWNCOL_NAME, x);
-   }
-   if (pSEQPrefs->isPreference("LevelWidth", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("LevelWidth", section, columnWidth(SPAWNCOL_LEVEL));
-      setColumnWidth(SPAWNCOL_LEVEL, x);
-      setColumnWidthMode(SPAWNCOL_LEVEL, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("HPWidth", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("HPWidth", section, columnWidth(SPAWNCOL_HP));
-      setColumnWidth(SPAWNCOL_HP, x);
-      setColumnWidthMode(SPAWNCOL_HP, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("MaxHPWidth", section)) {
-      x = pSEQPrefs->getPrefInt("MaxHPWidth", section, columnWidth(SPAWNCOL_MAXHP));
-      setColumnWidth(SPAWNCOL_MAXHP, x);
-      setColumnWidthMode(SPAWNCOL_MAXHP, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("Coord1Width", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("Coord1Width", section, columnWidth(SPAWNCOL_XPOS));
-      setColumnWidth(SPAWNCOL_XPOS, x);
-      setColumnWidthMode(SPAWNCOL_XPOS, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("Coord2Width", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("Coord2Width", section, columnWidth(SPAWNCOL_YPOS));
-      setColumnWidth(SPAWNCOL_YPOS, x);
-      setColumnWidthMode(SPAWNCOL_YPOS, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("Coord3Width", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("Coord3Width", section, columnWidth(SPAWNCOL_ZPOS));
-      setColumnWidth(SPAWNCOL_ZPOS, x);
-      setColumnWidthMode(SPAWNCOL_ZPOS, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("IDWidth", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("IDWidth", section, columnWidth(SPAWNCOL_ID));
-      setColumnWidth(SPAWNCOL_ID, x);
-      setColumnWidthMode(SPAWNCOL_ID, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("DistWidth", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("DistWidth", section, columnWidth(SPAWNCOL_DIST));
-      setColumnWidth(SPAWNCOL_DIST, x);
-      setColumnWidthMode(SPAWNCOL_DIST, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("RaceWidth", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("RaceWidth", section, columnWidth(SPAWNCOL_RACE));
-      setColumnWidth(SPAWNCOL_RACE, x);
-      setColumnWidthMode(SPAWNCOL_RACE, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("ClassWidth", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("ClassWidth", section, columnWidth(SPAWNCOL_CLASS));
-      setColumnWidth(SPAWNCOL_CLASS, x);
-      setColumnWidthMode(SPAWNCOL_CLASS, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("InfoWidth", section)) {
-      x = pSEQPrefs->getPrefInt("InfoWidth", section, columnWidth(SPAWNCOL_INFO));
-      setColumnWidth(SPAWNCOL_INFO, x);
-      setColumnWidthMode(SPAWNCOL_INFO, QListView::Manual);
-   }
-   if (pSEQPrefs->isPreference("SpawnTimeWidth", section)) 
-   {
-      x = pSEQPrefs->getPrefInt("SpawnTimeWidth", section, columnWidth(SPAWNCOL_SPAWNTIME));
-      setColumnWidth(SPAWNCOL_SPAWNTIME, x);
-      setColumnWidthMode(SPAWNCOL_SPAWNTIME, QListView::Manual);
-   }
+   // restore the columns settings from preferences
+   restoreColumns();
 
    // connect a QListView signal to ourselves
    connect(this, SIGNAL(selectionChanged(QListViewItem*)),
 	   this, SLOT(selChanged(QListViewItem*)));
 
    connect (this, SIGNAL(mouseButtonPressed(int, QListViewItem*, const QPoint&, int)),
-            this, SLOT(myMousePressEvent(int, QListViewItem*, const QPoint&, int)));
+            this, SLOT(mousePressEvent(int, QListViewItem*, const QPoint&, int)));
 
    connect (this, SIGNAL(doubleClicked(QListViewItem*)),
-            this, SLOT(myMouseDoubleClickEvent(QListViewItem*)));
-
-#if 0 //FEETMP it goes bye bye
-   connect (this, SIGNAL(rightButtonPressed( QListViewItem *,
-					     const QPoint&, int )),
-	    this, SLOT(rightBtnPressed(QListViewItem*,
-				       const QPoint&, int)) );
-   connect (this, SIGNAL(rightButtonClicked( QListViewItem *,
-					     const QPoint&, int )),
-	    this, SLOT(rightBtnReleased(QListViewItem*,
-					const QPoint&, int)) );
-#endif
+            this, SLOT(mouseDoubleClickEvent(QListViewItem*)));
 
    // connect CSpawnList slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(addItem(const Item *)),
@@ -408,7 +311,9 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
 				       int16_t,int16_t,int16_t,int32_t)), 
 	   this, SLOT(setPlayer(int16_t,int16_t,int16_t,
 				int16_t,int16_t,int16_t,int32_t)));
-
+   connect(m_player, SIGNAL(levelChanged(uint8_t)),
+	   this, SLOT(playerLevelChanged(uint8_t)));
+   
    // connect CSpawnList slots to CategoryMgr signals
    connect(m_categoryMgr, SIGNAL(addCategory(const Category*)),
 	   this, SLOT(addCategory(const Category*)));
@@ -421,153 +326,6 @@ CSpawnList::CSpawnList(EQPlayer* player, SpawnShell* spawnShell,
 
    // populate the initial spawn list
    rebuildSpawnList();
-}
-
-void CSpawnList::savePrefs()
-{
-  if (!isVisible())
-    return;
-
-  QString section = "SpawnList";
-  if (pSEQPrefs->getPrefBool("SaveWidth", section, 1)) 
-  {
-    pSEQPrefs->setPrefInt("NameWidth", section,
-      columnWidth(SPAWNCOL_NAME));
-    pSEQPrefs->setPrefInt("LevelWidth", section,
-      columnWidth(SPAWNCOL_LEVEL));
-    pSEQPrefs->setPrefInt("HPWidth", section,
-      columnWidth(SPAWNCOL_HP));
-    pSEQPrefs->setPrefInt("MaxHPWidth", section,
-      columnWidth(SPAWNCOL_MAXHP));
-    pSEQPrefs->setPrefInt("Coord1Width", section,
-      columnWidth(SPAWNCOL_XPOS));
-    pSEQPrefs->setPrefInt("Coord2Width", section,
-      columnWidth(SPAWNCOL_YPOS));
-    pSEQPrefs->setPrefInt("Coord3Width", section,
-      columnWidth(SPAWNCOL_ZPOS));
-    pSEQPrefs->setPrefInt("IDWidth", section,
-      columnWidth(SPAWNCOL_ID));
-    pSEQPrefs->setPrefInt("DistWidth", section,
-      columnWidth(SPAWNCOL_DIST));
-    pSEQPrefs->setPrefInt("RaceWidth", section,
-      columnWidth(SPAWNCOL_RACE));
-    pSEQPrefs->setPrefInt("ClassWidth", section,
-      columnWidth(SPAWNCOL_CLASS));
-    pSEQPrefs->setPrefInt("InfoWidth", section,
-      columnWidth(SPAWNCOL_INFO));
-    pSEQPrefs->setPrefInt("SpawnTimeWidth", section,
-      columnWidth(SPAWNCOL_SPAWNTIME));
-    char tempStr[256], tempStr2[256];
-    if (header()->count() > 0)
-      sprintf(tempStr, "%d", header()->mapToSection(0));
-    for(int i=1; i<header()->count(); i++) {
-      sprintf(tempStr2, ":%d", header()->mapToSection(i));
-      strcat(tempStr, tempStr2);
-    }
-    pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
-  }
-}
-
-void CSpawnList::setCaption(const QString& text)
-{
-  // set the caption
-  QListView::setCaption(text);
-
-  // set the preference
-  pSEQPrefs->setPrefString("Caption", "SpawnList", caption());
-}
-
-void CSpawnList::setWindowFont(const QFont& font)
-{
-  // set the font preference
-  pSEQPrefs->setPrefFont("Font", "SpawnList", font);
-
-  // restore the font to the preference
-  restoreFont();
-}
-
-void CSpawnList::restoreFont()
-{
-  QString section = "SpawnList";
-  // set the applications default font
-  if (pSEQPrefs->isPreference("Font", section))
-  {
-    // use the font specified in the preferences
-    QFont font = pSEQPrefs->getPrefFont("Font", section);
-    setFont( font);
-  }
-}
-
-void CSpawnList::setColumnVisible(int id, bool visible)
-{
-  if (visible)
-  {
-    int width;
-
-    QString section = "SpawnList";
-    switch(id)
-    {
-    case SPAWNCOL_NAME:
-      width = pSEQPrefs->getPrefInt("NameWidth", section, columnWidth(id));
-      break;
-    case SPAWNCOL_LEVEL:
-      width = pSEQPrefs->getPrefInt("LevelWidth", section, columnWidth(id));
-      break;
-    case SPAWNCOL_HP:
-      width = pSEQPrefs->getPrefInt("HPWidth", section, columnWidth(id));
-      break;
-    case SPAWNCOL_MAXHP:
-      width = pSEQPrefs->getPrefInt("MaxHPWidth", section, columnWidth(id));
-      break;
-    case SPAWNCOL_XPOS:
-      width = pSEQPrefs->getPrefInt("Coord1Width", section, columnWidth(id));
-      break;
-    case SPAWNCOL_YPOS:
-      width = pSEQPrefs->getPrefInt("Coord2Width", section, columnWidth(id));
-      break;
-    case SPAWNCOL_ZPOS:
-      width = pSEQPrefs->getPrefInt("Coord3Width", section, columnWidth(id));
-      break;
-    case SPAWNCOL_ID:
-      width = pSEQPrefs->getPrefInt("IDWidth", section, columnWidth(id));
-      break;
-    case SPAWNCOL_DIST:
-      width = pSEQPrefs->getPrefInt("DistWidth", section, columnWidth(id));
-      break;
-    case SPAWNCOL_RACE:
-      width = pSEQPrefs->getPrefInt("RaceWidth", section, columnWidth(id));
-      break;
-    case SPAWNCOL_CLASS:
-      width = pSEQPrefs->getPrefInt("ClassWidth", section, columnWidth(id));
-      break;
-    case SPAWNCOL_INFO:
-      width = pSEQPrefs->getPrefInt("InfoWidth", section, columnWidth(id));
-      break;
-    case SPAWNCOL_SPAWNTIME:
-      width = pSEQPrefs->getPrefInt("SpawnTimeWidth", section, columnWidth(id));
-      break;
-    default:
-      width = 0;
-    }
-
-    // if now real width found, just guess at a minimum width
-    if (width == 0)
-      width = 35;
-
-    // set the column width
-    setColumnWidth(id, width);
-  }
-  else
-  {
-    // set the column width to 0
-    setColumnWidth(id, 0);
-  }
-
-  // set the column width mode
-  setColumnWidthMode(id, QListView::Manual);
-
-  // trigger an update, otherwise things look messy
-  triggerUpdate();
 }
 
 void CSpawnList::setPlayer(int16_t xPos, int16_t yPos, int16_t zPos, 
@@ -825,18 +583,10 @@ void CSpawnList::addItem(const Item* item)
     // iterate over all the categories
     for(cat = cit.toFirst(); cat != NULL; cat = ++cit)
     { 
-#if 0
-      printf("Checking ='%s'= in category '%s' \n `-- filter='%s' filterout='%s' flags=%d\n", 
-	     (const char*)filterString(item,flags), (const char*)cat->name(),
-	     (const char*)cat->filter(), (const char*)cat->filterout());
-#endif
-      // skip filtered spawns, if this is a filtered filter category
+      // skip filtered spawns, if this isn't a filtered filter category
       if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
-	  cat->isFilteredFilter())
+	  !cat->isFilteredFilter())
       {
-#if 0
-	printf("Skipping\n");
-#endif
 	continue;
       }
 
@@ -1009,7 +759,7 @@ void CSpawnList::selectSpawn(const Item *item)
   if (j) 
   {
     // select the item
-    setSelectedQueit(j, true);
+    setSelectedQuiet(j, true);
     
     // if configured to do so, make sure it's visible
     if (showeq_params->keep_selected_visible)
@@ -1045,14 +795,14 @@ void CSpawnList::selectAndOpen(SpawnListItem *i)
   }
 
   // make sure the item is selected
-  setSelectedQueit(i, true);
+  setSelectedQuiet(i, true);
 
   // if configured to do so, make sure it's visible
   if (showeq_params->keep_selected_visible)
     ensureItemVisible(i);
 }
 
-void CSpawnList::setSelectedQueit(QListViewItem* item, bool selected)
+void CSpawnList::setSelectedQuiet(QListViewItem* item, bool selected)
 {
   if (!item || (item->isSelected() == selected) ||
       !item->isSelectable())
@@ -1276,6 +1026,49 @@ void CSpawnList::rebuildSpawnList()
   populateSpawns();
 }
 
+void CSpawnList::playerLevelChanged(uint8_t)
+{
+  QListViewItemIterator it(this);
+  SpawnListItem* slitem = NULL;
+  const Category* cat = NULL;
+  const Item* item = NULL;
+  
+  // iterate until we are out of items
+  while (it.current())
+  {
+    // get the current SpawnListItem
+    slitem = (SpawnListItem*)it.current();
+
+    // if this is a top level item, see if it's a category item, and if so
+    // get the category.
+    if (slitem->parent() == NULL)
+    {
+      cat = NULL;
+      QPtrDictIterator<SpawnListItem> it(m_categoryListItems);
+      
+      for (it.toFirst(); it.current() != NULL; ++it)
+      {
+	if (slitem == it.current())
+	{
+	  cat = (const Category*)it.currentKey();
+	  break;
+	}
+      }
+    }
+
+    // get the item associated with the list item
+    item = slitem->item();
+    
+    // set the color
+    if (cat != NULL)
+      slitem->setTextColor(pickSpawnColor(item, cat->color()));
+    else
+      slitem->setTextColor(pickSpawnColor(item));
+
+    ++it;
+  }
+}
+
 void CSpawnList::populateCategory(const Category* cat)
 {
   if (cat == NULL)
@@ -1302,7 +1095,7 @@ void CSpawnList::populateCategory(const Category* cat)
 
     // skip filtered spawns
     if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
-	cat->isFilteredFilter())
+	!cat->isFilteredFilter())
       continue;
 
     spawn = (const Spawn*)item;
@@ -1339,7 +1132,7 @@ void CSpawnList::populateCategory(const Category* cat)
 
       // skip filtered spawns
       if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
-	  cat->isFilteredFilter())
+	  !cat->isFilteredFilter())
 	continue;
 
       // does this spawn match the category
@@ -1400,7 +1193,7 @@ void CSpawnList::populateSpawns(void)
       { 
 	// skip filtered spawns
 	if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
-	    cat->isFilteredFilter())
+	    !cat->isFilteredFilter())
 	  continue;
 	
 	spawn = (const Spawn*)item;
@@ -1447,7 +1240,7 @@ void CSpawnList::populateSpawns(void)
 	{ 
 	  // skip filtered spawns
 	  if ((item->filterFlags() & FILTER_FLAG_FILTERED) &&
-	      cat->isFilteredFilter())
+	      !cat->isFilteredFilter())
 	    continue;
 
 	  // does this spawn match the category
@@ -1511,6 +1304,7 @@ void CSpawnList::populateSpawns(void)
     }
   }
 }
+
 
 //----------------------------------------------------------------------
 //
@@ -1589,7 +1383,7 @@ void CSpawnList::selChanged(QListViewItem* litem)
     emit spawnSelected(item);
 }
 
-void CSpawnList::myMousePressEvent(int button, QListViewItem* litem,
+void CSpawnList::mousePressEvent(int button, QListViewItem* litem,
 		                   const QPoint &point, int col)
 {
   // Left Mouse Button Events
@@ -1602,14 +1396,17 @@ void CSpawnList::myMousePressEvent(int button, QListViewItem* litem,
   if (button == RightButton)
   {
     SpawnListItem* slitem = (SpawnListItem*)litem;
+    const Item* item = NULL;
+    if (slitem != NULL)
+      item = slitem->item();
     SpawnListMenu* spawnMenu = menu();
-    spawnMenu->setCurrentItem(slitem->item());
+    spawnMenu->setCurrentItem(item);
     spawnMenu->setCurrentCategory(getCategory(slitem));
     spawnMenu->popup(point);
   }
 }
 
-void CSpawnList::myMouseDoubleClickEvent(QListViewItem* litem)
+void CSpawnList::mouseDoubleClickEvent(QListViewItem* litem)
 {
    //print spawn info to console
   if (litem == NULL)
@@ -1617,50 +1414,10 @@ void CSpawnList::myMouseDoubleClickEvent(QListViewItem* litem)
 
   const Item* item = ((SpawnListItem*)litem)->item();
   if (item != NULL)
-    printf("%s\n",(const char*)item->filterString());
-}
-
-  
-#if 0 //FEETMP  on its way to the door 
-//
-// rightButtonPressed
-//
-// if you right click on a spawn in the list dump its contents
-// and mark the column you selected as the current column for filtering
-//
-void CSpawnList::rightBtnPressed(QListViewItem* litem, 
-				 const QPoint &point, 
-				 int col)
-{
-  if (litem == NULL)
-    return;
-
-  const Item* item = ((SpawnListItem*)litem)->item();
-  if (item != NULL)
   {
     printf("%s\n",(const char*)item->filterString());
-
-    emit keepUpdated(true);
-  }
-  else
-  {
-    const Category* cat = getCategory((SpawnListItem*)litem);
-
-    if (!cat)
-      return;
-
-    // edit the category
-    m_categoryMgr->editCategories(cat, this);
   }
 }
-
-void CSpawnList::rightBtnReleased(QListViewItem *item,
-				  const QPoint &point, 
-				  int col)
-{
-  emit keepUpdated(false);
-}
-#endif
 
 QString CSpawnList::filterString(const Item* item, int flags)
 {
@@ -1713,13 +1470,11 @@ const Category* CSpawnList::getCategory(SpawnListItem *item)
 
 SpawnListMenu* CSpawnList::menu()
 {
-  printf("CSpawnList::menu()\n");
   if (m_menu != NULL)
     return m_menu;
   
   m_menu = new SpawnListMenu(this, m_spawnShell->filterMgr(),
 				 m_categoryMgr, this, "spawnlist menu");
-  printf("CSpawnList::menu() - m_menu returned\n");
 
   return m_menu;
 }
@@ -1847,13 +1602,17 @@ void SpawnListMenu::setCurrentCategory(const Category* cat)
   {
     changeItem(m_id_edit_category, 
 	       "&Edit '" + cat->name() + "' Category...");
+    setItemEnabled(m_id_edit_category, true);
     changeItem(m_id_delete_category, 
 	       "&Delete '" + cat->name() + "' Category...");
+    setItemEnabled(m_id_delete_category, true);
   }
   else
   {
     changeItem(m_id_edit_category, "&Edit Category...");
+    setItemEnabled(m_id_edit_category, false);
     changeItem(m_id_delete_category, "&Delete Category...");
+    setItemEnabled(m_id_delete_category, false);
   }
 }
 
@@ -1954,4 +1713,31 @@ void SpawnListMenu::rebuild_spawnlist(int id)
 {
   // rebuild the spawn list
   m_spawnlist->rebuildSpawnList();
+}
+
+
+SpawnListWindow::SpawnListWindow(EQPlayer* player, 
+				 SpawnShell* spawnShell,
+				 CategoryMgr* categoryMgr,
+				 QWidget* parent, const char* name)
+  : SEQWindow("SpawnList", "ShowEQ - Spawns", parent, name)
+{
+  QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setAutoAdd(true);
+  
+  m_spawnList = new CSpawnList(player, spawnShell, categoryMgr, this, name);
+}
+
+SpawnListWindow::~SpawnListWindow()
+{
+  delete m_spawnList;
+}
+
+void SpawnListWindow::savePrefs(void)
+{
+  // save SEQWindow prefs
+  SEQWindow::savePrefs();
+
+  // make the listview save it's prefs
+  m_spawnList->savePrefs();
 }

@@ -903,8 +903,6 @@ QString Spawn::filterString() const
 {
   return QString("Name:") + transformedName() 
     + ":Level:" + QString::number(level())
-    + ":HP:" + QString::number(HP())
-    + ":MaxHP:" + QString::number(maxHP())
     + ":Race:" + raceName()
     + ":Class:" + className() 
     + ":NPC:" + QString::number((NPC() == 10) ? 0 : NPC())

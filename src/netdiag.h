@@ -14,9 +14,10 @@
 #include <qlabel.h>
 #include <qspinbox.h>
 
+#include "seqwindow.h"
 #include "packet.h"
 
-class NetDiag : public QFrame
+class NetDiag : public SEQWindow
 {
   Q_OBJECT 
  public:
@@ -33,9 +34,6 @@ class NetDiag : public QFrame
    void seqReceive             (int);
    void seqExpect              (int);
    void keyChanged             (void);
-   virtual void setCaption(const QString&);
-   void setWindowFont(const QFont&);
-   void restoreFont();
 
  protected:
    QString print_addr(in_addr_t);

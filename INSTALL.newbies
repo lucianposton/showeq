@@ -1,8 +1,18 @@
+Document Version 4.2.3
+
+- 1.9 Changing Configurations
+    Deleted the change configuration part. With the xml implementation there is no need to change configuration manually, everything should be able to be saved while ShowEQ runs using the inprogram Save option.
+- 5. Version History of this document
+    Changed current version to match latest CVS commit
+- 6. Credits
+    Added Credits Chapter
+
+
 Following this file does not exempt you from reading and understanding the
 regular INSTALL file.  This should give you the knowledge you need to
 understand that file if you are new to linux and the development process.
 
-This does not cover the details of the RedHat 7 installation itself.  RedHat
+This does not cover the details of the RedHat 7.2 installation itself.  RedHat
 has lots of helpful advice on their web site, and USENET newsgroups are full
 of hints as well.
 
@@ -14,112 +24,320 @@ http://www.linuxnewbie.org
 http://www.linuxcentral.org
 http://www.linuxnews.org
 
+
+------------------
+Redhat 7.2 install
+------------------
+
+Important things to know:
+- Linux, unlike Windows, does make a difference between Uppercase and Lowercase. Please keep that in mind when issueing commands.
+
+Index:
+
+1.  Installation
+1.1 Downloading Red Hat 7.2
+1.2 Packet Selection
+1.3 Downloading qt-2.3.2
+1.4 Editting linux-g++-shared
+1.5 Compiling QT
+1.6 Downloading latest version of ShowEQ
+1.7 Downloading most recent libEQ.a file
+1.8 Compiling ShowEQ
+
+2.  Running ShowEQ
+2.1 Start X Windows Environment
+2.2 Opening Terminal window and logging in as superuser
+2.3 Starting ShowEQ
+
+3.  Updating
+3.1 Getting a new libEQ.a
+3.2 Updating ShowEQ from cvs
+3.3 Zone Specific Filter Files
+
+4.  Usefull Information
+4.1 Getting Help
+4.2 Saving Space
+
+5.  Version History of this document
+
+6.  Credits
+
+
+--------------
+
+1. Installation: 
+
+1.1 Downloading Red Hat 7.2
+    Download or buy RedHat 7.2, start the installation and choose what ever options you want, paying attention to a few small key steps outlined below. We will try and get all of the required rpms installed at installation to avoid more work later. During install, I always choose "custom" so that i get the most control over what i install. The iso version makes cds that are bootable, and of course the purchased cds are bootable as well. Another suggestion would be to choose a journaling filesystem like ReiserFS or ext3. this just means that you won't have to wait for the system to scan the disk when you do a dirty reboot.
+
+1.2 Packet Selection
+    The next important step is the package selection. you need to choose "select individual packages" and i personally choose "software development" and "Kernel development" in hopes that i have to pick fewer packages at the next stage. here are the rpms i think you will need (some might already be selected). in "flat view" they are easier to find. they may not be required, but i was able to compile without installing any additional rpms when these were installed. this should be the name as they appear in the redhat 7.2 install. 
+
+
+XFree86-devel 
+XFree86-libs 
+autoconf 
+automake 
+gcc3 
+gcc3-c++ 
+libpcap 
+libstdc++3 
+libstdc++3-devel 
+libgcc 
+zlib 
+zlib-devel 
+gd 
+gd-devel 
+gdbm 
+gdbm-devel 
+pine **for pico 
+kernel-headers 
+glibc-devel 
+cvs 
+patch 
+make 
+m4 
+libtool 
+libtool-libs 
+binutils 
+libpng 
+libpng-devel 
+libjpeg 
+libjpeg-devel 
+libmng 
+libmng-devel 
+freetype 
+
+
+Once Red Hat 7.2 is installed, you login as root with the password you entered during the install. You will notice the command prompt: "[]#"
+
+
+1.3 Downloading qt-2.3.2
+    Download qt-2.3.2 at ftp.trolltech.com and extract it to it's own directory.
+
+Code: 
+
+[]# cd /usr/lib/ 
+[]# wget --passive ftp ftp://ftp.trolltech.com/qt/source/qt-x11-2.3.2.tar.gz 
+[]# tar zxvf qt-x11-2.3.2.tar.gz 
+ 
+
+
+1.4 Editting linux-g++-shared
+    edit the file "qt-src/configs/linux-g++-shared and change all references to "gcc" to "gcc3" as well as "g++" to "g++3" (lines 3, 4, 35, and 59). save your changes (ctrl-o, ctrl-x) 
+
+Code: 
+
+[]# pico -w /usr/lib/qt-2.3.2/configs/linux-g++-shared 
+ 
+
+
+1.5 Compiling QT
+    "export QTDIR" and configure and compile qt-2.3.2 with the -thread option. Optionally you can use "make -j2" to possibly speed up compile. If you have 2 cpus then you can even use use "make -j3" 
+**this compile will take a LONG time, possibly as few as 1 hour and as many as 6 depending on cpu speed.
+
+Code: 
+
+[]# cd /usr/lib/qt-2.3.2/ 
+[]# export QTDIR=/usr/lib/qt-2.3.2/ 
+[]# ./configure -thread 
+[]# make 
+ 
+
+You might find that adding the line "/usr/lib/qt-2.3.2/lib" to the file "/etc/ld.so.conf" then running "ldconfig" will help you. 
+
+Code: 
+
+[]# echo "/usr/lib/qt-2.3.2/lib" >> /etc/ld.so.conf 
+[]# ldconfig 
+ 
+
+
+1.6 Downloading latest version of ShowEQ
+    now we need to get the latest version of showeq from cvs. this step is pretty easy. Some people remove or copy their ENTIRE source tree before re-compiling, but that's not realy necessary, so we leave that upto you. I am going to assume we are downloading in /seq and that showeq will end up in /seq/showeq. 
+
+Code: 
+
+[]# cd /seq 
+[]# cvs -d:pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq login 
+[]# cvs -z3 -d:pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq co showeq 
+[]# cd /seq/showeq 
+[]# cvs update -P 
+[]# cvs -d :pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq logout 
+ 
+
+
+1.7 Downloading most recent libEQ.a file
+    getting latest libEQ.a (see the file README.libEQ in cvs files) put this file in /usr/lib as well. it is important that this is the ONLY libEQ.a in the library path, and that it be the most current. It is okay to have an extra copy in say /seq, but not in /lib or a few other places. 
+
+[]# pico /seq/showeq/README.libEQ
+
+
+1.8 Compiling ShowEQ
+    configuring and compiling showeq v4.x
+
+Code: 
+
+[]# cd /seq/showeq/ 
+[]# export CC=gcc3
+[]# export CXX=g++3
+[]# export QTDIR=/usr/lib/qt-2.3.2 
+[]# make -f Makefile.dist 
+[]# ./configure 
+[]# make 
+[]# make install 
+ 
+
+--------------
+
+2. Running ShowEQ 
+
+IMPORTANT NOTICE:
+The next thing you do is to run X, It is important that you should NEVER start X as root. It's better and safer to use a seperate account to do things and loginto root while being on that account. If you did not yet make an account during install, please do so now:
+
+[]# /usr/sbin/adduser -g users -n <your accountname here>
+
+Enter a password and re-enter the password to confirm
+
+[]# logout
+
+Enter your accountname you just made and supply the password
+
+2.1 Start X Windows Environment
+    running it! start up X.
+
+Code: 
+
+[]# startX
+
+2.2 Opening Terminal window and logging in as superuser
+    Right click the background and select "New Terminal window"
+
+[]# su
+
+<enter your root password>
+
+2.3 Starting ShowEQ
+[]# export QTDIR=/usr/lib/qt-2.3.2 
+[]# cd /usr/local/bin
+[]# ./showeq eth0 --ip-address=10.0.0.10 
+ 
+
+Of course, for it to work you will need to replace my ip (10.0.0.10) with the ip of your computer that is/will be playing everquest. if your showeq box is also your gateway, you might want to use "eth1" instead of "eth0". 
+
+
+
+--------------
+
+3. Updating
+
+3.1 Getting a new libEQ.a
+    Please consult the file README.libEQ about this issue
+
+[]# pico /seq/showeq/README.libEQ
+
+3.2 Updating ShowEQ from cvs
+    So, you think there might be an update out... but you don't want to download the whole thing again? Try this. If it gets a couple changes, read the CHANGES file and see whats up. Then compile it if you want. 
+
+Code: 
+
+[]# cd /seq/showeq 
+[]# make distclean 
+[]# cvs -d :pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq login 
+[]# cvs -z3 update 
+[]# cvs -d :pserver:anonymous@cvs.seq.sourceforge.net:/cvsroot/seq logout 
+[]# export CC=gcc3
+[]# export CXX=g++3
+[]# export QTDIR=/usr/lib/qt-2.3.2 
+[]# make -f Makefile.dist
+[]# ./configure
+[]# make
+[]# make install 
+
+3.3 Zone Specific Filter Files: 
+    Is your filters.conf file getting really big? Taking 20min to parse the zone you just got into? You can get BlueAdept's zone specific filter files to help you out with that.
+
+Code: 
+
+[]# cd /usr/local/share/showeq/ 
+[]# wget --passive ftp http://www27.brinkster.com/blueadept/filters/zonefilters.zip
+[]# unzip zonefilters.zip
+
+There is no need to recompile ShowEQ after you downloaded a new set of filters.
+
+
+
+--------------
+
+4. Usefull Information
+
+4.1 Getting Help
+    You can find help on the ShowEQ messageboards at:
+http://seq.sourceforge.net/
+but please, before going there, read the following pdf file about what is custom on a board like that. This will prevent you from being dissappointed and should clarify a few things you might encounter.
+http://www.smoothwall.org/download/pdf/docs/0.9.9/doc.faq.pdf
+
+4.2 Saving Space
+    Is your qt-2.3.2 directory pretty big? want to reclaim some space? delete the "tutorials" and "examples" directory! 
+
+Code: 
+
+[]# rm -Rfv /usr/lib/qt-2.3.2/examples/ 
+[]# rm -Rfv /usr/lib/qt-2.3.2/tutorials/
+
+
+--------------
+
+5. Version History of this document:
+
+Version 4.2.3
+
+- 1.9 Changing Configurations
+    Deleted the change configuration part. With the xml implementation there is no need to change configuration manually, everything should be able to be saved while ShowEQ runs using the inprogram Save option.
+- 5. Version History of this document
+    Changed current version to match latest CVS commit
+- 6. Credits
+    Added Credits Chapter
+
+Version 0.1.2
+
+Changes:
+
+- 1.9 Changing Configurations
+    Changed to reflect new configuration way: showeq.xml
+
+Version 0.1.1
+
+- added version number of document
+- 1.7 Downloading most recent libEQ.a file
+    Changed this part to direct to README.libEQ instead of 
+giving the complete commandline (command lines are found in 
+README.libEQ)
+- 1.8 Compiling ShowEQ
+    Made correction to installpath displayed in 
+commandline. It errantly showed /root/showeq/ as path 
+instead of /seq/showeq/ (as used in the rest of the 
+document)
+
+
+--------------
+
+6. Credits
+
 The INSTALL.newbies file is based on a post from "mmdeath" at 
 http://www.ethernalquest.org/ubb/Forum3/HTML/001044.html
 
 by cpphack
 Dec 17, 2000
 
--=-
- Updated for ShowEQ 3.x by Andon
- Sep 06, 2001
--=-
+Updated for ShowEQ 3.x by Andon
+Sep 06, 2001
 
-------------------
-Redhat 7.0 install
-------------------
-1. During the installation choose Gnome Workstation.
-[This selection installs a number of common packages, but does NOT install
-everything you need to compile and run ShowEQ.  Those will be covered below.]
+Reupdated for ShowEQ 4.x by Mr. Suspicious
+May 09, 2002
 
-2. Do NOT set Xwindows to control the logon.
-[Usually X doesn't work on the first try, so it's safer to use a text-based
-login until you are all set up and working.]
+Reference url's that contributed to this update:
+   
+http://seq.sourceforge.net/showthread.php?s=&threadid=400 by monkey679
+http://www.hackersquest.org/boards/viewtopic.php?t=274 also by monkey679
 
-3. After the installation is complete, ensure that you can PING 
-your Win9x, or Win2K workstation that you are running EQ on.
-[This will let you know that your IP address and netmask choices made
-during the install were correct.]
-
-Download these into /root for ease of following these instructions later.
-
-Also download the following ShowEQ files:
-   - showeq-(version).tar.gz or .bz2
-   - libEQ.a [No download sites available for this yet, check the 
-              SourceForge "help" forum for locations and current version.
-              http://sourceforge.net/forum/forum.php?forum_id=31633 ]
-
-4. Login as root, and stay in console mode (do not run Xwindows).
-
-5. This is a good time to read the real INSTALL file.  Check using
-"rpm -q -a | grep <rpm-name>" that you have installed everything that
-ShowEQ requires.  Some people recommend a reboot at this stage.
-
-6. Copy/FTP the showeq-?.?.?.tar.gz file to /root
-[You can get this from http://sourceforge.net/projects/seq or the latest
-CVS mirror copy (may be buggy) from http://www.krisp.com/snapshot.html.]
-
-7. Type the command: tar -jxvf showeq-?.?.?.tar.gz  or
-                     tar -jxvf showeq-?.?.?.tar.bz2
-
-[This is just like "unzip" in the Windows world, only UNIX uses tar/gzip
-or tar/bzip2 (newer/improved) instead.]
-
-8. Copy the libEQ.a file you downloaded into /usr/local/lib and
-verify that the "md5sum" command on this file displays the correct
-checksum value.  This may be obtained from 
-http://sourceforge.net/projects/seq in either the news area or the 
-help forum.  (Presently under the news heading "libEQ.a Download Sites".)
-
-If the MD5 checksum doesn't match, your browser probably mangled the file.  
-Don't use it until you get one whose MD5 checksum matches the correct value.
-At best it won't work, and at worst it could be a hacked version that will
-steal your account/password info.
-
-9. Type the command: cd showeq
-[This directory was created when the above compressed tar archive was
-uncompressed/extracted]
-
-10. Type the command: make -f Makefile.dist
-[You will use this every time you want to compile a new version, it takes care
-of automating everything for you.  It even backs up your old binary, so you
-have a working copy backed up]
-
-11. Assuming you had no errors, type: ./configure
-[This should run fine.  If it doesn't, check the requirements in the INSTALL
-file for any extra RPMs you may need to install.  Check for a possible warning
-message which indicates it couldn't find libEQ.a.]
-
-12. Type the command: make
-[Again, you should see no problems here.  If you do see problems, check the
-INSTALL file extra extra close to be sure you've installed the required RPMs
-before asking for help.]
-
-13. Type the command: make install
-[This copies the compiled program and maps to /usr/local/share/showeq]
-
-14. Type the command: cd /usr/local/share/showeq
-
-15. Type the command: cp /root/showeq/conf/showeq.conf.dist showeq.conf
-[This copies in the default ShowEQ configuration file.  You can change this
-around with a text editor later on if you want.]
-
-16. Type the command: cd /root
-[This is unnecessary but helps to avoid problems with X applications
-starting with a strange current directory.]
-
-17. startx
-- XWindows should start
-- If not, then you didn't configure it correctly. (This is NOT covered here)
-- Try the RedHat site for help if you can't get X to start
-
-18. When in XWindows, open a terminal window.
-[It's the screen-looking icon at the bottom next to Netscape.  
-Right-click -> New -> Terminal also brings up a window.]
-
-19. Type the command: cd /usr/local/bin
-
-20. Type the command: ./showeq -i eth0 192.168.0.2 
-- Replace 192.168.0.2 with the IP address of your Win9x/Win2K 
-  machine running EQ.
-- A ShowEQ window should start.

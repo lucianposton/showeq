@@ -5,7 +5,7 @@
  *  http://seq.sourceforge.net/
  */
 
-#include <qheader.h>
+#include <qlayout.h>
 
 #include "player.h"
 #include "skilllist.h"
@@ -15,7 +15,7 @@
 EQSkillList::EQSkillList(EQPlayer* player,
 			 QWidget* parent, 
 			 const char* name)
-  : QListView(parent, name), 
+  : SEQListView("SkillList", parent, name), 
   m_pPlayer(player)
 {
   int i;
@@ -27,57 +27,11 @@ EQSkillList::EQSkillList(EQPlayer* player,
   for (i = 0; i < MAX_KNOWN_LANGS; i++)
     m_languageList[i] = NULL;
 
-  QString section = "SkillList";
-#if QT_VERSION >= 210
-   setShowSortIndicator(TRUE);
-#endif
-   setRootIsDecorated(false);
-
-   // set the windows caption
-   QListView::setCaption(pSEQPrefs->getPrefString("Caption", section,
-						  "ShowEQ - Skills"));
-   
-   // restore font to the preference
-   restoreFont();
-
   // add the columns
   addColumn("Skill");
   addColumn("Value");
-  setAllColumnsShowFocus(true);
 
-  // get preferences
-
-  // column order
-  QString tStr = pSEQPrefs->getPrefString("ColumnOrder", section, "N/A");
-  if (tStr != "N/A") {
-    int i = 0;
-    while (!tStr.isEmpty()) {
-      int toIndex;
-      if (tStr.find(':') != -1) {
-        toIndex = tStr.left(tStr.find(':')).toInt();
-        tStr = tStr.right(tStr.length() - tStr.find(':') - 1);
-      } else {
-        toIndex = tStr.toInt();
-        tStr = "";
-      }
-      header()->moveSection(toIndex, i++);
-    }
-  }
-
-  // column sizes
-  if (pSEQPrefs->isPreference("SkillWidth", section))
-  {
-    i = pSEQPrefs->getPrefInt("SkillWidth", section, columnWidth(SKILLCOL_NAME));
-    setColumnWidthMode(SKILLCOL_NAME, QListView::Manual);
-    setColumnWidth(SKILLCOL_NAME, i);
-  }
-
-  if (pSEQPrefs->isPreference("ValueWidth", section))
-  {
-    i = pSEQPrefs->getPrefInt("ValueWidth", section, columnWidth(SKILLCOL_VALUE));
-    setColumnWidthMode(SKILLCOL_VALUE, QListView::Manual);
-    setColumnWidth(SKILLCOL_VALUE, i);
-  }
+  restoreColumns();
 
   // connect to player signals
    connect (m_pPlayer, SIGNAL(addSkill(int,int)), 
@@ -97,69 +51,14 @@ EQSkillList::EQSkillList(EQPlayer* player,
      addSkill(i, m_pPlayer->getSkill(i));
 
    // show the languages or not according to the user preference
-   m_showLanguages = pSEQPrefs->getPrefBool("ShowLanguages", section, true);
+   m_showLanguages = pSEQPrefs->getPrefBool("ShowLanguages", preferenceName(),
+					    true);
    if (m_showLanguages)
      addLanguages();
 }
 
 EQSkillList::~EQSkillList()
 {
-}
-
-void EQSkillList::savePrefs(void)
-{
-  QString section = "SkillList";
-  // only save the preferences if visible
-  if (isVisible())
-  {
-    // only save column widths if the user has set for it
-    if (pSEQPrefs->getPrefBool("SaveWidth", section, true))
-    {
-      pSEQPrefs->setPrefInt("SkillWidth", section, 
-			      columnWidth(0));
-      pSEQPrefs->setPrefInt("ValueWidth", section, 
-			      columnWidth(1));
-    }
-
-    char tempStr[256], tempStr2[256];
-    if (header()->count() > 0)
-      sprintf(tempStr, "%d", header()->mapToSection(0));
-    for(int i=1; i<header()->count(); i++) {
-      sprintf(tempStr2, ":%d", header()->mapToSection(i));
-      strcat(tempStr, tempStr2);
-    }
-    pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
-  }
-}
-
-void EQSkillList::setCaption(const QString& text)
-{
-  // set the caption
-  QListView::setCaption(text);
-
-  // set the preference
-  pSEQPrefs->setPrefString("Caption", "SkillList", caption());
-}
-
-void EQSkillList::setWindowFont(const QFont& font)
-{
-  // set the font preference
-  pSEQPrefs->setPrefFont("Font", "SkillList", font);
-
-  // restore the font to the preference
-  restoreFont();
-}
-
-void EQSkillList::restoreFont()
-{
-  QString section = "SkillList";
-  // set the applications default font
-  if (pSEQPrefs->isPreference("Font", section))
-  {
-    // use the font specified in the preferences
-    QFont font = pSEQPrefs->getPrefFont("Font", section);
-    setFont( font);
-  }
 }
 
 /* Called to add a skill to the skills list */
@@ -317,11 +216,9 @@ void EQSkillList::showLanguages(bool show)
 {
   m_showLanguages = show;
 
-  QString section = "SkillList";
-
   // only save language visibility if the user has set for it
-  if (pSEQPrefs->getPrefBool("SaveShowLanguages", section, true))
-    pSEQPrefs->setPrefBool("ShowLanguages", section, m_showLanguages);
+  if (pSEQPrefs->getPrefBool("SaveShowLanguages", preferenceName(), true))
+    pSEQPrefs->setPrefBool("ShowLanguages", preferenceName(), m_showLanguages);
 
   if (m_showLanguages)
     addLanguages();
@@ -329,3 +226,26 @@ void EQSkillList::showLanguages(bool show)
     deleteLanguages();
 }
 
+SkillListWindow::SkillListWindow(EQPlayer* player, 
+				 QWidget* parent, const char* name)
+  : SEQWindow("SkillList", "ShowEQ - Skills", parent, name)
+{
+  QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setAutoAdd(true);
+  
+  m_skillList = new EQSkillList(player, this, name);
+}
+
+SkillListWindow::~SkillListWindow()
+{
+  delete m_skillList;
+}
+
+void SkillListWindow::savePrefs(void)
+{
+  // save SEQWindow prefs
+  SEQWindow::savePrefs();
+
+  // make the listview save it's prefs
+  m_skillList->savePrefs();
+}

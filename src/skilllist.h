@@ -11,12 +11,14 @@
 #include <qwidget.h>
 #include <qlistview.h>
 
+#include "seqlistview.h"
+#include "seqwindow.h"
 #include "player.h"
 
 #define SKILLCOL_NAME 0
 #define SKILLCOL_VALUE 1
 
-class EQSkillList : public QListView
+class EQSkillList : public SEQListView
 {
    Q_OBJECT
 
@@ -40,10 +42,6 @@ class EQSkillList : public QListView
    void deleteLanguages(void);
    void addLanguages(void);
    void showLanguages(bool show);
-   void savePrefs(void);
-   virtual void setCaption(const QString&);
-   void setWindowFont(const QFont&);
-   void restoreFont();
 
  private:
    // the player this skill list is monitoring
@@ -57,6 +55,22 @@ class EQSkillList : public QListView
 
    // whether or not to show languages
    bool m_showLanguages;
+};
+
+class SkillListWindow : public SEQWindow
+{
+  Q_OBJECT
+
+ public:
+  SkillListWindow(EQPlayer* player, QWidget* parent = 0, const char* name = 0);
+  ~SkillListWindow();
+  EQSkillList* skillList() { return m_skillList; }
+
+ public slots:
+  virtual void savePrefs(void);
+
+ protected:
+  EQSkillList* m_skillList;
 };
 
 #endif // EQSKILLLIST_H

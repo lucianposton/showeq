@@ -18,6 +18,9 @@
 #include <qpopupmenu.h>
 #include <time.h>
 #include <sys/time.h>
+
+#include "seqwindow.h"
+#include "seqlistview.h"
 #include "spellshell.h"
 #include "everquest.h"
 
@@ -52,7 +55,7 @@ class SpellListItem : public QListViewItem
       QString m_category;
 };
 
-class SpellList : public QListView 
+class SpellList : public SEQListView 
 {
    Q_OBJECT
    public:
@@ -84,11 +87,6 @@ class SpellList : public QListView
       void rightButtonClicked(QListViewItem *, const QPoint&, int);
       void activated(int);
 
-      void savePrefs(void);
-      virtual void setCaption(const QString&);
-      void setWindowFont(const QFont&);
-      void restoreFont();
-
    private:
       void selectAndOpen(SpellListItem *);
       QValueList<QString> m_categoryList;
@@ -99,6 +97,22 @@ class SpellList : public QListView
       int mid_casterId, mid_casterName;
       int mid_targetId, mid_targetName;
       int mid_casttime, mid_duration;
+};
+
+class SpellListWindow : public SEQWindow
+{
+  Q_OBJECT
+
+ public:
+  SpellListWindow(QWidget* parent = 0, const char* name = 0);
+  ~SpellListWindow();
+  SpellList* spellList() { return m_spellList; }
+
+ public slots:
+  virtual void savePrefs(void);
+
+ protected:
+  SpellList* m_spellList;
 };
 
 #endif

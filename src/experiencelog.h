@@ -23,6 +23,8 @@
 # include <fcntl.h>
 # include <stdio.h>
 
+#include "seqwindow.h"
+#include "seqlistview.h"
 #include "packet.h"
 #include "group.h"
 
@@ -54,17 +56,19 @@ private:
 
 };
 
-class ExperienceWindow : public QWidget 
+class ExperienceWindow : public SEQWindow
 {
    Q_OBJECT
 
 public:
 
-   ExperienceWindow( EQPlayer* player, GroupMgr* g );
+   ExperienceWindow( EQPlayer* player, GroupMgr* g, 
+		     QWidget* parent = 0, const char* name = 0 );
    ~ExperienceWindow();
 
 public slots:
 
+   virtual void savePrefs(void);
    void updateAverage( );
    void addExpRecord( const QString &mob_name, int mob_level, long xp_gained,
       QString zone_name );
@@ -79,9 +83,6 @@ public slots:
    void viewZEMraw();
    void viewZEMpercent();
    void viewZEMcalculated();
-   virtual void setCaption(const QString&);
-   void setWindowFont(const QFont&);
-   void restoreFont();
 
 private:
 
@@ -95,7 +96,7 @@ private:
 
    QVBoxLayout *m_layout;
 
-   QListView *m_exp_listview;
+   SEQListView *m_exp_listview;
 
    QLabel *m_experience_rate_label;
    QLabel *m_total_received, *m_mob_count, *m_average_per_mob,

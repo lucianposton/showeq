@@ -24,6 +24,8 @@
 # include <fcntl.h>
 # include <stdio.h>
 
+#include "seqwindow.h"
+#include "seqlistview.h"
 #include "player.h"
 #include "group.h"
 
@@ -132,22 +134,21 @@ private:
 ////////////////////////////////////////////
 //  CombatWindow definition
 ////////////////////////////////////////////
-class CombatWindow : public QTabWidget
+class CombatWindow : public SEQWindow
 {
 	Q_OBJECT
 
 public:
 
-	CombatWindow(EQPlayer* player);
+	CombatWindow(EQPlayer* player,
+		     QWidget* parent = 0, const char* name = 0);
 	~CombatWindow();
 
 public slots:
 
+	virtual void savePrefs(void);
 	void addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage);
 	void resetDPS();
-	virtual void setCaption(const QString&);
-	void setWindowFont(const QFont&);
-	void restoreFont();
 
 private:
 
@@ -173,12 +174,13 @@ private:
 	QWidget* 	m_widget_defense;
 	QWidget*	m_widget_mob;
 
+	QTabWidget*     m_tab;
 	QVBoxLayout*	m_layout_offense;
 	QVBoxLayout*	m_layout_defense;
 	QVBoxLayout*	m_layout_mob;
 
-	QListView* 	m_listview_offense;
-	QListView* 	m_listview_mob;
+	SEQListView* 	m_listview_offense;
+	SEQListView* 	m_listview_mob;
 
 	QLabel* 	m_label_offense_totaldamage;
 	QLabel*		m_label_offense_percentspecial;

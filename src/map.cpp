@@ -1181,6 +1181,9 @@ Map::Map(MapMgr* mapMgr,
   tmpPrefString = "WalkPathShowSelect";
   m_walkpathshowselect = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
+  tmpPrefString = "ShowFiltered";
+  m_showFiltered = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
+
   tmpPrefString = "DrawSize";
   int val = pSEQPrefs->getPrefInt(tmpPrefString, prefString, 3);
   m_drawSize = val; 
@@ -1385,10 +1388,15 @@ void Map::savePrefs(void)
 
 MapMenu* Map::menu()
 {
+  // return the existing menu if it exists
   if (m_menu != NULL)
     return m_menu;
 
+  // create the menu
   m_menu = new MapMenu(this, this, "map menu");
+
+  // make sure to use the applications font
+  m_menu->setFont(QFont());
 
   return m_menu;
 }
@@ -1859,7 +1867,10 @@ Map::setShowFiltered(bool bView)
 {
   m_showFiltered = bView;
 
-  refreshMap();
+  pSEQPrefs->setPrefBool("ShowFiltered", preferenceName(), m_showFiltered);
+  
+  if(!m_cacheChanges)
+    refreshMap ();
 }
 
 void Map::setFrameRate(int val) 
@@ -2421,6 +2432,7 @@ void Map::dumpInfo(QTextStream& out)
   out << "ShowDoors: " << m_showDoors << endl;
   out << "ShowSpawns: " << m_showSpawns << endl;
   out << "ShowSpawnNames: " << m_showSpawnNames << endl;
+  out << "ShowFiltered: " << m_showFiltered << endl;
   out << "HighlightConsideredSpawns: " << m_highlightConsideredSpawns << endl;
   out << "ShowTooltips: " << m_showTooltips << endl;
   out << "WalkPathShowSelect: " << m_walkpathshowselect << endl;
@@ -4185,27 +4197,23 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 		   MapMgr* mapMgr,
 		   EQPlayer* player, 
 		   SpawnShell* spawnshell,
-		   const QString& preferenceName, 
+		   const QString& prefName, 
 		   const QString& defCaption,
 		   const char* mapName,
 		   QWidget* parent, const char* name)
-  : QVBox(parent, name),
-    m_mapPreferenceName(preferenceName)
+  : SEQWindow(prefName + "Frame", defCaption, parent, name),
+    m_mapPreferenceName(prefName)
 {
   m_filterMgr = filterMgr;
-
-  // don't wan't to auto delete the status widgets
-  m_statusWidgets.setAutoDelete(false);
-
+  
   QString prefString = MapFrame::preferenceName();
   QString tmpPrefString;
 
-  tmpPrefString = "Caption";
-  QVBox::setCaption(pSEQPrefs->getPrefString(tmpPrefString, 
-					     prefString, 
-					     (const char*)defCaption));
-
   QLabel* tmpLabel;
+
+  // setup the vertical box
+  m_vertical = new QVBoxLayout(this);
+  m_vertical->setAutoAdd(true);
 
   // setup the top control window
   m_topControlBox = new QHBox(this);
@@ -4221,7 +4229,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 				     m_runtimeFilterFlagMask);
 
   // Create map
-  m_map = new Map(mapMgr, player, spawnshell, preferenceName, 
+  m_map = new Map(mapMgr, player, spawnshell, m_mapPreferenceName, 
 		  m_runtimeFilterFlagMask, this, mapName);
 
   // setup bottom control window
@@ -4237,7 +4245,6 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_zoomBox = new QHBox(m_topControlBox);
   tmpLabel = new QLabel(m_zoomBox);
   tmpLabel->setText("Zoom:");
-  m_statusWidgets.append(tmpLabel);
   m_zoom = new QSpinBox(1, 32, 1, m_zoomBox);
   m_zoom->setWrapping(true);
   m_zoom->setSuffix("x");
@@ -4255,12 +4262,10 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_playerLocationBox = new QHBox(m_topControlBox);
   tmpLabel = new QLabel(m_playerLocationBox);
   tmpLabel->setText("You:");
-  m_statusWidgets.append(tmpLabel);
   m_playerLocation = new QLabel(m_playerLocationBox);
   m_playerLocation->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   m_playerLocation->setText("0      0      0      ");
   m_playerLocation->setMinimumWidth(90);
-  m_statusWidgets.append(m_playerLocation);
   tmpLabel->setBuddy(m_playerLocation);
   tmpPrefString = "ShowPlayerLocation";
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
@@ -4274,12 +4279,10 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_mouseLocationBox = new QHBox(m_topControlBox);
   tmpLabel = new QLabel(m_mouseLocationBox);
   tmpLabel->setText("Cursor:");
-  m_statusWidgets.append(tmpLabel);
   m_mouseLocation = new QLabel(m_mouseLocationBox);
   m_mouseLocation->setFrameStyle(QFrame::Panel | QFrame::Sunken);
   m_mouseLocation->setText("0      0      ");
   m_mouseLocation->setMinimumWidth(70);
-  m_statusWidgets.append(m_mouseLocation);
   tmpLabel->setBuddy(m_mouseLocationBox);
   tmpPrefString = "ShowMouseLocation";
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
@@ -4291,7 +4294,6 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_filterBox = new QHBox(m_topControlBox);
   tmpLabel = new QLabel(m_filterBox);
   tmpLabel->setText("Find:");
-  m_statusWidgets.append(tmpLabel);
   m_filter = new MapFilterLineEdit(m_filterBox);
   //  m_filter->setAlignment(Qt::AlignCenter);
   tmpLabel->setBuddy(m_filter);
@@ -4310,7 +4312,6 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_frameRateBox = new QHBox(m_bottomControlBox);
   tmpLabel = new QLabel(m_frameRateBox);
   tmpLabel->setText("Frame Rate:");
-  m_statusWidgets.append(tmpLabel);
   m_frameRate = new QSpinBox(1, 60, 1, m_frameRateBox);
   m_frameRate->setWrapping(true);
   m_frameRate->setSuffix(" fps");
@@ -4329,12 +4330,10 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_panBox = new QHBox(m_bottomControlBox);
   tmpLabel = new QLabel(m_panBox);
   tmpLabel->setText("Pan X:");
-  m_statusWidgets.append(tmpLabel);
   m_panX = new QSpinBox(-8192, 8192, 16, m_panBox);
   m_panX->setValue(m_map->panOffsetX());
   tmpLabel = new QLabel(m_panBox);
   tmpLabel->setText("Y:");
-  m_statusWidgets.append(tmpLabel);
   m_panY = new QSpinBox(-8192, 8192, 16, m_panBox);
   m_panY->setValue(m_map->panOffsetY());
   tmpPrefString = "ShowPanControls";
@@ -4352,12 +4351,10 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_depthControlBox = new QHBox(m_bottomControlBox);
   tmpLabel = new QLabel(m_depthControlBox);
   tmpLabel->setText("Head:");
-  m_statusWidgets.append(tmpLabel);
   m_head = new QSpinBox(5, 3000, 10, m_depthControlBox);
   m_head->setValue(m_map->headRoom());
   tmpLabel = new QLabel(m_depthControlBox);
   tmpLabel->setText("Floor:");
-  m_statusWidgets.append(tmpLabel);
   m_floor = new QSpinBox(5, 3000, 10, m_depthControlBox);
   m_floor->setValue(m_map->floorRoom());
   tmpPrefString = "ShowDepthFilterControls";
@@ -4387,7 +4384,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 
   mapMenu->insertItem("Status Font...",
 		      this, 
-		      SLOT(set_statusFont(int)));
+		      SLOT(set_font(int)));
 
   // insert a seperator to seperate main controls from sub-menus
   mapMenu->insertSeparator(-1);
@@ -4423,40 +4420,10 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   // setup signal to initialize menu items when the map is about to be displayeed
   connect(mapMenu, SIGNAL(aboutToShow()),
 	  this, SLOT(init_Menu()));
-
-  // set the status widget fonts
-  restoreFont();
 }
 
 MapFrame::~MapFrame()
 {
-}
-
-void MapFrame::restoreFont()
-{
-  // setup the default status font
-  QFont def;
-  def.setPointSize(8);
-
-  // get the preferred status font
-  QFont statusFont = pSEQPrefs->getPrefFont("StatusFont",
-					    preferenceName(),
-					    def);
-  QWidget* widget;
-  // iterate over the status widgets and set their font
-  for (widget = m_statusWidgets.first(); 
-       widget != NULL;
-       widget = m_statusWidgets.next())
-    widget->setFont(statusFont);
-}
-
-void MapFrame::setCaption(const QString& text)
-{
-  // set the caption
-  QVBox::setCaption(text);
-
-  // set the preference
-  pSEQPrefs->setPrefString("Caption", preferenceName(), caption());
 }
 
 void MapFrame::filterConfirmed()
@@ -4544,39 +4511,11 @@ void MapFrame::setPlayer(int16_t x, int16_t y, int16_t z,
 
 void MapFrame::savePrefs(void)
 {
-  QString prefString = preferenceName();
-  QString tmpPrefString;
-
-  tmpPrefString = "SavePosition";
-  if (pSEQPrefs->getPrefBool(tmpPrefString, "Interface", true))
-  {
-    tmpPrefString = "WindowSize";
-    pSEQPrefs->setPrefSize(tmpPrefString, prefString, size());
-    tmpPrefString = "WindowPos";
-    pSEQPrefs->setPrefPoint(tmpPrefString, prefString, pos());
-  }
+  SEQWindow::savePrefs();
 
   // make the map belonging to this frame save it's preferences
   if (m_map)
     m_map->savePrefs();
-}
-
-void MapFrame::restoreSize()
-{
-  QString prefString = preferenceName();
-  QSize s = pSEQPrefs->getPrefSize("WindowSize", prefString, size());
-
-  resize(s);
-}
-
-void MapFrame::restorePosition()
-{
-  QString prefString = preferenceName();
-
-  QPoint p = pSEQPrefs->getPrefPoint("WindowPos", prefString, pos());
-
-  // Move window to new position
-  move(p);
 }
 
 void MapFrame::dumpInfo(QTextStream& out)
@@ -4663,9 +4602,9 @@ void MapFrame::toggle_bottom_controls(int id)
   }
 }
 
-void MapFrame::set_statusFont(int id)
+void MapFrame::set_font(int id)
 {
-  QString name = "ShowEQ - Status Font";
+  QString name = caption() + " Font";
   bool ok = false;
 
   // setup a default new status font
@@ -4674,22 +4613,12 @@ void MapFrame::set_statusFont(int id)
 
   // get new status font
   newFont = QFontDialog::getFont(&ok, 
-				 pSEQPrefs->getPrefFont("StatusFont",
-							preferenceName(),
-							newFont),
+				 font(),
 				 this, name);
 
   // if the user clicked ok and selected a valid font, set it
   if (ok)
-  {
-    // set the preference for future sessions
-    pSEQPrefs->setPrefFont("StatusFont", preferenceName(), 
-			   newFont);
-
-    // make sure to reset the status font since the previous call may have 
-    // changed it
-    restoreFont();
-  }
+    setWindowFont(newFont);
 }
 
 void MapFrame::toggle_zoom(int id)

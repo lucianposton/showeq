@@ -6,20 +6,16 @@
  */
 
 #include <qfont.h>
+#include <qlayout.h>
 
 #include "main.h"
 #include "compassframe.h"
 
 CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
-  : QVBox(parent, name)
+  : SEQWindow("Compass", "ShowEQ - Compass", parent, name)
 {
-  QString section = "Compass";
-
-  QVBox::setCaption(pSEQPrefs->getPrefString("Caption", section,
-					     "ShowEQ - Compass"));
-
-  restoreFont();
-
+  QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setAutoAdd(true);
   m_compass = new Compass (this, "compass");
   QHBox* coordsbox = new QHBox(this);
   m_compass->setFixedWidth(120);
@@ -78,36 +74,6 @@ CompassFrame::CompassFrame(EQPlayer* player, QWidget* parent, const char* name)
 
 CompassFrame::~CompassFrame()
 {
-}
-
-void CompassFrame::setCaption(const QString& text)
-{
-  // set the caption
-  QVBox::setCaption(text);
-
-  // set the preference
-  pSEQPrefs->setPrefString("Caption", "Compass", caption());
-}
-
-void CompassFrame::setWindowFont(const QFont& font)
-{
-  // set the font preference
-  pSEQPrefs->setPrefFont("Font", "Compass", font);
-
-  // restore the font to the preference
-  restoreFont();
-}
-
-void CompassFrame::restoreFont()
-{
-  QString section = "Compass";
-  // set the applications default font
-  if (pSEQPrefs->isPreference("Font", section))
-  {
-    // use the font specified in the preferences
-    QFont font = pSEQPrefs->getPrefFont("Font", section);
-    setFont( font);
-  }
 }
 
 void CompassFrame::selectSpawn(const Item* item)

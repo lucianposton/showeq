@@ -439,21 +439,14 @@ inline bool operator==(const EQPacketFormat& p1,
 // arent' appropriate for the packet cache for multiple reasons:
 // 1) They're iterators are based on key hash order and not key value
 // ordering, making certain algorithms more difficult and potentially 
-// time consuming.  2) The nature of the data is such that the data 
-// will have a tightly clustered set of keys, which is the worst case 
-// performance scenario for hash based collections.  Causing most of the
-// keys to end up in a small number of buckets.  This results in 
-// near linear time access as opposed to the constant average time that is 
-// typical for them on less clustered data sets. 3) To overcome problem
-// 2 would require a custom hashing function, which could be calculated, 
-// but is more work.  4) insertions into an STL map can be optimized 
+// time consuming. 2) insertions into an STL map can be optimized 
 // with the packet data's behavior using an iterator as a hint for 
 // insertion location to typically yield amortized constant time behavior.
-// 5) Another optimization possible with this data set using a mpa 
+// 3) Another optimization possible with this data set using a map 
 // is that after a matchintg arq is found in the map,  finding/checking 
 // for the next expected arq in the map only requires moving the iterator 
 // forward (using operator++()) once and checking if the next key in the list
-// is the expected arq.  This results in the check for follers to only 
+// is the expected arq.  This results in the check for followers to only 
 // taking amortized constant time (as opposed to the O(log N) of map::find()
 // or constant average time of the hash find methods.
 typedef std::map<uint16_t, EQPacketFormat* > EQPacketMap;

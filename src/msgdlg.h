@@ -34,6 +34,8 @@
 #include <qpopupmenu.h>
 #include <qlist.h>
 
+#include "seqwindow.h"
+
 class MyButton;  // button for use in MsgDialog
 class CButDlg;   // dialog for editing a button
 class MyEdit;
@@ -66,8 +68,7 @@ typedef QList<MyButton> MyButtonList;
 // If you wish to construct and have a list of strings already that you wish 
 // to send to the dialog, you can use the constructor to send a stringlist
 //
-//class MsgDialog: public QDialog 
-class MsgDialog : public QWidget
+class MsgDialog : public SEQWindow
 {
    Q_OBJECT
 public:
@@ -89,7 +90,7 @@ public slots:
    void showControls(bool);
    void showMsgType(bool);
    void load();
-   void savePrefs();
+   virtual void savePrefs();
 
 private slots:
    void editButton(MyButton *);         // popup button edit dialog

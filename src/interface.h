@@ -252,10 +252,10 @@ class EQInterface:public QMainWindow
 
  private:
    MapMgr* m_mapMgr;
-   CSpawnList* m_spawnList;
-   SpellList* m_spellList;
-   EQSkillList* m_skillList;
-   EQStatList* m_statList;
+   SpawnListWindow* m_spawnList;
+   SpellListWindow* m_spellList;
+   SkillListWindow* m_skillList;
+   StatListWindow* m_statList;
    EQPacket*  m_packet;
    FilterMgr* m_filterMgr;
    CategoryMgr* m_categoryMgr;

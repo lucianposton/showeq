@@ -14,18 +14,11 @@
 #include "netdiag.h"
 
 NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
-  : QFrame(parent, name),
+  : SEQWindow("NetDiag", "ShowEQ - Network Diagnostics", parent, name),
     m_packet(packet),
     m_playbackSpeed(NULL)
 {
   // get preferences
-  QString section = "NetDiag";
-
-  // set caption
-  QFrame::setCaption(pSEQPrefs->getPrefString("Caption", section,
-					      "ShowEQ - Network Diagnostics"));
-  restoreFont();
-
   QGridLayout* tmpGrid = new QGridLayout(this, 6, 9);
   tmpGrid->addColSpacing(3, 5);
   tmpGrid->addColSpacing(6, 5);
@@ -139,9 +132,9 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 
     QAccel* accel = new QAccel(this);
     int key;
-    key = pSEQPrefs->getPrefKey("IncPlaybackSpeedKey", section, "Ctrl+X");
+    key = pSEQPrefs->getPrefKey("IncPlaybackSpeedKey", preferenceName(), "Ctrl+X");
     accel->connectItem(accel->insertItem(key), m_packet, SLOT(incPlayback()));
-    key = pSEQPrefs->getPrefKey("IncPlaybackSpeedKey", section, "Ctrl+Z");
+    key = pSEQPrefs->getPrefKey("IncPlaybackSpeedKey", preferenceName(), "Ctrl+Z");
     accel->connectItem(accel->insertItem(key), m_packet, SLOT(decPlayback()));
   }
   
@@ -178,36 +171,6 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 
 NetDiag::~NetDiag()
 {
-}
-
-void NetDiag::setCaption(const QString& text)
-{
-  // set the caption
-  QFrame::setCaption(text);
-
-  // set the preference
-  pSEQPrefs->setPrefString("Caption", "NetDiag", caption());
-}
-
-void NetDiag::setWindowFont(const QFont& font)
-{
-  // set the font preference
-  pSEQPrefs->setPrefFont("Font", "NetDiag", font);
-
-  // restore the font to the preference
-  restoreFont();
-}
-
-void NetDiag::restoreFont()
-{
-  QString section = "NetDiag";
-  // set the applications default font
-  if (pSEQPrefs->isPreference("Font", section))
-  {
-    // use the font specified in the preferences
-    QFont font = pSEQPrefs->getPrefFont("Font", section);
-    setFont( font);
-  }
 }
 
 void NetDiag::seqReceive(int seq)

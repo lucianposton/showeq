@@ -5,7 +5,7 @@
  *  http://seq.sourceforge.net/
  */
 
-#include <qheader.h>
+#include <qlayout.h>
 
 #include "player.h"
 #include "statlist.h"
@@ -21,8 +21,8 @@ static const char* statNames[] =
 EQStatList::EQStatList(EQPlayer* player,
                        QWidget* parent, 
                        const char* name)
-                      : QListView(parent, name),
-                        m_pPlayer(player)
+  : SEQListView("StatList", parent, name),
+    m_pPlayer(player)
 {
    int i;
 
@@ -31,78 +31,21 @@ EQStatList::EQStatList(EQPlayer* player,
    for (i = 0; i < LIST_MAXLIST; i++)
      m_statList[i] = NULL;
 
-   QString section = "StatList";
-#if QT_VERSION >= 210
-   setShowSortIndicator(TRUE);
-#endif
-   setRootIsDecorated(false);
-
-   // set the windows caption
-   QListView::setCaption(pSEQPrefs->getPrefString("Caption", section, 
-						  "ShowEQ - Stats"));
-
-   // restore the windows font
-   restoreFont();
-
    // add columns
    addColumn("Stat");
-   addColumn("Val");
+   addColumn("Val", "Value");
    addColumn("Max");
-   addColumn("%");
-   setAllColumnsShowFocus(true);
+   addColumn("%", "Percent");
+
+   restoreColumns();
 
    QString statPrefName;
    for (int nloop = 0; nloop < LIST_MAXLIST; nloop++)
    {
      statPrefName.sprintf("show%s", statNames[nloop]);
-     m_showStat[nloop] = pSEQPrefs->getPrefBool(statPrefName, section, false);
+     m_showStat[nloop] = pSEQPrefs->getPrefBool(statPrefName, 
+						preferenceName(), false);
      updateStat(nloop);
-   }
-
-   // Restore column order
-   QString tStr = pSEQPrefs->getPrefString("ColumnOrder", section, "N/A");
-   if (tStr != "N/A") {
-      int i = 0;
-      while (!tStr.isEmpty()) {
-         int toIndex;
-         if (tStr.find(':') != -1) {
-            toIndex = tStr.left(tStr.find(':')).toInt();
-            tStr = tStr.right(tStr.length() - tStr.find(':') - 1);
-         } else {
-            toIndex = tStr.toInt();
-            tStr = "";
-         }
-         header()->moveSection(toIndex, i++);
-      }
-   }
-   // StatList column sizes
-   if (pSEQPrefs->isPreference("StatWidth", section))
-   {
-     i = pSEQPrefs->getPrefInt("StatWidth", section, 
-			       columnWidth(STATCOL_NAME));
-     setColumnWidthMode(STATCOL_NAME, QListView::Manual);
-     setColumnWidth(STATCOL_NAME, i);
-   }
-   if (pSEQPrefs->isPreference("ValueWidth", section))
-   {
-     i = pSEQPrefs->getPrefInt("ValueWidth", section, 
-			       columnWidth(STATCOL_VALUE));
-     setColumnWidthMode(STATCOL_VALUE, QListView::Manual);
-     setColumnWidth(STATCOL_VALUE, i);
-   }
-   if (pSEQPrefs->isPreference("MaxWidth", section))
-   {
-     i = pSEQPrefs->getPrefInt("MaxWidth", section, 
-			       columnWidth(STATCOL_MAXVALUE));
-     setColumnWidthMode(STATCOL_MAXVALUE, QListView::Manual);
-     setColumnWidth(STATCOL_MAXVALUE, i);
-   }
-   if (pSEQPrefs->isPreference("PercentWidth", section))
-   {
-     i = pSEQPrefs->getPrefInt("PercentWidth", section, 
-			       columnWidth(STATCOL_PERCENT));
-     setColumnWidthMode(STATCOL_PERCENT, QListView::Manual);
-     setColumnWidth(STATCOL_PERCENT, i);
    }
 
    connect (m_pPlayer, SIGNAL(statChanged(int,int,int)), 
@@ -117,69 +60,13 @@ EQStatList::EQStatList(EQPlayer* player,
 	    this, SLOT(manaChanged(uint32_t,uint32_t)));
    connect (m_pPlayer, SIGNAL(hpChanged(uint16_t, uint16_t)), 
 	    this, SLOT(hpChanged(uint16_t, uint16_t)));
+
+   // restore the columns
+   restoreColumns();
 }
 
 EQStatList::~EQStatList()
 {
-}
-
-void EQStatList::savePrefs(void)
-{
-  QString section = "StatList";
-  // only save the preferences if visible
-  if (isVisible())
-  {
-    if (pSEQPrefs->getPrefBool("SaveWidth", section, true))
-    {
-      pSEQPrefs->setPrefInt("StatWidth", section, 
-			      columnWidth(STATCOL_NAME));
-      pSEQPrefs->setPrefInt("ValueWidth", section, 
-			      columnWidth(STATCOL_VALUE));
-      pSEQPrefs->setPrefInt("MaxWidth", section, 
-			      columnWidth(STATCOL_MAXVALUE));
-      pSEQPrefs->setPrefInt("PercentWidth", section, 
-			      columnWidth(STATCOL_PERCENT));
-    }
-    // Save column order
-    char tempStr[256], tempStr2[256];
-    if (header()->count() > 0)
-      sprintf(tempStr, "%d", header()->mapToSection(0));
-    for(int i=1; i<header()->count(); i++) {
-      sprintf(tempStr2, ":%d", header()->mapToSection(i));
-      strcat(tempStr, tempStr2);
-    }
-    pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
-  }
-}
-
-void EQStatList::setCaption(const QString& text)
-{
-  // set the caption
-  QListView::setCaption(text);
-
-  // set the preference
-  pSEQPrefs->setPrefString("Caption", "StatList", caption());
-}
-
-void EQStatList::setWindowFont(const QFont& font)
-{
-  // set the font preference
-  pSEQPrefs->setPrefFont("Font", "StatList", font);
-
-  // restore the font to the preference
-  restoreFont();
-}
-
-void EQStatList::restoreFont()
-{
-  QString section = "StatList";
-  // set the applications default font
-  if (pSEQPrefs->isPreference("Font", section))
-  {
-    // use the font specified in the preferences
-    QFont font = pSEQPrefs->getPrefFont("Font", section);
-    setFont( font);
-  }
 }
 
 void EQStatList::expChanged  (int val, int min, int max) 
@@ -449,4 +336,29 @@ void EQStatList::updateStat(uint8_t stat)
       m_statList[stat] = NULL;
     }
   }
+}
+
+
+StatListWindow::StatListWindow(EQPlayer* player, 
+				 QWidget* parent, const char* name)
+  : SEQWindow("StatList", "ShowEQ - Stats", parent, name)
+{
+  QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setAutoAdd(true);
+  
+  m_statList = new EQStatList(player, this, name);
+}
+
+StatListWindow::~StatListWindow()
+{
+  delete m_statList;
+}
+
+void StatListWindow::savePrefs(void)
+{
+  // save SEQWindow prefs
+  SEQWindow::savePrefs();
+
+  // make the listview save it's prefs
+  m_statList->savePrefs();
 }

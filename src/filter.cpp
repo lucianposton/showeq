@@ -310,7 +310,12 @@ Filter::loadFilters(void)
      {
        printf (">> No such file: '%s', creating new one...\n", 
 	       (const char*)m_file);
-       fputs ("[Spawn]\n", fopen ((const char*)m_file, "a"));
+       in = fopen ((const char*)m_file, "a");
+       if (in != 0)
+       {
+	 fputs ("[Spawn]\n", in);
+	 fclose(in);
+       }
      }
      else
      {

@@ -460,8 +460,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
        toggle_view_ExpWindow();
    if (pSEQPrefs->getPrefBool("ShowCombatWindow", section, false))
        toggle_view_CombatWindow();
-   if (pSEQPrefs->getPrefBool("ShowSpellList", section, false))
-       toggle_view_SpellList();
 
   connect(pViewMenu, SIGNAL(aboutToShow()),
 	  this, SLOT(init_view_menu()));
@@ -1217,6 +1215,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // connect ExperienceWindow slots to EQInterface signals
     connect(this, SIGNAL(restoreFonts(void)),
 	    m_expWindow, SLOT(restoreFont(void)));
+    connect(this, SIGNAL(saveAllPrefs(void)),
+	    m_expWindow, SLOT(savePrefs(void)));
+    
 
    // connect CombatWindow slots to the signals
    connect (this, SIGNAL(combatSignal(int, int, int, int, int)),
@@ -1225,6 +1226,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    	    m_combatWindow, SLOT(resetDPS()));
    connect(this, SIGNAL(restoreFonts(void)),
 	   m_combatWindow, SLOT(restoreFont(void)));
+   connect(this, SIGNAL(saveAllPrefs(void)),
+	   m_combatWindow, SLOT(savePrefs(void)));
 
    // connect PktLogger to EQPacket signals
    connect (m_packet, SIGNAL(zoneServerInfo(const uint8_t*, uint32_t, uint8_t)),
@@ -1389,16 +1392,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
        connect (pMsgDlg, SIGNAL(toggle_view_ChannelMsgs()),
 		this, SLOT(toggle_view_ChannelMsgs()));
 
-       // set Geometry
-       QSize s = pSEQPrefs->getPrefSize("WindowSize", msgSection, 
-					size());
-       pMsgDlg->resize(s);
+       pMsgDlg->restoreSize();
        if (pSEQPrefs->getPrefBool("UseWindowPos", section, true))
-       {
-	 QPoint p = pSEQPrefs->getPrefPoint("WindowPos", msgSection, 
-					    pos());
-	 pMsgDlg->move(p);
-       }
+	 pMsgDlg->restorePosition();
      } // end if dialog config section found
      else 
        break;
@@ -1559,13 +1555,13 @@ void EQInterface::toggle_view_StatWin( int id )
    {
        m_statWinMenu->setItemChecked(id, FALSE);
        if (m_statList != NULL)
-	 m_statList->enableStat(statnum, false);
+	 m_statList->statList()->enableStat(statnum, false);
    }
    else
    {
        m_statWinMenu->setItemChecked(id, TRUE);
        if (m_statList != NULL)
-	 m_statList->enableStat(statnum, true);
+	 m_statList->statList()->enableStat(statnum, true);
    }
 }
 
@@ -1581,7 +1577,7 @@ void EQInterface::toggle_view_SkillWin( int id )
 
     if ((id == m_id_view_PlayerSkills_Languages) &&
 	(m_skillList != NULL))
-      m_skillList->showLanguages(false);
+      m_skillList->skillList()->showLanguages(false);
    }
    else
    {
@@ -1589,7 +1585,7 @@ void EQInterface::toggle_view_SkillWin( int id )
 
     if ((id == m_id_view_PlayerSkills_Languages) &&
 	(m_skillList != NULL))
-      m_skillList->showLanguages(true);
+      m_skillList->skillList()->showLanguages(true);
    }
 }
 
@@ -1604,14 +1600,14 @@ void EQInterface::toggle_view_SpawnListCol( int id )
     m_spawnListMenu->setItemChecked(id, FALSE);
     
     if (m_spawnList != NULL)
-      m_spawnList->setColumnVisible(colnum, false);
+      m_spawnList->spawnList()->setColumnVisible(colnum, false);
   }
   else
   {
     m_spawnListMenu->setItemChecked(id, TRUE);
     
     if (m_spawnList != NULL)
-      m_spawnList->setColumnVisible(colnum, true);
+      m_spawnList->spawnList()->setColumnVisible(colnum, true);
    }
 }
 
@@ -1830,104 +1826,78 @@ void EQInterface::set_interface_WindowCaption( int id )
 void EQInterface::set_interface_WindowFont( int id )
 {
   int winnum;
-  QString window;
 
   // get the window number parameter
   winnum = menuBar()->itemParameter(id);
 
   bool ok = false;
   QFont newFont;
+  SEQWindow* window = NULL;
+  QString title;
+  
   //
   // NOTE: Yeah, this sucks for now, but until the architecture gets cleaned
   // up it will have to do
   switch(winnum)
   {
   case 0: // Spawn List
-    // get a new font
-    newFont = QFontDialog::getFont(&ok, m_spawnList->font(), 
-				   this, "ShowEQ Spawn List Font");
+    title = "Spawn List";
     
-    
-    // if the user entered a font and clicked ok, set the windows font
-    if (ok)
-      m_spawnList->setWindowFont(newFont);
+    window = m_spawnList;
     break;
   case 1: // Player Stats
-    // get a new font
-    newFont = QFontDialog::getFont(&ok, m_statList->font(), 
-				   this, "ShowEQ Player Stats Font");
+    title = "Player Stats";
     
-    
-    // if the user entered a font and clicked ok, set the windows font
-    if (ok)
-      m_statList->setWindowFont(newFont);
+    window = m_statList;
     break;
   case 2: // Player Skills
-    // get a new font
-    newFont = QFontDialog::getFont(&ok, m_skillList->font(), 
-				   this, "ShowEQ Player Skills Font");
-    
-    
-    // if the user entered a font and clicked ok, set the windows font
-    if (ok)
-      m_skillList->setWindowFont(newFont);
+    title = "Player Skills";
+
+    window = m_skillList;
     break;
   case 3: // Spell List
-    // get a new font
-    newFont = QFontDialog::getFont(&ok, m_spellList->font(), 
-				   this, "ShowEQ Spell List Font");
+    title = "Spell List";
     
-    
-    // if the user entered a font and clicked ok, set the windows font
-    if (ok)
-      m_spellList->setWindowFont(newFont);
+    window = m_spellList;
     break;
   case 4: // Compass
-    // get a new font
-    newFont = QFontDialog::getFont(&ok, m_compass->font(), 
-				   this, "ShowEQ Compass Font");
+    title = "Compass";
     
-    
-    // if the user entered a font and clicked ok, set the windows font
-    if (ok)
-      m_compass->setWindowFont(newFont);
+    window = m_compass;
     break;
   case 5: // Interface
     // window = "Main Window";
     break;
   case 6: // Experience Window
-    // get a new font
-    newFont = QFontDialog::getFont(&ok, m_expWindow->font(), 
-				   this, "ShowEQ Experience Window Font");
+    title = "Experience Window";
     
-    
-    // if the user entered a font and clicked ok, set the windows font
-    if (ok)
-      m_expWindow->setWindowFont(newFont);
+    window = m_expWindow;
     break;
   case 7: // Combat Window
-    // get a new font
-    newFont = QFontDialog::getFont(&ok, m_combatWindow->font(), 
-				   this, "ShowEQ Combat Window Font");
-    
-    
-    // if the user entered a font and clicked ok, set the windows font
-    if (ok)
-      m_combatWindow->setWindowFont(newFont);
+    title = "Combat Window";
+
+    window = m_combatWindow;
     break;
   case 8: // Network Diagnostics
-    // get a new font
-    newFont = QFontDialog::getFont(&ok, m_netDiag->font(), 
-				   this, "ShowEQ Network Diagnostics Font");
-    
-    
-    // if the user entered a font and clicked ok, set the windows font
-    if (ok)
-      m_netDiag->setWindowFont(newFont);
+    title = "Network Diagnostics";
+
+    window = m_netDiag;
     break;
   default:
     break;
     };
+
+  if (window != NULL)
+  {
+    // get a new font
+    newFont = QFontDialog::getFont(&ok, window->font(), 
+				   this, "ShowEQ " + title + " Font");
+    
+    
+    // if the user entered a font and clicked ok, set the windows font
+    if (ok)
+      window->setWindowFont(newFont);
+  }
 }
 
 void EQInterface::set_interface_Font(int id)
@@ -2113,6 +2083,7 @@ EQInterface::toggle_interface_NoBank (int id)
 void
 EQInterface::savePrefs(void)
 {
+  int i;
    printf("==> EQInterface::savePrefs()\n");
    if( isVisible() ) {
      QString section;
@@ -2121,62 +2092,6 @@ EQInterface::savePrefs(void)
 
       // send savePrefs signal out
       emit saveAllPrefs();
-
-      // save experience window location
-      if(m_expWindow) 
-      {
-	section = "Experience";
-	if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
-	{
-	  pSEQPrefs->setPrefPoint("WindowPos", section, m_expWindow->pos());
-	  pSEQPrefs->setPrefSize("WindowSize", section, m_expWindow->size());
-	}
-      }
-
-      // save combat window location
-      if (m_combatWindow) 
-      {
-	section = "Combat";
-	if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
-	{
-	  pSEQPrefs->setPrefPoint("WindowPos", section, 
-				m_combatWindow->pos());
-	  pSEQPrefs->setPrefSize("WindowSize", section, 
-				 m_combatWindow->size());
-	}
-      }
-		
-      if (m_spawnList) 
-      {
-	section = "SpawnList";
-	if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
-	{
-	  pSEQPrefs->setPrefPoint("WindowPos", section, 
-				m_spawnList->pos());
-	  pSEQPrefs->setPrefSize("WindowSize", section, 
-				 m_spawnList->size());
-	}
-      }
-
-      // save message dialog geometries
-      MsgDialog* diag;
-      int i = 1;
-
-      QString msgSection;
-      for (diag=m_msgDialogList.first(); 
-	   diag != 0; 
-	   diag=m_msgDialogList.next() )
-      {
-	msgSection.sprintf("MessageBox%d", i++);
-
-	if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
-	{
-	  pSEQPrefs->setPrefPoint("WindowPos", msgSection, 
-				  diag->pos());
-	  pSEQPrefs->setPrefSize("WindowSize", msgSection, 
-				 diag->size());
-	}
-      }
 
       section = "Interface";
       if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
@@ -2571,7 +2486,7 @@ EQInterface::toggle_opt_Fast (void)
   showeq_params->fast_machine = !(showeq_params->fast_machine);
   menuBar()->setItemChecked (m_id_opt_Fast, showeq_params->fast_machine);
 
-  pSEQPrefs->setPrefBool("FastMachine", "Interface", showeq_params->fast_machine);
+  pSEQPrefs->setPrefBool("FastMachine", "Misc", showeq_params->fast_machine);
 }
 
 void
@@ -2639,20 +2554,11 @@ void EQInterface::toggle_view_ExpWindow (void)
     {
        menuBar()->setItemChecked (m_id_view_ExpWindow,1);
        m_expWindow->show();
-       // set exp window location
-       QString section = "Experience";
-       QSize s = pSEQPrefs->getPrefSize("WindowSize", section,
-					m_expWindow->size());
-
-       m_expWindow->resize(s);
+       m_expWindow->restoreSize();
 
        // move window to new position
        if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
-       {
-	 QPoint p = pSEQPrefs->getPrefPoint("WindowPos", section, 
-					    m_expWindow->pos());
-	 m_expWindow->move(p);
-       }
+	 m_expWindow->restorePosition();
     }
     else
     {
@@ -2667,22 +2573,11 @@ void EQInterface::toggle_view_CombatWindow (void)
     {
        menuBar()->setItemChecked (m_id_view_CombatWindow, 1);
        m_combatWindow->show();
-       QString section = "Combat";
-
-       // set combat window location
-       QSize s = pSEQPrefs->getPrefSize("WindowSize", section,
-					m_combatWindow->size());
-
-       m_combatWindow->resize(s);
+       m_combatWindow->restoreSize();
 
        // move window to new position
        if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
-       {
-	 QPoint p = pSEQPrefs->getPrefPoint("WindowPos", section,
-					    m_combatWindow->pos());
-
-	 m_combatWindow->move(p);
-       }
+	 m_combatWindow->restorePosition();
     }
     else
     {
@@ -2734,27 +2629,7 @@ void EQInterface::toggle_view_SpellList(void)
   menuBar()->setItemChecked (m_id_view_SpellList, !wasVisible);
   
   if (!wasVisible)
-  {
     showSpellList();
-
-    QString section = "SpellList";
-    QSize s = pSEQPrefs->getPrefSize("WindowSize", section, 
-				     m_spellList->size());
-    m_spellList->resize(s);
-    
-    // only do this move stuff iff the spell list isn't docked
-    // and the user set the option to do so.
-    if (!m_isSpellListDocked && 
-	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true)) 
-    {
-      // Set window location
-      QPoint p = pSEQPrefs->getPrefPoint("WindowPos", section, 
-					 m_spellList->pos());
-      
-      // Move window to new position
-      m_spellList->move(p);
-    }
-  }
   else
   {
     // save it's preferences
@@ -2973,7 +2848,7 @@ void EQInterface::ReloadMonitoredOpCodeList (void)
 void EQInterface::resetMaxMana(void)
 {
   if (m_statList != NULL)
-    m_statList->resetMaxMana();
+    m_statList->statList()->resetMaxMana();
 }
 
 void
@@ -4275,19 +4150,19 @@ void EQInterface::reloadCategories(void)
 void EQInterface::rebuildSpawnList()
 {
   if (m_spawnList)
-    m_spawnList->rebuildSpawnList();
+    m_spawnList->spawnList()->rebuildSpawnList();
 }
 
 void EQInterface::selectNext(void)
 {
   if (m_spawnList)
-    m_spawnList->selectNext();
+    m_spawnList->spawnList()->selectNext();
 }
 
 void EQInterface::selectPrev(void)
 {
   if (m_spawnList)
-    m_spawnList->selectPrev();
+    m_spawnList->spawnList()->selectPrev();
 }
 
 void EQInterface::toggle_net_real_time_thread(int id)
@@ -4449,18 +4324,21 @@ void EQInterface::init_view_menu()
 {
   if (m_spawnList != NULL)
   {
+    CSpawnList* spawnList = m_spawnList->spawnList();
+
     // make sure the menu bar settings are correct
     for (int i = 0; i < SPAWNCOL_MAXCOLS; i++)
       m_spawnListMenu->setItemChecked(m_id_view_SpawnList_Cols[i], 
-				      m_spawnList->columnWidth(i) != 0);
+				      spawnList->columnVisible(i));
   }
 
   if (m_statList != NULL)
   {
+    EQStatList* statList = m_statList->statList();
     // make sure the menu items are checked
     for (int i = 0; i < LIST_MAXLIST; i++)
       m_statWinMenu->setItemChecked(m_id_view_PlayerStats_Stats[i], 
-				    m_statList->statShown(i));
+				    statList->statShown(i));
 
   }
 
@@ -4468,7 +4346,7 @@ void EQInterface::init_view_menu()
   {
     // make sure the proper menu items are checked
     menuBar()->setItemChecked(m_id_view_PlayerSkills_Languages, 
-			      m_skillList->showLanguages());
+			      m_skillList->skillList()->showLanguages());
 
   }
 }
@@ -4688,36 +4566,28 @@ void EQInterface::showSpawnList(void)
   if (m_spawnList == NULL)
   {
     if (m_isSpawnListDocked)
-      m_spawnList = new CSpawnList (m_player, m_spawnShell, m_categoryMgr,
+      m_spawnList = new SpawnListWindow (m_player, m_spawnShell, m_categoryMgr,
 				    m_splitV, "spawnlist");
     else
-      m_spawnList = new CSpawnList (m_player, m_spawnShell, m_categoryMgr,
+      m_spawnList = new SpawnListWindow(m_player, m_spawnShell, m_categoryMgr,
 				    NULL, "spawnlist");
 
-    QString section = "SpawnList";
-    QSize s = pSEQPrefs->getPrefSize("WindowSize", section, 
-				     m_spawnList->size());
-    m_spawnList->resize(s);
+    // restore the size of the spawn list
+    m_spawnList->restoreSize();
 
     // only do this move stuff iff the spawn list isn't docked
     // and the user set the option to do so.
     if (!m_isSpawnListDocked &&
 	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
-    {
-      // Set window location
-      QPoint p = pSEQPrefs->getPrefPoint("WindowPos", section, 
-					 m_spawnList->pos());
+      m_spawnList->restorePosition();
 
-      // Move window to new position
-      m_spawnList->move(p);
-    }
      // connections from spawn list to interface
-     connect (m_spawnList, SIGNAL(spawnSelected(const Item*)),
+     connect (m_spawnList->spawnList(), SIGNAL(spawnSelected(const Item*)),
 	      this, SLOT(spawnSelected(const Item*)));
 
      // connections from interface to spawn list
      connect (this, SIGNAL(selectSpawn(const Item*)),
-	      m_spawnList, SLOT(selectSpawn(const Item*)));
+	      m_spawnList->spawnList(), SLOT(selectSpawn(const Item*)));
      connect(this, SIGNAL(saveAllPrefs(void)),
 	     m_spawnList, SLOT(savePrefs(void)));
      connect(this, SIGNAL(restoreFonts(void)),
@@ -4734,15 +4604,24 @@ void EQInterface::showStatList(void)
   if (m_statList == NULL)
   {
     if (m_isStatListDocked)
-      m_statList = new EQStatList(m_player, m_splitT, "stats");
+      m_statList = new StatListWindow(m_player, m_splitT, "stats");
     else
-      m_statList = new EQStatList(m_player, NULL, "stats");
+      m_statList = new StatListWindow(m_player, NULL, "stats");
 
     // connect stat list slots to interface signals
     connect(this, SIGNAL(saveAllPrefs(void)),
 	    m_statList, SLOT(savePrefs(void)));
     connect(this, SIGNAL(restoreFonts(void)),
 	    m_statList, SLOT(restoreFont(void)));
+
+    // restore the size of the spawn list
+    m_statList->restoreSize();
+
+    // only do this move stuff iff the spawn list isn't docked
+    // and the user set the option to do so.
+    if (!m_isStatListDocked &&
+	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
+      m_statList->restorePosition();
   }
 
   // make sure it's visible
@@ -4755,15 +4634,24 @@ void EQInterface::showSkillList(void)
   if (m_skillList == NULL)
   {
     if (m_isSkillListDocked)
-      m_skillList = new EQSkillList(m_player, m_splitT, "skills");
+      m_skillList = new SkillListWindow(m_player, m_splitT, "skills");
     else
-      m_skillList = new EQSkillList(m_player, NULL, "skills");
+      m_skillList = new SkillListWindow(m_player, NULL, "skills");
 
     // connect skill list slots to interfaces signals
     connect(this, SIGNAL(saveAllPrefs(void)),
 	    m_skillList, SLOT(savePrefs(void)));
     connect(this, SIGNAL(restoreFonts(void)),
 	    m_skillList, SLOT(restoreFont(void)));
+
+    // restore the size of the spawn list
+    m_skillList->restoreSize();
+
+    // only do this move stuff iff the spawn list isn't docked
+    // and the user set the option to do so.
+    if (!m_isSkillListDocked &&
+	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
+      m_skillList->restorePosition();
   }
 
   // make sure it's visible
@@ -4776,23 +4664,34 @@ void EQInterface::showSpellList(void)
   if (m_spellList == NULL)
   {
     if (m_isSpellListDocked)
-      m_spellList = new SpellList(m_splitV, "spelllist");
+      m_spellList = new SpellListWindow(m_splitV, "spelllist");
     else
-      m_spellList = new SpellList(NULL, "spelllist");
+      m_spellList = new SpellListWindow(NULL, "spelllist");
+
+    SpellList* spellList = m_spellList->spellList();
 
     // connect SpellShell to SpellList
     connect(m_spellShell, SIGNAL(addSpell(SpellItem *)),
-	    m_spellList, SLOT(addSpell(SpellItem *)));
+	    spellList, SLOT(addSpell(SpellItem *)));
     connect(m_spellShell, SIGNAL(delSpell(SpellItem *)),
-	    m_spellList, SLOT(delSpell(SpellItem *)));
+	    spellList, SLOT(delSpell(SpellItem *)));
     connect(m_spellShell, SIGNAL(changeSpell(SpellItem *)),
-	    m_spellList, SLOT(changeSpell(SpellItem *)));
+	    spellList, SLOT(changeSpell(SpellItem *)));
     connect(m_spellShell, SIGNAL(clearSpells()),
-	    m_spellList, SLOT(clear()));
+	    spellList, SLOT(clear()));
     connect(this, SIGNAL(saveAllPrefs(void)),
 	    m_spellList, SLOT(savePrefs(void)));
     connect(this, SIGNAL(restoreFonts(void)),
 	    m_spellList, SLOT(restoreFont(void)));
+
+    // restore the size of the spell list
+    m_spellList->restoreSize();
+
+    // only do this move stuff iff the spell list isn't docked
+    // and the user set the option to do so.
+    if (!m_isSpellListDocked &&
+	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
+      m_spellList->restorePosition();
   }
 
   // make sure it's visible
@@ -4814,7 +4713,15 @@ void EQInterface::showCompass(void)
 	     m_compass, SLOT(selectSpawn(const Item*)));
     connect(this, SIGNAL(restoreFonts(void)),
 	    m_compass, SLOT(restoreFont(void)));
-  }
+    connect(this, SIGNAL(saveAllPrefs(void)),
+	    m_compass, SLOT(savePrefs(void)));
+
+    m_compass->restoreSize();
+
+    // move window to new position
+    if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
+      m_compass->restorePosition(); 
+ }
 
   // make sure it's visible
   m_compass->show();

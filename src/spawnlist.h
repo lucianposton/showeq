@@ -46,6 +46,8 @@
 #include <qpushbutton.h>
 #include <qpopupmenu.h>
 
+#include "seqwindow.h"
+#include "seqlistview.h"
 #include "everquest.h"
 #include "player.h"
 #include "spawnshell.h"
@@ -136,6 +138,7 @@ public:
    void updateTitle(const QString& name);
    void setShellItem(const Item *);
    itemType type();
+   virtual QString key(int column, bool ascending) const;
    //--------------------------------------------------
    int m_npc;
 private:
@@ -148,7 +151,7 @@ private:
 
 //--------------------------------------------------
 // CSpawnList
-class CSpawnList : public QListView
+class CSpawnList : public SEQListView
 {
    Q_OBJECT
 public:
@@ -156,8 +159,6 @@ public:
 	      SpawnShell* spawnShell, 
 	      CategoryMgr* categoryMgr,
 	      QWidget *parent = 0, const char * name = 0);
-
-   const QString& preferenceName() { return m_preferenceName; }
 
    SpawnListItem* Selected();
    void DeleteItem(const Item* item);
@@ -191,14 +192,12 @@ signals:
    void keepUpdated(bool on);
 
 public slots: 
-   void savePrefs();
    void setPlayer(int16_t xPos, int16_t yPos, int16_t zPos, 
 		  int16_t deltaX, int16_t deltaY, int16_t deltaZ, 
 		  int32_t degrees); 
    void setDebug(bool bset)       { bDebug = bset; }
    void selectNext(void);
    void selectPrev(void);
-   void setColumnVisible(int id, bool visible);
    // SpawnShell signals
    void addItem(const Item *);
    void delItem(const Item *);
@@ -206,33 +205,22 @@ public slots:
    void killSpawn(const Item *);
    void selectSpawn(const Item *);
    void clear();
-
    void addCategory(const Category* cat);
    void delCategory(const Category* cat);
    void clearedCategories(void);
    void loadedCategories(void);
    
    void rebuildSpawnList();
-   virtual void setCaption(const QString&);
-   void setWindowFont(const QFont&);
-   void restoreFont();
+   void playerLevelChanged(uint8_t);
    
 private slots:
    void selChanged(QListViewItem*);
 
-//#if 0
-//   void rightBtnPressed(QListViewItem* litem, 
-//			const QPoint &point, 
-//			int col);
-//   void rightBtnReleased(QListViewItem *item,
-//			 const QPoint &point, 
-//			 int col);
-//#endif
-   void myMousePressEvent (int button, QListViewItem *litem, const QPoint &point, int col);
-   void myMouseDoubleClickEvent(QListViewItem *litem);
+   void mousePressEvent (int button, QListViewItem *litem, const QPoint &point, int col);
+   void mouseDoubleClickEvent(QListViewItem *litem);
 
 private:
-   void setSelectedQueit(QListViewItem* item, bool selected);
+   void setSelectedQuiet(QListViewItem* item, bool selected);
    void populateSpawns(void);
    void populateCategory(const Category* cat);
    QString filterString(const Item *item, int flags = 0);
@@ -246,8 +234,26 @@ private:
    QPtrDict<SpawnListItem> m_categoryListItems;
    bool     bDebug;
 
-   QString m_preferenceName;
    SpawnListMenu* m_menu;
+};
+
+class SpawnListWindow : public SEQWindow
+{
+  Q_OBJECT
+
+ public:
+  SpawnListWindow(EQPlayer* player, 
+		  SpawnShell* spawnShell, 
+		  CategoryMgr* categoryMgr,
+		  QWidget* parent = 0, const char* name = 0);
+  ~SpawnListWindow();
+  CSpawnList* spawnList() { return m_spawnList; }
+
+ public slots:
+  virtual void savePrefs(void);
+
+ protected:
+  CSpawnList* m_spawnList;
 };
 
 #endif // SPAWNLIST_H

@@ -135,9 +135,10 @@ ExperienceWindow::~ExperienceWindow()
       close(logfd);
 }
 
-ExperienceWindow::ExperienceWindow( EQPlayer* player, 
-				    GroupMgr* groupMgr) 
-  : m_player(player),
+ExperienceWindow::ExperienceWindow( EQPlayer* player, GroupMgr* groupMgr,
+				    QWidget* parent, const char* name) 
+  : SEQWindow("Experience", "ShowEQ - Experience", parent, name),
+    m_player(player),
     m_group(groupMgr)
 {
   /* Hopefully this is only called once to set up the window,
@@ -148,12 +149,6 @@ ExperienceWindow::ExperienceWindow( EQPlayer* player,
    m_timeframe = 0;
    m_calcZEM=0;
    m_ZEMviewtype = 0;
-
-   QString section = "Experience";
-   QWidget::setCaption(pSEQPrefs->getPrefString("Caption", section, 
-						"ShowEQ - Experience"));
-
-   restoreFont();
 
    m_view_menu = new QPopupMenu( this );
    m_view_menu->insertItem( "&All Mobs", this, SLOT(viewAll()) );
@@ -190,7 +185,7 @@ ExperienceWindow::ExperienceWindow( EQPlayer* player,
    QGroupBox *listGBox = new QVGroupBox( "Experience Log", this );
    m_layout->addWidget( listGBox );
 
-   m_exp_listview = new QListView(listGBox);
+   m_exp_listview = new SEQListView(preferenceName(), listGBox);
    m_exp_listview->addColumn("Time");
    m_exp_listview->addColumn("Mob");
    m_exp_listview->addColumn("Level");
@@ -200,6 +195,8 @@ ExperienceWindow::ExperienceWindow( EQPlayer* player,
    m_exp_listview->addColumn("Group total");
    m_exp_listview->addColumn("Experience Gained");
    
+   m_exp_listview->restoreColumns();
+
    m_exp_listview->setMinimumSize( m_exp_listview->sizeHint().width(),
       200 );
 
@@ -265,35 +262,13 @@ ExperienceWindow::ExperienceWindow( EQPlayer* player,
 
 }
 
-
-void ExperienceWindow::setCaption(const QString& text)
+void ExperienceWindow::savePrefs()
 {
-  // set the caption
-  QWidget::setCaption(text);
+  // save the SEQWindow's prefs
+  SEQWindow::savePrefs();
 
-  // set the preference
-  pSEQPrefs->setPrefString("Caption", "Experience", caption());
-}
-
-void ExperienceWindow::setWindowFont(const QFont& font)
-{
-  // set the font preference
-  pSEQPrefs->setPrefFont("Font", "Experience", font);
-
-  // restore the font to the preference
-  restoreFont();
-}
-
-void ExperienceWindow::restoreFont()
-{
-  QString section = "Experience";
-  // set the applications default font
-  if (pSEQPrefs->isPreference("Font", section))
-  {
-    // use the font specified in the preferences
-    QFont font = pSEQPrefs->getPrefFont("Font", section);
-    setFont( font);
-  }
+  // save the listview's prefs
+  m_exp_listview->savePrefs();
 }
 
 void ExperienceWindow::addExpRecord(const QString &mob_name,

@@ -1521,10 +1521,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
 	    unk = false;
 
-#if 1 // ZBTEMP
-	    logData("/tmp/zlibData.log", len, data);
-#endif
-
             // decode/decompress the payload
             decoded = m_decode->DecodePacket(data, len, decodedData,
                                      &decodedDataLen, showeq_params->ip);
@@ -2391,10 +2387,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
             unk = false;
 	    
-#if 1 // ZBTEMP
-	    logData("/tmp/zlibData.log", len, data);
-#endif
-
             // decode/decompress the payload
             decoded = m_decode->DecodePacket(data, len, decodedData,
                                      &decodedDataLen, showeq_params->ip);

@@ -11,6 +11,8 @@
 #include <qwidget.h>
 #include <qlistview.h>
 
+#include "seqwindow.h"
+#include "seqlistview.h"
 #include "player.h"
 
 #define STATCOL_NAME 0
@@ -18,7 +20,7 @@
 #define STATCOL_MAXVALUE 2
 #define STATCOL_PERCENT 3
 
-class EQStatList : public QListView
+class EQStatList : public SEQListView
 {
    Q_OBJECT
 
@@ -34,7 +36,6 @@ class EQStatList : public QListView
    bool statShown(int stat) { return m_showStat[stat]; }
    
  public slots:
-   void savePrefs(void);
 
    void expChanged(int val, int min, int max);
    void expAltChanged(int val, int min, int max);
@@ -45,9 +46,6 @@ class EQStatList : public QListView
    void resetMaxMana(void);
    void enableStat(uint8_t stat, bool enable);
    void updateStat(uint8_t stat);
-   virtual void setCaption(const QString&);
-   void setWindowFont(const QFont&);
-   void restoreFont();
 
  private:
    // the player this skill list is monitoring
@@ -57,6 +55,22 @@ class EQStatList : public QListView
 
    uint32_t  m_guessMaxMana;
    bool m_showStat[LIST_MAXLIST];
+};
+
+class StatListWindow : public SEQWindow
+{
+  Q_OBJECT
+
+ public:
+  StatListWindow(EQPlayer* player, QWidget* parent = 0, const char* name = 0);
+  ~StatListWindow();
+  EQStatList* statList() { return m_statList; }
+
+ public slots:
+  virtual void savePrefs(void);
+
+ protected:
+  EQStatList* m_statList;
 };
 
 #endif // EQSTATLIST_H

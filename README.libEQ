@@ -9,10 +9,21 @@ ShowEQ will function only in GPS (radar/map) mode with all mobs shown as
 
 The libEQ.a library may be downloaded from the following sites:
 
-ftp://azriel.trifocus.net/pub/libeq
-ftp://smurfette.trifocus.net/pub/libeq
-* krisp is not carrying the proper lib, update you lib krisp, and i'll
-  put you back :)  -casey
+ftp://azriel.trifocus.net/pub/libeq/{arch}/{os}/libEQ.a
+ftp://smurfette.trifocus.net/pub/libeq/{arch}/{os}/libEQ.a
+http://www.doomed.to/showeq/libEQ.a
+
+where:
+  {arch} is typically i386
+  {os} is typically linux
+
+Here are some example command lines you may use to download the libEQ.a for the linux i386 architecture:
+[]# cd /usr/lib/ (or whatever the location you stored the previous libEQ.a in)
+[]# wget --passive-ftp ftp://azriel.trifocus.net/pub/libeq/i386/linux/libEQ.a
+
+or alternatelly if you want to use the other ftp download site:
+
+[]# wget --passive-ftp ftp://smurfette.trifocus.net/pub/libeq/i386/linux/libEQ.a
 
 *** WARNING ***
 
@@ -30,3 +41,6 @@ accepted MD5 checksums.  You should also be mistrustful if we suddenly
 redirect everyone to a new site with a new libEQ.a file with a 
 different checksum.  It probably means someone hacked one of our accounts.
 
+To check the MD5 checksum, execute the following command from the directory you saved libEQ.a in (usually /usr/lib/):
+
+[]# md5sum libEQ.a

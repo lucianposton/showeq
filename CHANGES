@@ -1,6 +1,39 @@
 dohpaZ (18/05/02)
 ------------------
 Modifications:
+ + version 4.2.5
+ + Applied patch# 555002 "New README.libEQ" by mrsuspicious (mrsuspicious)
+ + Applied patch# 555000 "New INSTALL.newbies (complete overhaul)" 
+   by mrsuspicious(mrsuspicious)
+ + Added SEQWindow base class and made all top-level/dockable windows
+   inherit from it.  SEQWindow supports the setting/saving/restoring of 
+   caption, font, size, and position information.
+ + Added SEQListView base class and made all the listview's inherit from it or
+   use it SEQListView supports the setting/saving/restoring of listview 
+   column visibility/size/order and sort column/direction.
+ + Fixed crashing bug when right-clicking in the header of the Spawn List to
+   get a context menu.
+ + Fixed a bug where changes to the "FastMachine" setting were being made in
+   "Interface" instead of "Misc".
+ + Fixed an old crash in Filter::loadFilters() if /usr/local/share/showeq 
+   didn't exist.
+ + Fixed "Filtered" filtering so that filtered spawns no longer appear on the
+   map unless "Show Filtered" is enabled.
+ + Fixed handling of filtered spawns and categories in CategoryMgr and 
+   SpawnList.  Allow ":Filtered:" pattern to occur in more complex 
+   filter strings
+ + Removed HP and MaxHP from the filterString that filters and categories
+   are matched against, since they are no longer useful.
+ + Made it so that the following Spawn List columns sort in a proper numeric
+   fashion: Lvl, Hp, MaxHp, ID, and Dist.  Also made it so that the
+   category spawn list items always sort by their names (since they don't
+   have any other fields).
+ + Made it so that the color of the items in the spawn list will be updated
+   as appropriate when the players level changes.
+
+dohpaZ (18/05/02)
+------------------
+Modifications:
  + version 4.2.4
  + Improved behavior when no showeq.xml file is present
  + Removed showeq.xml from CVS (initial one created on first "Save Preferences"

@@ -175,6 +175,7 @@ public:
 		  int16_t deltaX, int16_t deltaY, int16_t deltaZ,
 		  int32_t heading);
   void headingChanged(int32_t heading);
+  void levelChanged(uint8_t level);
 
  protected:
   void fillConTable();

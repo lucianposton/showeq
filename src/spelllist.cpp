@@ -10,8 +10,8 @@
  * Date - 9/7/2001
  */
 
-#include <qheader.h>
 #include <qpainter.h>
+#include <qlayout.h>
 
 #include "spelllist.h"
 #include "main.h"
@@ -107,187 +107,25 @@ void SpellListItem::setCategory(QString& cat)
 // -------------------------------------------------------------------
 
 SpellList::SpellList(QWidget *parent, const char *name)
-   : QListView(parent, name)
+   : SEQListView("SpellList", parent, name)
 {
-#if QT_VERSION >= 210
-   setShowSortIndicator(TRUE);
-#endif
-   setRootIsDecorated(false);
-
-   QString section = "SpellList";
-
-   // restore the windows caption
-   QListView::setCaption(pSEQPrefs->getPrefString("Caption", section,
-						  "ShowEQ - Spells"));
-
-   // restore the font
-   restoreFont();
-
    //addColumn... spell icon
-   addColumn("Spell");
-   addColumn("Spell ID");
-   addColumn("Caster ID");
-   addColumn("Caster");
-   addColumn("Target ID");
-   addColumn("Target");
-   addColumn("Casted");
-   addColumn("Remain");
-   setAllColumnsShowFocus(true);
+   addColumn("Spell", "SpellName");
+   addColumn("Spell ID", "SpellID");
+   addColumn("Caster ID", "CasterID");
+   addColumn("Caster", "CasterName");
+   addColumn("Target ID", "TargetID");
+   addColumn("Target", "TargetName");
+   addColumn("Casted", "CastTime");
+   addColumn("Remain", "RemainTime");
    setSorting(SPELLCOL_DURATION);
 
-   // Restore column order
-   QString tStr = pSEQPrefs->getPrefString("ColumnOrder", section, "N/A");
-   if (tStr != "N/A") {
-      int i = 0;
-      while (!tStr.isEmpty()) {
-         int toIndex;
-         if (tStr.find(':') != -1) {
-            toIndex = tStr.left(tStr.find(':')).toInt();
-            tStr = tStr.right(tStr.length() - tStr.find(':') - 1);
-         } else {
-            toIndex = tStr.toInt();
-            tStr = "";
-         }
-         header()->moveSection(toIndex, i++);
-      }
-   }
-
-   char tempStr[256];
-   int x;
-   sprintf(tempStr, "SpellIDWidth");
-   if (pSEQPrefs->isPreference(tempStr, section)) {
-      x = pSEQPrefs->getPrefInt(tempStr, section, columnWidth(SPELLCOL_SPELLID));
-      setColumnWidth(SPELLCOL_SPELLID, x);
-      setColumnWidthMode(SPELLCOL_SPELLID, QListView::Manual);
-   }
-   sprintf(tempStr, "SpellNameWidth");
-   if (pSEQPrefs->isPreference(tempStr, section)) {
-      x = pSEQPrefs->getPrefInt(tempStr, section, columnWidth(SPELLCOL_SPELLNAME));
-      setColumnWidth(SPELLCOL_SPELLNAME, x);
-      setColumnWidthMode(SPELLCOL_SPELLNAME, QListView::Manual);
-   }
-   sprintf(tempStr, "CasterIDWidth");
-   if (pSEQPrefs->isPreference(tempStr, section)) {
-      x = pSEQPrefs->getPrefInt(tempStr, section, columnWidth(SPELLCOL_CASTERID));
-      setColumnWidth(SPELLCOL_CASTERID, x);
-      setColumnWidthMode(SPELLCOL_CASTERID, QListView::Manual);
-   }
-   sprintf(tempStr, "CasterNameWidth");
-   if (pSEQPrefs->isPreference(tempStr, section)) {
-      x = pSEQPrefs->getPrefInt(tempStr, section, columnWidth(SPELLCOL_CASTERNAME));
-      setColumnWidth(SPELLCOL_CASTERNAME, x);
-      setColumnWidthMode(SPELLCOL_CASTERNAME, QListView::Manual);
-   }
-   sprintf(tempStr, "TargetIDWidth");
-   if (pSEQPrefs->isPreference(tempStr, section)) {
-      x = pSEQPrefs->getPrefInt(tempStr, section, columnWidth(SPELLCOL_TARGETID));
-      setColumnWidth(SPELLCOL_TARGETID, x);
-      setColumnWidthMode(SPELLCOL_TARGETID, QListView::Manual);
-   }
-   sprintf(tempStr, "TargetNameWidth");
-   if (pSEQPrefs->isPreference(tempStr, section)) {
-      x = pSEQPrefs->getPrefInt(tempStr, section, columnWidth(SPELLCOL_TARGETNAME));
-      setColumnWidth(SPELLCOL_TARGETNAME, x);
-      setColumnWidthMode(SPELLCOL_TARGETNAME, QListView::Manual);
-   }
-   sprintf(tempStr, "CastTimeWidth");
-   if (pSEQPrefs->isPreference(tempStr, section)) {
-      x = pSEQPrefs->getPrefInt(tempStr, section, columnWidth(SPELLCOL_CASTTIME));
-      setColumnWidth(SPELLCOL_CASTTIME, x);
-      setColumnWidthMode(SPELLCOL_CASTTIME, QListView::Manual);
-   }
-   sprintf(tempStr, "RemainTimeWidth");
-   if (pSEQPrefs->isPreference(tempStr, section)) {
-      x = pSEQPrefs->getPrefInt(tempStr, section, columnWidth(SPELLCOL_DURATION));
-      setColumnWidth(SPELLCOL_DURATION, x);
-      setColumnWidthMode(SPELLCOL_DURATION, QListView::Manual);
-   }
+   restoreColumns();
 
    connect(this, SIGNAL(mouseButtonClicked(int, QListViewItem*, const QPoint&, int)),
          this, SLOT(mouseButtonClicked(int, QListViewItem*, const QPoint&, int)));
    connect(this, SIGNAL(rightButtonClicked(QListViewItem*, const QPoint&, int)),
          this, SLOT(rightButtonClicked(QListViewItem*, const QPoint&, int)));
-}
-
-void SpellList::savePrefs(void)
-{
-  QString section = "SpellList";
-  char tempStr[256];
-
-  // SpellList column positions
-  sprintf(tempStr, "SaveSettings");
-  if (isVisible() && pSEQPrefs->getPrefBool(tempStr, section, 1)) 
-  {
-    sprintf(tempStr, "SpellIDWidth");
-    pSEQPrefs->setPrefInt(tempStr, section,
-			    columnWidth(SPELLCOL_SPELLID));
-    sprintf(tempStr, "SpellNameWidth");
-    pSEQPrefs->setPrefInt(tempStr, section,
-			    columnWidth(SPELLCOL_SPELLNAME));
-    sprintf(tempStr, "CasterIDWidth");
-    pSEQPrefs->setPrefInt(tempStr, section,
-			    columnWidth(SPELLCOL_CASTERID));
-    sprintf(tempStr, "CasterNameWidth");
-    pSEQPrefs->setPrefInt(tempStr, section,
-			    columnWidth(SPELLCOL_CASTERNAME));
-    sprintf(tempStr, "TargetIDWidth");
-    pSEQPrefs->setPrefInt(tempStr, section,
-			    columnWidth(SPELLCOL_TARGETID));
-    sprintf(tempStr, "TargetNameWidth");
-    pSEQPrefs->setPrefInt(tempStr, section,
-			    columnWidth(SPELLCOL_TARGETNAME));
-    sprintf(tempStr, "CastTimeWidth");
-    pSEQPrefs->setPrefInt(tempStr, section,
-			    columnWidth(SPELLCOL_CASTTIME));
-    sprintf(tempStr, "RemainTimeWidth");
-    pSEQPrefs->setPrefInt(tempStr, section,
-			    columnWidth(SPELLCOL_DURATION));
-    
-    // Save column order
-    char tempStr[256], tempStr2[256];
-    if (header()->count() > 0)
-      sprintf(tempStr, "%d", header()->mapToSection(0));
-    for(int i=1; i<header()->count(); i++) {
-      sprintf(tempStr2, ":%d", header()->mapToSection(i));
-      strcat(tempStr, tempStr2);
-    }
-    pSEQPrefs->setPrefString("ColumnOrder", section, tempStr);
-
-    // Save window position
-    pSEQPrefs->setPrefPoint("WindowPos", section, pos());
-    pSEQPrefs->setPrefSize("WindowSize", section, size());
-  }
-}
-
-void SpellList::setCaption(const QString& text)
-{
-  // set the caption
-  QListView::setCaption(text);
-
-  // set the preference
-  pSEQPrefs->setPrefString("Caption", "SpellList", caption());
-}
-
-
-void SpellList::setWindowFont(const QFont& font)
-{
-  // set the font preference
-  pSEQPrefs->setPrefFont("Font", "SpellList", font);
-
-  // restore the font to the preference
-  restoreFont();
-}
-
-void SpellList::restoreFont()
-{
-  QString section = "SpellList";
-  // set the applications default font
-  if (pSEQPrefs->isPreference("Font", section))
-  {
-    // use the font specified in the preferences
-    QFont font = pSEQPrefs->getPrefFont("Font", section);
-    setFont( font);
-  }
 }
 
 void SpellList::selectSpell(SpellItem *item)
@@ -510,10 +348,32 @@ void SpellList::activated(int mid)
       col = SPELLCOL_DURATION;
    }
 
-   if (id) {
-      bool b = columnWidth(col) == 0;
-      setColumnWidth(col, b ? 50 : 0);
-      setColumnWidthMode(col, QListView::Manual);
-      m_menu->setItemChecked(id, b);
+   if (id) 
+   {
+     setColumnVisible(col, !columnVisible(col));
+     m_menu->setItemChecked(id, columnVisible(col));
    }
+}
+
+SpellListWindow::SpellListWindow(QWidget* parent, const char* name)
+  : SEQWindow("SpellList", "ShowEQ - Spell List", parent, name)
+{
+  QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setAutoAdd(true);
+  
+  m_spellList = new SpellList(this, name);
+}
+
+SpellListWindow::~SpellListWindow()
+{
+  delete m_spellList;
+}
+
+void SpellListWindow::savePrefs(void)
+{
+  // save SEQWindow prefs
+  SEQWindow::savePrefs();
+
+  // make the listview save it's prefs
+  m_spellList->savePrefs();
 }
