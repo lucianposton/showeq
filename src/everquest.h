@@ -1,4 +1,4 @@
-/*
+e*
  *  everquest.h
  *
  *  ShowEQ Distributed under GPL
@@ -738,96 +738,95 @@ struct deleteSpawnStruct
 */
 
 struct charProfileStruct 
-{
-/*0000*/ uint8_t  opCode;                 // 0x36
-/*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint8_t  unknown0006[6];         // ***Placeholder
-/*0004*/ char     name[64];               // Name of player sizes not right
-/*0068*/ char     lastName[70];           // Last name of player sizes not right
-/*0138*/ uint32_t gender;
-/*0142*/ uint32_t race;                   // Player race
-/*0146*/ uint32_t class_;                 // Player class
-/*0150*/ uint32_t unknown0154;
-/*0154*/ uint32_t level;                  // Level of player (might be one byte)
-/*0158*/ uint32_t exp;                    // Current Experience
-/*0162*/ uint32_t points;                 // Unspent Practice points
-/*0166*/ uint32_t MANA;                   // MANA
-/*0170*/ uint32_t curHp;                  // current hp
-/*0174*/ uint32_t unknown0178;            // ***Placeholder
-/*0178*/ uint32_t STR;                    // Strength
-/*0182*/ uint32_t STA;                    // Stamina
-/*0186*/ uint32_t CHA;                    // Charisma
-/*0190*/ uint32_t DEX;                    // Dexterity
-/*0194*/ uint32_t INT;                    // Intelligence
-/*0198*/ uint32_t AGI;                    // Agility
-/*0202*/ uint32_t WIS;                    // Wisdom
-/*0206*/ uint8_t  unknown0182[48];
-/*0254*/ uint32_t inventory[30];          // inventory images?
-/*0374*/ uint32_t unknown0378;
-/*0378*/ uint8_t  languages[32];          // List of languages (MAX_KNOWN_LANGS)
-/*0410*/ uint8_t  unknown0414[8];         // unknown ?more languages?
-/*0418*/ struct itemPropertiesStruct invitemprops[30];
-                                          // these correlate with inventory[30]
-/*0898*/ struct spellBuff buffs[15];      // Buffs currently on the player
-/*1142*/ uint32_t unknown1142[2];
-/*1150*/ uint32_t containerinv[80];       // player items in containers
-/*1470*/ uint32_t cursorinv[10];          // player items on cursor
-/*1510*/ struct itemPropertiesStruct containeritemprops[80];
-                                          //just like invitemprops[]
-/*2790*/ struct itemPropertiesStruct cursoritemprops[10];
-                                          //just like invitemprops[]
-/*2950*/ int32_t  sSpellBook[512];        // List of the Spells in spellbook
-/*4998*/ int32_t  sMemSpells[8];          // List of spells memorized
-/*5030*/ uint8_t  unknown5030[36];
-/*5066*/ float    y;
-/*5070*/ float    x;
-/*5074*/ float    z;
-/*5078*/ float    heading;
-/*5082*/ uint32_t unknown5082;
-/*5086*/ uint32_t platinum;               // Platinum Pieces on player
-/*5090*/ uint32_t gold;                   // Gold Pieces on player
-/*5094*/ uint32_t silver;                 // Silver Pieces on player
-/*5098*/ uint32_t copper;                 // Copper Pieces on player
-/*5102*/ uint32_t platinumBank;           // Platinum Pieces in Bank
-/*5106*/ uint32_t goldBank;               // Gold Pieces in Bank
-/*5110*/ uint32_t silverBank;             // Silver Pieces in Bank
-/*5114*/ uint32_t copperBank;             // Copper Pieces in Bank
-/*5118*/ uint8_t  unknown5118[32];
-/*5154*/ uint32_t skills[74];             // List of skills (MAX_KNOWN_SKILLS)
-/*5450*/ uint8_t  unknown5446[412];       // ***Placeholder
-/*5858*/ uint32_t zoneId;                 // see zones.h
-/*5862*/ uint8_t  unknown5862[548];
-/*6410*/ uint32_t bindzoneId[5];          // bound to bindzoneId[0]
-/*6430*/ float    sYpos[5];               // starting locs per bindzoneId
-/*6450*/ float    sXpos[5];               // starting locs per bindzoneId
-/*6470*/ float    sZpos[5];               // starting locs per bindzoneId
-/*6490*/ uint8_t  unknown9490[20];
-/*6510*/ struct itemPropertiesStruct bankinvprops[8];
-/*6638*/ struct itemPropertiesStruct bankinvprops2[8];
-/*6766*/ struct itemPropertiesStruct bankinvcontprops[80];
-/*8046*/ struct itemPropertiesStruct bankinvcontprops2[80];
-/*9326*/ uint8_t  unknown9326[4];
-/*9330*/ uint32_t bank_inv[8];            // itemIds of the 8 bank slots
-/*9362*/ uint32_t bank_inv2[8];           // itemIds of the 8 bank slots
-/*9394*/ uint32_t bank_cont_inv[80];      // itemIds of items inside containers in bank
-/*9714*/ uint32_t bank_cont_inv2[80];     // itemIds of items inside containers in bank
-/*10034*/ uint32_t deity;                  // deity
-/*10038*/ uint32_t guildID;                // guild ID
-/*10042*/ uint8_t  unknown10042[14];
-/*10056*/ uint8_t  pvp;
-/*10057*/ uint8_t  _level;                 // seems to be player level
-/*10058*/ uint8_t  anon;                   // 0 plain, 1 anon, 2 roleplay,
-/*10059*/ uint8_t  gm;                     // gm flag?
-/*10060*/ uint8_t  guildstatus;            // 0 member, 1 officer, 2 leader
-/*10061*/ uint8_t  unknown10061[44];
-/*10105*/ char     GroupMembers[6][64];    // all the members in group, including self
-/*10489*/ uint8_t  unknown10489[24];
-/*10513*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000
-/*10517*/ uint8_t  unknown10517[428];
-/*10945*/ uint32_t aapoints;               // number of unspent ability points
-/*10949*/ uint8_t  unknown10949[3293];
-/*10949*/ uint8_t  unknown10950[60];
-}; // 13562
+{ 
+/*0000*/ uint8_t opCode; // 0x36 
+/*0001*/ uint8_t version; // 0x20 
+/*0002*/ uint8_t unknown0006[6]; // ***Placeholder 
+/*0008*/ char name[64]; // Name of player sizes not right 
+/*0072*/ char lastName[20]; // Last name of player sizes not right 
+/*0092*/ char unknown0068[46]; // ***placeholder 
+/*0138*/ uint32_t unknown0138; // ***placeholder 
+/*0142*/ uint32_t gender; 
+/*0146*/ uint32_t race; // Player race 
+/*0150*/ uint32_t class_; // Player class 
+/*0154*/ uint32_t unknown0154; 
+/*0158*/ uint32_t level; // Level of player (might be one byte) 
+/*0162*/ uint32_t exp; // Current Experience 
+/*0166*/ uint32_t points; // Unspent Practice points 
+/*0170*/ uint32_t MANA; // MANA 
+/*0174*/ uint32_t curHp; // current hp 
+/*0178*/ uint32_t unknown0174; // ***Placeholder 
+/*0182*/ uint32_t STR; // Strength 
+/*0186*/ uint32_t STA; // Stamina 
+/*0190*/ uint32_t CHA; // Charisma 
+/*0194*/ uint32_t DEX; // Dexterity 
+/*0198*/ uint32_t INT; // Intelligence 
+/*0202*/ uint32_t AGI; // Agility 
+/*0206*/ uint32_t WIS; // Wisdom 
+/*0210*/ uint8_t unknown0210[48]; 
+/*0258*/ uint32_t inventory[31]; // inventory images? 
+/*0382*/ uint8_t languages[28]; // List of languages (MAX_KNOWN_LANGS) 
+/*0410*/ struct itemPropertiesStruct invitemprops[31]; 
+// these correlate with inventory[30] 
+/*0906*/ struct spellBuff buffs[15]; // Buffs currently on the player 
+/*1146*/ uint32_t unknown1146; 
+/*1150*/ uint32_t co2tainerinv[80]; // player items in containers 
+/*1470*/ uint32_t cursorinv[10]; // player items on cursor 
+/*1510*/ struct itemPropertiesStruct containeritemprops[80]; 
+//just like invitemprops[] 
+/*2790*/ struct itemPropertiesStruct cursoritemprops[10]; 
+//just like invitemprops[] 
+/*2950*/ int32_t sSpellBook[512]; // List of the Spells in spellbook 
+/*4998*/ int32_t sMemSpells[8]; // List of spells memorized 
+/*5030*/ uint8_t unknown5030[36]; 
+/*5066*/ float y; 
+/*5070*/ float x; 
+/*5074*/ float z; 
+/*5078*/ float heading; 
+/*5082*/ uint32_t unknown5082; 
+/*5086*/ uint32_t platinum; // Platinum Pieces on player 
+/*5090*/ uint32_t gold; // Gold Pieces on player 
+/*5094*/ uint32_t silver; // Silver Pieces on player 
+/*5098*/ uint32_t copper; // Copper Pieces on player 
+/*5102*/ uint32_t platinumBank; // Platinum Pieces in Bank 
+/*5106*/ uint32_t goldBank; // Gold Pieces in Bank 
+/*5110*/ uint32_t silverBank; // Silver Pieces in Bank 
+/*5114*/ uint32_t copperBank; // Copper Pieces in Bank 
+/*5118*/ uint8_t unknown5118[32]; 
+/*5154*/ uint32_t skills[74]; // List of skills (MAX_KNOWN_SKILLS) 
+/*5450*/ uint8_t unknown5446[412]; // ***Placeholder 
+/*5858*/ uint32_t zoneId; // see zones.h 
+/*5862*/ uint8_t unknown5862[548]; 
+/*6410*/ uint32_t bindzoneId[5]; // bound to bindzoneId[0] 
+/*6430*/ float sYpos[5]; // starting locs per bindzoneId 
+/*6450*/ float sXpos[5]; // starting locs per bindzoneId 
+/*6470*/ float sZpos[5]; // starting locs per bindzoneId 
+/*6490*/ uint8_t unknown9490[20]; 
+/*6510*/ struct itemPropertiesStruct bankinvprops[8]; 
+/*6638*/ struct itemPropertiesStruct bankinvprops2[8]; 
+/*6766*/ struct itemPropertiesStruct bankinvcontprops[80]; 
+/*8046*/ struct itemPropertiesStruct bankinvcontprops2[80]; 
+/*9326*/ uint8_t unknown9326[4]; 
+/*9330*/ uint32_t bank_inv[8]; // itemIds of the 8 bank slots 
+/*9362*/ uint32_t bank_inv2[8]; // itemIds of the 8 bank slots 
+/*9394*/ uint32_t bank_cont_inv[80]; // itemIds of items inside containers in bank 
+/*9714*/ uint32_t bank_cont_inv2[80]; // itemIds of items inside containers in bank 
+/*10034*/ uint32_t deity; // deity 
+/*10038*/ uint32_t guildID; // guild ID 
+/*10042*/ uint8_t unknown10042[14]; 
+/*10056*/ uint8_t pvp; 
+/*10057*/ uint8_t _level; // seems to be player level 
+/*10058*/ uint8_t anon; // 0 plain, 1 anon, 2 roleplay, 
+/*10059*/ uint8_t gm; // gm flag? 
+/*10060*/ uint8_t guildstatus; // 0 member, 1 officer, 2 leader 
+/*10061*/ uint8_t unknown10061[44]; 
+/*10104*/ char GroupMembers[6][64]; // all the members in group, including self 
+/*10489*/ uint8_t unknown10489[24]; 
+/*10513*/ uint32_t altexp; // alternate exp pool 0 - ~15,000,000 
+/*10517*/ uint8_t unknown10517[428]; 
+/*10945*/ uint32_t aapoints; // number of unspent ability points 
+/*10949*/ uint8_t unknown10949[3353]; 
+}; // 14302
 
 #if 0
 struct playerAAStruct {
@@ -1554,10 +1553,10 @@ struct inspectDataStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0xb6
 /*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint8_t  unknown0002[68];        // ***Placeholder
+/*0002*/ uint8_t  unknown0002[72];        // ***Placeholder
 /*0070*/ char     itemNames[21][64];      // 21 items with names 
                                           //    64 characters long.
-/*1414*/ uint8_t  unknown1344[2];         // ***placeholder
+/*1414*/ uint8_t  unknown1344[46];         // ***placeholder
 /*1416*/ int16_t  icons[21];              // Icon Information
 /*1458*/ char     mytext[200];            // Player Defined Text Info
 /*1658*/ uint8_t  unknown0958[88];        // ***Placeholder

@@ -150,7 +150,7 @@
 
 #define sSpellFizzleRegainCode      0x3542
 
-#define FormattedMessageCode        0x021c
+#define FormattedMessageCode        0x0204
 
 #define MoneyUpdateCode             0x3d41
 
@@ -230,7 +230,7 @@
 
 #define BeginCastCode               0x0017
 
-#define InspectDataCode             0xb640
+#define InspectDataCode             0x0262
 
 #define BookTextCode                0xffd2
 
