@@ -101,7 +101,7 @@
 #define RTEAM_OTHER			5
 
 //Maximum limits of certain types of data
-#define MAX_KNOWN_SKILLS                74
+#define MAX_KNOWN_SKILLS                75
 #define MAX_KNOWN_LANGS                 25
 #define MAX_SPELLBOOK_SLOTS             400
 #define MAX_GROUP_MEMBERS               6
@@ -559,23 +559,22 @@ struct charProfileStruct
 /*2964*/ uint32_t  copper_cursor;      // Copper Pieces on cursor
 /*2968*/ uint32_t  platinum_shared;    // Shared platinum pieces
 /*2972*/ uint8_t   unknown2972[20];    // Unknown - all zero
-/*2992*/ uint32_t  skills[74];         // List of skills (MAX_KNOWN_SKILLS)
-/*3288*/ uint8_t   unknown3288[412];   //
+/*2992*/ uint32_t  skills[75];         // List of skills (MAX_KNOWN_SKILLS)
+/*3288*/ uint8_t   unknown3288[408];   //
 /*3700*/ uint16_t  zoneId;             // see zones.h
 /*3702*/ uint16_t  zoneInstance;       // 
 /*3704*/ spellBuff buffs[15];          // Buffs currently on the player
 /*3944*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
-/*4328*/ uint8_t   unknown4328[668];   // *** Placeholder
-/*4996*/ uint32_t  ldon_guk_points;    // Earned GUK points
-/*5000*/ uint32_t  ldon_mir_points;    // Earned MIR points
-/*5004*/ uint32_t  ldon_mmc_points;    // Earned MMC points
-/*5008*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
-/*5012*/ uint32_t  ldon_tak_points;    // Earned TAK points
-/*5016*/ uint8_t   unknown4352[20];    // *** Placeholder
-/*5036*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*5040*/ uint8_t   unknown4380[632];   // *** Placeholder
-/*4644*/	
-};
+/*4328*/ uint8_t   unknown4328[672];   // *** Placeholder
+/*5000*/ uint32_t  ldon_guk_points;    // Earned GUK points
+/*5004*/ uint32_t  ldon_mir_points;    // Earned MIR points
+/*5008*/ uint32_t  ldon_mmc_points;    // Earned MMC points
+/*5012*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
+/*5016*/ uint32_t  ldon_tak_points;    // Earned TAK points
+/*5020*/ uint8_t   unknown4352[20];    // *** Placeholder
+/*5040*/ uint32_t  ldon_avail_points;  // Available LDON points
+/*5044*/ uint8_t   unknown4380[636];   // *** Placeholder
+}; /* 5680 */
 
 
 #if 1
@@ -1847,6 +1846,7 @@ struct bazaarSearchQueryStruct
   char unknownXXX0[20]; // Value seems to always be the same
   char searchstring[64];
   uint32_t unknownXXX1;
+  uint32_t unknownXXX2;
 };
 
 struct bazaarSearchResponseStruct 
@@ -1860,6 +1860,11 @@ struct bazaarSearchResponseStruct
   char item_name[64]; // nul-padded name with appended "(count)"
 };
 
+/*
+** Item Bazaar Search Result
+** Length: Variable
+** OpCode: BazaarSearch
+*/
 union bazaarSearchStruct
 {
   uint32_t mark;

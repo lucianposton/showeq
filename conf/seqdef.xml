@@ -2083,7 +2083,10 @@
    <bool value="false" />
    <comment>Log zone packets to zone log file</comment>
   </property>
-  <property name="LogUnknownZonePackets" >
+  <property name="LogBazaarPackets" >
+   <bool value="false" />
+   <comment>Log bazaar packets to bazaar log file</comment>
+  </property>  <property name="LogUnknownZonePackets" >
    <bool value="false" />
    <comment>Log unknown packets to unknown zone log file</comment>
   </property>
@@ -2102,8 +2105,12 @@
   <property name="ZoneLogFilename" >
    <string value="zone.log" />
    <comment>Zone log file (enabled with LogZonePackets)</comment>
+  </property> 
+  <property name="BazaarLogFilename" >
+   <string value="bazaar.log" />
+   <comment>Zone log file (enabled with LogBazaarPackets)</comment>
   </property>
-  <property name="UnknownZoneLogFilename" >
+ <property name="UnknownZoneLogFilename" >
    <string value="unknownzone.log" />
    <comment>Unknown Zone log file (enabled with LogUnknownZonePackets)</comment>
   </property>

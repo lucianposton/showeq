@@ -360,9 +360,6 @@ void MessageShell::zoneEntryServer(const ServerZoneEntryStruct* zsentry)
   QString tempStr;
 
   tempStr = "EntryCode: Server, Zone: ";
-#if 0 // ZBTEMP
-  tempStr += m_zoneMgr->zoneNameFromID(zsentry->zoneId);
-#endif // ZBTEMP
   m_messages->addMessage(MT_Zone, tempStr);
 }
 

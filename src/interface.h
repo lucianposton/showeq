@@ -32,6 +32,7 @@
 #include "everquest.h"
 #include "spawnlist.h"
 #include "spawnshell.h"
+#include "packetlog.h"
 
 //--------------------------------------------------
 // forward declarations
@@ -77,6 +78,7 @@ class Terminal;
 class MessageFilterDialog;
 class GuildShell;
 class GuildListWindow;
+class BazaarLog;
 
 //--------------------------------------------------
 // typedefs
@@ -167,6 +169,7 @@ class EQInterface:public QMainWindow
    void toggle_log_AllPackets();
    void toggle_log_WorldData();
    void toggle_log_ZoneData();
+   void toggle_opt_BazaarData();
    void toggle_log_UnknownData();
    void toggle_log_RawData();
    void toggle_log_ItemData();
@@ -318,6 +321,7 @@ class EQInterface:public QMainWindow
    void createGlobalLog(void);
    void createWorldLog(void);
    void createZoneLog(void);
+   void createBazaarLog(void);
    void createUnknownZoneLog(void);
    void createOPCodeMonitorLog(const QString&);
    void insertWindowMenu(SEQWindow* window);
@@ -362,6 +366,7 @@ class EQInterface:public QMainWindow
    PacketLog* m_globalLog;
    PacketStreamLog* m_worldLog;
    PacketStreamLog* m_zoneLog;
+   BazaarLog* m_bazaarLog;
    UnknownPacketLog* m_unknownZoneLog;
    OPCodeMonitorPacketLog* m_opcodeMonitorLog;
 
@@ -418,6 +423,7 @@ class EQInterface:public QMainWindow
    int  m_id_log_RawData;
    int  m_id_log_Items;
    int  m_id_log_ItemPackets;
+   int  m_id_opt_BazaarData;
    int  m_id_opt_OptionsDlg;
    int  m_id_opt_Fast;
    int  m_id_opt_ResetMana;

@@ -30,6 +30,7 @@
 #include "logger.h"
 #include "spawnlog.h"
 #include "packetlog.h"
+#include "bazaarlog.h"
 #include "category.h"
 #include "itemdb.h"
 #include "guild.h"
@@ -121,6 +122,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
     m_globalLog(0),
     m_worldLog(0),
     m_zoneLog(0),
+    m_bazaarLog(0),
     m_unknownZoneLog(0),
     m_opcodeMonitorLog(0),
     m_selectedSpawn(0),
@@ -333,6 +335,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    if (pSEQPrefs->getPrefBool("LogZonePackets", "PacketLogging", false))
      createZoneLog();
+
+   if (pSEQPrefs->getPrefBool("LogBazaarPackets", "PacketLogging", false))
+     createBazaarLog();
 
    if (pSEQPrefs->getPrefBool("LogWorldPackets", "PacketLogging", false))
      createWorldLog();
@@ -920,6 +925,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_id_opt_KeepSelectedVisible =
                   pOptMenu->insertItem("Keep Selected Visible?"  , this, SLOT(toggle_opt_KeepSelectedVisible()));
    m_id_opt_LogSpawns = pOptMenu->insertItem("Log Spawns", this, SLOT(toggle_opt_LogSpawns()));
+   m_id_opt_BazaarData    = pOptMenu->insertItem("Bazaar Searches", this, SLOT(toggle_opt_BazaarData()), Key_F11);
+   menuBar()->setItemChecked (m_id_opt_BazaarData, (m_bazaarLog != 0));
    m_id_opt_ResetMana = pOptMenu->insertItem("Reset Max Mana", this, SLOT(resetMaxMana()));
    m_id_opt_PvPTeams  = pOptMenu->insertItem("PvP Teams", this, SLOT(toggle_opt_PvPTeams()));
    m_id_opt_PvPDeity  = pOptMenu->insertItem("PvP Deity", this, SLOT(toggle_opt_PvPDeity()));
@@ -3574,6 +3581,22 @@ void EQInterface::toggle_log_ZoneData (void)
   pSEQPrefs->setPrefBool("LogZonePackets", "PacketLogging", state);
 }
 
+void EQInterface::toggle_opt_BazaarData (void)
+{
+  if (m_bazaarLog)
+  {
+    disconnect(m_bazaarLog,0,0,0);
+    delete m_bazaarLog;
+    m_bazaarLog = 0;
+  }
+  else
+    createBazaarLog();
+
+  bool state = (m_bazaarLog != 0);
+  menuBar()->setItemChecked(m_id_opt_BazaarData, state);
+  pSEQPrefs->setPrefBool("LogBazaarPackets", "PacketLogging", state);
+}
+
 void EQInterface::toggle_log_UnknownData (void)
 {
   if (m_unknownZoneLog)
@@ -5951,6 +5974,27 @@ void EQInterface::createZoneLog(void)
 	  m_zoneLog, SLOT(rawStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
   connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
 	  m_zoneLog, SLOT(decodedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
+}
+
+void EQInterface::createBazaarLog(void)
+{
+  if (m_bazaarLog)
+    return;
+  
+  QString logFile = pSEQPrefs->getPrefString("BazaarLogFilename",
+					     "PacketLogging",
+					     "bazaar.log");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
+  
+  m_bazaarLog = new BazaarLog(*m_packet,
+			      logFileInfo.absFilePath(),
+			      this,
+			      *m_spawnShell,
+			      "BazaarLog");
+  m_packet->connect2("OP_BazaarSearch", SP_Zone, DIR_Server,
+		     "bazaarSearchResponseStruct", SZC_Modulus,
+		     m_bazaarLog, SLOT(bazaarSearch(const uint8_t*, size_t, uint8_t)));
 }
 
 void EQInterface::createUnknownZoneLog(void)

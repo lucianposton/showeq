@@ -74,7 +74,6 @@ static const ZoneNames zoneNames[] =
 
 QString ZoneMgr::zoneNameFromID(uint16_t zoneId)
 {
-
    const char* zoneName = NULL;
    if (zoneId < (sizeof(zoneNames) / sizeof (ZoneNames)))
        zoneName = zoneNames[zoneId].shortName;

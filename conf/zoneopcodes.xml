@@ -521,7 +521,9 @@
         <comment></comment>
     </opcode>
     <opcode id="01e9" name="OP_BazaarSearch" updated="02/10/04">
-        <comment></comment>
+        <payload dir="client" typename="bazaarSearchQueryStruct" sizechecktype="none"/>
+        <payload dir="server" typename="bazaarSearchResponseStruct" sizechecktype="modulus"/>
+        <comment>Bazaar search tool</comment>
     </opcode>
     <opcode id="01ea" name="OP_Trader" updated="02/10/04">
         <comment>/trader</comment>

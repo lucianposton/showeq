@@ -1,5 +1,12 @@
 Version: $Id$ $Name$
 
+dohpaZ (02/18/04)
+---------------------
++ Updated version to 5.0.0.7
++ Updated to work with 02/18/04 EQLive
++ Added Frenzy to skill list
++ Integrated patch #899331 "Bazaar Search logging" from perlmonkey (ajs)
+
 dohpaZ (02/14/04)
 ---------------------
 + Updated version to 5.0.0.6
