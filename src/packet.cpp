@@ -2507,14 +2507,29 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             unk = false;
 
-	    if (!decoded)
-	      break;
+            compressedPacket* compressed;
+            compressed = (compressedPacket*)(decodedData);
 
-	    emit compressedDoorSpawn((const compressedDoorStruct *)decodedData);
+            // Make sure we do not divide by zero and there is something to process
+            if (compressed->count)
+            {
+                // Determine the size of a single structure in the compressed packet
+                int nPacketSize=((decodedDataLen - 4)/compressed->count);
+
+                // See if it is the size that we expect
+                int nVerifySize = sizeof(struct doorStruct);
+
+                if (nVerifySize == nPacketSize)
+                {
+                    for ( int i=0; i<compressed->count; i++ )
+                    {
+                        emit newDoorSpawn ((const doorStruct*)&compressed->compressedData[i*nPacketSize]);
+                    }
+                }
+            }
 
             break;
       }
-
 
       case groupinfoCode:
       {
@@ -2894,7 +2909,7 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
    }
 
    // initialize the pcap object 
-   m_pcache_pcap = pcap_open_live((char *) device, 1500, true, 0, ebuf);
+   m_pcache_pcap = pcap_open_live((char *) device, 1500, true, 100, ebuf);
 
    if (!m_pcache_pcap)
    {

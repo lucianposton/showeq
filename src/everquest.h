@@ -56,6 +56,7 @@
 #define SPAWN_NPC_UNKNOWN               4
 #define SPAWN_COINS                     5
 #define SPAWN_DROP                      6
+#define SPAWN_DOOR                      7
 #define SPAWN_SELF                      10
 
 /* 
@@ -97,7 +98,7 @@
 
 //Maximum limits of certain types of data
 #define MAX_KNOWN_SKILLS                74
-#define MAX_KNOWN_LANGS                 24
+#define MAX_KNOWN_LANGS                 25
 
 //Item Flags
 #define ITEM_NORMAL1                    0x0031
@@ -356,18 +357,23 @@ struct spawnZoneStruct
 
 /*
 ** Generic Door Struct
-** Length: 156 Octets
+** Length: 48 Octets
 ** Used in: 
 **    compressedDoorStruct(f721)
 **
 */
 struct doorStruct
 {
-/*0000*/ char   name[8];                  // Filename of Door?
-/*0008*/ int8_t unknown[40];              // ***Placeholder
+/*0000*/ char   name[8];             // Filename of Door?
+/*0008*/ int8_t unknown0008[8];      // ****Placeholder
+/*0016*/ float yPos;                 // y loc
+/*0020*/ float xPos;                 // x loc
+/*0024*/ float zPos;                 // z loc
+/*0028*/ int8_t unknown0032[12];      // ***Placeholder
+/*0040*/ uint8_t doorId;             // door's id #
+/*0041*/ uint8_t size;               // guess..
+/*0042*/ int8_t unknown0042[6];      // ***Placeholder
 };
-
-
 
 
 /*
@@ -612,8 +618,8 @@ struct playerProfileStruct
 /*0129*/ uint8_t  INT;                    // Intelligence
 /*0130*/ uint8_t  AGI;                    // Agility
 /*0131*/ uint8_t  WIS;                    // Wisdom
-/*0132*/ uint8_t  languages[24];          // List of languages (MAX_KNOWN_LANGS)
-/*0156*/ uint8_t  unknown0156[494];       // ***Placeholder//518
+/*0132*/ uint8_t  languages[25];          // List of languages (MAX_KNOWN_LANGS)
+/*0157*/ uint8_t  unknown0157[493];       // ***Placeholder//518
 /*0650*/ struct spellBuff buffs[15];      // Buffs currently on the player
 /*0800*/ int8_t   unknown0800[1080];      // ***Placeholder
 /*1880*/ int16_t  sSpellBook[256];        // List of the Spells scribed in the spell book

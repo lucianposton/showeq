@@ -1198,7 +1198,7 @@ void CSpawnList::populateCategory(const Category* cat)
     return;
 
   // types of items to populate category with
-  itemType types[3] = { tDrop, tCoins, };
+  itemType types[4] = { tDrop, tCoins, tDoors, };
 
   int flags = 0;
   const ItemMap& itemMap = m_spawnShell->spawns();

@@ -38,7 +38,8 @@ enum itemType
 { 
   tUnknown, 
   tCoins, 
-  tDrop, 
+  tDoors, 
+  tDrop,
   tSpawn 
 };
 
@@ -310,6 +311,22 @@ class Coin : public Item
   uint8_t m_coinType;
 };
 
+//----------------------------------------------------------------------
+// Door
+class Door : public Item
+{
+ public:
+  Door(const doorStruct* d);
+  virtual ~Door();
+
+  // virtual get method overloads
+  virtual QString raceName() const;
+  virtual QString className() const;
+
+  // update methods
+  void update(const doorStruct* d);
+
+};
 
 //----------------------------------------------------------------------
 // Drop
@@ -378,6 +395,24 @@ inline Coin* coinType(Item* item)
   // if this is an item of coin type, return the pointer to Coin
   if (item->type() == tCoins)
     return (Coin*)item;
+  else
+    return NULL; // otherwise NULL
+}
+
+inline const Door* doorType(const Item* item)
+{
+  // if this is an item of door type, return the pointer to Door
+  if (item->type() == tDoors)
+    return (const Door*)item;
+  else
+    return NULL; // otherwise NULL
+}
+
+inline Door* doorType(Item* item)
+{
+  // if this is an item of door type, return the pointer to Door
+  if (item->type() == tDoors)
+    return (Door*)item;
   else
     return NULL; // otherwise NULL
 }

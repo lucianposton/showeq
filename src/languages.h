@@ -9,7 +9,7 @@
   "Barbarian",     // 2
   "Erudian",       // 3
   "Elvish",        // 4
-  "Teir'Dal",      // 5
+  "Dark Elvish",   // 5
   "Dwarvish",      // 6
   "Troll",         // 7
   "Ogre",          // 8
@@ -21,11 +21,12 @@
   "Froglok",       // 14
   "Goblin",        // 15
   "Gnoll",         // 16
-  "Giant Tongue",  // 17
-  "Kobold",        // 18
+  "Combine Tongue",// 17 
+  "Elder Teir'Dal",// 18
   "Lizardman",     // 19
   "Orcish",        // 20
   "Faerie",        // 21
   "Dragon",        // 22
   "Elder Dragon",  // 23
   "Dark Speech",   // 24
+  "Van Shir",      // 25

@@ -162,10 +162,6 @@ QMainWindow (parent, name)
    connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, bool)),
 	   this, SLOT(zoneNew(const newZoneStruct*, bool)));
 
-   // connect FilterMgr slots to Packet signals
-   connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, bool)),
-	   m_filterMgr, SLOT(zoneNew(const newZoneStruct*, bool)));
-
    // connect MapMgr slots to interface signals
    connect(this, SIGNAL(saveAllPrefs(void)),
 	   m_mapMgr, SLOT(savePrefs(void)));
@@ -378,6 +374,8 @@ QMainWindow (parent, name)
 	   m_spawnShell, SLOT(newCoinsItem(const dropCoinsStruct *)));
    connect(m_packet, SIGNAL(removeCoinsItem(const removeCoinsStruct *)),
 	   m_spawnShell, SLOT(removeCoinsItem(const removeCoinsStruct *)));
+   connect(m_packet, SIGNAL(newDoorSpawn(const doorStruct *)),
+           m_spawnShell, SLOT(newDoorSpawn(const doorStruct*)));
    connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*)),
 	   m_spawnShell, SLOT(newSpawn(const newSpawnStruct*)));
    connect(m_packet, SIGNAL(updateSpawns(const spawnPositionUpdateStruct *)),
@@ -2723,7 +2721,7 @@ void EQInterface::channelMessage(const channelMessageStruct* cmsg, bool client)
     tempStr.sprintf("Say");
     break;
     
-  case 15:
+  case 14:
     tempStr.sprintf("GM-Tell");
     break;
     
@@ -3100,6 +3098,8 @@ void EQInterface::zoneEntry(const ServerZoneEntryStruct* zsentry)
     + zsentry->zoneShortName + "')";
   emit msgReceived(tempStr);
   emit newZoneName(zsentry->zoneShortName);
+
+  m_filterMgr->loadZone(zsentry->zoneShortName);
 }
 
 void EQInterface::zoneChange(const zoneChangeStruct* zoneChange, bool client)
@@ -3129,6 +3129,8 @@ void EQInterface::zoneChange(const zoneChangeStruct* zoneChange, bool client)
     tempStr = QString("Zone: Zoning, Please Wait...\t\t(Zone: '")
       + zoneChange->zoneName + "')";
     emit msgReceived(tempStr);
+
+    m_filterMgr->loadZone(zoneChange->zoneName);
   }
 }
 
@@ -3153,6 +3155,8 @@ void EQInterface::zoneNew(const newZoneStruct* zoneNew, bool client)
 
   emit newZoneName(zoneNew->longName);
   stsMessage("");
+
+  m_filterMgr->loadZone(zoneNew->shortName);
 }
 
 void EQInterface::clientTarget(const clientTargetStruct* cts)

@@ -601,6 +601,7 @@ class EQPacket : public QObject
    void removeGroundItem       (const removeThingOnGround*);
    void newCoinsItem           (const dropCoinsStruct*);
    void removeCoinsItem        (const removeCoinsStruct*);
+   void newDoorSpawn           (const doorStruct*);
 
    void updateSpawns           (const spawnPositionUpdateStruct* updates);
    void updateSpawnHP          (const spawnHpUpdateStruct* hpupdate);

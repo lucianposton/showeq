@@ -643,6 +643,8 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
 			  this, SLOT(toggle_drops(int)));
   m_id_coins = insertItem("Show Coins",
 			  this, SLOT(toggle_coins(int)));
+  m_id_doors = insertItem("Show Doors",
+			  this, SLOT(toggle_doors(int)));
   m_id_spawnNames = insertItem("Show SpawnNames",
 			       this, SLOT(toggle_spawnNames(int)));
   m_id_highlightConsideredSpawns =
@@ -714,6 +716,7 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_spawns, m_map->showSpawns());
   setItemChecked(m_id_drops, m_map->showDrops());
   setItemChecked(m_id_coins, m_map->showCoins());
+  setItemChecked(m_id_doors, m_map->showDoors());
   setItemChecked(m_id_spawnNames, m_map->showSpawnNames());
   setItemChecked(m_id_highlightConsideredSpawns, 
 		 m_map->highlightConsideredSpawns());
@@ -813,6 +816,11 @@ void MapMenu::toggle_drops(int itemId)
 void MapMenu::toggle_coins(int itemId)
 {
   m_map->setShowCoins(!m_map->showCoins());
+}
+
+void MapMenu::toggle_doors(int itemId)
+{
+  m_map->setShowDoors(!m_map->showDoors());
 }
 
 void MapMenu::toggle_spawnNames(int itemId)
@@ -956,6 +964,9 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "ShowDroppedCoins";
   m_showCoins = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
+
+  tmpPrefString = "ShowDoors";
+  m_showDoors = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
 
   tmpPrefString = "ShowSpawns";
   m_showSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1);
@@ -1179,6 +1190,9 @@ void Map::savePrefs(void)
 
   tmpPrefString = "ShowDroppedCoins";
   pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showCoins);
+
+  tmpPrefString = "ShowDoors";
+  pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showDoors);
 
   tmpPrefString = "ShowSpawns";
   pSEQPrefs->setPrefInt(tmpPrefString, prefString, m_showSpawns);
@@ -1825,6 +1839,14 @@ void Map::setShowCoins(bool val)
     refreshMap ();
 }
 
+void Map::setShowDoors(bool val) 
+{ 
+  m_showDoors = val; 
+  
+  if(!showeq_params->fast_machine)
+    refreshMap ();
+}
+
 void Map::setShowSpawnNames(bool val) 
 { 
   m_showSpawnNames = val; 
@@ -2090,6 +2112,7 @@ void Map::dumpInfo(QTextStream& out)
   out << "ShowPlayerView: " << m_showPlayerView << endl;
   out << "ShowDroppedItems: " << m_showDrops << endl;
   out << "ShowDroppedCoins: " << m_showCoins << endl;
+  out << "ShowDoors: " << m_showDoors << endl;
   out << "ShowSpawns: " << m_showSpawns << endl;
   out << "ShowSpawnNames: " << m_showSpawnNames << endl;
   out << "HighlightConsideredSpawns: " << m_highlightConsideredSpawns << endl;
@@ -2447,6 +2470,9 @@ void Map::paintMap (QPainter * p)
   if (m_showCoins)
     paintCoins(m_param, tmp);
 
+  if (m_showDoors)
+    paintDoors(m_param, tmp);
+
   if (m_showSpawns)
     paintSpawns(m_param, tmp, drawTime);
 
@@ -2645,6 +2671,40 @@ void Map::paintCoins(MapParameters& param,
 		 iylOffset + m_drawSize,
 		 ixlOffset + m_drawSize,
 		 iylOffset - m_drawSize);
+  }
+}		     
+
+void Map::paintDoors(MapParameters& param,
+		     QPainter& p)
+{
+#ifdef DEBUGMAP
+  printf("Paint the door items\n");
+#endif
+  const ItemMap& itemMap = m_spawnShell->doors();
+  ItemConstIterator it;
+  const Item* item;
+  const QRect& screenBounds = m_param.screenBounds();
+  int ixlOffset;
+  int iylOffset;
+
+  // coins only come in one color
+  p.setPen(QColor (110, 60, 0));
+
+  /* Paint the coin items */
+  for (it = itemMap.begin();
+       it != itemMap.end(); 
+       ++it)
+  {
+    // get the item from the list
+    item = it->second;
+
+    if (!inRect(screenBounds, item->xPos(), item->yPos()))
+      continue;
+
+    ixlOffset = param.calcXOffsetI(item->xPos());
+    iylOffset = param.calcYOffsetI(item->yPos());
+
+    p.drawRect(ixlOffset,iylOffset, m_drawSize, m_drawSize);
   }
 }		     
 
@@ -3639,9 +3699,9 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
   }
 
   const Item* item;
-  itemType itemTypes[2] = { tDrop, tCoins };
+  itemType itemTypes[3] = { tDrop, tCoins, tDoors };
   
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 3; i++)
   {
     const ItemMap& itemMap = m_spawnShell->getConstMap(itemTypes[i]);
 

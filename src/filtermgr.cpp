@@ -154,19 +154,27 @@ void FilterMgr::listFilters(void)
   }
 }
 
-void FilterMgr::zoneNew(const newZoneStruct* zoneNew, bool client)
+void FilterMgr::loadZone(const QString& shortZoneName)
 {
   QString zoneFilterFileName;
 
   zoneFilterFileName.sprintf(LOGDIR "/filters_%s.conf", 
-			     zoneNew->shortName);
+			     (const char*)shortZoneName.lower());
 
   QFileInfo fileInfo(zoneFilterFileName);
 
   if (fileInfo.exists())
+  {
     m_filterFile = zoneFilterFileName;
+    printf("Loading Filter File: %s\n", (const char*)m_filterFile);
+  }
   else
+  {
     m_filterFile = showeq_params->filterfile;
+    printf("No Zone Specific filter file '%s'.\n"
+	   "Loading default '%s'.\n",
+	   (const char*)zoneFilterFileName, (const char*)m_filterFile);
+  }
 
   for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
     m_filters[index]->changeFilterFile(m_filterFile);

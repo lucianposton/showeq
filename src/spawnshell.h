@@ -102,6 +102,7 @@ public:
    const ItemMap& spawns(void) const;
    const ItemMap& drops(void) const;
    const ItemMap& coins(void) const;
+   const ItemMap& doors(void) const;
 signals:
    void addItem(const Item* item);
    void delItem(const Item* item);
@@ -122,6 +123,7 @@ public slots:
    void newGroundItem(const dropThingOnGround*);
    void removeGroundItem(const removeThingOnGround*);
    void newCoinsItem(const dropCoinsStruct*);
+   void newDoorSpawn(const doorStruct*);
    void removeCoinsItem(const removeCoinsStruct*);
    void zoneSpawns(const zoneSpawnsStruct* zspawns, int len);
    void newSpawn(const newSpawnStruct* spawn);
@@ -176,6 +178,7 @@ public slots:
    ItemMap m_spawns;
    ItemMap m_drops;
    ItemMap m_coins;
+   ItemMap m_doors;
 
    // filter manager
    FilterMgr& m_filterMgr;
@@ -192,6 +195,8 @@ const ItemMap& SpawnShell::getConstMap(itemType type) const
     return m_coins;
   case tDrop:
     return m_drops;
+  case tDoors:
+    return m_doors;
   default:
     return m_spawns;
   }
@@ -208,6 +213,8 @@ ItemMap& SpawnShell::getMap(itemType type)
     return m_coins;
   case tDrop:
     return m_drops;
+  case tDoors:
+    return m_doors;
   default:
     return m_spawns;
   }
@@ -229,6 +236,12 @@ inline
 const ItemMap& SpawnShell::coins(void) const
 {
   return m_coins; 
+}
+
+inline
+const ItemMap& SpawnShell::doors(void) const
+{
+  return m_doors; 
 }
 
 //--------------------------------------------------

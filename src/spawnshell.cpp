@@ -119,6 +119,7 @@ void SpawnShell::clear(void)
 
    clearMap(m_spawns);
    clearMap(m_coins);
+   clearMap(m_doors);
    clearMap(m_drops);
    m_playerIdSet = false;
    m_playerId = 0;
@@ -352,6 +353,36 @@ void SpawnShell::removeGroundItem(const removeThingOnGround *d)
       deleteItem(tDrop, d->dropId);
 }
 
+void SpawnShell::newDoorSpawn(const doorStruct *d)
+{
+#ifdef SPAWNSHELL_DIAG
+   printf("SpawnShell::newDoorSpawn(doorStruct*)\n");
+#endif
+   if (!d)
+     return;
+   ItemMap::iterator it;
+   Door* item;
+   it = m_doors.find(d->doorId);
+   if (it != m_doors.end())
+   {
+     item = (Door*)it->second;
+     item->update(d);
+     updateFilterFlags(item);
+     emit changeItem(item, tSpawnChangedALL);
+   }
+   else
+   {
+     item = new Door(d);
+     updateFilterFlags(item);
+     m_doors.insert(ItemMap::value_type(d->doorId, item));
+     emit addItem(item);
+   }
+
+   if (item->filterFlags() & FILTER_FLAG_ALERT)
+     emit handleAlert(item, tNewSpawn);
+}
+
+
 void SpawnShell::newCoinsItem(const dropCoinsStruct *c)
 {
 #ifdef SPAWNSHELL_DIAG
@@ -484,7 +515,7 @@ void SpawnShell::playerUpdate(const playerUpdateStruct *pupdate, bool client)
 
   if (m_playerSpawn != NULL)
   {
-    m_playerSpawn->setPos(pupdate->xPos, pupdate->yPos, pupdate->zPos,
+    m_playerSpawn->setPos(pupdate->xPos, pupdate->yPos, pupdate->zPos / 10,
 			  showeq_params->walkpathrecord,
 			  showeq_params->walkpathlength);
     m_playerSpawn->setDeltas(pupdate->deltaX, pupdate->deltaY, 
@@ -506,7 +537,7 @@ void SpawnShell::playerUpdate(const playerUpdateStruct *pupdate, bool client)
 			      m_player->getPlayerDeity());
 
     // and set it's info
-    m_playerSpawn->setPos(pupdate->xPos, pupdate->yPos, pupdate->zPos,
+    m_playerSpawn->setPos(pupdate->xPos, pupdate->yPos, pupdate->zPos / 10,
 			  showeq_params->walkpathrecord,
 			  showeq_params->walkpathlength);
     m_playerSpawn->setDeltas(pupdate->deltaX, pupdate->deltaY, 
@@ -584,7 +615,7 @@ void SpawnShell::updateSpawns(const spawnPositionUpdateStruct* updates)
        updateSpawn(updates->spawnUpdate[a].spawnId,
 		   updates->spawnUpdate[a].xPos,
 		   updates->spawnUpdate[a].yPos,
-		   updates->spawnUpdate[a].zPos,
+		   updates->spawnUpdate[a].zPos / 10,
 		   updates->spawnUpdate[a].deltaX,
 		   updates->spawnUpdate[a].deltaY,
 		   updates->spawnUpdate[a].deltaZ,
@@ -596,7 +627,7 @@ void SpawnShell::updateSpawns(const spawnPositionUpdateStruct* updates)
        updateSpawn(updates->spawnUpdate[a].spawnId,
 		   updates->spawnUpdate[a].xPos,
 		   updates->spawnUpdate[a].yPos,
-		   updates->spawnUpdate[a].zPos,
+		   updates->spawnUpdate[a].zPos / 10,
 		   0, 0, 0,
 		   updates->spawnUpdate[a].heading, 
 		   0);
@@ -1057,6 +1088,7 @@ void SpawnShell::refilterSpawns()
   refilterSpawns(tSpawn);
   refilterSpawns(tDrop);
   refilterSpawns(tCoins);
+  refilterSpawns(tDoors);
 }
 
 void SpawnShell::refilterSpawns(itemType type)

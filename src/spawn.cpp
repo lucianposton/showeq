@@ -947,6 +947,40 @@ QString Coin::className() const
 }
 
 //----------------------------------------------------------------------
+// Door
+Door::Door(const doorStruct* d)
+  : Item(tDoors, d->doorId)
+{
+  m_NPC = SPAWN_DOOR;
+
+  update(d);
+}
+
+Door::~Door()
+{
+}
+
+void Door::update(const doorStruct* d)
+{
+  QString temp;
+  setPos((int16_t)(d->xPos), 
+	 (int16_t)(d->yPos), 
+	 (int16_t)(d->zPos));
+  m_name.sprintf("Door: %s (%d) ", d->name, d->doorId);
+  updateLast();
+}
+
+QString Door::raceName() const
+{
+  return "Door";
+}
+
+QString Door::className() const
+{
+  return "Thing";
+}
+
+//----------------------------------------------------------------------
 // Drop
 Drop::Drop(const dropThingOnGround* d, const QString& name)
   : Item(tDrop, d->dropId)

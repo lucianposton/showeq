@@ -5,24 +5,17 @@ AM_CONFIG_HEADER(conf.h)
 AM_INIT_AUTOMAKE(showeq, 4.0.0)
 AM_MAINTAINER_MODE
 
-dnl Checks for programs.
-AC_PROG_CC
-AC_PROG_CXX
-AC_PROG_CPP
+dnl Use CCd/CXXd rather than CC/CXX otherwise it cache's the value
+dnl and prevents the alternate search from working. Would be better
+dnl if there was someway to invalidate the cache entry. ??
 
-dnl Checks for typedefs, structures, and compiler characteristics.
-dnl AC_C_CONST will fail if c++ is switched on using AC_LANG_CPLUSPLUS
-dnl before this test is run.
-AC_C_CONST
+AC_CHECK_PROGS(CCd,$CC gcc cc gcc3 gcc-3.0)
+AC_CHECK_PROGS(CXXd,$CXX $CCC g++ c++ gcc CC cxx cc++ gcc g++3 g++-3.0)
 
-AC_PROG_INSTALL
-AC_PROG_LN_S
-AC_PROG_MAKE_SET
-AM_PROG_LIBTOOL
+CC=$CCd
+CXX=$CXXd
 
-AC_LANG_CPLUSPLUS
-
-AC_MSG_CHECKING(for supported compiler version)
+AC_DEFUN(CHECK_COMPILER,[
 AC_TRY_LINK(
 [
 #include <stdio.h>
@@ -50,15 +43,49 @@ AC_TRY_LINK(
 	#warning "Unknown Compiler may or may not work!"
 #endif
 ],
-[
+[ 
 AC_MSG_RESULT(yes)
+HAVE_GCC3="YES";
 ],
 [
-AC_MSG_RESULT(no)
-AC_MSG_ERROR([You need at least GCC 3.0 or greater to compile ShowEQ])
+AC_MSG_RESULT(no);
+HAVE_GCC3="NO";
+dnl AC_MSG_ERROR([You need at least GCC 3.0 or greater to compile ShowEQ])
+]
+)
 ]
 )
 
+AC_MSG_CHECKING(for supported compiler version)
+CHECK_COMPILER
+if test "$HAVE_GCC3" = "NO"; then
+    unset CC
+    unset CXX
+    AC_CHECK_PROGS(CC,gcc-3.0 gcc3)
+    AC_CHECK_PROGS(CXX,g++-3.0 g++3)
+    AC_MSG_CHECKING(alternate compiler for supported compiler version)
+    CHECK_COMPILER
+fi
+if test "$HAVE_GCC3" = "NO"; then
+    AC_MSG_ERROR([You need at least GCC 3.0 or greater to compile ShowEQ])
+fi
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_CPP
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+dnl AC_C_CONST will fail if c++ is switched on using AC_LANG_CPLUSPLUS
+dnl before this test is run.
+AC_C_CONST
+
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AM_PROG_LIBTOOL
+
+AC_LANG_CPLUSPLUS
 
 AC_MSG_CHECKING(for supported libc version)
 AC_TRY_LINK(

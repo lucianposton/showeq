@@ -1,3 +1,22 @@
+dohpaZ (03/01/02)
+---------------------
+Modifications:
+ + Applied patch #498090 "find and use gcc3 or gcc-3.0 if present" 
+   by njk (yendor)
+ + Applied patch #498465 "Timeout for pcap_open_live()" by grendel (runlevel)
+   aka segv
+ + Applied patch #498562 "Spawn z loc patch" by wyvern (mvern)
+ + Applied patch #498650 "door spawns patch" by wyvern (mvern)
+ + Applied patch #498652 "gm-tell fix" by wyvern (mvern)
+ + Applied patch #498822 "Language header chagnes for Vah Shir" 
+   by Bonkers D Bobcat (bonkersbobcat)
+ + Modified loading of zone specific filters to also occur on zone change and
+   zone entry (in case we don't see zone new).  Also made it always use an
+   all lowercase zone name and display the name of the filter file being 
+   loaded.
+ + Adjusted languages[] array definition to new known length, and also 
+   adjusted the following unknown[] uint8_t array.
+
 dohpaZ (02/01/02)
 ---------------------
 Bug Fixes:

@@ -85,11 +85,12 @@ class FilterMgr : public QObject
   void loadFilters(const QString& filterFile);
   void saveFilters(void);
   void listFilters(void);
-  void zoneNew(const newZoneStruct* zoneNew, bool client);
+  void loadZone(const QString& zoneShortName);
   
  signals:
   void filtersChanged();
   void runtimeFiltersChanged(uint8_t flag);
+
 
  private:
   QString m_filterFile;
