@@ -698,12 +698,11 @@ struct ServerZoneEntryStruct
 /*0007*/ char     name[64];               // Player first name
 /*0071*/ uint8_t  unknown0037[3];         // unknown
 /*0074*/ uint32_t zoneId;                 // zone number
-/*0078*/ uint32_t unknown0078;
-/*0082*/ float    x;
-/*0086*/ float    y;
-/*0090*/ float    z;
-/*0094*/ float    heading;
-/*0098*/ uint8_t  unknown0098[68];
+/*0078*/ float    x;
+/*0082*/ float    y;
+/*0086*/ float    z;
+/*0090*/ float    heading;
+/*0094*/ uint8_t  unknown0098[72];
 /*0166*/ uint16_t guildId;
 /*0168*/ uint8_t  unknown0169[7];
 /*0175*/ uint8_t  class_;                 // Player's Class
@@ -712,8 +711,7 @@ struct ServerZoneEntryStruct
 /*0179*/ uint8_t  level;                  // Player's Level
 /*0180*/ uint8_t  unknown0180[160];       // ***Placeholder 
 /*0340*/ uint16_t deity;                  // Player's Deity
-/*0342*/ uint8_t  unknown0310[8];         // ***Placeholder
-/*0350*/ uint8_t  unknown0318[8];         // ***Placeholder
+/*0342*/ uint8_t  unknown0310[12];         // ***Placeholder
 };
 
 /*
@@ -1197,7 +1195,7 @@ struct actionStruct
 
 /*
 ** New Zone Code
-** Length: 450 Octets
+** Length: 454 Octets
 ** OpCode: NewZoneCode
 */
 
@@ -1209,7 +1207,7 @@ struct newZoneStruct
 /*0032*/ uint8_t unknown0032[34];          // unknown
 /*0066*/ char    shortName[32];            // Zone Short Name
 /*0098*/ char    longName[180];            // Zone Long Name
-/*0278*/ uint8_t unknown0278[172];         // *** Placeholder
+/*0278*/ uint8_t unknown0278[176];         // *** Placeholder
 };
 
 /*
