@@ -721,11 +721,23 @@ void SpawnShell::spawnWearingUpdate(const wearChangeStruct *wearing)
    if (it != m_spawns.end())
    {
      item = (Spawn*)it->second;
+#if 1 // ZBTEMP: 
+     fprintf(stderr, "id=%d name=%s slotId=%d itemId=%d\n",
+	     wearing->spawnId, (const char*)item->name(),
+	     wearing->wearSlotId, wearing->newItemId);
+#endif
      item->setEquipment(wearing->wearSlotId, wearing->newItemId);
      updateFilterFlags(item);
      updateRuntimeFilterFlags(item);
      emit changeItem(item, tSpawnChangedWearing);
    }
+#if 1 // ZBTEMP: 
+   else
+     fprintf(stderr, "id=%d slotId=%d itemId=%d\n",
+	     wearing->spawnId, 
+	     wearing->wearSlotId, wearing->newItemId);
+#endif
+
 }
 
 void SpawnShell::consRequest(const considerStruct * con) 

@@ -180,7 +180,9 @@ ExperienceWindow::ExperienceWindow( EQPacket* p, GroupMgr* g )
    m_layout = new QVBoxLayout( this );
    m_layout->addSpacing( m_menu_bar->height() + 5 );
 
-   setCaption("ShowEQ - Experience");
+   QString section = "Experience";
+   setCaption(pSEQPrefs->getPrefString("Title", section, "ShowEQ - Experience"));
+
    QGroupBox *listGBox = new QVGroupBox( "Experience Log", this );
    m_layout->addWidget( listGBox );
 

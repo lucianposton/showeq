@@ -1,3 +1,11 @@
+dohpaZ (20/03/02)
+------------------
+Modifications:
+ + Applied patch #531296 "Window Title Configurability" 
+   by cybertech (CyberTech)
+ + Modified results of patch #531296 to not use C style strings nor strdup().
+ + Added "Save Preferences" option to the "File" menu.
+
 dohpaZ (19/03/02)
 ------------------
 Modifications:

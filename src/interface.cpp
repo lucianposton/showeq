@@ -222,8 +222,9 @@ QMainWindow (parent, name)
    //pFileMenu = new QPopupMenu;
    QPopupMenu* pFileMenu = new QPopupMenu;
    menuBar()->insertItem("&File", pFileMenu);
-   pFileMenu->insertItem("&Open Map", m_mapMgr, SLOT(loadMap()), Key_F1);
-   pFileMenu->insertItem("&Save Map", m_mapMgr, SLOT(saveMap()), Key_F2);
+   pFileMenu->insertItem("Open &Map", m_mapMgr, SLOT(loadMap()), Key_F1);
+   pFileMenu->insertItem("Sa&ve Map", m_mapMgr, SLOT(saveMap()), Key_F2);
+   pFileMenu->insertItem("&Save Preferences", this, SLOT(savePrefs()), CTRL+Key_S);
    pFileMenu->insertItem("&Reload Filters", m_filterMgr, SLOT(loadFilters()), Key_F3);
    pFileMenu->insertItem("&Save Filters", m_filterMgr, SLOT(saveFilters()), Key_F4);
    pFileMenu->insertItem("Edit Filters", this, SLOT(launch_editor_filters()));
@@ -1001,7 +1002,7 @@ QMainWindow (parent, name)
 #endif
 
    // Create message boxes defined in config preferences
-   char *title = 0;
+   QString title;
    int i = 0;
    int j = 0;
    MsgDialog* pMsgDlg;
@@ -1014,7 +1015,7 @@ QMainWindow (parent, name)
      {
        m_viewChannelMsgs = true;
        menuBar()->setItemChecked (m_id_view_ChannelMsgs, m_viewChannelMsgs);
-       title = strdup(pSEQPrefs->getPrefString("Title", msgSection));
+       title = pSEQPrefs->getPrefString("Title", msgSection);
 //        pMsgDlg = new MsgDialog(topLevelWidget(), title, m_StringList);
 //        pMsgDlg = new MsgDialog(this, title, m_StringList);
         // using the parentWidget makes this messagebox isolated from the
@@ -1066,7 +1067,7 @@ QMainWindow (parent, name)
              if (name || filter)
              {
                fprintf(stderr, "Error: Incomplete definition of Button '%s'\n",
-                  title);
+		       (const char*)title);
              }
 // allow skipped numbers
 //             break; // no more buttons
@@ -1090,9 +1091,6 @@ QMainWindow (parent, name)
         pMsgDlg->show();
         if (pSEQPrefs->getPrefBool("UseWindowPos", section, 0))
           pMsgDlg->move(x,y);
-
-        free(title);
-
       } // end if dialog config section found
 
 // allow skipped numbers
@@ -1194,8 +1192,9 @@ printf("Resizing %d/%d\n", w, h);
    // Set main window title
    // TODO: Add % replacement values and a signal to update, for ip address currently
    // TODO: being monitored.
-   setCaption(QString("ShowEQ - Main (ctrl+alt+t to toggle menubar)"));
 
+   setCaption(pSEQPrefs->getPrefString("Title", section, 
+				       "ShowEQ - Main (ctrl+alt+t to toggle menubar)"));
 
    /* Start the packet capturing */
    m_packet->start (10);

@@ -171,7 +171,7 @@ CompressTime    1000   # ignore timestamps (compress time) for pckts over 1sec
 # GUI Options
 #
 [Interface]
-Title          "ShowEQ - Main"       # allows setting of the caption
+Title          "ShowEQ - Main (ctrl+alt+t to toggle menubar)"  # caption
 UseWindowPos    0      # set to 1 if you want to restore the window pos
 WindowXOffset   0      # window manager decoration offset (0 for KDE works)
 WindowYOffset   0      # window manager decoration offset (0 for KDE works)
@@ -224,11 +224,13 @@ DockedMap4	0	# dock Map 4
 DockedMap5	0	# dock Map 5
 
 [Experience]
+Title             "ShowEQ - Experience"
 SavePosition      1    # if set and undocked, save window x, y, width, height
 WindowX 0              # modified when saved
 WindowY 0              # modified when saved
 
 [Combat]
+Title             "ShowEQ - Combat"
 SavePosition      1    # if set and undocked, save window x, y, width, height
 WindowX 0              # modified when saved
 WindowY 0              # modified when saved
