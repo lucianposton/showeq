@@ -44,8 +44,7 @@ SpawnList::SpawnList(Player* player,
     m_categoryMgr(categoryMgr),
     m_player(player),
     m_spawnShell(spawnShell),
-    m_menu(NULL),
-    m_holdUpdates(false)
+    m_menu(NULL)
 {
    setRootIsDecorated(true);
 
@@ -86,12 +85,6 @@ SpawnList::SpawnList(Player* player,
 
    connect (this, SIGNAL(doubleClicked(QListViewItem*)),
             this, SLOT(mouseDoubleClickEvent(QListViewItem*)));
-
-   // connect SpawnList slots to EQPacket signals
-   connect(packet, SIGNAL(startDecodeBatch(void)),
-	   this, SLOT(startDecodeBatch(void)));
-   connect(packet, SIGNAL(finishedDecodeBatch(void)),
-	   this, SLOT(finishedDecodeBatch(void)));
 
    // connect SpawnList slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(addItem(const Item *)),
@@ -170,7 +163,7 @@ void SpawnList::setPlayer(int16_t x, int16_t y, int16_t z,
 
 void SpawnList::changeItem(const Item* item, uint32_t changeItem)
 {
-  if (m_holdUpdates || (item == NULL))
+  if (item == NULL)
     return;
 
   QListViewItemIterator it(this);
@@ -213,7 +206,7 @@ void SpawnList::changeItem(const Item* item, uint32_t changeItem)
 
 void SpawnList::killSpawn(const Item* item)
 {
-  if (m_holdUpdates || (item == NULL))
+  if (item == NULL)
     return;
 
    QListViewItemIterator it(this);
@@ -276,7 +269,7 @@ SpawnListItem* SpawnList::Find(QListViewItemIterator& it,
 // Slot coming from SpawnShell::addItem.  Called when any spawn is created
 void SpawnList::addItem(const Item* item)
 {
-  if (m_holdUpdates || (item == NULL))
+  if (item == NULL)
     return;
 
   // ZB: Need to figure out how to derive flags
@@ -1047,21 +1040,6 @@ void SpawnList::selChanged(QListViewItem* litem)
   // it might have been a category title selected, only select if it's an item
   if (item != NULL)
     emit spawnSelected(item);
-}
-
-void SpawnList::startDecodeBatch(void)
-{
-  // disable updates during the decode batch
-  m_holdUpdates = true;
-}
-
-void SpawnList::finishedDecodeBatch(void)
-{
-  // re-enable updates once now that the decode batch is finished 
-  m_holdUpdates = false;
-  
-  // rebuild the spawn list
-  rebuildSpawnList();
 }
 
 void SpawnList::mousePressEvent(int button, QListViewItem* litem,

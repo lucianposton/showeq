@@ -614,9 +614,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    QPopupMenu* pSaveStateMenu = new QPopupMenu;
    pOptMenu->insertItem("&Save State", pSaveStateMenu);
    pSaveStateMenu->setCheckable(true);
-   x = pSaveStateMenu->insertItem("&Decode Key", this, 
-				  SLOT(toggle_opt_save_DecodeKey(int)));
-   pSaveStateMenu->setItemChecked(x, showeq_params->saveDecodeKey);
    x = pSaveStateMenu->insertItem("&Player", this, 
 				  SLOT(toggle_opt_save_PlayerState(int)));
    pSaveStateMenu->setItemChecked(x, showeq_params->savePlayerState);
@@ -725,15 +722,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    if(showeq_params->session_tracking)
       m_packet->session_tracking();
 
-   // Decoder Menu
-   m_decoderMenu = new QPopupMenu;
-   menuBar()->insertItem("&Decoder", m_decoderMenu);
-   m_decoderMenu->insertItem("Input Session Key", this, SLOT(set_decoder_key()), CTRL+Key_F12);
-   m_decoderMenu->insertItem("Load Session Key", this, SLOT(load_decoder_key()), Key_F12);
-   m_decoderMenu->insertItem("Key Filename...", this, 
-			      SLOT(set_opt_enc_BaseFilename(void)));
-   m_decoderMenu->insertItem("Key Port", this, SLOT(set_key_port()));
-   
    // Character Menu 
    m_charMenu = new QPopupMenu;
    menuBar()->insertItem("&Character", m_charMenu);
@@ -1328,14 +1316,14 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_spawnShell, SLOT(newCoinsItem(const dropCoinsStruct *)));
    connect(m_packet, SIGNAL(removeCoinsItem(const removeCoinsStruct *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(removeCoinsItem(const removeCoinsStruct *)));
-   connect(m_packet, SIGNAL(compressedDoorSpawn(const cDoorSpawnsStruct *, uint32_t, uint8_t)),
-           m_spawnShell, SLOT(compressedDoorSpawn(const cDoorSpawnsStruct*)));
+   connect(m_packet, SIGNAL(newDoorSpawn(const doorStruct *, uint32_t, uint8_t)),
+           m_spawnShell, SLOT(newDoorSpawn(const doorStruct *, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(newSpawn(const newSpawnStruct*)));
    connect(m_packet, SIGNAL(updateSpawns(const spawnPositionUpdate *, uint32_t, uint8_t)),
 	   m_spawnShell, SLOT(updateSpawns(const spawnPositionUpdate *)));
-   connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct *, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(updateSpawnHP(const hpUpdateStruct *)));
+   connect(m_packet, SIGNAL(updateSpawnInfo(const SpawnUpdateStruct *, uint32_t, uint8_t)),
+	   m_spawnShell, SLOT(updateSpawnMaxHP(const SpawnUpdateStruct *)));
    connect(m_packet, SIGNAL(updateNpcHP(const hpNpcUpdateStruct*, uint32_t, uint8_t)),
            m_spawnShell, SLOT(updateNpcHP(const hpNpcUpdateStruct*)));
    connect(m_packet, SIGNAL(deleteSpawn(const deleteSpawnStruct*, uint32_t, uint8_t)),
@@ -1382,8 +1370,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_player, SLOT(updateExp(const expUpdateStruct*)));
    connect(m_packet, SIGNAL(updateLevel(const levelUpUpdateStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(updateLevel(const levelUpUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(updateSpawnHP(const hpUpdateStruct*)));
+   connect(m_packet, SIGNAL(updateSpawnMaxHP(const SpawnUpdateStruct*, uint32_t, uint8_t)),
+	   m_player, SLOT(updateSpawnMaxHP(const SpawnUpdateStruct*)));
    connect(m_packet, SIGNAL(updateStamina(const staminaStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(updateStamina(const staminaStruct*)));
    connect(m_packet, SIGNAL(playerItem(const playerItemStruct*, uint32_t, uint8_t)),
@@ -1496,8 +1484,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	      m_pktLogger, SLOT(logPlayerContainer(const playerContainerStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(inspectData(const inspectDataStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logInspectData(const inspectDataStruct*, uint32_t, uint8_t)));
-     connect (m_packet, SIGNAL(updateSpawnHP(const hpUpdateStruct*, uint32_t, uint8_t)),
-	      m_pktLogger, SLOT(logHPUpdate(const hpUpdateStruct*, uint32_t, uint8_t)));
+     connect (m_packet, SIGNAL(updateSpawnInfo(const SpawnUpdateStruct*, uint32_t, uint8_t)),
+	      m_pktLogger, SLOT(logSpawnInfoUpdate(const SpawnUpdateStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(spMessage(const spMesgStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logSPMesg(const spMesgStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(handleSpell(const memSpellStruct*, uint32_t, uint8_t)),
@@ -1576,8 +1564,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	      m_pktLogger, SLOT(logClientTarget(const clientTargetStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(bindWound(const bindWoundStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logBindWound(const bindWoundStruct*, uint32_t, uint8_t)));
-     connect (m_packet, SIGNAL(compressedDoorSpawn(const cDoorSpawnsStruct*, uint32_t, uint8_t)),
-	      m_pktLogger, SLOT(logCDoorSpawns(const cDoorSpawnsStruct*, uint32_t, uint8_t)));
+     connect (m_packet, SIGNAL(newDoorSpawns(const doorSpawnsStruct *, uint32_t, uint8_t)),
+	      m_pktLogger, SLOT(logDoorSpawns(const doorSpawnsStruct *, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(groupInfo(const groupMemberStruct*, uint32_t, uint8_t)),
 	      m_pktLogger, SLOT(logGroupInfo(const groupMemberStruct*, uint32_t, uint8_t)));
      connect (m_packet, SIGNAL(groupInvite(const groupInviteStruct*, uint32_t, uint8_t)),
@@ -4450,9 +4438,9 @@ void EQInterface::addItem(const Item* item)
   if (filterFlags & FILTER_FLAG_LOCATE)
   {
     printf ("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
-    printf ("LocateSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s",
+    printf ("LocateSpawn: %s spawned LOC %dy, %dx, %dz at %s",
 	    (const char*)item->name(), 
-	    item->y(), item->x(), item->displayZPos(),
+	    item->y(), item->x(), item->z(),
 	    (const char*)item->spawnTimeStr());
     printf ("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n\n");
     
@@ -4475,9 +4463,9 @@ void EQInterface::addItem(const Item* item)
   
   if (filterFlags & FILTER_FLAG_CAUTION)
   {
-    printf ("CautionSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s\n", 
+    printf ("CautionSpawn: %s spawned LOC %dy, %dx, %dz at %s\n", 
 	    (const char*)item->name(), 
-	    item->y(), item->x(), item->displayZPos(),
+	    item->y(), item->x(), item->z(),
 	    (const char*)item->spawnTimeStr());
     
     if (showeq_params->spawnfilter_logcautions)
@@ -4491,9 +4479,9 @@ void EQInterface::addItem(const Item* item)
   
   if (filterFlags & FILTER_FLAG_HUNT)
   {
-    printf ("HuntSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s\n", 
+    printf ("HuntSpawn: %s spawned LOC %dy, %dx, %dz at %s\n", 
 	    (const char*)item->name(), 
-	    item->y(), item->x(), item->displayZPos(),
+	    item->y(), item->x(), item->z(),
 	    (const char*)item->spawnTimeStr());
     
     if (showeq_params->spawnfilter_loghunts)
@@ -4507,9 +4495,9 @@ void EQInterface::addItem(const Item* item)
   
   if (filterFlags & FILTER_FLAG_DANGER)
   {
-    printf ("DangerSpawn: %s spawned LOC %dy, %dx, %5.1fz at %s", 
+    printf ("DangerSpawn: %s spawned LOC %dy, %dx, %dz at %s", 
 	    (const char*)item->name(), 
-	    item->y(), item->x(), item->displayZPos(),
+	    item->y(), item->x(), item->z(),
 	    (const char*)item->spawnTimeStr());
     
     if (showeq_params->spawnfilter_logdangers)
@@ -4606,16 +4594,16 @@ void EQInterface::handleAlert(const Item* item,
     if (type == tNewSpawn)
     {
       if (spawn)
-	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%5.1f) LVL %d, HP %d/%d", 
+	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%d) LVL %d, HP %d/%d", 
 		     1900 + tp->tm_year, tp->tm_mon, tp->tm_mday,
 		     tp->tm_hour, tp->tm_min, tp->tm_sec,
-		     item->x(), item->y(), item->displayZPos(),
+		     item->x(), item->y(), item->z(),
 		     spawn->level(), spawn->HP(), spawn->maxHP());
       else
-	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%5.1f)", 
+	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%d)", 
 		     1900 + tp->tm_year, tp->tm_mon, tp->tm_mday,
 		     tp->tm_hour, tp->tm_min, tp->tm_sec,
-		     item->x(), item->y(), item->displayZPos());
+		     item->x(), item->y(), item->z());
     }
     else
       temp.sprintf(" [%d-%d-%d %d:%d:%d]", 
@@ -4748,11 +4736,11 @@ void EQInterface::updateSelectedSpawnStatus(const Item* item)
   if (showeq_params->retarded_coords)
     string += QString::number(item->y()) + "/" 
       + QString::number(item->x()) + "/" 
-      + QString::number(item->displayZPos(), 'f', 1);
+      + QString::number(item->z());
   else
     string += QString::number(item->x()) + "/" 
       + QString::number(item->y()) + "/" 
-      + QString::number(item->displayZPos(), 'f', 1);
+      + QString::number(item->z());
 
   string += QString(" (") 
     + QString::number(item->calcDist(m_player->x(),
@@ -5108,14 +5096,6 @@ void EQInterface::init_view_menu()
   }
 }
 
-void EQInterface::toggle_opt_save_DecodeKey(int id)
-{
-  showeq_params->saveDecodeKey = !showeq_params->saveDecodeKey;
-  menuBar()->setItemChecked(id, showeq_params->saveDecodeKey);
-  pSEQPrefs->setPrefBool("DecodeKey", "SaveState", 
-			 showeq_params->saveDecodeKey);
-}
-
 void EQInterface::toggle_opt_save_PlayerState(int id)
 {
   showeq_params->savePlayerState = !showeq_params->savePlayerState;
@@ -5196,13 +5176,15 @@ int EQInterface::setTheme(int id)
     case 1: // platinum
     {
       QPalette p( QColor( 239, 239, 239 ) );
-      qApp->setStyle( (QStyle *) new QPlatinumStyle );
+      //qApp->setStyle( (QStyle *) new QPlatinumStyle );
+      qApp->setStyle("platinum");
       qApp->setPalette( p, TRUE );
     }
     break;
     case 2: // windows
     {
-      qApp->setStyle( (QStyle *) new QWindowsStyle );
+      //qApp->setStyle( (QStyle *) new QWindowsStyle );
+      qApp->setStyle("windows");
       qApp->setFont( OrigFont, TRUE );
       qApp->setPalette( OrigPalette, TRUE );
     }
@@ -5211,7 +5193,8 @@ int EQInterface::setTheme(int id)
     case 4: // cde polished
     {
       QPalette p( QColor( 75, 123, 130 ) );
-      qApp->setStyle( (QStyle *) new QCDEStyle( theme == 3 ? TRUE : FALSE ) );
+      //qApp->setStyle( (QStyle *) new QCDEStyle( theme == 3 ? TRUE : FALSE ) );
+      qApp->setStyle("cde");
       p.setColor( QPalette::Active, QColorGroup::Base, QColor( 55, 77, 78 ) );
       p.setColor( QPalette::Inactive, QColorGroup::Base, QColor( 55, 77, 78 ) );
       p.setColor( QPalette::Disabled, QColorGroup::Base, QColor( 55, 77, 78 ) );
@@ -5237,7 +5220,8 @@ int EQInterface::setTheme(int id)
     case 5: // motif
     {
       QPalette p( QColor( 192, 192, 192 ) );
-      qApp->setStyle( (QStyle *) new QMotifStyle );
+      //qApp->setStyle( (QStyle *) new QMotifStyle );
+      qApp->setStyle("motif");
       qApp->setPalette( p, TRUE );
       qApp->setFont( OrigFont, TRUE );
     }
@@ -5245,7 +5229,8 @@ int EQInterface::setTheme(int id)
     case 6: // SGI
     {
       //QPalette p( QColor( 192, 192, 192 ) );
-      qApp->setStyle( (QStyle *) new QSGIStyle( FALSE ) );
+      //qApp->setStyle( (QStyle *) new QSGIStyle( FALSE ) );
+      qApp->setStyle("sgi");
       qApp->setPalette( OrigPalette, TRUE );
       qApp->setFont( OrigFont, TRUE );
     }
@@ -5253,7 +5238,8 @@ int EQInterface::setTheme(int id)
     default: // system default
     {
       QPalette p( QColor( 192, 192, 192 ) );
-      qApp->setStyle( (QStyle *) new QMotifStyle );
+      //qApp->setStyle( (QStyle *) new QMotifStyle );
+      qApp->setStyle("motif");
       qApp->setPalette( p, TRUE );
       qApp->setFont( OrigFont, TRUE );
       theme = 2;
@@ -5596,62 +5582,3 @@ void EQInterface::showNetDiag()
   m_netDiag->show();
 }
 
-void EQInterface::set_decoder_key()
-{
-  uint64_t key = 0xffffffffffffffff; // this is the bad value
-
-  //dialog here
-  bool ok = FALSE;
-  QString textkey = QInputDialog::getText(
-		  tr("Set Decoder Key"),
-		  tr("Key"),
-		  QLineEdit::Normal, QString::null, &ok, this);
-
-  if (ok && !textkey.isEmpty())
-  {
-    key = strtoull(textkey, NULL, 0);
-    qDebug("set_decoder_key: User specified key: 0x%llx", key);
-    emit theKey(key);
-  }
-  else  // empty string or cancel hit
-    return;
-}
-
-void EQInterface::load_decoder_key()
-{
-     emit loadKey();
-}
-
-void EQInterface::set_opt_enc_BaseFilename()
-{
-  QString fileName = 
-    QFileDialog::getSaveFileName(showeq_params->KeyBaseFilename, 
-				 QString::null, this, "KeyFilename",
-				 "Key Filename");
-  if (!fileName.isEmpty())
-  {
-    // set it to be the new base filename
-    showeq_params->KeyBaseFilename = fileName;
-    
-    // set preference to use for next session
-    pSEQPrefs->setPrefString("BaseFilename", "KeyFile", 
-			     showeq_params->KeyBaseFilename);
-  }
-}
-
-void EQInterface::set_key_port()
-{
-  bool ok = FALSE;
-
-  QString key_port = QInputDialog::getText(
-                     tr("Set Decoder Key Port"),
-                     tr("Port"),
-                     QLineEdit::Normal, QString::null, &ok, this);
-
-  if (ok && !key_port.isEmpty())
-  {
-     qDebug("set_decoder_key: User specified key port: %s", (const char*)key_port);
-     pSEQPrefs->setPrefInt("KeyPort", "KeyFile", (uint16_t)atoi(key_port));
-     showeq_params->keyport = (uint16_t)atoi(key_port);
-  }
-}

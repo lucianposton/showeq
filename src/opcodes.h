@@ -21,73 +21,76 @@
 
 #define ClientHashCode              0x3941
 
-#define GuildListCode               0x9241
+#define GuildListCode               0x0f00
 
 /***********************/
 /* Zone Server OpCodes */
 
-#define MobUpdateCode               0x0002
 
-#define EmoteTextCode               0x0008
+#define ZoneEntryCode               0x0010
 
-#define CorpseLocCode               0x0014
+#define CharProfileCode             0x0084
 
-#define DeleteSpawnCode             0x001e
+#define ChannelMessageCode          0x0133
 
-#define RemDropCode                 0x0020
+#define PlayerPosCode               0x0136
 
-#define MakeDropCode                0x0021
+#define ConsiderCode                0x0165
 
-#define CharProfileCode             0x002e
+#define ZoneSpawnsCode              0x0179
 
-#define NewCorpseCode               0x0042
+#define ClientTargetCode            0x017c
 
-#define ActionCode                  0x004d
+#define CPlayerItemsCode            0x01f6
 
-#define NewZoneCode                 0x0056
+#define NewSpawnCode                0x023a
 
-#define ZoneChangeCode              0x00a9
+#define MobUpdateCode               0x0242
 
-#define HPUpdateCode                0x00b6
+#define sWhoAllOutputCode           0x025e
 
-#define ChannelMessageCode          0x00fc
+#define NewZoneCode                 0x00ba
 
-#define TimeOfDayCode               0x00fe
+#define DeleteSpawnCode             0x00ca
 
-#define PlayerPosCode               0x00ff
+#define EmoteTextCode               0x00c1
 
-#define SpawnAppearanceCode         0x0101
+#define MakeDropCode                0x00d1
 
-#define ConsiderCode                0x0136
+#define DoorSpawnsCode              0x01f7
 
-#define ManaDecrementCode           0x0175
+#define GuildMemberUpdate           0x02a0
 
-#define ZoneSpawnsCode              0x0148
+#define NpcHpUpdateCode             0x0263
 
-#define ClientTargetCode            0x014b
+#define SpawnUpdateCode             0x014a
 
-#define StartCastCode               0x0174
-
-#define MemSpellCode                0x0178
-
-#define ExpUpdateCode               0x0187
-
-#define CPlayerItemsCode            0x01e9
-
-#define CDoorSpawnsCode             0x01ea
-
-#define AltExpUpdateCode            0x0209
-
-#define NewSpawnCode                0x023f
-
-#define sWhoAllOutputCode           0x0259
-
-#define NpcHpUpdateCode             0x02a5
-
-#define ZoneEntryCode               0x02ae
+#define NewCorpseCode               0x00e5
 
 /*********************/
 /* outdated          */
+
+#define ZoneChangeCode              0xff01
+
+#define CorpseLocCode               0xf014
+
+#define RemDropCode                 0xf020
+
+#define ActionCode                  0xf04d
+
+#define TimeOfDayCode               0xf0fe
+
+#define SpawnAppearanceCode         0xf101
+
+#define ManaDecrementCode           0xf175
+
+#define StartCastCode               0xf174
+
+#define MemSpellCode                0xf178
+
+#define ExpUpdateCode               0xf187
+
+#define AltExpUpdateCode            0xf209
 
 #define DropCoinsCode               0x0740
 
@@ -199,8 +202,6 @@
 
 #define cForageCode                 0x9440
 
-#define DoorSpawnCode               0x9520
-
 #define LevelUpUpdateCode           0x9841
 
 #define OpenGMCode                  0x9c20
@@ -213,7 +214,7 @@
 
 #define InspectDataCode             0xb640
 
-#define BookTextCode                0xce40
+#define BookTextCode                0xffd2
 
 #define xTradeSpellBookSlotsCode    0xce41
 

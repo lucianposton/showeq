@@ -36,8 +36,10 @@ GuildMgr::~GuildMgr()
 {
 }
 
-QString GuildMgr::guildIdToName(uint16_t guildID)
+QString GuildMgr::guildIdToName(int16_t guildID)
 {
+  if (guildID >= m_guildMap.size() || guildID < 0)
+    return "";
   return m_guildMap[guildID];
 }
 
@@ -66,7 +68,9 @@ void GuildMgr::writeGuildList(const char* data, uint32_t len)
 
   QDataStream guildDataStream(&guildsfile);
 
-  guildDataStream.writeRawBytes(data, len);
+  worldGuildListStruct *gls = (worldGuildListStruct *)data;
+
+  guildDataStream.writeRawBytes((char *)gls->guilds, sizeof(gls->guilds));
 
   guildsfile.close();
   printf("GuildMgr: new guildsfile written\n");
@@ -78,7 +82,8 @@ void GuildMgr::readGuildList()
 
   if (guildsfile.open(IO_ReadOnly))
   {
-     if (guildsfile.size() != sizeof(worldGuildListStruct))
+    worldGuildListStruct tmp;
+     if (guildsfile.size() != sizeof(tmp.guilds))
      {
 	fprintf(stderr, "WARNING: guildsfile not loaded, expected size %d got %d\n",
                 sizeof(worldGuildListStruct), guildsfile.size()); 
@@ -86,14 +91,12 @@ void GuildMgr::readGuildList()
      }
 
      struct guildListStruct gl;
-     uint32_t offset;
      
-     guildsfile.at(sizeof(offset));
      while (!guildsfile.atEnd())
      {
          guildsfile.readBlock(reinterpret_cast<char*>(&gl), sizeof(gl));
-         if (gl.valid)
-            m_guildMap.insert(gl.guildID, gl.guildName);
+         if (strlen(gl.guildName) > 0)
+            m_guildMap.push_back(gl.guildName);
      }
      
     guildsfile.close();
@@ -121,7 +124,6 @@ void GuildMgr::guildList2text(QString fn)
               fn.latin1());
       return;
    }
-
 
    for (int i =0 ; i < MAXGUILDS; i++)
    {

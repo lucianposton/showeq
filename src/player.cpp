@@ -669,13 +669,12 @@ void Player::updateLevel(const levelUpUpdateStruct *levelup)
   emit changeItem(this, tSpawnChangedLevel);
 }
 
-void Player::updateSpawnHP(const hpUpdateStruct *hpupdate)
+void Player::updateSpawnMaxHP(const SpawnUpdateStruct *su)
 {
-  if (hpupdate->spawnId != id())
+  if (su->spawnId != id())
     return;
 
-  m_curHP = m_plusHP + hpupdate->curHp;
-  m_maxHP = hpupdate->maxHp;
+  m_curHP = su->arg1;
 
   m_validHP = true;
 
@@ -764,16 +763,21 @@ void Player::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t dir)
     return;
   else if (dir == DIR_CLIENT)
     setPlayerID(pupdate->spawnId);
+  
+  int16_t py = pupdate->y / 8;
+  int16_t px = pupdate->x / 8;
+  int16_t pz = pupdate->z / 8;
+  int16_t pdeltaX = pupdate->deltaX / 64;
+  int16_t pdeltaY = pupdate->deltaY / 64;
+  int16_t pdeltaZ = pupdate->deltaZ / 64;
  
-  setPos(pupdate->x, pupdate->y, pupdate->z,
-	 showeq_params->walkpathrecord,
-	 showeq_params->walkpathlength);
-  setDeltas(pupdate->deltaX, pupdate->deltaY, 
-	    pupdate->deltaZ);
+  setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);
+  setDeltas(pdeltaX, pdeltaY, pdeltaZ);
   setHeading(pupdate->heading, pupdate->deltaHeading);
   updateLast();
 
-  m_headingDegrees = 360 - (pupdate->heading * 360) / 256;
+//  m_headingDegrees = 360 - (pupdate->heading * 360) / 256;
+  m_headingDegrees = 360 - (pupdate->heading * 360) / 2048;
   emit headingChanged(m_headingDegrees);
 
   emit posChanged(x(), y(), z(), 

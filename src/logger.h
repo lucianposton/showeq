@@ -85,7 +85,7 @@ protected:
 #define Attack2Mask         0x00080000
 #define ZoneChangeMask      0x00100000
 #define BeginCastMask       0x00200000
-#define HPUpdateMask        0x00400000
+#define SIUpdateMask        0x00400000
 #define InspectDataMask     0x00800000
 #define BookTextMask        0x01000000
 #define BadCastMask         0x02000000
@@ -135,7 +135,7 @@ public:
     int  isLoggingPlayerBook()      { return( mask2 & PlayerBookMask );      }
     int  isLoggingPlayerContainer() { return( mask2 & PlayerContainerMask ); }
     int  isLoggingInspectData()     { return( mask2 & InspectDataMask );     }
-    int  isLoggingHPUpdate()        { return( mask2 & HPUpdateMask );        }
+    int  isLoggingSIUpdate()        { return( mask2 & SIUpdateMask );        }
     int  isLoggingSPMesg()          { return( mask2 & SPMesgMask );          }
     int  isLoggingMemSpell()        { return( mask2 & MemSpellMask );        }
     int  isLoggingBeginCast()       { return( mask2 & BeginCastMask );       }
@@ -213,7 +213,7 @@ public:
     void logPlayerBook(const playerBookStruct* item, uint32_t len, uint8_t dir);
     void logPlayerContainer(const playerContainerStruct* item, uint32_t len, uint8_t dir);
     void logInspectData(const inspectDataStruct* data, uint32_t len, uint8_t dir);
-    void logHPUpdate(const hpUpdateStruct* hp, uint32_t len, uint8_t dir);
+    void logSpawnInfoUpdate(const SpawnUpdateStruct* spawnupdate, uint32_t len, uint8_t dir);
     void logSPMesg(const spMesgStruct* msg, uint32_t len, uint8_t dir);
     void logMemSpell(const memSpellStruct* spell, uint32_t len, uint8_t dir);
     void logBeginCast(const beginCastStruct* spell, uint32_t len, uint8_t dir);
@@ -251,7 +251,6 @@ public:
     void logMoneyThing(const moneyThingStruct* thing, uint32_t len, uint8_t dir);
     void logClientTarget(const clientTargetStruct* target, uint32_t len, uint8_t dir);
     void logBindWound(const bindWoundStruct* bind, uint32_t len, uint8_t dir);
-    void logCDoorSpawns(const cDoorSpawnsStruct* doors, uint32_t len, uint8_t dir);
     void logDoorSpawns(const doorSpawnsStruct* doors, uint32_t len, uint8_t dir);
     void logGroupInfo(const groupMemberStruct* guild, uint32_t len, uint8_t dir);
     void logGroupInvite(const groupInviteStruct* guild, uint32_t len, uint8_t dir);

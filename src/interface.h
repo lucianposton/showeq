@@ -207,7 +207,6 @@ class EQInterface:public QMainWindow
    void restoreFonts();
 
    // Decoder signals
-   void loadKey(void);
    void theKey(uint64_t);
    void backfillPlayer(charProfileStruct *);
    void backfillSpawn(spawnStruct *);
@@ -263,7 +262,6 @@ class EQInterface:public QMainWindow
    void toggle_main_UseWindowPos(int id);
    void toggle_main_UseStdout(int id);
    void toggle_main_NoBank(int id);
-   void toggle_opt_save_DecodeKey(int id);
    void toggle_opt_save_PlayerState(int id);
    void toggle_opt_save_ZoneState(int id);
    void toggle_opt_save_Spawns(int id);
@@ -271,10 +269,6 @@ class EQInterface:public QMainWindow
    void set_opt_save_BaseFilename();
    void opt_clearChannelMsgs(int id);
    void init_view_menu();
-   void set_decoder_key();
-   void load_decoder_key();
-   void set_opt_enc_BaseFilename();
-   void set_key_port();
 
  protected:
    bool getMonitorOpCodeList(const QString& title, const QString& defaultList);

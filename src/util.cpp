@@ -1108,37 +1108,3 @@ bool findFile( QString& filename )
   return found;
 }
 
-uint16_t implicitlen (uint16_t opcode)
-{
-    switch (opcode)
-    {
-        case 0x0002:
-            return 0x09; // 9
-        case 0x001e:
-            return 0x04; // 4
-        case 0x003d:
-            return 0x78; // 120
-        case 0x003e:
-            return 0x1f; // 31
-        case 0x004d:
-            return 0x17; // 23
-        case 0x0098:
-            return 0x09; // 9
-        case 0x00a7:
-            return 0x04; // 4
-        case 0x00ae:
-            return 0x08; // 8
-        case 0x00b6:
-            return 0x06; // 6
-        case 0x00ff:
-            return 0x0f; // 15
-        case 0x0101:
-            return 0x08; // 8
-        case 0x0175:
-            return 0x08; // 8
-        case 0x02a5:
-            return 0x03; // 3
-        default:
-            return 0;
-    }
-}

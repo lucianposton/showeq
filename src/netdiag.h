@@ -33,7 +33,6 @@ class NetDiag : public SEQWindow
    void sessionTrackingChanged (uint8_t);
    void seqReceive             (int, int);
    void seqExpect              (int, int);
-   void keyChanged             (void);
    void cacheSize              (int, int);
 
  protected:
@@ -51,7 +50,6 @@ class NetDiag : public SEQWindow
   QLabel* m_sessionLabel;
   QLabel* m_serverPortLabel;
   QLabel* m_clientPortLabel;
-  QLabel* m_decodeKeyLabel;
   QLabel* cache[MAXSTREAMS];
 
   int  m_packetStartTime[MAXSTREAMS];

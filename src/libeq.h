@@ -35,6 +35,7 @@ extern "C"
 #ifdef  __cplusplus
 }
 #endif
+
 #else
 #warning "HAVE_LIBEQ=0"
 #endif // HAVE_LIBEQ

@@ -1,3 +1,14 @@
+mvern 04/17/2003
+----------------
+ + huge changes to decryption code, movement update handling, and a number
+     of other things i'm likely forgetting.  
+ o new libEQ.a required
+ + changed some QT stuff to allow compile with version included in 
+     debian-unstable out of the box
+ - many thanks to dvorak for a good portion of the work done to get things
+     up and running again
+ + Version 4.3.7
+
 fee (floyd) 02/21/2003
 -----------------------
  + changed comparison op == to = in Makefile.dist for shell compatibility (sh vs bash)

@@ -54,7 +54,7 @@ public:
    void updateExp(const expUpdateStruct* exp);
    void updateAltExp(const altExpUpdateStruct* altexp);
    void updateLevel(const levelUpUpdateStruct* levelup);
-   void updateSpawnHP(const hpUpdateStruct* hpupdate);
+   void updateSpawnMaxHP(const SpawnUpdateStruct* su);
    void updateStamina(const staminaStruct* stam);
    void setLastKill(const QString& name, uint8_t level);
    void zoneChanged(void);

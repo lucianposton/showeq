@@ -225,7 +225,7 @@ NULL,
 "poair",                // 215
 "powater",                // 216
 "pofire",                // 217
-"poearth",                // 218
+"poeartha",                // 218
 "potimea",                // 219
 "hohonorb",                // 220
 "nightmareb",                // 221

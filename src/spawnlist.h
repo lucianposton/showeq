@@ -114,9 +114,6 @@ public slots:
 private slots:
    void selChanged(QListViewItem*);
 
-   void startDecodeBatch(void);
-   void finishedDecodeBatch(void);
-
    void mousePressEvent (int button, QListViewItem *litem, const QPoint &point, int col);
    void mouseDoubleClickEvent(QListViewItem *litem);
 
@@ -136,8 +133,6 @@ private:
 
    SpawnListMenu* m_menu;
 
-   // whether to hold off on updating the spawn list until a later time
-   bool m_holdUpdates;
 };
 
 class SpawnListWindow : public SEQWindow

@@ -18,7 +18,7 @@
     "Untargetable",		// 11
     NULL,			// 12
     NULL,			// 13
-    NULL,			// 14
+    "Greater Akheva",			// 14
     NULL,			// 15
     "Seru",			// 16
     NULL,			// 17

@@ -114,18 +114,14 @@ struct ShowEQParams
   QString        ItemRawDataDBFileName;
   bool           ItemDBEnabled;
 
-  bool           saveDecodeKey;
   bool           saveZoneState;
   bool           savePlayerState;
   bool           saveSpawns;
   uint32_t       saveSpawnsFrequency;
-  bool           restoreDecodeKey;
   bool           restorePlayerState;
   bool           restoreZoneState;
   bool           restoreSpawns;
   QString        saveRestoreBaseFilename;
-  QString        KeyBaseFilename;
-  uint16_t       keyport;
 };
  
 extern struct ShowEQParams *showeq_params;

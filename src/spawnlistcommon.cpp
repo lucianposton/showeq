@@ -204,10 +204,10 @@ int SpawnListItem::compare(QListViewItem *i, int col, bool ascending) const
          else
             return item->y() < other_item->y() ? -1 : 1;
       case 6:   // Z Position
-         if (item->displayZPos() == other_item->displayZPos())
+         if (item->z() == other_item->z())
             return 0;
          else
-            return item->displayZPos() < other_item->displayZPos() ? -1 : 1;
+            return item->z() < other_item->z() ? -1 : 1;
       case 7:   // ID
          if (item->id() == other_item->id())
             return 0;
@@ -306,7 +306,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      setText(tSpawnColYPos, buff);
      
      // Z position
-     buff.sprintf("%5.1f", item()->displayZPos());
+     buff.sprintf("%5d", item()->z());
      setText(tSpawnColZPos, buff);
 
      // Distance

@@ -17,7 +17,7 @@
 
 #include <qobject.h>
 #include <qstring.h>
-#include <qmap.h>
+#include <vector>
 
 #include "everquest.h"
 
@@ -35,7 +35,7 @@ class GuildMgr : public QObject
 
   ~GuildMgr();
 
-  QString guildIdToName(uint16_t);
+  QString guildIdToName(int16_t);
 
  public slots:
   void worldGuildList(const char*, uint32_t);
@@ -44,7 +44,7 @@ class GuildMgr : public QObject
   void listGuildInfo();
 
  private:
-  QMap<uint16_t,QString> m_guildMap;
+  std::vector<QString> m_guildMap;
  
   void writeGuildList(const char*, uint32_t);
 

@@ -59,7 +59,6 @@
 #define   WORLD_LOG_FILENAME_OPTION     32
 #define   ITEMDB_DISABLE                3
 #define   STATUS_FONT_SIZE              4
-#define   RESTORE_DECODE_KEY            5
 #define   RESTORE_PLAYER_STATE          6
 #define   RESTORE_ZONE_STATE            7
 #define   RESTORE_SPAWNS                8
@@ -132,7 +131,6 @@ static struct option option_list[] = {
   {"itemdb-raw-data-filename",     required_argument,  NULL, ITEMDB_RAW_FILENAME_OPTION},
   {"itemdb-databases-enabled",     required_argument,  NULL, ITEMDB_DATABASES_ENABLED},
   {"itemdb-disable",               no_argument,        NULL, ITEMDB_DISABLE},
-  {"restore-decode-key",           no_argument,        NULL, RESTORE_DECODE_KEY},
   {"restore-player-state",         no_argument,        NULL, RESTORE_PLAYER_STATE},
   {"restore-zone",                 no_argument,        NULL, RESTORE_ZONE_STATE},
   {"restore-spawns",               no_argument,        NULL, RESTORE_SPAWNS},
@@ -303,8 +301,6 @@ int main (int argc, char **argv)
    showeq_params->ItemDBEnabled = pSEQPrefs->getPrefBool("Enabled", section, 1);
 
    section = "SaveState";
-   showeq_params->saveDecodeKey = 
-     pSEQPrefs->getPrefBool("DecodeKey", section, 1);
    showeq_params->saveZoneState = 
      pSEQPrefs->getPrefBool("ZoneState", section, 1);
    showeq_params->savePlayerState = 
@@ -312,15 +308,10 @@ int main (int argc, char **argv)
    showeq_params->saveSpawns = pSEQPrefs->getPrefBool("Spawns", section, false);
    showeq_params->saveSpawnsFrequency = 
      pSEQPrefs->getPrefInt("SpawnsFrequency", section, (120 * 1000));
-   showeq_params->restoreDecodeKey = false;
    showeq_params->restorePlayerState = false;
    showeq_params->restoreZoneState = false;
    showeq_params->restoreSpawns = false;
    showeq_params->saveRestoreBaseFilename = pSEQPrefs->getPrefString("BaseFilename", section, LOGDIR "/last");
-
-   section = "KeyFile";
-   showeq_params->KeyBaseFilename = pSEQPrefs->getPrefString("BaseFilename", section, LOGDIR "/keyfile.dat");
-   showeq_params->keyport = pSEQPrefs->getPrefInt("KeyPort", section, 10000);
 
    /* Parse the commandline for commandline parameters */
    while ((opt = getopt_long( argc,
@@ -742,11 +733,6 @@ int main (int argc, char **argv)
 	   break;
 	 }
 
-         case RESTORE_DECODE_KEY:
-	 {
-	   showeq_params->restoreDecodeKey = true;
-	   break;
-	 }
          case RESTORE_PLAYER_STATE:
 	 {
 	   showeq_params->restorePlayerState = true;
@@ -764,7 +750,6 @@ int main (int argc, char **argv)
 	 }
          case RESTORE_ALL:
 	 {
-	   showeq_params->restoreDecodeKey = true;
 	   showeq_params->restorePlayerState = true;
 	   showeq_params->restoreZoneState = true;
 	   showeq_params->restoreSpawns = true;
@@ -860,15 +845,13 @@ int main (int argc, char **argv)
       printf ("                                                                   \n");
       printf ("                                                                   \n");
       printf (" The following four options should be used with extreme care!         \n");
-      printf ("      --restore-decode-key              Restores the decode key from\n");
-      printf ("                                        a previous session    \n");
       printf ("      --restore-player-state            Restores the player state\n");
       printf ("                                        from a previous session    \n");
       printf ("      --restore-zone                    Restores the zone state\n");
       printf ("                                        from a previous session    \n");
       printf ("      --restore-spawns                  Restores the spawns\n");
       printf ("                                        from a previous session    \n");
-      printf ("      --restore-all                     Restores decode key, \n");
+      printf ("      --restore-all                     Restores , \n");
       printf ("                                        player state, and spawns   \n");
       printf ("                                        from a previous session    \n");
       exit (0);

@@ -701,10 +701,9 @@ void
 PktLogger::logSpawnStruct(const spawnStruct *spawn)
 {
     //output(spawn->unknown0000, 49);
-    outputf(" %d %d %d %d %d %d %u %d %u %d ", spawn->heading,
+    outputf(" %d %d %d %d %d %d %d %d ", spawn->heading,
         spawn->deltaHeading, spawn->y, spawn->x, spawn->z,
-        spawn->deltaY, spawn->spacer1, spawn->deltaZ, spawn->spacer2,
-        spawn->deltaZ);
+        spawn->deltaY, spawn->deltaZ, spawn->deltaZ);
 
     //output(spawn->unknown0061, 1);
     outputf(" %u %d ", spawn->spawnId, spawn->typeflag);
@@ -744,8 +743,6 @@ PktLogger::logNewSpawn(const newSpawnStruct *s, uint32_t len, uint8_t dir)
     outputf("R %u %04d %d %.2X%.2X ", timestamp, len, dir, 
         s->opCode, s->version );
 
-    output(&s->unknown0002, 4);
-    outputf(" ");
     logSpawnStruct(&s->spawn);
     outputf("\n");
     flush();
@@ -777,14 +774,11 @@ PktLogger::logZoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len, uint8_t 
 
     for (int i = 0; i < spawndatasize; i++)
     {
-        const spawnZoneStruct *zspawn = &zspawns->spawn[i];
         const spawnStruct *spawn = &zspawns->spawn[i].spawn;
 
         outputf("R %u %04d %d %.2X%.2X ", zoneTimestamp, 
             sizeof(spawnStruct)+2, dir, zspawns->opCode,  zspawns->version );
 
-        output(zspawn->unknown0000, 4);
-        outputf(" ");
         logSpawnStruct(spawn);
         outputf("\n");
         flush();
@@ -1022,9 +1016,9 @@ PktLogger::logInspectData(const inspectDataStruct *data, uint32_t len, uint8_t d
 }
 
 void 
-PktLogger::logHPUpdate(const hpUpdateStruct *hp, uint32_t len, uint8_t dir)
+PktLogger::logSpawnInfoUpdate(const SpawnUpdateStruct *su, uint32_t len, uint8_t dir)
 {
-    if (!isLoggingHPUpdate())
+    if (!isLoggingSIUpdate())
       return;
 
     unsigned int timestamp = (unsigned int) time(NULL);
@@ -1034,10 +1028,11 @@ PktLogger::logHPUpdate(const hpUpdateStruct *hp, uint32_t len, uint8_t dir)
             return;
 
     outputf("R %u %04d %d %.2X%.2X %u ", timestamp, len, dir,
-       hp->opCode, hp->version, hp->spawnId);
+       su->opCode, su->version, su->spawnId);
 
-    outputf(" %d ", hp->curHp);
-    outputf(" %d ", hp->maxHp);
+    outputf(" %d ", su->subcommand);
+    outputf(" %d ", su->arg1);
+    outputf(" %d ", su->arg2);
     outputf("\n");
     flush();
 }
@@ -1433,12 +1428,12 @@ PktLogger::logPlayerPos(const playerPosStruct *pos, uint32_t len, uint8_t dir)
         if (logOpen() != 0)
             return;
 
-    outputf("R %u %04d %d %.2X%.2X %u ", timestamp, len, dir,
-        pos->opCode, pos->version, pos->spawnId);
+    outputf("R %u %04d %d 0x%04x %u ", timestamp, len, dir,
+        pos->opCode, pos->spawnId);
 
-    outputf(" %d %d %d %d %d %d %u %d %u %d\n", pos->heading, 
+    outputf(" %d %d %d %d %d %d %d %d\n", pos->heading, 
         pos->deltaHeading, pos->y, pos->x, pos->z, pos->deltaY,
-        pos->spacer1, pos->deltaZ, pos->spacer2, pos->deltaX);
+        pos->deltaZ, pos->deltaX);
 
     flush();
     return;
@@ -1924,27 +1919,6 @@ PktLogger::logBindWound(const bindWoundStruct *bind, uint32_t len, uint8_t dir)
 }
 
 void 
-PktLogger::logCDoorSpawns(const cDoorSpawnsStruct *doors, uint32_t len, uint8_t dir)
-{
-    if (!isLoggingCDoorSpawns())
-      return;
-
-    unsigned int timestamp = (unsigned int) time(NULL);
-
-    if (m_FP == NULL)
-        if (logOpen() != 0)
-            return;
-
-    outputf("R %u %04d %d %.2X%2.X %u ", timestamp, len, dir,
-        doors->opCode, doors->version, doors->count);
-
-    output(doors,len);
-    outputf("\n");
-    flush();
-    return;
-}
-
-void 
 PktLogger::logDoorSpawns(const doorSpawnsStruct *doors, uint32_t len, uint8_t dir)
 {
     if (!isLoggingDoorSpawns())
@@ -1956,11 +1930,13 @@ PktLogger::logDoorSpawns(const doorSpawnsStruct *doors, uint32_t len, uint8_t di
     if (m_FP == NULL)
         if (logOpen() != 0)
             return;
+
+    unsigned int nDoors = len / sizeof(doorStruct);
  
     outputf("R %u %04d %d %.2X%2.X %u ", timestamp, len, dir,
-        doors->opCode, doors->version, doors->count);
+        doors->opCode, doors->version, nDoors);
 
-    for(i = 0; i < doors->count; i++)
+    for(i = 0; i < nDoors; i++)
     {
         outputf("[%.8s] ", doors->doors[i].name);
         output(doors->doors[i].unknown0008,8);

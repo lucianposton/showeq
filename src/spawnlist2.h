@@ -79,8 +79,6 @@ public slots:
    virtual void savePrefs(void);
  private slots:
    // EQPacket signals
-   void startDecodeBatch(void);
-   void finishedDecodeBatch(void);
 
    // category combo box signals
    void categorySelected(int index);
@@ -133,7 +131,6 @@ public slots:
    // whether to immediately update the spawn list as changes occur, or
    // use timer.
    bool m_immediateUpdate;
-   bool m_holdUpdates;
    bool m_keepSorted;
    bool m_keepSelectedVisible;
 };

@@ -187,9 +187,6 @@ void Item::setPos(int16_t x, int16_t y, int16_t z)
 {
   // set the item position
   setPoint(x, y, z);
-
-  // set scale Z for display purposes
-  m_zDisplay = float(z) / 10.0;
 }
 
 void Item::setDistanceToPlayer(double dist)
@@ -324,7 +321,7 @@ void Spawn::update(const spawnStruct* s)
     setLastName(s->lastName);
   }
 
-  setPos(s->x, s->y, s->z);
+  setPos(s->x / 8, s->y / 8, s->z / 8);
   setPetOwnerID(s->petOwnerId);
   setLight(s->light);
   setGender(s->gender);
@@ -540,6 +537,14 @@ QString Spawn::equipmentStr(uint8_t wearingSlot) const
     return "";
 }
 
+QString Spawn::genderName() const
+{
+  if (m_gender == 0)
+    return "Male";
+  if (m_gender == 1)
+    return "Female";
+  return "Neuter";
+}
 
 QString Spawn::deityName() const
 {

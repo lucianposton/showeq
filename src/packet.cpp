@@ -31,6 +31,7 @@
 #include "main.h"
 #include "vpacket.h"
 #include "logger.h"
+#include "libeq.h"
 
 //----------------------------------------------------------------------
 // Macros
@@ -39,10 +40,10 @@
 //#undef DEBUG_PACKET
 
 // The following defines are used to diagnose packet handling behavior
-// this define is used to diagnose packet processing (in decodePacket mostly)
+// this define is used to diagnose packet processing (in dispatchPacket mostly)
 //#define PACKET_PROCESS_DIAG 3 // verbosity level 0-n
 
-// this define is used to diagnose cache handling (in decodePacket mostly)
+// this define is used to diagnose cache handling (in dispatchPacket mostly)
 // #define PACKET_CACHE_DIAG 3 // verbosity level (0-n)
 
 // diagnose structure size changes
@@ -74,6 +75,7 @@ const int16_t arqSeqGiveUp = 256;
 const in_port_t WorldServerGeneralPort = 9000;
 const in_port_t WorldServerChatPort = 9876;
 const in_port_t LoginServerMinPort = 15000;
+const in_port_t LoginServerMaxPort = 15010;
 const in_port_t ChatServerPort = 5998;
 
 //----------------------------------------------------------------------
@@ -84,11 +86,6 @@ static size_t maxServerCacheCount = 0;
 
 // used to translate EQStreamID to a string for debug and reporting
 static const char* EQStreamStr[] = {"client-world", "world-client", "client-zone", "zone-client"};
-
-//----------------------------------------------------------------------
-// global variables
-int32_t decodex_key = 0;
-bool decodex = false;
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -120,12 +117,6 @@ bool validatePayloadSize(int len, int size, uint16_t code,
 #define ValidatePayload(codeName, structName) \
   validatePayloadSize(len, sizeof( structName ), codeName, \
 		      "", #codeName , #structName )
-
-#define ValidateDecodedPayload(codeName, structName) \
-  validatePayloadSize(decodedDataLen, sizeof( structName ), codeName, \
-		      "Decoded ", #codeName , #structName )
-#else
-#define ValidatePayload(code, struct) true
 #endif
 
 //----------------------------------------------------------------------
@@ -443,10 +434,10 @@ QString EQUDPIPPacketFormat::headerFlags(bool brief) const
 /* EQPacket Class - Sets up packet capturing */
 EQPacket::EQPacket (QObject * parent, const char *name)
   : QObject (parent, name),
-    m_decode(NULL),
     m_packetCapture(NULL),
     m_vPacket(NULL),
-    m_timer(NULL)
+    m_timer(NULL),
+    m_busy_decoding(false)
 {
 
    for (int a = 0; a < MAXSTREAMS + 1; a++)
@@ -462,7 +453,6 @@ EQPacket::EQPacket (QObject * parent, const char *name)
        m_packetCount[a] = 0;
    }
 
-   m_keyPort = showeq_params->keyport;
    m_session_tracking_enabled = showeq_params->session_tracking;
    m_eqstreamid = unknown_stream;
    m_clientPort = 0;
@@ -523,21 +513,6 @@ EQPacket::EQPacket (QObject * parent, const char *name)
 				showeq_params->realtime, IP_ADDRESS_TYPE );
    }
 
-   // Create the decoder object
-   m_decode = new EQDecode (this, "decode");
-   
-   connect(m_decode, SIGNAL(keyChanged(void)),
-	   this, SIGNAL(keyChanged(void)));
-   connect(m_decode, SIGNAL(startDecodeBatch(void)),
-	   this, SIGNAL(startDecodeBatch(void)));
-   connect(m_decode, SIGNAL(finishedDecodeBatch(void)),
-	   this, SIGNAL(finishedDecodeBatch(void)));
-   connect(parent, SIGNAL(theKey(uint64_t)),
-           m_decode, SLOT(theKey(uint64_t)));
-   connect(parent, SIGNAL(loadKey()),
-           m_decode, SLOT(loadKey()));
-
-   m_busy_decoding     = false;
    for (int i = 0; i < MAXSTREAMS + 1 ; i++)
    {
        m_serverArqSeqFound[i] = false;
@@ -646,15 +621,6 @@ EQPacket::~EQPacket()
 
     // delete the timer
     delete m_timer;
-  }
-
-  if (m_decode != NULL)
-  { 
-    // reset the decode object to stop it from doing whatever it is doing
-    m_decode->ResetDecoder();
-
-    // delete the decode
-    delete m_decode;
   }
 
   resetEQPacket();
@@ -818,7 +784,7 @@ void EQPacket::processPackets (void)
       m_vPacket->Record((const char *) buffer, size, now, PACKETVERSION);
     }
       
-    decodePacket (size - sizeof (struct ether_header),
+    dispatchPacket (size - sizeof (struct ether_header),
 		  (unsigned char *) buffer + sizeof (struct ether_header) );
   }
 
@@ -860,7 +826,7 @@ void EQPacket::processPlaybackPackets (void)
 	
       if (PACKETVERSION == version)
       {
-	decodePacket ( size - sizeof (struct ether_header),
+	dispatchPacket ( size - sizeof (struct ether_header),
 		       (unsigned char *) buffer + sizeof (struct ether_header)
 		       );
       }
@@ -992,10 +958,10 @@ bool EQPacket::logData ( const QString& filename,
 
 /* This function decides the fate of the Everquest packet */
 /* and dispatches it to the correct packet handling function */
-void EQPacket::decodePacket (int size, unsigned char *buffer)
+void EQPacket::dispatchPacket (int size, unsigned char *buffer)
 {
 #ifdef DEBUG_PACKET
-  debug ("decodePacket()");
+  debug ("dispatchPacket()");
 #endif /* DEBUG_PACKET */
   /* Setup variables */
 
@@ -1016,25 +982,16 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
     }
   }
 
-  /* Key Sniffer Hook */
-  if ((packet.getDestPort() == m_keyPort))
-  {
-     keyStruct* keypacket = (keyStruct *)packet.getUDPPayload();
-     m_decode->theKey(keypacket->key);
-     return;
-  }
- 
   /* Chat and Login Server Packets, Discard for now */
   if ((packet.getDestPort() == ChatServerPort) ||
       (packet.getSourcePort() == ChatServerPort))
     return;
 
-#if 0 // FEETMP: commenting this block out temp to allow WineX functionality
-      // WineX clients apparently use client ports in the 30k+ range
-  if ((packet.getDestPort() >= LoginServerMinPort) || 
-      (packet.getSourcePort() >= LoginServerMinPort))
+  if ( ((packet.getDestPort() >= LoginServerMinPort) ||
+     (packet.getSourcePort() >= LoginServerMinPort)) &&
+     ((packet.getDestPort() <= LoginServerMaxPort) ||
+     (packet.getSourcePort() <= LoginServerMaxPort)) )
     return;
-#endif
 
   /* discard pure ack/req packets and non valid flags*/
   if (packet.flagsHi() < 0x02 || packet.flagsHi() > 0x46 || size < 10)
@@ -1186,9 +1143,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
         printf("EQPacket: SEQStart found, setting arq seq, %04x  stream %s\n",
                serverArqSeq, EQStreamStr[m_eqstreamid]);
 #endif
-	// initial decryption key
-	decodex_key = 0x14ae2355;
-	decodex = true;
+	initDecode();
 
         // hey, a SEQStart, use it's packet to set ARQ
         m_serverArqSeqExp[m_eqstreamid] = serverArqSeq;
@@ -1211,11 +1166,10 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   				            showeq_params->mac_address,
 				            showeq_params->realtime, 
 				            MAC_ADDRESS_TYPE, 0, 
-				            m_clientPort,
-                                            m_keyPort);
-	         printf ("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d, Key port %d\n",
+				            m_clientPort);
+	         printf ("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d\n",
 		         (const char*)showeq_params->mac_address, 
-		         m_clientPort, m_keyPort);
+		         m_clientPort);
 	      }
 	      else
 	      {
@@ -1223,11 +1177,10 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 	     			            showeq_params->ip,
 				            showeq_params->realtime, 
 				            IP_ADDRESS_TYPE, 0, 
-				            m_clientPort,
-                                            m_keyPort);
-	         printf ("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d, Key port %d\n",
+				            m_clientPort);
+	         printf ("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d\n",
 	  	         (const char*)showeq_params->ip, 
-		         m_clientPort, m_keyPort);
+		         m_clientPort);
 	      }
 	   }
         }
@@ -1284,7 +1237,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
            // the race condition between timer and processing the zoneServerInfo
            if(!showeq_params->playbackpackets) 
              m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
-                                        showeq_params->realtime, IP_ADDRESS_TYPE, 0, 0, m_keyPort);
+                                        showeq_params->realtime, IP_ADDRESS_TYPE, 0, 0);
 	   printf ("EQPacket: SEQClosing detected, awaiting next zone session,  pcap filter: EQ Client %s\n",
 	  	   (const char*)showeq_params->ip);
 
@@ -1292,7 +1245,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
               m_session_tracking_enabled = 1; 
 
            // decode key no longer valid
-	   decodex = false;
+	   stopDecode();
 
            // we'll be waiting for a new SEQStart for ALL streams
            // it seems we only ever see a proper closing sequence from the zone server
@@ -1340,7 +1293,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
 
   return;
   
-} /* end decodePacket() */
+} /* end dispatchPacket() */
 
 ////////////////////////////////////////////////////
 // setCache 
@@ -1480,7 +1433,7 @@ void EQPacket::processCache()
             pf->arq());
 #endif
 
-     // Duplicate ARQ processing functionality from decodePacket,
+     // Duplicate ARQ processing functionality from dispatchPacket,
      // should prolly be its own function processARQ() or some such beast
 
      if (!pf->isASQ() && !pf->isFragment() && !pf->isClosingHi())
@@ -1505,7 +1458,7 @@ void EQPacket::processCache()
         // the race condition between timer and processing the zoneServerInfo
         if(!showeq_params->playbackpackets) 
           m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
-                                     showeq_params->realtime, IP_ADDRESS_TYPE, 0, 0, m_keyPort);
+                                     showeq_params->realtime, IP_ADDRESS_TYPE, 0, 0);
 	printf ("EQPacket: SEQClosing detected, awaiting next zone session,  pcap filter: EQ Client %s\n",
                 (const char*)showeq_params->ip);
 
@@ -1704,47 +1657,64 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
   debug ("dispatchWorldData()");
 #endif /* DEBUG_PACKET */
   
-    //Logging 
-  if (showeq_params->logWorldPackets)
-     if (!logData (showeq_params->WorldLogFilename, len, data))
-        emit toggle_log_WorldData(); //untoggle the GUI checkmark
+  packetList pktlist = decodePacket(data, len);
+  if (pktlist.size() == 0)
+      return;
+  for (unsigned int packetNum = 0; packetNum < pktlist.size(); packetNum++) {
+      data = pktlist[packetNum].data;
+      len = pktlist[packetNum].len;
 
-  uint16_t opCode = eqntohuint16(data);
+      //Logging 
+      if (showeq_params->logWorldPackets)
+	  if (!logData (showeq_params->WorldLogFilename, len, data))
+	      emit toggle_log_WorldData(); //untoggle the GUI checkmark
 
-  bool unk = true;
-
-  switch (opCode)
-  {
+      
+      uint16_t opCode = eqntohuint16(data);
+      
+      bool unk = true;
+      
+      switch (opCode)
+      {
       case GuildListCode:
       {
-           if (direction != DIR_SERVER || len != sizeof(worldGuildListStruct)+2)
+	  if (direction != DIR_SERVER)
               break;
-
-           unk = ! ValidatePayload(GuildListCode, rawWorldGuildListStruct);
-
-           emit worldGuildList((const char*)data+2, len-2);
-
-           break;
+	  
+	  unk = ! ValidatePayload(GuildListCode, rawWorldGuildListStruct);
+	  if (unk)
+	      break;
+	  
+	  emit worldGuildList((const char*)data+2, len-2);
+	  
+	  break;
       } /* end GuildListCode */
-
+      
       case ClientHashCode:
       {
-           if (direction != DIR_CLIENT)
+	  if (direction != DIR_CLIENT)
               break;
-           
-           m_decode->setHash(data+2, len-2); 
-
-           break;
+	  
+	  
+	  break;
       }
-          
-
+      
+      
       default:
       {
           unk = true;
           break;
       }
-  }
+      
+      }
+      if (m_viewUnknownData && unk)
+      {
+	  printUnknown(0, opCode, len, data, direction);
+      }
+      if (pktlist[packetNum].allocated) 
+	  delete[] pktlist[packetNum].data;
 
+  }
 
 } // end dispatchWorld
 
@@ -1771,6 +1741,77 @@ void EQPacket::dispatchWorldChatData (uint32_t len, uint8_t *data,
   }
 }
 
+void EQPacket::printUnknown(unsigned int uiOpCodeIndex, uint16_t opCode, uint32_t len, 
+			    uint8_t *data, uint8_t dir) {
+     QString tmpStr;
+       if (len == 2)
+       {
+	 tmpStr.sprintf ("%s: %04x len %i [%s]", 
+			 uiOpCodeIndex > 0 ? 
+			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
+			 "UNKNOWN", opCode, len,
+			 dir == 2 ? "Server --> Client" : "Client --> Server");
+	 printf("\n%s\n\t", (const char*)tmpStr);
+
+	 if ((uiOpCodeIndex > 0) && showeq_params->monitorOpCode_Log)
+	 {
+	   logMessage(showeq_params->monitorOpCode_Filename, tmpStr);
+	   logData(showeq_params->monitorOpCode_Filename, len, data);
+	 }
+       }
+       else
+       {
+	 tmpStr.sprintf ("%s: %04x len %02d [%s] ID:%i", 
+			 uiOpCodeIndex > 0 ? 
+			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
+			 "UNKNOWN", opCode, len, 
+			 dir == 2 ? "Server --> Client" : "Client --> Server", 
+			 data[3] * 256 + data[2]);
+
+	 if ((uiOpCodeIndex > 0) && showeq_params->monitorOpCode_Log)
+	 {
+	   logMessage(showeq_params->monitorOpCode_Filename, tmpStr);
+	   logData(showeq_params->monitorOpCode_Filename, len, data);
+	 }
+
+	 printf("\n%s\n", (const char*)tmpStr);
+	 for (uint32_t a = 0; a < len; a ++)
+         {
+	   if ((data[a] >= 32) && (data[a] <= 126))
+	     printf ("%c", data[a]);
+	   else
+	     printf (".");
+	 }
+	 
+	 printf ("\n");
+
+	 for (uint32_t a = 0; a < len; a ++)
+         {
+	   if (data[a] < 32)
+	     printf ("%c", data[a] + 95);
+	   else if (data[a] > 126)
+	     printf ("%c", data[a] - 95);
+	   else if (data[a] > 221)
+	     printf ("%c", data[a] - 190);
+	   else
+	     printf ("%c", data[a]);
+	 }
+
+         printf("\n");
+
+         
+	 for (uint32_t a = 0; a < len; a ++)
+         {
+	     printf ("%02X", data[a]);
+	 }
+
+         printf("\n\n"); /* Adding an extra line break makes it easier
+			     for people trying to decode the OpCodes to
+			     tell where the raw data ends and the next
+			     message begins...  -Andon */
+       }
+}
+
 void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data, 
 				 uint8_t dir)
 {
@@ -1779,12 +1820,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 #endif /* DEBUG_PACKET */
 
     QString  tempStr;
-    int      decoded = 0;
-    uint32_t decodedDataLen = 131072;
-    uint8_t  decodedData[decodedDataLen];
 
-    uint16_t opCode = *((uint16_t *)data);
-    
     //Logging 
     if (showeq_params->logZonePackets)
         if (!logData (showeq_params->ZoneLogFilename, len, data))
@@ -1802,532 +1838,364 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
        struct timeOfDayStruct eqTime;
        getEQTimeOfDay( timeCurrent, &eqTime);
 
-       if (eqTime.hour >= 0 && eqTime.minute >= 0)
-       {
-          sprintf(timeMessage,"EQTime [%02d:%02d %s]",
-                  (eqTime.hour % 12) == 0 ? 12 : (eqTime.hour % 12),
-                  (eqTime.minute),
-                  ((eqTime.hour >= 12 && eqTime.hour << 24) ||
-                   (eqTime.hour == 24 && eqTime.minute == 0)) ? "pm" : "am");
-          emit eqTimeChangedStr(QString (timeMessage));
-       }
+       sprintf(timeMessage,"EQTime [%02d:%02d %s]",
+               (eqTime.hour % 12) == 0 ? 12 : (eqTime.hour % 12),
+               (eqTime.minute),
+               ((eqTime.hour >= 12 && eqTime.hour << 24) ||
+               (eqTime.hour == 24 && eqTime.minute == 0)) ? "pm" : "am");
+       emit eqTimeChangedStr(QString (timeMessage));
     }
 
-    if (opCode & 0x8000)
-    {
-	uint8_t *decompressed;
-	uint32_t dcomplen = PKTBUF_LEN;
-
-	decompressed = (unsigned char *) malloc (dcomplen+2);
-
-	if (m_decode->InflatePacket (&data[2], len-2, decompressed+2, &dcomplen) != 1)
-	{
-            printf ("decompression failed on 0x%04x\n", opCode);
-	    free (decompressed);
-	    return;
-	}
-
-	opCode = opCode & ~0x8000;
-	memcpy (decompressed, &opCode, 2);
-	dispatchZoneData (dcomplen+2, decompressed, dir);
-	free (decompressed);
-        return;
-    }
-
-    if (opCode & 0x1000)
-    {
-        if (decodex)
-	{
-	    int32_t tmplen = len-2;
-	    uint8_t *dptr = data+2;
-	    int32_t loc3 = abs(decodex_key) % (tmplen-4);
-
-	    //printf ("decoding 0x%04x with 0x%08x at %d, 8, & 1.\n", 
-			   // opCode, decodex_key, loc3);
-	    *((int32_t *)(dptr+loc3)) = *((int32_t *)(dptr+loc3)) ^ decodex_key;
-	    *((int32_t *)(dptr+8)) = *((int32_t *)(dptr+8)) ^ decodex_key;
-	    *((int32_t *)(dptr+1)) = *((int32_t *)(dptr+1)) ^ decodex_key;
-	    decodex_key = decodex_key ^ *((int32_t *)(dptr+(tmplen/3)));
-	    opCode = opCode & ~0x1000;
-	    memcpy (data, &opCode, 2);
-	    //printf ("decoded: 0x%04x, %d, new key: 0x%08x\n", opCode, len, decodex_key);
-	    dispatchZoneData (len, data, dir);
-	}
-	
+    packetList pktlist = decodePacket(data, len);
+    if (pktlist.size() == 0)
 	return;
-    }
-
-    while (len > 2)
-    {
-        if (opCode & 0x4000)
-        {
-	    bool repeatop = false;
-	    uint8_t *dptr = data+2;
-	    uint32_t left = len-2;
-	    int32_t count = 1;
-
-	    //printf ("unrolling 0x%04x\n", opCode);
-	    opCode = opCode & ~0x4000;
-
-	    if (opCode & 0x2000)
+    for (unsigned int packetNum = 0; packetNum < pktlist.size(); packetNum++) {
+	data = pktlist[packetNum].data;
+	len = pktlist[packetNum].len;
+	uint16_t opCode = *((uint16_t *)data);
+	
+	switch (opCode)
+	{
+	case CPlayerItemsCode:
+	{
+	    unk = false;
+	    // This is all totally broken, and needs to be rewritten to work like
+	    // the door code, but I don't care enough to do it
+#if 0
+	    // decode/decompress the payload
+	    decoded = m_decode->DecodePacket(data, len, decodedData,
+					     &decodedDataLen, showeq_params->ip);
+	    if (!decoded)
 	    {
-	        opCode = opCode & ~0x2000;
-	        repeatop = true;
+		printf("EQPacket: could not decompress CPlayerItemsCode 0x%x\n", opCode);
+		break;
 	    }
+	    cPlayerItemsStruct *citems;
+	    citems = (cPlayerItemsStruct *)(data);
 
-	    while (count > 0)
+	    emit cPlayerItems(citems, len, dir);
+
+	    fprintf(stderr, 
+		    "CPlayerItems: count=%d size=%d packetsize=%d expsize=%d\n",
+		    citems->count,
+		    len,
+		    ((len - 6)/citems->count),
+		    sizeof(playerItemStruct));
+
+	    // Make sure we do not divide by zero and there 
+	    // is something to process
+   
+	    if (citems->count)
 	    {
-	        uint16_t size;
+		// Determine the size of a single structure in 
+		// the compressed packet
+ 
+		int nPacketSize=((len - 6)/citems->count);
 
-	        size = implicitlen(opCode);
-	        if (size == 0)
-	        {
-	            if (dptr[0] == 0xff)
-		    {
-		        left--;
-		        dptr++;
-		        size = ntohs(*((uint16_t *)dptr));
-		        left -= 2;
-		        dptr += 2;
-		    } else {
-		        size = dptr[0];
-		        left--;
-		        dptr++;
-		    }
-	        }
-	        //printf ("size is %d\n", size);
-	    
-	        if (size > left)
-	        {
-		    printf ("error: size > left (size=%d, left=%d, opcode=0x%04x)\n", size, left, opCode);
-		    return;
-	        }
+		// See if it is the size that we expect
+ 
+		int nVerifySize = sizeof(playerItemStruct);
+    
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+		if (nVerifySize != nPacketSize)
+		{
+		    printf("WARNING: CPlayerItemsCode: packetSize:%d != "
+			   "sizeof(playerItemStruct):%d!\n",
+			   nPacketSize, nVerifySize);
+		    unk = true;
+		}
+#endif
 
-	        uint8_t *pkt = new uint8_t[size+2];
-	        memcpy (pkt, &opCode, 2);
-	        memcpy (pkt+2, dptr, size);
-	        //printf ("sending: 0x%04x, %d\n", opCode, size);
-	        dispatchZoneData (size+2, pkt, dir);
-	        delete[] pkt;
+		if (!showeq_params->no_bank)
+		{
+		    tempStr = "Item: Dispatching compressed Items " 
+			"(count = " +
+			QString::number(citems->count) + ")";
 
-	        dptr += size;
-	        left -= size;
+		    emit msgReceived(tempStr);
+ 
+		    for (unsigned int i=0; i < citems->count; i++)
+			dispatchZoneData(nPacketSize,
+					 &citems->compressedData[i*nPacketSize], dir);
 
-	        count--;
-	        if (repeatop)
-	        {
-		    count = dptr[0];
-		    dptr++;
-		    left--;
-		    repeatop = false;
-		    //printf ("repeating %d times\n", count);
-	        }
+		    emit msgReceived(QString("Item: Finished dispatching"));
+		}
+		else
+		{
+		    // Quietly dispatch the compressed data
+		    for (unsigned int i=0; i<citems->count; i++)
+			dispatchZoneData(nPacketSize,
+					 &citems->compressedData[i*nPacketSize], dir);
+		}
 	    }
+#endif
+	    break;
+	} /* end CPlayerItemCode */
 
-	    if (left > 2)
-	    {
- 	        opCode = *((unsigned short *)dptr);
-	        //printf ("doing leftover: 0x%04x, %d\n", opCode, left);
-	        data = dptr;
-	        len = left;
-		continue;
-	    }
-	    return;
-        } else {
+	case PlayerItemCode:
+	{
+	    unk = ! ValidatePayload(PlayerItemCode, playerItemStruct);
+
+	    emit playerItem((const playerItemStruct*)data, len, dir);
+ 
 	    break;
 	}
-    }
 
-    switch (opCode)
-    {
-       case CPlayerItemsCode:
-       {
-           unk = false;
+	case cItemInShopCode:
+	{
+	    cItemInShopStruct *citems;
+	    citems = (cItemInShopStruct *)(data);
 
-           // decode/decompress the payload
-           decoded = m_decode->DecodePacket(data, len, decodedData,
-                               &decodedDataLen, showeq_params->ip);
-           if (!decoded)
-           {
-              printf("EQPacket: could not decompress CPlayerItemsCode 0x%x\n", opCode);
-              break;
-           }
-
-           cPlayerItemsStruct *citems;
-           citems = (cPlayerItemsStruct *)(decodedData);
-
-           emit cPlayerItems(citems, decodedDataLen, dir);
-
-           fprintf(stderr, 
-           "CPlayerItems: count=%d size=%d packetsize=%d expsize=%d\n",
-           citems->count,
-           decodedDataLen,
-           ((decodedDataLen - 6)/citems->count),
-           sizeof(playerItemStruct));
-
-           // Make sure we do not divide by zero and there 
-           // is something to process
-   
-           if (citems->count)
-           {
-               // Determine the size of a single structure in 
-               // the compressed packet
+	    if (citems->count)
+	    {
+		// Determine the size of a single structure in 
+		// the compressed packet
  
-               int nPacketSize=((decodedDataLen - 6)/citems->count);
+		int nPacketSize=((len - 4)/citems->count);
 
-               // See if it is the size that we expect
+		// See if it is the size that we expect
  
-               int nVerifySize = sizeof(playerItemStruct);
+		int nVerifySize = sizeof(itemInShopStruct);
     
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
-               if (nVerifySize != nPacketSize)
-               {
-                  printf("WARNING: CPlayerItemsCode: packetSize:%d != "
-                  "sizeof(playerItemStruct):%d!\n",
-                  nPacketSize, nVerifySize);
-                  unk = true;
-               }
+		if (nVerifySize != nPacketSize)
+		{
+		    printf("WARNING: cItemInShopCode: packetSize:%d != "
+			   "sizeof(itemInShopStruct):%d!\n",
+			   nPacketSize, nVerifySize);
+		    unk = true;
+		}
 #endif
+		for (int i=0; i<citems->count; i++)
+		    emit itemShop((const itemInShopStruct*)&citems->compressedData[i*nPacketSize], nPacketSize, dir);
+	    }
 
-               if (!showeq_params->no_bank)
-               {
-                  tempStr = "Item: Dispatching compressed Items " 
-                  "(count = " +
-                  QString::number(citems->count) + ")";
+	    break;
+	} /* end ItemInShopCode */
 
-                  emit msgReceived(tempStr);
- 
-                  for (unsigned int i=0; i < citems->count; i++)
-                      dispatchZoneData(nPacketSize,
-                                      &citems->compressedData[i*nPacketSize], dir);
+	case MoneyOnCorpseCode:
+	{
+	    unk = ! ValidatePayload(MoneyOnCorpseCode, moneyOnCorpseStruct);
 
-                  emit msgReceived(QString("Item: Finished dispatching"));
-               }
-               else
-               {
-                  // Quietly dispatch the compressed data
-                  for (unsigned int i=0; i<citems->count; i++)
-                      dispatchZoneData(nPacketSize,
-                                       &citems->compressedData[i*nPacketSize], dir);
-               }
-           }
-           break;
-       } /* end CPlayerItemCode */
+	    emit moneyOnCorpse((const moneyOnCorpseStruct*)data, len, dir);
 
-       case PlayerItemCode:
-       {
-           unk = ! ValidatePayload(PlayerItemCode, playerItemStruct);
+	    break;
+	} /* end MoneyOnCorpseCode */
 
-           emit playerItem((const playerItemStruct*)data, len, dir);
- 
-           break;
-       }
+	case ItemOnCorpseCode:
+	{
+	    unk = ! ValidatePayload(ItemOnCorpseCode, itemOnCorpseStruct);
 
-       case cItemInShopCode:
-       {
-           // decode/decompress the payload
-           decoded = m_decode->DecodePacket(data, len, decodedData, &decodedDataLen, showeq_params->ip);
+	    emit itemPlayerReceived((const itemOnCorpseStruct *)data, len, dir);
 
-           if (!decoded)
-           {
-              printf("EQPacket: could not decompress cItemInShopCode 0x%x\n", opCode);
-              break;
-           }
+	    break;
+	} /* end ItemOnCorpseCode */
 
-           cItemInShopStruct *citems;
-           citems = (cItemInShopStruct *)(decodedData);
-
-           if (citems->count)
-           {
-               // Determine the size of a single structure in 
-               // the compressed packet
- 
-               int nPacketSize=((decodedDataLen - 4)/citems->count);
-
-               // See if it is the size that we expect
- 
-               int nVerifySize = sizeof(itemInShopStruct);
-    
+	case TradeItemOutCode:
+	{
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
-               if (nVerifySize != nPacketSize)
-               {
-                  printf("WARNING: cItemInShopCode: packetSize:%d != "
-                  "sizeof(itemInShopStruct):%d!\n",
-                  nPacketSize, nVerifySize);
-                  unk = true;
-               }
-#endif
-               for (int i=0; i<citems->count; i++)
-                   emit itemShop((const itemInShopStruct*)&citems->compressedData[i*nPacketSize], nPacketSize, dir);
-         }
+	    tradeItemOutStruct* itemt = (tradeItemOutStruct*)data;
+	    switch (itemt->itemType)
+	    {
+	    case 0: // it is an item, use the regular method
+		unk = ! ValidatePayload(TradeItemOutCode, tradeItemOutStruct);
+		break;
+	    case 1: // it is a container
+	    {
+		size_t itemt_size = sizeof(tradeItemOutStruct) 
+		    - sizeof(itemItemStruct)
+		    + sizeof(itemContainerStruct);
 
-           break;
-       } /* end ItemInShopCode */
-
-       case MoneyOnCorpseCode:
-       {
-           unk = ! ValidatePayload(MoneyOnCorpseCode, moneyOnCorpseStruct);
-
-           emit moneyOnCorpse((const moneyOnCorpseStruct*)data, len, dir);
-
-           break;
-       } /* end MoneyOnCorpseCode */
-
-       case ItemOnCorpseCode:
-       {
-           unk = ! ValidatePayload(ItemOnCorpseCode, itemOnCorpseStruct);
-
-           emit itemPlayerReceived((const itemOnCorpseStruct *)data, len, dir);
-
-           break;
-       } /* end ItemOnCorpseCode */
-
-       case TradeItemOutCode:
-       {
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-           tradeItemOutStruct* itemt = (tradeItemOutStruct*)data;
-           switch (itemt->itemType)
-           {
-               case 0: // it is an item, use the regular method
-                 unk = ! ValidatePayload(TradeItemOutCode, tradeItemOutStruct);
-                 break;
-               case 1: // it is a container
-               {
-                 size_t itemt_size = sizeof(tradeItemOutStruct) 
-                                       - sizeof(itemItemStruct)
-                                  + sizeof(itemContainerStruct);
-
-                 if (itemt_size != len)
-                 {
+		if (itemt_size != len)
+		{
                     fprintf(stderr, 
-                     "WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
-                     TradeItemOutCode, len, itemt_size);
-                     unk = true;
-                 }
-                 else
+			    "WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
+			    TradeItemOutCode, len, itemt_size);
+		    unk = true;
+		}
+		else
                     unk = false;
       
-                 break;
-               }
-               case 2: // it is a book
-               {
-                 size_t itemt_size = sizeof(tradeItemOutStruct) 
-                                       - sizeof(itemItemStruct)
-                                       + sizeof(itemBookStruct);
+		break;
+	    }
+	    case 2: // it is a book
+	    {
+		size_t itemt_size = sizeof(tradeItemOutStruct) 
+		    - sizeof(itemItemStruct)
+		    + sizeof(itemBookStruct);
       
-                 if (itemt_size != len)
-                 {
+		if (itemt_size != len)
+		{
                     fprintf(stderr, 
-                     "WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
-                     TradeItemOutCode, len, itemt_size);
-                     unk = true;
-                 }
-                 else
+			    "WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
+			    TradeItemOutCode, len, itemt_size);
+		    unk = true;
+		}
+		else
                     unk = false;
    
-                 break;
-               }
-           };
+		break;
+	    }
+	    };
 #endif
 
-           emit tradeItemOut((const tradeItemOutStruct*)data, len, dir);
+	    emit tradeItemOut((const tradeItemOutStruct*)data, len, dir);
 
-           break;
-       } /* end tradeItemCode */
+	    break;
+	} /* end tradeItemCode */
 
-       case TradeItemInCode:	// Item received by player
-       {
-           unk = ! ValidatePayload(TradeItemInCode, tradeItemInStruct);
+	case TradeItemInCode:	// Item received by player
+	{
+	    unk = ! ValidatePayload(TradeItemInCode, tradeItemInStruct);
 
-           emit tradeItemIn((const tradeItemInStruct*)data, len, dir);
+	    emit tradeItemIn((const tradeItemInStruct*)data, len, dir);
 
-           break;
-       } /* end TradeItemInCode */
+	    break;
+	} /* end TradeItemInCode */
 
-       case TradeContainerInCode:	// Container received by player
-       {
-           unk = ! ValidatePayload(TradeContainerInCode, tradeContainerInStruct);
+	case TradeContainerInCode:	// Container received by player
+	{
+	    unk = ! ValidatePayload(TradeContainerInCode, tradeContainerInStruct);
 
-           emit tradeContainerIn((const tradeContainerInStruct*)data, len, dir);
+	    emit tradeContainerIn((const tradeContainerInStruct*)data, len, dir);
 
-           break;
-       } /* end TradeContainerInCode */
+	    break;
+	} /* end TradeContainerInCode */
 
-       case TradeBookInCode:	// Item received by player
-       {
-           unk = ! ValidatePayload(TradeBookInCode, tradeBookInStruct);
+	case TradeBookInCode:	// Item received by player
+	{
+	    unk = ! ValidatePayload(TradeBookInCode, tradeBookInStruct);
 
-           emit tradeBookIn((const tradeBookInStruct*)data, len, dir);
+	    emit tradeBookIn((const tradeBookInStruct*)data, len, dir);
 
-           break;
-       } /* end TradeItemInCode */
+	    break;
+	} /* end TradeItemInCode */
 
-       case SummonedItemCode:
-       {
-           unk = ! ValidatePayload(SummonedItemCode, summonedItemStruct);
+	case SummonedItemCode:
+	{
+	    unk = ! ValidatePayload(SummonedItemCode, summonedItemStruct);
 
-           emit summonedItem((const summonedItemStruct*)data, len, dir);
+	    emit summonedItem((const summonedItemStruct*)data, len, dir);
 
-           break;
-       }
+	    break;
+	}
 
-       case SummonedContainerCode:
-       {
-           unk = ! ValidatePayload(SummonedContainerCode, summonedContainerStruct);
+	case SummonedContainerCode:
+	{
+	    unk = ! ValidatePayload(SummonedContainerCode, summonedContainerStruct);
 
-           emit summonedContainer((const summonedContainerStruct*)data, len, dir);
+	    emit summonedContainer((const summonedContainerStruct*)data, len, dir);
 
-           break;
-       }
+	    break;
+	}
 
-       case CharProfileCode:	// Character Profile server to client
-       {
-           /* This is an encrypted packet type, so log the raw packet for
-              detailed analysis */
+	case CharProfileCode:	// Character Profile server to client
+	{
+	    unk = false;
+	   
+	    ValidatePayload(CharProfileCode, charProfileStruct);
 
-           if (showeq_params->logEncrypted)
-              logData(showeq_params->CharProfileCodeFilename, len, data);
+	    //logData ("/tmp/charprofile.log", len, data);
+	    emit backfillPlayer((const charProfileStruct*)data, len, DIR_SERVER);
 
-           unk = false; // move above if to prevent duplicate logging
-                        // not sure if its placement was intentional before.
- 
-           // decode/decompress the payload
-           decoded = m_decode->DecodePacket(data, len, decodedData,
-                                 &decodedDataLen, showeq_params->ip);
+	    break;
+	}
 
-           if (decoded && !showeq_params->broken_decode)
-           {
-              printf("EQPacket::dispatchZoneData():CharProfileCode:Decoded\n");
-              // just call dispatchDecodedCharProfile (logged there as well)
+	case NewCorpseCode:
+	{
+	    unk = ! ValidatePayload(NewCorpseCode, newCorpseStruct);
 
-              dispatchDecodedCharProfile(decodedData, decodedDataLen);
-              //logData ("/tmp/charprofile.log", decodedDataLen, decodedData);
-           }
-           else
-              printf("EQPacket::dispatchZoneData():CharProfileCode:Not Decoded\n");
-           break;
-       }
+	    emit killSpawn((const newCorpseStruct*) data, len, dir);
 
-       case NewCorpseCode:
-       {
-           unk = ! ValidatePayload(NewCorpseCode, newCorpseStruct);
+	    break;
+	} /* end CorpseCode */
 
-           emit killSpawn((const newCorpseStruct*) data, len, dir);
+	case DeleteSpawnCode:
+	{
+	    unk = ! ValidatePayload(DeleteSpawnCode, deleteSpawnStruct);
 
-           break;
-       } /* end CorpseCode */
+	    emit deleteSpawn((const deleteSpawnStruct*)data, len, dir);
 
-       case DeleteSpawnCode:
-       {
-           unk = ! ValidatePayload(DeleteSpawnCode, deleteSpawnStruct);
+	    break;
+	}
 
-           emit deleteSpawn((const deleteSpawnStruct*)data, len, dir);
+	case ChannelMessageCode:
+	{
+	    unk = false;
 
-           break;
-       }
+	    emit channelMessage((const channelMessageStruct*)data, len, dir);
 
-       case ChannelMessageCode:
-       {
-           unk = false;
+	    break;
+	}
 
-           emit channelMessage((const channelMessageStruct*)data, len, dir);
+	case FormattedMessageCode:
+	{
+	    unk = false;
 
-           break;
-       }
+	    emit formattedMessage((const formattedMessageStruct*)data, len, dir);
 
-       case FormattedMessageCode:
-       {
-           unk = false;
+	    break;
+	}
 
-           emit formattedMessage((const formattedMessageStruct*)data, len, dir);
+	case NewSpawnCode:
+	{
+	    unk = ! ValidatePayload(NewSpawnCode, newSpawnStruct);
 
-           break;
-       }
+	    //logData ("/tmp/newspawn.log", len, data);
+	    emit newSpawn((const newSpawnStruct*)data, len, dir);
 
-       case NewSpawnCode:
-       {
-           /* This is one of the encrypted packet types, so log it */
+	    break;
+	}
 
-           if (showeq_params->logEncrypted)
-              logData(showeq_params->NewSpawnCodeFilename, len, data);
+	case ZoneSpawnsCode:
+	{
+	    unk = false; // move above break to prevent duplicate logging
+	    // not sure if its placement was intentional before.
 	    
-           // decode/decompress the payload
-           decoded = m_decode->DecodePacket(data, len, decodedData,
-                                    &decodedDataLen, showeq_params->ip);
-           //printf("NewSpawn received:\n");
+	    emit zoneSpawns((const zoneSpawnsStruct*)data, len, dir);
+	    //logData ("/tmp/zonespawn.log", len, data);
 
-           if (!decoded || showeq_params->broken_decode)
-              break;
+	    break;
+	}
 
-           unk = ! ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
-              //logData ("/tmp/newspawn.log", decodedDataLen, decodedData);
+	case TimeOfDayCode:
+	{
+	    struct timeOfDayStruct *tday;
 
-           emit newSpawn((const newSpawnStruct*)decodedData, decodedDataLen, dir);
+	    unk = ! ValidatePayload(TimeOfDayCode, timeOfDayStruct);
 
-           break;
-       }
+	    tday = (struct timeOfDayStruct *) data;
 
-       case ZoneSpawnsCode:
-       {
-           // printf ("ZONESPAWNS1: %d\n", len);
+	    m_eqTime.zoneInTime.minute   = tday->minute;
+	    m_eqTime.zoneInTime.hour     = tday->hour;
+	    m_eqTime.zoneInTime.day      = tday->day;
+	    m_eqTime.zoneInTime.month    = tday->month;
+	    m_eqTime.zoneInTime.year     = tday->year;
 
-           /* This is one of the encrypted packet types, so log it */
+	    m_eqTime.packetReferenceTime = time(NULL);
 
-           if (showeq_params->logEncrypted)
-              logData(showeq_params->ZoneSpawnsCodeFilename, len, data);
-  
-           unk = false; // move above break to prevent duplicate logging
-                        // not sure if its placement was intentional before.
-	    
-           // decode/decompress the payload
-           decoded = m_decode->DecodePacket(data, len, decodedData,
-                                 &decodedDataLen, showeq_params->ip);
+	    printf( "TIME: %02d:%02d %02d/%02d/%04d\n",
+		    tday->hour,
+		    tday->minute,
+		    tday->month,
+		    tday->day,
+		    tday->year
+		);
+	    emit timeOfDay(tday, len, dir);
+	    break;
+	}
 
-           if (!decoded || showeq_params->broken_decode)
-              break;
+	case BookTextCode:
+	{
+	    unk = false;
 
-              //logData ("/tmp/zonespawn.log", decodedDataLen, decodedData);
-           emit zoneSpawns((const zoneSpawnsStruct*)decodedData, 
-                           decodedDataLen, dir);
+	    emit bookText((const bookTextStruct*)data, len, dir);
 
-           break;
-       }
+	    printf("BOOK: '%s'\n", ((const bookTextStruct *)data)->text);
+	    emit bookText((const bookTextStruct*)data, len, dir);
 
-       case TimeOfDayCode:
-       {
-           struct timeOfDayStruct *tday;
-
-           unk = ! ValidatePayload(TimeOfDayCode, timeOfDayStruct);
-
-           tday = (struct timeOfDayStruct *) data;
-
-           m_eqTime.zoneInTime.minute   = tday->minute;
-           m_eqTime.zoneInTime.hour     = tday->hour;
-           m_eqTime.zoneInTime.day      = tday->day;
-           m_eqTime.zoneInTime.month    = tday->month;
-           m_eqTime.zoneInTime.year     = tday->year;
-
-           m_eqTime.packetReferenceTime = time(NULL);
-
-           printf( "TIME: %02d:%02d %02d/%02d/%04d\n",
-                   tday->hour,
-                   tday->minute,
-                   tday->month,
-                   tday->day,
-                   tday->year
-                 );
-           emit timeOfDay(tday, len, dir);
-           break;
-       }
-
-       case BookTextCode:
-       {
-           unk = false;
-
-	   emit bookText((const bookTextStruct*)data, len, dir);
-
-           break;
-       }
+            break;
+        }
 
         case RandomCode:
         {
@@ -2362,21 +2230,21 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         case PlayerBookCode:
         {
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
-	  size_t test_size = (sizeof(playerBookStruct) - 
-			      sizeof(itemContainerStruct) + 
-			      sizeof(itemItemStruct));
+	    size_t test_size = (sizeof(playerBookStruct) - 
+				sizeof(itemContainerStruct) + 
+				sizeof(itemItemStruct));
 
-	  if ((len != sizeof(playerBookStruct)) &&
-	      (len != test_size))
-	  {
-	    fprintf(stderr,
-		    "WARNING: PlayerBookCode (%04x) (dataLen:%d != sizeof(playerBookStruct:%d or %d\n",
-		    PlayerBookCode, len, sizeof(playerBookStruct),
-		    test_size);
-	    unk = true;
-	  }
-	  else
-	    unk = false;
+	    if ((len != sizeof(playerBookStruct)) &&
+		(len != test_size))
+	    {
+		fprintf(stderr,
+			"WARNING: PlayerBookCode (%04x) (dataLen:%d != sizeof(playerBookStruct:%d or %d\n",
+			PlayerBookCode, len, sizeof(playerBookStruct),
+			test_size);
+		unk = true;
+	    }
+	    else
+		unk = false;
 #endif
  
             emit playerBook((const playerBookStruct*)data, len, dir);
@@ -2387,21 +2255,21 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         case PlayerContainerCode:
         {
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
-	  size_t test_size = (sizeof(playerContainerStruct) - 
-			      sizeof(itemContainerStruct) + 
-			      sizeof(itemItemStruct));
+	    size_t test_size = (sizeof(playerContainerStruct) - 
+				sizeof(itemContainerStruct) + 
+				sizeof(itemItemStruct));
 
-	  if ((len != sizeof(playerContainerStruct)) &&
-	      (len != test_size))
-	  {
-	    fprintf(stderr,
-		    "WARNING: PlayerContainerCode (%04x) (dataLen:%d != sizeof(playerContainerStruct:%d or %d\n",
-		    PlayerContainerCode, len, sizeof(playerContainerStruct),
-		    test_size);
-	    unk = true;
-	  }
-	  else
-	    unk = false;
+	    if ((len != sizeof(playerContainerStruct)) &&
+		(len != test_size))
+	    {
+		fprintf(stderr,
+			"WARNING: PlayerContainerCode (%04x) (dataLen:%d != sizeof(playerContainerStruct:%d or %d\n",
+			PlayerContainerCode, len, sizeof(playerContainerStruct),
+			test_size);
+		unk = true;
+	    }
+	    else
+		unk = false;
 #endif
 
             emit playerContainer((const playerContainerStruct *)data, len, dir);
@@ -2418,13 +2286,20 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             break;
         }
 
-        case HPUpdateCode:
+        case SpawnUpdateCode:
         {
-            unk = ! ValidatePayload(HPUpdateCode, hpUpdateStruct);
-
-            emit updateSpawnHP((const hpUpdateStruct*)data, len, dir);
-
+            unk = ! ValidatePayload(SpawnUpdateCode, SpawnUpdateStruct);
+	    SpawnUpdateStruct *su = (SpawnUpdateStruct*)data;
+//	    printf("SpawnUpdateCode(id=%d, sub=%d, arg1=%d, arg2=%d)\n", 
+//		   su->spawnId, su->subcommand, 
+//		   su->arg1, su->arg2);
+	    switch(su->subcommand) {
+	    case 17:
+		emit updateSpawnMaxHP(su, len, dir);
+		break;
+	    }
             break;
+	    emit updateSpawnInfo(su, len, dir);
         }
 	
 	case NpcHpUpdateCode:
@@ -2587,8 +2462,8 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
 	    emit zoneNew((const newZoneStruct*)data, len, dir);
 
-           if (m_vPacket)
-              printf("New Zone at byte: %ld\n", m_vPacket->FilePos());
+	    if (m_vPacket)
+		printf("New Zone at byte: %ld\n", m_vPacket->FilePos());
 
             break;
         }
@@ -2731,127 +2606,127 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             
             switch (appearance->type)
             {
-                case 0x0003:
-                {
-                    /*
-                     ** Invisibility Flag
-                     ** 0x00 Visible
-                     ** 0x01 Invisible
-                    */
+	    case 0x0003:
+	    {
+		/*
+		** Invisibility Flag
+		** 0x00 Visible
+		** 0x01 Invisible
+		*/
 
 #if 0
-                    if( m_Spawns.contains(appearance->spawnId) )
-                        printf("%s ",m_Spawns[appearance->spawnId].name);
-                    else
-                        printf("spawn(%d) ", appearance->spawnId);
+		if( m_Spawns.contains(appearance->spawnId) )
+		    printf("%s ",m_Spawns[appearance->spawnId].name);
+		else
+		    printf("spawn(%d) ", appearance->spawnId);
 
-                    if(appearance->paramter)
-                        printf("is now invisible\n");
-                    else
-                        printf("is now visible\n");
+		if(appearance->paramter)
+		    printf("is now invisible\n");
+		else
+		    printf("is now visible\n");
 #endif 
-                    break;
-                }
+		break;
+	    }
 
-                case 0x000e:
-                {
-                    /*
-                     ** Shows how to display the other PCs and NPCs
-                     ** 0x64 Standing Up
-                     ** 0x6e Sitting Down
-                    */
+	    case 0x000e:
+	    {
+		/*
+		** Shows how to display the other PCs and NPCs
+		** 0x64 Standing Up
+		** 0x6e Sitting Down
+		*/
  
-                    break;
-                }
+		break;
+	    }
 
-                case 0x0010:
-                {
-                    /*
-                     ** This seems to be where the client is
-                     ** assigned the players ID
-                    */
+	    case 0x0010:
+	    {
+		/*
+		** This seems to be where the client is
+		** assigned the players ID
+		*/
 		 
-                    emit setPlayerID( appearance->paramter );
+		emit setPlayerID( appearance->paramter );
 
-                    break;
-                }
+		break;
+	    }
 
-                case 0x0011:
-                {
-                    /*
-                     ** This contains the current HP of the player.
-                    */
+	    case 0x0011:
+	    {
+		/*
+		** This contains the current HP of the player.
+		*/
 #if 0
-                    printf("Your hp is now %d.\n", 
-                           (unsigned short)appearance->paramter );
+		printf("Your hp is now %d.\n", 
+		       (unsigned short)appearance->paramter );
 #endif
-                    break;
-                }
+		break;
+	    }
 
-                case 0x0013:
-                {
-                    /*
-                     ** Not really sure.  Levitation is one of the events 
-                     ** seen by this. 0x02 Levitating
-                    */
-
-#if 0
-                    if ( m_Spawns.contains(appearance->spawnId) )
-                        printf("%s ",m_Spawns[appearance->spawnId].name);
-                    else
-                        printf("spawn(%d) ", appearance->spawnId);
-
-                    if (appearance->paramter & 0x0002)
-                        printf("is now levitating\n");
-                    else
-                        printf("is no longer levitating\n");
-#endif
- 
-                    break;
-                }
-
-                case 0x0015:
-                {
-                    /*
-                     ** Used for anonymous and roleplaying
-                     ** 0x01 Anonymous
-                     ** 0x02 Role Playing
-                    */
+	    case 0x0013:
+	    {
+		/*
+		** Not really sure.  Levitation is one of the events 
+		** seen by this. 0x02 Levitating
+		*/
 
 #if 0
-                    if ( m_Spawns.contains(appearance->spawnId) )
-                        printf("%s ",m_Spawns[appearance->spawnId].name);
-                    else
-                        printf("spawn(%d) ", appearance->spawnId);
+		if ( m_Spawns.contains(appearance->spawnId) )
+		    printf("%s ",m_Spawns[appearance->spawnId].name);
+		else
+		    printf("spawn(%d) ", appearance->spawnId);
 
-                    if (appearance->paramter & 0x0002)
-                        printf("is now role playing\n");
-                    else if(appearance->paramter & 0x0001)
-                        printf("is now anonymous\n");
-                    else
-                        printf("is no longer role playing or anonymous\n");
+		if (appearance->paramter & 0x0002)
+		    printf("is now levitating\n");
+		else
+		    printf("is no longer levitating\n");
 #endif
  
-                    break;
-                }
+		break;
+	    }
+
+	    case 0x0015:
+	    {
+		/*
+		** Used for anonymous and roleplaying
+		** 0x01 Anonymous
+		** 0x02 Role Playing
+		*/
+
+#if 0
+		if ( m_Spawns.contains(appearance->spawnId) )
+		    printf("%s ",m_Spawns[appearance->spawnId].name);
+		else
+		    printf("spawn(%d) ", appearance->spawnId);
+
+		if (appearance->paramter & 0x0002)
+		    printf("is now role playing\n");
+		else if(appearance->paramter & 0x0001)
+		    printf("is now anonymous\n");
+		else
+		    printf("is no longer role playing or anonymous\n");
+#endif
+ 
+		break;
+	    }
                 
-                default:
-                {
+	    default:
+	    {
 #if 0
-                    printf("%0.4x.%0.4x: ",
-                           (unsigned short)appearance->type,
-                           (unsigned short)appearance->unknown0008);
+		printf("%0.4x.%0.4x: ",
+		       (unsigned short)appearance->type,
+		       (unsigned short)appearance->unknown0008);
 
-                    if ( m_Spawns.contains(appearance->spawnId) )
-                        printf("%s: ",m_Spawns[appearance->spawnId].name);
-                    else
-                        printf("spawn(%d): ", appearance->spawnId);
+		if ( m_Spawns.contains(appearance->spawnId) )
+		    printf("%s: ",m_Spawns[appearance->spawnId].name);
+		else
+		    printf("spawn(%d): ", appearance->spawnId);
 
-                    printf("%0.8x\n", (unsigned short)appearance->paramter );
+		printf("%0.8x\n", (unsigned short)appearance->paramter );
 #endif
   
-                    break;
-                }
+		break;
+	    }
             }
 
             break;
@@ -2920,35 +2795,29 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             break;
         }
 
-        case CDoorSpawnsCode:
+        case DoorSpawnsCode:
         {
             unk = false;
 	    
-            // decode/decompress the payload
-            decoded = m_decode->DecodePacket(data, len, decodedData,
-                                     &decodedDataLen, showeq_params->ip);
-            if (!decoded)
-               break;
-
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
-            cDoorSpawnsStruct* compressed;
-            compressed = (cDoorSpawnsStruct *)(decodedData);
-
             // verify size
 
-            int pSize = (decodedDataLen - 4) / compressed->count;
-
-            if (pSize != sizeof(doorStruct))
+            if ((len - 2) % sizeof(doorStruct) != 0)
             {
-	        printf("WARNING: CompressedDoorSpawnCode (dataLen:%d "
-                       "!= sizeof(doorStruct):%d)!\n", 
-                       pSize, sizeof(doorStruct));
+	        printf("WARNING: DoorSpawnCode (dataLen:%d "
+                       "%% sizeof(doorStruct):%d) != 0!\n", 
+                       len - 2, sizeof(doorStruct));
 
 	        unk = true;
+		break;
             }
 #endif
-
-            emit compressedDoorSpawn((const cDoorSpawnsStruct *)decodedData, len, dir);
+	    int nDoors = (len - 2) / sizeof(doorStruct);
+	    const DoorSpawnsStruct *doorsStruct = (const DoorSpawnsStruct *)data;
+	    for (int i = 0; i < nDoors; i++) {
+		emit newDoorSpawn(&doorsStruct->doors[i], len, dir);
+	    }
+	    emit newDoorSpawns(doorsStruct, len, dir);
 
             break;
         }
@@ -3172,120 +3041,61 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    //both the client command and the server acknowledgement when buying
 	    break;
 	}
+
+        case GuildMemberUpdate:
+	    unk = false;
+   	    break;
 	
         default:
         {
         }
-    } /* end switch(opCode) */
+	} /* end switch(opCode) */
 
-    if (unk)
-      emit unknownOpcode(data, len, dir);
+	if (unk)
+	    emit unknownOpcode(data, len, dir);
 
-    if (showeq_params->logUnknownZonePackets && unk)
-    {
-      QString tmpStr;
-      tmpStr.sprintf ("%04x - %d (%s)\n", opCode, len,
-		      ((dir == DIR_SERVER) ? 
-		       "Server --> Client" : "Client --> Server"));
+	if (showeq_params->logUnknownZonePackets && unk)
+	{
+	    QString tmpStr;
+	    tmpStr.sprintf ("%04x - %d (%s)\n", opCode, len,
+			    ((dir == DIR_SERVER) ? 
+			     "Server --> Client" : "Client --> Server"));
 
-      if (!logMessage(showeq_params->UnknownZoneLogFilename, tmpStr))
-	emit toggle_log_UnknownData(); //untoggle the GUI checkmark
+	    if (!logMessage(showeq_params->UnknownZoneLogFilename, tmpStr))
+		emit toggle_log_UnknownData(); //untoggle the GUI checkmark
 
-      if (!logData (showeq_params->UnknownZoneLogFilename, len, data))
-	emit toggle_log_UnknownData(); //untoggle the GUI checkmark
+	    if (!logData (showeq_params->UnknownZoneLogFilename, len, data))
+		emit toggle_log_UnknownData(); //untoggle the GUI checkmark
+	}
+
+	unsigned int uiOpCodeIndex = 0;
+
+	if (showeq_params->monitorOpCode_Usage)
+	{
+	    unsigned int uiIndex = 0;
+
+	    for (; ((uiIndex < OPCODE_SLOTS) && (uiOpCodeIndex == 0)); uiIndex ++)
+	    {
+		if (opCode == MonitoredOpCodeList[ uiIndex ][ 0 ])
+		{
+		    if ((MonitoredOpCodeList[ uiIndex ][ 1 ] == dir) || 
+			(MonitoredOpCodeList[ uiIndex ][ 1 ] == 3))
+		    {
+			if ((!unk && (MonitoredOpCodeList[ uiIndex ][ 2 ] == 1)) 
+			    || unk)
+			    uiOpCodeIndex = uiIndex + 1;
+		    }
+		}
+	    }
+	}
+
+	if ((m_viewUnknownData && unk) || (uiOpCodeIndex > 0))
+	{
+	    printUnknown(uiOpCodeIndex, opCode, len, data, dir);
+	}
+	if (pktlist[packetNum].allocated) 
+	    delete[] pktlist[packetNum].data;
     }
-
-    unsigned int uiOpCodeIndex = 0;
-
-    if (showeq_params->monitorOpCode_Usage)
-    {
-        unsigned int uiIndex = 0;
-
-        for (; ((uiIndex < OPCODE_SLOTS) && (uiOpCodeIndex == 0)); uiIndex ++)
-        {
-            if (opCode == MonitoredOpCodeList[ uiIndex ][ 0 ])
-            {
-                if ((MonitoredOpCodeList[ uiIndex ][ 1 ] == dir) || 
-                    (MonitoredOpCodeList[ uiIndex ][ 1 ] == 3))
-                {
-                    if ((!unk && (MonitoredOpCodeList[ uiIndex ][ 2 ] == 1)) 
-			|| unk)
-                        uiOpCodeIndex = uiIndex + 1;
-                }
-            }
-        }
-   }
-
-   if ((m_viewUnknownData && unk) || (uiOpCodeIndex > 0))
-   {
-     QString tmpStr;
-       if (len == 2)
-       {
-	 tmpStr.sprintf ("%s: %04x len %i [%s]", 
-			 uiOpCodeIndex > 0 ? 
-			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
-			 "UNKNOWN", opCode, len,
-			 dir == 2 ? "Server --> Client" : "Client --> Server");
-	 printf("\n%s\n\t", (const char*)tmpStr);
-
-	 if ((uiOpCodeIndex > 0) && showeq_params->monitorOpCode_Log)
-	 {
-	   logMessage(showeq_params->monitorOpCode_Filename, tmpStr);
-	   logData(showeq_params->monitorOpCode_Filename, len, data);
-	 }
-       }
-       else
-       {
-	 tmpStr.sprintf ("%s: %04x len %02d [%s] ID:%i", 
-			 uiOpCodeIndex > 0 ? 
-			 MonitoredOpCodeAliasList[uiOpCodeIndex - 1].ascii() : 
-			 "UNKNOWN", opCode, len, 
-			 dir == 2 ? "Server --> Client" : "Client --> Server", 
-			 data[3] * 256 + data[2]);
-
-	 if ((uiOpCodeIndex > 0) && showeq_params->monitorOpCode_Log)
-	 {
-	   logMessage(showeq_params->monitorOpCode_Filename, tmpStr);
-	   logData(showeq_params->monitorOpCode_Filename, len, data);
-	 }
-
-	 printf("\n%s\n", (const char*)tmpStr);
-	 for (uint32_t a = 0; a < len; a ++)
-         {
-	   if ((data[a] >= 32) && (data[a] <= 126))
-	     printf ("%c", data[a]);
-	   else
-	     printf (".");
-	 }
-	 
-	 printf ("\n");
-
-	 for (uint32_t a = 0; a < len; a ++)
-         {
-	   if (data[a] < 32)
-	     printf ("%c", data[a] + 95);
-	   else if (data[a] > 126)
-	     printf ("%c", data[a] - 95);
-	   else if (data[a] > 221)
-	     printf ("%c", data[a] - 190);
-	   else
-	     printf ("%c", data[a]);
-	 }
-
-         printf("\n");
-
-         
-	 for (uint32_t a = 0; a < len; a ++)
-         {
-	     printf ("%02X", data[a]);
-	 }
-
-         printf("\n\n"); /* Adding an extra line break makes it easier
-			     for people trying to decode the OpCodes to
-			     tell where the raw data ends and the next
-			     message begins...  -Andon */
-       }
-   }
 }
 
 void EQPacket::setViewUnknownData (bool flag)
@@ -3384,24 +3194,6 @@ void EQPacket::decPlayback(void)
 
     setPlayback(x);
   }
-}
-
-void EQPacket::dispatchDecodedCharProfile(const uint8_t* decodedData, 
-					  uint32_t decodedDataLen)
-{
-  ValidateDecodedPayload(CharProfileCode, charProfileStruct);
-
-              //logData ("/tmp/charprofile.log", decodedDataLen, decodedData);
-  emit backfillPlayer((const charProfileStruct*)decodedData, decodedDataLen, DIR_SERVER);
-}
-
-void EQPacket::dispatchDecodedNewSpawn(const uint8_t* decodedData, 
-				       uint32_t decodedDataLen)
-{
-  ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
-
-              //logData ("/tmp/newspawn.log", decodedDataLen, decodedData);
-  emit backfillSpawn((newSpawnStruct*)decodedData, decodedDataLen, DIR_SERVER);
 }
 
 void EQPacket::dispatchDecodedZoneSpawns(const uint8_t* decodedData, 
@@ -3507,7 +3299,7 @@ void EQPacket::monitorIPClient(const QString& ip)
   if (!showeq_params->playbackpackets)
     m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
 			       showeq_params->realtime, 
-			       IP_ADDRESS_TYPE, 0, 0, m_keyPort);
+			       IP_ADDRESS_TYPE, 0, 0);
 }
 
 void EQPacket::monitorMACClient(const QString& mac)
@@ -3527,7 +3319,7 @@ void EQPacket::monitorMACClient(const QString& mac)
   if (!showeq_params->playbackpackets)
     m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
 			       showeq_params->realtime, 
-			       IP_ADDRESS_TYPE, 0, 0, m_keyPort);
+			       IP_ADDRESS_TYPE, 0, 0);
 }
 
 void EQPacket::monitorNextClient()
@@ -3546,7 +3338,7 @@ void EQPacket::monitorNextClient()
   if (!showeq_params->playbackpackets)
     m_packetCapture->setFilter(showeq_params->device, NULL,
 			       showeq_params->realtime, 
-			       DEFAULT_ADDRESS_TYPE, 0, 0, m_keyPort);
+			       DEFAULT_ADDRESS_TYPE, 0, 0);
 }
 
 void EQPacket::monitorDevice(const QString& dev)
@@ -3656,7 +3448,6 @@ void EQPacket::resetEQPacket()
 
    m_clientPort = 0;
    m_serverPort = 0;
-   m_keyPort = showeq_params->keyport;
 
    m_eqstreamid = unknown_stream;
 
@@ -3664,11 +3455,7 @@ void EQPacket::resetEQPacket()
    emit sessionTrackingChanged(m_session_tracking_enabled);
    emit clientPortLatched(m_clientPort);
 
-#if HAVE_LIBEQ
-  if (m_decode != NULL)
-     emit resetDecoder();
-#endif
-
+   stopDecode();
 }
 
 char* EQPacket::pcap_filter()
@@ -3681,7 +3468,7 @@ char* EQPacket::pcap_filter()
 //----------------------------------------------------------------------
 // PacketCaptureThread
 //  start and stop the thread
-//  get packets to the processing engine(decodePacket)
+//  get packets to the processing engine(dispatchPacket)
 PacketCaptureThread::PacketCaptureThread()
 {
 
@@ -3857,8 +3644,7 @@ void PacketCaptureThread::setFilter (const char *device,
                                      bool realtime,
                                      uint8_t address_type,
                                      uint16_t zone_port,
-				     uint16_t client_port,
-                                     uint16_t key_port
+				     uint16_t client_port
                                     )
 {
     char filter_buf[256]; // pcap filter buffer 
@@ -3867,13 +3653,13 @@ void PacketCaptureThread::setFilter (const char *device,
 
     /* Listen to World Server or the specified Zone Server */
     if (address_type == IP_ADDRESS_TYPE && client_port)   
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, key_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, hostname);
     else if (address_type == IP_ADDRESS_TYPE && zone_port) 
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_port, zone_port, key_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_port, zone_port, hostname);
     else if (address_type == MAC_ADDRESS_TYPE && client_port)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, key_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, hostname);
     else if (address_type == MAC_ADDRESS_TYPE && zone_port)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_port, zone_port, key_port, hostname);
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_port, zone_port, hostname);
     else if (hostname != NULL && !client_port && !zone_port)
          sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and host %s", hostname);
     else

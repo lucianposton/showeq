@@ -122,7 +122,6 @@ class Item : public EQPoint
   uint32_t filterFlags() const { return m_filterFlags; }
   uint32_t runtimeFilterFlags() const { return m_runtimeFilterFlags; }
   uint8_t NPC() const { return m_NPC; }
-  float displayZPos() const { return m_zDisplay; }
   double getFDistanceToPlayer() const { return m_fdist; }
   uint32_t getIDistanceToPlayer() const { return m_idist; }
 
@@ -170,7 +169,6 @@ class Item : public EQPoint
   QTime m_lastUpdate; 
   QTime m_spawnTime; 
   time_t m_lastChanged;
-  float m_zDisplay;
   uint16_t m_ID;
   uint8_t m_NPC;
   itemType m_type;
@@ -217,6 +215,7 @@ class Spawn : public Item
   uint8_t light() const { return m_light; }
   QString lightName() const;
   uint8_t gender() const { return m_gender; }
+  QString genderName() const;
   QString deityName() const;
   int16_t deityTeam() const { return m_deityTeam; }
   int16_t raceTeam() const { return m_raceTeam; }

@@ -108,8 +108,8 @@ public slots:
    void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
    void removeGroundItem(const remDropStruct*, uint32_t, uint8_t);
    void newCoinsItem(const dropCoinsStruct*);
-   void compressedDoorSpawn (const cDoorSpawnsStruct* c);
-   void newDoorSpawn(const doorStruct* d);
+   //   void compressedDoorSpawn (const cDoorSpawnsStruct* c);
+   void newDoorSpawn(const doorStruct* d, uint32_t len, uint8_t dir);
    void removeCoinsItem(const removeCoinsStruct*);
    void zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len);
    void newSpawn(const newSpawnStruct* spawn);
@@ -121,7 +121,7 @@ public slots:
 		    int8_t heading, int8_t deltaHeading,
 		    uint8_t animation);
    void updateSpawns(const spawnPositionUpdate* updates);
-   void updateSpawnHP(const hpUpdateStruct* hpupdate);
+   void updateSpawnMaxHP(const SpawnUpdateStruct* spawnupdate);
    void updateNpcHP(const hpNpcUpdateStruct* hpupdate);
    void spawnWearingUpdate(const wearChangeStruct* wearing);
    void consMessage(const considerStruct* con, uint32_t, uint8_t);

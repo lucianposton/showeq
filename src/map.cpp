@@ -504,8 +504,8 @@ void MapMgr::addLocation(QWidget* parent, const MapPoint& point)
     m_mapData.addLocation(name, m_curLocationColor, 
 			  QPoint(point.x(), point.y()));
   
-#ifdef DEBUGMAPMAP
-  printf("addLocation(): Location %d added at %d/%d\n", numLocations, 
+#ifdef DEBUGMAP
+  printf("addLocation(): Location x added at %d/%d\n", 
 	 point.x(), point.y()); 
 #endif
 }
@@ -4125,14 +4125,14 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     
     QString string;
     string.sprintf("SpawnPoint: %s\n"
-		   "%.3s/Z: %5d/%5d/%5.1f\n"
+		   "%.3s/Z: %5d/%5d/%5d\n"
 		   "Last: %s\n"
 		   "Spawned: %s\t Remaining: %s\t Count: %d", 
 		   (const char*)sp->name(),
 		   showeq_params->retarded_coords ? "Y/X" : "X/Y",
 		   showeq_params->retarded_coords ? sp->y() : sp->x(),
 		   showeq_params->retarded_coords ? sp->x() : sp->y(),
-		   sp->displayZPos(),
+		   sp->z(),
 		   (const char*)sp->last(), 
 		   (const char*)spawned,
 		   (const char*)remaining,
@@ -4171,30 +4171,32 @@ void Map::mouseMoveEvent( QMouseEvent* event )
 	hp = QString::number(spawn->HP());
 
       string.sprintf("%s  %s\n"
-		     "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5.1f\n"
+		     "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5d\n"
 		     "Race: %s\t Class: %s", 
 		     (const char*)spawn->transformedName(),(const char*)guild,
 		     spawn->level(), (const char*)hp,
 		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
 		     showeq_params->retarded_coords ? spawn->y() : spawn->x(),
 		     showeq_params->retarded_coords ? spawn->x() : spawn->y(),
-		     item->displayZPos(),
+		     item->z(),
 		     (const char*)spawn->raceString(), 
 		     (const char*)spawn->classString());
       if (spawn->isNPC())
 	string += "\tType: " + spawn->typeString();
+      else
+       	string += "\tGender: " + spawn->genderName();
 
       string += "\nEquipment: " + spawn->info();
     }
     else
       string.sprintf("%s\n"
-		     "%.3s/Z: %5d/%5d/%5.1f\n"
+		     "%.3s/Z: %5d/%5d/%5d\n"
 		     "Race: %s\t Class: %s", 
 		     (const char*)item->transformedName(),
 		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
 		     showeq_params->retarded_coords ? item->y() : item->x(),
 		     showeq_params->retarded_coords ? item->x() : item->y(),
-		     item->displayZPos(),
+		     item->z(),
 		     (const char*)item->raceString(), 
 		     (const char*)item->classString());
 

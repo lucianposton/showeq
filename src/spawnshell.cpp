@@ -393,18 +393,7 @@ void SpawnShell::removeGroundItem(const remDropStruct *d, uint32_t, uint8_t dir)
     deleteItem(tDrop, d->dropId);
 }
 
-void SpawnShell::compressedDoorSpawn(const cDoorSpawnsStruct *c)
-{
-#ifdef SPAWNSHELL_DIAG
-   printf("SpawnShell::compressedDoorSpawn(compressedDoorStruct*)\n");
-#endif
-   for (unsigned int i=0; i<c->count; i++)
-   {
-      newDoorSpawn((const doorStruct*)&c->doors[i]);
-   }
-}
-
-void SpawnShell::newDoorSpawn(const doorStruct* d)
+void SpawnShell::newDoorSpawn(const doorStruct* d, uint32_t len, uint8_t dir)
 {
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::newDoorSpawn(doorStruct*)\n");
@@ -503,7 +492,6 @@ void SpawnShell::newSpawn(const spawnStruct& s)
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::newSpawn(spawnStruct *(name='%s'), bSelected=%s)\n", s.name, bSelected?"true":"false");
 #endif
-   
    // if this is the SPAWN_SELF it's the player
    if (s.NPC == SPAWN_SELF)
      return;
@@ -577,13 +565,12 @@ void SpawnShell::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t 
   if ((dir != DIR_CLIENT) && 
       (pupdate->spawnId != m_player->id())) // PC Corpse Movement
   {
-       updateSpawn(pupdate->spawnId,  
-                   pupdate->x,
-                   pupdate->y,
-                   pupdate->z,
-                   0, 0, 0,
-                   pupdate->heading,
-                   0, 0);
+       int16_t y = pupdate->y / 8;
+       int16_t x = pupdate->x / 8;
+       int16_t z = pupdate->z / 8;
+
+       updateSpawn(pupdate->spawnId, x, y, z, 0, 0, 0,
+                   pupdate->heading, 0, 0);
   }
 }
 
@@ -666,24 +653,27 @@ void SpawnShell::updateSpawns(const spawnPositionUpdate* updates)
   if (m_zoneMgr->isZoning())
     return;
 
-  updateSpawn(updates->spawnId, updates->x, updates->y, updates->z,
+  updateSpawn(updates->spawnId, updates->x / 8, updates->y / 8, updates->z / 8,
 		 0,0,0,updates->heading,0,0);
 }
 
-void SpawnShell::updateSpawnHP(const hpUpdateStruct* hpupdate)
+void SpawnShell::updateSpawnMaxHP(const SpawnUpdateStruct* su)
 {
 #ifdef SPAWNSHELL_DIAG
-   printf("SpawnShell::updateSpawnHp(id=%d, hp=%d, maxHp=%d)\n", 
-	  hpupdate->spawnId, hpupdate->curHp, hpupdate->maxHp);
+   printf("SpawnShell::updateSpawnInfo(id=%d, sub=%d, hp=%d, maxHp=%d)\n", 
+	  su->spawnId, su->subcommand, su->arg1, su->arg2);
 #endif
-   Item* item = m_spawns.find(hpupdate->spawnId);
+   Item* item = m_spawns.find(su->spawnId);
    if (item != NULL)
    {
      Spawn* spawn = (Spawn*)item;
-     spawn->setHP(hpupdate->curHp);
-     spawn->setMaxHP(hpupdate->maxHp);
-     item->updateLastChanged();
-     emit changeItem(item, tSpawnChangedHP);
+     switch(su->subcommand) {
+     case 17: // current hp update
+       spawn->setHP(su->arg1);
+       item->updateLastChanged();
+       emit changeItem(item, tSpawnChangedHP);
+       break;
+     }
    }
 }
 
@@ -754,7 +744,7 @@ void SpawnShell::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
   if (con->playerid == con->targetid) 
   {
     // print it's deity
-    printf("Diety: %s\n", (const char*)m_player->deityName());
+    printf("Deity: %s\n", (const char*)m_player->deityName());
     
     // well, this is You
     msg += "YOU";
@@ -769,7 +759,7 @@ void SpawnShell::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
     {
       Spawn* spawn = (Spawn*)item;
       // yes
-      printf("Diety: %s\n", (const char*)spawn->deityName());
+      printf("Deity: %s\n", (const char*)spawn->deityName());
 
       int changed = tSpawnChangedNone;
 

@@ -54,7 +54,7 @@ void SpawnPointListItem::update()
     setText(tSpawnPointCoord2, QString::number(m_spawnPoint->y()));
   }
   setText(tSpawnPointCoord3, 
-	  QString::number(m_spawnPoint->displayZPos(), 'f', 1));
+	  QString::number(m_spawnPoint->z(), 'f', 1));
 
   // construct and set the time remaining string
   if ( m_spawnPoint->diffTime() == 0 || m_spawnPoint->deathTime() == 0 )
@@ -294,8 +294,8 @@ void SpawnPointList::deleteItem(const SpawnPointListItem* item)
   if (def.isEmpty())
     def = sp->last();
   
-  def.sprintf("%d/%d/%5.1f '%s'", 
-	      sp->x(), sp->y(), sp->displayZPos(), (const char*)def);
+  def.sprintf("%d/%d/%d '%s'", 
+	      sp->x(), sp->y(), sp->z(), (const char*)def);
   
   // confirm that the user wants to delete the category
   QMessageBox mb("Are you sure?",

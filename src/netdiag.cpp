@@ -76,28 +76,6 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
   tmpGrid->addWidget(new QLabel("Filter: ", this), row, col++);
   tmpLabel->setText(m_packet->pcap_filter());
   
-  // Decode
-  row++; row++; col = 0;
-  tmpGrid->addWidget(new QLabel("Decode ", this), row, col++);
-  tmpGrid->addWidget(new QLabel("Broken: ", this), row, col++);
-  tmpLabel = new QLabel(this);
-  tmpLabel->setText(QString::number(showeq_params->broken_decode));
-  tmpGrid->addWidget(tmpLabel, row, col++);
-  col++;
-  tmpGrid->addWidget(new QLabel("HAVE_LIBEQ: ", this), row, col++);
-  tmpLabel = new QLabel(this);
-  int num = 0;
-#ifdef HAVE_LIBEQ
-  num = HAVE_LIBEQ;
-#endif
-  tmpLabel->setText(QString::number(num));
-  tmpGrid->addWidget(tmpLabel, row, col++);
-  col++;
-  tmpGrid->addWidget(new QLabel("Key: ", this), row, col++);
-  m_decodeKeyLabel = new QLabel(this);
-  m_decodeKeyLabel->setText(QString::number(m_packet->decodeKey(), 16));
-  tmpGrid->addWidget(m_decodeKeyLabel, row, col++);
-
   // stream specific statistics
   row++; row++; col = 0;
 
@@ -311,11 +289,6 @@ void NetDiag::numPacket(int num, int stream)
      tempStr.sprintf("0.0");
 
    m_packetAvg[stream]->setText(tempStr);
-}
-
-void NetDiag::keyChanged(void)
-{
-  m_decodeKeyLabel->setText(QString::number(m_packet->decodeKey(), 16));
 }
 
 void NetDiag::cacheSize(int size, int stream)

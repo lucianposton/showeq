@@ -23,8 +23,7 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
     m_selectedItem(NULL),
     m_menu(NULL),
     m_spawnListItemDict(709),
-    m_immediateUpdate(true),
-    m_holdUpdates(false)
+    m_immediateUpdate(true)
 {
   m_spawnListItemDict.setAutoDelete(false);
 
@@ -108,12 +107,6 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   connect (m_spawnList, SIGNAL(doubleClicked(QListViewItem*)),
 	   this, SLOT(mouseDoubleClickEvent(QListViewItem*)));
 
-   // connect SpawnList slots to EQPacket signals
-   connect(packet, SIGNAL(startDecodeBatch(void)),
-	   this, SLOT(startDecodeBatch(void)));
-   connect(packet, SIGNAL(finishedDecodeBatch(void)),
-	   this, SLOT(finishedDecodeBatch(void)));
-  
   // connect SpawnList slots to SpawnShell signals
   connect(m_spawnShell, SIGNAL(addItem(const Item *)),
 	  this, SLOT(addItem(const Item *)));
@@ -245,7 +238,7 @@ void SpawnListWindow2::delItem(const Item* item)
 
 void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
 {
-  if (!item || m_holdUpdates)
+  if (!item)
     return;
 
   SpawnListItem* litem = NULL;
@@ -674,19 +667,6 @@ void SpawnListWindow2::savePrefs(void)
   m_spawnList->savePrefs();
 }
 
-void SpawnListWindow2::startDecodeBatch(void)
-{
-  // disable updates during the decode batch
-  m_holdUpdates = true;
-}
-
-void SpawnListWindow2::finishedDecodeBatch(void)
-{
-  // re-enable updates once the decode batch is finished and force a rebuild
-  // of the spawn list
-  m_holdUpdates = true;
-  rebuildSpawnList();
-}
 
 void SpawnListWindow2::categorySelected(int index)
 {

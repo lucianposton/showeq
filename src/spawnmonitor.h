@@ -68,7 +68,6 @@ public:
   uint16_t lastID() const { return m_lastID; }
   int32_t count() const { return m_count; }
   Spawn* getSpawn() const;
-  float displayZPos() const { return (float(z()) / 10.0); }
   time_t spawnTime() const { return m_spawnTime; }
   time_t deathTime() const { return m_deathTime; } 
   time_t diffTime() const { return m_diffTime; }

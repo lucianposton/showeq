@@ -26,8 +26,8 @@
 #include <qobject.h>
 #include <qregexp.h>
 #include "everquest.h"
-#include "decode.h"
 #include "opcodes.h"
+#include "decode.h"
 #include "util.h"
 
 #if defined (__GLIBC__) && (__GLIBC__ < 2)
@@ -542,12 +542,10 @@ class EQPacket : public QObject
    char* pcap_filter();
    int packetCount(int);
    uint32_t clientAddr(void);
-   uint16_t keyPort(void);
    uint16_t clientPort(void);
    uint16_t serverPort(void);
    uint8_t session_tracking_enabled(void);
    int playbackSpeed(void);
-   uint32_t decodeKey(void);
    int currentCacheSize(int);
    uint16_t serverSeqExp(int);
 
@@ -582,9 +580,6 @@ class EQPacket : public QObject
    void session_tracking();
    void setArqSeqGiveUp(int giveUp);
 
-   // Decoder slots
-   void dispatchDecodedCharProfile(const uint8_t* decodedData, uint32_t len);
-   void dispatchDecodedNewSpawn(const uint8_t* decodedData, uint32_t len);
    void dispatchDecodedZoneSpawns(const uint8_t* decodedData, uint32_t len);
 
  signals:
@@ -626,7 +621,8 @@ class EQPacket : public QObject
    void consMessage(const considerStruct*, uint32_t, uint8_t);
    
    void clientTarget(const clientTargetStruct* target, uint32_t, uint8_t);
-   void compressedDoorSpawn(const cDoorSpawnsStruct*, uint32_t, uint8_t);
+   void newDoorSpawns(const doorSpawnsStruct *, uint32_t, uint8_t);
+   void newDoorSpawn(const doorStruct *, uint32_t, uint8_t);
    void spawnWearingUpdate(const wearChangeStruct*, uint32_t, uint8_t);
 
    void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
@@ -635,7 +631,8 @@ class EQPacket : public QObject
    void removeCoinsItem(const removeCoinsStruct*, uint32_t, uint8_t);
 
    void updateSpawns(const spawnPositionUpdate* updates, uint32_t, uint8_t);
-   void updateSpawnHP(const hpUpdateStruct* hpupdate, uint32_t, uint8_t);
+   void updateSpawnMaxHP(const SpawnUpdateStruct* spawnupdate, uint32_t, uint8_t);
+   void updateSpawnInfo(const SpawnUpdateStruct* spawnupdate, uint32_t, uint8_t);
 
    void newSpawn(const newSpawnStruct* spawn, uint32_t, uint8_t);
    void deleteSpawn(const deleteSpawnStruct* delspawn, uint32_t, uint8_t);
@@ -682,13 +679,9 @@ class EQPacket : public QObject
    void msgReceived(const QString &);
    void stsMessage(const QString &, int = 0);
 
-   // Decoder signals
-   void resetDecoder(void);
    void backfillSpawn(const newSpawnStruct *, uint32_t, uint8_t);
    void backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t);
-   void startDecodeBatch(void);
-   void finishedDecodeBatch(void);
-
+ 
    // Spell signals
    void interruptSpellCast(const badCastStruct *, uint32_t, uint8_t);
 
@@ -716,7 +709,6 @@ class EQPacket : public QObject
 
  private:
       
-   EQDecode            *m_decode;
    PacketCaptureThread *m_packetCapture;
    VPacket             *m_vPacket;
    QString print_addr   (in_addr_t addr);
@@ -725,7 +717,6 @@ class EQPacket : public QObject
    int            m_packetCount[MAXSTREAMS];
    uint16_t       m_serverPort;
    uint16_t       m_clientPort;
-   uint16_t       m_keyPort;
    bool           m_busy_decoding;
    bool           m_viewUnknownData;
    bool           m_detectingClient;
@@ -756,12 +747,14 @@ class EQPacket : public QObject
    struct eqTimeOfDay m_eqTime;
 
    int  getEQTimeOfDay (time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay);
-   void decodePacket   (int size, unsigned char *buffer);
+   void dispatchPacket   (int size, unsigned char *buffer);
    void dispatchSplitData (EQPacketFormat& pf, uint8_t dir, EQStreamID streamid);
    void dispatchZoneData  (uint32_t len, uint8_t* data, uint8_t direction = 0);
    void dispatchWorldData (uint32_t len, uint8_t* data, uint8_t direction = 0);
    void dispatchWorldChatData (uint32_t len, uint8_t* data, uint8_t direction = 0);
    void logRawData (const char   *filename, unsigned char *data, unsigned int len);
+   void printUnknown(unsigned int uiOpCodeIndex, uint16_t opCode, uint32_t len, 
+		     uint8_t *data, uint8_t dir);
 
 };
 
@@ -773,11 +766,6 @@ inline int EQPacket::packetCount(int stream)
 inline uint32_t EQPacket::clientAddr(void)
 {
    return m_client_addr;
-}
-
-inline uint16_t EQPacket::keyPort(void)
-{
-  return m_keyPort;
 }
 
 inline uint16_t EQPacket::clientPort(void)
@@ -793,11 +781,6 @@ inline uint16_t EQPacket::serverPort(void)
 inline uint8_t EQPacket::session_tracking_enabled(void)
 {
   return m_session_tracking_enabled;
-}
-
-inline uint32_t EQPacket::decodeKey(void)
-{ 
-  return m_decode->decodeKey(); 
 }
 
 inline int EQPacket::currentCacheSize(int stream)
@@ -821,7 +804,7 @@ class PacketCaptureThread
 	 void stop ();
          uint16_t getPacket (unsigned char *buff); 
          void setFilter (const char *device, const char *hostname, bool realtime,
-                        uint8_t address_type, uint16_t zone_server_port, uint16_t client_port, uint16_t key_port);
+                        uint8_t address_type, uint16_t zone_server_port, uint16_t client_port);
 	 char* getFilter();
          
  private:
