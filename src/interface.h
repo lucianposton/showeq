@@ -412,6 +412,9 @@ class EQInterface:public QMainWindow
    // ZEM code
    QLabel* m_stsbarZEM;
 
+   QString ipstr[5];
+   QString macstr[5];   
+   
    QIntDict<QString> m_formattedMessageStrings;
 
    int char_ClassID[PLAYER_CLASSES];

@@ -223,7 +223,15 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 						 false),
 			   this, "packet");
    
+  ipstr[0] = m_packet->ip();	//Retrieves last IP used in previous session 
+  for( int i = 1; i < 5; i++) 
+  ipstr[i] = "0.0.0.0";
 
+  macstr[0] = m_packet->mac();	//Retrieves last MAC used in previous session
+  for( int i = 1; i < 5; i++)  
+  macstr[i] = "00:00:00:00:00:00";
+
+  
    // setup the user directory
    m_dataLocationMgr->setupUserDirectory();
 
@@ -4787,15 +4795,19 @@ void EQInterface::set_net_monitor_next_client()
 
 void EQInterface::set_net_client_IP_address()
 {
+  QStringList iplst;
+  for( int l = 0; l < 5; l++)
+  iplst += ipstr[l];    
   bool ok = false;
   QString address = 
-    QInputDialog::getText("ShowEQ - EQ Client IP Address",
-			  "Enter IP address of EQ client:",
-			  QLineEdit::Normal, m_packet->ip(),
-			  &ok, this);
-
+     QInputDialog::getItem("ShowEQ - EQ Client IP Address",
+      			   "Enter IP address of EQ client",
+			    iplst, 0, TRUE, &ok, this );
   if (ok)
   {
+	for (int i = 4; i > 0; i--)
+	ipstr[i] = ipstr[ i - 1 ];
+	ipstr[0] = address;
     // start monitoring the new address
     m_packet->monitorIPClient(address);
 
@@ -4806,13 +4818,14 @@ void EQInterface::set_net_client_IP_address()
 
 void EQInterface::set_net_client_MAC_address()
 {
+  QStringList maclst;
+  for( int l = 0; l < 5; l++)  
+  maclst += macstr[l];
   bool ok = false;
   QString address = 
-    QInputDialog::getText("ShowEQ - Client MAC Address",
-			  "Enter MAC address of EQ client:",
-			  QLineEdit::Normal, m_packet->mac(),
-			  &ok, this);
-
+     QInputDialog::getItem("ShowEQ - EQ Client MAC Address",
+     			   "Enter MAC address of EQ client",
+			    maclst, 0, TRUE, &ok, this );
   if (ok)
   {
     if (address.length() != 17)
@@ -4821,7 +4834,9 @@ void EQInterface::set_net_client_MAC_address()
 	      (const char*)address);
       return;
     }
-
+ 	for (int i = 4; i > 0; i--)
+	macstr[i] = macstr[ i - 1 ];
+	macstr[0] = address;
     // start monitoring the new address
     m_packet->monitorMACClient(address);
 

@@ -1,4 +1,11 @@
 Version: $Id$ $Name$
+BonkersBobcat (09/05/04)
+------------------------
++ Updated version to 5.0.0.13
++ Applied ksmith's race patch
++ Applied purple's charprofile struct and filter case ignore patches
++ Applied L1A's patch to remember IP and MAC addresses
+
 BonkersBobcat (08/13/04)
 ------------------------
 + Updated version to 5.0.0.12

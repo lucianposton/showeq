@@ -118,7 +118,7 @@ void FilterMgr::loadFilters(void)
   QFileInfo fileInfo(m_filterFile);
 
   fileInfo = 
-    m_dataLocMgr->findExistingFile("filters", fileInfo.fileName(), true);
+    m_dataLocMgr->findExistingFile("filters", fileInfo.fileName(), false);
 
   m_filterFile = fileInfo.absFilePath();
 
@@ -132,7 +132,7 @@ void FilterMgr::loadFilters(void)
 void FilterMgr::loadFilters(const QString& fileName)
 {
   QFileInfo fileInfo = 
-    m_dataLocMgr->findExistingFile("filters", fileName, true);
+    m_dataLocMgr->findExistingFile("filters", fileName, false);
 
   m_filterFile = fileInfo.absFilePath();
 
@@ -235,7 +235,7 @@ void FilterMgr::loadZone(const QString& shortZoneName)
   QString fileName = shortZoneName + ".xml";
 
   QFileInfo fileInfo = 
-    m_dataLocMgr->findExistingFile("filters", fileName, true);
+    m_dataLocMgr->findExistingFile("filters", fileName, false);
 
   m_zoneFilterFile = fileInfo.absFilePath();
 
@@ -251,7 +251,7 @@ void FilterMgr::loadZoneFilters(void)
   QFileInfo fileInfo(m_zoneFilterFile);
   
   fileInfo = m_dataLocMgr->findExistingFile("filters", fileInfo.fileName(),
-					    true);
+					    false);
 
   m_zoneFilterFile = fileInfo.absFilePath();
 

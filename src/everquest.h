@@ -516,65 +516,65 @@ struct charProfileStruct
 /*0218*/ uint8_t   unknown0218[2];     // *** Placeholder
 /*0220*/ uint32_t  item_material[9];   // Item texture/material of worn/held items
 /*0256*/ uint8_t   unknown0256[52];    // *** Placeholder
-/*0716*/ Color_Struct item_tint[9];    // RR GG BB 00
+/*0308*/ Color_Struct item_tint[9];    // RR GG BB 00
 /*0344*/ AA_Array  aa_array[122];      // Length may not be right
-/*3640*/ uint8_t   unknown0524[720];	// ?? pet data? 7-14
-/*0588*/ char 	   servername[64];     // length probably not right
-/*0652*/ uint32_t  altexp;  	       // aaxp? (wrong?
-/*0656*/ uint32_t  exp;                // Current Experience
-/*0660*/ uint32_t  points;             // Unspent Practice points
-/*0664*/ uint32_t  MANA;               // MANA
-/*0668*/ uint32_t  curHp;              // current hp
-/*0672*/ uint32_t  unknown0674;        // 0x05
-/*0676*/ uint32_t  STR;                // Strength
-/*0680*/ uint32_t  STA;                // Stamina
-/*0684*/ uint32_t  CHA;                // Charisma
-/*0688*/ uint32_t  DEX;                // Dexterity
-/*0692*/ uint32_t  INT;                // Intelligence
-/*0696*/ uint32_t  AGI;                // Agility
-/*0700*/ uint32_t  WIS;                // Wisdom
-/*0704*/ uint8_t   face;               // Player face
-/*0705*/ uint8_t   unknown0705[47];    // *** Placeholder
-/*0752*/ uint8_t   languages[28];      // List of languages (MAX_KNOWN_LANGS)
-/*0780*/ uint8_t   unknown0780[4];     // All 0x00
-/*0784*/ int32_t   sSpellBook[400];    // List of the Spells in spellbook
-/*2384*/ uint8_t   unknown2384[448];   // all 0xff after last spell    
-/*2832*/ int32_t   sMemSpells[8];      // List of spells memorized
-/*2864*/ uint8_t   unknown2864[36];    // *** Placeholder
-/*2900*/ float     x;                  // Players x position
-/*2904*/ float     y;                  // Players y position
-/*2908*/ float     z;                  // Players z position
-/*2912*/ float     heading;            // Players heading   
-/*2916*/ uint8_t   unknown2918[4];     //*** Placeholder    
-/*2920*/ uint32_t  platinum;           // Platinum Pieces on player
-/*2924*/ uint32_t  gold;               // Gold Pieces on player
-/*2928*/ uint32_t  silver;             // Silver Pieces on player
-/*2932*/ uint32_t  copper;             // Copper Pieces on player
-/*2936*/ uint32_t  platinum_bank;      // Platinum Pieces in Bank
-/*2940*/ uint32_t  gold_bank;          // Gold Pieces in Bank
-/*2944*/ uint32_t  silver_bank;        // Silver Pieces in Bank
-/*2948*/ uint32_t  copper_bank;        // Copper Pieces in Bank
-/*2952*/ uint32_t  platinum_cursor;    // Platinum Pieces on cursor
-/*2956*/ uint32_t  gold_cursor;        // Gold Pieces on cursor
-/*2960*/ uint32_t  silver_cursor;      // Silver Pieces on cursor
-/*2964*/ uint32_t  copper_cursor;      // Copper Pieces on cursor
-/*2968*/ uint32_t  platinum_shared;    // Shared platinum pieces
-/*2972*/ uint8_t   unknown2972[20];    // Unknown - all zero
-/*2992*/ uint32_t  skills[75];         // List of skills (MAX_KNOWN_SKILLS)
-/*3288*/ uint8_t   unknown3288[408];   //
-/*3700*/ uint16_t  zoneId;             // see zones.h
-/*3702*/ uint16_t  zoneInstance;       // 
-/*3704*/ spellBuff buffs[15];          // Buffs currently on the player
-/*3944*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
-/*4328*/ uint8_t   unknown4328[668];   // *** Placeholder
-/*5000*/ uint32_t  ldon_guk_points;    // Earned GUK points
-/*5004*/ uint32_t  ldon_mir_points;    // Earned MIR points
-/*5008*/ uint32_t  ldon_mmc_points;    // Earned MMC points
-/*5012*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
-/*5016*/ uint32_t  ldon_tak_points;    // Earned TAK points
-/*5020*/ uint8_t   unknown4352[24];    // *** Placeholder
-/*5760*/ uint32_t  ldon_avail_points;	// Available LDON points
-/*5764*/ uint8_t   unknown5764[5356];   // *** Placeholder
+/*0588*/ uint8_t   unknown0588[716];	// ?? pet data? 7-14
+/*1304*/ char 	   servername[64];     // length probably not right
+/*1368*/ uint32_t  altexp;  	       // aaxp? (wrong?
+/*1372*/ uint32_t  exp;                // Current Experience
+/*1376*/ uint32_t  points;             // Unspent Practice points
+/*1380*/ uint32_t  MANA;               // MANA
+/*1384*/ uint32_t  curHp;              // current hp (seems wrong)
+/*1388*/ uint32_t  unknown1308;        // 0x05
+/*1392*/ uint32_t  STR;                // Strength
+/*1396*/ uint32_t  STA;                // Stamina
+/*1400*/ uint32_t  CHA;                // Charisma
+/*1404*/ uint32_t  DEX;                // Dexterity
+/*1408*/ uint32_t  INT;                // Intelligence
+/*1412*/ uint32_t  AGI;                // Agility
+/*1416*/ uint32_t  WIS;                // Wisdom
+/*1420*/ uint8_t   face;               // Player face
+/*1421*/ uint8_t   unknown1418[47];    // *** Placeholder
+/*1468*/ uint8_t   languages[25];      // List of languages (MAX_KNOWN_LANGS)
+/*1493*/ uint8_t   unknown1493[7];     // All 0x00
+/*1500*/ int32_t   sSpellBook[400];    // List of the Spells in spellbook
+/*3100*/ uint8_t   unknown2384[448];   // all 0xff after last spell    
+/*3548*/ int32_t   sMemSpells[8];      // List of spells memorized
+/*3580*/ uint8_t   unknown3580[36];    // *** Placeholder
+/*3616*/ float     x;                  // Players x position
+/*3620*/ float     y;                  // Players y position
+/*3624*/ float     z;                  // Players z position
+/*3628*/ float     heading;            // Players heading   
+/*3632*/ uint8_t   unknown2918[4];     //*** Placeholder    
+/*3636*/ uint32_t  platinum;           // Platinum Pieces on player
+/*3640*/ uint32_t  gold;               // Gold Pieces on player
+/*3644*/ uint32_t  silver;             // Silver Pieces on player
+/*3648*/ uint32_t  copper;             // Copper Pieces on player
+/*3652*/ uint32_t  platinum_bank;      // Platinum Pieces in Bank
+/*3656*/ uint32_t  gold_bank;          // Gold Pieces in Bank
+/*3660*/ uint32_t  silver_bank;        // Silver Pieces in Bank
+/*3664*/ uint32_t  copper_bank;        // Copper Pieces in Bank
+/*3668*/ uint32_t  platinum_cursor;    // Platinum Pieces on cursor
+/*3672*/ uint32_t  gold_cursor;        // Gold Pieces on cursor
+/*3676*/ uint32_t  silver_cursor;      // Silver Pieces on cursor
+/*3680*/ uint32_t  copper_cursor;      // Copper Pieces on cursor
+/*3684*/ uint32_t  platinum_shared;    // Shared platinum pieces
+/*3688*/ uint8_t   unknown3688[20];    // Unknown - all zero
+/*3708*/ uint32_t  skills[75];         // List of skills (MAX_KNOWN_SKILLS)
+/*4008*/ uint8_t   unknown4008[408];   //
+/*4416*/ uint16_t  zoneId;             // see zones.h
+/*4418*/ uint16_t  zoneInstance;       // 
+/*4420*/ spellBuff buffs[15];          // Buffs currently on the player
+/*4660*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
+/*5044*/ uint8_t   unknown5044[664];   // *** Placeholder
+/*5708*/ uint32_t  ldon_guk_points;    // Earned GUK points
+/*5712*/ uint32_t  ldon_mir_points;    // Earned MIR points
+/*5716*/ uint32_t  ldon_mmc_points;    // Earned MMC points
+/*5720*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
+/*5724*/ uint32_t  ldon_tak_points;    // Earned TAK points
+/*5728*/ uint8_t   unknown5728[24];    // *** Placeholder
+/*5752*/ uint32_t  ldon_avail_points;	// Available LDON points
+/*5756*/ uint8_t   unknown5756[5364];   // *** Placeholder
 }; /* 11120 */
 
 

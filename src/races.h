@@ -18,24 +18,24 @@
     "Halfling",               // 11
     "Gnome",                  // 12
     "Aviak",                  // 13
-    "Werewolf",               // 14
+    "Were Wolf",              // 14
     "Brownie",                // 15
     "Centaur",                // 16
     "Golem",                  // 17
-    "Giant/Cyclops",          // 18
-    "Trakanon",               // 19
-    "Venril Sathir",          // 20
+    "Giant / Cyclops",        // 18
+    "Trakenon",               // 19
+    "Doppleganger",           // 20
     "Evil Eye",               // 21
     "Beetle",                 // 22
     "Kerra",                  // 23
     "Fish",                   // 24
     "Fairy",                  // 25
-    "Froglok",                // 26
-    "Froglok Ghoul",          // 27
+    "Old Froglok",            // 26
+    "Old Froglok Ghoul",      // 27
     "Fungusman",              // 28
     "Gargoyle",               // 29
     "Gasbag",                 // 30
-    "Gel Cube",               // 31
+    "Gelatinous Cube",        // 31
     "Ghost",                  // 32
     "Ghoul",                  // 33
     "Giant Bat",              // 34
@@ -48,7 +48,7 @@
     "Gorilla",                // 41
     "Wolf",                   // 42
     "Bear",                   // 43
-    "Freeport Guard",         // 44
+    "Freeport Guards",        // 44
     "Demi Lich",              // 45
     "Imp",                    // 46
     "Griffin",                // 47
@@ -61,7 +61,7 @@
     "Orc",                    // 54
     "Human Beggar",           // 55
     "Pixie",                  // 56
-    "Drachnid",               // 57
+    "Dracnid",                // 57
     "Solusek Ro",             // 58
     "Bloodgills",             // 59
     "Skeleton",               // 60
@@ -73,7 +73,7 @@
     "Rallos Zek",             // 66
     "Highpass Citizen",       // 67
     "Tentacle",               // 68
-    "Will O' Wisp",           // 69
+    "Will 'O Wisp",           // 69
     "Zombie",                 // 70
     "Qeynos Citizen",         // 71
     "Ship",                   // 72
@@ -82,7 +82,7 @@
     "Elemental",              // 75
     "Puma",                   // 76
     "Neriak Citizen",         // 77
-    "Erudin Citizen",         // 78
+    "Erudite Citizen",        // 78
     "Bixie",                  // 79
     "Reanimated Hand",        // 80
     "Rivervale Citizen",      // 81
@@ -99,29 +99,29 @@
     "Grobb Citizen",          // 92
     "Oggok Citizen",          // 93
     "Kaladim Citizen",        // 94
-    "Cazic-Thule",            // 95
+    "Cazic Thule",            // 95
     "Cockatrice",             // 96
     "Daisy Man",              // 97
     "Elf Vampire",            // 98
     "Denizen",                // 99
     "Dervish",                // 100
     "Efreeti",                // 101
-    "Froglok Tadpole",        // 102
+    "Old Froglok Tadpole",    // 102
     "Kedge",                  // 103
     "Leech",                  // 104
     "Swordfish",              // 105
-    "Felwithe Guard",         // 106
+    "Felguard",               // 106
     "Mammoth",                // 107
     "Eye of Zomm",            // 108
     "Wasp",                   // 109
     "Mermaid",                // 110
     "Harpie",                 // 111
-    "Faydark Guard",          // 112
+    "Fayguard",               // 112
     "Drixie",                 // 113
     "Ghost Ship",             // 114
     "Clam",                   // 115
     "Sea Horse",              // 116
-    "Dwarf Ghost",            // 117
+    "Ghost Dwarf",            // 117
     "Erudite Ghost",          // 118
     "Sabertooth Cat",         // 119
     "Wolf Elemental",         // 120
@@ -137,7 +137,7 @@
     "Vah Shir",               // 130
     "Sarnak",                 // 131
     "Draglock",               // 132
-    "Drolvarg",               // 133
+    "Lycanthrope",            // 133
     "Mosquito",               // 134
     "Rhino",                  // 135
     "Xalgoz",                 // 136
@@ -146,8 +146,8 @@
     "Iksar Citizen",          // 139
     "Forest Giant",           // 140
     "Boat",                   // 141
-    NULL,                     // 142 - Unknown Race
-    NULL,                     // 143 - Unknown Race
+    "UNKNOWN RACE",           // 142
+    "UNKNOWN RACE",           // 143
     "Burynai",                // 144
     "Goo",                    // 145
     "Spectral Sarnak",        // 146
@@ -182,13 +182,13 @@
     "Enchanted Armor",        // 175
     "Snow Bunny",             // 176
     "Walrus",                 // 177
-    "Rock-Gem Men",           // 178
-    NULL,                     // 179 - Unknown Race
-    NULL,                     // 180 - Unknown Race
+    "Rock-gem Men",           // 178
+    "UNKNOWN RACE",           // 179
+    "UNKNOWN RACE",           // 180
     "Yak Man",                // 181
     "Faun",                   // 182
     "Coldain",                // 183
-    "Velious Dragon",         // 184
+    "Velious Dragons",        // 184
     "Hag",                    // 185
     "Hippogriff",             // 186
     "Siren",                  // 187
@@ -199,7 +199,7 @@
     "Clockwork Dragon",       // 192
     "Abhorent",               // 193
     "Sea Turtle",             // 194
-    "B&W Dragon",             // 195
+    "Black and White Dragons",// 195
     "Ghost Dragon",           // 196
     "Ronnie Test",            // 197
     "Prismatic Dragon",       // 198
@@ -237,7 +237,7 @@
     "Akheva",                 // 230
     "Spire Spirit",           // 231
     "Sonic Wolf",             // 232
-    "Teleport Man",           // 233
+    "Ground Shaker",          // 233
     "Vah Shir Skeleton",      // 234
     "Mutant Humanoid",        // 235
     "Seru",                   // 236
@@ -249,17 +249,17 @@
     "Naiad",                  // 242
     "Nymph",                  // 243
     "Ent",                    // 244
-    "Wrinnfly",               // 245
+    "Fly Man",                // 245
     "Tarew Marr",             // 246
-    "Solusek Ro",             // 247
+    "Sol Ro",                 // 247
     "Clockwork Golem",        // 248
     "Clockwork Brain",        // 249
     "Spectral Banshee",       // 250
     "Guard of Justice",       // 251
-    "PoM Castle",             // 252
+    "UNKNOWN RACE",           // 252
     "Disease Boss",           // 253
-    "Solusek Ro Guard",       // 254
-    "Bertoxxulous",           // 255
+    "Sol Ro Guard",           // 254
+    "New Bertox",             // 255
     "New Tribunal",           // 256
     "Terris Thule",           // 257
     "Vegerog",                // 258
@@ -278,140 +278,134 @@
     "Water Mephit",           // 271
     "Stormrider",             // 272
     "Junk Beast",             // 273
-    "Broken Clockwork",	      // 274
-    "Giant Clockwork",	      // 275
-    "Clockwork Beetle",	      // 276
-    "Nightmare Goblin",	      // 277
+    "Broken Clockwork",       // 274
+    "Giant Clockwork",        // 275
+    "Clockwork Beetle",       // 276
+    "Nightmare Goblin",       // 277
     "Karana",                 // 278
-    "Blood Raven",	      // 279
+    "Blood Raven",            // 279
     "Nightmare Gargoyle",     // 280
     "Mouths of Insanity",     // 281
-    "Skeletal Horse",	      // 282
+    "Skeletal Horse",         // 282
     "Saryn",                  // 283
     "Fennin Ro",              // 284
     "Tormentor",              // 285
-    "Necromancer Priest",     // 286
+    "Necro Priest",           // 286
     "Nightmare",              // 287
     "New Rallos Zek",         // 288
     "Vallon Zek",             // 289
     "Tallon Zek",             // 290
     "Air Mephit",             // 291
     "Earth Mephit",           // 292
-    "Fire Mephit",	      // 293
-    "Nightmare Mephit",	      // 294
-    "Zebukoruk",              // 295
+    "Fire Mephit",            // 293
+    "Nightmare Mephit",       // 294
+    "Zebuxoruk",              // 295
     "Mithaniel Marr",         // 296
-    "Knightmare",             // 297
+    "Undead Knight",          // 297
     "The Rathe",              // 298
     "Xegony",                 // 299
-    "Balrog",                 // 300
-    "Unknown Race",           // 301
-    "Lobster Monster",        // 302
-    "Pheonix",                // 303
-    "Tiamat",                 // 304
-    "Bear PoP",               // 305
-    "Earth Golem",            // 306
-    "Iron Golem",             // 307
-    "Storm Golem",            // 308
-    "Air Golem",              // 309
-    "Wood Golem",             // 310
-    "Fire Golem",             // 311
-    "Water Golem",            // 312
-    "Veiled Gargoyle",        // 313
-    "Lynx",                   // 314
-    "Squid",                  // 315
-    "Frog",                   // 316
-    "Flying Serpent",         // 317
-    "War Soldier",            // 318
-    "Armored Boar",           // 319
-    "Djinni",                 // 320
-    "Boar",                   // 321
-    "Armor Knight",           // 322
-    "Ghost Armor",            // 323
-    "Death Knight",           // 324
-    "Zek Ogre",               // 325
-    "Nightmare Spider",       // 326
+    "Fiend",                  // 300
+    "Test Object",            // 301
+    "Crab",                   // 302
+    "Phoenix",                // 303
+    "PoP Dragon",             // 304
+    "PoP Bear",               // 305
+    "Storm Taarid",           // 306
+    "Storm Satuur",           // 307
+    "Storm Kuraaln",          // 308
+    "Storm Volaas",           // 309
+    "Storm Mana",             // 310
+    "Storm Fire",             // 311
+    "Storm Celestial",        // 312
+    "War Wraith",             // 313
+    "Wrulon",                 // 314
+    "Kraken",                 // 315
+    "Poison Frog",            // 316
+    "Queztocoatal",           // 317
+    "Valorian",               // 318
+    "War Boar",               // 319
+    "PoP Efreeti",            // 320
+    "War Boar Unarmored",     // 321
+    "Black Knight",           // 322
+    "Animated Armor",         // 323
+    "Undead Footman",         // 324
+    "Rallos Zek Minion",      // 325
+    "Arachnid",               // 326
     "Crystal Spider",         // 327
-    "A Tower",                // 328
-    NULL,                     // 329
+    "Zeb Cage",               // 328
+    "BoT Portal",             // 329
     "Froglok",                // 330
-    "Troll",                  // 331
-    "Troll",                  // 332
-    NULL,                     // 333
-    NULL,                     // 334
-    NULL,                     // 335
-    NULL,                     // 336
-    NULL,                     // 337
-    "Gnome",                  // 338
-    "Dark Elf",               // 339
-    "Ogre",                   // 340
-    "Human",                  // 341
-    "Erudite",                // 342
-    NULL,                     // 343
-    "Zombie",                 // 344
-    "Luggald",                // 345
-    "Luggald",                // 346
-    "Luggald",                // 347
-    "Drogmor",                // 348
-    "Guktan Skeleton",        // 349
-    "Guktan Ghoul",           // 350
-    "Dark Elf",               // 351
-    "Dark Elf",               // 352
-    NULL,                     // 353
-    "Veksar Citizen",         // 354
-    "Veksar Citizen",         // 355
-    NULL,                     // 356
-    NULL,                     // 357
-    NULL,                     // 358
-    "Elf Vampire",            // 359
-    "Progeny",                // 360
-    "Ruj Orc",                // 361
-    "Mutant",                 // 362
-    NULL,                     // 363
+    "Troll Buccaneer",        // 331
+    "Troll Freebooter",       // 332
+    "Troll Sea Rover",        // 333
+    "Spectre Pirate Boss",    // 334
+    "Pirate Boss",            // 335
+    "Pirate Dark Shaman",     // 336
+    "Pirate Officer",         // 337
+    "Gnome Pirate",           // 338
+    "Dark Elf Pirate",        // 339
+    "Ogre Pirate",            // 340
+    "Human Pirate",           // 341
+    "Erudite Pirate",         // 342
+    "Poison Dart Frog",       // 343
+    "Troll Zombie",           // 344
+    "Luggald Land",           // 345
+    "Luggald Armored",        // 346
+    "Luggald Robed",          // 347
+    "Froglok Mount",          // 348
+    "Froglok Skeleton",       // 349
+    "Undead Froglok",         // 350
+    "Chosen Warrior",         // 351
+    "Chosen Wizard",          // 352
+    "Veksar",                 // 353
+    "Greater Veksar",         // 354
+    "Veksar Boss",            // 355
+    "Chokadai",               // 356
+    "Undead Chokadai",        // 357
+    "Undead Veksar",          // 358
+    "Vampire Lesser",         // 359
+    "Vampire Elite",          // 360
+    "Rujakian Orc",           // 361
+    "Bone Golem",             // 362
+    "Synarcana",              // 363
     "Sand Elf",               // 364
-    "Progeny Boss",           // 365
-    "Ruj Orc Boss",           // 366
-    "Rawbone",                // 367
-    "Mummy",                  // 368
-    "Ruj Goblin",             // 369
-    "Scarab",                 // 370
-    "Guktan Spirit",          // 371
-    "Whirlwind",              // 372
-    "Wraith",                 // 373
-    "Sand Golem",             // 374
-    "Beholder",               // 375
-    "Crate",                  // 376
+    "Vampire Master",         // 365
+    "Rujakian Orc Elite",     // 366
+    "Skeleton New",           // 367
+    "Mummy New",              // 368
+    "Goblin New",             // 369
+    "Insect",                 // 370
+    "Froglok Ghost",          // 371
+    "Dervish New",            // 372
+    "Shadow Creatue",         // 373
+    "Golem New",              // 374
+    "Evil Eye New",           // 375
+    "Box",                    // 376
     "Barrel",                 // 377
     "Chest",                  // 378
     "Vase",                   // 379
-    "Coffin",                 // 380
-    "Weapon Rack",            // 381
+    "Table",                  // 380
+    "Weapons Rack",           // 381
     "Coffin",                 // 382
-    NULL,                     // 383 - unknown race
-    NULL,                     // 384 - unknown race
-    "Nihil",                  // 385
-    "Trusik",                 // 386
-    "Discord Golem",          // 387
-    "Hynid",                  // 388
-    "Turepta",                // 389
-    "Cragbeast",              // 390
-    "Stonemite",              // 391
-    "Ukun",                   // 392
-    "Discord Centaur",        // 393
-    "Ikaav",                  // 394
-    "Aneuk",                  // 395
+    "Bones",                  // 383
+    "Jokester",               // 384
+    "Talosian Nihil",         // 385
+    "Talosian Exile",         // 386
+    "Talosian Golem",         // 387
+    "Talosian Wolf",          // 388
+    "Talosian Amphibian",     // 389
+    "Talosian Mountain Beast",// 390
+    "Talosian Trilobyte",     // 391
+    "Invader War Hound",      // 392
+    "Invader Elite Centaur",  // 393
+    "Invader Lamia",          // 394
+    "Invader Cyclops",        // 395
     "Kyv",                    // 396
-    "Noc",                    // 397
-    "Ra'Tuk",                 // 398
-    NULL,                     // 399 - unknown race
-    NULL,                     // 400 - 2 Headed Snake Man
-    NULL,                     // 401 - unknown race
-    "Mastruq",                // 402
-    NULL,                     // 403
-    "Thorn of the Tides",     // 404 - Boat?
-    NULL,                     // 405
-    NULL,                     // 406
-    NULL,                     // 407
-    NULL,                     // 408
-    NULL,                     // 409
-    NULL,                     // 410
+    "Invader Soldier",        // 397
+    "Invader Brute",          // 398
+    "Invader Force Commander",// 399
+    "Invader Lieutenant Boss",// 400
+    "Invader War Beast",      // 401
+    "Invader Soldier Elite",  // 402
+    "UNKNOWN RACE",           // 403
+    "Discord Ship",           // 404
