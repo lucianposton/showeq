@@ -27,7 +27,7 @@ public:
   EQPlayer (QObject* parent,
 	    const char* name = "player",
 	    int level = 0, 
-	    int race = 1, 
+	    uint16_t race = 1, 
 	    int class_ = 1, 
 	    int deity = DEITY_AGNOSTIC);
 
@@ -55,7 +55,7 @@ public:
    void setPlayerName(const QString& playerName);
    void setPlayerLastName(const QString& playerLastName);
    void setPlayerLevel(uint8_t newlevel);
-   void setPlayerRace(uint8_t newrace);
+   void setPlayerRace(uint16_t newrace);
    void setPlayerClass(uint8_t newclass);
    void setPlayerDeity(uint16_t newdeity);
    void setPlayerID(uint16_t playerID);
@@ -74,7 +74,7 @@ public:
    uint8_t getPlayerLevel(void) const 
      { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
 	       m_defaultLevel : m_playerLevel);}
-   uint8_t getPlayerRace(void) const 
+   uint16_t getPlayerRace(void) const 
      { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
 	       m_defaultRace : m_playerRace);}
    uint8_t getPlayerClass(void) const 
@@ -185,14 +185,14 @@ public:
    QString m_defaultName;
    QString m_defaultLastName;
    int m_defaultLevel;
-   uint8_t m_defaultRace;
+   uint16_t m_defaultRace;
    uint8_t m_defaultClass;
    uint16_t m_defaultDeity;
    // The actual values are set by info from EQPacket.
    QString m_playerName;
    QString m_playerLastName;
    uint8_t m_playerLevel;
-   uint8_t m_playerRace;
+   uint16_t m_playerRace;
    uint8_t m_playerClass;
    uint16_t m_playerDeity;
 

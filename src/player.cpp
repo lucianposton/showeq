@@ -23,7 +23,7 @@ const int staleKillCutoff = 5;
 EQPlayer::EQPlayer (QObject* parent,
 		    const char* name,
 		    int level = 0, 
-		    int race = 1, 
+		    uint16_t race = 1, 
 		    int class_ = 1, 
 		    int deity = DEITY_AGNOSTIC)
 : QObject (parent, name)
@@ -655,7 +655,7 @@ void EQPlayer::zoneEntry(const ClientZoneEntryStruct* zsentry)
 
 void EQPlayer::zoneEntry(const ServerZoneEntryStruct* zsentry)
 {
-  m_shortZoneName = zsentry->zoneShortName;
+  m_shortZoneName = zone_name(zsentry->zoneId);
   clear();
   setPlayerName(zsentry->name);
   setPlayerDeity(zsentry->deity);
@@ -669,7 +669,7 @@ void EQPlayer::zoneEntry(const ServerZoneEntryStruct* zsentry)
 
 void EQPlayer::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t)
 {
-  m_shortZoneName = zoneChange->zoneName;
+  m_shortZoneName = zone_name(zoneChange->zoneId);
 
   if (showeq_params->savePlayerState)
     savePlayerState();
@@ -736,7 +736,7 @@ void EQPlayer::setPlayerLevel(uint8_t newlevel)
 
 }
 
-void EQPlayer::setPlayerRace(uint8_t newrace)
+void EQPlayer::setPlayerRace(uint16_t newrace)
 {
     m_playerRace = newrace;
 }

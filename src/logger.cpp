@@ -529,22 +529,22 @@ PktLogger::logCharProfile(const charProfileStruct *profile, uint32_t len, uint8_
     outputf("R %u %04d %d %.2X%2.X ",timestamp, len, dir, 
         profile->opCode, profile->version );
 
-    output(profile->unknown0002,4);
-    outputf(" [%.30s] [%.20s] %u %u ", profile->name, profile->lastName,
-        profile->face, profile->race);
-    output(&profile->unknown0059,1); 
-    outputf(" %u %u %u ", profile->class_, profile->gender,
-        profile->level);
-    output(profile->unknown0063,3);
-    outputf(" %u ",profile->exp);
-    output(profile->unknown0070,2);
-    outputf(" %u ",profile->MANA);
-    output(profile->unknown0074,48);
-    outputf(" %u ",profile->curHp);
-    output(&profile->unknown0124,1);
-    outputf(" %u %u %u ", profile->STR, profile->STA, profile->CHA);
-    outputf("%u %u %u %u ", profile->DEX, profile->INT, profile->AGI,
-        profile->WIS);
+//    output(profile->unknown0002,4);
+ //   outputf(" [%.30s] [%.20s] %u %u ", profile->name, profile->lastName,
+//        profile->face, profile->race);
+//    output(&profile->unknown0059,1); 
+ //   outputf(" %u %u %u ", profile->class_, profile->gender,
+  //      profile->level);
+//    output(profile->unknown0063,3);
+//    outputf(" %u ",profile->exp);
+//    output(profile->unknown0070,2);
+//    outputf(" %u ",profile->MANA);
+//    output(profile->unknown0074,48);
+//    outputf(" %u ",profile->curHp);
+//    output(&profile->unknown0124,1);
+//    outputf(" %u %u %u ", profile->STR, profile->STA, profile->CHA);
+//    outputf("%u %u %u %u ", profile->DEX, profile->INT, profile->AGI,
+//        profile->WIS);
 
     for(i = 0; i < 25; i++)
         outputf("%u ", profile->languages[i]);
@@ -562,7 +562,7 @@ PktLogger::logCharProfile(const charProfileStruct *profile, uint32_t len, uint8_
         outputf(" ");
     }
 
-    output(profile->unknown0800, 1080);
+    //output(profile->unknown0800, 1080);
     outputf(" ");
     
     for(i = 0; i < 256; i++)
@@ -571,36 +571,36 @@ PktLogger::logCharProfile(const charProfileStruct *profile, uint32_t len, uint8_
     for(i = 0; i < 8; i++)
         outputf("%d ", profile->sMemSpells[i]);
     
-    output(profile->unknown2408, 54);
+    //output(profile->unknown2408, 54);
     outputf(" %u %u %u %u %u %u %u %u ", profile->platinum,
         profile->gold, profile->silver, profile->copper, profile->platinumBank,
         profile->goldBank, profile->silverBank, profile->copperBank);
 
-    output(profile->unknown2494, 16); 
+    //output(profile->unknown2494, 16); 
     outputf(" ");
 
     for(i = 0; i < 74; i++)
         outputf("%u ", profile->skills[i]);
 
-    output(profile->unknown2584, 118); 
+    //output(profile->unknown2584, 118); 
 
-    outputf(" [%.144s] [%.20s] [%.20s] [%.20s] [%.20s] [%20s] ",
-        profile->GUILD, profile->bindpoint, profile->miscnames[0],
-        profile->miscnames[1], profile->miscnames[2], profile->miscnames[3]);
+    //outputf(" [%.144s] [%.20s] [%.20s] [%.20s] [%.20s] [%20s] ",
+    //    profile->GUILD, profile->bindpoint, profile->miscnames[0],
+    //    profile->miscnames[1], profile->miscnames[2], profile->miscnames[3]);
 
-    output(profile->unknown2946, 1212); 
+    //output(profile->unknown2946, 1212); 
     outputf(" %u ",profile->deity);
-    output(profile->unknown4160, 62); 
+    //output(profile->unknown4160, 62); 
     outputf(" ");
 
     for(i = 0; i < 5; i++)
         outputf("[%.48s] ", &profile->GroupMembers[i][0]);
 
-    output(profile->unknown4462, 72); 
+    //output(profile->unknown4462, 72); 
     outputf(" %u ", profile->altexp);
-    output(profile->unknown4538, 358); 
+    //output(profile->unknown4538, 358); 
     outputf(" %u ", profile->aapoints);
-    output(profile->unknown4897, 3209);
+    //output(profile->unknown4897, 3209);
     outputf("\n");
     flush();
     return;
@@ -709,26 +709,26 @@ PktLogger::logSpawnStruct(const spawnStruct *spawn)
         spawn->deltaY, spawn->spacer1, spawn->deltaZ, spawn->spacer2,
         spawn->deltaZ);
 
-    output(spawn->unknown0061, 1);
+    //output(spawn->unknown0061, 1);
     outputf(" %u %d ", spawn->spawnId, spawn->typeflag);
-    output(spawn->unknown0065, 1);
+    //output(spawn->unknown0065, 1);
 
     outputf(" %u %d %d %u %u %u %u %u ", spawn->petOwnerId,
         spawn->maxHp, spawn->curHp, spawn->race, spawn->NPC, spawn->class_,
-        spawn->Gender, spawn->level);
+        spawn->gender, spawn->level);
 
-    output(spawn->unknown0077,4);
-    outputf(" %u ", spawn->light);
-    output(spawn->unknown0082, 10);
-    outputf(" %u %u %u %u %u %u %u %u %u [%.30s] [%.20s] ", 
-        spawn->equipment[0], spawn->equipment[1], spawn->equipment[2], 
-        spawn->equipment[3], spawn->equipment[4], spawn->equipment[5], 
-        spawn->equipment[6], spawn->equipment[7], spawn->equipment[8], 
-        spawn->name, spawn->lastname);
+    //output(spawn->unknown0077,4);
+    //outputf(" %u ", spawn->light);
+    //output(spawn->unknown0082, 10);
+    //outputf(" %u %u %u %u %u %u %u %u %u [%.30s] [%.20s] ", 
+     //   spawn->equipment[0], spawn->equipment[1], spawn->equipment[2], 
+      //  spawn->equipment[3], spawn->equipment[4], spawn->equipment[5], 
+       // spawn->equipment[6], spawn->equipment[7], spawn->equipment[8], 
+       // spawn->name, spawn->lastname);
 
-    output(spawn->unknown0160, 2);
-    outputf(" %u ", spawn->deity);
-    output(spawn->unknown0164, 8);
+//    output(spawn->unknown0160, 2);
+ //   outputf(" %u ", spawn->deity);
+  //  output(spawn->unknown0164, 8);
     outputf(" ");
 }
 
@@ -1365,16 +1365,16 @@ PktLogger::logZoneEntry(const ServerZoneEntryStruct* zone, uint32_t len, uint8_t
     outputf("R %u %04d %d %.2X%.2X ", timestamp, len, dir,
             zone->opCode,zone->version);
     
-    output(zone->unknown0002, 5);
-    outputf(" [%s] [%s] ", zone->name, zone->zoneShortName);
-    output(zone->unknown0052, 107);
-    outputf(" %u %u ", zone->class_, zone->race);
-    output(zone->unknown0161, 2);
-    outputf(" %u ", zone->level);
-    output(zone->unknown0164, 148);
-    outputf(" %u ", zone->deity);
-    output(&zone->unknown0310, 8);
-    output(&zone->unknown0318, 8);
+    //output(zone->unknown0002, 5);
+    //outputf(" [%s] [%s] ", zone->name, zone->zoneShortName);
+//    output(zone->unknown0052, 107);
+ //   outputf(" %u %u ", zone->class_, zone->race);
+  //  output(zone->unknown0161, 2);
+   // outputf(" %u ", zone->level);
+    //output(zone->unknown0164, 148);
+//    outputf(" %u ", zone->deity);
+ //   output(&zone->unknown0310, 8);
+  //  output(&zone->unknown0318, 8);
     outputf("\n");
 
     flush();
@@ -1420,9 +1420,9 @@ PktLogger::logNewZone(const newZoneStruct *zone, uint32_t len, uint8_t dir)
     outputf("R %u %04d %d %.2X%.2X [%s] [%s] ", timestamp, len, dir,
         zone->opCode,zone->version, zone->charName, zone->shortName);
 
-    output(zone->unknown0047, 5);
+    //output(zone->unknown0047, 5);
     outputf(" [%s] ", zone->longName);
-    output(zone->unknown0232, 170);
+    //output(zone->unknown0232, 170);
     outputf("\n");
 
     flush();
@@ -1442,8 +1442,8 @@ PktLogger::logZoneChange(const zoneChangeStruct *zone, uint32_t len, uint8_t dir
         if (logOpen() != 0)
             return;
  
-    outputf("R %u %04d %d %.2X%.2X [%.32s] [%.16s] ", timestamp, len,
-        dir, zone->opCode, zone->version, zone->charName, zone->zoneName);
+   // outputf("R %u %04d %d %.2X%.2X [%.32s] ", timestamp, len,
+     //   dir, zone->opCode, zone->version, zone->charName,);
 
     output(zone->unknown0050, 20);
     outputf("\n");

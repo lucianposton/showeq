@@ -232,7 +232,7 @@ void MapMgr::zoneEntry(const ServerZoneEntryStruct* zsentry)
   QString fileName;
   
   // construct the map file name
-  fileName.sprintf("%s/%s.map", MAPDIR, zsentry->zoneShortName);
+  fileName.sprintf("%s/%s.map", MAPDIR, (const char*)zone_name(zsentry->zoneId));
   
   // load the map
   loadFileMap(fileName);
@@ -242,7 +242,7 @@ void MapMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t di
 {
 #ifdef DEBUGMAP
   debug ("zoneChange(%s, %d)", 
-	 zoneChange->zoneName, dir);
+	 (const char*)zone_name(zoneChange->zoneId), dir);
 #endif /* DEBUGMAP */
 
   // clear the map data
@@ -254,7 +254,7 @@ void MapMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t di
   QString fileName;
   
   // construct the map file name
-  fileName.sprintf("%s/%s.map", MAPDIR, zoneChange->zoneName);
+  fileName.sprintf("%s/%s.map", MAPDIR, (const char*)zone_name(zoneChange->zoneId));
   
   // load the map
   loadFileMap(fileName);

@@ -131,7 +131,7 @@ SpawnShell::timeOfDay(const timeOfDayStruct *tday)
 void 
 SpawnShell::zoneEntry(const ServerZoneEntryStruct* zsentry) 
 {
-    m_spawnlogger->logNewZone((const char *)zsentry->zoneShortName);
+    m_spawnlogger->logNewZone((const char *)zone_name(zsentry->zoneId));
     clear();
 }     
 

@@ -46,6 +46,25 @@ Commanate(uint32_t number)
    return newstring;
 } /* END Commanate */
 
+QString zone_name(uint32_t zoneID)
+{
+   QString tmpstr;
+   tmpstr.sprintf("unk_zone_%d",zoneID);
+   static const char* zonenames[] =
+   {
+#include "zones.h"
+   };
+
+   const char* zoneName = NULL;
+   if (zoneID < (sizeof(zonenames) / sizeof (char*)))
+       zoneName = zonenames[zoneID];
+
+   if (zoneName != NULL)
+      return zoneName;
+   else
+      return tmpstr;
+}
+
 
 QString
 spell_name (uint16_t spellId)
@@ -513,7 +532,7 @@ print_faction (int32_t faction)
   }
 }
 
-uint32_t calc_exp (int level, uint8_t race, uint8_t class_)
+uint32_t calc_exp (int level, uint16_t race, uint8_t class_)
 {
 
 	float exp=level*level*level;

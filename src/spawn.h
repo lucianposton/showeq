@@ -104,7 +104,7 @@ class Item : public EQPoint
 
   // virtual methods that provide reasonable default values
   virtual QString transformedName() const;
-  virtual uint8_t race() const;
+  virtual uint16_t race() const;
   virtual QString raceName() const;
   virtual uint8_t classVal() const;
   virtual QString className() const;
@@ -157,7 +157,7 @@ class Spawn : public Item
 
   Spawn(uint16_t id, 
 	const QString& name, const QString& lastName, 
-	uint8_t race, uint8_t classVal,
+	uint16_t race, uint8_t classVal,
 	uint8_t level, uint16_t deity = 0);
   
   // create an unknown spawn using the data available.
@@ -197,7 +197,7 @@ class Spawn : public Item
   uint16_t deity() const { return m_deity; }
   QString deityName() const;
   int16_t deityTeam() const { return m_deityTeam; }
-  int8_t raceTeam() const { return m_raceTeam; }
+  int16_t raceTeam() const { return m_raceTeam; }
   bool considered() const { return m_considered; }
   uint16_t equipment(uint8_t wearingSlot) const 
     { return m_equipment[wearingSlot]; }
@@ -212,7 +212,7 @@ class Spawn : public Item
 
   // virtual get method overloads
   virtual QString transformedName() const;
-  virtual uint8_t race() const;
+  virtual uint16_t race() const;
   virtual QString raceName() const;
   virtual uint8_t classVal() const;
   virtual QString className() const;
@@ -271,7 +271,7 @@ class Spawn : public Item
   void setGender(uint8_t gender) { m_gender = gender; }
   void setDeity(uint16_t deity) { m_deity = deity; calcDeityTeam(); }
   void setConsidered(bool considered) { m_considered = considered; }
-  void setRace(uint8_t race) { m_race = race; calcRaceTeam(); }
+  void setRace(uint16_t race) { m_race = race; calcRaceTeam(); }
   void setClassVal(uint8_t classVal) { m_class = classVal; }
   void setHP(uint16_t HP) { m_curHP = HP; }
   void setMaxHP(uint16_t maxHP) { m_maxHP = maxHP; }
@@ -306,8 +306,8 @@ class Spawn : public Item
   int16_t m_deityTeam;
   uint16_t m_equipment[tNumWearSlots];
   uint8_t m_level;
-  uint8_t m_race;
-  int8_t m_raceTeam;
+  uint16_t m_race;
+  int16_t m_raceTeam;
   uint8_t m_gender;
   uint8_t m_class;
   uint8_t m_light;

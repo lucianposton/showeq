@@ -28,7 +28,6 @@
 #include "decode.h"
 #include "opcodes.h"
 #include "util.h"
-#include "logger.h"
 
 #if defined (__GLIBC__) && (__GLIBC__ < 2)
 #error "Need glibc 2.1.3 or better"

@@ -17,6 +17,7 @@
 #include "util.h"
 #include "main.h"
 #include "editor.h"
+#include "logger.h"
 
 #include <qfont.h>
 #include <qapplication.h>
@@ -3075,15 +3076,15 @@ void EQInterface::zoneEntry(const ServerZoneEntryStruct* zsentry)
 
 #ifdef ZONE_ORDER_DIAG
   tempStr = "Zone: EntryCode: Server, Zone: ";
-  tempStr += zsentry->zoneShortName;
+  tempStr += zone_name(zsentry->zoneId);
   emit msgReceived(tempStr);
 #endif
   tempStr = QString("Zone: Zoning, Please Wait...\t(Zone: '")
-    + zsentry->zoneShortName + "')";
+    + zone_name(zsentry->zoneId) + "')";
   emit msgReceived(tempStr);
-  emit newZoneName(zsentry->zoneShortName);
+  emit newZoneName(zone_name(zsentry->zoneId));
 
-  m_filterMgr->loadZone(zsentry->zoneShortName);
+  m_filterMgr->loadZone(zone_name(zsentry->zoneId));
 }
 
 void EQInterface::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t dir)
@@ -3091,29 +3092,29 @@ void EQInterface::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8
   QString tempStr;
 
   stsMessage("- Busy Zoning -");
-  emit newZoneName(zoneChange->zoneName);
+  emit newZoneName(zone_name(zoneChange->zoneId));
 
   if (dir == DIR_CLIENT)
   {
 #ifdef ZONE_ORDER_DIAG
     tempStr = "Zone: ChangeCode: Client, Zone: ";
-    tempStr += zoneChange->zoneName;
+    tempStr += zone_name(zoneChange->zoneId);
     emit msgReceived(tempStr);
 #endif
   }
   else
   {
-    printf("Loading, Please Wait...\t(Zone: \'%s\')\n", zoneChange->zoneName);
+    printf("Loading, Please Wait...\t(Zone: \'%s\')\n", (const char*)zone_name(zoneChange->zoneId));
 #ifdef ZONE_ORDER_DIAG
     tempStr = "Zone: ChangeCode: Server, Zone:";
-    tempStr += zoneChange->zoneName;
+    tempStr += zone_name(zoneChange->zoneId);
     emit msgReceived(tempStr);
 #endif
     tempStr = QString("Zone: Zoning, Please Wait...\t(Zone: '")
-      + zoneChange->zoneName + "')";
+      + zone_name(zoneChange->zoneId) + "')";
     emit msgReceived(tempStr);
 
-    m_filterMgr->loadZone(zoneChange->zoneName);
+    m_filterMgr->loadZone(zone_name(zoneChange->zoneId));
   }
 }
 

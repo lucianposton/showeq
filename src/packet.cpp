@@ -30,6 +30,7 @@
 #include "util.h"
 #include "main.h"
 #include "vpacket.h"
+#include "logger.h"
 
 //----------------------------------------------------------------------
 // Macros
@@ -723,17 +724,10 @@ void EQPacket::processPackets (void)
 
   unsigned char buffer[1500]; 
   short size;
-  struct ether_header *ep;
 
   /* fetch them from pcap */
   while ((size = m_packetCapture->getPacket(buffer)))
   {
-    /* Get pointer to MAC layer header */
-    ep = (struct ether_header *) buffer;
-    /* If its not an IP packet, discard the packet */
-    //if (ntohs (ep->ether_type) != ETHERTYPE_IP)
-    //   continue;
-    
     /* Now.. we know the rest is an IP udp packet concerning the
      * host in question, because pcap takes care of that.
      */
@@ -1012,7 +1006,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   {
     dispatchWorldChatData(packet.payloadLength(), packet.payload(), DIR_SERVER);
 
-#if 1 // ZBTEMP
+#if 0 // ZBTEMP
     logData ("/tmp/WorldChatData.log", 
 	     packet.payloadLength(), 
 	     (const uint8_t*)packet.payload(), 
@@ -1025,7 +1019,7 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   {
     dispatchWorldChatData(packet.payloadLength(), packet.payload(), DIR_CLIENT);
 
-#if 1 // ZBTEMP
+#if 0 // ZBTEMP
     logData ("/tmp/WorldChatData.log", 
 	     packet.payloadLength(), 
 	     (const uint8_t*)packet.payload(), 
@@ -2428,7 +2422,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case CharUpdateCode:
         {
-           //logData("/tmp/CharUpdate.log", len, data);
+        }
+
+        default:
+        {
         }
     } /* end switch(opCode) */
        

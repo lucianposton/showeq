@@ -141,7 +141,7 @@ QString Item::transformedName() const
   return m_name;
 }
 
-uint8_t Item::race() const
+uint16_t Item::race() const
 {
   return 0;
 }
@@ -290,7 +290,7 @@ Spawn::Spawn(Spawn* item, uint16_t id)
 Spawn::Spawn(uint16_t id, 
 	     const QString& name, 
 	     const QString& lastName,
-	     uint8_t race, uint8_t classVal,
+	     uint16_t race, uint8_t classVal,
 	     uint8_t level, uint16_t deity)
   : Item(tSpawn, id)
 {
@@ -448,7 +448,7 @@ void Spawn::update(const spawnStruct* s)
   setPos(s->xPos, s->yPos, s->zPos);
   setPetOwnerID(s->petOwnerId);
   setLight(s->light);
-  setGender(s->Gender);
+  setGender(s->gender);
   setDeity(s->deity);
   setRace(s->race);
   setClassVal(s->class_);
@@ -494,7 +494,7 @@ void Spawn::backfill(const spawnStruct* s)
   int i;
 
   // set the characteristics that probably haven't changed.
-  setGender(s->Gender);
+  setGender(s->gender);
   setDeity(s->deity);
   setRace(s->race);
   setClassVal(s->class_);
@@ -818,7 +818,7 @@ QString Spawn::transformedName() const
   return temp;
 }
 
-uint8_t Spawn::race() const
+uint16_t Spawn::race() const
 {
   return m_race;
 }

@@ -33,6 +33,8 @@
 
 #define EmoteTextCode               0x1520
 
+#define PlayerAACode                0x1522
+
 #define CorpseLocCode               0x2120
 
 #define AltExpUpdateCode            0x2322 

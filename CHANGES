@@ -1,3 +1,18 @@
+fee    (ocho de mayo)
+---------------------
++ version 4.1.0
++ Packet Structure Changes
+  - spawnStruct
+  - charProfileStruct
+  - playerAAStruct
+  - makeDropStruct
+  - changeZoneStruct
+  - *ZoneEntryStruct
+  - newZoneStruct
+
++ various updates to convert zoneId to shortName
++ if you use libEQ, today might be a good day to get a fresh copy
+
 fee    (cinco de mayo)
 ------------------
  + added Vex Thal map. Grats FoH and others on the big time sink in the sky!
