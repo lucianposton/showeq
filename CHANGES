@@ -1,3 +1,33 @@
+dohpaZ (10/07/03)
+---------------------
++ Updated version to 4.3.15.
++ Fixed the Log Spawns item so that it actually controlled the creation and 
+  use of the SpawnLogger.  Also made it so that the setting would be saved and
+  changed its default setting to false.
++ Removed some extraneous printf's from SpawnShell.
++ Fixed assorted keyboard accelerators.
++ Readded the ability to delete a spell from the spelllist/spellshell, this time
+  by double clicking on it (to make it more accessible).
++ Added build information to the showeq version display.  
++ Removed -V/--no-keep-selected-visible command line option since its
+  functionality is available in the display.  Made -V and -v aliases for 
+  --version (to make it more obvious).
++ Fixed the issues with ldon zones... Turns out the zone id is 16-bits followed
+  by 16-bits that appear to be an instance or something.
++ Made ZoneMgr only use the short zone name from newZoneStruct as a last 
+  resort since it is a localized string.  
++ Added initial support for the Zone Experience Multiplier that was recently 
+  discovered by the EQEmu folks in the newZoneStruct.
++ Fixed the bug that was causing spells that were effected by item and AA 
+  effects to dissappear from the spell list.  Ah happy bonus from fixing this
+  bug is we now display the enhanced duration for self buffs.
++ Fixed a couple bugs that theoretically could cause a crash.
++ Coordinated opcode names with the EQEmu folks.
++ Integrated patch #817952 "Restores Light sources" from theblueadept (BlueAdept).
++ Integrated patch #817988 "Map updates esp. PoFire" from monster69.
++ Made it so that the item type will be displayed for drops instead of the raw
+  model name (IT{number}_ACTORDEF).
+
 dohpaZ (10/01/03)
 ---------------------
 + Updated version to 4.3.14.

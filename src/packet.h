@@ -563,31 +563,10 @@ class EQPacket : public QObject
    
    bool m_bOpCodeMonitorInitialized;
    #define OPCODE_SLOTS 15
-   unsigned int MonitoredOpCodeList      [OPCODE_SLOTS][3];
-   QString MonitoredOpCodeAliasList [OPCODE_SLOTS];
+   unsigned int MonitoredOpCodeList[OPCODE_SLOTS][3];
+   QString MonitoredOpCodeAliasList[OPCODE_SLOTS];
    
-   bool logMessage(const QString& filename,
-		   const QString& message);
-   bool logData ( const QString& filename,
-		  uint32_t       len,
-		  const uint8_t* data,
-		  const QString& prefix);
-   bool logData ( const QString& filename,
-		  uint32_t       len,
-		  const uint8_t* data,
-		  uint8_t        dir,
-		  uint16_t       opcode,
-		  const QString& origPrefix); 
-   bool logData(const QString& filename,
-		const EQUDPIPPacketFormat& packet);
-  bool logData(const QString& filename,
-		uint32_t       len,
-		const uint8_t* data,
-		in_addr_t      saddr = 0,
-		in_addr_t      daddr = 0,
-		in_port_t      sport = 0,
-		in_port_t      dport = 0
-                );
+   int  getEQTimeOfDay (time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay);
                
  public slots:
    void processPackets(void);
@@ -691,7 +670,7 @@ class EQPacket : public QObject
    void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
    void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
    void logOut(const uint8_t*, uint32_t, uint8_t);
-   void buffDrop(const buffDropStruct*, uint32_t, uint8_t);
+   void buff(const buffStruct*, uint32_t, uint8_t);
    void msgReceived(const QString &);
    void stsMessage(const QString &, int = 0);
 
@@ -762,12 +741,33 @@ class EQPacket : public QObject
 
    struct eqTimeOfDay m_eqTime;
 
-   int  getEQTimeOfDay (time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay);
    void dispatchPacket   (int size, unsigned char *buffer);
    void dispatchSplitData (EQPacketFormat& pf, uint8_t dir, EQStreamID streamid);
    void dispatchZoneData  (uint32_t len, uint8_t* data, uint8_t direction = 0);
    void dispatchWorldData (uint32_t len, uint8_t* data, uint8_t direction = 0);
    void dispatchWorldChatData (uint32_t len, uint8_t* data, uint8_t direction = 0);
+   bool logMessage(const QString& filename,
+		   const QString& message);
+   bool logData (const QString& filename,
+		 uint32_t       len,
+		 const uint8_t* data,
+		 const QString& prefix);
+   bool logData (const QString& filename,
+		 uint32_t       len,
+		 const uint8_t* data,
+		 uint8_t        dir,
+		 uint16_t       opcode,
+		 const QString& origPrefix); 
+   bool logData(const QString& filename,
+		const EQUDPIPPacketFormat& packet);
+   bool logData(const QString& filename,
+		uint32_t       len,
+		const uint8_t* data,
+		in_addr_t      saddr = 0,
+		in_addr_t      daddr = 0,
+		in_port_t      sport = 0,
+		in_port_t      dport = 0
+                );
    void logRawData (const char   *filename, unsigned char *data, unsigned int len);
    void printUnknown(unsigned int uiOpCodeIndex, uint16_t opCode, uint32_t len, 
 		     uint8_t *data, uint8_t dir);

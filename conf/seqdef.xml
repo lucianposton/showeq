@@ -84,8 +84,8 @@
    <comment>Create Unknown Spawns for those spawns with incomplete information</comment>
   </property>
   <property name="SpawnLogEnabled" >
-   <bool value="true" />
-   <comment>set to false to not log spawns</comment>
+   <bool value="false" />
+   <comment>set to true to log spawns</comment>
   </property>
   <property name="SpawnLogFilename" >
    <string value="/usr/local/share/showeq/spawnlog.txt" />

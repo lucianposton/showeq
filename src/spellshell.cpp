@@ -237,6 +237,12 @@ void SpellShell::UpdateSpell(SpellItem* item, const actionStruct *a)
    }
 }
 
+void SpellShell::UpdateSpell(SpellItem* item, const buffStruct *b)
+{
+  // right now we only know how to find the updated duration
+  item->setDuration(b->duration * 6);
+}
+
 void SpellShell::clear()
 {
    for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
@@ -303,6 +309,12 @@ SpellItem* SpellShell::InsertSpell(const spellBuff *c)
    return NULL;
 }
 
+// this is just the public way of doing this
+void SpellShell::DeleteSpell(const SpellItem* item)
+{
+  DeleteSpell((SpellItem*)item);
+}
+
 void SpellShell::DeleteSpell(SpellItem *item)
 {
    if (item) {
@@ -336,26 +348,31 @@ void SpellShell::buffLoad(const spellBuff* c)
    InsertSpell(c);
 }
 
-void SpellShell::buffDrop(const buffDropStruct* bd, uint32_t, uint8_t dir)
+void SpellShell::buff(const buffStruct* b, uint32_t, uint8_t dir)
 {
   // we only care about the server
   if (dir == DIR_CLIENT)
     return;
 
   // if this is the second server packet then ignore it
-  if (bd->spellid == 0xffffffff)
+  if (b->spellid == 0xffffffff)
     return;
 
 #ifdef DIAG_SPELLSHELL
-  printf("Dropping buff - id=%d from spawn=%d\n", bd->spellid, bd->spawnid);
+  printf("Dropping buff - id=%d from spawn=%d\n", b->spellid, b->spawnid);
 #endif // DIAG_SPELLSHELL
 
   // find the spell item
-  SpellItem* item = FindSpell(bd->spellid, bd->spawnid);
+  SpellItem* item = FindSpell(b->spellid, b->spawnid);
 
-  // if the spell item was found, then delete it
-  if (item)
+  if (!item)
+    return;
+
+  if (b->changetype == 0x01) // removing buff
     DeleteSpell(item);
+  else if (b->changetype == 0x02)
+    UpdateSpell(item, b);
+    
 }
 
 void SpellShell::action(const actionStruct* a, uint32_t, uint8_t)
@@ -427,7 +444,9 @@ void SpellShell::interruptSpellCast(const badCastStruct *icast)
 
 void SpellShell::selfFinishSpellCast(const memSpellStruct *b)
 {
+#ifdef DIAG_SPELLSHELL
    printf("selfFinishSpellCast - id=%d, by=%d\n", b->spellId, b->slotId);
+#endif // DIAG_SPELLSHELL
 }
 
 void SpellShell::spellMessage(QString &str)
@@ -484,4 +503,3 @@ void SpellShell::timeout()
    while (count)
       DeleteSpell(delList[--count]);
 }
-

@@ -46,71 +46,83 @@ const int animationCoefficientFixPt =
 //----------------------------------------------------------------------
 // Handy utility functions
 // static 
-QString print_weapon (uint16_t weapon)
+QString print_item (uint16_t item)
 {
-  // sparse array of weapon names, some are NULL
-  static const char*  weaponnames[] = 
+  // sparse array of item names, some are NULL
+  static const char*  itemnames[] = 
   {
 #include "weapons.h"
   };
 
-  // sparse array of weapon names (in 0x27 range), some are NULL
-  static const char*  weaponnames27[] = 
+  // sparse array of item names (in 0x01 range), some are NULL
+  static const char*  itemnames1[] = 
+  {
+#include "weapons1.h"
+  };
+
+  // sparse array of item names (in 0x27 range), some are NULL
+  static const char*  itemnames27[] = 
   {
 #include "weapons27.h"
   };
 
-  // sparse array of weapon names (in 0x28 range), some are NULL
-  static const char*  weaponnames28[] = 
+  // sparse array of item names (in 0x28 range), some are NULL
+  static const char*  itemnames28[] = 
   {
 #include "weapons28.h"
   };
 
-  // sparse array of weapon names (in 0x2b range), some are NULL
-  static const char*  weaponnames2b[] = 
+  // sparse array of item names (in 0x2b range), some are NULL
+  static const char*  itemnames2b[] = 
   {
 #include "weapons2b.h"
   };
 
   // assume no material name found
-  const char *weaponStr = NULL;
+  const char *itemStr = NULL;
 
-  uint8_t weaponLo = weapon & 0x00ff;
-  uint8_t weaponHi = (weapon & 0xff00) >> 8;
+  uint8_t itemLo = item & 0x00ff;
+  uint8_t itemHi = (item & 0xff00) >> 8;
 
-  if (weaponHi == 0x00)
+  if (itemHi == 0x00)
   {
-    // retrieve pointer to weapon name
-    if (weaponLo < (sizeof(weaponnames) / sizeof (char*)))
-      weaponStr = weaponnames[weaponLo];
+    // retrieve pointer to item name
+    if (itemLo < (sizeof(itemnames) / sizeof (char*)))
+      itemStr = itemnames[itemLo];
   }
-  else if (weaponHi == 0x27)
+  else if (itemHi == 0x01)
   {
-    // retrieve pointer to weapon name
-    if (weaponLo < (sizeof(weaponnames27) / sizeof (char*)))
-      weaponStr = weaponnames27[weaponLo];
+    // retrieve pointer to item name
+    if (itemLo < (sizeof(itemnames1) / sizeof (char*)))
+      itemStr = itemnames1[itemLo];
   }
-  else if (weaponHi == 0x28)
+  else if (itemHi == 0x27)
   {
-    // retrieve pointer to weapon name
-    if (weaponLo < (sizeof(weaponnames28) / sizeof (char*)))
-      weaponStr = weaponnames28[weaponLo];
+    // retrieve pointer to item name
+    if (itemLo < (sizeof(itemnames27) / sizeof (char*)))
+      itemStr = itemnames27[itemLo];
   }
-  else if (weaponHi == 0x2b)
+  else if (itemHi == 0x28)
   {
-    // retrieve pointer to weapon name
-    if (weaponLo < (sizeof(weaponnames2b) / sizeof (char*)))
-      weaponStr = weaponnames2b[weaponLo];
+    // retrieve pointer to item name
+    if (itemLo < (sizeof(itemnames28) / sizeof (char*)))
+      itemStr = itemnames28[itemLo];
+  }
+  else if (itemHi == 0x2b)
+  {
+    // retrieve pointer to item name
+    if (itemLo < (sizeof(itemnames2b) / sizeof (char*)))
+      itemStr = itemnames2b[itemLo];
   }
 
   // if race name exists, then return it, otherwise return a number string
-  if (weaponStr != NULL)
-    return weaponStr;
+  if (itemStr != NULL)
+    return itemStr;
   else
   {
-    QString weapon_str;
-    weapon_str.sprintf("U%04x", weapon);
-    return weapon_str;
+    QString item_str;
+    item_str.sprintf("U%04x", item);
+    return item_str;
   }
 }
 
@@ -563,7 +575,7 @@ QString Spawn::equipmentStr(uint8_t wearingSlot) const
   if (wearingSlot <= tLastMaterial)
     return print_material(equipment(wearingSlot));
   else if (wearingSlot <= tLastWeapon)
-    return print_weapon(equipment(wearingSlot));
+    return print_item(equipment(wearingSlot));
   else if (wearingSlot < tNumWearSlots)
     return print_material(equipment(wearingSlot));
   else
@@ -796,7 +808,7 @@ QString Spawn::info() const
  // Worn weapons
   for (i = tFirstWeapon; i <= tLastWeapon; i++)
     if (equipment(i))
-      temp += QString(locs[i]) + ":" +  + print_weapon(equipment(i)) + " ";
+      temp += QString(locs[i]) + ":" +  + print_item(equipment(i)) + " ";
 
   // Worn stuff -- Current best quess is that this may be material?
   i = tUnknown1;
@@ -985,15 +997,19 @@ void Drop::update(const makeDropStruct* d, const QString& name)
   if (name.isEmpty())
   {
     if (d->idFile[0] == 'I' && d->idFile[1] == 'T')
+    {
       buff = (d->idFile + 2);
+      buff = buff.section('_', 0, 0, QString::SectionCaseInsensitiveSeps);
+    }
     else
       buff = d->idFile;
+
     
     itemId = buff.toInt();
     
     buff = "Drop: ";
     if (itemId > 0) 
-      buff.append(print_weapon(itemId));
+      buff.append(print_item(itemId));
     else 
       buff.append(d->idFile);
 

@@ -9,6 +9,12 @@
  * options and initializes the application
  */
 
+#ifdef __linux__
+#include <linux/version.h>
+#endif
+
+#include <sys/utsname.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -31,10 +37,12 @@
 #include "conf.h"              // autoconf/configure definitions
 #include "itemdb.h"
 
+static const char *id="$Id$";
+
 /* **********************************
    defines used for option processing
    ********************************** */
-#define OPTION_LIST "i:rf:g::j:::s:aeo:CncFAKSVPNbtL:xWX:Y:Z:"
+#define OPTION_LIST "i:rf:g::j:::s:aeo:CncFAKSVvPNbtL:xWX:Y:Z:"
 
 /* For long options without any short (single letter) equivalent, we'll
    assign single char nonprinting character equivalents, as is common
@@ -102,7 +110,6 @@ static struct option option_list[] = {
   {"show-unknown-spawns",          no_argument,        NULL,  'K'},
   {"select-on-consider",           no_argument,        NULL,  'S'},
   {"select-on-target",             no_argument,        NULL,  'e'},
-  {"no-keep-selected-visible",     no_argument,        NULL,  'V'},
   {"no-promiscuous",               no_argument,        NULL,  'P'},
   {"show-packet-numbers",          no_argument,        NULL,  'N'},
   {"broken-decode",                no_argument,        NULL,  'b'},
@@ -114,7 +121,7 @@ static struct option option_list[] = {
   {"default-race",                 required_argument,  NULL,  'Y'},
   {"default-class",                required_argument,  NULL,  'Z'},
   {"help",                         no_argument,        NULL,  'h'},
-  {"version",                      no_argument,        NULL,  VERSION_OPTION},
+  {"version",                      no_argument,        NULL,  'v'},
   {"ip-address",                   required_argument,  NULL,  IPADDR_OPTION},
   {"mac-address",                  required_argument,  NULL,  MACADDR_OPTION},
   {"global-log-filename",          required_argument,  NULL,  GLOBAL_LOG_FILENAME_OPTION},
@@ -127,7 +134,6 @@ static struct option option_list[] = {
   {"log-raw",                      no_argument,        NULL,  RAW_LOG_OPTION},
   {"systime-spawntime",            no_argument,        NULL,  SYSTIME_SPAWNTIME_OPTION},
   {"spawnlog-filename",            required_argument,  NULL,  SPAWNLOG_FILENAME_OPTION},
-  {"disable-spawnlog",             no_argument,        NULL,  DISABLE_SPAWNLOG_OPTION},
   {"no-bank",                      no_argument,        NULL,  NO_BANK_INFO},    
   {"itemdb-lore-filename",         required_argument,  NULL, ITEMDB_LORE_FILENAME_OPTION},
   {"itemdb-name-filename",         required_argument,  NULL, ITEMDB_NAME_FILENAME_OPTION},
@@ -146,6 +152,9 @@ static struct option option_list[] = {
 struct ShowEQParams *showeq_params;
 XMLPreferences      *pSEQPrefs = NULL; 
 
+void displayVersion(void);
+void displayOptions(const char* progName);
+
 int main (int argc, char **argv)
 {
    int           opt;
@@ -154,15 +163,6 @@ int main (int argc, char **argv)
    
    bool          bOptionHelp = false;
         
-   /* Print the version number */
-   printf ("ShowEQ %s, released under the GPL.\n", VERSION);
-   printf ("  SINS 0.5, released under the GPL.\n");
-   printf ("All ShowEQ source code is Copyright (C) 2000-2003 by the respective ShowEQ Developers\n");
-   printf ("Binary distribution without source code and resale are explictily NOT authorized by ANY party.\n");
-   printf ("If you have paid for this software in any way, shape, or form, the person selling the\n");
-   printf ("software is doing so in violation of the express wishes and intents of the authors of this product.\n\n");
-   printf ("Please see http://seq.sourceforge.net for further information\n\n");
-
    /* Create application instance */
    //   QApplication::setStyle( new QWindowsStyle );
    QApplication qapp (argc, argv);
@@ -224,13 +224,11 @@ int main (int argc, char **argv)
 
    showeq_params->walkpathrecord = pSEQPrefs->getPrefBool("WalkPathRecording", section, false);
    showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 25);
-   showeq_params->logSpawns = pSEQPrefs->getPrefBool("LogSpawns", section, false);
-   showeq_params->logItems = pSEQPrefs->getPrefBool("LogItems",  section, false);
    /* Tells SEQ whether or not to display casting messages (Turn this off if you're on a big raid) */
    showeq_params->showSpellMsgs = pSEQPrefs->getPrefBool("ShowSpellMessages", section, true);
    /* Spawn logging preferences */
    showeq_params->SpawnLogFilename = pSEQPrefs->getPrefString("SpawnLogFilename", section, LOGDIR "/spawnlog.txt");
-   showeq_params->spawnlog_enabled = pSEQPrefs->getPrefBool("SpawnLogEnabled", section,  true);
+   showeq_params->logSpawns = pSEQPrefs->getPrefBool("LogSpawns", section, false);
 /* Decoder override for coping with encryption changes */
 
    section = "Filters";
@@ -439,14 +437,6 @@ int main (int argc, char **argv)
          }
 
 
-         /* Don't force the selected spawn to be visible in scrollbox */
-         case 'V':
-         {
-            showeq_params->keep_selected_visible = 0;
-            break;
-         }
-
-
          /* Don't use Promiscuous mode on sniffing */
          case 'P':
          {
@@ -492,10 +482,19 @@ int main (int argc, char **argv)
          /* Log spawns! */
          case 'x':
          {
-            showeq_params->logSpawns = 1;
+            showeq_params->logSpawns = true;
             break;
          }
 
+
+         /* Display the version info... */
+         case 'V':
+         case 'v':
+         {
+	   displayVersion();
+	   exit(0);
+	   break;
+         }
 
          /* Don't autodetect character settings */
          case 'W':
@@ -551,26 +550,6 @@ int main (int argc, char **argv)
             showeq_params->defaultClass = temp_int;
             break;
          }
-
-
-         /* Display the version info... */
-         case VERSION_OPTION:
-         {
-            printf ("ShowEQ %s\n",VERSION);
-            printf ("Copyright (C) 1999-2003 ShowEQ Contributors\n\n");
-            
-            printf ("ShowEQ comes with NO WARRANTY.\n\n");
-            
-            printf ("You may redistribute copies of ShowEQ under the terms of\n");
-            printf ("The GNU General Public License.\n");
-            printf ("See: http://www.gnu.org/copyleft/gpl.html for more details...\n\n");
-            
-            printf ("For updates and information, please visit http://seq.sourceforge.net/\n");
-            
-            exit(0);
-            break;
-         }
-
 
          /* IP address to track */
          case IPADDR_OPTION:
@@ -664,20 +643,12 @@ int main (int argc, char **argv)
             break;
          }
 
-         
          case SPAWNLOG_FILENAME_OPTION:
          {
             showeq_params->SpawnLogFilename = optarg;
             break;
          }
 
-
-         case DISABLE_SPAWNLOG_OPTION:
-         {
-            showeq_params->spawnlog_enabled = FALSE;
-            break;
-         }
-         
          case NO_BANK_INFO:
          {
          	showeq_params->no_bank = TRUE;
@@ -754,93 +725,13 @@ int main (int argc, char **argv)
       }
    }
 
+   /* Print the version number */
+   displayVersion();
+
    if (bOptionHelp)
    {
-      /* The default help text */
-      printf ("Usage:\n  %s [<options>] [<client IP address>]\n\n", argv[0]);
-      
-      printf ("  -h, --help                            Shows this help\n");
-      printf ("  -o CONFIGFILE                         Alternate showeq.xml pathname\n");
-      printf ("      --version                         Prints ShowEQ version number\n");
-      printf ("  -i, --net-interface=DEVICE            Specify which network device to bind to\n");
-      printf ("  -r, --realtime                        Set the network thread realtime\n");
-      printf ("  -f, --filter-file=FILENAME            Sets spawn filter file\n");
-      printf ("  -s, --spawn-file=FILENAME             Sets spawn alert file\n");
-      printf ("  -C, --filter-case-sensitive           Spawn alert and filter is case sensitive\n");
-      printf ("  -a, --enlightenment-audio             Use ESD to play alert during spawn alert\n");
-      printf ("  -c, --use-retarded-coords             Use \"retarded\" YXZ coordinates\n");
-      printf ("  -F, --fast-machine                    Fast machine - perform more accurate vs. \n");
-      printf ("                                        less accurate calculations.\n");
-      printf ("  -A, --spawn-alert                     Use name/race/class/light/equipment for \n");
-      printf ("                                        spawn matching\n");
-      printf ("  -K, --create-unknown-spawns           create unknown spawns\n");
-      printf ("  -S, --select-on-consider              Select the spawn considered\n");
-      printf ("  -e, --select-on-target                Select the spawn targetted\n");
-      printf ("  -V, --no-keep-selected-visible        Don't force the listbox to keep selected\n");
-      printf ("                                        spawn visible\n");
-      printf ("  -P, --no-promiscuous                  Don't sniff the network in promiscuous\n");
-      printf ("                                        mode (Don't process packets bound for\n");
-      printf ("                                        other machines).\n");
-      printf ("  -N, --show-packet-numbers             Show network info dialog\n");
-      printf ("  -j, --playback-file=FILENAME          Playback packets in FILENAME, previously\n");
-      printf ("                                        recorded with -g option\n");
-      printf ("      --playback-speed=SPEED            -1 = Paused, 0 = Max, 1 = Slow, 9 = Fast\n");
-      printf ("  -g, --record-file=FILENAME            Record packets to FILENAME to playback\n");
-      printf ("                                        with the -j option\n");
-      printf ("  -b, --broken-decode                   Broken decode -- Don't attempt to decode\n");
-      printf ("                                        the spawn packets (i.e. Your CPU is VERY\n");
-      printf ("                                        slow)\n");
-      printf ("  -t, --show-selected                   Track spawn movements (no path trace)\n");
-      printf ("  -L, --spawn-path-length=###           Track spawn maximum track length (min:3)\n");
-      printf ("  -x, --log-spawns                      Log spawns into spawns.db\n");
-      printf ("      --systime-spawntime               Show spawn time using UNIX systtem time\n");
-      printf ("      --ip-address=IP                   Client IP address\n");
-      printf ("      --mac-address=MAC                 Client MAC address as 00:00:00:00:00:00\n");
-      printf ("      --log-all                         Log all packets to global logfile\n");
-      printf ("      --global-log-filename=FILE        Use FILE for above packet logging\n");
-      printf ("      --log-zone                        Like --log-all, but only zone data\n");
-      printf ("      --zone-log-filename=FILE          Use FILE for above packet logging\n");
-      printf ("      --log-unknown-zone                Log only unrecognized zone data\n");
-      printf ("      --unknown-zone-log-filename=FILE  Use FILE for above packet logging\n");
-      printf ("      --log-raw                   Log some unprocessed raw data\n");
-      printf ("      --disable-spawnlog                Disable spawn logging to spawnlog.txt\n");
-      printf ("      --spawnlog-filename=FILE          Use FILE instead of spawnlog.txt\n");
-      printf ("      --itemdb-lore-filename=FILE       Use FILE instead of itemlore\n");
-      printf ("      --itemdb-name-filename=FILE       Use FILE instead of itemname\n");
-      printf ("      --itemdb-data-filename=FILE       Use FILE instead of itemdata\n");
-      printf ("      --itemdb-raw-data-filename=FILE   Use FILE instead of itemrawdata\n");
-      printf ("      --itemdb-databases-enabled=DBS    Use DBS to enable different item\n");
-      printf ("                                        databases.\n");
-      printf ("      --itemdb-disable                  Disable use of the item DB.\n");
-      printf ("  -W, --dont-autodetectcharsettings     Don't auto-detect your character's\n");
-      printf ("                                        Level/Race/Class.\n");
-      printf ("  -X, --default-level=##                Default player level. (1-60)\n");
-      printf ("  -Y, --default-race=##                 Default player race:");
-      printf ("\n\t                                    HUM 1,  BAR 2,  ERU 3");
-      printf ("\n\t                                    ELF 4,  HIE 5,  DEF 6");
-      printf ("\n\t                                    HEF 7,  DWF 8,  TRL 9");
-      printf ("\n\t                                    OGR 10, HFL 11, GNM 12");
-      printf ("\n\t                                    GNM 12, IKS 128\n");
-      printf ("  -Z, --default-class=##                Default player class:");
-      printf ("\n\t                                    WAR 1,  CLR 2,  PAL 3");
-      printf ("\n\t                                    RNG 4,  SHD 5,  DRU 6");
-      printf ("\n\t                                    MNK 7,  BRD 8,  ROG 9");
-      printf ("\n\t                                    SHM 10, NEC 11, WIZ 12");
-      printf ("\n\t                                    MAG 13, ENC 14\n");
-      
-      printf ("                                                                   \n");
-      printf ("                                                                   \n");
-      printf (" The following four options should be used with extreme care!         \n");
-      printf ("      --restore-player-state            Restores the player state\n");
-      printf ("                                        from a previous session    \n");
-      printf ("      --restore-zone                    Restores the zone state\n");
-      printf ("                                        from a previous session    \n");
-      printf ("      --restore-spawns                  Restores the spawns\n");
-      printf ("                                        from a previous session    \n");
-      printf ("      --restore-all                     Restores , \n");
-      printf ("                                        player state, and spawns   \n");
-      printf ("                                        from a previous session    \n");
-      exit (0);
+     displayOptions(argv[0]);
+     exit (0);
    }
 
    /* Set up individual files for logging selected packet types based on
@@ -898,3 +789,151 @@ int main (int argc, char **argv)
 
    return ret;
 }
+
+void displayVersion(void)
+{
+   printf ("ShowEQ %s, released under the GPL.\n", VERSION);
+   printf ("  SINS 0.5, released under the GPL.\n");
+   printf ("All ShowEQ source code is Copyright (C) 2000-2003 by the respective ShowEQ Developers\n");
+  
+  printf ("ShowEQ comes with NO WARRANTY.\n\n");
+  
+  printf ("You may redistribute copies of ShowEQ under the terms of\n");
+  printf ("The GNU General Public License.\n");
+  printf ("See: http://www.gnu.org/copyleft/gpl.html for more details...\n\n");
+  
+  printf ("For updates and information, please visit http://seq.sourceforge.net/\n");
+
+  /////////////////////////////////
+  // Display build information
+  printf ("ShowEQ %s, Built from '%s' on %s at %s\n", VERSION,
+	  __FILE__, __DATE__, __TIME__);
+  printf ("\tCVS: %s\n", id);
+#ifdef __GNUC__
+#ifdef __GNUC_PATCHLEVEL__
+  printf ("\t\tUsing GCC version: %d.%d.%d\n", 
+	  __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#else
+  printf ("\t\tUsing GCC version: %d.%d\n", 
+	  __GNUC__, __GNUC_MINOR__);
+#endif
+#elif defined(__VERSION__)
+  printf ("\t\tUsing c++ version %s\n", __VERSION__);
+#endif
+
+#ifdef __KCC
+  printf ("\t\tUsing a KAI compiler\n");
+#endif
+
+#ifdef __GLIBC__
+  printf ("\t\tUsing glibc version: %d.%d\n", __GLIBC__, __GLIBC_MINOR__);
+#endif
+
+#ifdef QT_VERSION_STR
+  printf ("\t\tUsing Qt version: %s\n", QT_VERSION_STR);
+#endif
+#ifdef __linux__
+  printf ("\t\tUsing headers from linux version: %s\n",
+	  UTS_RELEASE);
+#endif
+  printf ("\t\tUsing EQItemDB: %s\n", EQItemDB::Version());
+  printf ("\tUsing GDBM: %s\n", GDBMConvenience::Version());
+#ifdef USE_DB3
+  printf ("\tUsing DB3: %s\n", DB3Convenience::Version());
+#endif
+  /////////////////////////////////
+  // Display current system environment information
+  struct utsname utsbuff;
+  if (uname(&utsbuff) == 0)
+    printf ("\tRunning on %s release %s for processor %s\n",
+	    utsbuff.sysname, utsbuff.release, 
+	    utsbuff.machine);
+
+  printf ("\n");
+}
+
+void displayOptions(const char* progName)
+{
+  /* The default help text */
+  printf ("Usage:\n  %s [<options>] [<client IP address>]\n\n", progName);
+  
+  printf ("  -h, --help                            Shows this help\n");
+  printf ("  -o CONFIGFILE                         Alternate showeq.xml pathname\n");
+  printf ("  -V, --version                         Prints ShowEQ version number\n");
+  printf ("  -i, --net-interface=DEVICE            Specify which network device to bind to\n");
+  printf ("  -r, --realtime                        Set the network thread realtime\n");
+  printf ("  -f, --filter-file=FILENAME            Sets spawn filter file\n");
+  printf ("  -s, --spawn-file=FILENAME             Sets spawn alert file\n");
+  printf ("  -C, --filter-case-sensitive           Spawn alert and filter is case sensitive\n");
+  printf ("  -a, --enlightenment-audio             Use ESD to play alert during spawn alert\n");
+  printf ("  -c, --use-retarded-coords             Use \"retarded\" YXZ coordinates\n");
+  printf ("  -F, --fast-machine                    Fast machine - perform more accurate vs. \n");
+  printf ("                                        less accurate calculations.\n");
+  printf ("  -A, --spawn-alert                     Use name/race/class/light/equipment for \n");
+  printf ("                                        spawn matching\n");
+  printf ("  -K, --create-unknown-spawns           create unknown spawns\n");
+  printf ("  -S, --select-on-consider              Select the spawn considered\n");
+  printf ("  -e, --select-on-target                Select the spawn targetted\n");
+  printf ("  -P, --no-promiscuous                  Don't sniff the network in promiscuous\n");
+  printf ("                                        mode (Don't process packets bound for\n");
+  printf ("                                        other machines).\n");
+  printf ("  -N, --show-packet-numbers             Show network info dialog\n");
+  printf ("  -j, --playback-file=FILENAME          Playback packets in FILENAME, previously\n");
+  printf ("                                        recorded with -g option\n");
+  printf ("      --playback-speed=SPEED            -1 = Paused, 0 = Max, 1 = Slow, 9 = Fast\n");
+  printf ("  -g, --record-file=FILENAME            Record packets to FILENAME to playback\n");
+  printf ("                                        with the -j option\n");
+  printf ("  -b, --broken-decode                   Broken decode -- Don't attempt to decode\n");
+  printf ("                                        the spawn packets (i.e. Your CPU is VERY\n");
+  printf ("                                        slow)\n");
+  printf ("  -t, --show-selected                   Track spawn movements (no path trace)\n");
+  printf ("  -L, --spawn-path-length=###           Track spawn maximum track length (min:3)\n");
+  printf ("  -x, --log-spawns                      Log spawns into spawns.db\n");
+  printf ("      --systime-spawntime               Show spawn time using UNIX systtem time\n");
+  printf ("      --ip-address=IP                   Client IP address\n");
+  printf ("      --mac-address=MAC                 Client MAC address as 00:00:00:00:00:00\n");
+  printf ("      --log-all                         Log all packets to global logfile\n");
+  printf ("      --global-log-filename=FILE        Use FILE for above packet logging\n");
+  printf ("      --log-zone                        Like --log-all, but only zone data\n");
+  printf ("      --zone-log-filename=FILE          Use FILE for above packet logging\n");
+  printf ("      --log-unknown-zone                Log only unrecognized zone data\n");
+  printf ("      --unknown-zone-log-filename=FILE  Use FILE for above packet logging\n");
+  printf ("      --log-raw                   Log some unprocessed raw data\n");
+  printf ("      --spawnlog-filename=FILE          Use FILE instead of spawnlog.txt\n");
+  printf ("      --itemdb-lore-filename=FILE       Use FILE instead of itemlore\n");
+  printf ("      --itemdb-name-filename=FILE       Use FILE instead of itemname\n");
+  printf ("      --itemdb-data-filename=FILE       Use FILE instead of itemdata\n");
+  printf ("      --itemdb-raw-data-filename=FILE   Use FILE instead of itemrawdata\n");
+  printf ("      --itemdb-databases-enabled=DBS    Use DBS to enable different item\n");
+  printf ("                                        databases.\n");
+  printf ("      --itemdb-disable                  Disable use of the item DB.\n");
+  printf ("  -W, --dont-autodetectcharsettings     Don't auto-detect your character's\n");
+  printf ("                                        Level/Race/Class.\n");
+  printf ("  -X, --default-level=##                Default player level. (1-60)\n");
+  printf ("  -Y, --default-race=##                 Default player race:");
+  printf ("\n\t                                    HUM 1,  BAR 2,  ERU 3");
+  printf ("\n\t                                    ELF 4,  HIE 5,  DEF 6");
+  printf ("\n\t                                    HEF 7,  DWF 8,  TRL 9");
+  printf ("\n\t                                    OGR 10, HFL 11, GNM 12");
+  printf ("\n\t                                    GNM 12, IKS 128\n");
+  printf ("  -Z, --default-class=##                Default player class:");
+  printf ("\n\t                                    WAR 1,  CLR 2,  PAL 3");
+  printf ("\n\t                                    RNG 4,  SHD 5,  DRU 6");
+  printf ("\n\t                                    MNK 7,  BRD 8,  ROG 9");
+  printf ("\n\t                                    SHM 10, NEC 11, WIZ 12");
+  printf ("\n\t                                    MAG 13, ENC 14\n");
+  
+  printf ("                                                                   \n");
+  printf ("                                                                   \n");
+  printf (" The following four options should be used with extreme care!         \n");
+  printf ("      --restore-player-state            Restores the player state\n");
+  printf ("                                        from a previous session    \n");
+  printf ("      --restore-zone                    Restores the zone state\n");
+  printf ("                                        from a previous session    \n");
+  printf ("      --restore-spawns                  Restores the spawns\n");
+  printf ("                                        from a previous session    \n");
+  printf ("      --restore-all                     Restores , \n");
+  printf ("                                        player state, and spawns   \n");
+  printf ("                                        from a previous session    \n");
+}
+

@@ -324,7 +324,8 @@ struct spawnStruct
 /*021*/ uint8_t  unknown021;      // *** Placeholder
 /*022*/ int8_t   maxHp;           // max hp
 /*023*/ uint8_t  pvp;             // 0=Not pvp,1=pvp
-/*024*/ uint8_t  unknown024[2];   // *** Placeholder
+/*024*/ uint8_t  light;           // Light intensity
+/*025*/ uint8_t  unknown025;      // *** Placeholder
 /*026*/ uint8_t  lfg;             // 0=Not lfg,1=lfg
 /*027*/ uint16_t heading;         // spawn heading
 /*029*/ uint8_t  deltaHeading;    // change in heading
@@ -344,16 +345,16 @@ struct spawnStruct
                                   // 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2
 /*118*/ char     name[64];        // name
 /*182*/ int32_t  dye_rgb[7];      // armor dye colors
-/*210*/ char     unknown210;
-/*211*/ uint8_t  light;           // Light intensity
-/*212*/ char     unknown212[15];
+/*210*/ uint8_t  unknown210[8];
+/*218*/ float    size;            // Size
+/*222*/ uint8_t  unknown222[5];
 /*227*/ uint8_t  gm;              // 0=not GM,1=GM
 /*228*/ uint8_t  unknown228[4];   // *** Placeholder
 /*232*/ uint32_t guildID;         // GuildID
 /*236*/ uint8_t  linkdead;        // 0=Not LD, 1=LD
 /*237*/ uint32_t bodytype;        // Bodytype
 /*241*/ int8_t   guild_rank;      // 0=member,1=officer,2=leader
-/*242*/ char     unknown242[3];
+/*242*/ uint8_t  unknown242[3];
 /*245*/ uint32_t petOwnerId;      // If pet, the pet owner spawn id
 /*249*/ int16_t  deity;           // deity
 /*251*/ char     unknown251[7];
@@ -658,7 +659,8 @@ struct ServerZoneEntryStruct
 	   } equipment;
 	   /*0244*/ uint32_t equip[9];            // Array elements correspond to struct equipment above
          };
-/*0280*/ uint32_t zoneId;
+/*0280*/ uint16_t zoneId;
+/*0282*/ uint16_t zoneInstance;
 /*0284*/ uint8_t  unknown284[24];
 /*0308*/ char     lastName[32];
 /*0340*/ uint8_t  unknown340[8];
@@ -801,7 +803,8 @@ struct charProfileStruct
 /*2972*/ uint8_t   unknown2972[20];    // Unknown - all zero
 /*2992*/ uint32_t  skills[74];         // List of skills (MAX_KNOWN_SKILLS)
 /*3288*/ uint8_t   unknown3288[412];   //
-/*3700*/ uint32_t  zoneId;             // see zones.h
+/*3700*/ uint16_t  zoneId;             // see zones.h
+/*3702*/ uint16_t  zoneInstance;       // 
 /*3704*/ spellBuff buffs[15];          // Buffs currently on the player
 /*3944*/ char      groupMembers[6][64];// all the members in group, including self 
 /*4328*/ uint8_t   unknown4330[4];     // *** Placeholder
@@ -1076,7 +1079,8 @@ struct newCorpseStruct
 /*0008*/ uint32_t corpseid;               // corpses id
 /*0012*/ int32_t  type;                   // corpse type?  
 /*0016*/ uint32_t spellId;                // ID of Spell
-/*0020*/ uint32_t zoneId;                 // Bind zone id
+/*0020*/ uint16_t zoneId;                 // Bind zone id
+/*0022*/ uint16_t zoneInstance;           // Bind zone instance
 /*0024*/ uint32_t damage;                 // Damage
 /*0028*/ uint8_t  unknown0028[4];         // ***Placeholder
 /*0032*/
@@ -1154,8 +1158,23 @@ struct newZoneStruct
 {
 /*0000*/ char    name[64];                 // Character name
 /*0064*/ char    shortName[32];            // Zone Short Name
-/*0096*/ char    longName[180];            // Zone Long Name
-/*0276*/ uint8_t unknown0276[312];         // *** Placeholder
+/*0096*/ char    longName[278];            // Zone Long Name
+/*0310*/ uint8_t ztype;                    // Zone type
+/*0311*/ uint8_t fog_red[4];               // Zone fog (red)
+/*0315*/ uint8_t fog_green[4];             // Zone fog (green)
+/*0319*/ uint8_t fog_blue[4];              // Zone fog (blue)
+/*0374*/ uint8_t unknown0374[87];          // *** Placeholder
+/*0474*/ uint8_t sky;                      // Zone sky
+/*0475*/ uint8_t unknown0475[13];          // *** Placeholder
+/*0488*/ float   zone_exp_multiplier;      // Experience Multiplier
+/*0492*/ float   safe_y;                   // Zone Safe Y
+/*0496*/ float   safe_x;                   // Zone Safe X
+/*0500*/ float   safe_z;                   // Zone Safe Z
+/*0504*/ float   unknown0504;              // *** Placeholder
+/*0508*/ float   underworld;               // Underworld
+/*0512*/ float   minclip;                  // Minimum view distance
+/*0516*/ float   maxclip;                  // Maximum view distance
+/*0520*/ uint8_t unknown0520[68];          // *** Placeholder
 /*0588*/
 };
 
@@ -1357,8 +1376,9 @@ struct altExpUpdateStruct
 struct zoneChangeStruct
 {
 /*0000*/ char     name[64];		// Character Name
-/*0064*/ uint32_t zoneId;               // zone Id
-/*0068*/ uint8_t unknown[8];              // unknown
+/*0064*/ uint16_t zoneId;               // zone Id
+/*0066*/ uint16_t zoneInstance;         // zone Instance
+/*0068*/ uint8_t unknown[8];            // unknown
 /*0076*/
 };
 
@@ -1693,19 +1713,20 @@ struct clientLFGStruct
 };
 
 /*
-** buffDropStruct
-** Length: 10 Octets
-** signifies LFG, maybe afk, role, ld, etc
+** buffStruct
+** Length: 28 Octets
+** 
 */
 
-struct buffDropStruct
+struct buffStruct
 {
-/*0000*/ uint32_t spawnid;
+/*0000*/ uint32_t spawnid;        //spawn id
 /*0004*/ uint8_t  unknown0004[4]; 
-/*0008*/ uint32_t spellid;
-/*0012*/ uint8_t  unknown0012[8];
-/*0020*/ uint32_t spellslot;
-/*0024*/ uint32_t bufffade;
+/*0008*/ uint32_t spellid;        // spellid
+/*0012*/ uint32_t duration;       // duration
+/*0016*/ uint8_t  unknown0012[4];
+/*0020*/ uint32_t spellslot;      // spellslot
+/*0024*/ uint32_t changetype;     // 1=buff fading,2=buff duration
 /*0028*/
 };
 

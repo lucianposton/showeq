@@ -342,9 +342,11 @@ void SpawnShell::newGroundItem(const makeDropStruct *d, uint32_t, uint8_t dir)
   
   // attempt to get the item name
   QString name;
+#if 0 // ZBTEMP: ItemNr no longer really sent down
   if (m_itemDB != NULL)
     name = m_itemDB->GetItemLoreName(d->itemNr);
-  
+#endif // ZBTEMP
+
   Drop* item = (Drop*)m_drops.find(d->dropId);
   if (item != NULL)
   {
@@ -426,7 +428,7 @@ void SpawnShell::newDoorSpawn(const doorStruct* d, uint32_t len, uint8_t dir)
 
 void SpawnShell::zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len)
 {
-  int spawndatasize = (len - 2) / sizeof(spawnStruct);
+  int spawndatasize = len / sizeof(spawnStruct);
 
   for (int i = 0; i < spawndatasize; i++)
     newSpawn(zspawns->spawn[i].spawn);
@@ -528,8 +530,6 @@ void SpawnShell::playerUpdate(const playerSpawnPosStruct *pupdate, uint32_t, uin
     int16_t dz = pupdate->deltaZ >> 2;
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,
 		pupdate->heading, pupdate->deltaHeading,pupdate->animation);
-    if (pupdate->spawnId==1193)
-      printf("Spawn(%d) moved by dx=%d  dy=%d  dz=%d heading=%d delhead=%d  animation=%d\n",pupdate->spawnId,dx,dy,dz,pupdate->heading,pupdate->deltaHeading,pupdate->animation);
   }
 }
 
@@ -611,12 +611,10 @@ void SpawnShell::updateSpawns(const spawnPositionUpdate* updates)
   // if zoning, then don't do anything
   if (m_zoneMgr->isZoning())
     return;
-if (updates->spawnId==2803)
-	printf("heading=%d  u3=%lld  unused2=%d\n",updates->heading,updates->u3,updates->unused2);
 
- updateSpawn(updates->spawnId, 
-	     updates->x >> 3, updates->y >> 3, updates->z >> 3,
-	     0,0,0,updates->heading,0,0);
+  updateSpawn(updates->spawnId, 
+	      updates->x >> 3, updates->y >> 3, updates->z >> 3,
+	      0,0,0,updates->heading,0,0);
 }
 
 void SpawnShell::updateSpawnMaxHP(const SpawnUpdateStruct* su)

@@ -68,7 +68,6 @@ struct ShowEQParams
   bool           walkpathrecord;
   uint32_t       walkpathlength;
   bool           logSpawns;
-  bool           logItems;
   bool           spawnfilter_loglocates;
   bool           spawnfilter_logcautions;
   bool           spawnfilter_logdangers;
@@ -76,7 +75,6 @@ struct ShowEQParams
   bool           systime_spawntime;
   bool           showRealName;
   QString        SpawnLogFilename;
-  bool           spawnlog_enabled;
   
   bool           logAllPackets;
   bool           logWorldPackets;

@@ -290,6 +290,7 @@ class EQInterface:public QMainWindow
    void showSpellList(void);
    void showCompass(void);
    void showNetDiag(void);
+   void createSpawnLogger(void);
 
  public:
    Player* m_player;

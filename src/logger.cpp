@@ -156,7 +156,7 @@ SpawnLogger::logSpawnInfo(const char *type, const char *name, int id, int level,
 void 
 SpawnLogger::logZoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len)
 {
-  int spawndatasize = (len - 2) / sizeof(spawnStruct);
+  int spawndatasize = len / sizeof(spawnStruct);
 
   for (int i = 0; i < spawndatasize; i++)
     logZoneSpawn(&zspawns->spawn[i].spawn);

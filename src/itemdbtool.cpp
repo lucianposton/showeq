@@ -27,7 +27,7 @@
 #include "db3conv.h"
 #endif
 
-static char *id="@(#) $Id$";
+static const char *id="@(#) $Id$";
 
 ///////////////////////////////////
 // TODO:
@@ -445,8 +445,10 @@ void displayVersion(EQItemDB* itemDB)
   printf ("\t\tUsing headers from linux version: %s\n",
 	  UTS_RELEASE);
 #endif
-  printf ("\t\tUsing EQItemDB: %s\n", EQItemDB::Version());
-  printf ("\n");
+  printf ("\tUsing GDBM: %s\n", GDBMConvenience::Version());
+#ifdef USE_DB3
+  printf ("\tUsing DB3: %s\n", DB3Convenience::Version());
+#endif
 
   /////////////////////////////////
   // Display current system environment information
@@ -455,10 +457,6 @@ void displayVersion(EQItemDB* itemDB)
     printf ("\tRunning on %s release %s for processor %s\n",
 	    utsbuff.sysname, utsbuff.release, 
 	    utsbuff.machine);
-  printf ("\tUsing GDBM: %s\n", GDBMConvenience::Version());
-#ifdef USE_DB3
-  printf ("\tUsing DB3: %s\n", DB3Convenience::Version());
-#endif
   printf ("\n");
 
   /////////////////////////////////

@@ -4,7 +4,7 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  */
-    "None",                 // 0x00
+    "Generic",              // 0x00
     "1HSword",              // 0x01
     "2HSword",              // 0x02
     "Axe",                  // 0x03

@@ -183,8 +183,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // Create the Group Manager
    m_groupMgr = new GroupMgr(m_spawnShell, m_player, "groupmgr");
 
-   // create the spawn logger
-   m_spawnLogger = new SpawnLogger(showeq_params->SpawnLogFilename);
+   // if the user wants spawns logged, create the spawn logger
+   if (showeq_params->logSpawns)
+     createSpawnLogger();
 
    // Initialize the experience window;
    m_expWindow = new ExperienceWindow(m_player, m_groupMgr);
@@ -682,7 +683,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_id_log_WorldData   = pLogMenu->insertItem("World Data", this, SLOT(toggle_log_WorldData()), Key_F6);
    m_id_log_ZoneData    = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F7);
    m_id_log_UnknownData = pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F8);
-   m_id_log_RawData     = pLogMenu->insertItem("Raw Data", this, SLOT(toggle_log_RawData()), Key_F8);
+   m_id_log_RawData     = pLogMenu->insertItem("Raw Data", this, SLOT(toggle_log_RawData()), Key_F9);
    if (m_itemDB)			      
    {
      m_id_log_Items  = pLogMenu->insertItem("Item Data", this, SLOT(toggle_log_ItemData()));
@@ -715,7 +716,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    pOpCodeMenu->insertItem("Log &Filename...", this,
 			  SLOT(select_opcode_file()));
    pOpCodeMenu->setItemChecked(x, showeq_params->monitorOpCode_Log);
-   m_id_view_UnknownData = m_netMenu->insertItem("View Unknown Data", this, SLOT(toggle_view_UnknownData()) , Key_F9);
+   m_id_view_UnknownData = m_netMenu->insertItem("View Unknown Data", this, SLOT(toggle_view_UnknownData()) , Key_F10);
    viewUnknownData = false;
    menuBar()->setItemChecked(m_id_view_UnknownData, viewUnknownData);
    m_netMenu->insertSeparator(-1);
@@ -1052,16 +1053,16 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // Debug menu
    QPopupMenu* pDebugMenu = new QPopupMenu;
    menuBar()->insertItem("&Debug", pDebugMenu);
-   pDebugMenu->insertItem("List &Spawns", this, SLOT(listSpawns()), ALT+CTRL+Key_S);
+   pDebugMenu->insertItem("List S&pawns", this, SLOT(listSpawns()), ALT+CTRL+Key_P);
    pDebugMenu->insertItem("List &Drops", this, SLOT(listDrops()), ALT+CTRL+Key_D);
    pDebugMenu->insertItem("List &Map Info", this, SLOT(listMapInfo()), ALT+CTRL+Key_M);
    pDebugMenu->insertItem("List Guild Info", m_guildmgr, SLOT(listGuildInfo()));
-   pDebugMenu->insertItem("Dump &Spawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_S);
+   pDebugMenu->insertItem("Dump S&pawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_P);
    pDebugMenu->insertItem("Dump &Drops", this, SLOT(dumpDrops()), ALT+SHIFT+CTRL+Key_D);
    pDebugMenu->insertItem("Dump Map &Info", this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
    pDebugMenu->insertItem("Dump Guild Info", this , SLOT(dumpGuildInfo()));
    pDebugMenu->insertItem("Dump SpellBook Info", this , SLOT(dumpSpellBook()));
-   pDebugMenu->insertItem("&List Filters", m_filterMgr, SLOT(listFilters()), ALT+Key_I);
+   pDebugMenu->insertItem("List &Filters", m_filterMgr, SLOT(listFilters()), ALT+CTRL+Key_F);
 
    // Tools menu
    QPopupMenu* pToolsMenu = new QPopupMenu;
@@ -1193,12 +1194,15 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    connect(this, SIGNAL(saveAllPrefs(void)),
 	   m_categoryMgr, SLOT(savePrefs(void)));
 
-   // connect ItemDB slots to EQPacket signals
-   connect(m_packet, SIGNAL(item(const itemPacketStruct*, uint32_t, uint8_t)),
-	   m_itemDB, SLOT(item(const itemPacketStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(itemInfo(const itemInfoStruct*, uint32_t, uint8_t)),
-	   m_itemDB, SLOT(itemInfo(const itemInfoStruct*, uint32_t, uint8_t)));
-   
+   if (m_itemDB != NULL)
+   {
+     // connect ItemDB slots to EQPacket signals
+     connect(m_packet, SIGNAL(item(const itemPacketStruct*, uint32_t, uint8_t)),
+	     m_itemDB, SLOT(item(const itemPacketStruct*, uint32_t, uint8_t)));
+     connect(m_packet, SIGNAL(itemInfo(const itemInfoStruct*, uint32_t, uint8_t)),
+	     m_itemDB, SLOT(itemInfo(const itemInfoStruct*, uint32_t, uint8_t)));
+   }
+
    if (m_groupMgr != NULL)
    {
      // connect GroupMgr slots to EQPacket signals
@@ -1349,8 +1353,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_spellShell, SLOT(selfFinishSpellCast(const memSpellStruct *)));
    connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *, uint32_t, uint8_t)),
 	   m_spellShell, SLOT(interruptSpellCast(const badCastStruct *)));
-   connect(m_packet, SIGNAL(buffDrop(const buffDropStruct *, uint32_t, uint8_t)),
-	   m_spellShell, SLOT(buffDrop(const buffDropStruct *, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(buff(const buffStruct *, uint32_t, uint8_t)),
+	   m_spellShell, SLOT(buff(const buffStruct *, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(action(const actionStruct *, uint32_t, uint8_t)),
 	   m_spellShell, SLOT(action(const actionStruct *, uint32_t, uint8_t)));
 
@@ -1436,25 +1440,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	     m_combatWindow, SLOT(restoreFont(void)));
      connect(this, SIGNAL(saveAllPrefs(void)),
 	     m_combatWindow, SLOT(savePrefs(void)));
-   }
-
-   // Connect SpawnLogger slots to EQPacket signals
-   if (m_spawnLogger != NULL)
-   {
-     connect(m_packet, SIGNAL(timeOfDay(const timeOfDayStruct *, uint32_t, uint8_t)),
-	     m_spawnLogger, SLOT(logTimeSync(const timeOfDayStruct *)));
-     connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
-	     m_spawnLogger, SLOT(logNewZone(const QString&)));
-     connect(m_packet, SIGNAL(zoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)),
-	     m_spawnLogger, SLOT(logZoneSpawns(const zoneSpawnsStruct*, uint32_t)));
-     connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*, uint32_t, uint8_t)),
-	     m_spawnLogger, SLOT(logNewSpawn(const newSpawnStruct*)));
-
-     // Connect SpawnLogger slots to SpawnShell signals
-     connect(m_spawnShell, SIGNAL(delItem(const Item*)),
-	     m_spawnLogger, SLOT(logDeleteSpawn(const Item *)));
-     connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
-	     m_spawnLogger, SLOT(logKilledSpawn(const Item *, const Item*, uint16_t)));
    }
 
    // Create message boxes defined in config preferences
@@ -3255,7 +3240,20 @@ void
 EQInterface::toggle_opt_LogSpawns (void)
 {
     showeq_params->logSpawns = !(showeq_params->logSpawns);
+
+    if (showeq_params->logSpawns)
+      createSpawnLogger();
+    else
+    {
+      // delete the spawn logger
+      delete m_spawnLogger;
+
+      // make sure to clear it's varialbe
+      m_spawnLogger = NULL;
+    }
+
     menuBar()->setItemChecked (m_id_opt_LogSpawns, showeq_params->logSpawns);
+    pSEQPrefs->setPrefBool("LogSpawns", "Interface", showeq_params->pvp);
 }
 
 void
@@ -5519,9 +5517,9 @@ void EQInterface::showSpellList(void)
   if (m_spellList == NULL)
   {
     if (m_isSpellListDocked)
-      m_spellList = new SpellListWindow(m_splitV, "spelllist");
+      m_spellList = new SpellListWindow(m_spellShell, m_splitV, "spelllist");
     else
-      m_spellList = new SpellListWindow(NULL, "spelllist");
+      m_spellList = new SpellListWindow(m_spellShell, NULL, "spelllist");
 
     SpellList* spellList = m_spellList->spellList();
 
@@ -5596,3 +5594,38 @@ void EQInterface::showNetDiag()
   m_netDiag->show();
 }
 
+void EQInterface::createSpawnLogger(void)
+{
+  // if the spawnLogger already exists, then nothing to do... 
+  if (m_spawnLogger)
+    return;
+
+   // create the spawn logger
+   m_spawnLogger = new SpawnLogger(showeq_params->SpawnLogFilename);
+
+   // get the current EQ time && Initialize SpawnLogger with it
+   struct timeOfDayStruct eqTime;
+   if (m_packet->getEQTimeOfDay(time(NULL), &eqTime))
+     m_spawnLogger->logTimeSync(&eqTime);
+
+   // initialize it with the current state
+   QString shortZoneName = m_zoneMgr->shortZoneName();
+   if (!shortZoneName.isEmpty())
+     m_spawnLogger->logNewZone(shortZoneName);
+
+   // Connect SpawnLogger slots to EQPacket signals
+   connect(m_packet, SIGNAL(timeOfDay(const timeOfDayStruct *, uint32_t, uint8_t)),
+	   m_spawnLogger, SLOT(logTimeSync(const timeOfDayStruct *)));
+   connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
+	   m_spawnLogger, SLOT(logNewZone(const QString&)));
+   connect(m_packet, SIGNAL(zoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)),
+	   m_spawnLogger, SLOT(logZoneSpawns(const zoneSpawnsStruct*, uint32_t)));
+   connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*, uint32_t, uint8_t)),
+	   m_spawnLogger, SLOT(logNewSpawn(const newSpawnStruct*)));
+   
+   // Connect SpawnLogger slots to SpawnShell signals
+   connect(m_spawnShell, SIGNAL(delItem(const Item*)),
+	   m_spawnLogger, SLOT(logDeleteSpawn(const Item *)));
+   connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
+	   m_spawnLogger, SLOT(logKilledSpawn(const Item *, const Item*, uint16_t)));
+}

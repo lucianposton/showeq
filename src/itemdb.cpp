@@ -1211,7 +1211,7 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
   getField(field, curPos); fieldCount++; // 1 - charges
   getField(field, curPos); fieldCount++;
   getField(field, curPos); fieldCount++; // 3 - equipped slot;
-  getField(field, curPos); fieldCount++;
+  getField(field, curPos); fieldCount++; // 4 - bazaar trader price
   getField(field, curPos); fieldCount++;
 
   // skip over optional backslash and leading quote.
@@ -1501,7 +1501,7 @@ QString EQItemDB::GetItemName(uint32_t itemNr)
 QString EQItemDB::GetItemLoreName(uint32_t itemNr)
 {
   Datum key, data;
-  QString result = "";
+  QString result;
 
   // setup key datum for query
   key.size = sizeof(itemNr);

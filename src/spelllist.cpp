@@ -106,8 +106,9 @@ void SpellListItem::setCategory(QString& cat)
 
 // -------------------------------------------------------------------
 
-SpellList::SpellList(QWidget *parent, const char *name)
-   : SEQListView("SpellList", parent, name)
+SpellList::SpellList(SpellShell* sshell, QWidget *parent, const char *name)
+  : SEQListView("SpellList", parent, name),
+    m_spellShell(sshell)
 {
    //addColumn... spell icon
    addColumn("Spell", "SpellName");
@@ -122,8 +123,10 @@ SpellList::SpellList(QWidget *parent, const char *name)
 
    restoreColumns();
 
+   connect (this, SIGNAL(doubleClicked(QListViewItem*)),
+	    this, SLOT(mouseDoubleClicked(QListViewItem*)));
    connect(this, SIGNAL(rightButtonClicked(QListViewItem*, const QPoint&, int)),
-         this, SLOT(rightButtonClicked(QListViewItem*, const QPoint&, int)));
+	   this, SLOT(rightButtonClicked(QListViewItem*, const QPoint&, int)));
 }
 
 void SpellList::selectSpell(const SpellItem *item)
@@ -266,6 +269,16 @@ void SpellList::selectAndOpen(SpellListItem *item)
 //void interruptSpellCast(struct interruptCastStruct *);
 //void spellMessage(QString&);
 
+void SpellList::mouseDoubleClicked(QListViewItem *item) 
+{
+  if (!item)
+    return;
+
+  SpellListItem *i = (SpellListItem *)item;
+  const SpellItem *j = i->item(); 
+  if (j)
+    m_spellShell->DeleteSpell(j);
+}
 
 void SpellList::rightButtonClicked(QListViewItem *item, const QPoint& pos,
       int col)
@@ -343,13 +356,14 @@ void SpellList::activated(int mid)
    }
 }
 
-SpellListWindow::SpellListWindow(QWidget* parent, const char* name)
+SpellListWindow::SpellListWindow(SpellShell* sshell, 
+				 QWidget* parent, const char* name)
   : SEQWindow("SpellList", "ShowEQ - Spell List", parent, name)
 {
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setAutoAdd(true);
   
-  m_spellList = new SpellList(this, name);
+  m_spellList = new SpellList(sshell, this, name);
 }
 
 SpellListWindow::~SpellListWindow()

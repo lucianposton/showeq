@@ -63,7 +63,7 @@ ZoneMgr::ZoneMgr(EQPacket* packet, QObject* parent, const char* name)
     restoreZoneState();
 }
 
-QString ZoneMgr::zoneNameFromID(uint32_t zoneId)
+QString ZoneMgr::zoneNameFromID(uint16_t zoneId)
 {
    static const char* zoneNames[] =
    {
@@ -172,18 +172,32 @@ void ZoneMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t len, uint8
 
 void ZoneMgr::zoneNew(const newZoneStruct* zoneNew, uint32_t len, uint8_t dir)
 {
-  // ZBNOTE: Apparently these common in with the localized names, which means we 
-  //         may not wish to use them for zone short names.  An example of this is:
-  //         shortZoneName 'ecommons' in German comes in as 'OGemeinl'.
-  //         continuing to use the shortZoneName until we can figure out this 
-  //         LDON zone id nonsense.
-  m_shortZoneName = zoneNew->shortName;
+  m_zone_exp_multiplier = zoneNew->zone_exp_multiplier;
+
+  // ZBNOTE: Apparently these come in with the localized names, which means we 
+  //         may not wish to use them for zone short names.  
+  //         An example of this is: shortZoneName 'ecommons' in German comes 
+  //         in as 'OGemeinl'.  OK, now that we have figured out the zone id
+  //         issue, we'll only use this short zone name if there isn't one or
+  //         it is an unknown zone.
+  if (m_shortZoneName.isEmpty() || m_shortZoneName.startsWith("unk"))
+  {
+    m_shortZoneName = zoneNew->shortName;
+
+    // LDoN likes to append a _262 to the zonename. Get rid of it.
+    QRegExp rx("_\\d+$");
+    m_shortZoneName.replace( rx, "");
+  }
+
   m_longZoneName = zoneNew->longName;
   m_zoning = false;
 
-  // LDoN likes to append a _262 to the zonename. Get rid of it.
-  QRegExp rx("_\\d+$");
-  m_shortZoneName.replace( rx, "");
+#if 1 // ZBTEMP
+  printf("Welcome to lovely downtown '%s' with an experience multiplier of %f\n",
+	 zoneNew->longName, zoneNew->zone_exp_multiplier);
+  printf("Safe Point (%f, %f, %f)\n", 
+	 zoneNew->safe_x, zoneNew->safe_y, zoneNew->safe_z);
+#endif // ZBTEMP
   
   // fprintf(stderr,"zoneNew: m_short(%s) m_long(%s)\n",
   //    (const char*)m_shortZoneName,

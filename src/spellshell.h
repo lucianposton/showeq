@@ -162,16 +162,8 @@ class SpellShell : public QObject
   Q_OBJECT
  public:
   SpellShell(Player* player, SpawnShell* spawnshell, Spells* spells);
-  SpellItem* InsertSpell(const startCastStruct *c);
-  SpellItem* InsertSpell(const spellBuff *c);
-  void UpdateSpell(SpellItem* item, const startCastStruct *);
-  void UpdateSpell(SpellItem* item, const spellBuff *); //for spellBuff loading
-  void UpdateSpell(SpellItem* item, const actionStruct *); // for others spells
-  void DeleteSpell(SpellItem *);
+  void DeleteSpell(const SpellItem*);
   void clear();
-  SpellItem* FindSpell(int spell_id, int caster_id, int target_id);
-  SpellItem* FindSpell(int spell_id, int target_id);
-  SpellItem* FindSpell(int spell_id);
   
  signals:
   void addSpell(const SpellItem *); // done
@@ -183,12 +175,24 @@ class SpellShell : public QObject
   // slots received from EQPacket...
   void selfStartSpellCast(const startCastStruct *);
   void buffLoad(const spellBuff*);
-  void buffDrop(const buffDropStruct*, uint32_t, uint8_t);
+  void buff(const buffStruct*, uint32_t, uint8_t);
   void action(const actionStruct*, uint32_t, uint8_t);
   void interruptSpellCast(const badCastStruct *);
   void selfFinishSpellCast(const memSpellStruct *);
   void spellMessage(QString&);
   void timeout();
+
+ protected:
+  SpellItem* InsertSpell(const startCastStruct *c);
+  SpellItem* InsertSpell(const spellBuff *c);
+  void UpdateSpell(SpellItem* item, const startCastStruct *);
+  void UpdateSpell(SpellItem* item, const spellBuff *); //for spellBuff loading
+  void UpdateSpell(SpellItem* item, const actionStruct *); // for others spells
+  void UpdateSpell(SpellItem* item, const buffStruct *b);
+  void DeleteSpell(SpellItem *);
+  SpellItem* FindSpell(int spell_id, int caster_id, int target_id);
+  SpellItem* FindSpell(int spell_id, int target_id);
+  SpellItem* FindSpell(int spell_id);
   
  private:
   Player* m_player;

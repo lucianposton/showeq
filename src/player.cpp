@@ -178,6 +178,10 @@ void Player::backfill(const charProfileStruct* player)
 	 showeq_params->walkpathlength
         );
   setDeltas(0,0,0);
+#if 1 // ZBTEMP
+  printf("Player::backfill(): Pos (%f/%f/%f) Heading: %f\n",
+	 player->x, player->y, player->z, player->heading);
+#endif // ZBTEMP  
   setHeading((int8_t)lrintf(player->heading), 0);
   m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
   m_validPos = true;
@@ -796,6 +800,10 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
 	 showeq_params->walkpathlength
         );
   setDeltas(0,0,0);
+#if 1 // ZBTEMP
+  printf("Player::zoneBegin(): Pos (%f/%f/%f) Heading: %f\n",
+	 zsentry->x, zsentry->y, zsentry->z, zsentry->heading);
+#endif // ZBTEMP  
   setHeading((int8_t)lrintf(zsentry->heading), 0);
   m_validPos = true;
 

@@ -59,7 +59,7 @@ class SpellList : public SEQListView
 {
    Q_OBJECT
    public:
-      SpellList(QWidget *parent = 0, const char *name = 0);
+      SpellList(SpellShell* sshell, QWidget *parent = 0, const char *name = 0);
       void SelectItem(const SpellItem *item);
       SpellListItem* Selected();
       SpellListItem* InsertSpell(const SpellItem *item);
@@ -83,11 +83,13 @@ class SpellList : public SEQListView
       void selectSpell(const SpellItem *);
       void clear();
 
+      void mouseDoubleClicked(QListViewItem *item);
       void rightButtonClicked(QListViewItem *, const QPoint&, int);
       void activated(int);
 
    private:
       void selectAndOpen(SpellListItem *);
+      SpellShell* m_spellShell;
       QValueList<QString> m_categoryList;
       QValueList<SpellListItem *> m_spellList;
       QPopupMenu *m_menu;
@@ -103,7 +105,7 @@ class SpellListWindow : public SEQWindow
   Q_OBJECT
 
  public:
-  SpellListWindow(QWidget* parent = 0, const char* name = 0);
+  SpellListWindow(SpellShell* sshell, QWidget* parent = 0, const char* name = 0);
   ~SpellListWindow();
   SpellList* spellList() { return m_spellList; }
 
