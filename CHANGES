@@ -2,7 +2,7 @@ Version: $Id$ $Name$
 BonkersBobcat (08/12/04)
 ------------------------
 + Updated version to 5.0.0.12
-+ Note that maps are not currently loading
++ Applied epiccamp patch for maps to load
 + Applied ksmith's patch to add the new zones
 + Applied UnGod's patch for the guild file (finally)
 

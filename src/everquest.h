@@ -472,7 +472,7 @@ struct newZoneStruct
 /*0508*/ float   underworld;               // Underworld
 /*0512*/ float   minclip;                  // Minimum view distance
 /*0516*/ float   maxclip;                  // Maximum view distance
-/*0520*/ uint8_t unknown0520[76];          // *** Placeholder
+/*0520*/ uint8_t unknown0520[152];         // *** Placeholder
 /*0588*/
 };
 
