@@ -1,3 +1,9 @@
+casey 10/31/2002
+----------------------
+ + added some code (and fee added the rest) to allow user input of crypt 
+   session key.  You can find it under Decode->Input Session key.
+ + dont forget to kill a cat tonight.
+
 fee (floyd) 10/27/2002
 ----------------------
  + updated various PoP maps

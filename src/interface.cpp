@@ -727,8 +727,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
    // Decoder Menu
    m_decoderMenu = new QPopupMenu;
-   menuBar()->insertItem("&Decoder, m_decoderMenu);
-   m_netMenu->insertItem("Input Session Key", this, SLOT(set_decoder_key()));
+   menuBar()->insertItem("&Decoder", m_decoderMenu);
+   m_decoderMenu->insertItem("Input Session Key", this, SLOT(set_decoder_key()));
    
    // Character Menu 
    m_charMenu = new QPopupMenu;
@@ -5549,8 +5549,21 @@ void EQInterface::showNetDiag()
 
 void EQInterface::set_decoder_key()
 {
-//uint64_t key = 0xffffffffffffffff; // this is the bad value
+  uint64_t key = 0xffffffffffffffff; // this is the bad value
 
-//dialog here
-//emit theKey(key);
+  //dialog here
+  bool ok = FALSE;
+  QString textkey = QInputDialog::getText(
+		  tr("Set Decoder Key"),
+		  tr("Key"),
+		  QLineEdit::Normal, QString::null, &ok, this);
+
+  if (ok && !textkey.isEmpty())
+  {
+    key = strtoull(textkey, NULL, 0);
+    qDebug("set_decoder_key: User specified key: 0x%llx", key);
+    emit theKey(key);
+  }
+  else  // empty string or cancel hit
+    return;
 }
