@@ -202,7 +202,7 @@ int main (int argc, char *argv[])
     return -1;
   }
 
-  // retrieve an iterator over the LORE_DB
+  // retrieve an iterator over the DATA_DB
   EQItemDBIterator* pIter = new EQItemDBIterator(pItemDB, EQItemDB::DATA_DB);
 
   // if unsuccessful then can't do any more
@@ -218,13 +218,12 @@ int main (int argc, char *argv[])
   }
 
   bool hasNext = true;  
-  uint16_t currentItemNr;
-  uint16_t nextItemNr;
+  uint32_t currentItemNr;
+  uint32_t nextItemNr;
   QString nameString;
   QString loreString;
   bool hasEntry = false;
   EQItemDBEntry* entry = NULL;
-  int16_t flag;
 
   // retrieve the first number
   hasNext = pIter->GetFirstItemNumber(&nextItemNr);
@@ -318,23 +317,17 @@ int main (int argc, char *argv[])
       if (!searchEffect.isEmpty())
       {
 	// retrieve the spell Id's
-	int spellId0 = entry->GetSpellId0();
 	int spellId = entry->GetSpellId();
 
 	// perform a quick check to make sure there is a spell on them
-	if ((spellId0 == ITEM_SPELLID_NOSPELL) &&
-	    (spellId == ITEM_SPELLID_NOSPELL))
+	if (spellId == ITEM_SPELLID_NOSPELL)
 	  continue;
 
-	QString tmpval0;
+	QString tmpval;
 	if (spellId != ITEM_SPELLID_NOSPELL)
 	  tmpval = spell_name(spellId);
 
-	if (spellId0 != ITEM_SPELLID_NOSPELL)
-	  tmpval0 = spell_name(spellId0);
-
-	if ((tmpval.find(searchEffect, 0, false) == -1) &&
-	    (tmpval0.find(searchEffect, 0, false) == -1))
+	if (tmpval.find(searchEffect, 0, false) == -1)
 	  continue;
       }
     }
@@ -368,8 +361,6 @@ int main (int argc, char *argv[])
 	<< "\">" << loreString << "</A></TD>";
 
     // if we have more data for this item, print it
-    flag = entry->GetFlag();
-
     out << "<TD align=right>" << entry->GetWeight() << "</TD>"; 
     out << "<TD>" << size_name(entry->GetSize()) << "</TD>";
     out << "<TD align=right>" << (int)entry->GetCost() << "</TD>"; 
@@ -391,12 +382,19 @@ int main (int argc, char *argv[])
       buff += "CONTAINER ";
     if (entry->GetNoDrop()==0)
       buff += "NO-DROP ";
-    if (entry->GetNoSave()==0)
-      buff += "NO-SAVE ";
+    if (entry->GetNoRent()==0)
+      buff += "NO-Rent ";
     if (entry->GetMagic()==1)
       buff += "MAGIC ";
     if (loreString[0] == '*')
       buff += "LORE";
+    else if (loreString[0] == '&')
+      buff += "SUMMONED";
+    else if (loreString[0] == '#')
+      buff += "ARTIFACT";
+    else if (loreString[0] == '~')
+      buff += "PENDING-LORE";
+
     if (buff.isEmpty())
       buff = "&nbsp";
     out << buff << "</TD>";
@@ -467,8 +465,8 @@ int main (int argc, char *argv[])
       out << "Poison:" << (int)entry->GetPR() << " ";
     out << "&nbsp</TD>";
     
-    if (entry->GetSpellId0() != ITEM_SPELLID_NOSPELL)
-      out << "<TD>" << spell_name(entry->GetSpellId0()) << "</TD>";
+    if (entry->GetSpellId() != ITEM_SPELLID_NOSPELL)
+      out << "<TD>" << spell_name(entry->GetSpellId()) << "</TD>";
     else
       out << "<TD>&nbsp</TD>";
 

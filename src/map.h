@@ -134,6 +134,13 @@ class MapMgr : public QObject
   void setZEM(uint8_t newZEM) { m_mapData.setZoneZEM(newZEM); }
 
  public slots:
+  // Map Conversion
+  void convertSEQ(void);
+  void convertSOE(void);
+  void convertMap( bool direction );
+  bool convertSEQMap(const QString& inFileName, const QString& outFileName);
+  bool convertSOEMap(const QString& inFileName, const QString& outFileName);
+
   // Zone Handling
   void zoneBegin(const QString& shortZoneName);
   void zoneChanged(const QString& shortZoneName);
@@ -208,6 +215,7 @@ class MapMenu : public QPopupMenu
   void toggle_filtered(int itemId);
   void toggle_map(int itemId);
   void toggle_velocity(int itemId);
+  void toggle_lineToSelectedSpawnPoint(int itemId);
   void toggle_animate(int itemId);
   void toggle_player(int itemId);
   void toggle_playerBackground(int itemId);
@@ -269,6 +277,7 @@ class MapMenu : public QPopupMenu
   int m_id_filtered;
   int m_id_map;
   int m_id_velocity;
+  int m_id_lineToSelectedSpawnPoint;
   int m_id_animate;
   int m_id_player;
   int m_id_playerBackground;
@@ -384,6 +393,7 @@ class Map :public QWidget
   bool showSpawnNames() const { return m_showSpawnNames; }
   bool showFiltered() const { return m_showFiltered; }
   bool showVelocityLines() const { return m_showVelocityLines; }
+  bool showLineToSelectedSpawnPoint() const { return m_showLineToSelectedSpawnPoint; }
 #ifdef DEBUG
   bool showDebugInfo() const { return m_showDebugInfo; }
 #endif
@@ -482,6 +492,7 @@ class Map :public QWidget
   void setShowDoors(bool val);
   void setShowSpawnNames(bool val);
   void setShowVelocityLines(bool val);
+  void setShowLineToSelectedSpawnPoint(bool val);
   void setShowDebugInfo(bool val);
   void setCacheChanges(bool val);
   void setAnimate(bool val);
@@ -549,7 +560,10 @@ protected:
    void paintDoors(MapParameters& param, QPainter& p);
    void paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
 				   const QTime& drawTime);
-   void paintSpawns(MapParameters& param, QPainter& p, const QTime& drawTime);
+   void paintSelectedSpawnPointSpecials(MapParameters& param, QPainter& p,
+					const QTime& drawTime);
+   void paintSpawns(MapParameters& param, QPainter& p, 
+		    const QTime& drawTime);
    void paintSpawnPoints(MapParameters& param, QPainter& p);
    void paintDebugInfo(MapParameters& param, 
 		       QPainter& tmp, 
@@ -622,6 +636,7 @@ private:
    bool m_showSpawnNames;
    bool m_showFiltered;
    bool m_showVelocityLines;
+   bool m_showLineToSelectedSpawnPoint;
 #ifdef DEBUG
    bool m_showDebugInfo;
 #endif

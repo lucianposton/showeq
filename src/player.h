@@ -47,8 +47,10 @@ public:
    void backfill(const charProfileStruct* player); 
    void clear();
    void reset();
-   void wearItem(const playerItemStruct* itemp);
-   void removeItem(const itemItemStruct* item);
+#if 0 // ZBTEMP
+   //void wearItem(const playerItemStruct* itemp);
+   //void removeItem(const itemItemStruct* item);
+#endif // ZBTEMP
    void increaseSkill(const skillIncStruct* skilli);
    void manaChange(const manaDecrementStruct* mana);
    void updateExp(const expUpdateStruct* exp);
@@ -61,6 +63,7 @@ public:
    void zoneBegin(const ServerZoneEntryStruct* zsentry);
    void playerUpdate(const playerSelfPosStruct* pupdate, uint32_t, uint8_t);
    void consMessage(const considerStruct * con, uint32_t, uint8_t dir);
+   void tradeSpellBookSlots(const tradeSpellBookSlotsStruct*, uint32_t, uint8_t);
 
    void setPlayerID(uint16_t playerID);
    void checkDefaults(void) { setDefaults(); } // Update our default values
@@ -79,10 +82,11 @@ public:
    // ZBTEMP: compatibility code
    uint16_t getPlayerID() const { return id(); }
    int16_t headingDegrees() const { return m_headingDegrees; }
-   
+   bool validPos() const { return m_validPos; }
+
    uint8_t getSkill(uint8_t skillId) { return m_playerSkills[skillId]; }
    uint8_t getLanguage(uint8_t langId) { return m_playerLanguages[langId]; }
-
+   
    int getPlusHP() { return m_plusHP; }
    int getPlusMana() { return m_plusMana; }
 
@@ -95,6 +99,7 @@ public:
    uint8_t getMaxWIS() { return m_maxWIS; }
    uint16_t getMaxMana() { return m_maxMana; }
    uint16_t getMana() { return m_mana; }
+   uint32_t getSpellBookSlot(uint32_t slotid) { return m_spellBookSlots[slotid]; }
 
    uint32_t getCurrentExp() { return m_currentExp; }
    uint32_t getMaxExp() { return m_maxExp; }
@@ -110,6 +115,8 @@ public:
    void setDefaults(void);
 
  signals:
+
+   void buffLoad(const spellBuff*); 
    void newSpeed               (int speed);
    void msgReceived            (const QString &);
    void stsMessage             ( const QString &,
@@ -208,6 +215,8 @@ public:
    uint32_t m_currentExp;
    uint32_t m_maxExp;
 
+   uint32_t m_spellBookSlots[MAX_SPELLBOOK_SLOTS];
+
    // con color bases
    QColor m_conColorBases[tMaxColorLevels];
 
@@ -235,6 +244,7 @@ public:
    bool m_validHP;
    bool m_validExp;
    bool m_validAttributes;
+   bool m_validPos;
 };
 
 inline

@@ -353,7 +353,55 @@
     "Luggald",                // 346
     "Luggald",                // 347
     "Drogmor",                // 348
-    NULL,                     // 349
-    NULL,                     // 350
+    "Guktan Skeleton",        // 349
+    "Guktan Ghoul",           // 350
     "Dark Elf",               // 351
     "Dark Elf",               // 352
+    NULL,                     // 353
+    "Veksar Citizen",         // 354
+    "Veksar Citizen",         // 355
+    NULL,                     // 356
+    NULL,                     // 357
+    NULL,                     // 358
+    "Elf Vampire",            // 359
+    "Progeny",                // 360
+    "Ruj Orc",                // 361
+    "Mutant",                 // 362
+    NULL,                     // 363
+    "Sand Elf",               // 364
+    NULL,                     // 365
+    "Ruj Orc Boss",           // 366
+    "Rawbone",                // 367
+    "Mummy",                  // 368
+    "Ruj Goblin",             // 369
+    "Scarab",                 // 370
+    "Guktan Spirit",          // 371
+    "Whirlwind",              // 372
+    "Wraith",                 // 373
+    "Sand Golem",             // 374
+    "Beholder",               // 375
+    "Crate",                  // 376
+    "Barrel",                 // 377
+    "Chest",                  // 378
+    "Vase",                   // 379
+    "Coffin",                 // 380
+    "Weapon Rack",            // 381
+    NULL,                     // 382
+    NULL,                     // 383
+    NULL,                     // 384
+    NULL,                     // 385
+    NULL,                     // 386
+    NULL,                     // 387
+    NULL,                     // 388
+    NULL,                     // 389
+    NULL,                     // 390
+    NULL,                     // 391
+    NULL,                     // 392
+    NULL,                     // 393
+    NULL,                     // 394
+    NULL,                     // 395
+    NULL,                     // 396
+    NULL,                     // 397
+    NULL,                     // 398
+    NULL,                     // 399
+    NULL,                     // 400

@@ -44,14 +44,14 @@ class SpellListItem : public QListViewItem
       const QColor textColor();
       void setTextColor(const QColor &color);
       void update();
-      void setSpellItem(SpellItem *);
-      SpellItem* item();
-      QString& category();
+      void setSpellItem(const SpellItem *);
+      const SpellItem* item() const;
+      const QString& category() const;
       void setCategory(QString& cat);
    private:
       QColor m_textColor;
       bool m_btextSet;
-      SpellItem *m_item;
+      const SpellItem *m_item;
       QString m_category;
 };
 
@@ -60,16 +60,16 @@ class SpellList : public SEQListView
    Q_OBJECT
    public:
       SpellList(QWidget *parent = 0, const char *name = 0);
-      void SelectItem(SpellItem *item);
+      void SelectItem(const SpellItem *item);
       SpellListItem* Selected();
-      SpellListItem* InsertSpell(SpellItem *item);
-      void DeleteItem(SpellItem *item);
+      SpellListItem* InsertSpell(const SpellItem *item);
+      void DeleteItem(const SpellItem *item);
       //SpellItem* AddCategory(QString& name, QColor color = Qt::black);
       //void RemCategory(SpellListItem *);
       //void clearCategories();
-      QColor pickSpellColor(SpellItem *item, QColor def = Qt::black);
+      QColor pickSpellColor(const SpellItem *item, QColor def = Qt::black) const;
       //QString& getCategory(SpellListItem *);
-      SpellListItem* Find(SpellItem *);
+      SpellListItem* Find(const SpellItem *);
 
    signals:
       void listUpdated();   // flags in spawns have changed
@@ -77,13 +77,12 @@ class SpellList : public SEQListView
 
    public slots:
       // SpellShell signals
-      void addSpell(SpellItem *);
-      void delSpell(SpellItem *);
-      void changeSpell(SpellItem *);
-      void selectSpell(SpellItem *);
+      void addSpell(const SpellItem *);
+      void delSpell(const SpellItem *);
+      void changeSpell(const SpellItem *);
+      void selectSpell(const SpellItem *);
       void clear();
 
-      void mouseButtonClicked(int,QListViewItem *, const QPoint&, int);
       void rightButtonClicked(QListViewItem *, const QPoint&, int);
       void activated(int);
 

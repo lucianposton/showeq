@@ -286,8 +286,6 @@ int main (int argc, char **argv)
    showeq_params->WorldLogFilename = pSEQPrefs->getPrefString("WorldLogFilename", section, LOGDIR "/world.log");
    showeq_params->UnknownZoneLogFilename = pSEQPrefs->getPrefString("UnknownZoneLogFilename", section, LOGDIR "/unknownzone.log") ;
    /* Different files for different kinds of raw data */
-   showeq_params->PktLoggerMask = pSEQPrefs->getPrefString("PktLoggerMask", section, "");
-   showeq_params->PktLoggerFilename = pSEQPrefs->getPrefString("PktLoggerFilename", section, LOGDIR "/packet.log") ;
 
    // item database parameters
    section = "ItemDB";
@@ -295,7 +293,7 @@ int main (int argc, char **argv)
    showeq_params->ItemNameDBFilename = pSEQPrefs->getPrefString("NameDBFilename", section, LOGDIR "/itemname");
    showeq_params->ItemDataDBFilename = pSEQPrefs->getPrefString("DataDBFilename", section, LOGDIR "/itemdata");
    showeq_params->ItemRawDataDBFileName = pSEQPrefs->getPrefString("RawDataDBFilename", section, LOGDIR "/itemrawdata");
-   showeq_params->ItemDBTypes = pSEQPrefs->getPrefInt("DatabasesEnabled", section, (EQItemDB::LORE_DB | EQItemDB::NAME_DB | EQItemDB::DATA_DB));
+   showeq_params->ItemDBTypes = pSEQPrefs->getPrefInt("DatabasesEnabled", section, (EQItemDB::DATA_DB|EQItemDB::RAW_DATA_DB));
    showeq_params->ItemDBEnabled = pSEQPrefs->getPrefBool("Enabled", section, 1);
 
    section = "SaveState";

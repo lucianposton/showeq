@@ -41,9 +41,7 @@ class EQItemDB : public QObject, protected ITEMDBBASE
  public:
    typedef enum 
    {
-     LORE_DB = 0, // is the db of LoreNames used for display (always on)
-     NAME_DB = 1, // is the db for storage of the item name
-     DATA_DB = 2, // is the db to store the data in ShowEQ format
+     DATA_DB = 0, // is the db to store the data in ShowEQ format
      RAW_DATA_DB = 4 // contains the raw packet stream for an object
    };
 
@@ -60,31 +58,40 @@ class EQItemDB : public QObject, protected ITEMDBBASE
    bool Upgrade();
 
    // DB Access methods   
+#if 0 // ZBTEMP
    // Add's items to the enabled databases
    bool AddItem(const itemStruct* item, 
 		uint32_t size,
 		uint16_t flag, 
 		bool updated = true);
+#endif // ZBTEMP
+
+   bool AddItem(const char* serializedItem, int level = 0);
 
    // Delete's an item from the enabled databases
-   bool DeleteItem(uint16_t itemNr);
+   bool DeleteItem(uint32_t itemNr);
 
-   // checks if the item exists in the LORE_DB
-   bool ItemExist(uint16_t itemNr);
+   // checks if the item exists in the DB
+   bool ItemExist(uint32_t itemNr);
 
-   // Retrieves the item name from the NAME_DB
-   QString GetItemName(uint16_t itemNr);
+   // Retrieves the item name
+   QString GetItemName(uint32_t itemNr);
 
-   // Retrieves the item lore name from the LORE_DB
-   QString GetItemLoreName(uint16_t itemNr);
+   // Retrieves the item lore name
+   QString GetItemLoreName(uint32_t itemNr);
    
    // Retrieves the item data from the DATA_DB
-   bool GetItemData(uint16_t itemNr, class EQItemDBEntry** itemData);
+   bool GetItemData(uint32_t itemNr, class EQItemDBEntry** itemData);
 
    // Retrieves the raw byte stream data for the item
    // returns the size of the byte stream
-   int GetItemRawData(uint16_t itemNr, unsigned char** itemData);
+   size_t GetItemRawData(uint32_t itemNr, char** itemData);
 
+   // Retrieves the raw byte stream data for the item
+   // returns the size of the byte stream
+   size_t GetItemRawData(uint32_t itemNr, time_t& updated, char** itemData);
+   
+   
    // Reorganize the database (this should rarely be needed)
    bool ReorganizeDatabase(void);
 
@@ -99,26 +106,22 @@ class EQItemDB : public QObject, protected ITEMDBBASE
    ~EQItemDB();
 
  protected slots:
-   void itemShop(const itemInShopStruct* items, uint32_t, uint8_t);
-   void itemPlayerReceived(const itemOnCorpseStruct* itemc, uint32_t, uint8_t);
-   void tradeItemOut(const tradeItemOutStruct* itemt, uint32_t, uint8_t);
-   void tradeItemIn(const tradeItemInStruct* itemr, uint32_t, uint8_t);
-   void tradeContainerIn(const tradeContainerInStruct* itemr, uint32_t, uint8_t);
-   void tradeBookIn(const tradeBookInStruct* itemr, uint32_t, uint8_t);
-   void summonedItem(const summonedItemStruct*, uint32_t, uint8_t);
-   void summonedContainer(const summonedContainerStruct*, uint32_t, uint8_t);
-   void playerItem(const playerItemStruct* itemp, uint32_t, uint8_t);
-   void playerBook(const playerBookStruct* bookp, uint32_t, uint8_t);
-   void playerContainer(const playerContainerStruct* containp, uint32_t, uint8_t);
+   void item(const itemPacketStruct* item, uint32_t, uint8_t);
+   void itemInfo(const itemInfoStruct* item, uint32_t, uint8_t);
+
  private:
+   void logItem(const char* serializedItem, size_t len);
+
    // which databases are enabled
    int m_dbTypesEnabled;
+   bool m_logItems;
+   bool m_logItemPackets;
 
    // the filenames specifying the storage location of the databases
-   QString m_ItemNameDB;
-   QString m_ItemLoreDB;
    QString m_ItemDataDB;
    QString m_ItemRawDataDB;
+
+   QString m_itemBuffer;
 
    // declare friends
    friend class EQItemDBIterator;
@@ -144,10 +147,10 @@ class EQItemDBIterator : protected ITEMDBITBASE
    ~EQItemDBIterator();
    
    // Get the first item number in the database
-   bool GetFirstItemNumber(uint16_t* itemNr);
+   bool GetFirstItemNumber(uint32_t* itemNr);
 
    // Get the next item number available in the database
-   bool GetNextItemNumber(uint16_t* itemNr);
+   bool GetNextItemNumber(uint32_t* itemNr);
 
    // The methods below are provided to allow for faster access
    // to the already opened database and will only work
@@ -156,7 +159,7 @@ class EQItemDBIterator : protected ITEMDBITBASE
    // Only the ones appropriate for the database type
    // that the iterator was constructed for will work
 
-   // Retrieves the string for the data (LORE_DB and NAME_DB only)
+   // Retrieves the string for the data (DATA_DB only)
    bool GetItemData(QString& itemData);
 
    // Retrieves the item data (DATA_DB only)
@@ -164,7 +167,7 @@ class EQItemDBIterator : protected ITEMDBITBASE
 
    // Retrieves the raw byte stream data for the item
    // returns the size of the byte stream (RAW_DATA_DB only)
-   int GetItemData(unsigned char** itemData);
+   int GetItemData(char** itemData);
  
    // Closes up the database
    void Done();
@@ -176,7 +179,7 @@ class EQItemDBIterator : protected ITEMDBITBASE
    int m_dbType;
 
    // storage of current item number
-   int m_itemNr;
+   uint32_t m_itemNr;
 };
 
 // EQItemDBEntry is the class used to access item data
@@ -184,20 +187,23 @@ class EQItemDBEntry
 {
  public:
    // public constructor (uses datatype declared in itemdb.cpp)
-   EQItemDBEntry(uint16_t itemNr, 
+   EQItemDBEntry(uint32_t itemNr, 
                  void* entryData);
 
    // public destructor so anyone can delete an instance
    ~EQItemDBEntry();
 
    // Accessor methods to retrieve data
-   uint16_t GetUniqueItemNr() { return m_itemNr; }
+   time_t GetUpdated();
+   uint16_t GetEntryFormatVersion();
+   uint32_t GetUniqueItemNr() { return m_itemNr; }
    QString GetName() { return m_itemName; }
    QString GetLoreName() { return m_itemLore; }
    QString GetIdFile();
    int16_t GetFlag();
+   ItemType GetItemType();
    uint8_t GetWeight();
-   int8_t GetNoSave();
+   int8_t GetNoRent();
    int8_t GetNoDrop();
    uint8_t GetSize();
    uint16_t GetIconNr();
@@ -227,7 +233,6 @@ class EQItemDBEntry
    int8_t GetLevel0();
    uint8_t GetMaterial();
    uint32_t GetColor();
-   uint16_t GetSpellId0();
    uint16_t GetClasses();
    uint16_t GetRaces();
    uint8_t GetLevel();
@@ -252,7 +257,7 @@ class EQItemDBEntry
    struct EQItemDBEntryData* m_itemEntryData;
    const char* m_itemName;
    const char* m_itemLore;
-   uint16_t  m_itemNr; 
+   uint32_t  m_itemNr; 
 };
 
 #endif // EQITEMDB_H

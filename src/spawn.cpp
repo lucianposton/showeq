@@ -116,7 +116,7 @@ QString print_weapon (uint16_t weapon)
 
 //----------------------------------------------------------------------
 // Item
-Item::Item(itemType t, uint16_t id)
+Item::Item(spawnItemType t, uint16_t id)
   : m_filterFlags(0),
     m_runtimeFilterFlags(0),
     m_ID(id),
@@ -307,6 +307,39 @@ Spawn::Spawn(QDataStream& d, uint16_t id)
   setConsidered(false);
 }
 
+Spawn::Spawn(Spawn& s, uint16_t id)
+  : Item(tSpawn, id)
+{
+  setName(s.name());
+  setLastName(s.lastName());
+  Item::setPoint(s.x(), s.y(), s.z());
+  setPetOwnerID(s.petOwnerID());
+  setLight(s.light());
+  setGender(s.gender());
+  setDeity(s.deity());
+  setRace(s.race());
+  setClassVal(s.classVal());
+  setHP(s.HP());
+  setMaxHP(s.maxHP());
+  setGuildID(s.GuildID());
+  setLevel(s.level());
+  for (int i = 0; i <= tLastCoreWearSlot; i++)
+    setEquipment(i, s.equipment(i));
+  setEquipment(tUnknown1, 0);
+  setTypeflag(s.typeflag());
+  setNPC(s.NPC());
+  setAnimation(s.animation());
+  setDeltas(s.deltaX(), s.deltaY(), s.deltaZ());
+  setHeading(s.heading(), s.deltaHeading());
+  setConsidered(s.considered());
+
+  // the new copy will own the spawn track list
+  m_spawnTrackList.setAutoDelete(false);
+  m_spawnTrackList = s.m_spawnTrackList;
+  s.m_spawnTrackList.setAutoDelete(false);
+  m_spawnTrackList.setAutoDelete(true);
+}
+
 Spawn::~Spawn()
 {
   // clear out the spawn track list
@@ -337,7 +370,7 @@ void Spawn::update(const spawnStruct* s)
     setEquipment(i, s->equipment[i]);
   setEquipment(tUnknown1, 0);
 
-  setTypeflag(s->typeflag);
+  setTypeflag(s->bodytype);
 
   // If it is a corpse with Unknown (NPC) religion.
   if ((s->NPC == SPAWN_PC_CORPSE) && (s->deity == DEITY_UNKNOWN))
@@ -378,7 +411,7 @@ void Spawn::backfill(const spawnStruct* s)
   setClassVal(s->class_);
 
   // don't know how we'd find out if this changed, but it may, currently 
-  setTypeflag(s->typeflag);
+  setTypeflag(s->bodytype);
   // no-check
   setPetOwnerID(s->petOwnerId);
 
@@ -940,6 +973,7 @@ void Door::update(const doorStruct* d)
   setPos((int16_t)(d->x), 
 	 (int16_t)(d->y), 
 	 (int16_t)(d->z * 10.0));
+  setHeading((int8_t)lrintf(d->heading));
   m_name.sprintf("Door: %s (%d) ", d->name, d->doorId);
   updateLast();
 }
@@ -977,6 +1011,7 @@ void Drop::update(const makeDropStruct* d, const QString& name)
   setPos((int16_t)d->x, 
 	 (int16_t)d->y, 
 	 (int16_t)d->z * 10);
+  setHeading((int8_t)lrintf(d->heading));
 
   // set the drop specific info
   setItemNr(d->itemNr);
@@ -997,6 +1032,8 @@ void Drop::update(const makeDropStruct* d, const QString& name)
       buff.append(print_weapon(itemId));
     else 
       buff.append(d->idFile);
+
+    //    buff.append(QString(" (") + QString::number(d->itemNr) + ")");
   }
   else
     buff = QString("Drop: '") + name + "'";

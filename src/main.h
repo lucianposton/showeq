@@ -87,8 +87,6 @@ struct ShowEQParams
   QString        WorldLogFilename;
   QString        ZoneLogFilename;
   QString        UnknownZoneLogFilename;
-  QString        PktLoggerMask;
-  QString        PktLoggerFilename;
   QString        CharProfileCodeFilename;
   QString        NewSpawnCodeFilename;
   QString        ZoneSpawnsCodeFilename;

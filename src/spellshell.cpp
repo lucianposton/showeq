@@ -11,81 +11,22 @@
 
 #include "spellshell.h"
 #include "util.h"
+#include "player.h"
 #include "spawnshell.h"
+#include "spells.h"
 
-SpellItem::SpellItem(SpawnShell* spawnShell, 
-		     uint16_t casterId,
-		     const startCastStruct *c)
+SpellItem::SpellItem()
 {
    m_spellId = 0;
    m_casterId = 0;
    m_targetId = 0;
    m_duration = 0;
-   m_target = false;
-
-   UpdateSpell(spawnShell, casterId, c);
 }
 
-//SpellItem::SpellItem(struct beginCastStruct *b)
-//{
-//}
-
-void SpellItem::UpdateSpell(SpawnShell* spawnShell,
-			    uint16_t casterId,
-			    const startCastStruct *c)
+void SpellItem::updateCastTime()
 {
-   if (c) {
-      m_spellId = c->spellId;
-      m_targetId = c->targetId;
-      m_targetName = QString("N/A");
-      m_casterId = casterId;
-      m_casterName = QString("N/A");
-      m_spellName = spell_name(c->spellId);
-      //printf("Update:: %s\n", m_spellName.latin1());
-
-      const spellInfoStruct *info = spell_info(m_spellId);
-      m_duration = info->duration;
-      m_target = info->target;
-
-      const Item *s;
-      if (m_casterId)
-         if ((s = spawnShell->findID(tSpawn, m_casterId)))
-            m_casterName = s->name();
-
-      if ( (m_targetId) && (m_target) )
-	if ((s = spawnShell->findID(tSpawn, m_targetId)))
-            m_targetName = s->name();
-
-      struct timezone tz;
-      gettimeofday(&m_castTime,&tz);
-   }
-}
-
-//SpellItem::UpdateSpell(struct beginCastStruct *b)
-//{
-//}
-
-int SpellItem::spellId() const
-{
-   return m_spellId;
-}
-
-int SpellItem::targetId() const
-{
-   if (m_target)
-      return m_targetId;
-   else
-      return 0;
-}
-
-int SpellItem::casterId() const
-{
-   return m_casterId;
-}
-
-time_t SpellItem::castTime() const
-{
-   return m_castTime.tv_sec;
+  struct timezone tz;
+  gettimeofday(&m_castTime,&tz);
 }
 
 QString SpellItem::castTimeStr() const
@@ -107,11 +48,6 @@ QString SpellItem::castTimeStr() const
    return text;
 }
 
-int SpellItem::duration() const
-{
-   return m_duration;
-}
-
 QString SpellItem::durationStr() const
 {
    QString text;
@@ -125,35 +61,11 @@ QString SpellItem::durationStr() const
    return text;
 }
 
-void SpellItem::setDuration(int d)
-{
-   m_duration = d;
-}
-
-const QString SpellItem::spellName() const
-{
-   return m_spellName;
-}
-
-const QString SpellItem::targetName() const
-{
-   return m_targetName;
-}
-
-const QString SpellItem::casterName() const
-{
-   return m_casterName;
-}
-
-//struct startCastStruct* SpellItem::cast()
-//{
-//   return &m_cast;
-//}
-
-SpellShell::SpellShell(Player* player, SpawnShell* spawnshell)
-  : QObject(NULL, "spellshell"),
+SpellShell::SpellShell(Player* player, SpawnShell* spawnshell, Spells* spells)
+: QObject(NULL, "spellshell"),
   m_player(player), 
-  m_spawnShell(spawnshell)
+  m_spawnShell(spawnshell),
+  m_spells(spells)
 {
    m_timer = new QTimer(this);
    m_spellList.clear();
@@ -163,28 +75,127 @@ SpellShell::SpellShell(Player* player, SpawnShell* spawnshell)
 
 SpellItem* SpellShell::FindSpell(int spell_id, int caster_id, int target_id)
 {
-   for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
-         it != m_spellList.end(); it++) {
-      SpellItem *i = *it;
-      if ((i->spellId() == spell_id) && (i->casterId() == caster_id)) {
- 	 const spellInfoStruct *info;
-         info = spell_info(spell_id);
-         if ( (info->target) && (target_id) ) {
-            if (i->targetId() == target_id)
-               return i;
-         } else return i;
+  bool target = true;
+  const Spell* spell = m_spells->spell(spell_id);
+  if (spell)
+    target = (spell->targetType() != 6);
+
+  for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+      it != m_spellList.end(); it++) {
+    SpellItem *i = *it;
+    //loop to trap a spell being added that is already cast on self.
+    if ((i->spellId() == spell_id) && (i->casterId() == i->targetId()))
+      if (caster_id == target_id)
+	return i;
+	
+    if ((i->spellId() == spell_id) && (i->targetId() == target_id)) 
+    {
+      if ( (target) && (target_id) ) 
+      {
+	if (i->targetId() == target_id)
+	  return i;
       }
-   }
-   return NULL;
+      else return i;
+    }
+  }
+  return NULL;
 }
 
-void SpellShell::UpdateSpell(const startCastStruct *c)
+SpellItem* SpellShell::FindSpell(int spell_id, int target_id)
 {
-   if (c) {
-      SpellItem *item = FindSpell(c->spellId, m_player->id(),
-         c->targetId);
-      item->UpdateSpell(m_spawnShell, m_player->id(), c);
-      emit changeSpell(item);
+  bool target = true;
+  const Spell* spell = m_spells->spell(spell_id);
+  if (spell)
+    target = (spell->targetType() != 6);
+
+  for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+      it != m_spellList.end(); it++) {
+    SpellItem *i = *it;
+
+    //loop to trap a spell being added that is already cast on self.
+    if (i->spellId() == spell_id)
+    {
+      // if it's a targeted spell, check target, else just return the item
+      if (target) 
+      {
+	// if the target id is non-zero, then check it, otherwise return it
+	if (i->targetId())
+	{
+	  // if target id matches then return it
+	  if (i->targetId() == target_id)
+	    return i;
+	}
+	else
+	  return i; // no target id, return item
+      }
+      else 
+	return i; // non-targeted spell, return item
+    }
+  }
+  return NULL;
+}
+
+SpellItem* SpellShell::FindSpell(int spell_id)
+{
+  for(QValueList<SpellItem*>::Iterator it = m_spellList.begin(); it != m_spellList.end(); it++)
+  {      
+    if ((*it) != NULL)
+    {
+      if ((*it)->spellId() == spell_id)
+	return (*it);
+    }
+  }
+  return NULL;
+}
+
+void SpellShell::UpdateSpell(SpellItem* item, const startCastStruct *c)
+{
+   if (c && item) 
+   {
+     item->setSpellId(c->spellId);
+     item->setTargetName(QString("N/A"));
+     item->setCasterId(m_player->id());
+     item->setCasterName(QString("N/A"));
+     item->setCasterName(m_player->name());
+
+     const Spell* spell = m_spells->spell(c->spellId);
+     
+     bool target = true;
+     if (spell)
+     {
+       item->setSpellName(spell->name());
+       item->setDuration(spell->calcDuration(m_player->level()) * 6);
+       target = (spell->targetType() != 0x06);
+     }
+     
+     item->setTargetId(c->targetId);
+     
+     const Item* s;
+     if (target && c->targetId && 
+	 ((s = m_spawnShell->findID(tSpawn, c->targetId))))
+       item->setTargetName(s->name());
+     
+     item->updateCastTime();
+   }
+}
+
+//Overloaded function for spellBuff
+void SpellShell::UpdateSpell(SpellItem* item, const spellBuff *c)
+{
+   if (c && item) 
+   {
+     item->setSpellId(c->spellid);
+     item->setTargetName(m_player->name());
+     item->setTargetId(m_player->id());
+     item->setCasterName(QString("Buff"));
+     item->setDuration(c->duration * 6);
+     
+     const Spell* spell = m_spells->spell(c->spellid);
+
+     if (spell)
+       item->setSpellName(spell->name());
+     
+     item->updateCastTime();
    }
 }
 
@@ -201,22 +212,56 @@ void SpellShell::clear()
 
 SpellItem* SpellShell::InsertSpell(const startCastStruct *c)
 {
-   if (c) {
-      SpellItem *item = FindSpell(c->spellId, m_player->id(),
-         c->targetId);
-      if (item) { // exists
-         UpdateSpell(c);
-         return item;
-      } else { // new spell
-         item = new SpellItem(m_spawnShell, m_player->id(), c);
-         m_spellList.append(item);
-         if ((m_spellList.count() > 0) && (!m_timer->isActive()))
-            m_timer->start(1000 *
-               pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
-         emit addSpell(item);
-	 return item;
+   if (c) 
+   {
+     SpellItem *item = FindSpell(c->spellId, m_player->id(),
+				 c->targetId);
+     if (item) 
+     { // exists
+       UpdateSpell(item, c);
+       emit changeSpell(item);
+       return item;
+     } 
+     else 
+     { // new spell
+       item = new SpellItem();
+       UpdateSpell(item, c);
+       m_spellList.append(item);
+       if ((m_spellList.count() > 0) && (!m_timer->isActive()))
+	 m_timer->start(1000 *
+			pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
+       emit addSpell(item);
+       return item;
+     }
+   }
+
+   return NULL;
+}
+//Overloaded InsertSpell for buffLoad
+SpellItem* SpellShell::InsertSpell(const spellBuff *c)
+{
+   if (c) 
+   {
+      SpellItem *item = FindSpell(c->spellid);
+      if (item) 
+      { // exists
+	UpdateSpell(item, c);
+	emit changeSpell(item);
+	return item;
+      } 
+      else 
+      { // new spell
+	item = new SpellItem();
+	UpdateSpell(item, c);
+	m_spellList.append(item);
+	if ((m_spellList.count() > 0) && (!m_timer->isActive()))
+	  m_timer->start(1000 *
+			 pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
+	emit addSpell(item);
+	return item;
       }
    }
+
    return NULL;
 }
 
@@ -232,10 +277,39 @@ void SpellShell::DeleteSpell(SpellItem *item)
 }
 
 // slots
+
 void SpellShell::selfStartSpellCast(const startCastStruct *c)
 {
-   printf("selfStartSpellCast - id=%d\n", c->spellId);
+   printf("selfStartSpellCast - id=%d on spawnid=%d\n", 
+	  c->spellId, c->targetId);
    InsertSpell(c);
+}
+
+//slot for loading buffs when main char struct is loaded
+void SpellShell::buffLoad(const spellBuff* c)
+{
+   printf("Loading buff - id=%d.\n",c->spellid);
+   InsertSpell(c);
+}
+
+void SpellShell::buffDrop(const buffDropStruct* bd, uint32_t, uint8_t dir)
+{
+  // we only care about the server
+  if (dir == DIR_CLIENT)
+    return;
+
+  // if this is the second server packet then ignore it
+  if (bd->spellid == 0xffffffff)
+    return;
+
+  printf("Dropping buff - id=%d from spawn=%d\n", bd->spellid, bd->spawnid);
+
+  // find the spell item
+  SpellItem* item = FindSpell(bd->spellid, bd->spawnid);
+
+  // if the spell item was found, then delete it
+  if (item)
+    DeleteSpell(item);
 }
 
 //void SpellShell::spellStartCast(struct beginCastStruct *b)
@@ -264,15 +338,7 @@ void SpellShell::interruptSpellCast(const badCastStruct *icast)
 
 void SpellShell::selfFinishSpellCast(const memSpellStruct *b)
 {
-  if (b->param2 != 3)
-    return;
-
    printf("selfFinishSpellCast - id=%d, by=%d\n", b->spellId, b->slotId);
-   SpellItem *item = FindSpell(b->spellId, m_player->id(), b->slotId);
-   if (item) {
-      const spellInfoStruct *info = spell_info(b->spellId);
-      item->setDuration(info->duration);
-   }
 }
 
 void SpellShell::spellMessage(QString &str)
@@ -317,14 +383,6 @@ void SpellShell::timeout()
       if (*it) {
          int d = (*it)->duration() -
             pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6);
-         // check if target have despawned
-         /*
-         if ( (d > 0) && (*it)->targetId() && (!m_spawnShell->findID(
-               tSpawn, (*it)->targetId())) ) {
-            printf("timeout - caster/target died, stopping '%s'.\n", (*it)->spellName().latin1());
-            d = d > 0 ? 0 : d;
-         }
-         */
          if (d > -20) {
             (*it)->setDuration(d);
             emit changeSpell(*it);

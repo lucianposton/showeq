@@ -2220,24 +2220,16 @@
    <comment>Enables ItemDB, setting to false will disable all ItemDB functionality within ShowEQ</comment>
   </property>
   <property name="DatabasesEnabled" >
-   <int value="0" />
-   <comment>Databases enables is the logical or of the following values: DATA_DB=0, RAW_DATA_DB=4.  So, to enable all database use 4 (DATA_DB|RAW_DATA_DB), the default is 0 (DATA_DB)</comment>
+   <int value="4" />
+   <comment>Databases enables is the logical or of the following values: DATA_DB=0, RAW_DATA_DB=4.  So, to enable all database use 4 (DATA_DB|RAW_DATA_DB), the default is 4 (DATA_DB|RAW_DATA_DB)</comment>
   </property>
   <property name="DataDBFilename" >
-   <string value="/usr/local/share/showeq/itemdata" />
+   <string value="/usr/local/share/showeq/itemdata2" />
    <comment>Name of file that contains item data in ShowEQ format</comment>
   </property>
   <property name="RawDataDBFilename" >
-   <string value="/usr/local/share/showeq/itemrawdata" />
+   <string value="/usr/local/share/showeq/itemrawdata2" />
    <comment>Name of file that contains item data in Raw EQ format</comment>
-  </property>
-  <property name="LoreDBFilename" >
-   <string value="/usr/local/share/showeq/itemlore" />
-   <comment>Deprecated</comment>
-  </property>
-  <property name="NameDBFilename" >
-   <string value="/usr/local/share/showeq/itemname" />
-   <comment>Deprecated</comment>
   </property>
  </section>
 <!-- ============================================================= -->
@@ -2476,6 +2468,10 @@
   <property name="FormatFile" >
    <string value="/usr/local/share/showeq/eqstr_en.txt" />
    <comment>Location of file containing formatted strings</comment>
+  </property>
+  <property name="SpellsFile" >
+   <string value="/usr/local/share/showeq/spells_en.txt" />
+   <comment>Location of file containing spell information</comment>
   </property>
   <property name="NoBank" >
    <bool value="true" />

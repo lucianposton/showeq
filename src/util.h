@@ -28,13 +28,6 @@
 //#define GENERATE_CRCTAB_H
 #endif
 
-struct spellInfoStruct 
-{
-  const char* name;
-   int duration;
-   bool target;
-};
-
 typedef unsigned int eqtime_t;
 
 class EQTime
@@ -56,7 +49,6 @@ char *print_addr (unsigned long addr);
 
 QString Commanate (uint32_t number);
 
-const spellInfoStruct* spell_info (uint16_t spellId);
 QString spell_name (uint16_t spellId);
 QString language_name (uint8_t langId);
 QString skill_name (uint16_t skillId);

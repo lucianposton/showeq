@@ -51,7 +51,6 @@ class SpawnShell;
 class SpellShell;
 class GroupMgr;
 class SpawnMonitor;
-class PktLogger;
 class SpawnLogger;
 class Item;
 class CompassFrame;
@@ -61,6 +60,7 @@ class CombatWindow;
 class NetDiag;
 class MsgDialog;
 class GuildMgr;
+class Spells;
 
 //--------------------------------------------------
 // typedefs
@@ -101,22 +101,14 @@ class EQInterface:public QMainWindow
    void attack2Hand1(const attack2Struct *);
    void action2Message(const action2Struct *);
    void combatKillSpawn(const newCorpseStruct *);
-   void itemShop(const itemInShopStruct* items);
    void moneyOnCorpse(const moneyOnCorpseStruct* money);
-   void itemPlayerReceived(const itemOnCorpseStruct* itemc);
-   void tradeItemOut(const tradeItemOutStruct* itemt);
-   void tradeItemIn(const tradeItemInStruct* itemr);
-   void tradeContainerIn(const tradeContainerInStruct* itemr);
-   void tradeBookIn(const tradeBookInStruct* itemr);
+   void item(const itemPacketStruct* item);
    void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
    void simpleMessage(const simpleMessageStruct* cmsg, uint32_t, uint8_t);
    void formattedMessage(const formattedMessageStruct* cmsg, uint32_t, uint8_t);
    void random(const randomReqStruct* randr);
    void random(const randomStruct* randr);
    void emoteText(const emoteTextStruct* emotetext);
-   void playerItem(const playerItemStruct* itemp);
-   void playerBook(const playerBookStruct* bookp);
-   void playerContainer(const playerContainerStruct* containp);
    void inspectData(const inspectDataStruct* inspt);
    void spMessage(const spMesgStruct* spmsg);
    void handleSpell(const memSpellStruct* mem, uint32_t, uint8_t);
@@ -132,8 +124,6 @@ class EQInterface:public QMainWindow
    void groupDecline(const groupDeclineStruct* gmem);
    void groupAccept(const groupAcceptStruct* gmem);
    void groupDelete(const groupDeleteStruct* gmem);
-   void summonedItem(const summonedItemStruct*);
-   void summonedContainer(const summonedContainerStruct*);
    void logOut(const uint8_t*, uint32_t, uint8_t);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
@@ -176,6 +166,7 @@ class EQInterface:public QMainWindow
    void dumpCoins(void);
    void dumpMapInfo(void);
    void dumpGuildInfo(void);
+   void dumpSpellBook(void);
    void launch_editor_filters(void);
    void toggleAutoDetectCharSettings(int id);
    void SetDefaultCharacterClass(int id);
@@ -215,7 +206,6 @@ class EQInterface:public QMainWindow
    // Decoder signals
    void theKey(uint64_t);
    void backfillPlayer(charProfileStruct *);
-   void backfillSpawn(spawnStruct *);
 
    void combatSignal(int, int, int, int, int, QString, QString);
 
@@ -262,6 +252,7 @@ class EQInterface:public QMainWindow
    void set_main_WindowFont(int id);
    void set_main_Font(int id);
    void select_main_FormatFile(int id);
+   void select_main_SpellsFile(int id);
    void toggle_main_statusbar_Window(int id);
    void set_main_statusbar_Font(int id);
    void toggle_main_SavePosition(int id);
@@ -313,11 +304,11 @@ class EQInterface:public QMainWindow
    FilterMgr* m_filterMgr;
    CategoryMgr* m_categoryMgr;
    SpawnShell* m_spawnShell;
+   Spells* m_spells;
    SpellShell* m_spellShell;
    GroupMgr* m_groupMgr;
    SpawnMonitor* m_spawnMonitor;
    EQItemDB* m_itemDB;
-   PktLogger* m_pktLogger;
    SpawnLogger *m_spawnLogger;
    const Item* m_selectedSpawn;
    

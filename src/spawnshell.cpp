@@ -182,7 +182,7 @@ void SpawnShell::clear(void)
      m_deadSpawnID[i] = 0;
 } // end clear
 
-const Item* SpawnShell::findID(itemType type, int id)
+const Item* SpawnShell::findID(spawnItemType type, int id)
 {
   const Item* item = NULL;
   
@@ -195,7 +195,7 @@ const Item* SpawnShell::findID(itemType type, int id)
   return item;
 }
 
-const Item* SpawnShell::findClosestItem(itemType type, 
+const Item* SpawnShell::findClosestItem(spawnItemType type, 
 					int16_t x, int16_t y,
 					double& minDistance)
 {
@@ -249,7 +249,7 @@ const Spawn* SpawnShell::findSpawnByName(const QString& name)
   return NULL;
 }
 
-void SpawnShell::deleteItem(itemType type, int id)
+void SpawnShell::deleteItem(spawnItemType type, int id)
 {
 #ifdef SPAWNSHELL_DIAG
    printf ("SpawnShell::deleteItem()\n");
@@ -319,7 +319,7 @@ bool SpawnShell::updateRuntimeFilterFlags(Item* item)
   return false;
 }
 
-void SpawnShell::dumpSpawns(itemType type, QTextStream& out)
+void SpawnShell::dumpSpawns(spawnItemType type, QTextStream& out)
 {
    ItemIterator it(getMap(type));
 
@@ -891,14 +891,11 @@ void SpawnShell::killSpawn(const newCorpseStruct* deadspawn)
 	  deadspawn->spawnId, deadspawn->killerId);
 #endif
    Item* item;
-   Item* killer;
 
    item = m_spawns.find(deadspawn->spawnId);
    if (item != NULL)
    {
      Spawn* spawn = (Spawn*)item;
-     killer = m_spawns.find(deadspawn->killerId);
-
      // ZBTEMP: This is temporary until we can find a better way
      // set the last kill info on the player (do this before changing name)
      m_player->setLastKill(spawn->name(), spawn->level());
@@ -909,6 +906,8 @@ void SpawnShell::killSpawn(const newCorpseStruct* deadspawn)
 
      spawn->setName(spawn->realName() + Spawn_Corpse_Designator);
 
+     Item* killer;
+     killer = m_spawns.find(deadspawn->killerId);
      emit killSpawn(item, killer, deadspawn->killerId);
 
 
@@ -948,71 +947,6 @@ void SpawnShell::corpseLoc(const corpseLocStruct* corpseLoc)
   }
 }
 
-void SpawnShell::backfillZoneSpawns(const zoneSpawnsStruct* zdata, uint32_t len)
-{
-  int zoneSpawnsStructHeaderData = 
-    ((uint8_t*)&zdata->spawn[0]) - (uint8_t*)zdata;
-
-  int zoneSpawnsStructPayloadCount = 
-       (len - zoneSpawnsStructHeaderData) / sizeof(spawnZoneStruct);
-
-  for (int j = 0; j < zoneSpawnsStructPayloadCount; j++)
-    backfillSpawn(&zdata->spawn[j].spawn);
-
-  // if the spawns are to be saved, this is a good time to do it.
-  if (showeq_params->saveSpawns)
-  {
-    // stop the timer because saveSpawns will reset it.
-    m_timer->stop();
-
-    // save the spawns
-    saveSpawns();
-  }
-}
-
-void SpawnShell::backfillSpawn(const newSpawnStruct *ndata)
-{
-  const spawnStruct* sdata = &ndata->spawn;
-  backfillSpawn(sdata);
-}
-
-void SpawnShell::backfillSpawn(const spawnStruct *spawn)
-{
-  Item* item = m_spawns.find(spawn->spawnId);
-  
-  if (item == NULL)
-  {
-    // if it's not already in the list, then just add it.
-    newSpawn(*spawn);
-
-    return;
-  }
-
-  Spawn* spawnItem = (Spawn*)item;
-
-  // if we got the self item, then somethings screwy, so only update if
-  // not the self spawn
-  if (!spawnItem->isSelf())
-  {
-    spawnItem->backfill(spawn);
-    updateFilterFlags(spawnItem);
-    updateRuntimeFilterFlags(spawnItem);
-
-    if (spawnItem->GuildID() < MAXGUILDS)
-        spawnItem->setGuildTag(m_guildMgr->guildIdToName(spawnItem->GuildID()));
-    if (!showeq_params->fast_machine)
-       item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
-    else
-       item->setDistanceToPlayer(m_player->calcDist(*item));
-
-    spawnItem->updateLastChanged();
-    emit changeItem(spawnItem, tSpawnChangedALL);
-    
-    if (spawnItem->filterFlags() & FILTER_FLAG_ALERT)
-      emit handleAlert(spawnItem, tFilledSpawn);
-  }
-}
-
 void SpawnShell::playerChangedID(uint16_t playerID)
 {
   // remove the player from the list (if it had a 0 id)
@@ -1037,7 +971,7 @@ void SpawnShell::refilterSpawns()
   refilterSpawns(tDoors);
 }
 
-void SpawnShell::refilterSpawns(itemType type)
+void SpawnShell::refilterSpawns(spawnItemType type)
 {
    ItemMap& theMap = getMap(type);
    ItemIterator it(theMap);
@@ -1086,7 +1020,7 @@ void SpawnShell::refilterSpawnsRuntime()
   refilterSpawnsRuntime(tDoors);
 }
 
-void SpawnShell::refilterSpawnsRuntime(itemType type)
+void SpawnShell::refilterSpawnsRuntime(spawnItemType type)
 {
    ItemIterator it(getMap(type));
 

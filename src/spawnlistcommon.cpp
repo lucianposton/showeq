@@ -103,7 +103,7 @@ void SpawnListItem::paintCell( QPainter *p, const QColorGroup &cg,
   QListViewItem::paintCell( p, newCg, column, width, alignment );
 }
 
-itemType SpawnListItem::type()
+spawnItemType SpawnListItem::type()
 {
    return item() ? item()->type() : tUnknown;
 }

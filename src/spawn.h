@@ -39,7 +39,7 @@ class SpawnShell;
 //----------------------------------------------------------------------
 // enumerated types
 // type of item
-enum itemType 
+enum spawnItemType 
 { 
   tUnknown, 
   tCoins, 
@@ -109,14 +109,16 @@ class Item : public EQPoint
 {
  public:
   // constructor/destructor
-  Item(itemType t, uint16_t id);
+  Item(spawnItemType t, uint16_t id);
   virtual ~Item();
 
   // get methods
-  itemType type() const { return m_type; }
+  spawnItemType type() const { return m_type; }
   uint16_t id() const { return m_ID; }
   QString realName() const { return m_name; }
   time_t lastChanged() const { return m_lastChanged; }
+  int8_t heading() const { return m_heading; }
+  int16_t headingAngle() const { return 360 - (m_heading * 360) / 256; }
   const QTime& lastUpdate() const { return m_lastUpdate; }
   QString lastUpdateStr() const 
     { return m_lastUpdate.toString(); }
@@ -144,6 +146,7 @@ class Item : public EQPoint
   void setDistanceToPlayer(double);
   void setDistanceToPlayer(uint32_t);
   void setPos(int16_t x, int16_t y, int16_t z);
+  void setHeading(int8_t heading) { m_heading = heading; }
 
   void setName(const QString& name)
     { m_name = name; }
@@ -175,7 +178,8 @@ class Item : public EQPoint
   time_t m_lastChanged;
   uint16_t m_ID;
   uint8_t m_NPC;
-  itemType m_type;
+  int8_t m_heading;
+  spawnItemType m_type;
   double m_fdist;
   uint32_t m_idist;
 };
@@ -198,6 +202,7 @@ class Spawn : public Item
 
   // restore spawn from QDataStream
   Spawn(QDataStream&, uint16_t id);
+  Spawn(Spawn&, uint16_t id);
   virtual ~Spawn();
 
   // save spawn to QDataStream
@@ -207,8 +212,6 @@ class Spawn : public Item
   int16_t deltaX() const { return m_deltaX; }
   int16_t deltaY() const { return m_deltaY; }
   int16_t deltaZ() const { return m_deltaZ; }
-  int8_t heading() const { return m_heading; }
-  int16_t headingAngle() const { return 360 - (m_heading * 360) / 256; }
   int8_t deltaHeading() const { return m_deltaHeading; }
   uint8_t animation() const { return m_animation; }
   uint16_t HP() const { return m_curHP; }
@@ -293,7 +296,6 @@ class Spawn : public Item
   void setDeltas(int16_t deltaX, int16_t deltaY, int16_t deltaZ);
   void setHeading(int8_t heading, int8_t deltaHeading)
     { m_heading = heading; m_deltaHeading = deltaHeading; }
-  void setHeading(int8_t heading) { m_heading = heading; }
   void setDeltaHeading(int8_t deltaHeading) { m_deltaHeading = deltaHeading; }
   void setAnimation(uint8_t animation) { m_animation = animation; }
   void setPetOwnerID(uint16_t petOwnerID) { m_petOwnerID = petOwnerID; }
@@ -330,7 +332,6 @@ class Spawn : public Item
   int16_t m_deltaX;
   int16_t m_deltaY;
   int16_t m_deltaZ;
-  int8_t m_heading;
   int8_t m_deltaHeading;
 
   // persisted info below
@@ -413,7 +414,7 @@ class Drop : public Item
   virtual ~Drop();
 
   // drop specific get methods
-  uint16_t itemNr() const { return m_itemNr; }
+  uint32_t itemNr() const { return m_itemNr; }
   QString idFile() const { return m_idFile; }
 
   // virtual get method overloads
@@ -424,14 +425,14 @@ class Drop : public Item
   void update(const makeDropStruct* d, const QString& name);
 
   // drop specific set methods
-  void setItemNr(uint16_t itemNr) 
+  void setItemNr(uint32_t itemNr) 
     {  m_itemNr = itemNr; }
   void setIdFile(const QString& idFile)
     { m_idFile = idFile; }
 
  protected:
   // drop specific data
-  uint16_t m_itemNr;
+  uint32_t m_itemNr;
   QString m_idFile;
 };
 

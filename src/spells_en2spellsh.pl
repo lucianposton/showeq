@@ -21,11 +21,14 @@
 use Unicode::String qw(latin1 utf16 ucs2 utf8);
 
 $infile = "spells_en.txt";
-$outfile = "/tmp/spells.h";
-$nameField = 1;
-$durationField = 17;
-$targetField = 84;
+$outfile = "/tmp/staticspells.h";
+
+# file fields
 $spellIdField = 0;
+$nameField = 1;
+
+# Target type ID
+$targetSelf = 0x06;
 
 unless (open(SPELLSEN, "<$infile")) 
 {
@@ -53,7 +56,7 @@ $header = "/*
 
 print SPELLSH $header;
 
-print SPELLSH "// /* Spell ID */ { Spell Name, Duration, Target},\n";
+print SPELLSH "// /* Spell ID */ { Spell Name },\n";
 
 print SPELLSH "\n";
 
@@ -66,16 +69,12 @@ while($line = <SPELLSEN>)
     @fields = split(/\^/, $latin1line);
 #    print STDERR "Fields: ", $#fields, "\n";
     $spellId = $fields[$spellIdField];
-    next if (($spellId == 0) || ($fields[$targetField] eq ""));
     $spellName = $fields[$nameField];
-    $target = ($fields[$targetField] == 6) ? "false" : "true";
-    $duration = ($fields[$durationField] ? $fields[$durationField] : 0) * 6;
 
-    $records[$spellId] = sprintf("/* 0x%04x */ { \"%s\", %d, %s }, ", 
+    $records[$spellId] = sprintf("/* 0x%04x - %5d */ { \"%s\" }, ", 
 				 $spellId,
-				 $spellName,
-				 $duration,
-				 $target);
+				 $spellId,
+				 $spellName);
 
     $maxSpellId = $spellId if ($spellId > $maxSpellId);
 }
@@ -89,12 +88,12 @@ for ($spellId = 0; $spellId < $maxSpellId; $spellId++)
     }
     else
     {
-	printf SPELLSH "/* 0x%04x */ { NULL, 0, false },\n", $spellId;
+	printf SPELLSH "/* 0x%04x = %5d */ { NULL, },\n", $spellId, $spellId;
 	$emptyCount++;
     }
 }
 
 print SPELLSH "// \n";
-printf SPELLSH "// Max SpellId: 0x%04x\n", $maxSpellId;
+printf SPELLSH "// Max SpellId: 0x%04x = %5d\n", $maxSpellId, $maxSpellId;
 print SPELLSH "// Number of Spells: ", $#records - $emptyCount, "\n";
 print SPELLSH "// Empty Entries: ", $emptyCount, "\n";

@@ -249,6 +249,7 @@ class EQPacketFormatRaw
   bool isSEQEnd() const { return m_flagsHi.m_seqEnd; }
   bool isARSP() const { return m_flagsLo.m_arsp; }
   bool isSpecARQ() const { return m_flagsLo.m_specARQ; }
+  bool isNAK() const { return m_flagsLo.m_nak; }
 
   // Check flag against the EQPacketHeaderFlag{Hi, Lo} values
   bool checkFlagHi(uint8_t mask) const
@@ -263,21 +264,16 @@ class EQPacketFormatRaw
   // number of uint8_t's to skip when examining packets
   uint8_t skip() const
   {
-#if 0 // ZBTEMP
     return ((uint8_t)m_flagsLo.m_skip + 
-	    ((isARSP() || isSpecARQ()) ? 2 : 0));
-#else
-    return ((uint8_t)m_flagsLo.m_skip + 
-	    (isARSP() ? 2 : 0)// +
-	    //(isSpecARQ() ? 4 : 0)
-);
-#endif
+	    (isARSP() ? 2 : 0) + 
+	    (isNAK() ? 2 : 0));
   }
 
   // The following accessors are only valid if the corresponding
   // flag is set.
   uint16_t seq() const { return eqntohuint16(&m_data[0]); }
   uint16_t arsp() const { return eqntohuint16(&m_data[2]); }
+  uint16_t nak() const { return  eqntohuint16(&m_data[4]); }
   uint16_t arq() const 
     { return eqntohuint16(&m_data[2 + skip()]); }
   uint16_t fragSeq() const
@@ -329,7 +325,7 @@ class EQPacketFormatRaw
       unsigned int m_specARQ:1;        // 0x01 = speckARQ
       unsigned int m_unknown1:1;       // 0x02 = ?
       unsigned int m_arsp:1;           // 0x04 = ARSP
-      unsigned int m_unknown2:1;       // 0x08 = ?
+      unsigned int m_nak:1;            // 0x08 = NAK?
       unsigned int m_skip:4;           // amount of data to skip
     } m_flagsLo;
     uint8_t m_flagsLoVal;
@@ -382,6 +378,7 @@ class EQPacketFormat
   bool isClosingHi() const { return m_packet->isClosingHi(); }
   bool isSEQEnd() const { return m_packet->isSEQEnd(); }
   bool isARSP() const { return m_packet->isARSP(); }
+  bool isNAK() const { return m_packet->isNAK(); }
   bool isSpecARQ() const
     { return m_packet->isSpecARQ(); }
 
@@ -598,8 +595,6 @@ class EQPacket : public QObject
    void session_tracking();
    void setArqSeqGiveUp(int giveUp);
 
-   void dispatchDecodedZoneSpawns(const uint8_t* decodedData, uint32_t len);
-
  signals:
    // used for net_stats display
    void cacheSize(int, int);
@@ -646,8 +641,6 @@ class EQPacket : public QObject
 
    void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
    void removeGroundItem(const remDropStruct*, uint32_t, uint8_t);
-   void newCoinsItem(const dropCoinsStruct*, uint32_t, uint8_t);
-   void removeCoinsItem(const removeCoinsStruct*, uint32_t, uint8_t);
 
    void updateSpawns(const spawnPositionUpdate* updates, uint32_t, uint8_t);
    void updateSpawnMaxHP(const SpawnUpdateStruct* spawnupdate, uint32_t, uint8_t);
@@ -660,24 +653,16 @@ class EQPacket : public QObject
    void eqTimeChangedStr(const QString &);
    void timeOfDay(const timeOfDayStruct *tday, uint32_t, uint8_t);
 
-   void itemShop(const itemInShopStruct* items, uint32_t, uint8_t);
    void moneyOnCorpse(const moneyOnCorpseStruct* money, uint32_t, uint8_t);
-   void itemPlayerReceived(const itemOnCorpseStruct* itemc, uint32_t, uint8_t);
-   void tradeItemOut(const tradeItemOutStruct* itemt, uint32_t, uint8_t);
-   void tradeItemIn(const tradeItemInStruct* itemr, uint32_t, uint8_t);
-   void tradeContainerIn(const tradeContainerInStruct* itemr, uint32_t, uint8_t);
-   void tradeBookIn(const tradeBookInStruct* itemr, uint32_t, uint8_t);
    void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
    void simpleMessage(const simpleMessageStruct* fmsg, uint32_t, uint8_t);
    void formattedMessage(const formattedMessageStruct* fmsg, uint32_t, uint8_t);
+   void item(const itemPacketStruct* item, uint32_t, uint8_t);
+   void itemInfoReq(const itemInfoReqStruct* item, uint32_t, uint8_t);
+   void itemInfo(const itemInfoStruct* item, uint32_t, uint8_t);
    void random(const randomReqStruct* randr, uint32_t, uint8_t);
    void random(const randomStruct* randr, uint32_t, uint8_t);
    void emoteText(const emoteTextStruct* emotetext, uint32_t, uint8_t);
-#if 1 // ZBTEMP: dead signals as of 08/26/03 patch - cleanup later
-   void playerItem(const playerItemStruct* itemp, uint32_t, uint8_t);
-   void playerBook(const playerBookStruct* bookp, uint32_t, uint8_t);
-   void playerContainer(const playerContainerStruct* containp, uint32_t, uint8_t);
-#endif
    void inspectData(const inspectDataStruct* inspt, uint32_t, uint8_t);
    void spMessage(const spMesgStruct* spmsg, uint32_t, uint8_t);
    void handleSpell(const memSpellStruct* mem, uint32_t, uint8_t);
@@ -697,15 +682,11 @@ class EQPacket : public QObject
    void zoneEntry(const ClientZoneEntryStruct* zsentry, uint32_t, uint8_t);
    void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
    void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
-   void summonedItem(const summonedItemStruct*, uint32_t, uint8_t);
-   void summonedContainer(const summonedContainerStruct*, uint32_t, uint8_t);
    void logOut(const uint8_t*, uint32_t, uint8_t);
+   void buffDrop(const buffDropStruct*, uint32_t, uint8_t);
    void msgReceived(const QString &);
    void stsMessage(const QString &, int = 0);
 
-   void backfillSpawn(const newSpawnStruct *, uint32_t, uint8_t);
-   void backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t);
- 
    // Spell signals
    void interruptSpellCast(const badCastStruct *, uint32_t, uint8_t);
 
@@ -714,7 +695,6 @@ class EQPacket : public QObject
 
    // other signals
    void zoneServerInfo(const uint8_t*, uint32_t, uint8_t);
-   void playerItems(const playerItemsStruct *, uint32_t, uint8_t);
    void bookText(const bookTextStruct*, uint32_t, uint8_t);
    void doorOpen(const uint8_t*, uint32_t, uint8_t);
    void illusion(const uint8_t*, uint32_t, uint8_t);
@@ -730,6 +710,7 @@ class EQPacket : public QObject
 
    void worldGuildList(const char*, uint32_t);
    void updateNpcHP(const hpNpcUpdateStruct* hpupdate, uint32_t, uint8_t);
+   void tradeSpellBookSlots(const tradeSpellBookSlotsStruct*, uint32_t, uint8_t);
 
  private:
       

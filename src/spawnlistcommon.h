@@ -80,7 +80,7 @@ public:
    void update(Player* player, uint32_t changeType);
    void updateTitle(const QString& name);
    void setShellItem(const Item *);
-   itemType type();
+   spawnItemType type();
    virtual QString key(int column, bool ascending) const;
 #if (QT_VERSION > 0x030000)
    virtual int compare(QListViewItem *i, int col, bool ascending) const;

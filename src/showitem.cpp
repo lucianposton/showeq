@@ -20,7 +20,7 @@
 #include "itemdb.h"
 
 // forward declarations
-void printdata (QTextStream& out, int len, unsigned char *data);
+void printdata (QTextStream& out, int len, char *data);
 
 int main (int argc, char *argv[])
 {
@@ -207,9 +207,11 @@ int main (int argc, char *argv[])
     } 
     
     out << "<P>\n";
+    time_t updated = entry->GetUpdated();
+    out << "<B>Last Updated:</B> " << ctime(&updated) << "<BR>\n";
     out << "<B>Icon Number:</B> " << entry->GetIconNr() << "<BR>\n";
     out << "<B>Model:</B> " << entry->GetIdFile() << "<BR>\n";
-    out << "<B>flag:</B> " << QString::number(entry->GetFlag(), 16)
+    out << "<B>ItemType:</B> " << QString::number(entry->GetItemType())
 	<< "<BR>\n";
     out << "<B>Weight:</B> " << (int)entry->GetWeight() << "<BR>\n";
     out << "<B>Flags:</B> ";
@@ -219,12 +221,19 @@ int main (int argc, char *argv[])
       out << " CONTAINER";
     if (entry->GetNoDrop() == 0)
       out << " NO-DROP";
-    if (entry->GetNoSave() == 0)
-      out << " NO-SAVE";
+    if (entry->GetNoRent() == 0)
+      out << " NO-RENT";
     if (entry->GetMagic() == 1)
       out << " MAGIC";
     if (loreString[0] == '*')
       out << " LORE";
+    else if (loreString[0] == '&')
+      out << " SUMMONED";
+    else if (loreString[0] == '#')
+      out << " ARTIFACT";
+    else if (loreString[0] == '~')
+      out << " PENDING-LORE";
+
     out << "<BR>\n";
     out << "<B>Size:</B> " << size_name(entry->GetSize()) << "<BR>\n";
     out << "<B>Slots:</B> " << print_slot(entry->GetSlots()) << "<BR>\n";
@@ -302,9 +311,9 @@ int main (int argc, char *argv[])
     if (entry->GetEffectType() != -1)
       out << "<B>Effect Type:</B> " 
 	  << entry->GetEffectTypeString() << "<BR>\n";
-    if (entry->GetSpellId0() != ITEM_SPELLID_NOSPELL)
+    if (entry->GetSpellId() != ITEM_SPELLID_NOSPELL)
     {
-      out << "<B>Effect1:</B> " << spell_name (entry->GetSpellId0()) 
+      out << "<B>Spell Effect:</B> " << spell_name (entry->GetSpellId()) 
 	  << "<BR>\n";
       if (entry->GetLevel())
 	out << "<B>Casting Level:</B> " << (int)entry->GetLevel() << "<BR>\n";
@@ -321,9 +330,6 @@ int main (int argc, char *argv[])
 	out << "<B>Casting Time:</B> " << (int)entry->GetCastTime() 
 	    << "<BR>\n";
     }
-    if (entry->GetSpellId() != ITEM_SPELLID_NOSPELL)
-      out << "<B>Effect2:</B> " << spell_name (entry->GetSpellId()) 
-	  << "<BR>\n";
     out << "<B>Class:</B> " << print_classes (entry->GetClasses()) << "<BR>\n";
     out << "<B>Race:</B> " << print_races (entry->GetRaces()) << "<BR>\n";
     if (entry->GetSkillModId())
@@ -348,20 +354,14 @@ int main (int argc, char *argv[])
   
   if (displayBinaryData)
   {
-    unsigned char* rawData = NULL;
-    size = itemDB->GetItemRawData(currentItemNr, &rawData);
+    time_t updated;
+    char* rawData = NULL;
+    size = itemDB->GetItemRawData(currentItemNr, updated, &rawData);
 
     if ((size > 0) && (rawData != NULL))
     {
-      out << "<P><B>Packet data: (" << size << " octets)</B>\n";
-      if ((size != sizeof(itemItemStruct)) &&
-	  (size != sizeof(itemContainerStruct)) &&
-	  (size != sizeof(itemBookStruct)))
-	out << "<BR></BR><B class=\"warning\">Warning: ("
-	    << size << " octets) != sizeof(item{Item, Container, Book}Struct) (" 
-	    << sizeof(itemItemStruct) << ", " << sizeof(itemContainerStruct)
-	    << ", " << sizeof(itemBookStruct)
-	    << " octets): Data alignment is suspect!</B></FONT>\n";
+      out << "<P><B>Raw data: (" << size << " octets) last updated: " 
+	  << ctime(&updated) << "</B></P>\n";
       out << "</P>";
       out << "<PRE>\n";
       printdata (out, size, rawData);
@@ -389,123 +389,49 @@ int main (int argc, char *argv[])
   return 0;
 }
 
-void printdata (QTextStream& out, int len, unsigned char *data)
+void printdata (QTextStream& out, int len, char *data)
 {
-  char hex[1024];
   char asc[1024];
-  char tmp[1024];
-
-  const char* redUnknown = "</SPAN><SPAN class=\"unknown\">";
-  const char* green      = "</SPAN><SPAN class=\"known1\">";
-  const char* blue       = "</SPAN><SPAN class=\"known2\">";
-  const char* varies    = "</SPAN><SPAN class=\"varies\">";
-  const char* col = green;
-  hex[0] = 0;
-  asc[0] = 0;
-  int c;
+  uint8_t fieldCount = 1;
+  uint8_t beginField = fieldCount;
+  uint8_t col = 0;
+  size_t fieldWidth;
+  const char* curPos = data;
+  const char* endField;
   QString tempStr;
 
-  for (c = 0; c < len; c++)
+  asc[0] = '\0';
+  while (*curPos != '\0')
+  {
+    endField = curPos;
+    while ((*endField != '|') && (*endField != '\0'))
+      endField++;
+    fieldCount++;
+    
+    fieldWidth = endField - curPos + 1;
+    if (col + fieldWidth >= 75)
     {
-      if ((!(c % 16)) && c)
-	{
-	  tempStr.sprintf("<SPAN class=\"head\">%03d | "
-			  "%s</SPAN><SPAN class=\"head\"> | %s </SPAN>\n",
-			  c - 16, hex, asc);
-	  out << tempStr;
-	  hex[0] = 0;
-	  asc[0] = 0;
-	}
+      tempStr.sprintf("<SPAN class=\"head\">%.3d | %s</SPAN>\n",
+		      beginField, asc);
 
-      sprintf (tmp, "%02x ", data[c]);
-      // switches which color next text to be displayed in based on
-      //   RED = Unknown fields
-      //   BLUE and GREEN = known fields
-      switch (c)
-	{
-	case 64:
-	  col = blue;
-	  break;
-	case 144:
-	  col = green;
-	  break;
-	case 150:
-	  col = redUnknown;
-	  break;
-	case 174:
-	  col = blue;
-	  break;
-	case 175:
-	  col = green;
-	  break;
-	case 176:
-	  col = blue;
-	  break;
-	case 177:
-	  col = green;
-	  break;
-	case 178:
-	  col = redUnknown;
-	  break;
-	case 180:
-	  col = green;
-	  break;
-	case 182:
-	  col = blue;
-	  break;
-	case 184:
-	  col = green;
-	  break;
-	case 186:
-	  col = redUnknown;
-	  break;
-	case 188:
-	  col = blue;
-	  break;
-	case 192:
-	  col = green;
-	  break;
-	case 196:
-	  col = redUnknown;
-	  break;
-	case 228: // not gonna bother dealing with coloring the 3 variants
-	  col = varies;
-	  break;
-	}
-      strcat (hex, col);
-      strcat (hex, tmp);
-      strcat (asc, col);
-
-      // is the character printable
-      if ((data[c] >= 32) && (data[c] <= 126))
-      {
-	// it's printable, escape it if necessary.
-	if (data[c] == '<')
-	  strcpy(tmp, "&lt;");
-	else if (data[c] == '>')
-	  strcpy(tmp, "&gt;");
-	else if (data[c] == '&')
-	  strcpy(tmp, "&amp;");
-	else
-	{
-	  // no escaping needed
-	  tmp[0] = data[c];
-	  tmp[1] = '\0';
-	}
-      }
-      else // if it's not printable, then just insert a '.'
-	strcpy (tmp, ".");
-      strcat (asc, tmp);
-
+      out << tempStr;
+      asc[0] = '\0';
+      col = fieldWidth;
+      beginField = fieldCount;
     }
-  if (c % 16)
-    c = c - (c % 16);
-  else
-    c -= 16;
+    else
+    {
+      strncat(asc, curPos, fieldWidth);
+      col += fieldWidth;
+    }
+      
+    curPos = endField;
+    if (*curPos != '\0')
+      curPos++;
+  }
 
-  tempStr.sprintf("<SPAN class=\"head\">%03d | "
-		  "%-48s</SPAN><SPAN class=\"head\"> | %s </SPAN>\n\n",
-		  c, hex, asc);
+  tempStr.sprintf("<SPAN class=\"head\">%.3d | %s</SPAN>\n",
+		  beginField, asc);
 
   out << tempStr;
 }

@@ -83,17 +83,17 @@ void SpellListItem::update()
    setText(SPELLCOL_DURATION, m_item->durationStr());
 }
 
-void SpellListItem::setSpellItem(SpellItem *item)
+void SpellListItem::setSpellItem(const SpellItem *item)
 {
    m_item = item;
 }
 
-SpellItem* SpellListItem::item()
+const SpellItem* SpellListItem::item() const
 {
    return m_item;
 }
 
-QString& SpellListItem::category()
+const QString& SpellListItem::category() const
 {
    return m_category;
 }
@@ -122,13 +122,11 @@ SpellList::SpellList(QWidget *parent, const char *name)
 
    restoreColumns();
 
-   connect(this, SIGNAL(mouseButtonClicked(int, QListViewItem*, const QPoint&, int)),
-         this, SLOT(mouseButtonClicked(int, QListViewItem*, const QPoint&, int)));
    connect(this, SIGNAL(rightButtonClicked(QListViewItem*, const QPoint&, int)),
          this, SLOT(rightButtonClicked(QListViewItem*, const QPoint&, int)));
 }
 
-void SpellList::selectSpell(SpellItem *item)
+void SpellList::selectSpell(const SpellItem *item)
 {
    if (item) {
       SpellListItem *i = Find(item);
@@ -136,7 +134,7 @@ void SpellList::selectSpell(SpellItem *item)
    }
 }
 
-SpellListItem* SpellList::InsertSpell(SpellItem *item)
+SpellListItem* SpellList::InsertSpell(const SpellItem *item)
 {
    if (!item)
       return NULL;
@@ -172,7 +170,7 @@ SpellListItem* SpellList::InsertSpell(SpellItem *item)
    return j;
 }
 
-void SpellList::DeleteItem(SpellItem *item)
+void SpellList::DeleteItem(const SpellItem *item)
 {
    if (item) {
       SpellListItem *i = Find(item);
@@ -195,12 +193,12 @@ void SpellList::DeleteItem(SpellItem *item)
 //{
 //}
 
-QColor SpellList::pickSpellColor(SpellItem *item, QColor def)
+QColor SpellList::pickSpellColor(const SpellItem *item, QColor def) const
 {
    return Qt::black;
 }
 
-SpellListItem* SpellList::Find(SpellItem *item)
+SpellListItem* SpellList::Find(const SpellItem *item)
 {
    if (item) {
       QValueList<SpellListItem*>::Iterator it;
@@ -212,19 +210,19 @@ SpellListItem* SpellList::Find(SpellItem *item)
    return NULL;
 }
 
-void SpellList::addSpell(SpellItem *item)
+void SpellList::addSpell(const SpellItem *item)
 {
    if (item)
       InsertSpell(item);
 }
 
-void SpellList::delSpell(SpellItem *item)
+void SpellList::delSpell(const SpellItem *item)
 {
    if (item)
       DeleteItem(item);
 }
 
-void SpellList::changeSpell(SpellItem *item)
+void SpellList::changeSpell(const SpellItem *item)
 {
    if (item) {
       SpellListItem *i = Find(item);
@@ -268,16 +266,6 @@ void SpellList::selectAndOpen(SpellListItem *item)
 //void interruptSpellCast(struct interruptCastStruct *);
 //void spellMessage(QString&);
 
-void SpellList::mouseButtonClicked(int button, QListViewItem *item,
-      const QPoint& pos, int col)
-{
-   if ( (item) && (button == MidButton) ) {
-      SpellListItem *i = (SpellListItem *)item;
-      SpellItem *j = i->item();
-      if (j)
-         j->setDuration(-20);
-   }
-}
 
 void SpellList::rightButtonClicked(QListViewItem *item, const QPoint& pos,
       int col)

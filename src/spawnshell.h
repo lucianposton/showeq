@@ -77,17 +77,17 @@ public:
 	      EQItemDB* itemDB,
               GuildMgr* guildMgr);
 
-   const Item* findID(itemType type, int idSpawn);
+   const Item* findID(spawnItemType type, int idSpawn);
    
-   const Item* findClosestItem(itemType type, 
+   const Item* findClosestItem(spawnItemType type, 
 			       int16_t x,
 			       int16_t y, 
 			       double& minDistance);
    const Spawn* findSpawnByName(const QString& name);
 
-   void dumpSpawns(itemType type, QTextStream& out);
+   void dumpSpawns(spawnItemType type, QTextStream& out);
    FilterMgr* filterMgr(void) { return &m_filterMgr; }
-   const ItemMap& getConstMap(itemType type) const;
+   const ItemMap& getConstMap(spawnItemType type) const;
    const ItemMap& spawns(void) const;
    const ItemMap& drops(void) const;
    const ItemMap& coins(void) const;
@@ -133,9 +133,6 @@ public slots:
    void killSpawn(const newCorpseStruct* deadspawn);
    void corpseLoc(const corpseLocStruct* corpseLoc);
 
-   void backfillSpawn(const newSpawnStruct* nspawn);
-   void backfillSpawn(const spawnStruct* spawn);
-   void backfillZoneSpawns(const zoneSpawnsStruct*, uint32_t);
    void playerChangedID(uint16_t playerID);
    void refilterSpawns();
    void refilterSpawnsRuntime();
@@ -144,13 +141,13 @@ public slots:
    void setPlayerGuildTag(void);
 
  protected:
-   void refilterSpawns(itemType type);
-   void refilterSpawnsRuntime(itemType type);
-   void deleteItem(itemType type, int id);
+   void refilterSpawns(spawnItemType type);
+   void refilterSpawnsRuntime(spawnItemType type);
+   void deleteItem(spawnItemType type, int id);
    bool updateFilterFlags(Item* item);
    bool updateRuntimeFilterFlags(Item* item);
 
-   ItemMap& getMap(itemType type);
+   ItemMap& getMap(spawnItemType type);
 
  private:
    ZoneMgr* m_zoneMgr;
@@ -176,7 +173,7 @@ public slots:
 };
 
 inline
-const ItemMap& SpawnShell::getConstMap(itemType type) const
+const ItemMap& SpawnShell::getConstMap(spawnItemType type) const
 { 
   switch (type)
   {
@@ -196,7 +193,7 @@ const ItemMap& SpawnShell::getConstMap(itemType type) const
 }
 
 inline
-ItemMap& SpawnShell::getMap(itemType type)
+ItemMap& SpawnShell::getMap(spawnItemType type)
 { 
   switch (type)
   {

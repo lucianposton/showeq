@@ -172,10 +172,23 @@ void ZoneMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t len, uint8
 
 void ZoneMgr::zoneNew(const newZoneStruct* zoneNew, uint32_t len, uint8_t dir)
 {
+  // ZBNOTE: Apparently these common in with the localized names, which means we 
+  //         may not wish to use them for zone short names.  An example of this is:
+  //         shortZoneName 'ecommons' in German comes in as 'OGemeinl'.
+  //         continuing to use the shortZoneName until we can figure out this 
+  //         LDON zone id nonsense.
   m_shortZoneName = zoneNew->shortName;
   m_longZoneName = zoneNew->longName;
   m_zoning = false;
 
+  // LDoN likes to append a _262 to the zonename. Get rid of it.
+  QRegExp rx("_\\d+$");
+  m_shortZoneName.replace( rx, "");
+  
+  // fprintf(stderr,"zoneNew: m_short(%s) m_long(%s)\n",
+  //    (const char*)m_shortZoneName,
+  //    (const char*)m_longZoneName);
+  
   emit zoneEnd(m_shortZoneName, m_longZoneName);
 
   if (showeq_params->saveZoneState)

@@ -133,8 +133,17 @@ void Player::backfill(const charProfileStruct* player)
   emit msgReceived(messag);
   
   messag.sprintf("Player: BankMoney: P=%d G=%d S=%d C=%d\n",
-		 player->platinumBank, player->goldBank, 
-		 player->silverBank, player->copperBank);
+		 player->platinum_bank, player->gold_bank, 
+		 player->silver_bank, player->copper_bank);
+  emit msgReceived(messag);
+
+  messag.sprintf("Player: CursorMoney: P=%d G=%d S=%d C=%d\n",
+		 player->platinum_cursor, player->gold_cursor, 
+		 player->silver_cursor, player->copper_cursor);
+  emit msgReceived(messag);
+
+  messag.sprintf("Player: SharedMoney: P=%d\n",
+		player->platinum_shared);
   emit msgReceived(messag);
 
   // fill in base Spawn class
@@ -161,6 +170,20 @@ void Player::backfill(const charProfileStruct* player)
   setGuildID(player->guildID);
 
   emit getPlayerGuildTag();
+
+  setPos((int16_t)lrintf(player->x), 
+         (int16_t)lrintf(player->y), 
+         (int16_t)lrintf(player->z),
+	 showeq_params->walkpathrecord,
+	 showeq_params->walkpathlength
+        );
+  setDeltas(0,0,0);
+  setHeading((int8_t)lrintf(player->heading), 0);
+  m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
+  m_validPos = true;
+  emit headingChanged(m_headingDegrees);
+  emit posChanged(x(), y(), z(), 
+		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
 
   // Due to the delayed decode, we must reset
   // maxplayer on zone and accumulate all totals.
@@ -209,6 +232,10 @@ void Player::backfill(const charProfileStruct* player)
     emit addLanguage (a, m_playerLanguages[a]);
   }
 
+  // copy in the spell book
+  memcpy (&m_spellBookSlots[0], &player->sSpellBook[0], sizeof(m_spellBookSlots));
+
+  // Move 
   m_validAttributes = true;
   m_validMana = true;
   m_validExp = true;
@@ -256,6 +283,20 @@ void Player::backfill(const charProfileStruct* player)
   QDir tmp("/tmp/");
   tmp.rename(QString("bankfile.") + QString::number(getpid()),
 	     QString("bankfile.") + player->name);
+
+	//Added by Halcyon
+	int buffnumber;
+	const struct spellBuff *buff;
+	for (buffnumber=0;buffnumber<15;buffnumber++)
+	{
+		if (player->buffs[buffnumber].spellid && player->buffs[buffnumber].duration)
+		{
+			printf("You have buff %s duration left is %d in ticks.\n",(const char*)spell_name(player->buffs[buffnumber].spellid),player->buffs[buffnumber].duration);
+			buff = &(player->buffs[buffnumber]);
+			emit buffLoad(buff);
+		}
+	}
+	printf("PLAYERID#%d\n",id());
 }
 
 void Player::clear()
@@ -290,6 +331,7 @@ void Player::clear()
   
   setID(0);
   setPoint(0,0,0);
+  m_validPos = false;
 
   updateLastChanged();
 }
@@ -325,6 +367,7 @@ void Player::reset()
   updateLastChanged();
 }
 
+#if 0 // ZBTEMP
 void Player::wearItem(const playerItemStruct* itemp)
 {
   const itemItemStruct* item = &itemp->item;
@@ -478,6 +521,7 @@ void Player::removeItem(const itemItemStruct* item)
       savePlayerState();
   }
 }
+#endif // ZBTEMP
 
 void Player::increaseSkill(const skillIncStruct* skilli)
 {
@@ -753,6 +797,7 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
         );
   setDeltas(0,0,0);
   setHeading((int8_t)lrintf(zsentry->heading), 0);
+  m_validPos = true;
 
   m_headingDegrees = 360 - ((((int8_t)lrintf(zsentry->heading)) * 360) >> 11);
   emit headingChanged(m_headingDegrees);
@@ -787,6 +832,7 @@ void Player::playerUpdate(const playerSelfPosStruct *pupdate, uint32_t, uint8_t 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);
   setDeltas(pdeltaX, pdeltaY, pdeltaZ);
   setHeading(pupdate->heading, pupdate->deltaHeading);
+  m_validPos = true;
   updateLast();
 
   m_headingDegrees = 360 - ((pupdate->heading * 360) >> 11);
@@ -820,6 +866,21 @@ void Player::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
 
   if (con->playerid == con->targetid) 
     setPlayerID(con->playerid);
+}
+
+void Player::tradeSpellBookSlots(const tradeSpellBookSlotsStruct* tsb, uint32_t, uint8_t dir)
+{
+  fprintf(stderr, "tradeSpellBookSlots(dir=%d): Swapping %d (%04x) with %d (%04x)\n",
+	  dir,
+	  tsb->slot1, m_spellBookSlots[tsb->slot1],
+	  tsb->slot2, m_spellBookSlots[tsb->slot2]);
+
+  if (dir != DIR_SERVER)
+    return;
+
+  uint32_t spell1 = m_spellBookSlots[tsb->slot1];
+  m_spellBookSlots[tsb->slot1] = m_spellBookSlots[tsb->slot2];
+  m_spellBookSlots[tsb->slot2] = spell1;
 }
 
 // setPlayer* only updates player*.  If you want to change and use the defaults you
@@ -1071,32 +1132,12 @@ void Player::fillConTable()
     greenRange = -20;
     cyanRange = -15;
   }
-  else if (level() < 61)
-  { //57 - 60
-    greenRange = -26;
-    cyanRange = -21;
-  }
-  else if (level() == 61) // 61
-  {
-    greenRange = -24;
-    cyanRange = -19;
-  }
-  else if (level() == 62)
-  {
-    greenRange = -23;
-    cyanRange = -18;
-  }
-  else if (level() == 63)
-  {
-    greenRange = -22;
-    cyanRange = -17;
-  }
-  else if (level() < 66) //64 - 65
-  {
+  else if (level() < 66)
+  { //57 - 65
     greenRange = -21;
     cyanRange = -16;
   }
-  
+    
   uint8_t spawnLevel = 1; 
   uint8_t scale;
 

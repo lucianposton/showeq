@@ -43,7 +43,7 @@
 //#define PACKET_PROCESS_DIAG 3 // verbosity level 0-n
 
 // this define is used to diagnose cache handling (in dispatchPacket mostly)
-// #define PACKET_CACHE_DIAG 3 // verbosity level (0-n)
+//#define PACKET_CACHE_DIAG 3 // verbosity level (0-n)
 
 // diagnose structure size changes
 //#define PACKET_PROCESS_FRAG_DIAG
@@ -149,6 +149,8 @@ QString EQPacketFormatRaw::headerFlags(const QString& prefix,
     tmp += "SEQEnd, ";
   if (isARSP())
     tmp += "ARSP, ";
+  if (isNAK())
+    tmp += "NAK, ";
   if (isSpecARQ())
     tmp += "SpecARQ, ";
 
@@ -579,7 +581,7 @@ EQPacket::EQPacket (QObject * parent, const char *name)
        m_serverArqSeqGiveUp = 32;
 
 
-#if HAVE_LIBEQ
+#if HAVE_LIBEQ || 1
    if (showeq_params->broken_decode)
        printf("Running with broken decode set to true.\n");
 #else
@@ -1392,11 +1394,8 @@ void EQPacket::processCache()
      // one yet...
      while(it == m_serverCache[m_eqstreamid]->end())
      {
-
-#ifdef PACKET_CACHE_DIAG
         printf("SEQ: Giving up on finding arq %04x in cache stream %d, skipping!\n",
                m_serverArqSeqExp[m_eqstreamid], m_eqstreamid);
-#endif
 
         // incremente the expected arq sequence number
         m_serverArqSeqExp[m_eqstreamid]++;
@@ -1655,9 +1654,11 @@ void EQPacket::dispatchSplitData (EQPacketFormat& pf, uint8_t dir, EQStreamID st
          return;
       }
 #ifdef PACKET_PROCESS_FRAG_DIAG
-      else
-         printf("dispatchSplitData(): recieved fragment component (fragSeq 0x%04x, fragCur 0x%04x) before fragment start\n",
-                pf.fragSeq(), pf.fragCur());
+   }
+   else
+   {
+     printf("dispatchSplitData(): recieved fragment component (fragSeq 0x%04x, fragCur 0x%04x) before fragment start\n",
+	    pf.fragSeq(), pf.fragCur());
 #endif
    }
 }
@@ -1916,505 +1917,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	
 	switch (opCode)
 	{
-	case cItemInShopCode:
-	{
-	    cItemInShopStruct *citems;
-	    citems = (cItemInShopStruct *)(data);
-
-	    if (citems->count)
-	    {
-		// Determine the size of a single structure in 
-		// the compressed packet
- 
-		int nPacketSize=((len - 4)/citems->count);
-
-		// See if it is the size that we expect
- 
-		int nVerifySize = sizeof(itemInShopStruct);
-    
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-		if (nVerifySize != nPacketSize)
-		{
-		    printf("WARNING: cItemInShopCode: packetSize:%d != "
-			   "sizeof(itemInShopStruct):%d!\n",
-			   nPacketSize, nVerifySize);
-		    unk = true;
-		}
-#endif
-		for (int i=0; i<citems->count; i++)
-		    emit itemShop((const itemInShopStruct*)&citems->compressedData[i*nPacketSize], nPacketSize, dir);
-	    }
-
-	    break;
-	} /* end ItemInShopCode */
-
-	case MoneyOnCorpseCode:
-	{
-	    unk = ! ValidatePayload(MoneyOnCorpseCode, moneyOnCorpseStruct);
-
-	    emit moneyOnCorpse((const moneyOnCorpseStruct*)data, len, dir);
-
-	    break;
-	} /* end MoneyOnCorpseCode */
-
-	case ItemOnCorpseCode:
-	{
-	    unk = ! ValidatePayload(ItemOnCorpseCode, itemOnCorpseStruct);
-
-	    emit itemPlayerReceived((const itemOnCorpseStruct *)data, len, dir);
-
-	    break;
-	} /* end ItemOnCorpseCode */
-
-	case TradeItemOutCode:
-	{
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-	    tradeItemOutStruct* itemt = (tradeItemOutStruct*)data;
-	    switch (itemt->itemType)
-	    {
-	    case 0: // it is an item, use the regular method
-		unk = ! ValidatePayload(TradeItemOutCode, tradeItemOutStruct);
-		break;
-	    case 1: // it is a container
-	    {
-		size_t itemt_size = sizeof(tradeItemOutStruct) 
-		    - sizeof(itemItemStruct)
-		    + sizeof(itemContainerStruct);
-
-		if (itemt_size != len)
-		{
-                    fprintf(stderr, 
-			    "WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
-			    TradeItemOutCode, len, itemt_size);
-		    unk = true;
-		}
-		else
-                    unk = false;
-      
-		break;
-	    }
-	    case 2: // it is a book
-	    {
-		size_t itemt_size = sizeof(tradeItemOutStruct) 
-		    - sizeof(itemItemStruct)
-		    + sizeof(itemBookStruct);
-      
-		if (itemt_size != len)
-		{
-                    fprintf(stderr, 
-			    "WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
-			    TradeItemOutCode, len, itemt_size);
-		    unk = true;
-		}
-		else
-                    unk = false;
-   
-		break;
-	    }
-	    };
-#endif
-
-	    emit tradeItemOut((const tradeItemOutStruct*)data, len, dir);
-
-	    break;
-	} /* end tradeItemCode */
-
-	case TradeItemInCode:	// Item received by player
-	{
-	    unk = ! ValidatePayload(TradeItemInCode, tradeItemInStruct);
-
-	    emit tradeItemIn((const tradeItemInStruct*)data, len, dir);
-
-	    break;
-	} /* end TradeItemInCode */
-
-	case TradeContainerInCode:	// Container received by player
-	{
-	    unk = ! ValidatePayload(TradeContainerInCode, tradeContainerInStruct);
-
-	    emit tradeContainerIn((const tradeContainerInStruct*)data, len, dir);
-
-	    break;
-	} /* end TradeContainerInCode */
-
-	case TradeBookInCode:	// Item received by player
-	{
-	    unk = ! ValidatePayload(TradeBookInCode, tradeBookInStruct);
-
-	    emit tradeBookIn((const tradeBookInStruct*)data, len, dir);
-
-	    break;
-	} /* end TradeItemInCode */
-
-	case SummonedItemCode:
-	{
-	    unk = ! ValidatePayload(SummonedItemCode, summonedItemStruct);
-
-	    emit summonedItem((const summonedItemStruct*)data, len, dir);
-
-	    break;
-	}
-
-	case SummonedContainerCode:
-	{
-	    unk = ! ValidatePayload(SummonedContainerCode, summonedContainerStruct);
-
-	    emit summonedContainer((const summonedContainerStruct*)data, len, dir);
-
-	    break;
-	}
-
-	case CharProfileCode:	// Character Profile server to client
-	{
-	    unk = false;
-	   
-	    ValidatePayload(CharProfileCode, charProfileStruct);
-
-	    //logData ("/tmp/charprofile.log", len, data);
-	    emit backfillPlayer((const charProfileStruct*)data, len, DIR_SERVER);
-
-	    break;
-	}
-
-	case NewCorpseCode:
-	{
-	    unk = ! ValidatePayload(NewCorpseCode, newCorpseStruct);
-
-	    emit killSpawn((const newCorpseStruct*) data, len, dir);
-
-	    break;
-	} /* end CorpseCode */
-
-	case DeleteSpawnCode:
-	{
-	    unk = ! ValidatePayload(DeleteSpawnCode, deleteSpawnStruct);
-
-	    emit deleteSpawn((const deleteSpawnStruct*)data, len, dir);
-
-	    break;
-	}
-
-	case ChannelMessageCode:
-	{
-	    unk = false;
-
-	    emit channelMessage((const channelMessageStruct*)data, len, dir);
-
-	    break;
-	}
-
-	case SimpleMessageCode:
-	{
-	    unk = false;
-
-	    emit simpleMessage((const simpleMessageStruct*)data, len, dir);
-
-	    break;
-	}
-
-	case FormattedMessageCode:
-	{
-	    unk = false;
-
-	    emit formattedMessage((const formattedMessageStruct*)data, len, dir);
-
-	    break;
-	}
-
-	case NewSpawnCode:
-	{
-	    unk = ! ValidatePayload(NewSpawnCode, newSpawnStruct);
-
-	    //logData ("/tmp/newspawn.log", len, data);
-	    emit newSpawn((const newSpawnStruct*)data, len, dir);
-
-	    break;
-	}
-
-	case ZoneSpawnsCode:
-	{
-	    unk = false; // move above break to prevent duplicate logging
-	    // not sure if its placement was intentional before.
-	    
-	    emit zoneSpawns((const zoneSpawnsStruct*)data, len, dir);
-	    //logData ("/tmp/zonespawn.log", len, data);
-
-	    break;
-	}
-
-	case TimeOfDayCode:
-	{
-	    struct timeOfDayStruct *tday;
-
-	    unk = ! ValidatePayload(TimeOfDayCode, timeOfDayStruct);
-
-	    tday = (struct timeOfDayStruct *) data;
-
-	    m_eqTime.zoneInTime.minute   = tday->minute;
-	    m_eqTime.zoneInTime.hour     = tday->hour;
-	    m_eqTime.zoneInTime.day      = tday->day;
-	    m_eqTime.zoneInTime.month    = tday->month;
-	    m_eqTime.zoneInTime.year     = tday->year;
-
-	    m_eqTime.packetReferenceTime = time(NULL);
-
-	    printf( "TIME: %02d:%02d %02d/%02d/%04d\n",
-		    tday->hour,
-		    tday->minute,
-		    tday->month,
-		    tday->day,
-		    tday->year
-		);
-	    emit timeOfDay(tday, len, dir);
-	    break;
-	}
-
-	case BookTextCode:
-	{
-	    unk = false;
-
-	    printf("BOOK: '%s'\n", ((const bookTextStruct *)data)->text);
-	    emit bookText((const bookTextStruct*)data, len, dir);
-
-            break;
-        }
-
-        case RandomCode:
-        {
-            unk = ! ValidatePayload(RandomCode, randomStruct);
-
-	    emit random((const randomStruct*)data, len, dir);
-
-            break;
-        }
-
-        case RandomReqCode:
-        {
-            unk = ! ValidatePayload(RandomReqCode, randomReqStruct);
-
-	    emit random((const randomReqStruct*)data, len, dir);
-
-            break;
-        }
-
-        case EmoteTextCode:
-        {
-            unk = false;
-
-	    emit emoteText((const emoteTextStruct*)data, len, dir);
-
-            break;
-        }
-
-        case CorpseLocCode:
-        {
-	    unk = ! ValidatePayload(CorpseLocCode, corpseLocStruct);
-           
-	    emit corpseLoc((const corpseLocStruct*)data, len, dir);
-
-            break;
-        }
-
-        case InspectDataCode:
-        {
-            unk = ! ValidatePayload(InspectDataCode, inspectDataStruct);
-
-            emit inspectData((const inspectDataStruct *)data, len, dir);
-
-            break;
-        }
-
-        case SpawnUpdateCode:
-        {
-            unk = ! ValidatePayload(SpawnUpdateCode, SpawnUpdateStruct);
-	    SpawnUpdateStruct *su = (SpawnUpdateStruct*)data;
-//	    printf("SpawnUpdateCode(id=%d, sub=%d, arg1=%d, arg2=%d)\n", 
-//		   su->spawnId, su->subcommand, 
-//		   su->arg1, su->arg2);
-	    switch(su->subcommand) {
-	    case 17:
-		emit updateSpawnMaxHP(su, len, dir);
-		break;
-	    }
-            break;
-	    emit updateSpawnInfo(su, len, dir);
-        }
-	
-	case NpcHpUpdateCode:
-	{
-	    unk = ! ValidatePayload(NpcHpUpdateCode, hpNpcUpdateStruct);
-
-	    emit updateNpcHP((const hpNpcUpdateStruct*)data, len, dir);
-
-	    break;
-	}
-
-        case SPMesgCode:
-        {
-            unk = false;
-
-            emit spMessage((const spMesgStruct *)data, len, dir);
-
-            break;
-        }
-
-        case MemSpellCode:
-        {
-            unk = ! ValidatePayload(MemSpellCode, memSpellStruct);
-
-            emit handleSpell((const memSpellStruct*)data, len, dir);
-
-            break;
-        }
-
-        case BeginCastCode:
-        {
-            unk = ! ValidatePayload(BeginCastCode, beginCastStruct);
-
-            emit beginCast((const beginCastStruct*)data, len, dir);
-
-            break;
-        }
-
-        case StartCastCode:
-        {
-	    unk = ! ValidatePayload(StartCastCode, startCastStruct);
-
-	    emit startCast((const startCastStruct*)data, len, dir);
-
-	    break;
-        }
-
-	case SpellFadeCode:
-	{
-	     unk = false;
-
-	     emit spellFaded((const spellFadedStruct*)data, len, dir);
-
-	     break;
-	}
-
-        case MobUpdateCode:
-        {
-            unk = ! ValidatePayload(MobUpdateCode, spawnPositionUpdate);
-
-            emit updateSpawns((const spawnPositionUpdate *)data, len, dir);
-
-            break;
-        }
-
-        case ExpUpdateCode:
-        {
-            unk = ! ValidatePayload(ExpUpdateCode, expUpdateStruct);
-
-            emit updateExp((const expUpdateStruct*)data, len, dir);
-
-            break;
-        }
-
-        case AltExpUpdateCode:
-        {
-            unk = ! ValidatePayload(AltExpUpdateCode, altExpUpdateStruct);
-
-            emit updateAltExp((const altExpUpdateStruct*)data, len, dir);
-
-            break;
-        }
-
-        case LevelUpUpdateCode:
-        {
-            unk = ! ValidatePayload(LevelUpUpdateCode, levelUpUpdateStruct);
-
-            emit updateLevel((const levelUpUpdateStruct *)data, len, dir);
-
-            break;
-        }
-
-        case SkillIncCode:
-        {
-            unk = ! ValidatePayload(SkillIncCode, skillIncStruct);
-
-	    emit increaseSkill((const skillIncStruct *)data, len, dir);
-
-            break;
-        }
-
-        case DoorOpenCode:
-        {
-            unk = false;
-
-	    emit doorOpen(data, len, dir);
-
-            break;
-        }
-
-        case IllusionCode:
-        {
-            unk = false;
-
-	    emit illusion(data, len, dir);
-
-            break;
-        }
-
-        case BadCastCode:
-        {
-            unk = false; //! ValidatePayload(BadCastCode, badCastStruct);
-
-            emit interruptSpellCast((const badCastStruct*)data, len, dir);
-
-            break;
-        }
-
-        case SysMsgCode:
-        {
-            unk = false;
-
-	    emit systemMessage((const sysMsgStruct*)data, len, dir);
-
-            break;
-        }
-
-        case ZoneChangeCode:
-        {
-            unk = ! ValidatePayload(ZoneChangeCode, zoneChangeStruct);
-
-            // in the process of zoning, server hasn't switched yet.
-
-	    emit zoneChange((const zoneChangeStruct*)data, len, dir);
-            break;
-        }
-
-        case ZoneEntryCode:
-        {
-            // We're only interested in the server version
-
-            if (dir == DIR_CLIENT)
-	    {
-	        unk = ! ValidatePayload(ZoneEntryCode, ClientZoneEntryStruct);
-	        emit zoneEntry((const ClientZoneEntryStruct*)data, len, dir);
-	        break;
-            }
-
-            unk = ! ValidatePayload(ZoneEntryCode, ServerZoneEntryStruct);
-
-            emit zoneEntry((const ServerZoneEntryStruct*)data, len, dir);
-
-            break;
-        } /* end ZoneEntryCode */
-
-        case NewZoneCode:
-        {
-            unk = ! ValidatePayload(NewZoneCode, newZoneStruct);
-
-	    emit zoneNew((const newZoneStruct*)data, len, dir);
-
-	    if (m_vPacket)
-		printf("New Zone at byte: %ld\n", m_vPacket->FilePos());
-
-            break;
-        }
-
         case PlayerPosCode:
         {
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
@@ -2442,122 +1944,29 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             break;
         }
 
-        case WearChangeCode:
+        case MobUpdateCode:
         {
-            unk = ! ValidatePayload(WearChangeCode, wearChangeStruct);
+            unk = ! ValidatePayload(MobUpdateCode, spawnPositionUpdate);
 
-            emit spawnWearingUpdate ((const wearChangeStruct*)data, len, dir);
+            emit updateSpawns((const spawnPositionUpdate *)data, len, dir);
 
             break;
         }
 
-        case ActionCode:
+        case SpawnUpdateCode:
         {
-            unk = false;
-
-            emit action2Message ((const action2Struct *)data, len, dir);
-
+            unk = ! ValidatePayload(SpawnUpdateCode, SpawnUpdateStruct);
+	    SpawnUpdateStruct *su = (SpawnUpdateStruct*)data;
+//	    printf("SpawnUpdateCode(id=%d, sub=%d, arg1=%d, arg2=%d)\n", 
+//		   su->spawnId, su->subcommand, 
+//		   su->arg1, su->arg2);
+	    switch(su->subcommand) {
+	    case 17:
+		emit updateSpawnMaxHP(su, len, dir);
+		break;
+	    }
             break;
-        }
-
-        case CastOnCode:
-        {
-            unk = false;
-
-	    emit castOn((castOnStruct*)data, len, dir);
-
-            break;
-        }
-
-        case ManaDecrementCode:
-        {
-            unk = ! ValidatePayload(ManaDecrementCode, manaDecrementStruct);
-
-	    emit manaChange((struct manaDecrementStruct *)data, len, dir);
-
-            break;
-        }
-
-        case StaminaCode:
-        {
-            unk = ! ValidatePayload(StaminaCode, staminaStruct);
-
-	    emit updateStamina((const staminaStruct *)data, len, dir);
-
-            break;
-        }
-
-        case MakeDropCode:
-        {
-            unk = ! ValidatePayload(MakeDropCode, makeDropStruct);
-	    
-	    if (!unk)
-	      emit newGroundItem((const makeDropStruct*)data, len, dir);
-
-            break;
-        }
-
-        case RemDropCode:
-        {
-            unk = ! ValidatePayload(RemDropCode, remDropStruct);
-
-            emit removeGroundItem((const remDropStruct *)data, len, dir);
-
-            break;
-        }
-
-        case DropCoinsCode:
-        {
-            unk = ! ValidatePayload(DropCoinsCode, dropCoinsStruct);
-
-	    emit newCoinsItem((const dropCoinsStruct*)data, len, dir);
-
-            break;
-        }
-
-        case RemoveCoinsCode:
-        {
-            unk = ! ValidatePayload(RemoveCoinsCode, removeCoinsStruct);
-
-            emit removeCoinsItem ((const removeCoinsStruct *)data, len, dir);
-
-            break;
-        }
-
-        case OpenVendorCode:
-        {
-            unk = false;
-
-	    emit openVendor(data, len, dir);
-
-            break;
-        }
-
-        case CloseVendorCode:
-        {
-            unk = false;
-
-	    emit closeVendor(data, len, dir);
-
-            break;
-        }
-
-        case OpenGMCode:
-        {
-            unk = false;
-
-	    emit openGM(data, len, dir);
-
-            break;
-        }
-
-        case CloseGMCode:
-        {
-            unk = false;
-
-	    emit closeGM(data, len, dir);
-
-            break;
+	    emit updateSpawnInfo(su, len, dir);
         }
 
         case SpawnAppearanceCode:
@@ -2694,6 +2103,460 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 		break;
 	    }
             }
+
+            break;
+        }
+
+	case NewCorpseCode:
+	{
+	    unk = ! ValidatePayload(NewCorpseCode, newCorpseStruct);
+
+	    emit killSpawn((const newCorpseStruct*) data, len, dir);
+
+	    break;
+	} /* end CorpseCode */
+
+	case DeleteSpawnCode:
+	{
+	    unk = ! ValidatePayload(DeleteSpawnCode, deleteSpawnStruct);
+
+	    emit deleteSpawn((const deleteSpawnStruct*)data, len, dir);
+
+	    break;
+	}
+
+	case ChannelMessageCode:
+	{
+	    unk = false;
+
+	    emit channelMessage((const channelMessageStruct*)data, len, dir);
+
+	    break;
+	}
+
+	case SimpleMessageCode:
+	{
+	    unk = false;
+
+	    emit simpleMessage((const simpleMessageStruct*)data, len, dir);
+
+	    break;
+	}
+
+	case ItemInfoCode:
+	{
+	  unk = false;
+
+	  if (dir == DIR_SERVER)
+	    emit itemInfo((const itemInfoStruct*)data, len, dir);
+	  else
+	    emit itemInfoReq((const itemInfoReqStruct*)data, len, dir);
+	}
+
+	case ItemCode:
+	{
+	  unk = false;
+
+	  emit item((const itemPacketStruct*)data, len, dir);
+	  
+	  break;
+	}
+
+	case FormattedMessageCode:
+	{
+	    unk = false;
+
+	    emit formattedMessage((const formattedMessageStruct*)data, len, dir);
+
+	    break;
+	}
+
+	case NewSpawnCode:
+	{
+	    unk = ! ValidatePayload(NewSpawnCode, newSpawnStruct);
+
+	    //logData ("/tmp/newspawn.log", len, data);
+	    emit newSpawn((const newSpawnStruct*)data, len, dir);
+
+	    break;
+	}
+
+	case BookTextCode:
+	{
+	    unk = false;
+
+	    printf("BOOK: '%s'\n", ((const bookTextStruct *)data)->text);
+	    emit bookText((const bookTextStruct*)data, len, dir);
+
+            break;
+        }
+
+	case MoneyOnCorpseCode:
+	{
+	    unk = ! ValidatePayload(MoneyOnCorpseCode, moneyOnCorpseStruct);
+
+	    emit moneyOnCorpse((const moneyOnCorpseStruct*)data, len, dir);
+
+	    break;
+	} /* end MoneyOnCorpseCode */
+
+        case RandomCode:
+        {
+            unk = ! ValidatePayload(RandomCode, randomStruct);
+
+	    emit random((const randomStruct*)data, len, dir);
+
+            break;
+        }
+
+        case RandomReqCode:
+        {
+            unk = ! ValidatePayload(RandomReqCode, randomReqStruct);
+
+	    emit random((const randomReqStruct*)data, len, dir);
+
+            break;
+        }
+
+        case EmoteTextCode:
+        {
+            unk = false;
+
+	    emit emoteText((const emoteTextStruct*)data, len, dir);
+
+            break;
+        }
+
+        case CorpseLocCode:
+        {
+	    unk = ! ValidatePayload(CorpseLocCode, corpseLocStruct);
+           
+	    emit corpseLoc((const corpseLocStruct*)data, len, dir);
+
+            break;
+        }
+
+        case InspectDataCode:
+        {
+            unk = ! ValidatePayload(InspectDataCode, inspectDataStruct);
+
+            emit inspectData((const inspectDataStruct *)data, len, dir);
+
+            break;
+        }
+	
+	case NpcHpUpdateCode:
+	{
+	    unk = ! ValidatePayload(NpcHpUpdateCode, hpNpcUpdateStruct);
+
+	    emit updateNpcHP((const hpNpcUpdateStruct*)data, len, dir);
+
+	    break;
+	}
+
+        case SPMesgCode:
+        {
+            unk = false;
+
+            emit spMessage((const spMesgStruct *)data, len, dir);
+
+            break;
+        }
+
+        case MemSpellCode:
+        {
+            unk = ! ValidatePayload(MemSpellCode, memSpellStruct);
+
+            emit handleSpell((const memSpellStruct*)data, len, dir);
+
+            break;
+        }
+
+        case BeginCastCode:
+        {
+            unk = ! ValidatePayload(BeginCastCode, beginCastStruct);
+
+            emit beginCast((const beginCastStruct*)data, len, dir);
+
+            break;
+        }
+
+        case StartCastCode:
+        {
+	    unk = ! ValidatePayload(StartCastCode, startCastStruct);
+
+	    emit startCast((const startCastStruct*)data, len, dir);
+
+	    break;
+        }
+
+	case SpellFadeCode:
+	{
+	     unk = false;
+
+	     emit spellFaded((const spellFadedStruct*)data, len, dir);
+
+	     break;
+	}
+
+        case ExpUpdateCode:
+        {
+            unk = ! ValidatePayload(ExpUpdateCode, expUpdateStruct);
+
+            emit updateExp((const expUpdateStruct*)data, len, dir);
+
+            break;
+        }
+
+        case AltExpUpdateCode:
+        {
+            unk = ! ValidatePayload(AltExpUpdateCode, altExpUpdateStruct);
+
+            emit updateAltExp((const altExpUpdateStruct*)data, len, dir);
+
+            break;
+        }
+
+        case LevelUpUpdateCode:
+        {
+            unk = ! ValidatePayload(LevelUpUpdateCode, levelUpUpdateStruct);
+
+            emit updateLevel((const levelUpUpdateStruct *)data, len, dir);
+
+            break;
+        }
+
+        case SkillIncCode:
+        {
+            unk = ! ValidatePayload(SkillIncCode, skillIncStruct);
+
+	    emit increaseSkill((const skillIncStruct *)data, len, dir);
+
+            break;
+        }
+
+        case DoorOpenCode:
+        {
+            unk = false;
+
+	    emit doorOpen(data, len, dir);
+
+            break;
+        }
+
+        case IllusionCode:
+        {
+            unk = false;
+
+	    emit illusion(data, len, dir);
+
+            break;
+        }
+
+        case BadCastCode:
+        {
+            unk = false; //! ValidatePayload(BadCastCode, badCastStruct);
+
+            emit interruptSpellCast((const badCastStruct*)data, len, dir);
+
+            break;
+        }
+
+        case SysMsgCode:
+        {
+            unk = false;
+
+	    emit systemMessage((const sysMsgStruct*)data, len, dir);
+
+            break;
+        }
+
+        case ZoneChangeCode:
+        {
+            unk = ! ValidatePayload(ZoneChangeCode, zoneChangeStruct);
+
+            // in the process of zoning, server hasn't switched yet.
+
+	    emit zoneChange((const zoneChangeStruct*)data, len, dir);
+            break;
+        }
+
+        case ZoneEntryCode:
+        {
+            // We're only interested in the server version
+
+            if (dir == DIR_CLIENT)
+	    {
+	        unk = ! ValidatePayload(ZoneEntryCode, ClientZoneEntryStruct);
+	        emit zoneEntry((const ClientZoneEntryStruct*)data, len, dir);
+	        break;
+            }
+
+            unk = ! ValidatePayload(ZoneEntryCode, ServerZoneEntryStruct);
+
+            emit zoneEntry((const ServerZoneEntryStruct*)data, len, dir);
+
+            break;
+        } /* end ZoneEntryCode */
+
+        case NewZoneCode:
+        {
+            unk = ! ValidatePayload(NewZoneCode, newZoneStruct);
+
+	    emit zoneNew((const newZoneStruct*)data, len, dir);
+
+	    if (m_vPacket)
+		printf("New Zone at byte: %ld\n", m_vPacket->FilePos());
+
+            break;
+        }
+
+	case CharProfileCode:	// Character Profile server to client
+	{
+	    unk = false;
+	   
+	    ValidatePayload(CharProfileCode, charProfileStruct);
+
+	    //logData ("/tmp/charprofile.log", len, data);
+	    emit backfillPlayer((const charProfileStruct*)data, len, DIR_SERVER);
+
+	    break;
+	}
+
+	case ZoneSpawnsCode:
+	{
+	    unk = false; // move above break to prevent duplicate logging
+	    // not sure if its placement was intentional before.
+	    
+	    emit zoneSpawns((const zoneSpawnsStruct*)data, len, dir);
+	    //logData ("/tmp/zonespawn.log", len, data);
+
+	    break;
+	}
+
+	case TimeOfDayCode:
+	{
+	    struct timeOfDayStruct *tday;
+
+	    unk = ! ValidatePayload(TimeOfDayCode, timeOfDayStruct);
+
+	    tday = (struct timeOfDayStruct *) data;
+
+	    m_eqTime.zoneInTime.minute   = tday->minute;
+	    m_eqTime.zoneInTime.hour     = tday->hour;
+	    m_eqTime.zoneInTime.day      = tday->day;
+	    m_eqTime.zoneInTime.month    = tday->month;
+	    m_eqTime.zoneInTime.year     = tday->year;
+
+	    m_eqTime.packetReferenceTime = time(NULL);
+
+	    printf( "TIME: %02d:%02d %02d/%02d/%04d\n",
+		    tday->hour,
+		    tday->minute,
+		    tday->month,
+		    tday->day,
+		    tday->year
+		);
+	    emit timeOfDay(tday, len, dir);
+	    break;
+	}
+
+        case WearChangeCode:
+        {
+            unk = ! ValidatePayload(WearChangeCode, wearChangeStruct);
+
+            emit spawnWearingUpdate ((const wearChangeStruct*)data, len, dir);
+
+            break;
+        }
+
+        case ActionCode:
+        {
+            unk = false;
+
+            emit action2Message ((const action2Struct *)data, len, dir);
+
+            break;
+        }
+
+        case CastOnCode:
+        {
+            unk = false;
+
+	    emit castOn((castOnStruct*)data, len, dir);
+
+            break;
+        }
+
+        case ManaDecrementCode:
+        {
+            unk = ! ValidatePayload(ManaDecrementCode, manaDecrementStruct);
+
+	    emit manaChange((struct manaDecrementStruct *)data, len, dir);
+
+            break;
+        }
+
+        case StaminaCode:
+        {
+            unk = ! ValidatePayload(StaminaCode, staminaStruct);
+
+	    emit updateStamina((const staminaStruct *)data, len, dir);
+
+            break;
+        }
+
+        case MakeDropCode:
+        {
+            unk = ! ValidatePayload(MakeDropCode, makeDropStruct);
+	    
+	    if (!unk)
+	      emit newGroundItem((const makeDropStruct*)data, len, dir);
+
+            break;
+        }
+
+        case RemDropCode:
+        {
+            unk = ! ValidatePayload(RemDropCode, remDropStruct);
+
+            emit removeGroundItem((const remDropStruct *)data, len, dir);
+
+            break;
+        }
+
+        case OpenVendorCode:
+        {
+            unk = false;
+
+	    emit openVendor(data, len, dir);
+
+            break;
+        }
+
+        case CloseVendorCode:
+        {
+            unk = false;
+
+	    emit closeVendor(data, len, dir);
+
+            break;
+        }
+
+        case OpenGMCode:
+        {
+            unk = false;
+
+	    emit openGM(data, len, dir);
+
+            break;
+        }
+
+        case CloseGMCode:
+        {
+            unk = false;
+
+	    emit closeGM(data, len, dir);
 
             break;
         }
@@ -2871,12 +2734,11 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    break;
 	}
 
-	case xTradeSpellBookSlotsCode:
+	case TradeSpellBookSlotsCode:
 	{
-	    //unk = ! ValidatePayload(xTradeSpellBookSlotsCode, xTradeSpellBookSlotsStruct);
-	    //emit xTradeSpellBookSlots((const xTradeSpellBookSlotsStruct*)data, len, dir);
-	    unk = false;
-	    break;
+	  unk = ! ValidatePayload(TradeSpellBookSlotsCode, tradeSpellBookSlotsStruct);
+	  emit tradeSpellBookSlots((const tradeSpellBookSlotsStruct*)data, len, dir);
+	  break;
 	}
 
 	case sSpellFizzleRegainCode:  //unknown contents, also comes when you Forage
@@ -2907,7 +2769,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    break;
 	}
 
-	case cForageCode:
+	case ForageCode:
 	{
 	    //no data
 	    unk = false;
@@ -2942,27 +2804,14 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    break;
 	}
 
-	case sLootItemCode:  //unknown contents
+	case BuffDropCode:  //unknown contents
 	{
-	    //unk = ! ValidatePayload(sLootItemCode, sLootItemStruct);
-	    //emit sLootItem((const sLootItemStruct*)data, len, dir);
-	    break;
-	}
+	  unk = ! ValidatePayload(BuffDropCode, buffDropStruct);
 
-	case cCursorItemCode:  //unknown contents
-	{
-	    //unk = ! ValidatePayload(cCursorItemCode, cCursorItemStruct);
-	    //emit cCursorItem((const cCursorItemStruct*)data, len, dir);
-	    //this one is when an item (dis)appears under the cursor for many reasons
-	    break;
-	}
+	  emit buffDrop((const buffDropStruct*)data, len, dir);
 
-	case xBuffDropCode:  //unknown contents
-	{
-	  //unk = ! ValidatePayload(xBuffDropCode, xBuffDropStruct);
-	  //	    emit xBuffDrop((const xBuffDropStruct*)data, len, dir);
 	  // this is the server 'buff fading' AND the client 'cancel buff'
-	    break;
+	  break;
 	}
 
 	case cLootCorpseCode:  //unknown contents
@@ -2986,7 +2835,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	    break;
 	}
 
-	case cWhoAllCode:  //unknown contents
+	case WhoAllReqCode:  //unknown contents
 	{
 	    //unk = ! ValidatePayload(cWhoAllCode, cWhoAllStruct);
 	    //emit cWhoAll((const cWhoAllStruct*)data, len, dir);
@@ -3177,35 +3026,6 @@ void EQPacket::decPlayback(void)
 
     setPlayback(x);
   }
-}
-
-void EQPacket::dispatchDecodedZoneSpawns(const uint8_t* decodedData, 
-					 uint32_t decodedDataLen)
-{
-
-  zoneSpawnsStruct* zdata = (struct zoneSpawnsStruct *)(decodedData);
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-  int zoneSpawnsStructHeaderData = 
-    ((uint8_t*)&zdata->spawn[0]) - decodedData;
-
-  int zoneSpawnsStructPayloadCount = 
-       (decodedDataLen - zoneSpawnsStructHeaderData) / sizeof(spawnZoneStruct);
-
-  // validate payload size, decodedDataLen - zoneSpawnsStructHeader should be
-  // an exact multiple of the size of spawnZoneStruct
-  int remainder = 
-    (decodedDataLen - zoneSpawnsStructHeaderData) % sizeof(spawnZoneStruct);
-  if (remainder != 0)
-  {
-    printf("WARNING: Decoded ZoneSpawnsCode ((decodedDataLen:%d - zoneSpawnsStructHeaderData:%d) does not evenly contain %d spawnZoneStruct's:%d (remainder: %d)!\n",
-	   decodedDataLen, zoneSpawnsStructHeaderData, 
-	   zoneSpawnsStructPayloadCount, sizeof(spawnZoneStruct),
-	   remainder);
-  }
-#endif
-
-              //logData ("/tmp/zonespawn.log", decodedDataLen, decodedData);
-  emit backfillZoneSpawns(zdata, decodedDataLen, DIR_SERVER);
 }
 
 int EQPacket::getEQTimeOfDay( time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay )

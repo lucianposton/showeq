@@ -90,29 +90,29 @@ bool getConfirmation(void);
 int upgradeItemDB(EQItemDB* itemDB);
 int importFlatFile(EQItemDB* itemDB, 
 		   const char* filename, 
-		   uint16_t itemNr, 
+		   uint32_t itemNr, 
 		   bool force, 
 		   bool updateRecords);
 int importGDBM(EQItemDB* itemDB, 
 	       const char* filename, 
-	       uint16_t itemNr, 
+	       uint32_t itemNr, 
 	       bool force, 
 	       bool updateRecords);
 int exportRawRecord(EQItemDB* itemDB, 
 		    const char* filename, 
-		    uint16_t itemNr);
+		    uint32_t itemNr);
 int exportRecordCSV(EQItemDB* itemDB, 
 		    const char* filename, 
-		    uint16_t itemNr,
+		    uint32_t itemNr,
 		    char action);
 int deleteRecord(EQItemDB* itemDB, 
-		 uint16_t itemNr, 
+		 uint32_t itemNr, 
 		 bool force);
 int reorganize(EQItemDB* itemDB);
 int displayRecord(EQItemDB* itemDB, 
-		  uint16_t itemNr);
+		  uint32_t itemNr);
 int listRecords(EQItemDB* itemDB, 
-		uint16_t itemNr, 
+		uint32_t itemNr, 
 		QString search);
 
 ///////////////////////////////////
@@ -147,11 +147,10 @@ main (int argc, char *argv[])
   bool updateRecords = false;
 
   // selected itemNr, 0 = no specific item selected
-  uint16_t itemNr = 0;
+  uint32_t itemNr = 0;
 
   // enabled DBTypes (default to all)
-  int dbTypes = (EQItemDB::LORE_DB | EQItemDB::NAME_DB | 
-		 EQItemDB::DATA_DB | EQItemDB::RAW_DATA_DB);
+  int dbTypes = (EQItemDB::DATA_DB | EQItemDB::RAW_DATA_DB);
 
   // search string
   QString search;
@@ -193,7 +192,7 @@ main (int argc, char *argv[])
 	  }
 	  break;
 	case 'i':
-	  itemNr = (uint16_t)atoi(optarg);
+	  itemNr = (uint32_t)atoi(optarg);
 	  break;
 	case 'U':
 	  updateRecords = true;
@@ -201,12 +200,6 @@ main (int argc, char *argv[])
 	case 'v':
 	case 'V':
 	  displayVer = true;
-	  break;
-	case ITEMDB_LORE_FILENAME_OPTION:
-	  itemDB->SetDBFile(EQItemDB::LORE_DB, optarg);
-	  break;
-	case ITEMDB_NAME_FILENAME_OPTION:
-	  itemDB->SetDBFile(EQItemDB::NAME_DB, optarg);
 	  break;
 	case ITEMDB_DATA_FILENAME_OPTION:
 	  itemDB->SetDBFile(EQItemDB::DATA_DB, optarg);
@@ -453,14 +446,6 @@ void displayVersion(EQItemDB* itemDB)
 	  UTS_RELEASE);
 #endif
   printf ("\t\tUsing EQItemDB: %s\n", EQItemDB::Version());
-  printf ("\t\tsizeof(itemStruct) was %d bytes\n", 
-	  sizeof(itemStruct));
-  printf ("\t\tsizeof(itemItemStruct) was %d bytes\n", 
-	  sizeof(itemItemStruct));
-  printf ("\t\tsizeof(itemContainerStruct) was %d bytes\n", 
-	  sizeof(itemContainerStruct));
-  printf ("\t\tsizeof(itemBookStruct) was %d bytes\n", 
-	  sizeof(itemBookStruct));
   printf ("\n");
 
   /////////////////////////////////
@@ -496,12 +481,6 @@ void displayVersion(EQItemDB* itemDB)
   printstat(filename, "DATA_DB");
   printstat(itemDB->GetDBFile(EQItemDB::RAW_DATA_DB) + dbExt, 
 	    "RAW_DATA_DB");
-#ifndef USE_DB3
-  // only exist with GDBM, and use is superceded, 
-  // so it's ok if they don't exist
-  printstat(itemDB->GetDBFile(EQItemDB::LORE_DB) + dbExt, "LORE_DB", true);
-  printstat(itemDB->GetDBFile(EQItemDB::NAME_DB) + dbExt, "NAME_DB", true);
-#endif
   printf ("\n");
 }
 
@@ -563,10 +542,13 @@ int upgradeItemDB(EQItemDB* itemDB)
 
 int importFlatFile(EQItemDB* itemDB, 
 		   const char* filename, 
-		   uint16_t itemNr, 
+		   uint32_t itemNr, 
 		   bool force,
 		   bool update)
 {
+#if 1 // ZBTEMP
+  return 0;  // until I can implement this correctly
+#else
   int result = 0;
   int count = 0;
   int lookedat = 0;
@@ -687,14 +669,18 @@ int importFlatFile(EQItemDB* itemDB,
   }
 
   return result;
+#endif // ZBTEMP
 }
 
 int importGDBM(EQItemDB* itemDB, 
 	       const char* filename, 
-	       uint16_t itemNr, 
+	       uint32_t itemNr, 
 	       bool force,
 	       bool update)
 {
+#if 1 // ZBTEMP
+  return 1;
+#else
   int result = 0;
   Datum key, data;
   int count = 0;
@@ -786,14 +772,14 @@ int importGDBM(EQItemDB* itemDB,
 	    count++; // increment count
 	  else
 	    fprintf(stderr, "%s: Failure on insert of Item %d from file %s\n",
-		    progname, *(uint16_t*)key.data, filename);
+		    progname, *(uint32_t*)key.data, filename);
 	}
 	else
 	{
 	  // no, print warning
 	  fprintf(stderr, 
 		  "Warning Item %d from file '%s' has incorrect size %d (not %d): Not Inserted\n",
-		  *(uint16_t*)key.data, filename, data.size, sizeof(itemItemStruct));
+		  *(uint32_t*)key.data, filename, data.size, sizeof(itemItemStruct));
 	  result = 4;
 	}
 	
@@ -810,7 +796,7 @@ int importGDBM(EQItemDB* itemDB,
 	// no data associated with key
 	fprintf(stderr,
 		"Warning Item %d from file '%s' doesn't have data\n",
-		*(uint16_t*)key.data, filename);
+		*(uint32_t*)key.data, filename);
 	result = 5;
       }
       
@@ -831,17 +817,18 @@ int importGDBM(EQItemDB* itemDB,
   fprintf(stderr, "%s: Inserted %d item(s)\n", progname, count);
 
   return result;
+#endif // ZBTEMP
 }
 
 int exportRawRecord(EQItemDB* itemDB, 
 		 const char* filename, 
-		 uint16_t itemNr)
+		 uint32_t itemNr)
 {
   int result = 0;
   FILE* outfile;
   int count = 0;
-  int itemsize;
-  unsigned char* rawData = NULL;
+  size_t itemsize;
+  char* rawData = NULL;
 
   // open the output file
   outfile = fopen(filename, "w");
@@ -903,7 +890,7 @@ int exportRawRecord(EQItemDB* itemDB,
     }
     else
     {
-      uint16_t nextItemNr, currentItemNr;
+      uint32_t nextItemNr, currentItemNr;
       bool hasNext;
 
       // retrieve the first item number
@@ -972,7 +959,7 @@ int exportRawRecord(EQItemDB* itemDB,
 int
 dumpItemCSV(EQItemDB* itemDB, 
 			FILE* fh,
-		    uint16_t itemNr)
+		    uint32_t itemNr)
 {
 	QString nameString;
 	QString loreString;
@@ -1001,7 +988,7 @@ dumpItemCSV(EQItemDB* itemDB,
 			}
 	
 			fprintf (fh, "\"%.1f\",", (entry->GetWeight())/10.0);
-			fprintf (fh, "\"%#06x\",", entry->GetFlag());
+			fprintf (fh, "\"%d\",", entry->GetItemType());
 			fprintf (fh, "\"%d\",", entry->GetSize());
 			fprintf (fh, "\"%d\",", entry->GetSlots());
 			fprintf (fh, "\"%d\",", entry->GetIconNr());
@@ -1009,7 +996,7 @@ dumpItemCSV(EQItemDB* itemDB,
 			if (entry->GetNoDrop() == 0) fprintf (fh, "\"1\",");
 			else fprintf (fh, "\"0\",");
 	
-			if (entry->GetNoSave() == 0) fprintf (fh, "\"1\",");
+			if (entry->GetNoRent() == 0) fprintf (fh, "\"1\",");
 			else fprintf (fh, "\"0\",");
 	
 			if (entry->IsBook() == 0) fprintf (fh, "\"1\",");
@@ -1064,7 +1051,7 @@ dumpItemCSV(EQItemDB* itemDB,
 				if (entry->GetRange())		fprintf (fh, "\"%d\",", entry->GetRange());
 				else fprintf(fh, "\"\",");
 	
-				if (entry->GetSpellId0()) 	fprintf (fh, "\"%d\",", entry->GetSpellId0());
+				if (entry->GetSpellId()) 	fprintf (fh, "\"%d\",", entry->GetSpellId());
 				else fprintf (fh, "\"\",");
 				if (entry->GetLevel())		fprintf (fh, "\"%d\",", entry->GetLevel());
 				else fprintf (fh, "\"\",");
@@ -1099,7 +1086,7 @@ dumpItemCSV(EQItemDB* itemDB,
 int
 dumpItemLabeled(EQItemDB* itemDB, 
 			FILE* fh,
-		    uint16_t itemNr)
+		    uint32_t itemNr)
 {
 	QString nameString;
 	QString loreString;
@@ -1122,13 +1109,13 @@ dumpItemLabeled(EQItemDB* itemDB,
 			fprintf (fh, "LORE|1|");
 		}
 		fprintf (fh, "Weight|%.1f|", (entry->GetWeight())/10.0);
-		fprintf (fh, "Flag|%#06x|", entry->GetFlag());
+		fprintf (fh, "ItemType|%d|", entry->GetItemType());
 		fprintf (fh, "Size|%d|", entry->GetSize());
 		fprintf (fh, "Slot|%d|", entry->GetSlots());
 		fprintf (fh, "Icon|%d|", entry->GetIconNr());
 		if (entry->GetNoDrop() == 0)
 			fprintf (fh, "NODROP|1|");
-		if (entry->GetNoSave() == 0)
+		if (entry->GetNoRent() == 0)
 			fprintf (fh, "NORENT|1|");
 
 		if (entry->IsBook() == 0 && entry->IsContainer() == 0)
@@ -1176,9 +1163,9 @@ dumpItemLabeled(EQItemDB* itemDB,
 			}
 			if (entry->GetRange())
 				fprintf (fh, "Range|%d|", entry->GetRange());
-			if (entry->GetSpellId0() != ITEM_SPELLID_NOSPELL && entry->GetSpellId0() != 0)
+			if (entry->GetSpellId() != ITEM_SPELLID_NOSPELL && entry->GetSpellId() != 0)
 			{
-				fprintf (fh, "Effect|%d|", entry->GetSpellId0());
+				fprintf (fh, "Effect|%d|", entry->GetSpellId());
 				if (entry->GetLevel())
 					fprintf (fh, "EffLvl|%d|", entry->GetLevel());
 				if (entry->GetCharges())
@@ -1208,7 +1195,7 @@ dumpItemLabeled(EQItemDB* itemDB,
 
 int exportRecordCSV(EQItemDB* itemDB, 
 	const char* filename,
-	uint16_t itemNr,
+	uint32_t itemNr,
 	char action)
 {
 	int result = 0;
@@ -1249,7 +1236,7 @@ int exportRecordCSV(EQItemDB* itemDB,
 		}
 		else
 		{
-			uint16_t nextItemNr, currentItemNr;
+			uint32_t nextItemNr, currentItemNr;
 			bool hasNext;
 
 			// retrieve the first item number
@@ -1278,7 +1265,7 @@ int exportRecordCSV(EQItemDB* itemDB,
 }
 
 int deleteRecord(EQItemDB* itemDB, 
-		 uint16_t itemNr, 
+		 uint32_t itemNr, 
 		 bool force)
 {
   int result = 0;
@@ -1315,7 +1302,7 @@ int reorganize(EQItemDB* itemDB)
   return 0;
 }
 
-int listRecords(EQItemDB* itemDB, uint16_t itemNr, QString search)
+int listRecords(EQItemDB* itemDB, uint32_t itemNr, QString search)
 {
   // Display what is being done
   printf("Listing item(s)");
@@ -1329,7 +1316,7 @@ int listRecords(EQItemDB* itemDB, uint16_t itemNr, QString search)
   printf("Item#  Name  (Info)\n");
   printf("-----  -------------------------------------------\n");
 
-  // retrieve an iterator over the LORE_DB
+  // retrieve an iterator over the DATA_DB
   EQItemDBIterator* it = new EQItemDBIterator(itemDB, EQItemDB::DATA_DB);
 
   // if unsuccessful then can't do any more
@@ -1340,8 +1327,8 @@ int listRecords(EQItemDB* itemDB, uint16_t itemNr, QString search)
   }
 
   bool hasNext = true;  
-  uint16_t currentItemNr;
-  uint16_t nextItemNr;
+  uint32_t currentItemNr;
+  uint32_t nextItemNr;
   QString nameString;
   QString loreString;
   bool hasEntry = false;
@@ -1420,11 +1407,11 @@ int listRecords(EQItemDB* itemDB, uint16_t itemNr, QString search)
 	  info += ", ";
         info += "NO-DROP";
       }
-      if (entry->GetNoSave()==0)
+      if (entry->GetNoRent()==0)
       {
 	if (!info.isEmpty())
 	  info += ", ";
-        info += "NO-SAVE ";
+        info += "NO-RENT ";
       }
       if (entry->GetMagic()==1)
       {
@@ -1437,6 +1424,30 @@ int listRecords(EQItemDB* itemDB, uint16_t itemNr, QString search)
 	if (!info.isEmpty())
 	  info += ", ";
         info +="LORE";
+      }
+      else if (loreString[0] == '&')
+      {
+	if (!info.isEmpty())
+	  info += ", ";
+        info +="ARTIFACT";
+      }
+      else if (loreString[0] == '*')
+      {
+	if (!info.isEmpty())
+	  info += ", ";
+        info +="LORE";
+      }
+      else if (loreString[0] == '#')
+      {
+	if (!info.isEmpty())
+	  info += ", ";
+        info +="LORE";
+      }
+      else if (loreString[0] == '~')
+      {
+	if (!info.isEmpty())
+	  info += ", ";
+        info +="PENDING-LORE";
       }
 
       if (entry->GetAC())
@@ -1515,7 +1526,7 @@ int listRecords(EQItemDB* itemDB, uint16_t itemNr, QString search)
 }
 
 int displayRecord(EQItemDB* itemDB, 
-		  uint16_t itemNr)
+		  uint32_t itemNr)
 {
   QString nameString;
   QString loreString;
@@ -1528,8 +1539,12 @@ int displayRecord(EQItemDB* itemDB,
 
   printf ("Item ID: %d\n", itemNr);
  
-  if (hasEntry)
+  if (hasEntry) 
+  {
+    time_t updated = entry->GetUpdated();
+    printf("Last Updated: %s", ctime(&updated));
     printf ("IconNr: %d\n", entry->GetIconNr());
+  }
 
   if (!nameString.isEmpty())
   {
@@ -1544,7 +1559,7 @@ int displayRecord(EQItemDB* itemDB,
   if (hasEntry)
   {
     printf ("Model: %s\n", (const char*)entry->GetIdFile());
-    printf ("flag: 0x%4.4x\n", entry->GetFlag());
+    printf ("ItemType: %d\n", entry->GetItemType());
     printf ("MagicFlag: 0x%2.2x\n", entry->GetMagic());
     printf ("Weight: %.1f\n", (entry->GetWeight())/10.0);
     printf ("Flags: ");
@@ -1554,12 +1569,19 @@ int displayRecord(EQItemDB* itemDB,
       printf (" CONTAINER");
     if (entry->GetNoDrop() == 0)
       printf (" NO-DROP");
-    if (entry->GetNoSave() == 0)
-      printf (" NO-SAVE");
+    if (entry->GetNoRent() == 0)
+      printf (" NO-RENT");
     if (entry->GetMagic() == 1)
       printf (" MAGIC");
     if (loreString[0] == '*')
       printf (" LORE");
+    else if (loreString[0] == '&')
+      printf(" SUMMONED");
+    else if (loreString[0] == '#')
+      printf(" ARTIFACT");
+    else if (loreString[0] == '~')
+      printf(" PENDING-LORE");
+
     printf ("\n");
     printf ("Size: %s\n", (const char*)size_name(entry->GetSize()));
     printf ("Icon#: %d\n", entry->GetIconNr());
@@ -1614,16 +1636,16 @@ int displayRecord(EQItemDB* itemDB,
            entry->GetColor());
     if (entry->GetStackable() != -1)
       printf("Stackable: %s (%d)\n", 
-	     ((entry->GetStackable() == 1) ? "yes" : "no?"),
+	     ((entry->GetStackable() == 1) ? "yes" : "no"),
 	     entry->GetStackable());
     if (entry->GetEffectType() != -1)
       printf("Effect Type: %s (%d)\n",
 	     (const char*)entry->GetEffectTypeString(), 
 	     entry->GetEffectType());
-    if (entry->GetSpellId0() != ITEM_SPELLID_NOSPELL)
+    if (entry->GetSpellId() != ITEM_SPELLID_NOSPELL)
     {
-      printf ("Effect1: %s\n", 
-              (const char*)spell_name (entry->GetSpellId0()));
+      printf ("Spell Effect: %s\n", 
+              (const char*)spell_name (entry->GetSpellId()));
       if (entry->GetLevel())
 	printf ("Casting Level: %d\n", entry->GetLevel());
       if (entry->GetCastTime())
@@ -1631,9 +1653,6 @@ int displayRecord(EQItemDB* itemDB,
       if (entry->GetCharges())
 	printf ("Charges: %d\n", entry->GetCharges());
     }
-    if (entry->GetSpellId() != ITEM_SPELLID_NOSPELL)
-      printf ("Effect2: %s\n", 
-              (const char*)spell_name (entry->GetSpellId()));
     printf ("Class: %s\n", (const char*)print_classes (entry->GetClasses()));
     printf ("Race: %s\n", (const char*)print_races (entry->GetRaces()));
     if (entry->GetSkillModId() != 0)
@@ -1656,23 +1675,46 @@ int displayRecord(EQItemDB* itemDB,
     delete entry;
   }
 
-  unsigned char* rawData = NULL;
-  int size = itemDB->GetItemRawData(itemNr, &rawData);
+  time_t updated;
+  char* rawData = NULL;
+  int size = itemDB->GetItemRawData(itemNr, updated, &rawData);
 
   if ((size > 0) && (rawData != NULL))
   {
-    printf("Packet data: (%d octets)\n", size);
-    if ((size != sizeof(itemItemStruct)) &&
-	(size != sizeof(itemContainerStruct)) &&
-	(size != sizeof(itemBookStruct)))
-      printf("Warning: (%d octets) != sizeof(item{Item, Container, Book}Struct) (%d, %d, %d octets): "
-	     "Data alignment is suspect!\n", 
-	     size, 
-	     sizeof(itemItemStruct), sizeof(itemContainerStruct), 
-	     sizeof(itemBookStruct));
+    printf("Raw data: (%d bytes) last updated: %s", size, ctime(&updated));
+    printf("001: ");
+    uint8_t fieldCount = 1;
+    uint8_t col = 5;
+    size_t fieldWidth;
+    const char* curPos = rawData;
+    const char* endField;
     
-    fprintData(stdout, size, rawData);
+    while (*curPos != '\0')
+    {
+      endField = curPos;
+      while ((*endField != '|') && (*endField != '\0'))
+	endField++;
+      fieldCount++;
 
+      fieldWidth = endField - curPos + 1;
+      if (col + fieldWidth >= 80)
+      {
+	printf("\n%.3d: %*.*s", fieldCount, fieldWidth, fieldWidth, curPos);
+	col = 5 + fieldWidth;
+      }
+      else
+      {
+	printf("%*.*s", fieldWidth, fieldWidth, curPos);
+	col += fieldWidth;
+      }
+      
+      curPos = endField;
+      if (*curPos != '\0')
+	curPos++;
+    }
+
+    printf("\n");
+    
     delete [] rawData;
   }
 

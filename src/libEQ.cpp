@@ -181,7 +181,8 @@ uint8_t* decodeOpCode (uint8_t *data, uint32_t *len, uint8_t dir)
 	        valid_key[dir] = false;
 	    }
 
-	    printf ("uncompress failed on 0x%04x: %s\nno further attempts will be made until zone for direction %d.\n", opCode, zError (retval), dir);
+	    printf ("uncompress failed on 0x%04x: %d - %s\nno further attempts will be made until zone for direction %d.\n", 
+		    opCode, retval, zError (retval), dir);
 	    return NULL;
 	}
 //	printf ("clean uncompress on 0x%04x: %s\n", opCode, zError (retval));

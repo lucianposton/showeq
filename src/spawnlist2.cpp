@@ -572,13 +572,13 @@ void SpawnListWindow2::refresh(void)
   setUpdatesEnabled(false);
 
   // types of items to populate category with
-  itemType types[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
+  spawnItemType types[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
 
   const Item* item;
   SpawnListItem* litem;
 
   // iterate over all spawn types
-  for (uint8_t i = 0; i < (sizeof(types) / sizeof(itemType)) ; i++)
+  for (uint8_t i = 0; i < (sizeof(types) / sizeof(spawnItemType)) ; i++)
   {
     uint8_t level = 0;
     const ItemMap& itemMap = m_spawnShell->getConstMap(types[i]);
@@ -875,13 +875,13 @@ void SpawnListWindow2::populateSpawns(void)
   setUpdatesEnabled(false);
 
   // types of items to populate category with
-  itemType types[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
+  spawnItemType types[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
 
   const Item* item;
   SpawnListItem* litem;
 
   // iterate over all spawn types
-  for (uint8_t i = 0; i < (sizeof(types) / sizeof(itemType)); i++)
+  for (uint8_t i = 0; i < (sizeof(types) / sizeof(spawnItemType)); i++)
   {
     const ItemMap& itemMap = m_spawnShell->getConstMap(types[i]);
     ItemConstIterator it(itemMap);

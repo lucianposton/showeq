@@ -35,7 +35,7 @@ class GuildMgr : public QObject
 
   ~GuildMgr();
 
-  QString guildIdToName(int16_t);
+  QString guildIdToName(uint16_t);
 
  public slots:
   void worldGuildList(const char*, uint32_t);

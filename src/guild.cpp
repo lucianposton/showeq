@@ -36,9 +36,9 @@ GuildMgr::~GuildMgr()
 {
 }
 
-QString GuildMgr::guildIdToName(int16_t guildID)
+QString GuildMgr::guildIdToName(uint16_t guildID)
 {
-  if (guildID >= m_guildMap.size() || guildID < 0)
+  if (guildID >= m_guildMap.size())
     return "";
   return m_guildMap[guildID];
 }
@@ -86,7 +86,7 @@ void GuildMgr::readGuildList()
     worldGuildListStruct tmp;
      if (guildsfile.size() != sizeof(tmp.guilds))
      {
-	fprintf(stderr, "WARNING: guildsfile not loaded, expected size %d got %d\n",
+	fprintf(stderr, "WARNING: guildsfile not loaded, expected size %d got %ld\n",
                 sizeof(worldGuildListStruct), guildsfile.size()); 
 	return;
      }

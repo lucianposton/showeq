@@ -872,7 +872,7 @@ void SpawnList::populateCategory(const Category* cat)
   setUpdatesEnabled(false);
 
   // types of items to populate category with
-  itemType types[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer};
+  spawnItemType types[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer};
 
   int flags = 0;
   const ItemMap& itemMap = m_spawnShell->spawns();
@@ -882,7 +882,7 @@ void SpawnList::populateCategory(const Category* cat)
   SpawnListItem* catlitem = m_categoryListItems.find((void*)cat);
   
   // iterate over all spawn types
-  for (uint8_t i = 0; i < (sizeof(types) / sizeof(itemType)); i++)
+  for (uint8_t i = 0; i < (sizeof(types) / sizeof(spawnItemType)); i++)
   {
     const ItemMap& itemMap = m_spawnShell->getConstMap(types[i]);
     ItemConstIterator it(itemMap);
@@ -930,7 +930,7 @@ void SpawnList::populateCategory(const Category* cat)
 void SpawnList::populateSpawns(void)
 {
   // types of items to populate category with
-  itemType types[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
+  spawnItemType types[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
 
   int flags = 0;
   const Item* item;
@@ -947,7 +947,7 @@ void SpawnList::populateSpawns(void)
     CategoryListIterator cit(m_categoryMgr->getCategories());
    
     // iterate over all spawn types
-    for (uint8_t i = 0; i < (sizeof(types) / sizeof(itemType)); i++)
+    for (uint8_t i = 0; i < (sizeof(types) / sizeof(spawnItemType)); i++)
     {
       const ItemMap& itemMap = m_spawnShell->getConstMap(types[i]);
       ItemConstIterator it(itemMap);
@@ -1007,7 +1007,7 @@ void SpawnList::populateSpawns(void)
     // no categories, just add all the spawns
 
     // iterate over all spawn types
-    for (uint8_t i = 0; i < (sizeof(types) / sizeof(itemType)); i++)
+    for (uint8_t i = 0; i < (sizeof(types) / sizeof(spawnItemType)); i++)
     {
       const ItemMap& itemMap = m_spawnShell->getConstMap(types[i]);
       ItemConstIterator it(itemMap);

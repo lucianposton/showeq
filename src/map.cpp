@@ -614,6 +614,416 @@ void MapMgr::dumpInfo(QTextStream& out)
   out << endl;
 }
 
+void MapMgr::convertSOE (void)
+{
+  convertMap(0);
+  return;
+}
+
+void MapMgr::convertSEQ (void)
+{
+  convertMap(1);
+  return;
+}
+
+//belith
+void MapMgr::convertMap (bool direction)
+{
+  #ifdef DEBUGMAP
+  debug ("convertMap()");
+  #endif /* DEBUGMAP */
+
+  QString inFileName, outFileName;
+
+  if (direction)
+  {
+    inFileName = QFileDialog::getOpenFileName(MAPDIR, "*.map");
+    if (inFileName.isEmpty ())
+      return;
+    outFileName = QFileDialog::getSaveFileName(QString::null, "*.txt");
+    if (outFileName.isEmpty ())
+      return;
+  }
+  else
+  {
+    inFileName = QFileDialog::getOpenFileName(QString::null, "*.txt");
+    if (inFileName.isEmpty ())
+      return;
+    outFileName = QFileDialog::getSaveFileName(MAPDIR, "*.map");
+    if (outFileName.isEmpty ())
+      return;
+  }
+
+  printf("Attempting to convert map...\n");
+  printf("inFile : [%s format] %s\n", (direction) ? "SEQ" : "SOE", (const char*)inFileName);
+  printf("outFile: [%s format] %s\n", (direction) ? "SOE" : "SEQ", (const char*)outFileName);
+
+  // convert the map
+  if (direction)
+  {
+    convertSEQMap(inFileName, outFileName);
+  }
+  else
+  {
+    convertSOEMap(inFileName, outFileName);
+  }
+}
+
+#define	MAX_LINE_LENGTH 16384
+
+bool MapMgr::convertSOEMap(const QString& inFileName, const QString& outFileName)
+{
+  #ifdef DEBUGMAP
+  debug ("convertSOEMap()");
+  #endif /* DEBUGMAP */
+
+  FILE *inFile, *outFile;
+  float x1, y1, z1, x2, y2, z2;
+  int R, G, B;
+  int filelines = 0;
+  char line    [MAX_LINE_LENGTH];
+  char pointText[MAX_LINE_LENGTH];
+  
+  if (!(inFile = fopen((const char*)inFileName, "r")))
+  {
+    printf("Conversion FAILED inFile does not exist! [%s]\n", (const char*)inFileName);
+    return FALSE;
+  }
+  if (!(outFile = fopen((const char*)outFileName, "w")))
+  {
+    printf("Conversion FAILED outFile cannot be written! [%s]\n", (const char*)outFileName);
+    fclose(inFile);
+    return FALSE;
+  }
+  
+  fprintf(outFile, "ShowEQ Converted Map,ConvertedMap,0,0\n");
+
+  while (fgets(line, MAX_LINE_LENGTH, inFile) != NULL)
+  {
+    if (line[0] == '\0')
+      continue;
+    filelines++;
+    #ifdef DEBUGMAP
+    printf("Conversion of line %d: %s", filelines, line);
+    #endif
+    switch(line[0])
+    {
+      case 'L':
+      	sscanf(line, "L %f, %f, %f, %f, %f, %f, %d, %d, %d\n", 
+		&x1, &y1, &z1, &x2, &y2, &z2, &R, &G, &B);
+        // black lines on a black background == BAD
+        if (R < 20 && G < 20 && B < 20)
+        {
+          R = 196; 
+          G = 196;
+          B = 196;
+        }
+        fprintf(outFile, "M,line,#%0X%0X%0X,2,%d,%d,%d,%d,%d,%d\n",
+		R, G, B, -(int)x1, -(int)y1, (int)z1*10, -(int)x2, -(int)y2, (int)z2*10);
+        break;
+      case 'P':
+      	sscanf(line, "P %f, %f, %*f, %d, %d, %d, %*d, %[^\n]\n", &x1, &y1, &R, &G, &B, pointText);
+        if (!pointText)
+        {
+          printf("convertSOEMap: Skipping point with no name: %s\n", line);
+          continue;
+        }
+        // black text on a black background == BAD!!!
+        if (R < 20 && G < 20 && B < 20)
+        {
+          R = 255; 
+          G = 255;
+          B = 255;
+        }
+        for (unsigned int x = 0 ; x < strlen(pointText) ; x++)
+          if (pointText[x] == '_')
+            pointText[x] = ' ';
+            
+        fprintf(outFile, "P,%s,#%0X%0X%0X,%d,%d\n", pointText, R, G, B, -(int)x1, -(int)y1);
+        break;
+      default:
+        printf("convertSOEMap: Unknown line %s\n", line);
+        break;
+    }
+    // Belith -- I know this isn't very elegant, but there is problems if it's not flushed
+    // and it's not exactally a function that will run often!
+    fflush(outFile);
+  }
+  fclose(inFile);
+  fclose(outFile);
+  return TRUE;
+}
+
+bool MapMgr::convertSEQMap(const QString& inFileName, const QString& outFileName)
+{
+  #ifdef DEBUGMAP
+  debug ("convertSEQMap()");
+  #endif /* DEBUGMAP */
+
+  FILE *inFile, *outFile;
+  int mx, my, mz;
+  char* tempStr;
+  int filelines = 0;
+  char line    [MAX_LINE_LENGTH];
+  char pointText[MAX_LINE_LENGTH];
+  char tempstr [MAX_LINE_LENGTH];
+  int globHeight=0;
+  bool globHeightSet = false;
+  int lastX = 0, lastY = 0, lastZ = 0;
+  int R = 0, G = 0, B = 0;
+  int lastSet = 0;
+  QString name;
+  char *color;
+  char tempColor[MAX_LINE_LENGTH];
+  uint numPoints;
+  
+  if (!(inFile = fopen((const char*)inFileName, "r")))
+  {
+    printf("Conversion FAILED inFile does not exist! [%s]\n", (const char*)inFileName);
+    return FALSE;
+  }
+  if (!(outFile = fopen((const char*)outFileName, "w")))
+  {
+    printf("Conversion FAILED outFile cannot be written! [%s]\n", (const char*)outFileName);
+    fclose(inFile);
+    return FALSE;
+  }
+
+  while (fgets(line, MAX_LINE_LENGTH, inFile) != NULL)
+  {
+    filelines++;
+
+    // skip the map name line
+    if (filelines == 1)
+      continue;
+
+    #ifdef DEBUGMAP
+    printf("Conversion of line %d: %s", filelines, line);
+    #endif
+
+    strcpy (tempstr, strtok (line, ","));
+
+    // Ya gotta do whatcha gotta do!
+    fflush(outFile);
+
+    switch (tempstr[0]) 
+    {
+      case 'A':  //Creates aggro ranges. (useless here)
+        break;
+
+      case 'H':  //Sets global height for L lines.
+        tempStr = strtok (NULL, ",\n");
+        if (tempStr == NULL) 
+        {
+          fprintf(stderr, "Line %d in map '%s' has an H marker with no Z!\n", 
+		filelines, (const char*)inFileName);
+          break;
+        }
+        globHeight = atoi(tempStr);
+        globHeightSet = true;
+        break;
+
+      case 'Z': // ZEM Values (useless here)
+        break;
+
+      case 'L': // Standard line with no Z value
+        // Line Name (useless)
+        name = strtok(NULL, ",");
+        if (name.isNull()) 
+        {
+          fprintf(stderr, "Error reading line name on line %d in map '%s'!\n", 
+		filelines, (const char*)inFileName);
+          continue;
+        }
+
+        // Line Color
+        color = strtok(NULL, ",");
+        if (color[0] == '\0')
+        {
+          fprintf(stderr, "Error reading line color on line %d in map '%s'!\n", 
+		filelines, (const char*)inFileName);
+          continue;
+        }
+
+        if (color[0] != '#')
+        {
+          // this is kinda a wierd hack eh? but it works!
+          // convert name to #FFFFFF style
+          QColor colorTemp = QColor( color );
+          sprintf(tempColor, "%s\n", (const char*)colorTemp.name());
+        }
+        // hex to rgb
+        sscanf(tempColor, "#%2X%2X%2X", &R, &G, &B);
+
+        // Number of points (useless)
+        tempStr = strtok (NULL, ",");
+        if (tempStr == NULL) 
+        {
+          fprintf(stderr, "Error reading number of points on line %d in map '%s'!\n",
+		filelines, (const char*)inFileName);
+          continue;
+        }
+        numPoints = 0;
+        while (1) 
+        {
+          // X coord
+          tempStr = strtok (NULL, ",\n");
+          if (tempStr == NULL)
+            break;
+          mx = atoi(tempStr);
+
+          // Y coord
+          tempStr = strtok (NULL, ",\n");
+          if (tempStr == NULL) 
+          {
+            fprintf(stderr, "Line %d in map '%s' has an X coordinate with no Y!\n", 
+		filelines, (const char*)inFileName);
+            continue;
+          }
+          my = atoi(tempStr);
+
+          if (lastSet)
+          {
+            fprintf(outFile, "L %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
+		-(int)lastX, -(int)lastY, (globHeightSet) ? (int)globHeight/10 : 0,
+		-(int)mx, -(int)my, (globHeightSet) ? (int)globHeight/10 : 0, R, G, B);
+            lastX = mx;
+            lastY = my;
+          }
+          else
+          {
+            lastX = mx;
+            lastY = my;
+            lastSet = 1;
+          }
+        }
+        numPoints++;
+        lastX = 0;
+        lastY = 0;
+        lastSet = 0;
+        break;
+      case 'M': // line with a Z value YAY!
+        // Line Name (useless again)
+        name = strtok(NULL, ",");
+        if (name.isNull()) 
+        {
+          fprintf(stderr, "Error reading line name on line %d in map '%s'!\n", 
+		filelines, (const char*)inFileName);
+          continue;
+        }
+
+        // Line Color
+        color = strtok(NULL, ",");
+        if (color[0] == '\0')
+        {
+          fprintf(stderr, "Error reading line color on line %d in map '%s'!\n", 
+		filelines, (const char*)inFileName);
+          continue;
+        }
+
+        if (color[0] != '#')
+        {
+          // this is kinda a wierd hack eh? but it works!
+          // convert name to #FFFFFF style
+          QColor colorTemp = QColor( color );
+          sprintf(tempColor, "%s\n", (const char*)colorTemp.name());
+        }
+        // hex to rgb
+        sscanf(tempColor, "#%2X%2X%2X", &R, &G, &B);
+
+        // Number of points (useless again)
+        tempStr = strtok (NULL, ",");
+        if (tempStr == NULL) 
+        {
+          fprintf(stderr, "Error reading number of points on line %d in map '%s'!\n", 
+		filelines, (const char*)inFileName);
+          continue;
+        }
+
+        numPoints = 0;
+        while (1) 
+        {
+          mx = my = mz = 0;
+
+          // X coord
+          tempStr = strtok (NULL, ",\n");
+          if (tempStr == NULL)
+            break;
+          mx = atoi(tempStr);
+
+          // Y coord
+          tempStr = strtok (NULL, ",\n");
+          if (tempStr == NULL) 
+          {
+            fprintf(stderr, "Line %d in map '%s' has an X coordinate with no Y!\n", 
+		filelines, (const char*)inFileName);
+            continue;
+          }
+          my = atoi(tempStr);
+
+          // Z coord
+          tempStr = strtok (NULL, ",\n");
+          if (tempStr == NULL) 
+          {
+            fprintf(stderr, "Line %d in map '%s' has X and Y coordinates with no Z!\n", 
+		filelines, (const char*)inFileName);
+            continue;
+          }
+          mz = atoi(tempStr);
+
+          if (lastSet)
+          {
+            fprintf(outFile, "L %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
+		-(int)lastX, -(int)lastY, lastZ/10,
+		-(int)mx, -(int)my, mz/10, R, G, B);
+            lastX = mx;
+            lastY = my;
+          }
+          else
+          {
+            lastX = mx;
+            lastY = my;
+            lastSet = 1;
+          }
+
+          // increment point count
+          numPoints++;
+        }
+        lastX = 0;
+        lastY = 0;
+        lastSet = 0;
+        break;
+
+      case 'P':
+        sprintf(pointText, "%s", strtok (NULL,","));
+        color = strtok(NULL, ","); // Location color
+
+        if (color[0] != '#')
+        {
+          // this is kinda a wierd hack eh? but it works!
+          // convert name to #FFFFFF style
+          QColor colorTemp = QColor( color );
+          sprintf(tempColor, "%s\n", (const char*)colorTemp.name());
+        }
+        // hex to rgb
+        sscanf(tempColor, "#%2X%2X%2X", &R, &G, &B);
+
+        mx = atoi (strtok (NULL, ",\n"));
+        my = atoi (strtok (NULL, ",\n"));
+
+        for (unsigned int x = 0 ; x < strlen(pointText) ; x++)
+          if (pointText[x] == ' ')
+            pointText[x] = '_';
+
+        fprintf(outFile, "P %d, %d, %d, %d, %d, %d, 3, %s\n", -(int)mx, -(int)my, 0, R, G, B, pointText);
+        break;
+    }
+  }
+  fclose(inFile);
+  fclose(outFile);
+  return TRUE;
+}
+
 //----------------------------------------------------------------------
 // MapMenu
 MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
@@ -689,6 +1099,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_filtered = subMenu->insertItem("Filtered", this, SLOT(toggle_filtered(int)));
   m_id_map = subMenu->insertItem("Map Lines", this, SLOT(toggle_map(int)));
   m_id_velocity = subMenu->insertItem("Velocity Lines",	this, SLOT(toggle_velocity(int)));
+  m_id_lineToSelectedSpawnPoint = subMenu->insertItem("Line To Selected SpawnPoint",	this, SLOT(toggle_lineToSelectedSpawnPoint(int)));
   m_id_animate = subMenu->insertItem("Animate Spawns", this, SLOT(toggle_animate(int)));
   m_id_player = subMenu->insertItem("Player", this, SLOT(toggle_player(int)));
   m_id_playerBackground = subMenu->insertItem("Player Background", this, SLOT(toggle_playerBackground(int)));
@@ -861,6 +1272,7 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_filtered, m_map->showFiltered());
   setItemChecked(m_id_map, m_map->showLines());
   setItemChecked(m_id_velocity, m_map->showVelocityLines());
+  setItemChecked(m_id_lineToSelectedSpawnPoint, m_map->showLineToSelectedSpawnPoint());
   setItemChecked(m_id_animate, m_map->animate());
   setItemChecked(m_id_player, m_map->showPlayer());
   setItemChecked(m_id_playerBackground, m_map->showPlayerBackground());
@@ -992,6 +1404,11 @@ void MapMenu::toggle_racePvP(int itemId)
 void MapMenu::toggle_velocity(int itemId)
 {
   m_map->setShowVelocityLines(!m_map->showVelocityLines());
+}
+
+void MapMenu::toggle_lineToSelectedSpawnPoint(int itemId)
+{
+  m_map->setShowLineToSelectedSpawnPoint(!m_map->showLineToSelectedSpawnPoint());
 }
 
 void MapMenu::toggle_animate(int itemId)
@@ -1236,6 +1653,9 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "VelocityLines";
   m_showVelocityLines = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
+
+  tmpPrefString = "ShowLineToSelectedSpawnPoint";
+  m_showLineToSelectedSpawnPoint = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
   tmpPrefString = "SpawnDepthFilter";
   m_spawnDepthFilter = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
@@ -2223,6 +2643,17 @@ void Map::setShowVelocityLines(bool val)
     refreshMap ();
 }
 
+void Map::setShowLineToSelectedSpawnPoint(bool val) 
+{ 
+  m_showLineToSelectedSpawnPoint = val; 
+  
+  QString tmpPrefString = "ShowLineToSelectedSpawnPoint";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showLineToSelectedSpawnPoint);
+
+  if(!m_cacheChanges)
+    refreshMap ();
+}
+
 #ifdef DEBUG
 void Map::setShowDebugInfo(bool val) 
 { 
@@ -2919,8 +3350,9 @@ void Map::paintMap (QPainter * p)
     m_lastFlash.start(); 
   }
 
-  if ((!m_zoneMgr->isZoning()) && 
-      (m_player->id() != 0))
+  if ((m_player->validPos()) ||
+      ((!m_zoneMgr->isZoning()) && 
+       (m_player->id() != 0)))
   {
     if (m_showPlayerBackground)
       paintPlayerBackground(m_param, tmp);
@@ -2948,6 +3380,7 @@ void Map::paintMap (QPainter * p)
     paintSpawns(m_param, tmp, drawTime);
 
   paintSelectedSpawnSpecials(m_param, tmp, drawTime);
+  paintSelectedSpawnPointSpecials(m_param, tmp, drawTime);
 
 #ifdef DEBUG
   // increment paint count
@@ -3937,6 +4370,58 @@ void Map::paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
   }
 }
 
+void Map::paintSelectedSpawnPointSpecials(MapParameters& param, 
+					  QPainter& p,
+					  const QTime& drawTime)
+{
+  const SpawnPoint* sp;
+
+  // blue flashing square around selected spawn point
+  sp = m_spawnMonitor->selected();
+
+  // if no spawn point selected, or not showing a line to selected 
+  // spawn point and not flashing, just return
+  if ((sp == NULL) || (!m_showLineToSelectedSpawnPoint  && !m_flash))
+    return;
+
+  // calculate the pen color
+  if ((sp->diffTime() == 0) || (sp->deathTime() == 0))
+    p.setPen( darkGray );
+  else
+  {
+    unsigned char age = sp->age();
+    
+    if ( age == 255 )
+      p.setPen(gray);      
+    
+    if ( age > 220 )
+      p.setPen( red );
+    else
+      p.setPen( QColor( age, age, 0 ) );
+  }
+
+  int spawnXOffset = m_param.calcXOffsetI(sp->x());
+  int spawnYOffset = m_param.calcYOffsetI(sp->y());
+
+  if (m_showLineToSelectedSpawnPoint)
+  {
+    p.drawLine(m_param.playerXOffset(),
+	       m_param.playerYOffset(),
+	       spawnXOffset, 
+	       spawnYOffset);
+  }
+
+  if (m_flash)
+  {
+    p.setBrush(NoBrush);
+    p.setPen(blue);
+    p.drawRect(spawnXOffset - m_drawSize,
+	       spawnYOffset - m_drawSize, 
+	       m_drawSizeWH, m_drawSizeWH);
+  }
+
+}
+
 void Map::paintSpawnPoints( MapParameters& param, QPainter& p )
 {
   const QRect& screenBounds = m_param.screenBounds();
@@ -3989,25 +4474,6 @@ void Map::paintSpawnPoints( MapParameters& param, QPainter& p )
     // draw a small x at the spot
     p.drawLine( x, y - m_marker0Size, x, y + m_marker0Size );
     p.drawLine( x - m_marker0Size, y, x + m_marker0Size, y );
-  }
-
-  // blue flashing square around selected spawn point
-  sp = m_spawnMonitor->selected();
-
-  if ((sp != NULL) && (m_flash))
-  {
-    // make sure spawn point is within bounds
-    if (!inRect(screenBounds, sp->x(), sp->y()) ||
-	(m_spawnDepthFilter &&
-	 ((sp->z() > m_param.playerHeadRoom()) ||
-	  (sp->z() < m_param.playerFloorRoom()))))
-      return;
-
-    p.setBrush(NoBrush);
-    p.setPen(blue);
-    p.drawRect(m_param.calcXOffsetI(sp->x()) - m_drawSize,
-	       m_param.calcYOffsetI(sp->y()) - m_drawSize, 
-	       m_drawSizeWH, m_drawSizeWH);
   }
 }
 
@@ -4297,11 +4763,11 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
   EQPoint testPoint;
 
   const Item* item;
-  itemType itemTypes[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
+  spawnItemType itemTypes[] = { tSpawn, tDrop, tCoins, tDoors, tPlayer };
   const bool* showType[] = { &m_showSpawns, &m_showDrops, &m_showCoins, 
 			     &m_showDoors, &m_showPlayer };
   
-  for (uint8_t i = 0; i < (sizeof(itemTypes) / sizeof(itemType)); i++)
+  for (uint8_t i = 0; i < (sizeof(itemTypes) / sizeof(spawnItemType)); i++)
   {
     if (!*showType[i])
       continue;

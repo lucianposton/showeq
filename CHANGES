@@ -1,8 +1,52 @@
+dohpaZ (09/28/03)
+---------------------
++ Updated version to 4.3.13
++ Removed confusing, but benign "Running without libEQ.cpp message
++ Updated races.h from posts by uRit1u2CBBA=, curio, icyman, pooz, and patch #812234
+  "More races.h data" from llaffer.
++ Modified the map code to paint the specials for the selected spawn
+  point even if showSpawnPoints is off.  Also, added an option to draw 
+  a line (of the appropriate color) to the selected spawn point (default's
+  to off).
++ Incorporated Belith/UnGod's map converter patch from the forums
++ Added a mention to INSTALL.newbies to the README (not that anyone does
+  read the README, but heh, gotta try... ;))
++ Applied patch #803848 9-10-2003 -- Shared Platinum Slot, compile warning
++ Applied patch #807103 Con Color Patch for Levels 57-65
++ Started coordinating opcodes/structures with the EQEmu team
++ Beginnings of Assorted cleanup of everquest.h
++ Added some spellbook handling and the ability to dump your spellbook.
++ Updated slot_to_name to support new slot numbers
++ Removed the PktLogger from logger.{cpp, h} and the nonsense hooking it in.  
+  May it rest in pieces.  Left the SpawnLogger for now... 
++ A bunch of cleanup in SpellShell and some in SpellList
++ Added BuffDropCode handling to SpellShell
++ Added Spells() class that loads spells_en.txt and provides access to its data
++ Improved load speed of eqstr_en.txt for formatted messsage strings.
+  It turns out QTextStream::readLine() is ridiculously slow.
++ Minor optimizations and cleanup in EQPacket::dispatchZoneData()
++ Added support for the new item packet format.
++ Assorted bug fixes and optimizations
++ renamed old spells.h to staticspells.h until I figure out how to handle it..
++ updated spells_en2spellsh.pl to use new format and write to new file
++ Fixed "no skittles" issue related to the packet format (changes or just
+  a bit we didn't know about being used more often).  For the packet jocks in the
+  crowd EQPacketFormatRaw::m_flagsLo.m_unknown2 is now .m_nak, as in negative
+  acknowledgement.  Apparently this bit is either new or just really being excercised
+  alot with the new item data format (which may explain why naked or near naked characters
+  saw it less, and why it happens more on less optimal networks).
+ + Integrated the zone name fixing half of curio's ldonzonefilter.patch file until a better
+   solution can be found. I don't agree with the filter part and so didn't integrate it.  
+  
+NOTE: This release requires spells_en.txt to be placed in the directory pointed
+      at by LOGDIR, typically /usr/local/share/showeq, in order for spell
+      names and information to appear properly.
+
 dohpaZ (09/10/03)
 ---------------------
 + Updated version to 4.3.12
 + Applied patch #802406 "Patch for Combat Window" from UnGod (belith)
-+ Applied patch 802938 "Some Updates to races.h" from llaffer
++ Applied patch #802938 "Some Updates to races.h" from llaffer
 + Fixed a couple bugs in libEQ.cpp
 + Fixed packet.cpp to use BUFSIZ instead of 1500 for pcap snaplen
 + Updated to 09/09/03 patch - structure changes and new opcodes (some nods
