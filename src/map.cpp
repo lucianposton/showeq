@@ -4519,16 +4519,11 @@ void MapFrame::savePrefs(void)
   QString prefString = preferenceName();
   QString tmpPrefString;
 
-  tmpPrefString = "SaveSize";
-  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, true))
+  tmpPrefString = "SavePosition";
+  if (pSEQPrefs->getPrefBool(tmpPrefString, "Interface", true))
   {
     tmpPrefString = "WindowSize";
     pSEQPrefs->setPrefSize(tmpPrefString, prefString, size());
-  }
-
-  tmpPrefString = "SavePosition";
-  if (pSEQPrefs->getPrefBool(tmpPrefString, prefString, true))
-  {
     tmpPrefString = "WindowPos";
     pSEQPrefs->setPrefPoint(tmpPrefString, prefString, pos());
   }

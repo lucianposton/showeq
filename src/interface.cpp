@@ -219,10 +219,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    pFileMenu->insertItem("&Save Preferences", this, SLOT(savePrefs()), CTRL+Key_S);
    pFileMenu->insertItem("Open &Map", m_mapMgr, SLOT(loadMap()), Key_F1);
    pFileMenu->insertItem("Sa&ve Map", m_mapMgr, SLOT(saveMap()), Key_F2);
-   pFileMenu->insertItem("&Reload Filters", m_filterMgr, SLOT(loadFilters()), Key_F3);
-   pFileMenu->insertItem("&Save Filters", m_filterMgr, SLOT(saveFilters()), Key_F4);
-   pFileMenu->insertItem("Edit Filters", this, SLOT(launch_editor_filters()));
-   pFileMenu->insertItem("Select Filter File", this, SLOT(select_filter_file()));
    pFileMenu->insertItem("Add Spawn Category", this, SLOT(addCategory()) , ALT+Key_C);
    pFileMenu->insertItem("Rebuild SpawnList", this, SLOT(rebuildSpawnList()) , ALT+Key_R);
    pFileMenu->insertItem("Reload Categories", this, SLOT(reloadCategories()) , CTRL+Key_R);
@@ -235,32 +231,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
      pFileMenu->insertItem("Dec Playback Speed", m_packet, SLOT(decPlayback()), CTRL+Key_Z);
    }
    pFileMenu->insertItem("&Quit", qApp, SLOT(quit()));
-
-   // Debug menu
-   //pDebugMenu = new QPopupMenu;
-   QPopupMenu* pDebugMenu = new QPopupMenu;
-   menuBar()->insertItem("&Debug", pDebugMenu);
-   pDebugMenu->insertItem("List &Spawns", this, SLOT(listSpawns()), ALT+CTRL+Key_S);
-   pDebugMenu->insertItem("List &Drops", this, SLOT(listDrops()), ALT+CTRL+Key_D);
-   pDebugMenu->insertItem("List &Coins", this, SLOT(listCoins()), ALT+CTRL+Key_C);
-   pDebugMenu->insertItem("List &Map Info", this, SLOT(listMapInfo()), ALT+CTRL+Key_M);
-   pDebugMenu->insertItem("Dump &Spawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_S);
-   pDebugMenu->insertItem("Dump &Drops", this, SLOT(dumpDrops()), ALT+SHIFT+CTRL+Key_D);
-   pDebugMenu->insertItem("Dump &Coins", this, SLOT(dumpCoins()), ALT+SHIFT+CTRL+Key_C);
-   pDebugMenu->insertItem("Dump Map &Info", this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
-   pDebugMenu->insertItem("&List Filters", m_filterMgr, SLOT(listFilters()), ALT+Key_I);
-
-   // Log menu
-   QPopupMenu* pLogMenu = new QPopupMenu;
-   menuBar()->insertItem("Lo&g", pLogMenu);
-   pLogMenu->setCheckable(true);
-   m_id_log_AllPackets = pLogMenu->insertItem("All Packets", this, SLOT(toggle_log_AllPackets()), Key_F5);
-   m_id_log_ZoneData   = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F6);
-   m_id_log_UnknownData= pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F7);
-   menuBar()->setItemChecked (m_id_log_AllPackets , showeq_params->logAllPackets);
-   menuBar()->setItemChecked (m_id_log_ZoneData   , showeq_params->logZonePackets);
-   menuBar()->setItemChecked (m_id_log_UnknownData, showeq_params->logUnknownZonePackets);
-
 
    // View menu
    QPopupMenu* pViewMenu = new QPopupMenu;
@@ -488,7 +458,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    if (pSEQPrefs->getPrefBool("ShowSpellList", section, false))
        toggle_view_SpellList();
 
-   
 
    // Options Menu
    QPopupMenu* pOptMenu = new QPopupMenu;
@@ -505,6 +474,19 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_id_opt_PvPDeity  = pOptMenu->insertItem("PvP Deity", this, SLOT(toggle_opt_PvPDeity()));
    x = pOptMenu->insertItem("Create Unknown Spawns", this, SLOT(toggle_opt_CreateUnknownSpawns(int)));
    menuBar()->setItemChecked (x, showeq_params->createUnknownSpawns);
+   x = pOptMenu->insertItem("Show Spell Messages", this, SLOT(toggle_opt_ShowSpellMessages(int)));
+   menuBar()->setItemChecked (x, showeq_params->showSpellMsgs);
+   x = pOptMenu->insertItem("Record Spawn Walk Paths", this, SLOT(toggle_opt_WalkPathRecord(int)));
+   menuBar()->setItemChecked (x, showeq_params->walkpathrecord);
+
+   QPopupMenu* subMenu = new QPopupMenu;
+   QSpinBox* walkPathLengthSpinBox = new QSpinBox(0, 128, 1, subMenu);
+   walkPathLengthSpinBox->setValue(showeq_params->walkpathlength);
+   connect(walkPathLengthSpinBox, SIGNAL(valueChanged(int)),
+	   this, SLOT(set_opt_WalkPathLength(int)));
+   subMenu->insertItem(walkPathLengthSpinBox);
+   pOptMenu->insertItem("Walk Path Length", 
+			subMenu);
    
    menuBar()->setItemChecked (m_id_opt_Fast, showeq_params->fast_machine);
    menuBar()->setItemChecked (m_id_opt_ConSelect, showeq_params->con_select);
@@ -531,7 +513,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 			      SLOT(set_opt_save_BaseFilename(void)));
 
    pSaveStateMenu->insertSeparator(-1);
-   QPopupMenu* subMenu = new QPopupMenu;
+   subMenu = new QPopupMenu;
    QSpinBox* saveFrequencySpinBox = new QSpinBox(1, 320, 1, subMenu);
    saveFrequencySpinBox->setValue(showeq_params->saveSpawnsFrequency / 1000);
    connect(saveFrequencySpinBox, SIGNAL(valueChanged(int)),
@@ -552,7 +534,36 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_netMenu->setItemChecked(x, showeq_params->realtime);
    x = m_netMenu->insertItem("&Broken Decode", this, SLOT(toggle_net_broken_decode(int)));
    m_netMenu->setItemChecked(x, showeq_params->broken_decode);
+
    m_netMenu->insertSeparator(-1);
+   // Log menu
+   QPopupMenu* pLogMenu = new QPopupMenu;
+   m_netMenu->insertItem("Lo&g", pLogMenu);
+   pLogMenu->setCheckable(true);
+   m_id_log_AllPackets = pLogMenu->insertItem("All Packets", this, SLOT(toggle_log_AllPackets()), Key_F5);
+   m_id_log_ZoneData   = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F6);
+   m_id_log_UnknownData= pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F7);
+   menuBar()->setItemChecked (m_id_log_AllPackets , showeq_params->logAllPackets);
+   menuBar()->setItemChecked (m_id_log_ZoneData   , showeq_params->logZonePackets);
+   menuBar()->setItemChecked (m_id_log_UnknownData, showeq_params->logUnknownZonePackets);
+
+   // OpCode Monitor
+   QPopupMenu* pOpCodeMenu = new QPopupMenu;
+   m_netMenu->insertItem("OpCode Monitor", pOpCodeMenu);
+   if (showeq_params->monitorOpCode_Usage == true)
+       pOpCodeMenu->insertItem("Disable &OpCode Monitoring", this,
+			      SLOT(ToggleOpCodeMonitoring(int)), CTRL+ALT+Key_O);
+   else
+       pOpCodeMenu->insertItem("Enable &OpCode Monitoring", this,
+			      SLOT(ToggleOpCodeMonitoring(int)), CTRL+ALT+Key_O);
+   pOpCodeMenu->insertItem("&Reload Monitored OpCode List", this,
+			  SLOT(ReloadMonitoredOpCodeList()), CTRL+ALT+Key_R);
+   m_id_view_UnknownData = pOpCodeMenu->insertItem("Unknown Data", this, SLOT(toggle_view_UnknownData()) , Key_F8);
+   viewUnknownData = false;
+   menuBar()->setItemChecked(m_id_view_UnknownData, viewUnknownData);
+   m_netMenu->insertSeparator(-1);
+
+   // Advanced menu
    subMenu = new QPopupMenu;
    QPopupMenu* subSubMenu = new QPopupMenu;
    QSpinBox* arqSeqGiveUpSpinBox = new QSpinBox(32, 256, 8, subSubMenu);
@@ -614,23 +625,64 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    }
    connect (m_charRaceMenu, SIGNAL(activated(int)), this, SLOT(SetDefaultCharacterRace(int)));
 
-   // OpCode Monitor
-   QPopupMenu* pOpCodeMenu = new QPopupMenu;
-   menuBar()->insertItem("OpCode Monitor", pOpCodeMenu);
-   if (showeq_params->monitorOpCode_Usage == true)
-       pOpCodeMenu->insertItem("Disable &OpCode Monitoring", this,
-			      SLOT(ToggleOpCodeMonitoring(int)), CTRL+ALT+Key_O);
-   else
-       pOpCodeMenu->insertItem("Enable &OpCode Monitoring", this,
-			      SLOT(ToggleOpCodeMonitoring(int)), CTRL+ALT+Key_O);
-   pOpCodeMenu->insertItem("&Reload Monitored OpCode List", this,
-			  SLOT(ReloadMonitoredOpCodeList()), CTRL+ALT+Key_R);
-   m_id_view_UnknownData = pOpCodeMenu->insertItem("Unknown Data", this, SLOT(toggle_view_UnknownData()) , Key_F8);
-   viewUnknownData = false;
-   menuBar()->setItemChecked(m_id_view_UnknownData, viewUnknownData);
-   
+   // Filters Menu
+   QPopupMenu* filterMenu = new QPopupMenu;
+   menuBar()->insertItem( "Fi&lters" , filterMenu);
+   filterMenu->setCheckable(true);
+
+   filterMenu->insertItem("&Reload Filters", m_filterMgr, SLOT(loadFilters()), Key_F3);
+   filterMenu->insertItem("&Save Filters", m_filterMgr, SLOT(saveFilters()), Key_F4);
+   filterMenu->insertItem("&Edit Filters", this, SLOT(launch_editor_filters()));
+   filterMenu->insertItem("Select Fil&ter File", this, SLOT(select_filter_file()));
+
+   x = filterMenu->insertItem("&Is Case Sensitive", this, SLOT(toggle_filter_Case(int)));
+   filterMenu->setItemChecked(x, showeq_params->spawnfilter_case);
+   x = filterMenu->insertItem("&Display Alert Info", this, SLOT(toggle_filter_AlertInfo(int)));
+   filterMenu->setItemChecked(x, 
+			      pSEQPrefs->getPrefBool("AlertInfo", "Filters"));
+   x = filterMenu->insertItem("&Use Audio Device", this, SLOT(toggle_filter_Audio(int)));
+   filterMenu->setItemChecked(x, showeq_params->spawnfilter_audio);
+
+   // Filter -> Log
+   QPopupMenu* filterLogMenu = new QPopupMenu;
+   filterLogMenu->setCheckable(true);
+   filterMenu->insertItem("&Log", filterLogMenu);
+   x = filterLogMenu->insertItem( "Locates");
+   filterLogMenu->setItemParameter(x, 1);
+   filterLogMenu->setItemChecked(x, showeq_params->spawnfilter_loglocates);
+   x = filterLogMenu->insertItem( "Hunts");
+   filterLogMenu->setItemParameter(x, 2);
+   filterLogMenu->setItemChecked(x, showeq_params->spawnfilter_loghunts);
+   x = filterLogMenu->insertItem( "Cautions");
+   filterLogMenu->setItemParameter(x, 3);
+   filterLogMenu->setItemChecked(x, showeq_params->spawnfilter_logcautions);
+   x = filterLogMenu->insertItem( "Dangers");
+   filterLogMenu->setItemParameter(x, 4);
+   filterLogMenu->setItemChecked(x, showeq_params->spawnfilter_logdangers);
+   connect(filterLogMenu, SIGNAL(activated(int)),
+	   this, SLOT(toggle_filter_Log(int)));
+
+   // Filter -> Commands
+   QPopupMenu* filterCmdMenu = new QPopupMenu;
+   filterMenu->insertItem("&Audio Commands", filterCmdMenu);
+   x = filterCmdMenu->insertItem( "Spawn...");
+   filterCmdMenu->setItemParameter(x, 1);
+   x = filterCmdMenu->insertItem( "DeSpawn...");
+   filterCmdMenu->setItemParameter(x, 2);
+   x = filterCmdMenu->insertItem( "Death...");
+   filterCmdMenu->setItemParameter(x, 3);
+   x = filterCmdMenu->insertItem( "Locate...");
+   filterCmdMenu->setItemParameter(x, 4);
+   x = filterCmdMenu->insertItem( "Caution...");
+   filterCmdMenu->setItemParameter(x, 5);
+   x = filterCmdMenu->insertItem( "Hunt...");
+   filterCmdMenu->setItemParameter(x, 6);
+   x = filterCmdMenu->insertItem( "Danger...");
+   filterCmdMenu->setItemParameter(x, 7);
+   connect(filterCmdMenu, SIGNAL(activated(int)),
+	   this, SLOT(set_filter_AudioCommand(int)));
+
    // Interface Menu
-   //pInterfaceMenu = new QPopupMenu;
    QPopupMenu* pInterfaceMenu = new QPopupMenu;
    menuBar()->insertItem( "&Interface" , pInterfaceMenu);
 
@@ -642,7 +694,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    QPopupMenu* pStyleMenu = new QPopupMenu;
    pInterfaceMenu->insertItem( "&Style", pStyleMenu);
    pStyleMenu->setCheckable(TRUE);
-   pStyleMenu->insertItem( "Platinum (Macintosh)");
+   x = pStyleMenu->insertItem( "Platinum (Macintosh)");
    pStyleMenu->setItemParameter(x, 1);
    IDList_StyleMenu.append(x);
    x = pStyleMenu->insertItem( "Windows (Default)");
@@ -707,6 +759,28 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    }
     
    connect (m_windowCaptionMenu, SIGNAL(activated(int)), this, SLOT(set_interface_WindowCaption(int)));
+   x = pInterfaceMenu->insertItem("Save Window Sizes & Positions", this, SLOT(toggle_opt_SavePosition(int)));
+   menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("SavePosition", 
+							"Interface",
+							true));
+   x = pInterfaceMenu->insertItem("Restore Window Positions", this, SLOT(toggle_opt_UseWindowPos(int)));
+   menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("UseWindowPos", 
+							"Interface",
+							true));
+
+   // Debug menu
+   //pDebugMenu = new QPopupMenu;
+   QPopupMenu* pDebugMenu = new QPopupMenu;
+   menuBar()->insertItem("&Debug", pDebugMenu);
+   pDebugMenu->insertItem("List &Spawns", this, SLOT(listSpawns()), ALT+CTRL+Key_S);
+   pDebugMenu->insertItem("List &Drops", this, SLOT(listDrops()), ALT+CTRL+Key_D);
+   pDebugMenu->insertItem("List &Coins", this, SLOT(listCoins()), ALT+CTRL+Key_C);
+   pDebugMenu->insertItem("List &Map Info", this, SLOT(listMapInfo()), ALT+CTRL+Key_M);
+   pDebugMenu->insertItem("Dump &Spawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_S);
+   pDebugMenu->insertItem("Dump &Drops", this, SLOT(dumpDrops()), ALT+SHIFT+CTRL+Key_D);
+   pDebugMenu->insertItem("Dump &Coins", this, SLOT(dumpCoins()), ALT+SHIFT+CTRL+Key_C);
+   pDebugMenu->insertItem("Dump Map &Info", this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
+   pDebugMenu->insertItem("&List Filters", m_filterMgr, SLOT(listFilters()), ALT+Key_I);
 
 ////////////////////
 // QStatusBar creation
@@ -1252,7 +1326,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 					 pMsgDlg->size());
         pMsgDlg->resize(s);
         pMsgDlg->show();
-        if (pSEQPrefs->getPrefBool("UseWindowPos", section, 0))
+        if (pSEQPrefs->getPrefBool("UseWindowPos", section, true))
 	{
 	  QPoint p = pSEQPrefs->getPrefPoint("WindowPos", msgSection, 
 					     pMsgDlg->pos());
@@ -1332,12 +1406,13 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
 
    // set mainwindow Geometry
+   section = "Interface";
    s = pSEQPrefs->getPrefSize("WindowSize", section, size());
 #ifdef DEBUG
    printf("Resizing %d/%d\n", s.width(), s.height());
 #endif
    resize(s);
-   if (pSEQPrefs->getPrefBool("UseWindowPos", section, 0)) 
+   if (pSEQPrefs->getPrefBool("UseWindowPos", section, true)) 
    {
      p = pSEQPrefs->getPrefPoint("WindowPos", section, pos());
 #ifdef DEBUG
@@ -1658,7 +1733,8 @@ EQInterface::savePrefs(void)
 {
    printf("==> EQInterface::savePrefs()\n");
    if( isVisible() ) {
-     QString section = "Interface";
+     QString section;
+     QString interfaceSection = "Interface";
      QString tempStr;
 
       // send savePrefs signal out
@@ -1668,7 +1744,7 @@ EQInterface::savePrefs(void)
       if(m_expWindow) 
       {
 	section = "Experience";
-	if (pSEQPrefs->getPrefBool("SavePosition", section, false)) 
+	if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
 	{
 	  pSEQPrefs->setPrefPoint("WindowPos", section, m_expWindow->pos());
 	  pSEQPrefs->setPrefSize("WindowSize", section, m_expWindow->size());
@@ -1679,7 +1755,7 @@ EQInterface::savePrefs(void)
       if (m_combatWindow) 
       {
 	section = "Combat";
-	if (pSEQPrefs->getPrefBool("SavePosition", section, false)) 
+	if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
 	{
 	  pSEQPrefs->setPrefPoint("WindowPos", section, 
 				m_combatWindow->pos());
@@ -1691,7 +1767,7 @@ EQInterface::savePrefs(void)
       if (m_spawnList) 
       {
 	section = "SpawnList";
-	if (pSEQPrefs->getPrefBool("SavePosition", section, false)) 
+	if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
 	{
 	  pSEQPrefs->setPrefPoint("WindowPos", section, 
 				m_spawnList->pos());
@@ -1714,7 +1790,7 @@ EQInterface::savePrefs(void)
                break;
          }
 
-	 if (pSEQPrefs->getPrefBool("SavePosition", msgSection, false)) 
+	 if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
 	 {
 	   pSEQPrefs->setPrefPoint("WindowPos", msgSection, 
 				 diag->pos());
@@ -1724,7 +1800,7 @@ EQInterface::savePrefs(void)
       }
 
       section = "Interface";
-      if (pSEQPrefs->getPrefBool("SavePosition", section, false)) 
+      if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
       {
 	pSEQPrefs->setPrefPoint("WindowPos", section, 
 			      topLevelWidget()->pos());
@@ -1837,6 +1913,121 @@ EQInterface::select_filter_file(void)
                                                    );
   if (!filterFile.isEmpty())
     m_filterMgr->loadFilters(filterFile);
+}
+
+void EQInterface::toggle_filter_Case(int id)
+{
+  showeq_params->spawnfilter_case = !showeq_params->spawnfilter_case;
+  menuBar()->setItemChecked(id, showeq_params->spawnfilter_case);
+  pSEQPrefs->setPrefBool("IsCaseSensitive", "Filters", 
+			 showeq_params->spawnfilter_case);
+}
+
+void EQInterface::toggle_filter_AlertInfo(int id)
+{
+  pSEQPrefs->setPrefBool("AlertInfo", "Filters", 
+			 !pSEQPrefs->getPrefBool("AlertInfo", "Filters"));
+  menuBar()->setItemChecked(id, 
+			    pSEQPrefs->getPrefBool("AlertInfo", "Filters"));
+}
+
+void EQInterface::toggle_filter_Audio(int id)
+{
+  showeq_params->spawnfilter_audio = !showeq_params->spawnfilter_audio;
+  menuBar()->setItemChecked(id, showeq_params->spawnfilter_audio);
+  pSEQPrefs->setPrefBool("IsCaseSensitive", "Filters", 
+			 showeq_params->spawnfilter_audio);
+}
+
+void EQInterface::toggle_filter_Log(int id)
+{
+  bool value;
+  QString logName;
+  switch (menuBar()->itemParameter(id))
+  {
+  case 1:
+    value = showeq_params->spawnfilter_loglocates = 
+      !showeq_params->spawnfilter_loglocates;
+
+    logName = "LogLocates";
+    break;
+  case 2:
+    value = showeq_params->spawnfilter_loghunts = 
+      !showeq_params->spawnfilter_loghunts;
+
+    logName = "LogHunts";
+    break;
+  case 3:
+    value = showeq_params->spawnfilter_logcautions = 
+      !showeq_params->spawnfilter_logcautions;
+
+    logName = "LogCautions";
+    break;
+  case 4:
+    value = showeq_params->spawnfilter_logdangers = 
+      !showeq_params->spawnfilter_logdangers;
+
+    logName = "LogDangers";
+    break;
+  default:
+    return;
+  }
+
+  menuBar()->setItemChecked(id, value);
+  pSEQPrefs->setPrefBool(logName, "Filters", 
+			 value);
+}
+
+void EQInterface::set_filter_AudioCommand(int id)
+{
+  QString property;
+  QString prettyName;
+  switch(menuBar()->itemParameter(id))
+  {
+  case 1:
+    property = "SpawnAudioCommand";
+    prettyName = "Spawn";
+    break;
+  case 2:
+    property = "DeSpawnAudioCommand";
+    prettyName = "DeSpawn";
+    break;
+  case 3:
+    property = "DeathAudioCommand";
+    prettyName = "Death";
+    break;
+  case 4:
+    property = "LocateSpawnAudioCommand";
+    prettyName = "Locate Spawn";
+    break;
+  case 5:
+    property = "CautionSpawnAudioCommand";
+    prettyName = "Caution Spawn";
+    break;
+  case 6:
+    property = "HuntSpawnAudioCommand";
+    prettyName = "Hunt Spawn";
+    break;
+  case 7:
+    property = "DangerSpawnAudioCommand";
+    prettyName = "Danger Spawn";
+    break;
+  default: 
+    return;
+  }
+
+  QString value = pSEQPrefs->getPrefString(property, "Filters",
+					   "/usr/bin/esdplay " LOGDIR "/spawn.wav &");
+
+  bool ok = false;
+  QString command = 
+    QInputDialog::getText("ShowEQ " + prettyName + "Command",
+			  "Enter command line to use for " + prettyName + "'s:",
+			  QLineEdit::Normal, value,
+			  &ok, this);
+
+  if (ok)
+    pSEQPrefs->setPrefString(property, "Filters", command);
 }
 
 void EQInterface::listSpawns (void)
@@ -2074,7 +2265,7 @@ void EQInterface::toggle_view_ExpWindow (void)
        m_expWindow->resize(s);
 
        // move window to new position
-       if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0))
+       if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
        {
 	 QPoint p = pSEQPrefs->getPrefPoint("WindowPos", section, 
 					    m_expWindow->pos());
@@ -2103,7 +2294,7 @@ void EQInterface::toggle_view_CombatWindow (void)
        m_combatWindow->resize(s);
 
        // move window to new position
-       if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0))
+       if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
        {
 	 QPoint p = pSEQPrefs->getPrefPoint("WindowPos", section,
 					    m_combatWindow->pos());
@@ -2176,7 +2367,7 @@ void EQInterface::toggle_view_SpellList(void)
     // only do this move stuff iff the spell list isn't docked
     // and the user set the option to do so.
     if (!m_isSpellListDocked && 
-	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
+	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true)) 
     {
       // Set window location
       QPoint p = pSEQPrefs->getPrefPoint("WindowPos", section, 
@@ -2442,6 +2633,51 @@ EQInterface::toggle_opt_CreateUnknownSpawns (int id)
     showeq_params->createUnknownSpawns = !showeq_params->createUnknownSpawns;
     menuBar()->setItemChecked(id, showeq_params->createUnknownSpawns);
     pSEQPrefs->setPrefBool("CreateUnknownSpawns", "Misc", showeq_params->createUnknownSpawns);
+}
+
+void
+EQInterface::toggle_opt_ShowSpellMessages (int id)
+{
+    showeq_params->showSpellMsgs = !showeq_params->showSpellMsgs;
+    menuBar()->setItemChecked(id, showeq_params->showSpellMsgs);
+    pSEQPrefs->setPrefBool("ShowSpellMessages", "Misc", showeq_params->showSpellMsgs);
+}
+
+void
+EQInterface::toggle_opt_WalkPathRecord (int id)
+{
+    showeq_params->walkpathrecord = !showeq_params->walkpathrecord;
+    menuBar()->setItemChecked(id, showeq_params->walkpathrecord);
+    pSEQPrefs->setPrefBool("WalkPathRecording", "Misc", showeq_params->walkpathrecord);
+}
+
+void
+EQInterface::set_opt_WalkPathLength(int len)
+{
+  if ((len < 0) && (len <= 128))
+    showeq_params->walkpathlength = len;
+
+    pSEQPrefs->setPrefInt("WalkPathLength", "Misc", showeq_params->walkpathrecord);
+}
+
+void
+EQInterface::toggle_opt_SavePosition (int id)
+{
+    pSEQPrefs->setPrefBool("SavePosition", "Interface", 
+			   !pSEQPrefs->getPrefBool("SavePosition", 
+						   "Interface"));
+    menuBar()->setItemChecked(id, pSEQPrefs->getPrefBool("SavePosition", 
+							 "Interface"));
+}
+
+void
+EQInterface::toggle_opt_UseWindowPos (int id)
+{
+    pSEQPrefs->setPrefBool("UseWindowPos", "Interface", 
+			   !pSEQPrefs->getPrefBool("UseWindowPos", 
+						   "Interface"));
+    menuBar()->setItemChecked(id, pSEQPrefs->getPrefBool("UseWindowPos", 
+							 "Interface"));
 }
 
 void
@@ -3602,7 +3838,7 @@ void EQInterface::doAlertCommand(const Item* item,
 void EQInterface::logFilteredSpawn(const Item* item, uint32_t flag)
 {
   FILE *rar;
-  rar = fopen("/usr/local/share/showeq/filtered.spawns","at");
+  rar = fopen(LOGDIR "/filtered.spawns","at");
   if (rar) 
   {
     fprintf (rar, "%s %s spawned LOC %dy, %dx, %dz at %s", 
@@ -4018,7 +4254,7 @@ void EQInterface::showMap(int i)
 
     // restore it's position if necessary and practical
     if (!m_isMapDocked[i] && 
-	(pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0) != 0))
+	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
       m_map[i]->restorePosition();
   }
       

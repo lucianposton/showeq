@@ -47,9 +47,6 @@ struct ShowEQParams
   bool           realtime;
   uint16_t       arqSeqGiveUp;
   QString        filterfile;
-  bool           despawnalert;
-  bool           deathalert;
-  bool           spawnfilter_regexp;
   bool           spawnfilter_case;
   bool           spawnfilter_audio;
   int            fontsize;
@@ -70,7 +67,7 @@ struct ShowEQParams
   bool		 deitypvp;
   bool           broken_decode;
   bool           walkpathrecord;
-  uint32_t            walkpathlength;
+  uint32_t       walkpathlength;
   bool           logSpawns;
   bool           logItems;
   bool           spawnfilter_loglocates;

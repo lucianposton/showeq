@@ -187,6 +187,11 @@ class EQInterface:public QMainWindow
    void toggle_opt_PvPTeams();
    void toggle_opt_PvPDeity();
    void toggle_opt_CreateUnknownSpawns(int);
+   void toggle_opt_ShowSpellMessages(int);
+   void toggle_opt_WalkPathRecord(int);
+   void set_opt_WalkPathLength(int);
+   void toggle_opt_SavePosition(int);
+   void toggle_opt_UseWindowPos(int);
    void toggle_view_SpawnList();
    void toggle_view_SpellList();
    void toggle_view_PlayerStats();
@@ -197,6 +202,11 @@ class EQInterface:public QMainWindow
    void resetMaxMana();
    void createMessageBox();
    void select_filter_file();
+   void toggle_filter_Case(int id);
+   void toggle_filter_AlertInfo(int id);
+   void toggle_filter_Audio(int id);
+   void toggle_filter_Log(int id);
+   void set_filter_AudioCommand(int id);
    void toggle_view_menubar();
    void toggle_view_statusbar();
    void set_interface_WindowCaption(int id);

@@ -1,3 +1,25 @@
+dohpaZ (12/05/02)
+------------------
+Modifications:
+ + version 4.2.1
+ + Changed the default for SavePosition from false to true, also consolidated
+   all the SavePosition's to just use the one in the "Interface" section.
+ + Added picks to the "Interface" menu to toggle whether to save window size & 
+   position and whether to restore window position (size is always restored if 
+   available)
+ + Added a new "Filters" top-level menu with options to control filter
+   and filter alert behavior.  Moved filter related menu items from the
+   "File" menu to the "Filters" menu.
+ + Added ability to enable and configure spawn walk path recording from the 
+   "Option" menu
+ + Added control of spell message display to the "Option" menu
+ + Tweaked a few defaults in seqdef.xml to have better values.
+ + Moved "Opcode Monitor" and "Log" menu's to be sub-menus off of the 
+   "Network" menu
+ + Moved the "Debug" menu to the end of the menu bar.
+ + Removed assorted dead members from ShowEQParams and the long defunct
+   -d/--despawn-alert and -R/--spawn-regex command line options.
+
 dohpaZ (11/05/02)
 ------------------
 Modifications:

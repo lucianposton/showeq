@@ -28,7 +28,7 @@
 /* **********************************
    defines used for option processing
    ********************************** */
-#define OPTION_LIST "i:rf:g::j:::s:aedo:RCp:ncFAKSVPNbtL:xWX:Y:Z:"
+#define OPTION_LIST "i:rf:g::j:::s:aeo:Cp:ncFAKSVPNbtL:xWX:Y:Z:"
 
 /* For long options without any short (single letter) equivalent, we'll
    assign single char nonprinting character equivalents, as is common
@@ -81,7 +81,6 @@
 */
 
 static struct option option_list[] = {
-  {"despawn-alert",                no_argument,        NULL,  'd'},
   {"net-interface",                required_argument,  NULL,  'i'},
   {"realtime",                     no_argument,        NULL,  'r'},
   {"filter-file",                  required_argument,  NULL,  'f'},
@@ -89,7 +88,6 @@ static struct option option_list[] = {
   {"playback-speed",               required_argument,  NULL,  PLAYBACK_SPEED_OPTION},
   {"record-filename",              optional_argument,  NULL,  'g'},
   {"enlightenment-audio",          no_argument,        NULL,  'a'},
-  {"spawn-regex",                  no_argument,        NULL,  'R'},
   {"filter-case-sensitive",        no_argument,        NULL,  'C'},
   {"font-size",                    required_argument,  NULL,  'p'},
   {"status-font-size",             required_argument,  NULL,  STATUS_FONT_SIZE},
@@ -227,7 +225,6 @@ int main (int argc, char **argv)
    showeq_params->keep_selected_visible = pSEQPrefs->getPrefBool("KeepSelected", section, true);
 
    showeq_params->no_bank = pSEQPrefs->getPrefBool("NoBank", section, true);
-   showeq_params->spawnfilter_regexp = 0;
 
    section = "Interface_StatusBar";
    showeq_params->showEQTime = pSEQPrefs->getPrefBool("ShowEQTime",section,false);
@@ -248,14 +245,12 @@ int main (int argc, char **argv)
 
    section = "Filters";
    showeq_params->filterfile = pSEQPrefs->getPrefString("FilterFile", section, LOGDIR "/filters.conf");
-   showeq_params->spawnfilter_audio = pSEQPrefs->getPrefBool("SpawnFilterAudio", section, false);
+   showeq_params->spawnfilter_audio = pSEQPrefs->getPrefBool("Audio", section, false);
    showeq_params->spawnfilter_loglocates = pSEQPrefs->getPrefBool("LogLocates", section, 0);
    showeq_params->spawnfilter_logcautions = pSEQPrefs->getPrefBool("LogCautions", section, 0);
    showeq_params->spawnfilter_loghunts = pSEQPrefs->getPrefBool("LogHunts", section, 0);
    showeq_params->spawnfilter_logdangers = pSEQPrefs->getPrefBool("LogDangers", section, 0);
-   showeq_params->spawnfilter_case = pSEQPrefs->getPrefBool("SpawnFilterIsCaseSensitive", section, 0);
-   showeq_params->despawnalert = pSEQPrefs->getPrefBool("DeSpawnAlert", section, 0);
-   showeq_params->deathalert = pSEQPrefs->getPrefBool("DeathAlert", section, 0);
+   showeq_params->spawnfilter_case = pSEQPrefs->getPrefBool("IsCaseSensitive", section, 0);
    showeq_params->spawn_alert_plus_plus = pSEQPrefs->getPrefBool("AlertInfo", section, 0);
 
    /* Default Level / Race / Class preferences */
@@ -330,12 +325,6 @@ int main (int argc, char **argv)
       switch (opt)
       {
          /* Set the request to use a despawn list based off the spawn alert list. */
-         case 'd':
-         {
-            showeq_params->despawnalert = 1;
-            break;
-         }
-
 
          /* Set the interface */
          case 'i':
@@ -396,14 +385,6 @@ int main (int argc, char **argv)
          case 'a':
          {
             showeq_params->spawnfilter_audio = 1;
-            break;
-         }
-
-
-         /* Use regular expressions for filter */
-         case 'R':
-         {
-            showeq_params->spawnfilter_regexp = 1;
             break;
          }
 
@@ -806,10 +787,6 @@ int main (int argc, char **argv)
       printf ("  -r, --realtime                        Set the network thread realtime\n");
       printf ("  -f, --filter-file=FILENAME            Sets spawn filter file\n");
       printf ("  -s, --spawn-file=FILENAME             Sets spawn alert file\n");
-      printf ("  -d, --despawn-alert                   Enables de-spawn alert using spawn\n");
-      printf ("                                        alerts file\n");
-      printf ("  -R, --spawn-regex                     Spawn alert and filter uses regexp\n");
-      printf ("                                        as opposed to glob\n");
       printf ("  -C, --filter-case-sensitive           Spawn alert and filter is case sensitive\n");
       printf ("  -a, --enlightenment-audio             Use ESD to play alert during spawn alert\n");
       printf ("  -p, --font-size=SIZE                  Sets the point size of the skill and\n");
