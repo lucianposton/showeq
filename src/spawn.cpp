@@ -207,6 +207,7 @@ Spawn::Spawn()
   setHP(0);
   setMaxHP(0);
   setLevel(0);
+  setTypeflag(0);
   for (int i = 0; i < 9; i++)
     setEquipment(i, 0);
 
@@ -261,6 +262,7 @@ Spawn::Spawn(Spawn* item, uint16_t id)
   setHP(item->HP());
   setMaxHP(item->maxHP());
   setLevel(item->level());
+  setTypeflag(item->typeflag());
   
   for (int i = 0; i < 9; i++)
     setEquipment(i, item->equipment(i));
@@ -285,7 +287,7 @@ Spawn::Spawn(uint16_t id,
 	     const QString& name, 
 	     const QString& lastName,
 	     uint8_t race, uint8_t classVal,
-	     uint8_t level, uint8_t deity)
+	     uint8_t level, uint16_t deity)
   : Item(tSpawn, id)
 {
   // set what is known
@@ -307,6 +309,7 @@ Spawn::Spawn(uint16_t id,
   setPetOwnerID(0);
   setLight(0);
   setGender(0);
+  setTypeflag(0);
   setHP(0);
   setMaxHP(0);
   for (int i = 0; i < 9; i++)
@@ -317,9 +320,7 @@ Spawn::Spawn(uint16_t id,
   m_spawnTrackList.setAutoDelete(true);
 }
 
-Spawn::Spawn(const playerProfileStruct* player, 
-	     uint8_t deity)
-  : Item(tSpawn, 0)
+Spawn::Spawn(const playerProfileStruct* player) : Item(tSpawn, 0)
 {
   // set what's known 
   setNPC(SPAWN_SELF);
@@ -328,7 +329,7 @@ Spawn::Spawn(const playerProfileStruct* player,
   setClassVal(player->class_);
   setLevel(player->level);
   setGender(player->gender);
-  setDeity(deity);
+  setDeity(player->deity);
   
   // save the raw name
   m_rawName = player->name;
@@ -350,6 +351,7 @@ Spawn::Spawn(const playerProfileStruct* player,
   setMaxHP(0);
   for (int i = 0; i < 9; i++)
     setEquipment(i, 0);
+  setTypeflag(0);
   setConsidered(false);
 
   // turn on auto delete for the track list
@@ -385,6 +387,7 @@ Spawn::Spawn(uint16_t id,
   setLevel(0);
   for (int i = 0; i < 9; i++)
     setEquipment(i, 0);
+  setTypeflag(0);
   setConsidered(false);
 
   // turn on auto delete for the track list
@@ -420,6 +423,7 @@ void Spawn::update(const spawnStruct* s)
   setLevel(s->level);
   for (int i = 0; i < 9; i++)
     setEquipment(i, s->equipment[i]);
+  setTypeflag(s->typeflag);
 
   // If it is a corpse with Unknown (NPC) religion.
   if ((s->NPC == SPAWN_PC_CORPSE) && (s->deity == DEITY_UNKNOWN))
@@ -458,6 +462,7 @@ void Spawn::backfill(const spawnStruct* s)
   setClassVal(s->class_);
 
   // don't know how we'd find out if this changed, but it may, currently 
+  setTypeflag(s->typeflag);
   // no-check
   setPetOwnerID(s->petOwnerId);
 
@@ -528,6 +533,7 @@ void Spawn::backfill(const playerProfileStruct* player)
   setLevel(player->level);
 
   // save the raw name
+  setTypeflag(0);
   m_rawName = player->name;
 
   // start with the first name

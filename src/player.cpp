@@ -75,6 +75,7 @@ void EQPlayer::backfill(const playerProfileStruct* player)
   setPlayerLevel(player->level);
   setPlayerRace(player->race);
   setPlayerClass(player->class_);
+  setPlayerDeity(player->deity);
   
   // Due to the delayed decode, we must reset
   // maxplayer on zone and accumulate all totals.
@@ -131,22 +132,29 @@ void EQPlayer::backfill(const playerProfileStruct* player)
   // Exp handling
   uint32_t minexp;
 
-  m_currentExp = player->exp;
-  m_currentAltExp = player->altexp;
-  m_currentAApts = player->aapoints;
-
   m_maxExp = calc_exp(m_playerLevel, m_playerRace, m_playerClass);
   minexp  = calc_exp(m_playerLevel-1, m_playerRace, m_playerClass);
 
+  if(m_currentExp < player->exp);
+  {
+     m_currentExp = player->exp;
+     m_currentAltExp = player->altexp;
+     m_currentAApts = player->aapoints;
+
+     emit expChangedStr (messag);
+     emit expChangedInt (m_currentExp, minexp, m_maxExp);
+
+     emit expAltChangedStr (messag);
+     emit expAltChangedInt(m_currentAltExp, 0, 15050000);
+
+     printf("charpro_backfill: exp_debug: Setting m_current values %d %d %d\n", m_currentExp, m_currentAltExp, m_currentAApts);
+  }
+
   messag = "Exp: " + Commanate(player->exp);
   emit msgReceived(messag);
-  emit expChangedStr (messag);
-  emit expChangedInt (m_currentExp, minexp, m_maxExp);
 
   messag = "ExpAA: " + Commanate(player->altexp);
   emit msgReceived(messag);
-  emit expAltChangedStr (messag);
-  emit expAltChangedInt(m_currentAltExp, 0, 15050000);
 
 }
 
@@ -398,7 +406,7 @@ void EQPlayer::updateAltExp(const expAltUpdateStruct* altexp)
   uint32_t realexp;
   uint16_t aapoints;
 
-  realexp = altexp->altexp * 15050000 / 330 * altexp->percent / 100;
+  realexp = altexp->altexp * altexp->percent * (15050000 / 33000);
   aapoints = altexp->aapoints;
 
   if (m_currentAApts != aapoints)
@@ -440,70 +448,58 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
   minexp = calc_exp(getPlayerLevel() - 1, getPlayerRace(), getPlayerClass());
   maxexp = calc_exp(getPlayerLevel(), getPlayerRace(), getPlayerClass());
   diffexp = maxexp - minexp;
-  realexp = fractexp * diffexp / 330 + minexp;
+  realexp = (diffexp / 330) * fractexp + minexp;
   incrementExp = Commanate(diffexp/330);
 
-  if (m_currentExp > 0)
+printf("exp_debug: fract %d, min %d, max %d, diff %d, real %d, inc %d\n", fractexp, minexp, maxexp, diffexp, realexp, diffexp/330);
+
+  totalExp  = Commanate(realexp - minexp);
+  leftExp = Commanate(maxexp - realexp);
+  needKills = Commanate(((maxexp - realexp) / (realexp > m_currentExp ? realexp - m_currentExp : 1)) + 1 );
+
+  tempStr = QString("Exp: %1 (%2/330) [%3]").arg(totalExp).arg(tempStr2.sprintf("%u",fractexp)).arg(needKills);
+  emit expChangedStr(tempStr);
+  emit expChangedInt (realexp, minexp, maxexp);
+    
+  tempStr = QString("Exp: %1 (%2/330) left %3 - 1/330 = %4").arg(totalExp).arg(tempStr2.sprintf("%u",fractexp)).arg(leftExp).arg(incrementExp);
+  emit msgReceived(tempStr);
+  emit stsMessage(tempStr);
+
+  if(m_freshKill)
   {
-    if (m_currentExp > realexp)
-        realexp = m_currentExp;
-
-    totalExp  = Commanate(realexp - minexp);
-    leftExp = Commanate(maxexp - realexp);
-    needKills = Commanate(((maxexp - realexp) / (realexp > m_currentExp ? realexp - m_currentExp : 1)) + 1 );
-    
-    tempStr = QString("Exp: %1 (%2/330) [%3]").arg(totalExp).arg(tempStr2.sprintf("%u",fractexp)).arg(needKills);
-    emit expChangedStr(tempStr);
-    
-    tempStr = QString("Exp: %1 (%2/330) left %3 - 1/330 = %4").arg(totalExp).arg(tempStr2.sprintf("%u",fractexp)).arg(leftExp).arg(incrementExp);
-    emit msgReceived(tempStr);
-
-    if (m_freshKill)
-    {
-      emit expGained( m_lastSpawnKilledName,
-		      m_lastSpawnKilledLevel,
-		      realexp - m_currentExp,
-		      m_longZoneName);
+     emit expGained( m_lastSpawnKilledName,
+                     m_lastSpawnKilledLevel,
+                     realexp - m_currentExp,
+                     m_longZoneName);
       
-      // have gained experience for the kill, it's no longer fresh
-      m_freshKill = false;
-    }
-    else if ((m_lastSpellOnId == 0x0184) || // Resuscitate
-	     (m_lastSpellOnId == 0x0187) || // Revive (does it or don't it?)
-	     (m_lastSpellOnId == 0x0188) || // Resurrection
-	     (m_lastSpellOnId == 0x02f4) || // Resurrection Effects
-	     (m_lastSpellOnId == 0x02f5) || // Resurrection Effect
-	     (m_lastSpellOnId == 0x03e2) || // Customer Service Resurrection
-	     (m_lastSpellOnId == 0x05f4)) // Reviviscence
-      {
-	emit expGained( spell_name(m_lastSpellOnId),
-			0, // level of caster would only confuse things further
-			realexp - m_currentExp,
-			m_longZoneName);
-      }
-    else
-      emit expGained( "Unknown", // Randomly blessed with xp?
-		      0, // don't know what gave it so, level 0
-		      realexp - m_currentExp,
-		      m_longZoneName
-		      );
-    
-    emit stsMessage(tempStr);
+     // have gained experience for the kill, it's no longer fresh
+     m_freshKill = false;
   }
+  else if ((m_lastSpellOnId == 0x0184) || // Resuscitate
+	   (m_lastSpellOnId == 0x0187) || // Revive (does it or don't it?)
+	   (m_lastSpellOnId == 0x0188) || // Resurrection
+	   (m_lastSpellOnId == 0x02f4) || // Resurrection Effects
+	   (m_lastSpellOnId == 0x02f5) || // Resurrection Effect
+	   (m_lastSpellOnId == 0x03e2) || // Customer Service Resurrection
+	   (m_lastSpellOnId == 0x05f4)) // Reviviscence
+  {
+     emit expGained( spell_name(m_lastSpellOnId),
+                     0, // level of caster would only confuse things further
+                     realexp - m_currentExp,
+                     m_longZoneName);
+  }
+  else if (m_currentExp == 0) 
+  {
 
-  emit expChangedInt ( realexp,
-		       calc_exp( getPlayerLevel () - 1,
-				 getPlayerRace  (),
-				 getPlayerClass ()
-				 ),
-		       calc_exp( getPlayerLevel (),
-				 getPlayerRace  (),
-				 getPlayerClass ()
-				 )
-		       );
+  }
+  else
+     emit expGained( "Unknown", // Randomly blessed with xp?
+                     0, // don't know what gave it so, level 0
+		     realexp - m_currentExp,
+		     m_longZoneName
+		   );
   
   m_currentExp = realexp;
-
   m_validExp = true;
 }
 
@@ -683,7 +679,7 @@ void EQPlayer::setPlayerClass(uint8_t newclass)
     m_playerClass = newclass;
 }
 
-void EQPlayer::setPlayerDeity(uint8_t newdeity)
+void EQPlayer::setPlayerDeity(uint16_t newdeity)
 {
     //printf("New Deity: %i\n", newdeity);
     m_playerDeity = newdeity;

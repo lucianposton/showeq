@@ -2851,9 +2851,19 @@ void Map::paintSpawns(MapParameters& param,
 	{
 	  // set pen to black
 	  p.setPen(black);
-	
-	  // set brush to spawn con color
-	  p.setBrush(m_player->pickConColor(spawn->level()));
+
+          if (spawn->typeflag() == 65)
+             p.setBrush(magenta);
+          else
+          {
+             if ((spawn->typeflag() == 66) || (spawn->typeflag() == 67))
+                p.setBrush(darkMagenta);
+             else
+             {
+	        // set brush to spawn con color
+	        p.setBrush(m_player->pickConColor(spawn->level()));
+             }
+          }
 	}
 	else
 	{

@@ -130,13 +130,12 @@ class Spawn : public Item
   Spawn();
   Spawn(const spawnStruct* s);
   Spawn(uint16_t id, const spawnStruct* s);
-  Spawn(const playerProfileStruct* player,
-		  uint8_t deity);
+  Spawn(const playerProfileStruct* player);
 
   Spawn(uint16_t id, 
 		  const QString& name, const QString& lastName, 
 		  uint8_t race, uint8_t classVal,
-		  uint8_t level, uint8_t deity = 0);
+		  uint8_t level, uint16_t deity = 0);
 		  
   // create an unknown spawn using the data available.
   Spawn(uint16_t id, 
@@ -164,9 +163,9 @@ class Spawn : public Item
   uint8_t light() const { return m_light; }
   QString lightName() const;
   uint8_t gender() const { return m_gender; }
-  uint8_t deity() const { return m_deity; }
+  uint16_t deity() const { return m_deity; }
   QString deityName() const;
-  int8_t deityTeam() const { return m_deityTeam; }
+  int16_t deityTeam() const { return m_deityTeam; }
   int8_t raceTeam() const { return m_raceTeam; }
   bool considered() const { return m_considered; }
   uint16_t equipment(uint8_t wearingSlot) const 
@@ -179,6 +178,7 @@ class Spawn : public Item
 			   const QTime& curTime,
 			   EQPoint& newPos) const;
   
+  int8_t typeflag() const { return m_typeflag; }
 
   // virtual get method overloads
   virtual QString transformedName() const;
@@ -238,7 +238,7 @@ class Spawn : public Item
   void setPetOwnerID(uint16_t petOwnerID) { m_petOwnerID = petOwnerID; }
   void setLight(uint8_t light) { m_light = light; }
   void setGender(uint8_t gender) { m_gender = gender; }
-  void setDeity(uint8_t deity) { m_deity = deity; calcDeityTeam(); }
+  void setDeity(uint16_t deity) { m_deity = deity; calcDeityTeam(); }
   void setConsidered(bool considered) { m_considered = considered; }
   void setRace(uint8_t race) { m_race = race; calcRaceTeam(); }
   void setClassVal(uint8_t classVal) { m_class = classVal; }
@@ -250,6 +250,7 @@ class Spawn : public Item
   void setNPC(uint8_t NPC) { m_NPC = NPC; }
   void setID(uint16_t id) { m_ID = id; }
 
+  void setTypeflag(uint8_t typeflag) { m_typeflag = typeflag; }
  protected:
   void calcRaceTeam();
   void calcDeityTeam();
@@ -271,13 +272,14 @@ class Spawn : public Item
   uint8_t m_level;
   uint8_t m_race;
   int8_t m_raceTeam;
-  uint8_t m_deity;
-  int8_t m_deityTeam;
+  uint16_t m_deity;
+  int16_t m_deityTeam;
   uint8_t m_gender;
   uint8_t m_class;
   uint8_t m_light;
   uint16_t m_equipment[9];
   bool m_considered;
+  int8_t m_typeflag;
 };
 
 

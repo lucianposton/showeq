@@ -1,3 +1,17 @@
+fee (14/01/02)
+--------------------
+
+Mods
+ + more decoded fields in everquest.h, read it for details
+ + altered the method used to assign the player's deity in the spawnlist
+   may or may not affect the problems on the problems with deity teams play
+ + merged patch #502812, great job mvern!  Disarmable traps are pink,
+   non-disarmable traps and triggers are purple.
+
+Bugs 
+ + found and fixed a problem with the experience calculations. again this is
+   just a bandaid untill the new experience manager is complete.
+
 fee (10/01/02)
 --------------------
 

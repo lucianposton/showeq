@@ -322,7 +322,8 @@ struct spawnStruct
                   deltaX:10;              // Velocity X 
 /*0061*/ uint8_t  unknown0061[1];         // ***Placeholder 
 /*0062*/ uint16_t spawnId;                // Id of new spawn 
-/*0064*/ uint8_t  unknown0064[2];         // ***Placeholder 
+/*0064*/ int8_t   typeflag;               // 65 is disarmable trap, 66 and 67 are invis triggers/traps
+/*0065*/ uint8_t  unknown0065[1];         // ***Placeholder 
 /*0066*/ uint16_t petOwnerId;             // Id of pet owner (0 if not a pet) 
 /*0068*/ int16_t  maxHp;                  // Maximum hp's of Spawn 
 /*0070*/ int16_t  curHp;                  // Current hp's of Spawn // GuildID now 
@@ -338,8 +339,7 @@ struct spawnStruct
 /*0110*/ char     name[30];               // Name of spawn (len is 30 or less) 
 /*0140*/ char     lastname[20];           // Last Name of player 
 /*0160*/ uint8_t  unknown0160[2];         // ***Placeholder 
-/*0162*/ uint8_t  deity;                  // Deity. 
-/*0163*/ uint8_t  unknown0163[1];         // ***Placeholder 
+/*0162*/ uint16_t deity;                  // Deity. 
 /*0164*/ uint8_t  unknown0164[8];         // ***Placeholder 
 }; 
 
@@ -569,8 +569,7 @@ struct ServerZoneEntryStruct
 /*0161*/ uint8_t  unknown0161[2];         // ***Placeholder
 /*0163*/ uint8_t  level;                  // Player's Level
 /*0164*/ uint8_t  unknown0164[148];       // ***Placeholder, could be usefull things here
-/*0312*/ uint8_t  deity;                  // Player's Deity
-/*0313*/ int8_t   unknown0313;            // ***Placeholder
+/*0312*/ uint16_t  deity;                  // Player's Deity
 /*0314*/ int8_t   unknown0314[8];         // ***Placeholder
 };
 
@@ -599,9 +598,9 @@ struct playerProfileStruct
 /*0002*/ uint8_t  unknown0002[4];         // ***Placeholder
 /*0006*/ char     name[30];               // Name of player
 /*0036*/ char     lastName[20];           // Last name of player
-/*0056*/ uint8_t  unknown0056[2];         // ***Placeholder
+/*0056*/ uint16_t face;                   // faceID?
 /*0058*/ uint8_t  race;                   // Player race
-/*0059*/ int8_t   unknown1;               // ***Placeholder
+/*0059*/ uint8_t  unknown0059;            // ***Placeholder
 /*0060*/ uint8_t  class_;                 // Player class
 /*0061*/ uint8_t  gender;                 // Player gender
 /*0062*/ uint8_t  level;                  // Level of player (might be one byte)
@@ -609,7 +608,9 @@ struct playerProfileStruct
 /*0066*/ uint32_t exp;                    // Current Experience
 /*0070*/ uint8_t  unknown0070[2];         // ***Placeholder
 /*0072*/ uint16_t MANA;                   // MANA
-/*0074*/ uint8_t  unknown0074[51];        // ***Placeholder
+/*0074*/ uint8_t  unknown0074[48];        // ***Placeholder
+/*0122*/ uint16_t curHp;                  // current hp
+/*0124*/ uint8_t  unknown0124;            // ***Placeholder
 /*0125*/ uint8_t  STR;                    // Strength
 /*0126*/ uint8_t  STA;                    // Stamina
 /*0127*/ uint8_t  CHA;                    // Charisma
@@ -638,7 +639,9 @@ struct playerProfileStruct
 /*2702*/ char     GUILD[144];             // Guild Info -- Length wrong
 /*2846*/ char     bindpoint[20];          // short name of zone
 /*2866*/ char     unknown2866[4][20];     // contains other shortzone names, unknown use
-/*2946*/ uint8_t  unknown2946[1276];      // ***Placeholder
+/*2946*/ uint8_t  unknown2946[1212];      // ***Placeholder
+/*4158*/ uint16_t deity;                  // deity
+/*4160*/ uint8_t  unknown4160[62];        // ***Placeholder
 /*4222*/ char     GroupMembers[5][48];    // List of all the members in the players group
 /*4462*/ uint8_t  unknown4462[72];        // ***PlaceHolder
 /*4534*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000
@@ -998,7 +1001,7 @@ struct skillIncreaseStruct
 /*
 ** When somebody changes what they're wearing
 **      or give a pet a weapon (model changes)
-** Length: 14 Octets
+** Length: 18 Octets
 ** Opcode: WearChangeCode
 */
 struct wearChangeStruct

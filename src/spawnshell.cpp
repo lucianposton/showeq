@@ -1069,7 +1069,7 @@ void SpawnShell::backfillPlayer(const playerProfileStruct* player)
   else
   {
      // player spawn doesnt exist, fabricate one since we have the id.
-    m_playerSpawn = new Spawn(player, m_player->getPlayerDeity());
+    m_playerSpawn = new Spawn(player);
     updateFilterFlags(m_playerSpawn);
     updateRuntimeFilterFlags(m_playerSpawn);
 

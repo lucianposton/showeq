@@ -55,7 +55,7 @@ public:
    void setPlayerLevel(uint8_t newlevel);
    void setPlayerRace(uint8_t newrace);
    void setPlayerClass(uint8_t newclass);
-   void setPlayerDeity(uint8_t newdeity);
+   void setPlayerDeity(uint16_t newdeity);
    void setPlayerID(uint16_t playerID);
    void checkDefaults(void) { setDefaults(); } // Update our default values
    void setUseDefaults (bool bdefaults) { m_useDefaults = bdefaults; }
@@ -76,7 +76,7 @@ public:
    uint8_t getPlayerClass(void) const 
      { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
 	       m_defaultClass : m_playerClass);}
-   uint8_t getPlayerDeity(void) const 
+   uint16_t getPlayerDeity(void) const 
      { return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
 	       m_defaultDeity : m_playerDeity);}
    uint16_t getPlayerID() const { return m_playerID; }
@@ -183,14 +183,14 @@ public:
    int m_defaultLevel;
    uint8_t m_defaultRace;
    uint8_t m_defaultClass;
-   uint8_t m_defaultDeity;
+   uint16_t m_defaultDeity;
    // The actual values are set by info from EQPacket.
    QString m_playerName;
    QString m_playerLastName;
    uint8_t m_playerLevel;
    uint8_t m_playerRace;
    uint8_t m_playerClass;
-   uint8_t m_playerDeity;
+   uint16_t m_playerDeity;
 
    uint16_t m_playerID;
    int16_t m_xPos;
