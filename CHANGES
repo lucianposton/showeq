@@ -1,3 +1,11 @@
+ratt (3 Oct 02)
+----------------------
+
+Fixed the max HP bug that was reporting more HP than you really had.
+
+Released ShowEQ v4.2.15 in the file release section.  This is a 
+current CVS snapshot as of this moment. (13:00 EST 3 Oct 02)
+
 fee (floyd) (10/03/02)
 ----------------------
  + version 4.2.15
