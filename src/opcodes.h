@@ -23,9 +23,13 @@
 
 #define ChannelMessageCode          0x0721
 
+#define cStartCampingCode           0x0722
+
 #define RemoveCoinsCode             0x0820
 
 #define OpenVendorCode              0x0b20
+
+#define sWhoAllOutputCode           0x0b40
 
 #define ItemInShopCode              0x0c20
 
@@ -34,6 +38,10 @@
 #define EmoteTextCode               0x1520
 
 #define PlayerAACode                0x1522
+
+#define cRunToggleCode              0x1f20
+
+#define cJumpCode                   0x2020
 
 #define CorpseLocCode               0x2120
 
@@ -49,6 +57,8 @@
 
 #define RemDropCode                 0x2c20
 
+#define cCursorItemCode             0x2c21
+
 #define MakeDropCode                0x2d20
 
 #define CharInfo                    0x2e20
@@ -57,7 +67,15 @@
 
 #define TradeItemInCode             0x3120
 
+#define xBuffDropCode               0x3221
+
 #define TradeBookInCode             0x3420
+
+#define cConCorpseCode              0x3422
+
+#define xBuyItemCode                0x3520
+
+#define sSpellFizzleRegainCode      0x3522
 
 #define CharProfileCode             0x3620
 
@@ -71,11 +89,15 @@
 
 #define GroupDeclineCode            0x4120
 
+#define sSpellInterruptedCode       0x4122
+
 #define GroupAcceptCode             0x4220
 
 #define CloseGMCode                 0x4321
 
 #define GroupDeleteCode             0x4420
+
+#define sDoneLootingCode            0x4421
 
 #define CloseVendorCode             0x4521
 
@@ -84,6 +106,10 @@
 #define NewSpawnCode                0x4921
 
 #define NewCorpseCode               0x4a20
+
+#define cLootCorpseCode             0x4e20
+
+#define cDoneLootingCode            0x4f20
 
 #define MoneyOnCorpseCode           0x5020
 
@@ -94,6 +120,8 @@
 #define StaminaCode                 0x5721
 
 #define ActionCode                  0x5820
+
+#define cOpenSpellBookCode          0x5821
 
 #define NewZoneCode                 0x5b20
 
@@ -123,6 +151,14 @@
 
 #define BindWoundCode               0x8321
 
+#define cTrackCode                  0x8421
+
+#define cSneakCode                  0x8521
+
+#define cHideCode                   0x8621
+
+#define cSenseHeadingCode           0x8721
+
 #define SkillIncCode                0x8921
 
 #define DoorOpenCode                0x8e20
@@ -130,6 +166,8 @@
 #define IllusionCode                0x9120
 
 #define WearChangeCode              0x9220
+
+#define cForageCode                 0x9420
 
 #define DoorSpawnCode               0x9520
 
@@ -140,6 +178,8 @@
 #define OpenGMCode                  0x9c20
 
 #define MobUpdateCode               0x9f20
+
+#define sLootItemCode               0xa020
 
 #define Attack2Code                 0xa120
 
@@ -153,6 +193,8 @@
 
 #define BookTextCode                0xce20
 
+#define xTradeSpellBookSlotsCode    0xce21
+
 #define BadCastCode                 0xd321
 
 #define TradeItemOutCode            0xdf20
@@ -163,34 +205,14 @@
 
 #define PlayerPosCode               0xf320
 
+#define cWhoAllCode                 0xf420
+
 #define SpawnAppearanceCode         0xf520
 
 #define CPlayerItemsCode            0xf621
 
 #define CDoorSpawnsCode             0xf721
 
-#define cRunToggleCode 0x1f20
-#define cJumpCode 0x2020
-#define cChatFiltersCode 0xff21
-#define cOpenSpellBookCode 0x5821
-#define xTradeSpellBookSlotsCode 0xce21
-#define sSpellFizzleRegainCode 0x3522
-#define sSpellInterruptedCode 0x4122
-#define cStartCampingCode 0x0722
-#define cSenseHeadingCode 0x8721
-#define cForageCode 0x9420
-#define cHideCode 0x8621
-#define cSneakCode 0x8521
-#define cTrackCode 0x8421
-#define cConCorpseCode 0x3422
-#define sLootItemCode 0xa020
-#define cCursorItemCode 0x2c21
-#define xBuffDropCode 0x3221
-#define cLootCorpseCode 0x4e20
-#define cDoneLootingCode 0x4f20
-#define sDoneLootingCode 0x4421
-#define cWhoAllCode 0xf420
-#define sWhoAllOutputCode 0x0b40
-#define xBuyItemCode 0x3520
+#define cChatFiltersCode            0xff21
 
 #endif // OPCODES_H

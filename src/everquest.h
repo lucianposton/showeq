@@ -1819,47 +1819,38 @@ struct cChatFiltersStruct
 /*0000*/ uint8_t  opCode;
 /*0001*/ uint8_t  version;
 /*0002*/ uint32_t DamageShields;   //00=on  01=off
-         uint32_t NPCSpells;       //00=on  01=off
-          uint32_t PCSpells;        //00=all 01=off 02=grp
-          uint32_t BardSongs;       //00=all 01=me  02=grp 03=off
-          uint32_t Unused;
-          uint32_t GuildChat;       //00=off 01=on
-          uint32_t Socials;         //00=off 01=on
-          uint32_t GroupChat;       //00=off 01=on
-          uint32_t Shouts;          //00=off 01=on
-          uint32_t Auctions;        //00=off 01=on
-          uint32_t OOC;             //00=off 01=on
-          uint32_t MyMisses;        //00=off 01=on
-          uint32_t OthersMisses;    //00=off 01=on
-          uint32_t OthersHits;      //00=off 01=on
-          uint32_t AttackerMisses;  //00=off 01=on
-          uint32_t CriticalSpells;  //00=all 01=me  02=off
-          uint32_t CriticalMelee;   //00=all 01=me  02=off
+/*0006*/ uint32_t NPCSpells;       //00=on  01=off
+/*0010*/ uint32_t PCSpells;        //00=all 01=off 02=grp
+/*0014*/ uint32_t BardSongs;       //00=all 01=me  02=grp 03=off
+/*0018*/ uint32_t Unused;
+/*0022*/ uint32_t GuildChat;       //00=off 01=on
+/*0026*/ uint32_t Socials;         //00=off 01=on
+/*0030*/ uint32_t GroupChat;       //00=off 01=on
+/*0034*/ uint32_t Shouts;          //00=off 01=on
+/*0038*/ uint32_t Auctions;        //00=off 01=on
+/*0042*/ uint32_t OOC;             //00=off 01=on
+/*0046*/ uint32_t MyMisses;        //00=off 01=on
+/*0050*/ uint32_t OthersMisses;    //00=off 01=on
+/*0054*/ uint32_t OthersHits;      //00=off 01=on
+/*0058*/ uint32_t AttackerMisses;  //00=off 01=on
+/*0062*/ uint32_t CriticalSpells;  //00=all 01=me  02=off
+/*0066*/ uint32_t CriticalMelee;   //00=all 01=me  02=off
 };
 
 struct cOpenSpellBookStruct
 {
 /*0000*/ uint8_t  opCode;
 /*0001*/ uint8_t  version;
-          uint32_t status; //01=open 00=close
+/*0002*/ int32_t status; //01=open 00=close
 };
 
 struct xTradeSpellBookSlotsStruct
 {
 /*0000*/ uint8_t  opCode;
 /*0001*/ uint8_t  version;
-          uint32_t slot1;
-	  uint32_t slot2;
+/*0002*/ uint32_t slot1;
+/*0006*/ uint32_t slot2;
 };
-
-/*
-struct #
-{
-  0000 uint8_t  opCode;
-  0001 uint8_t  version;
-
-}
-*/
 
 // Restore structure packing to default
 #pragma pack()
