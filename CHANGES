@@ -1,3 +1,8 @@
+fee (floyd) 02/21/2003
+-----------------------
+ + changed comparison op == to = in Makefile.dist for shell compatibility (sh vs bash)
+ + fixed up Qt detection when QTDIR is not set, acinclude.m4
+
 bbobcat 02/20/03
 -----------------------
 
