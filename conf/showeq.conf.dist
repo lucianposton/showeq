@@ -11,6 +11,7 @@ MAC             0           # MAC address
 RealTimeThread  0           # put network in realtime thread
 NoPromiscuous   0           # don't use promiscuous mode
 ArqSeqGiveUp    96          # give up waiting for arq seq after cache fills to this size. don't set this too low, otherwise we'll artificially skip packets, minimum is 32, modem users may want to set 256, dsl and cable users may choose 128 or less
+SessionTracking 1           # enable/disbable session tracking
 
 # Below you may set the default Level/Race/Class of your char.
 # Defaults will be used whenver the decryption routine fails.
