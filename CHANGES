@@ -1,3 +1,17 @@
+ratt 10 Nov 2002
+----------------------
+
+ + Bug Fixes
+   - Fixed walk path length record option (Thanks Nok)
+
+ + Features and Updates
+   - Added Nok's Speedometer
+   - Catt's spell update
+   - Catt's filter update
+   - Bluevulpines raid channel update
+   
+
+
 casey 11/07/2002
 ----------------------
  + conf/seqdef.xml

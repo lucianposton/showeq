@@ -109,6 +109,7 @@ public:
    void setDefaults(void);
 
  signals:
+   void newSpeed               (int speed);
    void msgReceived            (const QString &);
    void stsMessage             ( const QString &,
                                  int              = 0

@@ -749,6 +749,7 @@ void Player::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t dir)
 	 showeq_params->walkpathlength);
   setDeltas(pupdate->deltaX, pupdate->deltaY, 
 	    pupdate->deltaZ);
+  emit newSpeed((int)lrint(hypot( hypot( pupdate->deltaX, pupdate->deltaY ), pupdate->deltaZ)));
   setHeading(pupdate->heading, pupdate->deltaHeading);
   updateLast();
 

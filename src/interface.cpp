@@ -729,7 +729,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_decoderMenu = new QPopupMenu;
    menuBar()->insertItem("&Decoder", m_decoderMenu);
    m_decoderMenu->insertItem("Input Session Key", this, SLOT(set_decoder_key()));
-   m_decoderMenu->insertItem("Load Session Key", this, SLOT(load_decoder_key()));
+   m_decoderMenu->insertItem("Load Session Key", this, SLOT(load_decoder_key()), Key_F12);
    m_decoderMenu->insertItem("Key Filename...", this, 
 			      SLOT(set_opt_enc_BaseFilename(void)));
    m_decoderMenu->insertItem("Key Port", this, SLOT(set_key_port()));
@@ -1016,6 +1016,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    statusBarMenu->setItemParameter(x, 7);
    statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowEQTime",
 							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "Run Speed");
+   statusBarMenu->setItemParameter(x, 8);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowSpeed",
+							   "Interface_StatusBar", false));
     
    connect (statusBarMenu, SIGNAL(activated(int)), 
 	    this, SLOT(toggle_main_statusbar_Window(int)));
@@ -1100,6 +1104,11 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
      m_stsbarEQTime->setText("EQTime [UNKNOWN]");
      statusBar()->addWidget(m_stsbarEQTime, 1);
 
+   // Run Speed widget
+     m_stsbarSpeed = new QLabel(statusBar(), "Speed");
+     m_stsbarSpeed->setText("Run Speed:");
+     statusBar()->addWidget(m_stsbarSpeed, 1);
+
      // setup the status fonts correctly
      restoreStatusFont();
 
@@ -1137,6 +1146,12 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
      m_stsbarEQTime->hide();
    else
      sts_widget_count++;
+
+   if (!pSEQPrefs->getPrefBool("ShowSpeed", statusBarSection, false))
+     m_stsbarSpeed->hide();
+   else
+     sts_widget_count++;
+
 
    //hide the statusbar if no visible widgets
    if (!sts_widget_count || !pSEQPrefs->getPrefBool("StatusBarActive", statusBarSection, 1))
@@ -1405,6 +1420,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
             this, SLOT(numPacket(int, int)));
    connect (m_packet, SIGNAL(resetPacket(int, int)),
             this, SLOT(resetPacket(int, int)));
+   connect (m_player, SIGNAL(newSpeed(int)),
+            this, SLOT(newSpeed(int)));
    
    if (m_expWindow != NULL)
    {
@@ -1841,6 +1858,8 @@ void EQInterface::restoreStatusFont()
    m_stsbarPkt->setFixedHeight(statusFixedHeight);
    m_stsbarEQTime->setFont(statusFont);
    m_stsbarEQTime->setFixedHeight(statusFixedHeight);
+   m_stsbarSpeed->setFont(statusFont);
+   m_stsbarSpeed->setFixedHeight(statusFixedHeight);
 }
 
 void EQInterface::toggle_view_StatWin( int id )
@@ -2341,6 +2360,12 @@ void EQInterface::toggle_main_statusbar_Window(int id)
 
     preference = "ShowEQTime";
     break;
+  case 8:
+    window = m_stsbarSpeed;
+
+    preference = "ShowSpeed";
+    break;
+
   default:
     return;
   }
@@ -3368,7 +3393,7 @@ EQInterface::toggle_opt_WalkPathRecord (int id)
 void
 EQInterface::set_opt_WalkPathLength(int len)
 {
-  if ((len < 0) && (len <= 128))
+  if ((len < 0) && (len <= 8192))
     showeq_params->walkpathlength = len;
 
     pSEQPrefs->setPrefInt("WalkPathLength", "Misc", showeq_params->walkpathrecord);
@@ -3460,6 +3485,7 @@ EQInterface::msgReceived(const QString &instring)
 	if (!strncmp(string.ascii(), "Tell",  4)) fprintf(stdout, "\e[0;35m"); // Magenta
 	if (!strncmp(string.ascii(), "Say",   3)) fprintf(stdout, "\e[1;37m"); // White
 	if (!strncmp(string.ascii(), "GM-Te", 5)) fprintf(stdout, "\e[5;31m"); // Blinking Red
+	if (!strncmp(string.ascii(), "Raid",  4)) fprintf(stdout, "\e[1;36m"); // Cyan
 
 	fprintf(stdout, "%s", string.ascii());
 	fprintf(stdout, "\e[0;0m\n"); // Shut off all ANSI
@@ -3495,6 +3521,20 @@ EQInterface::numSpawns(int num)
    QString tempStr;
    tempStr.sprintf("Mobs: %d", num);
    m_stsbarSpawns->setText(tempStr);
+}
+
+void
+EQInterface::newSpeed(int speed)
+{
+  // update twice per sec
+  static int lastupdate = 0;
+  if ( (mTime() - lastupdate) < 500)
+    return;
+  lastupdate = mTime();
+
+   QString tempStr;
+   tempStr.sprintf("Run Speed: %d", speed);
+   m_stsbarSpeed->setText(tempStr);
 }
 
 void 
@@ -3749,6 +3789,11 @@ void EQInterface::channelMessage(const channelMessageStruct* cmsg, uint32_t, uin
 
   case 14:
     tempStr.sprintf("GM-Tell");
+    target = true;
+    break;
+
+  case 15:
+    tmpStr.sprintf("Raid");
     target = true;
     break;
 
@@ -4668,7 +4713,7 @@ void EQInterface::logFilteredSpawn(const Item* item, uint32_t flag)
   rar = fopen(LOGDIR "/filtered.spawns","at");
   if (rar) 
   {
-    fprintf (rar, "%s %s spawned LOC %dy, %dx, %dz at %s", 
+    fprintf (rar, "%s %s spawned LOC %dy, %dx, %dz at %s\n", 
 	     (const char*)m_filterMgr->filterString(flag),
 	     (const char*)item->name(), 
 	     item->y(), item->x(), item->z(),

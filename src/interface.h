@@ -95,6 +95,7 @@ class EQInterface:public QMainWindow
    void msgReceived(const QString &);
    void stsMessage(const QString &, int timeout = 0);
    void numSpawns(int);
+   void newSpeed(int);
    void numPacket(int, int);
    void resetPacket(int, int);
    void attack2Hand1(const attack2Struct *);
@@ -349,6 +350,7 @@ class EQInterface:public QMainWindow
    QLabel* m_stsbarExpAA;
    QLabel* m_stsbarPkt;
    QLabel* m_stsbarEQTime;
+   QLabel* m_stsbarSpeed;
 
    QList<MsgDialog>  m_msgDialogList;   
 

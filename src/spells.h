@@ -146,15 +146,15 @@
 /* 0x0086 */ { "Blinding Luminance", 24, true }, 
 /* 0x0087 */ { "Word of Health", 0, true }, 
 /* 0x0088 */ { "Word of Healing", 0, true }, 
-/* 0x0089 */ { "Pack Regeneration", 0, true }, 
-/* 0x008a */ { "Pack Chloroplast", 0, true }, 
+/* 0x0089 */ { "Pack Regeneration", 480, true }, 	// 8 min
+/* 0x008a */ { "Pack Chloroplast", 480, true },		// 8 min 
 /* 0x008b */ { "Feral Spirit", 0, true }, 
 /* 0x008c */ { "Savage Spirit", 0, true }, 
 /* 0x008d */ { "Beguile Animals", 0, true }, 
 /* 0x008e */ { "Allure of the Wild", 0, true }, 
 /* 0x008f */ { "Sunbeam", 18, true }, 
-/* 0x0090 */ { "Regeneration", 0, true }, 
-/* 0x0091 */ { "Chloroplast", 0, true }, 
+/* 0x0090 */ { "Regeneration", 600, true },		// 10 min 
+/* 0x0091 */ { "Chloroplast", 900, true },		// 15 min 
 /* 0x0092 */ { "Spirit of Monkey", 2160, true }, 
 /* 0x0093 */ { "Spirit Strength", 2160, true }, 
 /* 0x0094 */ { "Spirit of Cat", 2700, true }, 
@@ -200,7 +200,7 @@
 /* 0x00bc */ { "Entrance", 72, true }, 
 /* 0x00bd */ { "Flame Flux", 0, true }, 
 /* 0x00be */ { "Dazzle", 96, true }, 
-/* 0x00bf */ { "Feedback", 0, true }, 
+/* 0x00bf */ { "Feedback", 300, true },			// 5 min 
 /* 0x00c0 */ { "Mind Wipe", 0, true }, 
 /* 0x00c1 */ { "Blanket of Forgetfulness", 0, true }, 
 /* 0x00c2 */ { "Reoccurring Amnesia", 24, true }, 
@@ -365,7 +365,7 @@
 /* 0x0161 */ { "Mend Bones", 0, true }, 
 /* 0x0162 */ { "Shadow Step", 0, true }, 
 /* 0x0163 */ { "Engulfing Darkness", 60, true }, 
-/* 0x0164 */ { "Shield of Thorns", 0, true }, 
+/* 0x0164 */ { "Shield of Thorns", 300, true },		// 5 min 
 /* 0x0165 */ { "Dark Empathy", 0, true }, 
 /* 0x0166 */ { "Impart Strength", 360, true }, 
 /* 0x0167 */ { "Vampiric Embrace", 0, true }, 
@@ -521,7 +521,7 @@
 /* 0x01fd */ { "Winter's Roar", 0, true }, 
 /* 0x01fe */ { "Blizzard Blast", 0, true }, 
 /* 0x01ff */ { "Affliction", 126, true }, 
-/* 0x0200 */ { "Ensnare", 0, true }, 
+/* 0x0200 */ { "Ensnare", 600, true },			// 10 min 
 /* 0x0201 */ { "Calm Animal", 180, true }, 
 /* 0x0202 */ { "Terrorize Animal", 54, true }, 
 /* 0x0203 */ { "Thistlecoat", 0, true }, 
@@ -1718,7 +1718,7 @@
 /* 0x06aa */ { "Boltran's Agacerie", 0, true }, 
 /* 0x06ab */ { "Dictate", 48, true }, 
 /* 0x06ac */ { "Aanya's Quickening", 1440, true }, 
-/* 0x06ad */ { "Wonderous Rapidity", 0, true }, 
+/* 0x06ad */ { "Wonderous Rapidity", 1200, true },		// 20 min 
 /* 0x06ae */ { "Visions of Grandeur", 2520, true }, 
 /* 0x06af */ { "Umbra", 5940, true }, 
 /* 0x06b0 */ { "Forlorn Deeds", 0, true }, 
