@@ -800,19 +800,34 @@ struct charProfileStruct
 /*2958*/ uint8_t  unknown2958[32];
 
 /*2990*/ uint16_t skills[74];             // List of skills (MAX_KNOWN_SKILLS)
-/*3138*/ uint8_t  unknown3138[306];       // ***Placeholder
-/*3444*/ uint32_t zoneId;                 // see zones.h
-/*3448*/ uint8_t  unknown3448[128];
-/*3576*/ uint32_t bindzoneId[5];          // bound to bindzoneId[0]
-/*3596*/ float    sYpos[5];               // starting locs per bindzoneId
-/*3616*/ float    sXpos[5];               // starting locs per bindzoneId
-/*3636*/ float    sZpos[5];               // starting locs per bindzoneId
-/*3656*/ uint8_t  unknown3658[1080];
-/*4736*/ uint16_t deity;                  // deity
-/*4738*/ char     GroupMembers[5][48];    // List of all the members in group
-/*4978*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000 
-/*4982*/ uint8_t  aapoints;               // number of ability points? 
-/*4983*/ uint8_t  unknown4983[3263];
+/*3138*/ uint8_t  unknown3138[308];       // ***Placeholder
+/*3446*/ uint32_t zoneId;                 // see zones.h
+/*3450*/ uint8_t  unknown3448[128];
+/*3578*/ uint32_t bindzoneId[5];          // bound to bindzoneId[0]
+/*3598*/ float    sYpos[5];               // starting locs per bindzoneId
+/*3618*/ float    sXpos[5];               // starting locs per bindzoneId
+/*3638*/ float    sZpos[5];               // starting locs per bindzoneId
+/*3658*/ uint8_t  unknown3658[20];
+/*3678*/ struct itemPropertiesStruct bankinvprops[8];
+/*3758*/ struct itemPropertiesStruct bankinvcontprops[80];
+/*4558*/ uint8_t  unknown4558[4];
+/*4562*/ uint16_t bank_inv[8];            // itemIds of the 8 bank slots
+/*4578*/ uint16_t bank_cont_inv[80];      // itemIds of items inside containers in bank
+/*4738*/ uint16_t deity;                  // deity
+/*4740*/ uint16_t guildId;                // guildId
+/*4742*/ uint8_t  unknown4742[15];
+/*4757*/ uint8_t  pvp;
+/*4758*/ uint8_t  _level;                 // seems to be player level
+/*4759*/ uint8_t  anon;                   // 0 plain, 1 anon, 2 roleplay, 
+/*4760*/ uint8_t  gm;                     // gm flag?
+/*4761*/ uint8_t  guildstatus;            // 0 member, 1 officer, 2 leader
+/*4762*/ uint8_t  unknown4762[44]; 
+/*4806*/ char     GroupMembers[5][64];    // List of all the members in group
+/*5126*/ uint8_t  uknown5060[88];
+/*5214*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000 
+/*5218*/ uint8_t  unknown5218[36];
+/*5254*/ uint32_t aapoints;               // number of unspent ability points 
+/*5258*/ uint8_t  unknown4983[2988];
 };
 
 
