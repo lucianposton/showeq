@@ -62,7 +62,7 @@ int main (int argc, char *argv[])
   bool displayBinaryData = false;
 
   // should the icon be displayed
-  bool displayIcon = false;
+  bool displayIcon = DISPLAY_ICONS;
 
   // CGI Convenience class
   CGI cgiconv;
@@ -184,7 +184,7 @@ int main (int argc, char *argv[])
     nameString = entry->GetName();
 
     if (displayIcon)
-      out << "<P><IMG src=\"/eq-icons/" << entry->GetIconNr() 
+      out << "<P><IMG src=\"" << ICON_DIR << entry->GetIconNr() 
 	  << ".png\" alt=\"Icon: " << entry->GetIconNr() << "\"/></P>";
 
     if (!nameString.isEmpty())

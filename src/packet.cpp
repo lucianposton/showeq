@@ -625,9 +625,9 @@ void EQPacket::InitializeOpCodeMonitor (void)
 
     int            iCommaPos      = 0;
     int            iColonPos      = 0;
-    unsigned short usIterationID  = 0;
+    uint8_t        uiIterationID  = 0;
 
-    for (unsigned int uiIndex = 0; uiIndex < OPCODE_SLOTS && !qsMonitoredOpCodes.isEmpty(); uiIndex ++)
+    for (uint8_t uiIndex = 0; uiIndex < OPCODE_SLOTS && !qsMonitoredOpCodes.isEmpty(); uiIndex ++)
     {
       /* Initialize the variables with their default values */
       MonitoredOpCodeList      [uiIndex] [0] = 0; /* OpCode number (16-bit HEX) */
@@ -644,10 +644,10 @@ void EQPacket::InitializeOpCodeMonitor (void)
       qsMonitoredOpCodes.remove (0, iCommaPos + 1);
 
 
-      usIterationID = 0;
+      uiIterationID = 0;
 
 
-      unsigned short usColonCount = qsCommaBuffer.contains(":");
+      uint8_t uiColonCount = qsCommaBuffer.contains(":");
       iColonPos = qsCommaBuffer.find (":");
 
       if (iColonPos == -1)
@@ -656,18 +656,18 @@ void EQPacket::InitializeOpCodeMonitor (void)
       else
         qsColonBuffer = qsCommaBuffer.left (iColonPos);
 
-      while (usIterationID <= usColonCount)
+      while (uiIterationID <= uiColonCount)
       {
-        if (usIterationID == 0)
+        if (uiIterationID == 0)
           MonitoredOpCodeList [uiIndex] [0] = qsColonBuffer.toUInt (NULL, 16);
 
-        else if (usIterationID == 1)
+        else if (uiIterationID == 1)
           MonitoredOpCodeAliasList [uiIndex] = qsColonBuffer;
 
-        else if (usIterationID == 2)
+        else if (uiIterationID == 2)
           MonitoredOpCodeList [uiIndex] [1] = qsColonBuffer.toUInt (NULL, 10);
 
-        else if (usIterationID == 3)
+        else if (uiIterationID == 3)
           MonitoredOpCodeList [uiIndex] [2] = qsColonBuffer.toUInt (NULL, 10);
 
         qsCommaBuffer.remove (0, iColonPos + 1);
@@ -680,7 +680,7 @@ void EQPacket::InitializeOpCodeMonitor (void)
         else
             qsColonBuffer = qsCommaBuffer.left (iColonPos);
 
-        usIterationID ++;
+        uiIterationID ++;
       }
     }
     m_bOpCodeMonitorInitialized = true;

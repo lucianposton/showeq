@@ -50,7 +50,7 @@ int main (int argc, char *argv[])
   bool doSearch = false;
 
   // should the item icons be displayed (default = false)
-  bool displayIcon = true;
+  bool displayIcon = DISPLAY_ICONS;
 
   // process any CGI data
   cgiconv.processCGIData();
@@ -342,7 +342,7 @@ int main (int argc, char *argv[])
     
     // only display icon number if we have that data
     if (displayIcon)
-      out << "<TD><IMG SRC=\"/eq-icons/" << entry->GetIconNr() 
+      out << "<TD><IMG SRC=\"" << ICON_DIR << entry->GetIconNr() 
 	  << ".png\" alt=\"Icon: " << entry->GetIconNr() << "\"/></TD>";
     else
       out << "<TD>" << entry->GetIconNr() << "</TD>";
