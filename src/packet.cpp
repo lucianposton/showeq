@@ -96,13 +96,14 @@ void searchForNum(unsigned char *data, int len, char *Name, char value){
 
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
 bool validatePayloadSize(int len, int size, uint16_t code,
+			 const char* clarifier,
 			 const char* codeName, const char* structName)
 {
   // verify size
   if (len != size)
   {
-    fprintf(stderr, "WARNING: %s (%04x) (dataLen:%d != sizeof(%s):%d)!\n",
-	   codeName, code, len, structName, size);
+    fprintf(stderr, "WARNING: %s%s (%04x) (dataLen:%d != sizeof(%s):%d)!\n",
+	    clarifier, codeName, code, len, structName, size);
     return false;
   }
   return true;
@@ -110,11 +111,11 @@ bool validatePayloadSize(int len, int size, uint16_t code,
 
 #define ValidatePayload(codeName, structName) \
   validatePayloadSize(len, sizeof( structName ), codeName, \
-		      #codeName , #structName )
+		      "", #codeName , #structName )
 
 #define ValidateDecodedPayload(codeName, structName) \
   validatePayloadSize(decodedDataLen, sizeof( structName ), codeName, \
-		      #codeName , #structName )
+		      "Decoded ", #codeName , #structName )
 #else
 #define ValidatePayload(code, struct) true
 #endif
@@ -1581,8 +1582,8 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	      printf("EQPacket::dispatchZoneData():CharProfileCode:Decoded\n");
                unk = false;
 
-	       // just call pkt_backfillPlayer
-	       pkt_backfillPlayer((struct playerProfileStruct *) (decodedData));
+	       // just call dispatchDecodedCharProfile
+	       dispatchDecodedCharProfile(decodedData, decodedDataLen);
            }
            else
            {
@@ -1602,115 +1603,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
            unk = ! ValidatePayload(CorpseCode, spawnKilledStruct);
 
            emit killSpawn((const spawnKilledStruct*) data);
-
-#if 0 // ZBTEMP: // Migrate prints to EQInterface, other to EQPlayer
-                         struct spawnKilledStruct *deadspawn;
-            deadspawn = (struct spawnKilledStruct *) (data);
-
-	    spawnStruct lastDeadSpawn;
-
-#ifdef PACKET_PAYLOAD_SIZE_DIAG
-	    // verify size
-	    if (len != sizeof(spawnKilledStruct))
-	    {
-	      printf("WARNING: CorpseCode (dataLen:%d != sizeof(spawnKilledStruct):%d)!\n",
-		     len, sizeof(spawnKilledStruct));
-	    }
-#endif
-
-            //printf("setting new dead spawn, id %d\n", deadspawn->spawnId);
-
-            if (m_Spawns.contains( deadspawn->spawnId ))
-               lastDeadSpawn = m_Spawns[ deadspawn->spawnId ];
-	    else
-	    {
-	      memset(&lastDeadSpawn, 0, sizeof(lastDeadSpawn));
-	      lastDeadSpawn.spawnId = deadspawn->spawnId;
-	      strcpy(lastDeadSpawn.name, "unknown");
-	    }
-
-            if (showeq_params->spawnlog_enabled)
-            {
-               time_t timeCurrent = time(NULL);
-
-               struct timeOfDayStruct eqTime;
-               getEQTimeOfDay( timeCurrent, &eqTime );
-
-               fprintf( spawnlogout,
-                        "x:%s(%d):%d,%d,%d:%s:%d:%s:%02d.%02d.%02d.%02d.%04d\n",
-                        lastDeadSpawn.name,
-                        lastDeadSpawn.spawnId,
-                        m_Spawns[lastDeadSpawn.spawnId].xPos,
-                        m_Spawns[lastDeadSpawn.spawnId].yPos,
-                        m_Spawns[lastDeadSpawn.spawnId].zPos,
-                        getTime(pchTempBuf),
-                        spawnlog_version,
-                        m_currentZoneName.shortName,
-                        eqTime.hour,
-                        eqTime.minute,
-                        eqTime.month,
-                        eqTime.day,
-                        eqTime.year
-                      );
-
-               fflush(spawnlogout);
-            }
-
-            if (deadspawn->killerId == m_player->getPlayerID())
-	    {
-	      // note that this is the last kill by the player
-	      m_player->setLastKill(lastDeadSpawn);
-
-	      printf("%s(%d) killed by YOU(%i).\n", 
-		     lastDeadSpawn.name, lastDeadSpawn.spawnId, 
-		     deadspawn->killerId);
-	    }
-            else if (m_Spawns.contains( deadspawn->killerId ))
-            {
-               bool bGroupMate = false;
-
-               for(char ng = 0; ng < groupSize; ng ++)
-               {
-                  if (deadspawn->killerId == groupID[ng])
-                  {
-                     bGroupMate = true;
-                     break;
-                  }
-               }
-
-               if (bGroupMate == true)
-	       {
-		 // note that this is the last kill by the player's group
-		 m_player->setLastKill(lastDeadSpawn);
-
-		 printf("%s(%d) killed by your group mate, %s(%d).\n", 
-			lastDeadSpawn.name, lastDeadSpawn.spawnId, 
-			m_Spawns[ deadspawn->killerId ].name, 
-			deadspawn->killerId);
-	       }
-               else
-	       {
-		 // note that the last player kill is stale
-		 m_player->incStaleKillCount();
-		 
-		 printf("%s(%d) killed by %s(%d).\n", 
-			lastDeadSpawn.name, lastDeadSpawn.spawnId, 
-			m_Spawns[ deadspawn->killerId ].name, 
-			 deadspawn->killerId);
-	       }
-            }
-            else
-	    {
-	      // note that the last player kill is stale
-	      m_player->incStaleKillCount();
-		 
-	      printf("%s(%d) killed by unknown(%i).\n", 
-		     lastDeadSpawn.name, lastDeadSpawn.spawnId, 
-		     deadspawn->killerId);
-	    }
-
-            emit killSpawn (deadspawn->spawnId);
-#endif // ZBTEMP:
 
            break;
       } /* end CorpseCode */
@@ -2781,14 +2673,55 @@ void EQPacket::decPlayback(void)
   }
 }
 
-void EQPacket::pkt_backfillPlayer(const playerProfileStruct *player)
+void EQPacket::dispatchDecodedCharProfile(const uint8_t* decodedData, 
+					  uint32_t decodedDataLen)
 {
-  emit backfillPlayer (player);
+  ValidateDecodedPayload(CharProfileCode, playerProfileStruct);
+
+  emit backfillPlayer((const playerProfileStruct*)decodedData);
 }
 
-void EQPacket::pkt_backfillSpawn(const spawnStruct *spawn)
+void EQPacket::dispatchDecodedNewSpawn(const uint8_t* decodedData, 
+				       uint32_t decodedDataLen)
 {
-  emit backfillSpawn(spawn);
+  ValidateDecodedPayload(NewSpawnCode, newSpawnStruct);
+
+  newSpawnStruct* ndata = (newSpawnStruct*)decodedData;
+  spawnStruct* sdata = &ndata->spawn;
+  emit backfillSpawn(sdata);
+}
+
+void EQPacket::dispatchDecodedZoneSpawns(const uint8_t* decodedData, 
+					 uint32_t decodedDataLen)
+{
+  zoneSpawnsStruct* zdata = (struct zoneSpawnsStruct *)(decodedData);
+  int zoneSpawnsStructHeaderData = 
+    ((uint8_t*)&zdata->spawn[0]) - decodedData;
+
+  int zoneSpawnsStructPayloadCount = 
+       (decodedDataLen - zoneSpawnsStructHeaderData) / sizeof(spawnZoneStruct);
+
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+  // validate payload size, decodedDataLen - zoneSpawnsStructHeader should be
+  // an exact multiple of the size of spawnZoneStruct
+  int remainder = 
+    (decodedDataLen - zoneSpawnsStructHeaderData) % sizeof(spawnZoneStruct);
+  if (remainder != 0)
+  {
+    printf("WARNING: Decoded ZoneSpawnsCode ((decodedDataLen:%d - zoneSpawnsStructHeaderData:%d) does not evenly contain %d spawnZoneStruct's:%d (remainder: %d)!\n",
+	   decodedDataLen, zoneSpawnsStructHeaderData, 
+	   zoneSpawnsStructPayloadCount, sizeof(spawnZoneStruct),
+	   remainder);
+  }
+#endif
+
+  spawnStruct* sdata;
+ 
+  for (int j = 0; j < zoneSpawnsStructPayloadCount; j++)
+  {
+    sdata = &zdata->spawn[j].spawn;
+    emit backfillSpawn(sdata);
+  }
 }
 
 int EQPacket::getEQTimeOfDay( time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay )

@@ -58,6 +58,18 @@ QString print_weapon (uint16_t weapon)
 #include "weapons27.h"
   };
 
+  // sparse array of weapon names (in 0x28 range), some are NULL
+  static const char*  weaponnames28[] = 
+  {
+#include "weapons28.h"
+  };
+
+  // sparse array of weapon names (in 0x2b range), some are NULL
+  static const char*  weaponnames2b[] = 
+  {
+#include "weapons2b.h"
+  };
+
   // assume no material name found
   const char *weaponStr = NULL;
 
@@ -75,6 +87,18 @@ QString print_weapon (uint16_t weapon)
     // retrieve pointer to weapon name
     if (weaponLo < (sizeof(weaponnames27) / sizeof (char*)))
       weaponStr = weaponnames27[weaponLo];
+  }
+  else if (weaponHi == 0x28)
+  {
+    // retrieve pointer to weapon name
+    if (weaponLo < (sizeof(weaponnames28) / sizeof (char*)))
+      weaponStr = weaponnames28[weaponLo];
+  }
+  else if (weaponHi == 0x2b)
+  {
+    // retrieve pointer to weapon name
+    if (weaponLo < (sizeof(weaponnames2b) / sizeof (char*)))
+      weaponStr = weaponnames2b[weaponLo];
   }
 
   // if race name exists, then return it, otherwise return a number string
@@ -871,11 +895,13 @@ bool Spawn::approximatePosition(bool animating,
       msec += 86400 * 1000;
     
     // if it's been over 90 seconds, then don't adjust position
-    if (msec < 90 * 1000)
+    if (msec < (90 * 1000))
     {
       newPos.addPoint(fixPtMulII(m_cookedDeltaXFixPt, qFormat, msec),
 		      fixPtMulII(m_cookedDeltaYFixPt, qFormat, msec),
 		      fixPtMulII(m_cookedDeltaZFixPt, qFormat, msec));
+
+      return true;
     }
     else
       return false;

@@ -41,8 +41,7 @@ public:
    void updateLevel(const levelUpStruct* levelup);
    void updateSpawnHP(const spawnHpUpdateStruct* hpupdate);
    void updateStamina(const staminaStruct* stam);
-   void setLastKill(const spawnStruct& lastKill);
-   void incStaleKillCount();
+   void setLastKill(const QString& name, uint8_t level);
    void setLastSpell(uint16_t spellId);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
@@ -232,13 +231,11 @@ public:
    QColor m_conTable[maxSpawnLevel];
 
    // last spawn this player killed
-   spawnStruct m_lastSpawnPlayerKilled;
+   QString m_lastSpawnKilledName;
+   uint8_t m_lastSpawnKilledLevel;
 
    // is the kill information fresh
    bool m_freshKill;
-
-   // how old is the kill
-   int m_staleKillCount;
 
    // last spell cast on this player
    uint16_t m_lastSpellOnId;

@@ -100,9 +100,6 @@ struct ShowEQParams
   bool           monitorOpCode_Usage;
   const char    *monitorOpCode_List;
 
-  // Keymaps, increase the number as additional keymappings are added
-  char *         keymap[2];
-
   int            ItemDBTypes;
   QString        ItemLoreDBFilename;
   QString        ItemNameDBFilename;

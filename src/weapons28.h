@@ -1,5 +1,5 @@
 /*
- * weapons27.h
+ * weapons28.h
  *
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
@@ -20,21 +20,21 @@
     NULL,                 // 0x0d
     NULL,                 // 0x0e
     NULL,                 // 0x0f
-    "Luclin Long Sword",  // 0x10
-    "Luclin Great Mace",  // 0x11
+    NULL,                 // 0x10
+    NULL,                 // 0x11
     NULL,                 // 0x12
-    "Luclin Warhammer",   // 0x13
-    "Luclin 2H Sword",    // 0x14
+    NULL,                 // 0x13
+    NULL,                 // 0x14
     NULL,                 // 0x15
-    "Gladius",            // 0x16
-    "Luclin Mace",        // 0x17
-    "Luclin Battle Staff",// 0x18
-    "Luclin Dagger",      // 0x19
+    NULL,                 // 0x16
+    NULL,                 // 0x17
+    NULL,                 // 0x18
+    NULL,                 // 0x19
     NULL,                 // 0x1a
-    "Stone Axe",          // 0x1b
-    "Stone Hammer",       // 0x1c
-    "Stone Warhammer",    // 0x1d
-    "Curved Blade",       // 0x1e
+    NULL,                 // 0x1b
+    NULL,                 // 0x1c
+    NULL,                 // 0x1d
+    NULL,                 // 0x1e
     NULL,                 // 0x1f
     NULL,                 // 0x20
     NULL,                 // 0x21
@@ -43,11 +43,11 @@
     NULL,                 // 0x24
     NULL,                 // 0x25
     NULL,                 // 0x26
-    "Luclin Scimitar",    // 0x27
+    NULL,                 // 0x27
     NULL,                 // 0x28
-    "Bone Blade",         // 0x29
+    NULL,                 // 0x29
     NULL,                 // 0x2a
-    "Mining Pick",        // 0x2b
+    NULL,                 // 0x2b
     NULL,                 // 0x2c
     NULL,                 // 0x2d
     NULL,                 // 0x2e
@@ -65,7 +65,7 @@
     NULL,                 // 0x3a
     NULL,                 // 0x3b
     NULL,                 // 0x3c
-    NULL,                 // 0x3d
+    "Blowgun",            // 0x3d
     NULL,                 // 0x3e
     NULL,                 // 0x3f
     NULL,                 // 0x40
@@ -120,16 +120,16 @@
     NULL,                 // 0x71
     NULL,                 // 0x72
     NULL,                 // 0x73
-    "Luclin Spear",       // 0x74
-    "Wood Spear",         // 0x75
+    NULL,                 // 0x74
+    NULL,                 // 0x75
     NULL,                 // 0x76
-    "Wood Spear",         // 0x77
+    NULL,                 // 0x77
     NULL,                 // 0x78
     NULL,                 // 0x79
-    "Stone Spear",        // 0x7a
-    "Stone Spear",        // 0x7b
-    "Bone Tipped Spear",  // 0x7c
-    "Bone Spear",         // 0x7d
+    NULL,                 // 0x7a
+    NULL,                 // 0x7b
+    NULL,                 // 0x7c
+    NULL,                 // 0x7d
     NULL,                 // 0x7e
     NULL,                 // 0x7f
 
@@ -237,10 +237,10 @@
     NULL,                 // 0xd5
     NULL,                 // 0xd6
     NULL,                 // 0xd7
-    "Luclin Staff",       // 0xd8
+    NULL,                 // 0xd8
     NULL,                 // 0xd9
     NULL,                 // 0xda
-    "Horned Staff",       // 0xdb
+    NULL,                 // 0xdb
     NULL,                 // 0xdc
     NULL,                 // 0xdd
     NULL,                 // 0xde

@@ -23,7 +23,8 @@ class GroupMgr: public QObject
  
   const Spawn* memberByID( uint16_t id );
   const Spawn* memberByName( const QString& name );
-  
+  const Spawn* memberBySlot( uint16_t slot );
+
   int groupSize();
   int groupPercentBonus();
   

@@ -45,9 +45,10 @@ class EQDecode : public QObject
   void ResetDecoder (void);
 
  signals:
-  void KeyChanged (void);
-  void BackfillPlayer (const playerProfileStruct *);
-  void BackfillSpawn (const spawnStruct *);
+  void keyChanged (void);
+  void dispatchDecodedCharProfile(const uint8_t* decodedData, uint32_t len);
+  void dispatchDecodedNewSpawn(const uint8_t* decodedData, uint32_t len);
+  void dispatchDecodedZoneSpawns(const uint8_t* decodedData, uint32_t len);
 
  public:
   int DecodePacket(const uint8_t *data, uint32_t len, 

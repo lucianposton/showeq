@@ -1,3 +1,42 @@
+dohpaZ (30/12/01)
+---------------------
+Modifications:
+ + Fix for map panning bug
+ + Applied patch #496581 "Quick fix for Exp-Window"
+ + Applied patch #496462 "consider msg patch" from wyvern (mvern)
+ + Modified Experience handling to use the group class and made the 
+   ExperienceWindow work more or less (not perfect, but it's something).
+ + Temporarily disable group code until the crashing bug can be found 
+   (any volunteers to fix it?)
+ + Added some keyboard accelerators to the maps.
+   The following keyboard accelerators are configurable on a per map basis 
+   (listed by preference name):
+     ZoomInKey                => +
+     ZoomOutKey               => -
+     CenterSelectedKey        => Ctrl+5
+     ViewLockKey              => Ctrl+0
+     PanDownLeftKey           => Ctrl+1
+     PanDownKey               => Ctrl+2
+     PanDownRightKey          => Ctrl+3
+     PanLeftKey               => Ctrl+4
+     PanRightKey              => Ctrl+6
+     PanUpLeftKey             => Ctrl+7
+     PanUpKey                 => Ctrl+8
+     PanUpRightKey            => Ctrl+9
+     AddLocationKey           => Ctrl+O
+     StartLineKey             => Ctrl+L
+     AddLinePointKey          => Ctrl+P
+     DeleteLinePointKey       => Ctrl+D
+     MapLineNormalKey         => Alt+1
+     MapLineDepthFilteredKey  => Alt+2
+     MapLineFadedFloorsKey    => Alt+3
+ + Added an explanation of how the filter string is composed to 
+   filters.conf.dist
+ + Added more weapon names (including adding weapon28.h and weapons2b.h)
+ + Added size checking for dispatched decoded data.
+ + Tweaked the structures related to Zone Spawns to more accurately reflect
+   the data organization.
+
 Ratt (18/Dec/01)
 ---------------------
 ShowEQ v4.0

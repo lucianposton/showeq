@@ -348,9 +348,10 @@ struct spawnStruct
 **    zoneSpawnStruct
 **
 */ 
-struct spawnZoneStruct : public spawnStruct
+struct spawnZoneStruct
 {
-/*0172*/ uint8_t  unknown0172[4];         // only seen in ZoneSpawn 
+/*0000*/ uint8_t  unknown0000[4];
+/*0004*/ spawnStruct spawn;
 };
 
 /*
@@ -824,8 +825,7 @@ struct zoneSpawnsStruct
 {
 /*0000*/ int8_t opCode;                     // 0x61
 /*0001*/ int8_t version;                    // 0x21
-/*0002*/ int32_t unknown0002;               // ***Placeholder
-/*0006*/ struct spawnZoneStruct spawn[0];   // Variable number of spawns
+/*0002*/ struct spawnZoneStruct spawn[0];   // Variable number of spawns
 };
 
 /*

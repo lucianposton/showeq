@@ -1,15 +1,74 @@
 # ShowEQ Filter file
-#
-# All entries are 'regular expressions' and may be optionally followed
-# by a level range.
+#            
+# If you make changes to this file while running ShowEQ, press F3 in ShowEQ
+# to reload and reapply all the filters.
 #
 # Note:  Sections end with a blank line.  Make sure the file ends with a blank
 #        line as well.  This file will be updated by the program with changes
 #        made while running
 #
-# If you make changes to this file while running ShowEQ, press F3 in ShowEQ
-# to reload and reapply all the filters.
-
+# All entries are POSIX style 'regular expressions' and may be 
+# optionally followed by a a level range, with a format of:
+# <Regular Expression>;<Level Range>
+# 
+# Where <Level Range> may be specified as follows:
+# <level>                 # matches a single level to match
+# <min_level>-            # match all levels at/above min_level
+# -<max_level>            # match all levels at/below max_level
+# <min_level>-<max_level> # match all levels between min_level and max_level
+#                         # inclusive
+#
+# Where the <Regular Expression> is matched against a filter string 
+# constructed as follows (where things in <> are replaced with the 
+# value specific to the particular item instance):
+#    Name:<Name>:Race:<Race>:Class:<Class>:NPC:<NPC Value>:X:<X>:Y:<Y>:Z:<Z>:
+#
+# For spawns that aren't drops/coins the string has the following added to the 
+# end of the string:
+#    Light:<Light>:Deity:<Deity Name>:RTeam:<RTeam>:DTeam:<DTeam>:
+#
+# Where:
+#    <Name> is the creatures transformed/pretty name, with numbers removed,
+#           underscores ("_") replaced with spaces, and articles (a, an, the)
+#           moved to the end of the name following a comma (",").
+#    <Race> is the race name as it appears the spawn list (as per races.h).
+#    <Class> is the class name as it appears in the spawn list 
+#            (as per classes.h)
+#    <NPC> has a numeric value as follows:
+#            0 = Player Spawn
+#            1 = NPC Spawn
+#            2 = Player Corpse
+#            3 = NPC Corpse
+#            4 = Unknown Spawn
+#            5 = Coin
+#            6 = Drop
+#    <X>, <Y>, <Z> are the coordinates of the MOB
+#    <Light> is the type of light source the spawn is using, where:
+#            CDL = Candle
+#            TR = Torch
+#            TGS = Tiny Glowing Skull
+#            SL = Small Lantern
+#            SoM = Stein of Moggok
+#            LL = Large Lantern
+#            FL = Flameless lantern
+#            GOS = Globe of stars
+#            LG = Light Globe
+#            LS = Lightstone, Burnt-out lightstone, wisp stone
+#            GLS = Greater Lightstone
+#            FBE = Fire Beatle Eye
+#            CL = Coldlight
+#    <Deity> is the deity name (as it appears in deity.h)
+#    <RTeam> is the Race Team where:
+#            1 = Human
+#            2 = Elf
+#            3 = Dark
+#            4 = Short
+#            5 = Other
+#    <DTeam> is the Deity Team where:
+#            1 = Good
+#            0 = Neutral
+#            -1 = Evil
+#            2 = Other
 
 
 # [Hunt] is the section for spawns you are hunting.

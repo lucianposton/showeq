@@ -204,7 +204,7 @@ int main (int argc, char **argv)
 
    section = "Misc";
    showeq_params->walkpathrecord = pSEQPrefs->getPrefBool("WalkPathRecording", section, 0);
-   showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 0);
+   showeq_params->walkpathlength = pSEQPrefs->getPrefInt("WalkPathLength", section, 25);
    showeq_params->logSpawns = pSEQPrefs->getPrefBool("LogSpawns", section, 0);
    showeq_params->logItems = pSEQPrefs->getPrefBool("LogItems",  section, 0);
    /* Tells SEQ whether or not to display casting messages (Turn this off if you're on a big raid) */
@@ -283,12 +283,6 @@ int main (int argc, char **argv)
    showeq_params->ItemRawDataDBFileName = pSEQPrefs->getPrefString("RawDataDBFilename", section, LOGDIR "/itemrawdata");
    showeq_params->ItemDBTypes = pSEQPrefs->getPrefInt("DatabasesEnabled", section, (EQItemDB::LORE_DB | EQItemDB::NAME_DB | EQItemDB::DATA_DB));
    showeq_params->ItemDBEnabled = pSEQPrefs->getPrefBool("Enabled", section, 1);
-
-   /* Read in Keymaps */
-   section = "KeyMap";
-   showeq_params->keymap[0] = strdup(pSEQPrefs->getPrefString("ZoomIn", section, "+"));
-   showeq_params->keymap[1] = strdup(pSEQPrefs->getPrefString("ZoomOut", section, "-"));
-
 
    /* Parse the commandline for commandline parameters */
    while ((opt = getopt_long( argc,

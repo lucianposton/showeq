@@ -468,7 +468,7 @@ QMainWindow (parent, name)
 	   m_player, SLOT(updateStamina(const staminaStruct*)));
 
    // Initialize the experience window;
-   m_expWindow = new ExperienceWindow( m_packet );
+   m_expWindow = new ExperienceWindow( m_packet, m_groupMgr );
 
    // Make the file menu
    QPopupMenu* pFileMenu = new QPopupMenu;
@@ -484,10 +484,7 @@ QMainWindow (parent, name)
 
 
    pFileMenu->insertItem("Edit Filters", this, SLOT(launch_editor_filters()));
-   if (pSEQPrefs->getPrefBool("Filters_UseOldFilters", section, 0))
-    pFileMenu->insertItem("Edit Spawns", this, SLOT(launch_editor_spawns()));
-   else
-    pFileMenu->insertItem("Select Filter File", this, SLOT(select_filter_file()));
+   pFileMenu->insertItem("Select Filter File", this, SLOT(select_filter_file()));
 
    pFileMenu->insertItem("Add Spawn Category",
 			 this, SLOT(addCategory()) , ALT+Key_C);
@@ -513,28 +510,35 @@ QMainWindow (parent, name)
    menuBar()->insertItem("&File", pFileMenu);
 
    QPopupMenu* pDebugMenu = new QPopupMenu;
-   pDebugMenu->insertItem("List &Spawns", this, SLOT(listSpawns()), CTRL+Key_S);
-   pDebugMenu->insertItem("List &Drops", this, SLOT(listDrops()), CTRL+Key_D);
-   pDebugMenu->insertItem("List &Coins", this, SLOT(listCoins()), CTRL+Key_C);
+   pDebugMenu->insertItem("List &Spawns", this, SLOT(listSpawns()), 
+			  ALT+CTRL+Key_S);
+   pDebugMenu->insertItem("List &Drops", this, SLOT(listDrops()), 
+			  ALT+CTRL+Key_D);
+   pDebugMenu->insertItem("List &Coins", this, SLOT(listCoins()), 
+			  ALT+CTRL+Key_C);
    pDebugMenu->insertItem("List &Map Info", 
-			  this, SLOT(listMapInfo()), CTRL+Key_M);
-   pDebugMenu->insertItem("Dump &Spawns", this, SLOT(dumpSpawns()), CTRL+Key_S);
-   pDebugMenu->insertItem("Dump &Drops", this, SLOT(dumpDrops()), CTRL+Key_D);
-   pDebugMenu->insertItem("Dump &Coins", this, SLOT(dumpCoins()), CTRL+Key_C);
+			  this, SLOT(listMapInfo()), ALT+CTRL+Key_M);
+   pDebugMenu->insertItem("Dump &Spawns", this, SLOT(dumpSpawns()), 
+			  ALT+SHIFT+CTRL+Key_S);
+   pDebugMenu->insertItem("Dump &Drops", this, SLOT(dumpDrops()), 
+			  ALT+SHIFT+CTRL+Key_D);
+   pDebugMenu->insertItem("Dump &Coins", this, SLOT(dumpCoins()), 
+			  ALT+SHIFT+CTRL+Key_C);
    pDebugMenu->insertItem("Dump Map &Info",
-			  this, SLOT(dumpMapInfo()), CTRL+Key_I);
+			  this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
    
-   pDebugMenu->insertItem("&List Filters", m_filterMgr, SLOT(listFilters()), ALT+Key_I);
+   pDebugMenu->insertItem("&List Filters", m_filterMgr, SLOT(listFilters()), 
+			  ALT+Key_I);
     pDebugMenu->insertSeparator(-1);
     if (showeq_params->monitorOpCode_Usage == true)
         x = pDebugMenu->insertItem("Disable &OpCode Monitoring");
     else
         x = pDebugMenu->insertItem("Enable &OpCode Monitoring");
     pDebugMenu->connectItem(x, this, SLOT(ToggleOpCodeMonitoring(int)));
-    pDebugMenu->setAccel(CTRL+Key_O, x);
+    pDebugMenu->setAccel(CTRL+ALT+Key_O, x);
     x = pDebugMenu->insertItem("&Reload Monitored OpCode List");
     pDebugMenu->connectItem(x, this, SLOT(ReloadMonitoredOpCodeList()));
-    pDebugMenu->setAccel(CTRL+Key_R, x);
+    pDebugMenu->setAccel(CTRL+ALT+Key_R, x);
     menuBar()->insertItem("&Debug", pDebugMenu);
 
    // Make the log menu

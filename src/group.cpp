@@ -20,7 +20,8 @@ GroupMgr::GroupMgr(SpawnShell* spawnShell,
  
 void GroupMgr::handleGroupInfo( const struct groupMemberStruct* gmem )
 {
-  //  return;
+  return;
+
   QString newName = gmem->membername;
   const Spawn* member;
 
@@ -90,19 +91,19 @@ void GroupMgr::delItem(const Item* item)
 
 int GroupMgr::groupSize()
 {
-  return m_group.count() + 1;
+  return m_group.count();
 }
 
 int GroupMgr::groupPercentBonus()
 {
   switch ( groupSize() )
   {
-  case 1:		return 100;
-  case 2:		return 102;
-  case 3:		return 106;
-  case 4:		return 110;
-  case 5:		return 114;
-  case 6:		return 120;
+  case 0:		return 100;
+  case 1:		return 102;
+  case 2:		return 106;
+  case 3:		return 110;
+  case 4:		return 114;
+  case 5:		return 120;
   default:	return 100;
   }
 }
@@ -136,6 +137,21 @@ const Spawn* GroupMgr::memberByName(const QString& name)
   for ( member = m_group.first(); member != NULL; member = m_group.next() )
   {
     if (member->rawName() == name)
+      return member;
+  }
+
+  return NULL;
+}
+
+const Spawn* GroupMgr::memberBySlot(uint16_t slot )
+{
+  const Spawn* member;
+  int curSlot;
+  for (curSlot = 0, member = m_group.first(); 
+       member != NULL; 
+       curSlot++, member = m_group.next() )
+  {
+    if (curSlot == slot)
       return member;
   }
 

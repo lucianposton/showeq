@@ -396,7 +396,7 @@ void SpawnShell::zoneSpawns(const zoneSpawnsStruct* zspawns, int len)
 
   for (int i = 0; i < spawndatasize; i++)
   {
-    newSpawn(zspawns->spawn[i]);
+    newSpawn(zspawns->spawn[i].spawn);
   }
 }
 
@@ -660,6 +660,7 @@ void SpawnShell::consMessage(const considerStruct * con)
   Spawn* item;
   QString lvl("");
   QString hps("");
+  QString cn("");
 
   QString msg("Faction: Your faction standing with ");
 
@@ -699,46 +700,38 @@ void SpawnShell::consMessage(const considerStruct * con)
 
       printf("\nDiety: %s\n", (const char*)item->deityName());
 
-#if 0 // ZBTEMP: Until we get the new struct figured out
       int changed = tSpawnChangedNone;
-
-      /* valid faction messages carry the level. */
-      if (con->level)
-      {
-	item->setLevel(con->level);
-	changed = true;
-      }
 
       /* maxhp and curhp are available when considering players, */
       /* but not when considering mobs. */
-      if (con->maxHp || con->curHp) 
+      if (con->maxHp || con->curHp)
       {
-	if (item->NPC() == SPAWN_NPC_UNKNOWN)
-	{
-	  item->setNPC(SPAWN_PLAYER);        // player
-	  changed |= tSpawnChangedNPC;
-	}
-	item->setMaxHP(con->maxHp);
-	item->setHP(con->curHp);
-	changed |= tSpawnChangedHP;
-      } 
+         if (item->NPC() == SPAWN_NPC_UNKNOWN)
+         {
+            item->setNPC(SPAWN_PLAYER);        // player
+            changed |= tSpawnChangedNPC;
+         }
+         item->setMaxHP(con->maxHp);
+         item->setHP(con->curHp);
+         changed |= tSpawnChangedHP;
+      }
       else if (item->NPC() == SPAWN_NPC_UNKNOWN)
       {
-	item->setNPC(SPAWN_NPC);
-	changed |= tSpawnChangedNPC;
+         item->setNPC(SPAWN_NPC);
+         changed |= tSpawnChangedNPC;
       }
-      
+
       // note the updates if any
       if (changed != tSpawnChangedNone)
       {
-	if (updateFilterFlags(item))
-	  changed |= tSpawnChangedFilter;
-	if (updateRuntimeFilterFlags(item))
-	  changed |= tSpawnChangedRuntimeFilter;
+        if (updateFilterFlags(item))
+           changed |= tSpawnChangedFilter;
+        if (updateRuntimeFilterFlags(item))
+           changed |= tSpawnChangedRuntimeFilter;
 
-	emit changeItem(item, changed);
+        emit changeItem(item, changed);
       }
-#endif // ZBTEMP
+
       // note that this spawn has been considered
       item->setConsidered(true);
 
@@ -750,13 +743,50 @@ void SpawnShell::consMessage(const considerStruct * con)
       msg += "Spawn:" + QString::number(con->targetid, 16);
   } // else not yourself
   
-  if (con->level) 
+  switch (con->level) 
   {
-    if (con->maxHp || con->curHp)
-      lvl.sprintf(" (level %i, %i/%i HP)", con->level, con->curHp, con->maxHp);
-    else
-      lvl.sprintf(" (level %i)", con->level);
+     case 0:
+     {
+        cn.sprintf(" (even)");
+        break;
+     }
+     case 2:
+     {
+        cn.sprintf(" (green)");
+        break;
+     }
+     case 4:
+     {
+        cn.sprintf(" (blue)");
+        break;
+     }
+     case 13:
+     {
+        cn.sprintf(" (red)");
+        break;
+     }
+     case 15:
+     {
+        cn.sprintf(" (yellow)");
+        break;
+     }
+     case 18:
+     {
+        cn.sprintf(" (cyan)");
+        break;
+     }
+     default:
+     {
+        cn.sprintf(" (unknown: %d)", con->level);
+        break;
+     }
+  }
 
+  msg += cn;
+
+  if (con->maxHp || con->curHp)
+  {
+    lvl.sprintf(" (%i/%i HP)", con->curHp, con->maxHp);
     msg += lvl;
   }
   
@@ -820,6 +850,10 @@ void SpawnShell::killSpawn(const spawnKilledStruct* deadspawn)
    if (it != m_spawns.end())
    {
      Spawn* item = (Spawn*)it->second;
+
+     // ZBTEMP: This is temporary until we can find a better way
+     // set the last kill info on the player (do this before changing name)
+     m_player->setLastKill(item->name(), item->level());
 
      item->killSpawn();
      updateFilterFlags(item);

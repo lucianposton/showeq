@@ -127,7 +127,7 @@ class MapMgr : public QObject
   void clearItems(void);
 
   // Map Editing
-  void addLocation(const MapPoint& point);
+  void addLocation(QWidget* parent, const MapPoint& point);
   void startLine(const MapPoint& point);
   void addLinePoint(const MapPoint& point);
   void delLinePoint(void);
@@ -135,7 +135,7 @@ class MapMgr : public QObject
   // Map Editing control
   void setLineName(const QString &);
   void setLineColor(const QString &);
-  void showLineDlg();
+  void showLineDlg(QWidget* parent);
 
   // Preference handling
   void savePrefs(void);
@@ -352,24 +352,25 @@ class Map :public QWidget
   void addLinePoint();
   void delLinePoint(void);
   void addPathPoint();
+  void showLineDlg(void);
 
   void makeSpawnLine(const Item* item);
   void makeSelectedSpawnLine();
  
-  void ZoomIn ();
-  void ZoomOut ();
+  void zoomIn();
+  void zoomOut();
   void increaseGridResolution	(void);
   void decreaseGridResolution	(void);
-  void PanRight();
-  void PanLeft();
-  void PanDown();
-  void PanUp();
-  void PanUpRight();
-  void PanUpLeft();
-  void PanDownRight();
-  void PanDownLeft();
-  void ViewTarget();
-  void ViewLock();
+  void panRight();
+  void panLeft();
+  void panDown();
+  void panUp();
+  void panUpRight();
+  void panUpLeft();
+  void panDownRight();
+  void panDownLeft();
+  void viewTarget();
+  void viewLock();
 
   void reAdjust (void);
   void refreshMap(void);

@@ -166,8 +166,9 @@ void EQPlayer::clear()
   m_validHP = false;
   m_validAttributes = false;
 
-  memset((void*)&m_lastSpawnPlayerKilled, 0, sizeof(spawnStruct));
-  m_staleKillCount = 0;
+  m_lastSpawnKilledName = "unknown";
+  m_lastSpawnKilledLevel = 0;
+  m_freshKill = false;
 
   m_heading = -1;
   m_playerID = 10;
@@ -388,18 +389,27 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
   QString leftExp;
   QString needKills;
   QString tempStr;
-
+  uint32_t realexp;
+  uint32_t minexp;
+  uint32_t maxexp;
+  uint32_t diffexp;
+  minexp=calc_exp(getPlayerLevel () - 1, getPlayerRace  (), getPlayerClass () );
+  maxexp=calc_exp(getPlayerLevel (), getPlayerRace  (), getPlayerClass () );
+  diffexp=maxexp-minexp;
+  
+  realexp =exp->exp * diffexp / 330 + minexp;
+  
   if (m_currentExp > 0)
   {
-    totalExp  = Commanate(exp->exp);
-    gainedExp = Commanate((uint32_t) (exp->exp - m_currentExp));
+    totalExp  = Commanate(realexp);
+    gainedExp = Commanate((uint32_t) (realexp - m_currentExp));
 
     needKills = Commanate((( calc_exp( getPlayerLevel (),
 				       getPlayerRace  (),
 				       getPlayerClass ()
-				       )  - exp->exp
-			     )           /   ( exp->exp > m_currentExp    ?
-					       exp->exp - m_currentExp :
+				       )  - realexp
+			     )           /   ( realexp > m_currentExp    ?
+					       realexp - m_currentExp :
 					       1
 					       )
 			   )            + 1
@@ -415,7 +425,7 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
 					  getPlayerClass ()
 					  )
 				 )
-			 )  - ( exp->exp - ( calc_exp( getPlayerLevel () - 1,
+			 )  - ( realexp - ( calc_exp( getPlayerLevel () - 1,
 						       getPlayerRace  (),
 						       getPlayerClass ()
 						       )
@@ -432,9 +442,9 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
 
     if (m_freshKill)
     {
-      emit expGained( m_lastSpawnPlayerKilled.name,
-		      m_lastSpawnPlayerKilled.level,
-		      exp->exp - m_currentExp,
+      emit expGained( m_lastSpawnKilledName,
+		      m_lastSpawnKilledLevel,
+		      realexp - m_currentExp,
 		      m_longZoneName);
       
       // have gained experience for the kill, it's no longer fresh
@@ -450,20 +460,20 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
       {
 	emit expGained( spell_name(m_lastSpellOnId),
 			0, // level of caster would only confuse things further
-			exp->exp - m_currentExp,
+			realexp - m_currentExp,
 			m_longZoneName);
       }
     else
       emit expGained( "Unknown", // Randomly blessed with xp?
 		      0, // don't know what gave it so, level 0
-		      exp->exp - m_currentExp,
+		      realexp - m_currentExp,
 		      m_longZoneName
 		      );
     
     emit stsMessage(tempStr);
   }
-  
-  emit expChangedInt ( exp->exp,
+
+  emit expChangedInt ( realexp,
 		       calc_exp( getPlayerLevel () - 1,
 				 getPlayerRace  (),
 				 getPlayerClass ()
@@ -474,7 +484,7 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
 				 )
 		       );
   
-  m_currentExp = exp->exp;
+  m_currentExp = realexp;
 
   m_validExp = true;
 }
@@ -562,40 +572,13 @@ void EQPlayer::updateStamina(const staminaStruct *stam)
 
 }
 
-void EQPlayer::setLastKill(const spawnStruct& lastKill)
+void EQPlayer::setLastKill(const QString& name, uint8_t level)
 {
   // note the last spawn this player killed
-  m_lastSpawnPlayerKilled = lastKill;
-
-  // note this is a fresh kill
+  m_lastSpawnKilledName = name;
+  m_lastSpawnKilledLevel = level;
   m_freshKill = true;
-
-  // stale count is 0 (since this was just killed)
-  m_staleKillCount = 0;
 }
-
-void EQPlayer::incStaleKillCount()
-{
-  if (m_freshKill)
-  {
-    // increment the stale kill count
-    m_staleKillCount++;
-
-    if (m_staleKillCount > staleKillCutoff)
-    {
-      printf("STALE KILL: (%d kills old) and no experience for kill: %s (level = %d)\n",
-	     m_staleKillCount,
-	     m_lastSpawnPlayerKilled.name, m_lastSpawnPlayerKilled.level);
-
-      // note that there isn't a fresh kill
-      m_freshKill = false;
-      
-      // clear the last spawn list
-      memset((void*)&m_lastSpawnPlayerKilled, 0, sizeof(m_lastSpawnPlayerKilled));
-    }
-  }
-}
-
 
 void EQPlayer::setLastSpell(uint16_t spellId)
 {

@@ -42,12 +42,16 @@ EQDecode::EQDecode (QObject *parent = 0, const char *name = 0)
   connect (parent, SIGNAL(resetDecoder()), this, SLOT(ResetDecoder()));
 
   // Link our BackfillPlayer signal to the packet class backfillPlayer slot
-  connect (this, SIGNAL(BackfillPlayer(const playerProfileStruct *)),
-           parent, SLOT(pkt_backfillPlayer(const playerProfileStruct *)));
+  connect (this, SIGNAL(dispatchDecodedCharProfile(const uint8_t*, uint32_t)),
+           parent, SLOT(dispatchDecodedCharProfile(const uint8_t*, uint32_t)));
 
   // Link our BackfillSpawn signal to the packet class backfillSpawn slot
-  connect (this, SIGNAL(BackfillSpawn(const spawnStruct *)),
-           parent, SLOT(pkt_backfillSpawn(const spawnStruct *)));
+  connect (this, SIGNAL(dispatchDecodedNewSpawn(const uint8_t*, uint32_t)),
+           parent, SLOT(dispatchDecodedNewSpawn(const uint8_t*, uint32_t)));
+
+  // Link our BackfillZoneSpawns signal to the packet class backfillSpawn slot
+  connect (this, SIGNAL(dispatchDecodedZoneSpawns(const uint8_t*, uint32_t)),
+           parent, SLOT(dispatchDecodedZoneSpawns(const uint8_t*, uint32_t)));
 
   // Our key is unknown
   m_decodeKey = 0;
@@ -119,7 +123,7 @@ EQDecode::ResetDecoder (void)
   m_decodeKey = 0;
 
   // Let anyone interested know we changed it
-  emit KeyChanged();
+  emit keyChanged();
 
   // We're no longer looking
   m_locateActive = false;
@@ -163,14 +167,10 @@ EQDecode::LocateKey ()
 void
 EQDecode::FoundKey ()
 {
-  unsigned int i, j;
+  unsigned int i;
   EQPktRec *pkt;
   uint32_t decodedDataLen = PKTBUF_LEN;
   uint8_t decodedData[decodedDataLen];
-  struct playerProfileStruct *pdata;
-  struct zoneSpawnsStruct *zdata;
-  struct newSpawnStruct *ndata;
-  struct spawnStruct *sdata;
 
 #if !HAVE_LIBEQ
   printf("BUG: libEQ not present, returning from FoundKey()\n");
@@ -179,7 +179,7 @@ EQDecode::FoundKey ()
 
   // Pass on the good news!
   printf("Decrypting and dispatching with key: 0x%08x\n", m_decodeKey);
-  emit KeyChanged();
+  emit keyChanged();
 
   // Check to see if we've been cancelled
   pthread_testcancel();
@@ -195,10 +195,7 @@ EQDecode::FoundKey ()
     decodedDataLen = PKTBUF_LEN;
     if (ProcessPacket(pkt->data, pkt->len, 
 		      decodedData, &decodedDataLen, &m_decodeKey, ""))
-    {
-      pdata = (struct playerProfileStruct *)(decodedData);
-      emit BackfillPlayer(pdata);
-    }
+      emit dispatchDecodedCharProfile(decodedData, decodedDataLen);
     else
 #endif
       printf("Warning: Failed to decrypt queued Player Profile packet: %d.\n", i);
@@ -216,14 +213,7 @@ EQDecode::FoundKey ()
     decodedDataLen = PKTBUF_LEN;
     if (ProcessPacket(pkt->data, pkt->len, 
 		      decodedData, &decodedDataLen, &m_decodeKey, ""))
-    {
-      zdata = (struct zoneSpawnsStruct *)(decodedData);
-      for (j = 0; j < (decodedDataLen - 2) / sizeof(spawnZoneStruct); j++)
-      {
-        sdata = (struct spawnStruct *)(&zdata->spawn[j]);
-        emit BackfillSpawn(sdata);
-      }
-    }
+      emit dispatchDecodedZoneSpawns(decodedData, decodedDataLen);
     else
 #endif
       printf("Warning: Failed to decrypt queued Zone Spawns packet: %d.\n", i);
@@ -241,9 +231,7 @@ EQDecode::FoundKey ()
     decodedDataLen = PKTBUF_LEN;
     DecodeSpawn(pkt->data, pkt->len, decodedData, &decodedDataLen, 
 		m_decodeKey);
-    ndata = (struct newSpawnStruct *)(decodedData);
-    sdata = (struct spawnStruct *)(&ndata->spawn);
-    emit BackfillSpawn(sdata);
+    emit dispatchDecodedNewSpawn(decodedData, decodedDataLen);
     free(pkt);
   }
 #endif

@@ -550,9 +550,9 @@ class EQPacket : public QObject
    void resetPcapFilter();   
 
    // Decoder slots
-   void pkt_backfillPlayer (const playerProfileStruct *);
-   void pkt_backfillSpawn  (const spawnStruct *);
- 
+   void dispatchDecodedCharProfile(const uint8_t* decodedData, uint32_t len);
+   void dispatchDecodedNewSpawn(const uint8_t* decodedData, uint32_t len);
+   void dispatchDecodedZoneSpawns(const uint8_t* decodedData, uint32_t len);
 
  signals:
    void addGroup               ( char *,

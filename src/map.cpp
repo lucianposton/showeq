@@ -26,7 +26,7 @@
 #include <qpushbutton.h>
 #include <qlayout.h>
 #include <qtoolbar.h>
-
+#include <qaccel.h>
 #include <qcolordialog.h>
 #include <qfontdialog.h>
 
@@ -41,17 +41,37 @@
 #include "spawnlist.h"
 #include "itemdb.h"
 
+
+//----------------------------------------------------------------------
+// Macros
 //#define DEBUG
 
 //#define DEBUGMAP
 
 //#define DEBUGMAPLOAD
 
-#define panAmmt 8
-
-// constants
 
 //----------------------------------------------------------------------
+// constants
+const int panAmmt = 8;
+
+//----------------------------------------------------------------------
+// utility functions
+int keyPref(QString pref, QString section, QString def)
+{
+  // get the key string
+  QString keyString = pSEQPrefs->getPrefString(pref, section, def);
+
+  // get the key code
+  int key = QAccel::stringToKey(keyString);
+  
+  // fix the key code (deal with Qt brain death)
+  key &= ~Qt::UNICODE_ACCEL;
+
+  return key;
+}
+
+
 // CLineDlg
 CLineDlg::CLineDlg(QWidget *parent, QString name, MapMgr *mapMgr) 
   : QDialog(parent, name, FALSE)
@@ -201,8 +221,8 @@ MapMgr::~MapMgr()
 void MapMgr::zoneEntry(const ServerZoneEntryStruct* zsentry)
 {
 #ifdef DEBUGMAP
-  debug ("zoneEntry(%s, %1d)", 
-	 zsentry->zoneShortName, client);
+  debug ("zoneEntry(%s)", 
+	 zsentry->zoneShortName);
 #endif /* DEBUGMAP */
   
   // clear the map data
@@ -409,13 +429,13 @@ void MapMgr::clearItems()
   m_spawnAggroRange.clear();
 }
 
-void MapMgr::addLocation(const MapPoint& point)
+void MapMgr::addLocation(QWidget* parent, const MapPoint& point)
 {
   // ZBTEMP: Should create a real dialog to enter location info
   bool ok;
   QString name = QInputDialog::getText("Location Name",
 				       "Please enter a location name",
-				       QString::null, &ok, m_dialogParent);
+				       QString::null, &ok, parent);
 
   // if the user clicked ok, and actually gave a name, add it
   if (ok && !name.isEmpty())
@@ -487,11 +507,11 @@ void MapMgr::setLineColor(const QString &color)
   emit mapUpdated();
 }
 
-void MapMgr::showLineDlg()
+void MapMgr::showLineDlg(QWidget* parent)
 {
    // Creat the line properties dialog the first time it is needed
    if (m_dlgLineProps == NULL)
-      m_dlgLineProps = new CLineDlg(m_dialogParent, "LineDlg", this);
+      m_dlgLineProps = new CLineDlg(parent, "LineDlg", this);
 
    m_dlgLineProps->show();
 }
@@ -529,8 +549,10 @@ void MapMgr::dumpInfo(QTextStream& out)
 MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   : m_map(map)
 {
+  QString preferenceName = m_map->preferenceName();
+
   // set the caption to be the preference name of the map
-  setCaption(m_map->preferenceName());
+  setCaption(preferenceName);
 
   QPopupMenu* subMenu;
 
@@ -546,28 +568,39 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
 	  this, SLOT(select_follow(int)));
   m_id_followMenu = insertItem("Follow", subMenu);
 
-  subMenu = new QPopupMenu;
+  subMenu = new QPopupMenu(m_map);
+  int key; 
+
+  key = keyPref("AddLocationKey", preferenceName, "Ctrl+O");
   m_id_addLocation = subMenu->insertItem("Add Location...",
-					 m_map, SLOT(addLocation()));
+					 m_map, SLOT(addLocation()), key);
+  key = keyPref("StartLineKey", preferenceName, "Ctrl+L");
   m_id_startLine = subMenu->insertItem("Start Line",
-				       m_map, SLOT(startLine()));
+				       m_map, SLOT(startLine()), key);
+  key = keyPref("AddLinePointKey", preferenceName, "Ctrl+P");
   m_id_addLinePoint = subMenu->insertItem("Add Line Point",
-					  m_map, SLOT(addLinePoint()));
+					  m_map, SLOT(addLinePoint()), key);
+  key = keyPref("DelLinePointKey", preferenceName, "Ctrl+D");
   m_id_delLinePoint = subMenu->insertItem("Delete Line Point",
-					  m_map, SLOT(delLinePoint()));
-  MapMgr* mapMgr = m_map->mapMgr();
+					  m_map, SLOT(delLinePoint()), key);
   m_id_showLineDlg = subMenu->insertItem("Show Line Dialog...",
-					 mapMgr, SLOT(showLineDlg()));
+					 m_map, SLOT(showLineDlg()));
   m_id_editMap = insertItem("Edit", subMenu);
 
-  subMenu = new QPopupMenu;
+  subMenu = new QPopupMenu(m_map);
   subMenu->setCheckable(true);
   m_id_mapLineStyle_Normal = subMenu->insertItem("Normal");
   subMenu->setItemParameter(m_id_mapLineStyle_Normal, tMap_Normal);
+  key = keyPref("MapLineNormalKey", preferenceName, "Alt+1");
+  subMenu->setAccel(key, m_id_mapLineStyle_Normal);
   m_id_mapLineStyle_DepthFiltered = subMenu->insertItem("Depth Filtered");
   subMenu->setItemParameter(m_id_mapLineStyle_DepthFiltered, tMap_DepthFiltered);
+  key = keyPref("MapLineDepthFilteredKey", preferenceName, "Alt+2");
+  subMenu->setAccel(key, m_id_mapLineStyle_DepthFiltered);
   m_id_mapLineStyle_FadedFloors = subMenu->insertItem("Faded Floors");
   subMenu->setItemParameter(m_id_mapLineStyle_FadedFloors, tMap_FadedFloors);
+  key = keyPref("MapLineFadedFloorsKey", preferenceName, "Alt+3");
+  subMenu->setAccel(key, m_id_mapLineStyle_FadedFloors);
   connect(subMenu, SIGNAL(activated(int)),
 	  this, SLOT(select_mapLine(int)));
   m_id_mapLineStyle = insertItem("Map Line Display", subMenu);
@@ -599,6 +632,14 @@ MapMenu::MapMenu(Map* map, QWidget* parent = 0, const char* name = 0)
   m_id_spawns = insertItem("Show Spawns",
 			   this, SLOT(toggle_spawns(int)));
   m_id_drops = insertItem("Show Drops",
+
+
+
+
+
+
+
+
 			  this, SLOT(toggle_drops(int)));
   m_id_coins = insertItem("Show Coins",
 			  this, SLOT(toggle_coins(int)));
@@ -1001,6 +1042,45 @@ Map::Map(MapMgr* mapMgr,
   tmpPrefString = "RacePvP";
   m_racePvP = pSEQPrefs->getPrefBool(tmpPrefString, prefString, showeq_params->pvp);
 
+  // Accelerators
+  QAccel *accel = new QAccel(this);
+  int key;
+  key = keyPref("ZoomInKey", prefString, "+");
+  accel->connectItem(accel->insertItem(key), this, SLOT(zoomIn()));
+
+  key = keyPref("ZoomOutKey", prefString, "-");
+  accel->connectItem(accel->insertItem(key), this, SLOT(zoomOut()));
+
+  key = keyPref("PanDownLeftKey", prefString, "Ctrl+1");
+  accel->connectItem(accel->insertItem(key), this, SLOT(panDownLeft()));
+
+  key = keyPref("PanDownKey", prefString, "Ctrl+2");
+  accel->connectItem(accel->insertItem(key), this, SLOT(panDown()));
+
+  key = keyPref("PanDownRightKey", prefString, "Ctrl+3");
+  accel->connectItem(accel->insertItem(key), this, SLOT(panDownRight()));
+
+  key = keyPref("PanLeftKey", prefString, "Ctrl+4");
+  accel->connectItem(accel->insertItem(key), this, SLOT(panLeft()));
+
+  key = keyPref("CenterSelectedKey", prefString, "Ctrl+5");
+  accel->connectItem(accel->insertItem(key), this, SLOT(viewTarget()));
+
+  key = keyPref("PanRightKey", prefString, "Ctrl+6");
+  accel->connectItem(accel->insertItem(key), this, SLOT(panRight()));
+
+  key = keyPref("PanUpLeftKey", prefString, "Ctrl+7");
+  accel->connectItem(accel->insertItem(key), this, SLOT(panUpLeft()));
+
+  key = keyPref("PanUpKey", prefString, "Ctrl+8");
+  accel->connectItem(accel->insertItem(key), this, SLOT(panUp()));
+
+  key = keyPref("PanUpRightKey", prefString, "Ctrl+9");
+  accel->connectItem(accel->insertItem(key), this, SLOT(panUpRight()));
+
+  key = keyPref("ViewLockKey", prefString, "Ctrl+0");
+  accel->connectItem(accel->insertItem(key), this, SLOT(viewLock()));
+
   m_followMode = tFollowPlayer;
   
   m_selectedItem = NULL;
@@ -1025,7 +1105,9 @@ Map::Map(MapMgr* mapMgr,
   
   m_mapTip = new MapLabel( this );
   this->setMouseTracking( TRUE );
-  
+
+  m_mapPanning = false;
+
   setMouseTracking(true);
   
   m_timer = new QTimer(this);
@@ -1214,7 +1296,7 @@ void Map::mouseDoubleClickEvent(QMouseEvent * me)
   debug ("mouseDoubleClickEvent()");
 #endif /* DEBUGMAP */
   if (me->button () == MidButton)
-    ViewTarget();
+    viewTarget();
 }
 
 void Map::mouseReleaseEvent(QMouseEvent* me)
@@ -1276,10 +1358,10 @@ void Map::mousePressEvent(QMouseEvent* me)
   }
 }
 
-void Map::ZoomIn()
+void Map::zoomIn()
 {
 #ifdef DEBUGMAP
-   debug("Map::ZoomIn()");
+   debug("Map::zoomIn()");
 #endif /* DEBUGMAP */
    if (m_player->getPlayerID() != 1)
    {
@@ -1296,10 +1378,10 @@ void Map::ZoomIn()
    }
 }
 
-void Map::ZoomOut()
+void Map::zoomOut()
 {
 #ifdef DEBUGMAP
-   debug("Map::ZoomOut()");
+   debug("Map::zoomOut()");
 #endif /* DEBUGMAP */
 
    if (m_player->getPlayerID() != 1)
@@ -1317,10 +1399,10 @@ void Map::ZoomOut()
    }    
 }
 
-void Map::PanRight()
+void Map::panRight()
 {
 #ifdef DEBUGMAP
-   debug("Map::PanRight()");
+   debug("Map::panRight()");
 #endif /* DEBUGMAP */
    m_param.panX(-panAmmt);
 
@@ -1332,10 +1414,10 @@ void Map::PanRight()
      refreshMap ();
 }
 
-void Map::PanLeft()
+void Map::panLeft()
 {
 #ifdef DEBUGMAP
-   debug("Map::PanLeft()");
+   debug("Map::panLeft()");
 #endif /* DEBUGMAP */
    m_param.panX(panAmmt);
 
@@ -1348,10 +1430,10 @@ void Map::PanLeft()
 }
 
 
-void Map::PanDown()
+void Map::panDown()
 {
 #ifdef DEBUGMAP
-   debug("Map::PanDown()");
+   debug("Map::panDown()");
 #endif /* DEBUGMAP */
    m_param.panY(-panAmmt);
 
@@ -1364,10 +1446,10 @@ void Map::PanDown()
 }
 
 
-void Map::PanUp()
+void Map::panUp()
 {
 #ifdef DEBUGMAP
-   debug("Map::PanUp()");
+   debug("Map::panUp()");
 #endif /* DEBUGMAP */
    m_param.panY(panAmmt);
 
@@ -1379,15 +1461,15 @@ void Map::PanUp()
      refreshMap ();
 }
 
-void Map::PanUpRight()
+void Map::panUpRight()
 {
 #ifdef DEBUGMAP
-   debug("Map::PanUpRight()");
+   debug("Map::panUpRight()");
 #endif /* DEBUGMAP */
    m_param.panXY(-panAmmt, panAmmt);
 
    emit panXChanged(m_param.panOffsetX());
-   emit panYChanged(m_param.panOffsetX());
+   emit panYChanged(m_param.panOffsetY());
 
    reAdjust();
 
@@ -1395,15 +1477,15 @@ void Map::PanUpRight()
      refreshMap ();
 }
 
-void Map::PanUpLeft()
+void Map::panUpLeft()
 {
 #ifdef DEBUGMAP
-   debug("Map::PanUpLeft()");
+   debug("Map::panUpLeft()");
 #endif /* DEBUGMAP */
    m_param.panXY(panAmmt, panAmmt);
 
    emit panXChanged(m_param.panOffsetX());
-   emit panYChanged(m_param.panOffsetX());
+   emit panYChanged(m_param.panOffsetY());
 
    reAdjust();
 
@@ -1411,15 +1493,15 @@ void Map::PanUpLeft()
      refreshMap ();
 }
 
-void Map::PanDownRight()
+void Map::panDownRight()
 {
 #ifdef DEBUGMAP
-   debug("Map::PanDownRight()");
+   debug("Map::panDownRight()");
 #endif /* DEBUGMAP */
    m_param.panXY(-panAmmt, -panAmmt);
 
    emit panXChanged(m_param.panOffsetX());
-   emit panYChanged(m_param.panOffsetX());
+   emit panYChanged(m_param.panOffsetY());
 
    reAdjust();
 
@@ -1427,15 +1509,15 @@ void Map::PanDownRight()
      refreshMap ();
 }
 
-void Map::PanDownLeft()
+void Map::panDownLeft()
 {
 #ifdef DEBUGMAP
-   debug("Map::PanDownLeft()");
+   debug("Map::panDownLeft()");
 #endif /* DEBUGMAP */
    m_param.panXY(panAmmt, -panAmmt);
 
    emit panXChanged(m_param.panOffsetX());
-   emit panYChanged(m_param.panOffsetX());
+   emit panYChanged(m_param.panOffsetY());
 
    reAdjust();
 
@@ -1459,10 +1541,10 @@ void Map::decreaseGridResolution (void)
      refreshMap ();
 }
 
-void Map::ViewTarget()
+void Map::viewTarget()
 {
 #ifdef DEBUGMAP
-  debug("Map::ViewTarget()");
+  debug("Map::viewTarget()");
 #endif /* DEBUGMAP */
   
   switch (m_followMode)
@@ -1489,14 +1571,15 @@ void Map::ViewTarget()
     refreshMap ();
 }
 
-void Map::ViewLock()
+void Map::viewLock()
 {
 #ifdef DEBUGMAP
-   debug("Map::ViewLock()");
+   debug("Map::viewLock()");
 #endif /* DEBUGMAP */
    switch (m_followMode)
    {
    case tFollowNone:
+     // next mode is focused on selection if there is one or player if not
      if (m_selectedItem != NULL)
        m_followMode = tFollowSpawn;
      else
@@ -1508,30 +1591,37 @@ void Map::ViewLock()
    case tFollowSpawn:
      if (m_selectedItem != NULL)
      {
+       // next mode is follow none
        m_followMode = tFollowNone;
        MapPoint location;
-       if (m_selectedItem)
+       if (m_selectedItem->type() == tSpawn)
        {
-	 if (m_selectedItem->type() == tSpawn)
-	 {
-	   const Spawn* spawn = (const Spawn*)m_selectedItem;
-	   
-	   spawn->approximatePosition(m_animate, QTime::currentTime(),
+	 const Spawn* spawn = (const Spawn*)m_selectedItem;
+	 
+	 spawn->approximatePosition(m_animate, QTime::currentTime(),
 				      location);
-	 }
-	 else
-	   location.setPoint(*m_selectedItem);
-	 m_param.setPan(location.xPos(), location.yPos());
        }
        else
-	 m_param.clearPan();
+	 location.setPoint(*m_selectedItem);
+       m_param.setPan(location.xPos(), location.yPos());
        emit panXChanged(m_param.panOffsetX());
        emit panYChanged(m_param.panOffsetY());
-       break;
      }
-   case tFollowPlayer:
-     m_followMode = tFollowNone;
+     else
      {
+       // next mode is follow player
+       m_followMode = tFollowPlayer;
+       m_param.clearPan();
+       emit panXChanged(m_param.panOffsetX());
+       emit panYChanged(m_param.panOffsetY());
+     }
+     break;
+   case tFollowPlayer:
+     if (m_selectedItem == NULL)
+     {
+       // next mode is follow none
+       m_followMode = tFollowNone;
+
        // retrieve the approximate position of the player
        const Spawn* player = m_spawnShell->playerSpawn();
        
@@ -1545,11 +1635,16 @@ void Map::ViewLock()
        emit panXChanged(m_param.panOffsetX());
        emit panYChanged(m_param.panOffsetY());
      }
+     else
+     {
+       // next mode is follow spawn
+       m_followMode = tFollowSpawn;
+       m_param.clearPan();
+       emit panXChanged(m_param.panOffsetX());
+       emit panYChanged(m_param.panOffsetY());
+     }
      break;
    }
-#if 0 // ZBTEMP
-   printf("ViewLock(): New Mode: %d\n", m_followMode);
-#endif
 
   // this requires a reAdjust
    reAdjust();
@@ -2140,7 +2235,7 @@ void Map::reAdjust ()
   }
 }
 
-void Map::addLocation (void)
+void Map::addLocation(void)
 {
 #ifdef DEBUGMAP
   debug ("addLocation()");
@@ -2149,12 +2244,19 @@ void Map::addLocation (void)
   // get the player spawn
   const Spawn* spawn = m_spawnShell->playerSpawn();
 
+  if (!spawn)
+    return;
+
   // get it's approximage location
   MapPoint point;
   spawn->approximatePosition(m_animate, QTime::currentTime(), point);
 
+#ifdef DEBUGMAP
+  printf("addLocation() point(%d, %d, %d)\n", point.x(), point.y(), point.z());
+#endif
+
   // add the location
-  m_mapMgr->addLocation(point);
+  m_mapMgr->addLocation(this, point);
 }
 
 void Map::startLine (void)
@@ -2165,25 +2267,41 @@ void Map::startLine (void)
   // get the player spawn
   const Spawn* spawn = m_spawnShell->playerSpawn();
 
+  if (!spawn)
+    return;
+
   // get it's approximate position
   MapPoint point;
   spawn->approximatePosition(m_animate, QTime::currentTime(), point);
+
+#ifdef DEBUGMAP
+  printf("startLine() point(%d, %d, %d)\n", point.x(), point.y(), point.z());
+#endif
 
   // start the line using the player spawns position
   m_mapMgr->startLine(point);
 }
 
-void Map::addLinePoint() {
+void Map::addLinePoint() 
+{
 #ifdef DEBUGMAP
   debug ("addLinePoint()");
 #endif /* DEBUGMAP */
 
   // get the player spawn
   const Spawn* spawn = m_spawnShell->playerSpawn();
-  
+
+  if (!spawn)
+    return;
+
   // get the player spawns approximate position
   MapPoint point;
   spawn->approximatePosition(m_animate, QTime::currentTime(), point);
+
+
+#ifdef DEBUGMAP
+  printf("addLinePoint() point(%d, %d, %d)\n", point.x(), point.y(), point.z());
+#endif
 
   // add it as the next line point
   m_mapMgr->addLinePoint(point);
@@ -2195,8 +2313,16 @@ void Map::delLinePoint(void)
 #ifdef DEBUGMAP
   debug ("delLinePoint()");
 #endif /* DEBUGMAP */
+
   m_mapMgr->delLinePoint();
 } // END delLinePoint
+
+
+void Map::showLineDlg(void)
+{
+  // show the line dialog
+  m_mapMgr->showLineDlg(this);
+}
 
 void Map::addPathPoint() 
 {

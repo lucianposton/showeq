@@ -24,13 +24,14 @@
 # include <stdio.h>
 
 #include "packet.h"
+#include "group.h"
 
-class ExperienceRecord {
-
+class ExperienceRecord 
+{
 public:
 
    ExperienceRecord( const QString &mob_name, int mob_level, long xp_gained,
-      time_t time, const QString &zone_name, EQPacket *p );
+      time_t time, const QString &zone_name, EQPacket* p, GroupMgr* g);
 
    const QString &getMobName() const;
    int getMobLevel() const;
@@ -43,8 +44,8 @@ public:
    const QString &getZoneName() const;
 
 private:
-   
-   EQPacket *m_packet;
+   EQPacket* m_packet;
+   GroupMgr* m_group;
    QString m_zone_name;
    QString m_mob_name;
    int m_mob_level;
@@ -53,13 +54,13 @@ private:
 
 };
 
-class ExperienceWindow : public QWidget {
-
+class ExperienceWindow : public QWidget 
+{
    Q_OBJECT
 
 public:
 
-   ExperienceWindow( EQPacket *p );
+   ExperienceWindow( EQPacket* p, GroupMgr* g );
    ~ExperienceWindow();
 
 public slots:
@@ -86,7 +87,8 @@ private:
    void logexp(long xp_gained, int mob_level);
 
    // Need to grab xp totals from here
-   EQPacket *m_packet;
+   EQPacket* m_packet;
+   GroupMgr* m_group;
 
    QVBoxLayout *m_layout;
 
