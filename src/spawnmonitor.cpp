@@ -209,6 +209,7 @@ void SpawnMonitor::zoneEnd( const QString& newZoneName )
   
   if ( m_zoneName != lower )
   {
+    saveSpawnPoints();
     m_zoneName = lower;
     clear();
     loadSpawnPoints();

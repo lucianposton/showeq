@@ -1,3 +1,9 @@
+bbobcat 21/May/03
+-----------------
++ Call the save of spawnpoint data upon zone end, in addtion to on zone change.
+  It appears that zone change doesn't really happen any more. Anyone know of
+  other logic that needs to be moved as well?
+
 Ratt 21/May/03
 ----------------
 
