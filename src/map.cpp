@@ -2138,6 +2138,7 @@ void Map::dumpInfo(QTextStream& out)
   out << "playerHeadRoom: " << m_param.playerHeadRoom() << endl;
   out << "playerFloorRoom: " << m_param.playerFloorRoom() << endl;
   out << "FollowMode: " << m_followMode << endl;
+  out << "MapPanning: " << m_mapPanning << endl;
   out << "DeityPvP: " << m_deityPvP << endl;
   out << "RacePvP: " << m_racePvP << endl;
   out << "CacheAlwaysRepaint: " << m_mapCache.alwaysRepaint() << endl;
