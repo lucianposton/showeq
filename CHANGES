@@ -1,3 +1,21 @@
+fee (10/01/02)
+--------------------
+
+Additions
+ + Alternate Experience is now being tracked, its in a very elementary form
+   so be patient more will follow. check the showeq.conf.dist file for the
+   new parameters
+
+Modifications
+ + added lots of members to the packet structs, see everquest.h for details
+ + altered some of the methods in how EQPlayer handles zoning, prelim work 
+   for future mods
+ + general house keeping, removed some obsolete methods and minor code cleanups
+
+Bugs
+ + experience tracking should be normal as can be now. the experience window
+   will still report inaccurate information, a fix is in the works
+
 casey (05/01/02)
 --------------------
 

@@ -2901,7 +2901,7 @@ void Map::paintSpawns(MapParameters& param,
 	  else if ((spawn->filterFlags() & FILTER_FLAG_FILTERED))
 	    p.setPen(gray);
 	  else
-	    p.setPen(yellow);
+	    p.setPen(magenta);
 
 	  p.drawLine(spawnOffsetXPos, 
 		     spawnOffsetYPos - m_drawSize,

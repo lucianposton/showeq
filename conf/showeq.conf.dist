@@ -10,7 +10,7 @@ IP              127.0.0.0   # IP of the EQ client, 127.0.0.0 is a wild card addr
 MAC             0           # MAC address
 RealTimeThread  0           # put network in realtime thread
 NoPromiscuous   0           # don't use promiscuous mode
-# ArqSeqGiveUp  96         # give up waiting for arq seq after cache fills to this size. don't set this too low, otherwise we'll artificially skip packets
+ArqSeqGiveUp    96          # give up waiting for arq seq after cache fills to this size. don't set this too low, otherwise we'll artificially skip packets, minimum is 32, modem users may want to set 256, dsl and cable users may choose 128 or less
 
 # Below you may set the default Level/Race/Class of your char.
 # Defaults will be used whenver the decryption routine fails.
@@ -231,6 +231,7 @@ WindowY 0              # modified when saved
 #
 [Interface_StatusBar]
 ShowExp           1    # show total exp in status bar
+ShowExpAA         1    # show total alt exp in status bar
 ShowPacketCounter 1    # show packet counter in status bar
 ShowSpawns        1    # show num of spawns in status bar
 ShowStatus        1    # show general status in status bar
@@ -254,6 +255,7 @@ showCR  	0      # 1 = Display Cold Resist in the stats window
 showDEX 	0      # 1 = Display DEX in the stats window
 showDR  	0      # 1 = Display Disease Resist in the stats window
 showExp 	1      # 1 = Display Experience in the stats window
+showExpAA 	1      # 1 = Display Alternate Experience in the stats window
 showFR  	0      # 1 = Display Fire Resist in the stats window
 showFood	0      # 1 = Display Food Value in the stats window
 showHP  	1      # 1 = Display Hit Points in the stats window    

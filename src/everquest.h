@@ -44,7 +44,8 @@
 #define LIST_DR                         16
 #define LIST_PR                         17
 #define LIST_AC                         18
-#define LIST_MAXLIST                    19
+#define LIST_ALTEXP                     19
+#define LIST_MAXLIST                    20 
 
 /*
 ** MOB Spawn Type
@@ -545,11 +546,9 @@ struct ClientZoneEntryStruct
 {
 /*0000*/ int8_t   opCode;                 // 0x29
 /*0001*/ int8_t   version;                // 0x20
-/*0002*/ int32_t  dwUnknown0002;          // ***Placeholder
-/*0006*/ char     name[20];               // Player firstname
-/*0026*/ int32_t  dwUnknown0026;          // ***Placeholder
-/*0030*/ int32_t  dwUnknown0030;          // ***Placeholder
-/*0034*/ int32_t  dwUnknown0034;          // ***Placeholder
+/*0002*/ int32_t  unknown0002;            // ***Placeholder
+/*0006*/ char     name[30];               // Player firstname
+/*0036*/ uint16_t unknown0036;            // ***Placeholder
 };
 
 /*
@@ -565,7 +564,7 @@ struct ServerZoneEntryStruct
 /*0007*/ char     name[30];               // Player first name
 /*0037*/ char     zoneShortName[15];      // Zone Short Name
 /*0052*/ int8_t   unknown0052[107];       // ***Placeholder
-/*0159*/ uint8_t  _class;                  // Player's Class
+/*0159*/ uint8_t  class_;                  // Player's Class
 /*0160*/ uint8_t  race;                   // Player's Race
 /*0161*/ uint8_t  unknown0161[2];         // ***Placeholder
 /*0163*/ uint8_t  level;                  // Player's Level
@@ -635,11 +634,17 @@ struct playerProfileStruct
 /*2490*/ uint32_t copperBank;             // Copper Pieces in Bank
 /*2494*/ uint8_t  unknown2494[16];        // ***Placeholder
 /*2510*/ uint8_t  skills[74];             // List of skills (MAX_KNOWN_SKILLS)
-/*2584*/ uint8_t  unknown2584[154];       // ***Placeholder
+/*2584*/ uint8_t  unknown2584[118];       // ***Placeholder
 /*2702*/ char     GUILD[144];             // Guild Info -- Length wrong
-/*2846*/ uint8_t  unknown2846[1376];      // ***Placeholder
+/*2846*/ char     bindpoint[20];          // short name of zone
+/*2866*/ char     unknown2866[4][20];     // contains other shortzone names, unknown use
+/*2946*/ uint8_t  unknown2946[1276];      // ***Placeholder
 /*4222*/ char     GroupMembers[5][48];    // List of all the members in the players group
-/*4462*/ uint8_t  unknown4462[3608];      // ***PlaceHolder
+/*4462*/ uint8_t  unknown4462[72];        // ***PlaceHolder
+/*4534*/ uint32_t altexp;                 // alternate exp pool 0 - ~15,000,000
+/*4538*/ uint8_t  unknown4538[358];       // ***PlaceHolder
+/*4896*/ uint8_t  aapoints;               // number of ability points?
+/*4897*/ uint8_t  unknown4897[3209];      // ***PlaceHolder 
 };
 
 /*
@@ -671,7 +676,7 @@ struct dropThingOnGround
 */
 struct removeThingOnGround
 {
-/*0000*/ int8_t   opCode;                 // 0x36
+/*0000*/ int8_t   opCode;                 // 0x2c
 /*0001*/ int8_t   version;                // 0x20
 /*0002*/ uint16_t dropId;                 // DropID - Guess
 /*0004*/ uint8_t  unknown0004[2];         // ***Placeholder
@@ -1030,8 +1035,7 @@ struct expUpdateStruct
 {
 /*0000*/ int8_t   opCode;                 // 0x99
 /*0001*/ int8_t   version;                // 0x21
-/*0002*/ uint8_t  exp_L;                  // experience value low
-/*0003*/ uint8_t  exp_H;                  // experience value high
+/*0003*/ uint16_t exp;                    // experience value  x/330
 /*0004*/ uint16_t unknown0004;            // ***Place Holder
 };
 
@@ -1042,12 +1046,12 @@ struct expUpdateStruct
 */
 struct expAltUpdateStruct
 {
-/*0000*/ int8_t   opCode;                 // 0x99
-/*0001*/ int8_t   version;                // 0x21
-/*0002*/ uint8_t  exp_L;                  // experience value low
-/*0003*/ uint8_t  exp_H;                  // experience value high
-/*0004*/ uint32_t unknown0004;            // ***Place Holder
-/*0008*/ uint8_t  unknown0008;            // ***Place Holder
+/*0000*/ int8_t   opCode;                 // 0x23
+/*0001*/ int8_t   version;                // 0x22
+/*0002*/ uint16_t altexp;                 // alt exp x/330
+/*0004*/ uint16_t unknown0004;            // ***Place Holder
+/*0006*/ uint16_t aapoints;               // current number of AA points
+/*0008*/ uint8_t  percent;                // percentage in integer form
 /*0009*/ uint8_t  unknown0009;            // ***Place Holder
 };
 

@@ -1006,7 +1006,7 @@ void Drop::update(const dropThingOnGround* d, const QString& name)
   // set the position
   setPos((int16_t)d->xPos, 
 	 (int16_t)d->yPos, 
-	 (int16_t)d->zPos * 10.0);
+	 (int16_t)d->zPos * 10);
 
   // set the drop specific info
   setItemNr(d->itemNr);

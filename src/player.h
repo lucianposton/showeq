@@ -38,6 +38,7 @@ public:
    void increaseSkill(const skillIncreaseStruct* skilli);
    void manaChange(const manaDecrementStruct* mana);
    void updateExp(const expUpdateStruct* exp);
+   void updateAltExp(const expAltUpdateStruct* altexp);
    void updateLevel(const levelUpStruct* levelup);
    void updateSpawnHP(const spawnHpUpdateStruct* hpupdate);
    void updateStamina(const staminaStruct* stam);
@@ -142,11 +143,10 @@ public:
                                );
    void deleteLanguages();
 
+   void expAltChangedStr       (const QString &);
+   void expAltChangedInt       (int, int, int);
    void expChangedStr          (const QString &);
-   void expChangedInt          ( int,
-                                 int,
-                                 int
-                               );
+   void expChangedInt          (int, int, int);
                                
    void expGained              ( const QString &,
                                  int,
@@ -224,9 +224,10 @@ public:
    uint16_t m_fatigue;
 
    // ExperienceWindow needs this
+   uint32_t m_currentAltExp;
+   uint16_t m_currentAApts;
    uint32_t m_currentExp;
    uint32_t m_maxExp;
-   uint16_t m_lastExp;
 
    // con color table
    QColor m_conTable[maxSpawnLevel];

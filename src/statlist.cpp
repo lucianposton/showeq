@@ -13,16 +13,16 @@
 static const char* statNames[] =
 { 
   "HP", "Mana", "Stam", "Exp", "Food", "Watr", "STR", "STA", "CHA", "DEX", 
-  "INT", "AGI", "WIS", "MR", "FR", "CR", "DR", "PR", "AC", "RSV",
+  "INT", "AGI", "WIS", "MR", "FR", "CR", "DR", "PR", "AC", "ExpAA", "RSV",
 };
 
 EQStatList::EQStatList(EQPlayer* player,
-			 QWidget* parent, 
-			 const char* name)
-  : QListView(parent, name),
-    m_pPlayer(player)
+                       QWidget* parent, 
+                       const char* name)
+                      : QListView(parent, name),
+                        m_pPlayer(player)
 {
-  int i;
+   int i;
 
    m_guessMaxMana = 0;
 
@@ -87,6 +87,8 @@ EQStatList::EQStatList(EQPlayer* player,
 	    this, SLOT(statChanged (int,int,int)));
    connect (m_pPlayer, SIGNAL(expChangedInt(int,int,int)),
 	    this, SLOT(expChanged(int,int,int)));
+   connect (m_pPlayer, SIGNAL(expAltChangedInt(int,int,int)),
+	    this, SLOT(expAltChanged(int,int,int)));
    connect (m_pPlayer, SIGNAL(stamChanged(int,int,int,int,int,int)),
 	    this, SLOT(stamChanged(int,int,int,int,int,int)));
    connect (m_pPlayer, SIGNAL(manaChanged(uint32_t,uint32_t)),
@@ -139,6 +141,21 @@ void EQStatList::expChanged  (int val, int min, int max)
     buf = Commanate((uint32_t) ((val - min) / ((max - min)/100))) + " %";
 
     m_statList[LIST_EXP]->setText (3, buf);
+}
+
+void EQStatList::expAltChanged  (int val, int min, int max) 
+{
+    if (!m_showStat[LIST_ALTEXP])
+      return;
+
+    QString buf;
+
+    m_statList[LIST_ALTEXP]->setText (1, Commanate((uint32_t) (val - min)));
+    m_statList[LIST_ALTEXP]->setText (2, Commanate((uint32_t) (max - min)));
+
+    buf = Commanate((uint32_t) ((val - min) / ((max - min)/100))) + " %";
+
+    m_statList[LIST_ALTEXP]->setText (3, buf);
 }
 
 void EQStatList::statChanged (int stat, int val, int max)

@@ -90,14 +90,7 @@ class PacketCaptureThread;
 struct eqTimeOfDay
 {
   struct timeOfDayStruct zoneInTime;
-	        time_t          packetReferenceTime;
-};
-
-// The various zone names
-struct zoneName
-{
-   char shortName [30];
-   char longName  [30];
+         time_t          packetReferenceTime;
 };
 
 //----------------------------------------------------------------------
@@ -529,10 +522,10 @@ class EQPacket : public QObject
    Q_OBJECT 
  public:
    
-   EQPacket                   ( EQPlayer    *pplayer,
-				QObject     *parent  = 0,
-				const char *name    = 0
-                                );
+   EQPacket                   ( EQPlayer   *pplayer,
+                                QObject    *parent = 0,
+                                const char *name   = 0
+                              );
    ~EQPacket                    ();           
    void start                   (int delay = 0);
    void stop                    (void);
@@ -541,7 +534,26 @@ class EQPacket : public QObject
    void setLogUnknownData       (bool);
    void setViewUnknownData      (bool);
 
- 
+   QObject        *m_parent;
+
+   EQPlayer *getplayer               (void);   
+   long getclientaddr                (void);
+   void InitializeOpCodeMonitor (void);
+   
+   bool            m_bOpCodeMonitorInitialized;
+   #define         OPCODE_SLOTS 10
+   unsigned int    MonitoredOpCodeList      [OPCODE_SLOTS][3];
+   QString         MonitoredOpCodeAliasList [OPCODE_SLOTS];
+   
+   bool logData ( const char*    filename,
+                  uint32_t       len,
+                  const uint8_t* data,
+                  in_addr_t      saddr = 0,
+                  in_addr_t      daddr = 0,
+                  in_port_t      sport = 0,
+                  in_port_t      dport = 0
+                );
+               
  public slots:
    void processPackets     (void);
    void processPlaybackPackets (void);
@@ -555,34 +567,30 @@ class EQPacket : public QObject
    void dispatchDecodedZoneSpawns(const uint8_t* decodedData, uint32_t len);
 
  signals:
-   void addGroup               ( char *,
-                                 int
-                               );
-   
-   void remGroup               ( char *,
-                                 int
-                               );
-                               
+   // EQPlayer signals
+   void backfillPlayer         (const playerProfileStruct *);
+   void increaseSkill          (const skillIncreaseStruct* skilli);
+   void manaChange             (const manaDecrementStruct* mana);
+   void playerUpdate           (const playerUpdateStruct* pupdate, bool client);
+   void setPlayerID            (uint16_t);
+   void updateExp              (const expUpdateStruct* exp);
+   void updateAltExp           (const expAltUpdateStruct* altexp);
+   void updateLevel            (const levelUpStruct* levelup);
+   void updateStamina          (const staminaStruct* stam);
+   void wearItem               (const itemPlayerStruct* itemp);
+
+
+   //group signals
+   void addGroup               (char *, int);
+   void remGroup               (char *, int);
    void clrGroup               (void);
 
    // used for net_stats display
    void cacheSize             (int);
    void seqReceive             (int);
    void seqExpect              (int);
-
    void numPacket              (int);
 
-   void setPlayerName          (const QString&);
-   void setPlayerDeity         (uint8_t);
-   void playerUpdate           (const playerUpdateStruct* pupdate, bool client);
-   void setPlayerID            (uint16_t);
-   void updateLevel            (const levelUpStruct* levelup);
-   void resetPlayer            (void);
-   void wearItem               (const itemPlayerStruct* itemp);
-   void updateExp              (const expUpdateStruct* exp);
-   void increaseSkill          (const skillIncreaseStruct* skilli);
-   void manaChange(const manaDecrementStruct* mana);
-   void updateStamina(const staminaStruct* stam);
 
 #if 1 // ZBTEMP: Currently not emit'd
    void attack1Hand1           (const attack1Struct*);
@@ -610,11 +618,7 @@ class EQPacket : public QObject
    void deleteSpawn            (const deleteSpawnStruct* delspawn);
    void killSpawn              (const spawnKilledStruct* deadspawn);
    void corpseLoc              (const corpseLocStruct*);
-   void newZone                ( char *,
-                                 char *,
-				 bool
-                               );
-                               
+   void newZone                (char *, char *, bool);
    void zoneChanged            (void);
    void eqTimeChangedStr       (const QString &);
 
@@ -645,9 +649,7 @@ class EQPacket : public QObject
    void summonedItem(const summonedItemStruct*);
  
    void msgReceived            (const QString &);
-   void stsMessage             (const QString &,
-                                 int              = 0
-                               );
+   void stsMessage             (const QString &, int = 0);
                                
    void toggle_log_AllPackets  (void);
    void toggle_log_ZoneData    (void);
@@ -656,110 +658,47 @@ class EQPacket : public QObject
    
    // Decoder signals
    void resetDecoder           (void);
-   void backfillPlayer     (const playerProfileStruct *);
    void backfillSpawn      (const spawnStruct *);
 
    // Spell signals
    void interruptSpellCast(const interruptCastStruct *);
  
- public:
-
-   QObject        *m_parent;
-
-   QString shortZoneName() { return m_currentZoneName.shortName; }
-   QString longZoneName() { return m_currentZoneName.longName; }
-   EQPlayer *getplayer               (void);   
-   long getclientaddr                (void);
-   void      InitializeOpCodeMonitor (void);
-   
-   bool            m_bOpCodeMonitorInitialized;
-   #define         OPCODE_SLOTS 10
-   unsigned int    MonitoredOpCodeList      [OPCODE_SLOTS][3];
-   QString         MonitoredOpCodeAliasList [OPCODE_SLOTS];
-   
-
  private:
    /* The player object, keeps track player's level, race and class.
       Will soon track all player stats. */
       
-   EQPlayer      *m_player;
-   EQDecode      *m_decode;
+   EQPlayer            *m_player;
+   EQDecode            *m_decode;
    PacketCaptureThread *m_packetCapture;
+   VPacket             *m_vPacket;
 
-   unsigned long  m_client_addr;
-
-   struct        zoneName            m_currentZoneName;
-                 
    QString print_addr   (in_addr_t addr);
    
-   void  decodePacket   ( int            size,
-                          unsigned char *buffer
-                        );
-   
-   int   getEQTimeOfDay ( time_t                   timeConvert,
-                          struct timeOfDayStruct *eqTimeOfDay
-                        );
-
- public:
-   bool logData ( const char*    filename,
-		  uint32_t       len,
-		  const uint8_t* data,
-		  in_addr_t       saddr    = 0,
-		  in_addr_t       daddr    = 0,
-		  in_port_t       sport    = 0,
-		  in_port_t      dport    = 0
-		  );
-               
-               
- private:
-   void logRawData        ( const char   *filename,
-                            unsigned char *data,
-                            unsigned int   len
-                          );
-
-   bool           m_busy_decoding;
-   //   int            fd;
-   //   unsigned long  packetcount;
-   QTimer        *m_timer;
-   
-   
-   void dispatchWorldData     ( uint32_t       len,
-                                uint8_t*       data,
-                                uint8_t        direction = 0
-                              );
-
-   void dispatchZoneData      ( uint32_t       len,
-                                uint8_t*       data,
-                                uint8_t        direction = 0
-                              );
-
-
-   void dispatchZoneSplitData ( EQPacketFormat& pf );
-
-
-   bool           m_zoning;
-
+   QTimer         *m_timer;
    int            m_nPacket;
-
    int            m_serverAddr;
    int            m_serverPort;
+   bool           m_busy_decoding;
+   bool           m_zoning;
    bool           m_serverArqSeqFound;
+   bool           m_viewUnknownData;
+   bool           m_detectingClient;
    uint16_t       m_serverArqSeqExp;
    uint16_t       m_serverArqSeqGiveUp;
-
    EQPacketMap    m_serverCache;
+   unsigned char  m_serverData [MAXSPAWNDATA];
+   uint32_t       m_serverDataSize;
+   unsigned long  m_client_addr;
 
-   unsigned char  m_serverData     [MAXSPAWNDATA];
-   uint32_t            m_serverDataSize;
-   
-   bool           m_viewUnknownData;
+   struct eqTimeOfDay m_eqTime;
 
-   VPacket        *m_vPacket;
-   
-   struct eqTimeOfDay         m_eqTime;
+   int  getEQTimeOfDay (time_t timeConvert, struct timeOfDayStruct *eqTimeOfDay);
+   void decodePacket   (int size, unsigned char *buffer);
+   void dispatchWorldData (uint32_t len, uint8_t* data, uint8_t direction = 0);
+   void dispatchZoneData (uint32_t len, uint8_t* data, uint8_t direction = 0);
+   void dispatchZoneSplitData (EQPacketFormat& pf);
+   void logRawData (const char   *filename, unsigned char *data, unsigned int len);
 
-   bool           m_detectingClient;
- public:
 };
 
 //----------------------------------------------------------------------

@@ -231,6 +231,7 @@ class EQInterface:public QMainWindow
    QLabel* m_stsbarZone;
    QLabel* m_stsbarID;
    QLabel* m_stsbarExp;
+   QLabel* m_stsbarExpAA;
    QLabel* m_stsbarPkt;
    QLabel* m_stsbarEQTime;
 

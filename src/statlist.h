@@ -32,6 +32,7 @@ class EQStatList : public QListView
    void savePrefs(void);
 
    void expChanged(int val, int min, int max);
+   void expAltChanged(int val, int min, int max);
    void hpChanged(uint16_t val, uint16_t max);
    void manaChanged(uint32_t val, uint32_t max);
    void stamChanged(int Sval, int Smax, int Fval, int Fmax, int Wval, int Wmax);

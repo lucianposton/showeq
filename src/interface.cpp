@@ -216,7 +216,18 @@ QMainWindow (parent, name)
      m_stsbarExp->setFont(QFont("Helvetica", showeq_params->statusfontsize));
      m_stsbarExp->setText("Exp [unknown]");
      m_stsbarExp->setFixedHeight(showeq_params->statusfontsize + 6);
-     statusBar()->addWidget(m_stsbarExp, 1);
+     statusBar()->addWidget(m_stsbarExp, 2);
+   }
+
+   m_stsbarExpAA = 0;
+   if (pSEQPrefs->getPrefBool("ShowExpAA", statusBarSection, 0))
+   {
+     m_stsbarExpAA = new QLabel(statusBar(), "ExpAA");
+     m_stsbarExpAA->setFrameStyle(QFrame::Sunken);
+     m_stsbarExpAA->setFont(QFont("Helvetica", showeq_params->statusfontsize));
+     m_stsbarExpAA->setText("ExpAA [unknown]");
+     m_stsbarExpAA->setFixedHeight(showeq_params->statusfontsize + 6);
+     statusBar()->addWidget(m_stsbarExpAA, 2);
    }
 
    m_stsbarPkt = 0;
@@ -362,8 +373,8 @@ QMainWindow (parent, name)
    // connect the SpawnShell slots to Packet signals
    connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*)),
 	   m_spawnShell, SLOT(clear(void)));
-   connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*)),
-	   m_spawnShell, SLOT(clear(void)));
+   //connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*)),
+   //	   m_spawnShell, SLOT(clear(void)));
    connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, bool)),
 	   m_spawnShell, SLOT(clear(void)));
    connect(m_packet, SIGNAL(newGroundItem(const dropThingOnGround*, bool)),
@@ -432,42 +443,36 @@ QMainWindow (parent, name)
 	   m_spellShell, SLOT(spellMessage(QString&)));
 
    // connect EQPlayer slots to EQPacket signals
-   connect(m_packet, SIGNAL(setPlayerName(const QString&)), 
-	   m_player, SLOT(setPlayerName(const QString&)));
-   connect(m_packet, SIGNAL(setPlayerDeity(uint8_t)), 
-	   m_player, SLOT(setPlayerDeity(uint8_t)));
-   connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*)),
-	   m_player, SLOT(zoneEntry(const ClientZoneEntryStruct*)));
-   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*)),
-	   m_player, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
-   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, bool)),
-	   m_player, SLOT(zoneChange(const zoneChangeStruct*, bool)));
-   connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, bool)),
-	   m_player, SLOT(zoneNew(const newZoneStruct*, bool)));
-   connect(m_packet, SIGNAL(updateSpawnHP(const spawnHpUpdateStruct*)),
-	   m_player, SLOT(updateSpawnHP(const spawnHpUpdateStruct*)));
-   connect(m_packet, SIGNAL(setPlayerID(uint16_t)), 
-	   m_player, SLOT(setPlayerID(uint16_t)));
    connect(m_packet, SIGNAL(backfillPlayer(const playerProfileStruct*)),
 	   m_player, SLOT(backfill(const playerProfileStruct*)));
-   connect(m_packet, SIGNAL(playerUpdate(const playerUpdateStruct*, bool)),
-	   m_player, SLOT(playerUpdate(const playerUpdateStruct*, bool)));
-   connect(m_packet, SIGNAL(updateLevel(const levelUpStruct*)),
-	   m_player, SLOT(updateLevel(const levelUpStruct*)));
-   connect(m_packet, SIGNAL(updateLevel(const levelUpStruct*)),
-	   m_player, SLOT(updateLevel(const levelUpStruct*)));
-   connect(m_packet, SIGNAL(resetPlayer()),
-	   m_player, SLOT(reset()));
-   connect(m_packet, SIGNAL(wearItem(const itemPlayerStruct*)),
-	   m_player, SLOT(wearItem(const itemPlayerStruct*)));
-   connect(m_packet, SIGNAL(updateExp(const expUpdateStruct*)),
-	   m_player, SLOT(updateExp(const expUpdateStruct*)));
    connect(m_packet, SIGNAL(increaseSkill(const skillIncreaseStruct*)),
 	   m_player, SLOT(increaseSkill(const skillIncreaseStruct*)));
    connect(m_packet, SIGNAL(manaChange(const manaDecrementStruct*)),
 	   m_player, SLOT(manaChange(const manaDecrementStruct*)));
+   connect(m_packet, SIGNAL(playerUpdate(const playerUpdateStruct*, bool)),
+	   m_player, SLOT(playerUpdate(const playerUpdateStruct*, bool)));
+   connect(m_packet, SIGNAL(setPlayerID(uint16_t)), 
+	   m_player, SLOT(setPlayerID(uint16_t)));
+   connect(m_packet, SIGNAL(updateAltExp(const expAltUpdateStruct*)),
+	   m_player, SLOT(updateAltExp(const expAltUpdateStruct*)));
+   connect(m_packet, SIGNAL(updateExp(const expUpdateStruct*)),
+	   m_player, SLOT(updateExp(const expUpdateStruct*)));
+   connect(m_packet, SIGNAL(updateLevel(const levelUpStruct*)),
+	   m_player, SLOT(updateLevel(const levelUpStruct*)));
+   connect(m_packet, SIGNAL(updateSpawnHP(const spawnHpUpdateStruct*)),
+	   m_player, SLOT(updateSpawnHP(const spawnHpUpdateStruct*)));
    connect(m_packet, SIGNAL(updateStamina(const staminaStruct*)),
 	   m_player, SLOT(updateStamina(const staminaStruct*)));
+   connect(m_packet, SIGNAL(wearItem(const itemPlayerStruct*)),
+	   m_player, SLOT(wearItem(const itemPlayerStruct*)));
+   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, bool)),
+	   m_player, SLOT(zoneChange(const zoneChangeStruct*, bool)));
+   connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*)),
+	   m_player, SLOT(zoneEntry(const ClientZoneEntryStruct*)));
+   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*)),
+	   m_player, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
+   connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, bool)),
+	   m_player, SLOT(zoneNew(const newZoneStruct*, bool)));
 
    // Initialize the experience window;
    m_expWindow = new ExperienceWindow( m_packet, m_groupMgr );
@@ -623,6 +628,12 @@ QMainWindow (parent, name)
     if (m_statList != NULL)
       pStatWinMenu->setItemChecked(m_id_view_PlayerStats_Stats[LIST_EXP], m_statList->statShown(LIST_EXP));
     
+    m_id_view_PlayerStats_Stats[LIST_ALTEXP] = pStatWinMenu->insertItem("Alt Experience");
+    pStatWinMenu->setItemParameter(m_id_view_PlayerStats_Stats[LIST_ALTEXP], 
+				   LIST_ALTEXP);
+    if (m_statList != NULL)
+      pStatWinMenu->setItemChecked(m_id_view_PlayerStats_Stats[LIST_ALTEXP], m_statList->statShown(LIST_ALTEXP));
+
     m_id_view_PlayerStats_Stats[LIST_FOOD] = pStatWinMenu->insertItem("Food");
     pStatWinMenu->setItemParameter(m_id_view_PlayerStats_Stats[LIST_FOOD], 
 				   LIST_FOOD);
@@ -1214,6 +1225,10 @@ QMainWindow (parent, name)
      connect (m_player, SIGNAL(expChangedStr(const QString&)),
 	      m_stsbarExp, SLOT(setText(const QString&)));
    
+   if (m_stsbarExpAA)
+     connect (m_player, SIGNAL(expAltChangedStr(const QString&)),
+	      m_stsbarExpAA, SLOT(setText(const QString&)));
+
    if (m_stsbarEQTime)
      connect(m_packet, SIGNAL(eqTimeChangedStr(const QString&)),
 	     m_stsbarEQTime, SLOT(setText(const QString&)));
@@ -3075,14 +3090,10 @@ void EQInterface::groupInfo(const groupMemberStruct* gmem)
 void EQInterface::zoneEntry(const ClientZoneEntryStruct* zsentry)
 {
   QString tempStr;
-  emit newZoneName("- Unknown -");
-  stsMessage("- Busy Zoning -");
 #ifdef ZONE_ORDER_DIAG
   tempStr = "Zone: EntryCode: Client";
   emit msgReceived(tempStr);
 #endif
-  emit stsMessage(QString("Zoning..."));
-  emit msgReceived("Zone: Cleared stat modifiers.");
 }
 
 void EQInterface::zoneEntry(const ServerZoneEntryStruct* zsentry)
@@ -3094,7 +3105,7 @@ void EQInterface::zoneEntry(const ServerZoneEntryStruct* zsentry)
   tempStr += zsentry->zoneShortName;
   emit msgReceived(tempStr);
 #endif
-  tempStr = QString("Zone: Zoning, Please Wait...\t\t(Zone: '")
+  tempStr = QString("Zone: Zoning, Please Wait...\t(Zone: '")
     + zsentry->zoneShortName + "')";
   emit msgReceived(tempStr);
   emit newZoneName(zsentry->zoneShortName);
@@ -3106,27 +3117,26 @@ void EQInterface::zoneChange(const zoneChangeStruct* zoneChange, bool client)
 {
   QString tempStr;
 
-  emit newZoneName("- Unknown -");
   stsMessage("- Busy Zoning -");
+  emit newZoneName(zoneChange->zoneName);
 
   if (client)
   {
 #ifdef ZONE_ORDER_DIAG
-    tempStr = "Zone: ChangeCode: Client, Zone:";
+    tempStr = "Zone: ChangeCode: Client, Zone: ";
     tempStr += zoneChange->zoneName;
     emit msgReceived(tempStr);
 #endif
   }
   else
   {
-    printf("Loading, Please Wait...\t\t(Zone:\t\'%s\')\n",
-	   zoneChange->zoneName);
+    printf("Loading, Please Wait...\t(Zone: \'%s\')\n", zoneChange->zoneName);
 #ifdef ZONE_ORDER_DIAG
     tempStr = "Zone: ChangeCode: Server, Zone:";
     tempStr += zoneChange->zoneName;
     emit msgReceived(tempStr);
 #endif
-    tempStr = QString("Zone: Zoning, Please Wait...\t\t(Zone: '")
+    tempStr = QString("Zone: Zoning, Please Wait...\t(Zone: '")
       + zoneChange->zoneName + "')";
     emit msgReceived(tempStr);
 
@@ -3144,14 +3154,12 @@ void EQInterface::zoneNew(const newZoneStruct* zoneNew, bool client)
     + zoneNew->longName + ")";
   emit msgReceived(tempStr);
 #endif
-  tempStr = QString("Zone: Entered: ShortName = '") + 
-    zoneNew->shortName +
-    "' LongName = " + 
-    zoneNew->longName;
+  tempStr = QString("Zone: Entered: ShortName = '") + zoneNew->shortName +
+                    "' LongName = " + zoneNew->longName;
   emit msgReceived(tempStr);
 
    if (pSEQPrefs->getPrefBool("UseStdout", "Interface"))
-     printf("Loading Complete...\t\t(Zone:\t'%s')\n", zoneNew->shortName);
+       printf("Loading Complete...\t(Zone: '%s')\n", zoneNew->shortName);
 
   emit newZoneName(zoneNew->longName);
   stsMessage("");

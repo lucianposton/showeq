@@ -1566,38 +1566,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
       }
 
 
-      case ZoneEntryCode:
-      {
-           if (ZoneEntryVer != opCodeVersion)
-              break;
-
-            // We're only interested in the server version
-            if (direction == DIR_SERVER)
-	    {
-	      unk = ! ValidatePayload(ZoneEntryCode, ServerZoneEntryStruct);
-
-	      emit zoneEntry((const ServerZoneEntryStruct*)data);
-	      
-	      // server considers us in the other zone now
-	      m_zoning = false;
-
-	      break;
-            }
-
-	    unk = ! ValidatePayload(ZoneEntryCode, ClientZoneEntryStruct);
-
-	    // server still doesn't know we're in other zone
-	    m_zoning = true;
-
-            // Zone entry request from client to server
-	    emit zoneEntry((const ClientZoneEntryStruct*)data);
-
-            emit resetDecoder();
-
-            break;
-      } /* end ZoneEntryCode */
-
-
       case CharProfileCode:	// Character Profile server to client
       {
            if (CharProfileVer != opCodeVersion)
@@ -1618,10 +1586,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	       dispatchDecodedCharProfile(decodedData, decodedDataLen);
            }
            else
-           {
 	      printf("EQPacket::dispatchZoneData():CharProfileCode:Not Decoded\n");
-	      emit resetPlayer();
-           }
 
            break;
       }
@@ -1908,6 +1873,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
            unk = false;
 
+
 #ifdef PACKET_PAYLOAD_SIZE_DIAG
                       struct spawnPositionUpdateStruct *updates;
            updates = (struct spawnPositionUpdateStruct *) (data);
@@ -1921,10 +1887,8 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 	      unk = true;
 	   }
 #endif
-
 	   if (!m_zoning)
-	       emit updateSpawns((const spawnPositionUpdateStruct *)data);
-
+	      emit updateSpawns((const spawnPositionUpdateStruct *)data);
            break;
       }
 
@@ -1948,7 +1912,7 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
            unk = ! ValidatePayload(AltExpUpdateCode, expAltUpdateStruct);
 
-           //emit updateAltExp((const expAltUpdateStruct*)data);
+           emit updateAltExp((const expAltUpdateStruct*)data);
 
            break;
       }
@@ -2038,26 +2002,42 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
            // in the process of zoning, server hasn't switched yet.
 	   m_zoning = true;
 
-	   emit zoneChange((const zoneChangeStruct*)data, 
-			    (direction == DIR_CLIENT));
-
-                          struct zoneChangeStruct *pZoneChange;
-           pZoneChange = (struct zoneChangeStruct *) (data);
-
-           strcpy(m_currentZoneName.shortName, pZoneChange->zoneName);
-
-           emit resetDecoder();
-
-           if (direction == DIR_SERVER)
-           {
+	   emit zoneChange((const zoneChangeStruct*)data,
+	                   (direction == DIR_CLIENT));
 #if HAVE_LIBEQ
-               // Reset the decoder
                emit resetDecoder();
 #endif
-           }
-
            break;
       }
+
+
+      case ZoneEntryCode:
+      {
+           if (ZoneEntryVer != opCodeVersion)
+              break;
+
+           // We're only interested in the server version
+           if (direction == DIR_CLIENT)
+           {
+	   unk = ! ValidatePayload(ZoneEntryCode, ClientZoneEntryStruct);
+	   emit zoneEntry((const ClientZoneEntryStruct*)data);
+#if HAVE_LIBEQ
+              emit resetDecoder();
+#endif
+	      m_zoning = true;
+	      break;
+	   }
+	   
+	   unk = ! ValidatePayload(ZoneEntryCode, ServerZoneEntryStruct);
+
+	   emit zoneEntry((const ServerZoneEntryStruct*)data);
+	      
+	   // server considers us in the other zone now
+	   m_zoning = false;
+
+           break;
+      } /* end ZoneEntryCode */
+
             
       case NewZoneCode:
       {
@@ -2066,21 +2046,14 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
            unk = ! ValidatePayload(NewZoneCode, newZoneStruct);
 
-	    emit zoneNew((const newZoneStruct*)data,
-			 (direction == DIR_CLIENT));
+	   emit zoneNew((const newZoneStruct*)data,
+                        (direction == DIR_CLIENT));
 
-                        struct newZoneStruct *pNewZone;
-            pNewZone = (struct newZoneStruct *) (data);
-
-            // Copy the zone name into member variables
-            strcpy(m_currentZoneName.longName,  pNewZone->longName);
-            strcpy(m_currentZoneName.shortName, pNewZone->shortName);
-
-	    // note that we're no longer Zoning
-	    m_zoning = false;
+	   // note that we're no longer Zoning
+	   m_zoning = false;
 	    
-            if (m_vPacket)
-               printf("New Zone at byte: %ld\n", m_vPacket->FilePos());
+           if (m_vPacket)
+              printf("New Zone at byte: %ld\n", m_vPacket->FilePos());
 
            break;
       }
@@ -2093,13 +2066,9 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
             unk = ! ValidatePayload(PlayerPosCode, playerUpdateStruct);
 
-
-            //printf("PlayerPosCode!\n");
-
 	    if (!m_zoning)
-	      emit playerUpdate((const playerUpdateStruct*)data, 
-				(direction == DIR_CLIENT));
-
+               emit playerUpdate((const playerUpdateStruct*)data, 
+                                 (direction == DIR_CLIENT));
             break;
       }
 
@@ -2187,9 +2156,8 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             unk = ! ValidatePayload(MakeDropCode, dropThingOnGround);
 
 	    if (!m_zoning)
-	      emit newGroundItem((const dropThingOnGround*)data, 
-				 (direction == DIR_CLIENT));
-
+               emit newGroundItem((const dropThingOnGround*)data, 
+                                  (direction == DIR_CLIENT));
             break;
       }
 
