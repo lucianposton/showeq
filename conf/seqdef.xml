@@ -2466,11 +2466,11 @@
    <comment>Dock Compass</comment>
   </property>
   <property name="FormatFile" >
-   <string value="/usr/local/share/showeq/eqstr_en.txt" />
+   <string value="/usr/local/share/showeq/eqstr_us.txt" />
    <comment>Location of file containing formatted strings</comment>
   </property>
   <property name="SpellsFile" >
-   <string value="/usr/local/share/showeq/spells_en.txt" />
+   <string value="/usr/local/share/showeq/spells_us.txt" />
    <comment>Location of file containing spell information</comment>
   </property>
   <property name="NoBank" >

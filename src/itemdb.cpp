@@ -1752,6 +1752,35 @@ void EQItemDB::item(const itemPacketStruct* item, uint32_t size, uint8_t)
   AddItem(item->serializedItem); 
 }
 
+void EQItemDB::playerItem(const char* serializedItem, uint32_t size, uint8_t)
+{
+  if (m_logItemPackets)
+  {
+    time_t now;
+    now = time (NULL);
+    
+    FILE *lh;
+    const char* filename = LOGDIR "/itempackets.log";
+    lh = fopen (filename, "a");
+    
+    if (lh == NULL)
+    {
+      fprintf(stderr, "\aUnable to open file: [%s]\n", 
+	      (const char*)filename);
+      return;
+    }
+    else
+    {
+      fprintf(lh, "Type(CharInventory) %s%s\n\n", 
+	      ctime(&now),  serializedItem);
+      
+      fclose(lh);
+    }
+  } 
+
+  AddItem(serializedItem); 
+}
+
 void EQItemDB::itemInfo(const itemInfoStruct* item, uint32_t size, uint8_t)
 {
   if (m_logItemPackets)

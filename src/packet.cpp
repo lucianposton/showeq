@@ -29,6 +29,7 @@
 #include <qdatetime.h>
 
 #include "everquest.h"
+#include "opcodes.h"
 #include "packet.h"
 #include "util.h"
 #include "main.h"
@@ -2094,11 +2095,11 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
 	//Logging 
 	if (showeq_params->logZonePackets)
-	  {
-	    if (!logData(showeq_params->ZoneLogFilename, len, data, 
-			  dir, opCode, "[Decoded]"))
-	      emit toggle_log_ZoneData(); //untoggle the GUI checkmark
-	  }
+	{
+	  if (!logData(showeq_params->ZoneLogFilename, len, data, 
+		       dir, opCode, "[Decoded]"))
+	    emit toggle_log_ZoneData(); //untoggle the GUI checkmark
+	}
 	
 	switch (opCode)
 	{
@@ -2344,6 +2345,16 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
 	  if (dir == DIR_SERVER)
 	    emit item((const itemPacketStruct*)data, len, dir);
+	  
+	  break;
+	}
+
+	case OP_ItemPlayerPacket:
+	{
+	  unk = false;
+
+	  if (dir == DIR_SERVER)
+	    emit playerItem((const char*)data, len, dir);
 	  
 	  break;
 	}

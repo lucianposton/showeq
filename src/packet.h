@@ -40,7 +40,6 @@
 #include <qobject.h>
 #include <qregexp.h>
 #include "everquest.h"
-#include "opcodes.h"
 #include "decode.h"
 #include "util.h"
 
@@ -647,6 +646,7 @@ class EQPacket : public QObject
    void item(const itemPacketStruct* item, uint32_t, uint8_t);
    void itemInfoReq(const itemInfoReqStruct* item, uint32_t, uint8_t);
    void itemInfo(const itemInfoStruct* item, uint32_t, uint8_t);
+   void playerItem(const char* serializedItem, uint32_t, uint8_t);
    void random(const randomReqStruct* randr, uint32_t, uint8_t);
    void random(const randomStruct* randr, uint32_t, uint8_t);
    void emoteText(const emoteTextStruct* emotetext, uint32_t, uint8_t);

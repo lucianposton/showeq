@@ -39,3 +39,33 @@
   "Enchanter GM", // 30
   "Beastlord GM", // 31
   "Shopkeeper", // 32
+  NULL,         // 33
+  NULL,         // 34
+  NULL,         // 35
+  NULL,         // 36
+  NULL,         // 37
+  NULL,         // 38
+  NULL,         // 39
+  NULL,         // 40
+  NULL,         // 41
+  NULL,         // 42
+  NULL,         // 43
+  NULL,         // 44
+  NULL,         // 45
+  NULL,         // 46
+  NULL,         // 47
+  NULL,         // 48
+  NULL,         // 49
+  NULL,         // 50
+  NULL,         // 51
+  NULL,         // 52
+  NULL,         // 53
+  NULL,         // 54
+  NULL,         // 55
+  NULL,         // 56
+  NULL,         // 57
+  NULL,         // 58
+  NULL,         // 59
+  "LDoN Recruiter", // 60
+  "LDoN Merchant",  // 61
+  "LDoN Object",    // 62

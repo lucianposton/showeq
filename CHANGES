@@ -1,3 +1,16 @@
+dohpaZ (10/09/03)
+---------------------
++ Updated version to 4.3.16
++ Updated to 09/09/03 patch - structure changes and new opcodes. (props go out
+  to Quark, Freakyuno, and suseuser7341 for the assist).
++ Integrated patch# 820410 "More races and classes" from llaffer (uRit1u2CBBA=)
++ Added support for new OP_ItemPlayerPacket.
+
+NOTE: As of the 10/09/03 EQ patch you must use eqstr_us.txt for formatted strings
+      (instead of eqstr_en.txt).
+NOTE: As of the 10/09/03 EQ patch you must use spells_us.txt for spell information
+      (instead of spells_en.txt).
+
 dohpaZ (10/07/03)
 ---------------------
 + Updated version to 4.3.15.

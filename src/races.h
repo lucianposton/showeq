@@ -369,7 +369,7 @@
     "Mutant",                 // 362
     NULL,                     // 363
     "Sand Elf",               // 364
-    NULL,                     // 365
+    "Progeny Boss",           // 365
     "Ruj Orc Boss",           // 366
     "Rawbone",                // 367
     "Mummy",                  // 368
@@ -386,7 +386,7 @@
     "Vase",                   // 379
     "Coffin",                 // 380
     "Weapon Rack",            // 381
-    NULL,                     // 382
+    "Coffin",                 // 382
     NULL,                     // 383
     NULL,                     // 384
     NULL,                     // 385

@@ -105,6 +105,7 @@ class EQItemDB : public QObject, protected ITEMDBBASE
 
  protected slots:
    void item(const itemPacketStruct* item, uint32_t, uint8_t);
+   void playerItem(const char* item, uint32_t, uint8_t);
    void itemInfo(const itemInfoStruct* item, uint32_t, uint8_t);
 
  private:

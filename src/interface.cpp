@@ -95,7 +95,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
     m_combatWindow(NULL),
     m_netDiag(NULL),
     m_guildmgr(NULL),
-    m_formattedMessageStrings(2099) // increase if eqstr_en.txt gets longer
+    m_formattedMessageStrings(2099) // increase if eqstr_us.txt gets longer
 {
   for (int l = 0; l < maxNumMaps; l++)
     m_map[l] = NULL;
@@ -127,7 +127,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
    // Create the Spells object
    m_spells = new Spells(pSEQPrefs->getPrefString("SpellsFile", "Interface",
-						  LOGDIR "/spells_en.txt"));
+						  LOGDIR "/spells_us.txt"));
 
    // Create the packet object
    m_packet = new EQPacket (this, "packet");
@@ -1199,6 +1199,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
      // connect ItemDB slots to EQPacket signals
      connect(m_packet, SIGNAL(item(const itemPacketStruct*, uint32_t, uint8_t)),
 	     m_itemDB, SLOT(item(const itemPacketStruct*, uint32_t, uint8_t)));
+     connect(m_packet, SIGNAL(playerItem(const char*, uint32_t, uint8_t)),
+	     m_itemDB, SLOT(playerItem(const char*, uint32_t, uint8_t)));
      connect(m_packet, SIGNAL(itemInfo(const itemInfoStruct*, uint32_t, uint8_t)),
 	     m_itemDB, SLOT(itemInfo(const itemInfoStruct*, uint32_t, uint8_t)));
    }
@@ -2122,7 +2124,7 @@ void EQInterface::set_main_Font(int id)
 void EQInterface::select_main_FormatFile(int id)
 {
   QString formatFile = pSEQPrefs->getPrefString("FormatFile", "Interface", 
-						    LOGDIR "/eqstr_en.txt");
+						    LOGDIR "/eqstr_us.txt");
   QString newFormatFile = 
     QFileDialog::getOpenFileName(formatFile, "*.txt", this, "FormatFile",
 				 "Select Format File");
@@ -2141,7 +2143,7 @@ void EQInterface::select_main_FormatFile(int id)
 void EQInterface::select_main_SpellsFile(int id)
 {
   QString spellsFile = pSEQPrefs->getPrefString("SpellsFile", "Interface", 
-						LOGDIR "/spells_en.txt");
+						LOGDIR "/spells_us.txt");
   QString newSpellsFile = 
     QFileDialog::getOpenFileName(spellsFile, "*.txt", this, "FormatFile",
 				 "Select Format File");
@@ -2371,7 +2373,7 @@ void EQInterface::loadFormatStrings()
 
   // get the name of the format file
   QString formatFileName = pSEQPrefs->getPrefString("FormatFile", "Interface", 
-						    LOGDIR "/eqstr_en.txt");
+						    LOGDIR "/eqstr_us.txt");
 
   // create a QFile on the file
   QFile formatFile(formatFileName);

@@ -611,59 +611,58 @@ struct ServerZoneEntryStruct
 /*0000*/ uint32_t checksum;      // some kind of checksum
 /*0004*/ uint8_t  gm;            // GM flag 0/1
 /*0005*/ char	  name[64];      // Player name
-/*0069*/ uint8_t  unknown069[7]; 
-/*0076*/ float	  y;
-/*0080*/ float	  x;
-/*0084*/ float    z;
-/*0088*/ float	  unknown088;
-/*0092*/ float    unknown092;
-/*0096*/ float    unknown096;
-/*0100*/ uint8_t  unknown100[4];
-/*0104*/ float    heading;
-/*0108*/ float    unknown108;
-/*0112*/ uint8_t  unknown112[88];
-/*0200*/ uint8_t  walk_mode;     // 0=not walking,non-zero=walking
-/*0201*/ uint8_t  linkdead;      // 1=LD,0=Not LD
-/*0202*/ uint8_t  unknown202; 
-/*0203*/ uint8_t  lfg;           // 1=LFG,0=Not FLG
-/*0204*/ uint8_t  unknown204[4];
-/*0208*/ union 
+/*0069*/ char     lastName[32];  // Players last name
+/*0101*/ uint8_t  unknown101[7]; 
+/*0108*/ float	  y;
+/*0112*/ float	  x;
+/*0116*/ float    z;
+/*0120*/ float	  unknown088;
+/*0124*/ float    unknown092;
+/*0128*/ float    unknown096;
+/*0132*/ uint8_t  unknown100[4];
+/*0136*/ float    heading;
+/*0140*/ float    unknown108;
+/*0144*/ uint8_t  unknown112[88];
+/*0232*/ uint8_t  walk_mode;     // 0=not walking,non-zero=walking
+/*0233*/ uint8_t  linkdead;      // 1=LD,0=Not LD
+/*0234*/ uint8_t  unknown202; 
+/*0235*/ uint8_t  lfg;           // 1=LFG,0=Not FLG
+/*0236*/ uint8_t  unknown204[4];
+/*0240*/ union 
          {
 	   struct 
 	   {
-	     /*0208*/ Color_Struct color_helmet;    // Color of helmet item
-	     /*0212*/ Color_Struct color_chest;     // Color of chest item
-	     /*0216*/ Color_Struct color_arms;      // Color of arms item
-	     /*0220*/ Color_Struct color_bracers;   // Color of bracers item
-	     /*0224*/ Color_Struct color_hands;     // Color of hands item
-	     /*0228*/ Color_Struct color_legs;      // Color of legs item
-	     /*0232*/ Color_Struct color_feet;      // Color of feet item
-	     /*0236*/ Color_Struct color_primary;   // Color of primary item
-	     /*0240*/ Color_Struct color_secondary; // Color of secondary item
+	     /*0240*/ Color_Struct color_helmet;    // Color of helmet item
+	     /*0244*/ Color_Struct color_chest;     // Color of chest item
+	     /*0248*/ Color_Struct color_arms;      // Color of arms item
+	     /*0252*/ Color_Struct color_bracers;   // Color of bracers item
+	     /*0256*/ Color_Struct color_hands;     // Color of hands item
+	     /*0260*/ Color_Struct color_legs;      // Color of legs item
+	     /*0264*/ Color_Struct color_feet;      // Color of feet item
+	     /*0268*/ Color_Struct color_primary;   // Color of primary item
+	     /*0272*/ Color_Struct color_secondary; // Color of secondary item
 	   } equipment_colors;
-	   /*0208*/ uint32_t colors[9];             // Array elements correspond to struct equipment_colors above
+	   /*0240*/ uint32_t colors[9];             // Array elements correspond to struct equipment_colors above
          };
-/*244*/  union 
+/*276*/  union 
          {
 	   struct 
 	   {
-	     /*0244*/ uint32_t equip_helmet;    // Equipment: Helmet Visual
-	     /*0248*/ uint32_t equip_chest;     // Equipment: Chest Visual
-	     /*0252*/ uint32_t equip_arms;      // Equipment: Arms Visual
-	     /*0256*/ uint32_t equip_bracers;   // Equipment: Bracers Visual
-	     /*0260*/ uint32_t equip_hands;     // Equipment: Hands Visual
-	     /*0264*/ uint32_t equip_legs;      // Equipment: Legs Visual
-	     /*0268*/ uint32_t equip_feet;      // Equipment: Feet Visual
-	     /*0272*/ uint32_t equip_primary;   // Equipment: Primary Visual
-	     /*0276*/ uint32_t equip_secondary; // Equipment: Secondary Visual
+	     /*0276*/ uint32_t equip_helmet;    // Equipment: Helmet Visual
+	     /*0280*/ uint32_t equip_chest;     // Equipment: Chest Visual
+	     /*0284*/ uint32_t equip_arms;      // Equipment: Arms Visual
+	     /*0288*/ uint32_t equip_bracers;   // Equipment: Bracers Visual
+	     /*0292*/ uint32_t equip_hands;     // Equipment: Hands Visual
+	     /*0296*/ uint32_t equip_legs;      // Equipment: Legs Visual
+	     /*0300*/ uint32_t equip_feet;      // Equipment: Feet Visual
+	     /*0304*/ uint32_t equip_primary;   // Equipment: Primary Visual
+	     /*0308*/ uint32_t equip_secondary; // Equipment: Secondary Visual
 	   } equipment;
-	   /*0244*/ uint32_t equip[9];            // Array elements correspond to struct equipment above
+	   /*0276*/ uint32_t equip[9];            // Array elements correspond to struct equipment above
          };
-/*0280*/ uint16_t zoneId;
-/*0282*/ uint16_t zoneInstance;
-/*0284*/ uint8_t  unknown284[24];
-/*0308*/ char     lastName[32];
-/*0340*/ uint8_t  unknown340[8];
+/*0312*/ uint16_t zoneId;
+/*0314*/ uint16_t zoneInstance;
+/*0316*/ uint8_t  unknown316[32];
 										// They control movement
 /*0348*/ float	runspeed;          // Speed when running
 /*0352*/ float	unknown0352[2];    //
