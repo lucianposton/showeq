@@ -263,7 +263,7 @@ struct itemItemStruct : public itemStruct
   };
 
 /*0299*/ int8_t   effectType;       // 0 = no effect, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check
-/*0300*/ uint32_t spellId;          // spellId of special effect
+/*0300*/ uint16_t spellId;          // spellId of special effect
 /*0304*/ uint8_t  unknown0282[12];  // ***Placeholder
 /*0316*/ uint32_t castTime;         // Cast time of clicky item in miliseconds
 /*0320*/ uint8_t  unknown0296[16];  // ***Placeholder
@@ -1093,10 +1093,10 @@ struct newCorpseStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x42
 /*0001*/ uint8_t  version;                // 0x00
-/*0002*/ uint32_t spawnId;                // Id of spawn that died
+/*0002*/ uint16_t spawnId;                // Id of spawn that died
 /*0006*/ uint32_t killerId;               // Killer
 /*0010*/ uint8_t  unknown0006[8];         // ***Placeholder
-/*0018*/ uint32_t spellId;                // ID of Spell
+/*0018*/ uint16_t spellId;                // ID of Spell
 /*0022*/ int8_t   type;                   // Spell, Bash, Hit, etc...
 /*0023*/ uint32_t damage;                 // Damage
 /*0027*/ uint8_t  unknown0016[7];         // ***Placeholder
@@ -1358,7 +1358,7 @@ struct startCastStruct
 /*0000*/ uint8_t  opCode;                 // 0x7e
 /*0001*/ uint8_t  version;                // 0x21
 /*0002*/ int32_t  unknown0002;            // ***Placeholder
-/*0006*/ uint32_t spellId;                // Spell ID
+/*0006*/ uint16_t spellId;                // Spell ID
 /*0010*/ int32_t  unknown0010;            // ***Placeholder
 /*0014*/ uint32_t targetId;               // The current selected target
 /*0018*/ uint32_t unknown0018;            // ***Placeholder 
@@ -1375,7 +1375,7 @@ struct manaDecrementStruct
 /*0000*/ uint8_t opCode;                   // 0x7f
 /*0001*/ uint8_t version;		   // 0x21
 /*0002*/ int32_t newMana;                  // New Mana AMount
-/*0004*/ int32_t spellID;                  // Last Spell Cast
+/*0004*/ int16_t spellId;                  // Last Spell Cast
 };
 
 /*
@@ -1400,8 +1400,8 @@ struct beginCastStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x82
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ uint32_t spawnId;                // Id of who is casting
-/*0004*/ uint32_t spellId;                // Id of spell
+/*0002*/ uint16_t spawnId;                // Id of who is casting
+/*0004*/ uint16_t spellId;                // Id of spell
 /*0006*/ int16_t  param1;                 // Paramater 1
 /*0008*/ int16_t  param2;                 // Paramater 2
 };
@@ -1416,8 +1416,8 @@ struct memSpellStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x82
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ uint32_t spawnId;                // Id of who is casting
-/*0006*/ uint32_t spellId;                // Id of spell
+/*0002*/ uint16_t spawnId;                // Id of who is casting
+/*0006*/ uint16_t spellId;                // Id of spell
 /*0010*/ int16_t  param1;                 // Paramater 1
 /*0012*/ int16_t  param2;                 // Paramater 2
 };
@@ -1449,7 +1449,7 @@ struct wearChangeStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x92
 /*0001*/ uint8_t  version;                // 0x20
-/*0002*/ uint32_t spawnId;                // SpawnID
+/*0002*/ uint16_t spawnId;                // SpawnID
 /*0004*/ uint8_t  wearSlotId;             // Slot ID
 /*0005*/ uint8_t  unknown0005[3];            // unknown
 /*0006*/ uint16_t newItemId;              // Item ID see weaponsX.h or util.cpp
@@ -1588,7 +1588,7 @@ struct badCastStruct
 {
 /*0000*/ uint8_t  opCode;                   // 0xd3
 /*0001*/ uint8_t  version;                  // 0x21
-/*0002*/ uint32_t spawnId;                  // Id of who is casting
+/*0002*/ uint16_t spawnId;                  // Id of who is casting
 /*0006*/ char     message[0];               // Text Message
 };
 

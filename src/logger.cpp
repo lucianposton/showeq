@@ -1525,7 +1525,7 @@ PktLogger::logManaDecrement(const manaDecrementStruct *mana, uint32_t len, uint8
             return;
  
     outputf("R %u %04d %d %.2X%.2X %d %d\n", timestamp, len, dir,
-        mana->opCode, mana->version, mana->newMana, mana->spellID);
+        mana->opCode, mana->version, mana->newMana, mana->spellId);
 
     flush();
     return;
