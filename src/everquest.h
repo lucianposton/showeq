@@ -360,8 +360,7 @@ struct spawnStruct
 /*0024*/ float    size;
 /*0028*/ float    walkspeed;
 /*0032*/ float    runspeed;
-/*0036*/ uint8_t  unknown0036[34];        // Placeholder 
-/*0070*/ uint16_t petOwnerId;             // Id of pet owner (0 if not a pet) 
+/*0036*/ uint8_t  unknown0036[36];        // Placeholder 
 /*0072*/ uint16_t spawnId;                // Id of new spawn 
 /*0074*/ uint8_t  typeflag;               // Bodytype id
 /*0075*/ uint8_t  unknown0075;            // ***Placeholder 
