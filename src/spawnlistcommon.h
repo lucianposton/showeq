@@ -81,10 +81,8 @@ public:
    void updateTitle(const QString& name);
    void setShellItem(const Item *);
    spawnItemType type();
-   virtual QString key(int column, bool ascending) const;
-#if (QT_VERSION > 0x030000)
    virtual int compare(QListViewItem *i, int col, bool ascending) const;
-#endif
+
    //--------------------------------------------------
    int m_npc;
 private:

@@ -36,6 +36,10 @@
 // forward declarations
 class SpawnShell;
 
+struct spawnStruct;
+struct makeDropStruct;
+struct doorStruct;
+
 //----------------------------------------------------------------------
 // enumerated types
 // type of item
@@ -218,8 +222,8 @@ class Spawn : public Item
   uint8_t animation() const { return m_animation; }
   int16_t HP() const { return m_curHP; }
   int16_t maxHP() const { return m_maxHP; }
-  uint16_t GuildID() const { return m_GuildID; }
-  QString GuildTag() const { return m_GuildTag; }
+  uint16_t guildID() const { return m_guildID; }
+  QString guildTag() const { return m_guildTag; }
   uint16_t petOwnerID() const { return m_petOwnerID; }
   uint8_t light() const { return m_light; }
   QString lightName() const;
@@ -310,8 +314,8 @@ class Spawn : public Item
   void setClassVal(uint8_t classVal) { m_class = classVal; }
   void setHP(int16_t HP) { m_curHP = HP; }
   void setMaxHP(int16_t maxHP) { m_maxHP = maxHP; }
-  void setGuildID(uint16_t GuildID) { m_GuildID = GuildID; }
-  void setGuildTag(QString GuildTag) { m_GuildTag = GuildTag; }
+  void setGuildID(uint16_t GuildID) { m_guildID = GuildID; }
+  void setGuildTag(QString GuildTag) { m_guildTag = GuildTag; }
   void setLevel(uint8_t level) { m_level = level; }
   void setEquipment(uint8_t wearSlot, uint16_t itemID)
     { if (wearSlot < tNumWearSlots) { m_equipment[wearSlot] = itemID; } }
@@ -332,6 +336,7 @@ class Spawn : public Item
 
   // spawn specific data
   QString m_lastName;
+  QString m_guildTag;
   SpawnTrackList m_spawnTrackList;
   int m_cookedDeltaXFixPt;
   int m_cookedDeltaYFixPt;
@@ -345,8 +350,7 @@ class Spawn : public Item
   uint16_t m_petOwnerID;
   int16_t m_curHP;
   int16_t m_maxHP;
-  uint16_t m_GuildID;
-  QString m_GuildTag;
+  uint16_t m_guildID;
   uint16_t m_deity;
   int16_t m_deityTeam;
   uint16_t m_equipment[tNumWearSlots];
@@ -375,8 +379,15 @@ class Door : public Item
   virtual QString raceString() const;
   virtual QString classString() const;
 
+  uint32_t zonePoint() const { return m_zonePoint; }
+  
   // update methods
   void update(const doorStruct* d);
+
+  void setZonePoint(uint32_t zonePoint) { m_zonePoint = zonePoint; }
+    
+ protected:
+  uint32_t m_zonePoint;
 };
 
 //----------------------------------------------------------------------

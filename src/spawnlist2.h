@@ -1,5 +1,5 @@
 /*
- * spawnlist.h
+ * spawnlist2.h
  *
  * ShowEQ Distributed under GPL
  * http://www.hackersquest.gomp.ch/
@@ -21,7 +21,6 @@ class CategoryMgr;
 class Player;
 class SpawnShell;
 class FilterMgr;
-class EQPacket;
 
 class QComboBox;
 class QTimer;
@@ -35,17 +34,16 @@ class SpawnListWindow2 : public SEQWindow
   SpawnListWindow2(Player* player, 
 		   SpawnShell* spawnShell, 
 		   CategoryMgr* categoryMgr,
-		   EQPacket* packet,
 		   QWidget* parent = 0, const char* name = 0);
   ~SpawnListWindow2();
+
+   virtual QPopupMenu* menu();
 
 
    SpawnListItem* selected();
    SpawnListItem* find(const Item* item);
 
    QString filterString(const Item* item);
-
-   SpawnListMenu* menu();
 
 signals:
    void listUpdated();   // flags in spawns have changed
@@ -78,8 +76,6 @@ public slots:
    void refresh(void);
    virtual void savePrefs(void);
  private slots:
-   // EQPacket signals
-
    // category combo box signals
    void categorySelected(int index);
    

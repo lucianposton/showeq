@@ -5,6 +5,11 @@
  *  http://seq.sourceforge.net
  */
 
+#include "combatlog.h"
+#include "player.h"
+#include "util.h"
+#include "diagnosticmessages.h"
+
 #include <qgrid.h>
 #include <qtimer.h>
 #include <qhbox.h>
@@ -13,10 +18,6 @@
 #include <qlayout.h>
 #include <stdio.h>
 #include <time.h>
-
-#include "combatlog.h"
-#include "player.h"
-#include "util.h"
 
 #define DEBUGCOMBAT
 
@@ -61,21 +62,24 @@ void CombatOffenseRecord::addHit(int iDamage)
 //  CombatDefenseRecord implementation
 ////////////////////////////////////////////
 CombatDefenseRecord::CombatDefenseRecord(Player* p) :
-	m_player(p),
-	m_iHits(0),
-	m_iMisses(0),
-	m_iBlocks(0),
-	m_iParries(0),
-	m_iRipostes(0),
-	m_iDodges(0),
-	m_iMinDamage(65536),
-	m_iMaxDamage(0),
-	m_iTotalDamage(0),
-	m_iTotalAttacks(0)
+	m_player(p)
 {
-
+  clear();
 }
 
+void CombatDefenseRecord::clear(void)
+{
+  m_iHits = 0;
+  m_iMisses = 0;
+  m_iBlocks = 0;
+  m_iParries = 0;
+  m_iRipostes = 0;
+  m_iDodges = 0;
+  m_iMinDamage = 65536;
+  m_iMaxDamage = 0;
+  m_iTotalDamage = 0;
+  m_iTotalAttacks = 0;
+}
 
 void CombatDefenseRecord::addHit(int iDamage)
 {
@@ -128,7 +132,7 @@ void CombatDefenseRecord::addMiss(int iMissReason)
 		default:
 		{
 #ifdef DEBUGCOMBAT
-			printf("CombatDefenseRecord::addMiss:WARNING: invalid miss reason\n");
+		  seqDebug("CombatDefenseRecord::addMiss:WARNING: invalid miss reason");
 #endif
 			break;
 		}
@@ -242,11 +246,15 @@ CombatWindow::CombatWindow(Player* player,
 void CombatWindow::initUI()
 {
 #ifdef DEBUGCOMBAT
-	printf("CombatWindow::initUI: starting...\n");
+	seqDebug("CombatWindow::initUI: starting...");
 #endif
-	QVBoxLayout* layout = new QVBoxLayout(this);
-	layout->setAutoAdd(true);
+	QVBoxLayout* layout = new QVBoxLayout(boxLayout());
+
+	m_menu_bar = new QMenuBar(this);
+	layout->addWidget(m_menu_bar);
+
 	m_tab = new QTabWidget(this);
+	layout->addWidget(m_tab);
 
 	m_widget_offense = initOffenseWidget();
 	m_tab->addTab(m_widget_offense, "&Offense");
@@ -261,7 +269,6 @@ void CombatWindow::initUI()
 	m_clear_menu->insertItem("Clear Offense Stats", this, SLOT(clearOffense()));
 	m_clear_menu->insertItem("Clear Mob Stats", this, SLOT(clearMob()));
 
-	m_menu_bar = new QMenuBar(this);
 	m_menu_bar->insertItem("&Clear", m_clear_menu);
 
 	updateOffense();
@@ -269,7 +276,7 @@ void CombatWindow::initUI()
 	updateMob();
 
 #ifdef DEBUGCOMBAT
-	printf("CombatWindow::initUI: finished...\n");
+	seqDebug("CombatWindow::initUI: finished...");
 #endif
 }
 
@@ -477,7 +484,7 @@ void CombatWindow::savePrefs()
 void CombatWindow::updateOffense()
 {
 #ifdef DEBUGCOMBAT
-	printf("CombatWindow::updateOffense starting...\n");
+	seqDebug("CombatWindow::updateOffense starting...");
 #endif
 
 
@@ -646,7 +653,7 @@ void CombatWindow::updateOffense()
 
 
 #ifdef DEBUGCOMBAT
-	printf("CombatWindow::updateOffense finished...\n");
+	seqDebug("CombatWindow::updateOffense finished...");
 #endif
 
 }
@@ -727,7 +734,10 @@ void CombatWindow::updateMob()
 		dDPSSum += dDPS;
 	}
 
-	dAvgDPS = dDPSSum / (double)iTotalMobs;
+	if (iTotalMobs)
+	  dAvgDPS = dDPSSum / (double)iTotalMobs;
+	else
+	  dAvgDPS = 0;
 
 	m_label_mob_totalmobs->setText(QString::number(iTotalMobs));
 	m_label_mob_avgdps->setText(QString::number(dAvgDPS));
@@ -739,8 +749,8 @@ void CombatWindow::updateMob()
 void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage, QString tName, QString sName)
 {
 #ifdef DEBUGCOMBAT
-	printf("CombatWindow::addCombatRecord starting...\n");
-	printf("target=%d, source=%d, type=%d, spell=%d, damage=%d\n",
+	seqDebug("CombatWindow::addCombatRecord starting...");
+	seqDebug("target=%d, source=%d, type=%d, spell=%d, damage=%d",
 			iTargetID, iSourceID, iType, iSpell, iDamage);
 #endif
 
@@ -771,7 +781,7 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 	}
 
 #ifdef DEBUGCOMBAT
-	printf("CombatWindow::addCombatRecord finished...\n");
+	seqDebug("CombatWindow::addCombatRecord finished...");
 #endif
 }
 
@@ -779,7 +789,7 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage, int iSpell)
 {
 
 #ifdef DEBUGCOMBAT
-	printf("CombatWindow::addOffenseRecord starting...\n");
+	seqDebug("CombatWindow::addOffenseRecord starting...");
 #endif
 
 	bool bFoundRecord = false;
@@ -821,7 +831,7 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage, int iSpell)
 	}
 
 #ifdef DEBUGCOMBAT
-	printf("CombatWindow::addOffenseRecord finished...\n");
+	seqDebug("CombatWindow::addOffenseRecord finished...");
 #endif
 }
 
@@ -838,7 +848,7 @@ void CombatWindow::addDefenseRecord(int iDamage)
 void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage, QString tName, QString sName)
 {
 #ifdef DEBUGCOMBAT
-	printf("CombatWindow::addMobRecord starting...\n");
+	seqDebug("CombatWindow::addMobRecord starting...");
 #endif
 
 	int iTimeNow = mTime();
@@ -887,7 +897,7 @@ void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage, QStri
 
 
 #ifdef DEBUGCOMBAT
-	printf("CombatWindow::addMobRecord finished...\n");
+	seqDebug("CombatWindow::addMobRecord finished...");
 #endif
 }
 
@@ -943,7 +953,7 @@ void CombatWindow::clearMob()
 	{
 		case 0:
 			m_combat_mob_list.clear();
-			m_listview_mob->clear();
+			updateMob();
 			break;
 		default:
 			break;
@@ -959,9 +969,21 @@ void CombatWindow::clearOffense()
 	{
 		case 0:
 			m_combat_offense_list.clear();
-			m_listview_offense->clear();
+			updateOffense();
 			break;
 		default:
 			break;
 	}
 }
+
+void CombatWindow::clear(void)
+{
+  m_combat_mob_list.clear();
+  updateMob();
+  m_combat_offense_list.clear();
+  updateOffense();
+  m_combat_defense_record->clear();
+  updateDefense();
+  resetDPS();
+}
+
