@@ -1,3 +1,20 @@
+Andon (04/Feb/02)
+-------------------
+
+Additions
+ + showitem.cgi now uses a table to display an items color..
+   This makes determining item colors much easier.
+ + showitem.cgi no longer displays an item color if the item
+   has no material.. Pointless to display (0x000000) when the
+   item's color is never seen.
+
+Bug fixes
+ + listitem.cgi and showitem.cgi now handle toggling icon states
+   at run-time far better than previously.
+
+Bug fixes
+
+
 fee (03/02/02)
 -------------------
 

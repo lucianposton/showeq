@@ -76,8 +76,10 @@ int main (int argc, char *argv[])
 	!searchClass.isEmpty() || !searchEffect.isEmpty())
       doSearch = true;
     
-    if (cgiconv.getParamValue("displayIcon") == "y")
+    if (cgiconv.getParamValue("showIcon") == "y")
       displayIcon = true;
+    else if (cgiconv.getParamValue("hideIcon") == "y")
+      displayIcon = false;
 
 #if 0
     cgiconv.logCGIData("/tmp/listitem.cgi.txt");
@@ -349,20 +351,20 @@ int main (int argc, char *argv[])
 
     out << "<TD><A HREF=\"showitem.cgi?item=" << currentItemNr
 	<< ";displayBinary=y" 
-	<< (displayIcon ? ";displayIcon=y" : "")
+	<< (displayIcon ? ";showIcon=y" : ";hideIcon=y")
 	<< "\">" << currentItemNr << "</A></TD>";
 
     // only display a name if we have the item name
     if (!nameString.isEmpty())
       out << "<TD><A HREF=\"showitem.cgi?item=" << currentItemNr 
-	  << (displayIcon ? ";displayIcon=y" : "")
+	  << (displayIcon ? ";showIcon=y" : ";hideIcon=y")
 	  << "\">" << nameString << "</A></TD>";
     else
       out << "<TD>&nbsp</TD>";
 
     // display the lore string 
     out << "<TD><A HREF=\"showitem.cgi?item=" << currentItemNr 
-	<< (displayIcon ? ";displayIcon=y" : "")
+	<< (displayIcon ? ";showIcon=y" : ";hideIcon=y")
 	<< "\">" << loreString << "</A></TD>";
 
     // if we have more data for this item, print it
@@ -627,10 +629,15 @@ void displayForm(QTextStream& out,
       << cgiconv.getParamValue("effect") << "\"/></TD>\n";
 
   // Should the icon be displayed
-  out << "<TD><INPUT type=\"checkbox\" name=\"displayIcon\" value=\"y\"/";
+  out << "<TD>";
   if (displayIcon) 
-    out << "checked=\"checked\"";
-  out << ">Display</TD>\n";
+    out << "<INPUT type=\"checkbox\" name=\"hideIcon\" value=\"y\" unchecked>\n"
+        << "Hide</TD>\n";
+
+  else
+    out << "<INPUT type=\"hidden\" name=\"hideIcon\" value=\"y\">\n"
+        << "<INPUT type=\"checkbox\" name=\"showIcon\" value=\"y\" unchecked>\n"
+        << "Show</TD>\n";
   
   // Submission button
   out << "<TD><INPUT type=\"submit\" value=\"Search\"/></TD>\n";

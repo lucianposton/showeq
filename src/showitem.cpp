@@ -1,13 +1,13 @@
 /*
- * showitem.cpp
- *
- * ShowEQ Distributed under GPL
- * http://seq.sourceforge.net/
- */
+* showitem.cpp
+*
+* ShowEQ Distributed under GPL
+* http://seq.sourceforge.net/
+*/
 
 /* CGI program to display details about a specific item - The ID of the item
- * is passed on the commandline
- */
+* is passed on the commandline
+*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,254 +24,276 @@ void printdata (QTextStream& out, int len, unsigned char *data);
 
 int main (int argc, char *argv[])
 {
-  // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
+// open the output data stream
+QTextStream out(stdout, IO_WriteOnly);
 
-  const char* header =
-    "Content-type: text/html; charset=iso-8859-1\n\n"
-    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
-    "<HTML>\n"
-    "  <HEAD>\n"
-    "    <TITLE>ShowEQ Item Display</TITLE>\n"
-    "    <style type=\"text/css\">\n"
-    "      <!--\n"
-    "          table { border: black 2px solid }\n"
-    "          td { border: black 1px solid }\n"
-    "          th { border: black 1px solid }\n"
-    "          span.head { color: black }\n"
-    "          span.known1 { color: green }\n"
-    "          span.known2 { color: blue }\n"
-    "          span.unknown { color: red }\n"
-    "          b.warning { color: red }\n"
-    "      -->\n"
-    "    </style>\n" 
-    "  </HEAD>\n"
-    "  <BODY>\n";
+const char* header =
+"Content-type: text/html; charset=iso-8859-1\n\n"
+"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\n"
+"<HTML>\n"
+"  <HEAD>\n"
+"    <TITLE>ShowEQ Item Display</TITLE>\n"
+"    <style type=\"text/css\">\n"
+"      <!--\n"
+"          table { border: black 2px solid }\n"
+"          td { border: black 1px solid }\n"
+"          th { border: black 1px solid }\n"
+"          span.head { color: black }\n"
+"          span.known1 { color: green }\n"
+"          span.known2 { color: blue }\n"
+"          span.unknown { color: red }\n"
+"          b.warning { color: red }\n"
+"      -->\n"
+"    </style>\n" 
+"  </HEAD>\n"
+"  <BODY>\n";
 
-  /* Print HTML header */
-  out << header;
+/* Print HTML header */
+out << header;
 
-  const char* footer = 
-    "  </BODY>\n"
-    "</HTML>\n";
+const char* footer = 
+"  </BODY>\n"
+"</HTML>\n";
 
-  // number of item to display
-  QString itemNumber;
+// number of item to display
+QString itemNumber;
 
-  // should binary data be displayed (default = false)
-  bool displayBinaryData = false;
+// should binary data be displayed (default = false)
+bool displayBinaryData = false;
 
-  // should the icon be displayed
-  bool displayIcon = DISPLAY_ICONS;
+// should the icon be displayed
+bool displayIcon = DISPLAY_ICONS;
 
-  // CGI Convenience class
-  CGI cgiconv;
+// CGI Convenience class
+CGI cgiconv;
 
-  // process any CGI data
-  cgiconv.processCGIData();
+// process any CGI data
+cgiconv.processCGIData();
 
-  // If there are form parameters use them
-  if (cgiconv.getParamCount() != 0)
-  {
-    itemNumber = cgiconv.getParamValue("item");
-    
-    if (cgiconv.getParamValue("displayBinary") == "y")
-      displayBinaryData = true;
-    
-    if (cgiconv.getParamValue("displayIcon") == "y")
-      displayIcon = true;
-  }
-  else if (argc == 2)
-  {
-    // use argument for item number
-    itemNumber = argv[1];
+// If there are form parameters use them
+if (cgiconv.getParamCount() != 0)
+{
+ itemNumber = cgiconv.getParamValue("item");
 
-  }
-  else if (argc > 2)
-  {
-    out << "<H1>Error: " << argv[0] << " called with " << argc 
-	<< " arguments!</H1>\n";
-    out << "Format: " << argv[0] << "?<ItemID>\n";
-    out << footer;
-    exit(-1);
-  }
+ if (cgiconv.getParamValue("displayBinary") == "y")
+  displayBinaryData = true;
+ else if (cgiconv.getParamValue("displayBinary") == "n")
+  displayBinaryData = false;
 
-  if (itemNumber.isNull())
-    itemNumber = "";
+ if (cgiconv.getParamValue("showIcon") == "y")
+  displayIcon = true;
+ else if (cgiconv.getParamValue("hideIcon") == "y")
+  displayIcon = false;
+}
+else if (argc == 2)
+{
+// use argument for item number
+itemNumber = argv[1];
 
-  // check for browser type
-  QString userAgent = cgiconv.getHTTPUserAgent();
-  out << "    <!-- Output for UserAgent: " << userAgent << "-->\n";
+}
+else if (argc > 2)
+{
+out << "<H1>Error: " << argv[0] << " called with " << argc 
+<< " arguments!</H1>\n";
+out << "Format: " << argv[0] << "?<ItemID>\n";
+out << footer;
+exit(-1);
+}
 
-  // beware Netscap4 style sheet brain death
-  bool isNetscape4 = false;
-  if ((userAgent.contains("Mozilla/4.") == 1) && 
-      (userAgent.contains("MSIE") == 0))
-    isNetscape4 = true;
+if (itemNumber.isNull())
+itemNumber = "";
 
-  // display form to allow user to select an item or display the binary data
-  out << "    <FORM method=\"POST\" action=\"" << cgiconv.getScriptName() 
-      << "\">\n";
+// check for browser type
+QString userAgent = cgiconv.getHTTPUserAgent();
+out << "    <!-- Output for UserAgent: " << userAgent << "-->\n";
 
-  if (isNetscape4)
-    out << "      <TABLE border cellspacing=0 cellpadding=2>\n";
-  else
-    out << "      <TABLE cellspacing=0 cellpadding=2>\n";
+// beware Netscap4 style sheet brain death
+bool isNetscape4 = false;
+if ((userAgent.contains("Mozilla/4.") == 1) && 
+(userAgent.contains("MSIE") == 0))
+isNetscape4 = true;
 
-  out <<
-    "        <TR><TH>Item ID:</TH><TH>Binary Data</TH><TH>Icon</TH>"
-    "<TD><INPUT type=\"reset\" value=\"Reset\"/></TD></TR>\n"
-    "        <TR>\n";
+// display form to allow user to select an item or display the binary data
+out << "    <FORM method=\"POST\" action=\"" << cgiconv.getScriptName() 
+<< "\">\n";
 
-  out << "          <TD><INPUT type=\"text\" name=\"item\" value=\"" 
-      << itemNumber 
-      << "\" size=\"5\"/></TD>\n";
+if (isNetscape4)
+out << "      <TABLE border cellspacing=0 cellpadding=2>\n";
+else
+out << "      <TABLE cellspacing=0 cellpadding=2>\n";
 
-  out << 
-    "          <TD>"
-    "<INPUT type=\"checkbox\" name=\"displayBinary\" value=\"y\"";
+out <<
+"        <TR><TH>Item ID:</TH><TH>Binary Data</TH><TH>Icon</TH>"
+"<TD><INPUT type=\"reset\" value=\"Reset\"/></TD></TR>\n"
+"        <TR>\n";
 
-  if (displayBinaryData)
-    out << " checked";
-  out << "/>Display</TD>\n";
+out << "          <TD><INPUT type=\"text\" name=\"item\" value=\"" 
+<< itemNumber 
+<< "\" size=\"5\"/></TD>\n";
 
-  out << 
-    "          <TD>"
-    "<INPUT type=\"checkbox\" name=\"displayIcon\" value=\"y\"";
+out << 
+"          <TD>"
+"<INPUT type=\"checkbox\" name=\"displayBinary\" value=\"y\"";
 
-  if (displayIcon)
-    out << " checked";
-  out << "/>Display</TD>\n",
+if (displayBinaryData)
+out << " checked";
+out << "/>Display</TD>\n";
 
-  // Submission button
-  out << 
-    "          <TD>"
-    "<INPUT type=\"submit\" value=\"Search\"/></TD>\n";
+out << 
+"          <TD>";
 
-  out << "        </TR>\n";
-  out << "      </TABLE>\n";
-  out << "    </FORM>\n";
+if (displayIcon)
+ out << "<INPUT type=\"checkbox\" name=\"hideIcon\" value=\"y\" unchecked>"
+     << "Hide</TD>\n";
+else
+ out << "<INPUT type=\"hidden\" name=\"hideIcon\" value=\"y\">"
+     << "<INPUT type=\"checkbox\" name=\"showIcon\" value=\"y\" unchecked>"
+     << "Show</TD>\n";
 
 
-  // if no item number was passed in, then just return
-  if (itemNumber.isEmpty())
-  {
-    // ask the user to enter an ItemID
-    out << "<H1>Please Enter an ItemID!</H1>\n";
+// Submission button
+out << 
+"          <TD>"
+"<INPUT type=\"submit\" value=\"Search\"/></TD>\n";
 
-    // close the document
-    out << footer;
+out << "        </TR>\n";
+out << "      </TABLE>\n";
+out << "    </FORM>\n";
 
-    return 0;
-  }
 
-  // convert the passed in item number to a short
-  uint16_t currentItemNr = itemNumber.toShort();
+// if no item number was passed in, then just return
+if (itemNumber.isEmpty())
+{
+// ask the user to enter an ItemID
+out << "<H1>Please Enter an ItemID!</H1>\n";
 
-  EQItemDB* itemDB = new EQItemDB;
-  QString nameString;
-  QString loreString;
-  bool hasEntry = false;
-  EQItemDBEntry* entry = NULL;
+// close the document
+out << footer;
 
-  hasEntry = itemDB->GetItemData(currentItemNr, &entry);
+return 0;
+}
 
-  out << "<H1>Information on ItemID: " << currentItemNr << "</H1>\n";
+// convert the passed in item number to a short
+uint16_t currentItemNr = itemNumber.toShort();
 
-  if (hasEntry)
-  {
-    loreString = entry->GetLoreName();
-    nameString = entry->GetName();
+EQItemDB* itemDB = new EQItemDB;
+QString nameString;
+QString loreString;
+bool hasEntry = false;
+EQItemDBEntry* entry = NULL;
 
-    if (displayIcon)
-      out << "<P><IMG src=\"" << ICON_DIR << entry->GetIconNr() 
-	  << ".png\" alt=\"Icon: " << entry->GetIconNr() << "\"/></P>";
+hasEntry = itemDB->GetItemData(currentItemNr, &entry);
 
-    if (!nameString.isEmpty())
-    {
-      out << "<H2>" << nameString << "</H2>\n";
-      out << "<P><B>Lore:</B> " << loreString << "<BR></P>\n";
-    }
-    else
-    {
-      out << "<H2>Lore: " << loreString << "</H2>\n";
-    } 
+out << "<H1>Information on ItemID: " << currentItemNr << "</H1>\n";
 
-    out << "<P>\n";
-    out << "<B>Icon Number:</B> " << entry->GetIconNr() << "<BR>\n";
-    out << "<B>Model:</B> " << entry->GetIdFile() << "<BR>\n";
-    out << "<B>flag:</B> " << QString::number(entry->GetFlag(), 16)
-	<< "<BR>\n";
-    out << "<B>Weight:</B> " << (int)entry->GetWeight() << "<BR>\n";
-    out << "<B>Flags:</B> ";
-    if (entry->IsBook())
-      out << " BOOK";
-    if (entry->IsContainer())
-      out << " CONTAINER";
-    if (entry->GetNoDrop() == 0)
-      out << " NO-DROP";
-    if (entry->GetNoSave() == 0)
-      out << " NO-SAVE";
-    if (entry->GetMagic() == 1)
-      out << " MAGIC";
-    if (loreString[0] == '*')
-      out << " LORE";
-    out << "<BR>\n";
-    out << "<B>Size:</B> " << size_name(entry->GetSize()) << "<BR>\n";
-    out << "<B>Slots:</B> " << print_slot(entry->GetSlots()) << "<BR>\n";
-    out << "<B>Base Price:</B> " << reformatMoney(entry->GetCost()) 
-	<< "<BR>\n";
-    if (entry->GetSTR())
-      out << "<B>Str:</B> " << (int)entry->GetSTR() << "<BR>\n";
-    if (entry->GetSTA())
-      out << "<B>Sta:</B> " << (int)entry->GetSTA() << "<BR>\n";
-    if (entry->GetCHA())
-      out << "<B>Cha:</B> " << (int)entry->GetCHA() << "<BR>\n";
-    if (entry->GetDEX())
-      out << "<B>Dex:</B> " << (int)entry->GetDEX() << "<BR>\n";
-    if (entry->GetINT())
-      out << "<B>Int:</B> " << (int)entry->GetINT() << "<BR>\n";
-    if (entry->GetAGI())
-      out << "<B>Agi:</B> " << (int)entry->GetAGI() << "<BR>\n";
-    if (entry->GetWIS())
-      out << "<B>Wis:</B> " << (int)entry->GetWIS() << "<BR>\n";
-    if (entry->GetMR())
-      out << "<B>Magic:</B> " << (int)entry->GetMR() << "<BR>\n";
-    if (entry->GetFR())
-      out << "<B>Fire:</B> " << (int)entry->GetFR() << "<BR>\n";
-    if (entry->GetCR())
-      out << "<B>Cold:</B> " << (int)entry->GetCR() << "<BR>\n";
-    if (entry->GetDR())
-      out << "<B>Disease:</B> " << (int)entry->GetDR() << "<BR>\n";
-    if (entry->GetPR())
-      out << "<B>Poison:</B> " << (int)entry->GetPR() << "<BR>\n";
-    if (entry->GetHP())
-      out << "<B>HP:</B> " << (int)entry->GetHP() << "<BR>\n";
-    if (entry->GetMana())
-      out << "<B>Mana:</B> " << (int)entry->GetMana() << "<BR>\n";
-    if (entry->GetAC())
-      out << "<B>AC:</B> " << (int)entry->GetAC() << "<BR>\n";
-    if (entry->GetLight())
-      out << "<B>Light:</B> " << (int)entry->GetLight() << "<BR>\n";
-    if (entry->GetDelay())
-      out << "<B>Delay:</B> " << (int)entry->GetDelay() << "<BR>\n";
-    if (entry->GetDamage())
-    {
-      out << "<B>Damage:</B> " << (int)entry->GetDamage() << "<BR>\n";
-      QString qsTemp = print_skill (entry->GetSkill());
-      out << "<B>Skill:</B> ";
-      if (qsTemp.find("U0x") == -1)
-        out << qsTemp << "<BR>\n";
-      else
-        out << "Unknown (ID: " << qsTemp << ")<BR>\n";
-    }
-    if (entry->GetRange())
-      out << "<B>Range:</B> " << (int)entry->GetRange() << "<BR>\n";
-    out << "<B>Material:</B> " << QString::number(entry->GetMaterial(), 16)
-	<< " (" << print_material (entry->GetMaterial()) << ")<BR>\n";
-    out << "<B>Color:</B> " << QString::number(entry->GetColor(), 16) 
-	<< QString(" <B style=\"color: #%1\">###SAMPLE###</B><BR>\n")
-      .arg(entry->GetColor(), 6, 16);
+if (hasEntry)
+{
+loreString = entry->GetLoreName();
+nameString = entry->GetName();
+
+if (displayIcon)
+out << "<P><IMG src=\"" << ICON_DIR << entry->GetIconNr() 
+  << ".png\" alt=\"Icon: " << entry->GetIconNr() << "\"/></P>";
+
+if (!nameString.isEmpty())
+{
+out << "<H2>" << nameString << "</H2>\n";
+out << "<P><B>Lore:</B> " << loreString << "<BR></P>\n";
+}
+else
+{
+out << "<H2>Lore: " << loreString << "</H2>\n";
+} 
+
+out << "<P>\n";
+out << "<B>Icon Number:</B> " << entry->GetIconNr() << "<BR>\n";
+out << "<B>Model:</B> " << entry->GetIdFile() << "<BR>\n";
+out << "<B>flag:</B> " << QString::number(entry->GetFlag(), 16)
+<< "<BR>\n";
+out << "<B>Weight:</B> " << (int)entry->GetWeight() << "<BR>\n";
+out << "<B>Flags:</B> ";
+if (entry->IsBook())
+out << " BOOK";
+if (entry->IsContainer())
+out << " CONTAINER";
+if (entry->GetNoDrop() == 0)
+out << " NO-DROP";
+if (entry->GetNoSave() == 0)
+out << " NO-SAVE";
+if (entry->GetMagic() == 1)
+out << " MAGIC";
+if (loreString[0] == '*')
+out << " LORE";
+out << "<BR>\n";
+out << "<B>Size:</B> " << size_name(entry->GetSize()) << "<BR>\n";
+out << "<B>Slots:</B> " << print_slot(entry->GetSlots()) << "<BR>\n";
+out << "<B>Base Price:</B> " << reformatMoney(entry->GetCost()) 
+<< "<BR>\n";
+if (entry->GetSTR())
+out << "<B>Str:</B> " << (int)entry->GetSTR() << "<BR>\n";
+if (entry->GetSTA())
+out << "<B>Sta:</B> " << (int)entry->GetSTA() << "<BR>\n";
+if (entry->GetCHA())
+out << "<B>Cha:</B> " << (int)entry->GetCHA() << "<BR>\n";
+if (entry->GetDEX())
+out << "<B>Dex:</B> " << (int)entry->GetDEX() << "<BR>\n";
+if (entry->GetINT())
+out << "<B>Int:</B> " << (int)entry->GetINT() << "<BR>\n";
+if (entry->GetAGI())
+out << "<B>Agi:</B> " << (int)entry->GetAGI() << "<BR>\n";
+if (entry->GetWIS())
+out << "<B>Wis:</B> " << (int)entry->GetWIS() << "<BR>\n";
+if (entry->GetMR())
+out << "<B>Magic:</B> " << (int)entry->GetMR() << "<BR>\n";
+if (entry->GetFR())
+out << "<B>Fire:</B> " << (int)entry->GetFR() << "<BR>\n";
+if (entry->GetCR())
+out << "<B>Cold:</B> " << (int)entry->GetCR() << "<BR>\n";
+if (entry->GetDR())
+out << "<B>Disease:</B> " << (int)entry->GetDR() << "<BR>\n";
+if (entry->GetPR())
+out << "<B>Poison:</B> " << (int)entry->GetPR() << "<BR>\n";
+if (entry->GetHP())
+out << "<B>HP:</B> " << (int)entry->GetHP() << "<BR>\n";
+if (entry->GetMana())
+out << "<B>Mana:</B> " << (int)entry->GetMana() << "<BR>\n";
+if (entry->GetAC())
+out << "<B>AC:</B> " << (int)entry->GetAC() << "<BR>\n";
+if (entry->GetLight())
+out << "<B>Light:</B> " << (int)entry->GetLight() << "<BR>\n";
+if (entry->GetDelay())
+out << "<B>Delay:</B> " << (int)entry->GetDelay() << "<BR>\n";
+
+if (entry->GetDamage())
+{
+ out << "<B>Damage:</B> " << (int)entry->GetDamage() << "<BR>\n";
+ QString qsTemp = print_skill (entry->GetSkill());
+ out << "<B>Skill:</B> ";
+
+ if (qsTemp.find("U0x") == -1)
+  out << qsTemp << "<BR>\n";
+ else
+  out << "Unknown (ID: " << qsTemp << ")<BR>\n";
+}
+
+if (entry->GetRange())
+ out << "<B>Range:</B> " << (int)entry->GetRange() << "<BR>\n";
+
+if (entry->GetMaterial())
+{
+ out << "<B>Material:</B> " << QString::number(entry->GetMaterial(), 16)
+     << " (" << print_material (entry->GetMaterial()) << ")<BR>\n";
+
+ out << "<B>Color:</B> " << QString::number(entry->GetColor(), 16) << "<BR>\n";
+
+ out << ((entry->GetColor())  ?
+           (QString("<TABLE><TR><TD bgcolor=\"#%1\">").arg(entry->GetColor(), 6, 16)) :
+           ("<TABLE><TR><TD bgcolor=\"#ffffff\">"))
+     << "&nbsp;&nbsp;###&nbsp;SAMPLE&nbsp;###&nbsp;&nbsp</TD></TR></TABLE>\n";
+}
+else
+ out << "<B>Material:</B> 0 (None)<BR>\n";
+
     if (entry->GetSpellId0() != ITEM_SPELLID_NOSPELL)
       out << "<B>Effect1:</B> " << spell_name (entry->GetSpellId0()) 
 	  << "<BR>\n";
