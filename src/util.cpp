@@ -518,9 +518,7 @@ uint32_t calc_exp (int level, uint8_t race, uint8_t class_)
 
 	float exp=level*level*level;
 	if (level<30)       exp*=10;
-	else if (level<35)	exp*=11;
-	else if (level<40)	exp*=12;
-	else if (level<45)	exp*=13;
+	else if (level<50)	exp*=(10.0 + ((level - 29) * 0.2));
 	else if (level<51)	exp*=14;
 	else if (level<52)	exp*=15;
 	else if (level<53)	exp*=16;

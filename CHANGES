@@ -1,3 +1,13 @@
+dohpaZ (20/03/02)
+------------------
+Modifications:
+ + support new mystery slot that VI now gives change notifications for in the 
+   wearSlotId  in the new wearChangeStruct...
+ + Actually save current animation in Spawn object
+ + Updated calc_exp() to reflect the current experience system
+   with the most reasonable formula I've seen so far:
+   (level^3) * RaceMod * ClassMod * (10 + ((Level - 29) * 0.2))
+
 fee (21/03/02)
 ------------------
 Modifications:

@@ -44,6 +44,28 @@ enum itemType
   tSpawn 
 };
 
+enum itemWearSlot
+{
+  tHead          = 0,
+  tChest         = 1,
+  tArms          = 2,
+  tWaist         = 3,
+  tGloves        = 4,
+  tLegs          = 5,
+  tFeet          = 6,
+  tPrimary       = 7,
+  tSecondary     = 8,
+  tUnknown1      = 9,
+
+  // these are for bookeeping
+  tNumWearSlots  = 10,
+  tFirstMaterial = tHead,
+  tLastMaterial  = tFeet,
+  tFirstWeapon   = tPrimary,
+  tLastWeapon    = tSecondary,
+  tLastCoreWearSlot = tSecondary,
+};
+
 //----------------------------------------------------------------------
 // type definitions
 typedef Point3D<int16_t> EQPoint;
@@ -136,15 +158,16 @@ class Spawn : public Item
   Spawn(const charProfileStruct* player);
 
   Spawn(uint16_t id, 
-		  const QString& name, const QString& lastName, 
-		  uint8_t race, uint8_t classVal,
-		  uint8_t level, uint16_t deity = 0);
-		  
+	const QString& name, const QString& lastName, 
+	uint8_t race, uint8_t classVal,
+	uint8_t level, uint16_t deity = 0);
+  
   // create an unknown spawn using the data available.
   Spawn(uint16_t id, 
-		  int16_t xPos, int16_t yPos, int16_t zPos,
-		  int16_t deltaX, int16_t deltaY, int16_t deltaZ,
-		  int8_t heading, int8_t deltaHeading);
+	int16_t xPos, int16_t yPos, int16_t zPos,
+	int16_t deltaX, int16_t deltaY, int16_t deltaZ,
+	int8_t heading, int8_t deltaHeading,
+	uint8_t animation);
 
   // destructive copy constructor, clears the track list of the 
   // spawn being copied.
@@ -165,6 +188,7 @@ class Spawn : public Item
   int8_t heading() const { return m_heading; }
   int16_t headingAngle() const { return 360 - (m_heading * 360) / 256; }
   int8_t deltaHeading() const { return m_deltaHeading; }
+  uint8_t animation() const { return m_animation; }
   uint16_t HP() const { return m_curHP; }
   uint16_t maxHP() const { return m_maxHP; }
   uint8_t level() const { return m_level; }
@@ -180,14 +204,13 @@ class Spawn : public Item
   uint16_t equipment(uint8_t wearingSlot) const 
     { return m_equipment[wearingSlot]; }
   QString equipmentStr(uint8_t wearingSlot) const;
+  int8_t typeflag() const { return m_typeflag; }
   const SpawnTrackList& trackList() const { return m_spawnTrackList; }
   SpawnTrackList& trackList() { return m_spawnTrackList; }
   QString cleanedName() const;
   bool approximatePosition(bool animating, 
 			   const QTime& curTime,
 			   EQPoint& newPos) const;
-  
-  int8_t typeflag() const { return m_typeflag; }
 
   // virtual get method overloads
   virtual QString transformedName() const;
@@ -244,6 +267,7 @@ class Spawn : public Item
     { m_heading = heading; m_deltaHeading = deltaHeading; }
   void setHeading(int8_t heading) { m_heading = heading; }
   void setDeltaHeading(int8_t deltaHeading) { m_deltaHeading = deltaHeading; }
+  void setAnimation(uint8_t animation) { m_animation = animation; }
   void setPetOwnerID(uint16_t petOwnerID) { m_petOwnerID = petOwnerID; }
   void setLight(uint8_t light) { m_light = light; }
   void setGender(uint8_t gender) { m_gender = gender; }
@@ -255,11 +279,11 @@ class Spawn : public Item
   void setMaxHP(uint16_t maxHP) { m_maxHP = maxHP; }
   void setLevel(uint8_t level) { m_level = level; }
   void setEquipment(uint8_t wearSlot, uint16_t itemID)
-    { if (wearSlot < 9) { m_equipment[wearSlot] = itemID; } }
+    { if (wearSlot < tNumWearSlots) { m_equipment[wearSlot] = itemID; } }
   void setNPC(uint8_t NPC) { m_NPC = NPC; }
+  void setTypeflag(int8_t typeflag) { m_typeflag = typeflag; }
   void setID(uint16_t id) { m_ID = id; }
-
-  void setTypeflag(uint8_t typeflag) { m_typeflag = typeflag; }
+  
  protected:
   void calcRaceTeam();
   void calcDeityTeam();
@@ -282,7 +306,7 @@ class Spawn : public Item
   uint16_t m_maxHP;
   uint16_t m_deity;
   int16_t m_deityTeam;
-  uint16_t m_equipment[9];
+  uint16_t m_equipment[tNumWearSlots];
   uint8_t m_level;
   uint8_t m_race;
   int8_t m_raceTeam;
@@ -290,6 +314,7 @@ class Spawn : public Item
   uint8_t m_class;
   uint8_t m_light;
   int8_t m_typeflag;
+  uint8_t m_animation;
   bool m_considered;
 };
 

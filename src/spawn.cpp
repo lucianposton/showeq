@@ -45,7 +45,7 @@ const int animationCoefficientFixPt =
 
 //----------------------------------------------------------------------
 // Handy utility functions
-static 
+// static 
 QString print_weapon (uint16_t weapon)
 {
   // sparse array of weapon names, some are NULL
@@ -200,6 +200,7 @@ Spawn::Spawn()
   Item::setPos(0, 0, 0);
   setDeltas(0, 0, 0);
   setHeading(0, 0);
+  setAnimation(0);
   setPetOwnerID(0);
   setLight(0);
   setGender(0);
@@ -210,7 +211,7 @@ Spawn::Spawn()
   setMaxHP(0);
   setLevel(0);
   setTypeflag(0);
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
 
   // just clear the considred flag since data would be outdated
@@ -255,6 +256,7 @@ Spawn::Spawn(Spawn* item, uint16_t id)
   Item::setPos(item->xPos(), item->yPos(), item->zPos());
   setDeltas(item->deltaX(), item->deltaY(), item->deltaZ());
   setHeading(item->heading(), item->deltaHeading());
+  setAnimation(item->animation());
   setPetOwnerID(item->petOwnerID());
   setLight(item->light());
   setGender(item->gender());
@@ -266,7 +268,7 @@ Spawn::Spawn(Spawn* item, uint16_t id)
   setLevel(item->level());
   setTypeflag(item->typeflag());
   
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, item->equipment(i));
 
   setNPC(item->NPC());
@@ -312,9 +314,10 @@ Spawn::Spawn(uint16_t id,
   setLight(0);
   setGender(0);
   setTypeflag(0);
+  setAnimation(0);
   setHP(0);
   setMaxHP(0);
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
   setConsidered(false);
 
@@ -348,11 +351,12 @@ Spawn::Spawn(const charProfileStruct* player)
   Item::setPos(0, 0, 0);
   setDeltas(0, 0, 0);
   setHeading(0, 0);
+  setAnimation(0);
   setPetOwnerID(0);
   setLight(0);
   setHP(0);
   setMaxHP(0);
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
   setTypeflag(0);
   setConsidered(false);
@@ -365,7 +369,8 @@ Spawn::Spawn(const charProfileStruct* player)
 Spawn::Spawn(uint16_t id, 
 	     int16_t xPos, int16_t yPos, int16_t zPos,
 	     int16_t deltaX, int16_t deltaY, int16_t deltaZ,
-	     int8_t heading, int8_t deltaHeading) 
+	     int8_t heading, int8_t deltaHeading,
+	     uint8_t animation) 
   : Item(tSpawn, id)
 {
   // apply the unknown mob values
@@ -377,6 +382,7 @@ Spawn::Spawn(uint16_t id,
   setPos(xPos, yPos, zPos);
   setDeltas(deltaX, deltaY, deltaZ);
   setHeading(heading, deltaHeading);
+  setAnimation(animation);
   
   // initialize what isn't to 0
   setPetOwnerID(0);
@@ -388,7 +394,7 @@ Spawn::Spawn(uint16_t id,
   setHP(0);
   setMaxHP(0);
   setLevel(0);
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
   setTypeflag(0);
   setConsidered(false);
@@ -449,8 +455,10 @@ void Spawn::update(const spawnStruct* s)
   setHP(s->curHp);
   setMaxHP(s->maxHp);
   setLevel(s->level);
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < tLastCoreWearSlot; i++)
     setEquipment(i, s->equipment[i]);
+  setEquipment(tUnknown1, 0);
+
   setTypeflag(s->typeflag);
 
   // If it is a corpse with Unknown (NPC) religion.
@@ -458,6 +466,8 @@ void Spawn::update(const spawnStruct* s)
     setNPC(SPAWN_NPC_CORPSE); // it's a dead monster
   else
     setNPC(s->NPC); // otherwise it is what it is
+
+  setAnimation(s->animation);
 
   // only non corpses and things with animation != 66 move
   if (!isCorpse() && (s->animation != 66))
@@ -538,7 +548,7 @@ void Spawn::backfill(const spawnStruct* s)
   }
 
   // only change unknown equipment
-  for (i = 0; i < 9; i++)
+  for (i = 0; i <= tLastCoreWearSlot; i++)
     if (equipment(i) == 0)
       setEquipment(i, s->equipment[i]);
 
@@ -663,9 +673,9 @@ QString Spawn::lightName() const
 
 QString Spawn::equipmentStr(uint8_t wearingSlot) const
 {
-  if (wearingSlot < 7)
+  if (wearingSlot <= tLastMaterial)
     return print_material(equipment(wearingSlot));
-  else if (wearingSlot < wearingSlot)
+  else if (wearingSlot <= tLastWeapon)
     return print_weapon(equipment(wearingSlot));
   else
     return "";
@@ -855,6 +865,7 @@ QString Spawn::className() const
 
 QString Spawn::info() const
 {
+  // Head, Chest, Arms, Waist, Gloves, Legs, Feet, Primary, Secondary
   static const char* locs[]={"H","C","A","W","G","L","F","1","2"};
   int i;
   QString temp = "";
@@ -864,12 +875,12 @@ QString Spawn::info() const
     temp += QString("Light:") + lightName() + " ";
 
   // Worn stuff
-  for (i = 0; i < 7 ; i++)
+  for (i = tFirstMaterial; i <= tLastMaterial ; i++)
     if (equipment(i))
       temp += QString(locs[i]) + print_material(equipment(i)) + " ";
 
   // Worn weapons
-  for (i = 7; i < 9; i++)
+  for (i = tFirstWeapon; i <= tLastWeapon; i++)
     if (equipment(i))
       temp += QString(locs[i]) + print_weapon(equipment(i)) + " ";
 

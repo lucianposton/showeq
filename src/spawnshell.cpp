@@ -41,7 +41,7 @@
 
 //----------------------------------------------------------------------
 // constants
-const char magicStr[5] = "spn1"; // magic is the size of uint32_t + a null
+const char magicStr[5] = "spn2"; // magic is the size of uint32_t + a null
 const uint32_t* magic = (uint32_t*)magicStr;
 
 //----------------------------------------------------------------------
@@ -569,7 +569,7 @@ void SpawnShell::playerUpdate(const playerPosStruct *pupdate, bool client)
                    pupdate->zPos,
                    0, 0, 0,
                    pupdate->heading,
-                   0);
+                   0, 0);
   }
   else if (m_playerSpawn != NULL)
   {
@@ -623,7 +623,8 @@ void SpawnShell::playerUpdate(const playerPosStruct *pupdate, bool client)
 void SpawnShell::updateSpawn(uint16_t id, 
 			     int16_t x, int16_t y, int16_t z,
 			     int16_t xVel, int16_t yVel, int16_t zVel,
-			     int8_t heading, int8_t deltaHeading)
+			     int8_t heading, int8_t deltaHeading,
+			     uint8_t animation)
 {
 #ifdef SPAWNSHELL_DIAG
    printf("SpawnShell::updateSpawn(id=%d, x=%d, y=%d, z=%d, xVel=%d, yVel=%d, zVel=%d)\n", id, x, y, z, xVel, yVel, zVel);
@@ -639,15 +640,25 @@ void SpawnShell::updateSpawn(uint16_t id,
      item->setPos(x, y, z,
 		  showeq_params->walkpathrecord,
 		  showeq_params->walkpathlength);
-     item->setDeltas(xVel, yVel, zVel);
-     item->setHeading(heading, deltaHeading);
+     item->setAnimation(animation);
+     if ((animation != 0) && (animation != 66))
+     {
+       item->setDeltas(xVel, yVel, zVel);
+       item->setHeading(heading, deltaHeading);
+     } 
+    else
+     {
+       item->setDeltas(0, 0, 0);
+       item->setHeading(heading, 0);
+     }
+
      item->updateLast();
      emit changeItem(item, tSpawnChangedPosition);
    }
    else if (showeq_params->showUnknownSpawns)
    {
      item = new Spawn(id, x, y, z, xVel, yVel, zVel, 
-				heading, deltaHeading);
+		      heading, deltaHeading, animation);
      updateFilterFlags(item);
      updateRuntimeFilterFlags(item);
      m_spawns.insert(ItemMap::value_type(id, item));
@@ -669,29 +680,16 @@ void SpawnShell::updateSpawns(const mobUpdateStruct* updates)
      // even though the velocity numbers arent 0.  this fix should reduce
      // drift when a mob stops moving. (or turns)
 
-     if ((updates->spawnUpdate[a].animation != 0) &&
-	 (updates->spawnUpdate[a].animation != 66))
-     {
-       updateSpawn(updates->spawnUpdate[a].spawnId,
-		   updates->spawnUpdate[a].xPos,
-		   updates->spawnUpdate[a].yPos,
-		   updates->spawnUpdate[a].zPos,
-		   updates->spawnUpdate[a].deltaX,
-		   updates->spawnUpdate[a].deltaY,
-		   updates->spawnUpdate[a].deltaZ,
-		   updates->spawnUpdate[a].heading,
-		   updates->spawnUpdate[a].deltaHeading);
-     }
-     else
-     {
-       updateSpawn(updates->spawnUpdate[a].spawnId,
-		   updates->spawnUpdate[a].xPos,
-		   updates->spawnUpdate[a].yPos,
-		   updates->spawnUpdate[a].zPos,
-		   0, 0, 0,
-		   updates->spawnUpdate[a].heading, 
-		   0);
-     }
+     updateSpawn(updates->spawnUpdate[a].spawnId,
+		 updates->spawnUpdate[a].xPos,
+		 updates->spawnUpdate[a].yPos,
+		 updates->spawnUpdate[a].zPos,
+		 updates->spawnUpdate[a].deltaX,
+		 updates->spawnUpdate[a].deltaY,
+		 updates->spawnUpdate[a].deltaZ,
+		 updates->spawnUpdate[a].heading,
+		 updates->spawnUpdate[a].deltaHeading,
+		 updates->spawnUpdate[a].animation);
    }
 }
 
@@ -721,23 +719,11 @@ void SpawnShell::spawnWearingUpdate(const wearChangeStruct *wearing)
    if (it != m_spawns.end())
    {
      item = (Spawn*)it->second;
-#if 0 // ZBTEMP: 
-     fprintf(stderr, "id=%d name=%s slotId=%d itemId=%d\n",
-	     wearing->spawnId, (const char*)item->name(),
-	     wearing->wearSlotId, wearing->newItemId);
-#endif
      item->setEquipment(wearing->wearSlotId, wearing->newItemId);
      updateFilterFlags(item);
      updateRuntimeFilterFlags(item);
      emit changeItem(item, tSpawnChangedWearing);
    }
-#if 0 // ZBTEMP: 
-   else
-     fprintf(stderr, "id=%d slotId=%d itemId=%d\n",
-	     wearing->spawnId, 
-	     wearing->wearSlotId, wearing->newItemId);
-#endif
-
 }
 
 void SpawnShell::consRequest(const considerStruct * con) 

@@ -133,10 +133,11 @@ public slots:
    void newSpawn(const newSpawnStruct* spawn);
    void newSpawn(const spawnStruct& s);
    void playerUpdate(const playerPosStruct *pupdate, bool client);
-   void updateSpawn(uint16_t, 
-		    int16_t, int16_t, int16_t, 
-		    int16_t, int16_t, int16_t,
-		    int8_t, int8_t);
+   void updateSpawn(uint16_t id, 
+		    int16_t x, int16_t y, int16_t z,
+		    int16_t xVel, int16_t yVel, int16_t zVel,
+		    int8_t heading, int8_t deltaHeading,
+		    uint8_t animation);
    void updateSpawns(const mobUpdateStruct* updates);
    void updateSpawnHP(const hpUpdateStruct* hpupdate);
    void spawnWearingUpdate(const wearChangeStruct* wearing);
