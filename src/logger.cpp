@@ -182,99 +182,86 @@ PktLogger::logItemHeader(const itemStruct *item)
     outputf("[%.35s] ", item->name);
     outputf("[%.60s] ", item->lore);
     outputf("[%.6s] ", item->idfile);
-    outputf("%d ", item->flag);
-    output(item->unknown0103, 22);
+    output(item->unknown0150, 24);
     outputf(" %d %d %d ", item->weight, item->nosave, item->nodrop);
     outputf("%d ", item->size);
-    output(&item->unknown0129, 1);
+    output(item->unknown0178, 2);
     outputf(" %d %d ", item->itemNr, item->iconNr);
     outputf("%d %d ", item->equipSlot, item->equipableSlots);
     outputf("%d ", item->cost);
-    output(item->unknown0144, 28);
+    output(item->unknown0196, 32);
     outputf(" ");
     return;
 }
 
 void
-PktLogger::logBookItem(const itemStruct *item)
+PktLogger::logBookItem(const itemBookStruct *book)
 {
-    logItemHeader(item);
-    output(item->book.unknown0172, 3);
-    outputf(" [%15s] ", item->book.file);
-    output(item->book.unknown0190, 102);
+    logItemHeader(book);
+    output(book->unknown0228, 6);
+    outputf(" [%15s] ", book->file);
+    output(book->unknown0246, 15);
     return;
 }   
     
 void
-PktLogger::logItemCommons(const itemStruct *item)
+PktLogger::logItemCommons(const itemItemStruct *item)
 {
     outputf(" %d %d %d ", 
-        item->common.STR, item->common.STA, item->common.CHA);
+        item->STR, item->STA, item->CHA);
     outputf("%d %d %d ", 
-        item->common.DEX, item->common.INT, item->common.AGI);
+        item->DEX, item->INT, item->AGI);
     outputf("%d %d %d ", 
-        item->common.WIS, item->common.MR, item->common.FR);
+        item->WIS, item->MR, item->FR);
     outputf("%d %d %d ", 
-        item->common.CR, item->common.DR, item->common.PR);
+        item->CR, item->DR, item->PR);
     outputf("%d %d %d ", 
-        item->common.HP, item->common.MANA, item->common.AC);
-    output(item->common.unknown0187, 2);
+        item->HP, item->MANA, item->AC);
+    output(item->unknown0246, 2);
     outputf(" %d %d %d ", 
-        item->common.light, item->common.delay, item->common.damage);
-    output(&item->common.unknown0192, 1);
+        item->light, item->delay, item->damage);
+    output(&item->unknown0251, 1);
     outputf(" %d %d ",
-        item->common.range,item->common.skill);
+        item->range,item->skill);
     outputf("%d %d %d ", 
-        item->common.magic, item->common.level0, item->common.material);
-    output(item->common.unknown0198, 2);
-    outputf(" %d ", item->common.color);
-    output(item->common.unknown0204, 2);
+        item->magic, item->level0, item->material);
+    output(item->unknown0258, 3);
+    outputf(" %d ", item->color);
+    output(item->unknown0264, 2);
     outputf(" %d %d ", 
-        item->common.spellId0, item->common.classes);
-    output(item->common.unknown0210, 2);
+        item->spellId0, item->classes);
+    output(item->unknown0270, 2);
     outputf(" ");
     return;
 }
 
 void
-PktLogger::logContainerItem(const itemStruct *item)
+PktLogger::logContainerItem(const itemContainerStruct *container)
 {
-    logItemHeader(item);
-    output(&item->container.unknown0191,41);
-    outputf(" %d ", item->container.numSlots);
-    output(&item->container.unknown0214,1);
-    outputf(" %d ", item->container.sizeCapacity);
-    outputf("%d ", item->container.weightReduction);
-    output(&item->common.unknown0192, 75);
+    logItemHeader(container);
+    output(&container->unknown0228,41);
+    outputf(" %d ", container->numSlots);
+    output(&container->unknown0271,1);
+    outputf(" %d ", container->sizeCapacity);
+    outputf("%d ", container->weightReduction);
+    output(&container->unknown0273, 3);
 }   
     
 void
-PktLogger::logNormalItem(const itemStruct *item)
+PktLogger::logNormalItem(const itemItemStruct *item)
 {
     logItemHeader(item);
     logItemCommons(item);
-    outputf(" %d ", item->common.races);
-    output(item->common.unknown0214, 3);
-    outputf(" %d %d ", item->common.level, item->common.charges);
-    output(&item->common.unknown0219, 1);
-    outputf(" %d ", item->common.spellId);
-    output(item->common.unknown0222, 70);
+    outputf(" %d ", item->races);
+    output(item->unknown0274, 2);
+    outputf(" %d %d %d %d ", 
+	    item->stackable,
+	    item->level, item->charges, item->effectType);
+    outputf(" %d ", item->spellId);
+    output(item->unknown0282, 10);
+    outputf(" %d ", item->castTime);
+    output(item->unknown0296, 41);
     outputf(" ");
-}
-
-void
-PktLogger::logItem(const itemStruct *item)
-{
-    if (m_FP == NULL)
-        if (logOpen() != 0)
-            return;
-
-    if (isItemBook(*item)) /* book */
-        logBookItem(item);
-    else if (isItemContainer(*item)) /* container */   
-        logContainerItem(item);
-    else /* normal item */
-        logNormalItem(item);
 }
 
 void
@@ -341,7 +328,17 @@ PktLogger::logItemInShop(const itemInShopStruct *sitem, uint32_t len, uint8_t di
     outputf(" %d ", sitem->playerid);
     outputf(" %d ", sitem->itemType);
 
-    logItem(&sitem->item);
+    switch(sitem->itemType)
+    {
+    case 0:
+      logNormalItem(&sitem->item);
+      break;
+    case 1:
+      logContainerItem(&sitem->container);
+      break;
+    case 2:
+      logBookItem(&sitem->book);
+    }
 
     outputf(" ");
     output(sitem->unknown0297, 6);
@@ -389,7 +386,7 @@ PktLogger::logItemOnCorpse(const itemOnCorpseStruct *item, uint32_t len, uint8_t
     outputf("R %u %04d %d %.2X%2.X ", timestamp, len, dir,
         item->opCode, item->version);
 
-    logItem(&item->item);
+    logNormalItem(&item->item);
 
     outputf("\n");
     flush();
@@ -411,7 +408,7 @@ PktLogger::logTradeItemIn(const tradeItemInStruct *item, uint32_t len, uint8_t d
     outputf("R %u %04d %d %.2X%2.X ", timestamp, len, dir, 
         item->opCode, item->version);
 
-    logItem(&item->item);
+    logNormalItem(&item->item);
 
     outputf("\n");
     flush();
@@ -434,9 +431,19 @@ PktLogger::logTradeItemOut(const tradeItemOutStruct *item, uint32_t len, uint8_t
         item->opCode, item->version);
 
     output(item->unknown0002,6);
-    outputf(" %d ", item->itemtype);
+    outputf(" %d ", item->itemType);
 
-    logItem(&item->item);
+    switch(item->itemType)
+    {
+    case 0:
+      logNormalItem(&item->item);
+      break;
+    case 1:
+      logContainerItem(&item->container);
+      break;
+    case 2:
+      logBookItem(&item->book);
+    }
 
     outputf(" ");
     output(item->unknown0253, 5);
@@ -461,7 +468,7 @@ PktLogger::logPlayerItem(const playerItemStruct *item, uint32_t len, uint8_t dir
     outputf("R %u %04d %d %.2X%2.X ", timestamp, len, dir, 
         item->opCode, item->version);
 
-    logItem(&item->item);
+    logNormalItem(&item->item);
 
     outputf("\n");
     flush();
@@ -483,7 +490,7 @@ PktLogger::logSummonedItem(const summonedItemStruct *item, uint32_t len, uint8_t
     outputf("R %u %04d %d %.2X%2.X ", timestamp, len, dir, 
         item->opCode, item->version);
 
-    logItem(&item->item);
+    logNormalItem(&item->item);
 
     outputf("\n");
     flush();
@@ -963,7 +970,7 @@ PktLogger::logPlayerBook(const playerBookStruct *book, uint32_t len, uint8_t dir
     outputf("R %u %04d %d %.2X%.2X ", timestamp, len, dir,
        book->opCode, book->version);
 
-    logItem(&book->item);
+    logBookItem(&book->book);
 
     outputf("\n");
     flush();
@@ -985,7 +992,7 @@ PktLogger::logPlayerContainer(const playerContainerStruct *container, uint32_t l
     outputf("R %u %04d %d %.2X%.2X ", timestamp, len, dir,
        container->opCode, container->version);
 
-    logItem(&container->item);
+    logContainerItem(&container->container);
 
     outputf("\n");
     flush();

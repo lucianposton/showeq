@@ -26,6 +26,7 @@
 
 struct spellInfoStruct 
 {
+  const char* name;
    int duration;
    bool target;
 };
@@ -51,7 +52,7 @@ char *print_addr (unsigned long addr);
 
 QString Commanate (uint32_t number);
 
-spellInfoStruct* spell_info (uint16_t spellId);
+const spellInfoStruct* spell_info (uint16_t spellId);
 QString spell_name (uint16_t spellId);
 QString language_name (uint8_t langId);
 QString skill_name (uint16_t skillId);

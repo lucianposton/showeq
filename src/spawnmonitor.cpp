@@ -67,6 +67,31 @@ unsigned char SpawnPoint::age() const
   return (unsigned char)scaledColor;
 }
 
+void SpawnPoint::restart(void)
+{
+  m_lastID = 0;
+  m_deathTime = time( 0 );
+}
+
+void SpawnPoint::update(const Spawn* spawn)
+{
+  if (spawn == NULL)
+    return;
+
+  m_lastID = spawn->id();
+  
+  if ( m_lastID )
+    m_last = spawn->name();
+  else
+    m_last = "";
+  
+  m_spawnTime = time(0);
+  
+  if (m_deathTime != 0)
+    m_diffTime = m_spawnTime - m_deathTime;
+  
+  m_count++;
+}
 
 SpawnMonitor::SpawnMonitor(ZoneMgr* zoneMgr,
 			   SpawnShell* spawnShell, 
@@ -122,6 +147,13 @@ void SpawnMonitor::setSelected(const SpawnPoint* selected)
   emit selectionChanged(m_selected);
 }
 
+void SpawnMonitor::clear(void)
+{
+  emit clearSpawnPoints();
+  m_spawns.clear();
+  m_points.clear();
+}
+
 void SpawnMonitor::deleteSpawnPoint(const SpawnPoint* sp)
 {
   // if deleting the selected spawn point, change the selection to NUL
@@ -133,11 +165,11 @@ void SpawnMonitor::deleteSpawnPoint(const SpawnPoint* sp)
 
   // remove the spawn point (will automatically delete it).
   m_spawns.remove(sp->key());
+  m_modified = true;
 }
 
 void SpawnMonitor::newSpawn(const Item* item)
 {
-//	debug( "SpawnMonitor::handleNewSpawn" );
   if (item->type() == tSpawn)
     checkSpawnPoint( (Spawn*)item );
 };
@@ -149,9 +181,8 @@ void SpawnMonitor::killSpawn(const Item* killedSpawn)
   SpawnPoint*		sp;
   while ( ( sp = it.current() ) )
   {
-    if ( killedSpawn->id() == sp->m_lastID )
+    if ( killedSpawn->id() == sp->lastID() )
     {
-      //printf( "death time: %d    %d\n", killedSpawn->spawnId, time( 0 ) );
       restartSpawnPoint( sp );
       break;
     }
@@ -165,9 +196,7 @@ void SpawnMonitor::zoneChanged( const QString& newZoneName )
   {
     saveSpawnPoints();
     
-    emit clearSpawnPoints();
-    m_spawns.clear();
-    m_points.clear();
+    clear();
     m_zoneName = newZoneName;
     
     loadSpawnPoints();
@@ -176,75 +205,42 @@ void SpawnMonitor::zoneChanged( const QString& newZoneName )
 
 void SpawnMonitor::zoneEnd( const QString& newZoneName )
 {
-  QString		lower = newZoneName.lower();
+  QString lower = newZoneName.lower();
   
   if ( m_zoneName != lower )
   {
     m_zoneName = lower;
-    emit clearSpawnPoints();
-    m_spawns.clear();
-    m_points.clear();
+    clear();
     loadSpawnPoints();
   }
 }
 
 void SpawnMonitor::restartSpawnPoint( SpawnPoint* sp )
 {
-  sp->m_lastID = 0;
-  sp->m_deathTime = time( 0 );
+  sp->restart();
 }
 	
 void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
 {
-//	debug( "SpawnMonitor::checkSpawnPoint" );
-
   // ignore everything but mobs
   if ( ( spawn->NPC() != SPAWN_NPC ) || ( spawn->petOwnerID() != 0 ) )
     return;
   
   QString		key = SpawnPoint::key( *spawn );
   
-  //	printf( "key: '%s'", (const char*)key );
-
   SpawnPoint*		sp;
   sp = m_points.find( key );
   if ( sp )
   {
-    //if ( sp->m_lastID != 0 )
-    //	printf( "DOUBLE SPAWN\n" );
-    
-    sp->m_lastID = spawn->id();
-    
-    if ( sp->m_lastID )
-      sp->m_last = spawn->name();
-    else
-      sp->m_last = "";
-    
-    sp->m_spawnTime = time( 0 );
-    
-    //		printf( "spawn time: %d    %d\n", sp->m_lastID, sp->m_spawnTime );
-    
-    if ( sp->m_deathTime != 0  )
-    {
-      sp->m_diffTime = sp->m_spawnTime - sp->m_deathTime;
-      //			printf( "setting diffTime: %d\n", sp->m_diffTime );
-    }
-    
-    sp->m_count++;
+    m_modified = true;
+    sp->update(spawn);
   }
   else
   {
     sp = m_spawns.find( key );
     if ( sp )
     {
-      sp->m_lastID = spawn->id();
-    
-      if ( sp->m_lastID )
-	sp->m_last = spawn->name();
-      else
-	sp->m_last = "";
-      sp->m_spawnTime = time( 0 );
-      sp->m_count++;
+      sp->update(spawn);
       
       m_points.insert( key, sp );
       emit newSpawnPoint( sp );
@@ -261,7 +257,9 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
 
 void SpawnMonitor::saveSpawnPoints()
 {
-//	debug( "SpawnMonitor::saveSpawnPoints" );
+  // only save if modified
+  if (!m_modified)
+    return;
 
   if ( !m_zoneName.length() )
   {
@@ -290,18 +288,17 @@ void SpawnMonitor::saveSpawnPoints()
   while ((sp = it.current()))
   {
     ++it;
-    //		printf( "writing: %d %d %d '%s'\n", sp->x, sp->y, sp->z, (const char*)sp->m_name );
     output	<< sp->x()
 		<< " "
 		<< sp->y()
 		<< " "
 		<< sp->z()
 		<< " "
-		<< (unsigned long)sp->m_diffTime
+		<< (unsigned long)sp->diffTime()
 		<< " "
 		<< sp->count()
 		<< " "
-		<< sp->m_name
+		<< sp->name()
 		<< '\n';
   }
   
@@ -362,17 +359,12 @@ void SpawnMonitor::loadSpawnPoints()
   while (!input.atEnd())
   {
     input >> x;
-    //		printf( "x: %d\n", x );
     input >> y;
-    //		printf( "y: %d\n", y );
     input >> z;
-    //		printf( "z: %d\n", z );
     input >> diffTime;
-    //		printf( "diff: %d\n", diffTime );
     input >> count;
     name = input.readLine();
     name = name.stripWhiteSpace();
-    //		printf( "name: '%s'\n", (const char*)name );
     
     EQPoint	loc(x, y, z);
     SpawnPoint*	p = new SpawnPoint( 0, loc, name, diffTime, count );

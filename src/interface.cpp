@@ -69,8 +69,35 @@
 /* The main interface widget */
 EQInterface::EQInterface (QWidget * parent, const char *name) 
   : QMainWindow (parent, name),
-    m_formattedMessageStrings(3001)
+    m_player(NULL),
+    m_mapMgr(NULL),
+    m_spawnList(NULL),
+    m_spawnList2(NULL),
+    m_spellList(NULL),
+    m_skillList(NULL),
+    m_statList(NULL),
+    m_spawnPointList(NULL),
+    m_packet(NULL),
+    m_zoneMgr(NULL),
+    m_filterMgr(NULL),
+    m_categoryMgr(NULL),
+    m_spawnShell(NULL),
+    m_spellShell(NULL),
+    m_groupMgr(NULL),
+    m_spawnMonitor(NULL),
+    m_itemDB(NULL),
+    m_pktLogger(NULL),
+    m_spawnLogger(NULL),
+    m_selectedSpawn(NULL),
+    m_compass(NULL),
+    m_expWindow(NULL),
+    m_combatWindow(NULL),
+    m_netDiag(NULL),
+    m_formattedMessageStrings(2099) // increase if eqstr_en.txt gets longer
 {
+  for (int l = 0; l < maxNumMaps; l++)
+    m_map[l] = NULL;
+
    QString tempStr;
    QString section = "Interface";
 
@@ -106,6 +133,23 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // Create our player object
    m_player = new Player(this, m_zoneMgr);
 
+   if (showeq_params->ItemDBEnabled)
+   {
+     // Create an instance of the ItemDB
+     m_itemDB = new EQItemDB;
+
+     // make it's parameters match those set via the config file and 
+     // command line
+     m_itemDB->SetDBFile(EQItemDB::LORE_DB, showeq_params->ItemLoreDBFilename);
+     m_itemDB->SetDBFile(EQItemDB::NAME_DB, showeq_params->ItemNameDBFilename);
+     m_itemDB->SetDBFile(EQItemDB::DATA_DB, showeq_params->ItemDataDBFilename);
+     m_itemDB->SetDBFile(EQItemDB::RAW_DATA_DB, showeq_params->ItemRawDataDBFileName);
+     m_itemDB->SetEnabledDBTypes(showeq_params->ItemDBTypes);
+
+     // Make sure the databases are upgraded to the current format
+     m_itemDB->Upgrade();
+   }
+
    // Create the filter manager
    m_filterMgr = new FilterMgr();
 
@@ -118,7 +162,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_categoryMgr = new CategoryMgr();
 
    // Create the spawn shell
-   m_spawnShell = new SpawnShell(*m_filterMgr, m_zoneMgr, m_player);
+   m_spawnShell = new SpawnShell(*m_filterMgr, m_zoneMgr, m_player, m_itemDB);
 
    // Create the map manager
    m_mapMgr = new MapMgr(m_spawnShell, m_player, m_zoneMgr, this);
@@ -186,9 +230,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // Create/display the Map(s)
    for (int i = 0; i < maxNumMaps; i++)
    {
-     // first clear the variable
-     m_map[i] = NULL;
-
      QString tmpPrefSuffix = "";
      if (i > 0)
        tmpPrefSuffix = QString::number(i + 1);
@@ -213,7 +254,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    //
    // Create the compass as required
    //
-   m_compass = NULL;
    if (pSEQPrefs->getPrefBool("ShowCompass", section, false))
        showCompass();
 
@@ -221,16 +261,14 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    //
    // Create the spells listview as required (dynamic object)
    //
-   m_spellList = NULL;
    m_isSpellListDocked = pSEQPrefs->getPrefBool("DockedSpellList", section, true);
-   if (pSEQPrefs->getPrefBool("ShowSpellList", section, true))
+   if (pSEQPrefs->getPrefBool("ShowSpellList", section, false))
        showSpellList();
 
 
    //
    // Create the Player Skills listview (ONLY CREATED WHEN NEEDED FLOYD!!!!)
    //
-   m_skillList = NULL;
    m_isSkillListDocked = pSEQPrefs->getPrefBool("DockedPlayerSkills", section, true);
    if (pSEQPrefs->getPrefBool("ShowPlayerSkills", section, true))
      showSkillList();
@@ -238,7 +276,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    //
    // Create the Player Status listview (ONLY CREATED WHEN NEEDED FLOYD!!!!)
    //
-   m_statList = NULL;
    m_isStatListDocked = pSEQPrefs->getPrefBool("DockedPlayerStats", section, true);
    if (pSEQPrefs->getPrefBool("ShowPlayerStats", section, true))
      showStatList();
@@ -246,7 +283,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    //
    // Create the Spawn List listview (always exists, just hidden if not specified)
    //
-   m_spawnList = NULL;
    m_isSpawnListDocked = pSEQPrefs->getPrefBool("DockedSpawnList", section, true);
    if (pSEQPrefs->getPrefBool("ShowSpawnList", section, false))
      showSpawnList();
@@ -254,7 +290,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    //
    // Create the Spawn List2 listview (always exists, just hidden if not specified)
    //
-   m_spawnList2 = NULL;
    m_isSpawnList2Docked = pSEQPrefs->getPrefBool("DockedSpawnList2", section, true);
    if (pSEQPrefs->getPrefBool("ShowSpawnList2", section, true))
      showSpawnList2();
@@ -262,15 +297,13 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    //
    // Create the Spawn List listview (always exists, just hidden if not specified)
    //
-   m_spawnPointList = NULL;
    m_isSpawnPointListDocked = pSEQPrefs->getPrefBool("DockedSpawnPointList", section, false);
-   if (pSEQPrefs->getPrefBool("ShowSpawnPointList", section, true))
+   if (pSEQPrefs->getPrefBool("ShowSpawnPointList", section, false))
      showSpawnPointList();
 
    //
    // Create the Net Statistics window as required
    // 
-   m_netDiag = NULL;
    if (showeq_params->net_stats)
      showNetDiag();
 
@@ -1087,6 +1120,30 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    connect(this, SIGNAL(saveAllPrefs(void)),
 	   m_categoryMgr, SLOT(savePrefs(void)));
 
+   // connect ItemDB slots to EQPacket signals
+   connect(m_packet, SIGNAL(itemShop(const itemInShopStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(itemShop(const itemInShopStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(itemPlayerReceived(const itemOnCorpseStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(itemPlayerReceived(const itemOnCorpseStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(tradeItemOut(const tradeItemOutStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(tradeItemOut(const tradeItemOutStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(tradeItemIn(const tradeItemInStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(tradeItemIn(const tradeItemInStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(tradeContainerIn(const tradeContainerInStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(tradeContainerIn(const tradeContainerInStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(tradeBookIn(const tradeBookInStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(tradeBookIn(const tradeBookInStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(summonedItem(const summonedItemStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(summonedItem(const summonedItemStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(summonedContainer(const summonedContainerStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(summonedContainer(const summonedContainerStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(playerItem(const playerItemStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(playerItem(const playerItemStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(playerBook(const playerBookStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(playerBook(const playerBookStruct*, uint32_t, uint8_t)));
+   connect(m_packet, SIGNAL(playerContainer(const playerContainerStruct*, uint32_t, uint8_t)),
+	   m_itemDB, SLOT(playerContainer(const playerContainerStruct*, uint32_t, uint8_t)));
+   
    // connect GroupMgr slots to EQPacket signals
    connect(m_packet, SIGNAL(groupInfo(const groupMemberStruct*, uint32_t, uint8_t)),
 	   m_groupMgr, SLOT(handleGroupInfo(const groupMemberStruct*)));
@@ -1102,8 +1159,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   this, SLOT(attack2Hand1(const attack2Struct*)));
    connect(m_packet, SIGNAL(action2Message(const action2Struct*, uint32_t, uint8_t)),
            this, SLOT(action2Message(const action2Struct*)));
-   connect(m_packet, SIGNAL(wearItem(const playerItemStruct*, uint32_t, uint8_t)),
-	   this, SLOT(wearItem(const playerItemStruct*)));
+   connect(m_packet, SIGNAL(playerItem(const playerItemStruct*, uint32_t, uint8_t)),
+	   this, SLOT(playerItem(const playerItemStruct*)));
    connect(m_packet, SIGNAL(itemShop(const itemInShopStruct*, uint32_t, uint8_t)),
 	   this, SLOT(itemShop(const itemInShopStruct*)));
    connect(m_packet, SIGNAL(moneyOnCorpse(const moneyOnCorpseStruct*, uint32_t, uint8_t)),
@@ -1114,6 +1171,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   this, SLOT(tradeItemOut(const tradeItemOutStruct*)));
    connect(m_packet, SIGNAL(tradeItemIn(const tradeItemInStruct*, uint32_t, uint8_t)),
 	   this, SLOT(tradeItemIn(const tradeItemInStruct*)));
+   connect(m_packet, SIGNAL(tradeContainerIn(const tradeContainerInStruct*, uint32_t, uint8_t)),
+	   this, SLOT(tradeContainerIn(const tradeContainerInStruct*)));
+   connect(m_packet, SIGNAL(tradeBookIn(const tradeBookInStruct*, uint32_t, uint8_t)),
+	   this, SLOT(tradeBookIn(const tradeBookInStruct*)));
    connect(m_packet, SIGNAL(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)),
 	   this, SLOT(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(formattedMessage(const formattedMessageStruct*, uint32_t, uint8_t)),
@@ -1126,6 +1187,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   this, SLOT(playerBook(const playerBookStruct*)));
    connect(m_packet, SIGNAL(playerContainer(const playerContainerStruct*, uint32_t, uint8_t)),
 	   this, SLOT(playerContainer(const playerContainerStruct*)));
+   connect(m_packet, SIGNAL(newGroundItem(const makeDropStruct*, uint32_t, uint8_t)),
+	   this, SLOT(newGroundItem(const makeDropStruct *, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(inspectData(const inspectDataStruct*, uint32_t, uint8_t)),
 	   this, SLOT(inspectData(const inspectDataStruct*)));
    connect(m_packet, SIGNAL(spMessage(const spMesgStruct*, uint32_t, uint8_t)),
@@ -1156,6 +1219,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   this, SLOT(groupDelete(const groupDeleteStruct*)));
    connect(m_packet, SIGNAL(summonedItem(const summonedItemStruct*, uint32_t, uint8_t)),
 	   this, SLOT(summonedItem(const summonedItemStruct*)));
+   connect(m_packet, SIGNAL(summonedContainer(const summonedContainerStruct*, uint32_t, uint8_t)),
+	   this, SLOT(summonedContainer(const summonedContainerStruct*)));
    connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)),
 	   this, SLOT(zoneEntry(const ClientZoneEntryStruct*)));
    connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
@@ -1258,7 +1323,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_player, SLOT(updateSpawnHP(const hpUpdateStruct*)));
    connect(m_packet, SIGNAL(updateStamina(const staminaStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(updateStamina(const staminaStruct*)));
-   connect(m_packet, SIGNAL(wearItem(const playerItemStruct*, uint32_t, uint8_t)),
+   connect(m_packet, SIGNAL(playerItem(const playerItemStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(wearItem(const playerItemStruct*)));
    connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
@@ -1329,7 +1394,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	    m_pktLogger, SLOT(logTradeItemOut(const tradeItemOutStruct*, uint32_t, uint8_t)));
    connect (m_packet, SIGNAL(tradeItemIn(const tradeItemInStruct*, uint32_t, uint8_t)),
 	    m_pktLogger, SLOT(logTradeItemIn(const tradeItemInStruct*, uint32_t, uint8_t)));
-   connect (m_packet, SIGNAL(wearItem(const playerItemStruct*, uint32_t, uint8_t)),
+   connect (m_packet, SIGNAL(playerItem(const playerItemStruct*, uint32_t, uint8_t)),
 	    m_pktLogger, SLOT(logPlayerItem(const playerItemStruct*, uint32_t, uint8_t)));
    connect (m_packet, SIGNAL(summonedItem(const summonedItemStruct*, uint32_t, uint8_t)),
 	    m_pktLogger, SLOT(logSummonedItem(const summonedItemStruct*, uint32_t, uint8_t)));
@@ -1479,6 +1544,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_spawnLogger, SLOT(logKilledSpawn(const Item *, const Item*, uint16_t)));
 
    // Create message boxes defined in config preferences
+   m_msgDialogList.setAutoDelete(true);
    QString title;
    int i = 0;
    MsgDialog* pMsgDlg;
@@ -1622,6 +1688,80 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
 EQInterface::~EQInterface()
 {
+  m_formattedMessageStrings.clear();
+  m_msgDialogList.clear();
+
+  if (m_netDiag != NULL)
+    delete m_netDiag;
+
+  if (m_spawnPointList != NULL)
+    delete m_spawnPointList;
+
+  if (m_statList != NULL)
+    delete m_statList;
+
+  if (m_skillList != NULL)
+    delete m_skillList;
+
+  if (m_spellList != NULL)
+    delete m_spellList;
+
+  if (m_spawnList2 != NULL)
+    delete m_spawnList2;
+
+  if (m_spawnList != NULL)
+    delete m_spawnList;
+
+  for (int i = 0; i < maxNumMaps; i++)
+    if (m_map[i] != NULL)
+      delete m_map[i];
+
+  if (m_combatWindow != NULL)
+    delete m_combatWindow;
+
+  if (m_expWindow != NULL)
+    delete m_expWindow;
+
+  if (m_spawnLogger != NULL)
+    delete m_spawnLogger;
+
+  if (m_pktLogger != NULL)
+    delete m_pktLogger;
+
+  if (m_spawnMonitor != NULL)
+    delete m_spawnMonitor;
+
+  if (m_groupMgr != NULL)
+    delete m_groupMgr;
+
+  if (m_spellShell != NULL)
+    delete m_spellShell;
+
+  if (m_mapMgr != NULL)
+    delete m_mapMgr;
+
+  if (m_spawnShell != NULL)
+    delete m_spawnShell;
+
+  if (m_categoryMgr != NULL)
+    delete m_categoryMgr;
+
+  if (m_filterMgr != NULL)
+    delete m_filterMgr;
+
+  // Shutdown the Item DB before any other cleanup
+  if (m_itemDB != NULL)
+     m_itemDB->Shutdown();
+
+  // delete the ItemDB before application exit
+  delete m_itemDB;
+
+  if (m_player != NULL)
+    delete m_player;
+
+  if (m_zoneMgr != NULL)
+    delete m_zoneMgr;
+  
   if (m_packet != NULL)
     delete m_packet;
 }
@@ -3311,11 +3451,7 @@ void EQInterface::itemShop(const itemInShopStruct* items)
 {
   QString tempStr;
 
-  // Add Item to Database
-  if (pItemDB != NULL) 
-    pItemDB->AddItem(&items->item);
-  
-  tempStr = QString("Item Shop: ") + items->item.lore + "(" 
+  tempStr = QString("Item Shop: '") + items->item.lore + "' (" 
     + QString::number(items->item.itemNr) + "), Value: "
     + reformatMoney(items->item.cost);
   
@@ -3324,11 +3460,11 @@ void EQInterface::itemShop(const itemInShopStruct* items)
   if (items->itemType == 1)
   {
     tempStr = QString("Item Shop: Container: Slots: ") 
-      + QString::number(items->item.container.numSlots)
+      + QString::number(items->container.numSlots)
       + ", Size Capacity: " 
-      + size_name(items->item.container.sizeCapacity)
+      + size_name(items->container.sizeCapacity)
       + ", Weight Reduction: "
-      + QString::number(items->item.container.weightReduction)
+      + QString::number(items->container.weightReduction)
       + "%";
     
     emit msgReceived(tempStr);
@@ -3387,12 +3523,8 @@ void EQInterface::itemPlayerReceived(const itemOnCorpseStruct* itemc)
 {
   QString tempStr;
 
-  // Add Item to Database
-  if (pItemDB != NULL) 
-    pItemDB->AddItem(&itemc->item);
-  
-  tempStr = QString("Item Looted: ") + itemc->item.lore
-    + "(" + QString::number(itemc->item.itemNr)
+  tempStr = QString("Item: Looted: '") + itemc->item.lore
+    + "' (" + QString::number(itemc->item.itemNr)
     + "), Value: " + reformatMoney(itemc->item.cost);
   
   emit msgReceived(tempStr);
@@ -3402,13 +3534,10 @@ void EQInterface::tradeItemOut(const tradeItemOutStruct* itemt)
 {
   QString tempStr;
 
-  // Add Item to Database
-  if (pItemDB != NULL) 
-    pItemDB->AddItem(&itemt->item);
-  
-  tempStr = QString("Item Trade [OUT]: ") + itemt->item.lore
-    + "(" + QString::number(itemt->item.itemNr)
-    + "), Value: "
+  tempStr = QString("Item: Trade [OUT]: '") + itemt->item.lore
+    + "' (" + QString::number(itemt->item.itemNr)
+    + "), Type: " + QString::number(itemt->itemType) 
+    + ", Value: "
     + reformatMoney(itemt->item.cost);
   
   emit msgReceived(tempStr);
@@ -3418,48 +3547,58 @@ void EQInterface::tradeItemIn(const tradeItemInStruct* itemr)
 {
   QString tempStr;
 
-  // Add Item to Database
-  if (pItemDB != NULL) 
-    pItemDB->AddItem(&itemr->item);
-  
-  tempStr = QString("Item Trade [IN]: ")
+  tempStr = QString("Item: Trade Item [IN]: '")
     + itemr->item.lore
-    + "(" + QString::number(itemr->item.itemNr)
+    + "' (" + QString::number(itemr->item.itemNr)
     + "), Value: "
     + reformatMoney(itemr->item.cost);
   
   emit msgReceived(tempStr);
 }
 
-void EQInterface::wearItem(const playerItemStruct* itemp)
+void EQInterface::tradeContainerIn(const tradeContainerInStruct* itemr)
 {
   QString tempStr;
 
-  // Add Item to Database
-  if (pItemDB != NULL) 
-    pItemDB->AddItem(&itemp->item);
+  tempStr = QString("Item: Trade Container [IN]: '")
+    + itemr->item.lore
+    + "' (" + QString::number(itemr->item.itemNr)
+    + "), Value: "
+    + reformatMoney(itemr->item.cost);
   
-  if (!showeq_params->no_bank)
-  {
-    tempStr = QString("Item: ") + itemp->item.lore
-      + "(" + QString::number(itemp->item.itemNr)
-      + "), Slot: " + QString::number(itemp->item.equipSlot)
-      + ", Value: " + reformatMoney(itemp->item.cost);
-    
-    emit msgReceived(tempStr);
-  }
+  emit msgReceived(tempStr);
+}
+
+void EQInterface::tradeBookIn(const tradeBookInStruct* itemr)
+{
+  QString tempStr;
+
+  tempStr = QString("Item: Trade Book [IN]: '")
+    + itemr->item.lore
+    + "' (" + QString::number(itemr->item.itemNr)
+    + "), Value: "
+    + reformatMoney(itemr->item.cost);
+  
+  emit msgReceived(tempStr);
 }
 
 void EQInterface::summonedItem(const summonedItemStruct* itemsum)
 {
   QString tempStr;
 
-  // Add Item to Database
-  if (pItemDB != NULL) 
-    pItemDB->AddItem(&itemsum->item);
+  tempStr = QString("Item: Summoned Item '") + itemsum->item.lore
+    + "' (" + QString::number(itemsum->item.itemNr)
+    + "), Value: " + reformatMoney(itemsum->item.cost);
   
-  tempStr = QString("ITEMSUM: ") + itemsum->item.lore
-    + "(" + QString::number(itemsum->item.itemNr)
+  emit msgReceived(tempStr);
+}
+
+void EQInterface::summonedContainer(const summonedContainerStruct* itemsum)
+{
+  QString tempStr;
+
+  tempStr = QString("Item: Summoned Container '") + itemsum->item.lore
+    + "' (" + QString::number(itemsum->item.itemNr)
     + "), Value: " + reformatMoney(itemsum->item.cost);
   
   emit msgReceived(tempStr);
@@ -3638,19 +3777,30 @@ void EQInterface::emoteText(const emoteTextStruct* emotetext)
   emit msgReceived(tempStr);
 }
 
+void EQInterface::playerItem(const playerItemStruct* itemp)
+{
+  QString tempStr;
+
+  if (!showeq_params->no_bank)
+  {
+    tempStr = QString("Item: ") + itemp->item.lore
+      + "(" + QString::number(itemp->item.itemNr)
+      + "), Slot: " + QString::number(itemp->item.equipSlot)
+      + ", Value: " + reformatMoney(itemp->item.cost);
+    
+    emit msgReceived(tempStr);
+  }
+}
+
 void EQInterface::playerBook(const playerBookStruct* bookp)
 {
   QString tempStr;
 
-  // Add Item to Database
-  if (pItemDB != NULL) 
-    pItemDB->AddItem(&bookp->item);
-  
   if (!showeq_params->no_bank)
   {
     tempStr = QString("Item: Book: ") + bookp->item.name
       + ", " + bookp->item.lore
-      + ", " + bookp->item.book.file
+      + ", " + bookp->book.file
       + ", Value: " + reformatMoney(bookp->item.cost);
     
     emit msgReceived(tempStr);
@@ -3661,10 +3811,6 @@ void EQInterface::playerContainer(const playerContainerStruct *containp)
 {
   QString tempStr;
 
-  // Add Item to Database
-  if (pItemDB != NULL) 
-    pItemDB->AddItem(&containp->item);
-  
   if (!showeq_params->no_bank)
   {
     tempStr = QString("Item: Container: ") + containp->item.lore
@@ -3675,11 +3821,11 @@ void EQInterface::playerContainer(const playerContainerStruct *containp)
     emit msgReceived(tempStr);
     
     tempStr = QString("Item: Container: Slots: ") 
-      + QString::number(containp->item.container.numSlots)
+      + QString::number(containp->container.numSlots)
       + ", Size Capacity: " 
-      + size_name(containp->item.container.sizeCapacity)
+      + size_name(containp->container.sizeCapacity)
       + ", Weight Reduction: " 
-      + QString::number(containp->item.container.weightReduction)
+      + QString::number(containp->container.weightReduction)
       + "%";
     
     emit msgReceived(tempStr);
@@ -3911,8 +4057,8 @@ void EQInterface::newGroundItem(const makeDropStruct* adrop, uint32_t, uint8_t d
      send the client a packet when it has actually placed the
      item on the ground.
   */
-  if (pItemDB != NULL) 
-    tempStr = pItemDB->GetItemLoreName(adrop->itemNr);
+  if (m_itemDB != NULL) 
+    tempStr = m_itemDB->GetItemLoreName(adrop->itemNr);
   else
     tempStr = "";
   
@@ -4665,8 +4811,11 @@ void EQInterface::init_view_menu()
 
   // set the checkmarks for windows that are always created, but not always
   // visible
-  menuBar()->setItemChecked(m_id_view_ExpWindow, m_expWindow->isVisible()); 
+  menuBar()->setItemChecked(m_id_view_ExpWindow, 
+			    (m_expWindow != NULL) && 
+			    m_expWindow->isVisible()); 
   menuBar()->setItemChecked (m_id_view_CombatWindow, 
+			     (m_combatWindow != NULL) &&
 			     m_combatWindow->isVisible());
    
    // set initial view options

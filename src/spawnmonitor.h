@@ -55,26 +55,34 @@ public:
 
   virtual ~SpawnPoint();
   
-  unsigned char age() const;
   long secsLeft() const { return m_diffTime - ( time( 0 ) - m_deathTime ); }
   
   static QString key( int x, int y, int z );
   static QString key( const EQPoint& l ) { return key( l.x(), l.y(), l.z() ); }
   QString key() const { return key( x(), y(), z() ); }
-  
-  QString name() const { return m_name; }
-  void setName( const QString& newName ) { m_name = newName; }
-  
-  QString last() const { return m_last; }
-  int32_t count() const { return m_count; }
 
+  // getters
+  unsigned char age() const;
+  QString name() const { return m_name; }
+  QString last() const { return m_last; }
+  uint16_t lastID() const { return m_lastID; }
+  int32_t count() const { return m_count; }
   Spawn* getSpawn() const;
   float displayZPos() const { return (float(z()) / 10.0); }
   time_t spawnTime() const { return m_spawnTime; }
   time_t deathTime() const { return m_deathTime; } 
   time_t diffTime() const { return m_diffTime; }
 
-  // protected:
+  // setters
+  void setName(const QString& newName) { m_name = newName; }
+  void setLast(const QString& last) { m_last = last; }
+  void setLastID(uint16_t lastID) { m_lastID = lastID; }
+
+  // utility methods
+  void update(const Spawn* spawn);
+  void restart(void);
+
+ protected:
   time_t m_spawnTime;
   time_t m_deathTime;
   time_t m_diffTime;
@@ -101,6 +109,7 @@ public slots:
   void setName(const SpawnPoint* sp, const QString& name);
   void setModified( SpawnPoint* changedSp );
   void setSelected(const SpawnPoint* sp);
+  void clear(void);
   void deleteSpawnPoint(const SpawnPoint* sp);
   void newSpawn(const Item* item );
   void killSpawn(const Item* item );

@@ -43,7 +43,7 @@ void SpellItem::UpdateSpell(SpawnShell* spawnShell,
       m_spellName = spell_name(c->spellId);
       //printf("Update:: %s\n", m_spellName.latin1());
 
-      struct spellInfoStruct *info = spell_info(m_spellId);
+      const spellInfoStruct *info = spell_info(m_spellId);
       m_duration = info->duration;
       m_target = info->target;
 
@@ -167,7 +167,7 @@ SpellItem* SpellShell::FindSpell(int spell_id, int caster_id, int target_id)
          it != m_spellList.end(); it++) {
       SpellItem *i = *it;
       if ((i->spellId() == spell_id) && (i->casterId() == caster_id)) {
-         struct spellInfoStruct *info;
+ 	 const spellInfoStruct *info;
          info = spell_info(spell_id);
          if ( (info->target) && (target_id) ) {
             if (i->targetId() == target_id)
@@ -270,7 +270,7 @@ void SpellShell::selfFinishSpellCast(const memSpellStruct *b)
    printf("selfFinishSpellCast - id=%d, by=%d\n", b->spellId, b->spawnId);
    SpellItem *item = FindSpell(b->spellId, m_player->id(), b->spawnId);
    if (item) {
-      struct spellInfoStruct *info = spell_info(b->spellId);
+      const spellInfoStruct *info = spell_info(b->spellId);
       item->setDuration(info->duration);
    }
 }

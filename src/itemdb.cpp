@@ -22,13 +22,13 @@ static char* itemdbid = "@(#) $Id$";
 #define UPGRADE_STATUS_UPDATE 100
 
 // define the current version number for data in database
-#define CURRENT_ITEM_FORMAT_VERSION 1
+#define CURRENT_ITEM_FORMAT_VERSION 2
 
 // Base Item Database Entry structure from which all EQItemDBEntryData
 // structures inherit for identity reasons
 struct EQItemDBEntryData
 {
-   int16_t   m_entryFormatVersion;   // Specifies version of entry data format
+   int16_t m_entryFormatVersion;   // Specifies version of entry data format
    size_t m_entrySize;            // size of the whole database entry in bytes
 };
 
@@ -37,12 +37,12 @@ struct EQItemDBEntryData_1 : public EQItemDBEntryData
  public:
   // public constructors (mostly for convenience)
   EQItemDBEntryData_1();
-  EQItemDBEntryData_1(const struct itemStruct* item);
+  EQItemDBEntryData_1(const struct itemStruct* item, uint16_t flag);
   EQItemDBEntryData_1(const EQItemDBEntryData &);
   
   // public member functions
   // initialize the DBEntryData using the itemStruct info
-  void Init(const struct itemStruct* item);
+  void Init(const struct itemStruct* item, uint16_t flag);
 
   // initialize the DBEntryData using Datum from a database
   void Init(const Datum& data);
@@ -51,13 +51,13 @@ struct EQItemDBEntryData_1 : public EQItemDBEntryData
   void Init();
 
   // public data members
-  char   m_idfile[6];           // Not sure what this is used for, eg: IT63
-  int16_t   m_flag;                // See itemStruct for values
+  char   m_idfile[6];             // Not sure what this is used for, eg: IT63
+  int16_t   m_flag;               // See itemStruct for values
   uint8_t  m_weight;              // Weight of item
   int8_t   m_nosave;              // Nosave flag 1=normal, 0=nosave, -1=spell?
   int8_t   m_nodrop;              // Nodrop flag 1=normal, 0=nodrop, -1=??
   uint8_t  m_size;                // Size of item
-  uint16_t  m_iconNr;              // Icon Number
+  uint16_t  m_iconNr;             // Icon Number
   uint32_t m_equipableSlots;      // Slots where this item goes
   int32_t  m_cost;                // Item cost in copper
   int8_t   m_STR;                 // Strength
@@ -84,18 +84,47 @@ struct EQItemDBEntryData_1 : public EQItemDBEntryData
   int8_t   m_level0;              // Casting level
   uint8_t  m_material;            // Material?
   uint32_t m_color;               // Amounts of RGB in original color
-  uint16_t  m_spellId0;            // SpellID of special effect
-  uint16_t  m_classes;             // Classes that can use this item
-  uint16_t  m_races;               // Races that can use this item
+  uint16_t  m_spellId0;           // SpellID of special effect
+  uint16_t  m_classes;            // Classes that can use this item
+  uint16_t  m_races;              // Races that can use this item
   uint8_t  m_level;               // Casting level
-  uint16_t  m_spellId;             // spellId of special effect
+  uint16_t  m_spellId;            // spellId of special effect
   int8_t   m_charges;             // number of charges of item effect (-1 = inf)
   uint8_t  m_numSlots;            // number of slots
   uint8_t  m_weightReduction;     // percentage weight reduction
   uint8_t  m_sizeCapacity;        // Maximum size item container can hold
 };
 
-typedef EQItemDBEntryData_1 EQItemDBEntryData_Current;
+struct EQItemDBEntryData_2 : public EQItemDBEntryData_1
+{
+ public:
+  // public constructors (mostly for convenience)
+  EQItemDBEntryData_2();
+  EQItemDBEntryData_2(const struct itemStruct* item, uint16_t flag);
+  EQItemDBEntryData_2(const EQItemDBEntryData &);
+  
+  // public member functions
+  // initialize the DBEntryData using the itemStruct info
+  void Init(const struct itemStruct* item, uint16_t flag);
+
+  // initialize the DBEntryData using Datum from a database
+  void Init(const Datum& data);
+
+  // initialize the DBEntryData with empty/default values
+  void Init();
+
+  // public data members
+  int8_t m_stackable;             // 1=stackable, 3=normal, 0=?
+  int8_t m_effectType;            // 0=no, 1=click anywhere w/o class check,
+                                  // 2=latent, 3=click anywhere EXPENDABLE,
+                                  // 4=click worn, 5=click anywhere with
+                                  // class check
+  uint32_t m_castTime;            // cast time of effect
+  uint16_t m_skillModId;          // ID of skill that item modifies
+  int8_t m_skillModPercent;       // Percent that item modifies the skill
+};
+
+typedef EQItemDBEntryData_2 EQItemDBEntryData_Current;
 
 ////////////////////////////////////////////////////////////////////
 // Life is easier if new versions can inherit from the immediate
@@ -103,15 +132,19 @@ typedef EQItemDBEntryData_1 EQItemDBEntryData_Current;
 // the EQItemDBEntry class accessor methods and in the 
 // EQItemDBEntryData child classes.  Therefore next one should be:
 //  
-// struct EQItemDBEntryData_2 : public EQItemDBEntryData_1
+// struct EQItemDBEntryData_3 : public EQItemDBEntryData_2
 //
 
 ////////////////////////////////////////////////////////////////////
 // Implementation of the EQItemDBEntryData class
-EQItemDBEntryData_1::EQItemDBEntryData_1(const struct itemStruct* item)
+EQItemDBEntryData_1::EQItemDBEntryData_1()
+{
+}
+
+EQItemDBEntryData_1::EQItemDBEntryData_1(const struct itemStruct* item, uint16_t flag)
 {
   // Just call initialize
-  Init(item);
+  Init(item, flag);
 }
 
 EQItemDBEntryData_1::EQItemDBEntryData_1(const EQItemDBEntryData& item)
@@ -127,20 +160,20 @@ EQItemDBEntryData_1::EQItemDBEntryData_1(const EQItemDBEntryData& item)
     memset((void*)this, 0, sizeof(*this));
 }
 
-void EQItemDBEntryData_1::Init(const struct itemStruct* item)
+void EQItemDBEntryData_1::Init(const struct itemStruct* item, uint16_t flag)
 {
    // Start with a clean slate
    memset((void*)this, '\0', sizeof(*this));
 
    // Set the structure format version information
-   m_entryFormatVersion = CURRENT_ITEM_FORMAT_VERSION; 
+   m_entryFormatVersion = 1; 
   
    // note the size of the entry
    m_entrySize = sizeof(EQItemDBEntryData_1);
 
    // now start copying data as appropriate
    memcpy((void*)&m_idfile[0], (void*)item->idfile, sizeof(m_idfile));
-   m_flag           = item->flag;
+   m_flag           = flag;
    m_weight         = item->weight;
    m_nosave         = item->nosave;
    m_nodrop         = item->nodrop;
@@ -153,37 +186,38 @@ void EQItemDBEntryData_1::Init(const struct itemStruct* item)
    if ((m_flag != ITEM_BOOK) && (m_flag != ITEM_CONTAINER_PLAIN) &&
 	 (m_flag != ITEM_CONTAINER))
    {
-     m_STR               = item->common.STR;
-     m_STA               = item->common.STA;
-     m_CHA               = item->common.CHA;
-     m_DEX               = item->common.DEX;
-     m_INT               = item->common.INT;
-     m_AGI               = item->common.AGI;
-     m_WIS               = item->common.WIS;
-     m_MR                = item->common.MR;
-     m_FR                = item->common.FR;
-     m_CR                = item->common.CR;
-     m_DR                = item->common.DR;
-     m_PR                = item->common.PR;
-     m_HP                = item->common.HP;
-     m_MANA              = item->common.MANA;
-     m_AC                = item->common.AC;
-     m_light             = item->common.light;
-     m_delay             = item->common.delay;
-     m_damage            = item->common.damage;
-     m_range             = item->common.range;
-     m_skill             = item->common.skill;
-     m_magic             = item->common.magic;
-     m_material          = item->common.material;
-     m_color             = item->common.color;
-     m_classes           = item->common.classes;
-     m_races             = item->common.races;
-       m_spellId0        = item->common.spellId0;
-       m_level0          = item->common.level0;
-       m_level           = item->common.level;
-       m_spellId         = item->common.spellId;
-       m_charges         = item->common.charges;
-     }
+     const itemItemStruct* itemItem = (const itemItemStruct*)item;
+     m_STR               = itemItem->STR;
+     m_STA               = itemItem->STA;
+     m_CHA               = itemItem->CHA;
+     m_DEX               = itemItem->DEX;
+     m_INT               = itemItem->INT;
+     m_AGI               = itemItem->AGI;
+     m_WIS               = itemItem->WIS;
+     m_MR                = itemItem->MR;
+     m_FR                = itemItem->FR;
+     m_CR                = itemItem->CR;
+     m_DR                = itemItem->DR;
+     m_PR                = itemItem->PR;
+     m_HP                = itemItem->HP;
+     m_MANA              = itemItem->MANA;
+     m_AC                = itemItem->AC;
+     m_light             = itemItem->light;
+     m_delay             = itemItem->delay;
+     m_damage            = itemItem->damage;
+     m_range             = itemItem->range;
+     m_skill             = itemItem->skill;
+     m_magic             = itemItem->magic;
+     m_material          = itemItem->material;
+     m_color             = itemItem->color;
+     m_classes           = itemItem->classes;
+     m_races             = itemItem->races;
+     m_spellId0        = itemItem->spellId0;
+     m_level0          = itemItem->level0;
+     m_level           = itemItem->level;
+     m_spellId         = itemItem->spellId;
+     m_charges         = itemItem->charges;
+   }
    else
    {
      m_spellId0          = ITEM_SPELLID_NOSPELL;
@@ -193,9 +227,10 @@ void EQItemDBEntryData_1::Init(const struct itemStruct* item)
    if ((m_flag == ITEM_CONTAINER_PLAIN) ||
 	 (m_flag == ITEM_CONTAINER))
    {
-     m_numSlots        = item->container.numSlots;
-     m_weightReduction = item->container.weightReduction;
-     m_sizeCapacity    = item->container.sizeCapacity;
+     const itemContainerStruct* container = (const itemContainerStruct*)item;
+     m_numSlots        = container->numSlots;
+     m_weightReduction = container->weightReduction;
+     m_sizeCapacity    = container->sizeCapacity;
    }
 }
 
@@ -205,7 +240,7 @@ void EQItemDBEntryData_1::Init()
    memset((void*)this, '\0', sizeof(*this));
 
    // Set the structure format version information
-   m_entryFormatVersion = CURRENT_ITEM_FORMAT_VERSION; 
+   m_entryFormatVersion = 1; 
   
    // note the size of the entry
    m_entrySize = sizeof(EQItemDBEntryData_1);
@@ -222,7 +257,7 @@ void EQItemDBEntryData_1::Init(const Datum& data)
    memset((void*)this, '\0', sizeof(*this));
 
    // Set the structure format version information
-   m_entryFormatVersion = CURRENT_ITEM_FORMAT_VERSION; 
+   m_entryFormatVersion = 1; 
 
    // by default copy the entire structure from the data
    size_t copySize = ((EQItemDBEntryData*)data.data)->m_entrySize;
@@ -238,9 +273,120 @@ void EQItemDBEntryData_1::Init(const Datum& data)
    m_entrySize = sizeof(EQItemDBEntryData_1);
 }
 
+// EQItemDBEntryData version 2
+EQItemDBEntryData_2::EQItemDBEntryData_2()
+{
+}
+
+EQItemDBEntryData_2::EQItemDBEntryData_2(const struct itemStruct* item, uint16_t flag)
+{
+  // Just call initialize
+  Init(item, flag);
+}
+
+EQItemDBEntryData_2::EQItemDBEntryData_2(const EQItemDBEntryData& item)
+{
+  // verify that the version is correct
+  if ((item.m_entryFormatVersion == 2) &&
+      (item.m_entrySize == sizeof(EQItemDBEntryData_2)))
+  {
+    // just copy the data into ourselves en-masse
+    memcpy((void*)this, &item, sizeof(*this));
+  }
+  else if ((item.m_entryFormatVersion == 1) &&
+	   (item.m_entrySize == sizeof(EQItemDBEntryData_1)))
+  {
+    // just copy the data into ourselves en-masse
+    memcpy((void*)this, &item, sizeof(EQItemDBEntryData_1));
+    
+    // and clear out the missing pieces
+    m_stackable = 0;
+    m_effectType = 0;
+    m_castTime = 0;
+    m_skillModId = 0;
+    m_skillModPercent = 0;
+  }
+  else // otherwise make it empty since nothing is valid
+    memset((void*)this, 0, sizeof(*this));
+}
+
+void EQItemDBEntryData_2::Init(const struct itemStruct* item, uint16_t flag)
+{
+  // initialize the underlying type
+  EQItemDBEntryData_1::Init(item, flag);
+
+   // Set the structure format version information
+   m_entryFormatVersion = 2; 
+  
+   // note the size of the entry
+   m_entrySize = sizeof(EQItemDBEntryData_2);
+  
+   // now start copying data as appropriate
+
+   // none of the following fields are valid for book items
+   if ((m_flag != ITEM_BOOK) && (m_flag != ITEM_CONTAINER_PLAIN) &&
+	 (m_flag != ITEM_CONTAINER))
+   {
+     const itemItemStruct* itemItem = (const itemItemStruct*)item;
+     m_stackable = itemItem->stackable;
+     m_effectType = itemItem->effectType;
+     m_castTime = itemItem->castTime;
+     m_skillModId = itemItem->skillModId;
+     m_skillModPercent = itemItem->skillModPercent;
+   }
+   else
+   {
+     m_stackable = 0;
+     m_effectType = 0;
+     m_castTime = 0;
+     m_skillModId = 0;
+     m_skillModPercent = 0;
+   }
+}
+
+void EQItemDBEntryData_2::Init()
+{
+  EQItemDBEntryData_1::Init();
+  
+   // Set the structure format version information
+   m_entryFormatVersion = 2; 
+  
+   // note the size of the entry
+   m_entrySize = sizeof(EQItemDBEntryData_2);
+
+   m_stackable = 0;
+   m_effectType = 0;
+   m_castTime = 0;
+   m_skillModId = 0;
+   m_skillModPercent = 0;
+}
+
+void EQItemDBEntryData_2::Init(const Datum& data)
+{
+   // Start with a clean slate
+   memset((void*)this, '\0', sizeof(*this));
+
+   // Set the structure format version information
+   m_entryFormatVersion = 2; 
+
+   // by default copy the entire structure from the data
+   size_t copySize = ((EQItemDBEntryData*)data.data)->m_entrySize;
+
+   // but not if it's bigger then us...
+   if (copySize > sizeof(EQItemDBEntryData_2))
+     copySize = sizeof(EQItemDBEntryData_2);
+
+   // now copy the entire other structure into ourselves
+   memcpy((void*)this, data.data, copySize);
+  
+   // note the size of the entry
+   m_entrySize = sizeof(EQItemDBEntryData_2);
+}
+
 ////////////////////////////////////////////////////////////////////
 // Implementation of the EQItemDB class
 EQItemDB::EQItemDB()
+  : QObject(NULL, "eqitemdb")
 {
   // What types of item data is saved
   m_dbTypesEnabled = (LORE_DB | NAME_DB | DATA_DB);
@@ -784,7 +930,10 @@ bool EQItemDB::Upgrade()
   return true;
 }
 
-bool EQItemDB::AddItem(const itemStruct* item, bool update)
+bool EQItemDB::AddItem(const itemStruct* item, 
+		       uint32_t size, 
+		       uint16_t flag,
+		       bool update)
 {
   Datum key, data;
   bool result, result2;
@@ -806,7 +955,7 @@ bool EQItemDB::AddItem(const itemStruct* item, bool update)
   unsigned char databuffer[data.size];
 
   // initialize the EQItemDBEntryData_Current portion
-  ((EQItemDBEntryData_Current*)databuffer)->Init(item);
+  ((EQItemDBEntryData_Current*)databuffer)->Init(item, flag);
 
   // add lore string after EQItemDBEntryData_Current
   strncpy((char*)(databuffer + sizeof(EQItemDBEntryData_Current)),
@@ -824,7 +973,7 @@ bool EQItemDB::AddItem(const itemStruct* item, bool update)
   if (m_dbTypesEnabled & RAW_DATA_DB)
   {
     // setup datum to insert
-    data.size = sizeof(struct itemStruct);
+    data.size = size;
     data.data = (void*)item;
 
     result2 = Insert(m_ItemRawDataDB, key, data, update);
@@ -885,13 +1034,15 @@ QString EQItemDB::GetItemName(uint16_t itemNr)
   // attempt to retrieve entry from the item name database
   if (GetEntry(m_ItemDataDB, key, data))
   {
-    // ok, it appears to be using the new data packing, 
+    // get the size of the entry (can be different sizes in different versions)
+    size_t entrySize = ((EQItemDBEntryData*)data.data)->m_entrySize;
+    
     // calculate pointer to lore string
     const char* loreString = ((const char*)data.data) 
-      + sizeof(EQItemDBEntryData_Current);
+      + entrySize;
       
     // calculate pointer to name string
-    result = ((const char*)data.data) + sizeof(EQItemDBEntryData_Current)
+    result = ((const char*)data.data) + entrySize
       + 1 + strlen(loreString);
     
     // release the database memory
@@ -913,9 +1064,11 @@ QString EQItemDB::GetItemLoreName(uint16_t itemNr)
   // attempt to retrieve entry from the item name database
   if (GetEntry(m_ItemDataDB, key, data))
   {
-    // ok, it appears to be using the new data packing, 
+    // get the size of the entry (can be different sizes in different versions)
+    size_t entrySize = ((EQItemDBEntryData*)data.data)->m_entrySize;
+    
     // calculate pointer to lore string
-    result = ((const char*)data.data) + sizeof(EQItemDBEntryData_Current);
+    result = ((const char*)data.data) + entrySize;
 
     // release the database memory
     Release(data);
@@ -1038,6 +1191,112 @@ void EQItemDB::Shutdown()
 const char* EQItemDB::Version()
 {
   return itemdbid;
+}
+
+void EQItemDB::itemShop(const itemInShopStruct* items, uint32_t size, uint8_t)
+{
+  // really should check for the different types in itemType and use
+  // the appropriate alternate sizes...
+  switch (items->itemType)
+  {
+  case 0:
+    if (size == sizeof(itemInShopStruct))
+      AddItem(&items->item, sizeof(items->item), ITEM_NORMAL);
+    break;
+  case 1:
+    if (size == (sizeof(itemInShopStruct) - sizeof(itemItemStruct) + 
+		 sizeof(itemContainerStruct)))
+      AddItem(&items->container, sizeof(items->container), ITEM_CONTAINER);
+    break;
+  case 2:
+    if (size == (sizeof(itemInShopStruct) - sizeof(itemItemStruct) + 
+		 sizeof(itemBookStruct)))
+      AddItem(&items->book, sizeof(items->book), ITEM_BOOK);
+    break;
+  }
+}
+
+void EQItemDB::itemPlayerReceived(const itemOnCorpseStruct* itemc, uint32_t size, uint8_t)
+{
+  if (size == sizeof(itemOnCorpseStruct))
+    AddItem(&itemc->item, sizeof(itemc->item), ITEM_NORMAL);
+}
+
+void EQItemDB::tradeItemOut(const tradeItemOutStruct* itemt, uint32_t size, uint8_t)
+{
+  switch (itemt->itemType)
+  {
+  case 0:
+    if (size == sizeof(tradeItemOutStruct))
+      AddItem(&itemt->item, sizeof(itemt->item), ITEM_NORMAL);
+    break;
+  case 1:
+    if (size == (sizeof(tradeItemOutStruct) - sizeof(itemItemStruct) + 
+		 sizeof(itemContainerStruct)))
+    AddItem(&itemt->container, sizeof(itemt->container), ITEM_CONTAINER);
+    break;
+  case 2:
+    if (size == (sizeof(tradeItemOutStruct) - sizeof(itemItemStruct) + 
+		 sizeof(itemBookStruct)))
+    AddItem(&itemt->book, sizeof(itemt->book), ITEM_BOOK);
+    break;
+  }
+}
+
+void EQItemDB::tradeItemIn(const tradeItemInStruct* itemr, uint32_t size, uint8_t)
+{
+  if (size == sizeof(tradeItemInStruct))
+    AddItem(&itemr->item, sizeof(itemr->item), ITEM_NORMAL);
+}
+
+void EQItemDB::tradeContainerIn(const tradeContainerInStruct* itemr, uint32_t size, uint8_t)
+{
+  if (size == sizeof(tradeContainerInStruct))
+    AddItem(&itemr->container, sizeof(itemr->container), ITEM_CONTAINER);
+}
+
+void EQItemDB::tradeBookIn(const tradeBookInStruct* itemr, uint32_t size, uint8_t)
+{
+  if (size == sizeof(tradeBookInStruct))
+    AddItem(&itemr->item, sizeof(itemr->book), ITEM_BOOK);
+}
+
+void EQItemDB::summonedItem(const summonedItemStruct* items, uint32_t size, uint8_t)
+{
+  if (size == sizeof(summonedItemStruct))
+    AddItem(&items->item, sizeof(items->item), ITEM_NORMAL);
+}
+
+void EQItemDB::summonedContainer(const summonedContainerStruct* items, uint32_t size, uint8_t)
+{
+  if (size == sizeof(summonedContainerStruct))
+    AddItem(&items->container, sizeof(items->container), ITEM_CONTAINER);
+}
+
+void EQItemDB::playerItem(const playerItemStruct* itemp, uint32_t size, uint8_t)
+{
+  if (size == sizeof(playerItemStruct))
+    AddItem(&itemp->item, sizeof(itemp->item), ITEM_NORMAL);
+}
+
+void EQItemDB::playerBook(const playerBookStruct* bookp, uint32_t size, uint8_t)
+{
+  if ((size == sizeof(playerBookStruct)) || 
+      (size == (sizeof(playerBookStruct) - sizeof(itemBookStruct) +
+		sizeof(itemItemStruct))))
+    AddItem(&bookp->book, ITEM_BOOK);
+  else
+    fprintf(stderr, "Ooops!!!! playerBook()\n");
+}
+
+void EQItemDB::playerContainer(const playerContainerStruct* containp, uint32_t size, uint8_t)
+{
+  if ((size == sizeof(playerContainerStruct)) ||
+      (size == (sizeof(playerContainerStruct) - sizeof(itemContainerStruct) + 
+		sizeof(itemItemStruct))))
+    AddItem(&containp->container, ITEM_CONTAINER);
+  else 
+    fprintf(stderr, "Ooops!!!! plyaerContainer()\n");
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -1457,6 +1716,68 @@ uint8_t  EQItemDBEntry::GetWeightReduction()
 uint8_t  EQItemDBEntry::GetSizeCapacity()
 {
   return ((EQItemDBEntryData_1*)m_itemEntryData)->m_sizeCapacity;
+}
+
+int8_t EQItemDBEntry::GetStackable()
+{
+  if (m_itemEntryData->m_entryFormatVersion >= 2)
+    return ((EQItemDBEntryData_2*)m_itemEntryData)->m_stackable;
+  else
+    return -1;
+}
+
+
+int8_t EQItemDBEntry::GetEffectType()
+{
+  if (m_itemEntryData->m_entryFormatVersion >= 2)
+    return ((EQItemDBEntryData_2*)m_itemEntryData)->m_effectType;
+  else
+    return -1;
+}
+
+QString EQItemDBEntry::GetEffectTypeString()
+{
+  static const char* effectNames[] = 
+  {
+    "No Effect",
+    "Click anywhere w/o class check",
+    "Latent/Worn",
+    "Click anywhere expendable",
+    "Click Worn",
+    "Click anywhere w/ class check"
+  };
+
+  int effect = GetEffectType();
+  if (effect == -1)
+    return "Unknown (Old Data)";
+  else if (effect < (int)(sizeof(effectNames) / sizeof (char*)))
+    return effectNames[effect];
+  else
+    return QString::number(effect);
+}
+
+uint32_t EQItemDBEntry::GetCastTime()
+{
+  if (m_itemEntryData->m_entryFormatVersion >= 2)
+    return ((EQItemDBEntryData_2*)m_itemEntryData)->m_castTime;
+  else
+    return 0;
+}
+
+uint16_t EQItemDBEntry::GetSkillModId()
+{
+  if (m_itemEntryData->m_entryFormatVersion >= 2)
+    return ((EQItemDBEntryData_2*)m_itemEntryData)->m_skillModId;
+  else
+    return 0;
+}
+
+int8_t EQItemDBEntry::GetSkillModPercent()
+{
+  if (m_itemEntryData->m_entryFormatVersion >= 2)
+    return ((EQItemDBEntryData_2*)m_itemEntryData)->m_skillModPercent;
+  else
+    return 0;
 }
 
 bool   EQItemDBEntry::IsBook()

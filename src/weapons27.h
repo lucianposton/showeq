@@ -22,7 +22,7 @@
     NULL,                 // 0x0f
     "Luclin Long Sword",  // 0x10
     "Luclin Great Mace",  // 0x11
-    NULL,                 // 0x12
+    "Luclin Scimitar",    // 0x12
     "Luclin Warhammer",   // 0x13
     "Luclin 2H Sword",    // 0x14
     NULL,                 // 0x15
@@ -40,13 +40,13 @@
     NULL,                 // 0x21
     NULL,                 // 0x22
     NULL,                 // 0x23
-    NULL,                 // 0x24
-    NULL,                 // 0x25
+    "Skull Stick (v1)",   // 0x24
+    "Skull Stick (v2)",   // 0x25
     NULL,                 // 0x26
     "Luclin Scimitar",    // 0x27
     NULL,                 // 0x28
     "Bone Blade",         // 0x29
-    NULL,                 // 0x2a
+    "Luclin Short Sword", // 0x2a
     "Mining Pick",        // 0x2b
     NULL,                 // 0x2c
     NULL,                 // 0x2d

@@ -10,6 +10,8 @@
 
 #include <stdlib.h>
 
+#include <qobject.h>
+
 #include "conf.h"
 #include "everquest.h"
 #ifdef USE_DB3
@@ -18,17 +20,24 @@
 #include "gdbmconv.h"
 #endif
 
+// forward declarations
 struct EQItemDBEntryData;
 class EQItemDBIterator;
 
+#ifdef USE_DB3
+#define ITEMDBBASE DB3Convenience
+#define ITEMDBITBASE DB3Iterator
+#else
+#define ITEMDBBASE GDBMConvenience
+#define ITEMDBITBASE GDBMIterator
+#endif
+
 // EQItemDB is the singleton object that manages the 
 // Item databases
-#ifdef USE_DB3
-class EQItemDB : protected DB3Convenience
-#else
-class EQItemDB : protected GDBMConvenience
-#endif
+class EQItemDB : public QObject, protected ITEMDBBASE
 {
+   Q_OBJECT
+
  public:
    typedef enum 
    {
@@ -52,7 +61,10 @@ class EQItemDB : protected GDBMConvenience
 
    // DB Access methods   
    // Add's items to the enabled databases
-   bool AddItem(const itemStruct* item, bool updated = true);
+   bool AddItem(const itemStruct* item, 
+		uint32_t size = sizeof(itemStruct),
+		uint16_t flag = 0x0000, 
+		bool updated = true);
 
    // Delete's an item from the enabled databases
    bool DeleteItem(uint16_t itemNr);
@@ -82,10 +94,22 @@ class EQItemDB : protected GDBMConvenience
    // get version info of ItemDB
    static const char* Version();
 
-   // Constructor/Destructor protected to enforce singleton access
+   // Constructor/Destructor
    EQItemDB();
    ~EQItemDB();
 
+ protected slots:
+   void itemShop(const itemInShopStruct* items, uint32_t, uint8_t);
+   void itemPlayerReceived(const itemOnCorpseStruct* itemc, uint32_t, uint8_t);
+   void tradeItemOut(const tradeItemOutStruct* itemt, uint32_t, uint8_t);
+   void tradeItemIn(const tradeItemInStruct* itemr, uint32_t, uint8_t);
+   void tradeContainerIn(const tradeContainerInStruct* itemr, uint32_t, uint8_t);
+   void tradeBookIn(const tradeBookInStruct* itemr, uint32_t, uint8_t);
+   void summonedItem(const summonedItemStruct*, uint32_t, uint8_t);
+   void summonedContainer(const summonedContainerStruct*, uint32_t, uint8_t);
+   void playerItem(const playerItemStruct* itemp, uint32_t, uint8_t);
+   void playerBook(const playerBookStruct* bookp, uint32_t, uint8_t);
+   void playerContainer(const playerContainerStruct* containp, uint32_t, uint8_t);
  private:
    // which databases are enabled
    int m_dbTypesEnabled;
@@ -109,11 +133,7 @@ class EQItemDB : protected GDBMConvenience
 //        GetFirstItemNumber() until either Done() is called
 //        or the iterator is deleted.  During this time no
 //        updates can occur to the selected DB.  So keep it brief
-#ifdef USE_DB3
-class EQItemDBIterator : protected DB3Iterator
-#else
-class EQItemDBIterator : protected GDBMIterator
-#endif
+class EQItemDBIterator : protected ITEMDBITBASE
 {
  public:
    // public constructor
@@ -182,42 +202,48 @@ class EQItemDBEntry
    uint8_t GetSize();
    uint16_t GetIconNr();
    uint32_t GetSlots();
-   int32_t  GetCost();
-   int8_t   GetSTR();
-   int8_t   GetSTA();
-   int8_t   GetCHA();
-   int8_t   GetDEX();
-   int8_t   GetINT();
-   int8_t   GetAGI();
-   int8_t   GetWIS();
-   int8_t   GetMR();
-   int8_t   GetFR();
-   int8_t   GetCR();
-   int8_t   GetDR();
-   int8_t   GetPR();
-   int8_t   GetHP();
-   int8_t   GetMana();
-   int8_t   GetAC();
-   uint8_t  GetLight();
-   uint8_t  GetDelay();
-   uint8_t  GetDamage();
-   uint8_t  GetRange();
-   uint8_t  GetSkill();
-   int8_t   GetMagic();
-   int8_t   GetLevel0();
-   uint8_t  GetMaterial();
+   int32_t GetCost();
+   int8_t GetSTR();
+   int8_t GetSTA();
+   int8_t GetCHA();
+   int8_t GetDEX();
+   int8_t GetINT();
+   int8_t GetAGI();
+   int8_t GetWIS();
+   int8_t GetMR();
+   int8_t GetFR();
+   int8_t GetCR();
+   int8_t GetDR();
+   int8_t GetPR();
+   int8_t GetHP();
+   int8_t GetMana();
+   int8_t GetAC();
+   uint8_t GetLight();
+   uint8_t GetDelay();
+   uint8_t GetDamage();
+   uint8_t GetRange();
+   uint8_t GetSkill();
+   int8_t GetMagic();
+   int8_t GetLevel0();
+   uint8_t GetMaterial();
    uint32_t GetColor();
-   uint16_t  GetSpellId0();
-   uint16_t  GetClasses();
-   uint16_t  GetRaces();
-   uint8_t  GetLevel();
-   uint16_t  GetSpellId();
-   int8_t   GetCharges();
-   uint8_t  GetNumSlots();
-   uint8_t  GetWeightReduction();
-   uint8_t  GetSizeCapacity();
-   bool   IsBook();
-   bool   IsContainer();
+   uint16_t GetSpellId0();
+   uint16_t GetClasses();
+   uint16_t GetRaces();
+   uint8_t GetLevel();
+   uint16_t GetSpellId();
+   int8_t GetCharges();
+   uint8_t GetNumSlots();
+   uint8_t GetWeightReduction();
+   uint8_t GetSizeCapacity();
+   int8_t GetStackable();
+   int8_t GetEffectType();
+   QString GetEffectTypeString();
+   uint32_t GetCastTime();
+   uint16_t GetSkillModId();
+   int8_t GetSkillModPercent();
+   bool IsBook();
+   bool IsContainer();
    
  protected:
    EQItemDBEntry();

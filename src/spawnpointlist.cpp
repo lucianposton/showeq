@@ -57,7 +57,7 @@ void SpawnPointListItem::update()
 	  QString::number(m_spawnPoint->displayZPos(), 'f', 1));
 
   // construct and set the time remaining string
-  if ( m_spawnPoint->m_diffTime == 0 || m_spawnPoint->m_deathTime == 0 )
+  if ( m_spawnPoint->diffTime() == 0 || m_spawnPoint->deathTime() == 0 )
     tmpStr = "\277 ?";  // upside down questoin mark followed by question mark
   else
   {
@@ -76,7 +76,7 @@ void SpawnPointListItem::update()
 
   // construct and set the spawned string
   QDateTime       dateTime;
-  dateTime.setTime_t( m_spawnPoint->m_spawnTime );
+  dateTime.setTime_t( m_spawnPoint->spawnTime() );
   QDate           createDate = dateTime.date();
   tmpStr = "";
   // spawn time
@@ -318,6 +318,22 @@ void SpawnPointList::deleteItem(const SpawnPointListItem* item)
   }
 }
 
+void SpawnPointList::clearItems(void)
+{
+  // confirm that the user wants to delete the category
+  QMessageBox mb("Are you sure?",
+		 "Are you sure you wish to clear all the spawn points?",
+		 QMessageBox::NoIcon,
+		 QMessageBox::Yes, 
+		 QMessageBox::No | QMessageBox::Default | QMessageBox::Escape,
+		 QMessageBox::NoButton,
+		 this);
+  
+  // if user chose eys, then clear the spawn points
+  if (mb.exec() == QMessageBox::Yes)
+    m_spawnMonitor->clear();
+}
+
 void SpawnPointList::refresh()
 {
   bool aboutToPop = false;
@@ -387,7 +403,9 @@ SpawnPointListMenu::SpawnPointListMenu(SpawnPointList* spawnPointList,
 			   this, SLOT(rename_item(int)));
   m_id_delete = insertItem("&Delete Spawn Point...",
 			   this, SLOT(delete_item(int)));
-  
+  insertItem("&Clear Spawn Points...",
+	     m_spawnPointList, SLOT(clearItems(void)));
+
   QPopupMenu* listColMenu = new QPopupMenu;
   insertItem("Show &Column", listColMenu);
   listColMenu->setCheckable(true);

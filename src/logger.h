@@ -262,11 +262,10 @@ public:
 
 private:
     void logItemHeader(const itemStruct *item);
-    void logBookItem(const itemStruct *item);
-    void logNormalItem(const itemStruct *item);
-    void logContainerItem(const itemStruct *item);
-    void logItemCommons(const itemStruct *item);
-    void logItem(const itemStruct *item);
+    void logBookItem(const itemBookStruct *book);
+    void logNormalItem(const itemItemStruct *item);
+    void logContainerItem(const itemContainerStruct *item);
+    void logItemCommons(const itemItemStruct *item);
     void logProcessMaskString(const char *maskstr, unsigned *m1, unsigned *m2, unsigned *m3);
     void logSpawnStruct(const spawnStruct *spawn);
     unsigned int mask1;

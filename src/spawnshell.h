@@ -34,6 +34,7 @@ class Player;
 class ZoneMgr;
 class FilterMgr;
 class SpawnShell;
+class EQItemDB;
 
 //----------------------------------------------------------------------
 // constants
@@ -65,7 +66,10 @@ class SpawnShell : public QObject
 {
    Q_OBJECT
 public:
-   SpawnShell(FilterMgr& filterMgr, ZoneMgr* zoneMgr, Player* player);
+   SpawnShell(FilterMgr& filterMgr, 
+	      ZoneMgr* zoneMgr, 
+	      Player* player,
+	      EQItemDB* itemDB);
 
    const Item* findID(itemType type, int idSpawn);
    
@@ -149,6 +153,7 @@ public slots:
    ZoneMgr* m_zoneMgr;
    Player* m_player;
    FilterMgr& m_filterMgr;
+   EQItemDB* m_itemDB;
 
    // track recently killed spawns
    uint16_t m_deadSpawnID[MAX_DEAD_SPAWNIDS];

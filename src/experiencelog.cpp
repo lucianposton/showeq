@@ -11,6 +11,7 @@
 #include <qvgroupbox.h>
 #include <qmessagebox.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "experiencelog.h"
 #include "interface.h"
@@ -135,7 +136,7 @@ ExperienceWindow::~ExperienceWindow()
 {
 
    if (logfd > -1)
-      close(logfd);
+     ::close(logfd);
 }
 
 ExperienceWindow::ExperienceWindow( Player* player, GroupMgr* groupMgr,

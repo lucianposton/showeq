@@ -107,6 +107,7 @@
 #define MAX_KNOWN_LANGS                 25
 
 //Item Flags
+#define ITEM_NORMAL                     0x0000
 #define ITEM_NORMAL1                    0x0031
 #define ITEM_NORMAL2                    0x0036
 #define ITEM_NORMAL3                    0x315f
@@ -186,113 +187,112 @@ struct spellBuff
 **    tradeItemInStruct(df20),
 */
 
+// this is the base structure from which all items are based
 struct itemStruct
 {
-/*0000*/ char      name[35];        // Name of item
-/*0035*/ char      lore[60];        // Lore text
-/*0095*/ char      idfile[6];       // Not sure what this is used for
-/*0101*/ int16_t   flag;            // Flag value indicating type of item:
-  // 0x0031 - Normal Item - Only seen once on GM summoned food
-  // 0x0036 - Normal Item (all scribed spells, Velium proc weapons, and misc.)
-  // 0x315f - Normal Item
-  // 0x3336 - Normal Item
-  // 0x7900 - Container (Combine, Player made, Weight Reducing, etc...)
-  // 0x7953 - Container, plain ordinary newbie containers
-  // 0x7379 - Book item 
-/*0103*/ uint8_t   unknown0103[22]; // Placeholder
-/*0125*/ uint8_t   weight;          // Weight of item
-/*0126*/ int8_t    nosave;          // Nosave flag 1=normal, 0=nosave, -1=spell?
-/*0127*/ int8_t    nodrop;          // Nodrop flag 1=normal, 0=nodrop, -1=??
-/*0128*/ uint8_t   size;            // Size of item
-/*0129*/ uint8_t   unknown0129;     // ***Placeholder
-/*0130*/ uint16_t  itemNr;          // Unique Item number
-/*0132*/ uint16_t  iconNr;          // Icon Number
-/*0134*/ int16_t   equipSlot;       // Current Equip slot
-/*0136*/ uint32_t  equipableSlots;  // Slots where this item goes
-/*0140*/ int32_t   cost;            // Item cost in copper
-/*0144*/ uint8_t   unknown0144[28]; // ***Placeholder
+/*0000*/ char      name[64];        // Name of item
+/*0064*/ char      lore[80];        // Lore text
+/*0144*/ char      idfile[6];       // Not sure what this is used for
+/*0150*/ uint8_t   unknown0150[24]; // Placeholder
+/*0174*/ uint8_t   weight;          // Weight of item
+/*0175*/ int8_t    nosave;          // Nosave flag 1=normal, 0=nosave, -1=spell?
+/*0176*/ int8_t    nodrop;          // Nodrop flag 1=normal, 0=nodrop, -1=??
+/*0177*/ uint8_t   size;            // Size of item
+/*0178*/ uint8_t   unknown0178[2];     // ***Placeholder
+/*0180*/ uint16_t  itemNr;          // Unique Item number
+/*0182*/ uint16_t  iconNr;          // Icon Number
+/*0184*/ int16_t   equipSlot;       // Current Equip slot
+/*0186*/ uint8_t   unknwn0186[2];      // Equip slot cont.?
+/*0188*/ uint32_t  equipableSlots;  // Slots where this item goes
+/*0192*/ int32_t   cost;            // Item cost in copper
+/*0196*/ uint8_t   unknown0196[32]; // ***Placeholder
+};
 
-  union // 0172-291 have different meanings depending on flags
-  {
-    // note, each of the following 2 structures must be kept of equal size
-
-    struct // Common Item Structure (everything but books (flag != 0x7669)
-    {
-      /*0172*/ int8_t   STR;              // Strength
-      /*0173*/ int8_t   STA;              // Stamina
-      /*0174*/ int8_t   CHA;              // Charisma
-      /*0175*/ int8_t   DEX;              // Dexterity
-      /*0176*/ int8_t   INT;              // Intelligence
-      /*0177*/ int8_t   AGI;              // Agility
-      /*0178*/ int8_t   WIS;              // Wisdom
-      /*0179*/ int8_t   MR;               // Magic Resistance
-      /*0180*/ int8_t   FR;               // Fire Resistance
-      /*0181*/ int8_t   CR;               // Cold Resistance
-      /*0182*/ int8_t   DR;               // Disease Resistance
-      /*0183*/ int8_t   PR;               // Poison Resistance
-      /*0184*/ int8_t   HP;               // Hitpoints
-      /*0185*/ int8_t   MANA;             // Mana
-      /*0186*/ int8_t   AC;               // Armor Class
-      /*0187*/ uint8_t  unknown0187[2];   // ***Placeholder
-      /*0189*/ uint8_t  light;            // Light effect of this item
-      /*0190*/ uint8_t  delay;            // Weapon Delay
-      /*0191*/ uint8_t  damage;           // Weapon Damage
-      /*0192*/ uint8_t  unknown0192;      // ***Placeholder
-      /*0193*/ uint8_t  range;            // Range of weapon
-      /*0194*/ uint8_t  skill;            // Skill of this weapon
-      /*0195*/ int8_t   magic;            // Magic flag
+// Common Item Structure (non-book non-containers)
+struct itemItemStruct : public itemStruct
+{
+// 0228- have different meanings depending on flags
+/*0228*/ int8_t   STR;              // Strength
+/*0229*/ int8_t   STA;              // Stamina
+/*0230*/ int8_t   CHA;              // Charisma
+/*0231*/ int8_t   DEX;              // Dexterity
+/*0232*/ int8_t   INT;              // Intelligence
+/*0233*/ int8_t   AGI;              // Agility
+/*0234*/ int8_t   WIS;              // Wisdom
+/*0235*/ int8_t   MR;               // Magic Resistance
+/*0236*/ int8_t   FR;               // Fire Resistance
+/*0237*/ int8_t   CR;               // Cold Resistance
+/*0238*/ int8_t   DR;               // Disease Resistance
+/*0239*/ int8_t   PR;               // Poison Resistance
+/*0240*/ int8_t   HP;               // Hitpoints
+/*0241*/ uint8_t  unknown0241;      // HP Cont?
+/*0242*/ int8_t   MANA;             // Mana
+/*0243*/ uint8_t  unknown0243;      // Mana Cont?
+/*0244*/ int8_t   AC;               // Armor Class
+/*0245*/ uint8_t  unknown0245;      // AC Cont?
+/*0246*/ uint8_t  unknown0246[2];   // ***Placeholder
+/*0248*/ uint8_t  light;            // Light effect of this item
+/*0249*/ uint8_t  delay;            // Weapon Delay
+/*0250*/ uint8_t  damage;           // Weapon Damage
+/*0251*/ uint8_t  unknown0251;      // ***Placeholder
+/*0252*/ uint8_t  range;            // Range of weapon
+/*0253*/ uint8_t  skill;            // Skill of this weapon
+/*0254*/ int8_t   magic;            // Magic flag
                         //   00  (0000)  =   ???
                         //   01  (0001)  =  magic
                         //   12  (1100)  =   ???
                         //   14  (1110)  =   ???
                         //   15  (1111)  =   ???
-      /*0196*/ int8_t   level0;           // Casting level
-      /*0197*/ uint8_t  material;         // Material?
-      /*0198*/ uint8_t  unknown0198[2];   // ***Placeholder
-      /*0200*/ uint32_t color;            // Amounts of RGB in original color
-      /*0204*/ uint8_t  unknown0204[2];   // ***Placeholder
-      /*0206*/ uint16_t spellId0;         // SpellID of special effect
-      /*0208*/ uint16_t classes;          // Classes that can use this item
-      /*0210*/ uint8_t  unknown0210[2];   // ***Placeholder
-      /*0212*/ uint16_t races;            // Races that can use this item
-      /*0214*/ int8_t   unknown0214[3];   // ***Placeholder
-      /*0217*/ uint8_t  level;            // Casting level
+/*0255*/ int8_t   level0;           // Casting level
+/*0256*/ uint8_t  material;         // Material?
+/*0258*/ uint8_t  unknown0258[3];   // ***Placeholder
+/*0260*/ uint32_t color;            // Amounts of RGB in original color
+/*0264*/ uint8_t  unknown0264[2];   // ***Placeholder
+/*0266*/ uint16_t spellId0;         // SpellID of special effect
+/*0268*/ uint16_t classes;          // Classes that can use this item
+/*0270*/ uint8_t  unknown0270[2];   // ***Placeholder
+/*0272*/ uint16_t races;            // Races that can use this item
+/*0274*/ int8_t   unknown0274[2];   // ***Placeholder
+/*0276*/ int8_t   stackable;        //  1= stackable, 3 = normal, 0 = ? (not stackable)
+/*0277*/ uint8_t  level;            // Casting level
 
-      union // 0218 has different meanings depending on an unknown indicator
-      {
-        /*0218*/ int8_t   number;          // Number of items in stack
-        /*0218*/ int8_t   charges;         // Number of charges (-1 = unlimited)
-      };
-
-      /*0219*/ int8_t   unknown0219;       // ***Placeholder
-      /*0220*/ uint16_t spellId;           // spellId of special effect
-      /*0222*/ uint8_t  unknown0222[70];   // ***Placeholder
-    } common;
-    struct // Book Structure (flag == 0x7379)
-    {
-      /*0172*/ uint8_t  unknown0172[3];      // ***Placeholder
-      /*0175*/ char     file[15];            // Filename of book text on server
-      /*0190*/ uint8_t  unknown0190[102];    // ***Placeholder
-    } book;
-    struct // Container Structure (flag == 0x7900 || flag == 0x7953
-    {
-      /*0172*/ int8_t   unknown0191[41];     // ***Placeholder
-      /*0213*/ uint8_t  numSlots;            // number of slots in container
-      /*0214*/ int8_t   unknown0214;         // ***Placeholder
-      /*0215*/ int8_t   sizeCapacity;        // Maximum size item container can hold
-      /*0216*/ uint8_t  weightReduction;     // % weight reduction of container
-      /*0217*/ uint8_t  unknown0217[75];     // ***Placeholder
-    } container;
+  union // 0278 has different meanings depending on an stackable
+  {
+    /*0278*/ int8_t   number;          // Number of items in stack
+    /*0278*/ int8_t   charges;         // Number of charges (-1 = unlimited)
   };
+
+/*0279*/ int8_t   effectType;       // 0 = no effect, 1=click anywhere w/o class check, 2=latent/worn, 3=click anywhere EXPENDABLE, 4=click worn, 5=click anywhere w/ class check
+/*0280*/ uint16_t spellId;           // spellId of special effect
+/*0282*/ uint8_t  unknown0282[10];   // ***Placeholder
+/*0292*/ uint32_t castTime;   // Cast time of clicky item in miliseconds
+/*0296*/ uint8_t  unknown0296[16];   // ***Placeholder
+/*0312*/ uint16_t skillModId; // ID of skill that item modifies
+/*0314*/ int8_t   skillModPercent; // Percent that item modifies skill
+/*0315*/ uint8_t  unknown0315[41];
+};
+ 
+// Book Structure (flag == 0x7379) 
+struct itemBookStruct : public itemStruct
+{
+  /*0228*/ uint8_t  unknown0228[6];      // ***Placeholder
+  /*0234*/ char     file[15];            // Filename of book text on server
+  /*0249*/ uint8_t  unknown0246[15];    // ***Placeholder 
+  // pad out to 0264
 };
 
-// Convenience inlines for itemStruct
+// Container Structure (flag == 0x7900 || flag == 0x7953
+struct itemContainerStruct : public itemStruct
+{
+  /*0228*/ int8_t   unknown0228[41];     // ***Placeholder
+  /*0269*/ uint8_t  numSlots;            // number of slots in container
+  /*0270*/ int8_t   unknown0271;         // ***Placeholder
+  /*0271*/ int8_t   sizeCapacity;        // Maximum size item container can hold
+  /*0272*/ uint8_t  weightReduction;     // % weight reduction of container
+  /*0273*/ uint8_t  unknown0273[3];     // ***Placeholder
+  // pad out to 0276
+};
 
-inline bool isItemBook(const struct itemStruct& i) 
-    { return (i.flag == ITEM_BOOK); }
-
-inline bool isItemContainer(const struct itemStruct& i)
-    { return ((i.flag == ITEM_CONTAINER) || (i.flag == ITEM_CONTAINER_PLAIN)); }
 
 /*
 ** Generic Item Properties
@@ -528,7 +528,12 @@ struct itemInShopStruct
 /*0001*/ uint8_t  version;                // 0x20
 /*0002*/ uint16_t playerid;               // player ID
 /*0004*/ int8_t   itemType;               // 0 - item, 1 - container, 2 - book
-/*0005*/ struct   itemStruct item;        // Refer to itemStruct for members
+union
+{
+  /*0005*/ struct itemItemStruct item;        // Refer to itemStruct for members
+  /*0005*/ struct itemContainerStruct container;
+  /*0005*/ struct itemBookStruct book;
+};
 /*0297*/ uint8_t  unknown0297[6];         // ***Placeholder
 };
 
@@ -1126,22 +1131,56 @@ struct moneyOnCorpseStruct
 
 /*
 ** Item received by the player
-** Length: 246 Octets
-** OpCode: ItemOnCorpseCode and ItemTradeCode
+** Length: x Octets
+** OpCode: ItemOnCorpseCode and TradeItemInCode
 */
 
 struct tradeItemInStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x52
 /*0001*/ uint8_t  version;                // 0x20
-/*0002*/ struct itemStruct item;          // Refer to itemStruct for members
+/*0002*/ struct itemItemStruct item;          // Refer to itemStruct for members
+};
+
+/*
+** Container Item received by the player
+** Length: x Octets
+** OpCode: TradeContainerInCode
+*/
+
+struct tradeContainerInStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x52
+/*0001*/ uint8_t  version;                // 0x20
+union
+{
+  /*0002*/ struct itemStruct item;
+  /*0002*/ struct itemContainerStruct container;          // Refer to itemStruct for members
+};
+};
+
+/*
+** Book Item received by the player
+** Length: x Octets
+** OpCode: TradeBookInCode
+*/
+
+struct tradeBookInStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x52
+/*0001*/ uint8_t  version;                // 0x20
+union
+{
+  /*0002*/ struct itemStruct item;
+  /*0002*/ struct itemBookStruct book;          // Refer to itemStruct for members
+};
 };
 
 struct itemOnCorpseStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x52
 /*0001*/ uint8_t  version;                // 0x20
-/*0002*/ struct itemStruct item;          // Refer to itemStruct for members
+/*0002*/ struct itemItemStruct item;          // Refer to itemStruct for members
 };
 
 /*
@@ -1247,7 +1286,7 @@ struct playerItemStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x64
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ struct itemStruct item;          // Refer to itemStruct for members
+/*0002*/ struct itemItemStruct item;          // Refer to itemStruct for members
 };
 
 /*
@@ -1260,7 +1299,11 @@ struct playerBookStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x65
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ struct itemStruct item;          // Refer to itemStruct for members
+union
+{
+  /*0002*/ struct itemStruct item;
+  /*0002*/ struct itemBookStruct book;          // Refer to itemStruct for members
+};
 };
 
 /*
@@ -1274,7 +1317,11 @@ struct playerContainerStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x66
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ struct itemStruct item;          // Refer to itemStruct for members
+union
+{
+  /*0002*/ struct itemStruct item;
+  /*0002*/ struct itemContainerStruct container;          // Refer to itemStruct for members
+};
 };
 
 /*
@@ -1287,8 +1334,26 @@ struct summonedItemStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x78
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ struct itemStruct item;          // Refer to itemStruct for members
+/*0002*/ struct itemItemStruct item;          // Refer to itemStruct for members
 };
+
+/*
+** Summoned Item - Player Made Item?
+** Length: 244 Octets
+** OpCode: summonedItemCode
+*/
+
+struct summonedContainerStruct
+{
+/*0000*/ uint8_t  opCode;                 // 0x78
+/*0001*/ uint8_t  version;                // 0x21
+union
+{
+  /*0002*/ struct itemStruct item;
+  /*0002*/ struct itemContainerStruct container;          // Refer to itemStruct for members
+};
+};
+
 
 /*
 ** Info sent when you start to cast a spell
@@ -1554,8 +1619,13 @@ struct tradeItemOutStruct
 /*0000*/ uint8_t  opCode;                 // 0xdf
 /*0001*/ uint8_t  version;                // 0x20
 /*0002*/ uint8_t  unknown0002[4];         // ***Placeholder
-/*0008*/ int8_t   itemtype;               // Type of item
-/*0009*/ struct itemStruct item;          // Refer to itemStruct for members
+/*0008*/ int8_t   itemType;               // Type of item
+union
+{
+  /*0008*/ struct itemItemStruct item;        // Refer to itemStruct for members
+  /*0009*/ struct itemContainerStruct container;
+  /*0009*/ struct itemBookStruct book;
+};
 /*0253*/ uint8_t  unknown0253[5];         // ***Placeholder
 };
 

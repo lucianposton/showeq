@@ -432,8 +432,12 @@ QString EQUDPIPPacketFormat::headerFlags(bool brief) const
 // EQPacket class methods
 
 /* EQPacket Class - Sets up packet capturing */
-EQPacket::EQPacket (QObject * parent, const char *name):
-QObject (parent, name)
+EQPacket::EQPacket (QObject * parent, const char *name)
+  : QObject (parent, name),
+    m_decode(NULL),
+    m_packetCapture(NULL),
+    m_vPacket(NULL),
+    m_timer(NULL)
 {
    struct hostent *he;
    struct in_addr  ia;
@@ -579,6 +583,24 @@ EQPacket::~EQPacket()
 #ifdef PACKET_CACHE_DIAG
   printf("SEQ: Maximum Packet Cache Used: %d\n", maxServerCacheCount);
 #endif
+  if (m_packetCapture != NULL)
+  {
+    // stop any packet capture 
+    m_packetCapture->stop();
+
+    // delete the object
+    delete m_packetCapture;
+  }
+
+  if (m_decode != NULL)
+  { 
+    // reset the decode object to stop it from doing whatever it is doing
+    m_decode->ResetDecoder();
+
+    // delete the decode
+    delete m_decode;
+  }
+
   // try to close down VPacket cleanly
   if (m_vPacket != NULL)
   {
@@ -587,6 +609,15 @@ EQPacket::~EQPacket()
 
     // delete VPacket
     delete m_vPacket;
+  }
+
+  if (m_timer != NULL)
+  {
+    // make sure the timer is stopped
+    m_timer->stop();
+
+    // delete the timer
+    delete m_timer;
   }
 }
 
@@ -1569,6 +1600,13 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             citems = (cPlayerItemsStruct *)(decodedData);
 
 	    emit cPlayerItems(citems, decodedDataLen, dir);
+	    
+	    fprintf(stderr, 
+		    "CPlayerItems: count=%d size=%d packetsize=%d expsize=%d\n",
+		    citems->count,
+		    decodedDataLen,
+		    ((decodedDataLen - 4)/citems->count),
+		    sizeof(playerItemStruct));
 
             // Make sure we do not divide by zero and there 
             // is something to process
@@ -1584,33 +1622,40 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
               
                 int nVerifySize = sizeof(playerItemStruct);
 	    
-                if (nVerifySize == nPacketSize)
-                {
-                    if (!showeq_params->no_bank)
-                    {
-                        tempStr = "Item: Dispatching compressed Items " 
-                                  "(count = " +
-                                  QString::number(citems->count) + ")";
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+                if (nVerifySize != nPacketSize)
+		{
+		  printf("WARNING: CPlayerItemsCode: packetSize:%d != "
+			 "sizeof(playerItemStruct):%d!\n",
+			 nPacketSize, nVerifySize);
+		  unk = true;
+		}
+#endif
 
-                        emit msgReceived(tempStr);
-	      
-                        for (int i=0; i < citems->count; i++)
-                            dispatchZoneData( nPacketSize,
-                                &citems->compressedData[i*nPacketSize], 
-                                dir);
-
-	                emit msgReceived(QString("Item: Finished dispatching"));
-	             }
-	             else
-	             {
-	                 // Quietly dispatch the compressed data
-	           
-                         for ( int i=0; i<citems->count; i++ )
-                             dispatchZoneData( nPacketSize, 
-                                &citems->compressedData[i*nPacketSize], 
-                                dir);
-	             }
-	        }
+		if (!showeq_params->no_bank)
+		{
+		  tempStr = "Item: Dispatching compressed Items " 
+		    "(count = " +
+		    QString::number(citems->count) + ")";
+		  
+		  emit msgReceived(tempStr);
+		  
+		  for (int i=0; i < citems->count; i++)
+		    dispatchZoneData( nPacketSize,
+				      &citems->compressedData[i*nPacketSize], 
+				      dir);
+		  
+		  emit msgReceived(QString("Item: Finished dispatching"));
+		}
+		else
+		{
+		  // Quietly dispatch the compressed data
+		  
+		  for ( int i=0; i<citems->count; i++ )
+		    dispatchZoneData( nPacketSize, 
+				      &citems->compressedData[i*nPacketSize], 
+				      dir);
+		}
             }
 	    break;
         } /* end CPlayerItemCode */
@@ -1619,14 +1664,58 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
             unk = ! ValidatePayload(PlayerItemCode, playerItemStruct);
 
-            emit wearItem((const playerItemStruct*)data, len, dir);
-
+            emit playerItem((const playerItemStruct*)data, len, dir);
+	    
             break;
         }
 
         case ItemInShopCode:
         {
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+	  itemInShopStruct* items = (itemInShopStruct*)data;
+	  switch (items->itemType)
+	  {
+	  case 0: // it is an item, use the regular method
             unk = ! ValidatePayload(ItemInShopCode, itemInShopStruct);
+	    break;
+	  case 1: // it is a container
+	    {
+	      size_t items_size = sizeof(itemInShopStruct) 
+		- sizeof(itemItemStruct)
+		+ sizeof(itemContainerStruct);
+
+	      if (items_size != len)
+	      {
+		fprintf(stderr, 
+			"WARNING: ItemInShopCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
+			ItemInShopCode, len, items_size);
+		unk = true;
+	      }
+	      else
+		unk = false;
+	      
+	      break;
+	    }
+	  case 2: // it is a book
+	    {
+	      size_t items_size = sizeof(itemInShopStruct) 
+		- sizeof(itemItemStruct)
+		+ sizeof(itemBookStruct);
+	      
+	      if (items_size != len)
+	      {
+		fprintf(stderr, 
+			"WARNING: ItemInShopeCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
+			ItemInShopCode, len, items_size);
+		unk = true;
+	      }
+	      else
+		unk = false;
+	      
+	      break;
+	    }
+	  };
+#endif
 	    
             emit itemShop((const itemInShopStruct*)data, len, dir);
 	    
@@ -1653,7 +1742,51 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case TradeItemOutCode:
         {
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+	  tradeItemOutStruct* itemt = (tradeItemOutStruct*)data;
+	  switch (itemt->itemType)
+	  {
+	  case 0: // it is an item, use the regular method
             unk = ! ValidatePayload(TradeItemOutCode, tradeItemOutStruct);
+	    break;
+	  case 1: // it is a container
+	    {
+	      size_t itemt_size = sizeof(tradeItemOutStruct) 
+		- sizeof(itemItemStruct)
+		+ sizeof(itemContainerStruct);
+
+	      if (itemt_size != len)
+	      {
+		fprintf(stderr, 
+			"WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
+			TradeItemOutCode, len, itemt_size);
+		unk = true;
+	      }
+	      else
+		unk = false;
+	      
+	      break;
+	    }
+	  case 2: // it is a book
+	    {
+	      size_t itemt_size = sizeof(tradeItemOutStruct) 
+		- sizeof(itemItemStruct)
+		+ sizeof(itemBookStruct);
+	      
+	      if (itemt_size != len)
+	      {
+		fprintf(stderr, 
+			"WARNING: TradeItemOutCode (%04x) (dataLen:%d != expectedLen:%d)!\n",
+			TradeItemOutCode, len, itemt_size);
+		unk = true;
+	      }
+	      else
+		unk = false;
+	      
+	      break;
+	    }
+	  };
+#endif
 
             emit tradeItemOut((const tradeItemOutStruct*)data, len, dir);
 
@@ -1667,13 +1800,40 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
             emit tradeItemIn((const tradeItemInStruct*)data, len, dir);
 
             break;
-        } /* end ItemTradeCode */
+        } /* end TradeItemInCode */
+
+        case TradeContainerInCode:	// Container received by player
+        {
+            unk = ! ValidatePayload(TradeContainerInCode, tradeContainerInStruct);
+
+            emit tradeContainerIn((const tradeContainerInStruct*)data, len, dir);
+
+            break;
+        } /* end TradeContainerInCode */
         
+        case TradeBookInCode:	// Item received by player
+        {
+            unk = ! ValidatePayload(TradeBookInCode, tradeBookInStruct);
+
+            emit tradeBookIn((const tradeBookInStruct*)data, len, dir);
+
+            break;
+        } /* end TradeItemInCode */
+
         case SummonedItemCode:
         {
             unk = ! ValidatePayload(SummonedItemCode, summonedItemStruct);
 	
 	    emit summonedItem((const summonedItemStruct*)data, len, dir);
+
+            break;
+        }
+        
+        case SummonedContainerCode:
+        {
+            unk = ! ValidatePayload(SummonedContainerCode, summonedContainerStruct);
+	
+	    emit summonedContainer((const summonedContainerStruct*)data, len, dir);
 
             break;
         }
@@ -1861,7 +2021,23 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         
         case PlayerBookCode:
         {
-            unk = ! ValidatePayload(PlayerBookCode, playerBookStruct);
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+	  size_t test_size = (sizeof(playerBookStruct) - 
+			      sizeof(itemContainerStruct) + 
+			      sizeof(itemItemStruct));
+
+	  if ((len != sizeof(playerBookStruct)) &&
+	      (len != test_size))
+	  {
+	    fprintf(stderr,
+		    "WARNING: PlayerBookCode (%04x) (dataLen:%d != sizeof(playerBookStruct:%d or %d\n",
+		    PlayerBookCode, len, sizeof(playerBookStruct),
+		    test_size);
+	    unk = true;
+	  }
+	  else
+	    unk = false;
+#endif
  
             emit playerBook((const playerBookStruct*)data, len, dir);
 
@@ -1870,7 +2046,23 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case PlayerContainerCode:
         {
-            unk = ! ValidatePayload(PlayerContainerCode, playerContainerStruct);
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
+	  size_t test_size = (sizeof(playerContainerStruct) - 
+			      sizeof(itemContainerStruct) + 
+			      sizeof(itemItemStruct));
+
+	  if ((len != sizeof(playerContainerStruct)) &&
+	      (len != test_size))
+	  {
+	    fprintf(stderr,
+		    "WARNING: PlayerContainerCode (%04x) (dataLen:%d != sizeof(playerContainerStruct:%d or %d\n",
+		    PlayerContainerCode, len, sizeof(playerContainerStruct),
+		    test_size);
+	    unk = true;
+	  }
+	  else
+	    unk = false;
+#endif
 
             emit playerContainer((const playerContainerStruct *)data, len, dir);
 

@@ -257,61 +257,61 @@ void Player::reset()
 
 void Player::wearItem(const playerItemStruct* itemp)
 {
-  const itemStruct* item = &itemp->item;
+  const itemItemStruct* item = &itemp->item;
 
-  if ((item->equipSlot < 22) && !isItemBook(*item))
+  if (item->equipSlot < 22)
   {
     bool manaAdjust = false;
 
-    if (item->common.STR != 0)
+    if (item->STR != 0)
     {
-      m_maxSTR += item->common.STR;
+      m_maxSTR += item->STR;
       emit statChanged (LIST_STR, m_maxSTR, m_maxSTR);
     }
     
-    if (item->common.STA != 0)
+    if (item->STA != 0)
     {
-      m_maxSTA += item->common.STA;
+      m_maxSTA += item->STA;
       emit statChanged (LIST_STA, m_maxSTA, m_maxSTA);
     }
 
-    if (item->common.CHA != 0)
+    if (item->CHA != 0)
     {
-      m_maxCHA += item->common.CHA;
+      m_maxCHA += item->CHA;
       emit statChanged (LIST_CHA, m_maxCHA, m_maxCHA);
     }
 
-    if (item->common.DEX != 0)
+    if (item->DEX != 0)
     {
-      m_maxDEX += item->common.DEX;
+      m_maxDEX += item->DEX;
       emit statChanged (LIST_DEX, m_maxDEX, m_maxDEX);
     }
 
-    if (item->common.INT != 0)
+    if (item->INT != 0)
     {
-      m_maxINT += item->common.INT;
+      m_maxINT += item->INT;
       emit statChanged (LIST_INT, m_maxINT, m_maxINT);
       manaAdjust = true;
     }
 
-    if (item->common.AGI != 0)
+    if (item->AGI != 0)
     {
-      m_maxAGI += item->common.AGI;
+      m_maxAGI += item->AGI;
       emit statChanged (LIST_AGI, m_maxAGI, m_maxAGI);
     }
 
-    if (item->common.WIS != 0)
+    if (item->WIS != 0)
     {
-      m_maxWIS += item->common.WIS;
+      m_maxWIS += item->WIS;
       emit statChanged (LIST_WIS, m_maxWIS, m_maxWIS);
       manaAdjust = true;
     }
 
-    m_plusHP += item->common.HP;
+    m_plusHP += item->HP;
 
-    if (item->common.MANA != 0)
+    if (item->MANA != 0)
     {
-      m_plusMana += item->common.MANA;
+      m_plusMana += item->MANA;
       manaAdjust = true;
     }
 
@@ -333,61 +333,61 @@ void Player::wearItem(const playerItemStruct* itemp)
   }
 }
 
-void Player::removeItem(const itemStruct* item)
+void Player::removeItem(const itemItemStruct* item)
 {
-  if ((item->equipSlot < 22) && !isItemBook(*item))
+  if (item->equipSlot < 22)
   {
     bool manaAdjust = false;
 
-    if (item->common.STR != 0)
+    if (item->STR != 0)
     {
-      m_maxSTR -= item->common.STR;
+      m_maxSTR -= item->STR;
       emit statChanged (LIST_STR, m_maxSTR, m_maxSTR);
     }
     
-    if (item->common.STA != 0)
+    if (item->STA != 0)
     {
-      m_maxSTA -= item->common.STA;
+      m_maxSTA -= item->STA;
       emit statChanged (LIST_STA, m_maxSTA, m_maxSTA);
     }
 
-    if (item->common.CHA != 0)
+    if (item->CHA != 0)
     {
-      m_maxCHA -= item->common.CHA;
+      m_maxCHA -= item->CHA;
       emit statChanged (LIST_CHA, m_maxCHA, m_maxCHA);
     }
 
-    if (item->common.DEX != 0)
+    if (item->DEX != 0)
     {
-      m_maxDEX -= item->common.DEX;
+      m_maxDEX -= item->DEX;
       emit statChanged (LIST_DEX, m_maxDEX, m_maxDEX);
     }
 
-    if (item->common.INT != 0)
+    if (item->INT != 0)
     {
-      m_maxINT -= item->common.INT;
+      m_maxINT -= item->INT;
       emit statChanged (LIST_INT, m_maxINT, m_maxINT);
       manaAdjust = true;
     }
 
-    if (item->common.AGI != 0)
+    if (item->AGI != 0)
     {
-      m_maxAGI -= item->common.AGI;
+      m_maxAGI -= item->AGI;
       emit statChanged (LIST_AGI, m_maxAGI, m_maxAGI);
     }
 
-    if (item->common.WIS != 0)
+    if (item->WIS != 0)
     {
-      m_maxWIS -= item->common.WIS;
+      m_maxWIS -= item->WIS;
       emit statChanged (LIST_WIS, m_maxWIS, m_maxWIS);
       manaAdjust = true;
     }
 
-    m_plusHP -= item->common.HP;
+    m_plusHP -= item->HP;
 
-    if (item->common.MANA != 0)
+    if (item->MANA != 0)
     {
-      m_plusMana -= item->common.MANA;
+      m_plusMana -= item->MANA;
       manaAdjust = true;
     }
 

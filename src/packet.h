@@ -536,7 +536,7 @@ class EQPacket : public QObject
    void InitializeOpCodeMonitor(void);
    
    bool m_bOpCodeMonitorInitialized;
-   #define OPCODE_SLOTS 10
+   #define OPCODE_SLOTS 15
    unsigned int MonitoredOpCodeList      [OPCODE_SLOTS][3];
    QString MonitoredOpCodeAliasList [OPCODE_SLOTS];
    
@@ -594,7 +594,6 @@ class EQPacket : public QObject
    void updateAltExp(const altExpUpdateStruct* altexp, uint32_t, uint8_t);
    void updateLevel(const levelUpUpdateStruct* levelup, uint32_t, uint8_t);
    void updateStamina(const staminaStruct* stam, uint32_t, uint8_t);
-   void wearItem(const playerItemStruct* itemp, uint32_t, uint8_t);
 
    void attack2Hand1(const attack2Struct*, uint32_t, uint8_t);
    void action2Message(const action2Struct*, uint32_t, uint8_t);
@@ -625,10 +624,13 @@ class EQPacket : public QObject
    void itemPlayerReceived(const itemOnCorpseStruct* itemc, uint32_t, uint8_t);
    void tradeItemOut(const tradeItemOutStruct* itemt, uint32_t, uint8_t);
    void tradeItemIn(const tradeItemInStruct* itemr, uint32_t, uint8_t);
+   void tradeContainerIn(const tradeContainerInStruct* itemr, uint32_t, uint8_t);
+   void tradeBookIn(const tradeBookInStruct* itemr, uint32_t, uint8_t);
    void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
    void formattedMessage(const formattedMessageStruct* fmsg, uint32_t, uint8_t);
    void random(const randomStruct* randr, uint32_t, uint8_t);
    void emoteText(const emoteTextStruct* emotetext, uint32_t, uint8_t);
+   void playerItem(const playerItemStruct* itemp, uint32_t, uint8_t);
    void playerBook(const playerBookStruct* bookp, uint32_t, uint8_t);
    void playerContainer(const playerContainerStruct* containp, uint32_t, uint8_t);
    void inspectData(const inspectDataStruct* inspt, uint32_t, uint8_t);
@@ -650,6 +652,7 @@ class EQPacket : public QObject
    void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
    void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
    void summonedItem(const summonedItemStruct*, uint32_t, uint8_t);
+   void summonedContainer(const summonedContainerStruct*, uint32_t, uint8_t);
  
    void msgReceived(const QString &);
    void stsMessage(const QString &, int = 0);

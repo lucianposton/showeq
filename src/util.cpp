@@ -17,6 +17,11 @@
 #include "util.h"
 #include "main.h"
 
+static const spellInfoStruct spellInfo[] =
+{
+#include "spells.h"
+};
+
 /*
  * Generate comma separated string from long int
  */
@@ -48,31 +53,21 @@ Commanate(uint32_t number)
 QString
 spell_name (uint16_t spellId)
 {
-  char spellname[256];
-  switch (spellId)
-    {
-#include "spells.h"
-    default:
-      sprintf (spellname, "%04x", spellId);
-    }
-
-  return spellname;
+   if (spellId < (sizeof(spellInfo) / sizeof(spellInfoStruct)))
+     return spellInfo[spellId].name;
+   else
+     return QString::number(spellId, 16);
 }
 
-struct spellInfoStruct*
+const spellInfoStruct*
 spell_info (uint16_t spellId)
 {
-   static struct spellInfoStruct s;
+   static struct spellInfoStruct fake = { "Unknown", 0, false };
 
-   int d = 0;
-   bool targ = true;
-   switch (spellId) {
-#include "spelltimes.h"
-   }
-
-   s.duration = d;
-   s.target = targ;
-   return &s;
+   if (spellId < (sizeof(spellInfo) / sizeof(spellInfoStruct)))
+     return &spellInfo[spellId];
+   else
+     return &fake;
 }
 
 QString

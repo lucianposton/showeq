@@ -53,7 +53,11 @@
 
 #define CharInfo                    0x2e20
 
+#define TradeContainerInCode        0x3020
+
 #define TradeItemInCode             0x3120
+
+#define TradeBookInCode             0x3420
 
 #define CharProfileCode             0x3620
 
@@ -104,6 +108,8 @@
 #define PlayerContainerCode         0x6621
 
 #define SummonedItemCode            0x7821
+
+#define SummonedContainerCode       0x7921
 
 #define NewGuildInZoneCode          0x7b21
 

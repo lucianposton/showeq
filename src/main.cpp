@@ -141,7 +141,6 @@ static struct option option_list[] = {
 /* Global parameters, so all parts of ShowEQ has access to it */
 struct ShowEQParams *showeq_params;
 XMLPreferences      *pSEQPrefs; 
-class EQItemDB* pItemDB;
 
 int main (int argc, char **argv)
 {
@@ -876,25 +875,6 @@ int main (int argc, char **argv)
    /* CharProfileCode */
    showeq_params->CharProfileCodeFilename = showeq_params->EncryptedLogFilenameBase + QString ("CharProfileCode.log");
 
-   if (showeq_params->ItemDBEnabled)
-   {
-     // Create an instance of the ItemDB
-     pItemDB = new EQItemDB;
-
-     // make it's parameters match those set via the config file and 
-     // command line
-     pItemDB->SetDBFile(EQItemDB::LORE_DB, showeq_params->ItemLoreDBFilename);
-     pItemDB->SetDBFile(EQItemDB::NAME_DB, showeq_params->ItemNameDBFilename);
-     pItemDB->SetDBFile(EQItemDB::DATA_DB, showeq_params->ItemDataDBFilename);
-     pItemDB->SetDBFile(EQItemDB::RAW_DATA_DB, showeq_params->ItemRawDataDBFileName);
-     pItemDB->SetEnabledDBTypes(showeq_params->ItemDBTypes);
-
-     // Make sure the databases are upgraded to the current format
-     pItemDB->Upgrade();
-   }
-   else
-     pItemDB = NULL;
-
    if (showeq_params->logEncrypted)
    {
       printf("Logging CharProfileCode packets to: %s\n",
@@ -933,22 +913,25 @@ int main (int argc, char **argv)
       }
    }
 
-   /* The main interface widget */
-   EQInterface intf (0, "interface");
-   qapp.setMainWidget (&intf);
+   int ret;
+
+   // just to add a scope to better control when the main interface gets 
+   // destroyed
+   if  (1)
+   {
+     /* The main interface widget */
+     EQInterface intf (0, "interface");
+     qapp.setMainWidget (&intf);
    
-   /* Start the main loop */
-   int ret = qapp.exec ();
+     /* Start the main loop */
+     ret = qapp.exec ();
+   }
 
-   // Shutdown the Item DB before any other cleanup
-   if (pItemDB != NULL)
-     pItemDB->Shutdown();
-
-   // delete the ItemDB before application exit
-   delete pItemDB;
-
-   // Causes segv on exit all of a sudden.  why?  no changes to cprefs classes. -- cybertech
+   // delete the preferences data
    delete pSEQPrefs;
+
+   // delete the showeq_params data
+   delete showeq_params;
 
    return ret;
 }

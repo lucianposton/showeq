@@ -103,6 +103,7 @@ class SpawnPointList : public SEQListView
   void rightButtonClicked(QListViewItem*, const QPoint&, int);
   void renameItem(const SpawnPointListItem* item);
   void deleteItem(const SpawnPointListItem* item);
+  void clearItems(void);
   void refresh();
   void handleSelectItem(QListViewItem* item);
   void newSpawnPoint(const SpawnPoint* sp);

@@ -36,7 +36,7 @@ public:
    void clear();
    void reset();
    void wearItem(const playerItemStruct* itemp);
-   void removeItem(const itemStruct* item);
+   void removeItem(const itemItemStruct* item);
    void increaseSkill(const skillIncStruct* skilli);
    void manaChange(const manaDecrementStruct* mana);
    void updateExp(const expUpdateStruct* exp);

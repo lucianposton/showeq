@@ -1,3 +1,24 @@
+dohpaZ (05/06/02)
+------------------
+Modifications:
+ + version 4.2.8
+ + Added the ability to remove all spawn points to the Spawn Point List context
+   window.
+ + Assorted SpawnMonitor/SpawnPoint cleanup.
+ + Updates to itemStruct (from EQEmu 0.3.3.1 we got stackable, effectType, 
+   and castTime) and I found skill mod id and skill mod percent.  Updated
+   to the 05/06/02 patch (many many changes here).  
+ + Many new item related opcodes (as of the 05/06/02 patch)
+ + Updated to v2 EQItemDB entries (supports both versions) with data from the 
+   new itemStruct.
+ + Changed how the ItemDB is instantiated and how items are added, including
+   more checks to minimize the chance of corrupt data being stored in the DB.
+ + Increased maximum number of monitored opcodes from 10 to 15.
+ + Minor additions to weapons27.h
+ + Removed spelltimes.h and created a new spells.h with all the info (from the
+   05/06/02 patches spdat.eff).  Modified spell_name() and spell_info() to
+   use the new data.
+
 fee (05/06/02)
 -----------------
 Mods:

@@ -103,11 +103,13 @@ class EQInterface:public QMainWindow
    void itemPlayerReceived(const itemOnCorpseStruct* itemc);
    void tradeItemOut(const tradeItemOutStruct* itemt);
    void tradeItemIn(const tradeItemInStruct* itemr);
-   void wearItem(const playerItemStruct* itemp);
+   void tradeContainerIn(const tradeContainerInStruct* itemr);
+   void tradeBookIn(const tradeBookInStruct* itemr);
    void channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t);
    void formattedMessage(const formattedMessageStruct* cmsg, uint32_t, uint8_t);
    void random(const randomStruct* randr);
    void emoteText(const emoteTextStruct* emotetext);
+   void playerItem(const playerItemStruct* itemp);
    void playerBook(const playerBookStruct* bookp);
    void playerContainer(const playerContainerStruct* containp);
    void inspectData(const inspectDataStruct* inspt);
@@ -125,6 +127,7 @@ class EQInterface:public QMainWindow
    void groupAccept(const groupAcceptStruct* gmem);
    void groupDelete(const groupDeleteStruct* gmem);
    void summonedItem(const summonedItemStruct*);
+   void summonedContainer(const summonedContainerStruct*);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
    void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
@@ -297,10 +300,11 @@ class EQInterface:public QMainWindow
    SpellShell* m_spellShell;
    GroupMgr* m_groupMgr;
    SpawnMonitor* m_spawnMonitor;
+   EQItemDB* m_itemDB;
    PktLogger* m_pktLogger;
    SpawnLogger *m_spawnLogger;
    const Item* m_selectedSpawn;
-
+   
    QPopupMenu* m_netMenu;
    QPopupMenu* m_statWinMenu;
    QPopupMenu* m_skillWinMenu;

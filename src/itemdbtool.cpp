@@ -455,6 +455,12 @@ void displayVersion(EQItemDB* itemDB)
   printf ("\t\tUsing EQItemDB: %s\n", EQItemDB::Version());
   printf ("\t\tsizeof(itemStruct) was %d bytes\n", 
 	  sizeof(itemStruct));
+  printf ("\t\tsizeof(itemItemStruct) was %d bytes\n", 
+	  sizeof(itemItemStruct));
+  printf ("\t\tsizeof(itemContainerStruct) was %d bytes\n", 
+	  sizeof(itemContainerStruct));
+  printf ("\t\tsizeof(itemBookStruct) was %d bytes\n", 
+	  sizeof(itemBookStruct));
   printf ("\n");
 
   /////////////////////////////////
@@ -565,7 +571,7 @@ int importFlatFile(EQItemDB* itemDB,
   int count = 0;
   int lookedat = 0;
   FILE* idb;
-  itemStruct i;
+  itemItemStruct i;
 
   // if not forced, make sure the user really means it.
   if (!force)
@@ -597,12 +603,12 @@ int importFlatFile(EQItemDB* itemDB,
 
     // the filesize must be a multiple of sizeof(itemStruct) otherwise 
     // it's corrupt
-    if ((filesize % sizeof(itemStruct)) != 0)
+    if ((filesize % sizeof(itemItemStruct)) != 0)
     {
       fprintf(stderr, 
 	      "%s: Error Flat File '%s' is corrupt!\n"
 	      "\tThe size of the file (%d) is not a multiple of %d!\n",
-	      progname, filename, filesize, sizeof(itemStruct));
+	      progname, filename, filesize, sizeof(itemItemStruct));
       return 2;
     }
 
@@ -612,7 +618,7 @@ int importFlatFile(EQItemDB* itemDB,
       bool found = false;
       
       // iterate through the records in the file
-      while (fread (&i, sizeof (itemStruct), 1, idb))
+      while (fread (&i, sizeof (itemItemStruct), 1, idb))
       {
 	// increment looked at count
 	lookedat++;
@@ -630,7 +636,7 @@ int importFlatFile(EQItemDB* itemDB,
 	found = true;
 
 	// import item
-	if (itemDB->AddItem(&i, update))
+	if (itemDB->AddItem(&i, sizeof(itemItemStruct), 0, update))
 	  count++; // increment count
 	else
 	  fprintf(stderr, "%s: Failure on insert of Item %d from file %s\n",
@@ -652,10 +658,10 @@ int importFlatFile(EQItemDB* itemDB,
       // insert all records in the file
 
       // iterate through the records in the file
-      while (fread (&i, sizeof (itemStruct), 1, idb))
+      while (fread (&i, sizeof (itemItemStruct), 1, idb))
       {
 	// import item
-	if (itemDB->AddItem(&i, update))
+	if (itemDB->AddItem(&i, sizeof(itemItemStruct), 0, update))
 	  count++; // increment count
 	else
 	  fprintf(stderr, "%s: Failure on insert of Item %d from file '%s'\n",
@@ -720,10 +726,10 @@ int importGDBM(EQItemDB* itemDB,
     {
       // an entry has been found
       // make sure the entry is the correct size
-      if (data.size == sizeof(itemStruct))
+      if (data.size == sizeof(itemItemStruct))
       {
 	// yes, insert it if it doesn't already exist
-	if (itemDB->AddItem((itemStruct*)data.data, update))
+	if (itemDB->AddItem((itemStruct*)data.data, data.size, 0, update))
 	  count++; // increment count
 	else
 	  fprintf(stderr, "%s: Failure on insert of Item %d from file %s\n",
@@ -733,7 +739,7 @@ int importGDBM(EQItemDB* itemDB,
       {
 	fprintf(stderr, 
 		"%s: Item %d from file '%s' has incorrect size %d (not %d)\n",
-		progname, itemNr, filename, data.size, sizeof(itemStruct));
+		progname, itemNr, filename, data.size, sizeof(itemItemStruct));
 	result = 2;
       }
 
@@ -773,10 +779,10 @@ int importGDBM(EQItemDB* itemDB,
 	lookedat++;
 
 	// does the entry have the correct size?
-	if (data.size == sizeof(itemStruct))
+	if (data.size == sizeof(itemItemStruct))
 	{
 	  // yes, insert item if it doesn't already exist
-	  if (itemDB->AddItem((itemStruct*)data.data, update))
+	  if (itemDB->AddItem((itemStruct*)data.data, data.size, 0, update))
 	    count++; // increment count
 	  else
 	    fprintf(stderr, "%s: Failure on insert of Item %d from file %s\n",
@@ -787,7 +793,7 @@ int importGDBM(EQItemDB* itemDB,
 	  // no, print warning
 	  fprintf(stderr, 
 		  "Warning Item %d from file '%s' has incorrect size %d (not %d): Not Inserted\n",
-		  *(uint16_t*)key.data, filename, data.size, sizeof(itemStruct));
+		  *(uint16_t*)key.data, filename, data.size, sizeof(itemItemStruct));
 	  result = 4;
 	}
 	
@@ -925,11 +931,11 @@ int exportRawRecord(EQItemDB* itemDB,
 	else
 	{
 	  // make sure the data is the correct size
-	  if (itemsize != sizeof(itemStruct))
+	  if (itemsize != sizeof(itemItemStruct))
 	  {
 	    fprintf(stderr, 
-		    "Warning: size (%d) of Raw Data for item %d is not equal sizeof(itemStruct) (%d): Record Not Written!\n",
-		    itemsize, currentItemNr, sizeof(itemStruct));
+		    "Warning: size (%d) of Raw Data for item %d is not equal sizeof(itemItemStruct) (%d): Record Not Written!\n",
+		    itemsize, currentItemNr, sizeof(itemItemStruct));
 	    result = 6;
 		    
 	  }
@@ -957,8 +963,8 @@ int exportRawRecord(EQItemDB* itemDB,
     }
   }
   
-  fprintf(stderr, "%s: Wrote %d itemStruct's (%d bytes each) to file '%s'.\n",
-	  progname, count, sizeof(itemStruct), filename);
+  fprintf(stderr, "%s: Wrote %d itemItemStruct's (%d bytes each) to file '%s'.\n",
+	  progname, count, sizeof(itemItemStruct), filename);
 
   return result;
 }
@@ -1606,18 +1612,36 @@ int displayRecord(EQItemDB* itemDB,
             (const char*)print_material (entry->GetMaterial()));
     printf("Color: 0x%8.8x\n",
            entry->GetColor());
+    if (entry->GetStackable() != -1)
+      printf("Stackable: %s (%d)\n", 
+	     ((entry->GetStackable() == 1) ? "yes" : "no?"),
+	     entry->GetStackable());
+    if (entry->GetEffectType() != -1)
+      printf("Effect Type: %s (%d)\n",
+	     (const char*)entry->GetEffectTypeString(), 
+	     entry->GetEffectType());
     if (entry->GetSpellId0() != ITEM_SPELLID_NOSPELL)
+    {
       printf ("Effect1: %s\n", 
               (const char*)spell_name (entry->GetSpellId0()));
-    if (entry->GetLevel())
-      printf ("Casting Level: %d\n", entry->GetLevel());
-    if (entry->GetCharges())
-      printf ("Stack: %d\n", entry->GetCharges());
+      if (entry->GetLevel())
+	printf ("Casting Level: %d\n", entry->GetLevel());
+      if (entry->GetCastTime())
+	printf ("Casting Time: %d\n", entry->GetCastTime());
+      if (entry->GetCharges())
+	printf ("Charges: %d\n", entry->GetCharges());
+    }
     if (entry->GetSpellId() != ITEM_SPELLID_NOSPELL)
       printf ("Effect2: %s\n", 
               (const char*)spell_name (entry->GetSpellId()));
     printf ("Class: %s\n", (const char*)print_classes (entry->GetClasses()));
     printf ("Race: %s\n", (const char*)print_races (entry->GetRaces()));
+    if (entry->GetSkillModId() != 0)
+      printf("SkillMod: %s (%d) by %d percent\n",
+	     (const char*)skill_name(entry->GetSkillModId()),
+	     entry->GetSkillModId(),
+	     entry->GetSkillModPercent());
+
     if (entry->IsContainer())
     {
       if (entry->GetNumSlots())
@@ -1638,10 +1662,14 @@ int displayRecord(EQItemDB* itemDB,
   if ((size > 0) && (rawData != NULL))
   {
     printf("Packet data: (%d octets)\n", size);
-    if (size != sizeof(itemStruct))
-      printf("Warning: (%d octets) != sizeof(itemStruct) (%d octets): "
+    if ((size != sizeof(itemItemStruct)) &&
+	(size != sizeof(itemContainerStruct)) &&
+	(size != sizeof(itemBookStruct)))
+      printf("Warning: (%d octets) != sizeof(item{Item, Container, Book}Struct) (%d, %d, %d octets): "
 	     "Data alignment is suspect!\n", 
-	     size, sizeof(itemStruct));
+	     size, 
+	     sizeof(itemItemStruct), sizeof(itemContainerStruct), 
+	     sizeof(itemBookStruct));
     
     fprintData(stdout, size, rawData);
 

@@ -80,11 +80,13 @@ static bool isValidName(const char* name, uint32_t len)
 // SpawnShell
 SpawnShell::SpawnShell(FilterMgr& filterMgr, 
 		       ZoneMgr* zoneMgr, 
-		       Player* player)
+		       Player* player,
+		       EQItemDB* itemDB)
   : QObject(NULL, "spawnshell"),
     m_zoneMgr(zoneMgr),
     m_player(player),
     m_filterMgr(filterMgr),
+    m_itemDB(itemDB),
     m_spawns(701),
     m_drops(211),
     m_coins(101),
@@ -369,8 +371,8 @@ void SpawnShell::newGroundItem(const makeDropStruct *d)
   
   // attempt to get the item name
   QString name;
-  if (pItemDB != NULL)
-    name = pItemDB->GetItemLoreName(d->itemNr);
+  if (m_itemDB != NULL)
+    name = m_itemDB->GetItemLoreName(d->itemNr);
   
   Drop* item = (Drop*)m_drops.find(d->dropId);
   if (item != NULL)
