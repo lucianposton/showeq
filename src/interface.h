@@ -67,12 +67,13 @@ class EQInterface:public QMainWindow
    EQInterface (QWidget * parent = 0, const char *name = 0);
    ~EQInterface();
 
+   QFont appFont;
+
  public slots:
    void msgReceived(const QString &);
    void stsMessage(const QString &, int timeout = 0);
    void numSpawns(int);
    void numPacket(int);
-   void attack1Hand1(const attack1Struct *);
    void attack2Hand1(const attack2Struct *);
    void action2Message(const action2Struct *);
    void itemShop(const itemInShopStruct* items);
@@ -140,13 +141,10 @@ class EQInterface:public QMainWindow
    void toggle_view_SpawnListCol( int id );
    void toggle_view_DockedWin( int id );
    
-   void SetDefaultCharacterLevel_COMPATABILITY (void);
-        void SetCharLevel                      (void);
-        void ResetCharLevel                    (void);
-   
    void selectTheme(int id);
    void ToggleOpCodeMonitoring (int id);
    void ReloadMonitoredOpCodeList (void);
+   void toggle_session_tracking(void);
 
  signals:
    void newMessage(int index);
@@ -171,23 +169,20 @@ class EQInterface:public QMainWindow
    void toggle_opt_ConSelect();
    void toggle_opt_TarSelect();
    void toggle_opt_KeepSelectedVisible();
-   void toggle_opt_SparrMessages();
    void toggle_opt_LogSpawns();
    void toggle_opt_PvPTeams();
    void toggle_opt_PvPDeity();
-
    void toggle_view_SpawnList();
    void toggle_view_SpellList();
    void toggle_view_PlayerStats();
    void toggle_view_Compass();
    void toggle_view_PlayerSkills();
    void toggle_view_Map(int id);
-   void grabNextAddr (void);
-
    void resetMaxMana();
-
    void createMessageBox();
    void select_filter_file();
+   void toggle_view_menubar();
+   void toggle_view_statusbar();
 
  protected:
    void resizeEvent (QResizeEvent *);
@@ -197,8 +192,6 @@ class EQInterface:public QMainWindow
 		       const QString& command,
 		       const QString& audioCue);
    void showMap(int mapNum);
-   void showStatList(void);
-   void showSkillList(void);
    void showSpawnList(void);
    void showSpellList(void);
    void showCompass(void);
@@ -220,6 +213,17 @@ class EQInterface:public QMainWindow
    SpellShell* m_spellShell;
    GroupMgr* m_groupMgr;
    const Item* m_selectedSpawn;
+
+   QPopupMenu* pNetMenu;
+   QPopupMenu* pStatWinMenu;
+   QPopupMenu* pSkillWinMenu;
+   QPopupMenu* pSpawnListMenu;
+   QPopupMenu* pDockedWinMenu;
+   QPopupMenu* pCharMenu;
+   QPopupMenu* pCharLevelMenu;
+   QSpinBox* levelSpinBox;
+   QPopupMenu* pCharClassMenu;
+   QPopupMenu* pCharRaceMenu;
 
 #if 1 // ZBTEMP: Migrate compass to own frame
    CompassFrame* m_compass;
@@ -244,9 +248,9 @@ class EQInterface:public QMainWindow
    QList<MsgDialog>  m_msgDialogList;   
 
    bool viewUnknownData;
-   bool viewExpWindow;
-   bool viewCombatWindow;
 
+   int char_ClassID[PLAYER_CLASSES];
+   int char_RaceID[PLAYER_RACES];
    int  m_id_log_AllPackets;
    int  m_id_log_ZoneData;
    int  m_id_log_UnknownData;
@@ -272,19 +276,15 @@ class EQInterface:public QMainWindow
    int  m_id_opt_ConSelect;
    int  m_id_opt_TarSelect;
    int  m_id_opt_KeepSelectedVisible;
-   int  m_id_opt_SparrMessages;
    int  m_id_opt_LogSpawns;
    int  m_id_opt_PvPTeams;
    int  m_id_opt_PvPDeity;
    int  m_lPacketStartTime;
+   int  m_id_net_sessiontrack;
 
    MenuIDList IDList_StyleMenu;
-   MenuIDList IDList_CharRaceMenu;
-   MenuIDList IDList_CharClassMenu;
-   MenuIDList IDList_StatWinMenu;
 
    QStringList m_StringList;
-   QSpinBox *levelSpinBox;
    QDialog *dialogbox;
 #if 0 // ZBTEMP: Migrate compass to own frame
    QLabel* m_xPos;
@@ -299,6 +299,8 @@ class EQInterface:public QMainWindow
    bool m_isSpawnListDocked;
    bool m_isSpellListDocked;
    bool m_isCompassDocked;
+
+   
 };
 
 #endif // EQINT_H

@@ -916,8 +916,10 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
     }
   }
 
-  /* Chat Server Packet, Discard for now */
+  /* Chat and Login Server Packets, Discard for now */
   if ((packet.getDestPort() == 5999) || (packet.getSourcePort() == 5999))
+    return;
+  if ((packet.getDestPort() >= 15000) || (packet.getSourcePort() >= 15000))
     return;
 
   /* discard pure ack/req packets and non valid flags*/
@@ -985,6 +987,28 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   // packet from the client
   if (packet.getIPv4SourceN() == m_client_addr)
   {
+    if ( packet.isSEQStart() && !showeq_params->playbackpackets  && session_tracking_enabled == 1)
+    {
+        session_tracking_enabled = 2;
+        if (strlen(showeq_params->mac_address) == 17)
+        {
+	   m_packetCapture->setFilter(showeq_params->device, 
+                                   showeq_params->mac_address,
+				   showeq_params->realtime, 
+				   MAC_ADDRESS_TYPE, m_serverPort, packet.getSourcePort());
+           printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
+		showeq_params->mac_address, packet.getSourcePort(), m_serverPort);
+         }
+         else
+         {
+           m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
+				   showeq_params->realtime, IP_ADDRESS_TYPE,
+				   m_serverPort, packet.getSourcePort());
+           printf ("Building new pcap filter: EQ Client %s, Client port %d, Zone Server port %d\n",
+                   showeq_params->ip, packet.getSourcePort(), m_serverPort);
+         }
+    }
+    
     // only dispatch packets with ASQ that aren't fragmented
     if (packet.isASQ() && !packet.isFragment())
     {
@@ -998,6 +1022,14 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   // packet destined for client
   else if (packet.getIPv4DestN() == m_client_addr)
   {
+    if (packet.isClosingHi() && packet.isClosingLo())
+    {
+        m_serverArqSeqFound = false;
+	if(session_tracking_enabled)
+	{
+	   session_tracking_enabled = 1;
+	}
+    }
     // process packets that don't have an arq sequence
     if (!packet.isARQ())
     {
@@ -1290,29 +1322,29 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
 #ifdef DEBUG_PACKET
   debug ("dispatchWorldData()");
 #endif /* DEBUG_PACKET */
-  if (len < 0)
+  if (len < 10)
     return;
   
   uint16_t opCode = eqntohuint16(data);
-  
-  //printf(" ZoneServerInfo 0x%04x, ip_dest %d, m_client_addr %d,\n", opCode, pkt.getIPv4DestN(), m_client_addr);
-  if ((opCode == ZoneServerInfo) && 
-      (direction == DIR_SERVER))
+
+  printf(" ZoneServerInfo 0x%04x, m_client_addr %d, sessionTrack = %d\n", opCode, m_client_addr, session_tracking_enabled);
+  if ((opCode == ZoneServerInfo) && (direction == DIR_SERVER))
   {
     uint16_t zone_server_port = eqntohuint16(data + 130);
+    m_serverPort = zone_server_port;
     
     if (m_logger->isLoggingZoneServerInfo())
         m_logger->logZoneServerInfo(data,len,direction);
 
     // only reset packet filter if this is a live session
-    if (!showeq_params->playbackpackets)
+    if (!showeq_params->playbackpackets && session_tracking_enabled < 2)
     {
       if (strlen(showeq_params->mac_address) == 17)
       {
 	m_packetCapture->setFilter(showeq_params->device, 
 				   showeq_params->mac_address,
 				   showeq_params->realtime, 
-				   MAC_ADDRESS_TYPE, zone_server_port);
+				   MAC_ADDRESS_TYPE, zone_server_port, 0);
 	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
 		showeq_params->mac_address, zone_server_port);
       }
@@ -1320,35 +1352,35 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
       {
 	m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
 				   showeq_params->realtime, IP_ADDRESS_TYPE,
-				   zone_server_port);
+				   zone_server_port, 0);
 	printf ("Building new pcap filter: EQ Client %s, Zone Server port %d\n",
-		showeq_params->ip, zone_server_port);
+                 showeq_params->ip, zone_server_port);
       }
-    }
     
-    // we'll be wainting for a new SEQStart
-    m_serverArqSeqFound = false;
+    
+      // we'll be waiting for a new SEQStart
+      m_serverArqSeqFound = false;
       
-    // clear out all the cache entries
+      // clear out all the cache entries
     
-    // first delete all the entries
-    EQPacketMap::iterator it = m_serverCache.begin();
-    EQPacketFormat* pf;
-    fprintf(stderr, "Clearing Cache: Count: %d\n", m_serverCache.size());
-    while (it != m_serverCache.end())
-    {
-      pf = it->second;
-      delete pf;
-      it++;
+      // first delete all the entries
+      EQPacketMap::iterator it = m_serverCache.begin();
+      EQPacketFormat* pf;
+      fprintf(stderr, "Clearing Cache: Count: %d\n", m_serverCache.size());
+      while (it != m_serverCache.end())
+      {
+        pf = it->second;
+        delete pf;
+        it++;
+      }
+    
+      // now clear the cache
+      printf ("Reseting sequence cache\n");
+      m_serverCache.clear();
+      emit cacheSize(0);
+      return;
     }
-    
-    // now clear the cache
-    printf ("Reseting sequence cache\n");
-    m_serverCache.clear();
-    emit cacheSize(0);
-    return;
   }
-
    return;
 }
 
@@ -2758,22 +2790,6 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
     }
 }
 
-
-void EQPacket::setLogAllPackets (bool flag)
-{
-  showeq_params->logAllPackets = flag;
-}
-
-void EQPacket::setLogZoneData (bool flag)
-{
-  showeq_params->logZonePackets = flag;
-}
-
-void EQPacket::setLogUnknownData (bool flag)
-{
-   showeq_params->logUnknownZonePackets = flag;
-}
-
 void EQPacket::setViewUnknownData (bool flag)
 {
   m_viewUnknownData = flag;
@@ -3004,12 +3020,18 @@ void EQPacket::monitorNextClient()
   struct in_addr  ia;
   inet_aton (showeq_params->ip, &ia);
   m_client_addr = ia.s_addr;
-  printf("Listening for next client seen.\n");
+  printf("Listening for next client seen. (you must zone for this to work!)\n");
 
+  emit (toggle_session_tracking());
   if (!showeq_params->playbackpackets)
     m_packetCapture->setFilter(showeq_params->device, showeq_params->ip,
 			       showeq_params->realtime, 
-			       DEFAULT_ADDRESS_TYPE, 0);
+			       DEFAULT_ADDRESS_TYPE, 0, 0);
+}
+
+void EQPacket::session_tracking()
+{
+   session_tracking_enabled = showeq_params->session_tracking;
 }
    
 //----------------------------------------------------------------------
@@ -3168,7 +3190,8 @@ void PacketCaptureThread::setFilter (const char *device,
                                      const char *hostname,
                                      bool realtime,
                                      uint8_t address_type,
-                                     uint16_t zone_server_port
+                                     uint16_t zone_server_port,
+				     uint16_t client_port
                                     )
 {
     char filter_buf[256]; // pcap filter buffer 
@@ -3176,9 +3199,13 @@ void PacketCaptureThread::setFilter (const char *device,
     struct sched_param sp;
 
     /* Listen to World Server or the specified Zone Server */
-    if (address_type == IP_ADDRESS_TYPE) 
+    if (address_type == IP_ADDRESS_TYPE && client_port)   
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, hostname);
+    else if (address_type == IP_ADDRESS_TYPE && !client_port) 
         sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
-    else if (address_type == MAC_ADDRESS_TYPE)
+    else if (address_type == MAC_ADDRESS_TYPE && client_port)
+        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, hostname);
+    else if (address_type == MAC_ADDRESS_TYPE && !client_port)
         sprintf (filter_buf, "(udp[0:2] = 9000 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_server_port, zone_server_port, hostname);
     else
     {

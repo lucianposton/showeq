@@ -12,8 +12,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <deque> /* LEAVE THIS HERE, it fixes gcc 3.0+ compile bottlenecks.
-                       -Andon */
+#include <deque>
 
 #include "preferences.h"
 extern class PreferenceFile *pSEQPrefs;
@@ -44,6 +43,7 @@ struct ShowEQParams
   const char    *device;
   const char    *ip;
   const char    *mac_address;
+  bool           session_tracking;
   bool           realtime;
   uint16_t       arqSeqGiveUp;
   const char    *spawnfilter_filterfile;
@@ -54,7 +54,7 @@ struct ShowEQParams
   bool           spawnfilter_regexp;
   bool           spawnfilter_case;
   bool           spawnfilter_audio;
-  unsigned char  fontsize;
+  int            fontsize;
   unsigned char  statusfontsize;
   bool           retarded_coords; // Verant style YXZ instead of XYZ
   bool           fast_machine;
@@ -64,7 +64,6 @@ struct ShowEQParams
   bool           tar_select;
   bool           keep_selected_visible;
   bool           promisc;
-  bool           sparr_messages;
   bool           net_stats;
   bool           recordpackets;
   bool           playbackpackets;

@@ -99,6 +99,9 @@ private slots:
    void editButton(void);
    void addButton(void);
 
+signals:
+   void toggle_view_ChannelMsgs(void);
+
 private:
    void addMessage(QString &);
    bool eventFilter(QObject *, QEvent *);
@@ -107,6 +110,7 @@ private:
    void rightButtonPressed(void);
    void appendWithWrap(QString &);
    void applyStyle(QString &);
+   void closeEvent( QCloseEvent *e);
 
    bool               m_bScrollLock;
    int                m_nButtons;        // num of buttons (needed for sizing)

@@ -809,6 +809,11 @@ MsgDialog::menuAboutToShow(void)
 {
 }
 
+void MsgDialog::closeEvent( QCloseEvent *e)
+{
+    e->accept();
+    emit toggle_view_ChannelMsgs();
+}
 
 //
 //

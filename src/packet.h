@@ -530,9 +530,6 @@ class EQPacket : public QObject
    ~EQPacket                    ();           
    void start                   (int delay = 0);
    void stop                    (void);
-   void setLogAllPackets        (bool);
-   void setLogZoneData          (bool);
-   void setLogUnknownData       (bool);
    void setViewUnknownData      (bool);
 
    QObject        *m_parent;
@@ -561,6 +558,7 @@ class EQPacket : public QObject
    void incPlayback        (void);
    void decPlayback        (void);
    void monitorNextClient();   
+   void session_tracking();
 
    // Decoder slots
    void dispatchDecodedCharProfile(const uint8_t* decodedData, uint32_t len);
@@ -592,13 +590,10 @@ class EQPacket : public QObject
    void seqExpect              (int);
    void numPacket              (int);
 
+   void toggle_session_tracking (void);
 
-#if 1 // ZBTEMP: Currently not emit'd
-   void attack1Hand1           (const attack1Struct*);
-#endif
    void attack2Hand1           (const attack2Struct*);
    void action2Message         (const action2Struct*);
-
    
    void consRequest            (const considerStruct*);
    void consMessage            (const considerStruct*);
@@ -653,12 +648,11 @@ class EQPacket : public QObject
  
    void msgReceived            (const QString &);
    void stsMessage             (const QString &, int = 0);
-                               
-   void toggle_log_AllPackets  (void);
-   void toggle_log_ZoneData    (void);
-   void toggle_log_UnknownData (void);
 
-   
+   void toggle_log_AllPackets(void);
+   void toggle_log_ZoneData(void);
+   void toggle_log_UnknownData();
+                               
    // Decoder signals
    void resetDecoder           (void);
    void backfillSpawn      (const spawnStruct *);
@@ -692,6 +686,8 @@ class EQPacket : public QObject
    unsigned char  m_serverData [MAXSPAWNDATA];
    uint32_t       m_serverDataSize;
    unsigned long  m_client_addr;
+   uint8_t        session_tracking_enabled;
+   uint16_t       m_clientPort;
 
    struct eqTimeOfDay m_eqTime;
 
@@ -714,7 +710,7 @@ class PacketCaptureThread
          void start (const char *device, const char *host, bool realtime, uint8_t address_type);
          uint16_t getPacket (unsigned char *buff); 
          void setFilter (const char *device, const char *hostname, bool realtime,
-                        uint8_t address_type, uint16_t zone_server_port);
+                        uint8_t address_type, uint16_t zone_server_port, uint16_t client_port);
          
  private:
          static void* loop(void *param);

@@ -145,9 +145,8 @@ void EQPlayer::backfill(const charProfileStruct* player)
      emit expChangedInt (m_currentExp, minexp, m_maxExp);
 
      emit expAltChangedStr (messag);
-     emit expAltChangedInt(m_currentAltExp, 0, 15050000);
+     emit expAltChangedInt(m_currentAltExp, 0, 15000000);
 
-     printf("charpro_backfill: exp_debug: Setting m_current values %d %d %d\n", m_currentExp, m_currentAltExp, m_currentAApts);
   }
 
   messag = "Exp: " + Commanate(player->exp);
@@ -406,7 +405,7 @@ void EQPlayer::updateAltExp(const altExpUpdateStruct* altexp)
   uint32_t realexp;
   uint16_t aapoints;
 
-  realexp = altexp->altexp * altexp->percent * (15050000 / 33000);
+  realexp = altexp->altexp * altexp->percent * (15000000 / 33000);
   aapoints = altexp->aapoints;
 
   if (m_currentAApts != aapoints)
@@ -418,10 +417,10 @@ void EQPlayer::updateAltExp(const altExpUpdateStruct* altexp)
       realexp = m_currentAltExp;
 
   totalAltExp = Commanate(realexp);
-  leftAltExp = Commanate(15050000 - realexp);
-  incrementAltExp = Commanate(15050000/330);
+  leftAltExp = Commanate(15000000 - realexp);
+  incrementAltExp = Commanate(15000000/330);
 
-  emit expAltChangedInt(realexp, 0, 15050000);
+  emit expAltChangedInt(realexp, 0, 15000000);
 
   tempStr = QString("ExpAA: %1 (%2/330)").arg(totalAltExp).arg(tempStr2.sprintf("%u",altexp->altexp));
   emit expAltChangedStr(tempStr);
@@ -451,7 +450,6 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
   realexp = (diffexp / 330) * fractexp + minexp;
   incrementExp = Commanate(diffexp/330);
 
-printf("exp_debug: fract %d, min %d, max %d, diff %d, real %d, inc %d\n", fractexp, minexp, maxexp, diffexp, realexp, diffexp/330);
 
   totalExp  = Commanate(realexp - minexp);
   leftExp = Commanate(maxexp - realexp);

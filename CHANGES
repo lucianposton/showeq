@@ -1,3 +1,20 @@
+fee (22/02/02)
+------------------
+
+  Lots of changes in this batch. 
+  + added Session Tracking to the packet engine. When enabled via conf or menu,
+    showeq will lock on to a specific EQ session. You could now run 2 sessions 
+    from the same host and showeq will not get confused. This will have NO 
+    affect on single session users. Please report bugs or questions on the 
+    official board.
+  + reworked a large chunk of the gui code. A few menu changes were made but
+    prior behavior should be maintained. 
+  + updated alt exp slightly, it appears 15,000,000 is the exact value per 
+    ability point
+  + lots of little fixes here and there, make diffs if you need details :)
+
+  Cheers, fee!
+
 fee (13/02/02)
 ------------------
 

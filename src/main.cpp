@@ -145,6 +145,7 @@ int main (int argc, char **argv)
         
    struct stat  ss;
 
+
    /* Print the version number */
    printf ("ShowEQ %s, released under the GPL.\n", VERSION);
    printf ("All ShowEQ source code is Copyright (C) 2000, 2001, 2002 by the respective ShowEQ Developers\n");
@@ -190,6 +191,7 @@ int main (int argc, char **argv)
    showeq_params->no_bank = pSEQPrefs->getPrefBool("NoBank", section, 0);
    showeq_params->promisc = pSEQPrefs->getPrefBool("NoPromiscuous", section, 1);
    showeq_params->arqSeqGiveUp = pSEQPrefs->getPrefInt("ArqSeqGiveUp", section, 96);
+   showeq_params->session_tracking = pSEQPrefs->getPrefBool("SessionTracking", section, 0);
 
 
    section = "Interface";
@@ -199,7 +201,6 @@ int main (int argc, char **argv)
    showeq_params->statusfontsize = pSEQPrefs->getPrefInt("StatusFontSize", section, 8);
    showeq_params->con_select = pSEQPrefs->getPrefBool("SelectOnCon", section, 0);
    showeq_params->tar_select = pSEQPrefs->getPrefBool("SelectOnTarget", section, 0);
-   showeq_params->sparr_messages = 0;
    showeq_params->net_stats = pSEQPrefs->getPrefBool("NetStats", section, 0);
    showeq_params->systime_spawntime = pSEQPrefs->getPrefBool("SystimeSpawntime", section, 0);
    showeq_params->pvp = pSEQPrefs->getPrefBool("PvPTeamColoring", section, 0);
@@ -939,14 +940,11 @@ int main (int argc, char **argv)
    QApplication::setStyle( new QWindowsStyle );
    QApplication qapp (argc, argv);
 
-   if (optind != argc)
-      showeq_params->ip = strdup(argv[optind]);
-
    /* The main interface widget */
    EQInterface intf (0, "interface");
    qapp.setMainWidget (&intf);
-
-   /* Return */
+   
+   /* Start the main loop */
    int ret = qapp.exec ();
 
    // Shutdown the Item DB before any other cleanup
