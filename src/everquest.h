@@ -1021,8 +1021,8 @@ struct makeDropStruct
 /*0150*/ float    x;                      // X Position
 /*0154*/ float    y;                      // Y Position
 /*0158*/ char     idFile[16];             // ACTOR ID
-/*0174*/ uint8_t  unknown0054[4];         // ***Placeholder
-/*0178*/ uint8_t  unknown0074[48];        // ***Placeholder
+/*0174*/ uint8_t  unknown0174[4];         // ***Placeholder
+/*0178*/ uint8_t  unknown0178[48];        // ***Placeholder
 /*0226*/
 };
 

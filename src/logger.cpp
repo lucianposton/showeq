@@ -1614,11 +1614,11 @@ PktLogger::logMakeDrop(const makeDropStruct *item, uint32_t len, uint8_t dir)
     outputf(" %u ", item->itemNr);
     output(item->unknown0012,2);
     outputf(" %u ", item->dropId);
-    output(item->unknown0016,26);
+    output(item->unknown0146,130);
     outputf(" %f %f %f ", item->y, item->x, item->z);
-    output(item->unknown0054,4);
+    output(item->unknown0174,4);
     outputf(" [%.16s] ", item->idFile);
-    output(item->unknown0074,168);
+    output(item->unknown0178,48);
     outputf("\n");
     flush();
     return;
