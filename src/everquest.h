@@ -584,7 +584,7 @@ struct deleteSpawnStruct
 
 /*
 ** Player Profile
-** Length: 4534 Octets
+** Length: 8106 Octets
 ** OpCode: CharProfileCode
 */
 struct playerProfileStruct
@@ -633,7 +633,7 @@ struct playerProfileStruct
 /*2702*/ char     GUILD[144];             // Guild Info -- Length wrong
 /*2846*/ uint8_t  unknown2846[1376];      // ***Placeholder
 /*4222*/ char     GroupMembers[5][48];    // List of all the members in the players group
-/*4462*/ uint8_t  unknown4462[72];        // ***PlaceHolder
+/*4462*/ uint8_t  unknown4462[3644];      // ***PlaceHolder
 };
 
 /*
@@ -805,8 +805,8 @@ struct actionStruct
 };
 
 /*
-** Battle Code
-** Length: 374 Octets
+** New Zone Code
+** Length: 402 Octets
 ** OpCode: NewZoneCode
 */
 struct newZoneStruct
@@ -817,9 +817,8 @@ struct newZoneStruct
 /*0032*/ char    shortName[15];            // Zone Short Name
 /*0047*/ uint8_t unknown0047[5];           // *** Placeholder
 /*0052*/ char    longName[180];            // Zone Long Name
-/*0232*/ uint8_t unknown0232[142];         // *** Placeholder
+/*0232*/ uint8_t unknown0232[170];         // *** Placeholder
 };
-
 
 /*
 ** Zone Spawns
