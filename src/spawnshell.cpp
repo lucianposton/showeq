@@ -186,14 +186,11 @@ const Item* SpawnShell::findID(itemType type, int id)
 {
   const Item* item = NULL;
   
+  if ((type == tSpawn) && (id == m_player->id()))
+    return (const Item*)m_player;
+
   if (type != tPlayer)
     item = getMap(type).find(id);
-
-  if (item != NULL)
-    return item;
-
-  if ((type == tSpawn) && (id == m_player->id()))
-    item = m_player;
 
   return item;
 }
@@ -355,6 +352,10 @@ void SpawnShell::newGroundItem(const makeDropStruct *d, uint32_t, uint8_t dir)
   if (item != NULL)
   {
     item->update(d, name);
+    if (!showeq_params->fast_machine)
+       item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
+    else
+       item->setDistanceToPlayer(m_player->calcDist(*item));
     updateFilterFlags(item);
     item->updateLastChanged();
     emit changeItem(item, tSpawnChangedALL);
@@ -362,6 +363,10 @@ void SpawnShell::newGroundItem(const makeDropStruct *d, uint32_t, uint8_t dir)
   else
   {
     item = new Drop(d, name);
+    if (!showeq_params->fast_machine)
+       item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
+     else
+       item->setDistanceToPlayer(m_player->calcDist(*item));
     updateFilterFlags(item);
     m_drops.insert(d->dropId, item);
     emit addItem(item);
@@ -409,6 +414,10 @@ void SpawnShell::newDoorSpawn(const doorStruct* d)
    {
      Door* door = (Door*)item;
      door->update(d);
+     if (!showeq_params->fast_machine)
+        item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
+     else
+        item->setDistanceToPlayer(m_player->calcDist(*item));
      updateFilterFlags(door);
      item->updateLastChanged();
      emit changeItem(door, tSpawnChangedALL);
@@ -416,6 +425,10 @@ void SpawnShell::newDoorSpawn(const doorStruct* d)
    else
    {
      item = (Item*)new Door(d);
+     if (!showeq_params->fast_machine)
+        item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
+     else
+        item->setDistanceToPlayer(m_player->calcDist(*item));
      updateFilterFlags(item);
      m_doors.insert(d->doorId, item);
      emit addItem(item);
@@ -523,6 +536,10 @@ void SpawnShell::newSpawn(const spawnStruct& s)
 
      if (spawn->GuildID() < MAXGUILDS)
         spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->GuildID()));
+     if (!showeq_params->fast_machine)
+        item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
+     else
+        item->setDistanceToPlayer(m_player->calcDist(*item));
 
      emit changeItem(item, tSpawnChangedALL);
    }
@@ -536,6 +553,10 @@ void SpawnShell::newSpawn(const spawnStruct& s)
 
      if (spawn->GuildID() < MAXGUILDS)
         spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->GuildID()));
+     if (!showeq_params->fast_machine)
+        item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
+     else
+        item->setDistanceToPlayer(m_player->calcDist(*item));
 
      emit addItem(item);
 
@@ -597,6 +618,12 @@ void SpawnShell::updateSpawn(uint16_t id,
        spawn->setHeading(heading, 0);
      }
 
+     // Distance
+     if (!showeq_params->fast_machine)
+        item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
+     else
+        item->setDistanceToPlayer(m_player->calcDist(*item));
+        
      spawn->updateLast();
      item->updateLastChanged();
      emit changeItem(item, tSpawnChangedPosition);
@@ -976,6 +1003,10 @@ void SpawnShell::backfillSpawn(const spawnStruct *spawn)
 
     if (spawnItem->GuildID() < MAXGUILDS)
         spawnItem->setGuildTag(m_guildMgr->guildIdToName(spawnItem->GuildID()));
+    if (!showeq_params->fast_machine)
+       item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
+    else
+       item->setDistanceToPlayer(m_player->calcDist(*item));
 
     spawnItem->updateLastChanged();
     emit changeItem(spawnItem, tSpawnChangedALL);

@@ -3,6 +3,13 @@
  *
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
+ *
+ * Copyright 2001 Fee (fee@users.sourceforge.net). All Rights Reserved.
+ *
+ * Contributed to ShowEQ by fee (fee@users.sourceforge.net)
+ * for use under the terms of the GNU General Public License,
+ * incorporated herein by reference.
+ *
  */
 
 #include <qfile.h>

@@ -1423,7 +1423,7 @@ PktLogger::logNewZone(const newZoneStruct *zone, uint32_t len, uint8_t dir)
             return;
  
     outputf("R %u %04d %d %.2X%.2X [%s] [%s] ", timestamp, len, dir,
-        zone->opCode,zone->version, zone->charName, zone->shortName);
+        zone->opCode,zone->version, zone->name, zone->shortName);
 
     //output(zone->unknown0047, 5);
     outputf(" [%s] ", zone->longName);
@@ -1447,10 +1447,10 @@ PktLogger::logZoneChange(const zoneChangeStruct *zone, uint32_t len, uint8_t dir
         if (logOpen() != 0)
             return;
  
-    outputf("R %u %04d %d %.2X%.2X [%.32s] ", timestamp, len,
-	    dir, zone->opCode, zone->version, zone->charName);
+    outputf("R %u %04d %d %.2X%.2X [%.64s] ", timestamp, len,
+	    dir, zone->opCode, zone->version, zone->name);
 
-    output(zone->unknown0050, 20);
+    //output(zone->unknown0050, 20);
     outputf("\n");
     flush();
     return;

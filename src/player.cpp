@@ -44,6 +44,12 @@ Player::Player (QObject* parent,
 #ifdef DEBUG_PLAYER
   debug("Player()");
 #endif
+
+  connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
+          this, SLOT(zoneBegin(const ServerZoneEntryStruct*)));
+  connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
+          this, SLOT(zoneChanged()));
+  
   m_NPC = SPAWN_SELF;
   
   setDefaults();
@@ -143,9 +149,6 @@ void Player::backfill(const charProfileStruct* player)
 
   emit getPlayerGuildTag();
 
-  // update the con table
-  fillConTable();
-  
   // Due to the delayed decode, we must reset
   // maxplayer on zone and accumulate all totals.
   m_maxSTR += player->STR;
@@ -714,17 +717,35 @@ void Player::setLastKill(const QString& name, uint8_t level)
   m_freshKill = true;
 }
 
-void Player::zoneEntry(const ServerZoneEntryStruct* zsentry)
+void Player::zoneChanged()
 {
-  if (name() != zsentry->name)
-    reset();
-
+  reset();
   clear();
+}
+
+void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
+{
   Spawn::setName(zsentry->name);
+  Spawn::setLastName(zsentry->lastName);
   setDeity(zsentry->deity);
   setLevel(zsentry->level);
   setClassVal(zsentry->class_);
   setRace(zsentry->race);
+  setGender(zsentry->gender);
+  setGuildID(zsentry->guildId);
+  setPos((int16_t)lrintf(zsentry->x), 
+         (int16_t)lrintf(zsentry->y), 
+         (int16_t)lrintf(zsentry->z),
+	 showeq_params->walkpathrecord,
+	 showeq_params->walkpathlength
+        );
+  setDeltas(0,0,0);
+  setHeading((int8_t)lrintf(zsentry->heading), 0);
+
+  m_headingDegrees = 360 - (((int8_t)lrintf(zsentry->heading)) * 360) / 256;
+  emit headingChanged(m_headingDegrees);
+  emit posChanged(x(), y(), z(), 
+		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
 
   setUseDefaults(false);
   
@@ -749,20 +770,19 @@ void Player::playerUpdate(const playerPosStruct *pupdate, uint32_t, uint8_t dir)
 	 showeq_params->walkpathlength);
   setDeltas(pupdate->deltaX, pupdate->deltaY, 
 	    pupdate->deltaZ);
-  emit newSpeed((int)lrint(hypot( hypot( pupdate->deltaX, pupdate->deltaY ), pupdate->deltaZ)));
   setHeading(pupdate->heading, pupdate->deltaHeading);
   updateLast();
 
   m_headingDegrees = 360 - (pupdate->heading * 360) / 256;
-
   emit headingChanged(m_headingDegrees);
 
   emit posChanged(x(), y(), z(), 
 		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
 
   updateLastChanged();
-
   emit changeItem(this, tSpawnChangedPosition);
+
+  emit newSpeed((int)lrint(hypot( hypot( pupdate->deltaX, pupdate->deltaY ), pupdate->deltaZ)));
 
   static uint8_t count = 0;
 

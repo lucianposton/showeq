@@ -1,3 +1,17 @@
+fee (floyd)  01/03/2003  -  Happy New Year
+-----------------------
++ ShowEQ 4.3.4
+ + Bug Fixes
+   - resolved Qt 3.x performance issues
+   - rework some zoning logic to allow for future cleanups
+   - clean up some structs in everquest.h
+   - temp fix for wineX users
+
++ Requirement update
+  ShowEQ will now require Qt 3.0.5+ from this release forward. 
+   Qt 2.3.2 should still work as of this release but may cease to 
+   work at a future time.
+
 fee (floyd)  11/11/2002
 -----------------------
 + ShowEQ 4.3.3

@@ -720,22 +720,30 @@ struct ServerZoneEntryStruct
 /*0002*/ uint32_t checksum;               // some kind of checksum
 /*0006*/ uint8_t  unknown0006;            // unknown
 /*0007*/ char     name[64];               // Player first name
-/*0071*/ uint8_t  unknown0037[3];         // unknown
+/*0071*/ uint8_t  unknown0071[3];
 /*0074*/ uint32_t zoneId;                 // zone number
-/*0078*/ float    x;
-/*0082*/ float    y;
+/*0078*/ float    y;
+/*0082*/ float    x;
 /*0086*/ float    z;
 /*0090*/ float    heading;
-/*0094*/ uint8_t  unknown0098[72];
+/*0094*/ uint8_t  unknown0094[72];
 /*0166*/ uint16_t guildId;
-/*0168*/ uint8_t  unknown0169[7];
+/*0168*/ uint8_t  unknown0168[7];
 /*0175*/ uint8_t  class_;                 // Player's Class
 /*0176*/ uint16_t race;                   // Player's Race
-/*0178*/ uint8_t  unknown0177;            // ***Placeholder
+/*0178*/ uint8_t  gender;
 /*0179*/ uint8_t  level;                  // Player's Level
-/*0180*/ uint8_t  unknown0180[160];       // ***Placeholder 
+/*0180*/ uint8_t  unknown0180[82];        // ***Placeholder 
+/*0262*/ float    walkspeed;
+/*0266*/ float    runspeed;
+/*0270*/ uint8_t  unknown0270[12]; 
+/*0282*/ uint8_t  anon;
+/*0283*/ uint8_t  unknown0283[23];
+/*0306*/ char     lastName[20];
+/*0326*/ uint8_t  unknown0326[14];
 /*0340*/ uint16_t deity;                  // Player's Deity
 /*0342*/ uint8_t  unknown0310[16];         // ***Placeholder
+/*0358*/
 };
 
 /*
@@ -764,8 +772,8 @@ struct charProfileStruct
 /*0002*/ uint32_t checksum;               // some pre-encryption checksum
 /*0006*/ uint8_t  unknown0006[2];         // ***Placeholder
 /*0008*/ char     name[64];               // Name of player sizes not right
-/*0072*/ char     lastName[70];           // Last name of player sizes not right
-/*0142*/ uint8_t  unknown0142[2];
+/*0072*/ char     lastName[20];           // Last name of player sizes not right
+/*0092*/ uint8_t  unknown0072[52];
 /*0144*/ uint16_t race;                   // Player race
 /*0146*/ uint8_t  class_;                 // Player class
 /*0147*/ uint8_t  unknown0147;
@@ -1262,8 +1270,7 @@ struct newZoneStruct
 {
 /*0000*/ uint8_t opCode;                   // 0x5b
 /*0001*/ uint8_t version;                  // 0x20
-/*0002*/ char    charName[30];             // Character name
-/*0032*/ uint8_t unknown0032[34];          // unknown
+/*0002*/ char    name[64];                 // Character name
 /*0066*/ char    shortName[32];            // Zone Short Name
 /*0098*/ char    longName[180];            // Zone Long Name
 /*0278*/ uint8_t unknown0278[296];         // *** Placeholder
@@ -1558,8 +1565,7 @@ struct zoneChangeStruct
 {
 /*0000*/ uint8_t  opCode;               // 0xa3
 /*0001*/ uint8_t  version;              // 0x20
-/*0002*/ char     charName[32];		// Character Name
-/*0034*/ uint8_t  unknown0050[32];	// *** Placeholder
+/*0002*/ char     name[64];		// Character Name
 /*0066*/ uint32_t zoneId;               // zone Id
 /*0070*/ uint8_t unknown[8];              // unknown
 };

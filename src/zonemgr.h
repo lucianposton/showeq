@@ -41,15 +41,18 @@ class ZoneMgr : public QObject
   void restoreZoneState(void);
 
  protected slots:
-  void zoneEntry(const ClientZoneEntryStruct* zsentry);
-  void zoneEntry(const ServerZoneEntryStruct* zsentry);
+  void zoneEntry(const ClientZoneEntryStruct* zsentry, uint32_t, uint8_t);
+  void zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t, uint8_t);
   void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
   void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
 
  signals:
   void zoneBegin();
   void zoneBegin(const QString& shortZoneName);
+  void zoneBegin(const ClientZoneEntryStruct* zsentry, uint32_t len, uint8_t dir);
+  void zoneBegin(const ServerZoneEntryStruct* zsentry, uint32_t len, uint8_t dir);
   void zoneChanged(const QString& shortZoneName);
+  void zoneChanged(const zoneChangeStruct*, uint32_t, uint8_t);
   void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
 
  private:

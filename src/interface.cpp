@@ -1282,12 +1282,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   this, SLOT(summonedItem(const summonedItemStruct*)));
    connect(m_packet, SIGNAL(summonedContainer(const summonedContainerStruct*, uint32_t, uint8_t)),
 	   this, SLOT(summonedContainer(const summonedContainerStruct*)));
-   connect(m_packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)),
-	   this, SLOT(zoneEntry(const ClientZoneEntryStruct*)));
-   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
-	   this, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
-   connect(m_packet, SIGNAL(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)),
-	   this, SLOT(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
 	   this, SLOT(zoneNew(const newZoneStruct*, uint32_t, uint8_t)));
    connect(m_packet, SIGNAL(toggle_session_tracking()),
@@ -1296,10 +1290,16 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // connect EQInterface slots to ZoneMgr signals
   connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
 	  this, SLOT(zoneBegin(const QString&)));
+  connect(m_zoneMgr, SIGNAL(zoneChanged(const zoneChangeStruct*, uint32_t, uint8_t)),
+	  this, SLOT(zoneChanged(const zoneChangeStruct*, uint32_t, uint8_t)));
   connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
 	  this, SLOT(zoneChanged(const QString&)));
   connect(m_zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)),
 	  this, SLOT(zoneEnd(const QString&, const QString&)));
+  connect(m_zoneMgr, SIGNAL(zoneBegin(const ClientZoneEntryStruct*, uint32_t, uint8_t)),
+          this, SLOT(zoneEntry(const ClientZoneEntryStruct*)));
+  connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
+          this, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
 
    // connect the SpellShell slots to EQInterface signals
    connect(this, SIGNAL(spellMessage(QString&)),
@@ -1386,8 +1386,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	   m_player, SLOT(updateStamina(const staminaStruct*)));
    connect(m_packet, SIGNAL(playerItem(const playerItemStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(wearItem(const playerItemStruct*)));
-   connect(m_packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
    connect(m_packet, SIGNAL(consMessage(const considerStruct*, uint32_t, uint8_t)),
 	   m_player, SLOT(consMessage(const considerStruct*, uint32_t, uint8_t)));
 
@@ -4314,7 +4312,7 @@ void EQInterface::zoneEntry(const ServerZoneEntryStruct* zsentry)
 #endif
 }
 
-void EQInterface::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t dir)
+void EQInterface::zoneChanged(const zoneChangeStruct* zoneChange, uint32_t, uint8_t dir)
 {
 #ifdef ZONE_ORDER_DIAG
   QString tempStr;

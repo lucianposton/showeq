@@ -57,7 +57,8 @@ public:
    void updateSpawnHP(const hpUpdateStruct* hpupdate);
    void updateStamina(const staminaStruct* stam);
    void setLastKill(const QString& name, uint8_t level);
-   void zoneEntry(const ServerZoneEntryStruct* zsentry);
+   void zoneChanged(void);
+   void zoneBegin(const ServerZoneEntryStruct* zsentry);
    void playerUpdate(const playerPosStruct* pupdate, uint32_t, uint8_t);
    void consMessage(const considerStruct * con, uint32_t, uint8_t dir);
 

@@ -78,6 +78,9 @@ public:
    void setShellItem(const Item *);
    itemType type();
    virtual QString key(int column, bool ascending) const;
+#if (QT_VERSION > 0x030000)
+   virtual int compare(QListViewItem *i, int col, bool ascending) const;
+#endif
    //--------------------------------------------------
    int m_npc;
 private:

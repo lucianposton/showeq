@@ -1026,9 +1026,13 @@ void EQPacket::decodePacket (int size, unsigned char *buffer)
   if ((packet.getDestPort() == ChatServerPort) ||
       (packet.getSourcePort() == ChatServerPort))
     return;
+
+#if 0 // FEETMP: commenting this block out temp to allow WineX functionality
+      // WineX clients apparently use client ports in the 30k+ range
   if ((packet.getDestPort() >= LoginServerMinPort) || 
       (packet.getSourcePort() >= LoginServerMinPort))
     return;
+#endif
 
   /* discard pure ack/req packets and non valid flags*/
   if (packet.flagsHi() < 0x02 || packet.flagsHi() > 0x46 || size < 10)

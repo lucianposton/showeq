@@ -132,11 +132,11 @@ class EQInterface:public QMainWindow
    void summonedContainer(const summonedContainerStruct*);
    void zoneEntry(const ClientZoneEntryStruct* zsentry);
    void zoneEntry(const ServerZoneEntryStruct* zsentry);
-   void zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
    void zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t);
    void zoneBegin(const QString& shortZoneName);
    void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
    void zoneChanged(const QString& shortZoneName);
+   void zoneChanged(const zoneChangeStruct* zoneChange, uint32_t, uint8_t);
    void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
    void clientTarget(const clientTargetStruct* cts);
    void spawnSelected(const Item* item);

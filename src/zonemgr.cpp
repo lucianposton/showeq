@@ -10,6 +10,8 @@
  * for use under the terms of the GNU General Public License, 
  * incorporated herein by reference.
  *
+ * modified by Fee (fee@users.sourceforge.net)
+ *
  */
 
 #include <qfile.h>
@@ -37,7 +39,7 @@ static const uint32_t* magic = (uint32_t*)magicStr;
 // ----------                            -------                       --------
 // zoneChange(zoneChangeStruct, client)                                true
 // zoneChange(zoneChangeStruct, server)  zoneChanged(shortName)        true
-// zoneEntry(ClientZoneEntryStruct)      zoneBegin()                   true
+// zoneEntry(ClientZoneEntryStruct)      zoneBegin()                   false
 // zoneEntry(ServerZoneEntryStruct)      zoneBegin(shortName)          false
 // zoneNew(newZoneStruct)                zoneEnd(shortName, longName)  false
 //
@@ -49,9 +51,9 @@ ZoneMgr::ZoneMgr(EQPacket* packet, QObject* parent, const char* name)
   m_zoning = false;
 
   connect(packet, SIGNAL(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)),
-	  this, SLOT(zoneEntry(const ClientZoneEntryStruct*)));
+	  this, SLOT(zoneEntry(const ClientZoneEntryStruct*, uint32_t, uint8_t)));
   connect(packet, SIGNAL(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
-	  this, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
+	  this, SLOT(zoneEntry(const ServerZoneEntryStruct*, uint32_t, uint8_t)));
   connect(packet, SIGNAL(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)),
 	  this, SLOT(zoneChange(const zoneChangeStruct*, uint32_t, uint8_t)));
   connect(packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
@@ -129,44 +131,47 @@ void ZoneMgr::restoreZoneState(void)
   }
 }
 
-void ZoneMgr::zoneEntry(const ClientZoneEntryStruct* zsentry)
+void ZoneMgr::zoneEntry(const ClientZoneEntryStruct* zsentry, uint32_t len, uint8_t dir)
 {
   m_shortZoneName = "unknown";
   m_longZoneName = "unknown";
 
-  m_zoning = true;
+  m_zoning = false;
 
   emit zoneBegin();
+  emit zoneBegin(zsentry, len, dir);
 
   if (showeq_params->saveZoneState)
     saveZoneState();
 }
 
-void ZoneMgr::zoneEntry(const ServerZoneEntryStruct* zsentry)
+void ZoneMgr::zoneEntry(const ServerZoneEntryStruct* zsentry, uint32_t len, uint8_t dir)
 {
   m_shortZoneName = zoneNameFromID(zsentry->zoneId);
 
   m_zoning = false;
 
   emit zoneBegin(m_shortZoneName);
+  emit zoneBegin(zsentry, len, dir);
 
   if (showeq_params->saveZoneState)
     saveZoneState();
 }
 
-void ZoneMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t, uint8_t dir)
+void ZoneMgr::zoneChange(const zoneChangeStruct* zoneChange, uint32_t len, uint8_t dir)
 {
   m_shortZoneName = zoneNameFromID(zoneChange->zoneId);
   m_zoning = true;
 
   if (dir == DIR_SERVER)
     emit zoneChanged(m_shortZoneName);
+    emit zoneChanged(zoneChange, len, dir);
 
   if (showeq_params->saveZoneState)
     saveZoneState();
 }
 
-void ZoneMgr::zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t dir)
+void ZoneMgr::zoneNew(const newZoneStruct* zoneNew, uint32_t len, uint8_t dir)
 {
   m_shortZoneName = zoneNew->shortName;
   m_longZoneName = zoneNew->longName;

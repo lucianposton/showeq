@@ -110,17 +110,122 @@ itemType SpawnListItem::type()
 
 QString SpawnListItem::key(int column, bool ascending) const
 {
-  if (m_item == NULL)
-    return text(0);
-    
+//  if (m_item == NULL)
+//    return text(0);
+#if (QT_VERSION < 300) 
   if ((column < tSpawnColHP) || (column > tSpawnColDist))
-    return text(column);
+     return text(column);
 
   double num = text(column).toDouble();
   QString textNum;
   textNum.sprintf("%08.2f", num);
   return textNum;
+#else
+  return text(column);
+#endif
 }
+
+#if (QT_VERSION > 0x030000)
+int SpawnListItem::compare(QListViewItem *i, int col, bool ascending) const
+{
+  if (col == 0) // Name
+     return key( col, ascending ).compare( i->key( col, ascending) );
+
+  if (m_item == NULL)
+     return -1;
+
+  SpawnListItem *other = (SpawnListItem *)i;
+
+  if (m_item->type() == tUnknown && other->m_item->type() == tUnknown)
+     return 0;
+  else if (m_item->type() == tUnknown)
+     return -1;
+  else if (other->m_item->type() == tUnknown)
+     return 1;
+
+
+  const Spawn* spawn = NULL;
+  const Spawn* other_spawn = NULL;
+  const Item* item = NULL;
+  const Item* other_item = NULL;
+
+
+  if ((m_item->type() == tSpawn) || (m_item->type() == tPlayer))
+      spawn = (const Spawn*)m_item;
+
+  if ((other->m_item->type() == tSpawn) || (other->m_item->type() == tPlayer))
+      other_spawn = (const Spawn*)other->m_item;
+
+  // Spawn v Spawn specific compares  
+  if ((spawn != NULL) && (other_spawn != NULL))
+  {
+     switch (col)
+     {
+         case 1: // Level
+            if (spawn->level() == other_spawn->level())
+               return 0;
+            else
+               return spawn->level() < other_spawn->level() ? -1 : 1;
+         case 2: // Current HP
+            if (spawn->HP() == other_spawn->HP())
+               return 0;
+            else
+               return spawn->HP() < other_spawn->HP() ? -1 : 1;
+         case 3: // Max HP
+            if (spawn->maxHP() == other_spawn->maxHP())
+               return 0;
+            else
+               return spawn->maxHP() < other_spawn->maxHP() ? -1 : 1;
+     };
+  }
+  else if (spawn != NULL && other_spawn == NULL && (col > 0 || col < 4))
+  {
+      return 1;
+  }
+  else if (spawn == NULL && other_spawn != NULL && (col > 0 || col < 4))
+  {
+      return -1;
+  }
+
+  item = (const Item*)m_item;
+  other_item = (const Item*)other->m_item;
+
+  // Generic Item compares
+  switch (col)
+  {
+      case 4:   // X Position
+         if (item->x() == other_item->x())
+            return 0;
+         else
+            return item->x() < other_item->x() ? -1 : 1;
+      case 5:   // Y Position
+         if (item->y() == other_item->y())
+            return 0;
+         else
+            return item->y() < other_item->y() ? -1 : 1;
+      case 6:   // Z Position
+         if (item->displayZPos() == other_item->displayZPos())
+            return 0;
+         else
+            return item->displayZPos() < other_item->displayZPos() ? -1 : 1;
+      case 7:   // ID
+         if (item->id() == other_item->id())
+            return 0;
+         else
+            return item->id() < other_item->id() ? -1 : 1;
+      case 8:   // Distance
+         if (item->getIDistanceToPlayer() == other_item->getIDistanceToPlayer())
+            return 0;
+         else
+            return item->getIDistanceToPlayer() < other_item->getIDistanceToPlayer() ? -1 : 1;
+      default:
+         // use default method for columns with simple text
+         return key( col, ascending ).compare( i->key( col, ascending) );
+
+  };
+
+}
+#endif
 
 void SpawnListItem::update(Player* player, uint32_t changeType)
 {
@@ -206,9 +311,15 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
 
      // Distance
      if (!showeq_params->fast_machine)
-       buff.sprintf("%5d", player->calcDist2DInt(*item()));
+     {
+       //buff.sprintf("%5d", player->calcDist2DInt(*item()));
+       buff.sprintf("%5d", item()->getIDistanceToPlayer());
+     }
      else
-       buff.sprintf("%5.1f", player->calcDist(*item()));
+     {
+       //buff.sprintf("%5.1f", player->calcDist(*item()));
+       buff.sprintf("%5.1f", item()->getFDistanceToPlayer());
+     }
      setText(tSpawnColDist, buff);
    }
 
