@@ -74,7 +74,7 @@
 
 #define CorpseLocCode               0xf014
 
-#define RemDropCode                 0xf020
+#define RemDropCode                 0x00d0
 
 #define ActionCode                  0xf04d
 
@@ -84,7 +84,7 @@
 
 #define ManaDecrementCode           0xf175
 
-#define StartCastCode               0xf174
+#define StartCastCode               0x0065
 
 #define MemSpellCode                0xf178
 
@@ -94,13 +94,13 @@
 
 #define DropCoinsCode               0x0740
 
-#define cStartCampingCode           0x0742
+#define cStartCampingCode           0x0206
 
 #define RemoveCoinsCode             0x0820
 
-#define OpenVendorCode              0x0b40
+#define OpenVendorCode              0x00ce
 
-#define cItemInShopCode             0x0c40
+#define cItemInShopCode             0x0080
 
 #define SysMsgCode                  0x1420
 
@@ -108,13 +108,13 @@
 
 #define cRunToggleCode              0x1f40
 
-#define cJumpCode                   0x2040
+#define cJumpCode                   0x00a6
 
 #define GroupInfoCode               0x2640
 
 #define MoneyThingCode              0x2820
 
-#define cCursorItemCode             0x2c41
+#define cCursorItemCode             0x015a
 
 #define CharInfo                    0x2e40
 
@@ -122,17 +122,17 @@
 
 #define TradeItemInCode             0x3140
 
-#define xBuffDropCode               0x3241
+#define xBuffDropCode               0x0160
 
 #define TradeBookInCode             0x3440
 
-#define cConCorpseCode              0x3442
+#define cConCorpseCode              0x021a
 
 #define xBuyItemCode                0x3540
 
 #define sSpellFizzleRegainCode      0x3542
 
-#define FormattedMessageCode        0x3642
+#define FormattedMessageCode        0x021c
 
 #define MoneyUpdateCode             0x3d41
 
@@ -190,11 +190,11 @@
 
 #define cHideCode                   0x8641
 
-#define cSenseHeadingCode           0x8741
+#define cSenseHeadingCode           0x006a
 
 #define SkillIncCode                0x8941
 
-#define DoorOpenCode                0x8e40
+#define DoorOpenCode                0x0111
 
 #define IllusionCode                0x9140
 
