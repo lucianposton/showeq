@@ -639,7 +639,7 @@ struct playerProfileStruct
 /*2702*/ char     GUILD[144];             // Guild Info -- Length wrong
 /*2846*/ uint8_t  unknown2846[1376];      // ***Placeholder
 /*4222*/ char     GroupMembers[5][48];    // List of all the members in the players group
-/*4462*/ uint8_t  unknown4462[3644];      // ***PlaceHolder
+/*4462*/ uint8_t  unknown4462[3608];      // ***PlaceHolder
 };
 
 /*

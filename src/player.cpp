@@ -415,7 +415,7 @@ void EQPlayer::updateExp(const expUpdateStruct* exp)
   incrementExp = Commanate(diffexp/330);
   if (m_currentExp > 0)
   {
-    if (m_currentExp > realexp)
+    if (m_currentExp > (realexp + minexp))
         realexp = m_currentExp;
 
     totalExp  = Commanate(realexp - minexp);
