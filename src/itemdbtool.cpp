@@ -41,7 +41,7 @@ static char *id="@(#) $Id$";
 
 ///////////////////////////////////
 //   defines used for option processing
-#define OPTION_LIST "dl::f:r:o:e:c:DRi:UuhvV"
+#define OPTION_LIST "dl::f:r:o:e:x:c:DRi:UuhvV"
 
 ///////////////////////////////////
 // For long options without any short (single letter) equivalent, we'll
@@ -956,15 +956,186 @@ int exportRawRecord(EQItemDB* itemDB,
   return result;
 }
 
-int exportRecordCSV(EQItemDB* itemDB, 
-		    const char* filename, 
+int
+dumpItemCSV(EQItemDB* itemDB, 
+			FILE* fh,
 		    uint16_t itemNr)
 {
-  // export data to Comma Seperated Value file
-  fprintf(stderr, "%s: TODO: Implement exportRecordCSV!\n",
-	  progname);
+	QString nameString;
+	QString loreString;
+	bool hasEntry = false;
+	EQItemDBEntry* entry = NULL;
 
-  return -1;
+	nameString = itemDB->GetItemName(itemNr);
+	loreString = itemDB->GetItemLoreName(itemNr);
+	hasEntry = itemDB->GetItemData(itemNr, &entry);
+
+	fprintf (fh, "itemNr:%d:", itemNr);
+	if (!nameString.isEmpty())
+		fprintf (fh, "Name:%s:", (const char*)nameString);
+
+	if (hasEntry)
+	{
+		if (loreString[0] == '*')
+		{
+			fprintf (fh, "Lore:%s:", (const char*)loreString);
+			fprintf (fh, "LORE:1:");
+		}
+		fprintf (fh, "Weight:%.1f:", (entry->GetWeight())/10.0);
+		fprintf (fh, "Flag:%#06x:", entry->GetFlag());
+		fprintf (fh, "Size:%d:", entry->GetSize());
+		fprintf (fh, "Slot:%d:", entry->GetSlots());
+		fprintf (fh, "Icon:%d:", entry->GetIconNr());
+		if (entry->GetNoDrop() == 0)
+			fprintf (fh, "NODROP:1:");
+		if (entry->GetNoSave() == 0)
+			fprintf (fh, "NORENT:1:");
+
+		if (entry->IsBook() == 0)
+		{
+			if (entry->GetMagic() == 1)
+				fprintf (fh, "MAGIC:1:");
+			if (entry->GetLight())
+				fprintf (fh, "Light:%d:", entry->GetLight());
+			if (entry->GetSTR())
+				fprintf (fh, "Str:%d:", entry->GetSTR());
+			if (entry->GetSTA())
+				fprintf (fh, "Sta:%d:", entry->GetSTA());
+			if (entry->GetCHA())
+				fprintf (fh, "Cha:%d:", entry->GetCHA());
+			if (entry->GetDEX())
+				fprintf (fh, "Dex:%d:", entry->GetDEX());
+			if (entry->GetINT())
+				fprintf (fh, "Int:%d:", entry->GetINT());
+			if (entry->GetAGI())
+				fprintf (fh, "Agi:%d:", entry->GetAGI());
+			if (entry->GetWIS())
+				fprintf (fh, "Wis:%d:", entry->GetWIS());
+			if (entry->GetMR())
+				fprintf (fh, "SvM:%d:", entry->GetMR());
+			if (entry->GetFR())
+				fprintf (fh, "SvF:%d:", entry->GetFR());
+			if (entry->GetCR())
+				fprintf (fh, "SvC:%d:", entry->GetCR());
+			if (entry->GetDR())
+				fprintf (fh, "SvD:%d:", entry->GetDR());
+			if (entry->GetPR())
+				fprintf (fh, "SvP:%d:", entry->GetPR());
+			if (entry->GetHP())
+				fprintf (fh, "HP:%d:", entry->GetHP());
+			if (entry->GetMana())
+				fprintf (fh, "Mana:%d:", entry->GetMana());
+			if (entry->GetAC())
+				fprintf (fh, "AC:%d:", entry->GetAC());
+			if (entry->GetDelay())
+				fprintf (fh, "Del:%d:", entry->GetDelay());
+			if (entry->GetDamage())
+			{
+				fprintf (fh, "Dam:%d:", entry->GetDamage());
+				fprintf (fh, "Skill:%d:", entry->GetSkill());
+			}
+			if (entry->GetRange())
+				fprintf (fh, "Range:%d:", entry->GetRange());
+			if (entry->GetSpellId0() != ITEM_SPELLID_NOSPELL && entry->GetSpellId0() != 0)
+			{
+				fprintf (fh, "Effect:%d:", entry->GetSpellId0());
+				if (entry->GetLevel())
+					fprintf (fh, "EffLvl:%d:", entry->GetLevel());
+				if (entry->GetCharges())
+					fprintf (fh, "EffChg:%d:", entry->GetCharges());
+			}
+			fprintf (fh, "Class:%d:", entry->GetClasses());
+			if (entry->IsContainer())
+			{
+				if (entry->GetNumSlots())
+					fprintf (fh, "ConSlot:%d:", entry->GetNumSlots());
+				if (entry->GetSizeCapacity())
+					fprintf (fh, "ConCap:%d:", entry->GetSizeCapacity());
+				if (entry->GetWeightReduction())
+					fprintf (fh, "ConWr:%d:", entry->GetWeightReduction());
+			} else
+			{
+				// Race only if not a container
+				fprintf (fh, "Race:%d:", entry->GetRaces());
+			}
+		}
+		fprintf (fh, "\n");
+
+		// don't need the entry anymore, delete it.
+		delete entry;
+	} else {
+		return -1;
+	}
+	return 0;
+}
+
+int exportRecordCSV(EQItemDB* itemDB, 
+	const char* filename,
+	uint16_t itemNr)
+{
+	int result = 0;
+	FILE* outfile;
+	int count = 0;
+
+	// open the output file
+	outfile = fopen(filename, "w");
+
+	// if unable to open it, just error out now
+	if (outfile == NULL)
+	{
+		fprintf(stderr, "%s: Unable to open output file '%s'\n", progname, filename);
+			return 1;
+	}
+
+	// if an item number was specified, just get that item
+	if (itemNr != 0)
+	{
+		// retrieve item data
+		dumpItemCSV(itemDB, outfile, itemNr);
+		count++;
+	}
+	else
+	{
+		// They didn't specify a specific item, so dump them all.
+
+		// retrieve an iterator over the RAW_DATA_DB
+		EQItemDBIterator* it = new EQItemDBIterator(itemDB, EQItemDB::RAW_DATA_DB);
+
+		// make sure there is an iterator
+		if (it == NULL)
+		{
+			// if unable to retrieve an iterator on the item raw data db
+			// then nothing else to do
+			fprintf(stderr, "%s: Unable to open iterator on item raw data db!\n", progname);
+			result = 4;
+		}
+		else
+		{
+			uint16_t nextItemNr, currentItemNr;
+			bool hasNext;
+
+			// retrieve the first item number
+			hasNext = it->GetFirstItemNumber(&nextItemNr);
+
+			// keep going until no more items
+			while (hasNext)
+			{
+				// the next item number is now the current item number
+				currentItemNr = nextItemNr;
+
+				// attempt to retrive a new next item number
+				hasNext = it->GetNextItemNumber(&nextItemNr);
+				// retrieve item data
+
+				dumpItemCSV(itemDB, outfile, currentItemNr);
+				count++;
+			}
+		}
+	}
+	fprintf(stderr, "%s: Wrote %d items to file '%s'.\n",
+		progname, count, filename);
+
+	return result;
 }
 
 int deleteRecord(EQItemDB* itemDB, 
@@ -1236,7 +1407,7 @@ int displayRecord(EQItemDB* itemDB,
     printf ("Model: %s\n", (const char*)entry->GetIdFile());
     printf ("flag: 0x%4.4x\n", entry->GetFlag());
     printf ("MagicFlag: 0x%2.2x\n", entry->GetMagic());
-    printf ("Weight: %d\n", entry->GetWeight());
+    printf ("Weight: %.1f\n", (entry->GetWeight())/10.0);
     printf ("Flags: ");
     if (entry->IsBook())
       printf (" BOOK");
