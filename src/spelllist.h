@@ -35,69 +35,72 @@
 
 class SpellListItem : public QListViewItem 
 {
-   public:
-      SpellListItem(QListViewItem *parent);
-      SpellListItem(QListView *parent = NULL);
-	//Worried - added paintCell to enable color changes
-      virtual void paintCell( QPainter *p, const QColorGroup &cg,
-                              int column, int width, int alignment );
-      const QColor textColor();
-      void setTextColor(const QColor &color);
-      void update();
-      void setSpellItem(const SpellItem *);
-      const SpellItem* item() const;
-      const QString& category() const;
-      void setCategory(QString& cat);
-   private:
-      QColor m_textColor;
-      bool m_btextSet;
-      const SpellItem *m_item;
-      QString m_category;
+ public:
+  SpellListItem(QListViewItem *parent);
+  SpellListItem(QListView *parent = NULL);
+  virtual void paintCell( QPainter *p, const QColorGroup &cg,
+			  int column, int width, int alignment );
+  const QColor textColor();
+  void setTextColor(const QColor &color);
+  void update();
+  void setSpellItem(const SpellItem *);
+  const SpellItem* item() const;
+  const QString& category() const;
+  void setCategory(QString& cat);
+ private:
+  QColor m_textColor;
+  bool m_btextSet;
+  const SpellItem *m_item;
+  QString m_category;
 };
 
 class SpellList : public SEQListView 
 {
-   Q_OBJECT
-   public:
-      SpellList(SpellShell* sshell, QWidget *parent = 0, const char *name = 0);
-      void SelectItem(const SpellItem *item);
-      SpellListItem* Selected();
-      SpellListItem* InsertSpell(const SpellItem *item);
-      void DeleteItem(const SpellItem *item);
-      //SpellItem* AddCategory(QString& name, QColor color = Qt::black);
-      //void RemCategory(SpellListItem *);
-      //void clearCategories();
-      QColor pickSpellColor(const SpellItem *item, QColor def = Qt::black) const;
-      //QString& getCategory(SpellListItem *);
-      SpellListItem* Find(const SpellItem *);
+  Q_OBJECT
+ public:
+  SpellList(SpellShell* sshell, QWidget *parent = 0, const char *name = 0);
+  QPopupMenu* menu();
+  void SelectItem(const SpellItem *item);
+  SpellListItem* Selected();
+  SpellListItem* InsertSpell(const SpellItem *item);
+  void DeleteItem(const SpellItem *item);
+  //SpellItem* AddCategory(QString& name, QColor color = Qt::black);
+  //void RemCategory(SpellListItem *);
+  //void clearCategories();
+  QColor pickSpellColor(const SpellItem *item, QColor def = Qt::black) const;
+  //QString& getCategory(SpellListItem *);
+  SpellListItem* Find(const SpellItem *);
+  
+ signals:
+  void listUpdated();   // flags in spawns have changed
+  void listChanged();   // categories have changed
+  
+ public slots:
+  // SpellShell signals
+  void addSpell(const SpellItem *);
+  void delSpell(const SpellItem *);
+  void changeSpell(const SpellItem *);
+  void selectSpell(const SpellItem *);
+  void clear();
 
-   signals:
-      void listUpdated();   // flags in spawns have changed
-      void listChanged();   // categories have changed
+  void mouseDoubleClicked(QListViewItem *item);
+  void rightButtonClicked(QListViewItem *, const QPoint&, int);
+  void activated(int);
 
-   public slots:
-      // SpellShell signals
-      void addSpell(const SpellItem *);
-      void delSpell(const SpellItem *);
-      void changeSpell(const SpellItem *);
-      void selectSpell(const SpellItem *);
-      void clear();
+ protected slots:  
+   void init_menu(void);
 
-      void mouseDoubleClicked(QListViewItem *item);
-      void rightButtonClicked(QListViewItem *, const QPoint&, int);
-      void activated(int);
-
-   private:
-      void selectAndOpen(SpellListItem *);
-      SpellShell* m_spellShell;
-      QValueList<QString> m_categoryList;
-      QValueList<SpellListItem *> m_spellList;
-      QPopupMenu *m_menu;
-
-      int mid_spellName, mid_spellId;
-      int mid_casterId, mid_casterName;
-      int mid_targetId, mid_targetName;
-      int mid_casttime, mid_duration;
+ private:
+  void selectAndOpen(SpellListItem *);
+  SpellShell* m_spellShell;
+  QValueList<QString> m_categoryList;
+  QValueList<SpellListItem *> m_spellList;
+  QPopupMenu *m_menu;
+  
+  int mid_spellName, mid_spellId;
+  int mid_casterId, mid_casterName;
+  int mid_targetId, mid_targetName;
+  int mid_casttime, mid_duration;
 };
 
 class SpellListWindow : public SEQWindow
@@ -107,6 +110,8 @@ class SpellListWindow : public SEQWindow
  public:
   SpellListWindow(SpellShell* sshell, QWidget* parent = 0, const char* name = 0);
   ~SpellListWindow();
+  virtual QPopupMenu* menu();
+
   SpellList* spellList() { return m_spellList; }
 
  public slots:
