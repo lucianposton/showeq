@@ -344,55 +344,58 @@ struct spawnPositionUpdate
 */ 
 struct spawnStruct
 { 
-/*0000*/ uint8_t  unknown0000[48];        // Placeholder 
-/*0048*/ uint16_t spawnId;                // Id of new spawn 
-/*0050*/ uint8_t  typeflag;               // Bodytype id
-/*0051*/ uint8_t  unknown0051;            // ***Placeholder 
-/*0052*/ uint16_t petOwnerId;             // Id of pet owner (0 if not a pet) 
-/*0054*/ int16_t  curHp;                  // Maximum hp 
-/*0056*/ uint16_t guildID;                // Current hp // GuildID now?
-/*0058*/ uint16_t race;                   // Race 
-/*0060*/ uint8_t  NPC;                    // NPC type: 0=Player, 1=NPC,
-                                          // 2=Player Corpse, 3=Monster Corpse,
-                                          // 4=???, 5=Unknown Spawn, 10=Self 
-/*0061*/ uint8_t  class_;                 // Class 
-/*0062*/ uint8_t  gender;                 // gender, 0=Male, 1=Female, 2=Other 
-/*0063*/ uint8_t  level;                  // Level of spawn (might be one byte) 
-/*0064*/ uint8_t  invis;                  // 1=invis
-/*0065*/ uint8_t  unknown0065;            // 
-/*0066*/ uint8_t  pvp;                    // 
-/*0067*/ uint8_t  anim_type;              // 
-/*0068*/ uint8_t  light;                  // light source
-/*0069*/ uint8_t  animation;              // Animation spawn is currently using
-/*0070*/ int8_t   heading;                // Current Heading 
-/*0071*/ int8_t   deltaHeading;           // Delta Heading 
-/*0072*/ int16_t  y;                      // Y Position 
-/*0074*/ int16_t  x;                      // X Position 
-/*0076*/ int16_t  z;                      // Z Position 
-/*0078*/ signed   deltaY:10;              // Velocity Y 
+/*0000*/ uint8_t  animation;              // Animation spawn is currently using
+/*0001*/ int8_t   heading;                // Current Heading 
+/*0002*/ int8_t   deltaHeading;           // Delta Heading 
+/*0003*/ int16_t  y;                      // Y Position 
+/*0005*/ int16_t  x;                      // X Position 
+/*0007*/ int16_t  z;                      // Z Position 
+/*0009*/ signed   deltaY:10;              // Velocity Y 
          unsigned spacer1:1;              // Placeholder 
          signed   deltaZ:10;              // Velocity Z 
          unsigned spacer2:1;              // ***Placeholder 
          signed   deltaX:10;              // Velocity X 
-/*0082*/ char     name[64];               // Name of spawn (len is 64 or less) 
-/*0146*/ char     lastName[20];           // Last Name of player 
-/*0166*/ uint8_t  unknown0194[8];         // ***Placeholder 
-/*0174*/ uint8_t  unknown0202[4];         // ***Placeholder 
-/*0178*/ uint8_t  anon;                   // Anon=1, Role=2
-/*0179*/ uint8_t  afk;                    //
-/*0180*/ uint8_t  unknown0180;            //
-/*0181*/ uint8_t  linkdead;               //
-/*0182*/ uint8_t  gm;                     // 
-/*0183*/ uint8_t  unknown0183;            //
-/*0184*/ uint8_t  npc_armor_graphic;      // 0xFF=Player, 0=none, 1=leather, 2=chain, 3=plate
-/*0185*/ uint8_t  npc_helm_graphic;       // 0xFF=Player, 0=none, 1=leather, 2=chain, 3=plate
-/*0186*/ uint8_t  unknown0186[2];         // 
-/*0188*/ uint16_t equipment[9];           // 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg
+/*0013*/ uint16_t petOwnerId;
+/*0015*/ uint8_t  unknown0013[9];
+/*0024*/ float    size;
+/*0028*/ float    walkspeed;
+/*0032*/ float    runspeed;
+/*0036*/ uint8_t  unknown0036[34];        // Placeholder 
+/*0070*/ uint16_t petOwnerId;             // Id of pet owner (0 if not a pet) 
+/*0072*/ uint16_t spawnId;                // Id of new spawn 
+/*0074*/ uint8_t  typeflag;               // Bodytype id
+/*0075*/ uint8_t  unknown0075;            // ***Placeholder 
+/*0076*/ int16_t  curHp;                  // Maximum hp 
+/*0078*/ uint16_t guildID;                // Current hp // GuildID now?
+/*0080*/ uint16_t race;                   // Race 
+/*0082*/ uint8_t  NPC;                    // NPC type: 0=Player, 1=NPC,
+                                          // 2=Player Corpse, 3=Monster Corpse,
+                                          // 4=???, 5=Unknown Spawn, 10=Self 
+/*0083*/ uint8_t  class_;                 // Class 
+/*0084*/ uint8_t  gender;                 // gender, 0=Male, 1=Female, 2=Other 
+/*0085*/ uint8_t  level;                  // Level of spawn
+/*0086*/ uint8_t  invis;                  // 1=invis
+/*0087*/ uint8_t  unknown0087;            // 
+/*0088*/ uint8_t  pvp;                    // 
+/*0089*/ uint8_t  anim_type;              // 
+/*0090*/ uint8_t  light;                  // light source
+/*0091*/ uint8_t  anon;                   // Anon=1, Role=2
+/*0092*/ uint8_t  afk;                    //
+/*0093*/ uint8_t  unknown0093;            //
+/*0094*/ uint8_t  linkdead;               //
+/*0095*/ uint8_t  gm;                     // 
+/*0096*/ uint8_t  unknown0096;            //
+/*0097*/ uint8_t  npc_armor_graphic;      // 0xFF=Player, 0=none, 1=leather, 2=chain, 3=plate
+/*0098*/ uint8_t  npc_helm_graphic;       // 0xFF=Player, 0=none, 1=leather, 2=chain, 3=plate
+/*0099*/ uint8_t  unknown0099;            // 
+/*0100*/ uint16_t equipment[9];           // 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg
                                           // 6=boot, 7=melee1, 8=melee2
-/*0206*/ uint8_t  unknown0206[2];         // 
-/*0208*/ uint16_t deity;                  // deity
-/*0210*/ uint8_t  unknown0210[8];         // ***Placeholder 
-/*0218*/ uint8_t  unknown0218[2];         // ***Placeholder 
+/*0118*/ uint8_t  unknown0118[2];         // 
+/*0120*/ uint16_t deity;                  // deity
+/*0122*/ uint8_t  unknown0122;            // 
+/*0123*/ char     name[64];               // Name of spawn (len is 64 or less) 
+/*0187*/ char     lastName[20];           // Last Name of player 
+/*0207*/ uint8_t  unknown0207[13];        // ***Placeholder 
 /*0220*/
 };  
 
