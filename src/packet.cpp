@@ -1346,8 +1346,8 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
 
   if ((opCode == ZoneServerInfo) && (direction == DIR_SERVER))
   {
-    printf(" ZoneServerInfo 0x%04x, m_client_addr %d, sessionTrack = %d\n", 
-	   opCode, m_client_addr, m_session_tracking_enabled);
+    //printf(" ZoneServerInfo 0x%04x, m_client_addr %d, sessionTrack = %d\n", 
+    //	   opCode, m_client_addr, m_session_tracking_enabled);
     uint16_t zone_server_port = eqntohuint16(data + 130);
     m_serverPort = zone_server_port;
     
@@ -2187,6 +2187,8 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
 
         case NewZoneCode:
         {
+            logData("/tmp/NewZone.log", len, data);
+
             if (m_logger->isLoggingNewZone())
                 m_logger->logNewZone((newZoneStruct *)data,len,dir);
 
