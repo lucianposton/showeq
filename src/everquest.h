@@ -360,10 +360,9 @@ signed deltaZ:13;
 /*045*/ uint16_t spawnId; // Id of spawn 
 /*047*/ char unknown047[3]; 
 /*050*/ char lastName[20]; // lastname 
-/*070*/ char unknown070[8]; 
-/*078*/ int32_t equipment[9]; // 0=helm, 1=chest, 2=arm, 3=bracer 
+/*070*/ char unknown070[12]; 
+/*082*/ int32_t equipment[9]; // 0=helm, 1=chest, 2=arm, 3=bracer 
 // 4=hand, 5=leg 6=boot, 7=melee1, 8=melee2 
-/*114*/ char unknown114[4]; 
 /*118*/ char name[64]; // name 
 /*182*/ int32_t dyergb[7]; // armor dye colors 
 /*210*/ char unknown210; 
@@ -377,7 +376,7 @@ signed deltaZ:13;
 /*247*/ char unknown247[2]; 
 /*249*/ int16_t deity; // deity 
 /*251*/ char unknown251[2]; 
-}; // 253 bytes 
+}; // 253 bytes
 
 
 /* 

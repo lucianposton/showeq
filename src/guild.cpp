@@ -80,6 +80,7 @@ void GuildMgr::readGuildList()
 {
   QFile guildsfile(guildsFileName);
 
+  m_guildMap.clear();
   if (guildsfile.open(IO_ReadOnly))
   {
     worldGuildListStruct tmp;
@@ -125,7 +126,7 @@ void GuildMgr::guildList2text(QString fn)
       return;
    }
 
-   for (int i =0 ; i < MAXGUILDS; i++)
+   for (unsigned int i =0 ; i < m_guildMap.size(); i++) 
    {
        if (m_guildMap[i])
           guildtext << i << "\t" << m_guildMap[i] << "\n";
@@ -139,7 +140,7 @@ void GuildMgr::guildList2text(QString fn)
 
 void GuildMgr::listGuildInfo()
 {
-   for (int i = 0; i < MAXGUILDS; i++)
+   for (unsigned int i = 0; i < m_guildMap.size(); i++) 
    {
        if (m_guildMap[i])
            printf("%d	%s\n", i, (const char*)m_guildMap[i]);

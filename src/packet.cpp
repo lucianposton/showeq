@@ -1668,11 +1668,10 @@ void EQPacket::dispatchWorldData (uint32_t len, uint8_t *data,
       if (showeq_params->logWorldPackets)
 	  if (!logData (showeq_params->WorldLogFilename, len, data))
 	      emit toggle_log_WorldData(); //untoggle the GUI checkmark
-
       
-      uint16_t opCode = eqntohuint16(data);
+	  uint16_t opCode = *((uint16_t *)data);  
       
-      bool unk = true;
+	  bool unk = true;
       
       switch (opCode)
       {
