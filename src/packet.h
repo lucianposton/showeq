@@ -565,6 +565,7 @@ class EQPacket : public QObject
    void monitorIPClient(const QString& address);   
    void monitorMACClient(const QString& address);   
    void monitorNextClient();   
+   void monitorDevice(const QString& dev);   
    void session_tracking();
    void setArqSeqGiveUp(int giveUp);
 
@@ -772,6 +773,7 @@ class PacketCaptureThread
          PacketCaptureThread();
          ~PacketCaptureThread();
          void start (const char *device, const char *host, bool realtime, uint8_t address_type);
+	 void stop ();
          uint16_t getPacket (unsigned char *buff); 
          void setFilter (const char *device, const char *hostname, bool realtime,
                         uint8_t address_type, uint16_t zone_server_port, uint16_t client_port);

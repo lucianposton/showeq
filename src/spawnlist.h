@@ -80,12 +80,34 @@ class SpawnListMenu : public QPopupMenu
    Q_OBJECT
 
  public:
-  SpawnListMenu(CSpawnList* spawnlist, QWidget* parent = 0, const char* name = 0);
+  SpawnListMenu(CSpawnList* spawnlist, 
+		FilterMgr* filterMgr, 
+		CategoryMgr* categoryMgr,
+		QWidget* parent = 0, const char* name = 0);
   virtual ~SpawnListMenu();
+  void setCurrentCategory(const Category* cat);
+  void setCurrentItem(const Item* item);
+
+ protected slots:
+   void init_Menu(void);
+   void toggle_spawnListCol( int id );
+   void add_filter(int id);
+   void add_category(int id);
+   void edit_category(int id);
+   void delete_category(int id);
+   void reload_categories(int id);
+   void rebuild_spawnlist(int id);
 
  protected:
   CSpawnList* m_spawnlist;
-
+  FilterMgr* m_filterMgr;
+  CategoryMgr* m_categoryMgr;
+  const Category* m_currentCategory;
+  const Item* m_currentItem;
+  int m_id_filterMenu;
+  int m_id_spawnList_Cols[SPAWNCOL_MAXCOLS];
+  int m_id_edit_category;
+  int m_id_delete_category;
 };
 
 

@@ -398,7 +398,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
     m_id_view_SpawnList_Cols[SPAWNCOL_SPAWNTIME] = m_spawnListMenu->insertItem("Spawn &Time");
     m_spawnListMenu->setItemParameter(m_id_view_SpawnList_Cols[SPAWNCOL_SPAWNTIME], SPAWNCOL_SPAWNTIME);
 
-    connect (m_spawnListMenu, SIGNAL(activated(int)), this, SLOT(toggle_view_SpawnListCol(int)));
+    connect (m_spawnListMenu, SIGNAL(activated(int)), 
+	     this, SLOT(toggle_view_SpawnListCol(int)));
 
    pViewMenu->insertSeparator(-1);
 
@@ -461,6 +462,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
        toggle_view_CombatWindow();
    if (pSEQPrefs->getPrefBool("ShowSpellList", section, false))
        toggle_view_SpellList();
+
+  connect(pViewMenu, SIGNAL(aboutToShow()),
+	  this, SLOT(init_view_menu()));
 
 
    // Options Menu
@@ -539,8 +543,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_netMenu = new QPopupMenu;
    menuBar()->insertItem("&Network", m_netMenu);
    m_netMenu->insertItem("Monitor &Next EQ Client Seen", this, SLOT(set_net_monitor_next_client()));
-   m_netMenu->insertItem("Monitor EQ Client &IP Address", this, SLOT(set_net_client_IP_address()));
-   m_netMenu->insertItem("Monitor EQ Client &MAC Address", this, SLOT(set_net_client_MAC_address()));
+   m_netMenu->insertItem("Monitor EQ Client &IP Address...", this, SLOT(set_net_client_IP_address()));
+   m_netMenu->insertItem("Monitor EQ Client &MAC Address...", this, SLOT(set_net_client_MAC_address()));
+   m_netMenu->insertItem("Set &Device...", this, SLOT(set_net_device()));
    m_id_net_sessiontrack = m_netMenu->insertItem("Session Tracking", this, SLOT(toggle_net_session_tracking()));
    m_netMenu->setItemChecked(m_id_net_sessiontrack, showeq_params->session_tracking);
    x = m_netMenu->insertItem("&Real Time Thread", this, SLOT(toggle_net_real_time_thread(int)));
@@ -2698,10 +2703,6 @@ EQInterface::toggle_view_SpawnList(void)
   {
     showSpawnList();
 
-    for (int i = 0; i < SPAWNCOL_MAXCOLS; i++)
-      m_spawnListMenu->setItemChecked(m_id_view_SpawnList_Cols[i], 
-				     m_spawnList->columnWidth(i) != 0);
-
     // enable it's options sub-menu
     menuBar()->setItemEnabled(m_id_view_SpawnList_Options, true);
   }
@@ -2782,10 +2783,6 @@ void EQInterface::toggle_view_PlayerStats(void)
   {
     showStatList();
 
-    for (int i = 0; i < LIST_MAXLIST; i++)
-      m_statWinMenu->setItemChecked(m_id_view_PlayerStats_Stats[i], 
-				   m_statList->statShown(i));
-
     // enable it's options sub-menu
     menuBar()->setItemEnabled(m_id_view_PlayerStats_Options, true);
   }
@@ -2820,8 +2817,6 @@ void EQInterface::toggle_view_PlayerSkills(void)
   {
     showSkillList();
 
-    menuBar()->setItemChecked(m_id_view_PlayerSkills_Languages, 
-			      m_skillList->showLanguages());
     menuBar()->setItemEnabled(m_id_view_PlayerSkills_Options, true);
   }
   else
@@ -4135,11 +4130,11 @@ void EQInterface::handleAlert(const Item* item,
 
   // Gereric system beep for those without a soundcard
   //
-  if (!pSEQPrefs->getPrefBool("SpawnFilterAudio", "Filters"))
-	{
+  if (!pSEQPrefs->getPrefBool("Audio", "Filters"))
+  {
     fprintf( stderr, "\a");
-	fflush( stderr);
-	}
+    fflush( stderr);
+  }
   else
   {
     // execute a command
@@ -4363,6 +4358,25 @@ void EQInterface::set_net_client_MAC_address()
   }
 }
 
+void EQInterface::set_net_device()
+{
+  bool ok = false;
+  QString dev = 
+    QInputDialog::getText("ShowEQ - Device",
+			  "Enter the device to sniff for EQ Packets:",
+			  QLineEdit::Normal, showeq_params->device,
+			  &ok, this);
+
+  if (ok)
+  {
+    // start monitoring the device
+    m_packet->monitorDevice(dev);
+
+    // set it as the device to monitor next session
+    pSEQPrefs->setPrefString("Device", "Network", showeq_params->device);
+  }
+}
+
 void EQInterface::set_net_arq_giveup(int giveup)
 {
   // set the Arq Seq Give Up length
@@ -4429,6 +4443,34 @@ void EQInterface::toggle_view_statusbar()
    else
        statusBar()->show();
    pSEQPrefs->setPrefBool("StatusBarActive", "Interface_StatusBar", statusBar()->isVisible());
+}
+
+void EQInterface::init_view_menu()
+{
+  if (m_spawnList != NULL)
+  {
+    // make sure the menu bar settings are correct
+    for (int i = 0; i < SPAWNCOL_MAXCOLS; i++)
+      m_spawnListMenu->setItemChecked(m_id_view_SpawnList_Cols[i], 
+				      m_spawnList->columnWidth(i) != 0);
+  }
+
+  if (m_statList != NULL)
+  {
+    // make sure the menu items are checked
+    for (int i = 0; i < LIST_MAXLIST; i++)
+      m_statWinMenu->setItemChecked(m_id_view_PlayerStats_Stats[i], 
+				    m_statList->statShown(i));
+
+  }
+
+  if (m_skillList != NULL)
+  {
+    // make sure the proper menu items are checked
+    menuBar()->setItemChecked(m_id_view_PlayerSkills_Languages, 
+			      m_skillList->showLanguages());
+
+  }
 }
 
 void EQInterface::toggle_opt_save_DecodeKey(int id)

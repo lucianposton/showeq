@@ -157,6 +157,7 @@ class EQInterface:public QMainWindow
    void set_net_monitor_next_client();
    void set_net_client_IP_address();
    void set_net_client_MAC_address();
+   void set_net_device();
    void set_net_arq_giveup(int giveup);
    virtual void setCaption(const QString&);
    void restoreStatusFont();
@@ -226,6 +227,7 @@ class EQInterface:public QMainWindow
    void toggle_opt_save_Spawns(int id);
    void set_opt_save_SpawnFrequency(int frequency);
    void set_opt_save_BaseFilename();
+   void init_view_menu();
 
  protected:
    int setTheme(int id);

@@ -1,3 +1,20 @@
+dohpaZ (18/05/02)
+------------------
+Modifications:
+ + version 4.2.4
+ + Improved behavior when no showeq.xml file is present
+ + Removed showeq.xml from CVS (initial one created on first "Save Preferences"
+   or manually by the user), so it will no longer overwrite the 
+   users showeq.xml.
+ + Added ability to delete a button from a message dialog
+ + Added menu pick to the "Network" menu to set the "Device" monitoring packets
+ + Fixed Spawn, Despawn, and Death alert audio
+ + Fixed a few places where menu items weren't getting checked in certain
+   scenarios.
+ + Added right-click context menu to Spawn List that allows the user to 
+   add/edit/delete/reload categories, add filters, toggle spawn list columns,
+   and rebuild the spawn list
+
 dohpaZ (14/05/02)
 ------------------
 Modifications:

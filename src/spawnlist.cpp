@@ -29,6 +29,8 @@
 #include <qpainter.h>
 #include <qfont.h>
 #include <qheader.h>
+#include <qinputdialog.h>
+#include <qmessagebox.h>
 
 #include "spawnlist.h"
 #include "util.h"
@@ -1599,17 +1601,11 @@ void CSpawnList::myMousePressEvent(int button, QListViewItem* litem,
   // Right Mouse Button Events
   if (button == RightButton)
   {
-     //press right button to display popup menu or edit category
-     const Category* cat = getCategory((SpawnListItem*)litem);
-
-     if (cat)
-     {
-       // edit the category
-       m_categoryMgr->editCategories(cat, this);
-       return;
-     }
-     //else
-//	  menu()->popup((point));
+    SpawnListItem* slitem = (SpawnListItem*)litem;
+    SpawnListMenu* spawnMenu = menu();
+    spawnMenu->setCurrentItem(slitem->item());
+    spawnMenu->setCurrentCategory(getCategory(slitem));
+    spawnMenu->popup(point);
   }
 }
 
@@ -1719,22 +1715,243 @@ SpawnListMenu* CSpawnList::menu()
 {
   printf("CSpawnList::menu()\n");
   if (m_menu != NULL)
-      return m_menu;
-
-      m_menu = new SpawnListMenu(this, this, "spawnlist menu");
+    return m_menu;
+  
+  m_menu = new SpawnListMenu(this, m_spawnShell->filterMgr(),
+				 m_categoryMgr, this, "spawnlist menu");
   printf("CSpawnList::menu() - m_menu returned\n");
 
-      return m_menu;
+  return m_menu;
 }
 
 SpawnListMenu::SpawnListMenu(CSpawnList* spawnlist,
+			     FilterMgr* filterMgr,
+			     CategoryMgr* categoryMgr,
 		             QWidget* parent, const char* name)
                              : m_spawnlist(spawnlist)
 {
+  m_spawnlist = spawnlist;
+  m_filterMgr = filterMgr;
+  m_categoryMgr = categoryMgr;
 
+  // Show Columns
+  QPopupMenu* spawnListColMenu = new QPopupMenu;
+  insertItem( "Show &Column", spawnListColMenu);
+  spawnListColMenu->setCheckable(TRUE);
+  m_id_spawnList_Cols[SPAWNCOL_NAME] = 
+    spawnListColMenu->insertItem("&Name");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_NAME], 
+				     SPAWNCOL_NAME);
+  m_id_spawnList_Cols[SPAWNCOL_LEVEL] = spawnListColMenu->insertItem("&Level");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_LEVEL], 
+				     SPAWNCOL_LEVEL);
+  m_id_spawnList_Cols[SPAWNCOL_HP] = spawnListColMenu->insertItem("&HP");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_HP], 
 
+				     SPAWNCOL_HP);
+  m_id_spawnList_Cols[SPAWNCOL_MAXHP] = 
+    spawnListColMenu->insertItem("&Max HP");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_MAXHP], 
+				     SPAWNCOL_MAXHP);
+  m_id_spawnList_Cols[SPAWNCOL_XPOS] = 
+    spawnListColMenu->insertItem("Coord &1");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_XPOS], 
+				     SPAWNCOL_XPOS);
+  m_id_spawnList_Cols[SPAWNCOL_YPOS] = 
+    spawnListColMenu->insertItem("Coord &2");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_YPOS], 
+				     SPAWNCOL_YPOS);
+  m_id_spawnList_Cols[SPAWNCOL_ZPOS] = 
+    spawnListColMenu->insertItem("Coord &3");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_ZPOS], 
+				     SPAWNCOL_ZPOS);
+  m_id_spawnList_Cols[SPAWNCOL_ID] = 
+    spawnListColMenu->insertItem("I&D");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_ID], 
+				     SPAWNCOL_ID);
+  m_id_spawnList_Cols[SPAWNCOL_DIST] = spawnListColMenu->insertItem("&Dist");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_DIST], 
+				     SPAWNCOL_DIST);
+  m_id_spawnList_Cols[SPAWNCOL_RACE] = spawnListColMenu->insertItem("&Race");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_RACE], 
+				     SPAWNCOL_RACE);
+  m_id_spawnList_Cols[SPAWNCOL_CLASS] = spawnListColMenu->insertItem("&Class");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_CLASS], 
+				     SPAWNCOL_CLASS);
+  m_id_spawnList_Cols[SPAWNCOL_INFO] = spawnListColMenu->insertItem("&Info");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_INFO], 
+				     SPAWNCOL_INFO);
+  m_id_spawnList_Cols[SPAWNCOL_SPAWNTIME] = 
+    spawnListColMenu->insertItem("Spawn &Time");
+  spawnListColMenu->setItemParameter(m_id_spawnList_Cols[SPAWNCOL_SPAWNTIME], 
+				     SPAWNCOL_SPAWNTIME);
+  
+  connect (spawnListColMenu, SIGNAL(activated(int)), 
+	   this, SLOT(toggle_spawnListCol(int)));
+
+  int x;
+  QPopupMenu* filterMenu = new QPopupMenu;
+  m_id_filterMenu = insertItem("Add &Filter", filterMenu);
+  setItemEnabled(m_id_filterMenu, false);
+  x = filterMenu->insertItem("&Hunt...");
+  filterMenu->setItemParameter(x, HUNT_FILTER);
+  x = filterMenu->insertItem("&Caution...");
+  filterMenu->setItemParameter(x, CAUTION_FILTER);
+  x = filterMenu->insertItem("&Danger...");
+  filterMenu->setItemParameter(x, DANGER_FILTER);
+  x = filterMenu->insertItem("&Locate...");
+  filterMenu->setItemParameter(x, LOCATE_FILTER);
+  x = filterMenu->insertItem("&Alert...");
+  filterMenu->setItemParameter(x, ALERT_FILTER);
+  x = filterMenu->insertItem("&Filtered...");
+  filterMenu->setItemParameter(x, FILTERED_FILTER);
+  x = filterMenu->insertItem("&Tracer...");
+  filterMenu->setItemParameter(x, TRACER_FILTER);
+  connect (filterMenu, SIGNAL(activated(int)), 
+	   this, SLOT(add_filter(int)));
+
+  insertSeparator(-1);
+
+  x = insertItem("&Add Category...", this, SLOT(add_category(int)));
+  m_id_edit_category = 
+    insertItem("&Edit Category...", this, SLOT(edit_category(int)));
+  m_id_delete_category = 
+    insertItem("&Delete Category...", this, SLOT(delete_category(int)));
+  insertItem("&Reload Categories", this, SLOT(reload_categories(int)));
+  insertItem("Re&build Spawnlist", this, SLOT(rebuild_spawnlist(int)));
+
+  connect(this, SIGNAL(aboutToShow()),
+	  this, SLOT(init_Menu()));
 }
 
 SpawnListMenu::~SpawnListMenu()
 {
+}
+
+void SpawnListMenu::init_Menu(void)
+{
+
+  // make sure the menu bar settings are correct
+  for (int i = 0; i < SPAWNCOL_MAXCOLS; i++)
+    setItemChecked(m_id_spawnList_Cols[i], 
+		   m_spawnlist->columnWidth(i) != 0);
+}
+
+void SpawnListMenu::setCurrentCategory(const Category* cat)
+{
+  // set the current category
+  m_currentCategory = cat;
+
+  // update the menu item names
+  if (cat != NULL)
+  {
+    changeItem(m_id_edit_category, 
+	       "&Edit '" + cat->name() + "' Category...");
+    changeItem(m_id_delete_category, 
+	       "&Delete '" + cat->name() + "' Category...");
+  }
+  else
+  {
+    changeItem(m_id_edit_category, "&Edit Category...");
+    changeItem(m_id_delete_category, "&Delete Category...");
+  }
+}
+
+void SpawnListMenu::setCurrentItem(const Item* item)
+{
+  // set the current item
+  m_currentItem = item;
+
+  // enable/disable item depending on if there is one
+  setItemEnabled(m_id_filterMenu, (item != NULL));
+
+  if (item != NULL)
+    changeItem(m_id_filterMenu,
+	       "Add '" + item->name() + "' &Filter");
+  else
+    changeItem(m_id_filterMenu,
+	       "Add &Filter");
+}
+
+void SpawnListMenu::toggle_spawnListCol(int id)
+{
+  int colnum;
+
+  colnum = itemParameter(id);
+  
+  if (isItemChecked(id))
+  {
+    setItemChecked(id, FALSE);
+    
+    m_spawnlist->setColumnVisible(colnum, false);
+  }
+  else
+  {
+    setItemChecked(id, TRUE);
+    
+    m_spawnlist->setColumnVisible(colnum, true);
+   }
+}
+
+void SpawnListMenu::add_filter(int id)
+{
+  if (m_currentItem == NULL)
+    return;
+
+  int filter = itemParameter(id);
+  QString filterName = m_filterMgr->filterName(filter);
+  QString filterString = m_currentItem->filterString();
+
+  // get the user edited filter string, based on the items filterString
+  bool ok = false;
+  filterString = 
+    QInputDialog::getText(filterName + " Filter",
+			  "Enter the filter string:",
+			  filterString, &ok, m_spawnlist);
+
+
+  // if the user clicked ok, add the filter
+  if (ok)
+    m_filterMgr->addFilter(filter, filterString);
+}
+
+void SpawnListMenu::add_category(int id)
+{
+  // add a category to the category manager
+  m_categoryMgr->addCategory(m_spawnlist);
+}
+
+void SpawnListMenu::edit_category(int id)
+{
+  // edit the current category
+  m_categoryMgr->editCategories(m_currentCategory, m_spawnlist);
+}
+
+void SpawnListMenu::delete_category(int id)
+{
+  // confirm that the user wants to delete the category
+  QMessageBox mb("Are you sure?",
+		 "Are you sure you wish to delete category "
+		 + m_currentCategory->name() + "?",
+		 QMessageBox::NoIcon,
+		 QMessageBox::Yes, 
+		 QMessageBox::No | QMessageBox::Default | QMessageBox::Escape,
+		 QMessageBox::NoButton,
+		 m_spawnlist);
+  
+  // if user chose yes, then delete the category
+  if (mb.exec() == QMessageBox::Yes)
+    m_categoryMgr->RemCategory(m_currentCategory);
+}
+
+void SpawnListMenu::reload_categories(int id)
+{
+  // reload the categories
+  m_categoryMgr->reloadCategories();
+}
+
+void SpawnListMenu::rebuild_spawnlist(int id)
+{
+  // rebuild the spawn list
+  m_spawnlist->rebuildSpawnList();
 }

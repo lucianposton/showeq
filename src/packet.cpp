@@ -1520,7 +1520,11 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         case CPlayerItemsCode:
         {
 	    unk = false;
-	    
+
+#if 1 // ZBTEMP
+	    logData("/tmp/zlibData.log", len, data);
+#endif
+
             // decode/decompress the payload
             decoded = m_decode->DecodePacket(data, len, decodedData,
                                      &decodedDataLen, showeq_params->ip);
@@ -2387,6 +2391,10 @@ void EQPacket::dispatchZoneData (uint32_t len, uint8_t *data,
         {
             unk = false;
 	    
+#if 1 // ZBTEMP
+	    logData("/tmp/zlibData.log", len, data);
+#endif
+
             // decode/decompress the payload
             decoded = m_decode->DecodePacket(data, len, decodedData,
                                      &decodedDataLen, showeq_params->ip);
@@ -2768,6 +2776,65 @@ void EQPacket::monitorNextClient()
 			       DEFAULT_ADDRESS_TYPE, 0, 0);
 }
 
+void EQPacket::monitorDevice(const QString& dev)
+{
+  // set the device to use
+  showeq_params->device = dev;
+
+  // make sure we aren't playing back packets
+  if (showeq_params->playbackpackets)
+    return;
+
+  // stop the current packet capture
+  m_packetCapture->stop();
+
+  // setup for capture on new device
+  if (!showeq_params->ip.isEmpty())
+  {
+    struct hostent *he;
+    struct in_addr  ia;
+
+    /* Substitute "special" IP which is interpreted 
+       to set up a different filter for picking up new sessions */
+    
+    if (showeq_params->ip == "auto")
+      inet_aton (AUTOMATIC_CLIENT_IP, &ia);
+    else if (inet_aton (showeq_params->ip, &ia) == 0)
+    {
+      he = gethostbyname(showeq_params->ip);
+      if (!he)
+      {
+	printf ("Invalid address; %s\n", (const char*)showeq_params->ip);
+	exit (0);
+      }
+      memcpy (&ia, he->h_addr_list[0], he->h_length);
+    }
+    m_client_addr = ia.s_addr;
+    showeq_params->ip = inet_ntoa(ia);
+    
+    if (showeq_params->ip ==  AUTOMATIC_CLIENT_IP)
+    {
+      m_detectingClient = true;
+      printf("Listening for first client seen.\n");
+    }
+    else
+    {
+      m_detectingClient = false;
+      printf("Listening for client: %s\n",
+	     (const char*)showeq_params->ip);
+    }
+  }
+
+  // restart packet capture
+  if (showeq_params->mac_address.length() == 17)
+    m_packetCapture->start(showeq_params->device, 
+			   showeq_params->mac_address, 
+			   showeq_params->realtime, MAC_ADDRESS_TYPE );
+  else
+    m_packetCapture->start(showeq_params->device, showeq_params->ip, 
+			   showeq_params->realtime, IP_ADDRESS_TYPE );
+}
+
 void EQPacket::session_tracking()
 {
    m_session_tracking_enabled = showeq_params->session_tracking;
@@ -2875,6 +2942,12 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
       if (pthread_setschedparam (m_tid, SCHED_RR, &sp) != 0)
          fprintf (stderr, "Failed to set capture thread realtime.");
    }
+}
+
+void PacketCaptureThread::stop()
+{
+  // close the pcap session
+  pcap_close(m_pcache_pcap);
 }
 
 void* PacketCaptureThread::loop (void *param)

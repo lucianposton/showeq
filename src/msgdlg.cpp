@@ -99,16 +99,14 @@ MsgDialog::MsgDialog(QWidget *parent, const char *name,
    m_bShowType = TRUE;
    m_nShown = 0;
    m_nEditItem = -1;
+   m_nDeleteItem = -1;
    m_bAdditiveFilter = FALSE;
-
-//  Anyone want to explain to me why ShowEQ segfaults upon exit when I
-//  uncomment out the following line.  This baffles me.... it acts like 
-//  it causes something to get destroyed when it's not supposed to be
-//     - Maerlyn
-//   m_pButtonOver = 0;
+   m_pButtonOver = NULL;
+   m_buttonList.setAutoDelete(false);
 
    // use the shared list given to us
    m_pStringList = &list;
+
 
    // set Title
    setCaption(QString(name));
@@ -507,16 +505,56 @@ MsgDialog::editButton(void)
 }
 
 void
+MsgDialog::deleteButton(void)
+{
+  if (!m_pButtonOver)
+    return;
+
+#ifdef DEBUGMSG
+  qDebug("deleteButton() '%s'", m_pButtonOver->text().ascii());
+#endif
+
+  // remove the filter if active
+  if (m_pButtonOver->isChecked())
+    delFilter(m_pButtonOver->filter());
+
+  // remove the button from the button list
+  m_buttonList.remove(m_pButtonOver);
+
+  // delete the button
+  delete m_pButtonOver;
+
+  // reset the button over to NULL
+  m_pButtonOver = NULL;
+  
+  // delete the associated menu items
+  if (-1 != m_nDeleteItem)
+  {
+    m_pMenu->removeItem(m_nDeleteItem);
+    m_nDeleteItem = -1;
+  }
+  if (-1 != m_nEditItem)
+  {
+    m_pMenu->removeItem(m_nEditItem);
+    m_nEditItem = -1;
+  }
+}
+
+void
 MsgDialog::setButton(MyButton* but, bool active)
 {
   if (active)
   {
+    if (-1 != m_nDeleteItem)
+      m_pMenu->removeItem(m_nDeleteItem);
     if (-1 != m_nEditItem)
-       m_pMenu->removeItem(m_nEditItem);
+      m_pMenu->removeItem(m_nEditItem);
 
-    QString tempstr("");
+    QString tempstr;
     tempstr.sprintf("&Edit '%s'", but->name().ascii());
     m_nEditItem = m_pMenu->insertItem(tempstr, this, SLOT(editButton()));
+    tempstr.sprintf("&Delete '%s'", but->name().ascii());
+    m_nDeleteItem = m_pMenu->insertItem(tempstr, this, SLOT(deleteButton()));
     m_pButtonOver = but;
   }
 }
@@ -854,6 +892,29 @@ MyButton::eventFilter(QObject *o, QEvent *e)
 
 } // end eventFilter
 
+void MyButton::setFilter(const QString& string)  
+{ 
+  m_filter = string; 
+}
+
+void MyButton::setText(const QString& string)    
+{ 
+  QButton::setText(string); 
+  m_name = string;
+}
+
+void MyButton::toggled(bool on)       
+{  
+  if (on) 
+    emit addFilter(m_filter);
+  else 
+    emit delFilter(m_filter); 
+}
+
+void MyButton::setColor(const QColor& color)
+{ 
+  m_color = color; 
+} 
 
 //
 // paintCell

@@ -149,9 +149,6 @@ int main (int argc, char **argv)
    
    bool          bOptionHelp = false;
         
-   struct stat  ss;
-
-
    /* Print the version number */
    printf ("ShowEQ %s, released under the GPL.\n", VERSION);
    printf ("All ShowEQ source code is Copyright (C) 2000, 2001, 2002 by the respective ShowEQ Developers\n");
@@ -165,10 +162,7 @@ int main (int argc, char **argv)
    QApplication qapp (argc, argv);
 
    /* Initialize the parameters with default values */
-   char *configfile = "showeq.xml";
-   if (stat (LOGDIR "/showeq.xml", &ss) == 0)
-      configfile = LOGDIR "/showeq.xml";
-
+   char *configfile = LOGDIR "/showeq.xml";
 
    // scan command line arguments for a specified config file
    int i = 1;

@@ -103,6 +103,7 @@ private slots:
    // For the popupmenu
    void menuAboutToShow(void);
    void editButton(void);
+   void deleteButton(void);
    void addButton(void);
 
 signals:
@@ -126,6 +127,7 @@ private:
    bool               m_bShowType;
    int                m_nShown;          // num of messages shown
    int                m_nEditItem;
+   int                m_nDeleteItem;
 
    QString            m_preferenceName;
    MyEdit*            m_pEdit;
@@ -164,11 +166,10 @@ public:
   const QColor&  color()                   { return m_color; }
 
 public slots:
-  void setFilter(const QString& string)  { m_filter = string; }
-  void setText(const QString& string)    { QButton::setText(string); }
-  void toggled(bool on)                  {  if (on) emit addFilter(m_filter);
-                                           else emit delFilter(m_filter); }
-  void setColor(const QColor& color)     { m_color = color; } 
+ void setFilter(const QString& string);
+ void setText(const QString& string);    
+ void toggled(bool on);
+ void setColor(const QColor& color);
 
 signals:
   void editButton(MyButton *);

@@ -40,30 +40,14 @@ XMLPreferences::XMLPreferences(const QString& defaultsFileName,
     m_modified(0),
     m_runtimeSections(sectionHashSize),
     m_userSections(sectionHashSize),
-    m_defaultsSections(preferenceHashSize),
-    m_templateDoc(seqPrefName)
+    m_defaultsSections(preferenceHashSize)
 {
-  QString templateDoc;
-  templateDoc.sprintf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		      "<!DOCTYPE %s SYSTEM \"%s\">\n"
-		      "<seqpreferences version=\"%1.1f\">\n"
-		      "</seqpreferences>\n",
-		      seqPrefName, seqPrefSysId, seqPrefVersion);
-
-  //  fprintf(stderr, "Default Document:\n%s\n", (const char*)templateDoc);
-#if QT_VERSION < 300
-  if (!m_templateDoc.setContent(templateDoc))
-    fprintf(stderr, "Error setting template document contents!\n");
-#else
-  QString errorMsg;
-  int errorLine = 0;
-  int errorColumn = 0;
-  if (!m_templateDoc.setContent(templateDoc, false, 
-				&errorMsg, &errorLine, &errorColumn))
-    qWarning("Error processing template document:\n"
-	     "\t %s on line %d in column %d!", 
-	     (const char*)errorMsg, errorLine, errorColumn);
-#endif
+  m_templateDoc.sprintf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			"<!DOCTYPE %s SYSTEM \"%s\">\n"
+			"<seqpreferences version=\"%1.1f\">\n"
+			"<!-- ============================================================= -->"
+			"</seqpreferences>\n",
+			seqPrefName, seqPrefSysId, seqPrefVersion);
 
   // automatically delete removed sections
   m_userSections.setAutoDelete(true);
@@ -293,44 +277,51 @@ void XMLPreferences::savePreferences(const QString& filename,
 				     PrefSectionDict& dict)
 {
   // open the existing preference file
-  QDomDocument doc(seqPrefName);
+  QDomDocument doc;
   QFile f(filename);
-  if (!f.open(IO_ReadOnly))
-  {
-    qWarning("Unable to open file for reading: %s!", 
-	     (const char*)filename);
-
-    // copy the template document
-    doc = m_templateDoc.cloneNode(true).toDocument();
-  }
-  else
+  bool loaded = false;
+  if (f.open(IO_ReadOnly))
   {
 #if QT_VERSION < 300
-    if (!doc.setContent(&f))
+    if (doc.setContent(&f))
+      loaded = true;
+    else
     {
       qWarning("Unable to set preference document to contents of file: %s!", 
 	       (const char*)filename);
-
-      // copy the template document
-      doc = m_templateDoc.cloneNode(true).toDocument();
     }
 #else
     QString errorMsg;
     int errorLine = 0;
     int errorColumn = 0;
-    if (!doc.setContent(&f, false, &errorMsg, &errorLine, &errorColumn))
+    if (doc.setContent(&f, false, &errorMsg, &errorLine, &errorColumn))
+      loaded = true;
+    else
     {
       qWarning("Error processing file: %s!\n\t %s on line %d in column %d!", 
 	       (const char*)filename, 
 	       (const char*)errorMsg, errorLine, errorColumn);
 
-      // copy the template document
-      doc = m_templateDoc.cloneNode(true).toDocument();
     }
 #endif
 
     // close the file
     f.close();
+  }
+
+  // if no file was loaded, use the template document
+  if (!loaded)
+  {
+#if QT_VERSION < 300
+    if (doc.setContent(m_templateDoc))
+      loaded = true;
+#else
+    QString errorMsg;
+    int errorLine = 0;
+    int errorColumn = 0;
+    if (doc.setContent(m_templateDoc, false, &errorMsg, &errorLine, &errorColumn))
+      loaded = true;
+#endif
   }
 
   // if there was an existing file, rename it
@@ -477,7 +468,6 @@ void XMLPreferences::savePreferences(const QString& filename,
     }
   }
 
-
   // write the modified DOM to disk
   if (!f.open(IO_WriteOnly))
   {
@@ -505,6 +495,9 @@ void XMLPreferences::savePreferences(const QString& filename,
 
   // close the file
   f.close();
+
+  printf("Finished saving preferences to file: %s\n",
+	 (const char*)filename);
 }
 
 QVariant* XMLPreferences::getPref(const QString& inName, 

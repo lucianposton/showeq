@@ -197,7 +197,7 @@ class XMLPreferences
  CommentSectionDict m_commentSections;
 
  // template document used to create saves to previously non-existant files
- QDomDocument m_templateDoc;
+ QString m_templateDoc;
 };
 
 #endif // __XMLPREFERENCE_H__
