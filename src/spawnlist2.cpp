@@ -944,3 +944,4 @@ void SpawnListWindow2::populateSpawns(void)
 #endif 
 }
 
+#include "spawnlist2.moc"

@@ -393,3 +393,5 @@ void SpellListWindow::savePrefs(void)
   // make the listview save it's prefs
   m_spellList->savePrefs();
 }
+
+#include "spelllist.moc"

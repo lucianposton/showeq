@@ -82,8 +82,6 @@ static const char *fileopen[] = {
 EditorWindow::EditorWindow(const char *fileName)
      : QMainWindow( 0, "ShowEQ - Editor", WDestructiveClose )
  {
-#if (QT_VERSION > 209)
-
      int id;
   
      QPixmap openIcon, saveIcon;
@@ -121,7 +119,6 @@ EditorWindow::EditorWindow(const char *fileName)
      resize( 600, 450 );
      filename = (QString)fileName;
      load(fileName);
-#endif
  }
 
  EditorWindow::~EditorWindow()
@@ -130,19 +127,16 @@ EditorWindow::EditorWindow(const char *fileName)
 
  void EditorWindow::load()
  {
-#if (QT_VERSION > 209)
      QString fn = QFileDialog::getOpenFileName( QString::null, QString::null,
                                                 this);
      if ( !fn.isEmpty() )
          load( fn );
      else
          statusBar()->message( "File Open Cancelled", 2000 );
-#endif
  }
 
  void EditorWindow::load( const char *fileName )
  {
-#if (QT_VERSION > 209)
      QFile f( fileName );
      if ( !f.open( IO_ReadOnly ) )
          return;
@@ -164,12 +158,10 @@ EditorWindow::EditorWindow(const char *fileName)
      QString s;
      s.sprintf( "Opened %s", fileName );
      statusBar()->message( s, 2000 );
-#endif
  }
 
  void EditorWindow::save()
  {
-#if (QT_VERSION > 209)
      if ( filename.isEmpty() ) {
          saveAs();
          return;
@@ -192,12 +184,10 @@ EditorWindow::EditorWindow(const char *fileName)
      setCaption( filename );
 
      statusBar()->message( QString( "Saved %1" ).arg( filename ), 2000 );
-#endif
  }
 
  void EditorWindow::saveAs()
  {
-#if (QT_VERSION > 209)
      QString fn = QFileDialog::getSaveFileName( QString::null, QString::null,
                                                 this );
      if ( !fn.isEmpty() ) {
@@ -206,12 +196,10 @@ EditorWindow::EditorWindow(const char *fileName)
      } else {
          statusBar()->message( "Saving cancelled", 2000 );
      }
-#endif
  }
 
  void EditorWindow::closeEvent( QCloseEvent* ce )
  {
-#if (QT_VERSION > 209)
      if ( !e->edited() ) {
          ce->accept();
          return;
@@ -234,5 +222,7 @@ EditorWindow::EditorWindow(const char *fileName)
          ce->accept();
          break;
      }
-#endif
  }
+
+ #include "editor.moc"
+ 

@@ -949,3 +949,4 @@ void MessageShell::filterMessage(const QString& prefix, MessageType type,
 			 .arg(spawnInfo));
 }
 
+#include "messageshell.moc"

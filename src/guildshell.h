@@ -8,6 +8,9 @@
  *
  */
 
+#ifndef _GUILDSHELL_H_
+#define _GUILDSHELL_H_
+
 #include <stdint.h>
 #include <time.h>
 
@@ -94,3 +97,4 @@ class GuildShell : public QObject
   ZoneMgr* m_zoneMgr;
 };
 
+#endif // _GUILDSHELL_H_

@@ -363,3 +363,5 @@ void StatListWindow::savePrefs(void)
   // make the listview save it's prefs
   m_statList->savePrefs();
 }
+
+#include "statlist.moc"

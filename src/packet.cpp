@@ -1092,3 +1092,5 @@ uint16_t EQPacket::serverSeqExp(int stream)
 {
   return m_streams[stream]->arqSeqExp();
 }
+
+#include "packet.moc"

@@ -4,6 +4,8 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  */
+ 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS 
     "Generic",              // 0x00
     "1HSword",              // 0x01
     "2HSword",              // 0x02
@@ -260,4 +262,5 @@
     NULL,                   // 0xfd - Unknown Weapon
     NULL,                   // 0xfe - Unknown Weapon
     NULL,                   // 0xff - Unknown Weapon
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 

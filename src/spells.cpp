@@ -261,19 +261,7 @@ void Spells::loadSpells(const QString& spellsFileName)
     if ((unicodeIndicator != 0xfffe) && (unicodeIndicator != 0xfeff))
       text = textData;
     else
-    {
-#if (QT_VERSION > 0x030100)
       text = QString::fromUcs2((uint16_t*)textData.data());
-#else
-      if (sizeof(QChar) == 2)
-	text.setUnicode(QChar*(textData.data()), textData.size() / 2);
-      else
-      {
-	seqWarn("Spells::loadSpells(): Upgrade your version of Qt to at least 3.1 to properly handle UTF-16 encoded files!");
-	text = textData;
-      }
-#endif
-    }
 
     // split the file into at the line termination
     QStringList lines = QStringList::split(lineTerm,

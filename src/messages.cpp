@@ -82,4 +82,4 @@ void Messages::addedFilter(uint32_t mask, uint8_t filterid,
       (*it).setFilterFlags((*it).filterFlags() | mask);
 }
 
-
+#include "messages.moc"

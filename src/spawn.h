@@ -428,16 +428,16 @@ inline const Spawn* spawnType(const Item* item)
 {
   // if this is an item of spawn type, return the pointer to Spawn, 
   // return otherwise NULL
-  if (!item || (item->type() == tSpawn))
-    return NULL; // otherwise NULL
-  else
+  if (item && ((item->type() == tSpawn) || (item->type() == tPlayer)))
     return (const Spawn*)item;
+  else
+    return NULL; // otherwise NULL
 }
 
 inline Spawn* spawnType(Item* item)
 {
   // if this is an item of spawn type, return the pointer to Spawn
-  if (item->type() == tSpawn)
+  if (item && ((item->type() == tSpawn) || (item->type() == tPlayer)))
     return (Spawn*)item;
   else
     return NULL; // otherwise NULL
@@ -447,7 +447,7 @@ inline Spawn* spawnType(Item* item)
 inline const Door* doorType(const Item* item)
 {
   // if this is an item of door type, return the pointer to Door
-  if (item->type() == tDoors)
+  if (item && (item->type() == tDoors))
     return (const Door*)item;
   else
     return NULL; // otherwise NULL
@@ -456,7 +456,7 @@ inline const Door* doorType(const Item* item)
 inline Door* doorType(Item* item)
 {
   // if this is an item of door type, return the pointer to Door
-  if (item->type() == tDoors)
+  if (item && (item->type() == tDoors))
     return (Door*)item;
   else
     return NULL; // otherwise NULL
@@ -466,7 +466,7 @@ inline Door* doorType(Item* item)
 inline const Drop* dropType(const Item* item)
 {
   // if this is an item of drop type, return the pointer to Drop
-  if (item->type() == tDrop)
+  if (item && (item->type() == tDrop))
     return (const Drop*)item;
   else
     return NULL; // otherwise NULL
@@ -475,7 +475,7 @@ inline const Drop* dropType(const Item* item)
 inline Drop* dropType(Item* item)
 {
   // if this is an item of drop type, return the pointer to Drop
-  if (item->type() == tDrop)
+  if (item && (item->type() == tDrop))
     return (Drop*)item;
   else
     return NULL; // otherwise NULL

@@ -35,11 +35,7 @@ SpawnLog::logSpawnInfo(const char *type, const char *name, int id, int level,
                           const char *killedBy, int kid, int guildid)
 {
   const QDateTime& eqDate = m_dateTimeMgr->updatedDateTime();
-#if (QT_VERSION > 0x030100)
   const QTime& time = QTime::currentTime(Qt::LocalTime);
-#else
-  const QTime& time = QTime::currentTime();
-#endif
 
   logSpawnInfo(type, name, id, level, x, y, z, 
 	       eqDate, time, 
@@ -88,11 +84,7 @@ SpawnLog::logZoneSpawns(const uint8_t* data, size_t len)
   int spawndatasize = len / sizeof(spawnStruct);
   
   const QDateTime& eqDate = m_dateTimeMgr->updatedDateTime();
-#if (QT_VERSION > 0x030100)
   const QTime& time = QTime::currentTime(Qt::LocalTime);
-#else
-  const QTime& time = QTime::currentTime();
-#endif
   
   for (int i = 0; i < spawndatasize; i++)
   {
@@ -151,4 +143,4 @@ SpawnLog::logNewZone(const QString& zonename)
   zoneShortName = zonename;
 }
 
-
+#include "spawnlog.moc"

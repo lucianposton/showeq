@@ -739,3 +739,4 @@ bool OPCodeXmlContentHandler::endDocument()
   return true;
 }
 
+#include "packetinfo.moc"

@@ -266,7 +266,7 @@ void PacketLog::printData(const uint8_t* data, size_t len, uint8_t dir,
   else
     ::putchar('\n');
   
-  ::printf("%s [Size: %d]%s\n",
+  ::printf("%s [Size: %u]%s\n",
 	   ((dir == DIR_Server) ? "[Server->Client]" : "[Client->Server]"),
 	   len, (const char*)opCodeToString(opcode));
 
@@ -487,3 +487,4 @@ void OPCodeMonitorPacketLog::packet(const uint8_t* data, size_t len,
   }
 }
 
+#include "packetlog.moc"

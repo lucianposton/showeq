@@ -132,7 +132,7 @@ public:
  signals:
    void newPlayer(void);
    void buffLoad(const spellBuff*); 
-   void newSpeed               (int speed);
+   void newSpeed               (double speed);
    void statChanged            ( int statNum,
                                  int val,
                                  int max

@@ -4755,3 +4755,4 @@ void MapFrame::toggle_depthControls(int id)
 }
 
 
+#include "map.moc"

@@ -4,6 +4,8 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  */
+ 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     "1H Blunt",                // 0
     "1H Slashing",             // 1
     "2H Blunt",                // 2
@@ -79,3 +81,5 @@
     "Berserking",              // 72
     "Taunt",                   // 73
     "Frenzy",                  // 74
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+

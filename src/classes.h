@@ -4,6 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  */
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 /* Maps class numbers to strings, included from util.cpp */
   "0",                  // 0 is unknown
@@ -69,3 +70,5 @@
   "LDoN Recruiter",     // 60
   "LDoN Merchant",      // 61
   "LDoN Object",        // 62
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+

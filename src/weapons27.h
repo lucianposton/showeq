@@ -4,6 +4,8 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  */
+ 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     NULL,                 // 0x00
     NULL,                 // 0x01
     NULL,                 // 0x02
@@ -277,3 +279,5 @@
     NULL,                 // 0xfd
     NULL,                 // 0xfe
     NULL,                 // 0xff
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+

@@ -213,3 +213,4 @@ void Terminal::newMessage(const MessageEntry& message)
   fputc('\n', stdout);
 }
 
+#include "terminal.moc"

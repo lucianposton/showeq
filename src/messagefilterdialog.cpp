@@ -466,3 +466,5 @@ void MessageFilterDialog::checkState()
   // only enable delete if editing an existing filter
   m_delete->setEnabled(m_currentFilter != 0);
 }
+
+#include "messagefilterdialog.moc"

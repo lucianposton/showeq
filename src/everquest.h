@@ -445,7 +445,7 @@ struct ServerZoneEntryStruct
 /*0244*/ uint8_t unknown244[14];
 
 /*0258*/ int16_t deity;           // Player's Deity
-/*0262*/ uint8_t unknown260[115];
+/*0262*/ uint8_t unknown260[119];
 }; /* 0375 */
 
 /*
@@ -473,7 +473,7 @@ struct newZoneStruct
 /*0508*/ float   underworld;               // Underworld
 /*0512*/ float   minclip;                  // Minimum view distance
 /*0516*/ float   maxclip;                  // Maximum view distance
-/*0520*/ uint8_t unknown0520[156];         // *** Placeholder
+/*0520*/ uint8_t unknown0520[160];         // *** Placeholder
 /*0676*/
 };
 
@@ -820,7 +820,7 @@ union {
 /*250*/ int8_t	unknown249[4]; 
 /*254*/ uint32_t petOwnerId;
 /*258*/ int16_t deity;
-/*260*/ uint8_t unknown260[115];
+/*260*/ uint8_t unknown260[119];
 /*375*/
 };
 

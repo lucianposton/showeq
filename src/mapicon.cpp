@@ -1264,3 +1264,5 @@ QColor MapIcons::pickSpawnColor(const Spawn* spawn)
 
   return m_player->pickConColor(spawn->level());
 }
+
+#include "mapicon.moc"

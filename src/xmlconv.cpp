@@ -205,11 +205,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
       // fix the key code (deal with Qt brain death)
       key &= ~Qt::UNICODE_ACCEL;
 
-#if QT_VERSION >= 300
       v = QVariant(QKeySequence(key));
-#else
-      v = QVariant(key);
-#endif
       ok = true;
     }
   }
@@ -240,12 +236,10 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
       sp.setHorData((QSizePolicy::SizeType)e.attribute("hsizetype").toInt());
     if (e.hasAttribute("vsizetype"))
       sp.setVerData((QSizePolicy::SizeType)e.attribute("vsizetype").toInt());
-#if (QT_VERSION >= 300)
     if (e.hasAttribute("horstretch"))
       sp.setHorStretch(e.attribute("horstretch").toInt());
     if (e.hasAttribute("verstretch"))
       sp.setHorStretch(e.attribute("verstretch").toInt());
-#endif
     v = QVariant(sp);
     ok = true;
   }
@@ -453,10 +447,8 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
       QSizePolicy sp(v.toSizePolicy());
       e.setAttribute("hsizetype", sp.horData());
       e.setAttribute("vsizetype", sp.verData());
-#if (QT_VERSION >= 300)
       e.setAttribute("horstretch", sp.horStretch());
       e.setAttribute("verstretch", sp.verStretch());
-#endif
     }
     break;
   case QVariant::Cursor:
@@ -515,12 +507,10 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
     }
     break;
 
-#if QT_VERSION >= 300
   case QVariant::KeySequence:
     e.setTagName("key");
     e.setAttribute("sequence", (QString)v.toKeySequence());
     break;
-#endif
 
   case QVariant::ByteArray: // this is only for [u]int64_t
     {

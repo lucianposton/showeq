@@ -987,3 +987,4 @@ void CombatWindow::clear(void)
   resetDPS();
 }
 
+#include "combatlog.moc"

@@ -5,6 +5,7 @@
  * http://seq.sourceforge.net/
  */
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
   "Common Tongue", // 0
   "Barbarian",     // 1
   "Erudian",       // 2
@@ -30,3 +31,5 @@
   "Elder Dragon",  // 22
   "Dark Speech",   // 23
   "Van Shir",      // 24
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+

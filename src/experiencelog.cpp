@@ -697,3 +697,5 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
    seqInfo("xpgained: %ld group_ag: %d myLevel: %d gbonus: %d mob_level: %d penalty: %d ", xp_gained, group_ag, myLevel, gbonus, mob_level, penalty);
    seqInfo("ZEM - ZEM - ZEM ===== %d ", ZEM);
 }
+
+#include "experiencelog.moc"

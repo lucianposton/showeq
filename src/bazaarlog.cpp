@@ -64,3 +64,6 @@ void BazaarLog::bazaarSearch(const uint8_t* data, size_t len, uint8_t dir)
 
   flush();
 }
+
+#include "bazaarlog.moc"
+

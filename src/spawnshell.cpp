@@ -1058,3 +1058,5 @@ void SpawnShell::restoreSpawns(void)
 	    (const char*)fileName);
   }
 }
+
+#include "spawnshell.moc"
