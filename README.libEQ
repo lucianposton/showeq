@@ -9,16 +9,7 @@ ShowEQ will function only in GPS (radar/map) mode with all mobs shown as
 
 The libEQ.a library may be downloaded from the following sites:
 
-http://seq.sf.net/libeq/libEQ.a
-
-
-Here are some example command lines you may use to download the libEQ.a for the linux i386 architecture:
-[]# cd /usr/lib/ (or whatever the location you stored the previous libEQ.a in)
-[]# wget --passive-ftp ftp://seq.sf.net/libeq/libEQ.a
-
-or alternatelly if you want to use the other ftp download site:
-
-[]# wget --passive-ftp ftp://seq.sf.net/libeq/libEQ.a
+http://prdownloads.sourceforge.net/seq/libEQ.a.f45cb14c?download
 
 *** WARNING ***
 
