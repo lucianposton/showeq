@@ -1001,10 +1001,15 @@ void Player::fillConTable()
     greenRange = -13;
     cyanRange = -10;
   }
-  else if (level() < 40) 
-  { // 43 - 44
-    greenRange = -14;
-    cyanRange = -11;
+  else if (level() < 41)
+  { // 37 - 40
+  	greenRange = -14;
+	cyanRange = -11;
+  }
+  else if (level() < 45)
+  { // 41 - 44
+  	greenRange = -16;
+	cyanRange = -12;
   }
   else if (level() < 49) 
   { // 45 - 48
