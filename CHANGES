@@ -1,5 +1,9 @@
 dohpaZ (08/27/03)
 ---------------------
++ Updated version to 4.3.9
+
+dohpaZ (08/27/03)
+---------------------
 + Removed references to libEQ.h
 + Removed HAVE_LIBEQ usage
 + Updated documentation to reflect that libEQ.a is no longer needed
