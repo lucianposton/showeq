@@ -2618,9 +2618,9 @@ void Map::paintSpawns(MapParameters& param,
 	//  brown = 165,42,42
 	//  purple = 160,32,240
 
-      if (spawns[n].race == 127)
+      if (item->race() == 127)
 	{
-	  tmp.setBrush (QColor (255,160,0));
+	  p.setBrush (QColor (255,160,0));
 	}
 
       //
