@@ -1,5 +1,16 @@
 Version: $Id$ $Name$
 
+dohpaZ (02/?/04)
+---------------------
++ Updated version to 5.0.0.5
++ Updated to work with 02/10/04 EQLive
++ Added Beserker class
++ Added Gate of Discord (GoD) maps.
++ Integrated patch #893070 "Races Update (GoD)" by curioseq
++ Minor fix to guild member list online member count tracking.
++ Make sure to cleanup guild list/shell when shutting down
++ Added special map icon for zone doors.
+
 dohpaZ (01/18/04)
 ---------------------
 + Updated version to 5.0.0.4

@@ -61,16 +61,38 @@ ZoneMgr::ZoneMgr(QObject* parent, const char* name)
     restoreZoneState();
 }
 
+struct ZoneNames
+{
+  const char* shortName;
+  const char* longName;
+};
+
+static const ZoneNames zoneNames[] =
+{
+#include "zones.h"
+};
+
 QString ZoneMgr::zoneNameFromID(uint16_t zoneId)
 {
-   static const char* zoneNames[] =
-   {
-#include "zones.h"
-   };
 
    const char* zoneName = NULL;
-   if (zoneId < (sizeof(zoneNames) / sizeof (char*)))
-       zoneName = zoneNames[zoneId];
+   if (zoneId < (sizeof(zoneNames) / sizeof (ZoneNames)))
+       zoneName = zoneNames[zoneId].shortName;
+
+   if (zoneName != NULL)
+      return zoneName;
+
+   QString tmpStr;
+   tmpStr.sprintf("unk_zone_%d", zoneId);
+   return tmpStr;
+}
+
+QString ZoneMgr::zoneLongNameFromID(uint16_t zoneId)
+{
+
+   const char* zoneName = NULL;
+   if (zoneId < (sizeof(zoneNames) / sizeof (ZoneNames)))
+       zoneName = zoneNames[zoneId].longName;
 
    if (zoneName != NULL)
       return zoneName;
@@ -155,10 +177,25 @@ void ZoneMgr::zoneEntryClient(const uint8_t* data, size_t len, uint8_t dir)
     saveZoneState();
 }
 
+void ZoneMgr::zonePlayer(const uint8_t* data)
+{
+  const charProfileStruct* player = (const charProfileStruct*)data;
+  m_shortZoneName = zoneNameFromID(player->zoneId);
+  m_longZoneName = zoneLongNameFromID(player->zoneId);
+  m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
+  m_zoning = false;
+  emit zoneBegin(m_shortZoneName);
+
+  if (showeq_params->saveZoneState)
+    saveZoneState();
+}
+
 void ZoneMgr::zoneEntryServer(const uint8_t* data, size_t len, uint8_t dir)
 {
   const ServerZoneEntryStruct* zsentry = (const ServerZoneEntryStruct*)data;
+#if 0 // ZBTEMP
   m_shortZoneName = zoneNameFromID(zsentry->zoneId);
+#endif // ZBTEMP
   m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
   m_zoning = false;
   emit zoneBegin(m_shortZoneName);
@@ -172,6 +209,7 @@ void ZoneMgr::zoneChange(const uint8_t* data, size_t len, uint8_t dir)
 {
   const zoneChangeStruct* zoneChange = (const zoneChangeStruct*)data;
   m_shortZoneName = zoneNameFromID(zoneChange->zoneId);
+  m_longZoneName = zoneLongNameFromID(zoneChange->zoneId);
   m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
   m_zoning = true;
 

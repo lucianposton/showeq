@@ -272,19 +272,28 @@ void GuildListWindow::updated(const GuildMember* member)
   {
     // if not-showing offline users and this user has become offline,
     // then remove it
-    if (!m_showOffline && !member->zoneId())
+    if (!member->zoneId())
     {
-      // remove the item from the item dictionary
-      m_guildListItemDict.remove((void*)member);
-      
-      // delete the item
-      delete memberItem;
+      // decrement members on count
+      m_membersOn--;
+
+      if (!m_showOffline)
+      {
+	// remove the item from the item dictionary
+	m_guildListItemDict.remove((void*)member);
+	
+	// delete the item
+	delete memberItem;
+      }
     }
     else
       memberItem->update(m_guildShell);
   } // 
   else 
   {
+    if (member->zoneId())
+      m_membersOn++;
+
     if (m_showOffline || (!m_showOffline && member->zoneId()))
     {
       // add the new guild member item

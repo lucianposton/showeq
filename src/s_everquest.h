@@ -19,6 +19,7 @@ AddStruct(AA_Array);
 AddStruct(zoneChangeStruct);
 AddStruct(ClientZoneEntryStruct);
 AddStruct(ServerZoneEntryStruct);
+AddStruct(ServerZoneEntryStruct);
 AddStruct(newZoneStruct);
 AddStruct(charProfileStruct);
 AddStruct(playerAAStruct);

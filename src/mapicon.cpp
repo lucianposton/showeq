@@ -52,6 +52,7 @@ static const QString iconTypePrefBaseNames[] =
   "Unknown",
   "Drop",
   "Door",
+  "ZoneDoor",
   "SpawnNPC",
   "SpawnNPCCorpse",
   "SpawnPlayer",
@@ -87,6 +88,7 @@ static const QString iconTypeNames[] =
   "Unknown",
   "Drop",
   "Door",
+  "Zone Door",
   "Spawn NPC",
   "Spawn NPC Corpse",
   "Spawn Player",
@@ -566,6 +568,10 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
   m_mapIcons[tIconTypeDoor]
     .setImage(QBrush(NoBrush), QPen(QColor(110, 60, 0)),
 	      tIconStyleSquare, tIconSizeTiny,
+	      true, false, false, false);
+  m_mapIcons[tIconTypeZoneDoor]
+    .setImage(QBrush(QColor(110,26,104)), QPen(QColor(110, 26, 104)),
+	      tIconStyleDiamond, tIconSizeSmall,
 	      true, false, false, false);
   m_mapIcons[tIconTypeSpawnNPC]
     .setImage(QBrush(SolidPattern), QPen(black, 0, SolidLine, cap, join), 

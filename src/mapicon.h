@@ -74,6 +74,7 @@ enum MapIconType
   tIconTypeUnknown = 0,
   tIconTypeDrop,
   tIconTypeDoor, 
+  tIconTypeZoneDoor, 
   tIconTypeSpawnNPC,
   tIconTypeSpawnNPCCorpse,
   tIconTypeSpawnPlayer, 

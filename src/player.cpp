@@ -794,6 +794,7 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
   setGuildID(zsentry->guildId);
   setGuildTag(m_guildMgr->guildIdToName(guildID()));
   emit guildChanged();
+#if 0 // ZBTEMP
   setPos((int16_t)lrintf(zsentry->x), 
          (int16_t)lrintf(zsentry->y), 
          (int16_t)lrintf(zsentry->z),
@@ -806,6 +807,16 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
 	   zsentry->x, zsentry->y, zsentry->z, zsentry->heading);
 #endif // ZBTEMP  
   setHeading((int8_t)lrintf(zsentry->heading), 0);
+#else // ZBTEMP
+  setPos(zsentry->x >> 3, 
+         zsentry->y >> 3, 
+         zsentry->z >> 3,
+	 showeq_params->walkpathrecord,
+	 showeq_params->walkpathlength);
+  seqDebug("Player::zoneBegin(): Pos (%f/%f/%f) Heading: %f",
+	   float(zsentry->x)/8.0, float(zsentry->y)/8.0, float(zsentry->z)/8.0);
+  setHeading(zsentry->heading, 0);
+#endif // ZBTEMP
   m_validPos = true;
 
   m_headingDegrees = 360 - ((((int8_t)lrintf(zsentry->heading)) * 360) >> 11);

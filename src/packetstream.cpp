@@ -703,7 +703,7 @@ void EQPacketStream::dispatchPacket(const uint8_t* data, size_t len,
 	    tempStr += QString(" sizeof(%1):%2")
 	      .arg(payload->typeName()).arg(payload->typeSize());
 	  else if (payload->sizeCheckType() == SZC_Modulus)
-	    tempStr += QString(" modulus of sizeof(%s):%d")
+	    tempStr += QString(" modulus of sizeof(%1):%2")
 	      .arg(payload->typeName()).arg(payload->typeSize());
 	}
       }      

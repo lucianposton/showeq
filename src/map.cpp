@@ -3212,7 +3212,7 @@ void Map::paintDoors(MapParameters& param,
 #endif
   const ItemMap& itemMap = m_spawnShell->doors();
   ItemConstIterator it(itemMap);
-  const Item* item;
+  const Door* item;
   const QRect& screenBounds = m_param.screenBounds();
   MapIcon mapIcon;
   uint32_t filterFlags;
@@ -3225,7 +3225,7 @@ void Map::paintDoors(MapParameters& param,
   for (; it.current(); ++it)
   {
     // get the item from the list
-    item = it.current();
+    item = (const Door*)it.current();
 
     filterFlags = item->filterFlags();
 
@@ -3238,6 +3238,10 @@ void Map::paintDoors(MapParameters& param,
       continue;
 
     mapIcon = m_mapIcons->icon(tIconTypeDoor);
+
+    // add zone door effects
+    if (item->zonePoint() != 0xFFFFFFFF)
+      mapIcon.combine(m_mapIcons->icon(tIconTypeZoneDoor));
 
     // only bother checking for specific flags if any are set...
     if (filterFlags != 0)

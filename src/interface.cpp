@@ -1589,6 +1589,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Server,
 			"ServerZoneEntryStruct", SZC_Match,
 			m_zoneMgr, SLOT(zoneEntryServer(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
+			"charProfileStruct", SZC_Match,
+			m_zoneMgr, SLOT(zonePlayer(const uint8_t*)));
      m_packet->connect2("OP_ZoneChange", SP_Zone, DIR_Client|DIR_Server,
 			"zoneChangeStruct", SZC_Match,
 			m_zoneMgr, SLOT(zoneChange(const uint8_t*, size_t, uint8_t)));
@@ -2064,6 +2067,9 @@ EQInterface::~EQInterface()
   if (m_statList != 0)
     delete m_statList;
 
+  if (m_guildListWindow != 0)
+    delete m_guildListWindow;
+
   if (m_skillList != 0)
     delete m_skillList;
 
@@ -2129,6 +2135,9 @@ EQInterface::~EQInterface()
 
   if (m_player != 0)
     delete m_player;
+
+  if (m_guildShell != 0)
+    delete m_guildShell;
 
   if (m_zoneMgr != 0)
     delete m_zoneMgr;

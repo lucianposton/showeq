@@ -367,6 +367,88 @@ struct ClientZoneEntryStruct
 ** Length: 390 Octets
 ** OpCode: ZoneEntryCode (when direction == server)
 */
+#if 1 // ZBTEMP
+struct ServerZoneEntryStruct
+{
+/*0000*/ uint8_t  unknown101[7]; 
+/*0007*/ union 
+         {
+	   struct 
+	   {
+	     /*0007*/ Color_Struct color_helmet;    // Color of helmet item
+	     /*0011*/ Color_Struct color_chest;     // Color of chest item
+	     /*0015*/ Color_Struct color_arms;      // Color of arms item
+	     /*0019*/ Color_Struct color_bracers;   // Color of bracers item
+	     /*0023*/ Color_Struct color_hands;     // Color of hands item
+	     /*0027*/ Color_Struct color_legs;      // Color of legs item
+	     /*0031*/ Color_Struct color_feet;      // Color of feet item
+	     /*0035*/ Color_Struct color_primary;   // Color of primary item
+	     /*0039*/ Color_Struct color_secondary; // Color of secondary item
+	   } equipment_colors;
+	   /*0007*/ Color_Struct colors[9];             // Array elements correspond to struct equipment_colors above
+         };
+
+/*0043*/ uint8_t  class_;          // Player's Class
+/*0044*/ uint8_t  unknown0044[5]; 
+
+/*0049*/ uint32_t race;            // Player's Race
+/*0053*/ uint8_t  unknown053;
+/*0054*/ char	  name[64];      // Player name
+
+/*0118*/ uint8_t  unknown0118[3];
+
+/*0121*/ int8_t hp;
+/*0122*/ uint8_t  unknown0122;
+
+/*0123*/ uint8_t  level;           // Player's Level
+/*0124*/ uint8_t lfg; // 0=Not lfg,1=lfg
+/*0125*/ uint16_t heading; // spawn heading
+/*0127*/ uint8_t  deltaHeading; // change in heading
+/*0128*/ uint8_t animation; // animation id
+/*0129*/ signed  deltaX:13;
+        signed  x:19;
+/*0133*/ signed  y:19;
+        signed  deltaZ:13;
+/*0137*/ signed  deltaY:13;
+        signed  z:19;
+/*0141*/ uint8_t  unknown0141[2];
+/*0143*/ uint8_t invis; // 0=visible,1=invisible
+/*0144*/ uint8_t  unknown0124[7];
+
+/*0151*/ float size;
+/*0155*/ uint8_t helm;
+/*0156*/ float	runspeed;          // Speed when running
+/*0160*/ uint8_t  unknown0160[1];
+/*0161*/ float    walkspeed;       // Speed when walking
+/*0165*/ uint32_t guildId;         // Current guild
+/*0169*/ uint8_t anon; // 0=normal,1=anon,2=roleplaying
+/*0170*/ uint8_t gender; // 0=male,1=female,2=other
+/*0171*/ uint8_t unknown171[5];
+
+/*0176*/ char     lastName[32];  // Players last name
+/*0208*/ union 
+         {
+	   struct 
+	   {
+	     /*0208*/ uint32_t equip_helmet;    // Equipment: Helmet Visual
+	     /*0212*/ uint32_t equip_chest;     // Equipment: Chest Visual
+	     /*0216*/ uint32_t equip_arms;      // Equipment: Arms Visual
+	     /*0220*/ uint32_t equip_bracers;   // Equipment: Bracers Visual
+	     /*0224*/ uint32_t equip_hands;     // Equipment: Hands Visual
+	     /*0228*/ uint32_t equip_legs;      // Equipment: Legs Visual
+	     /*0232*/ uint32_t equip_feet;      // Equipment: Feet Visual
+	     /*0236*/ uint32_t equip_primary;   // Equipment: Primary Visual
+	     /*0240*/ uint32_t equip_secondary; // Equipment: Secondary Visual
+	   } equipment;
+	   /*0208*/ Color_Struct equip[9];            // Array elements correspond to struct equipment above
+         };
+/*0244*/ uint8_t unknown244[14];
+
+/*0258*/ int16_t deity;           // Player's Deity
+/*0262*/ uint8_t unknown260[7];
+}; /* 0267 */
+
+#else // ZBTEMP
 struct ServerZoneEntryStruct
 {
 /*0000*/ uint32_t checksum;      // some kind of checksum
@@ -399,7 +481,7 @@ struct ServerZoneEntryStruct
 	     /*0252*/ Color_Struct color_bracers;   // Color of bracers item
 	     /*0256*/ Color_Struct color_hands;     // Color of hands item
 	     /*0260*/ Color_Struct color_legs;      // Color of legs item
-	     /*0264*/ Color_Struct color_feet;      // Color of feet item
+	     /*0264*/ Color_Struct color_feet;      //1 Color of feet item
 	     /*0268*/ Color_Struct color_primary;   // Color of primary item
 	     /*0272*/ Color_Struct color_secondary; // Color of secondary item
 	   } equipment_colors;
@@ -455,6 +537,7 @@ struct ServerZoneEntryStruct
 /*0440*/ uint8_t  unknown440[12];
 /*0452*/
 };
+#endif // ZBTEMP
 
 /*
 ** New Zone Code
@@ -574,15 +657,15 @@ struct charProfileStruct
 /*3702*/ uint16_t  zoneInstance;       // 
 /*3704*/ spellBuff buffs[15];          // Buffs currently on the player
 /*3944*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
-/*4328*/ uint8_t   unknown4328[4];     // *** Placeholder
-/*4332*/ uint32_t  ldon_guk_points;    // Earned Deepest Guk points
-/*4336*/ uint32_t  ldon_mir_points;    // Earned Deepest Guk points
-/*4340*/ uint32_t  ldon_mmc_points;    // Earned Deepest Guk points
-/*4344*/ uint32_t  ldon_ruj_points;    // Earned Deepest Guk points
-/*4348*/ uint32_t  ldon_tak_points;    // Earned Deepest Guk points
-/*4352*/ uint8_t   unknown4352[24];    // *** Placeholder
-/*4376*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*4380*/ uint8_t   unknown4380[540];   // *** Placeholder
+/*4328*/ uint8_t   unknown4328[668];   // *** Placeholder
+/*4996*/ uint32_t  ldon_guk_points;    // Earned GUK points
+/*5000*/ uint32_t  ldon_mir_points;    // Earned MIR points
+/*5004*/ uint32_t  ldon_mmc_points;    // Earned MMC points
+/*5008*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
+/*5012*/ uint32_t  ldon_tak_points;    // Earned TAK points
+/*5016*/ uint8_t   unknown4352[20];    // *** Placeholder
+/*5036*/ uint32_t  ldon_avail_points;  // Available LDON points
+/*5040*/ uint8_t   unknown4380[632];   // *** Placeholder
 /*4644*/	
 };
 
@@ -848,8 +931,8 @@ struct doorStruct
 /*0046*/ uint8_t  size;           // size of door
 /*0047*/ uint8_t holdstateforever;
 /*0048*/ uint32_t zonePoint;
-/*0052*/ uint8_t  unknown052[4]; // ***Placeholder
-/*0056*/
+/*0052*/ uint8_t  unknown052[12]; // ***Placeholder
+/*0064*/
 }; 
 
 /*
@@ -1337,7 +1420,7 @@ struct actionStruct
 /*0004*/ uint8_t  level;                  // Caster level
 /*0005*/ uint8_t  unknown0005[17];        // ***Placeholder
 /*0022*/ uint8_t  type;                   // Casts, Falls, Bashes, etc...
-/*0012*/ int32_t  damage;                 // Amount of Damage
+/*0023*/ int32_t  damage;                 // Amount of Damage
 /*0027*/ int16_t  spell;                  // SpellID
 /*0029*/ uint8_t  unknown0029[2];         // ***Placeholder
 /*0031*/
