@@ -1,3 +1,7 @@
+casey 01/17/2003
+-----------------------
+  + applied quackrabbits patch #669753, fixes to some packet structs.
+
 fee (floyd) 01/16/2003
 -----------------------
   ShowEQ 4.3.5 

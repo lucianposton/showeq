@@ -1386,12 +1386,11 @@ struct startCastStruct
 {
 /*0000*/ uint8_t  opCode;                 // 0x7e
 /*0001*/ uint8_t  version;                // 0x21
-/*0002*/ int16_t  unknown0002;            // ***Placeholder
-/*0004*/ uint16_t spellId;                // Spell ID
-/*0006*/ int16_t  unknown0006;            // ***Placeholder
-/*0008*/ //int16_t  unknown0008;            // ***Placeholder
-/*0010*/ uint16_t targetId;               // The current selected target
-/*0014*/ uint8_t  unknown0014[4];         // ***Placeholder 
+/*0002*/ int32_t  unknown0002;            // ***Placeholder
+/*0006*/ uint32_t spellId;                // Spell ID
+/*0010*/ int32_t  unknown0010;            // ***Placeholder
+/*0014*/ uint32_t targetId;               // The current selected target
+/*0018*/ uint32_t unknown0018;            // ***Placeholder 
 };
 
 /*
@@ -1447,11 +1446,9 @@ struct memSpellStruct
 /*0000*/ uint8_t  opCode;                 // 0x82
 /*0001*/ uint8_t  version;                // 0x21
 /*0002*/ uint32_t spawnId;                // Id of who is casting
-/*0004*/ int16_t  unknown0004;            // ***Placeholder
 /*0006*/ uint32_t spellId;                // Id of spell
-/*0008*/ int16_t  param1;                 // Paramater 1
-/*0010*/ int16_t  param2;                 // Paramater 2
-/*0012*/ int16_t  param3;                 // Parameter 3
+/*0010*/ int16_t  param1;                 // Paramater 1
+/*0012*/ int16_t  param2;                 // Paramater 2
 };
 
 /*
@@ -1673,6 +1670,7 @@ struct timeOfDayStruct
 /*0004*/ int8_t   day;                    // Day (1-28)
 /*0005*/ int8_t   month;                  // Month (1-12)
 /*0006*/ uint16_t year;                   // Year
+/*0008*/ uint16_t unknown0016;            // Placeholder
 };
 
 /*

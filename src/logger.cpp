@@ -1080,9 +1080,9 @@ PktLogger::logMemSpell(const memSpellStruct *spell, uint32_t len, uint8_t dir)
     outputf("R %u %04d %d %.2X%.2X %u ", timestamp, len, dir,
        spell->opCode, spell->version, spell->spawnId);
 
-    output(&spell->unknown0004, 2);
+    // output(&spell->unknown0004, 2);
     outputf(" %d %d %d %d\n", 
-       spell->spellId, spell->param1, spell->param2, spell->param3);
+       spell->spellId, spell->param1, spell->param2);
     flush();
 }
 
@@ -1120,11 +1120,12 @@ PktLogger::logStartCast(const startCastStruct *spell, uint32_t len, uint8_t dir)
     outputf("R %u %04d %d %.2X%.2X ", timestamp, len, dir,
        spell->opCode, spell->version);
 
-    output(&spell->unknown0002, 2);
+    output(&spell->unknown0002, 4);
     outputf(" %u ", spell->spellId);
-    output(&spell->unknown0006, 4);
+    output(&spell->unknown0010, 4);
     outputf(" ");
     outputf(" %u ", spell->targetId);
+    output(&spell->unknown0018, 4);
     outputf("\n");
 
     flush();
