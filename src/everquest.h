@@ -559,7 +559,7 @@ struct ServerZoneEntryStruct
 /*0007*/ char     name[30];               // Player first name
 /*0037*/ char     zoneShortName[15];      // Zone Short Name
 /*0052*/ int8_t   unknown0052[107];       // ***Placeholder
-/*0159*/ uint8_t  class;                  // Player's Class
+/*0159*/ uint8_t  _class;                  // Player's Class
 /*0160*/ uint8_t  race;                   // Player's Race
 /*0161*/ uint8_t  unknown0161[2];         // ***Placeholder
 /*0163*/ uint8_t  level;                  // Player's Level
