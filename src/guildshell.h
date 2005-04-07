@@ -50,10 +50,14 @@ class GuildMember
 
  protected:
   QString m_name;
+  uint8_t m_banker; // 0 = no, 1 = banker
   uint8_t m_level;
   uint8_t m_class;
-  uint32_t m_guildRank;
+  uint32_t m_guildRank; // 0 = member, 1 = officer, 2 = leader
   time_t m_lastOn;
+  uint8_t m_guildTributeOn; // 0 = off, 1 = on
+  uint8_t m_guildTributeDonated;
+  time_t m_guildTributeLastDonation;
   QString m_publicNote;
   uint16_t m_zoneId;
   uint16_t m_zoneInstance;

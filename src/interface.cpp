@@ -222,8 +222,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			   pSEQPrefs->getPrefBool("SessionTracking", 
 						  section, false),
 			   pSEQPrefs->getPrefBool("Record", vpsection, false),
-			   pSEQPrefs->getPrefBool("Playback", vpsection,
-						  false),
+			   pSEQPrefs->getPrefInt("Playback", vpsection,
+						  PLAYBACK_OFF),
 			   pSEQPrefs->getPrefInt("PlaybackRate", vpsection, 
 						 false),
 			   this, "packet");
@@ -563,7 +563,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			 this, SLOT(saveSelectedSpawnPath(void)));
    pFileMenu->insertItem("Save NPC Spawn Paths",
 			 this, SLOT(saveSpawnPaths(void)));
-   if (m_packet->playbackPackets())
+   if (m_packet->playbackPackets() != PLAYBACK_OFF)
    {
      pFileMenu->insertItem("Inc Playback Speed", m_packet, SLOT(incPlayback()), CTRL+Key_X);
      pFileMenu->insertItem("Dec Playback Speed", m_packet, SLOT(decPlayback()), CTRL+Key_Z);
@@ -2005,6 +2005,12 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_DeleteSpawn", SP_Zone, DIR_Server|DIR_Client,
 		      "deleteSpawnStruct", SZC_Match,
 		      m_spawnShell, SLOT(deleteSpawn(const uint8_t*)));
+   m_packet->connect2("OP_SpawnRename", SP_Zone, DIR_Server,
+		      "spawnRenameStruct", SZC_Match,
+		      m_spawnShell, SLOT(renameSpawn(const uint8_t*)));
+   m_packet->connect2("OP_SpawnAppearance", SP_Zone, DIR_Server|DIR_Client,
+		      "spawnAppearanceStruct", SZC_Match,
+		      m_spawnShell, SLOT(updateSpawnAppearance(const uint8_t*)));
    m_packet->connect2("OP_Death", SP_Zone, DIR_Server,
 		      "newCorpseStruct", SZC_Match,
 		      m_spawnShell, SLOT(killSpawn(const uint8_t*)));

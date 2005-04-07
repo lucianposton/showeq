@@ -335,8 +335,10 @@ void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
   // if their is an item already, just update it
   if (litem != NULL)
   {
-    // just update the item
+    // just update the item and recalc the color in case it was based on 
+    // something that we just changed.
     litem->update(m_player, changeItem);
+    litem->pickTextColor(item, m_player, m_currentCategory->color());
     
     // make sure it's sorted into the proper place
     if (m_keepSorted)
@@ -635,6 +637,7 @@ void SpawnListWindow2::refresh(void)
       {
 	// just update the item
 	litem->update(m_player, tSpawnChangedALL);
+        litem->pickTextColor(item, m_player, m_currentCategory->color());
 	
 	// nothing more to do for this item
 	continue;

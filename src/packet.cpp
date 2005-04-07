@@ -61,7 +61,7 @@
 
 const in_port_t WorldServerGeneralPort = 9000;
 const in_port_t WorldServerChatPort = 9876;
-const in_port_t WorldServerChat2Port = 9875; //%%% what is this?
+const in_port_t WorldServerChat2Port = 9875; // xgame tells, mail
 const in_port_t LoginServerMinPort = 15900;
 const in_port_t LoginServerMaxPort = 15910;
 const in_port_t ChatServerPort = 5998;
@@ -86,7 +86,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 		   bool realtime,
 		   bool sessionTrackingFlag,
 		   bool recordPackets,
-		   bool playbackPackets,
+		   int playbackPackets,
 		   int8_t playbackSpeed, 
 		   QObject * parent, const char *name)
   : QObject (parent, name),
@@ -351,7 +351,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     }
   }
   
-  if (!m_playbackPackets)
+  if (m_playbackPackets == PLAYBACK_OFF)
   {
     // create the pcap object and initialize, either with MAC or IP
     m_packetCapture = new PacketCaptureThread();
@@ -365,6 +365,18 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 			     m_realtime, IP_ADDRESS_TYPE );
     emit filterChanged();
   }
+  else if (m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
+  {
+    // Create the pcap object and initialize with the file input given
+    m_packetCapture = new PacketCaptureThread();
+
+    const char* filename = 
+      pSEQPrefs->getPrefString("Filename", "VPacket");
+
+    m_packetCapture->startOffline(filename, m_playbackSpeed);
+    seqInfo("Playing back packets from '%s' at speed '%d'", 
+      filename, m_playbackSpeed);
+  }
 
   // Flag session tracking properly on streams
   session_tracking(sessionTrackingFlag);
@@ -374,14 +386,20 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
   if ((geteuid() == 0) && (getuid() != geteuid()))
     setuid(getuid()); 
 
-
   /* Create timer object */
   m_timer = new QTimer (this);
   
-  if (!m_playbackPackets)
+  if (m_playbackPackets == PLAYBACK_OFF || 
+          m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
+  {
+    // Normal pcap packet handler
     connect (m_timer, SIGNAL (timeout ()), this, SLOT (processPackets ()));
+  }
   else
+  {
+    // Special internal playback handler
     connect (m_timer, SIGNAL (timeout ()), this, SLOT (processPlaybackPackets ()));
+  }
   
   /* setup VPacket */
   m_vPacket = NULL;
@@ -402,7 +420,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
       if (pSEQPrefs->getPrefString("FlushPackets", section))
 	m_vPacket->setFlushPacket(true);
     }
-    else if (m_playbackPackets)
+    else if (m_playbackPackets == PLAYBACK_FORMAT_SEQ)
     {
       m_vPacket = new VPacket(filename, 1, false);
       m_vPacket->setCompressTime(pSEQPrefs->getPrefInt("CompressTime", section, 0));
@@ -416,7 +434,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
   else
   {
     m_recordPackets = 0;
-    m_playbackPackets = 0;
+    m_playbackPackets = PLAYBACK_OFF;
   }
 }
 
@@ -734,7 +752,7 @@ void EQPacket::closeStream()
 {
   // reseting the pcap filter to a non-exclusive form allows us to beat 
   // the race condition between timer and processing the zoneServerInfo
-  if(!m_playbackPackets) 
+  if(m_playbackPackets == PLAYBACK_OFF) 
   {
     m_packetCapture->setFilter(m_device, m_ip,
 			       m_realtime, IP_ADDRESS_TYPE, 0, 0);
@@ -757,7 +775,7 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
   m_serverPort = serverPort;
   m_clientPort = clientPort;
 
-  if (!m_playbackPackets)
+  if (m_playbackPackets == PLAYBACK_OFF)
   {
     if (m_mac.length() == 17)
     {
@@ -767,9 +785,6 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
 				 MAC_ADDRESS_TYPE, 0, 
 				 m_clientPort);
       emit filterChanged();
-      seqInfo("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d",
-	      (const char*)m_mac, 
-	      m_clientPort);
     }
     else
     {
@@ -779,10 +794,19 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
 				 IP_ADDRESS_TYPE, 0, 
 				 m_clientPort);
       emit filterChanged();
-      seqInfo("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d",
-	      (const char*)m_ip, 
-	      m_clientPort);
     }
+  }
+
+  // Wanted this message even if we're running on playback...
+  if (m_mac.length() == 17)
+  {
+    seqInfo("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
+      (const char*)m_mac, m_clientPort, m_serverPort);
+  }
+  else
+  {
+    seqInfo("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
+      (const char*)m_ip, m_clientPort, m_serverPort);
   }
   
   emit clientPortLatched(m_clientPort);
@@ -826,8 +850,8 @@ int EQPacket::playbackSpeed(void)
 {
   if (m_vPacket)
     return m_vPacket->playbackSpeed();
-
-  return 1; // if not a vpacket stream, then is realtime
+  else
+    return m_packetCapture->getPlaybackSpeed();
 }
 
 ///////////////////////////////////////////
@@ -837,90 +861,107 @@ void EQPacket::setPlayback(int speed)
   if (m_vPacket)
   {
     m_vPacket->setPlaybackSpeed(speed);
-    
-    QString string("");
-    
-    if (speed == 0)
-      string.sprintf("Playback speed set Fast as possible");
-    else if (speed < 0)
-       string.sprintf("Playback paused (']' to resume)");
-    else
-       string.sprintf("Playback speed set to %d", speed);
-
-    emit stsMessage(string, 5000);
-
-    emit resetPacket(m_client2WorldStream->packetCount(), client2world);
-    emit resetPacket(m_world2ClientStream->packetCount(), world2client);
-    emit resetPacket(m_client2ZoneStream->packetCount(), client2zone);
-    emit resetPacket(m_zone2ClientStream->packetCount(), zone2client);
-
-    emit playbackSpeedChanged(speed);
   }
+  else
+  {
+    m_packetCapture->setPlaybackSpeed(speed);
+  }
+    
+  QString string("");
+    
+  if (speed == 0)
+    string.sprintf("Playback speed set Fast as possible");
+  else if (speed < 0)
+     string.sprintf("Playback paused (']' to resume)");
+  else
+     string.sprintf("Playback speed set to %d", speed);
+
+  emit stsMessage(string, 5000);
+
+  emit resetPacket(m_client2WorldStream->packetCount(), client2world);
+  emit resetPacket(m_world2ClientStream->packetCount(), world2client);
+  emit resetPacket(m_client2ZoneStream->packetCount(), client2zone);
+  emit resetPacket(m_zone2ClientStream->packetCount(), zone2client);
+
+  emit playbackSpeedChanged(speed);
 }
 
 ///////////////////////////////////////////
 // Increment the packet playback speed
 void EQPacket::incPlayback(void)
 {
+  int x;
+
   if (m_vPacket)
   {
-    int x = m_vPacket->playbackSpeed();
-    
-    switch(x)
-      {
-	// if we were paused go to 1X not full speed
-      case -1:
-	x = 1;
-	break;
-	
-	// can't go faster than full speed
-      case 0:
-	return;
-	
-      case 9:
-	x = 0;
-	break;
-	
-      default:
-	x += 1;
-	break;
-      }
-    
-    setPlayback(x);
+    x = m_vPacket->playbackSpeed();
   }
+  else
+  {
+    x = m_packetCapture->getPlaybackSpeed();
+  }
+    
+  switch(x)
+  {
+	// if we were paused go to 1X not full speed
+    case -1:
+      x = 1;
+      break;
+	
+    // can't go faster than full speed
+    case 0:
+      return;
+	
+    case 9:
+      x = 0;
+      break;
+	
+    default:
+      x += 1;
+      break;
+  }
+    
+  setPlayback(x);
 }
 
 ///////////////////////////////////////////
 // Decrement the packet playback speed
 void EQPacket::decPlayback(void)
 {
+  int x;
+
   if (m_vPacket)
   {
-    int x = m_vPacket->playbackSpeed();
-    switch(x)
-      {
-	// paused
-      case -1:
-	return;
-	break;
-	
-	// slower than 1 is paused
-      case 1:
-	x = -1;
-	break;
-	
-	// if we were full speed goto 9
-      case 0:
-	x = 9;
-	break;
-	
-      default:
-	x -= 1;
-	break;
-      }
-    
-    setPlayback(x);
+    x = m_vPacket->playbackSpeed();
   }
+  else
+  {
+    x = m_packetCapture->getPlaybackSpeed();
+  }
+
+  switch(x)
+  {
+    // paused
+    case -1:
+      return;
+	  break;
+
+    // slower than 1 is paused
+    case 1:
+      x = -1;
+      break;
+	
+    // if we were full speed goto 9
+    case 0:
+      x = 9;
+      break;
+	
+    default:
+      x -= 1;
+      break;
+  }
+    
+  setPlayback(x);
 }
 
 ///////////////////////////////////////////
@@ -936,7 +977,7 @@ void EQPacket::monitorIPClient(const QString& ip)
   resetEQPacket();
   
   seqInfo("Listening for IP client: %s", (const char*)m_ip);
-  if (!m_playbackPackets)
+  if (m_playbackPackets == PLAYBACK_OFF)
   {
     m_packetCapture->setFilter(m_device, m_ip,
 			       m_realtime, 
@@ -961,7 +1002,7 @@ void EQPacket::monitorMACClient(const QString& mac)
   seqInfo("Listening for MAC client: %s", 
 	 (const char*)m_mac);
 
-  if (!m_playbackPackets)
+  if (m_playbackPackets == PLAYBACK_OFF)
   {
     m_packetCapture->setFilter(m_device, m_ip,
 			       m_realtime, 
@@ -985,7 +1026,7 @@ void EQPacket::monitorNextClient()
 
   seqInfo("Listening for next client seen. (you must zone for this to work!)");
 
-  if (!m_playbackPackets)
+  if (m_playbackPackets == PLAYBACK_OFF)
   {
     m_packetCapture->setFilter(m_device, NULL,
 			       m_realtime, 
@@ -1002,7 +1043,7 @@ void EQPacket::monitorDevice(const QString& dev)
   m_device = dev;
 
   // make sure we aren't playing back packets
-  if (m_playbackPackets)
+  if (m_playbackPackets != PLAYBACK_OFF)
     return;
 
   // stop the current packet capture
@@ -1142,7 +1183,7 @@ void EQPacket::resetEQPacket()
 const QString EQPacket::pcapFilter()
 {
   // make sure we aren't playing back packets
-  if (m_playbackPackets)
+  if (m_playbackPackets != PLAYBACK_OFF)
     return QString("Playback");
 
   return m_packetCapture->getFilter();

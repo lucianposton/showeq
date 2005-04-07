@@ -20,7 +20,8 @@
 // PacketCaptureThread
 //  start and stop the thread
 //  get packets to the processing engine(dispatchPacket)
-PacketCaptureThread::PacketCaptureThread()
+PacketCaptureThread::PacketCaptureThread() :
+    m_playbackSpeed(0)
 {
 }
 
@@ -45,6 +46,27 @@ PacketCaptureThread::~PacketCaptureThread()
   m_pcache_closed = true;
 
   pthread_mutex_unlock (&m_pcache_mutex);
+}
+
+void PacketCaptureThread::setPlaybackSpeed(int playbackSpeed)
+{
+    if (playbackSpeed < -1)
+    {
+        m_playbackSpeed = -1;
+    }
+    else if (playbackSpeed > 9)
+    {
+        m_playbackSpeed = 9;
+    }
+    else if (playbackSpeed == 0)
+    {
+        // Fast as possible. But using 0 makes the UI unresponsive!
+        m_playbackSpeed = 100;
+    }
+    else
+    {
+        m_playbackSpeed = playbackSpeed;
+    }
 }
 
 void PacketCaptureThread::start(const char *device, const char *host, bool realtime, uint8_t address_type)
@@ -151,6 +173,39 @@ void PacketCaptureThread::start(const char *device, const char *host, bool realt
    }
 }
 
+//------------------------------------------------------------------------
+// Capture thread for offline packet capture. Input filename should be a
+// tcpdump file. playbackSpeed is how fast to playback. 1 = realtime,
+// 2 = 2x speed, 3 = 3x speed, etc. 0 = no throttle. -1 = paused.
+//
+void PacketCaptureThread::startOffline(const char* filename, int playbackSpeed)
+{
+    char ebuf[256]; // pcap error buffer
+
+    seqInfo("Initializing Offline Packet Capture Thread: ");
+    m_pcache_closed = false;
+
+    // initialize the pcap object 
+    m_pcache_pcap = pcap_open_offline(filename, ebuf);
+
+    if (!m_pcache_pcap)
+    {
+        seqWarn("pcap_error:pcap_open_offline(%s): %s", filename, ebuf);
+        exit(0);
+    }
+
+    // Set the speed
+    setPlaybackSpeed(playbackSpeed);
+
+    m_tvLastProcessedActual.tv_sec = 0;
+    m_tvLastProcessedOriginal.tv_sec = 0;
+
+    m_pcache_first = m_pcache_last = NULL;
+
+    pthread_mutex_init(&m_pcache_mutex, NULL);
+    pthread_create(&m_tid, NULL, loop, (void*)this);
+}
+
 void PacketCaptureThread::stop()
 {
   // close the pcap session
@@ -174,6 +229,66 @@ void PacketCaptureThread::packetCallBack(u_char * param,
     pc->len = ph->len;
     memcpy (pc->data, data, ph->len);
     pc->next = NULL;
+
+    // Throttle offline playback properly if applicable.
+    int speed = myThis->m_playbackSpeed;
+
+    if (speed != 0)
+    {
+        if (speed == -1)
+        {
+            // We are paused. Need to wait for it to unpause.
+            while ((speed = myThis->m_playbackSpeed) == -1)
+            {
+                sleep(1);
+            }
+        }
+
+        // Playing back from a file. Need to honor playback speed and packet
+        // timestamps properly.
+        timeval now;
+
+        if (gettimeofday(&now, NULL) == 0)
+        {
+            // Anchor the first run through.
+            if (myThis->m_tvLastProcessedActual.tv_sec == 0)
+            {
+                myThis->m_tvLastProcessedActual = now;
+            }
+            if (myThis->m_tvLastProcessedOriginal.tv_sec == 0)
+            {
+                myThis->m_tvLastProcessedOriginal = ph->ts;
+            }
+
+            // The goal here is to make sure that time elapsed since last
+            // packet / playbackSpeed > time elapsed between original
+            // previous packet and this packet. If it is not, we need to sleep
+            // for the difference.
+            long usecDiffActual = 
+                ((now.tv_sec - myThis->m_tvLastProcessedActual.tv_sec)*1000000 +
+                (now.tv_usec - myThis->m_tvLastProcessedActual.tv_usec));
+            long usecDiffOriginal =
+                ((ph->ts.tv_sec - myThis->m_tvLastProcessedOriginal.tv_sec)*1000000 +
+                (ph->ts.tv_usec - myThis->m_tvLastProcessedOriginal.tv_usec)) /
+                    ((long) speed);
+
+            if (usecDiffActual < usecDiffOriginal)
+            {
+                // Need to wait out the difference.
+                timeval tvWait;
+                
+                tvWait.tv_usec = (usecDiffOriginal - usecDiffActual) % 1000000;
+                tvWait.tv_sec = (usecDiffOriginal - usecDiffActual) / 1000000;
+
+                select(1, NULL, NULL, NULL, &tvWait);
+            }
+
+            // And get ready for next one
+            myThis->m_tvLastProcessedActual = now;
+        }
+    }
+
+    myThis->m_tvLastProcessedOriginal = ph->ts;
 
     pthread_mutex_lock (&myThis->m_pcache_mutex);
    

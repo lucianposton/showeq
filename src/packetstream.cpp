@@ -665,69 +665,59 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       uint16_t seq = packet.arqSeq();
       emit seqReceive(seq, (int)m_streamid);
 
-      if (seq >= m_arqSeqExp)
+      // Future packet?
+      if (seq == m_arqSeqExp)
       {
-        // Future packet?
-        if (seq == m_arqSeqExp)
-        {
-          // Expected packet.
-          m_arqSeqExp++;
-          emit seqExpect(m_arqSeqExp, (int)m_streamid);
+        // Expected packet.
+        m_arqSeqExp++;
+        emit seqExpect(m_arqSeqExp, (int)m_streamid);
 
-          // OpCode next. Net order for op codes.
-          uint16_t subOpCode = *(uint16_t*)(packet.payload());
+        // OpCode next. Net order for op codes.
+        uint16_t subOpCode = *(uint16_t*)(packet.payload());
        
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-          seqDebug("SEQ: Found next sequence number in data stream %s (%d), incrementing expected seq, %04x (op code %04x, sub opcode %04x)", 
-	        EQStreamStr[m_streamid], m_streamid, seq, 
-            packet.getNetOpCode(), subOpCode);
+        seqDebug("SEQ: Found next sequence number in data stream %s (%d), incrementing expected seq, %04x (op code %04x, sub opcode %04x)", 
+          EQStreamStr[m_streamid], m_streamid, seq, 
+          packet.getNetOpCode(), subOpCode);
 #endif
 
-          // App opcode or net opcode?
-          if (IS_NET_OPCODE(subOpCode))
-          {
-            // Net opcode. false = no copy. true = subpacket.
-            EQProtocolPacket spacket(packet.payload(), 
-              packet.payloadLength(), false, true);
-
-            processPacket(spacket, true);
-          }
-          else
-          {
-            // App opcode. Dispatch, skipping opcode.
-            dispatchPacket(&packet.payload()[2], packet.payloadLength()-2,
-              subOpCode, m_opcodeDB.find(subOpCode));
-          }
-        }
-        else if (seq < (uint32_t(m_arqSeqExp + arqSeqWrapCutoff)) ||
-                 seq < (int32_t(m_arqSeqExp - arqSeqWrapCutoff)))
+        // App opcode or net opcode?
+        if (IS_NET_OPCODE(subOpCode))
         {
-          // Yeah, future packet. Push it on the packet cache.
-#ifdef PACKET_PROCESS_DIAG
-          seqDebug("SEQ: out of order sequence %04x stream %s (%d) expecting %04x, sending to cache, %04d",
-	        seq, EQStreamStr[m_streamid], m_streamid, 
-            m_arqSeqExp, m_cache.size());
-#endif
-          setCache(seq, packet);
+          // Net opcode. false = no copy. true = subpacket.
+          EQProtocolPacket spacket(packet.payload(), 
+            packet.payloadLength(), false, true);
+
+          processPacket(spacket, true);
         }
         else
         {
-          // Past packet outside the cut off
-          seqWarn("SEQ: received sequenced %spacket outside the bounds of reasonableness on stream %s (%d) netopcode=%04x size=%d. Expecting seq=%04x got seq=%04x, reasonableness being %d in the future.", 
-            (isSubpacket ? "sub" : ""),
-            EQStreamStr[m_streamid], m_streamid,
-            packet.getNetOpCode(), packet.payloadLength(), 
-            m_arqSeqExp, seq, arqSeqWrapCutoff);
+          // App opcode. Dispatch, skipping opcode.
+          dispatchPacket(&packet.payload()[2], packet.payloadLength()-2,
+            subOpCode, m_opcodeDB.find(subOpCode));
         }
+      }
+      else if ((seq > m_arqSeqExp && 
+                  seq < (uint32_t(m_arqSeqExp + arqSeqWrapCutoff))) ||
+               seq < (int32_t(m_arqSeqExp) - arqSeqWrapCutoff))
+      {
+        // Yeah, future packet. Push it on the packet cache.
+#ifdef PACKET_PROCESS_DIAG
+        seqDebug("SEQ: out of order sequence %04x stream %s (%d) expecting %04x, sending to cache, %04d",
+          seq, EQStreamStr[m_streamid], m_streamid, 
+          m_arqSeqExp, m_cache.size());
+#endif
+        setCache(seq, packet);
       }
       else
       {
-        // Spooky packet from the past. Boo!
-#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-        seqDebug("discarding %spacket netopcode=%04x seq=%d size=%d on stream %s (%d). Packet is in the past. We've moved on.",
+#ifdef PACKET_PROCESS_DIAG
+        // Past packet outside the cut off
+        seqWarn("SEQ: received sequenced %spacket outside expected window on stream %s (%d) netopcode=%04x size=%d. Expecting seq=%04x got seq=%04x, window size %d, dropping packet as in the past.", 
           (isSubpacket ? "sub" : ""),
-          packet.getNetOpCode(), seq, packet.payloadLength(), 
-          EQStreamStr[m_streamid], m_streamid);
+          EQStreamStr[m_streamid], m_streamid,
+          packet.getNetOpCode(), packet.payloadLength(), 
+          m_arqSeqExp, seq, arqSeqWrapCutoff);
 #endif
       }
     }
@@ -738,68 +728,59 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       uint16_t seq = packet.arqSeq();
       emit seqReceive(seq, (int)m_streamid);
 
-      if (seq >= m_arqSeqExp)
+      // Future packet?
+      if (seq == m_arqSeqExp)
       {
-        // Future packet?
-        if (seq == m_arqSeqExp)
-        {
-          // Expected packet.
-          m_arqSeqExp++;
-          emit seqExpect(m_arqSeqExp, (int)m_streamid);
+        // Expected packet.
+        m_arqSeqExp++;
+        emit seqExpect(m_arqSeqExp, (int)m_streamid);
        
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-          seqDebug("SEQ: Found next sequence number in data stream %s (%d), incrementing expected seq, %04x (op code %04x)", 
-	        EQStreamStr[m_streamid], m_streamid, seq, packet.getNetOpCode());
+        seqDebug("SEQ: Found next sequence number in data stream %s (%d), incrementing expected seq, %04x (op code %04x)", 
+          EQStreamStr[m_streamid], m_streamid, seq, packet.getNetOpCode());
 #endif
 
-          // Push the fragment on.
-          m_fragment.addFragment(packet);
+        // Push the fragment on.
+        m_fragment.addFragment(packet);
 
-          if (m_fragment.isComplete())
-          {
-            // OpCode from fragment. In network order.
-            uint16_t fragOpCode = *(uint16_t*)(m_fragment.data());
+        if (m_fragment.isComplete())
+        {
+          // OpCode from fragment. In network order.
+          uint16_t fragOpCode = *(uint16_t*)(m_fragment.data());
 
 #ifdef PACKET_PROCESS_DIAG
-          seqDebug("SEQ: Completed oversized app packet on stream %s with seq %04x, total size %d opcode %04x", 
-	        EQStreamStr[m_streamid], seq, m_fragment.size()-2, fragOpCode);
+        seqDebug("SEQ: Completed oversized app packet on stream %s with seq %04x, total size %d opcode %04x", 
+          EQStreamStr[m_streamid], seq, m_fragment.size()-2, fragOpCode);
 #endif
 
-            // dispatch fragment. Skip opcode.
-            dispatchPacket(&m_fragment.data()[2], m_fragment.size()-2,
-              fragOpCode, m_opcodeDB.find(fragOpCode)); 
+          // dispatch fragment. Skip opcode.
+          dispatchPacket(&m_fragment.data()[2], m_fragment.size()-2,
+            fragOpCode, m_opcodeDB.find(fragOpCode)); 
 
-            m_fragment.reset();
-          }
+          m_fragment.reset();
         }
-        else if (seq < (uint32_t(m_arqSeqExp + arqSeqWrapCutoff)) ||
-                 seq < (int32_t(m_arqSeqExp - arqSeqWrapCutoff)))
-        {
-          // Yeah, future packet. Push it on the packet cache.
+      }
+      else if ((seq > m_arqSeqExp && 
+                  seq < (uint32_t(m_arqSeqExp + arqSeqWrapCutoff))) ||
+               seq < (int32_t(m_arqSeqExp) - arqSeqWrapCutoff))
+      {
+        // Yeah, future packet. Push it on the packet cache.
 #ifdef PACKET_PROCESS_DIAG
-          seqDebug("SEQ: out of order sequence %04x stream %s (%d) expecting %04x, sending to cache, %04d",
-	        seq, EQStreamStr[m_streamid], m_streamid, 
-            m_arqSeqExp, m_cache.size());
+        seqDebug("SEQ: out of order sequence %04x stream %s (%d) expecting %04x, sending to cache, %04d",
+          seq, EQStreamStr[m_streamid], m_streamid, 
+          m_arqSeqExp, m_cache.size());
 #endif
-          setCache(seq, packet);
-        }
-        else
-        {
-          // Past packet outside the cut off
-          seqWarn("SEQ: received sequenced %spacket outside the bounds of reasonableness on stream %s (%d) netopcode=%04x size=%d. Expecting seq=%04x got seq=%04x, reasonableness being %d in the future.", 
-            (isSubpacket ? "sub" : ""),
-            EQStreamStr[m_streamid], m_streamid,
-            packet.getNetOpCode(), packet.payloadLength(), 
-            m_arqSeqExp, seq, arqSeqWrapCutoff);
-        }
+        setCache(seq, packet);
       }
       else
       {
-        // Spooky packet from the past. Boo!
-#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-        seqDebug("discarding packet netopcode=%04x seq=%04x size=%d on stream %s (%d). Packet is in the past. We've moved on, expecting %04x.",
-          packet.getNetOpCode(), seq, packet.payloadLength(), 
-          EQStreamStr[m_streamid], m_streamid, m_arqSeqExp);
+#ifdef PACKET_PROCESS_DIAG
+        // Past packet outside the cut off
+        seqWarn("SEQ: received sequenced %spacket outside expected window on stream %s (%d) netopcode=%04x size=%d. Expecting seq=%04x got seq=%04x, window size %d, dropping packet as in the past.", 
+          (isSubpacket ? "sub" : ""),
+          EQStreamStr[m_streamid], m_streamid,
+          packet.getNetOpCode(), packet.payloadLength(), 
+          m_arqSeqExp, seq, arqSeqWrapCutoff);
 #endif
       }
     }

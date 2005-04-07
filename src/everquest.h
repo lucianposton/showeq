@@ -106,6 +106,12 @@
 #define MAX_SPELLBOOK_SLOTS             400
 #define MAX_GROUP_MEMBERS               6
 #define MAX_BUFFS                       25
+#define MAXGUILDS                       1500
+#define MAX_AA                          120
+#define MAX_BANDOLIERS                  4
+#define MAX_POTIONS_IN_BELT             4
+#define MAX_TRIBUTES                    5
+#define MAX_DISCIPLINES                 50
 
 //Item Flags
 #define ITEM_NORMAL                     0x0000
@@ -370,12 +376,50 @@ struct spellBuff
 
 /* 
  * Used in charProfileStruct
- * Size: 2 octets
+ * Size: 8 octets
  */
 struct AA_Array
 {
-/*000*/ uint8_t AA;
-/*001*/ uint8_t value;
+/*000*/ uint32_t AA;
+/*004*/ uint32_t value;
+/*008*/
+};
+
+/**
+ * An item inline in the stream, used in Bandolier and Potion Belt.
+ * Size: 72 Octets 
+ */
+struct InlineItem
+{
+/*000*/ uint32_t itemId;
+/*004*/ uint32_t icon;
+/*008*/ char itemName[64];
+/*072*/
+};
+
+/**
+ * Used in charProfileStruct. Contents of a Bandolier.
+ * Size: 320 Octets 
+ */
+struct BandolierStruct
+{
+/*000*/ char bandolierName[32];
+/*032*/ InlineItem mainHand;
+/*104*/ InlineItem offHand;
+/*176*/ InlineItem range;
+/*248*/ InlineItem ammo;
+/*320*/
+};
+
+/**
+ * A tribute a player can have loaded.
+ * Size: 8 Octets 
+ */
+struct TributeStruct
+{
+/*000*/ uint32_t tribute;
+/*004*/ uint32_t rank;
+/*008*/
 };
 
 /*
@@ -390,6 +434,22 @@ struct zoneChangeStruct
 /*0066*/ uint16_t zoneInstance;         // zone Instance
 /*0068*/ uint8_t unknown[8];            // unknown
 /*0076*/
+};
+
+/*
+** Type:  Request Zone Change (server asking the client to change zones)
+** Size:  24 Octets
+** OpCode: OP_RequestZoneChange
+*/
+struct requestZoneChangeStruct
+{
+/*0000*/ uint16_t zoneId;       // Zone to change to
+/*0002*/ uint16_t zoneInstance; // Instance to change to
+/*0004*/ float x;               // Zone in x coord in next zone
+/*0008*/ float y;               // Zone in y coord in next zone
+/*0012*/ float z;               // Zone in z coord in next zone
+/*0016*/ float heading;               // Zone in heading in next zone
+/*0020*/ uint32_t unknown0020;  // *** Placeholder
 };
 
 /*
@@ -528,18 +588,18 @@ struct newZoneStruct
 struct charProfileStruct
 {
 /*0000*/ uint32_t  checksum;           //
-/*0004*/ char      name[64];           // Name of player sizes not right
-/*0068*/ char      lastName[32];       // Last name of player sizes not right
+/*0004*/ char      name[64];           // Name of player
+/*0068*/ char      lastName[32];       // Last name of player
 /*0100*/ uint32_t  gender;             // Player Gender - 0 Male, 1 Female
 /*0104*/ uint32_t  race;               // Player race
 /*0108*/ uint32_t  class_;             // Player class
-/*0112*/ uint32_t  aapoints;           // unspent ability points? (wrong?)
+/*0112*/ uint32_t  unknown0112;        // *** Placeholder
 /*0116*/ uint32_t  level;              // Level of player (might be one byte)
-/*0120*/ uint32_t  bind_zone_id[5];    // Zone player is bound in
-/*0140*/ float     bind_x[5];          // Bind loc x coord
-/*0160*/ float     bind_y[5];          // Bind loc y coord
-/*0180*/ float     bind_z[5];          // Bind loc z coord
-/*0200*/ float     bind_heading[5];    // *** PLaceholder
+/*0120*/ uint32_t  bind_zone_id[5];    // Bind info (zone, x, y, z, heading)
+/*0140*/ float     bind_x[5];          // 0 is normal bind
+/*0160*/ float     bind_y[5];          // 5 is some weird point in newbie zone
+/*0180*/ float     bind_z[5];          // (which is secondary bind for wiz/dru?)
+/*0200*/ float     bind_heading[5];    // Unused slots show newbie bind
 /*0220*/ uint32_t  deity;              // deity
 /*0224*/ int32_t   guildID;            // guildID
 /*0228*/ uint32_t  birthdayTime;       // character birthday
@@ -548,30 +608,28 @@ struct charProfileStruct
 /*0240*/ uint8_t   pvp;                // 1=pvp, 0=not pvp
 /*0241*/ uint8_t   level1;             // Level of Player
 /*0242*/ uint8_t   anon;               // 2=roleplay, 1=anon, 0=not anon     
-/*0243*/ uint8_t   unknown243;         // *** Placeholder
+/*0243*/ uint8_t   gm;                 // 0=no, 1=yes
 /*0244*/ int8_t    guildstatus;        // 0=member, 1=officer, 2=guildleader
 /*0245*/ uint8_t   unknown0245[55];    // *** Placeholder
-/*0296*/ uint8_t   haircolor;          // Player hair color
-/*0297*/ uint8_t   beardcolor;         // Player beard color
-/*0298*/ uint8_t   eyecolor1;          // Player left eye color
-/*0299*/ uint8_t   eyecolor2;          // Player right eye color
-/*0300*/ uint8_t   hairstyle;          // Player hair style
-/*0301*/ uint8_t   beard;              // Player beard type
-/*0302*/ uint8_t   unknown0302[2];     // *** Placeholder
-/*0304*/ uint32_t  item_material[9];   // Item texture/material of worn/held items
-/*0340*/ uint8_t   unknown0256[52];    // *** Placeholder
-/*0392*/ Color_Struct item_tint[9];    // RR GG BB 00
-/*0428*/ AA_Array  aa_array[122];      // Length may not be right
-/*0672*/ uint8_t   unknown0672[716];   // ?? pet data? 7-14
+/*0300*/ uint8_t   haircolor;          // Player hair color
+/*0301*/ uint8_t   beardcolor;         // Player beard color
+/*0302*/ uint8_t   eyecolor1;          // Player left eye color
+/*0303*/ uint8_t   eyecolor2;          // Player right eye color
+/*0304*/ uint8_t   hairstyle;          // Player hair style
+/*0305*/ uint8_t   beard;              // Player beard type
+/*0306*/ uint8_t   unknown0302[6];     // *** Placeholder
+/*0312*/ uint32_t  item_material[9];   // Item texture/material of worn items
+/*0348*/ uint8_t   unknown0348[48];    // *** Placeholder
+/*0396*/ Color_Struct item_tint[9];    // RR GG BB 00
+/*0432*/ AA_Array  aa_array[MAX_AA];   // AAs
 /*1392*/ char      servername[32];     // server the char was created on
-/*1420*/ char      title[32];          // title before the characters name
-/*1452*/ uint8_t   unknown1452[36];    // unknown
+/*1424*/ uint8_t   unknown1452[68];    // *** Placeholder
 /*1492*/ uint32_t  exp;                // Current Experience
 /*1496*/ uint32_t  unknown1496;        // *** Placeholder
 /*1500*/ uint32_t  points;             // Unspent Practice points
 /*1504*/ uint32_t  MANA;               // Current MANA
 /*1508*/ uint32_t  curHp;              // Current HP without +HP equipment
-/*1512*/ uint32_t  unknown1308;        // 0x05
+/*1512*/ uint32_t  unknown1512;        // 0x05
 /*1516*/ uint32_t  STR;                // Strength
 /*1520*/ uint32_t  STA;                // Stamina
 /*1524*/ uint32_t  CHA;                // Charisma
@@ -582,11 +640,11 @@ struct charProfileStruct
 /*1544*/ uint8_t   face;               // Player face
 /*1545*/ uint8_t   unknown1545[47];    // *** Placeholder
 /*1592*/ uint8_t   languages[25];      // List of languages (MAX_KNOWN_LANGS)
-/*1617*/ uint8_t   unknown1617[7];     // All 0x00
+/*1617*/ uint8_t   unknown1617[7];     // All 0x00 (language buffer?)
 /*1624*/ int32_t   sSpellBook[400];    // List of the Spells in spellbook
 /*3224*/ uint8_t   unknown3224[448];   // all 0xff after last spell    
 /*3672*/ int32_t   sMemSpells[9];      // List of spells memorized
-/*3708*/ uint8_t   unknown3580[32];    // *** Placeholder
+/*3708*/ uint8_t   unknown3708[32];    // *** Placeholder
 /*3740*/ float     x;                  // Players x position
 /*3744*/ float     y;                  // Players y position
 /*3748*/ float     z;                  // Players z position
@@ -607,25 +665,53 @@ struct charProfileStruct
 /*3808*/ uint32_t  platinum_shared;    // Shared platinum pieces
 /*3812*/ uint8_t   unknown3812[20];    // Unknown - all zero
 /*3832*/ uint32_t  skills[75];         // List of skills (MAX_KNOWN_SKILLS)
-/*4132*/ uint8_t   unknown4132[408];   // *** Placeholder
-/*4540*/ uint32_t  zoneId;             // see zones.h
-/*4544 uint32_t  zoneInstance;       // Used to be here... */
+/*4132*/ uint8_t   unknown4132[348];   // *** Placeholder
+/*4480*/ uint32_t  expAA;              // Current AA experience
+/*4484*/ uint8_t   unknown4484[4];     // *** Placeholder
+/*4488*/ uint32_t  expansions;         // Bitmask for expansions
+/*4492*/ uint8_t   unknown4492[20];    // *** Placeholder
+/*4512*/ uint32_t  hunger;             // Food (ticks till next eat)
+/*4516*/ uint32_t  thirst;             // Drink (ticks till next drink)
+/*4520*/ uint8_t   unknown4520[20];    // *** Placeholder
+/*4540*/ uint16_t  zoneId;             // see zones.h
+/*4542*/ uint16_t  zoneInstance;       // Instance id
 /*4544*/ spellBuff buffs[MAX_BUFFS];   // Buffs currently on the player
-/*4864*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
-/*5248*/ uint8_t   unknown5248[668];   // *** Placeholder
-/*5916*/ uint32_t  ldon_guk_points;    // Earned GUK points
-/*5920*/ uint32_t  ldon_mir_points;    // Earned MIR points
-/*5924*/ uint32_t  ldon_mmc_points;    // Earned MMC points
-/*5928*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
-/*5932*/ uint32_t  ldon_tak_points;    // Earned TAK points
-/*5936*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*5940*/ uint8_t   unknown5940[448];   // *** Placeholder
-/*6388*/ uint8_t   unknown6388[84];    // *** Placeholder
-/*6472*/ uint8_t   unknown6472[176];   // *** Placeholder
-/*6648*/ uint32_t  endurance;          // Current endurance
-/*6652*/ uint8_t   unknown6652[4888];  // *** Placeholder 
-/*11540*/ uint16_t altexp;             // Total aaxp points
-/*11542*/ uint8_t  unknown11542[6874]; // *** Placeholder
+/*4944*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
+/*5328*/ uint8_t   unknown5328[668];   // *** Placeholder
+/*5996*/ uint32_t  ldon_guk_points;    // Earned GUK points
+/*6000*/ uint32_t  ldon_mir_points;    // Earned MIR points
+/*6004*/ uint32_t  ldon_mmc_points;    // Earned MMC points
+/*6008*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
+/*6012*/ uint32_t  ldon_tak_points;    // Earned TAK points
+/*6016*/ uint32_t  ldon_avail_points;  // Available LDON points
+/*6020*/ uint8_t   unknown6020[112];   // *** Placeholder
+/*6132*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)
+/*6136*/ uint32_t  unknown6136;        // *** Placeholder
+/*6140*/ uint32_t  careerTribute;      // Total favor points for this char
+/*6144*/ uint32_t  unknown6144;        // *** Placeholder
+/*6148*/ uint32_t  currentTribute;     // Current tribute points
+/*6152*/ uint32_t  unknown6152;        // *** Placeholder
+/*6156*/ uint32_t  tributeActive;      // 0 = off, 1=on
+/*6160*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout
+/*6200*/ uint32_t  disciplines[MAX_DISCIPLINES]; // Known disciplines
+/*6400*/ uint8_t   unknown6400[440];   // *** Placeholder
+/*6840*/ uint32_t  endurance;          // Current endurance
+/*6844*/ uint8_t   unknown6844[276];   // *** Placeholder
+/*7120*/ uint32_t  airRemaining;       // Air supply (seconds)
+/*7124*/ uint8_t   unknown7124[4608];  // *** Placeholder 
+/*11732*/ uint32_t aa_spent;           // Number of spent AA points
+/*11736*/ uint32_t unknown11736;       // *** Placeholder
+/*11740*/ uint32_t aa_unspent;         // Unspent AA points
+/*11744*/ uint8_t  unknown11744[36];   // *** Placeholder
+/*11780*/ BandolierStruct bandoliers[MAX_BANDOLIERS]; // bandolier contents
+/*13060*/ uint8_t  unknown13060[5120]; // *** Placeholder 
+/*18180*/ InlineItem potionBelt[MAX_POTIONS_IN_BELT]; // potion belt
+/*18468*/ uint8_t  unknown18468[8];    // *** Placeholder
+/*18476*/ uint32_t currentRadCrystals; // Current count of radiant crystals
+/*18480*/ uint32_t careerRadCrystals;  // Total count of radiant crystals ever
+/*18484*/ uint32_t currentEbonCrystals;// Current count of ebon crystals
+/*18488*/ uint32_t careerEbonCrystals; // Total count of ebon crystals ever
+/*18492*/ uint32_t unknown18492;       // *** Placeholder
 }; /* 18496 */
 
 #if 1
@@ -905,7 +991,8 @@ struct makeDropStruct
 /*0004*/ uint32_t nextObject;             // Next object in the linked list
 /*0008*/ uint32_t unknown0008;            // ***Placeholder
 /*0012*/ uint32_t dropId;                 // DropID
-/*0016*/ uint32_t zoneId;                 // ZoneID
+/*0016*/ uint16_t zoneId;                 // ZoneID
+/*0018*/ uint16_t zoneInstance;           // Zone instance id
 /*0014*/ uint8_t  unknown0014[8];         // ***Placeholder
 /*0028*/ float    heading;                // Heading
 /*0032*/ float    z;                      // Z Position
@@ -1016,6 +1103,20 @@ struct spawnPositionUpdate
          unsigned heading:12;
          signed unused2:4;
 /*0010*/
+};
+
+/*
+** Rename a spawn
+** Length: 200 Octets
+** OpCode: SpawnRename
+*/
+struct spawnRenameStruct
+{
+/*000*/	char        old_name[64];
+/*064*/	char        old_name_again[64];	//not sure what the difference is
+/*128*/	char        new_name[64];
+/*192*/	uint32_t	unknown192;	        //set to 0
+/*196*/	uint32_t	unknown196;	        //set to 1
 };
 
 
@@ -1755,7 +1856,7 @@ struct spawnAppearanceStruct
 {
 /*0000*/ uint16_t spawnId;                // ID of the spawn
 /*0002*/ uint16_t type;                   // Type of data sent
-/*0004*/ uint32_t paramter;               // Values associated with the type
+/*0004*/ uint32_t parameter;              // Values associated with the type
 /*0008*/
 };
 
@@ -1925,7 +2026,7 @@ struct buffStruct
 
 struct GuildMemberUpdate
 {
-/*000*/ uint32_t type;          // update type (0xe3 seems to update zone and last on time)
+/*000*/ uint32_t guildId;       // guild id
 /*004*/ char     name[64];      // member name
 /*068*/ uint16_t zoneId;        // zone id 
 /*070*/ uint16_t zoneInstance;  // zone instance
@@ -1997,7 +2098,6 @@ struct guildListStruct
 ** Guild List (from world server)
 ** Length: 96064 Octets
 */
-#define MAXGUILDS 1500
 struct worldGuildListStruct
 {
 /*000*/ guildListStruct dummy;

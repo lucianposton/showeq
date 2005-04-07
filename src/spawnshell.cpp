@@ -223,15 +223,15 @@ const Item* SpawnShell::findClosestItem(spawnItemType type,
    return closest;
 }
 
-const Spawn* SpawnShell::findSpawnByName(const QString& name)
+Spawn* SpawnShell::findSpawnByName(const QString& name)
 {
   ItemIterator it(m_spawns);
-  const Spawn* spawn;
+  Spawn* spawn;
 
   for (; it.current(); ++it)
   {
     // the item and coerce it to the Spawn type
-    spawn = (const Spawn*)it.current();
+    spawn = (Spawn*)it.current();
 
     if (name == spawn->name())
       return spawn;
@@ -637,6 +637,74 @@ void SpawnShell::updateSpawnInfo(const uint8_t* data)
        emit changeItem(item, tSpawnChangedHP);
        break;
      }
+   }
+}
+
+void SpawnShell::renameSpawn(const uint8_t* data)
+{
+    const spawnRenameStruct* rename = (const spawnRenameStruct*)data;
+#ifdef SPAWNSHELL_DIAG
+    seqDebug("SpawnShell::renameSpawn(oldname=%s, newname=%s)",
+             rename->old_name, rename->new_name);
+#endif
+    
+    Spawn* renameMe = findSpawnByName(rename->old_name);
+
+    if (renameMe != NULL)
+    {
+        renameMe->setName(rename->new_name);
+        renameMe->updateLastChanged();
+        emit changeItem(renameMe, tSpawnChangedName);
+    }
+    else
+    {
+        seqWarn("SpawnShell: tried to rename %s to %s, but the original mob didn't exist in the spawn list", rename->old_name, rename->new_name);
+    }
+}
+
+void SpawnShell::updateSpawnAppearance(const uint8_t* data)
+{
+    const spawnAppearanceStruct* app = (const spawnAppearanceStruct*)data;
+#ifdef SPAWNSHELL_DIAG
+    seqDebug("SpawnShell::updateSpawnAppearance(id=%d, sub=%d, parm=%08x)",
+             app->spawnId, app->type, app->parameter);
+#endif
+
+   Item* item = m_spawns.find(app->spawnId);
+
+   if (item != NULL)
+   {
+       Spawn* spawn = (Spawn*)item;
+       switch(app->type) 
+       {
+           case 1: // level update
+               spawn->setLevel(app->parameter);
+               spawn->updateLastChanged();
+               emit changeItem(spawn, tSpawnChangedLevel);
+               break;
+       }
+
+      /* Other types for OP_SpawnAppearance (from eqemu guys)
+       0  - this causes the client to keel over and zone to bind point
+       1  - level, parm = spawn level
+       3  - 0 = visible, 1 = invisible
+       4  - 0 = blue, 1 = pvp (red)
+       5  - light type emitted by player (lightstone, shiny shield)
+       14 - anim, 100=standing, 110=sitting, 111=ducking, 115=feigned, 105=looting
+       15 - sneak, 0 = normal, 1 = sneaking
+       16 - server to client, sets player spawn id
+       17 - Client->Server, my HP has changed (like regen tic)
+       18 - linkdead, 0 = normal, 1 = linkdead
+       19 - lev, 0=off, 1=flymode, 2=levitate
+       20 - GM, 0 = normal, 1 = GM - all odd numbers seem to make it GM
+       21 - anon, 0 = normal, 1 = anon, 2 = roleplay
+       22 - guild id
+       23 - guild rank, 0=member, 1=officer, 2=leader
+       24 - afk, 0 = normal, 1 = afk
+       28 - autosplit, 0 = normal, 1 = autosplit on
+       29 - spawn's size
+       31 -change PC's name's color to NPC color 0 = normal, 1 = npc name
+       */
    }
 }
 

@@ -311,12 +311,12 @@
 { "bloodfields", "The Bloodfields" }, // 301
 { "draniksscar", "Dranik's Scar" }, // 302
 { "causeway", "Nobles' Causeway" }, // 303
-{ "chambera", "Mata Muram's Labyrinth" }, // 304
-{ "chamberb", "Mata Muram's Labyrinth" }, // 305
-{ "chamberc", "Mata Muram's Labyrinth" }, // 306
-{ "chamberd", "Mata Muram's Labyrinth" }, // 307
-{ "chambere", "Mata Muram's Labyrinth" }, // 308
-{ "chamberf", "Mata Muram's Labyrinth" }, // 309
+{ "chambersa", "Mata Muram's Labyrinth" }, // 304
+{ "chambersb", "Mata Muram's Labyrinth" }, // 305
+{ "chambersc", "Mata Muram's Labyrinth" }, // 306
+{ "chambersd", "Mata Muram's Labyrinth" }, // 307
+{ "chamberse", "Mata Muram's Labyrinth" }, // 308
+{ "chambersf", "Mata Muram's Labyrinth" }, // 309
 { NULL, NULL }, // 310
 { NULL, NULL }, // 311
 { NULL, NULL }, // 312

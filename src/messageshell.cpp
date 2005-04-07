@@ -40,9 +40,12 @@ void MessageShell::channelMessage(const uint8_t* data, size_t, uint8_t dir)
 {
   const channelMessageStruct* cmsg = (const channelMessageStruct*)data;
 
-  // Tells happen twice *shrug*
-  if (dir == DIR_Client && cmsg->chanNum == MT_Tell)
+  // Tells and Group by us happen twice *shrug*. Ignore the client->server one.
+  if (dir == DIR_Client && 
+      (cmsg->chanNum == MT_Tell || cmsg->chanNum == MT_Group))
+  {
     return;
+  }
 
   QString tempStr;
 
@@ -715,7 +718,9 @@ void MessageShell::player(const uint8_t* data)
   message = "Exp: " + Commanate(player->exp);
   m_messages->addMessage(MT_Player, message);
 
-  message = "ExpAA: " + Commanate(player->altexp);
+  message = "ExpAA: " + Commanate(player->expAA) + 
+      "(aa spent: " + Commanate(player->aa_spent) + 
+      ", aa unspent: " + Commanate(player->aa_unspent) + ")";
   m_messages->addMessage(MT_Player, message);
 
   message.sprintf("Group: %s %s %s %s %s %s", player->groupMembers[0],

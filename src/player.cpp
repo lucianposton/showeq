@@ -283,7 +283,8 @@ void Player::player(const uint8_t* data)
   seqDebug("Player::backfill(): Pos (%f/%f/%f) Heading: %f",
 	   player->x, player->y, player->z, player->heading);
   seqDebug("Player::backfill(bind): Pos (%f/%f/%f) Heading: %f",
-	   player->bind_x, player->bind_y, player->bind_z, player->bind_heading);
+	   player->bind_x[0], player->bind_y[0], player->bind_z[0], 
+       player->bind_heading[0]);
 #endif // ZBTEMP  
   setHeading((int8_t)lrintf(player->heading), 0);
   m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
@@ -352,8 +353,8 @@ void Player::player(const uint8_t* data)
   m_tickExp = (m_maxExp - m_minExp) / 330;
 
   m_currentExp = player->exp;
-  m_currentAltExp = player->altexp;
-  m_currentAApts = player->aapoints;
+  m_currentAltExp = player->expAA;
+  m_currentAApts = player->aa_spent;
   
   emit expChangedInt (m_currentExp, m_minExp, m_maxExp);
   emit expAltChangedInt(m_currentAltExp, 0, 15000000);

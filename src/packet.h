@@ -60,7 +60,7 @@ class EQPacket : public QObject
 	    bool m_realtime,
 	    bool m_session_tracking,
 	    bool m_recordPackets,
-	    bool m_playbackPackets,
+	    int m_playbackPackets,
 	    int8_t m_playbackSpeed, 
 	    QObject *parent,
             const char *name);
@@ -77,7 +77,7 @@ class EQPacket : public QObject
    in_port_t clientPort(void);
    in_port_t serverPort(void);
    uint8_t session_tracking_enabled(void);
-   bool playbackPackets(void);
+   int playbackPackets(void);
    int playbackSpeed(void);
    size_t currentCacheSize(int);
    uint16_t serverSeqExp(int);
@@ -157,7 +157,7 @@ class EQPacket : public QObject
    bool m_realtime;
    bool m_session_tracking;
    bool m_recordPackets;
-   bool m_playbackPackets;
+   int m_playbackPackets;
    int8_t m_playbackSpeed; // Should be signed since -1 is pause
 
    EQPacketStream* m_client2WorldStream;
@@ -202,7 +202,7 @@ inline bool EQPacket::session_tracking(void)
   return m_session_tracking;
 }
 
-inline bool EQPacket::playbackPackets(void)
+inline int EQPacket::playbackPackets(void)
 {
   return m_playbackPackets;
 }

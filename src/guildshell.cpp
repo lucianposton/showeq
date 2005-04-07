@@ -23,18 +23,43 @@
 
 //----------------------------------------------------------------------
 // constants
-static const QString guildRanks[] = { "M", "O", "L", "?", };
+static const QString guildRanks[] = { "M", "O", "L", "?", "MB", "OB", "LB", "?B" };
 
 //----------------------------------------------------------------------
 // GuildMember implementation
 GuildMember::GuildMember(NetStream& netStream)
 {
+  // Null-terminated name
   m_name = netStream.readText();
+
+  // 4 byte level
   m_level = uint8_t(netStream.readUInt32());
+
+  // 4 byte banker flag (0 = no, 1 = banker)
+  m_banker = uint8_t(netStream.readUInt32());
+
+  // 4 byte class
   m_class = uint8_t(netStream.readUInt32());
+
+  // 4 byte rank (0 = member, 1 = officer, 2 = leader)
   m_guildRank = netStream.readUInt32();
+
+  // 4 byte date/time for last on
   m_lastOn = time_t(netStream.readUInt32());
+
+  // 4 byte guild tribute on/off (0 = off, 1 = on)
+  m_guildTributeOn = netStream.readUInt32();
+
+  // 4 byte guild tribute total donated
+  m_guildTributeDonated = netStream.readUInt32();
+
+  // 4 byte guild tribute last donation timestamp
+  m_guildTributeLastDonation = time_t(netStream.readUInt32());
+
+  // Null-terminated public note
   m_publicNote = netStream.readText();
+
+  // 2 byte zoneInstance and zoneId for current zone
   m_zoneInstance = netStream.readUInt16();
   m_zoneId = netStream.readUInt16();
 }
@@ -45,12 +70,21 @@ GuildMember::~GuildMember()
 
 void GuildMember::update(const GuildMemberUpdate* gmu)
 {
-  if (gmu->type == 0xe3)
-  {
-    m_zoneId = gmu->zoneId;
-    m_zoneInstance = gmu->zoneInstance;
-    m_lastOn = gmu->lastOn;
-  }
+  m_zoneId = gmu->zoneId;
+  m_zoneInstance = gmu->zoneInstance;
+  m_lastOn = gmu->lastOn;
+#ifdef GUILDSHELL_DIAG
+  QDateTime dt;
+  QString dateFormat("ddd MMM dd hh:mm:ss yyyy");
+  dt.setTime_t(m_lastOn);
+
+  QString zone;
+  zone = QString::number(m_zoneId);
+  if (zoneInstance())
+    zone += ":" + QString::number(m_zoneInstance);
+
+  seqDebug("GuildShell: updated zone for member (member: %s, zone: %s, last on: %s", (const char*) m_name, (const char*) zone, (const char*) dt.toString(dateFormat));
+#endif
 }
 
 QString GuildMember::classString() const
@@ -61,9 +95,9 @@ QString GuildMember::classString() const
 const QString& GuildMember::guildRankString() const
 {
   if (m_guildRank <= 2)
-    return guildRanks[m_guildRank];
+    return guildRanks[m_guildRank + 4*m_banker];
   else
-    return guildRanks[3]; // return the unknown rank character
+    return guildRanks[3 + 4*m_banker]; // return the unknown rank character
 }
 
 //----------------------------------------------------------------------
@@ -215,14 +249,6 @@ void GuildShell::guildMemberUpdate(const uint8_t* data, size_t len)
   {
     member->update(gmu);
     emit updated(member);
-#ifdef GUILDSHELL_DIAG
-    QDateTime dt;
-    dt.setTime_t(member->lastOn());
-    seqDebug("%s is now in zone %s (lastOn: %s).",
-	     (const char*)member->name(), 
-	     (const char*)m_zoneMgr->zoneNameFromID(member->zoneId()),
-	     (const char*)dt.toString());
-#endif // GUILDSHELL_DIAG
   }
   else
   {

@@ -71,6 +71,7 @@ static const char *id="@(#) $Id$ $Name$";
 #define   SPAWNLOG_FILENAME_OPTION      23
 #define   DISABLE_SPAWNLOG_OPTION       24
 #define   ITEMDB_ENABLE                 25
+#define   PLAYBACK_TCPDUMP_FILE_OPTION  26
 #define   ITEMDB_DATA_FILENAME_OPTION   28
 #define   ITEMDB_RAW_FILENAME_OPTION    29
 #define   ITEMDB_DATABASES_ENABLED      30
@@ -105,6 +106,7 @@ static struct option option_list[] = {
   {"filter-file",                  required_argument,  NULL,  'f'},
   {"playback-filename",            optional_argument,  NULL,  'j'},
   {"playback-speed",               required_argument,  NULL,  PLAYBACK_SPEED_OPTION},
+  {"playback-tcpdump-filename",    optional_argument,  NULL,  PLAYBACK_TCPDUMP_FILE_OPTION},
   {"record-filename",              optional_argument,  NULL,  'g'},
   {"filter-case-sensitive",        no_argument,        NULL,  'C'},
   {"use-retarded-coords",          no_argument,        NULL,  'c'},
@@ -298,7 +300,7 @@ int main (int argc, char **argv)
                pSEQPrefs->setPrefString("Filename", "VPacket", optarg, 
 					XMLPreferences::Runtime);
 
-	    pSEQPrefs->setPrefBool("Playback", "VPacket", true, 
+	    pSEQPrefs->setPrefInt("Playback", "VPacket", PLAYBACK_FORMAT_SEQ, 
 				   XMLPreferences::Runtime);
 	    pSEQPrefs->setPrefBool("Record", "VPacket", false, 
 				   XMLPreferences::Runtime);
@@ -313,7 +315,7 @@ int main (int argc, char **argv)
                pSEQPrefs->setPrefString("Filename", "VPacket", optarg, 
 					XMLPreferences::Runtime);
 
-	    pSEQPrefs->setPrefBool("Playback", "VPacket", false, 
+	    pSEQPrefs->setPrefInt("Playback", "VPacket", PLAYBACK_OFF, 
 				   XMLPreferences::Runtime);
 	    pSEQPrefs->setPrefBool("Record", "VPacket", true, 
 				   XMLPreferences::Runtime);
@@ -564,6 +566,17 @@ int main (int argc, char **argv)
 	   break;
          }
 
+         /* TCPDump playback file */
+         case PLAYBACK_TCPDUMP_FILE_OPTION:
+         {
+             pSEQPrefs->setPrefString("Filename", "VPacket", optarg, 
+                 XMLPreferences::Runtime);
+             pSEQPrefs->setPrefInt("Playback", "VPacket", PLAYBACK_FORMAT_TCPDUMP, 
+                 XMLPreferences::Runtime);
+             pSEQPrefs->setPrefBool("Record", "VPacket", false, 
+                 XMLPreferences::Runtime);
+             break;
+         }
 
          case PLAYBACK_SPEED_OPTION:
          {
@@ -785,6 +798,8 @@ void displayOptions(const char* progName)
   printf ("  -N, --show-packet-numbers             Show network info dialog\n");
   printf ("  -j, --playback-file=FILENAME          Playback packets in FILENAME, previously\n");
   printf ("                                        recorded with -g option\n");
+  printf ("      --playback-tcpdump-filename=FILE  Playback packets in FILE, previously\n");
+  printf ("                                        recorded with tcpdump\n");
   printf ("      --playback-speed=SPEED            -1 = Paused, 0 = Max, 1 = Slow, 9 = Fast\n");
   printf ("  -g, --record-file=FILENAME            Record packets to FILENAME to playback\n");
   printf ("                                        with the -j option\n");

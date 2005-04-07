@@ -286,6 +286,9 @@
         <comment></comment>
         <payload dir="server" typename="GuildMemberUpdate" sizechecktype="match"/>
     </opcode>
+    <opcode id="417c" name="OP_GuildTributeStatus" updated="02/15/05">
+        <comment>Guild tribute stats send on zone</comment>
+    </opcode>
     <opcode id="7dca" name="OP_Track" updated="02/15/05">
         <comment>Clicked Track</comment>
     </opcode>
@@ -363,6 +366,10 @@
     <opcode id="202a" name="OP_DeleteSpawn" implicitlen="4" updated="02/15/05">
         <comment>old DeleteSpawnCode</comment>
         <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="0b8b" name="OP_SpawnRename" updated="02/15/05">
+        <comment>Spawns getting renamed after initial NewSpawn</comment>
+        <payload dir="server" typename="spawnRenameStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="5f64" name="OP_ReqNewZone" updated="02/15/05">
         <comment>Client requesting NewZone_Struct</comment>
@@ -486,11 +493,15 @@
         <comment>old ZoneChangeCode</comment>
         <payload dir="both" typename="zoneChangeStruct" sizechecktype="match"/>
     </opcode>
+    <opcode id="2c2f" name="OP_RequestZoneChange" updated="02/15/05">
+        <comment>Send by server when a click causes zone. Also, origin</comment>
+        <payload dir="server" typename="requestZoneChangeStruct" sizechecktype="match"/>
+    </opcode>
     <opcode id="2f76" name="OP_SendZonePoints" updated="02/15/05">
         <comment>Coords in a zone that will port you to another zone</comment>
         <payload dir="server" typename="zonePointsStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="1d38" name="OP_MemorizeSpell" updated="02/15/05">
+    <opcode id="1d3b" name="OP_MemorizeSpell" updated="02/15/05">
         <comment>old MemSpellCode</comment>
         <payload dir="both" typename="memSpellStruct" sizechecktype="match"/>
     </opcode>

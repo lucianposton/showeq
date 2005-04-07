@@ -76,7 +76,7 @@ public:
 			       int16_t x,
 			       int16_t y, 
 			       double& minDistance);
-   const Spawn* findSpawnByName(const QString& name);
+   Spawn* findSpawnByName(const QString& name);
 
    void dumpSpawns(spawnItemType type, QTextStream& out);
    FilterMgr* filterMgr(void) { return &m_filterMgr; }
@@ -113,6 +113,8 @@ public slots:
 		    uint8_t animation);
    void updateSpawns(const uint8_t* updates);
    void updateSpawnInfo(const uint8_t* spawnupdate);
+   void renameSpawn(const uint8_t* renameupdate);
+   void updateSpawnAppearance(const uint8_t* appearanceupdate);
    void updateNpcHP(const uint8_t* hpupdate);
    void spawnWearingUpdate(const uint8_t* wearing);
    void consMessage(const uint8_t* con, size_t, uint8_t);
