@@ -1,5 +1,29 @@
 Version: $Id$ $Name$
 
+dophaZ (04/06/05)
+-----------------------
++ Updated version to 5.0.0.19
++ Update INSTALL to reflect new minimum automake 1.9 requirement for 
+  Makefile.dist users.
++ Incorporated Purple's "5.0.0.18-purple1" patch.
++ - Fix for sequence rollover in net layer with arqSeqWrapCutOff
++ - Oversized packets will check for arqSeqGiveUp properly
++ - Added a playback mode for tcpdump files (see notes)
++ - Cleanup in PlayerProfile (fixed offset comments, got rid of some unknowns)
++ - Handle spawns renaming themselves (new OP_SpawnRename). This renames fabled
+    mobs which spawn after you are already in zone properly
++ - Handle mobs changing level while you are in the zone (old 
+    OP_SpawnAppearance, new handler in SpawnShell for it). This properly levels
+    fabled mobs which spawn after you are in the zone
++ - Group chat that you say won't echo to the message shell twice
++ - Fix to properly name the MPG trial zones chambersa-chambersf, instead of 
+    chambera-chamberf. zones.h was wrong.
++ Incorporated Purple's added patch
++ - Guild member list is aligned properly 
++ - Filled in unknowns in charProfileStruct for Bandolier, Potion Belt, air, 
+    hunger, thirst, instanceId, disciplines, personal tribute 
++ - fixed a type in opcode for OP_MemorizeSpell
+	
 BBobcat (02/20/05)
 -----------------------
 

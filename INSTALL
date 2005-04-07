@@ -285,7 +285,7 @@ Below is a list of packages needed to generate ShowEQ's build system.
    *** GNU tools ***
    libtool    1.3.4-3   Most recent...   http://www.gnu.org/software/libtool/
    autoconf   2.53      Most recent...   http://www.gnu.org/software/autoconf/
-   automake   1.7       Most recent...   http://www.gnu.org/software/automake/
+   automake   1.9       Most recent...   http://www.gnu.org/software/automake/
    perl       5.0       Most recent...   http://www.perl.org/
    ---------------------------------------------------------------------------
 
