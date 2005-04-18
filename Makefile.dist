@@ -90,10 +90,10 @@ configure: install-sh missing Makefile.in src/Makefile.in conf/Makefile.in confi
 
 automake: install-sh missing Makefile.in src/Makefile.in conf/Makefile.in
 
-install-sh missing Makefile.in: config.h.in aclocal.m4 Makefile.dist
+install-sh missing Makefile.in src/Makefile.in conf/Makefile.in: config.h.in aclocal.m4 Makefile.dist
 	@echo -n "Generating Makefile.in from Makefile.am....................."
 	@echo -e "\n*!* automake ... *!*" >> Makefile.dist.dbg
-	@$(AUTOMAKE) $(AUTOMAKE_ARGS) Makefile >> Makefile.dist.dbg 2>&1
+	@$(AUTOMAKE) $(AUTOMAKE_ARGS) >> Makefile.dist.dbg 2>&1
 	@echo "!*! automake ... !*!" >> Makefile.dist.dbg
 	@if [ -s "$@" ]; then { \
 		echo " done!"; \
@@ -103,18 +103,6 @@ install-sh missing Makefile.in: config.h.in aclocal.m4 Makefile.dist
 		 exit -1; \
 	} fi 
 
-%.in: %.am  aclocal Makefile.dist
-	@echo -n "Generating $< from $@ ....................."
-	@echo -e "\n*!* automake ... *!*" >> Makefile.dist.dbg
-	@$(AUTOMAKE) $(AUTOMAKE_ARGS) $* >> Makefile.dist.dbg 2>&1
-	@echo "!*! automake ... !*!" >> Makefile.dist.dbg
-	@if [ -s "$@" ]; then { \
-		echo " done!"; \
-	} else { \
-		 echo " failed! ";\
-		 echo "See Makefile.dist.dbg for details"; \
-		 exit -1; \
-	} fi 
 
 autoheader: config.h.in
 
