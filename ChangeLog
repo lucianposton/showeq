@@ -1,5 +1,27 @@
 Version: $Id$ $Name$
 
+dophaZ (04/17/05)
+-----------------------
++ Updated version to 5.0.0.20
++ Update INSTALL to reflect new minimum autoconf 2.59 requirement for 
+  Makefile.dist users.
++ cleanup configure.am, and acinclude.m4 warnings and issues.
++ Fixed need to run Makefile.dist twice problem.
++ Incorporated Purples "5.0.0.19-purple2" patch.
++ - Added to charProfileStruct:
++ - - Leadership AAs (thanks to FatherNitwit for a lot of this)
++ - - Intoxication, Toxicity, Autosplit (from Glee)
++ - - Spell refresh
++ - - expAA
++ - Fixed hpNpcUpdateStruct for 4/12 by rearranging and making hp int32
++ - Properly name drop codes for new combine containers (from uRit2CBBA)
++ - Fixed a problem with drop codes higher than 0x90 in most of the drop code mappings
++ - Added tutorial zones to zone.h (from uRit2CBBA)
++ - Spawns that rename themselves will properly filter themselves now, so they show up if they match the map's runtime filter or your zone filters
++ - Made offline tcpdump reading set pcap filters to test session tracking better
++ Fixed src/Makefile.am to include new weapons29.h and weapons2a.h headers to 
+  fix 'make distcheck'
+
 dophaZ (04/06/05)
 -----------------------
 + Updated version to 5.0.0.19
