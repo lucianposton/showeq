@@ -1,5 +1,5 @@
 /*
- * weapons1.h
+ * weapons29.h
  *
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
@@ -134,7 +134,6 @@
     NULL,                 // 0x7d
     NULL,                 // 0x7e
     NULL,                 // 0x7f
-
     NULL,                 // 0x80
     NULL,                 // 0x81
     NULL,                 // 0x82
@@ -151,10 +150,10 @@
     NULL,                 // 0x8d
     NULL,                 // 0x8e
     NULL,                 // 0x8f
-    "Lava Rock",          // 0x90
-    "Red Mushroom",       // 0x91
-    "Blue Mushroom",      // 0x92
-    "Green Leaf",         // 0x93
+    NULL,                 // 0x90
+    NULL,                 // 0x91
+    NULL,                 // 0x92
+    NULL,                 // 0x93
     NULL,                 // 0x94
     NULL,                 // 0x95
     NULL,                 // 0x96
@@ -225,7 +224,7 @@
     NULL,                 // 0xd7
     NULL,                 // 0xd8
     NULL,                 // 0xd9
-    NULL,                 // 0xda
+    "AugmentSealer",      // 0xda
     NULL,                 // 0xdb
     NULL,                 // 0xdc
     NULL,                 // 0xdd

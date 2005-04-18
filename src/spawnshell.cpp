@@ -653,6 +653,14 @@ void SpawnShell::renameSpawn(const uint8_t* data)
     if (renameMe != NULL)
     {
         renameMe->setName(rename->new_name);
+
+        uint32_t changeType = tSpawnChangedName;
+
+        if (updateFilterFlags(renameMe))
+          changeType |= tSpawnChangedFilter;
+        if (updateRuntimeFilterFlags(renameMe))
+          changeType |= tSpawnChangedRuntimeFilter;
+
         renameMe->updateLastChanged();
         emit changeItem(renameMe, tSpawnChangedName);
     }

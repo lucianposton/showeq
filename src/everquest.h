@@ -102,6 +102,7 @@
 
 //Maximum limits of certain types of data
 #define MAX_KNOWN_SKILLS                75
+#define MAX_SPELL_SLOTS                 9
 #define MAX_KNOWN_LANGS                 25
 #define MAX_SPELLBOOK_SLOTS             400
 #define MAX_GROUP_MEMBERS               6
@@ -264,6 +265,46 @@ enum GroupUpdateAction
   GUA_FullGroupInfo = 7,
   GUA_MakeLeader = 8,
   GUA_Started = 9,
+};
+
+/**
+ * Leadership AAs enum, used to index into leadershipAAs in charProfileStruct
+ */
+enum LeadershipAAIndex
+{
+  groupMarkNPC = 0,
+  groupNPCHealth,
+  groupDelegateMainAssist,
+  groupDelegateMarkNPC,
+  groupUnknown4,
+  groupUnknown5,
+  groupInspectBuffs,
+  groupUnknown7,
+  groupSpellAwareness,
+  groupOffenseEnhancement,
+  groupManaEnhancement,
+  groupHealthEnhancement,
+  groupHealthRegeneration,
+  groupFindPathToPC,
+  groupHealthOfTargetsTarget,
+  groupUnknown15,
+  raidMarkNPC,  //0x10
+  raidNPCHealth,
+  raidDelegateMainAssist,
+  raidDelegateMarkNPC,
+  raidUnknown4,
+  raidUnknown5,
+  raidUnknown6,
+  raidSpellAwareness,
+  raidOffenseEnhancement,
+  raidManaEnhancement,
+  raidHealthEnhancement,
+  raidHealthRegeneration,
+  raidFindPathToPC,
+  raidHealthOfTargetsTarget,
+  raidUnknown14,
+  raidUnknown15,
+  MAX_LEAD_AA //=32
 };
 
 
@@ -610,7 +651,10 @@ struct charProfileStruct
 /*0242*/ uint8_t   anon;               // 2=roleplay, 1=anon, 0=not anon     
 /*0243*/ uint8_t   gm;                 // 0=no, 1=yes
 /*0244*/ int8_t    guildstatus;        // 0=member, 1=officer, 2=guildleader
-/*0245*/ uint8_t   unknown0245[55];    // *** Placeholder
+/*0245*/ uint8_t   unknown0245[7];     // *** Placeholder
+/*0252*/ uint32_t  intoxication;       // Alcohol level (in ticks till sober?)
+/*0256*/ uint32_t  spellSlotRefresh[MAX_SPELL_SLOTS]; // Refresh time (millis)
+/*0292*/ uint8_t   unknown0292[8];     // *** Placeholder
 /*0300*/ uint8_t   haircolor;          // Player hair color
 /*0301*/ uint8_t   beardcolor;         // Player beard color
 /*0302*/ uint8_t   eyecolor1;          // Player left eye color
@@ -623,7 +667,9 @@ struct charProfileStruct
 /*0396*/ Color_Struct item_tint[9];    // RR GG BB 00
 /*0432*/ AA_Array  aa_array[MAX_AA];   // AAs
 /*1392*/ char      servername[32];     // server the char was created on
-/*1424*/ uint8_t   unknown1452[68];    // *** Placeholder
+/*1424*/ char      title[32];          // Current character title
+/*1456*/ char      suffix[32];         // Current character suffix
+/*1488*/ uint8_t   unknown1452[4];     // *** Placeholder
 /*1492*/ uint32_t  exp;                // Current Experience
 /*1496*/ uint32_t  unknown1496;        // *** Placeholder
 /*1500*/ uint32_t  points;             // Unspent Practice points
@@ -643,7 +689,7 @@ struct charProfileStruct
 /*1617*/ uint8_t   unknown1617[7];     // All 0x00 (language buffer?)
 /*1624*/ int32_t   sSpellBook[400];    // List of the Spells in spellbook
 /*3224*/ uint8_t   unknown3224[448];   // all 0xff after last spell    
-/*3672*/ int32_t   sMemSpells[9];      // List of spells memorized
+/*3672*/ int32_t   sMemSpells[MAX_SPELL_SLOTS]; // List of spells memorized
 /*3708*/ uint8_t   unknown3708[32];    // *** Placeholder
 /*3740*/ float     x;                  // Players x position
 /*3744*/ float     y;                  // Players y position
@@ -665,11 +711,14 @@ struct charProfileStruct
 /*3808*/ uint32_t  platinum_shared;    // Shared platinum pieces
 /*3812*/ uint8_t   unknown3812[20];    // Unknown - all zero
 /*3832*/ uint32_t  skills[75];         // List of skills (MAX_KNOWN_SKILLS)
-/*4132*/ uint8_t   unknown4132[348];   // *** Placeholder
-/*4480*/ uint32_t  expAA;              // Current AA experience
-/*4484*/ uint8_t   unknown4484[4];     // *** Placeholder
+/*4132*/ uint8_t   unknown4132[312];   // *** Placeholder
+/*4444*/ uint32_t  autosplit;          // 0 = off, 1 = on
+/*4448*/ uint8_t   unknown4448[8];     // *** Placeholder
+/*4456*/ uint32_t  zoneCounter;        // No idea. Goes up by 2 each zone.
+/*4460*/ uint8_t   unknown4460[28];    // *** Placeholder
 /*4488*/ uint32_t  expansions;         // Bitmask for expansions
-/*4492*/ uint8_t   unknown4492[20];    // *** Placeholder
+/*4492*/ uint32_t  toxicity;           // Potion Toxicity (15=too toxic, each potion adds 3)
+/*4496*/ uint8_t   unknown4496[16];    // *** Placeholder
 /*4512*/ uint32_t  hunger;             // Food (ticks till next eat)
 /*4516*/ uint32_t  thirst;             // Drink (ticks till next drink)
 /*4520*/ uint8_t   unknown4520[20];    // *** Placeholder
@@ -696,11 +745,16 @@ struct charProfileStruct
 /*6200*/ uint32_t  disciplines[MAX_DISCIPLINES]; // Known disciplines
 /*6400*/ uint8_t   unknown6400[440];   // *** Placeholder
 /*6840*/ uint32_t  endurance;          // Current endurance
-/*6844*/ uint8_t   unknown6844[276];   // *** Placeholder
+/*6844*/ uint32_t  expGroupLeadAA;     // Current group lead AA exp (0-1000)
+/*6848*/ uint32_t  expRaidLeadAA;      // Current raid lead AA exp (0-2000)
+/*6852*/ uint32_t  groupLeadAAUnspent; // Unspent group lead AA points
+/*6856*/ uint32_t  raidLeadAAUnspent;  // Unspent raid lead AA points
+/*6860*/ uint32_t  leadershipAAs[MAX_LEAD_AA]; // Leader AA ranks
+/*6988*/ uint8_t   unknown6988[132];   // *** Placeholder
 /*7120*/ uint32_t  airRemaining;       // Air supply (seconds)
-/*7124*/ uint8_t   unknown7124[4608];  // *** Placeholder 
+/*7124*/ uint8_t   unknown7274[4608];  // *** Placeholder
 /*11732*/ uint32_t aa_spent;           // Number of spent AA points
-/*11736*/ uint32_t unknown11736;       // *** Placeholder
+/*11736*/ uint32_t expAA;              // Exp earned in current AA point
 /*11740*/ uint32_t aa_unspent;         // Unspent AA points
 /*11744*/ uint8_t  unknown11744[36];   // *** Placeholder
 /*11780*/ BandolierStruct bandoliers[MAX_BANDOLIERS]; // bandolier contents
@@ -1724,16 +1778,16 @@ struct SpawnUpdateStruct
 
 /*
 ** NPC Hp Update
-** Length: 6 Octets
+** Length: 10 Octets
 ** Opcode NpcHpUpdateCode
 */
 
 struct hpNpcUpdateStruct
 {
-/*0000*/ uint16_t spawnId;
-/*0002*/ int16_t maxHP;
-/*0004*/ int16_t curHP;
-/*0006*/ 
+/*0000*/ int32_t curHP;
+/*0004*/ int32_t maxHP;
+/*0008*/ uint16_t spawnId;
+/*0010*/ 
 }; 
 
 /*

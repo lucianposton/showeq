@@ -689,8 +689,8 @@ void MessageShell::player(const uint8_t* data)
   const charProfileStruct* player = (const charProfileStruct*)data;
   QString message;
 
-  message.sprintf("Name: '%s' Last: '%s'", 
-		  player->name, player->lastName);
+  message.sprintf("Name: '%s' Last: '%s' Title: '%s' Suffix: '%s'", 
+		  player->name, player->lastName, player->title, player->suffix);
   m_messages->addMessage(MT_Player, message);
   
   message.sprintf("Level: %d", player->level);
@@ -715,12 +715,23 @@ void MessageShell::player(const uint8_t* data)
 		  player->platinum_shared);
   m_messages->addMessage(MT_Player, message);
 
+  message.sprintf("DoN Crystals: Radiant=%d Ebon=%d",
+          player->currentRadCrystals, player->currentEbonCrystals);
+  m_messages->addMessage(MT_Player, message);
+
   message = "Exp: " + Commanate(player->exp);
   m_messages->addMessage(MT_Player, message);
 
   message = "ExpAA: " + Commanate(player->expAA) + 
-      "(aa spent: " + Commanate(player->aa_spent) + 
+      " (aa spent: " + Commanate(player->aa_spent) + 
       ", aa unspent: " + Commanate(player->aa_unspent) + ")";
+  m_messages->addMessage(MT_Player, message);
+
+  message.sprintf("GroupLeadAA: %.1f%% (unspent: %d)",
+      (player->expGroupLeadAA)/10.0, player->groupLeadAAUnspent);
+  m_messages->addMessage(MT_Player, message);
+  message.sprintf("RaidLeadAA: %.1f%% (unspent: %d)",
+      (player->expRaidLeadAA)/20.0, player->raidLeadAAUnspent);
   m_messages->addMessage(MT_Player, message);
 
   message.sprintf("Group: %s %s %s %s %s %s", player->groupMembers[0],

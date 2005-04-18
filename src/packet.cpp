@@ -752,7 +752,7 @@ void EQPacket::closeStream()
 {
   // reseting the pcap filter to a non-exclusive form allows us to beat 
   // the race condition between timer and processing the zoneServerInfo
-  if(m_playbackPackets == PLAYBACK_OFF) 
+  if(m_playbackPackets == PLAYBACK_OFF || m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
     m_packetCapture->setFilter(m_device, m_ip,
 			       m_realtime, IP_ADDRESS_TYPE, 0, 0);
@@ -775,7 +775,8 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
   m_serverPort = serverPort;
   m_clientPort = clientPort;
 
-  if (m_playbackPackets == PLAYBACK_OFF)
+  if (m_playbackPackets == PLAYBACK_OFF || 
+          m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
     if (m_mac.length() == 17)
     {
@@ -977,7 +978,8 @@ void EQPacket::monitorIPClient(const QString& ip)
   resetEQPacket();
   
   seqInfo("Listening for IP client: %s", (const char*)m_ip);
-  if (m_playbackPackets == PLAYBACK_OFF)
+  if (m_playbackPackets == PLAYBACK_OFF || 
+          m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
     m_packetCapture->setFilter(m_device, m_ip,
 			       m_realtime, 
@@ -1002,7 +1004,8 @@ void EQPacket::monitorMACClient(const QString& mac)
   seqInfo("Listening for MAC client: %s", 
 	 (const char*)m_mac);
 
-  if (m_playbackPackets == PLAYBACK_OFF)
+  if (m_playbackPackets == PLAYBACK_OFF ||
+          m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
     m_packetCapture->setFilter(m_device, m_ip,
 			       m_realtime, 
@@ -1026,7 +1029,8 @@ void EQPacket::monitorNextClient()
 
   seqInfo("Listening for next client seen. (you must zone for this to work!)");
 
-  if (m_playbackPackets == PLAYBACK_OFF)
+  if (m_playbackPackets == PLAYBACK_OFF ||
+          m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
     m_packetCapture->setFilter(m_device, NULL,
 			       m_realtime, 

@@ -1,5 +1,5 @@
 /*
- * weapons1.h
+ * weapons2a.h
  *
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
@@ -54,12 +54,12 @@
     NULL,                 // 0x2d
     NULL,                 // 0x2e
     NULL,                 // 0x2f
-    NULL,                 // 0x30
-    NULL,                 // 0x31
-    NULL,                 // 0x32
-    NULL,                 // 0x33
-    NULL,                 // 0x34
-    NULL,                 // 0x35
+    "PotteryWheel",       // 0x30
+    "Kiln",               // 0x31
+    "Loom",               // 0x32
+    "Oven",               // 0x33
+    "Forge",              // 0x34
+    "BrewBarrel",         // 0x35
     NULL,                 // 0x36
     NULL,                 // 0x37
     NULL,                 // 0x38
@@ -134,7 +134,6 @@
     NULL,                 // 0x7d
     NULL,                 // 0x7e
     NULL,                 // 0x7f
-
     NULL,                 // 0x80
     NULL,                 // 0x81
     NULL,                 // 0x82
@@ -151,10 +150,10 @@
     NULL,                 // 0x8d
     NULL,                 // 0x8e
     NULL,                 // 0x8f
-    "Lava Rock",          // 0x90
-    "Red Mushroom",       // 0x91
-    "Blue Mushroom",      // 0x92
-    "Green Leaf",         // 0x93
+    NULL,                 // 0x90
+    NULL,                 // 0x91
+    NULL,                 // 0x92
+    NULL,                 // 0x93
     NULL,                 // 0x94
     NULL,                 // 0x95
     NULL,                 // 0x96

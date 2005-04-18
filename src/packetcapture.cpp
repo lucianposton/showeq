@@ -383,6 +383,8 @@ void PacketCaptureThread::setFilter (const char *device,
         exit (0);
     }
 
+    seqDebug("PCAP Filter Set: %s", filter_buf);
+
     if (realtime)
     {
        memset (&sp, 0, sizeof (sp));

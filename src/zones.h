@@ -195,8 +195,8 @@
 { "load2", "Loading" }, // 185
 { "hateplaneb", "The Plane of Hate" }, // 186
 { "shadowrest", "Shadowrest" }, // 187
-{ NULL, NULL }, // 188
-{ NULL, NULL }, // 189
+{ "tutoriala", "The Mines of Gloomingdeep" }, // 188
+{ "tutorialb", "The Mines of Gloomingdeep" }, // 189
 { NULL, NULL }, // 190
 { NULL, NULL }, // 191
 { NULL, NULL }, // 192

@@ -72,6 +72,18 @@ QString print_item (uint16_t item)
 #include "weapons28.h"
   };
 
+  // sparse array of item names (in 0x29 range), some are NULL
+  static const char*  itemnames29[] = 
+  {
+#include "weapons29.h"
+  };
+
+  // sparse array of item names (in 0x2a range), some are NULL
+  static const char*  itemnames2a[] = 
+  {
+#include "weapons2a.h"
+  };
+
   // sparse array of item names (in 0x2b range), some are NULL
   static const char*  itemnames2b[] = 
   {
@@ -107,6 +119,18 @@ QString print_item (uint16_t item)
     // retrieve pointer to item name
     if (itemLo < (sizeof(itemnames28) / sizeof (char*)))
       itemStr = itemnames28[itemLo];
+  }
+  else if (itemHi == 0x29)
+  {
+    // retrieve pointer to item name
+    if (itemLo < (sizeof(itemnames29) / sizeof (char*)))
+      itemStr = itemnames29[itemLo];
+  }
+  else if (itemHi == 0x2a)
+  {
+    // retrieve pointer to item name
+    if (itemLo < (sizeof(itemnames2a) / sizeof (char*)))
+      itemStr = itemnames2a[itemLo];
   }
   else if (itemHi == 0x2b)
   {
