@@ -299,7 +299,11 @@ void Spells::loadSpells(const QString& spellsFileName)
       // remove from queue
       newSpell = spellQueue.dequeue();
       
-      // insert into table
+      // insert into table. Make sure we don't clobber and lose memory
+      if (m_spells[newSpell->spell()] != NULL)
+      {
+        delete m_spells[newSpell->spell()];
+      }
       m_spells[newSpell->spell()] = newSpell;
     }
   }
@@ -314,7 +318,12 @@ void Spells::unloadSpells(void)
   if (m_spells)
   {
     for (int i = 0; i <= m_maxSpell; i++)
-      delete m_spells[i];
+    {
+      if (m_spells[i] != NULL)
+      {
+        delete m_spells[i];
+      }
+    }
     
     delete [] m_spells;
 

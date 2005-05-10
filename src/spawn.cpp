@@ -242,6 +242,7 @@ Spawn::Spawn()
   : Item(tSpawn, 0)
 {
   m_name = "fake";
+  m_lastName = "";
   setNPC(SPAWN_NPC_UNKNOWN);
 
   Item::setPos(0, 0, 0);
@@ -279,9 +280,6 @@ Spawn::Spawn(const spawnStruct* s)
 
   // have update initialize everything
   update(s);
-
-  // turn on auto delete for the track list
-  m_spawnTrackList.setAutoDelete(true);
 }
 
 Spawn::Spawn(uint16_t id, 
@@ -293,6 +291,7 @@ Spawn::Spawn(uint16_t id,
 {
   // apply the unknown mob values
   m_name = "unknown";
+  m_lastName = "";
   setNPC(SPAWN_NPC_UNKNOWN);
 
   // set what is known
@@ -311,6 +310,8 @@ Spawn::Spawn(uint16_t id,
   setHP(0);
   setMaxHP(0);
   setLevel(0);
+  setGuildID(0xffff);
+  setGuildTag(NULL);
   for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
   setTypeflag(0);
@@ -319,6 +320,9 @@ Spawn::Spawn(uint16_t id,
 
   // turn on auto delete for the track list
   m_spawnTrackList.setAutoDelete(true);
+
+  // Finally, note when this update ocurred
+  updateLast();
 }
 		  
 Spawn::Spawn(QDataStream& d, uint16_t id)

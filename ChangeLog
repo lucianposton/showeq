@@ -10,6 +10,7 @@ purple (05/11/05)
 + Added unknown world data to the unknown log
 + Fixed the skills window to properly show skills > 252
 + Show strings in the spawnlist as utf8 properly
++ Valgrind cleanup for some uninitialized references and minor memory leaks
 
 dophaZ (04/17/05)
 -----------------------

@@ -123,7 +123,7 @@ private:
       *m_experience_remaining, *m_play_time,
       *m_experience_rate, *m_kills_to_level, *m_time_to_level;
 
-   QList<ExperienceRecord> m_exp_list;
+   QPtrList<ExperienceRecord> m_exp_list;
 
    QMenuBar *m_menu_bar;
    QPopupMenu *m_view_menu, *m_exp_rate_menu, *m_ZEM_menu;

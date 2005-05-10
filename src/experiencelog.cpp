@@ -260,10 +260,17 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
       m_log_exp = 0;
       seqWarn("Error opening exp.log, no exp will be logged this session");
    }
+   else
+   {
+     m_log_exp = 1;
+   }
 
    fileInfo = m_dataLocMgr->findWriteFile("logs", "newexp.log");
 
    m_newExpLogFile = fileInfo.absFilePath();
+
+   // Clear the exp list on removes and deletes.
+   m_exp_list.setAutoDelete(true);  
 }
 
 void ExperienceWindow::savePrefs()

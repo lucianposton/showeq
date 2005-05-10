@@ -62,6 +62,9 @@ XMLPreferences::XMLPreferences(const QString& defaultsFileName,
 
 XMLPreferences::~XMLPreferences()
 {
+  m_userSections.clear();
+  m_defaultsSections.clear();
+  m_commentSections.clear();
 }
 
 void XMLPreferences::load()

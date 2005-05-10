@@ -119,7 +119,7 @@ SpellShell::SpellShell(Player* player, SpawnShell* spawnshell, Spells* spells)
 
 SpellShell::~SpellShell()
 {
-  clearSpells();
+  clear();
 }
 
 SpellItem* SpellShell::findSpell(uint16_t spellId, 
