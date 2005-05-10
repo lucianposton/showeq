@@ -1043,7 +1043,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_id_log_AllPackets  = pLogMenu->insertItem("All Packets", this, SLOT(toggle_log_AllPackets()), Key_F5);
    m_id_log_WorldData   = pLogMenu->insertItem("World Data", this, SLOT(toggle_log_WorldData()), Key_F6);
    m_id_log_ZoneData    = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F7);
-   m_id_log_UnknownData = pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F8);
+   m_id_log_UnknownData = pLogMenu->insertItem("Unknown Data", this, SLOT(toggle_log_UnknownData()), Key_F8);
    m_id_view_UnknownData = pLogMenu->insertItem("View Unknown Data", this, 
 						 SLOT(toggle_view_UnknownData()) , 
 						 Key_F9);
@@ -6040,6 +6040,8 @@ void EQInterface::createUnknownZoneLog(void)
 						   false));
 
   connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+	  m_unknownZoneLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
+  connect(m_packet, SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
 	  m_unknownZoneLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
 }
 

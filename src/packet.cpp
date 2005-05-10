@@ -152,6 +152,10 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 	  this,
 	  SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
   connect(m_client2WorldStream, 
+	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+	  this,
+	  SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
+  connect(m_client2WorldStream, 
 	  SIGNAL(cacheSize(int, int)),
 	  this,
 	  SIGNAL(cacheSize(int, int)));
@@ -181,10 +185,13 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 	  this,
 	  SIGNAL(rawWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
   connect(m_world2ClientStream, 
-
  	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
 	  this,
 	  SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
+  connect(m_world2ClientStream, 
+ 	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+	  this,
+	  SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
   connect(m_world2ClientStream, 
 	  SIGNAL(cacheSize(int, int)),
 	  this,
