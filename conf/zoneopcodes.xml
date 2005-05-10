@@ -400,6 +400,7 @@
     </opcode>
     <opcode id="0c78" name="OP_AAExpUpdate" updated="02/15/05">
         <comment>Receiving AA experience. Also when percent to AA changes.</comment>
+         <payload dir="server" typename="altExpUpdateStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="412a" name="OP_GetGuildMOTD" updated="02/15/05">
         <comment></comment>
