@@ -3,6 +3,8 @@ Version: $Id$ $Name$
 purple (05/11/05)
 ----------------------
 + Added some session-related opcodes to worldopcodes.xml
++ Fixed opcodes for alt exp and hooked altExpUpdateStruct so alt exp updating
+	maps properly
 
 dophaZ (04/17/05)
 -----------------------

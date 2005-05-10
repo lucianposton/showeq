@@ -398,8 +398,8 @@
     <opcode id="6529" name="OP_SetRunMode" updated="02/15/05">
         <comment>old cRunToggleCode</comment>
     </opcode>
-    <opcode id="0c78" name="OP_UpdateAA" updated="02/15/05">
-        <comment></comment>
+    <opcode id="0c78" name="OP_AAExpUpdate" updated="02/15/05">
+        <comment>Receiving AA experience. Also when percent to AA changes.</comment>
     </opcode>
     <opcode id="412a" name="OP_GetGuildMOTD" updated="02/15/05">
         <comment></comment>

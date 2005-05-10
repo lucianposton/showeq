@@ -573,6 +573,10 @@ void Player::updateAltExp(const uint8_t* data)
 {
   const altExpUpdateStruct* altexp = (const altExpUpdateStruct*)data;
 
+  /* purple: I got no idea what is up here. This seems to be written like
+   *         the packet from the server gives the entire exp bump and not
+   *         just the proper percent. This makes it behave funny. Taking out
+   *         the multiply by percent here.
   uint32_t realExp = altexp->altexp * altexp->percent * (15000000 / 33000);
   uint32_t expIncrement;
 
@@ -580,6 +584,18 @@ void Player::updateAltExp(const uint8_t* data)
     expIncrement = realExp - m_currentAltExp;
   else
     expIncrement = 0;
+   */
+  uint32_t realExp = altexp->altexp * (15000000 / 33000);
+  uint32_t expIncrement;
+
+  if (realExp > m_currentExp)
+  {
+    expIncrement = realExp - m_currentAltExp;
+  }
+  else
+  {
+    expIncrement = 0;
+  }
 
   m_currentAApts = altexp->aapoints;
   m_currentAltExp = realExp;

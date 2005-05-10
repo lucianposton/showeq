@@ -2077,6 +2077,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_ExpUpdate", SP_Zone, DIR_Server,
 		      "expUpdateStruct", SZC_Match,
 		      m_player, SLOT(updateExp(const uint8_t*)));
+   m_packet->connect2("OP_AAExpUpdate", SP_Zone, DIR_Server,
+		      "altExpUpdateStruct", SZC_Match,
+		      m_player, SLOT(updateAltExp(const uint8_t*)));
    m_packet->connect2("OP_LevelUpdate", SP_Zone, DIR_Server,
 		      "levelUpUpdateStruct", SZC_Match,
 		      m_player, SLOT(updateLevel(const uint8_t*)));
@@ -2098,10 +2101,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_SwapSpell", SP_Zone, DIR_Server,
 		      "tradeSpellBookSlotsStruct", SZC_Match,
 	   m_player, SLOT(tradeSpellBookSlots(const uint8_t*, size_t, uint8_t)));
-#if 0 // ZBTEMP
-   connect(m_packet, SIGNAL(updateAltExp(const uint8_t*, size_t, uint8_t)),
-	   m_player, SLOT(updateAltExp(const uint8_t*)));
-#endif
 
    // interface statusbar slots
    connect (this, SIGNAL(newZoneName(const QString&)),
@@ -4369,8 +4368,13 @@ void EQInterface::newAltExp(uint32_t newExp, uint32_t totalExp,
 			    uint32_t aapoints)
 {
   if (m_stsbarExpAA)
-    m_stsbarExpAA->setText(QString("ExpAA: %1 (%2/330)")
-			   .arg(Commanate(totalExp)).arg(totalTick));
+  {
+    char aaperc[5];
+    sprintf(aaperc, "%.2f", totalExp*100.0/maxExp);
+
+    m_stsbarExpAA->setText(QString("ExpAA: %1 (%2/330, %3%)")
+        .arg(Commanate(totalExp)).arg(totalTick).arg(aaperc));
+  }
 }
 
 void EQInterface::levelChanged(uint8_t level)
