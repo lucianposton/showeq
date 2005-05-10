@@ -621,8 +621,9 @@
         <comment></comment>
     </opcode>
     <opcode id="1281" name="OP_ManaChange" implicitlen="16" updated="02/15/05">
-        <comment></comment>
-        <payload dir="both" typename="manaDecrementStruct" sizechecktype="match"/>
+        <comment>Mana change. Bards send this up with no size. Casters receive this for mana updates.</comment>
+        <payload dir="server" typename="manaDecrementStruct" sizechecktype="match"/>
+        <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
     <opcode id="4ee6" name="OP_ShopPlayerBuy" updated="02/15/05">
         <comment>old BuyItemCode</comment>
