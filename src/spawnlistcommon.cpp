@@ -229,10 +229,11 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      if (spawn != NULL) 
      {
        if (!spawn->lastName().isEmpty())
-	 buff.sprintf("%s (%s)", 
-		      (const char*)buff, (const char*)spawn->lastName());
+       {
+         buff = QString("%1 (%2)").arg(buff).arg(spawn->lastName());
+       }
        if (spawn->gm())
-	 buff += " *GM* ";
+         buff += " *GM* ";
      }
 
      setText(tSpawnColName, buff);
