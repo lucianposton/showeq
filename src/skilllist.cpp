@@ -74,7 +74,13 @@ void SkillList::addSkill (int skillId, int value)
     return;
   }
 
-  /* Check if this is a valid skill */
+  // Purple: Skills are uint32_now, but these special values don't seem to have
+  //         been moved up to the top bits. Somehow, the client still knows
+  //         the difference between a skill you don't get get and a skill that
+  //         you do get and can train and should be shown in the list. For us,
+  //         for now all skills show up and are skill 0 whether you can learn
+  //         them or now.
+#if 0
   if (value == 255)
     return;
 
@@ -85,6 +91,10 @@ void SkillList::addSkill (int skillId, int value)
     str = " NA";
   else
     str.sprintf ("%3d", value);
+#endif
+  QString str;
+
+  str.sprintf("%3d", value);
 
   /* If the skill is not added yet, look up the correct skill namd and add it
    * to the list

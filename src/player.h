@@ -100,7 +100,7 @@ public:
    int16_t headingDegrees() const { return m_headingDegrees; }
    bool validPos() const { return m_validPos; }
 
-   uint8_t getSkill(uint8_t skillId) { return m_playerSkills[skillId]; }
+   uint32_t getSkill(uint8_t skillId) { return m_playerSkills[skillId]; }
    uint8_t getLanguage(uint8_t langId) { return m_playerLanguages[langId]; }
    
    int getPlusHP() { return m_plusHP; }
@@ -210,7 +210,7 @@ public:
   uint16_t m_defaultDeity;
   uint8_t m_defaultClass;
   uint8_t m_defaultLevel;
-  uint8_t m_playerSkills[MAX_KNOWN_SKILLS];
+  uint32_t m_playerSkills[MAX_KNOWN_SKILLS];
   uint8_t m_playerLanguages[MAX_KNOWN_LANGS];
   
   uint16_t m_plusMana;
