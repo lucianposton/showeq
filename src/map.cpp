@@ -3862,7 +3862,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     if (spawn)
     {
       QString guild;
-      if (spawn->guildID() < 512)
+      if (spawn->guildID() < MAX_GUILDS)
       {
 	if (!spawn->guildTag().isEmpty())
 	  guild.sprintf("<%s>", (const char*)spawn->guildTag());

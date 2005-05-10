@@ -107,7 +107,7 @@
 #define MAX_SPELLBOOK_SLOTS             400
 #define MAX_GROUP_MEMBERS               6
 #define MAX_BUFFS                       25
-#define MAXGUILDS                       1500
+#define MAX_GUILDS                      1500
 #define MAX_AA                          120
 #define MAX_BANDOLIERS                  4
 #define MAX_POTIONS_IN_BELT             4
@@ -2155,7 +2155,7 @@ struct guildListStruct
 struct worldGuildListStruct
 {
 /*000*/ guildListStruct dummy;
-/*064*/ guildListStruct guilds[MAXGUILDS];
+/*064*/ guildListStruct guilds[MAX_GUILDS];
 };
 
 struct worldMOTDStruct

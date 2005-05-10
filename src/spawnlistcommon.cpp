@@ -263,7 +263,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      {
        setText(tSpawnColDeity, spawn->deityName());
        setText(tSpawnColBodyType, spawn->typeString());
-       if (spawn->guildID() < 512)
+       if (spawn->guildID() < MAX_GUILDS)
        {  
           if(spawn->guildTag())
             setText(tSpawnColGuildID, spawn->guildTag());

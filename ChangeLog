@@ -6,6 +6,7 @@ purple (05/11/05)
 + Fixed opcodes for alt exp and hooked altExpUpdateStruct so alt exp updating
 	maps properly
 + Made is so OP_ManaChange can be 0 size. Bards have this a lot.
++ Fix problems with guilds numbered higher than 512
 
 dophaZ (04/17/05)
 -----------------------

@@ -475,7 +475,7 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      updateRuntimeFilterFlags(spawn);
      item->updateLastChanged();
 
-     if (spawn->guildID() < MAXGUILDS)
+     if (spawn->guildID() < MAX_GUILDS)
         spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
      else
         spawn->setGuildTag("");
@@ -494,7 +494,7 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      updateRuntimeFilterFlags(spawn);
      m_spawns.insert(s.spawnId, item);
 
-     if (spawn->guildID() < MAXGUILDS)
+     if (spawn->guildID() < MAX_GUILDS)
         spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
      else
         spawn->setGuildTag("");
