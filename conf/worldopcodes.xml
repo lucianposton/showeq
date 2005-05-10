@@ -54,7 +54,10 @@
         <comment></comment>
     </opcode>
     <opcode id="1f7b" name="OP_SendLoginInfo" updated="02/15/05">
-        <comment></comment>
+        <comment>Client starting world session by asking for login information</comment>
+    </opcode>
+    <opcode id="7402" name="OP_WorldComplete" updated="02/15/05">
+        <comment>Client telling world server it is done. World replies by disconnecting.</comment>
     </opcode>
     <opcode id="47b6" name="OP_World_Client_CRC1" updated="02/15/05">
         <comment>Contains a snippet of spell data</comment>
