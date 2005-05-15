@@ -368,7 +368,7 @@ void MessageShell::zoneEntryServer(const ServerZoneEntryStruct* zsentry)
 {
   QString tempStr;
 
-  tempStr = "EntryCode: Server, Zone: ";
+  tempStr = "EntryCode: Server";
   m_messages->addMessage(MT_Zone, tempStr);
 }
 

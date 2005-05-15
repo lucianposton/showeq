@@ -3,21 +3,8 @@
 <seqopcodes>
     <!-- OLD OPCODES - these need updating still post 1/26/2005 
 
-
-    <opcode id="0018" name="OP_AckPacket" updated="02/10/04">
-        <comment>Appears to be generic ack at the presentation level</comment>
-    </opcode>
-    <opcode id="0106" name="OP_CharacterCreate" updated="02/10/04">
-        <comment>Create character @ char select</comment>
-    </opcode>
-    <opcode id="0127" name="OP_ApproveName" updated="02/10/04">
-        <comment>Approving new character name @ char creation</comment>
-    </opcode>
     <opcode id="02a5" name="OP_UserCompInfo" updated="02/10/04">
         <comment>User submitted computer information</comment>
-    </opcode>
-    <opcode id="02ae" name="OP_GetName" updated="02/10/04">
-        <comment>Returns a random name</comment>
     </opcode>
     <opcode id="02db" name="OP_LoginComplete" updated="02/10/04">
         <comment></comment>
@@ -25,53 +12,60 @@
 -->
 
 
-
-
-    <opcode id="5ef9" name="OP_ZoneServerInfo" updated="02/15/05">
+    <opcode id="6bff" name="OP_ZoneServerInfo" updated="05/11/05">
         <comment>old ZoneServerInfo</comment>
     </opcode>
-    <opcode id="16f7" name="OP_SendCharInfo" updated="02/15/05">
+    <opcode id="6196" name="OP_SendCharInfo" updated="05/11/05">
         <comment>Send all chars visible @ char select</comment>
     </opcode>
-    <opcode id="12ad" name="OP_MOTD" updated="02/15/05">
+    <opcode id="6dd0" name="OP_MOTD" updated="05/11/05">
         <comment>old MOTDCode Server message of the day</comment>
         <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="0353" name="OP_GuildList" updated="02/15/05">
+    <opcode id="595f" name="OP_GuildList" updated="05/11/05">
         <comment>old GuildListCode</comment>
         <payload dir="server" typename="worldGuildListStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="26ad" name="OP_SetChatServer" updated="02/15/05">
+    <opcode id="38c0" name="OP_SetChatServer" updated="05/11/05">
         <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
-    <opcode id="1087" name="OP_SetChatServer2" updated="02/15/05">
+    <opcode id="62c7" name="OP_SetChatServer2" updated="05/11/05">
         <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
-    <opcode id="3bfb" name="OP_ApproveWorld" updated="02/15/05">
+    <opcode id="25d4" name="OP_ApproveWorld" updated="05/11/05">
         <comment></comment>
     </opcode>
-    <opcode id="1c3a" name="OP_LogServer" updated="02/15/05">
+    <opcode id="1c3a" name="OP_LogServer" updated="05/11/05">
         <comment></comment>
     </opcode>
-    <opcode id="1f7b" name="OP_SendLoginInfo" updated="02/15/05">
+    <opcode id="67fd" name="OP_SendLoginInfo" updated="05/11/05">
         <comment>Client starting world session by asking for login information</comment>
     </opcode>
-    <opcode id="7402" name="OP_WorldComplete" updated="02/15/05">
+    <opcode id="2ee3" name="OP_WorldComplete" updated="05/11/05">
         <comment>Client telling world server it is done. World replies by disconnecting.</comment>
     </opcode>
-    <opcode id="47b6" name="OP_World_Client_CRC1" updated="02/15/05">
+    <opcode id="3c52" name="OP_World_Client_CRC1" updated="05/11/05">
         <comment>Contains a snippet of spell data</comment>
     </opcode>
-    <opcode id="09e6" name="OP_World_Client_CRC2" updated="02/15/05">
+    <opcode id="37aa" name="OP_World_Client_CRC2" updated="05/11/05">
         <comment>Second client verification packet</comment>
     </opcode>
-    <opcode id="7c66" name="OP_ExpansionInfo" updated="02/15/05">
+    <opcode id="51b4" name="OP_ExpansionInfo" updated="05/11/05">
         <comment>Which expansions user has</comment>
     </opcode>
-    <opcode id="5a62" name="OP_EnterWorld" updated="02/15/05">
+    <opcode id="727c" name="OP_EnterWorld" updated="05/11/05">
         <comment>Server approval for client to enter world</comment>
     </opcode>
-    <opcode id="6748" name="OP_DeleteCharacter" updated="02/15/05">
+    <opcode id="633e" name="OP_DeleteCharacter" updated="05/11/05">
         <comment>Delete character @ char select</comment>
+    </opcode>
+    <opcode id="0471" name="OP_CharacterCreate" updated="05/11/04">
+        <comment>Create character @ char select</comment>
+    </opcode>
+    <opcode id="4de1" name="OP_ApproveName" updated="05/11/04">
+        <comment>Approving new character name @ char creation</comment>
+    </opcode>
+    <opcode id="678c" name="OP_RandomNameGenerator" updated="05/11/05">
+        <comment>Returns a random name</comment>
     </opcode>
 </seqopcodes>

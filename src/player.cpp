@@ -769,17 +769,9 @@ void Player::updateStamina(const uint8_t* data)
   const staminaStruct *stam = (const staminaStruct *)data;
   m_food = stam->food;
   m_water = stam->water;
-  m_fatigue = stam->fatigue;
   m_validStam = true;
 
-  emit stamChanged( 100 - m_fatigue,
-		    100,
-		    m_food,
-		    127,
-		    m_water,
-		    127
-		    );
-
+  emit stamChanged(m_food, 127, m_water, 127);
 
   if (showeq_params->savePlayerState)
     savePlayerState();
@@ -808,7 +800,7 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
   setClassVal(zsentry->class_);
   setRace(zsentry->race);
   setGender(zsentry->gender);
-  setGuildID(zsentry->guildId);
+  setGuildID(zsentry->guildID);
   setGuildTag(m_guildMgr->guildIdToName(guildID()));
   emit guildChanged();
   setPos(zsentry->x >> 3, 
@@ -816,8 +808,9 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
          zsentry->z >> 3,
 	 showeq_params->walkpathrecord,
 	 showeq_params->walkpathlength);
-  seqDebug("Player::zoneBegin(): Pos (%f/%f/%f)",
-	   float(zsentry->x)/8.0, float(zsentry->y)/8.0, float(zsentry->z)/8.0);
+  seqDebug("Player::zoneBegin(): Pos (%f/%f/%f) Heading %f",
+	   float(zsentry->x)/8.0, float(zsentry->y)/8.0, float(zsentry->z)/8.0,
+       float(zsentry->heading));
   setHeading(zsentry->heading, 0);
   m_validPos = true;
 
@@ -852,6 +845,28 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
   int16_t pdeltaX = int16_t(pupdate->deltaX);
   int16_t pdeltaY = int16_t(pupdate->deltaY);
   int16_t pdeltaZ = int16_t(pupdate->deltaZ);
+
+#if 0 
+  // Dump position updates for debugging client update changes
+  for (int i=0; i<36; i++)
+  {
+      printf("%.2x", data[i]);
+
+      if ((i+1) % 8 == 0)
+      {
+          printf("    ");
+      }
+      else
+      {
+          printf(" ");
+      }
+  }
+  printf("pad %d unk %d %d dh %d pad %d ani %d pad %d\n", 
+          pupdate->padding0004, pupdate->unknown0006[0],
+          pupdate->unknown0006[1], pupdate->deltaHeading,
+          pupdate->padding0020, pupdate->animation,
+          pupdate->padding0022);
+#endif
 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);
   setDeltas(pdeltaX, pdeltaY, pdeltaZ);

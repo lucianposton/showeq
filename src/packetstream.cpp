@@ -21,7 +21,7 @@
 
 // The following defines are used to diagnose packet handling behavior
 // this define is used to diagnose packet processing (in processPacket mostly)
-//#define PACKET_PROCESS_DIAG 2
+//#define PACKET_PROCESS_DIAG 3
 
 // this define is used to diagnose cache handling (in processPacket mostly)
 //#define PACKET_CACHE_DIAG 3

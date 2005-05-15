@@ -54,8 +54,8 @@ StatList::StatList(Player* player,
 	    this, SLOT(expChanged(int,int,int)));
    connect (m_player, SIGNAL(expAltChangedInt(int,int,int)),
 	    this, SLOT(expAltChanged(int,int,int)));
-   connect (m_player, SIGNAL(stamChanged(int,int,int,int,int,int)),
-	    this, SLOT(stamChanged(int,int,int,int,int,int)));
+   connect (m_player, SIGNAL(stamChanged(int,int,int,int)),
+	    this, SLOT(stamChanged(int,int,int,int)));
    connect (m_player, SIGNAL(manaChanged(uint32_t,uint32_t)),
 	    this, SLOT(manaChanged(uint32_t,uint32_t)));
    connect (m_player, SIGNAL(hpChanged(int16_t, int16_t)), 
@@ -182,21 +182,9 @@ void StatList::manaChanged (uint32_t val, uint32_t max)
    }
 }
 
-void StatList::stamChanged (int Sval, int Smax, 
-			       int Fval, int Fmax,
-			       int Wval, int Wmax) 
+void StatList::stamChanged(int Fval, int Fmax, int Wval, int Wmax) 
 {
   char buf[64];
-
-  if (m_showStat[LIST_STAM])
-   {
-  	sprintf(buf,"%d",Sval);
-  	m_statList[LIST_STAM]->setText (1, buf);
-  	sprintf(buf,"%d",Smax);
-  	m_statList[LIST_STAM]->setText (2, buf);
-  	sprintf(buf,"%d %%",Sval*100/Smax);
-  	m_statList[LIST_STAM]->setText (3, buf);
-   }
 
   if (m_showStat[LIST_FOOD])
    {

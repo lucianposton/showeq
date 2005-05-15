@@ -510,11 +510,29 @@ void SpawnShell::newSpawn(const spawnStruct& s)
    }
 }
 
-void SpawnShell::playerUpdate(const uint8_t* data, size_t, uint8_t dir)
+void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 {
   // if zoning, then don't do anything
   if (m_zoneMgr->isZoning())
     return;
+
+#if 0 
+  // Dump position updates for debugging client update changes
+  for (int i=0; i<len; i++)
+  {
+      printf("%.2x", data[i]);
+
+      if ((i+1) % 8 == 0)
+      {
+          printf("    ");
+      }
+      else
+      {
+          printf(" ");
+      }
+  }
+  printf("\n");
+#endif
 
   const playerSpawnPosStruct *pupdate = (const playerSpawnPosStruct *)data;
 

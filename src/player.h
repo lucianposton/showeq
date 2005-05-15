@@ -177,13 +177,7 @@ public:
                                  uint32_t
                                );
                                
-   void stamChanged            ( int,
-                                 int,
-                                 int,
-                                 int,
-                                 int,
-                                 int
-                               );
+   void stamChanged            ( int, int, int, int);
   void hpChanged(int16_t, int16_t);
   void changedID(uint16_t playerID);
   void posChanged(int16_t x, int16_t y, int16_t z,

@@ -2,3 +2,10 @@
 Known bugs
 ----------
 
+1) Net Layer problems with opcodes like 0x??00
+Opcodes that end in 00 (i.e. OP_BazaarSearch or OP_ConsentDeny right now) will
+be falsely identified as net opcodes and not processed. You will see a message
+on the console, but this is harmless. Unless you are doing stuff with bazaar
+searches (which I don't think even works right now), this will not impact
+your showeq session.
+

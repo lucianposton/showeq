@@ -397,21 +397,22 @@ struct Color_Struct
 
 /*
 ** Buffs
-** Length: 16 Octets
+** Length: 20 Octets
 ** Used in:
 **    charProfileStruct(2d20)
 */
 
 struct spellBuff
 {
-/*0000*/  uint8_t     unknown0012;        //
+/*0000*/  uint8_t     unknown0000;        //
 /*0001*/  int8_t      level;              // Level of person who cast buff
-/*0002*/  uint8_t     unknown0014;        //
-/*0003*/  uint8_t     unknown0015;        //
+/*0002*/  uint8_t     unknown0002;        //
+/*0003*/  uint8_t     unknown0003;        //
 /*0004*/  int32_t     spellid;            // Spell
 /*0008*/  int32_t     duration;           // Time remaining in ticks
 /*0012*/  int32_t     effect;             // holds the dmg absorb amount on runes
-/*0016*/
+/*0016*/  uint32_t    playerId;           // Global id of caster (for wear off)
+/*0020*/
 };
 
 
@@ -495,7 +496,7 @@ struct requestZoneChangeStruct
 
 /*
 ** Client Zone Entry struct
-** Length: 70 Octets
+** Length: 68 Octets
 ** OpCode: ZoneEntryCode (when direction == client)
 */
 struct ClientZoneEntryStruct
@@ -506,94 +507,10 @@ struct ClientZoneEntryStruct
 /*0064*/ uint32_t unknown0064;            // unknown
 };
 
-/*
-** Server Zone Entry struct
-** Length: 390 Octets
-** OpCode: ZoneEntryCode (when direction == server)
-*/
-struct ServerZoneEntryStruct
-{
-/*0000*/ uint8_t  unknown101[7]; 
-/*0007*/ union 
-         {
-	   struct 
-	   {
-	     /*0007*/ Color_Struct color_helmet;    // Color of helmet item
-	     /*0011*/ Color_Struct color_chest;     // Color of chest item
-	     /*0015*/ Color_Struct color_arms;      // Color of arms item
-	     /*0019*/ Color_Struct color_bracers;   // Color of bracers item
-	     /*0023*/ Color_Struct color_hands;     // Color of hands item
-	     /*0027*/ Color_Struct color_legs;      // Color of legs item
-	     /*0031*/ Color_Struct color_feet;      // Color of feet item
-	     /*0035*/ Color_Struct color_primary;   // Color of primary item
-	     /*0039*/ Color_Struct color_secondary; // Color of secondary item
-	   } equipment_colors;
-	   /*0007*/ Color_Struct colors[9];             // Array elements correspond to struct equipment_colors above
-         };
-
-/*0043*/ uint8_t  class_;          // Player's Class
-/*0044*/ uint8_t  unknown0044[5]; 
-
-/*0049*/ uint32_t race;            // Player's Race
-/*0053*/ uint8_t  unknown053;
-/*0054*/ char	  name[64];      // Player name
-
-/*0118*/ uint8_t  unknown0118[3];
-
-/*0121*/ int8_t hp;
-/*0122*/ uint8_t  unknown0122;
-
-/*0123*/ uint8_t  level;           // Player's Level
-/*0124*/ uint8_t lfg; // 0=Not lfg,1=lfg
-/*0125*/ uint16_t heading; // spawn heading
-/*0127*/ uint8_t  deltaHeading; // change in heading
-/*0128*/ uint8_t animation; // animation id
-/*0129*/ signed  deltaX:13;
-        signed  x:19;
-/*0133*/ signed  y:19;
-        signed  deltaZ:13;
-/*0137*/ signed  deltaY:13;
-        signed  z:19;
-/*0141*/ uint8_t  unknown0141[2];
-/*0143*/ uint8_t invis; // 0=visible,1=invisible
-/*0144*/ uint8_t  unknown0124[7];
-
-/*0151*/ float size;
-/*0155*/ uint8_t helm;
-/*0156*/ float	runspeed;          // Speed when running
-/*0160*/ uint8_t  unknown0160[1];
-/*0161*/ float    walkspeed;       // Speed when walking
-/*0165*/ uint32_t guildId;         // Current guild
-/*0169*/ uint8_t anon; // 0=normal,1=anon,2=roleplaying
-/*0170*/ uint8_t gender; // 0=male,1=female,2=other
-/*0171*/ uint8_t unknown171[5];
-
-/*0176*/ char     lastName[32];  // Players last name
-/*0208*/ union 
-         {
-	   struct 
-	   {
-	     /*0208*/ uint32_t equip_helmet;    // Equipment: Helmet Visual
-	     /*0212*/ uint32_t equip_chest;     // Equipment: Chest Visual
-	     /*0216*/ uint32_t equip_arms;      // Equipment: Arms Visual
-	     /*0220*/ uint32_t equip_bracers;   // Equipment: Bracers Visual
-	     /*0224*/ uint32_t equip_hands;     // Equipment: Hands Visual
-	     /*0228*/ uint32_t equip_legs;      // Equipment: Legs Visual
-	     /*0232*/ uint32_t equip_feet;      // Equipment: Feet Visual
-	     /*0236*/ uint32_t equip_primary;   // Equipment: Primary Visual
-	     /*0240*/ uint32_t equip_secondary; // Equipment: Secondary Visual
-	   } equipment;
-	   /*0208*/ Color_Struct equip[9];            // Array elements correspond to struct equipment above
-         };
-/*0244*/ uint8_t unknown244[14];
-
-/*0258*/ int16_t deity;           // Player's Deity
-/*0262*/ uint8_t unknown260[119];
-}; /* 0375 */
 
 /*
 ** New Zone Code
-** Length: 596 Octets
+** Length: 692 Octets
 ** OpCode: NewZoneCode
 */
 struct newZoneStruct
@@ -616,8 +533,8 @@ struct newZoneStruct
 /*0508*/ float   underworld;               // Underworld
 /*0512*/ float   minclip;                  // Minimum view distance
 /*0516*/ float   maxclip;                  // Maximum view distance
-/*0520*/ uint8_t unknown0520[168];         // *** Placeholder
-/*0688*/
+/*0520*/ uint8_t unknown0520[172];         // *** Placeholder
+/*0692*/
 };
 
 
@@ -709,64 +626,64 @@ struct charProfileStruct
 /*3800*/ uint32_t  silver_cursor;      // Silver Pieces on cursor
 /*3804*/ uint32_t  copper_cursor;      // Copper Pieces on cursor
 /*3808*/ uint32_t  platinum_shared;    // Shared platinum pieces
-/*3812*/ uint8_t   unknown3812[20];    // Unknown - all zero
-/*3832*/ uint32_t  skills[75];         // List of skills (MAX_KNOWN_SKILLS)
-/*4132*/ uint8_t   unknown4132[312];   // *** Placeholder
-/*4444*/ uint32_t  autosplit;          // 0 = off, 1 = on
-/*4448*/ uint8_t   unknown4448[8];     // *** Placeholder
-/*4456*/ uint32_t  zoneCounter;        // No idea. Goes up by 2 each zone.
-/*4460*/ uint8_t   unknown4460[28];    // *** Placeholder
-/*4488*/ uint32_t  expansions;         // Bitmask for expansions
-/*4492*/ uint32_t  toxicity;           // Potion Toxicity (15=too toxic, each potion adds 3)
-/*4496*/ uint8_t   unknown4496[16];    // *** Placeholder
-/*4512*/ uint32_t  hunger;             // Food (ticks till next eat)
-/*4516*/ uint32_t  thirst;             // Drink (ticks till next drink)
-/*4520*/ uint8_t   unknown4520[20];    // *** Placeholder
-/*4540*/ uint16_t  zoneId;             // see zones.h
-/*4542*/ uint16_t  zoneInstance;       // Instance id
-/*4544*/ spellBuff buffs[MAX_BUFFS];   // Buffs currently on the player
-/*4944*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
-/*5328*/ uint8_t   unknown5328[668];   // *** Placeholder
-/*5996*/ uint32_t  ldon_guk_points;    // Earned GUK points
-/*6000*/ uint32_t  ldon_mir_points;    // Earned MIR points
-/*6004*/ uint32_t  ldon_mmc_points;    // Earned MMC points
-/*6008*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
-/*6012*/ uint32_t  ldon_tak_points;    // Earned TAK points
-/*6016*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*6020*/ uint8_t   unknown6020[112];   // *** Placeholder
-/*6132*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)
-/*6136*/ uint32_t  unknown6136;        // *** Placeholder
-/*6140*/ uint32_t  careerTribute;      // Total favor points for this char
-/*6144*/ uint32_t  unknown6144;        // *** Placeholder
-/*6148*/ uint32_t  currentTribute;     // Current tribute points
-/*6152*/ uint32_t  unknown6152;        // *** Placeholder
-/*6156*/ uint32_t  tributeActive;      // 0 = off, 1=on
-/*6160*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout
-/*6200*/ uint32_t  disciplines[MAX_DISCIPLINES]; // Known disciplines
-/*6400*/ uint8_t   unknown6400[440];   // *** Placeholder
-/*6840*/ uint32_t  endurance;          // Current endurance
-/*6844*/ uint32_t  expGroupLeadAA;     // Current group lead AA exp (0-1000)
-/*6848*/ uint32_t  expRaidLeadAA;      // Current raid lead AA exp (0-2000)
-/*6852*/ uint32_t  groupLeadAAUnspent; // Unspent group lead AA points
-/*6856*/ uint32_t  raidLeadAAUnspent;  // Unspent raid lead AA points
-/*6860*/ uint32_t  leadershipAAs[MAX_LEAD_AA]; // Leader AA ranks
-/*6988*/ uint8_t   unknown6988[132];   // *** Placeholder
-/*7120*/ uint32_t  airRemaining;       // Air supply (seconds)
-/*7124*/ uint8_t   unknown7274[4608];  // *** Placeholder
-/*11732*/ uint32_t aa_spent;           // Number of spent AA points
-/*11736*/ uint32_t expAA;              // Exp earned in current AA point
-/*11740*/ uint32_t aa_unspent;         // Unspent AA points
-/*11744*/ uint8_t  unknown11744[36];   // *** Placeholder
-/*11780*/ BandolierStruct bandoliers[MAX_BANDOLIERS]; // bandolier contents
-/*13060*/ uint8_t  unknown13060[5120]; // *** Placeholder 
-/*18180*/ InlineItem potionBelt[MAX_POTIONS_IN_BELT]; // potion belt
-/*18468*/ uint8_t  unknown18468[8];    // *** Placeholder
-/*18476*/ uint32_t currentRadCrystals; // Current count of radiant crystals
-/*18480*/ uint32_t careerRadCrystals;  // Total count of radiant crystals ever
-/*18484*/ uint32_t currentEbonCrystals;// Current count of ebon crystals
-/*18488*/ uint32_t careerEbonCrystals; // Total count of ebon crystals ever
-/*18492*/ uint32_t unknown18492;       // *** Placeholder
-}; /* 18496 */
+/*3812*/ uint8_t   unknown3812[24];    // Unknown - all zero
+/*3836*/ uint32_t  skills[75];         // List of skills (MAX_KNOWN_SKILLS)
+/*4136*/ uint8_t   unknown4136[312];   // *** Placeholder
+/*4448*/ uint32_t  autosplit;          // 0 = off, 1 = on
+/*4452*/ uint8_t   unknown4452[8];     // *** Placeholder
+/*4460*/ uint32_t  zoneCounter;        // No idea. Goes up by 2 each zone.
+/*4464*/ uint8_t   unknown4464[28];    // *** Placeholder
+/*4492*/ uint32_t  expansions;         // Bitmask for expansions
+/*4496*/ uint32_t  toxicity;           // Potion Toxicity (15=too toxic, each potion adds 3)
+/*4500*/ uint8_t   unknown4500[16];    // *** Placeholder
+/*4516*/ uint32_t  hunger;             // Food (ticks till next eat)
+/*4520*/ uint32_t  thirst;             // Drink (ticks till next drink)
+/*4524*/ uint8_t   unknown4524[20];    // *** Placeholder
+/*4544*/ uint16_t  zoneId;             // see zones.h
+/*4546*/ uint16_t  zoneInstance;       // Instance id
+/*4548*/ spellBuff buffs[MAX_BUFFS];   // Buffs currently on the player
+/*5048*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
+/*5332*/ uint8_t   unknown5332[668];   // *** Placeholder
+/*6100*/ uint32_t  ldon_guk_points;    // Earned GUK points
+/*6104*/ uint32_t  ldon_mir_points;    // Earned MIR points
+/*6108*/ uint32_t  ldon_mmc_points;    // Earned MMC points
+/*6112*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
+/*6116*/ uint32_t  ldon_tak_points;    // Earned TAK points
+/*6120*/ uint32_t  ldon_avail_points;  // Available LDON points
+/*6124*/ uint8_t   unknown6124[112];   // *** Placeholder
+/*6236*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)
+/*6240*/ uint32_t  unknown6240;        // *** Placeholder
+/*6244*/ uint32_t  careerTribute;      // Total favor points for this char
+/*6248*/ uint32_t  unknown6248;        // *** Placeholder
+/*6252*/ uint32_t  currentTribute;     // Current tribute points
+/*6256*/ uint32_t  unknown6256;        // *** Placeholder
+/*6260*/ uint32_t  tributeActive;      // 0 = off, 1=on
+/*6264*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout
+/*6304*/ uint32_t  disciplines[MAX_DISCIPLINES]; // Known disciplines
+/*6504*/ uint8_t   unknown6504[440];   // *** Placeholder
+/*6944*/ uint32_t  endurance;          // Current endurance
+/*6948*/ uint32_t  expGroupLeadAA;     // Current group lead AA exp (0-1000)
+/*6952*/ uint32_t  expRaidLeadAA;      // Current raid lead AA exp (0-2000)
+/*6954*/ uint32_t  groupLeadAAUnspent; // Unspent group lead AA points
+/*6960*/ uint32_t  raidLeadAAUnspent;  // Unspent raid lead AA points
+/*6964*/ uint32_t  leadershipAAs[MAX_LEAD_AA]; // Leader AA ranks
+/*7092*/ uint8_t   unknown7092[132];   // *** Placeholder
+/*7224*/ uint32_t  airRemaining;       // Air supply (seconds)
+/*7228*/ uint8_t   unknown7228[4608];  // *** Placeholder
+/*11836*/ uint32_t aa_spent;           // Number of spent AA points
+/*11840*/ uint32_t expAA;              // Exp earned in current AA point
+/*11844*/ uint32_t aa_unspent;         // Unspent AA points
+/*11848*/ uint8_t  unknown11848[36];   // *** Placeholder
+/*11884*/ BandolierStruct bandoliers[MAX_BANDOLIERS]; // bandolier contents
+/*13164*/ uint8_t  unknown13164[5120]; // *** Placeholder 
+/*18284*/ InlineItem potionBelt[MAX_POTIONS_IN_BELT]; // potion belt
+/*18572*/ uint8_t  unknown18572[8];    // *** Placeholder
+/*18580*/ uint32_t currentRadCrystals; // Current count of radiant crystals
+/*18684*/ uint32_t careerRadCrystals;  // Total count of radiant crystals ever
+/*18588*/ uint32_t currentEbonCrystals;// Current count of ebon crystals
+/*18592*/ uint32_t careerEbonCrystals; // Total count of ebon crystals ever
+/*18596*/ uint32_t unknown18596;       // *** Placeholder
+}; /* 18600 */
 
 #if 1
 struct playerAAStruct {
@@ -934,7 +851,7 @@ struct playerAAStruct {
 
 /* 
 ** Generic Spawn Struct 
-** Length: 255 Octets 
+** Length: 383 Octets 
 ** Used in: 
 **   spawnZoneStruct
 **   dbSpawnStruct
@@ -943,66 +860,123 @@ struct playerAAStruct {
 */ 
 struct spawnStruct
 {
-/*000*/ uint8_t NPC; // 0=player,1=npc,2=pc corpse,3=npc corpse,a
+/*0000*/ uint8_t  unknown0000[5]; // ***Placeholder
+/*0005*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
+/*0006*/ uint8_t  bodytype;       // Bodytype
+/*0007*/ uint8_t  unknown0010[4]; // ***Placeholder
+/*0011*/ uint8_t  NPC;            // 0=player,1=npc,2=pc corpse,3=npc corpse,a
+/*0012*/ float    size;           // Model size
+/*0016*/ char     title[32];      // Player's title
+/*0048*/ uint32_t guildID;        // Current guild
+/*0052*/ uint8_t  invis;          // Invis (0=not, 1=invis)
+/*0053*/ float    walkspeed;      // Speed when walking
+/*0057*/ int16_t  deity;          // Player's Deity
+/*0059*/ uint8_t  unknown0059[2]; // ***Placeholder
+/*0061*/ uint8_t  gender;         // 0=male, 1=female, 2=other
+/*0062*/ uint16_t spawnId;        // Spawn Id
+/*0064*/ uint8_t  unknown0064[6]; // ***Placeholder
+/*0070*/ int8_t   guildrank;      // 0=normal, 1=officer, 2=leader
+/*0071*/ uint8_t  unknown0071[7]; // ***Placeholder
+/*0078*/ signed   deltaX:13;      // change in x
+         signed   y:19;           // y coord
+/*0082*/ signed   deltaY:13;      // change in y
+         signed   z:19;           // z coord
+/*0086*/ signed   deltaHeading:10;// change in heading 
+         signed   heading:12;     // spawn heading 
+         signed   animation:10;   // animation id
+/*0090*/ signed   x:19;           // x coord
+         signed   deltaZ:13;      // change in z
+/*0094*/ uint8_t  unknown0094[4]; // ***Placeholder
+/*0098*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
+/*0130*/ uint8_t  class_;         // Player's class
+/*0131*/ uint8_t  unknown0131[6]; // ***Placeholder
+/*0137*/ uint8_t  light;          // Spawn's lightsource
+/*0138*/ float    runspeed;       // Speed when running
+/*0142*/ uint8_t  unknown0142[6]; // ***Placeholder
+/*0148*/ uint8_t  curHp;          // Current hp
+/*0149*/ uint8_t  findable;       // 0=can't be found, 1=can be found
+/*0150*/ uint8_t  unknown0149[24];// ***Placeholder
+union 
+{
+/*0174*/ int8_t equip_chest2;     // Second place in packet for chest texture (usually 0xFF in live packets)
+                                  // Not sure why there are 2 of them, but it effects chest texture!
+/*0174*/ int8_t mount_color;      // drogmor: 0=white, 1=black, 2=green, 3=red
+                                  // horse: 0=brown, 1=white, 2=black, 3=tan
+};
+/*0175*/ uint8_t  level;          // Spawn Level
+/*0176*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
+/*0177*/ uint8_t  unknown0177[2]; // ***Placeholder
+/*0179*/ union 
+         {
+             struct 
+             {
+               /*0179*/ uint32_t equip_helmet;    // Equipment: Helmet Visual
+               /*0183*/ uint32_t equip_chest;     // Equipment: Chest Visual
+               /*0187*/ uint32_t equip_arms;      // Equipment: Arms Visual
+               /*0191*/ uint32_t equip_bracers;   // Equipment: Bracers Visual
+               /*0195*/ uint32_t equip_hands;     // Equipment: Hands Visual
+               /*0199*/ uint32_t equip_legs;      // Equipment: Legs Visual
+               /*0203*/ uint32_t equip_feet;      // Equipment: Feet Visual
+               /*0207*/ uint32_t equip_primary;   // Equipment: Primary Visual
+               /*0211*/ uint32_t equip_secondary; // Equipment: Secondary Visual
+             } equip;
+             /*0179*/ uint32_t equipment[9];  // Array elements correspond to struct equipment above
+         };
+/*0215*/ union 
+         {
+             struct 
+             {
+                 /*0007*/ Color_Struct color_helmet;    // Color of helmet item
+                 /*0011*/ Color_Struct color_chest;     // Color of chest item
+                 /*0015*/ Color_Struct color_arms;      // Color of arms item
+                 /*0019*/ Color_Struct color_bracers;   // Color of bracers item
+                 /*0023*/ Color_Struct color_hands;     // Color of hands item
+                 /*0027*/ Color_Struct color_legs;      // Color of legs item
+                 /*0031*/ Color_Struct color_feet;      // Color of feet item
+                 /*0035*/ Color_Struct color_primary;   // Color of primary item
+                 /*0039*/ Color_Struct color_secondary; // Color of secondary item
+             } equipment_colors;
+             /*0007*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
+         };
+/*0251*/ char     name[64];        // Player's Name
+/*0315*/ uint32_t petOwnerId;      // If this is a pet, the spawn id of owner
+/*0319*/ uint8_t  afk;             // 0=no, 1=afk
+/*0320*/ uint8_t  unknown0320[2];  // ***Placeholder
+/*0322*/ char     lastName[32];    // Players last name
+/*0354*/ uint8_t  gm;              // 0=no, 1=gm
+/*0355*/ uint8_t  unknown0354[13]; //***Placeholder
+/*0368*/ uint8_t  lfg;             // 0=off, 1=lfg on
+/*0369*/ uint8_t  unknown0369[8];  //***Placeholder
+/*0378*/ uint32_t  race;            // Spawn race
+/*0382*/ uint8_t   unknown0381[2];  //***Placeholder
+/*0383*/
+
+#if 0 // Need placed in spawn struct still... %%%
 /*001*/	int8_t  eyecolor1;			// Player left eye color
 /*002*/	int8_t  eyecolor2;			// Player right eye color
-/*003*/	int8_t  aa_title; // 0=none, 1=general, 2=archtype, 3=class
-/*004*/	int32_t dye_rgb[7]; 			// armor dye colors
-/*032*/ int8_t  unknown001[11]; 
-/*043*/ uint8_t class_;
-/*044*/ char unknown044[2]; // *** Placeholder
-/*046*/ int8_t curHp;
-/*047*/	int8_t afk; // 0=not afk, 1=afk
-union {
-/*048*/	int8_t equip_chest2;// Second place in packet for chest texture (usually 0xFF in live packets)
-// Not sure why there are 2 of them, but it effects chest texture!
-/*048*/	int8_t mount_color;// drogmor: 0=white, 1=black, 2=green, 3=red
-// horse: 0=brown, 1=white, 2=black, 3=tan
-};
-/*049*/ int32_t race; // race
-/*053*/ char    unknown053;
-/*054*/ char    name[64]; // name
+
 /*118*/ uint8_t haircolor; // hair color
-/*119*/ uint8_t unknown119; 
-/*120*/ uint8_t invis; // 0=visible,1=invisible
+
 /*121*/ int8_t  maxHp; // max hp
 /*122*/ uint8_t pvp; // 0=Not pvp,1=pvp
-/*123*/ uint8_t level;
-/*124*/ uint8_t lfg; // 0=Not lfg,1=lfg
-/*125*/ uint16_t heading; // spawn heading
-/*127*/ uint8_t  deltaHeading; // change in heading
-/*128*/ uint8_t animation; // animation id
-/*129*/ signed  deltaX:13;
-        signed  x:19;
-/*133*/ signed  y:19;
-        signed  deltaZ:13;
-/*137*/ signed  deltaY:13;
-        signed  z:19;
+
 /*141*/ int8_t	beardcolor;
 /*142*/ int8_t	hairstyle;
 /*143*/ int8_t	face;
-/*144*/ int8_t	unknown144[6]; 
-/*150*/ uint8_t light; // LightSource 0a=bo and ls, 0b=gls, 0c=fbe
-/*151*/ float   size; // Size
+
 /*155*/ uint8_t helm;
-/*156*/ float   runspeed; //
-/*160*/ uint8_t gm; // 0=not GM,1=GM
-/*161*/ float   walkspeed; //
-/*165*/ uint32_t guildID; // GuildID
-/*169*/ uint8_t anon; // 0=normal,1=anon,2=roleplaying
-/*170*/ uint8_t gender; // 0=male,1=female,2=other
-/*171*/ uint16_t spawnId; // Id of spawn
-/*173*/ char    unknown173[3];
-/*176*/ char    lastName[32]; // lastname
-/*208*/ int32_t equipment[9];
-/*244*/ uint8_t linkdead; // 0=Not LD, 1=LD
-/*245*/ uint32_t bodytype; // Bodytype
-/*249*/	int8_t	guild_rank;
-/*250*/ int8_t	unknown249[4]; 
-/*254*/ uint32_t petOwnerId;
-/*258*/ int16_t deity;
-/*260*/ uint8_t unknown260[119];
-/*375*/
+#endif
+};
+
+/*
+** Server Zone Entry struct
+** Length: 383 Octets
+** OpCode: ZoneEntryCode (when direction == server)
+*
+*  This is just a spawnStruct for the player
+*/
+struct ServerZoneEntryStruct : public spawnStruct
+{
 };
 
 /*
@@ -1536,16 +1510,15 @@ struct moneyOnCorpseStruct
 
 /*
 ** Stamina
-** Length: 12 Octets
+** Length: 8 Octets
 ** OpCode: staminaCode
 */
 
 struct staminaStruct 
 {
-/*0000*/ uint32_t food;                     // (low more hungry 127-0)
-/*0004*/ uint32_t water;                    // (low more thirsty 127-0)
-/*0008*/ uint32_t fatigue;                  // (high more fatigued 0-100)
-/*0012*/
+/*0000*/ uint32_t food;                     // Hunger, in ticks till next eat
+/*0004*/ uint32_t water;                    // Thirst, in ticks till next eat
+/*0008*/
 };
 
 /*
@@ -1859,44 +1832,50 @@ struct randomStruct
 
 /*
 ** Player Position Update
-** Length: 20 Octets
+** Length: 22 Octets
 ** OpCode: PlayerPosCode
 */
 
 struct playerSpawnPosStruct
 {
 /*0000*/ uint16_t spawnId;
-/*0002*/ unsigned heading:12;
-         signed   deltaHeading:10;
-         unsigned animation:10;
-/*0006*/ signed   deltaX:13;
-         signed   x:19;
-/*0010*/ signed   y:19;
-         signed   deltaZ:13;
-/*0014*/ signed   deltaY:13;
+/*0002*/ uint8_t  unknown016[4];
+/*0010*/ signed   deltaX:13;
+         signed   y:19;
+/*0006*/ signed   deltaY:13;
          signed   z:19;
-/*0018*/
+/*0014*/ signed   deltaHeading:10;
+         unsigned animation:10;
+         unsigned heading:12;
+/*0018*/ signed   x:19;
+         signed   deltaZ:13;
+/*0022*/
 };
 
 /*
 ** Self Position Update
-** Length: 30 Octets
+** Length: 36 Octets
 ** OpCode: PlayerPosCode
 */
 
 struct playerSelfPosStruct
 {
-/*0000*/ uint16_t spawnId;
-/*0002*/ float z;
-/*0006*/ float y;
-/*0010*/ float deltaY;
-/*0014*/ float x;
-/*0018*/ float deltaX;
-/*0022*/ float deltaZ;
-/*0026*/ unsigned heading:12;
-         signed deltaHeading:10;
-         unsigned animation:10;
-/*0030*/
+/*0000*/ uint16_t spawnId;        // Player's spawn id
+/*0002*/ uint8_t unknown0002[2];  // ***Placeholder (update time counter?)
+/*0004*/ unsigned heading:12;     // Directional heading
+         unsigned padding0004:4;  // ***Placeholder
+/*0006*/ uint8_t unknown0006[2];  // ***Placeholder
+/*0008*/ float deltaY;            // Change in y
+/*0012*/ float x;                 // x coord
+/*0016*/ float deltaX;            // Change in x
+/*0020*/ signed deltaHeading:10;  // Change in heading
+         unsigned padding0020:6;  // ***Placeholder (speed?)
+         unsigned padding0022:6;  // ***Placeholder
+/*0022*/ unsigned animation:10;   // %%% wrong
+/*0024*/ float z;                 // z coord
+/*0028*/ float y;                 // y coord
+/*0032*/ float deltaZ;            // Change in z
+/*0036*/
 };
 
 
@@ -2056,7 +2035,7 @@ struct clientLFGStruct
 
 /*
 ** buffStruct
-** Length: 28 Octets
+** Length: 32 Octets
 ** 
 */
 
@@ -2067,9 +2046,10 @@ struct buffStruct
 /*0008*/ uint32_t spellid;        // spellid
 /*0012*/ uint32_t duration;       // duration
 /*0016*/ uint8_t  unknown0012[4];
-/*0020*/ uint32_t spellslot;      // spellslot
-/*0024*/ uint32_t changetype;     // 1=buff fading,2=buff duration
-/*0028*/
+/*0020*/ uint32_t playerId;       // Player id who cast the buff
+/*0024*/ uint32_t spellslot;      // spellslot
+/*0028*/ uint32_t changetype;     // 1=buff fading,2=buff duration
+/*0032*/
 };
 
 /*

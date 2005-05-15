@@ -2,15 +2,20 @@ Version: $Id$ $Name$
 
 purple (05/11/05)
 ----------------------
++ Updated version to 5.0.0.21
 + Added some session-related opcodes to worldopcodes.xml
 + Fixed opcodes for alt exp and hooked altExpUpdateStruct so alt exp updating
 	maps properly
-+ Made is so OP_ManaChange can be 0 size. Bards have this a lot.
++ Made it so OP_ManaChange can be 0 size. Bards have this a lot.
 + Fix problems with guilds numbered higher than 512
 + Added unknown world data to the unknown log
 + Fixed the skills window to properly show skills > 252
 + Show strings in the spawnlist as utf8 properly
 + Valgrind cleanup for some uninitialized references and minor memory leaks
++ All opcodes remapped for 5/11 patch
++ Structs updated for 5/11 patch
++ Added some new pseudo-classes to classes.h
++ Rehooked up stamina changes after removing stamina (only food/drink now)
 
 dophaZ (04/17/05)
 -----------------------
