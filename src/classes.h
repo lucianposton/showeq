@@ -72,5 +72,7 @@
   "LDoN Object",        // 62
   "Tribute Master",     // 63
   "Guild Tribute Master", // 64
+  NULL,                 // 65
+  "Guild Banker",       // 66
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
