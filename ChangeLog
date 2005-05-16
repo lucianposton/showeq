@@ -1,5 +1,9 @@
 Version: $Id$ $Name$
 
+purple (05/15/05)
+---------------------
++ Found OP_SpawnRename again. It's used to rename the Bristlebane jesters
+
 purple (05/11/05)
 ----------------------
 + Updated version to 5.0.0.21

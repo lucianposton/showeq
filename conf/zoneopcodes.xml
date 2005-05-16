@@ -21,10 +21,6 @@
         <comment>old CorpseLocCode:</comment>
         <payload dir="server" typename="corpseLocStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0b8b" name="OP_SpawnRename" updated="02/15/05">
-        <comment>Spawns getting renamed after initial NewSpawn</comment>
-        <payload dir="server" typename="spawnRenameStruct" sizechecktype="match"/>
-    </opcode>
 
 
 <!-- OLD OPCODES. These haven't been mapped in a post 1/26/2005 world. If you
@@ -747,5 +743,9 @@
     <opcode id="0430" name="OP_SkillUpdate" updated="05/11/05">
         <comment>old SkillIncCode</comment>
         <payload dir="server" typename="skillIncStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="5958" name="OP_SpawnRename" updated="05/11/05">
+        <comment>Spawns getting renamed after initial NewSpawn</comment>
+        <payload dir="server" typename="spawnRenameStruct" sizechecktype="match"/>
     </opcode>
 </seqopcodes>
