@@ -564,7 +564,25 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
 #endif
         
         // Opcode is next. Net opcode or app opcode?
-        if (IS_NET_OPCODE(subOpCode))
+        if (subOpCode == 0)
+        {
+          // App opcode < 0x00ff. Skip the first byte and dispatch the app
+          // opcode appropriately
+          subpacket++;
+
+          subOpCode = *(uint16_t*)subpacket;
+
+#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
+          seqDebug("EQPacket: processing unrolled special app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %04x", 
+            subpacketLength-3, EQStreamStr[m_streamid], m_streamid, subOpCode);
+#endif
+
+          // App opcode. Dispatch it, skipping opcode.
+          dispatchPacket(&subpacket[2], subpacketLength-2, 
+            subOpCode, m_opcodeDB.find(subOpCode));
+
+        }
+        else if (IS_NET_OPCODE(subOpCode))
         {
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
           seqDebug("EQPacket: processing unrolled net opcode, length %d bytes from combined packet on stream %s (%d). Opcode %04x", 
@@ -616,6 +634,15 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           // Dispatch app op code using given packet length. Net order!
           uint16_t subOpCode = *(uint16_t*)(subpacket);
 
+          // Handle 3 byte opcodes properly
+          if (subOpCode == 0)
+          {
+            // 3 byte opcode. Drop the first byte, opcode is byte 2 and 3
+            subpacket++;
+            subpacketLength--;
+            subOpCode = *(uint16_t*)(subpacket);
+          }
+
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
         seqDebug("EQPacket: unrolling length %d bytes from combined packet on stream %s (%d). Opcode %04x", 
           subpacketLength, EQStreamStr[m_streamid], m_streamid, subOpCode);
@@ -641,6 +668,15 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
 
           // OpCode next. Net order for op codes.
           uint16_t subOpCode = *(uint16_t*)subpacket;
+
+          // Handle 3 byte opcodes properly
+          if (subOpCode == 0)
+          {
+            // 3 byte opcode. Drop the first byte, opcode is byte 2 and 3
+            subpacket++;
+            longOne--;
+            subOpCode = *(uint16_t*)(subpacket);
+          }
           
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
         seqDebug("EQPacket: unrolling length %d bytes from combined packet on stream %s (%d). Opcode %04x", 
@@ -681,8 +717,24 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           packet.getNetOpCode(), subOpCode);
 #endif
 
-        // App opcode or net opcode?
-        if (IS_NET_OPCODE(subOpCode))
+        // Opcode is next. Net opcode or app opcode?
+        if (subOpCode == 0)
+        {
+          // App opcode < 0x00ff. Skip the first byte and dispatch the app
+          // opcode appropriately
+          subOpCode = *(uint16_t*)&packet.payload()[1];
+
+#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
+          seqDebug("EQPacket: special app opcode extracted for opcode 0000 on stream %s (%d). Opcode %04x", 
+            EQStreamStr[m_streamid], m_streamid, subOpCode);
+#endif
+
+          // App opcode. Dispatch it, skipping opcode.
+          dispatchPacket(&packet.payload()[3], packet.payloadLength()-3, 
+            subOpCode, m_opcodeDB.find(subOpCode));
+
+        }
+        else if (IS_NET_OPCODE(subOpCode))
         {
           // Net opcode. false = no copy. true = subpacket.
           EQProtocolPacket spacket(packet.payload(), 
@@ -754,8 +806,24 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
 #endif
 
           // dispatch fragment. Skip opcode.
-          dispatchPacket(&m_fragment.data()[2], m_fragment.size()-2,
-            fragOpCode, m_opcodeDB.find(fragOpCode)); 
+          if (fragOpCode == 0)
+          {
+            // Special app opcode. Skip first byte and op is byte 2 and 3.
+            fragOpCode = *(uint16_t*)(&m_fragment.data()[1]);
+
+#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
+            seqDebug("EQPacket: special app opcode on completed fragment for opcode 0000 on stream %s (%d). Opcode %04x", 
+            EQStreamStr[m_streamid], m_streamid, fragOpCode);
+#endif
+
+            dispatchPacket(&m_fragment.data()[3], m_fragment.size()-3,
+              fragOpCode, m_opcodeDB.find(fragOpCode)); 
+          }
+          else
+          {
+            dispatchPacket(&m_fragment.data()[2], m_fragment.size()-2,
+              fragOpCode, m_opcodeDB.find(fragOpCode)); 
+          }
 
           m_fragment.reset();
         }

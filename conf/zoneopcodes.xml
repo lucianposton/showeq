@@ -632,7 +632,7 @@
         <comment>old RandomCode</comment>
         <payload dir="server" typename="randomStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="1700" name="OP_DenyResponse" updated="05/11/05">
+    <opcode id="3c00" name="OP_DenyResponse" updated="05/11/05">
         <comment>Server replying with deny information after /deny</comment>
         <payload dir="server" typename="consentResponseStruct" sizechecktype="match"/>
     </opcode>
