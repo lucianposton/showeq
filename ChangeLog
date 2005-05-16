@@ -1,8 +1,10 @@
 Version: $Id$ $Name$
 
-purple (05/15/05)
+purple (05/16/05)
 ---------------------
 + Found OP_SpawnRename again. It's used to rename the Bristlebane jesters
++ Fixed problem in net layer where opcodes were showing up as 0000. Treat 0000
+	as a special case where the app opcode is on the wire next.
 
 purple (05/11/05)
 ----------------------
