@@ -1,10 +1,12 @@
 Version: $Id$ $Name$
 
-purple (05/16/05)
+purple (05/18/05)
 ---------------------
++ Updated version to 5.0.0.22
 + Found OP_SpawnRename again. It's used to rename the Bristlebane jesters
 + Fixed problem in net layer where opcodes were showing up as 0000. Treat 0000
-	as a special case where the app opcode is on the wire next.
+	as a special case where the app opcode is 00 + next byte on the wire
++ Fixed to work with patch on 05/18/2005 by bumping MAX_AA to 240
 
 purple (05/11/05)
 ----------------------
