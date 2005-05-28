@@ -789,12 +789,9 @@ void displayOptions(const char* progName)
   printf ("  -c, --use-retarded-coords             Use \"retarded\" YXZ coordinates\n");
   printf ("  -F, --fast-machine                    Fast machine - perform more accurate vs. \n");
   printf ("                                        less accurate calculations.\n");
-  printf ("                                        spawn matching\n");
   printf ("  -K, --create-unknown-spawns           create unknown spawns\n");
   printf ("  -S, --select-on-consider              Select the spawn considered\n");
   printf ("  -e, --select-on-target                Select the spawn targetted\n");
-  printf ("                                        mode (Don't process packets bound for\n");
-  printf ("                                        other machines).\n");
   printf ("  -N, --show-packet-numbers             Show network info dialog\n");
   printf ("  -j, --playback-file=FILENAME          Playback packets in FILENAME, previously\n");
   printf ("                                        recorded with -g option\n");
@@ -817,7 +814,7 @@ void displayOptions(const char* progName)
   printf ("      --zone-log-filename=FILE          Use FILE for above packet logging\n");
   printf ("      --log-unknown-zone                Log only unrecognized zone data\n");
   printf ("      --unknown-zone-log-filename=FILE  Use FILE for above packet logging\n");
-  printf ("      --log-raw                   Log some unprocessed raw data\n");
+  printf ("      --log-raw                         Log some unprocessed raw data\n");
   printf ("      --spawnlog-filename=FILE          Use FILE instead of spawnlog.txt\n");
   printf ("      --itemdb-data-filename=FILE       Use FILE instead of itemdata\n");
   printf ("      --itemdb-raw-data-filename=FILE   Use FILE instead of itemrawdata\n");

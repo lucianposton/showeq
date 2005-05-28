@@ -6,6 +6,7 @@ purple (05/27/05)
 + Strip the # off names before matching to filters to aid in filter writing
 + Strip the # off the strong of filters as well just to make the # irrevelant
 	to filters (thanks BlueAdept for both these)
++ Cleaned up the help spew for --help. There were some bogus things in there.
 
 purple (05/18/05)
 ---------------------
