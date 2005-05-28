@@ -860,10 +860,26 @@ QString Spawn::typeString() const
 
 QString Spawn::filterString() const
 {
+  QString name = transformedName();
+
+  // For the spawn name, remove the # off the front if it is there. This is
+  // because only some mobs have #, but there's no real rule to where it is
+  // there or not. To ease in filter writing, we just remove it before 
+  // filtering, so you don't have to see the spawn in seq before writing a
+  // filter for it.
+  //
+  // If this turns out too slow, we could always cache the name without the #
+  // I guess, but transformedName already does string manipulation without
+  // caching, so what's another only if there's a # at the start *wink*
+  if (name.startsWith("#"))
+  {
+    name = name.mid(1);
+  }
+
   QString buff;
   buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
 	       "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:",
-	       (const char*)transformedName().utf8(),
+	       (const char*)name.utf8(),
 	       level(),
 	       (const char*)raceString(),
 	       (const char*)classString(),

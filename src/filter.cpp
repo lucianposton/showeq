@@ -213,13 +213,13 @@ bool FilterItem::isFiltered(const QString& filterString, uint8_t level) const
     {
       if (m_maxLevel != m_minLevel)
       {
-	if ((level >= m_minLevel) && (level <= m_maxLevel))
-	  return true; // filter matched
+        if ((level >= m_minLevel) && (level <= m_maxLevel))
+          return true; // filter matched
       }
       else
       {
-	if (level == m_minLevel)
-	  return true;
+        if (level == m_minLevel)
+         return true;
       }
     }
     else 
@@ -331,17 +331,27 @@ Filter::addFilter(const QString& filterPattern)
 {
   FilterItem* re;
 
+  // Take the # off the front of the filters.
+  // 
+  // This is showeq specific, since EQ puts #'s in front of some
+  // special mobs, but without being in the zone, it's hard to tell what
+  // has a # and what doesn't. In order to ease in filter writing, just
+  // strip it off here, and we'll strip it off the spawn names before matching
+  // too.
+  QString fixedFilterPattern = filterPattern;
+  fixedFilterPattern.replace("Name:#", "Name:", false);
+
   // no duplicates allowed
-  if (findFilter(filterPattern))
+  if (findFilter(fixedFilterPattern))
     return false;
 
-  re = new FilterItem(filterPattern, m_caseSensitive);
+  re = new FilterItem(fixedFilterPattern, m_caseSensitive);
 
   // append it to the end of the list
   m_filterItems.append(re);
 
 #ifdef DEBUG_FILTER
-  seqDebug("Added Filter '%s'", (const char*)filterPattern);
+  seqDebug("Added Filter '%s'", (const char*)fixedFilterPattern);
 #endif
 
  return re->valid(); 
@@ -352,18 +362,28 @@ Filter::addFilter(const QString& filterPattern, uint8_t minLevel, uint8_t maxLev
 {
   FilterItem* re;
 
+  // Take the # off the front of the filters for name.
+  //
+  // This is showeq specific, since EQ puts #'s in front of some
+  // special mobs, but without being in the zone, it's hard to tell what
+  // has a # and what doesn't. In order to ease in filter writing, just
+  // strip it off here, and we'll strip it off the spawn names before matching
+  // too.
+  QString fixedFilterPattern = filterPattern;
+  fixedFilterPattern.replace("Name:#", "Name:", false);
+  
   // no duplicates allowed
-  if (findFilter(filterPattern))
+  if (findFilter(fixedFilterPattern))
     return false;
 
-  re = new FilterItem(filterPattern, m_caseSensitive, minLevel, maxLevel);
+  re = new FilterItem(fixedFilterPattern, m_caseSensitive, minLevel, maxLevel);
 
   // append it to the end of the list
   m_filterItems.append(re);
 
 #ifdef DEBUG_FILTER
   seqDebug("Added Filter '%s' (%d, %d)",
-	   (const char*)filterPattern, minLevel, maxLevel);
+	   (const char*)fixedFilterPattern, minLevel, maxLevel);
 #endif
 
  return re->valid(); 
