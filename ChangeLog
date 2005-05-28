@@ -1,5 +1,9 @@
 Version: $Id$ $Name$
 
+purple (05/27/05)
+---------------------
++ Swapped heading and deltaHeading in spawnStruct (thanks Doodman)
+
 purple (05/18/05)
 ---------------------
 + Updated version to 5.0.0.22

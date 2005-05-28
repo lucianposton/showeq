@@ -539,7 +539,7 @@ struct newZoneStruct
 
 /*
 ** Player Profile
-** Length: 18496 Octets
+** Length: 19560 Octets
 ** OpCode: CharProfileCode
 */
 struct charProfileStruct
@@ -880,8 +880,8 @@ struct spawnStruct
          signed   y:19;           // y coord
 /*0082*/ signed   deltaY:13;      // change in y
          signed   z:19;           // z coord
-/*0086*/ signed   deltaHeading:10;// change in heading 
-         signed   heading:12;     // spawn heading 
+/*0086*/ signed   heading:12;     // spawn heading 
+         signed   deltaHeading:10;// change in heading 
          signed   animation:10;   // animation id
 /*0090*/ signed   x:19;           // x coord
          signed   deltaZ:13;      // change in z
@@ -1869,8 +1869,8 @@ struct playerSelfPosStruct
 /*0016*/ float deltaX;            // Change in x
 /*0020*/ signed deltaHeading:10;  // Change in heading
          unsigned padding0020:6;  // ***Placeholder (speed?)
-         unsigned padding0022:6;  // ***Placeholder
-/*0022*/ unsigned animation:10;   // %%% wrong
+/*0022*/ unsigned padding0022:6;  // ***Placeholder
+         unsigned animation:10;   // %%% wrong
 /*0024*/ float z;                 // z coord
 /*0028*/ float y;                 // y coord
 /*0032*/ float deltaZ;            // Change in z
