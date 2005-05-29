@@ -585,7 +585,7 @@ void Player::updateAltExp(const uint8_t* data)
   else
     expIncrement = 0;
    */
-  uint32_t realExp = altexp->altexp * (15000000 / 33000);
+  uint32_t realExp = altexp->altexp * (15000000 / 330);
   uint32_t expIncrement;
 
   if (realExp > m_currentExp)

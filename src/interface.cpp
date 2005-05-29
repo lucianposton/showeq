@@ -4306,10 +4306,13 @@ void EQInterface::setExp(uint32_t totalExp, uint32_t totalTick,
 			  uint32_t tickExpLevel)
 {
   if (m_stsbarExp)
-    m_stsbarExp->setText(QString("Exp: %1; %2 (%3/330); 1/330 = %4")
-			 .arg(Commanate(totalExp))
-			 .arg(Commanate(totalExp - minExpLevel))
-			 .arg(totalTick).arg(tickExpLevel));
+  {
+    char expperc[5];
+    sprintf(expperc, "%.2f", totalTick*100.0/330.0);
+
+    m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")
+      .arg(Commanate(totalExp)).arg(totalTick).arg(expperc));
+  }
 }
 
 void EQInterface::newExp(uint32_t newExp, uint32_t totalExp, 
@@ -4333,10 +4336,13 @@ void EQInterface::newExp(uint32_t newExp, uint32_t totalExp,
 			      .arg(needKills));
 
     if (m_stsbarExp)
-      m_stsbarExp->setText(QString("Exp: %1; %2 (%3/330) [%4]")
-			   .arg(Commanate(totalExp))
-			   .arg(Commanate(intoExp))
-			   .arg(totalTick).arg(needKills));
+    {
+      char expperc[5];
+      sprintf(expperc, "%.2f", totalTick*100.0/330.0);
+
+      m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")
+        .arg(Commanate(totalExp)).arg(totalTick).arg(expperc));
+    }
   }
   else
   {
@@ -4347,10 +4353,13 @@ void EQInterface::newExp(uint32_t newExp, uint32_t totalExp,
 			      .arg(totalTick).arg(Commanate(leftExp)));
 
     if (m_stsbarExp)
-      m_stsbarExp->setText(QString("Exp: %1; %2 (%3/330)")
-			   .arg(Commanate(totalExp))
-			   .arg(Commanate(intoExp))
-			   .arg(totalTick));
+    {
+      char expperc[5];
+      sprintf(expperc, "%.2f", totalTick*100.0/330.0);
+
+      m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")
+        .arg(Commanate(totalExp)).arg(totalTick).arg(expperc));
+    }
   }
 }
 
@@ -4370,7 +4379,7 @@ void EQInterface::newAltExp(uint32_t newExp, uint32_t totalExp,
   if (m_stsbarExpAA)
   {
     char aaperc[5];
-    sprintf(aaperc, "%.2f", totalExp*100.0/maxExp);
+    sprintf(aaperc, "%.2f", totalTick*100.0/330.0);
 
     m_stsbarExpAA->setText(QString("ExpAA: %1 (%2/330, %3%)")
         .arg(Commanate(totalExp)).arg(totalTick).arg(aaperc));
