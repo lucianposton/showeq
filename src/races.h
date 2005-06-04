@@ -411,7 +411,7 @@
     "Invader Soldier Elite",  // 402
     "UNKNOWN RACE",           // 403
     "Discord Ship",           // 404
-    NULL,                     // 405
+    "Discord Golem",          // 405
     NULL,                     // 406
     "Lightning Armor",        // 407
     NULL,                     // 408

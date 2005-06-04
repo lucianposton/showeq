@@ -8,6 +8,8 @@ purple (05/27/05)
 	to filters (thanks BlueAdept for both these)
 + Cleaned up the help spew for --help. There were some bogus things in there.
 + Cleaned up the status bar exp/aa exp display
++ Fixed positioning in playerSpawnPosUpdate. Changed deltaZ and heading
+	so they are correct now (thanks Doodman)
 
 purple (05/18/05)
 ---------------------

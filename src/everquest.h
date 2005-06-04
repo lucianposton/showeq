@@ -1838,16 +1838,18 @@ struct randomStruct
 struct playerSpawnPosStruct
 {
 /*0000*/ uint16_t spawnId;
-/*0002*/ uint8_t  unknown016[4];
-/*0010*/ signed   deltaX:13;
-         signed   y:19;
-/*0006*/ signed   deltaY:13;
-         signed   z:19;
-/*0014*/ signed   deltaHeading:10;
+/*0002*/ signed   deltaZ:13;
          unsigned animation:10;
-         unsigned heading:12;
+         signed   padding0002:9;
+/*0006*/ signed   deltaX:13;
+         signed   y:19;
+/*0010*/ signed   deltaY:13;
+         signed   z:19;
+/*0014*/ unsigned heading:12;
+         signed   deltaHeading:10;
+         unsigned padding0014:10;
 /*0018*/ signed   x:19;
-         signed   deltaZ:13;
+         signed   padding0018:13;
 /*0022*/
 };
 
