@@ -688,6 +688,33 @@ void SpawnShell::renameSpawn(const uint8_t* data)
     }
 }
 
+void SpawnShell::illusionSpawn(const uint8_t* data)
+{
+    const spawnIllusionStruct* illusion = (const spawnIllusionStruct*)data;
+#ifdef SPAWNSHELL_DIAG
+    seqDebug("SpawnShell::illusionSpawn(id=%d, name=%s, new race=%d)",
+             illusion->spawnId, illusion->name, illusion->race);
+#endif
+    
+    const Item* item = findID(tSpawn, illusion->spawnId);
+
+    if (item != NULL)
+    {
+        Spawn* spawn = (Spawn*) item;
+
+        // Update what we can
+        spawn->setGender(illusion->gender);
+        spawn->setRace(illusion->race);
+
+        spawn->updateLastChanged();
+        emit changeItem(spawn, tSpawnChangedALL);
+    }
+    else
+    {
+        seqWarn("SpawnShell: tried to illusion %s (id=%d) to race %d, but the mob didn't exist in the spawn list", illusion->name, illusion->spawnId, illusion->race);
+    }
+}
+
 void SpawnShell::updateSpawnAppearance(const uint8_t* data)
 {
     const spawnAppearanceStruct* app = (const spawnAppearanceStruct*)data;
@@ -701,6 +728,7 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
    if (item != NULL)
    {
        Spawn* spawn = (Spawn*)item;
+
        switch(app->type) 
        {
            case 1: // level update

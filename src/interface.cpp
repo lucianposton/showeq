@@ -2008,6 +2008,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_SpawnRename", SP_Zone, DIR_Server,
 		      "spawnRenameStruct", SZC_Match,
 		      m_spawnShell, SLOT(renameSpawn(const uint8_t*)));
+   m_packet->connect2("OP_Illusion", SP_Zone, DIR_Server|DIR_Client,
+		      "spawnIllusionStruct", SZC_Match,
+		      m_spawnShell, SLOT(illusionSpawn(const uint8_t*)));
    m_packet->connect2("OP_SpawnAppearance", SP_Zone, DIR_Server|DIR_Client,
 		      "spawnAppearanceStruct", SZC_Match,
 		      m_spawnShell, SLOT(updateSpawnAppearance(const uint8_t*)));
@@ -4320,7 +4323,6 @@ void EQInterface::newExp(uint32_t newExp, uint32_t totalExp,
 			 uint32_t minExpLevel, uint32_t maxExpLevel, 
 			 uint32_t tickExpLevel)
 {
-  uint32_t intoExp = totalExp - minExpLevel;
   uint32_t leftExp = maxExpLevel - totalExp;
 
   if (newExp)

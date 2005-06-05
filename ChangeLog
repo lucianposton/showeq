@@ -1,6 +1,6 @@
 Version: $Id$ $Name$
 
-purple (05/27/05)
+purple (06/04/05)
 ---------------------
 + Swapped heading and deltaHeading in spawnStruct (thanks Doodman)
 + Strip the # off names before matching to filters to aid in filter writing
@@ -10,6 +10,8 @@ purple (05/27/05)
 + Cleaned up the status bar exp/aa exp display
 + Fixed positioning in playerSpawnPosUpdate. Changed deltaZ and heading
 	so they are correct now (thanks Doodman)
++ Added struct for OP_Illusion and a spawnshell handler so that illusions
+	are propagated to the spawn list and the map
 
 purple (05/18/05)
 ---------------------

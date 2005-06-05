@@ -1146,6 +1146,24 @@ struct spawnRenameStruct
 /*196*/	uint32_t	unknown196;	        //set to 1
 };
 
+/*
+** Illusion a spawn
+** Length: 168 Octets
+** OpCode: Illusion
+*/
+struct spawnIllusionStruct
+{
+/*0000*/ uint32_t   spawnId;            // Spawn id of the target
+/*0004*/ char       name[64];           // Name of the target
+/*0068*/ uint32_t   race;               // New race
+/*0072*/ uint8_t    gender;             // New gender (0=male, 1=female)
+/*0073*/ uint8_t    texture;            // ???
+/*0074*/ uint8_t    helm;               // ???
+/*0075*/ uint8_t    unknown0077;        // ***Placeholder
+/*0076*/ uint32_t   face;               // New face
+/*0080*/ uint8_t    unknown0082[88];    // ***Placeholder
+};
+
 
 /*
 **                 ShowEQ Specific Structures

@@ -114,6 +114,7 @@ public slots:
    void updateSpawns(const uint8_t* updates);
    void updateSpawnInfo(const uint8_t* spawnupdate);
    void renameSpawn(const uint8_t* renameupdate);
+   void illusionSpawn(const uint8_t* illusionupdate);
    void updateSpawnAppearance(const uint8_t* appearanceupdate);
    void updateNpcHP(const uint8_t* hpupdate);
    void spawnWearingUpdate(const uint8_t* wearing);

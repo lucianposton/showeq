@@ -577,8 +577,8 @@
         <comment></comment>
     </opcode>
     <opcode id="19d8" name="OP_Illusion" updated="05/11/05">
-        <comment>old IllusionCode</comment>
-        <payload dir="both" typename="uint8_t" sizechecktype="none"/>
+        <comment>Spawn being illusioned (changing forms)</comment>
+        <payload dir="both" typename="spawnIllusionStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="76b4" name="OP_AckPacket" updated="05/11/05">
         <comment>Appears to be generic ack at the presentation level</comment>
