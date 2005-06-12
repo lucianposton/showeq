@@ -421,10 +421,46 @@
     "Chimera",                // 412
     "Dragorn",                // 413
     "Murkglider",             // 414
-    NULL,                     // 415
-    NULL,                     // 416
+    "Rat",                    // 415
+    "Bat",                    // 416
     "Gelidran",               // 417
     "Discordling",            // 418
     "Girplan",                // 419
+    NULL,                     // 420
+    NULL,                     // 421
+    NULL,                     // 422
+    NULL,                     // 423
+    NULL,                     // 424
+    NULL,                     // 425
+    NULL,                     // 426
+    NULL,                     // 427
+    "Nest",                   // 428
+    NULL,                     // 429
+    "Drake",                  // 430
+    "Dervish",                // 431
+    "Drake",                  // 432
+    "Goblin",                 // 433
+    NULL,                     // 434
+    NULL,                     // 435
+    "Basilisk",               // 436
+    NULL,                     // 437
+    "Yar'Lir",                // 438
+    NULL,                     // 439
+    "Spider",                 // 440
+    "Spider",                 // 441
+    NULL,                     // 442
+    NULL,                     // 443
+    NULL,                     // 444
+    NULL,                     // 445
+    NULL,                     // 446
+    NULL,                     // 447
+    NULL,                     // 448
+    "Cocoon",                 // 449
+    "Spider",                 // 450
+    NULL,                     // 451
+    NULL,                     // 452
+    NULL,                     // 453
+    NULL,                     // 454
+    "Kobold",                 // 455
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
