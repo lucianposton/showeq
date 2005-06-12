@@ -5,14 +5,6 @@
      handlers. These need to be refound again, but we'd see errors if they
      were commented out. If you're looking for opcodes, find these first
      if you're so inclined! -->
-    <opcode id="016a" name="OP_Logout" updated="05/26/04">
-        <comment></comment>
-        <payload dir="server" typename="none" sizechecktype="match"/>
-    </opcode>
-    <opcode id="0078" name="OP_LevelUpdate" updated="05/26/04">
-        <comment>old LevelUpUpdateCode</comment>
-        <payload dir="server" typename="levelUpUpdateStruct" sizechecktype="match"/>
-    </opcode>
     <opcode id="003e" name="OP_MobUpdate" implicitlen="12" updated="05/26/04">
         <comment>old MobUpdateCode</comment>
         <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
@@ -747,5 +739,13 @@
     <opcode id="5958" name="OP_SpawnRename" updated="05/11/05">
         <comment>Spawns getting renamed after initial NewSpawn</comment>
         <payload dir="server" typename="spawnRenameStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="0455" name="OP_LevelUpdate" updated="05/11/05">
+        <comment>old LevelUpUpdateCode</comment>
+        <payload dir="server" typename="levelUpUpdateStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="016a" name="OP_Logout" updated="05/26/04">
+        <comment></comment>
+        <payload dir="server" typename="none" sizechecktype="match"/>
     </opcode>
 </seqopcodes>
