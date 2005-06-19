@@ -261,7 +261,7 @@ void EQPacketStream::processCache()
     // one yet...
     while(it == m_cache.end())
     {
-      seqDebug("SEQ: Giving up on finding arq %04x in stream %s cache, skipping!",
+      seqWarn("SEQ: Giving up on finding arq %04x in stream %s cache, skipping!",
 	     m_arqSeqExp, EQStreamStr[m_streamid]);
       
       // incremente the expected arq sequence number

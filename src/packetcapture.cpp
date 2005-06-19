@@ -12,9 +12,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <netinet/ip.h>
+#include <netinet/udp.h>
+#include <netinet/if_ether.h>
+#include <arpa/inet.h>
 
 #include "packetcapture.h"
 #include "diagnosticmessages.h"
+
+//#define PCAP_DEBUG 1
   
 //----------------------------------------------------------------------
 // PacketCaptureThread
@@ -229,6 +235,45 @@ void PacketCaptureThread::packetCallBack(u_char * param,
     pc->len = ph->len;
     memcpy (pc->data, data, ph->len);
     pc->next = NULL;
+
+#ifdef PCAP_DEBUG
+    struct ether_header* ethHeader = (struct ether_header*) data;
+
+    if (ntohs(ethHeader->ether_type) == ETHERTYPE_IP)
+    {
+        struct ip* ipHeader = 
+            (struct ip*) (data + sizeof(struct ether_header));
+
+        char src[128];
+        strcpy(src, inet_ntoa(ipHeader->ip_src));
+        char dst[128];
+        strcpy(dst, inet_ntoa(ipHeader->ip_dst));
+
+        if (ipHeader->ip_p == IPPROTO_UDP)
+        {
+            struct udphdr* udpHeader = 
+                (struct udphdr*) (data + sizeof(struct ip) + sizeof(struct ether_header));
+
+            printf("recv(%d): %s:%d -> %s:%d (size: %d)\n",
+                    ipHeader->ip_p,
+                    src,
+                    ntohs(udpHeader->source),
+                    dst,
+                    ntohs(udpHeader->dest),
+                    ph->len);
+        }
+        else
+        {
+            printf("Non-UDP traffic %s -> %s\n",
+                    inet_ntoa(ipHeader->ip_src),
+                    inet_ntoa(ipHeader->ip_dst));
+        }
+    }
+    else
+    {
+        printf("Non-IP packet...\n");
+    }
+#endif
 
     // Throttle offline playback properly if applicable.
     int speed = myThis->m_playbackSpeed;

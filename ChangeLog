@@ -14,6 +14,7 @@ purple (06/12/05)
 	are propagated to the spawn list and the map
 + Filled in some missing races with artificial names not taken from the
 	.exe (thanks uRit1u2CBBA=)
++ Added two known bugs to BUGS with descriptions and workarounds
 
 purple (05/18/05)
 ---------------------
