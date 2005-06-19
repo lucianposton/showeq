@@ -696,8 +696,8 @@ void SpawnShell::illusionSpawn(const uint8_t* data)
              illusion->spawnId, illusion->name, illusion->race);
 #endif
     
-    const Item* item = findID(tSpawn, illusion->spawnId);
-
+    Item* item = m_spawns.find(illusion->spawnId);
+   
     if (item != NULL)
     {
         Spawn* spawn = (Spawn*) item;
@@ -708,10 +708,17 @@ void SpawnShell::illusionSpawn(const uint8_t* data)
 
         spawn->updateLastChanged();
         emit changeItem(spawn, tSpawnChangedALL);
+#ifdef SPAWNSHELL_DIAG
+        seqDebug("SpawnShell: Illusioned %s (id=%d) into race %d",
+                 illusion->name, illusion->spawnId, illusion->race);
+#endif
     }
     else
     {
-        seqWarn("SpawnShell: tried to illusion %s (id=%d) to race %d, but the mob didn't exist in the spawn list", illusion->name, illusion->spawnId, illusion->race);
+        // Someone with an illusion up zoning in will generate an
+        // OP_Illusion BEFORE the OP_NewSpawn, so they won't be
+        // in the spawn list. Their spawnStruct will have their
+        // illusioned race anyways.
     }
 }
 

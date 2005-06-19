@@ -12,10 +12,6 @@
 #include "everquest.h"
 #include "diagnosticmessages.h"
 
-// ZBTEMP: Will re-enable the group manager when someone figures out
-// how to fix it's crashing bug.
-//#define ENABLE_GROUPMGR 1
-
 GroupMgr::GroupMgr(SpawnShell* spawnShell, 
 		   Player* player,  
 		   QObject* parent, const char* name)
@@ -25,20 +21,18 @@ GroupMgr::GroupMgr(SpawnShell* spawnShell,
     m_memberCount(0),
     m_membersInZoneCount(0)
 {
-  // create the array of group members
-  m_members = new GroupMember[MAX_GROUP_MEMBERS];
+  for (int i=0; i<MAX_GROUP_MEMBERS; i++)
+  {
+    m_members[i] = new GroupMember();
+  }
 
   // clear the array of members
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
-    m_members[i].m_spawn = 0;
+    m_members[i]->m_spawn = 0;
 }
 
 GroupMgr::~GroupMgr()
 {
-  if (m_members)
-  {
-    delete[] m_members;
-  }
 }
 
 void GroupMgr::player(const uint8_t* data)
@@ -54,21 +48,21 @@ void GroupMgr::player(const uint8_t* data)
   // initialize the array of members with information from the player profile
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
-    m_members[i].m_name = player->groupMembers[i];
+    m_members[i]->m_name = player->groupMembers[i];
 
-    if (!m_members[i].m_name.isEmpty())
+    if (!m_members[i]->m_name.isEmpty())
       m_memberCount++;
 
-    if (m_members[i].m_name != player->name)
-      m_members[i].m_spawn = 0;
+    if (m_members[i]->m_name != player->name)
+      m_members[i]->m_spawn = 0;
     else
     {
-      m_members[i].m_spawn = (const Spawn*)m_player;
+      m_members[i]->m_spawn = (const Spawn*)m_player;
       
       m_membersInZoneCount++;
     }
 
-    emit added(m_members[i].m_name, m_members[i].m_spawn);
+    emit added(m_members[i]->m_name, m_members[i]->m_spawn);
   }
 }
  
@@ -95,21 +89,21 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
       for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
       {
 	// copy the member name
-	m_members[i].m_name = gfupdate->membernames[i];
+	m_members[i]->m_name = gfupdate->membernames[i];
 
 	// if their is a member, increment the member count
-	if (!m_members[i].m_name.isEmpty()) 
+	if (!m_members[i]->m_name.isEmpty()) 
 	  m_memberCount++;
 
 	// attempt to retrieve the members spawn
-	m_members[i].m_spawn = 
-	  m_spawnShell->findSpawnByName(m_members[i].m_name);
+	m_members[i]->m_spawn = 
+	  m_spawnShell->findSpawnByName(m_members[i]->m_name);
 
 	// incremement the spawn count
-	if (m_members[i].m_spawn)
+	if (m_members[i]->m_spawn)
 	  m_membersInZoneCount++;
 
-	emit added(m_members[i].m_name, m_members[i].m_spawn);
+	emit added(m_members[i]->m_name, m_members[i]->m_spawn);
       }
     }
   }
@@ -124,25 +118,25 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
       // iterate over all the slots until an empty one is found
       for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
       {
-	if (m_members[i].m_name.isEmpty())
+	if (m_members[i]->m_name.isEmpty())
 	{
 	  // copy the member name
-	  m_members[i].m_name = gupdate->membername;
+	  m_members[i]->m_name = gupdate->membername;
 	  
 	  // if their is a member, increment the member count
-	  if (!m_members[i].m_name.isEmpty()) 
+	  if (!m_members[i]->m_name.isEmpty()) 
 	    m_memberCount++;
 	  
 	  // attempt to retrieve the members spawn
-	  m_members[i].m_spawn = 
-	    m_spawnShell->findSpawnByName(m_members[i].m_name);
+	  m_members[i]->m_spawn = 
+	    m_spawnShell->findSpawnByName(m_members[i]->m_name);
 	  
 	  // incremement the spawn count
-	  if (m_members[i].m_spawn)
+	  if (m_members[i]->m_spawn)
 	    m_membersInZoneCount++;
 
 	  // signal the addition
-	  emit added(m_members[i].m_name, m_members[i].m_spawn);
+	  emit added(m_members[i]->m_name, m_members[i]->m_spawn);
 
 	  // added it, so break
 	  break;
@@ -154,14 +148,14 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
       for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
       {
 	// is this the member?
-	if (m_members[i].m_name == gupdate->membername)
+	if (m_members[i]->m_name == gupdate->membername)
 	{
 	  // yes, announce its removal
-	  emit removed(m_members[i].m_name, m_members[i].m_spawn);
+	  emit removed(m_members[i]->m_name, m_members[i]->m_spawn);
 
 	  // clear it
-	  m_members[i].m_name = "";
-	  m_members[i].m_spawn = 0;
+	  m_members[i]->m_name = "";
+	  m_members[i]->m_spawn = 0;
 	  break;
 	}
       }
@@ -175,8 +169,8 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
       for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
       {
 	// clear the member
-	m_members[i].m_name = "";
-	m_members[i].m_spawn = 0;
+	m_members[i]->m_name = "";
+	m_members[i]->m_spawn = 0;
       }
 
       emit cleared();
@@ -201,10 +195,10 @@ void GroupMgr::addItem(const Item* item)
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
     // is this spawn a group member?
-    if (m_members[i].m_name == spawn->name())
+    if (m_members[i]->m_name == spawn->name())
     {
       // yes, so note its Spawn object
-      m_members[i].m_spawn = spawn;
+      m_members[i]->m_spawn = spawn;
 
       // decrement member in zone count
       m_membersInZoneCount++;
@@ -229,10 +223,10 @@ void GroupMgr::delItem(const Item* item)
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
     // is this spawn a group member?
-    if (m_members[i].m_name == spawn->name())
+    if (m_members[i]->m_name == spawn->name())
     {
       // yes, so clear its Spawn object
-      m_members[i].m_spawn = 0;
+      m_members[i]->m_spawn = 0;
 
       // decrement member in zone count
       m_membersInZoneCount--;
@@ -257,10 +251,10 @@ void GroupMgr::killSpawn(const Item* item)
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
     // is this spawn a group member?
-    if (m_members[i].m_name == spawn->name())
+    if (m_members[i]->m_name == spawn->name())
     {
       // yes, so clear its Spawn object
-      m_members[i].m_spawn = 0;
+      m_members[i]->m_spawn = 0;
 
       // decrement members in zone count
       m_membersInZoneCount--;
@@ -288,15 +282,15 @@ void GroupMgr::dumpInfo(QTextStream& out)
   // iterate over the group members
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
-    if (m_members[i].m_name.isEmpty())
+    if (m_members[i]->m_name.isEmpty())
       continue;
 
-    out << "Member (" << i << "): " << m_members[i].m_name;
+    out << "Member (" << i << "): " << m_members[i]->m_name;
 
-    if (m_members[i].m_spawn)
-      out << " level " << m_members[i].m_spawn->level()
-	  << " " << m_members[i].m_spawn->raceString()
-	  << " " << m_members[i].m_spawn->classString();
+    if (m_members[i]->m_spawn)
+      out << " level " << m_members[i]->m_spawn->level()
+	  << " " << m_members[i]->m_spawn->raceString()
+	  << " " << m_members[i]->m_spawn->classString();
 
     out << endl;
   }  
@@ -327,8 +321,8 @@ unsigned long GroupMgr::totalLevels()
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
     // add up the group member levels
-    if (m_members[i].m_spawn)
-      total += m_members[i].m_spawn->level();
+    if (m_members[i]->m_spawn)
+      total += m_members[i]->m_spawn->level();
   }
 
   // shouldn't happen, but just in-case
@@ -344,8 +338,8 @@ const Spawn* GroupMgr::memberByID(uint16_t id)
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
     // if this member is in zone, and the spawnid matches, return it
-    if (m_members[i].m_spawn && (m_members[i].m_spawn->id() == id))
-      return m_members[i].m_spawn;
+    if (m_members[i]->m_spawn && (m_members[i]->m_spawn->id() == id))
+      return m_members[i]->m_spawn;
   }
 
   // not found
@@ -358,8 +352,8 @@ const Spawn* GroupMgr::memberByName(const QString& name)
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
     // if this member has the name, return its spawn
-    if (m_members[i].m_name == name)
-      return m_members[i].m_spawn;
+    if (m_members[i]->m_name == name)
+      return m_members[i]->m_spawn;
   }
   
   // not found
@@ -373,7 +367,7 @@ const Spawn* GroupMgr::memberBySlot(uint16_t slot )
     return 0;
 
   // return the spawn object associated with the group slot, if any
-  return m_members[slot].m_spawn;
+  return m_members[slot]->m_spawn;
 }
 
 #include "group.moc"

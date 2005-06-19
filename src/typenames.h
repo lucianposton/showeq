@@ -26,7 +26,7 @@
     NULL,			// 17
     NULL,			// 18
     "Zek",			// 19
-    NULL,			// 20
+    "Luggald",		// 20
     "Animal",			// 21
     "Insect",			// 22
     "ExtraPlanar",		// 23
@@ -34,13 +34,13 @@
     "Plant",			// 25
     "Dragonkin",		// 26
     "Elemental",		// 27
-    "Doppleganger",		// 28
+    "Summoned Creature",		// 28
     "Dragon",			// 29
     "BaneDragon",		// 30
     "Familiar",			// 31
     NULL,			// 32
     NULL,			// 33
-    NULL,			// 34
+    "Muramite",	    // 34
     NULL,			// 35
     NULL,			// 36
     NULL,			// 37

@@ -89,9 +89,6 @@
     <opcode id="013c" name="OP_GMEndTraining" updated="05/26/04">
         <comment></comment>
     </opcode>
-    <opcode id="0140" name="OP_Animation" implicitlen="4" updated="05/26/04">
-        <comment></comment>
-    </opcode>
     <opcode id="0152" name="OP_MoveCash" updated="05/26/04">
         <comment></comment>
     </opcode>
@@ -744,8 +741,11 @@
         <comment>old LevelUpUpdateCode</comment>
         <payload dir="server" typename="levelUpUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="016a" name="OP_Logout" updated="05/26/04">
+    <opcode id="016a" name="OP_Logout" updated="05/11/05">
         <comment></comment>
         <payload dir="server" typename="none" sizechecktype="match"/>
+    </opcode>
+    <opcode id="5f54" name="OP_Animation" implicitlen="4" updated="05/11/05">
+        <comment></comment>
     </opcode>
 </seqopcodes>

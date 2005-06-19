@@ -859,10 +859,15 @@ struct playerAAStruct {
 */ 
 struct spawnStruct
 {
-/*0000*/ uint8_t  unknown0000[5]; // ***Placeholder
+/*0000*/ uint8_t  is_pet;         // 0=no, 1=yes
+/*0001*/ uint8_t  face;	          // Face id for players
+/*0002*/ uint8_t  unknown0002;    // ***Placeholder
+/*0003*/ uint8_t  is_npc;         // 0=no, 1=yes
+/*0004*/ uint8_t  unknown0004;    // ***Placeholder
 /*0005*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
 /*0006*/ uint8_t  bodytype;       // Bodytype
-/*0007*/ uint8_t  unknown0010[4]; // ***Placeholder
+/*0007*/ uint8_t  unknown0010[3]; // ***Placeholder
+/*0010*/ uint8_t  hairstyle;      // Hair style
 /*0011*/ uint8_t  NPC;            // 0=player,1=npc,2=pc corpse,3=npc corpse,a
 /*0012*/ float    size;           // Model size
 /*0016*/ char     title[32];      // Player's title
@@ -888,7 +893,8 @@ struct spawnStruct
 /*0094*/ uint8_t  unknown0094[4]; // ***Placeholder
 /*0098*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
 /*0130*/ uint8_t  class_;         // Player's class
-/*0131*/ uint8_t  unknown0131[6]; // ***Placeholder
+/*0131*/ uint8_t  eyecolor1;      // Player's left eye color
+/*0131*/ uint8_t  unknown0131[5]; // ***Placeholder
 /*0137*/ uint8_t  light;          // Spawn's lightsource
 /*0138*/ float    runspeed;       // Speed when running
 /*0142*/ uint8_t  unknown0142[6]; // ***Placeholder
@@ -904,7 +910,8 @@ union
 };
 /*0175*/ uint8_t  level;          // Spawn Level
 /*0176*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
-/*0177*/ uint8_t  unknown0177[2]; // ***Placeholder
+/*0177*/ uint8_t  beardcolor;     // Beard color
+/*0178*/ uint8_t  unknown0178;    // ***Placeholder
 /*0179*/ union 
          {
              struct 
@@ -940,30 +947,23 @@ union
 /*0251*/ char     name[64];        // Player's Name
 /*0315*/ uint32_t petOwnerId;      // If this is a pet, the spawn id of owner
 /*0319*/ uint8_t  afk;             // 0=no, 1=afk
-/*0320*/ uint8_t  unknown0320[2];  // ***Placeholder
+/*0320*/ uint8_t  haircolor;       // Hair color
+/*0321*/ uint8_t  helm;            // Helm texture
 /*0322*/ char     lastName[32];    // Players last name
 /*0354*/ uint8_t  gm;              // 0=no, 1=gm
-/*0355*/ uint8_t  unknown0354[13]; //***Placeholder
+/*0355*/ uint8_t  unknown0354[12]; //***Placeholder
+/*0367*/ uint8_t  eyecolor2;       // Player right eye color
 /*0368*/ uint8_t  lfg;             // 0=off, 1=lfg on
 /*0369*/ uint8_t  unknown0369[8];  //***Placeholder
-/*0378*/ uint32_t  race;            // Spawn race
-/*0382*/ uint8_t   unknown0381[2];  //***Placeholder
+/*0378*/ uint32_t race;            // Spawn race
+/*0382*/ uint8_t  unknown0381[2];  //***Placeholder
 /*0383*/
 
 #if 0 // Need placed in spawn struct still... %%%
-/*001*/	int8_t  eyecolor1;			// Player left eye color
-/*002*/	int8_t  eyecolor2;			// Player right eye color
-
-/*118*/ uint8_t haircolor; // hair color
 
 /*121*/ int8_t  maxHp; // max hp
 /*122*/ uint8_t pvp; // 0=Not pvp,1=pvp
 
-/*141*/ int8_t	beardcolor;
-/*142*/ int8_t	hairstyle;
-/*143*/ int8_t	face;
-
-/*155*/ uint8_t helm;
 #endif
 };
 

@@ -12,6 +12,7 @@
 
 #include <qobject.h>
 #include <qstring.h>
+#include "everquest.h"
 
 
 //----------------------------------------------------------------------
@@ -63,7 +64,7 @@ class GroupMgr: public QObject
   {
     QString m_name;
     const Spawn* m_spawn;
-  } * m_members;
+  }* m_members[MAX_GROUP_MEMBERS];
   size_t m_memberCount;
   size_t m_membersInZoneCount;
 };
