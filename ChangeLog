@@ -1,6 +1,6 @@
 Version: $Id$ $Name$
 
-purple (06/12/05)
+purple (06/21/05)
 ---------------------
 + Swapped heading and deltaHeading in spawnStruct (thanks Doodman)
 + Strip the # off names before matching to filters to aid in filter writing
@@ -15,6 +15,7 @@ purple (06/12/05)
 + Filled in some missing races with artificial names not taken from the
 	.exe (thanks uRit1u2CBBA=)
 + Added two known bugs to BUGS with descriptions and workarounds
++ Fixed some long zone names in zones.h and added new zones from .exe
 
 purple (05/18/05)
 ---------------------
