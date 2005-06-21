@@ -197,7 +197,7 @@
 { "shadowrest", "Shadowrest" }, // 187
 { "tutoriala", "The Mines of Gloomingdeep" }, // 188
 { "tutorialb", "The Mines of Gloomingdeep" }, // 189
-{ NULL, NULL }, // 190
+{ "clz", "Loading" }, // 190
 { NULL, NULL }, // 191
 { NULL, NULL }, // 192
 { NULL, NULL }, // 193
@@ -231,11 +231,11 @@
 { "nightmareb", "Lair of Terris Thule" }, // 221
 { "poearthb", "Ragrax, Stronghold of the Twelve" }, // 222
 { "potimeb", "Plane of Time" }, // 223
-{ "gunthak", "Gunthak" }, // 224
-{ "dulak", "Dulak" }, // 225
-{ "torgiran", "Torgiran" }, // 226
-{ "nadox", "Nadox" }, // 227
-{ "hatesfury", "Hatesfury" }, // 228
+{ "gunthak", "Gulf of Gunthak" }, // 224
+{ "dulak", "Dulak's Harbor" }, // 225
+{ "torgiran", "Torgiran Mines" }, // 226
+{ "nadox", "Crypt of Nadox" }, // 227
+{ "hatesfury", "Hate's Fury, The Scorned Maiden" }, // 228
 { "guka", "The Cauldron of Lost Souls" }, // 229
 { "ruja", "The Bloodied Quarries" }, // 230
 { "taka", "The Sunken Library" }, // 231
@@ -311,19 +311,19 @@
 { "bloodfields", "The Bloodfields" }, // 301
 { "draniksscar", "Dranik's Scar" }, // 302
 { "causeway", "Nobles' Causeway" }, // 303
-{ "chambersa", "Mata Muram's Labyrinth" }, // 304
-{ "chambersb", "Mata Muram's Labyrinth" }, // 305
-{ "chambersc", "Mata Muram's Labyrinth" }, // 306
-{ "chambersd", "Mata Muram's Labyrinth" }, // 307
-{ "chamberse", "Mata Muram's Labyrinth" }, // 308
-{ "chambersf", "Mata Muram's Labyrinth" }, // 309
+{ "chambersa", "Muramite Proving Grounds" }, // 304
+{ "chambersb", "Muramite Proving Grounds" }, // 305
+{ "chambersc", "Muramite Proving Grounds" }, // 306
+{ "chambersd", "Muramite Proving Grounds" }, // 307
+{ "chamberse", "Muramite Proving Grounds" }, // 308
+{ "chambersf", "Muramite Proving Grounds" }, // 309
 { NULL, NULL }, // 310
 { NULL, NULL }, // 311
 { NULL, NULL }, // 312
 { NULL, NULL }, // 313
 { NULL, NULL }, // 314
 { NULL, NULL }, // 315
-{ "provinggrounds", "Muramite Provinggrounds" }, // 316
+{ "provinggrounds", "Muramite Proving Grounds" }, // 316
 { "anguish", "Asylum of Anguish" }, // 317
 { "dranikhollowsa", "Dranik's Hollows" }, // 318
 { "dranikhollowsb", "Dranik's Hollows" }, // 319
@@ -341,7 +341,7 @@
 { "draniksewersa", "Sewers of Dranik" }, // 331
 { "draniksewersb", "Sewers of Dranik" }, // 332
 { "draniksewersc", "Sewers of Dranik" }, // 333
-{ "riftseekers", "Riftbreakers' Sanctum" }, // 334
+{ "riftseekers", "Riftseekers' Sanctum" }, // 334
 { "harbingers", "Harbingers' Spire" }, // 335
 { "dranik", "The Ruined City of Dranik" }, // 336
 { "broodlands", "The Broodlands" }, // 337
@@ -354,28 +354,28 @@
 { "guildlobby", "Guild Lobby" }, // 344
 { "guildhall", "Guild Hall" }, // 345
 { "barter", "Barter Hall" }, // 346
-{ NULL, NULL }, // 347
-{ NULL, NULL }, // 348
-{ NULL, NULL }, // 349
-{ NULL, NULL }, // 350
-{ NULL, NULL }, // 351
-{ NULL, NULL }, // 352
-{ NULL, NULL }, // 353
-{ NULL, NULL }, // 354
-{ NULL, NULL }, // 355
-{ NULL, NULL }, // 356
-{ NULL, NULL }, // 357
-{ NULL, NULL }, // 358
-{ NULL, NULL }, // 359
-{ NULL, NULL }, // 360
-{ NULL, NULL }, // 361
-{ NULL, NULL }, // 362
-{ NULL, NULL }, // 363
-{ NULL, NULL }, // 364
-{ NULL, NULL }, // 365
-{ NULL, NULL }, // 366
-{ NULL, NULL }, // 367
-{ NULL, NULL }, // 368
+{ "Illsalin", "The Ruins of Illsalin" }, // 347
+{ "IllsalinA", "Illsalin Marketplace" }, // 348
+{ "IllsalinB", "Temple of the Korlach" }, // 349
+{ "IllsalinC", "The Nargilor Pits" }, // 350
+{ "Dreadspire", "Dreadspire Keep" }, // 351
+{ "DreadspireA", "The Torture Chamber" }, // 352
+{ "DreadspireB", "The Artifact Room" }, // 353
+{ "DrachnidHive", "The Hive" }, // 354
+{ "DrachnidHiveA", "The Hatchery" }, // 355
+{ "DrachnidHiveB", "The Cocoons" }, // 356
+{ "DrachnidHiveC", "The Queen's Lair" }, // 357
+{ "WestKorlach", "Stoneroot Falls" }, // 358
+{ "WestKorlachA", "Prince's Manor" }, // 359
+{ "WestKorlachB", "Caverns of the Lost" }, // 360
+{ "WestKorlachC", "Lair of the Korlach" }, // 361
+{ "EastKorlach", "The Undershore" }, // 362
+{ "EastKorlachA", "Snarlstone Dens" }, // 363
+{ "EastKorlachB", "Shadowspine" }, // 364
+{ "Corathus", "Corathus Creep" }, // 365
+{ "CorathusA", "Sporali Caverns" }, // 366
+{ "CorathusB", "Corathus Lair" }, // 367
+{ "NektulosA", "Shadowed Grove" }, // 368
 { NULL, NULL }, // 369
 { NULL, NULL }, // 370
 { NULL, NULL }, // 371
@@ -1004,5 +1004,6 @@
 { NULL, NULL }, // 994
 { NULL, NULL }, // 995
 { NULL, NULL }, // 996
-{ NULL, NULL }, // 997
+{ "arttest", "Art Testing Domain" }, // 997
 { "fhalls", "The Forgotten Halls" }, // 998
+{ "apprentice", "Designer Apprentice" }, // 998
