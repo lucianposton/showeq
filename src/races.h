@@ -431,8 +431,8 @@
     NULL,                     // 422
     NULL,                     // 423
     NULL,                     // 424
-    NULL,                     // 425
-    NULL,                     // 426
+    "Portal",                 // 425
+    "Portal",                 // 426
     NULL,                     // 427
     "Nest",                   // 428
     NULL,                     // 429
@@ -440,15 +440,15 @@
     "Dervish",                // 431
     "Drake",                  // 432
     "Goblin",                 // 433
-    NULL,                     // 434
+    "Kirin",                  // 434
     NULL,                     // 435
     "Basilisk",               // 436
-    NULL,                     // 437
+    "Rikkukun",               // 437
     "Yar'Lir",                // 438
-    NULL,                     // 439
+    "Puma",                   // 439
     "Spider",                 // 440
     "Spider",                 // 441
-    NULL,                     // 442
+    "Golem",                  // 442
     NULL,                     // 443
     NULL,                     // 444
     NULL,                     // 445
