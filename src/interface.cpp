@@ -1909,7 +1909,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			"groupDisbandStruct", SZC_Match,
             m_messageShell, SLOT(groupDisband(const uint8_t*, size_t, uint8_t)));
 
-     m_packet->connect2("OP_CancelInvite", SP_Zone, DIR_Server|DIR_Client,
+     m_packet->connect2("OP_GroupCancelInvite", SP_Zone, DIR_Server|DIR_Client,
 			"groupDeclineStruct", SZC_Match,
 			m_messageShell, SLOT(groupDecline(const uint8_t*)));
    }

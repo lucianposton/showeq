@@ -861,11 +861,37 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
           printf(" ");
       }
   }
-  printf("pad %d unk %d %d dh %d pad %d ani %d pad %d\n", 
-          pupdate->padding0004, pupdate->unknown0006[0],
-          pupdate->unknown0006[1], pupdate->deltaHeading,
-          pupdate->padding0020, pupdate->animation,
-          pupdate->padding0022);
+#endif
+
+#if 0
+    // Debug positioning without having to recompile everything...
+#pragma pack(1)
+    struct pos
+{
+/*0000*/ uint16_t spawnId;        // Player's spawn id
+/*0002*/ uint8_t unknown0002[2];  // ***Placeholder (update time counter?)
+/*0004*/ float y;                 // y coord
+/*0008*/ float deltaZ;            // Change in z
+/*0016*/ float deltaX;            // Change in x
+/*0012*/ float deltaY;            // Change in y
+/*0020*/ signed animation:10;     // animation
+         signed deltaHeading:10;  // change in heading
+         signed padding0020:12;   // ***Placeholder (mostly 1)
+/*0024*/ float x;                 // x coord
+/*0028*/ float z;                 // z coord
+/*0034*/ unsigned heading:12;     // Directional heading
+         unsigned padding0004:4;  // ***Placeholder
+/*0032*/ uint8_t unknown0006[2];  // ***Placeholder
+/*0036*/
+};
+#pragma pack(0)
+    struct pos *p = (struct pos *)data;
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
+            p->spawnId, p->x, p->y, p->z, 
+            p->deltaX, p->deltaY, p->deltaZ, 
+            float(p->heading), float(p->deltaHeading),
+            p->animation, *(uint16_t*) p->unknown0002, p->padding0020, 
+            p->padding0004, *(uint16_t*) p->unknown0006);
 #endif
 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);

@@ -435,7 +435,7 @@
     "Portal",                 // 426
     NULL,                     // 427
     "Nest",                   // 428
-    NULL,                     // 429
+    "Egg",                    // 429
     "Drake",                  // 430
     "Dervish",                // 431
     "Drake",                  // 432

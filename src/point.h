@@ -111,28 +111,28 @@ class Point3D
 
 // default constructor
 template <class _T> inline
-Point3D<_T>::Point3D<_T>()
+Point3D<_T>::Point3D()
 {
   setPoint(0, 0, 0);
 }
 
 // copy constructor
 template <class _T> inline
-Point3D<_T>::Point3D<_T>(const Point3D<_T>& point)
+Point3D<_T>::Point3D(const Point3D<_T>& point)
 {
   setPoint(point.x(), point.y(), point.z());
 }
 
 // copy constructor
 template <class _T> inline
-Point3D<_T>::Point3D<_T>(const QPoint& point)
+Point3D<_T>::Point3D(const QPoint& point)
 {
   setPoint(point.x(), point.y(), 0);
 }
 
 // convenience constructor
 template <class _T> inline
-Point3D<_T>::Point3D<_T>(_T x, _T y, _T z)
+Point3D<_T>::Point3D(_T x, _T y, _T z)
 {
   setPoint(x, y, z);
 }

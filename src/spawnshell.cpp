@@ -426,7 +426,58 @@ void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
   const spawnStruct* zspawns = (const spawnStruct*)data;
 
   for (int i = 0; i < spawndatasize; i++)
+  {
+#if 0 
+  // Dump position updates for debugging spawn struct position changes
+  for (int j=54; j<70; i++)
+  {
+      printf("%.2x", zspawns[i][j]);
+
+      if ((j+1) % 8 == 0)
+      {
+          printf("    ");
+      }
+      else
+      {
+          printf(" ");
+      }
+  }
+  printf("\n");
+#endif
+
+#if 0
+    // Debug positioning without having to recompile everything...
+#pragma pack(1)
+    struct pos
+{
+/*0054*/ signed   deltaHeading:10;  // change in heading
+         signed   x:19;             // x coord
+         signed   padding0054:3;    // ***Placeholder
+/*0058*/ signed   y:19;             // y coord
+         signed   animation:10;     // ***Placeholder (seems like speed)
+         signed   padding0058:3;    // animation
+/*0062*/ signed   z:19;             // z coord
+         signed   deltaY:13;        // change in y
+/*0066*/ signed   deltaX:13;        // change in x
+         unsigned heading:12;       // heading
+         signed   padding0066:7;    // ***Placeholder
+/*0070*/ signed   deltaZ:13;        // change in z
+         signed   padding0070:19;   // ***Placeholder
+/*0074*/
+};
+#pragma pack(0)
+    struct pos *p = (struct pos *)(data + i*sizeof(spawnStruct) + 54);
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
+            zspawns[i].spawnId, 
+            float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0, 
+            float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
+            float(p->deltaZ)/4.0, 
+            float(p->heading), float(p->deltaHeading),
+            p->animation, p->padding0054, p->padding0058, 
+            p->padding0066, p->padding0070);
+#endif
     newSpawn(zspawns[i]);
+  }
 }
 
 void SpawnShell::newSpawn(const uint8_t* data)
@@ -436,6 +487,7 @@ void SpawnShell::newSpawn(const uint8_t* data)
     return;
 
   const spawnStruct* spawn = (const spawnStruct*)data;
+
 
   newSpawn(*spawn);
 }
@@ -465,7 +517,7 @@ void SpawnShell::newSpawn(const spawnStruct& s)
        return;
      }
    }
-   
+
    Item* item = m_spawns.find(s.spawnId);
    if (item != NULL)
    {
@@ -546,6 +598,39 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
     int16_t dy = pupdate->deltaY >> 2;
     int16_t dx = pupdate->deltaX >> 2;
     int16_t dz = pupdate->deltaZ >> 2;
+    
+#if 0
+    // Debug positioning without having to recompile everything...
+#pragma pack(1)
+    struct pos
+{
+/*0000*/ uint16_t spawnId;          // spawn id of the thing moving
+/*0002*/ signed   deltaHeading:10;  // change in heading
+         signed   x:19;             // x coord
+         signed   padding0002:3;    // ***Placeholder
+/*0006*/ signed   y:19;             // y coord
+         signed   animation:10;     // ***Placeholder (seems like speed)
+         signed   padding0006:3;    // animation
+/*0010*/ signed   z:19;             // z coord
+         signed   deltaY:13;        // change in y
+/*0014*/ signed   deltaX:13;        // change in x
+         unsigned heading:12;       // heading
+         signed   padding0014:7;    // ***Placeholder
+/*0018*/ signed   deltaZ:13;        // change in z
+         signed   padding0018:19;   // ***Placeholder
+/*0022*/
+};
+#pragma pack(0)
+    struct pos *p = (struct pos *)data;
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
+            p->spawnId, float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0, 
+            float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
+            float(p->deltaZ)/4.0, 
+            float(p->heading), float(p->deltaHeading),
+            p->animation, p->padding0002, p->padding0006, 
+            p->padding0014, p->padding0018);
+#endif
+
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,
 		pupdate->heading, pupdate->deltaHeading,pupdate->animation);
   }
