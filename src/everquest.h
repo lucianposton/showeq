@@ -682,7 +682,10 @@ struct charProfileStruct
 /*19544*/ uint32_t careerRadCrystals;  // Total count of radiant crystals ever
 /*19548*/ uint32_t currentEbonCrystals;// Current count of ebon crystals
 /*19552*/ uint32_t careerEbonCrystals; // Total count of ebon crystals ever
-/*19556*/ uint8_t  unknown19556[8];    // ***Placeholder (6/29/2005)
+/*19556*/ uint8_t  groupAutoconsent;   // 0=off, 1=on
+/*19557*/ uint8_t  raidAutoconsent;    // 0=off, 1=on
+/*19558*/ uint8_t  guildAutoconsent;   // 0=off, 1=on
+/*19559*/ uint8_t  unknown19556[5];    // ***Placeholder (6/29/2005)
 /*19564*/ uint32_t unknown19564;       // *** Placeholder
 }; /* 19568 */
 

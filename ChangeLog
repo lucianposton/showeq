@@ -1,12 +1,14 @@
 Version: $Id$ $Name$
 
-purple (07/03/05)
+purple (07/04/05)
 --------------------
 + Updated version to 5.0.0.24pre
 + Fixed light member of spawnStruct (thanks BlueAdept)
 + Updated qt required version to 3.2 because I used QString.replace that
 	was added there
 + Rewrote the # stripping stuff from filters so you can still search on #
++ Filled in auto consents into charProfileStruct
+
 
 purple (07/02/05)
 ---------------------
