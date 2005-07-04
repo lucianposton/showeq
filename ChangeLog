@@ -6,6 +6,7 @@ purple (07/03/05)
 + Fixed light member of spawnStruct (thanks BlueAdept)
 + Updated qt required version to 3.2 because I used QString.replace that
 	was added there
++ Rewrote the # stripping stuff from filters so you can still search on #
 
 purple (07/02/05)
 ---------------------

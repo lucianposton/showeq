@@ -56,8 +56,8 @@ protected:
 /* FilterItem Class - allows easy creation / deletion of regex types */
 FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive)
 {
-  m_minLevel = 0;
-  m_maxLevel = 0;
+  uint8_t minLevel = 0;
+  uint8_t maxLevel = 0;
   
   QString workString = filterPattern;
   
@@ -95,11 +95,11 @@ FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive)
 
       // only use the number if it's ok
       if (ok)
-	m_minLevel = level;
+        minLevel = level;
 
 #ifdef DEBUG_FILTER
       seqDebug("filter min level decode levelStr='%s' level=%d ok=%1d minLevel=%d",
-	     (const char*)levelString, level, ok, m_minLevel);
+	     (const char*)levelString, level, ok, minLevel);
 #endif
     }
     else
@@ -110,11 +110,11 @@ FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive)
 
       // only use the number if it's ok
       if (ok)
-	m_minLevel = level;
+        minLevel = level;
 
 #ifdef DEBUG_FILTER
       seqDebug("filter min level decode levelStr='%s' level=%d ok=%1d minLevel=%d",
-	     (const char*)levelString.left(breakPoint), level, ok, m_minLevel);
+	     (const char*)levelString.left(breakPoint), level, ok, minLevel);
 #endif
 
       // the rest of the string after the hyphen is the max
@@ -123,37 +123,54 @@ FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive)
       // if a hyphen was specified, but no max value after it, it means
       // all values above min
       if (levelString.isEmpty())
-	m_maxLevel = INT_MAX;
+        maxLevel = INT_MAX;
       else
       {
-	// get the max level
-	level = levelString.toInt(&ok);
+        // get the max level
+        level = levelString.toInt(&ok);
 
-	// only use the number if it's ok
-	if (ok)
-	  m_maxLevel = level;
+        // only use the number if it's ok
+        if (ok)
+          maxLevel = level;
 
 #ifdef DEBUG_FILTER
-      seqDebug("filter max level decode levelStr='%s' level=%d ok=%1d maxLevel=%d",
-	     (const char*)levelString, level, ok, m_maxLevel);
+        seqDebug("filter max level decode levelStr='%s' level=%d ok=%1d maxLevel=%d",
+	      (const char*)levelString, level, ok, m_maxLevel);
 #endif
       }
     }
     
     // if no max level specified, or some dope set it below min, make it 
     // equal the min
-    if(m_maxLevel < m_minLevel)
-      m_maxLevel = m_minLevel;
+    if(maxLevel < minLevel)
+      maxLevel = minLevel;
   }
+
+  init(regexString, caseSensitive, minLevel, maxLevel);
+}
+
+void FilterItem::init(const QString& regexString, bool caseSensitive, 
+        uint8_t minLevel, uint8_t maxLevel)
+{
+  m_minLevel = minLevel;
+  m_maxLevel = maxLevel;
 
 #ifdef DEBUG_FILTER
   seqDebug("regexString=%s minLevel=%d maxLevel=%d", 
-	 (const char*)regexString, m_minLevel, m_maxLevel);
+	 (const char*)regexString, minLevel, maxLevel);
 #endif
 
   m_regexp.setWildcard(false);
   m_regexp.setCaseSensitive(caseSensitive);
-  m_regexp.setPattern(regexString);
+
+  // For the pattern, save off the original. This is what will be saved
+  // during save operations. But the actual regexp we filter with will
+  // mark the # in spawn names as optional to aid in filter writing.
+  m_regexpOriginalPattern = QString(regexString.ascii());
+
+  QString fixedFilterPattern = regexString;
+  fixedFilterPattern.replace("Name:", "Name:#?", false);
+  m_regexp.setPattern(fixedFilterPattern);
 
   if (!m_regexp.isValid())
   {
@@ -165,10 +182,9 @@ FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive)
 
 FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive, 
 		       uint8_t minLevel, uint8_t maxLevel)
-  : m_regexp(filterPattern, caseSensitive, false),
-    m_minLevel(minLevel),
-    m_maxLevel(maxLevel)
 {
+  init(filterPattern, caseSensitive, minLevel, maxLevel);
+
   if (!m_regexp.isValid())
   {
     seqWarn("Filter Error: '%s' - %s",
@@ -186,7 +202,7 @@ bool FilterItem::save(QString& indent, QTextStream& out)
   out << indent << "<oldfilter>";
 
   if (!m_regexp.pattern().isEmpty())
-    out << "<regex>" << m_regexp.pattern() << "</regex>";
+    out << "<regex>" << m_regexpOriginalPattern << "</regex>";
 
   if (m_minLevel || m_maxLevel)
   {
@@ -331,27 +347,17 @@ Filter::addFilter(const QString& filterPattern)
 {
   FilterItem* re;
 
-  // Take the # off the front of the filters.
-  // 
-  // This is showeq specific, since EQ puts #'s in front of some
-  // special mobs, but without being in the zone, it's hard to tell what
-  // has a # and what doesn't. In order to ease in filter writing, just
-  // strip it off here, and we'll strip it off the spawn names before matching
-  // too.
-  QString fixedFilterPattern = filterPattern;
-  fixedFilterPattern.replace("Name:#", "Name:", false);
-
   // no duplicates allowed
-  if (findFilter(fixedFilterPattern))
+  if (findFilter(filterPattern))
     return false;
 
-  re = new FilterItem(fixedFilterPattern, m_caseSensitive);
+  re = new FilterItem(filterPattern, m_caseSensitive);
 
   // append it to the end of the list
   m_filterItems.append(re);
 
 #ifdef DEBUG_FILTER
-  seqDebug("Added Filter '%s'", (const char*)fixedFilterPattern);
+  seqDebug("Added Filter '%s'", (const char*)filterPattern);
 #endif
 
  return re->valid(); 
@@ -362,28 +368,18 @@ Filter::addFilter(const QString& filterPattern, uint8_t minLevel, uint8_t maxLev
 {
   FilterItem* re;
 
-  // Take the # off the front of the filters for name.
-  //
-  // This is showeq specific, since EQ puts #'s in front of some
-  // special mobs, but without being in the zone, it's hard to tell what
-  // has a # and what doesn't. In order to ease in filter writing, just
-  // strip it off here, and we'll strip it off the spawn names before matching
-  // too.
-  QString fixedFilterPattern = filterPattern;
-  fixedFilterPattern.replace("Name:#", "Name:", false);
-  
   // no duplicates allowed
-  if (findFilter(fixedFilterPattern))
+  if (findFilter(filterPattern))
     return false;
 
-  re = new FilterItem(fixedFilterPattern, m_caseSensitive, minLevel, maxLevel);
+  re = new FilterItem(filterPattern, m_caseSensitive, minLevel, maxLevel);
 
   // append it to the end of the list
   m_filterItems.append(re);
 
 #ifdef DEBUG_FILTER
   seqDebug("Added Filter '%s' (%d, %d)",
-	   (const char*)fixedFilterPattern, minLevel, maxLevel);
+	   (const char*)filterPattern, minLevel, maxLevel);
 #endif
 
  return re->valid(); 

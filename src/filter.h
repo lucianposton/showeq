@@ -58,7 +58,11 @@ public:
   bool valid() { return m_regexp.isValid(); }
 
  protected:
+  void init(const QString& filterPattern, bool caseSensitive, uint8_t minLevel,
+         uint8_t maxLevel);
+  
   QRegExp m_regexp;
+  QString m_regexpOriginalPattern;
   uint8_t m_minLevel;
   uint8_t m_maxLevel;
 };
