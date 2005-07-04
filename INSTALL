@@ -19,7 +19,7 @@ compile ShowEQ:
    Name:      Minimum:  Suggested:         Source:
    --------------------------------------------------------------------------
    *** 3rd party libraries ***                        
-   qt         3.1   Compiled with -thread) http://www.trolltech.com)
+   qt         3.2   Compiled with -thread) http://www.trolltech.com)
    libpcap    0.62                         http://www.tcpdump.org/
    gdbm       1.8.0                        http://www.gnu.org/software/gdbm/
 

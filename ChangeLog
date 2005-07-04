@@ -1,7 +1,15 @@
 Version: $Id$ $Name$
 
+purple (07/03/05)
+--------------------
++ Updated version to 5.0.0.24pre
++ Fixed light member of spawnStruct (thanks BlueAdept)
++ Updated qt required version to 3.2 because I used QString.replace that
+	was added there
+
 purple (07/02/05)
 ---------------------
++ Updated version to 5.0.0.23
 + Strip the # off names before matching to filters to aid in filter writing
 + Strip the # off the strong of filters as well just to make the # irrevelant
 	to filters (thanks BlueAdept for both these)

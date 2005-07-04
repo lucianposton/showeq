@@ -866,14 +866,14 @@ struct spawnStruct
 /*0009*/ uint8_t  curHp;          // Current hp
 /*0010*/ char    lastName[32];    // Player's Lastname
 /*0042*/ uint8_t  bodytype;       // Bodytype
-/*0043*/ uint8_t unknown0042[7];
+/*0043*/ uint8_t unknown0042[7];  // ***Placeholder
 /*0050*/ uint32_t petOwnerId;     // If this is a pet, the spawn id of owner
 /*0054*/ signed   deltaHeading:10;// change in heading
          signed   x:19;           // x coord
          signed   padding0054:3;  // ***Placeholder
 /*0058*/ signed   y:19;           // y coord
-         signed   animation:10;   // ***Placeholder (seems like speed)
-         signed   padding0058:3;  // animation
+         signed   animation:10;   // animation
+         signed   padding0058:3;  // ***Placeholder
 /*0062*/ signed   z:19;           // z coord
          signed   deltaY:13;      // change in y
 /*0066*/ signed   deltaX:13;      // change in x
@@ -951,15 +951,13 @@ struct spawnStruct
 /*0273*/ uint8_t unknown0276[6];
 /*0279*/ uint8_t  level;          // Spawn Level
 /*0280*/ uint8_t  haircolor;      // Hair color
-/*0281*/ uint8_t unknown0282[2];
+/*0281*/ uint8_t unknown0281;
+/*0282*/ uint8_t  light;          // Spawn's lightsource
 /*0283*/ uint8_t  gender;         // Gender (0=male, 1=female)
 /*0284*/ char     name[64];       // Player's Name
 /*0348*/ uint8_t  eyecolor2;      // Left eye color
 /*0349*/ char     title[32];      // Title
-/*0381*/ uint8_t unknown0381;
-
-// Wrong but compile please. Was light removed 6/29/2005? %%%
-/*0009*/ uint8_t  light;          // Spawn's lightsource
+/*0381*/ uint8_t unknown0381[2];
 }; /*0383*/
 
 #if 0  
