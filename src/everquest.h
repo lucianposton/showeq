@@ -918,7 +918,13 @@ struct spawnStruct
 /*0164*/ uint8_t  eyecolor1;      // Player's left eye color
 /*0165*/ uint8_t unknown0165;
 /*0166*/ uint8_t  is_npc;         // 0=no, 1=yes
-/*0167*/ uint8_t unknown0167;
+union 
+{
+/*0167*/ int8_t equip_chest2;     // Second place in packet for chest texture (usually 0xFF in live packets)
+                                  // Not sure why there are 2 of them, but it effects chest texture!
+/*0167*/ int8_t mount_color;      // drogmor: 0=white, 1=black, 2=green, 3=red
+                                  // horse: 0=brown, 1=white, 2=black, 3=tan
+};
 /*0168*/ uint32_t guildID;        // Current guild
 /*0172*/ union 
          {
@@ -949,12 +955,13 @@ struct spawnStruct
 /*0263*/ int8_t   guildrank;      // 0=normal, 1=officer, 2=leader
 /*0264*/ uint8_t unknown0264[3];
 /*0267*/ uint8_t  is_pet;         // 0=no, 1=yes
-/*0268*/ uint32_t race;            // Spawn race
+/*0268*/ uint32_t race;           // Spawn race
 /*0272*/ uint8_t  invis;          // Invis (0=not, 1=invis)
-/*0273*/ uint8_t unknown0276[6];
+/*0273*/ uint8_t unknown0276[5];
+/*0278*/ uint8_t  lfg;            // 0=off, 1=lfg on
 /*0279*/ uint8_t  level;          // Spawn Level
 /*0280*/ uint8_t  haircolor;      // Hair color
-/*0281*/ uint8_t unknown0281;
+/*0281*/ uint8_t unknown0281;     // ***Placeholder (maxhp?)
 /*0282*/ uint8_t  light;          // Spawn's lightsource
 /*0283*/ uint8_t  gender;         // Gender (0=male, 1=female)
 /*0284*/ char     name[64];       // Player's Name
@@ -965,18 +972,8 @@ struct spawnStruct
 
 #if 0  
 /*0010*/ uint8_t  hairstyle;      // Hair style
-union 
-{
-/*0174*/ int8_t equip_chest2;     // Second place in packet for chest texture (usually 0xFF in live packets)
-                                  // Not sure why there are 2 of them, but it effects chest texture!
-/*0174*/ int8_t mount_color;      // drogmor: 0=white, 1=black, 2=green, 3=red
-                                  // horse: 0=brown, 1=white, 2=black, 3=tan
-};
 /*0321*/ uint8_t  helm;            // Helm texture
-/*0368*/ uint8_t  lfg;             // 0=off, 1=lfg on
-
 /*122*/ uint8_t pvp; // 0=Not pvp,1=pvp
-
 #endif
 
 /*

@@ -8,6 +8,7 @@ purple (07/04/05)
 	was added there
 + Rewrote the # stripping stuff from filters so you can still search on #
 + Filled in auto consents into charProfileStruct
++ Filled in a little more of spawnStruct
 
 
 purple (07/02/05)
