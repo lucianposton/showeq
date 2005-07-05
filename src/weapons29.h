@@ -185,7 +185,7 @@
     NULL,                 // 0xb0
     NULL,                 // 0xb1
     NULL,                 // 0xb2
-    NULL,                 // 0xb3
+    "CrudeWarhammer",     // 0xb3
     NULL,                 // 0xb4
     NULL,                 // 0xb5
     NULL,                 // 0xb6
@@ -196,7 +196,7 @@
     NULL,                 // 0xbb
     NULL,                 // 0xbc
     NULL,                 // 0xbd
-    NULL,                 // 0xbe
+    "MiningPick",         // 0xbe
     NULL,                 // 0xbf
     NULL,                 // 0xc0
     NULL,                 // 0xc1
@@ -214,14 +214,14 @@
     NULL,                 // 0xcd
     NULL,                 // 0xce
     NULL,                 // 0xcf
-    NULL,                 // 0xd0
+    "ShortSword",         // 0xd0
     NULL,                 // 0xd1
     NULL,                 // 0xd2
     NULL,                 // 0xd3
     NULL,                 // 0xd4
     NULL,                 // 0xd5
     NULL,                 // 0xd6
-    NULL,                 // 0xd7
+    "Dagger",             // 0xd7
     NULL,                 // 0xd8
     NULL,                 // 0xd9
     "AugmentSealer",      // 0xda

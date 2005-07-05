@@ -32,7 +32,7 @@
     NULL,                 // 0x17
     NULL,                 // 0x18
     NULL,                 // 0x19
-    NULL,                 // 0x1a
+    "Whip",               // 0x1a
     NULL,                 // 0x1b
     NULL,                 // 0x1c
     NULL,                 // 0x1d
