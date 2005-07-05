@@ -430,7 +430,7 @@
     NULL,                     // 421
     NULL,                     // 422
     NULL,                     // 423
-    NULL,                     // 424
+    "Shell",                  // 424
     "Portal",                 // 425
     "Portal",                 // 426
     NULL,                     // 427
