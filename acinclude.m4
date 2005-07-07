@@ -714,7 +714,7 @@ else
   AC_MSG_ERROR([Please verify your Qt devel install!]);
 fi;
 
-qt_target_version="3.1.0"
+qt_target_version="3.2.0"
 
 if test $qt_major_version -le 1 ; then
   AC_MSG_ERROR([Please Make sure $qt_target_version or later is installed!!!]);
