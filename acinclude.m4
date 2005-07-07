@@ -717,14 +717,12 @@ fi;
 qt_target_version="3.2.0"
 
 if test $qt_major_version -le 1 ; then
-  AC_MSG_ERROR([Please Make sure $qt_target_version or later is installed!!!]);
+  AC_MSG_ERROR([Please Make sure qt $qt_target_version or later is installed!!!]);
 elif test $qt_major_version -eq 2 ; then
-  if test $qt_minor_version -le 2 ; then
-    AC_MSG_ERROR([Please Make sure $qt_target_version or later is installed!!!]);
-  elif test $qt_minor_version -eq 3 ; then
-    if test $qt_major_build -lt 1 ; then
-      AC_MSG_ERROR([Please Make sure $qt_target_version or later is installed!!!]);
-    fi;
+  AC_MSG_ERROR([Please Make sure qt $qt_target_version or later is installed!!!]);
+elif test $qt_major_version -le 3 ; then
+  if test $qt_minor_version -le 1 ; then
+    AC_MSG_ERROR([Please Make sure qt $qt_target_version or later is installed!!!]);
   fi;
 fi;
 
