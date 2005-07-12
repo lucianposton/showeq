@@ -105,7 +105,7 @@ class EQPacket : public QObject
       uint32_t sessionKey);
 
  protected slots:
-   void closeStream();
+   void closeStream(uint32_t sessionId, EQStreamID streamId);
    void lockOnClient(in_port_t serverPort, in_port_t clientPort);
 
  signals:
@@ -173,6 +173,7 @@ class EQPacket : public QObject
    EQPacketOPCodeDB* m_worldOPCodeDB;
    EQPacketOPCodeDB* m_zoneOPCodeDB;
 
+   void connectStream(EQPacketStream* stream);
    void dispatchPacket   (int size, unsigned char *buffer);
    void dispatchPacket(EQUDPIPPacketFormat& packet);
  protected slots:

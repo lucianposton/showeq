@@ -143,174 +143,25 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
   m_client2WorldStream = new EQPacketStream(client2world, DIR_Client, 
 					    m_arqSeqGiveUp, *m_worldOPCodeDB,
 					    this, "client2world");
-  connect(m_client2WorldStream, 
-	  SIGNAL(rawPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
-	  this,
-	  SIGNAL(rawWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
-  connect(m_client2WorldStream, 
-	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
-	  this,
-	  SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
-  connect(m_client2WorldStream, 
-	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
-	  this,
-	  SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
-  connect(m_client2WorldStream, 
-	  SIGNAL(cacheSize(int, int)),
-	  this,
-	  SIGNAL(cacheSize(int, int)));
-  connect(m_client2WorldStream, 
-	  SIGNAL(seqReceive(int, int)),
-	  this,
-	  SIGNAL(seqReceive(int, int)));
-  connect(m_client2WorldStream, 
-	  SIGNAL(seqExpect(int, int)),
-	  this,
-	  SIGNAL(seqExpect(int, int)));
-  connect(m_client2WorldStream, 
-	  SIGNAL(numPacket(int, int)),
-	  this,
-	  SIGNAL(numPacket(int, int)));
-  connect(m_client2WorldStream, 
-	  SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
-	  this,
-	  SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
-  
+  connectStream(m_client2WorldStream);
+
   // Setup world -> client stream
   m_world2ClientStream = new EQPacketStream(world2client, DIR_Server,
 					    m_arqSeqGiveUp, *m_worldOPCodeDB,
 					    this, "world2client");
-  connect(m_world2ClientStream, 
-	  SIGNAL(rawPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
-	  this,
-	  SIGNAL(rawWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
-  connect(m_world2ClientStream, 
- 	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
-	  this,
-	  SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
-  connect(m_world2ClientStream, 
- 	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
-	  this,
-	  SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
-  connect(m_world2ClientStream, 
-	  SIGNAL(cacheSize(int, int)),
-	  this,
-	  SIGNAL(cacheSize(int, int)));
-  connect(m_world2ClientStream, 
-	  SIGNAL(seqReceive(int, int)),
-	  this,
-	  SIGNAL(seqReceive(int, int)));
-  connect(m_world2ClientStream, 
-	  SIGNAL(seqExpect(int, int)),
-	  this,
-	  SIGNAL(seqExpect(int, int)));
-  connect(m_world2ClientStream, 
-	  SIGNAL(numPacket(int, int)),
-	  this,
-	  SIGNAL(numPacket(int, int)));
-  connect(m_world2ClientStream, 
-	  SIGNAL(sessionTrackingChanged(uint8_t)),
-	  this,
-	  SIGNAL(sessionTrackingChanged(uint8_t)));
-  connect(m_world2ClientStream, 
-	  SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
-	  this,
-	  SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
+  connectStream(m_world2ClientStream);
 
   // Setup client -> zone stream
   m_client2ZoneStream = new EQPacketStream(client2zone, DIR_Client,
 					  m_arqSeqGiveUp, *m_zoneOPCodeDB,
 					  this, "client2zone");
-  connect(m_client2ZoneStream, 
-	  SIGNAL(rawPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
-	  this,
-	  SIGNAL(rawZonePacket(const uint8_t*, size_t, uint8_t, uint16_t)));
-  connect(m_client2ZoneStream, 
-	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
-	  this,
-	  SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
-  connect(m_client2ZoneStream, 
-	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*,bool)),
-	  this,
-	  SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*,bool)));
-  connect(m_client2ZoneStream, 
-	  SIGNAL(cacheSize(int, int)),
-	  this,
-	  SIGNAL(cacheSize(int, int)));
-  connect(m_client2ZoneStream, 
-	  SIGNAL(seqReceive(int, int)),
-	  this,
-	  SIGNAL(seqReceive(int, int)));
-  connect(m_client2ZoneStream, 
-	  SIGNAL(seqExpect(int, int)),
-	  this,
-	  SIGNAL(seqExpect(int, int)));
-  connect(m_client2ZoneStream, 
-	  SIGNAL(numPacket(int, int)),
-	  this,
-	  SIGNAL(numPacket(int, int)));
-  connect(m_client2ZoneStream, 
-	  SIGNAL(sessionTrackingChanged(uint8_t)),
-	  this,
-	  SIGNAL(sessionTrackingChanged(uint8_t)));
-  connect(m_client2ZoneStream, 
-	  SIGNAL(closing()),
-	  this,
-	  SLOT(closeStream()));
-  connect(m_client2ZoneStream, 
-	  SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
-	  this,
-	  SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
+  connectStream(m_client2ZoneStream);
 
   // Setup zone -> client stream
   m_zone2ClientStream = new EQPacketStream(zone2client, DIR_Server,
 					   m_arqSeqGiveUp, *m_zoneOPCodeDB,
 					   this, "zone2client");
-  connect(m_zone2ClientStream, 
-	  SIGNAL(rawPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
-	  this,
-	  SIGNAL(rawZonePacket(const uint8_t*, size_t, uint8_t, uint16_t)));
-  connect(m_zone2ClientStream, 
-	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
-	  this,
-	  SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
-  connect(m_zone2ClientStream, 
-	  SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
-	  this,
-	  SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
-  connect(m_zone2ClientStream, 
-	  SIGNAL(cacheSize(int, int)),
-	  this,
-	  SIGNAL(cacheSize(int, int)));
-  connect(m_zone2ClientStream, 
-	  SIGNAL(seqReceive(int, int)),
-	  this,
-	  SIGNAL(seqReceive(int, int)));
-  connect(m_zone2ClientStream, 
-	  SIGNAL(seqExpect(int, int)),
-	  this,
-	  SIGNAL(seqExpect(int, int)));
-  connect(m_zone2ClientStream, 
-	  SIGNAL(numPacket(int, int)),
-	  this,
-	  SIGNAL(numPacket(int, int)));
-  // Zone to client stream specific signals (session tracking non-sense)
-  connect(m_zone2ClientStream, 
-	  SIGNAL(sessionTrackingChanged(uint8_t)),
-	  this,
-	  SIGNAL(sessionTrackingChanged(uint8_t)));
-  connect(m_zone2ClientStream, 
-	  SIGNAL(lockOnClient(in_port_t, in_port_t)),
-	  this,
-	  SLOT(lockOnClient(in_port_t, in_port_t)));
-  connect(m_zone2ClientStream, 
-	  SIGNAL(closing()),
-	  this,
-	  SLOT(closeStream()));
-  connect(m_zone2ClientStream, 
-	  SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
-	  this,
-	  SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
+  connectStream(m_zone2ClientStream);
 
   // Initialize convenient streams array
   m_streams[client2world] = m_client2WorldStream;
@@ -622,6 +473,96 @@ void EQPacket::processPlaybackPackets (void)
   m_busy_decoding = false;
 }
 
+/////////////////////////////////////////////////////////
+// Connect the given stream's signals to the proper slots
+void EQPacket::connectStream(EQPacketStream* stream)
+{
+  // Packet logging
+  switch (stream->streamID())
+  {
+    case zone2client:
+    case client2zone:
+    {
+      // Zone server stream
+      connect(stream,
+        SIGNAL(rawPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
+        this,
+        SIGNAL(rawZonePacket(const uint8_t*, size_t, uint8_t, uint16_t)));
+
+      connect(stream,
+        SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
+        this,
+        SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
+
+      connect(stream,
+        SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+        this,
+        SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
+    }
+    break;
+    case world2client:
+    case client2world:
+    {
+      // World server stream
+      connect(stream,
+        SIGNAL(rawPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
+        this,
+        SIGNAL(rawWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
+
+      connect(stream,
+        SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
+        this,
+        SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
+
+      connect(stream,
+        SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+        this,
+        SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
+    }
+    break;
+    default :
+    {
+      return;
+    }
+  }
+
+  // Debugging
+  connect(stream,
+      SIGNAL(cacheSize(int, int)),
+      this,
+      SIGNAL(cacheSize(int, int)));
+  connect(stream,
+      SIGNAL(seqReceive(int, int)),
+      this,
+      SIGNAL(seqReceive(int, int)));
+  connect(stream,
+      SIGNAL(seqExpect(int, int)),
+      this,
+      SIGNAL(seqExpect(int, int)));
+  connect(stream,
+      SIGNAL(numPacket(int, int)),
+      this,
+      SIGNAL(numPacket(int, int)));
+
+  // Session handling
+  connect(stream,
+      SIGNAL(sessionTrackingChanged(uint8_t)),
+      this,
+      SIGNAL(sessionTrackingChanged(uint8_t)));
+  connect(stream,
+      SIGNAL(lockOnClient(in_port_t, in_port_t)),
+      this,
+      SLOT(lockOnClient(in_port_t, in_port_t)));
+  connect(stream,
+      SIGNAL(closing(uint32_t, EQStreamID)),
+      this,
+      SLOT(closeStream(uint32_t, EQStreamID)));
+  connect(stream,
+      SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
+      this,
+      SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
+}
+
 ////////////////////////////////////////////////////
 // This function decides the fate of the Everquest packet 
 // and dispatches it to the correct packet stream for handling function
@@ -630,7 +571,6 @@ void EQPacket::dispatchPacket(int size, unsigned char *buffer)
 #ifdef DEBUG_PACKET
   debug ("EQPacket::dispatchPacket()");
 #endif /* DEBUG_PACKET */
-  /* Setup variables */
 
   // Create an object to parse the packet
   EQUDPIPPacketFormat packet(buffer, size, false);
@@ -644,7 +584,7 @@ void EQPacket::dispatchPacket(int size, unsigned char *buffer)
 
 void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
 {
-  /* Client Detection */
+  // Detect client by world server port traffic...
   if (m_detectingClient && packet.getSourcePort() == WorldServerGeneralPort)
   {
     m_ip = packet.getIPv4DestA();
@@ -661,118 +601,93 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     emit clientChanged(m_client_addr);
     seqInfo("Client Detected: %s", (const char*)m_ip);
   }
-  /* end client detection */
 
-  /* Find the stream we are sending this to */
-  EQPacketStream* stream;
-
-  /* Chat and Login Server Packets, Discard for now */
+  // Dispatch based on known streams
   if ((packet.getDestPort() == ChatServerPort) ||
       (packet.getSourcePort() == ChatServerPort))
+  {
+    // Drop chat server traffic
     return;
-
-  if ((packet.getDestPort() == WorldServerChatPort) ||
+  }
+  else if ((packet.getDestPort() == WorldServerChatPort) ||
       (packet.getSourcePort() == WorldServerChatPort))
+  {
+    // Drop cross-server chat traffic
     return;
-
-  if ((packet.getDestPort() == WorldServerChat2Port) ||
+  }
+  else if ((packet.getDestPort() == WorldServerChat2Port) ||
       (packet.getSourcePort() == WorldServerChat2Port))
+  {
+    // Drop email and cross-game chat traffic
     return;
-
-  if (((packet.getDestPort() >= LoginServerMinPort) &&
-       (packet.getDestPort() <= LoginServerMaxPort)) ||
+  }
+  else if (((packet.getDestPort() >= LoginServerMinPort) &&
+      (packet.getDestPort() <= LoginServerMaxPort)) ||
       (packet.getSourcePort() >= LoginServerMinPort) &&
       (packet.getSourcePort() <= LoginServerMaxPort))
+  {
+    // Drop login server traffic
     return;
-
-  if (packet.getIPv4SourceN() == m_client_addr)
-  {
-    if (packet.getDestPort() == WorldServerGeneralPort)
-      stream = m_client2WorldStream;
-    else 
-      stream = m_client2ZoneStream;
   }
-  else if (packet.getIPv4DestN() == m_client_addr)
+  else if (packet.getDestPort() == WorldServerGeneralPort ||
+      packet.getSourcePort() == WorldServerGeneralPort)
   {
-    if (packet.getSourcePort() == WorldServerGeneralPort)
-      stream = m_world2ClientStream;
-    else 
-      stream = m_zone2ClientStream;
+    // World server traffic. Dispatch it.
+    if (packet.getIPv4SourceN() == m_client_addr)
+    {
+      m_client2WorldStream->handlePacket(packet);
+    }
+    else
+    {
+      m_world2ClientStream->handlePacket(packet);
+    }
   }
   else
   {
-    return;
-  }
-
-  // Fill in the session id of the packet in case people need it and only
-  // have the packet. This is crappy, but logging doesn't have access to
-  // the stream the packet came from.
-  packet.setSessionKey(stream->getSessionKey());
-
-#ifdef APPLY_CRC_CHECK
-  // Check CRC. Have to ask the stream to do it, since the packet doesn't know
-  // it's sessionKey yet.
-  if (packet.hasCRC())
-  {
-    uint16_t calcedCRC = stream->calculateCRC(packet);
-  
-    if (calcedCRC != packet.crc() && packet.getSessionKey() != 0)
+    // Anything else we assume is zone server traffic.
+    if (packet.getIPv4SourceN() == m_client_addr)
     {
-      seqWarn("INVALID PACKET: Bad CRC [%s:%d -> %s:%d] netOp %04x seq %04x len %d crc (%04x != %04x)",
-	     (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
-	     (const char*)packet.getIPv4DestA(), packet.getDestPort(),
-             packet.getNetOpCode(),
-	     packet.arqSeq(), 
-	     packet.getUDPPayloadLength(),
-	     packet.crc(), calcedCRC);
-      return;
+      m_client2ZoneStream->handlePacket(packet);
+    }
+    else
+    {
+      m_zone2ClientStream->handlePacket(packet);
     }
   }
-#endif /* APPLY_CRC_CHECK */
-
-  /* discard pure ack/req packets */
-  if (packet.getNetOpCode() == OP_KeepAlive ||
-      packet.getNetOpCode() == OP_SessionStatRequest ||
-      packet.getNetOpCode() == OP_SessionStatResponse ||
-      packet.getNetOpCode() == OP_AckFuture ||
-      packet.getNetOpCode() == OP_AckAfterDisconnect ||
-      packet.getNetOpCode() == OP_Ack)
-  {
-#if defined(PACKET_PROCESS_DIAG)
-    seqDebug("discarding packet %s:%d ==>%s:%d netopcode=%04x size=%d",
-	   (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
-	   (const char*)packet.getIPv4DestA(), packet.getDestPort(),
-	   packet.getNetOpCode(), size);
-#endif
-    return;    
-  }
-
-  // Send it to the stream handler.
-  stream->handlePacket(packet);
-
-  return;
 } /* end dispatchPacket() */
 
 ////////////////////////////////////////////////////
 // Handle zone2client stream closing
-void EQPacket::closeStream()
+void EQPacket::closeStream(uint32_t sessionId, EQStreamID streamId)
 {
-  // reseting the pcap filter to a non-exclusive form allows us to beat 
-  // the race condition between timer and processing the zoneServerInfo
-  if(m_playbackPackets == PLAYBACK_OFF || m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
+  // If this is the zone server session closing, reset the pcap filter to
+  // a non-exclusive form
+  if ((streamId == zone2client || streamId == client2zone) &&
+         (m_playbackPackets == PLAYBACK_OFF || 
+          m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP))
   {
     m_packetCapture->setFilter(m_device, m_ip,
 			       m_realtime, IP_ADDRESS_TYPE, 0, 0);
     emit filterChanged();
   }
 
-  seqInfo("EQPacket: SEQClosing detected, awaiting next zone session,  pcap filter: EQ Client %s",
+  // Pass the close onto the streams
+  m_client2WorldStream->close(sessionId, streamId, m_session_tracking);
+  m_world2ClientStream->close(sessionId, streamId, m_session_tracking);
+  m_client2ZoneStream->close(sessionId, streamId, m_session_tracking);
+  m_zone2ClientStream->close(sessionId, streamId, m_session_tracking);
+
+  // If we just closed the zone server session, unlatch the client port
+  if (streamId == zone2client || streamId == client2zone)
+  {
+    m_clientPort = 0;
+    m_serverPort = 0;
+
+    emit clientPortLatched(m_clientPort);
+
+    seqInfo("EQPacket: SessionDisconnect detected, awaiting next zone session,  pcap filter: EQ Client %s",
 	  (const char*)m_ip);
-  
-  // we'll be waiting for a new SEQStart for ALL streams
-  // it seems we only ever see a proper closing sequence from the zone server
-  // so reset all packet sequence caches 
-  resetEQPacket();
+  }
 }
 
 ////////////////////////////////////////////////////
@@ -808,12 +723,12 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
   // Wanted this message even if we're running on playback...
   if (m_mac.length() == 17)
   {
-    seqInfo("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
+    seqInfo("EQPacket: SessionRequest detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
       (const char*)m_mac, m_clientPort, m_serverPort);
   }
   else
   {
-    seqInfo("EQPacket: SEQStart detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
+    seqInfo("EQPacket: SessionRequest detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
       (const char*)m_ip, m_clientPort, m_serverPort);
   }
   

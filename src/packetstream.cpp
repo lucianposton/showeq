@@ -71,6 +71,7 @@ EQPacketStream::EQPacketStream(EQStreamID streamid, uint8_t dir,
     m_fragment(streamid),
     m_sessionId(0),
     m_sessionKey(0),
+    m_sessionClientPort(0),
     m_maxLength(0),
     m_decodeKey(0),
     m_validKey(true)
@@ -161,6 +162,9 @@ void EQPacketStream::reset()
   m_fragment.reset();
   m_arqSeqExp = 0;
   m_arqSeqFound = false;
+  m_sessionClientPort = 0;
+  m_sessionId = 0;
+  m_sessionKey = 0;
 }
 
 ////////////////////////////////////////////////////
@@ -248,8 +252,13 @@ void EQPacketStream::processCache()
 
   // check if the cache has grown large enough that we should give up
   // on seeing the current serverArqSeqExp
-  // this should really only kick in for people with pathetic
-  // network cards that missed the packet.
+  // 
+  // If people see this a lot, they either have pathetic network cards, or
+  // are having problems keeping up with packets (slow computer? Too much
+  // net traffic?). Some possible solutions to this are to turn on session
+  // tracking to filter out more PF_PACKET packets from getting passed out of
+  // the kernel and to up the socket receive buffer sizes. See FAQ for
+  // more information.
   if (m_cache.size() >= m_arqSeqGiveUp)
   {
     // ok, if the expected server arq sequence isn't here yet, give up
@@ -467,6 +476,9 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
 {
   emit numPacket(++m_packetCount, (int)m_streamid);
 
+  // Packet is ours now. Logging needs to know this later on.
+  packet.setSessionKey(getSessionKey());
+
   // Only accept packets if we've been initialized unless they are
   // initialization packets!
   if (packet.getNetOpCode() != OP_SessionRequest &&
@@ -483,6 +495,44 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
 #endif
     return;
   }
+
+  // Only accept packets that correspond to our latched client port, if
+  // it is set. This helps filter out multiple sessions on the same physical
+  // host when two eq clients zone at the same time. The first one will win.
+  if (m_sessionClientPort != 0 &&
+      ((dir() == DIR_Server && m_sessionClientPort != packet.getDestPort()) ||
+       (dir() == DIR_Client && m_sessionClientPort != packet.getSourcePort())))
+  {
+#if (defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)) || (defined(PACKET_SESSION_DIAG) && PACKET_SESSION_DIAG > 1)
+    seqDebug("discarding packet %s:%d ==>%s:%d netopcode=%04x size=%d. Multiple sessions on the same box? Ignoring all but one of them. Latched client port %d. Session tracking %s.",
+      (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
+      (const char*)packet.getIPv4DestA(), packet.getDestPort(),
+      packet.getNetOpCode(), packet.payloadLength(),
+      m_sessionClientPort,
+        (m_session_tracking_enabled == 2 ? "locked on" :
+          (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
+#endif
+    return;
+  }
+
+  // Only accept packets that pass the EQ protocol-level CRC check. This helps
+  // weed out non-EQ packets that we might see.
+#ifdef APPLY_CRC_CHECK
+  if (packet.hasCRC())
+  {
+    uint16_t calcedCRC = calculateCRC(packet);
+
+    if (calcedCRC != packet.crc())
+    {
+      seqWarn("INVALID PACKET: Bad CRC [%s:%d -> %s:%d] netOp %04x seq %04x len %d crc (%04x != %04x)",
+         (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
+         (const char*)packet.getIPv4DestA(), packet.getDestPort(),
+         packet.getNetOpCode(), packet.arqSeq(), packet.getUDPPayloadLength(),
+         packet.crc(), calcedCRC);
+      return;
+    }
+  }
+#endif /* APPLY_CRC_CHECK */
 
   // Decode the packet first
   if (! packet.decode(m_maxLength))
@@ -894,6 +944,14 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
 
       m_arqSeqExp = 0;
       m_arqSeqFound = true;
+
+      if (m_session_tracking_enabled)
+      {
+        // Save off client port for the stream so we can match against it
+        // later. SessionRequest should always be an outer protocol packet
+        // so we can cast it to EQUDPIPPacketFormat to get the ip headers.
+        m_sessionClientPort = ((EQUDPIPPacketFormat&) packet).getSourcePort();
+      }
     }
     break;
     case OP_SessionResponse:
@@ -952,6 +1010,11 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       // Session tracking
       if (m_session_tracking_enabled)
       {
+        // Save off client port for the stream so we can match against it
+        // later. SessionRequest should always be an outer protocol packet
+        // so we can cast it to EQUDPIPPacketFormat to get the ip headers.
+        m_sessionClientPort = ((EQUDPIPPacketFormat&) packet).getDestPort();
+
         // If this is the world server talking to us, reset session tracking if
         // it is on so we unlatch the client in case of getting kicked.
         if (m_streamid == world2client)
@@ -1005,9 +1068,11 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       {
         m_session_tracking_enabled = 1;
         emit sessionTrackingChanged(m_session_tracking_enabled);
+
+        m_sessionClientPort = 0;
       }
 
-      emit closing();
+      emit closing(m_sessionId, m_streamid);
     }
     break;
     case OP_Ack:
@@ -1015,7 +1080,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
     case OP_AckAfterDisconnect:
     {
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-      seqDebug("EQPacket: no-op on for net opcode %04x seq %04x, stream %s (%d)",
+      seqDebug("EQPacket: no-op on ACK for net opcode %04x seq %04x, stream %s (%d)",
 	    packet.getNetOpCode(), eqntohuint16(packet.payload()), 
         EQStreamStr[m_streamid], m_streamid);
 #endif
@@ -1026,7 +1091,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
     case OP_SessionStatResponse:
     {
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-      seqDebug("EQPacket: no-op on for net opcode %04x, stream %s (%d)",
+      seqDebug("EQPacket: no-op on stats for net opcode %04x, stream %s (%d)",
 	    packet.getNetOpCode(), EQStreamStr[m_streamid], m_streamid);
 #endif
     }
@@ -1053,6 +1118,25 @@ void EQPacketStream::receiveSessionKey(uint32_t sessionId,
     seqDebug("EQPacket: Received key %u for session %u on stream %s (%d) from stream %s (%d)",
       m_sessionKey, m_sessionId, EQStreamStr[m_streamid], m_streamid,
       EQStreamStr[streamid], streamid);
+#endif
+  }
+}
+
+///////////////////////////////////////////////////////////////
+// Process a session disconnect if it is for us
+void EQPacketStream::close(uint32_t sessionId, EQStreamID streamId,
+  uint8_t sessionTracking)
+{
+  if (sessionId == m_sessionId)
+  {
+     // Close is for us
+     reset();
+     setSessionTracking(sessionTracking);
+
+#ifdef PACKET_SESSION_DIAG
+     seqInfo("EQPacket: SessionDisconnected received on stream %s (%d). Closing session %u on stream %s (%d).",
+       EQStreamStr[streamId], streamId, sessionId,
+       EQStreamStr[m_streamid], m_streamid);
 #endif
   }
 }

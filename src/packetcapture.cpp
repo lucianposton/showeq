@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2003 by the respective ShowEQ Developers
+ *  Copyright 2000-2005 by the respective ShowEQ Developers
  *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
  */
 
@@ -33,25 +33,31 @@ PacketCaptureThread::PacketCaptureThread() :
 
 PacketCaptureThread::~PacketCaptureThread()
 {
-  // Drop the packets we have lying around
-  pthread_mutex_lock (&m_pcache_mutex);
+    if (m_pcache_pcap)
+    {
+        // Turn off pcap
+        pcap_close(m_pcache_pcap);
+    }
 
-  struct packetCache *pc = m_pcache_first;
-  struct packetCache* freeMe = NULL;
+    // Drop the packets we have lying around
+    pthread_mutex_lock (&m_pcache_mutex);
 
-  while (pc)
-  {
-    freeMe = pc;
-    pc = pc->next;
+    struct packetCache *pc = m_pcache_first;
+    struct packetCache* freeMe = NULL;
 
-    free(freeMe);
-  }
+    while (pc)
+    {
+        freeMe = pc;
+        pc = pc->next;
 
-  m_pcache_first = NULL;
-  m_pcache_last = NULL;
-  m_pcache_closed = true;
+        free(freeMe);
+    }
 
-  pthread_mutex_unlock (&m_pcache_mutex);
+    m_pcache_first = NULL;
+    m_pcache_last = NULL;
+    m_pcache_closed = true;
+
+    pthread_mutex_unlock (&m_pcache_mutex);
 }
 
 void PacketCaptureThread::setPlaybackSpeed(int playbackSpeed)
@@ -75,108 +81,124 @@ void PacketCaptureThread::setPlaybackSpeed(int playbackSpeed)
     }
 }
 
-void PacketCaptureThread::start(const char *device, const char *host, bool realtime, uint8_t address_type)
+void PacketCaptureThread::start(const char *device, const char *host, 
+        bool realtime, uint8_t address_type)
 {
-
-    char ebuf[256]; // pcap error buffer
+    char ebuf[PCAP_ERRBUF_SIZE]; // pcap error buffer
     char filter_buf[256]; // pcap filter buffer 
     struct bpf_program bpp;
     struct sched_param sp;
+    bpf_u_int32 mask; // sniff device netmask
+    bpf_u_int32 net; // sniff device ip
 
     seqInfo("Initializing Packet Capture Thread: ");
     m_pcache_closed = false;
 
-   // create pcap style filter expressions
-   if (address_type == IP_ADDRESS_TYPE)
-   {
-      if (strcmp(host, AUTOMATIC_CLIENT_IP) == 0)
-      {
-	seqInfo("Filtering packets on device %s, searching for EQ client...", device);
-	sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800");
-      }
-      else
-      {
-	seqInfo("Filtering packets on device %s, IP host %s", device, host);
-	sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and host %s and ether proto 0x0800", host);
-      }
-   }
+    // Fetch the netmask for the device to use later with the filter.
+    if (pcap_lookupnet(device, &net, &mask, ebuf) == -1)
+    {
+        // Couldn't find net mask. Just leave it open.
+        seqWarn("Couldn't determine netmask of device %s. Using 0.0.0.0. Error was %s",
+                device, ebuf);
+    }
 
-   else if (address_type == MAC_ADDRESS_TYPE)
-   {
-     seqInfo("Filtering packets on device %s, MAC host %s", device, host);
-     sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether host %s and ether proto 0x0800", host);
-   }
+    // create pcap style filter expressions
+    if (address_type == IP_ADDRESS_TYPE)
+    {
+        if (strcmp(host, AUTOMATIC_CLIENT_IP) == 0)
+        {
+            seqInfo("Filtering packets on device %s, searching for EQ client...", device);
+            sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800");
+        }
+        else
+        {
+            seqInfo("Filtering packets on device %s, IP host %s", device, host);
+            sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and host %s and ether proto 0x0800", host);
+        }
+    }
+    else if (address_type == MAC_ADDRESS_TYPE)
+    {
+        seqInfo("Filtering packets on device %s, MAC host %s", device, host);
+        sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether host %s and ether proto 0x0800", host);
+    }
+    else
+    {
+        seqFatal("pcap_error:filter_string: unknown address_type (%d)", address_type);
+        exit(0);
+    }
 
-   else
-   {
-     seqFatal("pcap_error:filter_string: unknown address_type (%d)", address_type);
-     exit(0);
-   }
-
-   /* A word about pcap_open_live() from the docs
-   ** to_ms specifies the read timeout in milliseconds.   The
-   ** read timeout is used to arrange that the read not necessarily
-   ** return immediately when a packet is seen, but that it wait
-   ** for  some amount of time to allow more packets to arrive and 
-   ** to read multiple packets from the OS kernel in one operation.
-   ** Not all  platforms  support  a read timeout; on platforms that
-   ** don't, the read timeout is ignored.
-   ** 
-   ** In Linux 2.4.x with the to_ms set to 0 we get packets immediatly,
-   ** and thats what we need in this application, so don't change it!! 
-   ** 
-   ** a race condition exists between this thread and the main thread 
-   ** any artificial delay in getting packets can cause filtering problems
-   ** and cause us to miss new stream when the player zones.
-   */
-   // initialize the pcap object 
-   m_pcache_pcap = pcap_open_live((char *) device, BUFSIZ, true, 0, ebuf);
+    /* A word about pcap_open_live() from the docs
+     ** to_ms specifies the read timeout in milliseconds.   The
+     ** read timeout is used to arrange that the read not necessarily
+     ** return immediately when a packet is seen, but that it wait
+     ** for  some amount of time to allow more packets to arrive and 
+     ** to read multiple packets from the OS kernel in one operation.
+     ** Not all  platforms  support  a read timeout; on platforms that
+     ** don't, the read timeout is ignored.
+     ** 
+     ** In Linux 2.4.x with the to_ms set to 0 we get packets immediatly,
+     ** and thats what we need in this application, so don't change it!! 
+     ** 
+     ** a race condition exists between this thread and the main thread 
+     ** any artificial delay in getting packets can cause filtering problems
+     ** and cause us to miss new stream when the player zones.
+     */
+    // initialize the pcap object 
+    m_pcache_pcap = pcap_open_live((char *) device, BUFSIZ, true, 0, ebuf);
 #ifdef __FreeBSD__
-   // if we're on FreeBSD, we need to call ioctl on the file descriptor
-   // with BIOCIMMEDIATE to get the kernel Berkeley Packet Filter device
-   // to return packets to us immediately, rather than holding them in
-   // it's internal buffer... if we don't do this, we end up getting 32K
-   // worth of packets all at once, at long intervals -- if someone
-   // knows a less hacky way of doing this, I'd love to hear about it.
-   // the problem here is that libpcap doesn't expose an API to do this
-   // in any way
-   int fd = *((int*)m_pcache_pcap);
-   int temp = 1;
-   if ( ioctl( fd, BIOCIMMEDIATE, &temp ) < 0 )
-     seqWarn("PCAP couldn't set immediate mode on BSD" );
+    // if we're on FreeBSD, we need to call ioctl on the file descriptor
+    // with BIOCIMMEDIATE to get the kernel Berkeley Packet Filter device
+    // to return packets to us immediately, rather than holding them in
+    // it's internal buffer... if we don't do this, we end up getting 32K
+    // worth of packets all at once, at long intervals -- if someone
+    // knows a less hacky way of doing this, I'd love to hear about it.
+    // the problem here is that libpcap doesn't expose an API to do this
+    // in any way
+    int fd = *((int*)m_pcache_pcap);
+    int temp = 1;
+    if ( ioctl( fd, BIOCIMMEDIATE, &temp ) < 0 )
+    {
+        seqWarn("PCAP couldn't set immediate mode on BSD" );
+    }
 #endif
-   if (!m_pcache_pcap)
-   {
-     seqWarn("pcap_error:pcap_open_live(%s): %s", device, ebuf);
-     if ((getuid() != 0) && (geteuid() != 0))
-       seqWarn("Make sure you are running ShowEQ as root.");
-     exit(0);
-   }
+    if (!m_pcache_pcap)
+    {
+        seqWarn("pcap_error:pcap_open_live(%s): %s", device, ebuf);
+        if ((getuid() != 0) && (geteuid() != 0))
+        {
+            seqWarn("Make sure you are running ShowEQ as root.");
+        }
+        exit(0);
+    }
 
-   if (pcap_compile(m_pcache_pcap, &bpp, filter_buf, 1, 0) == -1)
-   {
-      pcap_perror (m_pcache_pcap, "pcap_error:pcap_compile");
-      exit(0);
-   }
+    if (pcap_compile(m_pcache_pcap, &bpp, filter_buf, 1, net) == -1)
+    {
+        pcap_perror (m_pcache_pcap, "pcap_error:pcap_compile");
+        exit(0);
+    }
 
-   if (pcap_setfilter (m_pcache_pcap, &bpp) == -1)
-   {
-      pcap_perror (m_pcache_pcap, "pcap_error:pcap_setfilter");
-      exit(0);
-   }
+    if (pcap_setfilter (m_pcache_pcap, &bpp) == -1)
+    {
+        pcap_perror (m_pcache_pcap, "pcap_error:pcap_setfilter");
+        exit(0);
+    }
 
-   m_pcache_first = m_pcache_last = NULL;
+    pcap_freecode(&bpp);
 
-   pthread_mutex_init (&m_pcache_mutex, NULL);
-   pthread_create (&m_tid, NULL, loop, (void*)this);
+    m_pcache_first = m_pcache_last = NULL;
 
-   if (realtime)
-   {
-      memset (&sp, 0, sizeof (sp));
-      sp.sched_priority = 1;
-      if (pthread_setschedparam (m_tid, SCHED_RR, &sp) != 0)
-         seqWarn("Failed to set capture thread realtime.");
-   }
+    pthread_mutex_init (&m_pcache_mutex, NULL);
+    pthread_create (&m_tid, NULL, loop, (void*)this);
+
+    if (realtime)
+    {
+        memset (&sp, 0, sizeof (sp));
+        sp.sched_priority = 1;
+        if (pthread_setschedparam (m_tid, SCHED_RR, &sp) != 0)
+        {
+            seqWarn("Failed to set capture thread realtime.");
+        }
+    }
 }
 
 //------------------------------------------------------------------------
@@ -214,8 +236,9 @@ void PacketCaptureThread::startOffline(const char* filename, int playbackSpeed)
 
 void PacketCaptureThread::stop()
 {
-  // close the pcap session
-  pcap_close(m_pcache_pcap);
+    // close the pcap session
+    pcap_close(m_pcache_pcap);
+    m_pcache_pcap = NULL;
 }
 
 void* PacketCaptureThread::loop (void *param)
@@ -226,8 +249,8 @@ void* PacketCaptureThread::loop (void *param)
 }
 
 void PacketCaptureThread::packetCallBack(u_char * param, 
-					 const struct pcap_pkthdr *ph,
-					 const u_char *data)
+            const struct pcap_pkthdr *ph,
+            const u_char *data)
 {
     struct packetCache *pc;
     PacketCaptureThread* myThis = (PacketCaptureThread*)param;
@@ -339,13 +362,17 @@ void PacketCaptureThread::packetCallBack(u_char * param,
    
     if (! myThis->m_pcache_closed)
     {
-      if (myThis->m_pcache_last)
-       myThis->m_pcache_last->next = pc;
+        if (myThis->m_pcache_last)
+        {
+            myThis->m_pcache_last->next = pc;
+        }
 
-      myThis->m_pcache_last = pc;
+        myThis->m_pcache_last = pc;
 
-      if (!myThis->m_pcache_first)
-       myThis->m_pcache_first = pc;
+        if (!myThis->m_pcache_first)
+        {
+            myThis->m_pcache_first = pc;
+        }
     }
     else
     {
@@ -391,35 +418,73 @@ void PacketCaptureThread::setFilter (const char *device,
                                      bool realtime,
                                      uint8_t address_type,
                                      uint16_t zone_port,
-				     uint16_t client_port
-                                    )
+                                     uint16_t client_port)
 {
     char filter_buf[256]; // pcap filter buffer 
+    char ebuf[PCAP_ERRBUF_SIZE];
     struct bpf_program bpp;
     struct sched_param sp;
+    bpf_u_int32 mask; // sniff device netmask
+    bpf_u_int32 net; // sniff device ip
+
+    // Fetch the netmask for the device to use later with the filter
+    if (pcap_lookupnet(device, &net, &mask, ebuf) == -1)
+    {
+        // Couldn't find net mask. Just leave it open.
+        seqWarn("Couldn't determine netmask of device %s. Using 0.0.0.0. Error was %s",
+                device, ebuf);
+    }
 
     /* Listen to World Server or the specified Zone Server */
     if (address_type == IP_ADDRESS_TYPE && client_port)   
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", client_port, client_port, hostname);
+    {
+        // Restrict to client port and ip, plus world streams.
+        sprintf(filter_buf, 
+            "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", 
+            client_port, client_port, hostname);
+    }
     else if (address_type == IP_ADDRESS_TYPE && zone_port) 
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", zone_port, zone_port, hostname);
+    {
+        // Restrict to zone port and world streams.
+        sprintf(filter_buf, 
+            "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and host %s and ether proto 0x0800", 
+            zone_port, zone_port, hostname);
+    }
     else if (address_type == MAC_ADDRESS_TYPE && client_port)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", client_port, client_port, hostname);
+    {
+        // Restrict to client port and world streams.
+        sprintf(filter_buf, 
+            "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", 
+            client_port, client_port, hostname);
+    }
     else if (address_type == MAC_ADDRESS_TYPE && zone_port)
-        sprintf (filter_buf, "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", zone_port, zone_port, hostname);
+    {
+        // Restrict to zone port and world streams.
+        sprintf(filter_buf, 
+            "(udp[0:2] = 9000 or udp[2:2] = 9000 or udp[0:2] = 9876 or udp[0:2] = %d or udp[2:2] = %d) and ether host %s and ether proto 0x0800", 
+            zone_port, zone_port, hostname);
+    }
     else if (hostname != NULL && !client_port && !zone_port)
-         sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and host %s", hostname);
+    {
+        // Leave wide open.
+        sprintf(filter_buf, 
+          "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and host %s", 
+          hostname);
+    }
     else
     {
-      seqInfo("Filtering packets on device %s, searching for EQ client...", device);
-      sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800");
+        // Not even a hostname. Leave really wide open!
+        seqInfo("Filtering packets on device %s, searching for EQ client...", 
+                device);
+        sprintf(filter_buf, 
+                "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800");
     }
 
-    if (pcap_compile (m_pcache_pcap, &bpp, filter_buf, 1, 0) == -1)
+    if (pcap_compile (m_pcache_pcap, &bpp, filter_buf, 1, net) == -1)
     {
-      seqWarn("%s",filter_buf);
-      pcap_perror(m_pcache_pcap, "pcap_error:pcap_compile_error");
-      exit (0);
+        seqWarn("%s",filter_buf);
+        pcap_perror(m_pcache_pcap, "pcap_error:pcap_compile_error");
+        exit(0);
     }
 
     if (pcap_setfilter (m_pcache_pcap, &bpp) == -1)
@@ -428,14 +493,18 @@ void PacketCaptureThread::setFilter (const char *device,
         exit (0);
     }
 
+    pcap_freecode(&bpp);
+
     seqDebug("PCAP Filter Set: %s", filter_buf);
 
     if (realtime)
     {
-       memset (&sp, 0, sizeof (sp));
-       sp.sched_priority = 1;
-       if (pthread_setschedparam (m_tid, SCHED_RR, &sp) != 0)
-	 seqWarn("Failed to set capture thread realtime.");
+        memset (&sp, 0, sizeof (sp));
+        sp.sched_priority = 1;
+        if (pthread_setschedparam (m_tid, SCHED_RR, &sp) != 0)
+        {
+            seqWarn("Failed to set capture thread realtime.");
+        }
     }
 
     m_pcapFilter = filter_buf;

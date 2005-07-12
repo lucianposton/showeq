@@ -76,6 +76,7 @@ class EQPacketStream : public QObject
 		const QObject* receiver, const char* member);
   void receiveSessionKey(uint32_t sessionId, EQStreamID streamid, 
     uint32_t sessionKey);
+  void close(uint32_t sessionId, EQStreamID streamid, uint8_t sessionTracking);
   uint16_t calculateCRC(EQProtocolPacket& packet);
   uint32_t getSessionKey() const { return m_sessionKey; }
   
@@ -92,7 +93,7 @@ class EQPacketStream : public QObject
 		     bool unknown);
 
   // this signals stream closure
-  void closing();
+  void closing(uint32_t sessionId, EQStreamID streamId);
 
   // this signals a change in the session tracking state
   void sessionTrackingChanged(uint8_t);
@@ -137,6 +138,7 @@ class EQPacketStream : public QObject
   // Session info
   uint32_t m_sessionId;
   uint32_t m_sessionKey;
+  in_port_t m_sessionClientPort;
   uint32_t m_maxLength;
 
   // encryption
