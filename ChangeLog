@@ -6,6 +6,7 @@ purple (07/11/05)
 + Merged in my old alpha netlayer patch which helps with double boxing by
 	enforcing port matches in code for when the pcap filter isn't
 	locked down fast enough because of multithreading
++ Fixed template constructor in Point3DArray to comply with gcc4 (thanks Basic)
 
 purple (07/07/05)
 --------------------

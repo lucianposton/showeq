@@ -57,7 +57,7 @@ class Point3DArray : public QMemArray<Point3D<_T> >
 };
 
 template <class _T> inline 
-Point3DArray<_T>::Point3DArray<_T>(uint32_t nPoints, const _T* points)
+Point3DArray<_T>::Point3DArray(uint32_t nPoints, const _T* points)
 {
   setPoints(nPoints, points);
 }
