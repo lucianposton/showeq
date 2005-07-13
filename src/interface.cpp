@@ -1167,8 +1167,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    filterMenu->insertItem("&Reload Filters", m_filterMgr, SLOT(loadFilters()), Key_F3);
    filterMenu->insertItem("&Save Filters", m_filterMgr, SLOT(saveFilters()), Key_F4);
-   if (!shortZoneName.isEmpty())
-      filterMenu->insertItem("Save &Zone Filter", this, SLOT(save_as_filter_file()));
    filterMenu->insertItem("&Edit Filters", this, SLOT(launch_editor_filters()));
    filterMenu->insertItem("Select Fil&ter File", this, SLOT(select_filter_file()));
 
@@ -3125,14 +3123,6 @@ EQInterface::select_filter_file(void)
                                                    );
   if (!filterFile.isEmpty())
     m_filterMgr->loadFilters(filterFile);
-}
-
-void
-EQInterface::save_as_filter_file(void)
-{
-   QString shortZoneName = m_zoneMgr->shortZoneName();
-   if (!shortZoneName.isEmpty())
-      m_filterMgr->saveAsFilters(shortZoneName);
 }
 
 void EQInterface::toggle_filter_Case(int id)

@@ -1,12 +1,14 @@
 Version: $Id$ $Name$
 
-purple (07/11/05)
+purple (07/12/05)
 -------------------
 + Updated version to 5.0.0.25pre
 + Merged in my old alpha netlayer patch which helps with double boxing by
 	enforcing port matches in code for when the pcap filter isn't
 	locked down fast enough because of multithreading
 + Fixed template constructor in Point3DArray to comply with gcc4 (thanks Basic)
++ Removed the redundant and broken Save Zone Filters from the Filters menu
+	since it was both redundant and broken
 
 purple (07/07/05)
 --------------------

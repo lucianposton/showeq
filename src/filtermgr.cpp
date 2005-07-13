@@ -157,18 +157,6 @@ void FilterMgr::saveFilters(void)
   m_filters->save(m_filterFile);
 }
 
-
-void FilterMgr::saveAsFilters(const QString& shortZoneName)
-{
-  QString fileName = shortZoneName + ".xml";
-
-  QFileInfo fileInfo = m_dataLocMgr->findWriteFile("filters", fileName, true);
-
-  seqInfo("Saving filters to %s", (const char*)fileInfo.absFilePath());
-
-  m_filters->save(fileInfo.absFilePath());
-}
-
 void FilterMgr::listFilters(void)
 {
   m_filters->list();

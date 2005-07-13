@@ -264,7 +264,6 @@ class EQInterface:public QMainWindow
    void toggle_view_GuildList();
    void resetMaxMana();
    void select_filter_file();
-   void save_as_filter_file();
    void toggle_filter_Case(int id);
    void toggle_filter_AlertInfo(int id);
    void toggle_filter_UseSystemBeep(int id);
