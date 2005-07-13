@@ -279,7 +279,10 @@ void FilterMgr::saveZoneFilters(void)
 
   seqInfo("Saving filters to %s", (const char*)m_zoneFilterFile);
 
-  m_zoneFilters->save(m_zoneFilterFile);
+  if (! m_zoneFilters->save(m_zoneFilterFile))
+  {
+    seqWarn("Failed saving filters.");
+  }
 }
 
 bool FilterMgr::registerRuntimeFilter(const QString& name, 

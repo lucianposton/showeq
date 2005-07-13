@@ -551,7 +551,7 @@ bool Filters::save(const QString& filename) const
   // output closing entity
   out << "</seqfilters>" << endl;
 
-  return false;
+  return true;
 }
 
 bool Filters::save(void) const
