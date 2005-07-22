@@ -71,6 +71,7 @@ Player::Player (QObject* parent,
   m_defaultDeity = pSEQPrefs->getPrefInt("DefaultDeity", section, DEITY_AGNOSTIC);
   
   setUseDefaults(true);
+  setDistanceToPlayer(0.00f);
   
   // set the name to the default name
   Spawn::setName(m_defaultName);
