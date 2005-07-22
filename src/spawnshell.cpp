@@ -427,7 +427,7 @@ void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
 
   for (int i = 0; i < spawndatasize; i++)
   {
-#if 0 
+#if 0
   // Dump position updates for debugging spawn struct position changes
   for (int j=54; j<70; i++)
   {
@@ -495,7 +495,7 @@ void SpawnShell::newSpawn(const uint8_t* data)
 void SpawnShell::newSpawn(const spawnStruct& s)
 {
 #ifdef SPAWNSHELL_DIAG
-   seqDebug("SpawnShell::newSpawn(spawnStruct *(name='%s'), bSelected=%s)", s.name, bSelected?"true":"false");
+   seqDebug("SpawnShell::newSpawn(spawnStruct *(name='%s'))", s.name);
 #endif
    // if this is the SPAWN_SELF it's the player
    if (s.NPC == SPAWN_SELF)

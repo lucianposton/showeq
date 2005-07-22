@@ -33,6 +33,10 @@ GroupMgr::GroupMgr(SpawnShell* spawnShell,
 
 GroupMgr::~GroupMgr()
 {
+  for (int i=0; i<MAX_GROUP_MEMBERS; i++)
+  {
+    delete m_members[i];
+  }
 }
 
 void GroupMgr::player(const uint8_t* data)

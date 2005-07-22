@@ -223,7 +223,9 @@ void EQPacketStream::setCache(uint16_t serverArqSeq, EQProtocolPacket& packet)
         seqDebug("SEQ: Update arq (%04x) stream %d in cache", serverArqSeq, m_streamid);
 #endif
 
-        *it->second = packet;
+        // Free the old packet at this place and replace with the new one.
+        delete it->second;
+        it->second = new EQProtocolPacket(packet, true);
      }
 #if defined(PACKET_PROCESS_DIAG) && defined(APPLY_CRC_CHECK)
      else

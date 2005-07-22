@@ -1,14 +1,18 @@
 Version: $Id$ $Name$
 
-purple (07/12/05)
+purple (07/22/05)
 -------------------
-+ Updated version to 5.0.0.25pre
++ Updated version to 5.0.0.25
 + Merged in my old alpha netlayer patch which helps with double boxing by
 	enforcing port matches in code for when the pcap filter isn't
 	locked down fast enough because of multithreading
 + Fixed template constructor in Point3DArray to comply with gcc4 (thanks Basic)
 + Removed the redundant and broken Save Zone Filters from the Filters menu
 	since it was both redundant and broken
++ Fixed a major bug in the netlayer which caused sequenced packets that are
+	seen twice to invalidate themselves in the cache and cause garbage
++ Couple new races hand-entered
++ Cleanup memory leak in group manager
 
 purple (07/07/05)
 --------------------

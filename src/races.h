@@ -426,7 +426,7 @@
     "Gelidran",               // 417
     "Discordling",            // 418
     "Girplan",                // 419
-    NULL,                     // 420
+    "Battlemaster Rhorius",   // 420
     NULL,                     // 421
     NULL,                     // 422
     NULL,                     // 423
