@@ -4,124 +4,100 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2000-2003 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Copyright 2000-2004 by the respective ShowEQ Developers
+ *  Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
  */
 
 /* Implementation of packet format classes class */
 
 #include "packetformat.h"
+#include "diagnosticmessages.h"
+
+#include <zlib.h>
 
 //----------------------------------------------------------------------
-// EQPacketFormatRaw class methods
-QString EQPacketFormatRaw::headerFlags(const QString& prefix, 
-				       bool brief) const
+// EQProtocolPacket class methods
+EQProtocolPacket::EQProtocolPacket(EQProtocolPacket& packet, bool copy)
+  : m_ownCopy(copy)
 {
-  QString tmp;
-  if (!prefix.isEmpty())
-  {
-    if (brief)
-      tmp = prefix + ": ";
-    else
-      tmp = prefix + "[Hdr (" + QString::number(flagsHi(), 16) + ", "
-	+ QString::number(flagsLo(), 16) + "): ";
-  }
-  else if (!brief)
-    tmp = "[Hdr (" + QString::number(flagsHi(), 16) + ", "
-	+ QString::number(flagsLo(), 16) + "): ";
+  // Take the easy stuff first.
+  m_length = packet.m_length;
+  m_netOp = packet.m_netOp;
+  m_flags = packet.m_flags;
+  m_payloadLength = packet.m_payloadLength;
+  m_rawPayloadLength = packet.m_rawPayloadLength;
+  m_arqSeq = packet.m_arqSeq;
+  m_subpacket = packet.m_subpacket;
+  m_bDecoded = packet.m_bDecoded;
 
-  if (isARQ())
-    tmp += "ARQ, ";
-  if (isClosingLo())
-    tmp += "closingLo, ";
-  if (isFragment())
-    tmp += "Fragment, ";
-  if (isASQ())
-    tmp += "ASQ, ";
-  if (isSEQStart())
-    tmp += "SEQStart, ";
-  if (isClosingHi())
-    tmp += "closingHi, ";
-  if (isSEQEnd())
-    tmp += "SEQEnd, ";
-  if (isARSP())
-    tmp += "ARSP, ";
-  if (isNAK())
-    tmp += "NAK, ";
-  if (isSpecARQ())
-    tmp += "SpecARQ, ";
-  if (m_flagsHi.m_unknown1)
-    tmp += "HiUnknown1, ";
-
-  if (skip() != 0)
-    tmp += QString("Skip: ") + QString::number(skip(), 16) + ", ";
-  
-  tmp += QString("seq: ") + QString::number(seq(), 16);
-
-  tmp += "] ";
-
-  if (!brief)
-  {
-    if (isARQ())
-      tmp += QString("[ARQ: ") + QString::number(arq(), 16) + "] ";
-    
-    if (isFragment())
-    {
-      tmp += QString("[FragSeq: ") + QString::number(fragSeq(), 16)
-	+ ", FragCur: " + QString::number(fragCur(), 16)
-	+ ", FragTot: " + QString::number(fragTot(), 16) + "] ";
-    }
-  }
-
-  return tmp;
-}
-
-//----------------------------------------------------------------------
-// EQPacketFormat class methods
-EQPacketFormat::EQPacketFormat(EQPacketFormat& packet, bool copy)
-{
   if (!copy)
   {
-    // the data is someone elses memory
-    m_ownCopy = false;
-
     // just copy all their values
     m_packet = packet.m_packet;
-    m_length = packet.m_length;
-    m_postSkipData = packet.m_postSkipData;
-    m_postSkipDataLength = packet.m_postSkipDataLength;
     m_payload = packet.m_payload;
-    m_payloadLength = packet.m_payloadLength;
-    m_arq = packet.m_arq;
+    m_rawPayload = packet.m_rawPayload;
+    m_bAllocedPayload = false;
   }
   else
   {
-    init(packet.m_packet, packet.m_length, copy);
+    // Need to copy copy their values for buffers. m_packet first.
+    m_packet = new uint8_t[m_length];
+    memcpy(m_packet, packet.m_packet, m_length);
+
+    // Still have m_payload, m_rawPayload to do. Only if this packet
+    // alloced itself otherwise these point into m_packet.
+    if (packet.m_bAllocedPayload)
+    {
+      // Have packet owned payload to copy over.
+      m_rawPayload = new uint8_t[m_rawPayloadLength];
+      memcpy(m_rawPayload, packet.m_rawPayload, m_rawPayloadLength);
+      m_bAllocedPayload = true;
+
+      m_payload = m_rawPayload + (packet.m_payload - packet.m_rawPayload);
+    }
+    else
+    {
+      // No packet owned payload and init copied the raw payload. Just set
+      // pointers into m_packet
+      m_rawPayload = m_packet + (packet.m_rawPayload - packet.m_packet);
+      m_payload = m_packet + (packet.m_payload - packet.m_packet);
+      m_bAllocedPayload = false;
+    }
   }
 }
 
-EQPacketFormat::~EQPacketFormat()
+EQProtocolPacket::~EQProtocolPacket()
 {
   if (m_ownCopy)
     delete [] (uint8_t*)m_packet;
+
+  if (m_bAllocedPayload)
+  {
+    delete[] m_rawPayload;
+  }
 }
 
-EQPacketFormat& EQPacketFormat::operator=(const EQPacketFormat& packet)
+EQProtocolPacket& EQProtocolPacket::operator=(const EQProtocolPacket& packet)
 {
   // if this was a deep copy, delete the existing data
   if (m_ownCopy)
     delete [] (uint8_t*)m_packet;
+  if (m_bAllocedPayload)
+  {
+    delete[] m_rawPayload;
+    m_bAllocedPayload = false;
+  }
 
-  // initialize as deep as this object previously was
-  init(packet.m_packet, packet.m_length, m_ownCopy);
+  init(packet.m_packet, packet.m_length, m_ownCopy, packet.m_subpacket);
 
   return *this;
 }
 
-void EQPacketFormat::init(EQPacketFormatRaw* packet,
-			  uint16_t length,
-			  bool copy)
+void EQProtocolPacket::init(uint8_t* packet, uint16_t length, 
+  bool copy, bool subpacket)
 {
+  m_subpacket = subpacket;
+
   if (!copy)
   {
     // the data is someone elses memory
@@ -139,8 +115,7 @@ void EQPacketFormat::init(EQPacketFormatRaw* packet,
     m_ownCopy = true;
 
     // allocate memory for the copy
-    // NOTE: We should use an allocater for this instead of normal new
-    m_packet = (EQPacketFormatRaw*)new uint8_t[length];
+    m_packet = new uint8_t[length];
 
     // copy the data
     memcpy((void*)m_packet, (void*)packet, length);
@@ -153,54 +128,160 @@ void EQPacketFormat::init(EQPacketFormatRaw* packet,
   init();
 }
 
-void EQPacketFormat::init()
+////////////////////////////////////////////////////////////////////////////
+// Initialize the packet. After this is done, flags will be correct and the
+// payload will be pointing at the payload, unless flags say this is a
+// compressed packet all bets are off until you've called decode.
+void EQProtocolPacket::init()
 {
-  // calculate position of first byte past the skipable data
-  m_postSkipData = ((uint8_t*)m_packet) + m_packet->skip() + 2;
+  // Get the net op code. Leave in network order. Need this to decide things.
+  m_netOp = *(uint16_t*)(m_packet);
 
-  // calculate the length of the rest of the data
-  m_postSkipDataLength = m_length - (m_postSkipData - ((uint8_t*)m_packet));
-
-  // get the location of the payload
-  m_payload = m_packet->payload();
-
-  // calculate the lenght of the payload (length - diff - len(checkSum))
-  m_payloadLength = m_length - (m_payload - ((uint8_t*)m_packet)) - 4; 
-    
-
-  // make a local copy of the arq to speed up comparisons
-  m_arq = eqntohuint16(&m_postSkipData[2]);
-}
-
-QString EQPacketFormat::headerFlags(const QString& prefix, 
-				    bool brief) const
-{
-  QString tmp;
-
-  if (brief)
-    tmp = prefix + ": ";
-  else
-    tmp = prefix + " Hdr (" + QString::number(flagsHi(), 16) + ", "
-      + QString::number(flagsLo(), 16) + "): ";
-
-  tmp += m_packet->headerFlags("", true);
-
-  if (!brief)
+  // Now line up the payload as best we can. Note that if this packet is 
+  // compressed, the opcode could potentially be wrong and the payload
+  // not aligned properly. You need to call decode to make sure. But on
+  // non-compressed packets this is good enough and you don't need to decode
+  if (! hasFlags())
   {
-    if (isARQ())
-      tmp += QString("arq: ") + QString::number(arq(), 16) + ", ";
-    
-    if (isFragment())
+    // No flags. Netopcode, then payload. Easy.
+    m_flags = 0;
+    m_rawPayload = &m_packet[2];
+    m_bAllocedPayload = false;
+
+    // Total - net op - crc
+    m_rawPayloadLength = m_length - 2 - (hasCRC() ? 2 : 0);
+
+    // Decoded since no flags
+    m_payload = m_rawPayload;
+    m_payloadLength = m_rawPayloadLength;
+    m_bDecoded = true;
+  }
+  else
+  {
+    // Flags in the stream. Placement depends on whether this is an app or net
+    // opcode.
+    if (IS_APP_OPCODE(m_netOp))
     {
-      tmp += QString("FragSeq: ") + QString::number(fragSeq(), 16)
-	+ ", FragCur: " + QString::number(fragCur(), 16)
-	+ ", FragTot: " + QString::number(fragTot(), 16) + ", ";
+      // opcode is an app opcode. Flags are byte 2 of the packet.
+      m_flags = m_packet[1];
+
+      // The opcode is split by the flags. If it is compressed (based on those 
+      // above flags) then this is wrong but will fixed by decode
+      m_netOp = m_packet[2] << 8 | m_packet[0];
+    }
+    else
+    {
+      // Flags at byte #3 after net opcode. m_netOp is correct.
+      m_flags = m_packet[2];
     }
 
-    tmp += QString("Opcode: ") + QString::number(eqntohuint16(payload()), 16);
+    // Either way, let's start the payload at byte 4 for now. Decode may
+    // change this. Length is total - netop - flags - crc.
+    m_rawPayload = &m_packet[3];
+    m_rawPayloadLength = m_length - 2 - 1 - (hasCRC() ? 2 : 0);
+    m_bAllocedPayload = false;
+
+    if (! (m_flags & PROTOCOL_FLAG_COMPRESSED))
+    {
+      // We have the packet here, let's finish the job.
+      m_payloadLength = m_rawPayloadLength;
+      m_payload = m_rawPayload;
+
+      m_bDecoded = true;
+    }
+    else
+    {
+      m_bDecoded = false;
+    }
   }
 
-  return tmp;
+  // Take seq off the top if necessary
+  if (hasArqSeq() && m_bDecoded)
+  {
+    m_arqSeq = eqntohuint16(m_payload);
+    m_payload += 2;
+    m_payloadLength -= 2;
+  }
+}
+
+////////////////////////////////////////////////////////////////
+// Take a raw wire packet and align the payload, decompressing if necessary
+bool EQProtocolPacket::decode(uint32_t maxPayloadLength)
+{
+  // No double decoding...
+  if (m_bDecoded)
+  {
+    return true;
+  }
+
+  // Decoding is only necessary for compressed packets
+  if (hasFlags() && getFlags() & PROTOCOL_FLAG_COMPRESSED)
+  {
+    // Compressed app opcode? If so, net op is half compressed. Align
+    // the buffer we need to uncompress.
+    if (IS_APP_OPCODE(getNetOpCode()))
+    {
+      // Total - 1/2 netop - flags - crc
+      m_payloadLength = m_length - 1 - 1 - (hasCRC() ? 2 : 0);
+      m_payload = &m_packet[2];
+    }
+    else
+    {
+      // Total - netop - flags - crc
+      m_payloadLength = m_length - 2 - 1 - (hasCRC() ? 2 : 0);
+      m_payload = &m_packet[3];
+    }
+
+    // Compressed. Need to inflate. RawPayload is going to be our decompress
+    // buffer and needs to be managed properly.
+    m_rawPayload = new uint8_t[maxPayloadLength];
+    m_rawPayloadLength = maxPayloadLength; // alloced size for zlib
+    m_bAllocedPayload = true;
+
+    // Decompress
+    uint32_t retval = uncompress(m_rawPayload, (uLongf*)&m_rawPayloadLength,
+      m_payload, m_payloadLength);
+
+    if (retval != 0)
+    {
+      seqWarn("Uncompress failed for packet op %04x, flags %02x. Error was %s (%d)",
+        getNetOpCode(), getFlags(), zError(retval), retval);
+
+      delete[] m_rawPayload;
+      m_bAllocedPayload = false;
+      return false;
+    }
+
+    // Align buffer pointers in the decompressed buffer and reconstitue the 
+    // opcode if it's a split compressed app opcode
+    if (IS_APP_OPCODE(getNetOpCode()))
+    {
+      // Actual net op is first raw byte + first uncompressed byte
+      m_netOp = m_rawPayload[0] << 8 | m_packet[0];
+
+      // payload is the actual payload, skipping the 2nd byte of the opcode
+      m_payload = &m_rawPayload[1];
+      m_payloadLength = m_rawPayloadLength - 1;
+    }
+    else
+    {
+      // Net op is correct. Payload is correct.
+      m_payload = m_rawPayload;
+      m_payloadLength = m_rawPayloadLength;
+    }
+
+    // Take seq off the top if necessary
+    if (hasArqSeq())
+    {
+      m_arqSeq = eqntohuint16(m_payload);
+      m_payload += 2;
+      m_payloadLength -= 2;
+    }
+
+    m_bDecoded = true;
+  }
+
+  return true;
 }
 
 //----------------------------------------------------------------------
@@ -224,6 +305,9 @@ EQUDPIPPacketFormat::EQUDPIPPacketFormat(uint8_t* data,
   // note whether or not this object ownw the memory
   m_ownCopy = copy;
 
+  // No session yet
+  m_sessionKey = 0;
+
   // initialize the object
   init(ipdata);
 }
@@ -233,6 +317,7 @@ EQUDPIPPacketFormat::EQUDPIPPacketFormat(EQUDPIPPacketFormat& packet,
 {
   // note whether or not this object ownw the memory
   m_ownCopy = copy;
+  m_sessionKey = packet.getSessionKey();
 
   if (copy)
   {
@@ -312,17 +397,8 @@ void EQUDPIPPacketFormat::init(uint8_t* data)
   length  -= sizeof  (struct udphdr);
   data += (sizeof (struct udphdr));
   m_rawpayload = data;
+  m_rawpayloadSize = length;
 
-  // initialize underlying EQPacketFormat with the UDP payload
-  EQPacketFormat::init((EQPacketFormatRaw*)data, length, false);
-}
-
-QString EQUDPIPPacketFormat::headerFlags(bool brief) const
-{
-  QString tmp;
-  tmp.sprintf("[%s:%d -> %s:%d]", 
-	      (const char*)getIPv4SourceA(), getSourcePort(),
-	      (const char*)getIPv4DestA(), getDestPort());
-
-  return EQPacketFormat::headerFlags(tmp, brief);
+  // initialize underlying EQProtocolPacket with the UDP payload
+  EQProtocolPacket::init(data, length, false);
 }

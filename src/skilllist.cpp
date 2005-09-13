@@ -5,12 +5,14 @@
  *  http://seq.sourceforge.net/
  */
 
-#include <qlayout.h>
-
 #include "player.h"
 #include "skilllist.h"
 #include "util.h"
 #include "main.h" // for pSEQPrefs & showeq_params
+#include "diagnosticmessages.h"
+
+#include <qlayout.h>
+
 
 SkillList::SkillList(Player* player,
 			 QWidget* parent, 
@@ -66,13 +68,19 @@ void SkillList::addSkill (int skillId, int value)
 {
   if (skillId >= MAX_KNOWN_SKILLS)
   {
-    printf("Warning: skillId (%d) is more than max skillId (%d)\n", 
+    seqWarn("skillId (%d) is more than max skillId (%d)\n", 
 	   skillId, MAX_KNOWN_SKILLS - 1);
 
     return;
   }
 
-  /* Check if this is a valid skill */
+  // Purple: Skills are uint32_now, but these special values don't seem to have
+  //         been moved up to the top bits. Somehow, the client still knows
+  //         the difference between a skill you don't get get and a skill that
+  //         you do get and can train and should be shown in the list. For us,
+  //         for now all skills show up and are skill 0 whether you can learn
+  //         them or now.
+#if 0
   if (value == 255)
     return;
 
@@ -83,6 +91,10 @@ void SkillList::addSkill (int skillId, int value)
     str = " NA";
   else
     str.sprintf ("%3d", value);
+#endif
+  QString str;
+
+  str.sprintf("%3d", value);
 
   /* If the skill is not added yet, look up the correct skill namd and add it
    * to the list
@@ -99,7 +111,7 @@ void SkillList::changeSkill (int skillId, int value)
 {
   if (skillId >= MAX_KNOWN_SKILLS)
   {
-    printf("Warning: skillId (%d) is more than max skillId (%d)\n", 
+    seqWarn("skillId (%d) is more than max skillId (%d)\n", 
 	   skillId, MAX_KNOWN_SKILLS - 1);
 
     return;
@@ -137,7 +149,7 @@ void SkillList::addLanguage (int langId, int value)
 
   if (langId >= MAX_KNOWN_LANGS)
   {
-    printf("Warning: langId (%d) is more than max langId (%d)\n", 
+    seqWarn("langId (%d) is more than max langId (%d)\n", 
 	   langId, MAX_KNOWN_LANGS - 1);
 
     return;
@@ -173,8 +185,8 @@ void SkillList::changeLanguage (int langId, int value)
 
   if (langId > MAX_KNOWN_LANGS)
   {
-    printf("Warning: langId (%d) is more than max langId (%d)\n", 
-	   langId, MAX_KNOWN_LANGS - 1);
+    seqWarn("Warning: langId (%d) is more than max langId (%d)\n", 
+	    langId, MAX_KNOWN_LANGS - 1);
 
     return;
   }
@@ -230,10 +242,11 @@ SkillListWindow::SkillListWindow(Player* player,
 				 QWidget* parent, const char* name)
   : SEQWindow("SkillList", "ShowEQ - Skills", parent, name)
 {
-  QVBoxLayout* layout = new QVBoxLayout(this);
-  layout->setAutoAdd(true);
+  //  QVBoxLayout* layout = new QVBoxLayout(this);
+  //layout->setAutoAdd(true);
   
   m_skillList = new SkillList(player, this, name);
+  setWidget(m_skillList);
 }
 
 SkillListWindow::~SkillListWindow()
@@ -249,3 +262,5 @@ void SkillListWindow::savePrefs(void)
   // make the listview save it's prefs
   m_skillList->savePrefs();
 }
+
+#include "skilllist.moc"

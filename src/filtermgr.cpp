@@ -10,188 +10,135 @@
 // to be reused for other Show{} style projects.  Any existing ShowEQ/EQ
 // dependencies will be migrated out.
 //
+#include "filtermgr.h"
+#include "filter.h"
+#include "datalocationmgr.h"
+#include "diagnosticmessages.h"
 
-#include <stdio.h>
 #include <errno.h>
 
 #include <qregexp.h>
 #include <qstring.h>
 #include <qfileinfo.h>
 
-#include "filtermgr.h"
-#include "filter.h"
-
 //
-// ZBTEMP: predefined filters and filter flags will be migrated out
-// so that ShowEQ code can register the file based filters and there flags
+// ZBTEMP: predefined filters and filter mask will be migrated out
+// so that ShowEQ code can register the file based filters and there mask
 // at runtime ala the runtime Filter stuff
 //
 
 //----------------------------------------------------------------------
 // FilterMgr
-FilterMgr::FilterMgr(const QString filterFile, bool spawnfilter_case)
+FilterMgr::FilterMgr(const DataLocationMgr* dataLocMgr, 
+		     const QString filterFile, bool spawnfilter_case)
   : QObject(NULL, "filtermgr"),
-    m_isCaseSensitive(spawnfilter_case)
+    m_dataLocMgr(dataLocMgr),
+    m_caseSensitive(spawnfilter_case)
 {
-  // Initialize spawn filters
-  m_cFlags = REG_EXTENDED;
-  if (!m_isCaseSensitive)
-    m_cFlags |= REG_ICASE;
+  // Initialize filters
 
-  // get the current filter file name
-  m_filterFile = filterFile;
+  // allocate general filter types object
+  m_types = new FilterTypes;
 
-  printf("Loading filters from '%s'\n", (const char*)m_filterFile);
-  
-  m_filters[HUNT_FILTER] = new Filter(m_filterFile, "Hunt", m_cFlags);
-  m_filters[CAUTION_FILTER] = new Filter(m_filterFile, "Caution", m_cFlags);
-  m_filters[DANGER_FILTER] = new Filter(m_filterFile, "Danger", m_cFlags);
-  m_filters[LOCATE_FILTER] = new Filter(m_filterFile, "Locate", m_cFlags);
-  m_filters[ALERT_FILTER] = new Filter(m_filterFile, "Alert", m_cFlags);
-  m_filters[FILTERED_FILTER] = new Filter(m_filterFile, "Filtered", m_cFlags);
-  m_filters[TRACER_FILTER] = new Filter(m_filterFile, "Tracer", m_cFlags);
+  // Initialize filter types (start with legacy filter types)
+  uint8_t type;
+  uint32_t mask;
+  m_types->registerType("Hunt", type, mask);
+  m_types->registerType("Caution", type, mask);
+  m_types->registerType("Danger", type, mask);
+  m_types->registerType("Locate", type, mask);
+  m_types->registerType("Alert", type, mask);
+  m_types->registerType("Filtered", type, mask);
+  m_types->registerType("Tracer", type, mask);
 
-  m_zoneFilterFile = LOGDIR "/filters_unknown.conf";
-  m_zoneFilters[HUNT_FILTER] = new Filter(m_zoneFilterFile, "Hunt", m_cFlags);
-  m_zoneFilters[CAUTION_FILTER] = new Filter(m_zoneFilterFile, "Caution", 
-					     m_cFlags);
-  m_zoneFilters[DANGER_FILTER] = new Filter(m_zoneFilterFile, "Danger", 
-					    m_cFlags);
-  m_zoneFilters[LOCATE_FILTER] = new Filter(m_zoneFilterFile, "Locate", 
-					    m_cFlags);
-  m_zoneFilters[ALERT_FILTER] = new Filter(m_zoneFilterFile, "Alert", 
-					   m_cFlags);
-  m_zoneFilters[FILTERED_FILTER] = new Filter(m_zoneFilterFile, "Filtered", 
-					      m_cFlags);
-  m_zoneFilters[TRACER_FILTER] = new Filter(m_zoneFilterFile, "Tracer", 
-					    m_cFlags);
+  // create global filters object
+  m_filters = new Filters(*m_types);
 
-  // setup runtime filterings
-  m_runtimeFiltersAllocated = 0;
-  for (int i = 0; i < MAXSIZEOF_RUNTIMEFILTERS; i++)
-    m_runtimeFilters[i] = NULL;
+  // load the global filters
+  loadFilters(filterFile);
+
+  // create the zone filters object
+  m_zoneFilters = new Filters(*m_types);
+
+  // load the zone filters
+  loadZone("unknown");
+
+  // allocate runtime filter types object
+  m_runtimeTypes = new FilterTypes;
+
+  // create runtime filters object
+  m_runtimeFilters = new Filters(*m_runtimeTypes);
 }
 
 FilterMgr::~FilterMgr()
 {
-  int i;
-  // delete the filters
-  for (i = 0; i < SIZEOF_FILTERS; i++)
-    delete m_filters[i];
-  for (i = 0; i < SIZEOF_FILTERS; i++)
-    delete m_zoneFilters[i];
-  for (i = 0; i < MAXSIZEOF_RUNTIMEFILTERS; i++)
-    if (m_runtimeFilters[i])
-      delete m_runtimeFilters[i];
+  if (m_filters)
+    delete m_filters;
+  if (m_zoneFilters)
+    delete m_zoneFilters;
+  if (m_types)
+    delete m_types;
+  if (m_runtimeFilters)
+    delete m_runtimeFilters;
+  if (m_runtimeTypes)
+    delete m_runtimeTypes;
 }
 
 void FilterMgr::setCaseSensitive(bool caseSensitive)
 {
-  m_isCaseSensitive = caseSensitive;
+  m_caseSensitive = caseSensitive;
 
-  m_cFlags = REG_EXTENDED;
-  if (!m_isCaseSensitive)
-    m_cFlags |= REG_ICASE;
-
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-    m_filters[index]->setCFlags(m_cFlags);
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-    m_zoneFilters[index]->setCFlags(m_cFlags);
-  for (int index = 0; index < MAXSIZEOF_RUNTIMEFILTERS; index++)
-    if (m_runtimeFilters[index])
-      m_runtimeFilters[index]->setCFlags(m_cFlags);
+  m_filters->setCaseSensitive(m_caseSensitive);
+  m_zoneFilters->setCaseSensitive(m_caseSensitive);
+  m_runtimeFilters->setCaseSensitive(m_caseSensitive);
 }
 
-uint32_t FilterMgr::filterFlags(const QString& filterString, int level) const
+uint32_t FilterMgr::filterMask(const QString& filterString, uint8_t level) const
 {
-  uint32_t flags = 0;
+  uint32_t mask = 0;
 
-  // determine the filter flags, iterate over all the filters
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-  {
-    // if there's a match, note it in the flags
-    if(m_filters[index]->isFiltered(filterString, level))
-      flags |= (1 << index);
-  }
+  mask = m_filters->filterMask(filterString, level);
+  mask |= m_zoneFilters->filterMask(filterString, level);
 
-  // determine the filter flags, iterate over all the filters
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-  {
-    // if there's a match, note it in the flags
-    if(m_zoneFilters[index]->isFiltered(filterString, level))
-      flags |= (1 << index);
-  }
-  
-  return flags;
+  return mask;
 }
 
-QString FilterMgr::filterString(uint32_t filterFlags) const
+QString FilterMgr::filterString(uint32_t mask) const
 {
-   QString text = "";
-
-   if (filterFlags & FILTER_FLAG_HUNT)
-     text += "Hunt:";
-
-   if (filterFlags & FILTER_FLAG_CAUTION)
-     text += "Caution:";
-
-   if (filterFlags & FILTER_FLAG_DANGER)
-     text += "Danger:";
-
-   if (filterFlags & FILTER_FLAG_LOCATE)
-     text += "Locate:";
-
-   if (filterFlags & FILTER_FLAG_ALERT)
-     text += "Alert:";
-
-   if (filterFlags & FILTER_FLAG_FILTERED)
-     text += "Filtered:";
-
-   if (filterFlags & FILTER_FLAG_TRACER)
-     text += "Tracer:";
-
-   return text;
+  return m_types->names(mask);
 }
 
 QString FilterMgr::filterName(uint8_t filter) const
 {
-  if (filter == HUNT_FILTER)
-    return "Hunt";
-
-   if (filter == CAUTION_FILTER)
-     return "Caution";
-
-   if (filter == DANGER_FILTER)
-     return "Danger";
-
-   if (filter == LOCATE_FILTER)
-     return "Locate";
-
-   if (filter == ALERT_FILTER)
-     return "Alert";
-
-   if (filter == FILTERED_FILTER)
-     return "Filtered";
-
-   if (filter == TRACER_FILTER)
-     return "Tracer";
-
-   return QString("Unknown ") + QString::number(filter);
+  return m_types->names(filter);
 }
 
 void FilterMgr::loadFilters(void)
 {
-  // load the filters using the existing filter file
-  loadFilters(m_filterFile);
+  QFileInfo fileInfo(m_filterFile);
+
+  fileInfo = 
+    m_dataLocMgr->findExistingFile("filters", fileInfo.fileName(), false);
+
+  m_filterFile = fileInfo.absFilePath();
+
+  seqInfo("Loading Filters from '%s'", (const char*)m_filterFile);
+
+  m_filters->load(m_filterFile);
+
+  emit filtersChanged();
 }
 
-void FilterMgr::loadFilters(const QString& filterFileName)
+void FilterMgr::loadFilters(const QString& fileName)
 {
-  m_filterFile = filterFileName;
-  printf("Loading filters from '%s'\n", (const char*)m_filterFile);
+  QFileInfo fileInfo = 
+    m_dataLocMgr->findExistingFile("filters", fileName, false);
+
+  m_filterFile = fileInfo.absFilePath();
+
+  seqInfo("Loading Filters from '%s'", (const char*)m_filterFile);
   
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-    m_filters[index]->changeFilterFile(m_filterFile);
+  m_filters->load(m_filterFile);
 
   emit filtersChanged();
 }
@@ -199,84 +146,20 @@ void FilterMgr::loadFilters(const QString& filterFileName)
 
 void FilterMgr::saveFilters(void)
 {
-  printf("Saving filters to %s\n", (const char*)m_filterFile);
+  QFileInfo fileInfo(m_filterFile);
+  
+  fileInfo = m_dataLocMgr->findWriteFile("filters", fileInfo.fileName(), true);
 
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-    m_filters[index]->saveFilters();
+  m_filterFile = fileInfo.absFilePath();
+
+  seqInfo("Saving filters to %s", (const char*)m_filterFile);
+
+  m_filters->save(m_filterFile);
 }
-
-
-void FilterMgr::saveAsFilters(const QString& shortZoneName)
-{
-   QString zoneFilterFileName;
-
-   zoneFilterFileName.sprintf(LOGDIR "/filters_%s.conf", 
-			     (const char*)shortZoneName.lower());
-
-
-   // If we are not already in a zone-specific filter, copy the current file to the
-   // zone-specific file name
-
-   if (zoneFilterFileName != m_filterFile)
-   {
-      FILE *in;
-      FILE *out;
-      char buf[100];
-      unsigned i;
-
-      printf("Copying filter file '%s' -> '%s'\n", (const char*)m_filterFile, (const char*)zoneFilterFileName);
-
-      if ((in = fopen((const char*)m_filterFile, "r"))==NULL)
-      {
-         fprintf (stderr, "Couldn't open filter file for copy. '%s' - %s\n",
-                 (const char*)m_filterFile, strerror(errno));
-         return;
-      }
-      if ((out = fopen((const char*)zoneFilterFileName, "w+"))==NULL)
-      {
-         fclose(in);
-         fprintf (stderr, "Couldn't open filter file for copy. '%s' - %s\n",
-                 (const char*)zoneFilterFileName, strerror(errno));
-         return;
-      }
-
-      while ((i=fread(buf,1,100,in)))
-         if (fwrite(buf,1,i,out)!=i)
-            break;
-
-      if (ferror(in)||ferror(out))
-      {
-         fprintf (stderr, "Couldn't copy filter file.  - %s\n",
-                 strerror(errno));
-         fclose(in);
-         fclose(out);
-         return;
-      }
-
-      fclose(in);
-      fclose(out);
-
-      m_filterFile = zoneFilterFileName;
-   }
-
-  printf("Saving filters to %s\n", (const char*)m_filterFile);
-
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-    m_filters[index]->saveAsFilters(zoneFilterFileName);
-}
-
-
-
 
 void FilterMgr::listFilters(void)
 {
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-  {
-    printf("Filters %d from '%s' section of file '%s':\n", index,
-	   (const char*)m_filters[index]->filterType(), 
-	   (const char*)m_filters[index]->filterFile());
-    m_filters[index]->listFilters();
-  }
+  m_filters->list();
 }
 
 bool FilterMgr::addFilter(uint8_t filter, const QString& filterString)
@@ -286,7 +169,7 @@ bool FilterMgr::addFilter(uint8_t filter, const QString& filterString)
     return false;
 
   // add the filter
-  bool ok = m_filters[filter]->addFilter(filterString);
+  bool ok = m_filters->addFilter(filter, filterString);
 
   // signal that the filters have changed
   emit filtersChanged();
@@ -301,7 +184,7 @@ void FilterMgr::remFilter(uint8_t filter, const QString& filterString)
     return;
 
   // remove a filter
-  m_filters[filter]->remFilter(filterString);
+  m_filters->remFilter(filter, filterString);
 
   // notify that the filters have changed
   emit filtersChanged();
@@ -314,7 +197,7 @@ bool FilterMgr::addZoneFilter(uint8_t filter, const QString& filterString)
     return false;
 
   // add the filter
-  bool ok = m_zoneFilters[filter]->addFilter(filterString);
+  bool ok = m_zoneFilters->addFilter(filter, filterString);
 
   // signal that the filters have changed
   emit filtersChanged();
@@ -329,7 +212,7 @@ void FilterMgr::remZoneFilter(uint8_t filter, const QString& filterString)
     return;
 
   // remove a filter
-  m_zoneFilters[filter]->remFilter(filterString);
+  m_zoneFilters->remFilter(filter, filterString);
 
   // notify that the filters have changed
   emit filtersChanged();
@@ -337,145 +220,100 @@ void FilterMgr::remZoneFilter(uint8_t filter, const QString& filterString)
 
 void FilterMgr::loadZone(const QString& shortZoneName)
 {
-  QString zoneFilterFileName;
+  QString fileName = shortZoneName + ".xml";
 
-  zoneFilterFileName.sprintf(LOGDIR "/filters_%s.conf", 
-			     (const char*)shortZoneName.lower());
+  QFileInfo fileInfo = 
+    m_dataLocMgr->findExistingFile("filters", fileName, false);
 
-  QFileInfo fileInfo(zoneFilterFileName);
+  m_zoneFilterFile = fileInfo.absFilePath();
 
-  m_zoneFilterFile = zoneFilterFileName;
-  printf("Loading Filter File: %s\n", (const char*)m_zoneFilterFile);
+  seqInfo("Loading Zone Filter File: %s", (const char*)m_zoneFilterFile);
 
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-    m_zoneFilters[index]->changeFilterFile(m_zoneFilterFile);
+  m_zoneFilters->load(m_zoneFilterFile);
 
   emit filtersChanged();
 }
 
 void FilterMgr::loadZoneFilters(void)
 {
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-    m_zoneFilters[index]->changeFilterFile(m_zoneFilterFile);
+  QFileInfo fileInfo(m_zoneFilterFile);
+  
+  fileInfo = m_dataLocMgr->findExistingFile("filters", fileInfo.fileName(),
+					    false);
 
+  m_zoneFilterFile = fileInfo.absFilePath();
+
+  seqInfo("Loading Zone Filter File: %s", (const char*)m_zoneFilterFile);
+
+  m_zoneFilters->load(m_zoneFilterFile);
+  
   emit filtersChanged();
 }
 
 
 void FilterMgr::listZoneFilters(void)
 {
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-  {
-    printf("Filters %d from '%s' section of file '%s':\n", index,
-	   (const char*)m_filters[index]->filterType(), 
-	   (const char*)m_filters[index]->filterFile());
-    m_zoneFilters[index]->listFilters();
-  }
+  m_zoneFilters->list();
 }
 
 
 void FilterMgr::saveZoneFilters(void)
 {
-  printf("Saving filters to %s\n", (const char*)m_zoneFilterFile);
+  QFileInfo fileInfo(m_zoneFilterFile);
+  
+  fileInfo = m_dataLocMgr->findWriteFile("filters", fileInfo.fileName(), true);
 
-  for(int index = 0 ; index < SIZEOF_FILTERS ; index++)
-    m_zoneFilters[index]->saveFilters();
+  m_zoneFilterFile = fileInfo.absFilePath();
+
+  seqInfo("Saving filters to %s", (const char*)m_zoneFilterFile);
+
+  if (! m_zoneFilters->save(m_zoneFilterFile))
+  {
+    seqWarn("Failed saving filters.");
+  }
 }
 
 bool FilterMgr::registerRuntimeFilter(const QString& name, 
-				      uint8_t& flag,
-				      uint32_t& flagMask)
+				      uint8_t& type,
+				      uint32_t& mask)
 {
-  int tmpFlagMask;
-  for(int index = 0 ; index < MAXSIZEOF_RUNTIMEFILTERS ; index++)
-  {
-    tmpFlagMask = (1 << index);
-    if (!(m_runtimeFiltersAllocated & tmpFlagMask))
-    {
-      m_runtimeFiltersAllocated |= tmpFlagMask;
-      m_runtimeFilterNames[index] = name;
-      m_runtimeFilters[index] = new Filter(m_cFlags);
-      flag = index;
-      flagMask = tmpFlagMask;
-      return true;
-    }
-  }
-
-  return false;
+  return m_runtimeTypes->registerType(name, type, mask);
 }
 
-void FilterMgr::unregisterRuntimeFilter(uint8_t flag)
+void FilterMgr::unregisterRuntimeFilter(uint8_t type)
 {
-  uint32_t flagMask = (1 << flag);
+  // first, clear any filter associated with the type
+  m_runtimeFilters->clearType(type);
 
-  // make sure it's actually an allocated flag
-  if (m_runtimeFiltersAllocated & flagMask)
-  {
-    m_runtimeFiltersAllocated &= ~flagMask;
-    m_runtimeFilterNames[flag] = "";
-    delete m_runtimeFilters[flag];
-    m_runtimeFilters[flag] = NULL;
-  }
+  // Then unregister the type
+  m_runtimeTypes->unregisterType(type);
 }
 
-uint32_t FilterMgr::runtimeFilterFlags(const QString& filterString,
-				       int level) const
+uint32_t FilterMgr::runtimeFilterMask(const QString& filterString,
+				       uint8_t level) const
 {
-  uint32_t flags = 0;
-  uint32_t flagMask;
-
-  // determine the filter flags, iterate over all the filters
-  for(int index = 0 ; index < MAXSIZEOF_RUNTIMEFILTERS ; index++)
-  {
-    flagMask = (1 << index);
-
-    if (m_runtimeFiltersAllocated & flagMask)
-    {
-      // if there's a match, note it in the flags
-      if(m_runtimeFilters[index]->isFiltered(filterString, level))
-	flags |= flagMask;
-    }
-  }
-
-  return flags;
+  return m_runtimeFilters->filterMask(filterString, level);
 }
 
-QString FilterMgr::runtimeFilterString(uint32_t filterFlags) const
+QString FilterMgr::runtimeFilterString(uint32_t filterMask) const
 {
-   QString text = "";
-
-   uint32_t flagMask;
-   for (int index = 0; index < MAXSIZEOF_RUNTIMEFILTERS; index++)
-   {
-     flagMask = (1 << index);
-     if ((filterFlags & flagMask) && (m_runtimeFiltersAllocated & flagMask))
-       text += m_runtimeFilterNames[index] + ":";
-   }
-
-   return text;
+  return m_runtimeTypes->names(filterMask);
 }
 
-bool FilterMgr::runtimeFilterAddFilter(uint8_t flag, const QString& filter)
+bool FilterMgr::runtimeFilterAddFilter(uint8_t type, const QString& filter)
 {
-  uint32_t flagMask = (1 << flag);
-  if ((m_runtimeFiltersAllocated & flagMask) &&
-      (m_runtimeFilters[flag] != NULL))
-    return m_runtimeFilters[flag]->addFilter(filter);
-
-  return false;
+  return m_runtimeFilters->addFilter(type, filter);
 }
 
-void FilterMgr::runtimeFilterRemFilter(uint8_t flag, const QString& filter)
+void FilterMgr::runtimeFilterRemFilter(uint8_t type, const QString& filter)
 {
-  uint32_t flagMask = (1 << flag);
-  if ((m_runtimeFiltersAllocated & flagMask) &&
-      (m_runtimeFilters[flag] != NULL))
-    m_runtimeFilters[flag]->remFilter(filter);
+  return m_runtimeFilters->remFilter(type, filter);
 }
 
-void FilterMgr::runtimeFilterCommit(uint8_t flag)
+void FilterMgr::runtimeFilterCommit(uint8_t type)
 {
   // notify that the runtime filters have changed
-  emit runtimeFiltersChanged(flag);
+  emit runtimeFiltersChanged(type);
 }
 
+#include "filtermgr.moc"

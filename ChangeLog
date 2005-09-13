@@ -1,0 +1,4691 @@
+Version: $Id$ $Name$
+
+purple (09/13/05)
+-------------------
++ Updated version to 5.1.0.0
++ Branched 4.x off the trunk to v4 branch
++ Merged pre_5_0_beta branch down to the trunk. The trunk will be used for
+	development now
++ Updated zones to reflect new .exe
+
+purple (07/22/05)
+-------------------
++ Updated version to 5.0.0.25
++ Merged in my old alpha netlayer patch which helps with double boxing by
+	enforcing port matches in code for when the pcap filter isn't
+	locked down fast enough because of multithreading
++ Fixed template constructor in Point3DArray to comply with gcc4 (thanks Basic)
++ Removed the redundant and broken Save Zone Filters from the Filters menu
+	since it was both redundant and broken
++ Fixed a major bug in the netlayer which caused sequenced packets that are
+	seen twice to invalidate themselves in the cache and cause garbage
++ Couple new races hand-entered
++ Cleanup memory leak in group manager
+
+purple (07/07/05)
+--------------------
++ Updated version to 5.0.0.24
++ Fixed light member of spawnStruct (thanks BlueAdept)
++ Updated qt required version to 3.2 because I used QString.replace that
+	was added there
++ Rewrote the # stripping stuff from filters so you can still search on #
++ Filled in auto consents into charProfileStruct
++ Filled in a little more of spawnStruct
++ Added a couple new weapons that show when worn (from uRit1u2CBBA=)
+
+
+purple (07/02/05)
+---------------------
++ Updated version to 5.0.0.23
++ Strip the # off names before matching to filters to aid in filter writing
++ Strip the # off the strong of filters as well just to make the # irrevelant
+	to filters (thanks BlueAdept for both these)
++ Cleaned up the help spew for --help. There were some bogus things in there.
++ Cleaned up the status bar exp/aa exp display
++ Added struct for OP_Illusion and a spawnshell handler so that illusions
+	are propagated to the spawn list and the map
++ Filled in some missing races with artificial names not taken from the
+	.exe (thanks uRit1u2CBBA=)
++ Added two known bugs to BUGS with descriptions and workarounds
++ Fixed some long zone names in zones.h and added new zones from .exe
++ Updated all opcodes for 6/29 patch (thanks Doodman, ieatacid)
++ Updated structs for 6/29 patch (spawnStruct, positioning structs mostly)
+
+purple (05/18/05)
+---------------------
++ Updated version to 5.0.0.22
++ Found OP_SpawnRename again. It's used to rename the Bristlebane jesters
++ Fixed problem in net layer where opcodes were showing up as 0000. Treat 0000
+	as a special case where the app opcode is 00 + next byte on the wire
++ Fixed to work with patch on 05/18/2005 by bumping MAX_AA to 240
+
+purple (05/11/05)
+----------------------
++ Updated version to 5.0.0.21
++ Added some session-related opcodes to worldopcodes.xml
++ Fixed opcodes for alt exp and hooked altExpUpdateStruct so alt exp updating
+	maps properly
++ Made it so OP_ManaChange can be 0 size. Bards have this a lot.
++ Fix problems with guilds numbered higher than 512
++ Added unknown world data to the unknown log
++ Fixed the skills window to properly show skills > 252
++ Show strings in the spawnlist as utf8 properly
++ Valgrind cleanup for some uninitialized references and minor memory leaks
++ All opcodes remapped for 5/11 patch
++ Structs updated for 5/11 patch
++ Added some new pseudo-classes to classes.h
++ Rehooked up stamina changes after removing stamina (only food/drink now)
+
+dophaZ (04/17/05)
+-----------------------
++ Updated version to 5.0.0.20
++ Update INSTALL to reflect new minimum autoconf 2.59 requirement for 
+  Makefile.dist users.
++ cleanup configure.am, and acinclude.m4 warnings and issues.
++ Fixed need to run Makefile.dist twice problem.
++ Incorporated Purples "5.0.0.19-purple2" patch.
++ - Added to charProfileStruct:
++ - - Leadership AAs (thanks to FatherNitwit for a lot of this)
++ - - Intoxication, Toxicity, Autosplit (from Glee)
++ - - Spell refresh
++ - - expAA
++ - Fixed hpNpcUpdateStruct for 4/12 by rearranging and making hp int32
++ - Properly name drop codes for new combine containers (from uRit2CBBA)
++ - Fixed a problem with drop codes higher than 0x90 in most of the drop code mappings
++ - Added tutorial zones to zone.h (from uRit2CBBA)
++ - Spawns that rename themselves will properly filter themselves now, so they show up if they match the map's runtime filter or your zone filters
++ - Made offline tcpdump reading set pcap filters to test session tracking better
++ Fixed src/Makefile.am to include new weapons29.h and weapons2a.h headers to 
+  fix 'make distcheck'
+
+dophaZ (04/06/05)
+-----------------------
++ Updated version to 5.0.0.19
++ Update INSTALL to reflect new minimum automake 1.9 requirement for 
+  Makefile.dist users.
++ Incorporated Purple's "5.0.0.18-purple1" patch.
++ - Fix for sequence rollover in net layer with arqSeqWrapCutOff
++ - Oversized packets will check for arqSeqGiveUp properly
++ - Added a playback mode for tcpdump files (see notes)
++ - Cleanup in PlayerProfile (fixed offset comments, got rid of some unknowns)
++ - Handle spawns renaming themselves (new OP_SpawnRename). This renames fabled
+    mobs which spawn after you are already in zone properly
++ - Handle mobs changing level while you are in the zone (old 
+    OP_SpawnAppearance, new handler in SpawnShell for it). This properly levels
+    fabled mobs which spawn after you are in the zone
++ - Group chat that you say won't echo to the message shell twice
++ - Fix to properly name the MPG trial zones chambersa-chambersf, instead of 
+    chambera-chamberf. zones.h was wrong.
++ Incorporated Purple's added patch
++ - Guild member list is aligned properly 
++ - Filled in unknowns in charProfileStruct for Bandolier, Potion Belt, air, 
+    hunger, thirst, instanceId, disciplines, personal tribute 
++ - fixed a type in opcode for OP_MemorizeSpell
+	
+BBobcat (02/20/05)
+-----------------------
+
++ Updated version to 5.0.0.18
++ Included Purple's "-purple2" patch
++ + Deal with a now compressed protocol
++ + Increased buff slots (25)
++ + Updated world and game opcodes
++ + Updated structures
++ + Logging and console message clean up
++ + Memory cleanups
++ Included uRit1u2CBBA= zones.h update (For DoN zones)
+
+purple (02/08/05)
+-----------------------
++ Updated version to 5.0.0.17
++ Updated net layer to support EQ's new net protocol
++ First pass at new zoneopcodes.xml and worldopcodes.xml. Most things work.
++ Cleaned up everquest.h offset comments and fixed a couple struct changes
++ Edge case cleanup for con colors in player.cpp (uRit1u2CBBA)
++ More significant digits on runspeed (uRit1u2CBBA)
++ OP_SimpleMessage now is sizechecktype="match" since it's not variable length
++ Added struct for consenting with message in message shell
++ Added struct for environmental damage
++ Regenerated staticspells.h from latest spells_en.txt
+	
+dohpaZ (11/7/04)
+------------------------
++ Updated version to 5.0.0.16
++ Tweaked acinclude.m4 to improve x86_64 behaviour.
+
+dohpaZ (11/6/04)
+------------------------
++ Minor 64-bit compatibility cleanup.
++ Cleaned up some minor warnings under gcc 3.4.2.
+	
+dophaZ (10/27/04)
+------------------------
++ Applied patch #1047554 "Oct13 struct patch" created by codepig666 and 
+  submitted to the Patches tracker by tanner (Basic).
+	
+dohpaZ (10/2/04)
+------------------------
++ Migrate to new (autoconf >2.50) style AC_INIT & AM_INIT_AUTOMAKE
++ Update INSTALL to reflect new minimum automake 1.7 requirement for 
+  Makefile.dist users.
++ Exclude MOC output files m_*.cpp from Doxygen processing.
++ Removed QT_VERSION checks that for versions of Qt that we no longer 
+  support (Qt 2.x, 3.0.x) to improve code readability/maintainability.
++ Improved MOC file handling.
++ Miscellaneous cleanup.
+
+dohpaZ (10/1/04)
+------------------------
++ Integrated patch #'s: 1037498, 1037496, 1037494, 1037493, 1037491
+  "Doxygen support for autoconf/automake" from tanner(Basic)
++ Added minor Doxygen related tweaks to source.
++ Added automatic Qt tag file generation for use with doxygen, along with  
+  a doxygen-installdox rule to build the html dox and link them to 
+  trolltech's website.
++ Minor bug fix related to a recently integrated patch.
++ Some more robustness modifications. 
++ Fixed a minor warning.
+
+dohpaZ (09/29/04)
+------------------------
++ More kdevelop project related tweaks.
++ Added Doxyfile for DOxygen related configuration.
+	
+dophaZ (09/27/04)
+------------------------
++ Added kdevelop project.
+	
+dophaZ (09/25/04)
+------------------------
++ Fixed some more gcc 3.4 warnings.
++ Made configure pay attention to CFLAGS and CXXFLAGS passed in on the 
+  the command line.
+	
+dophaZ (09/24/04)
+------------------------
++ Updated version to 5.0.0.15
++ Migrated the dominant distribution method of ShowEQ to tarballs and 
+  packages.  Support for direct building off of CVS by non-developers, 
+  although still supported, is deprecated and strongly discouraged.
+  This just means we are moving our distribution model to be more inline with
+  most free and Open Source software projects.
++ moved the maps out of the 'showeq' repository and into a new 'showeq-maps'
+  repository.
++ New INSTALL file derived from the standard GNU INSTALL file base with ShowEQ
+  specific modifications and tweaks.
++ Updated INSTALL.newbies to Fedora Core 2 and new distribution model.
++ Integrated patch #1033780 "misc main.cpp / interface.cpp fixes" from pac1085
++ Integrated patch #1031396/1031394/1030642 "L66 Color-conning Fix"
+  from llaffer(uRit1u2CBBA=).
++ Integrated patch #949056 "Fix rare crash when zoning - 5.0.0.7" 
+  from playarone.
++ Integrated patch #902675 "Shut up the bazaar search warnings" 
+  from ajs(perlmonkey).
++ Fix gcc-3.4.x compatibility issues.
++ split Point3DArray<> out of point.h and put it in pointarray.h.
++ renamed CHANGES to ChangeLog.
++ added AUTHORS, and NEWS files.
++ Removed 'missing', 'install-sh', and 'mkinstalldirs' files from CVS 
+  since automake should automagically add them to the project anyway.  This
+  solves the problem of them being incompatible with the installed versions of
+  autoconf/automake.
++ Re-added bounds-checking from EQPacketFormat and EQPacketFormatRaw CRC32 
+  routines.  This should fix some spurious crashes/hangs on seeing non-EQ
+  network traffic..
++ Major rework of Makefile.dist to actually be setup like a makefile with 
+  dependencies, etc...
++ removed conf.h.in from CVS since it's automatically generated by autoheader.
++ Changed the name used by configure and the source files to config.h
++ Changed autoconf min version requirement to 2.53 (should now only effect
+  developers and those still using CVS)..
+	
+dophaZ (09/17/04)
+------------------------
++ Updated version to 5.0.0.14
++ Applied pac1085's level70 and race patches.
++ Applied ksmith's structure patch.
++ Changed autoconf min version requirement to 2.54.
++ Tweaked raw packet logging to log both pre and post decompress/decrypted raw
+  packets to aide in debugging packet unrolling problems.
++ Made ShowEQ ignore new login server ports...
+
+BonkersBobcat (09/05/04)
+------------------------
++ Updated version to 5.0.0.13
++ Applied ksmith's race patch
++ Applied purple's charprofile struct and filter case ignore patches
++ Applied L1A's patch to remember IP and MAC addresses
+
+BonkersBobcat (08/13/04)
+------------------------
++ Updated version to 5.0.0.12
++ Applied epiccamp patch for maps to load
++ Applied ksmith's patch to add the new zones
++ Applied UnGod's patch for the guild file (finally)
++ Applied PlayarOne's patch for chat channel
+
+BonkersBobcat (07/14/04)
+------------------------
++ Updated version to 5.0.0.11
++ Applied UnGod's patches to work with 07/14/04 version
+
+BonkersBobcat (06/09/04)
+------------------------
++ Updated version to 5.0.0.10
++ Updated zoneopcodes.xml to kmsith's latest version
++ Added an include to bazaarlog.cpp 
+
+BonkersBobcat (05/27/04)
+------------------------
++ Updated version to 5.0.0.9
++ Updated to work with 05/26/04 EQLive (ksmith's patches)
+
+BonkersBobcat (05/06/04)
+------------------------
++ Updated version to 5.0.0.8
++ Added CodePigs fix to work with 05/05/04 patch
+
+dohpaZ (02/18/04)
+---------------------
++ Updated version to 5.0.0.7
++ Updated to work with 02/18/04 EQLive
++ Added Frenzy to skill list
++ Integrated patch #899331 "Bazaar Search logging" from perlmonkey (ajs)
+
+dohpaZ (02/14/04)
+---------------------
++ Updated version to 5.0.0.6
++ Patch to fix QCursor issue.
++ More updates to work with 02/10/04 EQLive
++ Added the "Dockable" sub-menu to the View menu to control the dockability 
+  of various windows.
+
+dohpaZ (02/11/04)
+---------------------
++ Updated version to 5.0.0.5
++ Updated to work with 02/10/04 EQLive
++ Added Beserker class
++ Added Gate of Discord (GoD) maps.
++ Integrated patch #893070 "Races Update (GoD)" by curioseq
++ Minor fix to guild member list online member count tracking.
++ Make sure to cleanup guild list/shell when shutting down
++ Added special map icon for zone doors.
+
+dohpaZ (01/18/04)
+---------------------
++ Updated version to 5.0.0.4
++ More updates to work with 12/19/03 EQLive 
++ Fix border cases in SpellShell that would cause ShowEQ to crash.
++ Added a workaround for ISO/ANSI/IEC C++ and C conformance regressions
+  in gcc 3.3.
++ Minor fix in h2info.pl that fixes the comment and operation with certain
+  versions of perl.
++ Made packet handling more robust in the face of corrupt and non-EQ packets
+  that are captured.
++ Support display of a zone's safepoint from the zone packet on the map.
++ Added NetStream classes for handling network byte order data streams.
++ Cleaned up the textual dump of guild names
++ Added GuildShell to track the list of guild members.
++ Added support for LoY guild information capture/display.
++ Made filter2xml.pl more robust in the face of trailing spaces and Windows
+  line termination.
++ Integrated patch #861374 "Fix-three options aren't saved".
++ Integrated patch #864328 "Nedaria's Landing Map".
++ Integrated patch #864329 "Map: JaggedPine touchups".
++ Integrated patch #868227 "Restore light sources".
+
+dohpaZ (12/19/03)
+---------------------
++ Updated version to 5.0.0.3
++ Updated to work with 12/19/03 EQLive 
++ Fixed spell related crashes when using either an outdated spells_us.txt
+  or not using one.
++ Fixed uic configure problem caused by people running ./configure while su'd
+  to root.
+
+dohpaZ (12/13/03)
+---------------------
++ Updated version to 5.0.0.2
++ Updated the default ArqSeqGiveUp to 512 since with the current encryption
+  scheme a single missed packet can have greater ramifications then under the
+  previous one.
++ Removed some extraneous command line options.
++ Removed some more cruft from ShowEQParams.
++ Minor tweak to map spawn color selection to deal with properly with traps,
+  event-triggers, and timers.
+
++ Many SpellShell improvements
+  + Made it delete expired spells faster (after up to 6 seconds of 0, 
+    rather then 20).  
+  + Modified it to delete spells from the list for spawns that are killed.  
+  + It also now clears the caster and target ids when you zone, since they are 
+    not valid in the new zone.  This allows for it to fall back to matching
+    by target name for spells not cast in the current zone.
+  + Major revamp of how spells are internally managed.  This fixed numerous
+    bugs and usability issues.
+  + Added support for handling spell failure messages so that failed spells 
+    will be removed from the list.
++ Fixed parsing of the spells_us.txt for the targettype field. This fixed
+  numerous problems with the handling of self-only spells.
++ Added a workaround to allow the use of autoconf 2.13 which turns out not
+  to properly support automake's BUILT_SOURCES feature.
++ Added stdlib.h inclusion to xmlpreferences.cpp to fix the build on some
+  Linux distributions.
++ Fixed addition/update of the user message filter list when no or only
+  one item is present.
++ Integrated patches # 855993 "Map: potimea", # 855994 "Map: potime-b", 
+  # 855995 "Map: poearth-a", # 855996 "Map: poearth-b" submitted by curioseq
++ Integrated patch "showeq-5.0.0-gcc-3.3.x.patch.gz" that fixes the gcc 3.3 
+  compatibility problem caused by a noxious bug introduced in gcc 3.3.
++ Updated several structures in everquest.h to be more inline with EQEmu's
+  latest updates.
++ Added Group opcodes to zoneopcodes.xml.  Updated group structures, and 
+  updated group notification support in MessageShell.
++ Major revamp of the GroupMgr.  It now actually works.
++ Fixed map loading to be more robust in the face of malformed map files.
++ Fixed line 77 of Overthere.map (which map loading was choking on).
+
+dohpaZ (12/7/03)
+---------------------
++ Updated version to 5.0.0.1
++ OPCode and structure fixes for 11/05/03 patch.
++ Some minor optimization of door spawn handling.
++ Added zone safepoint support to ZoneMgr
++ Some dependency cleanups.
++ Fix to support people running EQ under winex.
++ Added support for user configurable map icons (spawns, pc's, items, etc...)
++ Added support for rescaling the Z for a whole map to allow migration of 
+  old/borked maps.
++ Added minimal support for importing maps (warning, this imports everything,
+  so if not importing other SOE layers you will probably end up with duplicate
+  lines, points, etc...).
++ Support for direct loading of SOE txt format map files.
++ Slight improvement in map loading speeds.
++ Added zone point destination information to map tooltip for teleport doors.
++ New message storage.
++ New message filtering system.
++ Entirely new message window, with greatly enhanced functionality.
++ Got rid of the old MsgDialog classes
++ Move terminal UI to its own class
++ Added diagnostic message functions to unify how certain messages were 
+  being handled.  The message output is now included with the rest of the 
+  text messages.
++ Moved eqstr_{}.txt handling to its own class.
++ Added Proper seperation of user data from distributed program data.
+ + Support .showeq directory
+ + Moved maps, filters, spawnpoints, and logs to their own subdirectories.
++ Switch to using QRegExp for filter pattern matching.
++ Major cleanup/revamp of Filter handling (stage 1), filters are now stored in 
+  their own sub-directories, and now uses an XML format.
++ Created a perl script filter2xml.pl which can be used to convert existing
+  filter conf files to the new XML format.
++ Fixed the duplicate accelerator bug.  Shift+F3 is now "Reload Zone Filters",
+  and Shift+F4 is now "Save Zone Filters".  Also fixed a bug that was causing
+  the zone specific filters not to be used.
++ Moved filter notification handling out of EQInterface and into its own class.
+  "Use Spawn Audio" has been split into "Use System Beep" and "Use Command"
+  in the process to create more flexibility.
++ Assorted changes/fixes to experience handling in the Player object. No more
+  bizarre out of range values.
++ Improved behaviour when swapping players.
++ Modifed default player characteristic handling.  Made the code more 
+  responsive to configuration changes.
++ Assorted experience window fixes, including the use of the ZEM that the
+  zonemgr gets from the zone packets.
++ More major cleanup of packet handling (stage 2).  Migrated opcode,implicitlen
+  and dispatch handling to an XML based system (see worldopcodes.xml and
+  zoneopcodes.xml).
++ Modified logging of decoded world/zone packets to include which 
+  packet in the opcode DB they matched, when the entry was updated, 
+  and information about the type that is supposed to be in the payload.
++ Migrated SEQWindow to be based off of QDockWindow so that all classes 
+  derived from it could take advantage of Qt's native dockable window support.
++ Made the right-click menus of SEQWindow derived windows come up in a
+  more consistent fashion.
++ Add a Window menu item to the menubar.  It contains items the control window
+  display and behaviour and also gives access to the popup menus of all 
+  active SEQWindow derived windows.
++ Added support for storing 64 bit integers, QPens, and QBrushes to the 
+  XML preference system.
++ Fixed the spawn logger to log the adjusted x/y/z values for zone/new spawns..
++ Found zonePoint in doorStruct.  
++ Made itemdb support default to disabled until the new version is in-place.
++ zones.h, changed 162 to be ssratemple and 182 to be nedaria, thanks to 
+  darkgrue and uRit1u2CBBA= respectively.
++ Integrated patch# 832080 "freebsd-stable compile 10/24/03" from jonseq
++ Integrated patch# 844078 "Fix to class displays" by belith (UnGod).
++ Integrated patch# 851037 "New map for Mistmoore" by showeqfan & Boredmapper
++ Integrated patch# 850894 "Map for Cabilis West" by showeqfan
++ Integrated patch# 846353 "ZEM Display" by archpriest (with fixes).
++ Added mir{a-j], mmc[a-j], and ruj[a-j] LDoN maps.
+
++ Requirement update
+  ShowEQ will now require Qt 3.1+ from this release forward. 
+
+dohpaZ (10/24/03)
+---------------------
++ Updated version to 4.3.17.1
++ Fixed build for certain Linux variants.
++ Made it support Qt 3.0.5 again.
+
+dohpaZ (10/24/03)
+---------------------
++ Updated version to 4.3.17
++ More opcode and structure fixes for 10/09/03 patch.  This includes ones that
+  appear to made the Combat Window and Experience Window not work.  It also
+  includes the fix for the zoom out to oblivion bug.
++ Assorted bug fixes
++ Integrated patch# 824478 "HP Changed fix (and compile error fix)" 
+  from belith (UnGod)
++ Integrated patch# 824942 "utf8 support for spawn names" from suseuser7341
++ Added handling for OP_SpecialMesg and OP_GuildMOTD, and initial support for
+  OP_SendZonePoints.
++ Added DateTimeMgr to manage EQ Time keeping (and removed the other places
+  where EQTime was being tracked).
++ Some cleanup and optimization of SEQLogger.
++ Some cleanup and optimization of SpawnLog (formerly SpawnLogger). Also, 
+  updated it use DateTimeMgr.
++ Moved packet logging out of EQPacket and cleaned it up.
++ Major refactoring and cleanup of packet handling (stage 1).
++ Modified the FilterMgr to support both global and zone specific filters.
++ Made change filter case sensitivity take place during the next time
+  the filters are loaded.  No longer have to restart ShowEQ for it to take
+  effect.
++ Added a few body type names to typenames.h.
++ Added a weapon to weapons.h.
++ Fixed filter, spell and eqstr loading to deal with Unicode strings UTF8 or
+  UCS2 as necessary.
++ Fixed several additional functions to support UTF8 encoding.
++ Updated item support to work with the 10/09/03 format changes.
++ Assorted minor cleanup and optimization.
+
+dohpaZ (10/09/03)
+---------------------
++ Updated version to 4.3.16
++ Updated to 10/09/03 patch - structure changes and new opcodes. (props go out
+  to Quark, Freakyuno, and suseuser7341 for the assist).
++ Integrated patch# 820410 "More races and classes" from llaffer (uRit1u2CBBA=)
++ Added support for new OP_ItemPlayerPacket.
+
+NOTE: As of the 10/09/03 EQ patch you must use eqstr_us.txt for formatted strings
+      (instead of eqstr_en.txt).
+NOTE: As of the 10/09/03 EQ patch you must use spells_us.txt for spell information
+      (instead of spells_en.txt).
+
+dohpaZ (10/07/03)
+---------------------
++ Updated version to 4.3.15.
++ Fixed the Log Spawns item so that it actually controlled the creation and 
+  use of the SpawnLogger.  Also made it so that the setting would be saved and
+  changed its default setting to false.
++ Removed some extraneous printf's from SpawnShell.
++ Fixed assorted keyboard accelerators.
++ Readded the ability to delete a spell from the spelllist/spellshell, this time
+  by double clicking on it (to make it more accessible).
++ Added build information to the showeq version display.  
++ Removed -V/--no-keep-selected-visible command line option since its
+  functionality is available in the display.  Made -V and -v aliases for 
+  --version (to make it more obvious).
++ Fixed the issues with ldon zones... Turns out the zone id is 16-bits followed
+  by 16-bits that appear to be an instance or something.
++ Made ZoneMgr only use the short zone name from newZoneStruct as a last 
+  resort since it is a localized string.  
++ Added initial support for the Zone Experience Multiplier that was recently 
+  discovered by the EQEmu folks in the newZoneStruct.
++ Fixed the bug that was causing spells that were effected by item and AA 
+  effects to dissappear from the spell list.  Ah happy bonus from fixing this
+  bug is we now display the enhanced duration for self buffs.
++ Fixed a couple bugs that theoretically could cause a crash.
++ Coordinated opcode names with the EQEmu folks.
++ Integrated patch #817952 "Restores Light sources" from theblueadept (BlueAdept).
++ Integrated patch #817988 "Map updates esp. PoFire" from monster69.
++ Made it so that the item type will be displayed for drops instead of the raw
+  model name (IT{number}_ACTORDEF).
+
+dohpaZ (10/01/03)
+---------------------
++ Updated version to 4.3.14.
++ Tuned spell duration formulae.
++ Added menu items to enable/disable item logging (now disabled by default)
++ Integrated curio's clearing of the selected spawn point fix.
++ Integrated patch #814819 "Prevent Mounts in spawn points" by monster69 (code 
+  by UnGod/Belith).
++ Cleaned up some compile warnings.
++ Made spells_en.txt and eqstr_en.txt string loading more forgiving about line
+  termination
++ Made the interface.cpp stdout spell notifications prefer the new spell data.
++ Added more world server opcodes, and added handling for the MOTD.
++ Fixed a bug in spellshell that was occasionally showing other targets for
+  self only spells.
++ Made ItemDB more robust in the face of items that don't parse properly
++ Fixed an incorrect field assignment in ItemDB.
++ Changed logging in EQPacket:
+  + Seperated out the opcode (and the decode flags) from the payload data 
+  + Global logging now logs a lot more information to make it easier to debug.
++ Removed the opCode information from the beginning of all the packet 
+  structures.  It is really a part of the protocol layer and shouldn't be in
+  the structures (been meaning to do this for a long long time).
++ Brought some more structures up to date in everquest.h, renumbered all the 
+  byte offsets to match the structures current setup.
++ Removed legacy coin drop support (if they haven't come back by now...)
++ Fixed Z coordinate of drops to match the rest of the spawns
++ Added support for spells being cast on you (useful for all classes, 
+  especially melee) and for others updating buffs you'd cast (useful in raids)
+  to SpellShell.
++ Added last name to the map spawn tooltip, with parens around it on NPCs.
++ Improved SpawnList2 count display by making it not be fixed width and by
+   actually display the number of items in the spawn list.
+
+dohpaZ (09/28/03)
+---------------------
++ Updated version to 4.3.13
++ Removed confusing, but benign "Running without libEQ.cpp message
++ Updated races.h from posts by uRit1u2CBBA=, curio, icyman, pooz, and patch #812234
+  "More races.h data" from llaffer.
++ Modified the map code to paint the specials for the selected spawn
+  point even if showSpawnPoints is off.  Also, added an option to draw 
+  a line (of the appropriate color) to the selected spawn point (default's
+  to off).
++ Incorporated Belith/UnGod's map converter patch from the forums
++ Added a mention to INSTALL.newbies to the README (not that anyone does
+  read the README, but heh, gotta try... ;))
++ Applied patch #803848 9-10-2003 -- Shared Platinum Slot, compile warning
++ Applied patch #807103 Con Color Patch for Levels 57-65
++ Started coordinating opcodes/structures with the EQEmu team
++ Beginnings of Assorted cleanup of everquest.h
++ Added some spellbook handling and the ability to dump your spellbook.
++ Updated slot_to_name to support new slot numbers
++ Removed the PktLogger from logger.{cpp, h} and the nonsense hooking it in.  
+  May it rest in pieces.  Left the SpawnLogger for now... 
++ A bunch of cleanup in SpellShell and some in SpellList
++ Added BuffDropCode handling to SpellShell
++ Added Spells() class that loads spells_en.txt and provides access to its data
++ Improved load speed of eqstr_en.txt for formatted messsage strings.
+  It turns out QTextStream::readLine() is ridiculously slow.
++ Minor optimizations and cleanup in EQPacket::dispatchZoneData()
++ Added support for the new item packet format.
++ Assorted bug fixes and optimizations
++ renamed old spells.h to staticspells.h until I figure out how to handle it..
++ updated spells_en2spellsh.pl to use new format and write to new file
++ Fixed "no skittles" issue related to the packet format (changes or just
+  a bit we didn't know about being used more often).  For the packet jocks in the
+  crowd EQPacketFormatRaw::m_flagsLo.m_unknown2 is now .m_nak, as in negative
+  acknowledgement.  Apparently this bit is either new or just really being excercised
+  alot with the new item data format (which may explain why naked or near naked characters
+  saw it less, and why it happens more on less optimal networks).
+ + Integrated the zone name fixing half of curio's ldonzonefilter.patch file until a better
+   solution can be found. I don't agree with the filter part and so didn't integrate it.  
+  
+NOTE: This release requires spells_en.txt to be placed in the directory pointed
+      at by LOGDIR, typically /usr/local/share/showeq, in order for spell
+      names and information to appear properly.
+
+dohpaZ (09/10/03)
+---------------------
++ Updated version to 4.3.12
++ Applied patch #802406 "Patch for Combat Window" from UnGod (belith)
++ Applied patch #802938 "Some Updates to races.h" from llaffer
++ Fixed a couple bugs in libEQ.cpp
++ Fixed packet.cpp to use BUFSIZ instead of 1500 for pcap snaplen
++ Updated to 09/09/03 patch - structure changes and new opcodes (some nods
+  to Talorn).
++ Updates zones.h to include the new LDoN zones.
++ Generated an up to date spells.h from the LDoN spells_en.txt file.
+
+dohpaZ (09/8/03)
+---------------------
++ Updated version to 4.3.11
++ More updates related to 08/26/03 patch new opcodes and structure changes
++ Added support for logging raw packets as well as decoded packets
++ Applied patch #799386 (Change con tables) from Elyon (elyon) to fix con levels
+
+dohpaZ (08/30/03)
+---------------------
++ Updated version to 4.3.10
++ More updates related to 08/26/03 EQ patch numerous opcodes (one from x_b)
+  and a structure change
++ Updated INSTALL doc.
++ Minor speed improvements (people should learn that multiplying and dividing
+  by a power of 2 in integer math are performed fastest using a bitshift)
++ Incorporated Patch # 797336 "mapcore.cpp / player.cpp fix" from 
+  Philip (guice) containing fixes by Elyon, con >= 60 and minor map fix.
+
+dohpaZ (08/27/03)
+---------------------
++ Updated version to 4.3.9
+
+dohpaZ (08/27/03)
+---------------------
++ Removed references to libEQ.h
++ Removed HAVE_LIBEQ usage
++ Updated documentation to reflect that libEQ.a is no longer needed
++ Updated Copyright years in a few places
++ Incorporated patches # 753236, 784791, 784794, 787748, Zoolander
++ Minor cleanups in netdiag, packet, and interface
++ Fixed assorted opcodes and structures
++ Fixed bank item slot printout for high number slots
++ Fixed formatted message, opcode, and updated to current format handling 
++ Updated to work with 08/26/03 EQ patch (with help from codepig666, Talorn, 
+  and DebianSEQ)
+
+ratt 07 Jun 03
+---------------------
+
++ Added some fixes from the message board from Piggy and User387
+
+ratt 27 May 03
+---------------------
+
++ Applied partial patch from user387
++ Updated some stuff from the message board
+
+ratt 26 May 03
+---------------------
+
++ Added all updates on the forums as of noon CST 26 May 03
++ Changed a few minor things to make SEQ smoother
+
+fee (floyd) 24/May/03
+---------------------
++ added LoY maps by request
+
+bbobcat 21/May/03
+-----------------
++ Call the save of spawnpoint data upon zone end, in addtion to on zone change.
+  It appears that zone change doesn't really happen any more. Anyone know of
+  other logic that needs to be moved as well?
+
+Ratt 21/May/03
+----------------
+
++ As of 12:07 AM CST all patches and mods on the forum have been applied
+  where appropriate.  Start using the patch feature of sourceforge! :)
++ Thanks goes out to Quark, user387, Wildcat, Quackrabbit and of course Piggy
+  Did I miss anyone?
+
+Ratt 19/May/03
+----------------
+
++ Applied all patches from Piggy and User387
++ Few minor mods
++ Bumped rev to 4.3.8
+
+Ratt 21/Apr/03
+----------------
+
++ Applied Spawnlist2 widget patch
++ Applied update to FreeBSD patch
++ Applied Combat window patch
++ INSTALL.newbies updated
++ Other small misc things
+
+bbobcat 04/19/2003
+----------------
+ + struct update to realign skill values (again)
+
+mvern 04/18/2003
+----------------
+ + applied jonseq's freebsd compatibility patch and fixes for qt2.
+     neither is officialy supported, so ymmv.
+
+mvern 04/17/2003
+----------------
+ + huge changes to decryption code, movement update handling, and a number
+     of other things i'm likely forgetting.  
+ o new libEQ.a required
+ + changed some QT stuff to allow compile with version included in 
+     debian-unstable out of the box
+ - many thanks to dvorak for a good portion of the work done to get things
+     up and running again
+ + Version 4.3.7
+
+fee (floyd) 02/21/2003
+-----------------------
+ + changed comparison op == to = in Makefile.dist for shell compatibility (sh vs bash)
+ + fixed up Qt detection when QTDIR is not set, acinclude.m4
+
+bbobcat 02/20/03
+-----------------------
+ + struct update to realign skill values so they work
+
+mvern  02/18/03
+-----------------------
+ + Misc. opcode and struct updates, also reordered the updated/working
+      opcodes in opcodes.h
+ + Applied patch #650401 - races fix 
+
+ratt 15 Feb 03
+-----------------------
+
++ Applied mverns patch to fix SEQ temporarily. Will break next patch,
+	use it in good health in the mean time.
++ Bumped revision to 4.3.6 for tracking purposes.
+
+Thanks Mvern!
+
+casey 01/17/2003
+-----------------------
+  + applied quackrabbits patch #669753, fixes to some packet structs.
+
+fee (floyd) 01/16/2003
+-----------------------
+  ShowEQ 4.3.5 
+  + Applied mvern's patch to fix up the latest changes in the network code
+    
+ratt 9 Jan 03
+-----------------------
+
++ Applied mvern's opcode fixes as a temporary measure to get things
+  running.
+
+fee (floyd)  01/03/2003  -  Happy New Year
+-----------------------
++ ShowEQ 4.3.4
+ + Bug Fixes
+   - resolved Qt 3.x performance issues
+   - rework some zoning logic to allow for future cleanups
+   - clean up some structs in everquest.h
+   - temp fix for wineX users
+
++ Requirement update
+  ShowEQ will now require Qt 3.0.5+ from this release forward. 
+   Qt 2.3.2 should still work as of this release but may cease to 
+   work at a future time.
+
+fee (floyd)  11/11/2002
+-----------------------
++ ShowEQ 4.3.3
+ + Bug Fixes
+   - updated EQDecode to be more sane about accepting user keys
+     in conjunction with a new libEQ (ddaac48baaa3e9b015984a366748ed72)
+
+ + Features
+   - HotKeys  F12 to load key from file
+   - HotKeys  CTRL+F12 to bring up key dialog
+    
+ratt 10 Nov 2002
+----------------------
+
+ + Bug Fixes
+   - Fixed walk path length record option (Thanks Nok)
+
+ + Features and Updates
+   - Added Nok's Speedometer
+   - Catt's spell update
+   - Catt's filter update
+   - Bluevulpines raid channel update
+   
+
+
+casey 11/07/2002
+----------------------
+ + conf/seqdef.xml
+   - fixed typo (a property tag was missing the y, thx fippy)
+
+fee (floyd) 11/05/2002
+----------------------
+ + ShowEQ 4.3.2
+
+ + Bug Fixes
+   - player corpses will now appear as yellow boxes, not cyan +
+   - player corpses will now appear at the correct coordinates
+   - corpses will not have the extra Soandso's corpse's corpse (not working 100% but close)
+
+ + Features and Updates
+   - ShowEQ can now be configured to listen on a specified port
+     for a decryption key, expects a udp packet with an 8 byte
+     payload containing the key in little endian byte order
+   - updated races.h, thank you Ty
+   - updated concolors for post 60 players
+
+ + New Maps, Thank you Dok
+   - Povalor
+   - Powater
+   - Potactics
+   - Bothunder
+   - Potorment
+   - Pofire
+   - Postorms
+   - Poair
+
+fee (floyd) 11/01/2002
+----------------------
+ + ShowEQ 4.3.1
+ + created 2 methods for manual key input, see Decoder menu for options
+   - manual key input via a dialog, input is expect to be in the form
+     0xFFAAFFAA00110011  (little endian)
+   - ability to set a file to load the key from, see the seqdef.xml for the default name
+   - load from the named key file.
+
+ + updates in EQInterface and EQDecode classes to accomodate key entry
+ + everquest.h - various struct updates
+
+casey 10/31/2002
+----------------------
+ + added some code (and fee added the rest) to allow user input of crypt 
+   session key.  You can find it under Decode->Input Session key.
+ + dont forget to kill a cat tonight.
+
+fee (floyd) 10/27/2002
+----------------------
+ + updated various PoP maps
+ + update to handled compressed item data for merchants
+ + update to EQDecode to handle new crypto
+
+casey 10/26/2002
+----------------------
+ + src/interface.cpp
+   + applied baelang's patch to fix transposed strings in player_classes[]
+
+fee (floyd) 10/26/2002
+----------------------
+ + bug fix: tweaked spawnshell to track ground spanws more accuratly
+ + updated makeDropStruct to fit current packet (resolves the map scaling)
+
+fee (floyd) 10/25/2002
+----------------------
+ + Version 4.3.0
+ + update spawnStruct
+ + update opcode, thanks to all who helped find them
+ + update EQDecode class in preparation for a new libEQ, if such time as
+   one becomes available
+ + update spells.h
+
+casey (10/24/02)
+----------------------
+
+added the following maps.
+  Poinnovation.map
+
+updated 3 structs and a bunch of opcodes.  I havent personally tested
+them, but they seem to be working for the people who are.  If you find
+differences, make a diff and post it to the patch section.
+
+casey (10/21/02)
+----------------------
+
+added the following maps (from HoiHoi).
+  Hohonora.map
+  Hohonorb.map
+  Nightmareb.map
+  Poknowledge.map
+  Potranquility.map
+  Powar.map
+  Solrotower.map
+
+ratt (3 Oct 02)
+----------------------
+
+Fixed the max HP bug that was reporting more HP than you really had.
+
+Released ShowEQ v4.2.15 in the file release section.  This is a 
+current CVS snapshot as of this moment. (13:00 EST 3 Oct 02)
+
+fee (floyd) (10/03/02)
+----------------------
+ + version 4.2.15
+New Features:
+  GuildMgr Class
+     captures guilds2.dat from worldserver
+     reads the regular eq client guilds2.dat (File->Reload Guilds File)
+     dump a plain text list of guild id to guild tag (Debug->List/Dump Guild Info)
+     filter and category support for spawnlists(regex on 'Guild:')
+     map tip support
+     spawnlog support, guild id added as last field in the output
+Updates:
+    random clean ups
+    new guildlist structs
+    updated charprofilestruct
+    spells.h regenerated from current spells_en.txt
+    applied patch[604874] - thanks to Bonkers D Bobcat (bonkersbobcat)
+
+fee (10/09/02)
+---------------------
+ + updated charProfile struct, includes correct offset for AAXP
+
+casey (08/29/02)
+---------------------
+ + Corrected the spelling of "Wizard" in interface.cpp
+
+fee (floyd) (08/15/02)
+----------------------
+ + completion of Vexthal.map
+
+fee (floyd) (08/14/02)
+----------------------
+Modifications:
+ + fixed acinclude to parse the new QT_VERSION from qt3.0.5
+   maintaining compatibility with qt2.3.2
+
+fee (floyd) (08/08/02)
+----------------------
+Modifications:
+ + version 4.2.14
+ + changed default Arq seq give up in seqdef.xml to 256
+ + up'd max Arq seq give up to 1024
+ + added debug macro to prevent /tmp/coords from being written
+ + added zone shortname for JaggedPine to zones.h
+ + added new/updated maps for Jaggedpine, Bazaar, Surefall and Skyshrine
+
+fee (floyd) (29/07/02)
+----------------------
+Modifications:
+ + version 4.2.13
+ + Complete overhaul of EQPacket members decodePacket
+   - now includes functionality for sequencing client and server data streams
+   - better sequence handling
+   - elimination of a race condition between pcap and main threads
+   - better session tracking
+     - should be same behavior as before, do not zone multiple clients 
+       simultaneously, if you LD you can reset session tracking by
+       clicking Monitor Next EQ Client or the other Monitor options.
+ + dispatchSplitZoneData has been replaced with dispatchSplitData
+   - dynamic allocation for fragment assembly
+   - improved error checking/handling
+ + new members processCache, setCache and resetCache
+   - based on zaphod's original design, extended to handle more data streams
+ + new member resetEQPacket
+   - called upon session Close or while setting a pcap filter vi Network menu
+   - resets all states, caches, etc in EQPacket
+ + Improved NetDiags to show all the new data from EQPacket
+ + pcap filter rework
+
+*** If you still experience packet loss, which results in failure to decode,
+*** set Network->Advanced->seq arq give up to a higher value! Recomend Broadband
+*** users set to 128+ and modem users to 256+.  Do not be afraid to crank this
+*** value to 512 or better if that is what it takes. 
+
+fee(floyd) (23/07/02)
+------------------
+Bug Fix:
+ + fixed a potential segmentation fault within spawnshell 
+
+dohpaZ (22/06/02)
+------------------
+Modifications:
+ + Made the Map::closestSpawnToPoint() method pay more attention to whether or 
+   not items are displayed on the map.  This should greatly reduce the number
+   of times a tooltip pops up for an item that isn't displayed (filtered,
+   etc...) or an item that isn't displayed is selected via mouse click.  
+
+dohpaZ (22/06/02)
+------------------
+Modifications:
+ + version 4.2.12
+ + Applied patch # 569708 "bugfix for filter.cpp" by mydor
+ + Applied patch # 570621 "Update to saving of player inventory"
+ + Applied patch from Sparr (new opcodes, packet structures, races, 
+ + Added Source Navigator 5.0 project showeq.proj.
+ + Changed FlushPackets VPacket setting to default to true.
+ + Changed maximum value on the "Walk Path Length" spinbox to be 8192.  Please
+   remember that the walk path option can use a lot of memory.
+ + Added the ability to show the walk paths of all NPCs, available from the
+   "NPC Walk Paths" option of the "Show" sub-menu of the maps right-click
+   context menu.
+ + Fixed a bug where if there wasn't a template filter file an empty one with
+   a section named "[Spawn]" would be created instead of using the proper
+   filter section name.
+ + Added "Save Selected Spans Path" and "Save NPC Spawn Paths" items to the 
+   "File" menu.  They will respectively save the currently selected spawns
+   or all spawns walk paths to a file <MAPDIR>/<Short Zone Name>_mobpath.map.
+ + Fixed a file format handling bug in drawmap.cgi.  No longer pretend to use
+   extra fields on the first line of the map file.
+ + Added book information to player inventory.
+ + Optimized slot_to_name() function. Fixed bug generating names for slots
+   in containers in the general and bank slots.  Moved it in with the other 
+   utility functions in util.cpp.
+ + "No Bank" should only effect the display of bank items, made it so the 
+   bank info gets dumped irregardless of its setting.
+ + Workaround for Qt 3.0.[1-4] bug involving slots that take an int argument
+   with the string "int" in the name being unable to recieve events from
+   menus (just renamed them all).  Qt 3.0.x now officially supported (and is
+   about as supported as it will be until ShowEQ 5, whenever that is).  This
+   also makes it so that RedHat 7.3 (and possibly Mandrake 8.2) users can 
+   compile out of the box using "./configure --enable-old-compiler"
+
+dohpaZ (13/06/02)
+------------------
+Modifications:
+ + version 4.2.11
+ + Made the Map tooltips behave better: No longer always on top, parented by 
+   map, tries to make sure entire tip is visible (borrowed logic from 
+   QPopupMenu::popup(), and will dissappear if clicked on.
+ + Changed the DTEAM_ teams to use the same numeric scale as the RTEAM_ teams.
+   This will allow some code simplification in map.cpp.
+ + Updated to new libEQ.a (23249b5a6a04f2b900449d9c4aa0994a).  Includes
+   possible decoding of new spawns without zoning.
+ + Have configure default to validating the Qt install (disable with
+   the --without-qt-validation option).
+ + Made configure properly handle build directories properly again.
+ + Added a configure option (--enable-old-compiler) to allow the use of 
+   certain older gcc compilers (the 2.96.x compilers that come with certain
+   linux distributions).
+
+dohpaZ (13/06/02)
+------------------
+Modifications:
+ + Added curio's updated Kurn, Droga, and Hollowshade Moor maps (hopefully for
+   real this time (cvs commit didn't catch them last time for some reason).
+
+dohpaZ (12/06/02)
+------------------
+Modifications:
+ + version 4.2.10
+ + Added ./doc/map.html which describes the map file format
+ + Made the search and checks for libEQ.a more robust and report more
+   information
+ + Added code to SpawnList2 to protect against situations where there aren't 
+   any categories.  Also made SpawnList2 save/restore the currently selected
+   category.
+ + Updated spells.h to 12/06/02 patch
+ + Added Pasla's Shawl 8 spawn points to the Iceclad map
+ + Added curio's updated Kurn, Droga, and Hollowshade Moor maps
+ + Applied patch # 566996 "Patch to dump player + bank items" from nalr 
+   (Morannon).
+ + Modified the code to dump bank items to use the Qt classes.
+ + Added a "Refilter Spawns" menu pick to the "Filters" menu.  
+ + Simplified some filtering logic in SpawnShell.  This fixed where filters 
+   with level's specified weren't being checked properly in some cases.
+ + Added the ability to select the base con colors from the "Con Colors"
+   sub-menu of the "Options" menu.
+
+dohpaZ (08/06/02)
+------------------
+Modifications:
+ + version 4.2.9
+ + Applied patch #563579 "pvp teams update" by g0hst (g0hst)
+ + Added m_itemdb.cpp to BUILT_SOURCES in Makefile.am (this should make sure
+   it gets cleaned up when doing a make clean.
+ + Changed "CreateUnknownSpawns" option to default to true since too many 
+   couldn't figure out that this was required BEFORE "Show Unknown Spawns" 
+   would work (Can't show what isn't created).
+ + Corrected help displays option list --restore-zone-state should have 
+   been --restore-zone.
+ + Fixed saving of spawns.  Also made sure zone position was saved with the 
+   rest of the spawn info.  Also added a check that will attempt to verify
+   that restored spawns are for the expected zone.
+ + Added some more checks for the state/version of save/restore files to
+   SpawnShell, Player, and ZoneMgr.
+ + Make sure player information gets reset upon zone entry if the player
+   name is different.
+ + Updates spells.h again (with latest data).
+ + Added spells_en2spellsh.pl Perl 5 script that creates a spells.h file 
+   using data from spells_en.txt.
+ + Added the start of a little ROADMAP file that gives basic info about the 
+   structure of ShowEQ to help bring new developers up to speed.
+ + Added menu picks for race/deity PvP to the right-click context menus so that
+   it can be enabled/disabled on a per map basis.
+
+dohpaZ (06/06/02)
+------------------
+Modifications:
+ + Minor bug fix for itemdb handling of playerBook and playerContainer
+ + Minor tweak to showitem.cgi to update coloring of the binary data
+
+dohpaZ (06/06/02)
+------------------
+Modifications:
+ + version 4.2.8
+ + Added the ability to remove all spawn points to the Spawn Point List context
+   window.
+ + Assorted SpawnMonitor/SpawnPoint cleanup.
+ + Updates to itemStruct (from EQEmu 0.3.3.1 we got stackable, effectType, 
+   and castTime) and I found skill mod id and skill mod percent.  Updated
+   to the 05/06/02 patch (many many changes here).  
+ + Many new item related opcodes (as of the 05/06/02 patch)
+ + Updated to v2 EQItemDB entries (supports both versions) with data from the 
+   new itemStruct.
+ + Changed how the ItemDB is instantiated and how items are added, including
+   more checks to minimize the chance of corrupt data being stored in the DB.
+ + Increased maximum number of monitored opcodes from 10 to 15.
+ + Minor additions to weapons27.h
+ + Removed spelltimes.h and created a new spells.h with all the info (from the
+   05/06/02 patches spdat.eff).  Modified spell_name() and spell_info() to
+   use the new data.
+
+fee (05/06/02)
+-----------------
+Mods:
+ + updated ServerZoneEntry and newZone structs
+
+fee (04/06/02)
+-----------------
+Map Update:
+ + added succor point locations from LordCrush
+
+dohpaZ (31/05/02)
+------------------
+Modifications:
+ + version 4.2.7
+ + Applied patch # 561114 "3 new maps" by mrsuspicious (mrsuspicious)
+ + Added a KDevelop 2.0 project (showeq.kdevprj) for those who wish to use 
+   that IDE.
+ + Added Deity and Body type fields to the Spawn List.
+ + Cleaned up some class names EQPlayer => Player, EQStatList => StatList,
+   EQSkillList => SkillList.
+ + Renamed class CSpawnList to SpawnList.  Split SpawnList related classes 
+   into current SpawnList specific classes and those that could be reused 
+   in the new lighter weight SpawnList.
+ + Created Spawn List 2, a lighter weight less memory/CPU intensive
+   Spawn List.  Defaults set to minimize CPU usage.  Made it the spawn list
+   used by default.
+ + Assorted cleanups in SpawnList.
+ + Changed SpawnShell from using an stl::map to a Qt QIntDict for maintaining 
+   the Spawn/Coin/Drop/Door information.  This is mostly being done as a 
+   punt to fix the current primary crashing problem.  We'll see if this works
+   or the standing problem will continue to mock us...
+ + Modified SpawnShell::findID() method to return the Player object if the 
+   user requested type == tSpawn and the id happens to be the player id.   
+   Also, modified SpawnShell:findSpawnByRawName() to check and return the 
+   Player object if no other match was found and the player matches.
+ + Modified spawnshell to make the player appear more as a normal spawn.
+   It now appears in the spawn list again and a tooltip will now appear
+   for the player on the map again.
+ + Cleaned up the spawn monitor ipmlementation a little, SpawnPoint now 
+   inherits from EQPoint instead of Item (reduces memory footprint and 
+   unneeded functionality).
+ + Modified Spawn Point interaction with the map.  The currently selected 
+   spawn point will now be surrounded by a flashing blue square.  The spawn 
+   points now have tooltips and are selectable.  They also follow the spawn 
+   depth filtering settings.
+ + Added the ability to delete individual spawn points through the right-click
+   context menu of the Spawn Point List.
+ + Fixed the "smoothness" issue with the map following the player.
+ + Fixed renaming of Spawn Points.  Also fixed the displayed Z coordinate
+   of Spawn Points.
+ + Fixed map tooltip so that it now pays attention to spawn depth if 
+   spawn depth filtering is enabled.
+ + Normalized naming of x, y, and z coordinate members, methods, and variables.
+ + Further cleanup of the Spawn and Player classes.
+ + Improved performance of SpawnList under Qt 3.x.
+
+Notes:
+ + Use of Qt 3.x is currently unsupported.  But if you choose to use
+   Qt 3.0.[1-4] you should apply the following patch to it and rebuild it:
+   http://www.doomed.to/showeq/qt/qt-x11-free-3.0.4_qsignal.patch
+   Theoretically this patch should not be necessary with Qt 3.0.5 when it is
+   released.
+
+ratt (30 May 02)
+------------------
+Fixed EQTime display (am/pm thing)
+
+fee (26/05/02)
+------------------
+ + updated CharProfileStruct
+
+fee  (25/05/02)
+------------------
+ + updated Tenebrous.map
+ + updated Acrylia.map
+ + updated Griegsend.map (thanks Morannon)
+ + updated Nektulos.map (thanks Mr. Suspicious)
+
+dohpaZ (24/05/02)
+------------------
+Modifications:
+ + version 4.2.6
+ + Applied patch# 559953 "Update to Group Packet Structures" 
+   by Bonkers D Bobcat (bonkersbobcat)
+ + Applied patch# 560200 "Bodytype display" by wyvern (mvern)
+ + Fixed some g++ 3.1 compilation issues.  g++ 3.1 is now officially supported
+   and despite some previous reports it DOES work with the libEQ.a that was
+   compiled with g++ 3.0.x.  However, in order to compile ShowEQ with g++ 3.1 
+   your installation of Qt MUST be compiled with g++ 3.1 due to ABI 
+   compatibility issues between the compiler versions
+ + Added the COPYING file that contains the GNU Public licence version 2 under
+   which ShowEQ is licensed.
+ + Added the ZoneMgr object to unify tracking of zone state information,
+   modified the rest of ShowEQ to use it.
+ + Made the selected spawn always be visible on the map irregardless of 
+   being depth filtering, unknown, or filtered.
+ + Added the SINS SpawnMonitor and Spawn Point List to ShowEQ.
+ + Added a right-click context menu to the Spawn Point List.
+ + Made EQPlayer inherit from the Spawn class as well as the QObject class
+   and made the necessary modifications to remove redundancies and fix 
+   conflicts.
+ + Cleaned up SpawnShell, moved SpawnLogger out of SpawnShell.
+ + Cleaned up a bunch of header and source file issues.  Better use of
+   forward declarations instead of including unnecessary header files.
+ + Made it so windows that have a specific font set keep it after
+   interface theme changes.
+ + Cleaned up "View" menu checkmark initialization/handling.
+ + Made the behavior of when the player is painted on the map more sensible.
+ + Added an item to the "Options" menu to "Clear Channel Messages", which 
+   clears out the channel message storage and refreshes all the channel message
+   dialogs.
+ + Added a QInputDialog that will popup when the user chooses to "Enable
+   Opcode Monitoring..." or "Reload Monitored OpCode List..." that allows 
+   the user to edit the list of monitored opcodes.
+ + Added the ability to log monitored OpCode data to a log file and the 
+   ability to configure this logging via the "OpCode" sub-menu of the
+   "Network" menu.
+ + Fixed some bugs in the OpCode monitor.  Changed some of its 
+   configuration parameter names in the process.
+ + Changed/Added a bunch of sections and parameters to/in seqdef.xml.
+ + Fixed a bug in SEQListView::restoreColumns() where it was restoring
+   the visibility state of the columns.
+ + Added an accelerator key for toggling spawn depth filtering.
+   It defaults to Alt+5, configurable by making an appropriate entry
+   in showeq.xml (I wouldn't recommend Alt+4).
+ + Updated the filter string description in filters.conf.dist to reflect
+   the new ":Type:" field.
+
+dohpaZ (21/05/02)
+------------------
+Modifications:
+ + version 4.2.5
+ + Applied patch# 555002 "New README.libEQ" by mrsuspicious (mrsuspicious)
+ + Applied patch# 555000 "New INSTALL.newbies (complete overhaul)" 
+   by mrsuspicious(mrsuspicious)
+ + Added SEQWindow base class and made all top-level/dockable windows
+   inherit from it.  SEQWindow supports the setting/saving/restoring of 
+   caption, font, size, and position information.
+ + Added SEQListView base class and made all the listview's inherit from it or
+   use it SEQListView supports the setting/saving/restoring of listview 
+   column visibility/size/order and sort column/direction.
+ + Fixed crashing bug when right-clicking in the header of the Spawn List to
+   get a context menu.
+ + Fixed a bug where changes to the "FastMachine" setting were being made in
+   "Interface" instead of "Misc".
+ + Fixed an old crash in Filter::loadFilters() if /usr/local/share/showeq 
+   didn't exist.
+ + Fixed "Filtered" filtering so that filtered spawns no longer appear on the
+   map unless "Show Filtered" is enabled.
+ + Fixed handling of filtered spawns and categories in CategoryMgr and 
+   SpawnList.  Allow ":Filtered:" pattern to occur in more complex 
+   filter strings
+ + Removed HP and MaxHP from the filterString that filters and categories
+   are matched against, since they are no longer useful.
+ + Made it so that the following Spawn List columns sort in a proper numeric
+   fashion: Lvl, Hp, MaxHp, ID, and Dist.  Also made it so that the
+   category spawn list items always sort by their names (since they don't
+   have any other fields).
+ + Made it so that the color of the items in the spawn list will be updated
+   as appropriate when the players level changes.
+
+dohpaZ (18/05/02)
+------------------
+Modifications:
+ + version 4.2.4
+ + Improved behavior when no showeq.xml file is present
+ + Removed showeq.xml from CVS (initial one created on first "Save Preferences"
+   or manually by the user), so it will no longer overwrite the 
+   users showeq.xml.
+ + Added ability to delete a button from a message dialog
+ + Added menu pick to the "Network" menu to set the "Device" monitoring packets
+ + Fixed Spawn, Despawn, and Death alert audio
+ + Fixed a few places where menu items weren't getting checked in certain
+   scenarios.
+ + Added right-click context menu to Spawn List that allows the user to 
+   add/edit/delete/reload categories, add filters, toggle spawn list columns,
+   and rebuild the spawn list
+
+dohpaZ (14/05/02)
+------------------
+Modifications:
+ + version 4.2.3
+ + Added support for persisting the category manager
+ + Added support for persisting MessageBoxes.
+ + Changed the category manager to edit colors using QColorDialog
+ + Modifed spawn list so that it used the color of new/changed categories
+ + Fixed a bug where we were trying to assemble client fragment packets
+   despite not caching them nor ordering them.
+ + Fixed a bug where toggling the audio option for filters was changing the
+   "IsCaseSensitive" preference instead of the "Audio" preference
+
+dohpaZ (14/05/02)
+------------------
+Modifications:
+ + version 4.2.2
+ + Changed how fonts are set and configured.  Ended the Helvetica tyranny 
+   (where no matter what font you set over half the GUI would still use 
+   Helvetica and not at the size you specified).
+ + Added menu option to allow setting of the application font from the
+   "Interface" menu.
+ + Added "Status Bar" sub-menu to the "Interface" menu, included options to
+   show/hide status bar windows.
+ + Added additional options to the "Options" menu to control the use
+   of EQ retarded coordinates, use of unix system time for spawn times"
+ + Added additional options to the "Interface" menu to control the display
+   of messages to Stdout, and whether bank info is displayed, to set the 
+   location of the formatted messages file
+ + Added "Font" sub-menu to the "Options" menu to control the application 
+   default font, main window status bar font, and the fonts used by 
+   numerous other windows (not all windows added yet).
+ + Made the show/hide of the channel messages dialogs persistant
+ + Changed MAXSPAWNDATA size from 49152 to 98304 since I was seeing the
+   EQPacket::m_serverData buffer whose size is determined by it overflowing, 
+   which in turn caused crashes.  Added \a's (bell's) around the warning
+   message so that it is more noticable.
+
+dohpaZ (12/05/02)
+------------------
+Modifications:
+ + version 4.2.1
+ + Changed the default for SavePosition from false to true, also consolidated
+   all the SavePosition's to just use the one in the "Interface" section.
+ + Added picks to the "Interface" menu to toggle whether to save window size & 
+   position and whether to restore window position (size is always restored if 
+   available)
+ + Added a new "Filters" top-level menu with options to control filter
+   and filter alert behavior.  Moved filter related menu items from the
+   "File" menu to the "Filters" menu.
+ + Added ability to enable and configure spawn walk path recording from the 
+   "Option" menu
+ + Added control of spell message display to the "Option" menu
+ + Tweaked a few defaults in seqdef.xml to have better values.
+ + Moved "Opcode Monitor" and "Log" menu's to be sub-menus off of the 
+   "Network" menu
+ + Moved the "Debug" menu to the end of the menu bar.
+ + Removed assorted dead members from ShowEQParams and the long defunct
+   -d/--despawn-alert and -R/--spawn-regex command line options.
+
+dohpaZ (11/05/02)
+------------------
+Modifications:
+ + version 4.2.0
+ + Applied patch #539485 "spells update" by wyvern (mvern)
+ + Applied patch #554633 "Default Parameter/Minimum Size Fixes" 
+   by asdf (adenine)
+ + Applied fixes from Ryntar's "Some bug fixes..." post from 5/10/2002
+ + Fixed language handling
+ + Fixed so that recieving a position update on a just deleted spawn
+   will no longer create an unknown spawn
+ + Packet Structure Changes
+   - channelMessageStruct
+   - charProfileStruct
+ + Added support for a per-map default zoom level
+ + Added ability to set window captions from the Interface menu
+ + Added map menu options to control map repainting.
+ + Added Network menu options to allow setting of various parameters previously
+   only exposed via the config file
+ + Added the ability to change the Save State options from a sub-menu off of
+   the Options menu.
+ + Added ability to control creation of unknown spawns from the Options menu
+ + Added map menu option for controlling the display of unknown spawns on a
+   per-map basis.
+ + Made some of the default settings more slow machine friendly:
+   AnimateSpawns(false), ShowDoors(false), ShowDroppedCoins(false), 
+   CacheChanges(true), FastMachine(false), FrameRate(5),
+   SaveState Spawns(false)
+ + Removed the code to prevent using Qt command line arguments since a number
+   of useful options are/were not supported via ShowEQ GUI or command line
+ + Actually made the Spawn list, Stat List, Skill List, and Spell List 
+   dynamic again and only created when needed.  Thereby finally fixing the 
+   regressions introduced in interface.cpp version 1.16 on 22/02/02.
+ + Made FastMachine meaningful.  It now just controls 2D integer vs. 
+   3D floating point distance calculation.  Previously it also forced a 
+   map repaint on every change that effected a visible map element, which
+   actually ended up having the opposite of the intended effect.
+ + No longer save preferences on exit, only save when user chooses to via
+   the menu "File" -> "Save Preferences" or via the CTRL+S accelerator
+ + Migrated to an XML based preference system.
+     + The configuration file seqdef.xml contains the ShowEQ defaults and
+       will usually only be modified to change site specific things, if ever.  
+     + The user configuration file showeq.xml can be used as a template 
+       to create user specific overrides of specific options.  It contains
+       Category Manager and Message Box (Channel messages) window descriptions
+       by default.  Many user settable parameters may now be set via the GUI
+       and will be saved to this file via the "File" menu's "Save Preferences"
+       option.
+     + The DTD describing the specific XML format used in the files is called
+       seqpref.dtd for those who understand such things.
+
+Notes:
+ + Make sure to do a clean build and install, starting from 
+  'make -f Makefile.dist' and ending with a make install.
+ + The old configuration files will no longer be used, a method for migrating
+   configuration information from these files has not been provided.
+ 
+
+fee    (ocho de mayo)
+---------------------
++ version 4.1.0
++ Packet Structure Changes
+  - spawnStruct
+  - charProfileStruct
+  - playerAAStruct
+  - makeDropStruct
+  - changeZoneStruct
+  - *ZoneEntryStruct
+  - newZoneStruct
+
++ various updates to convert zoneId to shortName
++ if you use libEQ, today might be a good day to get a fresh copy
+
+fee    (cinco de mayo)
+------------------
+ + added Vex Thal map. Grats FoH and others on the big time sink in the sky!
+
+fee    (29/04/02)
+------------------
+ + reworked fillConTable(), this may have fixed the 1 off con colors some have
+   seen.  There will still be errors in the con color. If you happen to find
+   any errors please see the thread on the dev board and post any corrections 
+   there.
+
+fee    (09/04/02)
+------------------
+ + made spawnlist, stats and skill windows dynamic again. If you choose not
+   to have these windows visible they will no longer be taking up memory. 
+   This is a regression of an earlier change
+ + inspectStruct is now correct
+ + moved some things around in dispatchZoneData, should save a few cpu cycles
+ + added some code for a future modification to spawnlist.cpp. The options 
+   available under the View menu for the spawnlist, skill and stat lists
+   will eventually be available on a popup by right clicking inside the 
+   desired widget. Mouse events may also change for these widgets. Right-
+   clicking on a spawnlist category and single-left clicking will remain 
+   the same. Double-Left-Click will now dump the selected spawn's info to
+   the console. Single-right-clicking will bring up the popup(coming soon).
+
+dohpaZ (08/04/02)
+------------------
+Modifications:
+ + Applied patch #535167 "Mapmenu change" by CodeWarrior (seqcodewarrior)
+ + Bunch of fixes to the Channel Message dialog to fix some issues, both
+   in Qt 2.x and Qt 3.x 
+
+dohpaZ (03/04/02)
+------------------
+Modifications:
+ + Minor bug fix in equipment handling (should clear up spurious unknown
+   weapons.
+ + Support displaying Unknown1 possibly slot in info display, think it may
+   be back slot so using letter B and that it is a material, this could well
+   be an incorrect assumption.  Also put a colon ":" between slot designator 
+   and slot content
+ + Additional logic for managing dead spawn ID's in SpawnShell
+ + Initial tentative modifications to handle world chat server data (still
+   not functional, but it's a start).
+
+fee    (01/04/02)
+------------------
+Modifications:
+ + clean up some stdout messages
+ + added NoBank option under [Misc] in showeq.conf.dist
+   set to 1(now default) causes inventory items not to be printed out to stdout
+   set to 0 to see inventory 
+ + added new OpCode named CharUpdate for lack of a better idea, may have future uses
+ + fixed bug were exp and aaexp were not being displayed in status bar correctly
+ + showeq will no long support libEQ, you will now need to type in characted and 
+   mob information manually after you zone.
+
+dohpaZ (29/03/02)
+------------------
+Modifications:
+ + Updated tradeItemOutStruct
+ + Fixed window caption setting for Spawn List and Compass, just set the Caption.
+ + Updated version to 4.0.1, just for kicks...
+
+dohpaZ (27/03/02)
+------------------
+Bug Fix:
+ + No longer crash if LOGDIR "/eqstr_en.txt" isn't there... ;-) Doh!
+
+dohpaZ (26/03/02)
+------------------
+Modifications:
+ + Remove artificial dependency on EQPacket from CombatWindow and 
+   ExperienceWindow.  
+ + Remove artificial dependency on EQPlayer from EQPacket.  Also removed
+   non-sensical m_parent member from EQPacket.
+ + Assorted general code cleanup
+ + updated itemInShopStruct (more or less)
+ + added formattedMessageStruct and it's opcode FormattedMessageCode (0x3622)
+   These are used for many of the messages displayed to the user, by default
+   only the message code and it's arguments are displayed.  But, if you copy
+   the eqstr_en.txt from your everquest installation to LOGDIR "/eqstr_en.txt",
+   which would typically result in "/usr/local/share/showeq/eqstr_en.txt", 
+   the actual text messages will be displayed with the appropriate 
+   substitutions.
+ + Made the logger stuff derive from QObjects and moved the PktLogger stuff out
+   of EQPacket and made it fed by EQPackets signals to remove the dependency.
+ + updated showeq.conf.dist [MessageBox1] section by adding a button for 
+   Formatted messages
+
+cwebster (26/03/02)
+-------------------
+Bugfix:
+ + added logger.h to EXTRA_DIST in the automake template
+
+fee (23/03/02)
+-------------------
+Modifications:
+ + Updated charProileStrcut and ServerZoneEntryStruct
+ 
+dohpaZ (20/03/02)
+------------------
+Modifications:
+ + Fix listspawn.cpp to compile and run again.
+
+dohpaZ (20/03/02)
+------------------
+Modifications:
+ + support new mystery slot that VI now gives change notifications for in the 
+   wearSlotId  in the new wearChangeStruct...
+ + Actually save current animation in Spawn object
+ + Updated calc_exp() to reflect the current experience system
+   with the most reasonable formula I've seen so far:
+   (level^3) * RaceMod * ClassMod * (10 + ((Level - 29) * 0.2))
+
+fee (21/03/02)
+------------------
+Modifications:
+ + fixed the wearChangeStruct and ServerZoneEntryStruct 
+
+dohpaZ (20/03/02)
+------------------
+Modifications:
+ + Applied patch #531296 "Window Title Configurability" 
+   by cybertech (CyberTech)
+ + Modified results of patch #531296 to not use C style strings nor strdup().
+ + Added "Save Preferences" option to the "File" menu.
+
+dohpaZ (19/03/02)
+------------------
+Modifications:
+ + Tweaked showeq.conf.dist to remove an outdated statement
+ + Tweaked the help to correct some entries
+ + identified animation field in spawnStruct
+ + EQ 19/03/02 Patch fix for "racing"/"raining" PC problem 
+   (notification to client that server is not sending more position updates)".
+
+dohpaZ (18/03/02)
+------------------
+Modifications:
+ + Map optimizations.  Switched from using {QPixmap, QWidget}::drawPixmap() to 
+   bitBlt() for copying pixmap data around and to screen.  Also, cache 
+   the item->filterFlags() value on the stack for slightly faster access.
+   The bitBlt optimization MAY help those seeing lockups.
+ + Changed default spawn save frequency, and updated showeq.conf.dist to 
+   reflect the new default (saves spawns every 60 seconds).
+ + Optimized how spawn information was saved and added a magic number to the
+   beginning of it's file
+ + Added FOV Mode selection to the map, with three options: 
+   Distance Based (default), Scaled Classic, and Classic.  This controls the
+   style of player background/field of view display
+   + "Distance Based" where its size is based on an actual distance 
+     along a horizontal plane from the player.
+   + "Scaled Classic" where its size is based on the classic formula 
+     a simple scale applied to compensate for zoom.
+   + "Classic" where the size uses the old, meaningless, non-scaled classic
+     formula.
+
+dohpaZ (17/03/02)
+------------------
+Modifications:
+ + Made FOV distance configurable in map units (defaults to 200 units), and
+   also made FOV color and fill pattern style be configurable
+ + Added options to the map menu to allow the configuration of the 
+   FOV parameters as well as the base spawn DrawSize
+ + Cleaned up all the code that uses FOV, and pre-calculate the scale in 
+   Map::reAdjust()
+ + Minor map optimizations (pre-calculate common draw size derivatives)
+ + Added more information to the Network Diagnostics dialog
+ + Added the ability to configure the base filename of save/restore session
+   data files.  This is useful for those running multiple instances of ShowEQ
+   at once, in which case you don't wan't all your session snapshots using
+   the same snapshot files...
+ + Added "BaseFilename" key to the [SaveState] section of the configure file,
+   and added an example to showeq.conf.dist
+
+dohpaZ (17/03/02)
+------------------
+Modifications:
+ + Added the ability to save/restore the decode key, player state and/or
+   the spawns to allow the recover of a session after a crash.  
+ + Added [SaveState] section to showeq.conf.dist with examples of how to 
+   enable/disable saving of showeq state for later restoration.  
+ + Added new command line options for the restoration of state after a crash:
+   --restore-decode-key 
+   --restore-player-state
+   --restore-spawns
+   --restore-all
+
+Notes:
+ + Restoring after a crash will not necessarily result in a stable ShowEQ,
+   make sure you only specify the --restore-{} command line options if
+   you are in the same zone and in the same session as before the crash.
+   DO NOT USE THESE IF YOU'VE ZONED OR LOGGED OUT/IN, WIERD THINGS WILL HAPPEN!
+   YOU HAVE BEEN WARNED!
+
+dohpaZ (16/03/02)
+------------------
+Patches Applied:
+ + #514219 "Container Item Struct modifications" by countzer0 (Steven Kordik)
+ + #516830 "Spell timer coloring" by worried (John Bar)
+ + #517655 "door struct fix (take 2)" by mvern (Wyvern)
+ + #526644 "ToolTips Coordinate Fix" by darkgrue (Dark Grue)
+
+Modifications:
+ + Minor itemdb cleanup, removed dead code
+ + Minor modification to patch #516830 results:
+   + Added check for duration > 120 to make sure it's black
+   + Modified to "else if" format for performance
+ + Minor tweaks to EQPacket to support directly setting/getting playback speed
+ + Added Network Diagnostics dialog netdialog.{cpp,h} to make certain network
+   diagnostics more visible, and to allow more direct control of the playback
+   of recorded files.
+ + Made the status bar default to visible if any of it's widgets are visible
+ + Updated showeq.conf.dist to add the missing StatusBarActive option to
+   Interface_StatusBar
+
+fee (22/02/02)
+------------------
+
+  Lots of changes in this batch. 
+  + added Session Tracking to the packet engine. When enabled via conf or menu,
+    showeq will lock on to a specific EQ session. You could now run 2 sessions 
+    from the same host and showeq will not get confused. This will have NO 
+    affect on single session users. Please report bugs or questions on the 
+    official board.
+  + reworked a large chunk of the gui code. A few menu changes were made but
+    prior behavior should be maintained. 
+  + updated alt exp slightly, it appears 15,000,000 is the exact value per 
+    ability point
+  + lots of little fixes here and there, make diffs if you need details :)
+
+  Cheers, fee!
+
+fee (13/02/02)
+------------------
+
+  + updated Ssra Temple map
+  + fixed small problem with con colors for lvl 60
+  + updated packet structs for todays EQ patch
+
+cjd1 (11 Feb 2002)
+------------------
+
++ Made the spell timer a configurable setting
++ Maybe fixed it to reset the spell timer on a finish cast .. lemme know
+
+ratt (09/Feb/02)
+-------------------
+
+Small bug fix on the showeqitemdbtool
+
+Updated some maps from SeqTester, thanks SeqTester!
+
+ratt (07/Feb/02)
+-------------------
+
+Gave showeqitemdbtool the ability to export lists in
+CSV or LSV format making database importation a 
+little more friendly
+
+fee (05/02/02)
+-------------------
+
+Additions
+ + Applied patch #513117 Combat Window
+   http://seq.sourceforge.net/showthread.php?s=&threadid=467 
+   
+
+
+Andon (04/Feb/02)
+-------------------
+
+Additions
+ + showitem.cgi now uses a table to display an items color..
+   This makes determining item colors much easier.
+ + showitem.cgi no longer displays an item color if the item
+   has no material.. Pointless to display (0x000000) when the
+   item's color is never seen.
+
+Bug fixes
+ + listitem.cgi and showitem.cgi now handle toggling icon states
+   at run-time far better than previously.
+
+Bug fixes
+
+
+fee (03/02/02)
+-------------------
+
+Applied remainder of patch #503766. see patch manager for details.
+New Acrylia map.
+
+
+ratt (31/Jan/02)
+-------------------
+
+Applied Yendor's spawn logging patch
+
+Andon (31/Jan/02)
+-------------------
+
+I'm back! <grins>..
+
+Additions
+ + --enable-cgi-icons to configure, see configure --help..
+
+Bug Fixes
+ + Fixed a few instances in the CGIs where 'cout' calls should have been
+   calls to 'out'..
+ + Optimized portions of the OpCode monitor slightly, saving up to 3-bytes
+   per loop iteration (during the initial list parsing and reloading).
+
+ratt (28/Jan/02)
+--------------------
+
+Added Yendors corpse movement patch
+Added Yendors newCorpsespawn struct patch
+
+fee (26/01/02)
+--------------------
+
+ updated and added several luclin maps
+
+cjd1 (23/01/02)
+--------------------
+
+Additions
+ + Window geometry is saved better, see new entries in conf/showeq.conf.
+ + QListView columns orders are preserved, drag/drop them to rearrange.
+
+fee (21/01/02)
+--------------------
+
+Mods.
+ + Applied patch #500653, Fix for deque.h problems.
+ + Applied patch #500732, Fix for QT 3.0.1 and QT lib search.
+ + Applied patch #500538, Fix Quick Spawn Display Issue
+ + Applied patch #504970, PktLogger Pretty Printer Patch
+ + Applied patch #505115, fix eqTime display
+
+Thank you all for submitting these much needed patches. If I have not
+gotten to yours yet, please be patient. I evaluate each patch as I have
+time.  I promise I will get to it sooner or later. Keep up the good work!
+
+fee (17/01/02)
+--------------------
+
+Additions
+ + applied patch #502126 by Yendor, this patch introduces an advanced
+   packet logging facility. This patch adds 2 definitions to showeq.conf
+   PktLoggerMask and PktLoggerFilename. See the patch manager, logger.h 
+   and showeq.conf.dist for details.  Great addition Yendor!
+
+
+Modifications
+ + patch #502126 extensivley modifies opcode and structure names. If you have
+   submitted prior patches that have not been accepted at this time, then please
+   review your changes for compatibility.
+
+ + slipped in some changes from patch #503766, redefining the ITEM_xxxx.
+
+fee (14/01/02)
+--------------------
+
+Mods
+ + more decoded fields in everquest.h, read it for details
+ + altered the method used to assign the player's deity in the spawnlist
+   may or may not affect the problems on the problems with deity teams play
+ + merged patch #502812, great job mvern!  Disarmable traps are pink,
+   non-disarmable traps and triggers are purple.
+
+Bugs 
+ + found and fixed a problem with the experience calculations. again this is
+   just a bandaid untill the new experience manager is complete.
+
+fee (10/01/02)
+--------------------
+
+Additions
+ + Alternate Experience is now being tracked, its in a very elementary form
+   so be patient more will follow. check the showeq.conf.dist file for the
+   new parameters
+
+Modifications
+ + added lots of members to the packet structs, see everquest.h for details
+ + altered some of the methods in how EQPlayer handles zoning, prelim work 
+   for future mods
+ + general house keeping, removed some obsolete methods and minor code cleanups
+
+Bugs
+ + experience tracking should be normal as can be now. the experience window
+   will still report inaccurate information, a fix is in the works
+
+casey (05/01/02)
+--------------------
+
+Additions
+ + got tired of running around Paludul without a map, so i borrowed one 
+   from mapfiend and added it.  enjoy.
+
+casey (03/01/02)
+---------------------
+
+ + date before month dating messes with my head :)
+
+Additions
+ + FAQ
+   - Frequently asked questions, its short, only 4 questions/answers that
+     apply to runtime issues.  If people take the time to read it before 
+     posting in the forums we can add build time issues and anything else
+     that may be helpful to people
+ + configure.in
+   - changed the libEQ search, looks for InitializeLibEQ, and if not found,
+     the error message has been modified to suggest the lib is either not
+     found or out of date.
+
+fee (03/01/02)
+---------------------
+Mods:
+ + updated experience handling
+   - the stat list will show sane numbers
+   - the exp box in the main window will display current exp plus the x/330 fraction
+ + created opcode AltExpUpdateCode and expAltUpdateStruct for future mods
+
+dohpaZ (03/01/02)
+---------------------
+Modifications:
+ + Un-applied patch #498562 "Spawn z loc patch" by wyvern (mvern),
+   it turns out that this had negative implications for the map code in
+   regards to existing maps and depth scaling.
+ + Applied patch #498938 "doors patch part 2" by wyvern (mvern)
+ + Applied patch #498735 "ShowEQ install/usability patch" 
+   by Kenny FromSouthPark (kennysp)
+ + Modified the Drop, Coin, and Door classes to multiply the Z up by 10.0
+   and have the Item class also save a floating point version of the Z
+   coordinate that is Z divided by 10, and added a displayZPos() method.
+ + Modified the Spawn List, Interface, and Map to use the displayZPos() for
+   textual display purposes.
+ + Modified the paintDrops(), paintCoins(), and painDoors() methods to 
+   pay attention to Spawn Depth Filter setting.
+
+Bug Fixes:
+ + Made the text output when a spawn that matches a filter is seen actually
+   display the z coordinate instead of print the y coordinat twice.
+
+dohpaZ (03/01/02)
+---------------------
+Modifications:
+ + Applied patch #498090 "find and use gcc3 or gcc-3.0 if present" 
+   by njk (yendor)
+ + Applied patch #498465 "Timeout for pcap_open_live()" by grendel (runlevel)
+   aka segv
+ + Applied patch #498562 "Spawn z loc patch" by wyvern (mvern)
+ + Applied patch #498650 "door spawns patch" by wyvern (mvern)
+ + Applied patch #498652 "gm-tell fix" by wyvern (mvern)
+ + Applied patch #498822 "Language header chagnes for Vah Shir" 
+   by Bonkers D Bobcat (bonkersbobcat)
+ + Modified loading of zone specific filters to also occur on zone change and
+   zone entry (in case we don't see zone new).  Also made it always use an
+   all lowercase zone name and display the name of the filter file being 
+   loaded.
+ + Adjusted languages[] array definition to new known length, and also 
+   adjusted the following unknown[] uint8_t array.
+
+dohpaZ (02/01/02)
+---------------------
+Bug Fixes:
+ + Fixed it so that people who don't need to specify a path to the qt libraries
+   won't get a bogus -rpath in their link lines.
+
+dohpaZ (01/01/02)
+---------------------
+Modifications:
+ + Applied patch #498339 "Patch to sound alerts and some cleanup" from
+   Druppy (druppy).
+
+dohpaZ (01/01/02)
+---------------------
+Happy New Year
+
+Modifications:
+ + Made the map check check that the followed player/spawn is visible more 
+   often.
+ + Updated INSTALL to warn people about using Qt 3.x.
+ + Applied patch #498257 "fix --with-qt-dir" from njk (yendor).
+
+dohpaZ (31/12/01)
+---------------------
+Modifications:
+ + a few tweaks to configure.  Robustness and made the RPATH, extra libs,
+   and extra includes stuff actually work.
+
+Bug Fixes:
+ + Made ShowEQ not crash and give an appropriate error message if it is 
+   unable to open the network device.  If it detects that the user is 
+   not running as root it will suggest they do so.
+
+dohpaZ (31/12/01)
+---------------------
+Modifications:
+ + Updated showeq.conf.dist to reflect that the KeyMap section is no longer 
+   used, and how to configure keyboard accelerators on a per map basis
+   (see Map section).
+
+Bug Fixes:
+ + Made automatic client detection work again.
+
+fee (31/12/01)
+---------------------
+Mods:
+ + updated playerProfile, newZone and zoneEntry structs to mach current
+   data (these structs are still not 100% documented)
+
+dohpaZ (30/12/01)
+---------------------
+Modifications:
+ + Fix for map panning bug
+ + Applied patch #496581 "Quick fix for Exp-Window"
+ + Applied patch #496462 "consider msg patch" from wyvern (mvern)
+ + Modified Experience handling to use the group class and made the 
+   ExperienceWindow work more or less (not perfect, but it's something).
+ + Temporarily disable group code until the crashing bug can be found 
+   (any volunteers to fix it?)
+ + Added some keyboard accelerators to the maps.
+   The following keyboard accelerators are configurable on a per map basis 
+   (listed by preference name):
+     ZoomInKey                => +
+     ZoomOutKey               => -
+     CenterSelectedKey        => Ctrl+5
+     ViewLockKey              => Ctrl+0
+     PanDownLeftKey           => Ctrl+1
+     PanDownKey               => Ctrl+2
+     PanDownRightKey          => Ctrl+3
+     PanLeftKey               => Ctrl+4
+     PanRightKey              => Ctrl+6
+     PanUpLeftKey             => Ctrl+7
+     PanUpKey                 => Ctrl+8
+     PanUpRightKey            => Ctrl+9
+     AddLocationKey           => Ctrl+O
+     StartLineKey             => Ctrl+L
+     AddLinePointKey          => Ctrl+P
+     DeleteLinePointKey       => Ctrl+D
+     MapLineNormalKey         => Alt+1
+     MapLineDepthFilteredKey  => Alt+2
+     MapLineFadedFloorsKey    => Alt+3
+ + Added an explanation of how the filter string is composed to 
+   filters.conf.dist
+ + Added more weapon names (including adding weapon28.h and weapons2b.h)
+ + Added size checking for dispatched decoded data.
+ + Tweaked the structures related to Zone Spawns to more accurately reflect
+   the data organization.
+
+Ratt (18/Dec/01)
+---------------------
+ShowEQ v4.0
+
+Please read INSTALL for new information.  You MUST meet the minimum version
+of the tools listed, or you WILL NOT BE ABLE TO COMPILE ShowEQ v4 and above.
+
+dohpaZ (18/12/01)
+---------------------
+Modifications: 
+ + Assorted copyright clarifications
+ + Fixed configure.in so it doesn't do the stupid showeq.C nonsense (make sure
+   to get rid of your config.cache file)
+ + Added checks to configure.in for supported compiler and glibc versions
+ + Made all the qt checks check for qt-mt.
+ + Additional minor bugfix to libeq.h (now compiles with HAVE_LIBEQ set to 0)
+
+dohpaZ (17/12/01)
+---------------------
+Modifications:
+ + Updated to new libEQ API
+
+fee (16/12/01)
+---------------------
+Mods:
+  + Created dispatchWorldData to handle worldserver opcodes
+    + added new section in opcodes.h for future additions
+  + Tweaked pcap filtering in PacketCaptureThread
+    + the menu item 'Monitor Next EQ Client Session" is functional again
+    + a more robust filter is now created including only capturing correct ether
+       type 0x0800
+    + MAC based filters will now be preserved through zoning, if you defined a 
+       MAC in showeq.conf
+    + a few type optimizations
+  + Source formating issues in dipatchZoneData, just a clean up for readablility
+  + Added an additional check to decodePacket to prevent non-eq udp packets
+     from corrupting things
+
+Bugs:
+  + BadCastCode generated by other players is causing constant segfaults in
+       interruptSpellCast()
+    + spellshell.cpp:246, there are comments that this was a known issue, 
+       for stability this has been temporarily commented out.
+
+fee (13/12/01)
+---------------------
+
+  + hand picked new luclin maps from mapfiend
+  + modified the IP directive in showeq.conf.dist, premptive for new packet filtering
+
+dohpaZ (13/12/01)
+---------------------
+Modifications:
+ + Modified display properties of certain objects on the map per discussiosn
+   with ratt:
+   + Drops are now yellow x's
+   + Coins are now magenta x's
+   + PC Corpses are now hollow yellow squares drawn with pen width 2
+ + Small optimizations to paintCoins and paintDrops
+
+Bug Fixes:
+ + Corpses don't have velocity no matter what the server tells us
+
+dohpaZ (12/12/01)
+---------------------
+Modifications:
+ + Fixed several bugs related to level handling in the filter code
+ + Improved memory utilization in used by queued encrypted packets
+
+Bug Fixes:
+ + Small bug fix to calcPickConColor imported from SINS
+ + Fix map loading from the File menu
+ + Fix painting of M lines in MapData::paintDepthFiltering.
+
+dohpaZ (12/12/01)
+---------------------
+Modifications:
+ + Split beginCastStruct into seperate beginCastStruct(BeginCastCode) and
+   spellCastStruct(MemSpellCode), and removed members from beginCastStruct
+   that no longer exist.
+ + fixed spawnKilledStruct(CorpseCode), removed the members that are 
+   no longer present.
+ + fixed interruptCastStruct(BadCastCode), removed member that VI removed.
+ + cleaned up some player spawn handling in the SpawnShell, could possibly
+   fix a couple bugs.
+ + Tweaked spell_name to display unknown spellIds in hex.
+ + Added more general display of interrupted spell casts
+ + Added more diagnostic text to GroupMgr
+
+dohpaZ (11/12/01)
+---------------------
+Modifications:
+ + Made it so that Map will repaint even if a map isn't loaded.
+
+dohpaZ (11/12/01)
+---------------------
+Notes:
+ + This patch also requires a re-compile of libEQ with the updated headers!
+
+Modifications:
+ + Added new races to races.h
+ + Updated equipment structure and weapon printing (added new file for 
+   weapons with ids in the 0x2700-0x27ff range.
+ + Updated opcodes (opcodes.h) and structures (everquest.h) to deal with 
+   the 10/12/01 patch and other changes.
+
+Bug Fixes:
+ + Fix assorted borkage I caused when I migrated to the SINS preference 
+   handling.
+ + Fixed src/Makefile.am to link the tools and CGI's with -lpthread and.
+ + Imported Fix from SINS to the calcPickConColor() function we imported from
+   SINS.
+
+dohpaZ (10/12/01)
+---------------------
+Modifications:
+ + Migrated to the preference code from SINS.
+
+Bug Fixes:
+ + Fixed a SegFault that occurred if the status bar status wasn't enabled
+
+dohpaZ (9/12/01)
+---------------------
+Modifications:
+ + Finally got rid of the accursed M$ types
+ + Added a header file fixpt.h with templatized fixed point math routines.
+ + Some optimizations in SpawnShellSpawn::approximatePosition() and in 
+   Map::paintSpawns(), including migrating 
+   SpawnShellSpawn::aproximatePosition() to fixed point math
+ + Migrated to the SINS pickConColor optimization
+ + Migrated over a variation on the SINS use of an Inverted ratio for the
+   calc[XY]Offset() methods using fixed point math.  I found q=14 to be 
+   ~2% more accurate than the q=11 they used.  This is not a large
+   improvement in accuracy, but it helps.  Also, this version uses 
+   fixpt.h.  Migrated a bunch of routines that can deal where the accuracy 
+   hit will not be a serious detriment to the new calc[XY]OffsetI() methods.
+ + Cleaned up some of the packet structure size checking.
+ + Moved SpawnShell{Item, Spawn, Drop, Coin} to spawn.{h, cpp} to help clear
+   up some dependencies for use by the CGI's, also removed SpawnShell from
+   their names.  Migrated all code with dependencies to the new header file
+   and names.
+ + Cleaned up the rest of the dependencies and got showspawn.cgi and
+   listspawn.cgi to compile again.
+
+Bug Fixes:
+ + Fixed the GroupMgr, need to more closely examine and test SINS imports 
+   before using them.  This one was busted in SINS.
+
+dohpaZ (02/12/01)
+---------------------
+Modifications:
+ + Cleaned up EQPacket quite a bit.  Removed it's spawn list maintenance,
+   and queueing for spawndb use.
+ + Moved a lot of functionality that was in EQPacket to the objects that
+   should be providing it.
+ + Changed zoning notifications from the ambigous zoneChanged() and newZone()
+   to zoneEntry(Client), zoneEntry(Server) zoneChange(), and zoneNew().
+ + Migrated a bunch of stuff and concepts from SINS configure.in to ShowEQ's.
+ + A bunch of prep work for migration to SINS logging code
+ + Migrated to SINS GroupMgr for Group Management
+
+Bug Fixes:
+ + Fixed major memory overwrite problem caused by EQDecode::DecodePacket()
+   that was causing many crashes, frequently in EQPacket::decodePacket().
+ + Fixed major thread re-entrancy problem caused by LocateKey calling
+   FoundKey directly in it's thread, thus causing signals that updated the
+   GUI to be called from the wrong thread, causing many crashes in the 
+   GUI, usually the SpawnList
+ + Fixed a bunch of warnings and bugs that were exposed with -Wall
+
+Temporary Limitations:
+ + spawndb and spawnlog are temporarily removed from the code as we migrate
+   to the SINS logging system
+
+dohpaZ (29/Nov/01)
+---------------------
+Modifications:
+ + cleanup EQPacket to EQPlayer connections a bit (switched to emit'd signals)
+ + Add support for player level update to SpawnShell
+ + Added corpse loc handling (taken from SINS, with nods to their johnq_p)
+ + Made it so non-docked maps can restore their position, and will be 
+   restored if Interface_UseWindowPos is set.
+ + A couple tweaks/fixes to showeq.conf.dist
+
+Bug Fixes: 
+ + Fix minor gcc-3.x compile issue
+ + Minor initialization cleanup in SpawnShellSpawn for the player spawn
+ + Fixed include problem in drawmap.cpp
+
+casey (29/Nov/01)
+---------------------
+
+I un-inlined EQPlayer::setPlayerID(uint16_t), as it was causing compile 
+errors on all my boxes.  Best i could tell, it has to do with Qt's MOC, 
+and the function being marked a slot, so when its optimized away in 
+player.o, m_player.o cant reference it in the link stage.
+
+dohpaZ (28/Nov/01)
+---------------------
+Notes: 
+ + Requires rerunning Makefile.dist
+ + PLEASE look at the new showeq.conf.dist and filters.conf.dist and adjust
+   your config files accordingly.
+
+Modification:
+ + Made common Point3D<> and Point3DArray<> template classes for handling 
+   positional information and calculating distances (both 2D and 3D
+   Euclidean distances).
+ + Rewrote/Reworked much of the SpawnShell
+   + Fixed bugs necessary to get it's level of handling to meet and then
+     exceed what was being done in the Map code.
+   + Added features necessary to support the Map
+   + Split SpawnShellItem monolith into a SpawnShellItem base class that just
+     contains the common basic info, and SpawnShellDrop, SpawnShellCoin, and
+     SpawnShellSpawn classes that only contain the known field data instead of
+     the raw packet information (good memory savings). Also have the base
+     SpawnShellItem inherit from Point3D<int16_t> for core location maintenance
+     and distance calculations.  Added support for approximating the current
+     location of SpawnShellSpawns (borrowed some optimizations for it from SINS
+     later).
+ + Rewrote/Reworked much of the Map
+   + Uses C++ objects and paradigms for all map related data
+   + Uses the SpawnShell instead of maintaining it's own spawn information
+   + Added support for multiple maps
+   + Support display of Spawn Names
+   + Core map file/drawing handling has been moved mapcore.{h, cpp}
+   + Optimized the Map code
+   + Added the MapCache class to cache the core Map background (background
+     image/color fill, grid lines/ticks, lines, and locations) so they only
+     get repainted if they need to be.  Depending on your map viewing style
+     this can be a large improvement, but in general seems to reduce aggregate
+     map repaint times by over half.
+   + Migrated some optimizations and funtionality from SINS
+ + Moved all filter management into it's own class FilterMgr
+ + Made the same basic filtering scheme be used throughout with support
+   for full posix regex on a spawns filter string. 
+   (see SpawnShellItem::filterString() and SpawnShellSpawn::filterString()).
+   Can now have a filter of the form "Race:Will[^:]*:.*:Light:GLS:.*"
+   which will match all spawns whose races have names beginning with "Will" 
+   and who using a GLS as a Light (typically GLS wielding Will o' wisps).
+   Or say you make a sport out of hunting the local guards that are in the 
+   level 32-34 range, you might use "Race:[^:]*Guard[^:]*:;32-34".
+ + Added ability for Categories to match on any filter flags.
+   As an example, for a category to contain everything that the Hunt filter
+   matches use a category filter of ":Hunt:". For a category to match
+   contain all spawns found by Map Find queries you could use a category 
+   filter of ":Map[2-5]{0,1}:"
+ + Added support for runtime filters (used by Map Find)
+ + Moved all category management into it's own class CategoryMgr
+ + Moved playerID and position/heading information to EQPlayer
+ + Made most EQPacket signals use const data types so that the 
+   so that receivingg slots have to work to mess things up.
+ + Cleaned up a bunch of signals, slots and connections.
+ + Cleaned out a bunch of dead code and variables.
+ + Many other changes/updates I'm sure I'm forgetting...
+
+Bug Fixes:
+ + CPreferenceFile now properly quotes new entries that require them
+ + Fixed a race condition in decode.cpp involving the creation of the thread
+   that does the LocateKey stuff (need to set m_locateActive to true, before
+   creating the thread that calls the function that basically just exist if
+   it's false).
+
+casey (17/Nov/01)
+---------------------
+Additions --Luclin maps--
+ + Nexus.map 
+ + Katta.map 
+ + Hollowshade.map 
+ + Shadeweaver.map 
+ + SharVahl.map 
+ + Tenebrous.map
+
+fee (14/Nov/01)
+---------------------
+ + implementing a packet capture class, based on what was in pcap.c,
+     something we can work with and build on.
+ + working broken decode, if ever needed
+ + bug fix in decode.cpp, will now properly cancel the LocateKey thread
+      if it gets used.
+ + my take on the spawn struct, may not be accurate in terms of data,
+       but is of correct size
+ 
+ 
+ratt (07/Nov/01)
+---------------------
+Robustisized (is that a word?) the spawn alerting.
+ 
+Added the ability to play different alerts based on the filter type.
+Added the ability to log the different filter types
+Check your showeq.conf.dist file -- these features added to it
+
+Locate filter should now auto-select the filtered mob.
+
+New console messages based on filters.
+
+MessageBox filtering based on the spawns filter is not working?  I'm
+missing something simple, but I can't figure out what it is ... anyone?
+ 
+ 
+ratt (03/Nov/01)
+---------------------
+Fixed spawn alerting for the LOCATE header ...
+ONLY the LOCATE category will produce a spawn alert, other
+categories will produce no audible alert.
+
+Added a trace stub for spawn tracing... now to beat QT into
+submission.
+
+dohpaZ (02/Nov/01)
+---------------------
+Modifications:
+ + Integrated Sdodell's patch #476594
+ + Split the QValueList used in SpawnShell to keep track of all the different
+   types of spawns into 3 STL maps (m_spawns, m_coins, m_drops).  This
+   improved performance.
+ + Some general small code cleanups, removed dead code.
+ + put some more diagnostics in to dispatchZoneData that verify the size
+   of various structures before dispatching them.  It looks like some 
+   structures have changed without our noticing.  I haven't analyzed all 
+   they're new configurations yet (only deleteSpawnStruct).  If you 
+   uncomment the PACKET_PAYLOAD_SIZE_DIAG define in packet.cpp or 
+   put the define in your compile options you'll see warnings about
+   structures being the wrong size.  I still allow the code to dispatch them, 
+   but these could be causing some funky behavior.
+ + Ability to show/hide columns in the SpawnList via a "Spawn List" sub-menu 
+   off the View menu.
+ + Removed CSpawnList's use of a QValueList to keep track of spawns, and 
+   made it use the QListView itself.  Also modified it to use the state 
+   aware iterator QListViewItemIterator.
+ + Moved "List {Spawns, Coins, Drops}" capability to SpawnShell which dumps
+   all of that type of spawn to stdout, also added "Dump {Spawns, Coins, 
+   Drops }" capability that will dump to a file.
+ + Added SPAWNSHELL_DIAG define to spawnshell.cpp, if it's defined
+   then a bunch of diagnostics for SpawnShell will be displayed.  Also 
+   added SPAWNSHELL_NAME_VALIDATE define which enables validation of 
+   spawn names, it prints a SUSPECT message if any spawns have 
+   names that are suspicious.
+ + Updated INSTALL file to represent current requirements.
+
+Bug Fixes:
+ + Fixed a small memory corruption problem in SpawnShell.
+ + Fixed several memory overwrites, accesses to delted memory, and logic 
+   errors in CSpawnList.  Including an infinite loop.
+ + Fixed a bug in decodePacket's cache handling that was messing up 
+   the dispatch of some packets (Doh!).
+
+dohpaZ (31/Oct/01)
+---------------------
+Happy Halloween, Samhain, etc...
+
+Modifications:
+ + for the moment made the packet decode stuff pedantic about what it will 
+   accept (always verifies CRC32).
+ + Added some checks to VPacket on Playback so it is more likely to spot
+   corrupted files.
+  
+Bug Fixes:
+ + Made VPacket no longer write to files opened for playback.
+ + Actually put the player in the spawnlist (The initial "You" when you
+   zone in).
+ + More likely to give appropriate experience information on a kill.
+
+cwebster (10/31/01)
+---------------------
+Bugfix:
+ + added crctab.h to EXTRA_DIST in src/Makefile.am
+
+dohpaZ (29/Oct/01)
+---------------------
+Modifications:
+ + Major revamp of packet decoding, how packets are examined and processed 
+   has changed.  A whole new caching scheme has been implemented.
+   Uses less memory and is generally faster and more closely reflects the 
+   EQ protocol. Handles lost packets better and in a tunable fashion 
+   (ArqSeqGiveUp).
+ + Moved player related info, handling and signals from EQPacket to EQPlayer
+ + Removed unused member variables from EQPacket.
+ + Removed dead code from packet.{cpp, h}
+ + Moved the player stat and skill windows to their own classes:
+   + EQStatList - statlist.{cpp, h}
+   + EQSkillList - skilllist.{cpp, h}
+   They get information and notifications from EQPlayer.  They can be docked 
+   or undocked via user options and via menu.  They will attempt to display 
+   information immediately upon being displayed, and in the case of EQStatList
+   when a stat is being displayed.  These classes are only instantaited and 
+   taking notifications when the user chooses to display them.
+ + One of CJD's mods to spell handling in packet.cpp
+ + Reverted some maps, and chose different versions of others.  Some of the
+   maps on mapfiends site are optimized for static display (with different
+   levels and info omitted) and not for ShowEQ.  Some of the new maps on 
+   the mapfiend site are just broken and/or incomplete.  Please remember to
+   review all maps (old vs. new versions) before updating them.  
+ + Added support for configuring compilation for the test server 
+   (--with-test-server) which causes TEST_SERVER in to be defined in conf.h.  
+   Note, compilation and running for the test server is hit or miss.
+ + Put fee's initial attempt at the test servers new spawnStruct in everquest.h
+   conditionally included via TEST_SERVER
+
+Bug fixes:
+ + improved behavior when ShowEQ is brought up in the middle of an EQ session
+ + receipt of a SEQStart retransmit no longer messes things up.
+ + properly shutdown VPacket when EQPacket gets deleted so files will be 
+   closed properly.
+ + CJD's RALLOWS -> RALLOS fixes
+ + A variant on CJD's max mana guessing fixes in EQStatList
+ + Removed bogus SebilisUpperLevel.map
+
+cwebster (29/Oct/01)
+-----------------------
+
+Bug Fixes:
+ + src/Makefile.am:
+     added db3conv.h dbcommon.h deity.h dump-seqdb.h pcap_local.h 
+           player.h spelltimes.h
+     to EXTRA_DIST so that "make dist" produces a compilable release.
+     (someone added some files and didnt update the variable).
+Modifications and Additions:
+ + synced mapfiends maps into CVS.
+
+dohpaZ (18/Oct/01)
+---------------------
+Bug Fixes:
+ + Fixed a bug in packet.cpp that prevented the playback of recorded sessions.
+ + I think I've fixed at least one of the "encryption" bugs that's been 
+   going around.  The problem was related to poor link quality with resends 
+   and out of order packet receipt.  The encryption issues were the most 
+   obvious symptom.  This fix involved upping the MAXPACKETCACHECOUNT to 256 
+   in packet.h, and #ifdef'ing out and adding some code to decodePacket() 
+   in packet.cpp.  This fix will only effect encryption issues that are
+   due to a recent patch.  This will not fix any others, certain zones
+   just take a while for the encryption to be broken.
+ + Handles more sequence wraps (0xFFFF -> 0x0000)
+
+Notes:
+ + I believe there are still some issues with out of sequence packets
+   around the time of sequence wraps (0xFFFF -> 0x0000), specifically
+   related to the packet caching mechanism.
+
+Andon (18/Oct/01)
+---------------------
+Bug Fixes:
+ + STUPID distros (i.e. RedHat) will no longer choke on the shell script:
+   'which'. I had to resort to using sh's built-in 'type' command... Life
+   would be so much easier if RedHat would just conform to standards :)
+
+dohpaZ (17/Oct/01)
+---------------------
+Modifications:
+ + drawmap.cgi used to dump core on half the maps, and display nothing 
+   for half of what was left, well after Various fixes it appears to 
+   display all the maps that are in map file format, dumps core on none 
+   of the maps, and merely displays an error on the one that's actually a 
+   JPEG and not a map (SebilisUpperLevel.map).  I've also added a form to 
+   allow for map selection.  And it also has some rudimentary 
+   support for colored lines where the color was specified by a color name.
+ + Fixes spawndb in packet.cpp, actually setting the zone name sensibly 
+   and when we can reliably have the zone name.  
+ + Modified the database format of ItemDB to improve performance.
+ + Modified ItemDB so that it can be used with database backends
+   other than GDBM.  Also various improvements to the database 
+   convenience classes to minimize usage differences between different
+   databases.  Also added a header file for common database convenience
+   classes (dbcommon.h).
+ + Added support for using Berkeley DB3 as the database backend for the
+   ItemDB.  User must pass --with-db3 option to configure.  Also provide
+   --with-db3-{dir, includes, libraries} configuration options in case
+   it's not installed in the default paths.  Support for DB3 is still 
+   provisional at this time, but greatly improves performance.
+ + Added support so that the ItemDB will automatically be upgraded to the
+   current format when either ShowEQ is launched or the user runs
+   'showeqitemdbtool --upgrade'.
+ + Moved some file access diagnostics from gdbmconv.cpp to util.cpp.
+ + Added forms to listspawn.cgi and showspawn.cgi to allow for more 
+   advanced searching.
+ + Made listitem.cgi, showitem.cgi, drawmap.cgi, listspawn.cgi, 
+   and showspawn.cgi validate as HTML 4.01 Strict.  As well as 
+   assorted content display improvements.
+ + Moved extraneous filterString functions in util.cpp over to map.cpp 
+   which is the last place they are currently used, thus eliminating the
+   requirement that anything linking to util.cpp had to link with itemdb 
+   and all of it's dependencies...
+ + Changed the ItemDB from using a Singleton pattern to being just
+   a regular class whose lifetime is controlled using new/delete by
+   the program using it.
+ + Added the ability to completely disable the use of the ItemDB from
+   within ShowEQ.  Use either the --itemdb-disable command line option 
+   or by setting the Enabled entry in the ItemDB section of the config file
+   to 0.
+ + Corrected listitem.cpp and showitem.cpp to once again properly show
+   "0 Copper" for the base price, instead of the incorrect "N/A" display.
+ + Added another value for Piercing to print_skill (0x23).
+ + Added the ability to configure a build using the following memory 
+   profiling tools: ElectricFence, mpr, and mpatrol.  Also added the
+   ability to disable code inlining and optimization via configure flags.
+ + Fixed assorted memory leaks, overwrites, etc...
+
+Andon (16/Oct/01)
+---------------------
+Bug Fixes:
+ + Item structure adjustments... Mainly signed --> unsigned.
+ + Weapon skill adjustments... Throwing was being used as DEC 13
+   when it was meant to be used as HEX 0x13 (or DEC 19).
+
+Features:
+ + A lot of stdout text messages have been cleaned up, they will
+   actually display correctly on a std. UNIX terminal now! :)
+ + Makefile.dist's autoconf/automake version detection has been
+   completely (100%) revamped!
+ + The Item DB cgi's have been cleaned up a bit... Their output
+   is now more user friendly.
+
+Fee (11/Oct/01)
+---------------------
+Bug Fixes:
+ + Handles sequence wraps (0xFFFF -> 0x000)0.
+ + Handles any possible length of embeded ack.
+ + Removes a possible invalid memory access in certain objects.
+
+Features:
+ + Should operate effeciently if showeq was started after zone in.
+ + Better sequence tolerance for missed packets.
+ + All around less CPU utilization, should only be noticable on
+   slower machine (P166 class or less). 
+
+dohpaZ (09/Oct/01)
+---------------------
+ + Fixed a variety of regressions that occurred in 3.1.1
+   + changed reformatMoney back to QString to fix the access to deleted memory
+     created by it's conversion to const char*.
+   + Changed defaultName and defaultLastName methods back to the proper 
+     QString in main.h to fix accesses to memory with semi-random contents
+   + Re-fixed the ?: operator in player.cpp back to the appropriate QString 
+     to fix several memory corruption problems caused by it's regressing to 
+     const char*.  
+   + between the above 3 changes fixed the crash in 
+     ExperienceWindow::addExpRecord().
+ + Cleaned up item messages in packet.cpp to have a more consistant format 
+   so that a user can setup a filter for them
+ + have CharProfileCode call pkt_backfillPlayer if the data has been decoded
+   instead of replicating code.
+ + More cleanup in listitem.cpp, showitem.cpp, itemdbtool.cpp, etc...
+ + Made itemStruct in everquest.h maintainable again.
+ + Readded connects from EQPacket to EQPlayer for setPlayerName() and
+   SetPlayerLastName()
+  
+Andon (07/Oct/01)
+---------------------
+ + Fixed changes that made reformatMoney's return hard to read.
+ + Changed reformatMoney to const char*.
+ + Fixed the ? operator issue in player.cpp...  Instead of changing the value
+   types used in the functions, I've changed the functions' return types.
+ + Fixed gcc 2.9x compile issues.
+ + Made the Makefile a bit easier to read.
+ + Pushed the version to 3.1.1.
+ + Adjusted the structures in everquest.h, itemStruct is now object oriented.
+ + Changed the mouseover cursor position indicator... It was using a double...
+   This wasn't necessary, since the returned value is always an integer.
+ 
+dohpaZ (06/Oct/01)
+---------------------
+Modification:
+ + Added --list=SEARCH option to showeqitemdbtool, allows the user to 
+   list and search the contents of the ItemDB via the command line tool
+ + Made showeqitemdbtool display help if no action was specified and if
+   extra arguments are given.
+ + Added cgiconv.cpp and cgiconv.h files with convenience classes for 
+   handling CGI interactions
+ + Modified listitem.cpp and showitem.cpp to use the new CGI classes
+   and to present HTML forms to allow for more advanced searching and
+   configuration of data display
+ + removed dispitem.cpp, it's capabilities have been superceded by 
+   showitem.cpp
+ + Modified packet.cpp to eliminate the detrimental side effects of the
+   showeq_params->no_bank option.  Also cleaned up display of bank/player
+   items to be more compact as well as making the order of item handling
+   and display more consistant
+ + Made the source compatible with gcc-2.95.3 again in such a way as 
+   to minimize the impact on maintainability and understandability
+
+
+dohpaZ (03/Oct/01)
+---------------------
+Modifications:
+ + Added more diagnostics and clearer messagese on GDBM errors
+ + Fixed gcc-3.0.1 compilation of listspawn.cpp and showspawn.cpp
+ + Fixed gcc-2.95.3 problem with operator?:
+ + Added more build/platform/diagnostic info in showeqitemdbool version info: 
+    showeqitemdbtool -v
+ + Added a new Throwing skill value to print_skill
+ + Cleaned up some border cases in reformatMoney
+ + Added tests of faction_strings, reformatMoney, and print_skill to sortitem
+ + Added configuration support for default player name and last name
+ + Fixed a value in showeq_params (no_bank) that wasn't being initialized
+   
+
+dohpaZ (01/Oct/01)
+---------------------
+Merged new item database and other fixes into 3.1.0, it contains:
+ + new item databases
+   + data stored in GDBM files
+   + information about items stored in packet indepenedent format
+   + data storage is versioned, so the internal storage format can be changed
+     in the future and still support old data.
+ + Added GDBM database convenience classes
+ + Updated itemStruct including many more fields being decoded and known, 
+   plus numerous errors/out of date info fixed
+ + Cleaned up/Fixed bookPlayerStruct and containerPlayerStruct
+ + new showeqitemdbtool program for manipulating the item database
+ + Migrated listitem.cgi, showitem.cgi, and dispitem.cgi programs to 
+   work with the new item database system and updated them to 
+   support display of new information
+ + Rewrote sortitem program for regression testing util.cpp functions
+ + Optimized, Fixed argument types, and Migrated to QString a bunch
+   of functions in util.cpp
+ + Modified skills.h, races.h, languages.h, classes.h, deity.h, and 
+   created weapons.h to support new optimized util.cpp functions
+ + Added Player Name and LastName to EQPlayer and setup the appropriate wiring
+ + Added size_name() function to util.cpp
+ + Added fields for bank vs. char inventory money to playerProfileStruct
+ + Added fields for language skills to playerProfileStruct
+ + Added rudimentary support for languages to "Player Skills" window
+ + Updated emoteTextStruct to work with the latest patches
+ + Fixed datatype of skillId in skillIncreasesStruct (UWORD)
+ + Fixed datatype of spellId in spawnKilledStruct and castStruct (UWORD)
+ + Updated print_faction to deal with new faction values in considerStruct
+ + Support for a new experience log file with more info and works
+   when multiple ShowEQ instances are running
+ + Added the appropriate "#pragma pack()" to restore structure packing to 
+   the end of everquest.h.  This fixed a couple crash bugs.
+ + Fixed assorted memory leaks/corruptions
+
+Ratt (26/Sep/01)
+---------------------
+
+Moving along to version 3.1.0 ->
+
+I have tagged v306-Stable in the CVS repository before I commit the 
+backend spawn shell by Crazy Joe and the Packet Filtering by Fee.  These
+two patches will move us forward to SEQ 3.1.0, which will be nominally be 
+considered unstable.
+
+If you wish to revert back to the stable 3.0.6 (as stable as SEQ ever is, that is),
+this can be done with:
+
+cvs checkout -r v306-Stable linux
+
+or
+
+cvs update -r v306-Stable linux
+
+Ratt (23/Sep/01)
+---------------------
+Added a little color to your life ... let me know how this turns out.
+
+Andon (06/Sep/01)
+---------------------
++ Fixed a whole bunch of problems in interface.cpp
++ Added the ability to turn map tooltips on / off
++ Map item menus now display their correct checked or not checked settings upon
+  initialization.
+
+Andon (06/Sep/01)
+---------------------
++ Fixed a few "issues" with packet.cpp, everquest.h and opcodes.h... In general
+  you guys can't count =P  0x0a20 does NOT come between 0x0720 and 0x0820.
++ Cleaned up the types used for the structures... We were defining BYTE, but not
+  using it. BYTE is now used for all non-text fields that use 1 Byte or an array
+  of bytes.
+
+Andon (06/Sep/01)
+---------------------
++ Updated INSTALL.newbies... It never mentioned 'make -f Makefile.dist'.
+  (since it was written for 2.5.x)
++ Fixed some more verbosity issues with the map loading portion of ShowEQ.
+
+Andon (03/Sep/01)
+---------------------
++ All known issues relating to my OpCode A320 patch have been resolved
++ ShowEQ is once again stable :)
+
+Andon (02/Sep/01)
+---------------------
++ Version number pushed up to 3.0.5
++ 3.0.4 tarball released
+
+Andon (31/Aug/01)
+---------------------
+Yet more updates and bug fixes... I'm on fire! :)
+
++ OpCode A320 (ZoneChange) is now processed, and 3.0.4 now takes full advantage
+  of it... This allows us to load maps, clear the spawn list and begin decoding
+  new spanws WHILE you're zoning!
++ Map files using the wrong naming convention (i.e. Incorrect case) will now be
+  loaded. If the map file using the server case isn't found, we get a directory
+  list and look through it for a map file with the same name (without regard to
+  case).
++ Text labels on maps that are set to BLACK in the file are reversed now... That
+  is to say, they're WHITE now, and you can actually READ them!!! :)
+
+Andon (27/Aug/01)
+---------------------
++ Added a new "default" category to the message filter dialog (Spells), you'll
+  have to use the new showeq.conf.dist or add the entry manually though...
++ Fixed a bunch of map bugs relating to zooming and scaling, you should notice
+  when zooming in that things are much more accurate now.
++ Added faction name to the consider message, instead of just number...  The
+  data for faction ranges  needs to be revised, but it's a nice start.
+
+Andon (26/Aug/01)
+---------------------
++ Added a new feature... By default now, when you move the mouse over the map,
+  you should see "Cursor: +/-..., +/-..." up in the top right. You can disable
+  this feature by deselecting it under the view menu.
+
+Andon (26/Aug/01)
+---------------------
++ Fixed the filter file editor
++ Gave user the ability to toggle JohnQ's real-time RegEx filter feature...
++ Hard coded some UI defaults (the ones used when no config file exists) into
+  interface.cpp... Some people were reporting the map portion of ShowEQ to not
+  be working.. This is because there was no hard coded default, which caused it
+  not to display the map.
++ Fixed a problem with the new map panning code that would cause people with old
+  versions of QT to get an error along the lines of "TearOffHandle, not a member
+  of QMenu"... Since it's 2.3+, it's disabled using the pre-processor on systems
+  with older versions of QT.
++ Changed the hotkey accelerators for the map depth filtering... Assigning a non
+  -modifier based hotkey is generally a big no no. The user can't use the letter
+  in JohnQ's RegEx filter tool.
++ People with "Fast Machines" will now benefit from added accuracy in distance
+  calculations... People who don't have this setting on will use the normal meth
+  od:  distance = ((abs(xcor - x) + abs(xcor - y))...
+
+Andon (25/Aug/01)
+---------------------
+Added a lot of nice new features to the map... All dealing with the gridlines,
+you can now enable / disable, adjust brightness, color, adjust the tick marks,
+etc... on them without recompiling EQ!  - See the Map menu for more details.
+
+On another note, ShowEQ now saves settings on exit =P  I think the reason this
+wasn't implimented before was because it could possibly cause crash-prone sett-
+ings to be saved... However, if we do some checking using the return code from
+the main window, we ought to be able to prevent this.
+
+Andon (25/Aug/01)
+---------------------
+Made a few changes to filter.cpp / map.cpp... This is the beginning of
+a series of updates I'm planning that ought to make filters more reliable...
+
+I also fixed a minor technical error in acinclude.m4, that could cause the
+End-User to perform the wrong command when attempting to locate the QT MOC.
+
+cwebster (17/Aug/01)
+---------------------
+I upped the version number to 3.0.4 to get rid of the confusion people
+were having over the change made after the last patch.
+
+Andon (16/Aug/01)
+---------------------
+Fixed issues in Makefile.dist and acinclude.m4 that would make compilation
+on Debian Testing / Unstable machines impossible...
+
+I also fixed a few minor problems with prox's autoconf version detection code
+and removed the '-k' switch from the phase two make (no-backup)... The '-k'
+switch was responsible for the script giving success messages even when a
+portion failed.
+
+cwebster (15/Aug/01)
+---------------------
+spawnStruct changed, unknown7 added to the end.  Havent had a chance to
+test personally, but lots of confirmation in irc and some on boards.
+So here it is.
+
+ratt (11/Jul/01)
+---------------------
+No major updates in awhile ... condition normal.
+
+Updated the latest spell.h from Jynx
+
+cwebster (17/Jun/01)
+---------------------
+Basic Experience logging functionality has been implemented.
+Upon every kill, a line will be written to LOGDIR/exp.log in the form of
+
+version timestamp mob_lvl exp_award your_lvl your_class num_group_members
+
+following num_group_members will be that many numbers, indicating your 
+group members levels.
+
+version number is ther so i can change the log format not break anything
+people write to parse the log.  current version number is 1.
+
+You cant disable logging at the moment without editing the source, I'll add
+functionality to do that from a menu somwhere, but if someone feels like 
+doing that and saving state to showeq.conf, they re more than welcome.  I use
+the var Experiencelog::m_exp_log right now to control logging (its just always
+1 if the file is opened succesfully).
+
+Now that this is in it will aid my exp formula revisions, so those shouldnt
+be too much farther down the road.
+
+cwebster (16/Jun/01)
+---------------------
+fixed div by zero bug in experiencelog.cpp that exposed itself on alpha systems.
+
+Andrew (16/Jun/01)
+-------------------
+Ok, found a packet with deity in it.  You can now just let SEQ take care of your class, race, level, deity needs. :)
+For the big news everybody has been waiting for!  You can now pan/scroll around the map!
+Just zoom in and hit ctrl+number/keypad number.
+Ctrl+5 will toggle your centering between you and your selected spawn.
+Ctrl+0 will toggle you between classic zoom area moves with you and frozen zoom area (still pan with keys).
+
+If you enable pvp or deitypvp, the players will appear as triangles.  Each triangle represents a different team.
+Up is Good or Human (Deity/Race)
+Right is Neutral or Elf (Deity/Race)
+Down is Evil or Darkies (Deity/Race)
+Left is Shorties. (race only)
+
+If something isn't one of those, it will appear as it would without teampvp/deitypvp set.
+(Agnostic on non-deity pvp servers would still be square.)
+
+Share and Enjoy!
+
+Andrew (12/Jun/01)
+-------------------
+Ok, it seems I messed up after finding deity.  That got fixed today.
+Sorry about the broken decode stuff for a couple of days.
+It was working on one computer but not the other, so I thought it was just me.
+Anywho, now that that is working right now, I got my deity pvp colors working.
+You have to use the conf file to set up your deity and set up use defaults for 
+race, level, etc; because I haven't found the player struct ones yet.
+I'll be doing that very soon.
+BTW, the no-bank thing was probably not a fix for what was really wrong.
+You can filter on teams and deities now.  Deity:deity name:RTeam:1-5:DTeam:-1, 0, 1, 2.
+5 for race team is unknown, and 2 for deity team is unknown. (other)
+Enjoy!
+
+
+Ratt (12/Jun/01)
+-------------------
+
+Added option --no-bank to help those machines that seem
+to be decoding the compressed packets very very slowly and
+bringing the output to it's knees.
+
+Adding --no-bank on the command line when you start
+SEQ will supress this output (and decoding as well),
+hopefully speeding things up for those that are 
+experiencing the problems.  A better solution should
+be available in the near future.
+
+Andon (04/Jun/01)
+-------------------
+Changed the Makefile a little bit, added several of
+prox's never ending Debian testing/unstable Autoconf
+fix patches...
+
+NOTE: Makefile.dist now does EVERYTHING for you.
+Do NOT use make distclean manually, or you could have
+a big mess on your hands!
+
+The biggest thing this patch adds is: Automated binary
+archiving at compile time. This means that before you
+compile a new binary, your old one is automatically
+compressed in BACKUP/showeq-<timestamp>[.bz2/.gz].
+
+For those of you who don't like the idea of wasting disk
+space backing things up or like to live on the wild side,
+you can disable this feature one of two ways:
+
+1) Use: make -f Makefile.dist no-backup
+
+  or
+
+2) Add a blank file called '.no-backup' to the same dir
+   you're reading this file from.
+
+Hope this saves you guys some time, I know it'll save me
+a lot of time dealing with "My SEQ binary won't work for
+me after build such and such...".
+
+- Andon
+
+
+ratt (30/May/01)
+-------------------
+
+SEQ 3.0.1 is working as intended.  If you are reading
+this, you have the new working everquest.h already.
+
+ratt (29/May/01)
+-------------------
+
+Added several patches and updates, nothing too major.
+
+There are now zone specific filter files (have fun
+with this one adenine! :) )
+
+Basically, instead of having all the filters in
+one file, you can now put them in filters_<mapname>.conf
+and they will only be processed on that current zone.
+
+The original global filter file(s) can still be used, but
+if you wish, you can break them up by zone.
+
+The other major change:
+
+(if you haven't read this file, you will most likely not
+be compiling SEQ :) )
+
+You need to have zlib installed to compile SEQ from now on.
+
+This is to facilitate the decompression of some of the
+compressed packets being sent (Bank data, etc...)  This 
+essentially provides a stepping stone for some more 
+robust player information.
+
+
+
+Andon (28/May/01)
+-------------------
+Updated Makefile.dist and acinclude.m4 to support
+older or strange GNU autotool configurations...
+
+Also had decode.cpp manually include string.h...
+This fixes problems with gcc as of 3.0-pre010527
+
+- Andon
+
+
+Andon (15/May/01)
+-------------------
+Cleaned up the code in main.cpp / h, it's a little
+easier to read now than it used to be :) It's also
+more efficient. Again, I was appaled to see int
+being used for boolean operations...
+
+Updated INSTALL to reflect some of the more recent
+changes (such as newer QT versions, the new pcap
+version requirement, and the GNU packages for CVS
+installs).
+
+- Andon
+
+
+Andon (09/May/01)
+-------------------
+Cleaned up the code in packet.cpp / h... Just about
+every line in the code was re-formatted for easier
+reading.
+
+Changed a lot of variable types in: interface, packet
+and map. To my astonishment, int was being used for
+strictly boolean purposes more often than not.
+
+Finished QT backwards compatability... SEQ can now be
+compiled with any version of QT greater than 2.0.1!
+
+Fixed the "killed by unknown" bug. The cause of this
+was actually that the code assumed if the person who
+killed the mob wasn't in your group that it wasn't in
+the mob database either.
+
+Optimized the map portion by using smaller data types
+for things such as number of items ont he ground, etc
+... and increasing the size of floating point values.
+This gives more accuracy with roughly the same memory
+consumption.
+
+Fixed a crash bug in map.cpp, where if you zoomed in
+enough you could cause a divide by zero floating point
+exception. Now if you attempt to duplicate this, the
+code will automatically zoom out to a known safe ratio
+... If you don't understand this, try pressing and
+holding the plus key down for a little while...
+
+- Andon
+
+
+Andon (03/May/01)
+-------------------
+Added Jynx's patch which updated the OpCodes and added
+more documentation to them in OpCode.h and Everquest.h
+
+Also added my code for long-hand money formatting and
+changed ITrade to Item Trade [IN] and ITradeI to Item
+Trade [OUT].
+
+Fixed a few bugs in Interface.cpp, it's now safe to use
+ShowEQ on a system using libsafe (a library used to
+prevent buffer overflows when using strcpy and sprintf).
+
+- Andon
+
+
+Andon (02/May/01)
+-------------------
+Fixed potentially serious problem where mana calculation
+always assumed that MaxPlayerMana was non-zero. You all
+know what happens when we try to divide by zero :) This
+has been fixed now and should not pose a problem anymore.
+
+I have added my OpCode monitoring code... It basically
+lets you monitor only a select few OpCodes to view raw
+data for. This is a more advanced version of View Unknown
+Data.
+
+See: http://www.nothing-inc.com/ShowEQ/OpcodeMon1a.txt
+for more details on the OpCode Monitor...
+
+I have also fixed the Temple of Veeshan map, it had an
+incorrect name and would not load correctly on Linux
+because of case sensativity.
+
+Last, I have added spell gem slot info to the spell
+memorization packet and removed unnecessary debug info
+from the memorization message.
+
+- Andon
+
+
+Ratt (26/Apr/01)
+-------------------
+Applied Cybertechs major patches!  Very nice work indeed.
+
+A VERY big patch.  I'm including the changes here for
+posterity.
+
+The method to build SEQ has changed slightly... instead
+of sh autogen.sh, you should use:
+
+make -f Makefile.dist
+./configure
+make
+make install (if you are so inclined)
+
+Due to the nature of the patch and the options it's giving,
+this will be the initial test of version ShowEQ v3.0, thus
+ending the SEQ 2.x line.  A final tarball of SEQ 2.5.5 will
+be released sometime soon.
+
+What I see on the far horizon is tweaking and twiddling
+the 3.x line into shape, refining what we have now and
+adding minor bells and whistles (and hopefully stomping the
+jumping spawnlist bug once and for all).
+
+This version will NOT compile on a system with QT 2.0.1
+installed.  Initially, I was not going to commit this to
+the CVS because of this, but upon further thought, this
+IS the CVS version, and not necessarily meant to work like
+the tarball version.  Those of you grabbing the CVS version
+should be aware of this fact already.  If you aren't, you 
+are now.  
+
+I would like this set of code change out there to test it
+out and let us squash any bugs that may be hiding.  My
+testing hasn't revealed anything beyond the QT 2.0.1 issue,
+which was fairly trivial to overcome by downloading the
+2.3.0 version of QT and resetting two environment variables
+before compiling (and at runtime) (QTDIR and LD_LIBRARY_PATH).
+
+QT 2.0.1 compatibility will be included soon, but don't panic
+in the meantime.  I suspect many of you are going to download
+the CVS version and blindly compile it and try to make 
+it "go", and it will break and you won't have saved your
+old showeq executable.  You should do this... rename it
+showeq.24apr01 or something.  Barring this, if you totally
+fudged your system and don't want to install (or can't figure
+out how to) the newest version of QT, I suggest executing this:
+
+cvs update -D "25 Apr 2001 11:59pm"
+
+and then recompiling from a fresh compile.  Please bear in mind
+that the Date specified will be sticky and will stay with you. 
+When you are ready to resume using the current version of the
+tree, use:
+
+cvs update -D now
+
+Everyone give a big round of thanks to Cybertech and andon!  
+Without them, we'd not have all these nifty new features :)
+
+
+Changes: 
+
+01) Changed "Ipaddr" menu to "Network" 
+
+02) Moved "Resync Network" from File to Network
+
+03) Changed "Grab Next" to "Monitor Next EQ Client
+Seen"
+
+04) Created "Debug" menu, moved the following
+"Dump Spawns" (now List Spawns) from File 
+"List Drops" from File 
+"Dump Coins" (now List Coins) from File 
+"List Filters" from File 
+"Toggle Debug" from File 
+
+05) Added File:Select Filter File 
+Allows you to select the filter file to use 
+without restarting. Must have 
+UseOldfilters 0 in order to use (or see) this 
+option. 
+
+06) Filters changed a bit. (closed) bug #227234 
+UseOldFilters defaulted to 1 in config file, 
+this meant to use filter.conf and spawn.conf 
+to activated filters and alerts. However, 
+most seem to be using Filters.conf. 
+
+The end result is a msg at startup that says 
+filter & spawn files are null, and reload 
+filters failing to work, for most everyone.
+
+Filters.conf is (and was) always parsed at 
+startup whether UseOldFilters was on or off. 
+
+Config file changed to use a default of 0 (do 
+not use old filters) 
+
+Config file addition, [Filters] FilterFile, 
+to specify the filters.conf to use. 
+
+Output at startup is now letting you know 
+you're using the oldstyle filter method. 
+
+Works as expected now, and reload works. 
+Existing configs with incorrect 
+UseOldFilters values will hopefully be
+cought by the new startup msg. 
+
+07) Updated linux/Makefile.am and 
+linux/src/Makefile.am 
+to delete all generated files when called 
+with "make maintainer-clean". 
+
+08) QT Version 2.1 or higher is required to 
+reliably use the on-the-fly theme changing. 
+I haven't even tested this sucker on qt 
+2.0.1 though, perhaps someone can do that? 
+Wouldn't be so bad to require qt 2.3 though. 
+
+09) Fixed AC_C_CONST check to be done in the same 
+order newer configure.in do (before 
+AC_LANG_CPLUSPLUS, which breaks it) (Patch 
+already applied, and not included in this 
+patch set) 
+
+10) Fixed a few typos in debug output 
+
+11) Fixed Erudite class name (was Eurodite) 
+
+12) Title of experience window is now set to 
+"ShowEQ - Experience" 
+
+13) Title of main window is now set to 
+"ShowEQ - Main". Can still be changed via 
+config file option. 
+
+14) Changed map.cpp to allow the optimization 
+method to be configured. 
+Config Addition: [Map] Optimize_Method 
+Menu Addition: Interface: Map Optimization 
+
+15) Theme Support: 
+More a toy than anything else. Perhaps some
+creative person will design us a nice custom 
+ShowEQ theme based on EQ textures? 
+Motif, CDE, Windows, Platinum, and SGI
+Selected theme is saved and restored. 
+Menu Option: Interface:Theme 
+
+16) Feature Request #413473 
+Ability to edit Filter/Spawn list) 
+if (UseOldFilters) 
+File:Edit Filters (filter.conf) 
+File:Edit Spawns (spawns.conf) 
+else 
+file:Edit Filters (filters.conf) 
+
+17) Fix for bug #227230, Self-Player isn't listed 
+as a PC during regex categorization. Caused 
+by internal designation of spawnlist.NPC == 
+10 for self. Fix: Mapped NPC==10 to NPC=0 in 
+util.cpp:filterString(spawnStruct *s). Allows 
+regex searches to work without affecting 
+player tracking. Made same change to 
+dumpspawn in map.cpp 
+
+18) Removed default Corpses category, and replaced 
+with two new categories, Corpses/Players and 
+Corpses/NPCs. 
+
+19) Documented everquest.h::spawnStruct->NPC 
+possible values 
+
+20) Map::toggleDebug(void) changed to do what it 
+says. It had been set to turn debug on
+without any facility to disable it. Not that 
+it's actually checked anywhere. 
+
+MORE: 
+Toggle Debug has been changed. It wasn't
+doing anything useful that I could see. 
+It's been renamed to "Enable Spawnlist 
+Debugging" or "Disable Spawnlist Debugging", 
+depending on state. Perhaps we can add some 
+text debugging output from the spawnlist if 
+this option is active? Might be useful, who 
+knows. Removed the F12 shortcut key. 
+
+21) Changed function names from *_vew_* to 
+*_view_*. ok, so 
+I'm nit-picking, shoot me! 
+
+22) Removed config file option [Defaults] 
+forcedefaults 
+
+23) Added config file option [Defaults] 
+AutoDetectCharSettings, with the reverse 
+logic of the old forcedefaults. Menu option 
+is now Character:Auto Detect Settings. 
+Config file option might seem like a silly 
+change, but I felt it was important to 
+maintain the option name<>menu text logical
+connection. 
+
+24) Character: Select Defaults (was 
+Options:Options) removed. Character 
+level/class/race are now chosen from within 
+the main menu via dropdown list. 
+
+Note: 
+I'm not 100% happy with the appearance of 
+the menu option Character:Level. If others 
+are also unhappy with it, the menu can be 
+changed to use the old level query popup 
+box, or maybe the spinbox can be tweaked 
+to look better in the popup menu. 
+
+25) Added Special and Caution filters to the List 
+Filter output 
+
+26) Added Loading Filters from <filterfile> during 
+startup 
+
+27) Changed StripNumbersFromName to only filter 0 
+thru 9 
+
+28) Changed the new cast time display to properly 
+pluralize. 
+
+29) Removed autogen.sh and created Makefile.dist 
+CVS builds can now be done by doing a
+checkout and performing a 
+"make -f Makefile.dist" 
+
+30) Updated INSTALL to reflect new CVS build 
+instructions. Removed instructions for old 
+style spawn filter files. I know the 
+functionality still exists, but it's best 
+to start phasing it out, and it just confuses 
+folks. 
+
+31) Updated INSTALL.newbies to remove the 
+instructions for downgrading QT and libpcap. 
+There are many happy newbies today, let me 
+tell you. 
+
+Ratt (25/Apr/01)
+-------------------
+Manually applied andons Mandrake 8 / QT 2.3 / gcc 3.0 patch ... patch
+still didn't sync, seems the patch got kind of funkdafied with the
+diff generator he's using... no clue why.  Everything should be
+peachy now.  Try it out... post if you find some bugs.
+
+Also applied adenine's patch for alert on death
+
+Ratt (24/Apr/01)
+-------------------
+Added in several of andons patches.
+
+Specifically: 
+
+Item drop fix (duplicate items show up when dropped)
+Spell casting log
+Absent conf file error message box popup
+
+
+Megaton (20/Apr/01)
+-------------------
+Made some changes to packet.cpp, map.cpp and util.cpp to ensure that the
+contents of the spawnstruct packet does not get altered (The name used
+to be changed to strip out the trailing numbers from spawns).
+I changed this to preserve the original name, never know when it might
+come in useful, especially to identify mobs uniquely (when there two of
+the same named mobs, etc).
+
+I also updated map.cpp, packet.cpp and util.cpp to disregard the numbers
+when filtering - I hope I got them all =). Added a StripNumbersFromName
+function in util.cpp to do this.
+
+Added a new ShowRealName option the config file which will show the
+real mob names instead of the transformed name.
+
+
+cpphack (15/Apr/01)
+-------------------
+Added cybertech's configure.in "const" fix.
+
+Added some map loading debug code.  Some points in new maps (e.g. Skyshrine2)
+do not get displayed for some reason.
+
+Wholesale map update from Mapfiend website (http://www.k-r-g.com/mapfiend).
+Every zone should be up-to-date as of April 15.  If not, let me know which
+ones I missed.
+
+Changed map.cpp to no longer allow the "darkYellow" option when creating 
+maps since this color is not available in the X11R6 stock rgb.txt 
+file, hence does not get displayed (unless the rgb.txt file is updated
+manually).
+
+Maps different from what was on the Mapfiend website:
+
+Overthere: Missing Z-coordinate line 77
+HatePlane: Incorrect point counts, lines 84 and 86
+SwampOfNoHope: Incorrect point count, line 11
+Highkeep: darkYellow changed to yellow
+Blackburrow: darkYellow changed to yellow
+kerraridge: darkYellow changed to yellow
+
+You must repeat the "make install" before these maps will work.  (Or copy
+them into /usr/local/share/showeq manually).
+
+I have not verified that all the new maps auto-load on zoning, so there may
+be some name changes soon.
+
+ratt (09/Apr/01)
+-------------------
+
+Added in the [Special] category.  Special mobs will now be flagged with a
+blue flashing bullseye for easy tracking of a particular type of mob.
+
+What's wrong with my column width! Doesn't everyone run in 132 Column mode?
+
+What happened to bank inventory on zone in the terminal window, anyone know?
+I want to add a popup box that has the contents of your bank in it.
+
+cpphack (07/Apr/01)
+-------------------
+Fixed column width bug on Ratt's CHANGES file updates.  :)
+
+Added a notice when a mana change update is received.  Notice that all
+mana regeneration is handled client-side so the nice HP ticks you get
+do not translate to mana. :(
+
+ratt (05/Apr/01)
+--------------------
+
+Minor update --
+
+Seems my new code for the Caution and Radar alert (Sticky Alerts) would 
+bring slower machines to it's knees.  I put that code in and tested 
+it on a PIII 450 with oodles of RAM ... worked fine :)
+
+I then brought the code over to my normal SEQ machine, which is a a
+PIII 333 with a fairly decent amount of RAM.  Over the course of 
+about 45 sec or so, you could noticably see a response slow down
+in the tracking of mobs/player location.  As time went on, it 
+got slower and s l o w e r with the packet queue backing up more and more.
+
+So, taking a cue from the Highlight considered spawns code ... 
+each caution and radar alert spawn is individually flagged, making 
+the comparison code much more optimized (instead of comparing 
+each redraw of the map against the filtered and caution list, 
+it just checks against one array variable.  (It was checking each 
+spawn against your entire filter list 5 or more times per second 
+before, in retrospect it was bound to bring all but the 
+heartiest machines to their knees.)
+
+Any feedback on the speed of this code is greatly apprecited.
+
+As usual, do a make distclean before building this... otherwise 
+SEQ will seqfault when it tries to use old files.
+
+ratt (03/Apr/01)
+--------------------
+
+Added a couple nifty little changes that I have been meaning to 
+impliment for awhile:
+
+1.  Caution alerts.  In your filter file, if you add a new 
+[Caution] section and put the mobs you want alerted as caution
+mobs, they will be flagged on the map in a flashing yellow/red 
+triangle (Ok, so the triangle looks kinda dorky, sue me :) ) instead 
+of the normal dot/color.  I use this for mobs I want to avoid 
+at all costs (Such as Treah Greenroot, Gorenaire, Severilous, 
+Ail the Elder, etc...) ... it's mainly intended for pullers, but 
+can be used by anyone who wants to always avoid certain 
+mobs and have a visual reminder as to where they are.  When you 
+couple this with the agro-radius function, you have a pretty 
+nifty little tool.
+
+2.  Sticky Alerts ... no changes are necessary for this.  If 
+people hate it and want to disable it, I will make it an option 
+via the config file or drop down menu, but I don't think it'll cause
+too much problem.  This will flash a double lined green target 
+circle around Alert mobs.  I know that occasionally, I'll get 
+multiple alert mobs in the zone and get 3 - 10 or more 
+beeps upon decode.
+
+It can be a major pain to track them all down... now all of 
+them will be highlighted on the map with the flashing target 
+indicator, making it easy to pick them out of the crowd.
+
+Both things work for me... submit a bug report if something breaks 
+for you. (I don't know how it will behave with other versions 
+of the QT library.  Shouldn't affect it, but who can tell with QT)
+
+ratt (02/Apr/01)
+--------------------
+
+Added Jynx code for force close saving problems (Ie - your 
+options will be saved when you force close it instead of 
+closing via the Quit drop down menu)
+
+Added Jynx code changes for GoodCast vs ActionCode... this puts in 
+a stepping stone to adding a more robust spell tracking, among other things.
+
+Applied patch to fix memory leak in the getTime() function.
+
+Added ToolTip patch by GRUGGER.  Will display some minor spawn info 
+when you hover your mouse over a MOB in the spawn area (map).  To 
+activate you must add ShowTooltips 1 in the [Map] section of the 
+conf file.  Otherwise this code does nothing :)
+
+Fixed some minor map naming issues.
+
+Thanks for the patches folks, keep them coming!
+
+cwebster (15/Mar/01)
+--------------------
+Added Warrens.map.  Not all the lines are prefect, but its complete as far
+as i could tell. 
+
+dev cwebster (09/Feb/01)
+------------------------
+Rewrote group experience code, removing calls to CSpawnList::FindItem() and 
+adding code to EQPacket to track group members levels where it maintains
+thier ID's.
+
+Added preliminary ability to show ZEM in experience window as Calculated Value,
+raw number, or % above 75.  % option is not formatted as of yet and may be off
+from its expected value.  It will work correctly when i add code to log exp
+to a file, just wanted to get this out the door to fix the exp related 
+SIGSEGV's.
+
+cpphack (07/Feb/01)
+-------------------
+Applied patch from jynx to fix the nzone bug I put in.
+
+Applied patch from jynx to determine EQ game time.
+
+Applied patch from jynx to log packet length and time even if the address
+doesn't match filters.
+
+Megaton (05/Feb/2001)
+---------------------
+- Added a lot of Velious and some missing Kunark weapon models to model list
+- Added 2 new materials to mat list
+- Added seconds to time-of-death in experience log (makes it a bit
+  easier to time respawn times)
+- Cleaned up the cvs a bit, removed files which were auto-generated by
+  autoconf/automake :
+          configure
+          Makefile.in
+          aclocal.m4
+          config.guess
+          config.sub
+          ltconfig
+          ltmain.sh
+          conf/Makefile.in
+          maps/Makefile.in
+          src/Makefile.in
+- Attempted to fix cvs permission on autogen.sh script
+
+dev (Andrew 03/Feb/01)  
+-----------------------
+Added aggro range thing.
+To use this, Add to the map file the aggro range of the monster in question.
+Example, in EastKarana.map
+add A,crag,80 to the bottom.
+now, when you are in EK, you will see a red circle around all the crags.
+I'm not sure if this is a true distance for the crags, but as you discover them,
+you can write them down. ;)
+There is a chance I'll move these into a different file.
+(Heck, might just be nice to mark things you're looking for.)
+
+TODO: 
+  Doesn't save and looses current ones if you save the map.
+  make it use REGEXP instead of substring.
+
+
+dev (cpphack 31/Jan/01)
+-----------------------
+Updated spells.h using patch from jynx.
+
+Also from jynx, changes to main.cpp fixing a couple of places where I copy
+pointers to temporary strings, thinking they are permanent.  Whoops.
+Thanks for the bugfix, jynx!  I may change cpreferences.cpp to do what 
+I thought it did later on (i.e. return a pointer to a permanent copy),
+but this patch is great for now.
+
+Added ][cyman's performance patch (well, a variant) to Map::spawnListUpdated.
+
+Backed out the last remnants of my previous performance patch since it was
+breaking the spawn list.
+
+dev (cpphack 30/Jan/01)
+-----------------------
+Version bumped to 2.5.3.  Initial performance tuning release.
+
+This version is likely to be less stable than others since some of 
+the core functions have changed.  Your patience and help with debugging
+are both appreciated.
+
+The function FindNext was found to consume an inordinant amount of CPU
+time.  It appears that this function may attempt to return spawns in id
+order even when this is not necessary.  The net result seems to be lots
+of unnecesary sort-like behavior.
+
+This function has been renamed to FindNextId() to reflect that it only
+returns a particular spawnId, and all existing references to FindNext()
+have been changed to FindNextId().
+
+A new FindNext() has been created which does essentially the same thing
+as FindNextId() except that it does not care what order it returns the
+spawns.  Two calls have been changed to use this new call:
+
+Map::spawnListUpdated()  [uncommonly used]
+CSpawnList::UpdateSpawn() [commonly used]
+
+There are lots of other opportunities to change FindNextId calls to 
+FindNext, but to make debugging simpler I've limited the number of 
+changes made at once.
+
+In some profiling runs against packet playback data these two changes 
+alone resulted in 40% lower (absolute) %time spent in FindNextId()
+and FindNext().  (FindNextId dropped from 60% time to 20% time, and 
+FindNext() was too low to measure.)
+
+If we determine that the id values are really unique among all spawns
+(they seem to be) then the lookup times on these could be dramatically
+reduced since there would be no need to check the spawn type when
+looking up by id.
+
+------
+I backed out the change to Map::spawnListUpdated since it was behaving
+strangely.  That call actually does need to have the SpawnListItem elements
+returned in order.
+
+dev (cpphack 28/Jan/01)
+-----------------------
+Added a version and zone name to each entry in the spawnlog.txt file.  
+Also made it append each time so the file contents won't be lost.
+
+Added an "--enable-profiling" option to the configure script.  In order
+for this to work, the profiling glibc must be installed.  When compiled
+with this option each time showeq is run it creates a gmon.out file
+suitable for use with gprof.
+
+Added a "--disable-decryption" option to skip the configure-time check for
+libEQ.a.  When this option is not present and libEQ.a cannot be found,
+configure will abort with an error message.
+
+dev (cpphack 27/Jan/01)
+-----------------------
+Fixed a problem with the automake environment which wouldn't link
+libraries for the CGI functionality properly.
+
+Added --disable-spawnlog and --spawnlog-filename=<FILE> options.  Changed
+default location for this file to LOGDIR (/usr/local/share/showeq).  Updated
+showeq.conf.dist with the new options, set to their defaults.
+
+dev (Andrew 26/Jan/01)  
+-----------------------
+Fixed the death time for monster info for spawnlog.txt.
+It now captures that regarless of who killed it.  (Previously, just group, you, or a few odd cases.)
+On a reminder,
+numbers:
+1 = map depth filter
+2 = monster depth filter
+3 = fading lines map depth filter.  (turn this on with 1)
+5 = lower floor viewing limit.
+6 = raise floor viewing limit.
+8 = lower above head viewing limit.
+9 = raise above head viewing limit.
+
+dev (cwebster 22/Jan/01)
+------------------------
+Updated the experience changes to add the functionality for the Group Total
+column of the Experience Window.
+
+Added View|Calculate ZEM on Next Kill option to the Experience window.  Use
+this option to automatically calculate the ZEM for zones that differ from 
+the base modifier of 75.
+
+The group numbers may be off to a degree, but the are mostly accurate, I will
+update this as soon as i get some more numbers to check some calculations.
+
+dev (cpphack 22/Jan/01)
+-----------------------
+Merged in cwebster's experience changes to offer support for various
+Zone Experience Multipliers in the future.
+
+Changed main.cpp to explain the cause of disabling the decryption in
+more detail.
+
+Also merged in the level 60 experience patch, and the "mana reset" menu
+option patch.
+
+Change the gdImageGif call to the new gdImagePng call, per patch uploaded
+by spook_seq.
+
+dev (cpphack 15/Jan/01)
+-----------------------
+Added some buffer flushing to the spawnlog.txt (Keev) code to make it 
+easier to follow with "tail -f".  The default location of this file 
+should be command-line configurable, but I haven't done that yet.
+
+Made the "decryption disabled" message include possible libEQ.a problems.
+
+Added some notes to the INSTALL.newbies file.
+
+dev (cpphack 12/Jan/01)
+-----------------------
+Changes to the automake/autoconf scripts to support externally-linked
+libEQ.a and some general cleanup.
+
+Version changed to 2.5.2 since changing autoconf often breaks lots of 
+things.  This way we can tell who's having problems because of it.
+
+dev (cpphack 30/Dec/00)
+-----------------------
+Added changes suggested by Daisy on the HackersQuest forums.  These were:
+
+1) Use localtime() format for spawn time instead of UNIX time
+2) Hide the channel window when channel windows GUI option is deselected
+
+Added "--systime-spawntime" command-line option to have SpawnTime column
+use the old UNIX system time value for simpler sorting.
+
+dev (Andrew 24/Dec/00)  
+-----------------------
+Added H to map format.  This is a global height identifier for L lines that 
+follow it.
+example:
+L,normal L line stuff. (this line is at 0)
+H,100
+L, normal L line stuff (this line is at 100 units high.)
+L, normal L line stuff (this one is also.)
+H,-50
+L, normal L line stuff (this one is at -50)
+M lines are unaffected by this.
+Add these things to your [Map] section of showeq.conf, or use the menu:
+MapDepthFilter             1
+SpawnDepthFilter           1
+FadingFloors               0
+OverheadDepth              80
+UnderfeetDepth             60
+There are no command line parameters for this.
+Fading floors are all white, but they fade to black based on how far from you
+to your distance you set.  Things at Overhead depth are black.  Things at or
+below underfeet depth are also black.
+Spawn Depth determines if you can see spawns based off of the same filter.
+L lines at 0 height are ALWAYS visible in their normal colors, but if they 
+are at 1, they will filter.
+Your targetted monster will always be visible on the map.
+Keev added stuff to Packet.cpp to write out the life cycle of monsters.
+I need to ask him who he wants those sent to.  I'll make it so you can turn
+it off in a day or two.
+
+
+dev (cpphack 19/Dec/00)
+-----------------------
+Version bumped to 2.5.1 in preparation for a tar file release.
+
+Tagged in CVS as VERSION_2_5_1
+
+dev (cpphack 17/Dec/00)
+-----------------------
+Some of the autoconf files have been updated in preparation for merging in
+FreeBSD changes.
+
+An addition to the INSTALL file with detailed instructions for Linux newbies
+was added as "INSTALL.newbies".
+
+dev (Andrew 16/Dec/00)
+-----------------------
+Fixed target select, it's like consider target, except when you target 
+something in EQ.
+It has it's own flag, menu thing, conf file option, and command parameter.
+Connected the /say Hail "my own name" control, you can rename any targeted 
+spawn to anything you want just by giving a name after hail.  (IE for NPCs
+you just hail it and it renames to it's normal name.  (ment for broken 
+packets.))
+Made it so if you compile without -DLOG_DIR=something, it will still work.
+
+dev (cpphack 15/Dec/00)
+-----------------------
+The configure script now checks for the new "deque.h" dependency.
+
+The autogen.sh now does a "make distclean" to ensure a clean compile when
+updating from CVS.
+
+dev (Xylor 14/Dec/00) 
+----------------------
+Version change to 2.5, new libEQ.a
+
+Bundling/packaging/CVS checkin by cpphack, but Xylor and others did all the
+real work.
+
+Incorporated contributor code to save encrypted packets for update once we 
+get a key, and run the brute force in a separate thread.
+
+Added code to do a cryptanalytic attack on the encrypted data. 
+
+Allowed spawns to be decoded as soon as SEQ starts up, without 
+having to zone.
+
+dev (ratt 08/Dec/00)
+--------------------
+
+Added Daneel's /con message and map update:
+
+This patch updates considerStruct to include three previously 
+missing fields that are transmitted by the server: the level of 
+the mob, the current maximum HP of the mob, and the current 
+actual HP of the mob. 
+
+Added Gandalfh's spawntime column and highlight con'd mobs
+
+Some miscellaneous code format cleanup for easier future modifications.
+
+dev (cpphack 02/Dec/00)
+-----------------------
+It seems that there are several people working on breaking the encryption.
+Although the HackersQuest group will make the final determination for what
+gets included, I've added a new option to ShowEQ to make the decryption
+analysis easier. 
+
+From following the if(pre_worked) statements it seems there are only three
+kinds of packets which are encrypted.  Those are opcode CharProfileCode,
+ZoneSpawnsCode, and NewSpawnCode.
+
+The "--log-encrypted" option turns on logging of these three packet types
+to three separate files.
+
+The "--encrypted-log-filebase" sets a common path and filename to be used
+for the three files.  The packet type will be appended to this file base.
+
+For example, using "--encrypted-log-filebase=/tmp/encrypted" results in the
+following files being created:
+
+/tmp/encrypted_CharProfileCode.log
+/tmp/encrypted_NewSpawnCode.log
+/tmp/encrypted_ZoneSpawnsCode.log
+
+These contain each packet sent of the appropriate type, giving the
+cryptanalysts something to work on.  These are presently logged using
+logData() so they are human-readable.
+
+dev (cpphack 20/Nov/00)
+-----------------------
+Included Pack's patch for updating race/class/level without modification.
+
+I plan to rework the menu system a bit, but I'd like to get Pack's code out
+right away so people can take a look at it.
+
+dev (cpphack 19/Nov/00)
+-----------------------
+Updated maps with files from http://www.crushandswill.com/mapfiend
+Lots of new "P" entries, so don't forget about the new GUI option to
+disable these points of interest.
+
+The map of The Hole is especially impressive.
+
+Lots of point colors were changed to white, now that this attribute
+is actually used.  Also, lots of 'darkYellow' objects changed to darkRed 
+to avoid color bug with Qt 2.0.1.
+
+Thanks go to Hitek for making these files publicly available.
+
+GUI class/race dialogs on hold pending update from Pack.
+
+dev (cpphack 16/Nov/00)
+-----------------------
+First try at a GUI character level dialog is now included.  Race and 
+class are still stubbed out with "coming soon" messageboxes.
+
+dev (cpphack 16/Nov/00)
+-----------------------
+Bumped version number after JohnQ's changes in anticipation of some
+major butchery to the Qt interface for race/class/level dialogs.
+
+New version is 2.4.4.
+
+dev (JohnQ 15/Nov/00)
+-----------------------
+Bunch 'o Stuff:
+1---
+We were incorrectly responding to the spawnPositionUpdate packets... 
+Put in a short fix so that we decode them correctly now.  The mobs used to
+not stop when they should, instead they would drift forward until the next
+spawn update packet.  Now they stop on a dime, like they should.
+2--
+Added the channel "GM-Tell" Apparenly when a GM tells you, it comes in a 
+different channel (0xe for those who care) Found this out in a very
+embarassing way.  My macro programs now quit when I get a GM tell. =) good
+thing to be able to catch.
+3--
+Fixed a small typo in the declaration of preProcessPackets (const char*
+vs char*) Forgot that c++ cant cope with that.  noone else shold have
+noticed, since the call to it is commented out until
+(if) we release the new .a
+4--
+Added my "regexp line" above the map.  This takes some explaining and to
+what it is, and why its there.  Basically, all you do is type a regexp in
+the text box, and anything that matches will flash white on the map (just
+the line not the fill)  Why its there is for farming, huting etc.  For
+instance.. Imagine a necro needing bones.. they can put in "skel" into the
+regexp box and just glance at the map, instead fo hunting through the
+spawn list sorting by distance etc... Its for hunting at a glance.  Its
+also GREAT in trakanons teeth when hunting the forager/hunter.  
+"froglok_[fh].*er" makes hunting easier. =)
+When there is no regexp ni the box, the border of the text box is
+black.  Re means it is not a valid reexp, and blue means it is valid and
+working.  The coloring is really subtle.  
+Its not so much usefull unless the decode is working though.  If anyone
+has objections to it, feel free to nuke/comment/optional-ize it. etc.
+
+dev (cpphack 14/Nov/00)
+-----------------------
+Restored some changes from JohnQ which were mistakenly removed during
+a CVS conflict resolution.  The restored changes will allow JohnQ's
+new libEQ.a interface to be used.
+
+The GUI selector for race/class/level is about half done.
+
+dev (cpphack 10/Nov/00)
+-----------------------
+Added a GUI option to the Map menu to disable the display of "P" records.
+
+Also renamed the option "DisableMapPoints" to "ShowMapPoints" and reversed
+the logic since the old way was giving me a serious headache due to the
+constant double negatives.  What was I thinking when I put it in like that?
+
+dev (cpphack 09/Nov/00)
+-----------------------
+Found the bug which kept the packet logging from unchecking the GUI box
+after an error writing/opening the logfile.  It's amazing what a few 
+minutes with the Qt documentation can do for bugfixes.
+
+The pcap library seems to report the destination MAC as either 
+00:00:00:00:00:00 or 00:00:00:00:00:01 in some cases.  I'm not sure how to
+best handle this yet, since I don't know what else comes in with those MAC
+addresses as the destination.
+
+dev (cpphack 08/Nov/00)
+-----------------------
+Added Pack's patch to save the location of the experience window.
+
+Discovered that sometimes the MAC based filtering fails to capture packets
+which do not originate from the Everquest host.  No explanation yet,
+but I've removed the MAC description from the showeq.conf.dist file
+to discourage its use by non-developers.
+
+Cleaning up some uninitialized variables and other long ignored maintenance.
+
+dev (cpphack 06/Nov/00)
+-----------------------
+Added a modified version of atreus' patch to allow for autodetecting the
+IP address of an EQ stream based on UDP packets to port 9000.
+
+Version bumped to 2.4.3 to reflect the changes in the packet capture code.
+
+dev (cpphack 05/Nov/00)
+-----------------------
+Added a partially functional item.db parser.  It should also be able to
+parse spawn.db, but my only test file seems to be broken, so I have
+disabled that feature until I can generate a new one.
+
+The item.db parser should be handy for anyone who wants to create an
+item database.  Note that this is a brand new, untested program.  Don't
+go trusting what it says yet.
+
+It is not included in the Makefile, so you'll need to build it manually.
+
+dev (cpphack 04/Nov/00)
+-----------------------
+Packet logging filenames are now configurable via config file and
+command line.  Logging may now be enabled via config file or via
+command line.  Bug someplace prevents updating the UI if the logging must
+be turned off due to file I/O error.
+
+Minor bugfix to GetPrefString.
+
+Allow packet playback speed to be given over the command line.
+
+adm (Ratt 2/Nov/00)
+-----------------------
+Bumped the version number to 2.4.2.  Been really bad on changing that when
+there are significant revisions.  Need to keep up with that for better 
+troubleshooting/bug tracking off of SF.
+
+dev (cpphack 31/Oct/00)
+-----------------------
+Fixed minor bug in exp window where it would show full exp to next level
+after zoning.
+
+Added Shag's patch to keep most recently killed mob in the window.  Thanks
+for fixing that little annoyance!  Perfect example of a simple fix for
+a problem that's bothersome, but not enough to really attract any attention.
+
+Added support for choosing data stream based on MAC address to help out
+those burdened with dynamic IP allocation. (--mac-address)
+
+Added new "Dump Drops" and "Dump Coins" to menu since those objects are kept
+in separate internal arrays than spawns.  These also now include location
+info.
+
+Added an error message specific to problems opening the showeq.conf file.
+
+dev (cpphack 20/Oct/00)
+-----------------------
+Overhaul of command line processing to support long GNU-style options.
+This should make feature additions a bit less painful for the GUI-averse.
+
+dev (cpphack 19/Oct/00)
+-----------------------
+Fixed cosmetic bug with experience window where it would sometimes show
+negative experience values.  Also fixed minor bug where using 
+"showeq -j <filename>" on a file which didn't exist would create a zero
+length file, then cause showeq to crash messily.  It now skips the file
+creation and errors out.
+
+Also changed version in main.cpp to use VERSION from configure.in and
+changed that version to 2.4.1.
+
+dev (JohnQ 12/Oct/00)
+---------------------
+
+Updated packet.cpp to allow for the new libEQ.a if and when it happens.
+
+dev (JohnQ 12/Oct/00)
+---------------------
+Just wanted to test my ability to write to CVS so I made two MINOR changes:
+
+Changed the time before a spawn is considered "stale" from 30 sec to 50.. 
+I was seeing errors in large zones (like kunark etc)
+
+I also made a minor optimization in the FindNext function in spawnlist.cpp
+It really needs all the help it can get =/
+
+dev (Ratt 11/Oct/00)
+---------------------
+
+Changed the experience calculation routines to reflect the
+ability to force a player level/race/class.
+
+Currently this is done in the .conf file
+
+Add these lines to your conf file (see the showeq.conf.dist file for more info)
+
+forcePlayer     1
+forcedLevel     10
+forcedClass     1
+forcedRace      1
+
+Change the Level/Class/Race options to reflect the level/class/race combo you want
+to have used in your experience calculations.
+
+Exp info will only be displayed after the first kill each time you zone.  The first 
+time you make a kill, it will be its baseline exp info and compute from there.  Each
+time you zone, this resets.
+
+Please look at the showeq.conf.dist file for the above 4 lines before you ask questions,
+everything you need to know about Race/Class values is in there.
+
+dev (Steve 08/Oct/00)
+---------------------
+Rewrote much of the map code
+  - Made the map reading more robust
+  - Moved some hardcoded numbers into map.h as constants
+
+dev (Steve 01/Oct/00)
+---------------------
+Fixed a couple races that were wrong
+Added Wurmslayer to weapons
+
+adm (Ratt 27/Sep/00)
+--------------------
+Well, that was one big fat ugly mess.  All seems settled now though.
+
+Linux and FreeBSD files will be seperated into their own modules.
+
+The linux version of SEQ will now be under the linux module and the
+FreeBSD version of SEQ will be under the freebsd module.  No more
+checkout .  , you should now be using checkout linux or checkout freebsd
+
+Revision history got trashed due to the way SF operates.  There are also
+some empty directories.  When doing an update, you should always use
+cvs update -P to prune the empty directories.
+
+dev (Andrew 14/Sep/00)
+--------------------
+Improved -b's ability to prevent segfaults with the new encryption.
+Use that until we say we have a fix. 
+You may want to edit packet.cpp to have your race/class/level for exp
+to show nicely until we add that to the conf file.
+
+dev (Ratt 12/Sep/00)
+--------------------
+Fixed up 51+ cons and tweaked some of the color shading slightly.
+Still need hard numbers for what levels things green out at past 50.
+But cons should be more accurate now.
+
+dev (Ratt 05/Sep/00)
+--------------------
+
+Added the ability to configure what you want to display in the Player Stats box,
+the new options are in the showeq.conf.dist file.  You can cut and paste into your
+current showeq.conf file.  All new options start with "statwin".
+
+On the TODO list still:  Color code stats in stat box
+
+dev (Andrew 26/Aug/00)
+-------------------
+My first CVS update with new CVS server.
+Found where mana and stats are stored in player info.
+I've made it use ((INTorWIS/5)+2)*lvl for mana (+Mana also)
+It'll total up all +stats and display those in main stats list.
+The formula is not quite right. (but close enough.)
+If you are full mana, it will be correct on zone-in.
+mana is updated on spell cast and zoning.
+If anybody wants to research regen rate...
+
+Fixed player in spawn list to update pos and health!
+
+dev (Ratt 28/Aug/00)
+--------------------
+
+- Received xyzzy00's source for libEQ.a .  Verified the code and compiled it on my
+  machine.  Excellent work by xyzzy00, no doubt.  The new libEQ.a comitted to CVS
+  as the permanent libEQ.a file.  libEQ.a.new removed as it's no longer required.
+- Upped the version number to 2.4 to differentiate between the old CVS versions and
+  the new CVS versions to help with bug tracking.
+
+dev (Ratt 25/Aug/00
+-------------------
+- Added xyzzy00's libEQ.a library file. It is named "libEQ.a.new".  Rename it to 
+  libEQ.a if you wish to use it, otherwise you'll be using the original (buggy) version.
+  I've encountered no ill effects, although I do not have the source. Use it at your
+  own risk and security.
+
+dev (Ratt 22/Aug/00)
+--------------------
+- Added Razers spawn select fix. Spawns should now auto select when they spawn and 
+  beep.  Previously, it would only do this if you have .wav files active.
+- Added post 50 Experience calculation (corrected version) and the fix for 
+  the % completed display, which bombed if it was over 22 million or so. Who do I 
+  credit for this fix?
+- Added a test version of the "Max Mana" calculator by JCorey.  It's kind of
+  wonky, and if you don't exit showeq every time you play a new character (like me)
+  you get the max mana from your previous character if it was more.  Perhaps we need
+  some code to reset the max mana every time you logon a new character?
+- Lots and lots and lots of new maps added/updated. Thanks Mapfiend!
+
+admin (Ratt 22/Aug/00)
+---------------------
+- New CVS server opened at SourceForge
+- My current source tree used as the starting point.  See above for included mods.
+
+dev (Steve 06/26/2000)
+----------------------
+- Fixed mob color so green and blue mobs display correctly
+- Small updates to many maps
+- New Ak'Anon map from board (by Anon SEQ User)
+
+dev (Megaton 06/11/2000)
+------------------------
+- Changed version to 2.3 for distrib and fixed up some automake
+  files that was missing files
+
+dev (Steve 05/30/2000)
+----------------------
+- Added separate (correct) con colors for levels 23 and 24
+- Increased the maximum length of map lines to 16K bytes
+- Corrected exp multipliers for double hell levels (54 and 59)
+- Spawn log now logged when max hp are different than previous
+    (This is to catch the buffed guards)
+- Kunark Fish added to races
+- Listspawn generates complete HTML
+- Z coord added to status bar
+- Number of kills to level added to lower right status bar in []
+    (Same data in status bar doesn't stick around long enough)
+- Added more detail to TD, Nro and FoB maps
+
+dev (Steve 05/09/2000)
+----------------------
+- Commanated exp values on status bar
+- Added spawn logging on/off switch to Options menu
+
+dev (Steve 05/09/2000)
+----------------------
+- Fixed CGIs to read from spawn file, was broken
+- Modified main.h to have the name of the spawn file in one place
+- Changed race "Kunark Fish" to "Goo"
+- Added race "Cactus"
+- Added filter (*.map) to map open dialog
+- Added label and details to a bunch of maps
+
+dev (Megaton 05/07/2000)
+------------------------
+- Fixed util.cpp to log spawns and items to database again, was broken
+- Changed default behaviour to NOT to log to spawn database. (please note
+  that the -x option now means the opposite, -x now means log spawns).
+  The default was changed due to the large cpu overhead spawn logging
+  places on showeq - it really needs to be done more efficiently.
+
+dev (Steve 05/05/2000)
+----------------------
+Changed "Spectral Sarnak" to "Burynai"
+Changed "Sarnak Golem" to "Iksar skeleton"
+
+dev (Megaton 05/01/2000)
+------------------------
+- Changed the coloring of the mobs, so that they are shaded a bit.
+  I know some might not like this.. I kept the old function in there
+  as well and still working on the shading (some of the low blues look
+  a lot like green right now).
+- Fixed map to show unknown spawns as gray, and not blue
+- Fixed up some cgi stuff to find .db files in correct places
+
+dev (Megaton 04/30/2000)
+------------------------
+- Made the 'Loc' button on maps have text labels and display the
+  text label on the map. For now you have to edit these text labels
+  by hand in the .map file after adding them, and most maps don't
+  contain any labels yet. Will update as I go along.
+  Look at LakeRathe.map for an example text label.
+- Added text labels to grid showing loc legend
+- Added some stuff to make grid resizing possible in the future
+
+dev (wes 04/29/2000)
+--------------------
+- updated layout code in experiencewindow a bit.  Should look better 
+  now. 
+
+dev (Steve 04/28/2000)
+----------------------
+- Made Open map default to map directory
+
+dev (Steve 04/28/2000)
+----------------------
+- Added the Iksar value to calc_exp
+
+dev (wes 04/21/2000)
+--------------------
+- New experience window code committed!  Looks a little better, though
+  I'm still working on the layout of the statistics section.  Also
+  added time to level statistic.
+- packet.cpp, packet.h: changed args in expGained, changed currentZone
+  to a QString
+- interface.cpp: added QString arg to expGained signal/slot
+- main.cpp: set showeq interface to use QWindowsStyle!  Dunno why I
+  put this off so long.  Makes most widgets look much, much better.
+
+dev (Maerlyn 04/09/2000)
+------------------------
+- Added SpawnList Category support
+  See sample conf/showeq.conf and doc/configfile.doc for documentation and 
+  examples.  This change involved ripping the majority of the spawnlist code 
+  out of the map class.  Please let me know if you encounter any problems or 
+  stability issues.  If you don't like the category support, just don't put 
+  any categories in your config file.  If you wish to examine the text used 
+  to filter against for categories select a spawn and right click on it and 
+  it will be dumped to the console. 
+
+dev (JohnQ 04/10/2000)
+------------------------
+- Added the ability to "resync" the network
+  ie. pretend the next packet has a synch on it.
+- Put in a really stupid fix for the wraparound bug.  it needs to be done 
+  better later by megaton, but I was getting impatient =)
+- Removed my fix for pet-death-after-owner in favor of Andys new one
+
+
+dev (Andy 04/09/2000)
+------------------------
+- Decoded some Group information.
+- Members of your group listed below you on list.
+- Fixed segfaults related to pets.
+- Spams you with what somebody has when you inspect them.
+- Books and Container names should start showing up in spawns list
+- Books and Containers are now itemDBed.
+
+
+dev (Maerlyn 04/02/2000)
+------------------------
+- Bumped packet version number to keep packet playback from accepting old files.
+- Implemented splitters in the mainwindow to set sizing between spawnlist, 
+  statlist, skilllist, compass and map.  
+- Implemented Save/Restore positions for splitters.
+  The positions of the splitters will be saved upon normal exit and will 
+  be restored upon running.
+- Implemented Save/Restore for column widths on skillList and statList 
+
+dev (Megaton 04/02/2000)
+------------------------
+- Fixed packet.cpp to handle non-split character profile
+  structures.
+
+dev (Steve 03/31/2000)
+----------------------
+- Added SomeFool's FreeBSD patch
+
+dev (Megaton 03/31/2000)
+------------------------
+- Bumped up version of cvs to 2.2c to avoid confusion with released
+  versions - added decryption to 2.1.1 release version.
+- Moved packet decryption to a library for modularity. The lib can
+  just be replaced without affecting the rest of showeq.
+- Added new encryption for 03/27/2000 patch, thanks to the contribution
+  of Ashran, Bellhead, Grimsby, JohnQ, Megaton (they forced me to put
+  my name here), Quadlynx and Wiley and of course, Mrs Megaton,
+  Coke'a'Cola, McDonalds, and various pizza delivery services.
+
+dev (Steve 03/31/2000)
+----------------------
+- Added config file option to enable/disable animated spawn movement
+
+dev (Maerlyn 03/29/2000)
+------------------------
+- Added documentation for the config file (see docs/configfile.doc)
+- Added SpawnList config options to config file to allow save/restore 
+  of widths of the columns in the spawn list.  Can be used to set text
+  columns to fixed widths, autosize, or hide completely.  See config file docs
+- Added deadtime compression to VPacket feature.  See config file docs
+- Added ability to speed up and slow down packet playback using the 
+  '[' and ']' to increase/decrease playback speed
+- Added a packet counter and packets/sec display to the status bar
+- Added config file options to enable/disable any of the status bar fields
+  (see config file docs)
+- Added a settable X/Y offset for window position restoring to hack around
+  the fact that window managers don't follow a standard.  (see config file 
+  docs for Window position explanations)
+- Added language name to end of channel messages spoken in other than common
+- Cleaned up some of messages generated by server packets
+- Filtered blank messages before they get sent to message handler
+- Fixed a couple of bugs in the config file code causing clobbering of
+  values that were specified on the command line
+ 
+dev (Megaton 03/28/2000)
+------------------------
+- Modified the default showeq.conf and filters.conf to reflect the
+  default setup as it used to be in pre-config days. Also made the
+  sample filters comments.
+
+dev (Maerlyn 03/27/2000)
+------------------------
+- Added MsgDialog class
+  This allows dynamic filtering/display of messages generated by the server
+  and ShowEQ.  The user can add a message box from the File menu, or create 
+  preconfigured ones from the config file.  See ./conf/showeq.conf for 
+  examples.
+- Added option to Interface Section called 'UseWindowPos'.  If enabled the 
+  config file WindowX, WindowY options will be used to attempt to restore 
+  window positions upon starting ShowEQ.  This is known to work only under 
+  KDE with fwvm window manager at this time.  Other environments are known 
+  to be buggy.
+
+dev (Whizzie 03/27/2000)
+------------------------
+- updated book text opcode
+- added -b option and [Misc]Broken_Decode option to skip spawn packet handling 
+  (for when Verant break it again, <sigh>, but this may already be useless 
+   since the Test server seems also to be encoding the Character Profile 
+   packets).
+
+dev (Megaton 03/26/2000)
+------------------------
+- Hacked out the move of showeq window to saved position in
+  interface.cpp (currently restores position without decorations)
+- Added random request opcode (even though will never get called,
+   since ShowEQ currently ignores SEQ client packets)
+- Added work-in-progress Oceon of Tears map
+- Fixed a bug introduced in latest changes that prevented HP updates
+- Added the following new/modified maps from John, check
+   maps/README for credits:
+   Everfrost.map FelwitheA.map FelwitheB.map Grobb.map
+   Halas.map NeriakB.map NeriakC.map Rahtemtn.map
+
+dev (Maerlyn 03/25/2000)
+------------------------
+updated README and INSTALL 
+Added persistant Configuration file (showeq.conf is default)
+Added a statusbar
+Added pvp option to eqparams that will cause other players to 'blink'
+      on map with a difficulty level if they are on opposing team and 
+      in your range
+Added coloring to spawnItems to reflect pvp team - turn on pvp option in config 
+Added multiple dynamic load/saveable filters to filter on stats other than 
+      just name
+Added vpacket class for record and playback of packets
+Added ability to toggle visibility of filtered Spawns in map
+Added statusbar to main interface (moved some label widgets down there for
+      organization)
+Added configuration options to tweak GUI (see config file for details)
+
+Disclaimer:  There are a ton of changes here and more to come.  I've been 
+waiting for CVS write access for a while so the changes have been piling up. 
+Thanks to Slicer, I now have write access.  I deeply appoligize for any 
+features that I've broken with my additions.  Please let me know what you 
+think of the mods and where work is needed.
+
+- Maerlyn (maerlynthewizard@yahoo.com)
+
+dev (Megaton 03/24/2000)
+------------------------
+- Bumped up version to 2.1 again, and release another
+  tarball.
+
+dev (cattj 03/24/2000)
+----------------------
+- JohnQ checked in new decryption for 03/24/2000 verant patch
+   (thanks to CattJ, Ashram, Quadlynx, Wiley, Bellhead,
+   code-pro and JohnQ)!
+
+dev (megaton 03/22/2000)
+------------------------
+- Changed version to 2.0c (to reflect major changes :)
+- Added a filter to libpcap to throw out packets below 1024 
+
+dev (Astone 03/21/2000)
+-----------------------
+- Added function for new decryption and support function for
+  calculating the key when zoning.
+
+dev (wes 03/20/2000)
+--------------------
+- tweaked experience window a bit.  code now shows average xp per
+  timeframe selected, average xp per mob kill, and approximate number
+  of kills needed to level similar to main window.
+- fixed Makefile.am (oops)
+
+dev (wes 03/20/2000)
+--------------------
+- _really_ added the experience log code.  The actual experience values
+  are correct, but I still need to figure out the exact experience values that
+  you _should_ get for each mob level.  Anyone have this information?
+- added .cvsignore in src to ignore bogus files like m_*.cpp and Makefiles
+
+dev (megaton 02/17/2000)
+------------------------
+Put up released version of 1.9, bumped version up to 1.9c for
+development till next release (03/17/2000)
+Tagged source as v1.9 - Megaton (03/17/2000)
+
+dev (wes 03/08/2000) 
+-------------------- 
+Added experience log window.  Note mob information isn't always correct,
+need to track down a few bugs with m_Spawns not being updated properly.  
+I think I need to add a scrollbar, too. :)
+
+dev (Megaton 03/05/2000)
+------------------------
+Added lastname, race, class and gender to character profile struct
+Modified calc_exp to use class and race modifiers for experience
+Removed -e option since calc_exp now automatically calculates the modifier
+
+dev (Steve 03/02/2000)
+----------------------
+Moved Commanate to util and used it when displaying XP in new table
+
+dev (Sparr 02/27/2000)
+------------------------
+Added channel names and language numbers to CMSG's
+
+dev (Megaton 02/27/2000)
+------------------------
+Fixed a bug that was introduced by someone trying to fix
+the sequence wrap. It messed up the packet caching, adding
+packets that was already processed to the queue and filling it up.
+
+dev (Megaton 02/26/2000)
+------------------------
+Added northkarana.map, updated eastkarana.map
+Added exp calculation formula to show experence percentage
+Added -e <mod> to change the experience modifier
+
+dev (Steve 02/17/2000)
+----------------------
+Added the object Manastone (0x44)
+Fixxed the spawn alert code so that lights would be matched
+
+dev (Whizzie Wiz 15/02/2000)
+----------------------------
+Added code that builds on the Consider information to allow the spawn
+that is being considered to be automatically selected by ShowEQ, also
+to print the name of the Considered spawn as well. This allows easy
+inspection of spawns while playing the game (no need to change mice
+or tap extra keys to locate what you are facing...!)
+
+dev (JohnQ 2/13/2000)
+---------------------
+Sparr found the packet that contains the consider information.  We have
+exact values of your faction when you con somthing now.. GO Sparr!
+
+dev (JohnQ 2/13/2000)
+---------------------
+Added Sparr's changes to add coins on the floor to the lists.
+Andy, you might want to clean it up a bit if you have a minute.. 
+Its ripped directly from your item code with Sparr's packet
+structs =)  --  Somone give Sparr write accrss to cvs! =)
+(Andy: The item code was ripped from the spawns...)
+
+dev (Steve 2/12/2000)
+---------------------
+Added SolA, Upper & Lower Guk maps (incomplete)
+Moved Kithicor.map to kithicor.map so it would work
+Updated FreportW.map and FreportE.map with underground
+
+dev (Andy 2/12/2000)
+----------------------
+Found items on the ground and to turn them on add -G
+Added -K for showing unknown spawns based on position updates.
+
+dev (Andy 2/11/2000)
+----------------------
+-Tore out the old zoom code, redid mine and made it work right.
+-Limit maximum zoom to prevent divide by zero.
+
+
+dev (AStone 2/11/2000)
+----------------------
+- Made several changes names of variables and functions used for menus.
+  Tried to establish a naming convention.
+- Added a View menu. It was added to primarily to control all the spam that
+  goes to the terminal window that started SEQ.
+- Added spam filter for Channel Messages.
+- Added spam filter for Andy's Unknown Packet information.
+
+dev (JohnQ 2/11/2000)
+----------------------
+- Added -A option for "enhanced spawn [A]lerts" when testing for match
+  (both regexp or glob) it now tests a longer string containing:
+    name/race/class/info
+  so, for instance you can filter for:
+    all orcs with 2H weapons:    */*orc*/*/*2H*
+    all druids:            */*/druid/*
+    and my favorite... 
+    all wisps carying a GLS:    *wisp*/*/*/*gls*
+    etc..
+- Made it so that dead bodies dont drift if they die while moving.. 
+  I hate that
+- other minor bugfixes.. noone will notice but me and the people who 
+  reported them =)
+
+dev (JohnQ 2/7/2000)
+----------------------
+- Added display of Z values for player and mobs (Happy birthday Sparr)
+- Added -c option for "retarted verant style" YXZ style coords. (Also for Sparr)
+- Found PlayerID, velocity, and angular velocity in the playerUpdateStruct
+- Made player location move with velocity when animating.. Like a mob.
+  I coudlnt get it to recenter every frame though... Wally?? can you hack that?
+- Added a -F "fast machine" option.. when ON, showeq uses new "framerate" based
+  updates, when off uses old packet based updates (for slow machines)
+- Using new PlayerID info, grabbed HP and MaxHP, made a window for player Stats
+- Installed one struct that contains mana.. there MUST be more though.. we are missing 
+  data at all times EXCEPT just after you cast.  and we have no info about max mana lemme 
+  know if you find them.. I have the stubs in place for a more acurate XP, Mana and Stam
+  Once the packets are decyphered.
+- Increased the "I havent heard about velocity" timeout to 30 from 20.. large zones
+  had problems.
+- NOTE: wearing +HP items increases the "Max HP" from the server, but the "HP"  We need
+  to adjust the players HP value according to their clothing.  Who wants to do this??
+
+dev (Steve 2/7/2000)
+--------------------
+- Added the TranformName function that changes names of the form:
+    "a_dwarf_skeleton" into "dwarf skeleton, a"
+    "an_ice_giant" into "ice giant, an"
+    "the_froglok_king" into "froglok king, the"
+
+dev (Megaton 2/7/2000)
+----------------------
+- Removed map triggered refreshes and made refreshes based on timer
+- Added -u commandline option to specify framerate in fps (default 5fps)
+
+dev (v 1.8?) - (Steve  2/7/2000)
+-----------------------
+- Exp numbers are now comma separated.
+  i.e. -  Exp: 123,456,789 (98,000)
+
+dev (v 1.8?) - (JohnQ  2/7/2000)
+-----------------------
+
+- looked at Wallys resize code and saw that it was good. But I
+  wanted to make one change.. I put a user slideable divider betwen the
+  map and the spawn list so that you can decide where to use your screen
+  realestate.
+
+- added a -p option to specify the font size of the skill and spawn tables.
+
+- added an -n option (aNimate, a was taken) which animates the
+  spawns on the map based off of their velocity and last known
+  location.. I beleive it is a similar algorithm to the one the actual
+  client uses.. more or less. It looks NIIICE =) It's MUCH easier to
+  intercept a mob now.  It might be a little processor intensive..
+
+- I added an options menu to toggle the velocity lines and animations
+  while it is running.. I always forget to put the -v and -n on there =)
+
+dev - (AStone 2/6/2000)
+-----------------------
+- Added menu options to turn logging packets to disk on and off. Now
+  you wont have to recompile when you want to log packets.
+
+
+dev - (Wally59 2/4/00)
+-------------
+- Added mapping dialog, lets you change line color/name.
+- Changed hotkeys for adding lines (L) and points (P) 
+- Added resizing capabilities, map resizes when window resizes
+- Moved all buttons to menu's with hotkeys
+- Removed sequence number LCD widgets, until I can figure out where
+  to put them.
+- Put a dot on compass showing direction of selected spawn.
+- Changed the way spawns are saved in spawn.db, upon entering a zone
+  spawns are now queued, after the zone has supplied us a zone name
+  I dequeue all the spawns adding the zone name, and saving this
+  to the spawn.db.
+  NOTICE:  This means you must move or delete any old spawn.db files.
+
+dev
+---
+- Added --enable-cgi to build CGIs, otherwise ignore them (Slicer)
+- Added Arena.map (Megaton)
+- Moved CHANGES, BUGS, README to toplevel dir (Megaton)
+- Updated to full autoconf/automake (Slicer)
+- Added -v commandline option to draw velocities on map (Megaton)
+- Added more weapon and material types from Slicer/Andrew
+- Added mob velocities to spawnlist in map (Megaton)
+- Created drawmap.cgi, a CGI tool to view maps (Megaton)
+- Fixed bug introduced in v1.7 when deleting spawns in map (Megaton)
+- Added SoldungB.map by Steve
+- Added struct for player visible item changes. (Andrew)
+- Added more info on spawnKilledStruct. (Wizzie Wiz)
+- Added updater for mob info field. (Andrew)
+- Added spawn deletion notifier, -d.  Uses spawn alert list.
+
+v1.7 - 01/31/2000
+-----------------
+- Added new listspawn.cgi and listitem.cgi by Monchi
+- Added worn equipment to spawnStruct by Slicer
+- Added worn equipment to Info column in spawnlist by Slicer
+- Added race, class and info column in spawn list (Megaton)
+- Cleaned up code a bit and started adding comments (Megaton)
+- Added autoselect alert spawn code by Slicer
+- Added cmdline paramater changes by Slicer
+- Added regexp options to spawn filter/alert by Slicer
+- Added map zooming code by Andrew
+- Added spawn killed structure
+- Added spawn killed map handling by Andrew
+- Added mob update structure changes by Andrew
+- Added KaladimA.map by Steve
+- Added KaladimB.map by Steve
+- Added LakeRathe.map by Steve
+- Added Lfaydark.map by ACiDFlux2000 
+- Added Mistmoore.map by ACiDFlux2000 
+- Added OOT.map changes by ACiDFlux2000 
+
+v1.61 - 01/26/2000
+------------------
+- Added new mob decoding function by Ashran
+- Fixed "zone mob spawns" opcode (Megaton)
+- Fixed "new mob spawn" opcode (Megaton)
+
+v1.6 - 01/25/2000
+------------------
+- Replaced socket capture with pcap/thread code by Slicer
+- Added mob level/map color scaling by Slicer
+- Added mob filter and alert code by GrinningPizza
+- Added compass-in-map and color changes by Kai
+- Added Andrew's line color changes
+- Replaced mob decode funtion with function by AnonCS
+- Added "interrupt casting" structure by Grimsby
+- Added "door open" opcode by Grimsby
+- Added "illusion" opcode by Grimsby
+- Added "begin casting" opcode fix by Grimsby
+- Added this CHANGES file (Megaton)
+- Added a BUGS file to list known bugs (Megaton)
+- Added README in maps directory listing map contributions (Megaton)
+- Added Misty.map by GrinningPizza
+- Added Nro.map by ACiDFlux2000
+- Added Qeynos2.map by Avatar
+- Added Qcat.map by Andrew
+- Added ErudsXing.map by Andrew
+- Added Butcher.map changes by Sparr
+- Added Lavastorm.map by Sparr
+- Added Gfaydark.map changes by Sparr
+- Added Sro.map by ACiDFlux2000
+
+v1.51 - 01/24/2000
+------------------
+- Changed opcode to two bytes instead of one (Megaton)
+- Fixed "item in shop" opcode (Megaton)
+- Added "item on corpse" opcode  (Megaton)
+- Fixed "item received" opcode (Megaton)
+- Fixed "character profile" opcode (Megaton)
+- Fixed "delete spawn" opcode (Megaton)
+- Fixed "channel message" opcode (Megaton)
+- Fixed "new spawn" opcode (Megaton)
+- Fixed "zone spawns" opcode (Megaton)
+- Fixed "player item" opcode (Megaton)
+- Fixed "player book" opcode (Megaton)
+- Fixed "player container" opcode (Megaton)
+- Fixed "mob HP update" opcode (Megaton)
+- Fixed "gaining experience message" opcode (Megaton)
+- Fixed "gaining experience" opcode (Megaton)
+- Fixed "skill increase" opcode (Megaton)
+- Fixed "new zone name" opcode (Megaton)
+- Fixed "player position" opcode (Megaton)
+
+v1.5 - 01/24/2000
+-----------------
+- Added mob decryption function (Megaton)
+- Fixed up some packet opcodes (Megaton)
+- Added Nektulos.map (Megaton)
+- Added Unrest.map by Steve
+- Added Oggok.map by Kyle
+- Added Oasis.map by Steve
+- Added CazicThule.map by Kyle
+- Added Cauldron.map by Kyle/Steve
+- Added Butcher.map by Steve
+
+v1.4 - ?
+--------
+- Added exp view (Megaton)
+
+v1.3 - ?
+--------
+- Added selecting spawns from Map (Megaton)
+- Added grid background and some map cosmetics  (Megaton)
+- Improved auto-scaling (Megaton)
+- Added makefile rule for .cpp to fix some make dependancies (Megaton)
+
+v1.2b - ?
+---------
+- Fixed a bug that caused crash when selecting a deleted spawn (Megaton)
+- Cleaned up header includes for glibc (Megaton)
+- Added IP binary conversion (Megaton)
+
+v1.2 - ?
+--------
+- Cleaned up maps and distributed with source now  (Megaton)
+- Zones should work fine now without maps (Megaton)
+- Added scaling for zones without maps based on mobs in the zone (Megaton)
+
+v1.1 - ?
+--------
+- Added light-level to mob name  (Megaton)
+- Switched to Qt 2.x (Megaton)
+
+v1.0 - 01/01/2000
+-----------------
+- Initial Release (Megaton)

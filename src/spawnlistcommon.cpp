@@ -10,14 +10,6 @@
  * Date   - 3/16/00
  */
 
-#include <string.h>
-
-#include <qfontdialog.h>
-#include <qinputdialog.h>
-#include <qmessagebox.h>
-#include <qfont.h>
-#include <qpainter.h>
-
 #include "seqwindow.h"
 #include "seqlistview.h"
 #include "spawnlistcommon.h"
@@ -26,6 +18,15 @@
 #include "spawnshell.h"
 #include "main.h"
 #include "player.h"
+#include "diagnosticmessages.h"
+
+#include <string.h>
+
+#include <qfontdialog.h>
+#include <qinputdialog.h>
+#include <qmessagebox.h>
+#include <qfont.h>
+#include <qpainter.h>
 
 SpawnListItem::SpawnListItem(QListViewItem *parent) : QListViewItem(parent)
 {
@@ -108,24 +109,6 @@ spawnItemType SpawnListItem::type()
    return item() ? item()->type() : tUnknown;
 }
 
-QString SpawnListItem::key(int column, bool ascending) const
-{
-//  if (m_item == NULL)
-//    return text(0);
-#if (QT_VERSION < 300) 
-  if ((column < tSpawnColHP) || (column > tSpawnColDist))
-     return text(column);
-
-  double num = text(column).toDouble();
-  QString textNum;
-  textNum.sprintf("%08.2f", num);
-  return textNum;
-#else
-  return text(column);
-#endif
-}
-
-#if (QT_VERSION > 0x030000)
 int SpawnListItem::compare(QListViewItem *i, int col, bool ascending) const
 {
   if (col == 0) // Name
@@ -225,11 +208,10 @@ int SpawnListItem::compare(QListViewItem *i, int col, bool ascending) const
   };
 
 }
-#endif
 
 void SpawnListItem::update(Player* player, uint32_t changeType)
 {
-//   printf ("SpawnListItem::update()\n");
+//   seqDebug("SpawnListItem::update()\n");
    QString buff;
    const Spawn* spawn = NULL;
 
@@ -247,10 +229,11 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      if (spawn != NULL) 
      {
        if (!spawn->lastName().isEmpty())
-	 buff.sprintf("%s (%s)", 
-		      (const char*)buff, (const char*)spawn->lastName());
+       {
+         buff = QString("%1 (%2)").arg(buff).arg(spawn->lastName());
+       }
        if (spawn->gm())
-	 buff += " *GM* ";
+         buff += " *GM* ";
      }
 
      setText(tSpawnColName, buff);
@@ -281,12 +264,12 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      {
        setText(tSpawnColDeity, spawn->deityName());
        setText(tSpawnColBodyType, spawn->typeString());
-       if (spawn->GuildID() < 512)
+       if (spawn->guildID() < MAX_GUILDS)
        {  
-          if(spawn->GuildTag())
-            setText(tSpawnColGuildID, spawn->GuildTag());
+          if(spawn->guildTag())
+            setText(tSpawnColGuildID, spawn->guildTag());
           else
-            setText(tSpawnColGuildID, QString::number(spawn->GuildID()));
+            setText(tSpawnColGuildID, QString::number(spawn->guildID()));
        }
      }
    }
@@ -758,3 +741,5 @@ void SpawnListMenu::set_caption(int id)
   if (ok)
     m_spawnlistWindow->setCaption(caption);
 }
+
+#include "spawnlistcommon.moc"

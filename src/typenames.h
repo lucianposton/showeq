@@ -4,6 +4,8 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  */
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     NULL,			// 0
     "Humanoid",			// 1
     NULL,			// 2
@@ -24,7 +26,7 @@
     NULL,			// 17
     NULL,			// 18
     "Zek",			// 19
-    NULL,			// 20
+    "Luggald",		// 20
     "Animal",			// 21
     "Insect",			// 22
     "ExtraPlanar",		// 23
@@ -32,13 +34,13 @@
     "Plant",			// 25
     "Dragonkin",		// 26
     "Elemental",		// 27
-    "Doppleganger",		// 28
+    "Summoned Creature",		// 28
     "Dragon",			// 29
     "BaneDragon",		// 30
     "Familiar",			// 31
     NULL,			// 32
     NULL,			// 33
-    NULL,			// 34
+    "Muramite",	    // 34
     NULL,			// 35
     NULL,			// 36
     NULL,			// 37
@@ -73,3 +75,5 @@
     "Timer",			// 66
     "EventTrigger",		// 67
     NULL,			// 68
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+

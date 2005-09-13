@@ -16,6 +16,7 @@
 
 #include "packetcommon.h"
 #include "packetfragment.h"
+#include "packetinfo.h"
 
 #if (defined(__FreeBSD__) || defined(__linux__)) && defined(__GLIBC__) && (__GLIBC__ == 2) && (__GLIBC_MINOR__ < 2)
 typedef uint16_t in_port_t;
@@ -25,7 +26,9 @@ typedef uint32_t in_addr_t;
 #include <netinet/in.h>
 
 class EQUDPIPPacketFormat;
-class EQPacketFormat;
+class EQProtocolPacket;
+class EQPacketOPCodeDB;
+class EQPacketOPCode;
 
 //----------------------------------------------------------------------
 // map type used for caching packets.
@@ -39,13 +42,13 @@ class EQPacketFormat;
 // with the packet data's behavior using an iterator as a hint for 
 // insertion location to typically yield amortized constant time behavior.
 // 3) Another optimization possible with this data set using a map 
-// is that after a matchintg arq is found in the map,  finding/checking 
+// is that after a matching arq is found in the map,  finding/checking 
 // for the next expected arq in the map only requires moving the iterator 
 // forward (using operator++()) once and checking if the next key in the list
 // is the expected arq.  This results in the check for followers to only 
 // taking amortized constant time (as opposed to the O(log N) of map::find()
 // or constant average time of the hash find methods.
-typedef std::map<uint16_t, EQPacketFormat* > EQPacketMap;
+typedef std::map<uint16_t, EQProtocolPacket* > EQPacketMap;
 
 //----------------------------------------------------------------------
 // EQPacketStream
@@ -55,6 +58,7 @@ class EQPacketStream : public QObject
 
  public:
   EQPacketStream(EQStreamID streamid, uint8_t dir, uint16_t m_arqSeqGiveUp,
+		 EQPacketOPCodeDB& opcodeDB, 
 		 QObject* parent = 0, const char* name = 0);
   ~EQPacketStream();
   void reset();
@@ -67,6 +71,14 @@ class EQPacketStream : public QObject
   EQStreamID streamID();
   size_t currentCacheSize();
   uint16_t arqSeqExp();
+  bool connect2(const QString& opcodeName, 
+		const char* payload,  EQSizeCheckType szt, 
+		const QObject* receiver, const char* member);
+  void receiveSessionKey(uint32_t sessionId, EQStreamID streamid, 
+    uint32_t sessionKey);
+  void close(uint32_t sessionId, EQStreamID streamid, uint8_t sessionTracking);
+  uint16_t calculateCRC(EQProtocolPacket& packet);
+  uint32_t getSessionKey() const { return m_sessionKey; }
   
  public slots:
   void handlePacket(EQUDPIPPacketFormat& pf);
@@ -75,17 +87,20 @@ class EQPacketStream : public QObject
   void rawPacket(const uint8_t* data, size_t len, uint8_t dir, 
 		 uint16_t opcode);
   void decodedPacket(const uint8_t* data, size_t len, uint8_t dir,
-		     uint16_t opcode);
-  void dispatchData(const uint8_t* data, size_t len, uint8_t dir, 
-		    uint16_t opCode);
+		     uint16_t opcode, const EQPacketOPCode* opcodeEntry);
+  void decodedPacket(const uint8_t* data, size_t len, uint8_t dir,
+		     uint16_t opcode, const EQPacketOPCode* opcodeEntry,
+		     bool unknown);
 
   // this signals stream closure
-  void closing();
+  void closing(uint32_t sessionId, EQStreamID streamId);
 
   // this signals a change in the session tracking state
   void sessionTrackingChanged(uint8_t);
-  
   void lockOnClient(in_port_t serverPort, in_port_t clientPort);
+
+  // Signal a new session key being received
+  void sessionKey(uint32_t sessionId, EQStreamID streadid, uint32_t sessionKey);
 		    
   // used for net_stats display
   void cacheSize(int, int);
@@ -96,15 +111,15 @@ class EQPacketStream : public QObject
 
  protected:
   void resetCache();
-  void setCache(uint16_t serverArqSeq, EQPacketFormat& packet);
+  void setCache(uint16_t serverArqSeq, EQProtocolPacket& packet);
   void processCache();
-  void processFragment(EQPacketFormat& pf);
-  void initDecode();
-  void stopDecode();
-  uint8_t* decodeOpCode(uint8_t *data, size_t *len, uint16_t& opCode);
-  void decodePacket(uint8_t *data, size_t len, uint16_t opCode);
-  void processPayload(uint8_t* data, size_t len);
+  void processPacket(EQProtocolPacket& packet, bool subpacket);
+  void dispatchPacket(const uint8_t* data, size_t len,
+		      uint16_t opCode, const EQPacketOPCode* opcodeEntry);
 
+
+  EQPacketOPCodeDB& m_opcodeDB;
+  QPtrDict<EQPacketDispatch> m_dispatchers;
   EQStreamID m_streamid;
   uint8_t m_dir;
   int m_packetCount;
@@ -119,6 +134,12 @@ class EQPacketStream : public QObject
   
   // Fragment handling
   EQPacketFragmentSequence m_fragment;
+
+  // Session info
+  uint32_t m_sessionId;
+  uint32_t m_sessionKey;
+  in_port_t m_sessionClientPort;
+  uint32_t m_maxLength;
 
   // encryption
   int64_t m_decodeKey;

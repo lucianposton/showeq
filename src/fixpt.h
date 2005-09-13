@@ -128,7 +128,7 @@ _T fixPtAddG(_T a, qType q1, _T b, qType q2, qType q3)
 template <class _T> inline
 _T fixPtSubG(_T a, qType q1, _T b, qType q2, qType q3)
 { 
-  return (fixPtConv(a, q1, q3) - fixPtConv(ab, q2, q3)); 
+  return (fixPtConv(a, q1, q3) - fixPtConv(b, q2, q3)); 
 }
 
 template <class _T> inline

@@ -7,34 +7,57 @@
  *  http://www.sourceforge.net/projects/seq
  */
 
-//
-// NOTE: Trying to keep this file ShowEQ/Everquest independent to allow it
-// to be reused for other Show{} style projects.  Any existing ShowEQ/EQ
-// dependencies will be migrated out.
-//
-
 /* Implementation of filter class */
+#include "filter.h"
+#include "diagnosticmessages.h"
+#include "everquest.h"
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <limits.h>
+#include <stdint.h>
 
-#include "everquest.h"
-#include "filter.h"
+#include <qfile.h>
 
 #define MAXLEN   5000
 
 //#define DEBUG_FILTER
 
-/* FilterItem Class - allows easy creation / deletion of regex types */
-FilterItem::FilterItem(const QString& filterPattern, int cflags)
+//----------------------------------------------------------------------
+//  LoadXmlContentHandler declaration
+class LoadXmlContentHandler : public QXmlDefaultHandler
 {
-  m_valid = false;
+public:
+  LoadXmlContentHandler(Filters& filters, const FilterTypes& types);
+  virtual ~LoadXmlContentHandler();
+  
+  // QXmlContentHandler overrides
+  bool startDocument();
+  bool startElement( const QString&, const QString&, const QString& , 
+		     const QXmlAttributes& );
+  bool characters(const QString& ch);
+  bool endElement( const QString&, const QString&, const QString& );
+  bool endDocument();
+  
+protected:
+  Filters& m_filters;
+  const FilterTypes& m_types;
+  
+  uint8_t m_currentType;
+  
+  QString m_currentFilterPattern;
+  uint8_t m_currentMinLevel;
+  uint8_t m_currentMaxLevel;
+  bool m_inRegex;
+};
 
-  m_minLevel = 0;
-  m_maxLevel = 0;
+//----------------------------------------------------------------------
+// FilterItem
+/* FilterItem Class - allows easy creation / deletion of regex types */
+FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive)
+{
+  uint8_t minLevel = 0;
+  uint8_t maxLevel = 0;
   
   QString workString = filterPattern;
   
@@ -55,8 +78,8 @@ FilterItem::FilterItem(const QString& filterPattern, int cflags)
     QString levelString = workString.mid(breakPoint + 1);
 
 #ifdef DEBUG_FILTER 
-    printf("regexString=%s\n", (const char*)regexString);
-    printf("breakPoint=%d mid()=%s\n",
+    seqDebug("regexString=%s", (const char*)regexString);
+    seqDebug("breakPoint=%d mid()=%s",
 	   breakPoint, (const char*)levelString);
 #endif
 
@@ -72,11 +95,11 @@ FilterItem::FilterItem(const QString& filterPattern, int cflags)
 
       // only use the number if it's ok
       if (ok)
-	m_minLevel = level;
+        minLevel = level;
 
 #ifdef DEBUG_FILTER
-      printf("filter min level decode levelStr='%s' level=%d ok=%1d minLevel=%d\n",
-	     (const char*)levelString, level, ok, m_minLevel);
+      seqDebug("filter min level decode levelStr='%s' level=%d ok=%1d minLevel=%d",
+	     (const char*)levelString, level, ok, minLevel);
 #endif
     }
     else
@@ -87,11 +110,11 @@ FilterItem::FilterItem(const QString& filterPattern, int cflags)
 
       // only use the number if it's ok
       if (ok)
-	m_minLevel = level;
+        minLevel = level;
 
 #ifdef DEBUG_FILTER
-      printf("filter min level decode levelStr='%s' level=%d ok=%1d minLevel=%d\n",
-	     (const char*)levelString.left(breakPoint), level, ok, m_minLevel);
+      seqDebug("filter min level decode levelStr='%s' level=%d ok=%1d minLevel=%d",
+	     (const char*)levelString.left(breakPoint), level, ok, minLevel);
 #endif
 
       // the rest of the string after the hyphen is the max
@@ -100,130 +123,119 @@ FilterItem::FilterItem(const QString& filterPattern, int cflags)
       // if a hyphen was specified, but no max value after it, it means
       // all values above min
       if (levelString.isEmpty())
-	m_maxLevel = INT_MAX;
+        maxLevel = INT_MAX;
       else
       {
-	// get the max level
-	level = levelString.toInt(&ok);
+        // get the max level
+        level = levelString.toInt(&ok);
 
-	// only use the number if it's ok
-	if (ok)
-	  m_maxLevel = level;
+        // only use the number if it's ok
+        if (ok)
+          maxLevel = level;
 
 #ifdef DEBUG_FILTER
-      printf("filter max level decode levelStr='%s' level=%d ok=%1d maxLevel=%d\n",
-	     (const char*)levelString, level, ok, m_maxLevel);
+        seqDebug("filter max level decode levelStr='%s' level=%d ok=%1d maxLevel=%d",
+	      (const char*)levelString, level, ok, m_maxLevel);
 #endif
       }
     }
     
     // if no max level specified, or some dope set it below min, make it 
     // equal the min
-    if(m_maxLevel < m_minLevel)
-      m_maxLevel = m_minLevel;
+    if(maxLevel < minLevel)
+      maxLevel = minLevel;
   }
 
-  // save the string as the name
-  m_name = filterPattern;
+  init(regexString, caseSensitive, minLevel, maxLevel);
+}
+
+void FilterItem::init(const QString& regexString, bool caseSensitive, 
+        uint8_t minLevel, uint8_t maxLevel)
+{
+  m_minLevel = minLevel;
+  m_maxLevel = maxLevel;
 
 #ifdef DEBUG_FILTER
-  printf("regexString=%s minLevel=%d maxLevel=%d\n", 
-	 (const char*)regexString, m_minLevel, m_maxLevel);
+  seqDebug("regexString=%s minLevel=%d maxLevel=%d", 
+	 (const char*)regexString, minLevel, maxLevel);
 #endif
 
-  // compile the regular expression
-  switch (regcomp(&m_regexp, (const char*)regexString.utf8(), cflags))
+  m_regexp.setWildcard(false);
+  m_regexp.setCaseSensitive(caseSensitive);
+
+  // For the pattern, save off the original. This is what will be saved
+  // during save operations. But the actual regexp we filter with will
+  // mark the # in spawn names as optional to aid in filter writing.
+  m_regexpOriginalPattern = QString(regexString.ascii());
+
+  QString fixedFilterPattern = regexString;
+  fixedFilterPattern.replace("Name:", "Name:#?", false);
+  m_regexp.setPattern(fixedFilterPattern);
+
+  if (!m_regexp.isValid())
   {
-    case 0:	// no error
-      m_valid = true;
-      break;
-    case REG_BADRPT:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Invalid use of repetition operators such as using '*' as the first character.\n");
-      break;
-    case REG_BADBR:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Invalid use of back reference operator\n");
-      break;
-    case REG_EBRACE:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Un-matched bracket list operators\n");
-      break;
-    case REG_EBRACK:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Un-matched bracket list operators.\n");
-      break;
-    case REG_ERANGE:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Invalid use of the range operator, eg. the ending point of the range occurs prior to the starting point.\n");
-      break;
-    case REG_ECTYPE:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Unknown character class name.\n");
-      break;
-    case REG_ECOLLATE:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Invalid collating element.\n");
-      break;
-    case REG_EPAREN:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Un-matched parenthesis group operators.\n");
-      break;
-    case REG_ESUBREG:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Invalid back reference to a subexpression\n");
-      break;
-#ifndef __FreeBSD__
-    case REG_EEND:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Non specific error.\n");
-      break;
-#endif
-    case REG_EESCAPE:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Trailing backslash.\n");
-      break;
-    case REG_BADPAT:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Invalid use of pattern operators such as group or list.\n");
-      break;
-#ifndef __FreeBSD__
-    case REG_ESIZE:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "Compiled regular expression requires a pattern buffer larger than 64 Kb.\n");
-      break;
-#endif
-    case REG_ESPACE:
-      fprintf(stderr, "Filter Error: '%s' - ", (const char*)filterPattern);
-      fprintf(stderr, "The regex routines ran out of memory\n");
-      break;
-  } // end of error
+    seqWarn("Filter Error: '%s' - %s",
+	    (const char*)m_regexp.pattern(), 
+	    (const char*)m_regexp.errorString());
+  }
+}
+
+FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive, 
+		       uint8_t minLevel, uint8_t maxLevel)
+{
+  init(filterPattern, caseSensitive, minLevel, maxLevel);
+
+  if (!m_regexp.isValid())
+  {
+    seqWarn("Filter Error: '%s' - %s",
+	    (const char*)m_regexp.pattern(), 
+	    (const char*)m_regexp.errorString());
+  }
 }
 
 FilterItem::~FilterItem(void)
 {
-  regfree(&m_regexp);
 }
 
-bool FilterItem::isFiltered(const QString& filterString, int level)
+bool FilterItem::save(QString& indent, QTextStream& out)
 {
-  regmatch_t match[1];
+  out << indent << "<oldfilter>";
+
+  if (!m_regexp.pattern().isEmpty())
+    out << "<regex>" << m_regexpOriginalPattern << "</regex>";
+
+  if (m_minLevel || m_maxLevel)
+  {
+    out << "<level";
+    if (m_minLevel)
+      out << " min=\"" << m_minLevel << "\"";
+    if (m_maxLevel)
+      out << " max=\"" << m_maxLevel << "\"";
+    out << "/>";
+  }
+
+  out << "</oldfilter>" << endl;
+
+  return true;
+}
+
+bool FilterItem::isFiltered(const QString& filterString, uint8_t level) const
+{
   // check the main filter string
-  if (!regexec(&m_regexp, (const char*)filterString.utf8(), 1, 
-	       match, 0))
+  if (m_regexp.search(filterString) != -1)
   {
     // is there is a level range component to this filter
     if ((m_minLevel > 0) || (m_maxLevel > 0))
     {
       if (m_maxLevel != m_minLevel)
       {
-	if ((level >= m_minLevel) && (level <= m_maxLevel))
-	  return true; // filter matched
+        if ((level >= m_minLevel) && (level <= m_maxLevel))
+          return true; // filter matched
       }
       else
       {
-	if (level == m_minLevel)
-	  return true;
+        if (level == m_minLevel)
+         return true;
       }
     }
     else 
@@ -233,36 +245,13 @@ bool FilterItem::isFiltered(const QString& filterString, int level)
   return false;
 }
 
+//----------------------------------------------------------------------
+// Filter
 /* Filter Class - Sets up regex filter */
-Filter::Filter(int cFlags)
+Filter::Filter(bool caseSensitive)
 {
-  // set new cFlags
-  m_cFlags = cFlags;
-
-  // reload filters so change can take effect
-  loadFilters();
-} // end Filter()
-
-/* Filter Class - Sets up regex filter */
-Filter::Filter(const QString& file, int cFlags)
-{
-  m_file = file;
-  m_cFlags = cFlags;
-
-  loadFilters();
-
-} // end Filter()
-
-/* Filter Class - Sets up regex filter */
-Filter::Filter(const QString& file, const char* type, int cFlags)
-{
-  m_file = file;
-  m_cFlags = cFlags;
-  m_type = type;
-  m_filterItems.setAutoDelete(true);
-
-  loadFilters();
-
+  // set new caseSensitive
+  m_caseSensitive = caseSensitive;
 } // end Filter()
 
 Filter::~Filter(void)
@@ -272,133 +261,16 @@ Filter::~Filter(void)
 
 } // end ~Filter()
 
-void Filter::setCFlags(int cFlags)
+void Filter::setCaseSensitive(bool caseSensitive)
 {
-  m_cFlags = cFlags;
+  m_caseSensitive = caseSensitive;
 }
 
-void
-Filter::changeFilterFile(const QString& newfile)
-{
-    m_file = newfile;
-
-    loadFilters();
-}
-
-//
-// loadFilters
-//
-// parses the filter file and builds filter list
-//
-bool
-Filter::loadFilters(void)
-{
-   FILE* in;
-   char msg[MAXLEN + 1];
-   QString msgu;
-   char* p;
-#ifdef DEBUG_FILTER
-   printf("loadFilter()\n");
-#endif /* DEBUG_FILTER */
-
-   // Free any current list
-   m_filterItems.clear();
-
-   if (m_file.isEmpty())
-     return false;
-
-   // Parse filter file
-   in = fopen ((const char*)m_file, "r");
-
-   if (in == 0)
-   {
-     if (errno == ENOENT)
-     {
-       printf (">> No such file: '%s', creating new one...\n", 
-	       (const char*)m_file);
-       in = fopen ((const char*)m_file, "a");
-       if (in != 0)
-       {
-	 if (!m_type.isEmpty())
-	   fprintf(in, "[%s]\n", (const char*)m_type);
-	 else
-	   fputs ("[Spawn]\n", in);
-	 fclose(in);
-       }
-     }
-     else
-     {
-       fprintf (stderr, "Couldn't open filter file. '%s' - %s\n", 
-		(const char*)m_file, strerror(errno));
-     }
-   }
-   else
-   {
-     char *sType = NULL;
-     
-     while (fgets (msg, MAXLEN, in) != NULL)
-     {
-       // treat lines beginning with # or ; as comments
-       if ( (msg[0] == '#') || (msg[0] == ';'))
-       {
-	 msg[0] = 0;
-	 continue;
-       }
-       p = index (msg, '\n');
-       if (p)
-	 *p = 0;
-       p = index (msg, '\r');
-       if (p)
-	 *p = 0;
-       if (!msg[0])
-	 continue;
-       
-       // if this filter uses different types make sure we are in ours
-       if (!m_type.isEmpty())
-       {
-	 if (msg[0] == '[')
-	 {
-	   p = index(msg, ']');
-	   if (p)
-	     *p = 0;
-	   if (sType)
-	     free(sType);
-	   sType = strdup(msg + 1);
-	   continue;
-	 }
-	 
-	 if (m_type == sType)
-	   addFilter(QString::fromUtf8(msg));
-       } 
-       else if (msg[0])
-	 addFilter(QString::fromUtf8(msg));
-     }
-
-     if (sType)
-       free(sType);
-     fclose (in);
-   }
-
-#ifdef DEBUG_FILTER
-   if (!m_type.isEmpty())
-     printf("Loaded %d filters from section '%s' in file '%s'\n", 
-	    m_filterItems.count(), (const char*)m_type, (const char*)m_file);
-   else 
-     printf("Loaded %d filters from file '%s'\n", 
-	    m_filterItems.count(), (const char*)m_file);
-#endif
-
-//listFilters();
-   return true;
-
-} // end loadFilter()
-
-bool
-Filter::isFiltered(const QString& filterString, int level)
+bool Filter::isFiltered(const QString& filterString, uint8_t level)
 {
   FilterItem *re;
 #ifdef DEBUG_FILTER
-// printf("isFiltered(%s)\n", string);
+  //seqDebug("isFiltered(%s)", string);
 #endif /* DEBUG_FILTER */
 
   // iterate over the filters checking for a match
@@ -408,244 +280,34 @@ Filter::isFiltered(const QString& filterString, int level)
     if (re->isFiltered(filterString, level))
       return true;
   }
-  
+
   return false;
 }
 
-bool
-Filter::saveAsFilters(const QString& filterFileName)
+//
+// save
+//
+// parses the filter file and builds filter list
+//
+bool Filter::save(QString& indent, QTextStream& out)
 {
-#ifdef DEBUG_FILTER
-   printf("Filter::saveAsFilters(void)\n");
-#endif
+  FilterItem *re;
 
-   m_file = filterFileName;
+  // increase indent
+  indent += "    ";
 
-   return saveFilters();
-}
+  // construct an iterator over the filter items
+  FilterListIterator it(m_filterItems);
 
-bool
-Filter::saveFilters(void)
-{
-  FILE *in;
-  FILE *out;
-  FilterItem* re;
-  char msg[MAXLEN + 1];
-  char *p;
-  int count = 0;
-  bool done  = false;
-  bool start = false;
-  
-#ifdef DEBUG_FILTER
-  printf("Filter::saveFilters(void)\n");
-#endif
-  // if no filename can't save
-  if (m_file.isEmpty())
-    return false;
-  
-  // Save filter file
-  // Open source and destination files
-  QString outfilename = NULL;
-  QString infilename = m_file;
-  
-  outfilename = infilename + ".new";
-  in = fopen ((const char*)infilename, "r");
-  out = fopen ((const char*)outfilename, "w+");
-  if (in == 0)
-  {
-    fprintf (stderr, "Couldn't open filter file. '%s' - %s\n", 
-	     (const char*)infilename, strerror(errno));
-  }
-  if (out == 0)
-  {
-    fprintf (stderr, "Couldn't open filter file. '%s' - %s\n", 
-	     (const char*)outfilename, strerror(errno));
-    return false;
-  }
-  else
-  {
-    char *sType = NULL;
-    
-    if (in)
-    {
-      // Parse source file
-      while (fgets (msg, MAXLEN, in) != NULL)
-      {
-	// terminate the line
-	p = index (msg, '\n');
-	if (p)
-	  *p = 0;
-	p = index (msg, '\r');
-	if (p)
-	  *p = 0;
-	
-	// terminate on CF or LF 
-	// if this filter uses section names
-	if (!m_type.isEmpty())
-	{
-	  // end of section - dump all items left in list that belong here
-	  if (sType && !msg[0])
-	  {
-	    // if this is our section
-	    if (m_type == sType)
-	    {
-	      // done copying filters that existed in file already
-	      // dump whatever is left in list
-	      FilterListIterator it(m_filterItems);
-	      for (re = it.toFirst(); re != NULL; re = ++it)
-	      {
-#ifdef DEBUG_FILTER
-		printf("OUT: '%s'\n", (const char*)re->name().utf8());
-#endif
-		fprintf(out, "%s\n", (const char*)re->name().utf8());
-	      }
-	      done = true;
-	      start = false;
-	    } // end if our section
-	    free(sType);
-	    sType = 0;
-	  } // end if end of section
-	}
-	
-	// treat lines beginning with # or ; as comments
-	if ( (msg[0] == '#') || (msg[0] == ';'))
-	{
-#ifdef DEBUG_FILTER
-	  printf("OUT: '%s'\n", msg);
-#endif
-	  fprintf(out, "%s", msg);
-	  msg[0] = 0;
-	}
-	
-	// preserve blank lines
-	if (!msg[0])
-	  fprintf(out, "\n");
-	
-	if (!m_type.isEmpty())
-	{
-	  // check for section name
-	  if (msg[0] == '[')
-	  {
-	    p = index(msg, ']');
-	    if (p)
-	      *p = 0;
-	    p = index(msg, '\r');
-	    if (p)
-	      *p = 0;
-	    if (sType)
-	      free(sType);
-	    sType = strdup(msg + 1);
-#ifdef DEBUG_FILTER
-	    printf("OUT: '[%s]'\n", sType);
-#endif
-	    fprintf(out, "[%s]\n", sType);
-	    start = true;
-	    msg[0] = 0;
-	  }
-	} // end if filter uses section names  
-	
-	if (msg[0])
-	{
-	  // if this is our section
-	  if (sType && (m_type == sType))
-	  { 
-	    // look for a match, if found put it in the file and 
-	    // remove it from the list
-	    FilterListIterator it(m_filterItems);
-	    for (re = it.toFirst(); re != NULL; re = ++it)
-	    {
-	      // if we found a match, output it
-	      if (re->name() ==  QString::fromUtf8(msg))
-	      {
-#ifdef DEBUG_FILTER
-		printf("OUT: '%s'\n", msg);
-#endif
-		fprintf(out, "%s\n", msg);
-		count++;
-		remFilter(msg);
-		break;
-	      }
-	     } // for all items in list
-	  } // end if our section
-	  
-	  // someone elses section, just output it without alteration
-	  else
-	  {
-#ifdef DEBUG_FILTER
-	    printf("OUT: '%s'\n", msg);
-#endif
-	    fprintf(out, "%s\n", msg);
-	  }
-	} // end if msg
-      }  // end while lines in source file
-    } // end if source file
-    
-    // if we still have filters in our list, we never found our section
-    // add it
-    if (!done)
-    {
-      if (!m_type.isEmpty() && !start)
-      {
-#ifdef DEBUG_FILTER
-	printf("done parsing file... creating section '%s'\n", 
-	       (const char*)m_type);
-#endif
-	fprintf(out, "\n[%s]\n", (const char*)m_type);
-      }
-       
-      // done copying filters that existed in file already
-      // dump whatever is left in list
-      FilterListIterator it(m_filterItems);
-      for (re = it.toFirst(); re != NULL; re = ++it)
-      {
-#ifdef DEBUG_FILTER
-	printf("OUT: '%s'\n", (const char*)re->name().utf8());
-#endif
-	fprintf(out, "%s\n", (const char*)re->name().utf8());
-      }
-    }
-    if (fflush (out))
-      fprintf (stderr, "Couldn't flush filter file. '%s' - %s\n", 
-	       (const char*)outfilename, strerror(errno));
-    if (fclose (out))
-      fprintf (stderr, "Couldn't flush filter file. '%s' - %s\n", 
-	       (const char*)outfilename, strerror(errno));
-    if (in)
-      fclose (in);
-    
-    //  printf ("Filter file saved '%s'\n", outfilename);
-    
-    // rename files
-    int result;
-    QString bakFileName = infilename + ".bak";
-    // rename input file to filename.bak
-    result = rename((const char*)infilename,
-		    (const char*)bakFileName);
-    if (result != 0)
-      fprintf(stderr, "rename '%s' to '%s' failed: (%d): %s\n",
-	      (const char*)infilename, (const char*)bakFileName,
-	      errno, strerror(errno));
+  // iterate over the filter items, saving them as we go along.
+  for (re = it.toFirst(); re != NULL; re = ++it)
+    re->save(indent, out);
 
-    // rename the output file to the input filename
-    result = rename((const char*)outfilename,
-		    (const char*)infilename);
+  // decrease indent
+  indent.remove(0, 4);
 
-    if (result != 0)
-      fprintf(stderr, "rename '%s' to '%s' failed: (%d): %s\n",
-	      (const char*)outfilename, (const char*)infilename,
-	      errno, strerror(errno));
-
-     if (sType)
-       free(sType);
-  }
-  
-  // re-read the filters from file
-  loadFilters();
-  
   return true;
-} // end saveFilters
-
-
+}
 
 //
 // remFilter
@@ -667,7 +329,7 @@ Filter::remFilter(const QString& filterPattern)
        m_filterItems.remove(re);
 
 #ifdef DEBUG_FILTER
-printf("Removed '%s' from List\n", (const char*)filterPattern);
+       seqDebug("Removed '%s' from List", (const char*)filterPattern);
 #endif
        break;
      }
@@ -689,13 +351,35 @@ Filter::addFilter(const QString& filterPattern)
   if (findFilter(filterPattern))
     return false;
 
-  re = new FilterItem(filterPattern, m_cFlags);
+  re = new FilterItem(filterPattern, m_caseSensitive);
 
   // append it to the end of the list
   m_filterItems.append(re);
 
 #ifdef DEBUG_FILTER
-printf("Added Filter '%s'\n", (const char*)filterPattern);
+  seqDebug("Added Filter '%s'", (const char*)filterPattern);
+#endif
+
+ return re->valid(); 
+} // end addFilter
+
+bool 
+Filter::addFilter(const QString& filterPattern, uint8_t minLevel, uint8_t maxLevel)
+{
+  FilterItem* re;
+
+  // no duplicates allowed
+  if (findFilter(filterPattern))
+    return false;
+
+  re = new FilterItem(filterPattern, m_caseSensitive, minLevel, maxLevel);
+
+  // append it to the end of the list
+  m_filterItems.append(re);
+
+#ifdef DEBUG_FILTER
+  seqDebug("Added Filter '%s' (%d, %d)",
+	   (const char*)filterPattern, minLevel, maxLevel);
 #endif
 
  return re->valid(); 
@@ -725,10 +409,462 @@ Filter::listFilters(void)
   FilterItem *re;
 
 #ifdef DEBUG_FILTER
-//  printf("Filter::listFilters\n");
+//  seqDebug("Filter::listFilters");
 #endif
 
   FilterListIterator it(m_filterItems);
   for (re = it.toFirst(); re != NULL; re = ++it)
-    printf("'%s'\n", (const char*)re->name().utf8());
+  {
+    if (re->minLevel() || re->maxLevel())
+      seqInfo("\t'%s' (%d, %d)", 
+	     (const char*)re->name().utf8(), re->minLevel(), re->maxLevel());
+    else
+      seqInfo("\t'%s'", (const char*)re->name().utf8());
+  }
+}
+
+//----------------------------------------------------------------------
+//  Filters
+Filters::Filters(const FilterTypes& types)
+  : m_types(types)
+{
+}
+
+Filters::~Filters()
+{
+}
+
+bool Filters::clear(void)
+{
+  Filter* filter;
+  FilterMap::iterator it;
+
+  // iterate over the filters
+  for (it = m_filters.begin(); it != m_filters.end(); it++)
+  {
+    // get the Filter object
+    filter = it->second;
+    
+    // erase the member from the list
+    m_filters.erase(it);
+
+    // delete the filter
+    delete filter;
+  }
+
+  return true;
+}
+
+bool Filters::clearType(uint8_t type)
+{
+  // create the mask
+  uint32_t mask = (1 << type);
+
+  // find the filter object
+  FilterMap::iterator it = m_filters.find(mask);
+
+  // if filter type not found, just return success
+  if (it == m_filters.end())
+    return true;
+
+  // get the Filter object
+  Filter* filter = it->second;
+  
+  // erase the filter from the map
+  m_filters.erase(it);
+
+  // delete the filter
+  delete filter;
+
+  return true;
+}
+
+bool Filters::load(const QString& filename)
+{
+  // clear existing 
+  clear();
+
+  // load filters
+  m_file = filename;
+
+  // create XML content handler
+  LoadXmlContentHandler handler(*this, m_types);
+
+  // create a file object on the file
+  QFile xmlFile(filename);
+
+  // create an XmlInputSource on the file
+  QXmlInputSource source(&xmlFile);
+  
+  // create an XML parser
+  QXmlSimpleReader reader;
+
+  // set the content handler
+  reader.setContentHandler(&handler);
+
+  // parse the file
+  return reader.parse(source);
+}
+
+bool Filters::save(const QString& filename) const
+{
+  // create QFile object
+  QFile file(filename);
+
+  // open the file for write only
+  if (!file.open(IO_WriteOnly))
+    return false;
+
+  // create a QTextStream object on the QFile object
+  QTextStream out(&file);
+  
+  // set the output encoding to be UTF8
+  out.setEncoding(QTextStream::UnicodeUTF8);
+
+  // set the number output to be left justified decimal
+  out.setf(QTextStream::dec | QTextStream::left);
+
+  // print document header
+  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl
+      << "<!DOCTYPE seqfilters SYSTEM \"seqfilters.dtd\">" << endl
+      << "<seqfilters>" << endl;
+
+  // set initial indent
+  QString indent = "    ";
+
+  FilterMap::const_iterator it;
+
+  // iterate over the filters, saving them to the stream
+  for (it = m_filters.begin(); it != m_filters.end(); it++)
+  {
+    // section start tag
+    out << indent << "<section name=\"" << m_types.name(it->first)
+	<< "\">" << endl;
+
+    // persist the filter
+    it->second->save(indent, out);
+
+    // section end tag
+    out << indent << "</section>" << endl;
+  }
+
+  // output closing entity
+  out << "</seqfilters>" << endl;
+
+  return true;
+}
+
+bool Filters::save(void) const
+{
+  return save(m_file);
+}
+
+void Filters::list(void) const
+{
+  FilterMap::const_iterator it;
+
+  seqInfo("Filters from file '%s':",
+	 (const char*)m_file);
+  // iterate over the filters
+  for (it = m_filters.begin(); it != m_filters.end(); it++)
+  {
+    // print the header
+    seqInfo("Filter Type '%s':", 
+	   (const char*)m_types.name(it->first));
+
+    // list off the actual filters
+    it->second->listFilters();
+  }
+}
+
+void Filters::setCaseSensitive(bool caseSensitive)
+{
+  FilterMap::iterator it;
+
+  // iterate over the filters
+  for (it = m_filters.begin(); it != m_filters.end(); it++)
+  {
+    // set the case sensitivity of each one
+    it->second->setCaseSensitive(caseSensitive);
+  }
+}
+
+uint32_t Filters::filterMask(const QString& filterString, uint8_t level) const
+{
+  uint32_t mask = 0;
+  FilterMap::const_iterator it;
+
+  // iterate over the filters
+  for (it = m_filters.begin(); it != m_filters.end(); it++)
+  {
+    // checking each one to see if it matches
+    if (it->second->isFiltered(filterString, level))
+      mask |= it->first; // if so, include the filters mask in the return mask
+  }
+
+  return mask;
+}
+
+bool Filters::addFilter(uint8_t type, const QString& filterPattern, 
+			uint8_t minLevel, uint8_t maxLevel)
+{
+  uint32_t mask = (1 << type);
+
+  // only add filters for valid types
+  if (!m_types.validMask(mask))
+    return false;
+
+  // find the filters
+  FilterMap::iterator it = m_filters.find(mask);
+
+  Filter* filter;
+
+  // if the filter doesn't exist, create it
+  if (it == m_filters.end())
+  {
+    // create a new filter
+    filter = new Filter(m_caseSensitive);
+
+    // add it to the map
+    m_filters[mask] = filter;
+  }
+  else // use the existing filter
+    filter = it->second;
+
+  if (filter)
+    filter->addFilter(filterPattern, minLevel, maxLevel);
+
+  return false;
+}
+
+void Filters::remFilter(uint8_t type, const QString& filterPattern)
+{
+  uint32_t mask = (1 << type);
+
+  // only add filters for valid types
+  if (!m_types.validMask(mask))
+    return;
+
+  // find the filters
+  FilterMap::iterator it = m_filters.find(mask);
+
+  Filter* filter;
+
+  // if filter doesn't exist, then nothing to remove
+  if (it == m_filters.end())
+    return;
+
+  filter = it->second;
+
+  if (filter)
+    filter->remFilter(filterPattern);
+}
+
+///////////////////////////////////
+//  FilterTypes
+FilterTypes::FilterTypes()
+  : m_allocated(0), 
+    m_maxType(0)
+{
+}
+
+FilterTypes::~FilterTypes()
+{
+}
+
+bool FilterTypes::registerType(const QString& name, uint8_t& type, uint32_t& mask)
+{
+  uint32_t tmpMask;
+  for (uint8_t i = 0; i <= (sizeof(tmpMask) * 8); i++)
+  {
+    tmpMask = (1 << i);
+    if (!(m_allocated & tmpMask))
+    {
+      m_allocated |= tmpMask;
+      m_filters[tmpMask] = name;
+      type = i;
+      mask = tmpMask;
+      if (type > m_maxType)
+	m_maxType = type;
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void FilterTypes::unregisterType(uint8_t type)
+{
+  uint32_t tmpMask = (1 << type);
+
+  if (m_allocated & tmpMask)
+  {
+    m_allocated &= ~tmpMask;
+    m_filters.erase(m_filters.find(tmpMask));
+
+    if (type == m_maxType)
+      m_maxType--;
+  }
+}
+
+uint32_t FilterTypes::mask(const QString& query) const
+{
+  uint8_t i;
+  for (i = 0; i <= maxType(); i++)
+  {
+    if (name(i) == query)
+      return mask(i);
+  }
+
+  return 0;
+}
+
+uint8_t FilterTypes::type(const QString& query) const
+{
+  uint8_t i;
+  for (i = 0; i <= maxType(); i++)
+  {
+    if (name(i) == query)
+      return i;
+  }
+
+  return 255;
+}
+
+QString FilterTypes::names(uint32_t mask) const
+{
+  // start with an empty string
+  QString text("");
+
+  FilterTypeMap::const_iterator it;
+
+  // iterate over the filters, adding matches as we go
+  for (it = m_filters.begin(); it != m_filters.end(); ++it)
+  {
+    // as masks are found, add their strings to the text
+    if (mask & it->first)
+      text += it->second + ":";
+  }
+
+  return text;
+}
+
+//----------------------------------------------------------------------
+//  LoadXmlContentHandler
+LoadXmlContentHandler::LoadXmlContentHandler(Filters& filters, 
+						      const FilterTypes& types)
+  : m_filters(filters),
+    m_types(types)
+{
+}
+
+LoadXmlContentHandler::~LoadXmlContentHandler()
+{
+}
+
+bool LoadXmlContentHandler::startDocument()
+{
+  m_currentType = 255;
+  m_currentFilterPattern = "";
+  m_currentMinLevel = 0;
+  m_currentMaxLevel = 0;
+  m_inRegex = false;
+  return true;
+}
+
+bool LoadXmlContentHandler::startElement(const QString&, 
+						  const QString&, 
+						  const QString& name, 
+						  const QXmlAttributes& attr)
+{
+  if (name == "oldfilter")
+  {
+    // clear information about the current filter
+    m_currentFilterPattern = "";
+    m_currentMinLevel = 0;
+    m_currentMaxLevel = 0;
+
+    return true;
+  }
+
+  if (name == "regex")
+  {
+    m_inRegex =true;
+    return true;
+  }
+
+  if (name == "level")
+  {
+    int index;
+    
+    // first check for a min
+    index = attr.index("min");
+
+    // if min attribute was found, use it
+    if (index != -1)
+      m_currentMinLevel = uint8_t(attr.value(index).toUShort());
+
+    // then check for a max
+    index = attr.index("max");
+
+    // if max attribute was found, use it
+    if (index != -1)
+      m_currentMaxLevel = uint8_t(attr.value(index).toUShort());
+
+    // done
+    return true;
+  }
+
+  if (name == "section")
+  {
+    int index = attr.index("name");
+    // section is only valid if a name is specified
+    if (index == -1)
+      return false;
+
+    // get the current type for the name
+    m_currentType = m_types.type(attr.value(index));
+
+    return true;
+  }
+  
+  return true;
+}
+
+bool LoadXmlContentHandler::characters(const QString& ch)
+{
+  if (m_inRegex)
+    m_currentFilterPattern = ch;
+
+  return true;
+}
+
+bool LoadXmlContentHandler::endElement(const QString&, 
+						const QString&, 
+						const QString& name)
+{
+  if (name == "regex")
+    m_inRegex = false;
+
+  if (name == "oldfilter")
+  {
+    if (m_currentType <= m_types.maxType())
+    {
+      m_filters.addFilter(m_currentType, m_currentFilterPattern,
+			  m_currentMinLevel, m_currentMaxLevel);
+    }
+
+    return true;
+  }
+
+  if (name == "section")
+    m_currentType = 255;
+
+  return true;
+}
+
+bool LoadXmlContentHandler::endDocument()
+{
+  return true;
 }

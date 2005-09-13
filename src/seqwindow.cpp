@@ -4,7 +4,7 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  *
- * Copyright 2001 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ * Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
  *
  * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
  * for use under the terms of the GNU General Public License, 
@@ -15,15 +15,23 @@
 #include "seqwindow.h"
 #include "main.h"
 
+#include <qpopupmenu.h>
+
 SEQWindow::SEQWindow(const QString prefName, const QString caption,
 		     QWidget* parent, const char* name, WFlags f)
-  : QWidget(parent, name, f),
+  : QDockWindow(parent, name, f),
     m_preferenceName(prefName)
 {
   // set the windows caption
-  QWidget::setCaption(pSEQPrefs->getPrefString("Caption", preferenceName(),
+  QDockWindow::setCaption(pSEQPrefs->getPrefString("Caption", preferenceName(),
 					       caption));
-  
+
+  // windows default to resizable
+  setResizeEnabled(true);
+
+  // windows default to be closable when not docked
+  setCloseMode(Always);
+
   // restore the font
   restoreFont();
 }
@@ -32,11 +40,16 @@ SEQWindow::~SEQWindow()
 {
 }
 
+QPopupMenu* SEQWindow::menu()
+{
+  return 0;
+}
 
 void SEQWindow::setCaption(const QString& text)
 {
   // set the caption
-  QWidget::setCaption(text);
+  QDockWindow::setCaption(text);
+  setName((const char*)caption());
 
   // set the preference
   pSEQPrefs->setPrefString("Caption", preferenceName(), caption());
@@ -64,27 +77,78 @@ void SEQWindow::restoreFont()
 
 void SEQWindow::restoreSize()
 {
-  // retrieve the saved size information
-  QSize s = pSEQPrefs->getPrefSize("WindowSize", preferenceName(), size());
+  if (place() == InDock)
+  {
+    QSize s = pSEQPrefs->getPrefSize("DockFixedExtent", preferenceName(), 
+				     fixedExtent());
+    setFixedExtentWidth(s.width());
+    setFixedExtentHeight(s.height());
+  }
+  else
+  {
+    // retrieve the saved size information
+    QSize s = pSEQPrefs->getPrefSize("WindowSize", preferenceName(), size());
+    
+    resize(s);
+  }
 
-  resize(s);
+  if (pSEQPrefs->getPrefBool("DockVisible", preferenceName(), !isHidden()))
+    show();
+  else
+    hide();
 }
 
 void SEQWindow::restorePosition()
 {
-  // retrieve the saved position information
-  QPoint p = pSEQPrefs->getPrefPoint("WindowPos", preferenceName(), pos());
-
-  // Move window to new position
-  move(p);
+  if (place() == InDock)
+  {
+    setNewLine(pSEQPrefs->getPrefBool("DockNewLine", preferenceName(),
+				      newLine()));
+    setOffset(pSEQPrefs->getPrefInt("DockOffset", preferenceName(), offset()));
+  }
+  else
+  {
+    // retrieve the saved position information
+    QPoint p = pSEQPrefs->getPrefPoint("WindowPos", preferenceName(), pos());
+    
+    // Move window to new position
+    move(p);
+  }
 }
 
 void SEQWindow::savePrefs(void)
 {
   if (pSEQPrefs->getPrefBool("SavePosition", "Interface", true))
   {
-    // save the windows size and position information
-    pSEQPrefs->setPrefSize("WindowSize", preferenceName(), size());
-    pSEQPrefs->setPrefPoint("WindowPos", preferenceName(), pos());
+    if (place() == InDock)
+    {
+      pSEQPrefs->setPrefBool("DockNewLine", preferenceName(), newLine());
+      pSEQPrefs->setPrefInt("DockOffset", preferenceName(), offset());
+      pSEQPrefs->setPrefSize("DockFixedExtent", preferenceName(), fixedExtent());
+    }
+    else
+    {
+      // save the windows size and position information
+      pSEQPrefs->setPrefSize("WindowSize", preferenceName(), size());
+      pSEQPrefs->setPrefPoint("WindowPos", preferenceName(), pos());
+    }
+
+    pSEQPrefs->setPrefBool("DockVisible", preferenceName(), !isHidden());
   }
 }
+
+void SEQWindow::mousePressEvent(QMouseEvent* e)
+{
+  if (e->button() == RightButton)
+  {
+    QPopupMenu* popupMenu = menu();
+    if (popupMenu)
+      popupMenu->popup(mapToGlobal(e->pos()));
+    else
+      QDockWindow::mousePressEvent(e);
+  }
+  else
+    QDockWindow::mousePressEvent(e);
+}
+
+#include "seqwindow.moc"

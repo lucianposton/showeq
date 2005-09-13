@@ -38,6 +38,11 @@
 // Constants
 const char* const AUTOMATIC_CLIENT_IP = "127.0.0.0";
 
+// Preference constants for VPacket.Playback.
+#define PLAYBACK_OFF 0
+#define PLAYBACK_FORMAT_SEQ 1
+#define PLAYBACK_FORMAT_TCPDUMP 2
+
 //----------------------------------------------------------------------
 // Enumerated types
 enum EQStreamID 
@@ -49,6 +54,14 @@ enum EQStreamID
   zone2client = 3,
   MAXSTREAMS = 4,
 };
+
+// direction the data is coming from
+enum EQDir
+{
+  DIR_Client = 0x01,
+  DIR_Server = 0x02,
+};
+
 
 //----------------------------------------------------------------------
 // Useful inline functions

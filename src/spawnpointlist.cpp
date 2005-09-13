@@ -233,7 +233,7 @@ void SpawnPointList::rightButtonClicked(QListViewItem* item,
 					const QPoint& point, int)
 {
   // popup a context-menu
-  SpawnPointListMenu* spawnPointMenu = menu();
+  SpawnPointListMenu* spawnPointMenu = (SpawnPointListMenu*)menu();
   spawnPointMenu->setCurrentItem((const SpawnPointListItem*)item);
   spawnPointMenu->popup(point);
 }
@@ -536,14 +536,27 @@ SpawnPointWindow::SpawnPointWindow(SpawnMonitor* spawnMonitor,
 				   QWidget* parent, const char* name):
         SEQWindow("SpawnPointList", "ShowEQ - Spawn Points", parent, name)
 {
-  QVBoxLayout*    layout = new QVBoxLayout( this );
-  layout->setAutoAdd( true );
+  //QVBoxLayout*    layout = new QVBoxLayout( this );
+  //layout->setAutoAdd( true );
   
   m_spawnPointList = new SpawnPointList(spawnMonitor, this, name );
+  setWidget(m_spawnPointList);
 };
 
 SpawnPointWindow::~SpawnPointWindow()
 {
+}
+
+QPopupMenu* SpawnPointWindow::menu()
+{
+  // retrieve the spawn point list menu
+  SpawnPointListMenu* splMenu = m_spawnPointList->menu();
+  
+  // since being brought up without an item, set a 0 current item
+  splMenu->setCurrentItem(0);
+
+  // return the menu
+  return (QPopupMenu*)splMenu;
 }
 
 void SpawnPointWindow::savePrefs(void)
@@ -555,3 +568,5 @@ void SpawnPointWindow::savePrefs(void)
   if (m_spawnPointList)
     m_spawnPointList->savePrefs();
 }
+
+#include "spawnpointlist.moc"

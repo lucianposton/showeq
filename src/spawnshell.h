@@ -3,6 +3,9 @@
  *
  * ShowEQ Distributed under GPL
  * http://sourceforge.net/projects/seq/
+ * 
+ * Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ * 
  */
 
 /*
@@ -50,15 +53,6 @@ const int MAX_DEAD_SPAWNIDS = 50;
 //----------------------------------------------------------------------
 // enumerated types
 
-// type of action that triggered alert
-enum alertType
-{
-  tNewSpawn,
-  tFilledSpawn,
-  tKillSpawn,
-  tDelSpawn,
-};
-
 //----------------------------------------------------------------------
 // type definitions
 typedef QIntDict<Item> ItemMap;
@@ -74,7 +68,6 @@ public:
    SpawnShell(FilterMgr& filterMgr, 
 	      ZoneMgr* zoneMgr, 
 	      Player* player,
-	      EQItemDB* itemDB,
               GuildMgr* guildMgr);
 
    const Item* findID(spawnItemType type, int idSpawn);
@@ -83,7 +76,7 @@ public:
 			       int16_t x,
 			       int16_t y, 
 			       double& minDistance);
-   const Spawn* findSpawnByName(const QString& name);
+   Spawn* findSpawnByName(const QString& name);
 
    void dumpSpawns(spawnItemType type, QTextStream& out);
    FilterMgr* filterMgr(void) { return &m_filterMgr; }
@@ -100,41 +93,41 @@ signals:
    void spawnConsidered(const Item* item);
    void clearItems();
    void numSpawns(int);
-   void handleAlert(const Item* item, alertType type);
-
-   void msgReceived(const QString& msg);
 
 public slots: 
    void clear();
 
    // slots to receive from EQPacket...
-   void newGroundItem(const makeDropStruct*, uint32_t, uint8_t);
-   void removeGroundItem(const remDropStruct*, uint32_t, uint8_t);
-   void newDoorSpawn(const doorStruct* d, uint32_t len, uint8_t dir);
-   void zoneSpawns(const zoneSpawnsStruct* zspawns, uint32_t len);
-   void newSpawn(const newSpawnStruct* spawn);
+   void newGroundItem(const uint8_t*, size_t, uint8_t);
+   void removeGroundItem(const uint8_t*, size_t, uint8_t);
+   void newDoorSpawns(const uint8_t*, size_t, uint8_t);
+   void newDoorSpawn(const doorStruct&, size_t, uint8_t);
+   void zoneSpawns(const uint8_t* zspawns, size_t len);
+   void newSpawn(const uint8_t* spawn);
    void newSpawn(const spawnStruct& s);
-   void playerUpdate(const playerSpawnPosStruct *pupdate, uint32_t, uint8_t);
+   void playerUpdate(const uint8_t*pupdate, size_t, uint8_t);
    void updateSpawn(uint16_t id, 
 		    int16_t x, int16_t y, int16_t z,
 		    int16_t xVel, int16_t yVel, int16_t zVel,
 		    int8_t heading, int8_t deltaHeading,
 		    uint8_t animation);
-   void updateSpawns(const spawnPositionUpdate* updates);
-   void updateSpawnMaxHP(const SpawnUpdateStruct* spawnupdate);
-   void updateNpcHP(const hpNpcUpdateStruct* hpupdate);
-   void spawnWearingUpdate(const wearChangeStruct* wearing);
-   void consMessage(const considerStruct* con, uint32_t, uint8_t);
-   void deleteSpawn(const deleteSpawnStruct* delspawn);
-   void killSpawn(const newCorpseStruct* deadspawn);
-   void corpseLoc(const corpseLocStruct* corpseLoc);
+   void updateSpawns(const uint8_t* updates);
+   void updateSpawnInfo(const uint8_t* spawnupdate);
+   void renameSpawn(const uint8_t* renameupdate);
+   void illusionSpawn(const uint8_t* illusionupdate);
+   void updateSpawnAppearance(const uint8_t* appearanceupdate);
+   void updateNpcHP(const uint8_t* hpupdate);
+   void spawnWearingUpdate(const uint8_t* wearing);
+   void consMessage(const uint8_t* con, size_t, uint8_t);
+   void deleteSpawn(const uint8_t* delspawn);
+   void killSpawn(const uint8_t* deadspawn);
+   void corpseLoc(const uint8_t* corpseLoc);
 
    void playerChangedID(uint16_t playerID);
    void refilterSpawns();
    void refilterSpawnsRuntime();
    void saveSpawns(void);
    void restoreSpawns(void);
-   void setPlayerGuildTag(void);
 
  protected:
    void refilterSpawns(spawnItemType type);
@@ -149,7 +142,6 @@ public slots:
    ZoneMgr* m_zoneMgr;
    Player* m_player;
    FilterMgr& m_filterMgr;
-   EQItemDB* m_itemDB;
    GuildMgr* m_guildMgr;
 
    // track recently killed spawns

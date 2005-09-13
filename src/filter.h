@@ -13,44 +13,58 @@
 #ifndef FILTER_H
 #define FILTER_H
 
+#include <stdint.h>
 #include <sys/types.h>
-#include <regex.h>
 
 #include <qstring.h>
 #include <qlist.h>
+#include <qregexp.h>
+#include <qxml.h>
+#include <qtextstream.h>
+
+#include <map>
 
 //--------------------------------------------------
 // forward declarations
 class FilterItem;
 class Filter;
+class Filters;
+class FilterTypes;
 
 //--------------------------------------------------
 // typedefs
 typedef QList<FilterItem> FilterList;
 typedef QListIterator<FilterItem> FilterListIterator;
+typedef std::map<uint32_t, QString> FilterTypeMap;
+typedef std::map<uint32_t, Filter*> FilterMap;
 
 //--------------------------------------------------
 // FilterItem
 class FilterItem
 {
 public:
-  FilterItem(const QString& filterPattern, int cflags = 0);
+  FilterItem(const QString& filterPattern, bool caseSensitive);
+  FilterItem(const QString& filterPattern, bool caseSensitive, 
+	     uint8_t minLevel, uint8_t maxLevel);
   ~FilterItem(void);
+   bool save(QString& indent, QTextStream& out);
 
-  bool isFiltered(const QString& filterString, int level);
+  bool isFiltered(const QString& filterString, uint8_t level) const;
 
-  const QString& name() { return m_name; }
-  const QString& filterPattern() { return m_name; }
-  int minLevel() { return m_minLevel; }
-  int maxLevel() { return m_maxLevel; }
-  bool valid() { return m_valid; }
+  QString name() const { return m_regexp.pattern(); }
+  QString filterPattern() const { return m_regexp.pattern(); }
+  uint8_t minLevel() const { return m_minLevel; }
+  uint8_t maxLevel() const { return m_maxLevel; }
+  bool valid() { return m_regexp.isValid(); }
 
  protected:
-  int m_minLevel;
-  int m_maxLevel;
-  regex_t m_regexp;
-  QString m_name;
-  bool m_valid;
+  void init(const QString& filterPattern, bool caseSensitive, uint8_t minLevel,
+         uint8_t maxLevel);
+  
+  QRegExp m_regexp;
+  QString m_regexpOriginalPattern;
+  uint8_t m_minLevel;
+  uint8_t m_maxLevel;
 };
 
 
@@ -59,31 +73,108 @@ public:
 class Filter
 {
 public:
-   Filter(int cFlags = 0);
-   Filter(const QString& file = 0, int cFlags = 0);
-   Filter(const QString& file = 0, const char *type = 0, int cFlags = 0);
+   Filter(bool caseSensitive = 0);
    ~Filter();
 
-   const QString& filterFile() { return m_file; }
-   const QString& filterType() { return m_type; }
-
-   bool loadFilters(void);
-   bool saveFilters(void);
-   bool saveAsFilters(const QString& filterFileName);
-   bool isFiltered(const QString& filterString, int level);
+   bool save(QString& indent, QTextStream& out);
+   bool isFiltered(const QString& filterString, uint8_t level);
    bool addFilter(const QString& filterPattern);
+   bool addFilter(const QString& filterPattern, uint8_t minLevel, uint8_t maxLevel);
    void remFilter(const QString& filterPattern); 
    void listFilters(void);
-   void changeFilterFile(const QString&);
-   void setCFlags(int cFlags);
+   void setCaseSensitive(bool caseSensitive);
 
 private:
    FilterItem* findFilter(const QString& filterPattern);
 
-   QString m_file;
    FilterList m_filterItems;
-   char  m_cFlags;        // flags passed to regcomp
-   QString m_type;
+   bool m_caseSensitive;
 };
+
+//--------------------------------------------------
+// Filters
+class Filters
+{
+ public:
+  Filters(const FilterTypes& types);
+  ~Filters();
+  
+  bool clear(void);
+  bool clearType(uint8_t type);
+  bool load(const QString& filename);
+  bool save(const QString& filename) const;
+  bool save(void) const;
+  void list(void) const;
+
+  bool caseSensitive(void) const { return m_caseSensitive; }
+  void setCaseSensitive(bool caseSensitive);
+  uint32_t filterMask(const QString& filterString, uint8_t level) const;
+  bool addFilter(uint8_t type, const QString& filterString, 
+		 uint8_t minLevel = 0, uint8_t maxLevel = 0);
+  void remFilter(uint8_t type, const QString& filterString);
+
+ protected:
+
+ protected:
+  QString m_file;
+  FilterMap m_filters;
+  const FilterTypes& m_types;
+  bool m_caseSensitive;
+};
+
+//--------------------------------------------------
+// FilterTypes
+class FilterTypes
+{
+ public:
+  FilterTypes();
+  ~FilterTypes();
+
+  bool registerType(const QString& name, uint8_t& type, uint32_t& mask);
+  void unregisterType(uint8_t type);
+  uint8_t maxType(void) const;
+  uint32_t mask(uint8_t type) const;
+  uint32_t mask(const QString& name) const;
+  uint8_t type(const QString& name) const;
+  QString name(uint8_t type) const;
+  QString name(uint32_t mask) const;
+  QString names(uint32_t mask) const;
+  bool validMask(uint32_t mask) const;
+
+ protected:
+  uint32_t m_allocated;
+  FilterTypeMap m_filters;
+  uint8_t m_maxType;
+};
+
+inline uint8_t FilterTypes::maxType(void) const
+{
+  return m_maxType;
+}
+
+inline uint32_t FilterTypes::mask(uint8_t type) const
+{
+  return (1 << type);
+}
+
+inline QString FilterTypes::name(uint8_t type) const
+{
+  return name(mask(type));
+}
+
+inline QString FilterTypes::name(uint32_t mask) const
+{
+  FilterTypeMap::const_iterator it = m_filters.find(mask);
+
+  if (it != m_filters.end())
+    return it->second;
+
+  return QString("Unknown:") + QString::number(mask);
+}
+
+inline bool FilterTypes::validMask(uint32_t mask) const 
+{
+  return ((m_allocated & mask) != 0);
+}
 
 #endif // FILTER_H

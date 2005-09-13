@@ -1,19 +1,20 @@
-#include <qcombobox.h>
-#include <qspinbox.h>
-#include <qtimer.h>
-#include <qlayout.h>
 
 #include "spawnlist2.h"
 #include "category.h"
 #include "spawnshell.h"
 #include "filtermgr.h"
 #include "player.h"
-#include "packet.h"
+#include "diagnosticmessages.h"
+#include "main.h"
+
+#include <qcombobox.h>
+#include <qspinbox.h>
+#include <qtimer.h>
+#include <qlayout.h>
 
 SpawnListWindow2::SpawnListWindow2(Player* player, 
 				   SpawnShell* spawnShell,
 				   CategoryMgr* categoryMgr,
-				   EQPacket* packet,
 				   QWidget* parent, const char* name)
   : SEQWindow("SpawnList2", "ShowEQ - Spawns", parent, name),
     m_player(player),
@@ -42,7 +43,7 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   int fpm = pSEQPrefs->getPrefInt("FPM", preferenceName(), 10);
   m_delay = 60000L / fpm;
 
-  QVBoxLayout* vLayout = new QVBoxLayout(this);
+  QBoxLayout* vLayout = new QVBoxLayout(boxLayout());
   QHBoxLayout* hLayout= new QHBoxLayout(vLayout);
 
   // create the spawn list combo box
@@ -196,11 +197,16 @@ QString SpawnListWindow2::filterString(const Item* item)
    return text;
 }
 
-SpawnListMenu* SpawnListWindow2::menu()
+QPopupMenu* SpawnListWindow2::menu()
 {
   if (m_menu != NULL)
+  {
+    // make sure the menu is setup
+    m_menu->setCurrentItem(0);
+    m_menu->setCurrentCategory(m_currentCategory);
     return m_menu;
-  
+  }
+
   m_menu = new SpawnListMenu(m_spawnList, this, m_spawnShell->filterMgr(),
 			     m_categoryMgr, this, "spawnlist menu");
   m_menu->insertSeparator(-1);
@@ -214,6 +220,8 @@ SpawnListMenu* SpawnListWindow2::menu()
   x = m_menu->insertItem("Keep Selected Visible", 
 			 this, SLOT(toggle_keepSelectedVisible(int)));
   m_menu->setItemChecked(x, m_keepSelectedVisible);
+
+  m_menu->setCurrentCategory(m_currentCategory);
 
   return m_menu;
 }
@@ -327,8 +335,10 @@ void SpawnListWindow2::changeItem(const Item* item, uint32_t changeItem)
   // if their is an item already, just update it
   if (litem != NULL)
   {
-    // just update the item
+    // just update the item and recalc the color in case it was based on 
+    // something that we just changed.
     litem->update(m_player, changeItem);
+    litem->pickTextColor(item, m_player, m_currentCategory->color());
     
     // make sure it's sorted into the proper place
     if (m_keepSorted)
@@ -546,8 +556,7 @@ void SpawnListWindow2::refresh(void)
 #if 0 // ZBTEMP
   QTime test;
   test.start();
-  fprintf(stderr, 
-	  "SpawnListWindow2::refresh(void) Category=%08x '%s' %d:%d:%d\n",
+  seqDebug("SpawnListWindow2::refresh(void) Category=%08x '%s' %d:%d:%d",
 	  m_currentCategory, 
 	  (m_currentCategory != NULL) ? 
 	  (const char*) m_currentCategory->name() : "NONE",
@@ -628,6 +637,7 @@ void SpawnListWindow2::refresh(void)
       {
 	// just update the item
 	litem->update(m_player, tSpawnChangedALL);
+        litem->pickTextColor(item, m_player, m_currentCategory->color());
 	
 	// nothing more to do for this item
 	continue;
@@ -650,7 +660,7 @@ void SpawnListWindow2::refresh(void)
   m_lastUpdate = time(NULL);
 
 #if 0 // ZBTEMP
-  fprintf(stderr, "* elapsed (pre-sort): %d\n", test.elapsed());
+  seqDebug("* elapsed (pre-sort): %d", test.elapsed());
 #endif 
 
   // make sure the spawnlist is sorted
@@ -662,7 +672,7 @@ void SpawnListWindow2::refresh(void)
     selectSpawn(m_selectedItem);
 
 #if 0 // ZBTEMP
-  fprintf(stderr, "* elapsed (post-sort): %d\n", test.elapsed());
+  seqDebug("* elapsed (post-sort): %d", test.elapsed());
 #endif 
 
   // update the displayed count
@@ -673,7 +683,7 @@ void SpawnListWindow2::refresh(void)
   repaint();
 
 #if 0 // ZBTEMP
-  fprintf(stderr, "* elapsed (post-paint): %d\n", test.elapsed());
+  seqDebug("* elapsed (post-paint): %d", test.elapsed());
 #endif 
 
   if (!m_immediateUpdate)
@@ -734,10 +744,8 @@ void SpawnListWindow2::mousePressEvent(int button, QListViewItem* litem,
   if (button  == LeftButton && litem != NULL)
   {
     m_spawnList->setSelected(litem, true);
-  }
-
-  // Right Mouse Button Events
-  if (button == RightButton)
+  } // Right Mouse Button Events
+  else if (button == RightButton)
   {
     const Item* item = NULL;
     if (litem != NULL)
@@ -745,9 +753,8 @@ void SpawnListWindow2::mousePressEvent(int button, QListViewItem* litem,
       SpawnListItem* slitem = (SpawnListItem*)litem;
       item = slitem->item();
     }
-    SpawnListMenu* spawnMenu = menu();
+    SpawnListMenu* spawnMenu = (SpawnListMenu*)menu();
     spawnMenu->setCurrentItem(item);
-    spawnMenu->setCurrentCategory(m_currentCategory);
     spawnMenu->popup(point);
   }
 }
@@ -760,7 +767,7 @@ void SpawnListWindow2::mouseDoubleClickEvent(QListViewItem* litem)
 
   const Item* item = ((SpawnListItem*)litem)->item();
   if (item != NULL)
-    printf("%s\n",(const char*)item->filterString());
+    seqInfo("%s",(const char*)filterString(item));
 }
 
 
@@ -848,8 +855,7 @@ void SpawnListWindow2::setSelectedQuiet(QListViewItem* item, bool selected)
 void SpawnListWindow2::populateSpawns(void)
 {
 #if 0 // ZBTEMP
-  fprintf(stderr, 
-	  "SpawnListWindow2::populateSpawns(void) Category=%08x '%s'\n",
+  seqDebug("SpawnListWindow2::populateSpawns(void) Category=%08x '%s'",
 	  m_currentCategory, 
 	  (m_currentCategory != NULL) ? 
 	  (const char*) m_currentCategory->name() : "NONE");
@@ -914,7 +920,7 @@ void SpawnListWindow2::populateSpawns(void)
   m_lastUpdate = time(NULL);
 
 #if 0 // ZBTEMP
-  fprintf(stderr, "* elapsed (pre-sort): %d\n", test.elapsed());
+  seqDebug("* elapsed (pre-sort): %d", test.elapsed());
 #endif 
 
   // make sure the spawnlist is sorted
@@ -929,7 +935,7 @@ void SpawnListWindow2::populateSpawns(void)
     selectSpawn(m_selectedItem);
 
 #if 0 // ZBTEMP
-  fprintf(stderr, "* elapsed (post-sort): %d\n", test.elapsed());
+  seqDebug("* elapsed (post-sort): %d", test.elapsed());
 #endif 
 
   // re-enable updates and force a repaint
@@ -937,7 +943,8 @@ void SpawnListWindow2::populateSpawns(void)
   repaint();
 
 #if 0 // ZBTEMP
-  fprintf(stderr, "* elapsed (post-paint): %d\n", test.elapsed());
+  seqDebug("* elapsed (post-paint): %d", test.elapsed());
 #endif 
 }
 
+#include "spawnlist2.moc"

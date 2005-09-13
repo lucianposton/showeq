@@ -5,15 +5,20 @@
  *  http://seq.sourceforge.net/
  */
 
+#include "player.h"
+#include "util.h"
+#include "packetcommon.h"
+#include "diagnosticmessages.h"
+#include "guild.h"
+#include "zonemgr.h"
+#include "main.h"
+
 #include <stdio.h>
 #include <unistd.h>
 
 #include <qdir.h>
 #include <qfile.h>
 #include <qdatastream.h>
-
-#include "player.h"
-#include "util.h"
 
 
 //#define DEBUG_PLAYER
@@ -37,24 +42,36 @@ static const char* conColorBasePrefNames[] =
 
 Player::Player (QObject* parent,
 		ZoneMgr* zoneMgr,
+		GuildMgr* guildMgr,
 		const char* name)
   : QObject(parent, name),
     Spawn(),
-    m_zoneMgr(zoneMgr)
+    m_zoneMgr(zoneMgr),
+    m_guildMgr(guildMgr)
 {
 #ifdef DEBUG_PLAYER
   debug("Player()");
 #endif
 
-  connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
+  connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, size_t, uint8_t)),
           this, SLOT(zoneBegin(const ServerZoneEntryStruct*)));
   connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
           this, SLOT(zoneChanged()));
   
   m_NPC = SPAWN_SELF;
+
+  QString section = "Defaults";
+  m_useAutoDetectedSettings = 
+    pSEQPrefs->getPrefBool("useAutoDetectedSettings", section, true);
+  m_defaultName = pSEQPrefs->getPrefString("DefaultName", section, "You");
+  m_defaultLastName = pSEQPrefs->getPrefString("DefaultLastName", section, "");
+  m_defaultLevel = pSEQPrefs->getPrefInt("DefaultLevel", section, 1);
+  m_defaultRace = pSEQPrefs->getPrefInt("DefaultRace", section, 1);
+  m_defaultClass = pSEQPrefs->getPrefInt("DefaultClass", section, 1);
+  m_defaultDeity = pSEQPrefs->getPrefInt("DefaultDeity", section, DEITY_AGNOSTIC);
   
-  setDefaults();
   setUseDefaults(true);
+  setDistanceToPlayer(0.00f);
   
   // set the name to the default name
   Spawn::setName(m_defaultName);
@@ -102,202 +119,6 @@ Player::~Player()
 {
 }
 
-void Player::backfill(const charProfileStruct* player)
-{
-  QString messag;
-
-  printf("Player::backfill():\n");
-
-  messag.sprintf("Player: Name: '%s' Last: '%s'\n", 
- 		 player->name, player->lastName);
-  emit msgReceived(messag);
-  
-  messag.sprintf("Player: Level: %d\n", player->level);
-  emit msgReceived(messag);
-  
-  messag.sprintf("Player: PlayerMoney: P=%d G=%d S=%d C=%d\n",
-		 player->platinum, player->gold, 
-		 player->silver, player->copper);
-  emit msgReceived(messag);
-  
-  messag.sprintf("Player: BankMoney: P=%d G=%d S=%d C=%d\n",
-		 player->platinum_bank, player->gold_bank, 
-		 player->silver_bank, player->copper_bank);
-  emit msgReceived(messag);
-
-  messag.sprintf("Player: CursorMoney: P=%d G=%d S=%d C=%d\n",
-		 player->platinum_cursor, player->gold_cursor, 
-		 player->silver_cursor, player->copper_cursor);
-  emit msgReceived(messag);
-
-  messag.sprintf("Player: SharedMoney: P=%d\n",
-		player->platinum_shared);
-  emit msgReceived(messag);
-
-  // fill in base Spawn class
-  // set the characteristics that probably haven't changed.
-  setNPC(SPAWN_SELF);
-  setGender(player->gender);
-  setRace(player->race);
-  setClassVal(player->class_);
-  setLevel(player->level);
-  m_curHP = player->curHp;
-
-  // save the raw name
-  setTypeflag(1);
-
-  Spawn::setName(player->name);
-  setLastName(player->lastName);
-
-  // if it's got a last name add it
-  if (level() < player->level)
-    setLevel(player->level);
-
-  // Stats hanling
-  setUseDefaults(false);
-  setDeity(player->deity);
-  setGuildID(player->guildID);
-
-  emit getPlayerGuildTag();
-
-#if 1 // ZBTEMP
-  printf("charProfile(%f/%f/%f - %f)\n",
-	 player->x, player->y, player->z, player->heading);
-#endif
-  setPos((int16_t)lrintf(player->x), 
-         (int16_t)lrintf(player->y), 
-         (int16_t)lrintf(player->z),
-	 showeq_params->walkpathrecord,
-	 showeq_params->walkpathlength
-        );
-  setDeltas(0,0,0);
-#if 1 // ZBTEMP
-  printf("Player::backfill(): Pos (%f/%f/%f) Heading: %f\n",
-	 player->x, player->y, player->z, player->heading);
-  printf("Player::backfill(bind): Pos (%f/%f/%f) Heading: %f\n",
-	 player->bind_x, player->bind_y, player->bind_z, player->bind_heading);
-#endif // ZBTEMP  
-  setHeading((int8_t)lrintf(player->heading), 0);
-  m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
-  m_validPos = true;
-  emit headingChanged(m_headingDegrees);
-  emit posChanged(x(), y(), z(), 
-		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
-
-  // Due to the delayed decode, we must reset
-  // maxplayer on zone and accumulate all totals.
-  m_maxSTR += player->STR;
-  m_maxSTA += player->STA;
-  m_maxCHA += player->CHA;
-  m_maxDEX += player->DEX;
-  m_maxINT += player->INT;
-  m_maxAGI += player->AGI;
-  m_maxWIS += player->WIS;
-  
-  emit statChanged (LIST_STR, m_maxSTR, m_maxSTR);
-  emit statChanged (LIST_STA, m_maxSTA, m_maxSTA);
-  emit statChanged (LIST_CHA, m_maxCHA, m_maxCHA);
-  emit statChanged (LIST_DEX, m_maxDEX, m_maxDEX);
-  emit statChanged (LIST_INT, m_maxINT, m_maxINT);
-  emit statChanged (LIST_AGI, m_maxAGI, m_maxAGI);
-  emit statChanged (LIST_WIS, m_maxWIS, m_maxWIS);
-  
-  m_mana = player->MANA;
-
-  m_maxMana = calcMaxMana( m_maxINT, m_maxWIS,
-                           m_class, m_level
-			 ) + m_plusMana;
-  
-  emit manaChanged(m_mana, m_maxMana);  // need max mana
-
-  
-  // Merge in our new skills...
-  for (int a = 0; a < MAX_KNOWN_SKILLS; a++)
-  {
-    if ((m_playerSkills[a] == 255) || // not valid
-	(player->skills[a] > m_playerSkills[a])) // or a higher value
-      m_playerSkills[a] = player->skills[a];
-
-    emit addSkill (a, m_playerSkills[a]);
-  }
-
-  // Merge in our new languages...
-  for (int a = 0; a < MAX_KNOWN_LANGS; a++)
-  {
-    if ((m_playerLanguages[a] == 255) ||
-	(player->languages[a] > m_playerLanguages[a]))
-      m_playerLanguages[a] = player->languages[a];
-    
-    emit addLanguage (a, m_playerLanguages[a]);
-  }
-
-  // copy in the spell book
-  memcpy (&m_spellBookSlots[0], &player->sSpellBook[0], sizeof(m_spellBookSlots));
-
-  // Move 
-  m_validAttributes = true;
-  m_validMana = true;
-  m_validExp = true;
-
-  // update the con table
-  fillConTable();
-
-  // Exp handling
-  uint32_t minexp;
-
-  m_maxExp = calc_exp(m_level, m_race, m_class);
-  minexp  = calc_exp(m_level-1, m_race, m_class);
-
-  if(m_currentExp < player->exp);
-  {
-     m_currentExp = player->exp;
-     m_currentAltExp = player->altexp;
-     m_currentAApts = player->aapoints;
-
-     emit expChangedInt (m_currentExp, minexp, m_maxExp);
-
-     messag = "Exp: " + Commanate(player->exp);
-     emit expChangedStr(messag);
-
-     emit expAltChangedInt(m_currentAltExp, 0, 15000000);
-
-     messag = "ExpAA: " + Commanate(player->altexp);
-     emit expAltChangedStr(messag);
-
-  }
-
-  if (showeq_params->savePlayerState)
-    savePlayerState();
-
-  messag = "Player: Exp =" + Commanate(player->exp);
-  emit msgReceived(messag);
-
-  messag = "Player: ExpAA =" + Commanate(player->altexp);
-  emit msgReceived(messag);
-
-  updateLastChanged();
-
-  emit changeItem(this, tSpawnChangedALL);
-
-  QDir tmp("/tmp/");
-  tmp.rename(QString("bankfile.") + QString::number(getpid()),
-	     QString("bankfile.") + player->name);
-
-	//Added by Halcyon
-	int buffnumber;
-	const struct spellBuff *buff;
-	for (buffnumber=0;buffnumber<15;buffnumber++)
-	{
-		if (player->buffs[buffnumber].spellid && player->buffs[buffnumber].duration)
-		{
-			printf("You have buff %s duration left is %d in ticks.\n",(const char*)spell_name(player->buffs[buffnumber].spellid),player->buffs[buffnumber].duration);
-			buff = &(player->buffs[buffnumber]);
-			emit buffLoad(buff);
-		}
-	}
-	printf("PLAYERID#%d\n",id());
-}
-
 void Player::clear()
 {
   m_plusMana = 0; 
@@ -341,7 +162,9 @@ void Player::reset()
 
   m_currentAltExp = 0;
   m_currentExp = 0;
-  m_maxExp = calc_exp(level(), race(), classVal());
+  m_minExp = calc_exp(level() - 1, race(), classVal());
+  m_maxExp = calc_exp(level(), race(), classVal ());
+  m_tickExp = (m_maxExp - m_minExp) / 330;
 
   for (int a = 0; a < MAX_KNOWN_SKILLS; a++)
     m_playerSkills[a] = 255; // indicate an invalid value
@@ -364,6 +187,203 @@ void Player::reset()
   fillConTable();
 
   updateLastChanged();
+}
+
+void Player::setUseAutoDetectedSettings(bool enable)
+{
+  m_useAutoDetectedSettings = enable;
+  pSEQPrefs->setPrefBool("useAutoDetectedSettings", "Defaults", enable);
+  fillConTable();
+}
+
+void Player::setDefaultName(const QString& name)
+{
+  m_defaultName = name;
+  pSEQPrefs->setPrefString("DefaultName", "Defaults", name);
+}
+
+void Player::setDefaultLastname(const QString& lastName)
+{
+  m_defaultLastName = lastName;
+  pSEQPrefs->setPrefString("DefaultLastName", "Defaults", lastName);
+}
+
+void Player::setDefaultLevel(uint8_t level)
+{
+  m_defaultLevel = level;
+  pSEQPrefs->setPrefInt("DefaultLevel", "Defaults", level);
+  if (!m_useAutoDetectedSettings || m_useDefaults)
+    fillConTable();
+}
+
+void Player::setDefaultRace(uint16_t race)
+{
+  m_defaultRace = race;
+  pSEQPrefs->setPrefInt("DefaultRace", "Defaults", race);
+}
+
+void Player::setDefaultClass(uint8_t classVal)
+{
+  m_defaultClass = classVal;
+  pSEQPrefs->setPrefInt("DefaultClass", "Defaults", classVal);
+}
+
+void Player::setDefaultDeity(uint16_t deity)
+{
+  m_defaultDeity = deity;
+  pSEQPrefs->setPrefInt("DefaultDeity", "Defaults", deity);
+}
+
+void Player::player(const uint8_t* data)
+{
+  const charProfileStruct* player = (const charProfileStruct*)data;
+  QString messag;
+
+  if (m_name != player->name)
+    emit newPlayer();
+  
+  // fill in base Spawn class
+  // set the characteristics that probably haven't changed.
+  setNPC(SPAWN_SELF);
+  setGender(player->gender);
+  setRace(player->race);
+  setClassVal(player->class_);
+  setLevel(player->level);
+  m_curHP = player->curHp;
+
+  // save the raw name
+  setTypeflag(1);
+
+  Spawn::setName(player->name);
+
+  // if it's got a last name add it
+  setLastName(player->lastName);
+
+  // set the player level
+  setLevel(player->level);
+
+  // Stats hanling
+  setUseDefaults(false);
+  setDeity(player->deity);
+  setGuildID(player->guildID);
+  setGuildTag(m_guildMgr->guildIdToName(guildID()));
+  emit guildChanged();
+
+#if 1 // ZBTEMP
+  seqDebug("charProfile(%f/%f/%f - %f)",
+	   player->x, player->y, player->z, player->heading);
+#endif
+  setPos((int16_t)lrintf(player->x), 
+         (int16_t)lrintf(player->y), 
+         (int16_t)lrintf(player->z),
+	 showeq_params->walkpathrecord,
+	 showeq_params->walkpathlength
+        );
+  setDeltas(0,0,0);
+#if 1 // ZBTEMP
+  seqDebug("Player::backfill(): Pos (%f/%f/%f) Heading: %f",
+	   player->x, player->y, player->z, player->heading);
+  seqDebug("Player::backfill(bind): Pos (%f/%f/%f) Heading: %f",
+	   player->bind_x[0], player->bind_y[0], player->bind_z[0], 
+       player->bind_heading[0]);
+#endif // ZBTEMP  
+  setHeading((int8_t)lrintf(player->heading), 0);
+  m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
+  m_validPos = true;
+  emit headingChanged(m_headingDegrees);
+  emit posChanged(x(), y(), z(), 
+		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
+
+  // Due to the delayed decode, we must reset
+  // maxplayer on zone and accumulate all totals.
+  m_maxSTR += player->STR;
+  m_maxSTA += player->STA;
+  m_maxCHA += player->CHA;
+  m_maxDEX += player->DEX;
+  m_maxINT += player->INT;
+  m_maxAGI += player->AGI;
+  m_maxWIS += player->WIS;
+  
+  emit statChanged (LIST_STR, m_maxSTR, m_maxSTR);
+  emit statChanged (LIST_STA, m_maxSTA, m_maxSTA);
+  emit statChanged (LIST_CHA, m_maxCHA, m_maxCHA);
+  emit statChanged (LIST_DEX, m_maxDEX, m_maxDEX);
+  emit statChanged (LIST_INT, m_maxINT, m_maxINT);
+  emit statChanged (LIST_AGI, m_maxAGI, m_maxAGI);
+  emit statChanged (LIST_WIS, m_maxWIS, m_maxWIS);
+  
+  m_mana = player->MANA;
+
+  m_maxMana = calcMaxMana( m_maxINT, m_maxWIS,
+                           m_class, m_level
+			 ) + m_plusMana;
+  
+  emit manaChanged(m_mana, m_maxMana);  // need max mana
+
+  
+  // Merge in our new skills...
+  for (int a = 0; a < MAX_KNOWN_SKILLS; a++)
+  {
+    m_playerSkills[a] = player->skills[a];
+
+    emit addSkill (a, m_playerSkills[a]);
+  }
+
+  // Merge in our new languages...
+  for (int a = 0; a < MAX_KNOWN_LANGS; a++)
+  {
+    m_playerLanguages[a] = player->languages[a];
+    
+    emit addLanguage (a, m_playerLanguages[a]);
+  }
+
+  // copy in the spell book
+  memcpy (&m_spellBookSlots[0], &player->sSpellBook[0], sizeof(m_spellBookSlots));
+
+  // Move 
+  m_validAttributes = true;
+  m_validMana = true;
+  m_validExp = true;
+
+  // update the con table
+  fillConTable();
+
+  // Exp handling
+  m_minExp = calc_exp(m_level-1, m_race, m_class);
+  m_maxExp = calc_exp(m_level, m_race, m_class);
+  m_tickExp = (m_maxExp - m_minExp) / 330;
+
+  m_currentExp = player->exp;
+  m_currentAltExp = player->expAA;
+  m_currentAApts = player->aa_spent;
+  
+  emit expChangedInt (m_currentExp, m_minExp, m_maxExp);
+  emit expAltChangedInt(m_currentAltExp, 0, 15000000);
+
+  emit setAltExp(m_currentAltExp, 15000000, 15000000/330, m_currentAApts);
+
+  if (showeq_params->savePlayerState)
+    savePlayerState();
+
+  updateLastChanged();
+
+  emit changeItem(this, tSpawnChangedALL);
+
+  QDir tmp("/tmp/");
+  tmp.rename(QString("bankfile.") + QString::number(getpid()),
+	     QString("bankfile.") + player->name);
+
+  //Added by Halcyon
+  int buffnumber;
+  const struct spellBuff *buff;
+  for (buffnumber=0;buffnumber<MAX_BUFFS;buffnumber++)
+  {
+    if (player->buffs[buffnumber].spellid && player->buffs[buffnumber].duration)
+    {
+      buff = &(player->buffs[buffnumber]);
+      emit buffLoad(buff);
+    }
+  }
 }
 
 #if 0 // ZBTEMP
@@ -522,28 +542,22 @@ void Player::removeItem(const itemItemStruct* item)
 }
 #endif // ZBTEMP
 
-void Player::increaseSkill(const skillIncStruct* skilli)
+void Player::increaseSkill(const uint8_t* data)
 {
+  const skillIncStruct* skilli = (const skillIncStruct*)data;
   // save the new skill value
   m_playerSkills[skilli->skillId] = skilli->value;
 
   // notify others of the new value
   emit changeSkill (skilli->skillId, skilli->value);
 
-  QString tempStr;
-  tempStr.sprintf("Skill: %s has increased (%d)",
-		  (const char*)skill_name(skilli->skillId),
-		  skilli->value);
-
-  emit msgReceived(tempStr);
-  emit stsMessage(tempStr);
-
   if (showeq_params->savePlayerState)
     savePlayerState();
 }
 
-void Player::manaChange(const manaDecrementStruct *mana)
+void Player::manaChange(const uint8_t* data)
 {
+  const manaDecrementStruct *mana = (const manaDecrementStruct*)data;
   // update the players mana
   m_mana = mana->newMana;
 
@@ -556,166 +570,142 @@ void Player::manaChange(const manaDecrementStruct *mana)
     savePlayerState();
 }
 
-void Player::updateAltExp(const altExpUpdateStruct* altexp)
+void Player::updateAltExp(const uint8_t* data)
 {
-  QString totalAltExp;
-  QString leftAltExp;
-  QString incrementAltExp;
-  QString tempStr;
-  QString tempStr2;
-  uint32_t realexp;
-  uint16_t aapoints;
+  const altExpUpdateStruct* altexp = (const altExpUpdateStruct*)data;
 
-  realexp = altexp->altexp * altexp->percent * (15000000 / 33000);
-  aapoints = altexp->aapoints;
+  /* purple: I got no idea what is up here. This seems to be written like
+   *         the packet from the server gives the entire exp bump and not
+   *         just the proper percent. This makes it behave funny. Taking out
+   *         the multiply by percent here.
+  uint32_t realExp = altexp->altexp * altexp->percent * (15000000 / 33000);
+  uint32_t expIncrement;
 
-  if (m_currentAApts != aapoints)
+  if (realExp > m_currentExp)
+    expIncrement = realExp - m_currentAltExp;
+  else
+    expIncrement = 0;
+   */
+  uint32_t realExp = altexp->altexp * (15000000 / 330);
+  uint32_t expIncrement;
+
+  if (realExp > m_currentExp)
   {
-      m_currentAApts = aapoints;
-      m_currentAltExp = realexp;
+    expIncrement = realExp - m_currentAltExp;
   }
-  if (m_currentAltExp > realexp)
-      realexp = m_currentAltExp;
+  else
+  {
+    expIncrement = 0;
+  }
 
-  totalAltExp = Commanate(realexp);
-  leftAltExp = Commanate(15000000 - realexp);
-  incrementAltExp = Commanate(15000000/330);
+  m_currentAApts = altexp->aapoints;
+  m_currentAltExp = realExp;
 
-  emit expAltChangedInt(realexp, 0, 15000000);
+  emit expAltChangedInt(m_currentAltExp, 0, 15000000);
 
-  tempStr = QString("ExpAA: %1 (%2/330)").arg(totalAltExp).arg(tempStr2.sprintf("%u",altexp->altexp));
-  emit expAltChangedStr(tempStr);
-  tempStr = QString("ExpAA: %1 (%2/330) left %3 - 1/330 = %4").arg(totalAltExp).arg(tempStr2.sprintf("%u",altexp->altexp)).arg(leftAltExp).arg(incrementAltExp);
-  emit msgReceived(tempStr);
-
+  emit newAltExp(expIncrement, m_currentAltExp, altexp->altexp,
+		 15000000, 15000000/330, m_currentAApts);
 
   if (showeq_params->savePlayerState)
     savePlayerState();
 }
 
-void Player::updateExp(const expUpdateStruct* exp)
+void Player::updateExp(const uint8_t* data)
 {
-  QString totalExp;
-  QString incrementExp;
-  QString leftExp;
-  QString needKills;
-  QString tempStr;
-  QString tempStr2;
-  uint32_t realexp;
-  uint32_t minexp;
-  uint32_t maxexp;
-  uint32_t diffexp;
-  uint16_t fractexp;
+  const expUpdateStruct* exp = (const expUpdateStruct*)data;
 
-  fractexp =  exp->exp;
-  minexp = calc_exp(level() - 1, race(), classVal());
-  maxexp = calc_exp(level(), race(), classVal());
-  diffexp = maxexp - minexp;
-  realexp = (diffexp / 330) * fractexp + minexp;
-  incrementExp = Commanate(diffexp/330);
+  // if this is just setting the percentage, then do nothing (use info from
+  //   player packet).
+  if (exp->type == 0) 
+  {
+    // signal the setting of experience
+    emit setExp(m_currentExp, exp->exp, m_minExp, m_maxExp, m_tickExp);
 
+    // nothing more to do.
+    return;
+  }
 
-  totalExp  = Commanate(realexp - minexp);
-  leftExp = Commanate(maxexp - realexp);
-  needKills = Commanate(((maxexp - realexp) / (realexp > m_currentExp ? realexp - m_currentExp : 1)) + 1 );
+  uint32_t realExp = (m_tickExp * exp->exp) + m_minExp;
+  uint32_t expIncrement;
+  
+  // if realExperience is greater then current expereince, calculate the 
+  // increment, otherwise this was a < 1/330'th kill and/or the calculated
+  // real experience is in that funky rounding place that EQ has...
+  if (realExp > m_currentExp)
+    expIncrement = realExp - m_currentExp;
+  else 
+    expIncrement = 0;
+  
+  m_currentExp = realExp;
+  m_validExp = true;
 
-  tempStr = QString("Exp: %1 (%2/330) [%3]").arg(totalExp).arg(tempStr2.sprintf("%u",fractexp)).arg(needKills);
-  emit expChangedStr(tempStr);
-  emit expChangedInt (realexp, minexp, maxexp);
+  // signal the new experience
+  emit newExp(expIncrement, realExp, exp->exp, 
+	      m_minExp, m_maxExp, m_tickExp);
+  
+  emit expChangedInt (realExp, m_minExp, m_maxExp);
     
-  tempStr = QString("Exp: %1 (%2/330) left %3 - 1/330 = %4").arg(totalExp).arg(tempStr2.sprintf("%u",fractexp)).arg(leftExp).arg(incrementExp);
-  emit msgReceived(tempStr);
-  emit stsMessage(tempStr);
-
   if(m_freshKill)
   {
      emit expGained( m_lastSpawnKilledName,
                      m_lastSpawnKilledLevel,
-                     realexp - m_currentExp,
+                     expIncrement,
                      m_zoneMgr->longZoneName());
       
      // have gained experience for the kill, it's no longer fresh
      m_freshKill = false;
   }
-  else if ((m_lastSpellOnId == 0x0184) || // Resuscitate
-	   (m_lastSpellOnId == 0x0187) || // Revive (does it or don't it?)
-	   (m_lastSpellOnId == 0x0188) || // Resurrection
-	   (m_lastSpellOnId == 0x02f4) || // Resurrection Effects
-	   (m_lastSpellOnId == 0x02f5) || // Resurrection Effect
-	   (m_lastSpellOnId == 0x03e2) || // Customer Service Resurrection
-	   (m_lastSpellOnId == 0x05f4)) // Reviviscence
-  {
-     emit expGained( spell_name(m_lastSpellOnId),
-                     0, // level of caster would only confuse things further
-                     realexp - m_currentExp,
-                     m_zoneMgr->longZoneName());
-  }
-  else if (m_currentExp != 0) 
+  else
      emit expGained( "Unknown", // Randomly blessed with xp?
                      0, // don't know what gave it so, level 0
-		     realexp - m_currentExp,
-		     m_zoneMgr->longZoneName()
-		   );
-  
-  m_currentExp = realexp;
-  m_validExp = true;
+		     expIncrement,
+		     m_zoneMgr->longZoneName());
 
   if (showeq_params->savePlayerState)
     savePlayerState();
 }
 
-void Player::updateLevel(const levelUpUpdateStruct *levelup)
+void Player::updateLevel(const uint8_t* data)
 {
-  QString totalExp;
-  QString gainedExp;
-  QString leftExp;
-  QString needKills;
-  QString tempStr;
+  const levelUpUpdateStruct *levelup = (const levelUpUpdateStruct *)data;
 
-  tempStr.sprintf("Player: NewLevel: %d\n", levelup->level);
-  emit msgReceived(tempStr);
-  emit stsMessage(tempStr);
-  
-  totalExp = Commanate(levelup->exp);
-  gainedExp = Commanate((uint32_t) (levelup->exp - m_currentExp));
-  
-  needKills = Commanate(((calc_exp( levelup->level,
-				    race  (),
-				    classVal ()
-				    ) - levelup->exp
-			  )          /  ( levelup->exp > m_currentExp    ?
-					  levelup->exp - m_currentExp :
-					  1
-					  )
-			 )
-			);
-  
-  tempStr = QString("Exp: %1 (%2) [%3]").arg(totalExp).arg(gainedExp).arg(needKills);
-  
-  emit expChangedStr (tempStr);
+  // cache previous experience for later calculations
+  uint32_t prevExp = m_currentExp;
 
-  m_defaultLevel = levelup->level;
+  // save the new level information
   m_level  = levelup->level;
 
-  m_maxExp = calc_exp( level (),
-		     race  (),
-		     classVal ()
-		     );
-  
-  emit expChangedInt( levelup->exp,
-		      calc_exp( level () - 1,
-				race  (),
-				classVal ()
-				),
-		      calc_exp( level (),
-				race  (),
-				classVal ()
-				)
-		      );
-  
-  m_currentExp = levelup->exp;
-
+  // calculate the new experience information
+  m_minExp = calc_exp(level() - 1, race(), classVal());
+  m_maxExp = calc_exp(level(), race(), classVal ());
+  m_tickExp = (m_maxExp - m_minExp) / 330;
+  m_currentExp = (m_tickExp * levelup->exp) + m_minExp;
   m_validExp = true;
+
+  // calculate the increment in experience between the current experience and
+  // the previous experience
+  uint32_t expIncrement =  m_currentExp - prevExp;
+  
+  emit newExp(expIncrement, m_currentExp, levelup->exp, 
+	      m_minExp, m_maxExp, m_tickExp);
+
+  if(m_freshKill)
+  {
+     emit expGained( m_lastSpawnKilledName,
+                     m_lastSpawnKilledLevel,
+                     expIncrement,
+                     m_zoneMgr->longZoneName());
+      
+     // have gained experience for the kill, it's no longer fresh
+     m_freshKill = false;
+  }
+  else
+     emit expGained( "Unknown", // Randomly blessed with xp?
+                     0, // don't know what gave it so, level 0
+		     expIncrement,
+		     m_zoneMgr->longZoneName());
+
+  emit expChangedInt( m_currentExp, m_minExp, m_maxExp);
 
   // update the con table
   fillConTable();
@@ -725,12 +715,15 @@ void Player::updateLevel(const levelUpUpdateStruct *levelup)
 
   updateLastChanged();
 
+  // signal that the level changed
   emit levelChanged(m_level);
   emit changeItem(this, tSpawnChangedLevel);
 }
 
-void Player::updateNpcHP(const hpNpcUpdateStruct* hpupdate)
+void Player::updateNpcHP(const uint8_t* data)
 {
+  const hpNpcUpdateStruct* hpupdate = (const hpNpcUpdateStruct*)data;
+
   if (hpupdate->spawnId != id())
     return;
 
@@ -749,10 +742,13 @@ void Player::updateNpcHP(const hpNpcUpdateStruct* hpupdate)
     savePlayerState();
 }
 
-/* depreciated? */
-void Player::updateSpawnMaxHP(const SpawnUpdateStruct *su)
+void Player::updateSpawnInfo(const uint8_t* data)
 {
+  const SpawnUpdateStruct *su = (const SpawnUpdateStruct *)data;
   if (su->spawnId != id())
+    return;
+
+  if (su->subcommand != 17)
     return;
 
   m_curHP = su->arg1;
@@ -769,21 +765,14 @@ void Player::updateSpawnMaxHP(const SpawnUpdateStruct *su)
     savePlayerState();
 }
 
-void Player::updateStamina(const staminaStruct *stam)
+void Player::updateStamina(const uint8_t* data)
 {
+  const staminaStruct *stam = (const staminaStruct *)data;
   m_food = stam->food;
   m_water = stam->water;
-  m_fatigue = stam->fatigue;
   m_validStam = true;
 
-  emit stamChanged( 100 - m_fatigue,
-		    100,
-		    m_food,
-		    127,
-		    m_water,
-		    127
-		    );
-
+  emit stamChanged(m_food, 127, m_water, 127);
 
   if (showeq_params->savePlayerState)
     savePlayerState();
@@ -812,13 +801,17 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
   setClassVal(zsentry->class_);
   setRace(zsentry->race);
   setGender(zsentry->gender);
-  setGuildID(zsentry->guildId);
+  setGuildID(zsentry->guildID);
+  setGuildTag(m_guildMgr->guildIdToName(guildID()));
+  emit guildChanged();
   setPos(zsentry->x >> 3, 
          zsentry->y >> 3, 
          zsentry->z >> 3,
 	 showeq_params->walkpathrecord,
 	 showeq_params->walkpathlength);
-  setDeltas(0,0,0);
+  seqDebug("Player::zoneBegin(): Pos (%f/%f/%f) Heading %f",
+	   float(zsentry->x)/8.0, float(zsentry->y)/8.0, float(zsentry->z)/8.0,
+       float(zsentry->heading));
   setHeading(zsentry->heading, 0);
   m_validPos = true;
 
@@ -838,11 +831,13 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
   emit changeItem(this, tSpawnChangedALL);
 }
 
-void Player::playerUpdate(const playerSelfPosStruct *pupdate, uint32_t, uint8_t dir)
+void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
 {
-  if ((dir != DIR_CLIENT) && (pupdate->spawnId != id()))
+  const playerSelfPosStruct *pupdate = (const playerSelfPosStruct*)data;
+
+  if ((dir != DIR_Client) && (pupdate->spawnId != id()))
     return;
-  else if (dir == DIR_CLIENT)
+  else if (dir == DIR_Client)
     setPlayerID(pupdate->spawnId);
   
   int16_t py = int16_t(pupdate->y);
@@ -851,6 +846,54 @@ void Player::playerUpdate(const playerSelfPosStruct *pupdate, uint32_t, uint8_t 
   int16_t pdeltaX = int16_t(pupdate->deltaX);
   int16_t pdeltaY = int16_t(pupdate->deltaY);
   int16_t pdeltaZ = int16_t(pupdate->deltaZ);
+
+#if 0 
+  // Dump position updates for debugging client update changes
+  for (int i=0; i<36; i++)
+  {
+      printf("%.2x", data[i]);
+
+      if ((i+1) % 8 == 0)
+      {
+          printf("    ");
+      }
+      else
+      {
+          printf(" ");
+      }
+  }
+#endif
+
+#if 0
+    // Debug positioning without having to recompile everything...
+#pragma pack(1)
+    struct pos
+{
+/*0000*/ uint16_t spawnId;        // Player's spawn id
+/*0002*/ uint8_t unknown0002[2];  // ***Placeholder (update time counter?)
+/*0004*/ float y;                 // y coord
+/*0008*/ float deltaZ;            // Change in z
+/*0016*/ float deltaX;            // Change in x
+/*0012*/ float deltaY;            // Change in y
+/*0020*/ signed animation:10;     // animation
+         signed deltaHeading:10;  // change in heading
+         signed padding0020:12;   // ***Placeholder (mostly 1)
+/*0024*/ float x;                 // x coord
+/*0028*/ float z;                 // z coord
+/*0034*/ unsigned heading:12;     // Directional heading
+         unsigned padding0004:4;  // ***Placeholder
+/*0032*/ uint8_t unknown0006[2];  // ***Placeholder
+/*0036*/
+};
+#pragma pack(0)
+    struct pos *p = (struct pos *)data;
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
+            p->spawnId, p->x, p->y, p->z, 
+            p->deltaX, p->deltaY, p->deltaZ, 
+            float(p->heading), float(p->deltaHeading),
+            p->animation, *(uint16_t*) p->unknown0002, p->padding0020, 
+            p->padding0004, *(uint16_t*) p->unknown0006);
+#endif
 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);
   setDeltas(pdeltaX, pdeltaY, pdeltaZ);
@@ -867,9 +910,9 @@ void Player::playerUpdate(const playerSelfPosStruct *pupdate, uint32_t, uint8_t 
   updateLastChanged();
   emit changeItem(this, tSpawnChangedPosition);
 
-  emit newSpeed((int)lrint(hypot( hypot( (pupdate->deltaX*8), 
-					 (pupdate->deltaY*8)), 
-				  (pupdate->deltaZ*8))));
+  emit newSpeed((int)lrint(hypot( hypot( (pupdate->deltaX*80), 
+					 (pupdate->deltaY*80)), 
+				  (pupdate->deltaZ*80))));
 
   static uint8_t count = 0;
 
@@ -882,23 +925,27 @@ void Player::playerUpdate(const playerSelfPosStruct *pupdate, uint32_t, uint8_t 
   }
 }
 
-void Player::consMessage(const considerStruct * con, uint32_t, uint8_t dir)
+void Player::consMessage(const uint8_t* data, size_t, uint8_t dir)
 {
-  if (dir == DIR_CLIENT)
+  if (dir == DIR_Client)
     return;
+
+  const considerStruct * con = (const considerStruct*)data;
 
   if (con->playerid == con->targetid) 
     setPlayerID(con->playerid);
 }
 
-void Player::tradeSpellBookSlots(const tradeSpellBookSlotsStruct* tsb, uint32_t, uint8_t dir)
+void Player::tradeSpellBookSlots(const uint8_t* data, size_t, uint8_t dir)
 {
-  fprintf(stderr, "tradeSpellBookSlots(dir=%d): Swapping %d (%04x) with %d (%04x)\n",
+  const tradeSpellBookSlotsStruct* tsb = (const tradeSpellBookSlotsStruct*)data;
+
+  seqDebug("tradeSpellBookSlots(dir=%d): Swapping %d (%04x) with %d (%04x)",
 	  dir,
 	  tsb->slot1, m_spellBookSlots[tsb->slot1],
 	  tsb->slot2, m_spellBookSlots[tsb->slot2]);
 
-  if (dir != DIR_SERVER)
+  if (dir != DIR_Server)
     return;
 
   uint32_t spell1 = m_spellBookSlots[tsb->slot1];
@@ -912,23 +959,12 @@ void Player::setPlayerID(uint16_t playerID)
 {
   if (id() != playerID)
   {
-     printf("Your player's id is %i\n", playerID);
+     seqInfo("Your player's id is %i", playerID);
      setID(playerID);
      emit changedID(id());
      updateLastChanged();
      emit changeItem(this, tSpawnChangedALL);
   }
-}
-
-// Set our internal defaults equal to the showeq_params defaults.
-void Player::setDefaults(void)
-{
-    m_defaultName     = showeq_params->defaultName;
-    m_defaultLastName = showeq_params->defaultLastName;
-    m_defaultLevel    = showeq_params->defaultLevel;
-    m_defaultRace     = showeq_params->defaultRace;
-    m_defaultClass    = showeq_params->defaultClass;
-    m_defaultDeity    = showeq_params->defaultDeity;
 }
 
 bool Player::getStatValue(uint8_t stat,
@@ -1054,22 +1090,6 @@ void Player::fillConTable()
 //
 // to make changes here, simply alter greenRange and cyanRange
 //
-// *OLD* This is the info we have to work with
-// Level Range		Green		Red
-// 1-12				-4			+3
-// 13-22			-6			+3
-// 23-24			-7			+3
-// 25-34			-8			+3
-// 35-40			-10			+3
-// 41-42			-11			+3
-// 43-44			-12			+3
-// 45-48			-13			+3
-// 49-51			-14			+3
-// 52-54			-15			+3
-// 55-57			-16			+3
-// 58-60			-17			+3
-
-// *NEW* 
 // Levels	Green	Cyan    Red
 // 1-7		-4      n/a	+3
 // 8-?          -5      -4      +3
@@ -1102,8 +1122,8 @@ void Player::fillConTable()
   }
   else if (level() < 23) 
   { // 
-    greenRange = -7;
-    cyanRange = -5;
+    greenRange = -8;
+    cyanRange = -6;
   }
   else if (level() < 27) 
   { //
@@ -1155,12 +1175,12 @@ void Player::fillConTable()
     greenRange = -20;
     cyanRange = -15;
   }
-  else if (level() < 66)
-  { //57 - 65
+  else if (level() < 71)
+  { //57 - 70
     greenRange = -21;
     cyanRange = -16;
   }
-    
+
   uint8_t spawnLevel = 1; 
   uint8_t scale;
 
@@ -1221,37 +1241,37 @@ void Player::fillConTable()
 
 QString Player::name() const
 {
-  return (!showeq_params->AutoDetectCharSettings || m_useDefaults ?
+  return (!m_useAutoDetectedSettings || m_useDefaults ?
 	m_defaultName : m_name);
 }
 
 QString Player::lastName() const
 {
-  return (!showeq_params->AutoDetectCharSettings || m_useDefaults ?
+  return (!m_useAutoDetectedSettings || m_useDefaults ?
 	m_defaultLastName : m_lastName);
 }
 
 uint16_t Player::deity() const 
 { 
-  return ((!showeq_params->AutoDetectCharSettings || m_useDefaults) ? 
+  return ((!m_useAutoDetectedSettings || m_useDefaults) ? 
 	  m_defaultDeity : m_deity); 
 }
 
 uint8_t Player::level() const 
 { 
-  return (!showeq_params->AutoDetectCharSettings || m_useDefaults ? 
+  return (!m_useAutoDetectedSettings || m_useDefaults ? 
 	  m_defaultLevel : m_level);
 }
 
 uint16_t Player::race() const
 {
-  return ((!showeq_params->AutoDetectCharSettings || m_useDefaults) ? 
+  return ((!m_useAutoDetectedSettings || m_useDefaults) ? 
 	  m_defaultRace : m_race);
 }
 
 uint8_t Player::classVal() const
 {
-  return ((!showeq_params->AutoDetectCharSettings || m_useDefaults) ? 
+  return ((!m_useAutoDetectedSettings || m_useDefaults) ? 
 	  m_defaultClass : m_class);
 }
 
@@ -1354,8 +1374,7 @@ void Player::restorePlayerState(void)
 
     if (magicTest != *magic)
     {
-      fprintf(stderr, 
-	      "Failure loading %s: Bad magic string!\n",
+      seqWarn("Failure loading %s: Bad magic string!",
 	      (const char*)fileName);
       reset();
       clear();
@@ -1366,8 +1385,7 @@ void Player::restorePlayerState(void)
     d >> testVal;
     if (testVal != sizeof(charProfileStruct))
     {
-      fprintf(stderr, 
-	      "Failure loading %s: Bad player size!\n", 
+      seqWarn("Failure loading %s: Bad player size!", 
 	      (const char*)fileName);
       reset();
       clear();
@@ -1377,8 +1395,7 @@ void Player::restorePlayerState(void)
     d >> testVal;
     if (testVal != MAX_KNOWN_SKILLS)
     {
-      fprintf(stderr, 
-	      "Failure loading %s: Bad known skills!\n", 
+      seqWarn("Failure loading %s: Bad known skills!", 
 	      (const char*)fileName);
       reset();
       clear();
@@ -1388,8 +1405,7 @@ void Player::restorePlayerState(void)
     d >> testVal;
     if (testVal != MAX_KNOWN_LANGS)
     {
-      fprintf(stderr, 
-	      "Failure loading %s: Bad known langs!\n", 
+      seqWarn("Failure loading %s: Bad known langs!", 
 	      (const char*)fileName);
       reset();
       clear();
@@ -1401,8 +1417,7 @@ void Player::restorePlayerState(void)
     d >> zoneShortName;
     if (zoneShortName != m_zoneMgr->shortZoneName().lower())
     {
-      fprintf(stderr,
-	      "\aWARNING: Restoring player state for potentially incorrect zone (%s != %s)!\n",
+      seqWarn("\aWARNING: Restoring player state for potentially incorrect zone (%s != %s)!",
 	      (const char*)zoneShortName, 
 	      (const char*)m_zoneMgr->shortZoneName().lower());
     }
@@ -1473,16 +1488,17 @@ void Player::restorePlayerState(void)
     // now fill out the con table
     fillConTable();
 
-    fprintf(stderr, "Restored PLAYER: %s (%s)!\n",
+    seqInfo("Restored PLAYER: %s (%s)!",
 	    (const char*)m_name,
 	    (const char*)m_lastName);
   }
   else
   {
-    fprintf(stderr,
-	    "Failure loading %s: Unable to open!\n", 
+    seqWarn("Failure loading %s: Unable to open!", 
 	    (const char*)fileName);
     reset();
     clear();
   }
 }
+
+#include "player.moc"

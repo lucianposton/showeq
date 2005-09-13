@@ -14,10 +14,11 @@
 CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
   : SEQWindow("Compass", "ShowEQ - Compass", parent, name)
 {
-  QVBoxLayout* layout = new QVBoxLayout(this);
-  layout->setAutoAdd(true);
+  QVBoxLayout* layout = new QVBoxLayout(boxLayout());
   m_compass = new Compass (this, "compass");
+  layout->addWidget(m_compass);
   QHBox* coordsbox = new QHBox(this);
+  layout->addWidget(coordsbox);
   m_compass->setFixedWidth(120);
   m_compass->setFixedHeight(120);
 
@@ -97,3 +98,5 @@ void CompassFrame::posChanged(int16_t x, int16_t y, int16_t z,
   m_y->setText(QString::number(y));
   m_z->setText(QString::number(z));
 }
+
+#include "compassframe.moc"

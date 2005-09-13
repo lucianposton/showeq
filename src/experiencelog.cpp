@@ -5,20 +5,25 @@
  *  http://www.sourceforge.net/projects/seq
  */
 
+
+#include "experiencelog.h"
+#include "map.h"
+#include "util.h"
+#include "group.h"
+#include "player.h"
+#include "datalocationmgr.h"
+#include "diagnosticmessages.h"
+#include "zonemgr.h"
+
+#include <stdio.h>
+#include <time.h>
+
 #include <qgrid.h>
 #include <qtimer.h>
 #include <qhbox.h>
 #include <qvgroupbox.h>
 #include <qmessagebox.h>
-#include <stdio.h>
-#include <time.h>
-
-#include "experiencelog.h"
-#include "interface.h"
-#include "map.h"
-#include "util.h"
-#include "group.h"
-#include "player.h"
+#include <qfileinfo.h>
 
 #define DEBUGEXP
 
@@ -29,15 +34,19 @@ ExperienceRecord::ExperienceRecord( const QString &mob_name,
 				    long xp_gained, 
 				    time_t time, 
 				    const QString &zone_name, 
-				    Player* player,
-				    GroupMgr* groupMgr) 
-: m_player(player), 
-  m_group(groupMgr),
-  m_zone_name(zone_name), 
-  m_mob_name(mob_name),
-  m_mob_level(mob_level),
-  m_xp_gained(xp_gained),
-  m_time(time)
+				    uint8_t classVal, uint8_t level, float zem,
+				    float totalLevels, 
+				    float groupBonus) 
+  : m_class(classVal),
+    m_level(level),
+    m_zem(zem),
+    m_totalLevels(totalLevels),
+    m_groupBonus(groupBonus),
+    m_zone_name(zone_name), 
+    m_mob_name(mob_name),
+    m_mob_level(mob_level),
+    m_xp_gained(xp_gained),
+    m_time(time)
 {
 
 }
@@ -69,9 +78,8 @@ long ExperienceRecord::getExpValue() const
 
 long ExperienceRecord::getExpValueZEM() const 
 {
-   EQInterface *parent = (EQInterface*)m_player->parent();
-   int ZEM = parent->mapMgr()->getZEM();
-   return m_mob_level*m_mob_level*ZEM;
+  int ZEM = int(m_zem * 100);
+  return m_mob_level*m_mob_level*ZEM;
 }
  
 long ExperienceRecord::getExpValuep() const 
@@ -79,7 +87,7 @@ long ExperienceRecord::getExpValuep() const
    int p_penalty; 
    // WAR and ROG are at 10 since thier EXP is not scaled to compensate
    // for thier bonus
-   switch (m_player->classVal())
+   switch (m_class)
    {
       case 1 : p_penalty = 10; break; // WAR
       case 2 : p_penalty = 10; break; // CLR
@@ -105,19 +113,9 @@ long ExperienceRecord::getExpValuep() const
 long ExperienceRecord::getExpValueg() const 
 {
    int pExp = getExpValuep();
-   int gbonus;
-   int myLevel = m_player->level();
-   int group_ag;
+   int myLevel = m_level;
 
-   gbonus = m_group->groupPercentBonus();
-
-   /* calculate group aggregate level */
-   printf("GROUPSIZE: %d\n", m_group->groupSize());
-   group_ag = m_group->totalLevels();
-   printf("MY Level: %d\n GroupTot: %d\n BONUS   :%d\n", 
-	  myLevel, group_ag, gbonus);
-
-   return (int) (((float)pExp)*((float)gbonus/(float)100)*((float)myLevel/(float)group_ag));
+   return int(((float)pExp)*m_groupBonus*((float)myLevel/m_totalLevels));
 }
 
 time_t ExperienceRecord::getTime() const 
@@ -134,16 +132,19 @@ const QString &ExperienceRecord::getZoneName() const
 
 ExperienceWindow::~ExperienceWindow() 
 {
-
-   if (logfd > -1)
-     ::close(logfd);
+  if (m_log)
+    ::fclose(m_log);
 }
 
-ExperienceWindow::ExperienceWindow( Player* player, GroupMgr* groupMgr,
-				    QWidget* parent, const char* name) 
+ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr, 
+				   Player* player, GroupMgr* groupMgr,
+				   ZoneMgr* zoneMgr,
+				   QWidget* parent, const char* name) 
   : SEQWindow("Experience", "ShowEQ - Experience", parent, name),
+    m_dataLocMgr(dataLocMgr),
     m_player(player),
-    m_group(groupMgr)
+    m_group(groupMgr),
+    m_zoneMgr(zoneMgr)
 {
   /* Hopefully this is only called once to set up the window,
      so this is a good place to initialize some things which
@@ -180,11 +181,12 @@ ExperienceWindow::ExperienceWindow( Player* player, GroupMgr* groupMgr,
    m_view_menu->insertItem( "ZEM View Options", m_ZEM_menu );
    m_view_menu->insertItem( "Calculate ZEM on next kill", this, SLOT(calcZEMNextKill()) );
 
+   m_layout = new QVBoxLayout(boxLayout());
+
    m_menu_bar = new QMenuBar( this );
    m_menu_bar->insertItem( "&View", m_view_menu );
-
-   m_layout = new QVBoxLayout( this );
-   m_layout->addSpacing( m_menu_bar->height() + 5 );
+   //m_layout->addSpacing( m_menu_bar->height() + 5 );
+   m_layout->addWidget(m_menu_bar);
 
    QGroupBox *listGBox = new QVGroupBox( "Experience Log", this );
    m_layout->addWidget( listGBox );
@@ -250,20 +252,25 @@ ExperienceWindow::ExperienceWindow( Player* player, GroupMgr* groupMgr,
    connect( timer, SIGNAL(timeout()), SLOT(updateAverage()));
    timer->start(15*1000); // calculate every 15 seconds
 
-//   setMinimumSize( sizeHint() );
+   QFileInfo fileInfo = m_dataLocMgr->findWriteFile("logs", "exp.log");
 
-   logfd = open(LOGDIR "/exp.log", O_RDWR | O_CREAT | O_APPEND);
-   if (logfd < 0)
+   m_log = fopen(fileInfo.absFilePath(), "a");
+   if (m_log == 0)
    {
       m_log_exp = 0;
-      printf("Error opening exp.log, no exp will be logged this session\n");
+      seqWarn("Error opening exp.log, no exp will be logged this session");
    }
    else
    {
-      m_log_exp = 1;
-      logstr = fdopen(logfd, "a");
+     m_log_exp = 1;
    }
 
+   fileInfo = m_dataLocMgr->findWriteFile("logs", "newexp.log");
+
+   m_newExpLogFile = fileInfo.absFilePath();
+
+   // Clear the exp list on removes and deletes.
+   m_exp_list.setAutoDelete(true);  
 }
 
 void ExperienceWindow::savePrefs()
@@ -279,8 +286,12 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    int mob_level, long xp_gained, QString zone_name ) 
 {
 
-   ExperienceRecord *xp = new ExperienceRecord( mob_name, mob_level,
-      xp_gained, time(0), zone_name, m_player, m_group);
+   ExperienceRecord *xp = 
+     new ExperienceRecord(mob_name, mob_level, xp_gained, time(0), zone_name, 
+			  m_player->classVal(), m_player->level(), 
+			  m_zoneMgr->zoneExpMultiplier(), 
+			  m_group->totalLevels(),
+			  m_group->groupBonus());
 
 #ifdef DEBUGEXP
    resize( sizeHint() );
@@ -305,14 +316,13 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    {
       calculateZEM(xp_gained, mob_level);
       m_calcZEM = 0;
-      m_view_menu->setItemChecked(m_view_menu->idAt(9), false);
+      m_view_menu->setItemChecked(m_view_menu->idAt(10), false);
    }   
    s_xp_value.setNum(xp->getExpValue());
    QString s_xp_valueZEM;
-   EQInterface *parent = (EQInterface*)m_player->parent();
    switch (m_ZEMviewtype) {
-      case 1 : s_xp_valueZEM.setNum(parent->mapMgr()->getZEM()); break;
-      case 2 : s_xp_valueZEM.setNum(((float)(parent->mapMgr()->getZEM()-75)/(float)75)*100);
+      case 1 : s_xp_valueZEM.setNum(m_zoneMgr->zoneExpMultiplier()); break;
+      case 2 : s_xp_valueZEM.setNum(((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100);
          break;
       default: s_xp_valueZEM.setNum(xp->getExpValueZEM()); break;
    }
@@ -339,7 +349,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    FILE* newlogfp = NULL;
 
    // open the file for append
-   newlogfp = fopen(LOGDIR "/newexp.log", "a");
+   newlogfp = fopen(m_newExpLogFile, "a");
 
    if (newlogfp != NULL)
    {   
@@ -356,9 +366,14 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
               m_player->level(), 
               m_player->classVal(), m_group->groupSize());
 
+      const Spawn* spawn;
       // continue with info for group members
-      for (int i=0; i < m_group->groupSize(); i++)
-        fprintf(newlogfp, "\t%d", m_group->memberBySlot(i)->level());
+      for (int i=0; i < MAX_GROUP_MEMBERS; i++)
+      {
+	spawn = m_group->memberBySlot(i);
+	if (spawn)
+	  fprintf(newlogfp, "\t%d", spawn->level());
+      }
 
       // finish the record with a line
       fprintf(newlogfp, "\n"); 
@@ -583,7 +598,7 @@ void ExperienceWindow::viewRatePerMinute()
 void ExperienceWindow::calcZEMNextKill() 
 {
    m_calcZEM = 1;
-   m_view_menu->setItemChecked(m_view_menu->idAt(9), true);
+   m_view_menu->setItemChecked(m_view_menu->idAt(10), true);
 }
 
 void ExperienceWindow::viewZEMcalculated() 
@@ -615,51 +630,55 @@ void ExperienceWindow::viewZEMpercent()
 
 void ExperienceWindow::viewClear() 
 {
-   switch( QMessageBox::information( this, "ShowEQ",
+   if (QMessageBox::information( this, "ShowEQ",
       "This function will clear all data listed in the experience "
       "log.  Do you want to continue?",
-      "&OK", "&Cancel", QString::null, 1, 1 ) ) {
+      "&OK", "&Cancel", QString::null, 1, 1) == 0) 
+   {
+     clear();
+   }
+}
 
-      case 0:
-        m_exp_list.clear();
-        m_exp_listview->clear();
-        break;
-
-      default:
-        break;
-    }
+void ExperienceWindow::clear(void)
+{
+  m_exp_list.clear();
+  m_exp_listview->clear();
 }
 
 void ExperienceWindow::logexp(long xp_gained, int mob_level) 
 {
-   if (!m_log_exp || logstr == NULL) /* sanity */
+   if (!m_log_exp || (!m_log)) /* sanity */
       return;
 
-   fprintf(logstr, "1 %d %d %ld %d %d %d", 
+   fprintf(m_log, "1 %d %d %ld %d %d %d", 
 	   (int)time(NULL), mob_level, 
       xp_gained, m_player->level(), 
       m_player->classVal(), m_group->groupSize());
 
-   for (int i=0; i < m_group->groupSize(); i++)
-      fprintf(logstr, " %d", m_group->memberBySlot(i)->level());
+   const Spawn* spawn;
+   for (int i=0; i < MAX_GROUP_MEMBERS; i++)
+   {
+     spawn = m_group->memberBySlot(i);
+     if (spawn)
+       fprintf(m_log, " %d", spawn->level());
+   }
 
-   fprintf(logstr, "\n"); 
-   fflush(logstr); /* some people like to tail -f and see live data :) */
+   fprintf(m_log, "\n"); 
+   fflush(m_log); /* some people like to tail -f and see live data :) */
 }
 
 void ExperienceWindow::calculateZEM(long xp_gained, int mob_level) 
 {
-   int gbonus=100;
+   float gbonus=1.00;
    int penalty; 
    int myLevel = m_player->level();
    int group_ag;
-   EQInterface *parent = (EQInterface*)m_player->parent();
-   gbonus = m_group->groupPercentBonus();
+   gbonus = m_group->groupBonus();
    group_ag = m_group->totalLevels();
    if (m_group->groupSize())
    {
-      printf("MY Level: %d\n GroupTot: %d\n BONUS   :%d\n", 
-	     myLevel, group_ag, gbonus);
+     seqInfo("MY Level: %d GroupTot: %d BONUS   :%d", 
+	     myLevel, group_ag, gbonus * 100);
    }
    // WAR and ROG are at 10 since thier EXP is not scaled to compensate
    // for thier bonus
@@ -681,8 +700,9 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
       default: /* why are we here? */
          penalty = 10; break; 
    }
-   unsigned char ZEM = (unsigned char) ((float)xp_gained*((float)((float)group_ag/(float)myLevel)*(float)((float)100/(float)gbonus))*((float)1/(float)(mob_level*mob_level))*((float)10/(float)penalty));
-   printf("xpgained: %ld\ngroup_ag: %d\nmyLevel: %d\ngbonus: %d\nmob_level: %d\npenalty: %d\n", xp_gained, group_ag, myLevel, gbonus, mob_level, penalty);
-   printf("ZEM - ZEM - ZEM ===== %d\n", ZEM);
-   parent->mapMgr()->setZEM(ZEM);
+   unsigned char ZEM = (unsigned char) ((float)xp_gained*((float)((float)group_ag/(float)myLevel)*(float)((float)1.0/(float)gbonus))*((float)1/(float)(mob_level*mob_level))*((float)10/(float)penalty));
+   seqInfo("xpgained: %ld group_ag: %d myLevel: %d gbonus: %d mob_level: %d penalty: %d ", xp_gained, group_ag, myLevel, gbonus, mob_level, penalty);
+   seqInfo("ZEM - ZEM - ZEM ===== %d ", ZEM);
 }
+
+#include "experiencelog.moc"

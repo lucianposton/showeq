@@ -4,7 +4,8 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  *
- * Copyright 2002 Zaphod (dohpaz@users.sourceforge.net). All Rights Reserved.
+ * Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *     All Rights Reserved.
  *
  * Contributed to ShowEQ by Zaphod (dohpaz@users.sourceforge.net) 
  * for use under the terms of the GNU General Public License, 
@@ -13,19 +14,20 @@
  */
 
 
+#include "xmlpreferences.h"
+#include "xmlconv.h"
+
+#include <stdlib.h>
+
 #include <qfile.h>
 #include <qnamespace.h>
 #include <qaccel.h>
 #include <qdir.h>
 #include <qfileinfo.h>
 #include <qregexp.h>
-#if QT_VERSION > 300
 #include <qkeysequence.h>
-#endif
 #include <qtextstream.h>
 
-#include "xmlpreferences.h"
-#include "xmlconv.h"
 
 const float seqPrefVersion = 1.0;
 const char* seqPrefName = "seqpreferences";
@@ -52,13 +54,17 @@ XMLPreferences::XMLPreferences(const QString& defaultsFileName,
   // automatically delete removed sections
   m_userSections.setAutoDelete(true);
   m_defaultsSections.setAutoDelete(true);
-  
+  m_commentSections.setAutoDelete(true);
+
   // load the preferences
   load();
 }
 
 XMLPreferences::~XMLPreferences()
 {
+  m_userSections.clear();
+  m_defaultsSections.clear();
+  m_commentSections.clear();
 }
 
 void XMLPreferences::load()
@@ -108,15 +114,6 @@ void XMLPreferences::loadPreferences(const QString& filename,
     return;
   }
 
-#if QT_VERSION < 300
-  if (!doc.setContent(&f))
-  {
-    qWarning("Unable to set preference document to contents of file: %s!", 
-	     (const char*)filename);
-    f.close();
-    return;
-  }
-#else
   QString errorMsg;
   int errorLine = 0;
   int errorColumn = 0;
@@ -128,7 +125,6 @@ void XMLPreferences::loadPreferences(const QString& filename,
     f.close();
     return;
   }
-#endif
 
   // do more processing here
  QDomElement docElem = doc.documentElement();
@@ -282,15 +278,6 @@ void XMLPreferences::savePreferences(const QString& filename,
   bool loaded = false;
   if (f.open(IO_ReadOnly))
   {
-#if QT_VERSION < 300
-    if (doc.setContent(&f))
-      loaded = true;
-    else
-    {
-      qWarning("Unable to set preference document to contents of file: %s!", 
-	       (const char*)filename);
-    }
-#else
     QString errorMsg;
     int errorLine = 0;
     int errorColumn = 0;
@@ -303,7 +290,6 @@ void XMLPreferences::savePreferences(const QString& filename,
 	       (const char*)errorMsg, errorLine, errorColumn);
 
     }
-#endif
 
     // close the file
     f.close();
@@ -312,16 +298,11 @@ void XMLPreferences::savePreferences(const QString& filename,
   // if no file was loaded, use the template document
   if (!loaded)
   {
-#if QT_VERSION < 300
-    if (doc.setContent(m_templateDoc))
-      loaded = true;
-#else
     QString errorMsg;
     int errorLine = 0;
     int errorColumn = 0;
     if (doc.setContent(m_templateDoc, false, &errorMsg, &errorLine, &errorColumn))
       loaded = true;
-#endif
   }
 
   // if there was an existing file, rename it
@@ -686,6 +667,8 @@ getPrefMethod(uint, UInt, uint);
 getPrefMethod(double, Double, double);
 getPrefMethod(bool, Bool, bool);
 getPrefMethod(QColor, Color, const QColor&);
+getPrefMethod(QPen, Pen, const QPen&);
+getPrefMethod(QBrush, Brush, const QBrush&);
 getPrefMethod(QPoint, Point, const QPoint&);
 getPrefMethod(QRect, Rect, const QRect&);
 getPrefMethod(QSize, Size, const QSize&);
@@ -719,11 +702,9 @@ int XMLPreferences::getPrefKey(const QString& inName,
 
     switch(preference->type())
     {
-#if QT_VERSION >= 300
     case QVariant::KeySequence:
       key = preference->toInt();
       break;
-#endif
     case QVariant::String:
       // convert it to a key
       key = QAccel::stringToKey(preference->toString());
@@ -745,6 +726,104 @@ int XMLPreferences::getPrefKey(const QString& inName,
 
     // return the key
     return key;
+  }
+
+  // return the default value
+  return def;
+}
+
+
+int64_t XMLPreferences::getPrefInt64(const QString& inName, 
+				     const QString& inSection, 
+				     int64_t def, 
+				     Persistence pers)
+{
+  // try to retrieve the preference
+  QVariant* preference = getPref(inName, inSection, pers);
+
+  // if preference was retrieved, return it as a string
+  if (preference != NULL)
+  {
+    int64_t value = def;
+
+    switch(preference->type())
+    {
+    case QVariant::String:
+      // convert it to a int64_t (in base 16)
+      value = strtoll(preference->toString(), 0, 16);
+      break;
+    case QVariant::Int:
+    case QVariant::UInt:
+      value = preference->toInt();
+      break;
+    case QVariant::Double:
+      value = int64_t(preference->toDouble());
+      break;
+    case QVariant::ByteArray:
+      {
+	QByteArray& ba = preference->asByteArray();
+	if (ba.size() == sizeof(int64_t))
+	  value = *(int64_t*)ba.data();
+	break;
+      }
+    default:
+      qWarning("XMLPreferences::getPrefInt64(%s, %s, %lld): preference found,\n"
+	       "\tbut type %s is not convertable to type int64_t!",
+	       (const char*)inName, (const char*)inSection, (long long)def,
+	       preference->typeName());
+    }
+
+    // return the key
+    return value;
+  }
+
+  // return the default value
+  return def;
+}
+
+uint64_t XMLPreferences::getPrefUInt64(const QString& inName, 
+				       const QString& inSection, 
+				       uint64_t def, 
+				       Persistence pers)
+{
+  // try to retrieve the preference
+  QVariant* preference = getPref(inName, inSection, pers);
+
+  // if preference was retrieved, return it as a string
+  if (preference != NULL)
+  {
+    uint64_t value = def;
+
+    switch(preference->type())
+    {
+    case QVariant::String:
+      // convert it to a uint64_t (in base 16)
+      value = strtoull(preference->toString(), 0, 16);
+      break;
+    case QVariant::Int:
+    case QVariant::UInt:
+      value = preference->toInt();
+      break;
+    case QVariant::Double:
+      value = uint64_t(preference->toDouble());
+      break;
+    case QVariant::ByteArray:
+      {
+	QByteArray& ba = preference->asByteArray();
+	if (ba.size() == sizeof(uint64_t))
+	  value = *(uint64_t*)ba.data();
+	break;
+      }
+    default:
+      qWarning("XMLPreferences::getPrefUInt64(%s, %s, %llu): preference found,\n"
+	       "\tbut type %s is not convertable to type uint64_t!",
+	       (const char*)inName, (const char*)inSection, 
+	       (unsigned long long)def,
+	       preference->typeName());
+    }
+
+    // return the key
+    return value;
   }
 
   // return the default value
@@ -784,6 +863,8 @@ setPrefMethod(Int, int);
 setPrefMethod(UInt, uint);
 setPrefMethod(Double, double);
 setPrefMethod(Color, const QColor&);
+setPrefMethod(Pen, const QPen&);
+setPrefMethod(Brush, const QBrush&);
 setPrefMethod(Point, const QPoint&);
 setPrefMethod(Rect, const QRect&);
 setPrefMethod(Size, const QSize&);
@@ -804,11 +885,28 @@ void XMLPreferences::setPrefKey(const QString& inName,
 				int inValue,
 				Persistence pers)
 {
-#if QT_VERSION < 300
-  setPref(inName, inSection, QVariant(QAccel::keyToString(inValue)), pers);
-#else
   setPref(inName, inSection, QVariant(QKeySequence(inValue)), pers);
-#endif
+}
+
+void XMLPreferences::setPrefInt64(const QString& inName,
+				  const QString& inSection,
+				  int64_t inValue,
+				  Persistence pers)
+{
+  QByteArray ba;
+  ba.duplicate((const char*)&inValue, sizeof(int64_t));
+  setPref(inName, inSection, ba, pers);
+}
+
+
+void XMLPreferences::setPrefUInt64(const QString& inName,
+				   const QString& inSection,
+				   uint64_t inValue,
+				   Persistence pers)
+{
+  QByteArray ba;
+  ba.duplicate((const char*)&inValue, sizeof(uint64_t));
+  setPref(inName, inSection, ba, pers);
 }
 
 void XMLPreferences::setPrefVariant(const QString& inName, 
@@ -819,3 +917,4 @@ void XMLPreferences::setPrefVariant(const QString& inName,
   setPref(inName, inSection, inValue, pers);
 }
 
+#include "xmlpreferences.moc"

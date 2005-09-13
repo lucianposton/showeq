@@ -33,7 +33,7 @@ dnl ------------------------------------------------------------------------
 dnl Find a file (or one of more files in a list of dirs)
 dnl ------------------------------------------------------------------------
 dnl
-AC_DEFUN(AC_FIND_FILE,
+AC_DEFUN([AC_FIND_FILE],
 [
 $3=NO
 for i in $2;
@@ -48,7 +48,7 @@ do
 done
 ])
 
-AC_DEFUN(MOC_ERROR_MESSAGE,
+AC_DEFUN([MOC_ERROR_MESSAGE],
 [
 
 HEADER="No working Qt meta object compiler (moc) found!
@@ -91,7 +91,7 @@ dnl Find the meta object compiler in the PATH, in $QTDIR/bin, and some
 dnl more usual places
 dnl ------------------------------------------------------------------------
 dnl
-AC_DEFUN(AC_PATH_QT_MOC,
+AC_DEFUN([AC_PATH_QT_MOC],
 [
   if [[ -n "$ac_qt_includes" ]]; then
    
@@ -162,7 +162,122 @@ AC_DEFUN(AC_PATH_QT_MOC,
   fi
 ])
 
-AC_DEFUN(KDE_MISC_TESTS,
+AC_DEFUN([UIC_ERROR_MESSAGE],
+[
+
+HEADER="No working Qt user interface compiler (uic) found!
+"
+
+FOOTER="
+
+As a last resort, it may be possible to eliminate this error by typing:
+
+	export UIC=\`updatedb && locate uic | grep bin/uic\`  (with the \`s)"
+
+if [[ -e "$ac_cv_path_uic" ]]; then
+  if ! [[ -x "$ac_cv_path_uic" ]]; then
+    AC_MSG_ERROR([$HEADER
+Configure found and tried to use '$ac_cv_path_uic', but failed...
+
+The problem appears to be the lack of an executable flag for the file...
+Try changing the permissions of '$ac_cv_path_uic' by issuing the following:
+
+	chmod 774 $ac_cv_path_uic    (NOTE: > 774 may pose a security risk...)])
+  else
+    AC_MSG_ERROR([$HEADER
+Configure found and tried to use '$ac_cv_path_uic', but failed...
+
+If configure shouldn't have tried '$ac_cv_path_uic', please set the environment 
+variable UIC to point to the location of your prefered uic binary and run
+configure over. $FOOTER])
+  fi
+else
+  AC_MSG_ERROR([$HEADER
+Configure was unable to locate a uic binary anywhere on your system!
+
+If you have a working uic binary, please set the environment variable UIC
+to point to the location of your uic binary and run configure over. $FOOTER])
+fi
+])
+
+
+dnl ------------------------------------------------------------------------
+dnl Find the meta object compiler in the PATH, in $QTDIR/bin, and some
+dnl more usual places
+dnl ------------------------------------------------------------------------
+dnl
+AC_DEFUN([AC_PATH_QT_UIC],
+[
+  if [[ -n "$ac_qt_includes" ]]; then
+   
+     AC_MSG_CHECKING([for Qt UIC]);
+     AC_FIND_FILE(uic, [ $ac_qt_bindir              \
+                         $QTDIR/bin                 \
+                         $QTDIR/src/uic             \
+                         /usr/local/qt3/bin	    \
+                         /usr/local/qt/bin          \
+                         /usr/local/qt2/bin         \
+	                 /usr/local/qt-2.3.2/lib    \
+                         /usr/local/qt*/bin         \
+	                 /usr/lib/qtgcc3-2.3.2/lib  \
+	                 /usr/lib/qtgcc3-*/lib  \
+	                 /opt/qt-gcc3-2.3.2/lib	    \
+	                 /opt/qt-gcc3-*/lib	    \
+	                 /opt/qt-2.3.2/lib          \
+                         /usr/bin                   \
+                         /usr/X11R6/bin             \
+                         /usr/X11R6/bin/qt3	    \
+                         /usr/X11R6/bin/qt          \
+                         /usr/X11R6/bin/qt2         \
+                         /usr/X11R6/bin/qt*         \
+                         /usr/X11R6/bin/qt2/bin     \
+                         /usr/X11R6/bin/qt3/bin     \
+                         /usr/X11R6/bin/qt/bin      \
+                         /usr/X11R6/bin/qt*/bin     \
+                         /usr/X11R6/bin/X11/qt3     \
+                         /usr/X11R6/bin/X11/qt      \
+                         /usr/X11R6/bin/X11/qt2     \
+                         /usr/X11R6/bin/X11/qt*     \
+                         /usr/X11R6/bin/X11/qt3/bin \
+                         /usr/X11R6/bin/X11/qt/bin  \
+                         /usr/X11R6/bin/X11/qt2/bin \
+                         /usr/X11R6/bin/X11/qt*/bin \
+                         /usr/lib/qt3/bin	    \
+                         /usr/lib/qt/bin            \
+                         /usr/lib/qt2/bin           \
+                         /usr/lib/qt*/bin           \
+                         /usr/src/qt-*/bin            ],
+
+             UIC)
+
+     UIC="$UIC/uic"
+     ac_cv_path_uic="$UIC"
+
+     if [[ -n "$ac_cv_path_uic" ]]; then
+       if ! [[ -e "$ac_cv_path_uic" ]]; then
+         UIC_ERROR_MESSAGE
+       fi
+
+       if ! [[ -x "$ac_cv_path_uic" ]]; then
+         UIC_ERROR_MESSAGE
+       fi
+
+       output=`eval "$ac_cv_path_uic --help  2>&1 | grep -i 'Qt user interface'"`
+
+       echo "configure:__oline__: tried to call $ac_cv_path_uic --help 2>&1 | sed -e '1q' | grep Qt" >&AC_FD_CC
+       echo "configure:__oline__: uic output: $output" >&AC_FD_CC
+
+       if [[ -z "$output" ]]; then
+         UIC_ERROR_MESSAGE
+       fi
+     fi
+
+     AC_SUBST(UIC)
+     AC_MSG_RESULT(yes)
+  fi
+])
+
+AC_DEFUN([KDE_MISC_TESTS],
 [
    AC_LANG_C
    dnl Checks for libraries.
@@ -232,7 +347,7 @@ dnl Find the header files and libraries for X-Windows. Extended the
 dnl macro AC_PATH_X
 dnl ------------------------------------------------------------------------
 dnl
-AC_DEFUN(K_PATH_X,
+AC_DEFUN([K_PATH_X],
 [
 AC_REQUIRE([AC_PROG_CPP])
 dnl AC_MSG_CHECKING(for X)
@@ -367,7 +482,7 @@ AC_LANG_RESTORE
 ])
 ])
 
-AC_DEFUN(PRINT_QT_PROGRAM,
+AC_DEFUN([PRINT_QT_PROGRAM],
 [
 cat > conftest.$ac_ext <<EOF
 #define QT_THREAD_SUPPORT 1
@@ -394,7 +509,7 @@ int main() {
 EOF
 ])
 
-AC_DEFUN(CHECK_QT_DIRECT,
+AC_DEFUN([CHECK_QT_DIRECT],
 [
 AC_MSG_CHECKING([if Qt compiles without flags])
 AC_CACHE_VAL(cv_qt_direct,
@@ -452,7 +567,7 @@ dnl $(QT_LDFLAGS) will be -Lqtliblocation (if needed)
 dnl and $(QT_INCLUDES) will be -Iqthdrlocation (if needed)
 dnl ------------------------------------------------------------------------
 dnl
-AC_DEFUN(AC_PATH_QT_1_3,
+AC_DEFUN([AC_PATH_QT_1_3],
 [
 AC_REQUIRE([K_PATH_X])
 LIBQT="-lqt-mt"
@@ -467,21 +582,30 @@ LIBQT="$LIBQT $X_PRE_LIBS -lXext -lX11 $LIBSOCKET"
 ac_qt_includes=""
 ac_qt_libraries=""
 ac_qt_bindir=""
+ac_qt_docs=""
 
 qt_libraries=""
 qt_includes=""
+qt_docs=""
 
 AC_ARG_WITH(qt-dir,
     [  --with-qt-dir=DIR       where the root of Qt is installed ],
     [  ac_qt_includes="$withval"/include
        ac_qt_libraries="$withval"/lib
        ac_qt_bindir="$withval"/bin
+       ac_qt_docs="$withval"/doc/html
     ])
 
 AC_ARG_WITH(qt-includes,
     [  --with-qt-includes=DIR  where the Qt includes are. ],
     [
        ac_qt_includes="$withval"
+    ])
+
+AC_ARG_WITH(qt-docs,
+    [  --with-qt-docs=DIR  where the Qt docs are. ],
+    [
+       ac_qt_docs="$withval"
     ])
 
 ac_qt_libs_given=no
@@ -507,41 +631,31 @@ qt_incdirs=" $QTDIR/include                     \
              $QTINC                             \
 	     /usr/local/qt3/include		\
              /usr/local/qt/include              \
-             /usr/local/qt2/include             \
-	     /usr/local/qt-2.3.2/include	\
              /usr/local/qt*/include             \
-	     /opt/qt-gcc3-2.3.2/include		\
+	     /usr/qt/3/include			\
+	     /usr/qt/*/include			\
 	     /opt/qt-gcc3-*/include		\
-	     /opt/qt-2.3.2/include		\
 	     /usr/include/qt3			\
              /usr/include/qt                    \
-             /usr/include/qt2                   \
              /usr/include/qt*                   \
              /usr/include                       \
 	     /usr/lib/qt3/include		\
              /usr/lib/qt/include                \
-             /usr/lib/qt2/include               \
              /usr/lib/qt*/include               \
-	     /usr/lib/qtgcc3-2.3.2/include	\
 	     /usr/lib/qtgcc3-*/include		\
 	     /usr/lib/qt3/include		\
              /usr/lib/qt/include                \
-             /usr/lib/qt2/include               \
              /usr/lib/qt*/include               \
-             /usr/X11R6/include/X11/qt2         \
 	     /usr/X11R6/include/X11/qt3		\
              /usr/X11R6/include/X11/qt          \
              /usr/X11R6/include/X11/qt*         \
-             /usr/X11R6/include/X11/qt2/include \
 	     /usr/X11R6/include/X11/qt3/include \
              /usr/X11R6/include/X11/qt/include  \
              /usr/X11R6/include/X11/qt*/include \
-             /usr/X11R6/include/qt2             \
 	     /usr/X11R6/include/qt3		\
              /usr/X11R6/include/qt              \
              /usr/X11R6/include/qt*             \
-             /usr/X11R6/include/qt2/include     \
-	     /usr/X11R6/include/qt3/include	\
+ 	     /usr/X11R6/include/qt3/include	\
              /usr/X11R6/include/qt/include      \
              /usr/X11R6/include/qt*/include     \
              /usr/src/qt-*/include              \
@@ -600,17 +714,13 @@ else
   AC_MSG_ERROR([Please verify your Qt devel install!]);
 fi;
 
-qt_target_version="3.0.5"
+qt_target_version="3.2.0"
 
-if test $qt_major_version -le 1 ; then
-  AC_MSG_ERROR([Please Make sure $qt_target_version or later is installed!!!]);
-elif test $qt_major_version -eq 2 ; then
-  if test $qt_minor_version -le 2 ; then
-    AC_MSG_ERROR([Please Make sure $qt_target_version or later is installed!!!]);
-  elif test $qt_minor_version -eq 3 ; then
-    if test $qt_major_build -lt 1 ; then
-      AC_MSG_ERROR([Please Make sure $qt_target_version or later is installed!!!]);
-    fi;
+if test $qt_major_version -le 2 ; then
+  AC_MSG_ERROR([Please Make sure qt $qt_target_version or later is installed!!!]);
+elif test $qt_major_version -le 3 ; then
+  if test $qt_minor_version -lt 2 ; then
+    AC_MSG_ERROR([Please Make sure qt $qt_target_version or later is installed!!!]);
   fi;
 fi;
 
@@ -623,40 +733,55 @@ qt_libdirs=" $QTDIR/lib			\
              $QTLIB			\
 	     /usr/local/qt3/lib		\
              /usr/local/qt/lib		\
-	     /usr/local/qt2/lib		\
-	     /usr/local/qt-2.3.2/lib	\
              /usr/local/qt*/lib		\
-	     /opt/qt-gcc3-2.3.2/lib	\
-	     /opt/qt-2.3.2/lib		\
+	     /usr/qt/3/lib		\
+	     /usr/qt/*/lib		\
 	     /usr/lib/qt3/lib		\
              /usr/lib/qt/lib		\
 	     /usr/lib/qt*/lib		\
 	     /usr/lib/qt3		\
-             /usr/lib/qt2		\
              /usr/lib/qt		\
-             /usr/lib/qt2/lib		\
-	     /usr/lib/qtgcc3-2.3.2/lib	\
              /usr/lib/qt*		\
              /usr/lib			\
 	     /usr/X11R6/lib/X11/qt3	\
              /usr/X11R6/lib/X11/qt	\
-             /usr/X11R6/lib/X11/qt2	\
              /usr/X11R6/lib/X11/qt*	\
 	     /usr/X11R6/lib/X11/qt3/lib	\
              /usr/X11R6/lib/X11/qt/lib	\
-             /usr/X11R6/lib/X11/qt2/lib	\
              /usr/X11R6/lib/X11/qt*/lib	\
 	     /usr/X11R6/lib/qt3		\
              /usr/X11R6/lib/qt		\
-             /usr/X11R6/lib/qt2		\
              /usr/X11R6/lib/qt*		\
 	     /usr/X11R6/lib/qt3/lib	\
              /usr/X11R6/lib/qt/lib	\
-             /usr/X11R6/lib/qt2/lib	\
 	     /usr/X11R6/lib/qt*/lib	\
              /usr/src/qt-*/lib		\
              $x_libraries		\
              $qt_libdirs"
+
+case $host_cpu in
+powerpc64 | s390x | sparc64 | x86_64)
+qt_libdirs=" $QTDIR/lib64			\
+             $QTLIB			\
+	     /usr/local/qt3/lib64	\
+             /usr/local/qt/lib64	\
+             /usr/local/qt*/lib64	\
+	     /usr/qt/3/lib64		\
+	     /usr/qt/*/lib64		\
+	     /usr/lib/qt3/lib64		\
+             /usr/lib/qt/lib64		\
+	     /usr/lib/qt*/lib64		\
+             /usr/lib64			\
+	     /usr/X11R6/lib/X11/qt3/lib64 \
+             /usr/X11R6/lib/X11/qt/lib64  \
+             /usr/X11R6/lib/X11/qt*/lib64 \
+	     /usr/X11R6/lib/qt3/lib64	\
+             /usr/X11R6/lib/qt/lib64	\
+	     /usr/X11R6/lib/qt*/lib64	\
+             /usr/src/qt-*/lib64	\
+             $qt_libdirs"
+;;
+esac
 
 [[ "$ac_qt_libraries" != "NO" ]]   &&   \
 qt_libdirs="$ac_qt_libraries $qt_libdirs"
@@ -673,7 +798,6 @@ for dir in $qt_libdirs; do
   else
     echo "tried $dir" >&AC_FD_CC;
   fi
-
 done
 
 ac_qt_libraries="$qt_libdir"
@@ -730,6 +854,53 @@ LDFLAGS="$ac_ldflags_safe"
 LIBS="$ac_libs_safe"
 
 AC_LANG_RESTORE
+
+dnl ************************************
+dnl * Build yet another search path... *
+dnl ************************************
+
+qt_docdirs=" $QTDIR/doc/html		     \
+	     $qt_incdir../doc/html     	     \
+             /usr/local/qt3/doc/html	     \
+             /usr/local/qt/doc/html	     \
+             /usr/local/qt*/doc/html	     \
+	     /usr/qt/3/doc/html	     	     \
+	     /usr/qt/*/doc/html	     	     \
+	     /usr/lib/qt3/doc/html	     \
+             /usr/lib/qt/doc/html	     \
+	     /usr/lib/qt*/doc/html	     \
+	     /usr/lib/doc/html	     	     \
+             /usr/lib/qt/doc/html	     \
+             /usr/lib/qt*/doc/html	     \
+	     /usr/X11R6/lib/X11/qt3/doc/html \
+             /usr/X11R6/lib/X11/qt/doc/html  \
+             /usr/X11R6/lib/X11/qt*/doc/html \
+	     /usr/X11R6/lib/X11/qt3/doc/html \
+             /usr/X11R6/lib/X11/qt/doc/html  \
+             /usr/X11R6/lib/X11/qt*/doc/html \
+	     /usr/X11R6/lib/qt3/doc/html     \
+             /usr/X11R6/lib/qt/doc/html	     \
+             /usr/X11R6/lib/qt*/doc/html     \
+	     /usr/X11R6/lib/qt3/doc/html     \
+             /usr/X11R6/lib/qt/doc/html	     \
+	     /usr/X11R6/lib/qt*/doc/html     \
+             /usr/src/qt-*/doc/html	     \
+             $qt_docdirs"
+
+[[ "$ac_qt_docs" != "NO" ]]   &&   \
+qt_docdirs="$ac_qt_docs $qt_docdirs"
+
+AC_FIND_FILE("qobject.html", $qt_docdirs, qt_docdir)
+
+ac_qt_docs="$qt_docdir"
+
+if [[ -n "$ac_qt_docs" -a "$ac_qt_docs" != "NO" ]]; then
+  echo -e ">>>> Documentation...:\t$ac_qt_docs/"
+else
+  echo -e ">>>> Documentation...:\tUnable to locate?!?"
+  AC_MSG_WARN([Qt documenation not installed?!]);
+fi;
+
 if [[ -z "$ac_qt_includes" ]] || [[ -z "$ac_qt_libraries" ]]; then
   ac_cv_have_qt="have_qt=no";
   ac_qt_notfound="";
@@ -776,15 +947,16 @@ elif [[ $qt_major_version -lt 3 ]]; then
        echo "]]]]]" > /dev/null 2>&1`;
 
   if [[ -n "$MBY" ]]; then
-    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 3.0.5+, please upgrade
+    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 3.1.0+, please upgrade
 >>>>>> Workable..:	$MBY]);
   else
-    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 3.0.5+, please upgrade
+    AC_MSG_RESULT([>>>>> NOTE.......:	ShowEQ is designed for Qt 3.1.0+, please upgrade
 >>>>>> Workable..:  -*{ ??? }*-]);
   fi
 
   qt_libraries=$ac_qt_libraries
   qt_includes=$ac_qt_includes
+  qt_docs=$ac_qt_docs
 
 else
 
@@ -799,14 +971,17 @@ else
 
   qt_libraries=$ac_qt_libraries
   qt_includes=$ac_qt_includes
+  qt_docs=$ac_qt_docs
 
 fi
 
 AC_PATH_QT_MOC
+AC_PATH_QT_UIC
 CHECK_QT_DIRECT(qt_libraries= ,[])
 
 AC_SUBST(qt_libraries)
 AC_SUBST(qt_includes)
+AC_SUBST(qt_docs)
 
 if [[ "$qt_includes" == "$x_includes" ]] ||
    [[ -z "$qt_includes" ]]; then
@@ -824,20 +999,23 @@ else
  all_libraries="$all_libraries $QT_LDFLAGS"
 fi
 
+QT_DOCS="$qt_docs"
+
 AC_SUBST(QT_INCLUDES)
 AC_SUBST(QT_LDFLAGS)
+AC_SUBST(QT_DOCS)
 
 LIB_QT='-lqt-mt $(LIBPNG) -lXext $(LIB_X11) $(X_PRE_LIBS)'
 AC_SUBST(LIB_QT)
 
 ])
 
-AC_DEFUN(AC_PATH_QT,
+AC_DEFUN([AC_PATH_QT],
 [
 AC_PATH_QT_1_3
 ])
 
-AC_DEFUN(KDE_CHECK_FINAL,
+AC_DEFUN([KDE_CHECK_FINAL],
 [
   AC_ARG_ENABLE(final, [  --enable-final          build size optimized apps (needs lots of memory)],
 	kde_use_final=yes, kde_use_final=no, kde_use_final=no)
@@ -854,7 +1032,7 @@ AC_DEFUN(KDE_CHECK_FINAL,
   AC_SUBST(KDE_USE_FINAL_FALSE)
 ])
 
-AC_DEFUN(SHOWEQ_CHECK_EXTRA_LIBS,
+AC_DEFUN([SHOWEQ_CHECK_EXTRA_LIBS],
 [
 AC_MSG_CHECKING(for extra includes)
 AC_ARG_WITH(extra-includes, [  --with-extra-includes=DIR
@@ -909,7 +1087,7 @@ AC_MSG_RESULT($showeq_use_extra_libs)
 
 ])
 
-AC_DEFUN(KDE_CHECK_KIMGIO,
+AC_DEFUN([KDE_CHECK_KIMGIO],
 [
    AC_REQUIRE([AC_BASE_PATH_KDE])
    AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
@@ -939,7 +1117,7 @@ AC_DEFUN(KDE_CHECK_KIMGIO,
    AC_SUBST(LIB_KIMGIO)
 ])
 
-AC_DEFUN(KDE_CREATE_LIBS_ALIASES,
+AC_DEFUN([KDE_CREATE_LIBS_ALIASES],
 [
    AC_REQUIRE([KDE_MISC_TESTS])
    AC_REQUIRE([KDE_CHECK_LIBDL])
@@ -984,7 +1162,7 @@ else
 fi
 ])
 
-AC_DEFUN(AC_PATH_KDE,
+AC_DEFUN([AC_PATH_KDE],
 [
   AC_BASE_PATH_KDE
   AC_ARG_ENABLE(path-check, [  --disable-path-check    don't try to find out, where to install],
@@ -1003,7 +1181,7 @@ AC_DEFUN(AC_PATH_KDE,
 ])
 
 dnl slightly changed version of AC_CHECK_FUNC(setenv)
-AC_DEFUN(AC_CHECK_SETENV,
+AC_DEFUN([AC_CHECK_SETENV],
 [AC_MSG_CHECKING([for setenv])
 AC_CACHE_VAL(ac_cv_func_setenv,
 [AC_LANG_C
@@ -1038,7 +1216,7 @@ else
 fi
 ])
 
-AC_DEFUN(AC_CHECK_GETDOMAINNAME,
+AC_DEFUN([AC_CHECK_GETDOMAINNAME],
 [
 AC_LANG_CPLUSPLUS
 save_CXXFLAGS="$CXXFLAGS"
@@ -1066,7 +1244,7 @@ fi
 CXXFLAGS="$save_CXXFLAGS"
 ])
 
-AC_DEFUN(AC_CHECK_GETHOSTNAME,
+AC_DEFUN([AC_CHECK_GETHOSTNAME],
 [
 AC_LANG_CPLUSPLUS
 save_CXXFLAGS="$CXXFLAGS"
@@ -1095,7 +1273,7 @@ fi
 CXXFLAGS="$save_CXXFLAGS"
 ])
 
-AC_DEFUN(AC_CHECK_USLEEP,
+AC_DEFUN([AC_CHECK_USLEEP],
 [
 AC_LANG_CPLUSPLUS
 
@@ -1121,7 +1299,7 @@ fi
 LIBS="$ac_libs_safe"
 ])
 
-AC_DEFUN(AC_CHECK_RANDOM,
+AC_DEFUN([AC_CHECK_RANDOM],
 [
 AC_LANG_CPLUSPLUS
 
@@ -1146,7 +1324,7 @@ fi
 LIBS="$ac_libs_safe"
 ])
 
-AC_DEFUN(AC_FIND_GIF,
+AC_DEFUN([AC_FIND_GIF],
    [AC_MSG_CHECKING([for giflib])
 AC_CACHE_VAL(ac_cv_lib_gif,
 [ac_save_LIBS="$LIBS"
@@ -1176,7 +1354,7 @@ else
 fi
 ])
 
-AC_DEFUN(KDE_FIND_JPEG_HELPER,
+AC_DEFUN([KDE_FIND_JPEG_HELPER],
 [
 AC_MSG_CHECKING([for libjpeg$2])
 AC_CACHE_VAL(ac_cv_lib_jpeg_$1,
@@ -1216,7 +1394,7 @@ fi
 
 ])
 
-AC_DEFUN(AC_FIND_JPEG,
+AC_DEFUN([AC_FIND_JPEG],
 [
 KDE_FIND_JPEG_HELPER(6b, 6b,
    KDE_FIND_JPEG_HELPER(normal, [],
@@ -1248,7 +1426,7 @@ AC_DEFINE_UNQUOTED(HAVE_LIBJPEG, 1, [Define if you have libjpeg])
 
 ])
 
-AC_DEFUN(AC_FIND_ZLIB,
+AC_DEFUN([AC_FIND_ZLIB],
 [
 AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 AC_MSG_CHECKING([for libz])
@@ -1281,7 +1459,7 @@ else
 fi
 ])
 
-AC_DEFUN(KDE_TRY_TIFFLIB,
+AC_DEFUN([KDE_TRY_TIFFLIB],
 [
 AC_MSG_CHECKING([for libtiff $1])
 
@@ -1322,7 +1500,7 @@ fi
 
 ])
 
-AC_DEFUN(AC_FIND_TIFF,
+AC_DEFUN([AC_FIND_TIFF],
 [
 AC_REQUIRE([K_PATH_X])
 AC_REQUIRE([AC_FIND_ZLIB])
@@ -1336,7 +1514,7 @@ AC_SUBST(LIBTIFF)
 ])
 
 
-AC_DEFUN(AC_FIND_PNG,
+AC_DEFUN([AC_FIND_PNG],
 [
 AC_REQUIRE([AC_FIND_ZLIB])
 AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
@@ -1375,7 +1553,7 @@ else
 fi
 ])
 
-AC_DEFUN(AC_CHECK_BOOL,
+AC_DEFUN([AC_CHECK_BOOL],
 [
 	AC_MSG_CHECKING([for bool])
         AC_CACHE_VAL(ac_cv_have_bool,
@@ -1392,7 +1570,7 @@ AC_DEFUN(AC_CHECK_BOOL,
         fi
 ])
 
-AC_DEFUN(AC_CHECK_GNU_EXTENSIONS,
+AC_DEFUN([AC_CHECK_GNU_EXTENSIONS],
 [
 AC_MSG_CHECKING(if you need GNU extensions)
 AC_CACHE_VAL(ac_cv_gnu_extensions,
@@ -1420,7 +1598,7 @@ if test "$ac_cv_gnu_extensions" = "yes"; then
 fi
 ])
 
-AC_DEFUN(KDE_CHECK_COMPILER_FLAG,
+AC_DEFUN([KDE_CHECK_COMPILER_FLAG],
 [
 AC_REQUIRE([AC_CHECK_COMPILERS])
 AC_MSG_CHECKING(whether $CXX supports -$1)
@@ -1446,7 +1624,7 @@ else
 fi
 ])
 
-AC_DEFUN(AC_CHECK_COMPILERS,
+AC_DEFUN([AC_CHECK_COMPILERS],
 [
   dnl this is somehow a fat lie, but prevents other macros from double checking
   AC_PROVIDE([AC_PROG_CC])
@@ -1695,14 +1873,14 @@ dnl dependecies between AC_PROG_CPP and AC_PROG_CC (or is it automake?)
     AC_SUBST(KDE_CXXFLAGS)
 ])
 
-AC_DEFUN(KDE_ADD_DEPENDENCIES,
+AC_DEFUN([KDE_ADD_DEPENDENCIES],
 [
    [A]M_DEPENDENCIES(CC)
    [A]M_DEPENDENCIES(CXX)
 ])
 
 dnl just a wrapper to clean up configure.in
-AC_DEFUN(KDE_PROG_LIBTOOL,
+AC_DEFUN([KDE_PROG_LIBTOOL],
 [
 AC_REQUIRE([AC_CHECK_COMPILERS])
 AC_REQUIRE([AC_ENABLE_SHARED])
@@ -1728,7 +1906,7 @@ if test -z "$LIBTOOL"; then
 fi
 ])
 
-AC_DEFUN(KDE_DO_IT_ALL,
+AC_DEFUN([KDE_DO_IT_ALL],
 [
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
@@ -1741,7 +1919,7 @@ AM_KDE_WITH_NLS
 AC_PATH_KDE
 ])
 
-AC_DEFUN(AC_CHECK_RPATH,
+AC_DEFUN([AC_CHECK_RPATH],
 [
 AC_MSG_CHECKING(for rpath)
 AC_ARG_ENABLE(rpath,
@@ -1770,7 +1948,7 @@ AC_MSG_RESULT($USE_RPATH)
 ])
 
 dnl Check for the type of the third argument of getsockname
-AC_DEFUN(AC_CHECK_KSIZE_T,
+AC_DEFUN([AC_CHECK_KSIZE_T],
 [AC_MSG_CHECKING(for the third argument of getsockname)
 AC_CACHE_VAL(ac_cv_ksize_t,
 AC_LANG_SAVE
@@ -1830,7 +2008,7 @@ dnl PARTICULAR PURPOSE.
 dnl >
 dnl for this file it is relicensed under LGPL
 
-AC_DEFUN(AM_KDE_WITH_NLS,
+AC_DEFUN([AM_KDE_WITH_NLS],
   [AC_MSG_CHECKING([whether NLS is requested])
     dnl Default is enabled NLS
     AC_ARG_ENABLE(nls,
@@ -1883,7 +2061,7 @@ AC_DEFUN(AM_KDE_WITH_NLS,
 
 dnl AM_PATH_PROG_WITH_TEST_KDE(VARIABLE, PROG-TO-CHECK-FOR,
 dnl   TEST-PERFORMED-ON-FOUND_PROGRAM [, VALUE-IF-NOT-FOUND [, PATH]])
-AC_DEFUN(AM_PATH_PROG_WITH_TEST_KDE,
+AC_DEFUN([AM_PATH_PROG_WITH_TEST_KDE],
 [# Extract the first word of "$2", so it can be a program name with args.
 set dummy $2; ac_word=[$]2
 AC_MSG_CHECKING([for $ac_word])
@@ -1925,7 +2103,7 @@ AC_SUBST($1)dnl
 
 # serial 1
 
-AC_DEFUN(AM_LC_MESSAGES,
+AC_DEFUN([AM_LC_MESSAGES],
   [if test $ac_cv_header_locale_h = yes; then
     AC_CACHE_CHECK([for LC_MESSAGES], am_cv_val_LC_MESSAGES,
       [AC_TRY_LINK([#include <locale.h>], [return LC_MESSAGES],
@@ -1935,43 +2113,13 @@ AC_DEFUN(AM_LC_MESSAGES,
     fi
   fi])
 
-dnl From Jim Meyering.
-dnl FIXME: migrate into libit.
-
-dnl AC_DEFUN(AM_FUNC_OBSTACK,
-dnl [AC_CACHE_CHECK([for obstacks], am_cv_func_obstack,
-dnl [AC_TRY_LINK([#include "obstack.h"],
-dnl	      [struct obstack *mem;obstack_free(mem,(char *) 0)],
-dnl	      am_cv_func_obstack=yes,
-dnl	      am_cv_func_obstack=no)])
-dnl if test $am_cv_func_obstack = yes; then
-dnl   AC_DEFINE(HAVE_OBSTACK)
-dnl else
-dnl   LIBOBJS="$LIBOBJS obstack.o"
-dnl fi
-dnl ])
-
-dnl From Jim Meyering.  Use this if you use the GNU error.[ch].
-dnl FIXME: Migrate into libit
-
-dnl AC_DEFUN(AM_FUNC_ERROR_AT_LINE,
-dnl [AC_CACHE_CHECK([for error_at_line], am_cv_lib_error_at_line,
-dnl [AC_TRY_LINK([],[error_at_line(0, 0, "", 0, "");],
-dnl              am_cv_lib_error_at_line=yes,
-dnl	      am_cv_lib_error_at_line=no)])
-dnl if test $am_cv_lib_error_at_line = no; then
-dnl   LIBOBJS="$LIBOBJS error.o"
-dnl fi
-dnl AC_SUBST(LIBOBJS)dnl
-dnl ])
-
 # Macro to add for using GNU gettext.
 # Ulrich Drepper <drepper@cygnus.com>, 1995.
 
 # serial 1
 # Stephan Kulow: I put a KDE in it to avoid name conflicts
 
-AC_DEFUN(AM_KDE_GNU_GETTEXT,
+AC_DEFUN([AM_KDE_GNU_GETTEXT],
   [AC_REQUIRE([AC_PROG_MAKE_SET])dnl
    AC_REQUIRE([AC_PROG_RANLIB])dnl
    AC_REQUIRE([AC_HEADER_STDC])dnl
@@ -2035,7 +2183,7 @@ __argz_count __argz_stringify __argz_next])
 
   ])
 
-AC_DEFUN(AC_HAVE_XPM,
+AC_DEFUN([AC_HAVE_XPM],
  [AC_REQUIRE_CPP()dnl
   AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 
@@ -2087,7 +2235,7 @@ AC_DEFUN(AC_HAVE_XPM,
  AC_SUBST(XPMLIB)
 ])
 
-AC_DEFUN(AC_HAVE_DPMS,
+AC_DEFUN([AC_HAVE_DPMS],
  [AC_REQUIRE_CPP()dnl
   AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 
@@ -2139,7 +2287,7 @@ AC_DEFUN(AC_HAVE_DPMS,
  AC_SUBST(DPMSLIB)
 ])
 
-AC_DEFUN(AC_HAVE_GL,
+AC_DEFUN([AC_HAVE_GL],
  [AC_REQUIRE_CPP()dnl
   AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 
@@ -2211,7 +2359,7 @@ AC_DEFUN(AC_HAVE_GL,
  dnl PAM pam
 
  dnl Should test for PAM (Pluggable Authentication Modules)
- AC_DEFUN(AC_PATH_PAM_DIRECT,
+ AC_DEFUN([AC_PATH_PAM_DIRECT],
  [
  test -z "$pam_direct_test_library" && pam_direct_test_library=pam
  test -z "$pam_direct_test_include" && pam_direct_test_include=security/pam_appl.h
@@ -2256,7 +2404,7 @@ AC_DEFUN(AC_HAVE_GL,
  done
 ])
 
-AC_DEFUN(AC_PATH_PAM,
+AC_DEFUN([AC_PATH_PAM],
  [
   AC_REQUIRE([KDE_CHECK_LIBDL])
   AC_REQUIRE_CPP()dnl
@@ -2357,7 +2505,7 @@ dnl test whether struct pam_message is const (Linux) or not (Sun)
 
 ])
 
-AC_DEFUN(KDE_CHECK_LIBDL,
+AC_DEFUN([KDE_CHECK_LIBDL],
 [
 AC_CHECK_LIB(dl, dlopen, [
 LIBDL="-ldl"
@@ -2372,7 +2520,7 @@ ac_cv_have_shload=yes
 AC_SUBST(LIBDL)
 ])
 
-AC_DEFUN(KDE_CHECK_DLOPEN,
+AC_DEFUN([KDE_CHECK_DLOPEN],
 [
 KDE_CHECK_LIBDL
 AC_CHECK_HEADERS(dlfcn.h dl.h)
@@ -2413,7 +2561,7 @@ fi
 
 ])
 
-AC_DEFUN(KDE_CHECK_DYNAMIC_LOADING,
+AC_DEFUN([KDE_CHECK_DYNAMIC_LOADING],
 [
 KDE_CHECK_DLOPEN(libtool_enable_shared=yes, libtool_enable_static=no)
 KDE_PROG_LIBTOOL
@@ -2433,7 +2581,7 @@ else
 fi
 ])
 
-AC_DEFUN(KDE_ADD_INCLUDES,
+AC_DEFUN([KDE_ADD_INCLUDES],
 [
 if test -z "$1"; then
   test_include="Pix.h"
@@ -2471,7 +2619,7 @@ fi
 ])
 
 
-AC_DEFUN(KDE_CHECK_MICO,
+AC_DEFUN([KDE_CHECK_MICO],
 [
 AC_REQUIRE([KDE_CHECK_LIBDL])
 AC_REQUIRE([KDE_MISC_TESTS])
@@ -2580,7 +2728,7 @@ AC_SUBST(idldir)
 
 ])
 
-AC_DEFUN(KDE_CHECK_MINI_STL,
+AC_DEFUN([KDE_CHECK_MINI_STL],
 [
 AC_REQUIRE([KDE_CHECK_MICO])
 
@@ -2618,13 +2766,13 @@ fi
 ])
 
 
-AC_DEFUN(KDE_CHECK_LIBPTHREAD,
+AC_DEFUN([KDE_CHECK_LIBPTHREAD],
 [
 AC_CHECK_LIB(pthread, pthread_create, [LIBPTHREAD="-lpthread"], LIBPTHREAD= )
 AC_SUBST(LIBPTHREAD)
 ])
 
-AC_DEFUN(KDE_TRY_LINK_PYTHON,
+AC_DEFUN([KDE_TRY_LINK_PYTHON],
 [
 if test "$kde_python_link_found" = no; then
 
@@ -2677,7 +2825,7 @@ fi
 ])
 
 
-AC_DEFUN(KDE_CHECK_STL_SGI,
+AC_DEFUN([KDE_CHECK_STL_SGI],
 [
     AC_MSG_CHECKING([if STL implementation is SGI like])
     AC_CACHE_VAL(kde_cv_stl_type_sgi,
@@ -2700,7 +2848,7 @@ using namespace std;
    fi
 ])
 
-AC_DEFUN(KDE_CHECK_STL_HP,
+AC_DEFUN([KDE_CHECK_STL_HP],
 [
     AC_MSG_CHECKING([if STL implementation is HP like])
     AC_CACHE_VAL(kde_cv_stl_type_hp,
@@ -2722,7 +2870,7 @@ using namespace std;
    fi
 ])
 
-AC_DEFUN(KDE_CHECK_STL,
+AC_DEFUN([KDE_CHECK_STL],
 [
     AC_LANG_SAVE
     AC_LANG_CPLUSPLUS
@@ -2739,7 +2887,7 @@ AC_DEFUN(KDE_CHECK_STL,
     AC_LANG_RESTORE
 ])
 
-AC_DEFUN(AC_FIND_QIMGIO,
+AC_DEFUN([AC_FIND_QIMGIO],
    [AC_REQUIRE([AC_FIND_JPEG])
 AC_REQUIRE([SHOWEQ_CHECK_EXTRA_LIBS])
 AC_MSG_CHECKING([for qimgio])
@@ -2778,11 +2926,11 @@ else
 fi
 ])
 
-AC_DEFUN(KDE_CHECK_ANSI,
+AC_DEFUN([KDE_CHECK_ANSI],
 [
 ])
 
-AC_DEFUN(KDE_CHECK_INSURE,
+AC_DEFUN([KDE_CHECK_INSURE],
 [
   AC_ARG_ENABLE(insure, [  --enable-insure             use insure++ for debugging [default=no]],
   [
@@ -2799,7 +2947,7 @@ AC_DEFUN(KDE_CHECK_INSURE,
    fi
 ])
 
-AC_DEFUN(AM_DISABLE_LIBRARIES,
+AC_DEFUN([AM_DISABLE_LIBRARIES],
 [
     AC_PROVIDE([AM_ENABLE_STATIC])
     AC_PROVIDE([AM_ENABLE_SHARED])
@@ -2808,7 +2956,7 @@ AC_DEFUN(AM_DISABLE_LIBRARIES,
 ])
 
 
-AC_DEFUN(AC_CHECK_UTMP_FILE,
+AC_DEFUN([AC_CHECK_UTMP_FILE],
 [
     AC_MSG_CHECKING([for utmp file])
 
@@ -2837,7 +2985,7 @@ AC_DEFUN(AC_CHECK_UTMP_FILE,
 ])
 
 
-AC_DEFUN(KDE_CREATE_SUBDIRSLIST,
+AC_DEFUN([KDE_CREATE_SUBDIRSLIST],
 [
 
 DO_NOT_COMPILE="$DO_NOT_COMPILE CVS debian bsd-port admin"
@@ -2881,7 +3029,7 @@ done
 AC_SUBST(TOPSUBDIRS)
 ])
 
-AC_DEFUN(KDE_CHECK_NAMESPACES,
+AC_DEFUN([KDE_CHECK_NAMESPACES],
 [
 AC_MSG_CHECKING(whether C++ compiler supports namespaces)
 AC_LANG_SAVE
@@ -2907,7 +3055,7 @@ AC_MSG_RESULT(no)
 AC_LANG_RESTORE
 ])
 
-AC_DEFUN(KDE_CHECK_NEWLIBS,
+AC_DEFUN([KDE_CHECK_NEWLIBS],
 [
 
 ])
@@ -2916,7 +3064,7 @@ dnl ------------------------------------------------------------------------
 dnl Check for S_ISSOCK macro. Doesn't exist on Unix SCO. faure@kde.org
 dnl ------------------------------------------------------------------------
 dnl
-AC_DEFUN(AC_CHECK_S_ISSOCK,
+AC_DEFUN([AC_CHECK_S_ISSOCK],
 [
 AC_MSG_CHECKING(for S_ISSOCK)
 AC_CACHE_VAL(ac_cv_have_s_issock,
@@ -2945,7 +3093,7 @@ dnl ------------------------------------------------------------------------
 dnl Check for MAXPATHLEN macro, defines KDEMAXPATHLEN. faure@kde.org
 dnl ------------------------------------------------------------------------
 dnl
-AC_DEFUN(AC_CHECK_KDEMAXPATHLEN,
+AC_DEFUN([AC_CHECK_KDEMAXPATHLEN],
 [
 AC_MSG_CHECKING(for MAXPATHLEN)
 AC_CACHE_VAL(ac_cv_maxpathlen,
@@ -2980,7 +3128,7 @@ AC_DEFINE_UNQUOTED(KDEMAXPATHLEN,$ac_cv_maxpathlen, [Define a safe value for MAX
 dnl -------------------------------------------------------------------------
 dnl See if the compiler supports a template repository         bero@redhat.de
 dnl -------------------------------------------------------------------------
-AC_DEFUN(KDE_COMPILER_REPO,
+AC_DEFUN([KDE_COMPILER_REPO],
 [
   REPO=""
   NOREPO=""
@@ -3009,7 +3157,7 @@ AC_DEFUN(KDE_COMPILER_REPO,
   AC_SUBST(NOREPO)
 ])
 
-AC_DEFUN(KDE_CHECK_HEADER,
+AC_DEFUN([KDE_CHECK_HEADER],
 [
    AC_LANG_SAVE
    kde_safe_cxxflags=$CXXFLAGS
@@ -3020,7 +3168,7 @@ AC_DEFUN(KDE_CHECK_HEADER,
    AC_LANG_RESTORE
 ])
 
-AC_DEFUN(KDE_CHECK_QWSPRITEFIELD,
+AC_DEFUN([KDE_CHECK_QWSPRITEFIELD],
 [
   KDE_CHECK_HEADER(QwSpriteField.h, ,
   [
@@ -3030,7 +3178,7 @@ AC_DEFUN(KDE_CHECK_QWSPRITEFIELD,
   ])
 ])
 
-AC_DEFUN(KDE_SET_PREFIX,
+AC_DEFUN([KDE_SET_PREFIX],
 [
   dnl make $KDEDIR the default for the installation
   AC_PREFIX_DEFAULT(${KDEDIR:-/usr/local/kde})

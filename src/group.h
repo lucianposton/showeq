@@ -8,13 +8,19 @@
 #ifndef _GROUP_H_
 #define _GROUP_H_
 
-#include <qstring.h>
+#include <stdint.h>
 
-#include "spawnshell.h"
+#include <qobject.h>
+#include <qstring.h>
+#include "everquest.h"
+
 
 //----------------------------------------------------------------------
 // forward declarations
 class Player;
+class SpawnShell;
+class Item;
+class Spawn;
 
 class GroupMgr: public QObject
 {
@@ -22,30 +28,45 @@ class GroupMgr: public QObject
  public:
   GroupMgr(SpawnShell* spawnShell, 
 	   Player* player,  
-	   const char* name = NULL);
+	   QObject* parent = 0, const char* name = 0);
+  virtual ~GroupMgr();
  
   const Spawn* memberByID( uint16_t id );
   const Spawn* memberByName( const QString& name );
   const Spawn* memberBySlot( uint16_t slot );
 
-  int groupSize();
-  int groupPercentBonus();
+  size_t groupSize() { return m_memberCount; }
+  size_t groupMemberCount() { return m_memberCount; }
+  size_t groupMembersInZoneCount() { return m_membersInZoneCount; }
+  float groupBonus();
   
   unsigned long totalLevels();
   
  public slots:
-  void handleGroupInfo(const groupMemberStruct* gmem);
+  void player(const uint8_t* player); 
+  void groupUpdate(const uint8_t* data, size_t size);
+  void addItem(const Item* item);
   void delItem(const Item* item);
+  void killSpawn(const Item* item);
+
+  // dump debug info
+  void dumpInfo(QTextStream& out);
 
  signals:
-  void addGroup( const Spawn* mem );
-  void remGroup( const Spawn* mem );
-  void clrGroup();
+  void added(const QString& name, const Spawn* mem);
+  void removed(const QString& name, const Spawn* mem);
+  void cleared();
   
  protected:
-  QList<Spawn> m_group;
   SpawnShell* m_spawnShell;
   Player* m_player;
+  struct GroupMember
+  {
+    QString m_name;
+    const Spawn* m_spawn;
+  }* m_members[MAX_GROUP_MEMBERS];
+  size_t m_memberCount;
+  size_t m_membersInZoneCount;
 };
 
 #endif // _GROUP_H_

@@ -14,15 +14,16 @@
 // dependencies will be migrated out.
 //
 
-#include <stdio.h>
-
-#include<qcolordialog.h>
+#include "category.h"
+#include "filter.h"
+#include "diagnosticmessages.h"
 
 // ZBTEMP: Temporarily use pSEQPrefs for data
 #include "main.h"
 
-#include "category.h"
-#include "filter.h"
+#include <stdio.h>
+
+#include<qcolordialog.h>
 
 // ------------------------------------------------------
 // Category
@@ -160,6 +161,18 @@ CategoryMgr::CategoryMgr(QObject* parent, const char* name)
 
 CategoryMgr::~CategoryMgr()
 {
+  // Clear the categories list. Since AutoDelete is off. This is manual.
+  if (m_categories.first())
+  {
+    Category* deleteMe;
+
+    while ((deleteMe = m_categories.current()))
+    {
+      m_categories.remove();
+
+      delete deleteMe;
+    }
+  }
 }
 
 const CategoryList CategoryMgr::findCategories(const QString& filterString, 
@@ -186,7 +199,7 @@ const Category* CategoryMgr::addCategory(const QString& name,
 					 const QString& filterout, 
 					 QColor color)
 {
-  //printf("addCategory() '%s' - '%s':'%s'\n", name, filter, filterout?filterout:"null");
+  //seqDebug("addCategory() '%s' - '%s':'%s'", name, filter, filterout?filterout:"null");
   
   // ZBTEMP: TODO, need to add check for duplicate category name
   m_changed = true;
@@ -198,7 +211,7 @@ const Category* CategoryMgr::addCategory(const QString& name,
     
     emit addCategory(newcat);
     
-    //printf("Added '%s'-'%s' '%s' %d\n", newcat->name, newcat->filter, newcat->listitem->text(0).ascii(), newcat->listitem);
+    //seqDebug("Added '%s'-'%s' '%s' %d", newcat->name, newcat->filter, newcat->listitem->text(0).ascii(), newcat->listitem);
      return newcat;
   }
 
@@ -207,7 +220,7 @@ const Category* CategoryMgr::addCategory(const QString& name,
 
 void CategoryMgr::remCategory(const Category* cat)
 {
-//printf("remCategory()\n");
+//seqDebug("remCategory()");
   m_changed = true;
 
   if (cat != NULL) 
@@ -225,7 +238,7 @@ void CategoryMgr::remCategory(const Category* cat)
 
 void CategoryMgr::clearCategories(void)
 {
-  //printf("clearCategories()\n");
+  //seqDebug("clearCategories()");
   emit clearedCategories();
 
   m_categories.clear();
@@ -275,7 +288,7 @@ void CategoryMgr::editCategories(const Category* cat, QWidget* parent)
   QString name = dlg->m_Name->text();
   QString filter = dlg->m_Filter->text();
 
-  //printf("Got name: '%s', filter '%s', filterout '%s', color '%s'\n",
+  //seqDebug("Got name: '%s', filter '%s', filterout '%s', color '%s'",
   //  name?name:"", color?color:"", filter?filter:"", filterout?filterout:""); 
 
   if (!name.isEmpty() && !filter.isEmpty())
@@ -314,12 +327,12 @@ void CategoryMgr::reloadCategories(void)
       if (pSEQPrefs->isPreference(tempStr, section))
 	filterout = pSEQPrefs->getPrefString(tempStr, section);
 	
-      //printf("%d: Got '%s' '%s' '%s'\n", i, name, filter, color);
+      //seqDebug("%d: Got '%s' '%s' '%s'", i, name, filter, color);
       if (!name.isEmpty() && !filter.isEmpty())
       {
-	Category* newcat = new Category(name, filter, filterout, color);
+        Category* newcat = new Category(name, filter, filterout, color);
 	
-	m_categories.append(newcat);
+        m_categories.append(newcat);
       }
     }
   }
@@ -327,7 +340,7 @@ void CategoryMgr::reloadCategories(void)
    // signal that the categories have been loaded
    emit loadedCategories();
 
-   printf("Categories Reloaded\n");
+   seqInfo("Categories Reloaded");
 }
 
 void CategoryMgr::savePrefs(void)
@@ -365,3 +378,5 @@ void CategoryMgr::savePrefs(void)
     pSEQPrefs->setPrefColor(prefBaseName + "Color", section, black);
   }
 }
+
+#include "category.moc"

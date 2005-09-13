@@ -1,9 +1,25 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(src/main.cpp)
+dnl $Id$ $Name$
+
+AC_PREREQ(2.59)
+AC_INIT(showeq, 5.1.0.0)
+AC_CONFIG_SRCDIR(src/main.cpp)
 AC_CANONICAL_SYSTEM
-AM_CONFIG_HEADER(conf.h)
-AM_INIT_AUTOMAKE(showeq, 4.3.22)
+
+AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(1.9 dist-bzip2)
 AM_MAINTAINER_MODE
+
+dnl doxygen macros
+DX_HTML_FEATURE(ON)
+DX_CHM_FEATURE(OFF)
+DX_CHI_FEATURE(OFF)
+DX_MAN_FEATURE(OFF)
+DX_RTF_FEATURE(OFF)
+DX_XML_FEATURE(OFF)
+DX_PDF_FEATURE(OFF)
+DX_PS_FEATURE(OFF)
+DX_INIT_DOXYGEN(ShowEQ, doxygen.cfg, dox)
 
 dnl Use CCd/CXXd rather than CC/CXX otherwise it cache's the value
 dnl and prevents the alternate search from working. Would be better
@@ -27,7 +43,7 @@ AC_ARG_ENABLE(old-compiler,
 		;;
 	esac] )
 
-AC_DEFUN(CHECK_COMPILER,[
+AC_DEFUN([CHECK_COMPILER],[
 ac_save_cxxflags="$CXXFLAGS"
 if [[ "$ac_cv_showeq_old_compiler" == "yes" ]]; then
 	CXXFLAGS="$CXXFLAGS -DOLDCOMPILER"
@@ -135,13 +151,14 @@ AC_MSG_ERROR([You need at least glibc-2.2 or greater to compile ShowEQ])
 )
 
 AC_PATH_QT_MOC
+AC_PATH_QT_UIC
 AC_PATH_QT
 
 dnl The below needs to be re-defined since the Qt defines from KDE destroy it
 AC_LANG_CPLUSPLUS
 
 dnl Check taken from SINS 0.5
-AC_DEFUN(SHOWEQ_CHECK_THREADING,[
+AC_DEFUN([SHOWEQ_CHECK_THREADING],[
 AC_LANG_CPLUSPLUS
 USE_THREADS=""
 LIBGETOPT=""
@@ -511,10 +528,10 @@ AM_CONDITIONAL(TEST_SERVER, test x$test_server = xtrue)
 
 AC_CHECK_RPATH
 
-CFLAGS="$USE_THREADS $USE_OPT_C $USE_DEBUG_C $USE_INLINE_C $USE_PROFILE_C"
-CXXFLAGS="$USE_THREADS $USE_OPT_CXX $USE_DEBUG_CXX $USE_INLINE_CXX  $USE_PROFILE_CXX -DQT_THREAD_SUPPORT=1 -DDISPLAY_ICONS=${CGI_ICONS} -DICON_DIR=\\\"${CGI_ICON_DIR}\\\""
+CFLAGS="$USE_THREADS $USE_OPT_C $USE_DEBUG_C $USE_INLINE_C $USE_PROFILE_C $CFLAGS"
+CXXFLAGS="$USE_THREADS $USE_OPT_CXX $USE_DEBUG_CXX $USE_INLINE_CXX  $USE_PROFILE_CXX -DQT_THREAD_SUPPORT=1 -DDISPLAY_ICONS=${CGI_ICONS} -DICON_DIR=\\\"${CGI_ICON_DIR}\\\" $CXXFLAGS"
 
-AC_DEFUN(SUCCESS,[
+AC_DEFUN([SUCCESS],[
 echo "Success!"
 case $target_os in
   solaris*)
@@ -531,5 +548,5 @@ case $target_os in
 esac
 ])
 
-AC_OUTPUT([Makefile src/Makefile maps/Makefile conf/Makefile])
+AC_OUTPUT([Makefile src/Makefile conf/Makefile])
 SUCCESS

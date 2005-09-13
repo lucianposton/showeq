@@ -18,16 +18,17 @@
 
 #include <qfileinfo.h>
 
-#include "conf.h"
+#include "config.h"
 #include "util.h"
 #include "gdbmconv.h"
 #include "itemdb.h"
+#include "datalocationmgr.h"
 
 #ifdef USE_DB3
 #include "db3conv.h"
 #endif
 
-static const char *id="@(#) $Id$";
+static const char *id="@(#) $Id$ $Name$";
 
 ///////////////////////////////////
 // TODO:
@@ -158,8 +159,10 @@ main (int argc, char *argv[])
   // note program name for later use.
   progname = argv[0];
 
+  DataLocationMgr dataLocMgr(".showeq");
+
   // Get an instance of the EQItemDB
-  EQItemDB* itemDB = new EQItemDB;
+  EQItemDB* itemDB = new EQItemDB(&dataLocMgr);
   
   // begin processing options
   while ((opt = getopt_long( argc,
@@ -461,7 +464,7 @@ void displayVersion(EQItemDB* itemDB)
 
   /////////////////////////////////
   // Display database file information
-  printstat(LOGDIR, "LOGDIR");
+  printstat(PKGDATADIR, "PKGDATADIR");
   
   QString dbExt;
 
@@ -1680,7 +1683,7 @@ int displayRecord(EQItemDB* itemDB,
     printf("001: ");
     uint8_t fieldCount = 1;
     uint8_t col = 5;
-    size_t fieldWidth;
+    int fieldWidth;
     const char* curPos = rawData;
     const char* endField;
     

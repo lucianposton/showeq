@@ -5,6 +5,7 @@
  * http://seq.sourceforge.net/
  */
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     "Bertoxxulous",   // DEITY_BERT = 201
     "Brell Serilis",  // DEITY_BRELL = 202
     "Cazic Thule",    // DEITY_CAZIC = 203
@@ -21,3 +22,5 @@
     "The Tribunal",   // DEITY_TRIBUNAL = 214
     "Tunare",         // DEITY_TUNARE = 215
     "Veeshan",        // DEITY_VEESHAN = 216
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+

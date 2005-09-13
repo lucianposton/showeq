@@ -15,7 +15,7 @@
 
 #include "packetcommon.h"
 
-class EQPacketFormat;
+class EQProtocolPacket;
 
 //----------------------------------------------------------------------
 // EQPacketFragmentSequence
@@ -26,7 +26,7 @@ class EQPacketFragmentSequence
   EQPacketFragmentSequence(EQStreamID streamid);
   ~EQPacketFragmentSequence();
   void reset();
-  void addFragment(EQPacketFormat& pf);
+  void addFragment(EQProtocolPacket& packet);
   bool isComplete();
 
   uint8_t* data();
@@ -35,16 +35,14 @@ class EQPacketFragmentSequence
  protected:
   EQStreamID m_streamid;
   uint8_t *m_data;
+  uint32_t m_totalLength;
   size_t m_dataSize;
-  uint16_t m_dataAllocSize;
-  uint16_t m_seq;
-  uint16_t m_current;
-  uint16_t m_total;
+  uint32_t m_dataAllocSize;
 };
 
 inline bool EQPacketFragmentSequence::isComplete()
 {
-  return m_current == m_total;
+  return m_dataSize != 0 && m_totalLength == m_dataSize;
 }
 
 inline uint8_t* EQPacketFragmentSequence::data()

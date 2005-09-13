@@ -5,14 +5,6 @@
  *  http://seq.sourceforge.net/
  */
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "interface.h"
 #include "util.h"
 #include "main.h"
@@ -23,7 +15,6 @@
 #include "map.h"
 #include "experiencelog.h"
 #include "combatlog.h"
-#include "msgdlg.h"
 #include "filtermgr.h"
 #include "spellshell.h"
 #include "spawnlist.h"
@@ -39,11 +30,33 @@
 #include "logger.h"
 #include "spawnlog.h"
 #include "packetlog.h"
+#include "bazaarlog.h"
 #include "category.h"
 #include "itemdb.h"
 #include "guild.h"
+#include "guildshell.h"
+#include "guildlist.h"
 #include "spells.h"
 #include "datetimemgr.h"
+#include "datalocationmgr.h"
+#include "eqstr.h"
+#include "messagefilter.h"
+#include "messages.h"
+#include "messageshell.h"
+#include "messagewindow.h"
+#include "terminal.h"
+#include "filteredspawnlog.h"
+#include "messagefilterdialog.h"
+#include "diagnosticmessages.h"
+#include "filternotifications.h"
+
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include <qfont.h>
 #include <qapplication.h>
@@ -57,11 +70,13 @@
 #include <qmessagebox.h>
 #include <qfiledialog.h>
 #include <qaccel.h>
+#include <qfileinfo.h>
 #include <qfile.h>
 #include <qtextstream.h>
 #include <qinputdialog.h>
 #include <qfontdialog.h>
 #include <qcolordialog.h>
+#include <qdockarea.h>
 #include <qwindowsstyle.h>
 #include <qplatinumstyle.h>
 #include <qmotifstyle.h>
@@ -72,56 +87,87 @@
 #define ZONE_ORDER_DIAG
 
 /* The main interface widget */
-EQInterface::EQInterface (QWidget * parent, const char *name) 
+EQInterface::EQInterface(DataLocationMgr* dlm, 
+			 QWidget * parent, const char *name) 
   : QMainWindow (parent, name),
-    m_player(NULL),
-    m_mapMgr(NULL),
-    m_spawnList(NULL),
-    m_spawnList2(NULL),
-    m_spellList(NULL),
-    m_skillList(NULL),
-    m_statList(NULL),
-    m_spawnPointList(NULL),
-    m_packet(NULL),
-    m_zoneMgr(NULL),
-    m_filterMgr(NULL),
-    m_categoryMgr(NULL),
-    m_spawnShell(NULL),
-    m_spellShell(NULL),
-    m_groupMgr(NULL),
-    m_spawnMonitor(NULL),
-    m_itemDB(NULL),
-    m_guildmgr(NULL),
-    m_dateTimeMgr(NULL),
-    m_spawnLogger(NULL),
+    m_player(0),
+    m_dataLocationMgr(dlm),
+    m_mapMgr(0),
+    m_spawnList(0),
+    m_spawnList2(0),
+    m_spellList(0),
+    m_skillList(0),
+    m_statList(0),
+    m_spawnPointList(0),
+    m_packet(0),
+    m_zoneMgr(0),
+    m_filterMgr(0),
+    m_categoryMgr(0),
+    m_spawnShell(0),
+    m_spellShell(0),
+    m_groupMgr(0),
+    m_spawnMonitor(0),
+    m_itemDB(0),
+    m_guildmgr(0),
+    m_guildShell(0),
+    m_dateTimeMgr(0),
+    m_eqStrings(0),
+    m_messageFilters(0),
+    m_messages(0),
+    m_messageShell(0),
+    m_terminal(0),
+    m_filteredSpawnLog(0),
+    m_filterNotifications(0),
+    m_spawnLogger(0),
     m_globalLog(0),
     m_worldLog(0),
     m_zoneLog(0),
+    m_bazaarLog(0),
     m_unknownZoneLog(0),
     m_opcodeMonitorLog(0),
-    m_selectedSpawn(NULL),
-    m_compass(NULL),
-    m_expWindow(NULL),
-    m_combatWindow(NULL),
-    m_netDiag(NULL),
-    m_formattedMessageStrings(8009) // increase if eqstr_us.txt gets longer
+    m_selectedSpawn(0),
+    m_windowsMenus(11),
+    m_compass(0),
+    m_expWindow(0),
+    m_combatWindow(0),
+    m_netDiag(0),
+    m_messageFilterDialog(0),
+    m_guildListWindow(0)
 {
+  // disable the dock menu
+  setDockMenuEnabled(false);
+  
+  // make sure the windows menus list autodeletes
+  m_windowsMenus.setAutoDelete(true);
+
+  setCentralWidget(new QWidget(this, "filler"));
+  
+  setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum, false));
+
   for (int l = 0; l < maxNumMaps; l++)
-    m_map[l] = NULL;
+    m_map[l] = 0;
 
-   QString tempStr;
-   QString section = "Interface";
+  for (int l = 0; l < maxNumMessageWindows; l++)
+    m_messageWindow[l] = 0;
 
-   const char* player_classes[] = {"Warrior", "Cleric", "Paladin", "Ranger",
-                                   "Shadow Knight", "Druid", "Monk", "Bard",
-                                   "Rogue", "Shaman", "Necromancer", "Wizard",
-                                   "Magician", "Enchanter", "Beastlord"
-                                  };
-   const char* player_races[] = {"Human", "Barbarian", "Erudite", "Wood elf",
-                                 "High Elf", "Dark Elf", "Half Elf", "Dwarf",
-                                 "Troll", "Ogre", "Halfling", "Gnome", "Iksar",
-                                 "Vah Shir"
-                                };
+  QString tempStr;
+  QString section = "Interface";
+
+  m_selectOnConsider = pSEQPrefs->getPrefBool("SelectOnCon", section, false);
+  m_selectOnTarget = pSEQPrefs->getPrefBool("SelectOnTarget", section, false);
+
+
+  const char* player_classes[] = {"Warrior", "Cleric", "Paladin", "Ranger",
+				  "Shadow Knight", "Druid", "Monk", "Bard",
+				  "Rogue", "Shaman", "Necromancer", "Wizard",
+				  "Magician", "Enchanter", "Beastlord",
+				  "Berserker"
+  };
+  const char* player_races[] = {"Human", "Barbarian", "Erudite", "Wood elf",
+				"High Elf", "Dark Elf", "Half Elf", "Dwarf",
+				"Troll", "Ogre", "Halfling", "Gnome", "Iksar",
+				"Vah Shir", "Froglok"
+  };
 
    // set the applications default font
    if (pSEQPrefs->isPreference("Font", section))
@@ -134,74 +180,177 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_initialcount = 0;
    m_packetStartTime = 0;
 
-   // Create the Spells object
-   m_spells = new Spells(pSEQPrefs->getPrefString("SpellsFile", "Interface",
-						  LOGDIR "/spells_us.txt"));
-
-   // Create the packet object
-   m_packet = new EQPacket (this, "packet");
-
    // Create the date/time manager
    m_dateTimeMgr = new DateTimeMgr(this, "datetimemgr");
 
+   // Create Message Filters object
+   m_messageFilters = new MessageFilters(this, "messagefilters");
+
+   // Create Messages storage
+   m_messages = new Messages(m_dateTimeMgr, m_messageFilters, 
+			     this, "messages");
+
+   // Create the terminal object
+   m_terminal = new Terminal(m_messages, this, "terminal");
+
+   QString fileName, fileName2;
+   QFileInfo fileInfo, fileInfo2;
+
+   // Create the packet object
+   section = "Network";
+   QString vpsection = "VPacket";
+
+   fileName = pSEQPrefs->getPrefString("WorldOPCodes", section, 
+				       "worldopcodes.xml");
+
+   fileInfo = m_dataLocationMgr->findExistingFile(".", fileName);
+
+   fileName2 = pSEQPrefs->getPrefString("ZoneOPCodes", section, 
+					"zoneopcodes.xml");
+
+   fileInfo2 = m_dataLocationMgr->findExistingFile(".", fileName2);
+
+   m_packet = new EQPacket(fileInfo.absFilePath(),
+			   fileInfo2.absFilePath(),
+			   pSEQPrefs->getPrefInt("ArqSeqGiveUp", section, 512),
+			   pSEQPrefs->getPrefString("Device", section, "eth0"),
+			   pSEQPrefs->getPrefString("IP", section,
+						    AUTOMATIC_CLIENT_IP),
+			   pSEQPrefs->getPrefString("MAC", section, "0"),
+			   pSEQPrefs->getPrefBool("RealTimeThread", section,
+						  false),
+			   pSEQPrefs->getPrefBool("SessionTracking", 
+						  section, false),
+			   pSEQPrefs->getPrefBool("Record", vpsection, false),
+			   pSEQPrefs->getPrefInt("Playback", vpsection,
+						  PLAYBACK_OFF),
+			   pSEQPrefs->getPrefInt("PlaybackRate", vpsection, 
+						 false),
+			   this, "packet");
+   
+  ipstr[0] = m_packet->ip();	//Retrieves last IP used in previous session 
+  for( int i = 1; i < 5; i++) 
+  ipstr[i] = "0.0.0.0";
+
+  macstr[0] = m_packet->mac();	//Retrieves last MAC used in previous session
+  for( int i = 1; i < 5; i++)  
+  macstr[i] = "00:00:00:00:00:00";
+
+  
+   // setup the user directory
+   m_dataLocationMgr->setupUserDirectory();
+
+   section = "Interface";
+			      
+   // Create the Spells object
+   fileName = pSEQPrefs->getPrefString("SpellsFile", section,
+					       "spells_us.txt");
+
+   fileInfo = m_dataLocationMgr->findExistingFile(".", fileName);
+   
+   m_spells = new Spells(fileInfo.absFilePath());
+   
+   // Create the EQStr storage
+   m_eqStrings = new EQStr(8009); // increase if the number of stings exeeds
+
    // Create the Zone Manager
-   m_zoneMgr = new ZoneMgr(m_packet, this, "zonemgr");
+   m_zoneMgr = new ZoneMgr(this, "zonemgr");
+
+   // Create GuildMgr object
+   fileName = pSEQPrefs->getPrefString("GuildsFile", "Interface",
+				       "guilds2.dat");
+   
+   fileInfo = m_dataLocationMgr->findWriteFile("tmp", fileName);
+
+   m_guildmgr = new GuildMgr(fileInfo.absFilePath(), 
+			     this, "guildmgr");
 
    // Create our player object
-   m_player = new Player(this, m_zoneMgr);
+   m_player = new Player(this, m_zoneMgr, m_guildmgr);
 
-   if (showeq_params->ItemDBEnabled)
+   section = "ItemDB";
+   if (pSEQPrefs->getPrefBool("Enabled", section, false))
    {
+     seqDebug("ItemDB: Enabled");
+
      // Create an instance of the ItemDB
-     m_itemDB = new EQItemDB;
+     m_itemDB = new EQItemDB(m_dataLocationMgr);
 
      // make it's parameters match those set via the config file and 
      // command line
-     m_itemDB->SetDBFile(EQItemDB::DATA_DB, showeq_params->ItemDataDBFilename);
-     m_itemDB->SetDBFile(EQItemDB::RAW_DATA_DB, showeq_params->ItemRawDataDBFileName);
-     m_itemDB->SetEnabledDBTypes(showeq_params->ItemDBTypes);
+     fileName = pSEQPrefs->getPrefString("DataDBFilename", section, 
+					 "itemdata2");
+
+     fileInfo = m_dataLocationMgr->findWriteFile(".", fileName);
+
+     m_itemDB->SetDBFile(EQItemDB::DATA_DB, fileInfo.absFilePath());
+
+     fileName = pSEQPrefs->getPrefString("RawDataDBFilename", section, 
+					 "itemrawdata2");
+
+     m_itemDB->SetDBFile(EQItemDB::RAW_DATA_DB, fileInfo.absFilePath());
+     m_itemDB->SetEnabledDBTypes(pSEQPrefs->getPrefInt("DatabasesEnabled",
+						       section, 
+						       (EQItemDB::DATA_DB|EQItemDB::RAW_DATA_DB)));
      m_itemDB->SetItemLogging(pSEQPrefs->getPrefBool("ItemLogging", "ItemDB", false));
      m_itemDB->SetItemPacketLogging(pSEQPrefs->getPrefBool("ItemPackingLogging", "ItemDB", false));
      // Make sure the databases are upgraded to the current format
      m_itemDB->Upgrade();
    }
+   else
+     seqDebug("ItemDB: Disabled");
 
    // Create the filter manager
-   m_filterMgr = new FilterMgr(showeq_params->filterfile,
-			       showeq_params->spawnfilter_case);
+   m_filterMgr = new FilterMgr(m_dataLocationMgr,
+			       pSEQPrefs->getPrefString("FilterFile", 
+							section, "global.xml"),
+			       pSEQPrefs->getPrefBool("IsCaseSensitive", 
+						      section, false));
 
    // if there is a short zone name already, try to load its filters
    QString shortZoneName = m_zoneMgr->shortZoneName();
    if (!shortZoneName.isEmpty())
      m_filterMgr->loadZone(shortZoneName);
    
-   // Create GuildMgr object
-   m_guildmgr = new GuildMgr(pSEQPrefs->getPrefString("GuildsFile", "Interface",
-                                             LOGDIR "/guilds2.dat"), m_packet, this, "guildmgr");
+   m_guildShell = new GuildShell(m_zoneMgr, this, "GuildShell");
+
    // Create the spawn shell
-   m_spawnShell = new SpawnShell(*m_filterMgr, m_zoneMgr, m_player, m_itemDB, m_guildmgr);
+   m_spawnShell = new SpawnShell(*m_filterMgr, m_zoneMgr, m_player, m_guildmgr);
 
    // Create the Category manager
    m_categoryMgr = new CategoryMgr();
 
    // Create the map manager
-   m_mapMgr = new MapMgr(m_spawnShell, m_player, m_zoneMgr, this);
+   m_mapMgr = new MapMgr(m_dataLocationMgr, m_spawnShell, m_player, m_zoneMgr,
+			 this);
 
    // Create the spell shell
    m_spellShell = new SpellShell(m_player, m_spawnShell, m_spells);
 
    // Create the Spawn Monitor
-   m_spawnMonitor = new SpawnMonitor(m_zoneMgr, m_spawnShell);
+   m_spawnMonitor = new SpawnMonitor(m_dataLocationMgr, 
+				     m_zoneMgr, m_spawnShell);
 
    // Create the Group Manager
-   m_groupMgr = new GroupMgr(m_spawnShell, m_player, "groupmgr");
+   m_groupMgr = new GroupMgr(m_spawnShell, m_player, this, "groupmgr");
 
+   // Create the message shell
+   m_messageShell = new MessageShell(m_messages, m_eqStrings, m_spells, 
+				     m_zoneMgr, m_spawnShell, m_player,
+				     this, "messageshell");
+
+   // Create the Filter Notifications object
+   m_filterNotifications = new FilterNotifications(this, "filternotifications");
+   
    // Create log objects as necessary
    if (pSEQPrefs->getPrefBool("LogAllPackets", "PacketLogging", false))
      createGlobalLog();
 
    if (pSEQPrefs->getPrefBool("LogZonePackets", "PacketLogging", false))
      createZoneLog();
+
+   if (pSEQPrefs->getPrefBool("LogBazaarPackets", "PacketLogging", false))
+     createBazaarLog();
 
    if (pSEQPrefs->getPrefBool("LogWorldPackets", "PacketLogging", false))
      createWorldLog();
@@ -213,14 +362,37 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    if (pSEQPrefs->getPrefBool("Enable", section, false))
      createOPCodeMonitorLog(pSEQPrefs->getPrefString("OpCodeList", section, ""));
 
+   // create the filtered spawn log object if any filters are to be logged
+   uint32_t filters = pSEQPrefs->getPrefInt("Log", "Filters", 0);
+   if (filters)
+   {
+     // create the filtered spawn log object
+     createFilteredSpawnLog();
+
+     // set the filters to log
+     m_filteredSpawnLog->setFilters(filters);
+   }
+
    // if the user wants spawns logged, create the spawn logger
    if (pSEQPrefs->getPrefBool("LogSpawns", "Misc", false))
      createSpawnLog();
 
    section = "Interface";
 
+   // create window menu
+   m_windowMenu = new QPopupMenu;
+
    // Initialize the experience window;
-   m_expWindow = new ExperienceWindow(m_player, m_groupMgr);
+   m_expWindow = new ExperienceWindow(m_dataLocationMgr, m_player, m_groupMgr,
+				      m_zoneMgr);
+   setDockEnabled(m_expWindow, 
+		  pSEQPrefs->getPrefBool("DockableExperienceWindow",
+					 section, false));
+   Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					   m_expWindow->preferenceName(),
+					   DockUnmanaged);
+   addDockWindow(m_expWindow, edge, false);
+   m_expWindow->undock();
 
    m_expWindow->restoreSize();
 
@@ -231,8 +403,19 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    if (pSEQPrefs->getPrefBool("ShowExpWindow", section, false))
      m_expWindow->show();
 
+    // insert its menu into the window menu
+   insertWindowMenu(m_expWindow);
+
    // Initialize the combat window
    m_combatWindow = new CombatWindow(m_player);
+   setDockEnabled(m_combatWindow, 
+		  pSEQPrefs->getPrefBool("DockableCombatWindow",
+					 section, false));
+   edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+				      m_combatWindow->preferenceName(),
+				      DockUnmanaged);
+   addDockWindow(m_combatWindow, edge, false);
+   m_combatWindow->undock();
 
    m_combatWindow->restoreSize();
 
@@ -243,25 +426,12 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    if (pSEQPrefs->getPrefBool("ShowCombatWindow", section, false))
      m_combatWindow->show();
 
+    // insert its menu into the window menu
+   insertWindowMenu(m_combatWindow);
+
 /////////////////
 // Main widgets
    // Make a VBox to use as central widget
-   QVBox* pCentralBox = new QVBox(this);
-   setCentralWidget(pCentralBox);
- 
-   // Make the horizontal splitter deviding the map from the other objects
-   // and add it to the main window
-   m_splitH =new QSplitter(QSplitter::Horizontal,pCentralBox,"SplitH");
-   m_splitH->setOpaqueResize(TRUE);
-
-   // make a splitter between the spawnlist and other objects
-   m_splitV = new QSplitter(QSplitter::Vertical,m_splitH,"SplitV");
-   m_splitV->setOpaqueResize(TRUE);
-
-   // Make a horizontal splitter for the skilllist/statlist/compass
-   m_splitT = new QSplitter(QSplitter::Horizontal,m_splitV,"SplitT");
-   m_splitT->setOpaqueResize(TRUE);
-
    // Create/display the Map(s)
    for (int i = 0; i < maxNumMaps; i++)
    {
@@ -282,24 +452,31 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
      if (pSEQPrefs->getPrefBool(tmpPrefName, section, (i == 0)))
        showMap(i);
    }
-   
+
+   // Create/display the MessageWindow(s)
+   for (int i = 0; i < maxNumMessageWindows; i++)
+   {
+     QString tmpPrefSuffix = "";
+     if (i > 0)
+       tmpPrefSuffix = QString::number(i + 1);
+     
+     // construct the preference name
+     QString tmpPrefName = QString("DockedMessageWindow") + tmpPrefSuffix;
+
+     // retrieve if the message window should be docked
+     m_isMessageWindowDocked[i] = 
+       pSEQPrefs->getPrefBool(tmpPrefName, section, false);
+
+     // construct the preference name
+     tmpPrefName = QString("ShowMessageWindow") + tmpPrefSuffix;
+
+     // and as appropriate, craete the message window
+     if (pSEQPrefs->getPrefBool(tmpPrefName, section, false))
+       showMessageWindow(i);
+   }
+
    // should the compass be docked if it's created
    m_isCompassDocked = pSEQPrefs->getPrefBool("DockedCompass", section, true);
-
-   //
-   // Create the compass as required
-   //
-   if (pSEQPrefs->getPrefBool("ShowCompass", section, false))
-       showCompass();
-
-
-   //
-   // Create the spells listview as required (dynamic object)
-   //
-   m_isSpellListDocked = pSEQPrefs->getPrefBool("DockedSpellList", section, true);
-   if (pSEQPrefs->getPrefBool("ShowSpellList", section, false))
-       showSpellList();
-
 
    //
    // Create the Player Skills listview (ONLY CREATED WHEN NEEDED FLOYD!!!!)
@@ -314,6 +491,20 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_isStatListDocked = pSEQPrefs->getPrefBool("DockedPlayerStats", section, true);
    if (pSEQPrefs->getPrefBool("ShowPlayerStats", section, true))
      showStatList();
+
+   //
+   // Create the compass as required
+   //
+   if (pSEQPrefs->getPrefBool("ShowCompass", section, false))
+       showCompass();
+
+   //
+   // Create the spells listview as required (dynamic object)
+   //
+   m_isSpellListDocked = pSEQPrefs->getPrefBool("DockedSpellList", section, true);
+   if (pSEQPrefs->getPrefBool("ShowSpellList", section, false))
+       showSpellList();
+
 
    //
    // Create the Spawn List listview (always exists, just hidden if not specified)
@@ -339,8 +530,13 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    //
    // Create the Net Statistics window as required
    // 
-   if (showeq_params->net_stats)
+   if (pSEQPrefs->getPrefBool("ShowNetStats", section, false))
      showNetDiag();
+
+   //
+   // Create the Guild member List window as required
+   if (pSEQPrefs->getPrefBool("ShowGuildList", section, false))
+     showGuildList();
 
 /////////////////////
 // QMenuBar
@@ -354,19 +550,20 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    menuBar()->insertItem("&File", pFileMenu);
    pFileMenu->insertItem("&Save Preferences", this, SLOT(savePrefs()), CTRL+Key_S);
    pFileMenu->insertItem("Open &Map", m_mapMgr, SLOT(loadMap()), Key_F1);
+   pFileMenu->insertItem("&Import &Map", m_mapMgr, SLOT(importMap()));
    pFileMenu->insertItem("Sa&ve Map", m_mapMgr, SLOT(saveMap()), Key_F2);
+   pFileMenu->insertItem("Save SOE Map", m_mapMgr, SLOT(saveSOEMap()));
    pFileMenu->insertItem("Reload Guilds File", m_guildmgr, SLOT(readGuildList()));
    pFileMenu->insertItem("Add Spawn Category", this, SLOT(addCategory()) , ALT+Key_C);
    pFileMenu->insertItem("Rebuild SpawnList", this, SLOT(rebuildSpawnList()) , ALT+Key_R);
    pFileMenu->insertItem("Reload Categories", this, SLOT(reloadCategories()) , CTRL+Key_R);
-   pFileMenu->insertItem("Create MessageBox", this, SLOT(createMessageBox()), Key_F11);
    pFileMenu->insertItem("Select Next", this, SLOT(selectNext()), CTRL+Key_Right);
    pFileMenu->insertItem("Select Prev", this, SLOT(selectPrev()), CTRL+Key_Left);
    pFileMenu->insertItem("Save Selected Spawns Path", 
 			 this, SLOT(saveSelectedSpawnPath(void)));
    pFileMenu->insertItem("Save NPC Spawn Paths",
 			 this, SLOT(saveSpawnPaths(void)));
-   if (showeq_params->playbackpackets)
+   if (m_packet->playbackPackets() != PLAYBACK_OFF)
    {
      pFileMenu->insertItem("Inc Playback Speed", m_packet, SLOT(incPlayback()), CTRL+Key_X);
      pFileMenu->insertItem("Dec Playback Speed", m_packet, SLOT(decPlayback()), CTRL+Key_Z);
@@ -377,7 +574,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    QPopupMenu* pViewMenu = new QPopupMenu;
    menuBar()->insertItem("&View", pViewMenu);
    pViewMenu->setCheckable(true);
-   m_id_view_ChannelMsgs = pViewMenu->insertItem("Channel Messages", this, SLOT(toggle_view_ChannelMsgs()));
    m_id_view_ExpWindow = pViewMenu->insertItem("Experience Window", this, SLOT(toggle_view_ExpWindow()));
    m_id_view_CombatWindow = pViewMenu->insertItem("Combat Window", this, SLOT(toggle_view_CombatWindow()));
    pViewMenu->insertSeparator(-1);
@@ -388,18 +584,40 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_id_view_PlayerStats = pViewMenu->insertItem("Player Stats", this, SLOT(toggle_view_PlayerStats()));
    m_id_view_PlayerSkills = pViewMenu->insertItem("Player Skills", this,SLOT(toggle_view_PlayerSkills()));
    m_id_view_Compass = pViewMenu->insertItem("Compass", this, SLOT(toggle_view_Compass()));
-   menuBar()->setItemChecked(m_id_view_PlayerStats, (m_statList != NULL));
+   menuBar()->setItemChecked(m_id_view_PlayerStats, (m_statList != 0));
 
+   QPopupMenu* subMenu = new QPopupMenu;
    for (int i = 0; i < maxNumMaps; i++)
    {     
         QString mapName = "Map ";
         if (i > 0)
             mapName += QString::number(i + 1);
-        m_id_view_Map[i] = pViewMenu->insertItem(mapName, this, SLOT(toggle_view_Map(int)));
-        pViewMenu->setItemParameter(m_id_view_Map[i], i);
-        menuBar()->setItemChecked(m_id_view_Map[i], (m_map[i] != NULL));
+        m_id_view_Map[i] = subMenu->insertItem(mapName, this, SLOT(toggle_view_Map(int)));
+        subMenu->setItemParameter(m_id_view_Map[i], i);
+        subMenu->setItemChecked(m_id_view_Map[i], (m_map[i] != 0));
    }
+   pViewMenu->insertItem("Maps", subMenu);
+
+   subMenu = new QPopupMenu;
+   QString messageWindowName;
+   for (int i = 0; i < maxNumMessageWindows; i++)
+   {     
+        messageWindowName = "Channel Messages ";
+        if (i > 0)
+	  messageWindowName += QString::number(i + 1);
+        m_id_view_MessageWindow[i] = subMenu->insertItem(messageWindowName, this, SLOT(toggle_view_ChannelMsgs(int)));
+        subMenu->setItemParameter(m_id_view_MessageWindow[i], i);
+        subMenu->setItemChecked(m_id_view_MessageWindow[i],
+				(m_messageWindow[i] != 0));
+   }
+   pViewMenu->insertItem("Channel Mesages", subMenu);
+
+
    m_id_view_NetDiag = pViewMenu->insertItem("Network Diagnostics", this, SLOT(toggle_view_NetDiag()));
+
+   m_id_view_GuildListWindow = 
+     pViewMenu->insertItem("Guild Member List", this, 
+			   SLOT(toggle_view_GuildList()));
 
    pViewMenu->insertSeparator(-1);
 
@@ -484,7 +702,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // View -> PlayerSkills
    m_skillWinMenu = new QPopupMenu;
    m_id_view_PlayerSkills_Options = pViewMenu->insertItem( "Player &Skills", m_skillWinMenu);
-   pViewMenu->setItemEnabled(m_id_view_PlayerSkills_Options, (m_skillList != NULL));
+   pViewMenu->setItemEnabled(m_id_view_PlayerSkills_Options, (m_skillList != 0));
    m_skillWinMenu->setCheckable(TRUE);
    
    m_id_view_PlayerSkills_Languages = m_skillWinMenu->insertItem("&Langauges");
@@ -495,7 +713,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // View -> SpawnList
     m_spawnListMenu = new QPopupMenu;
     m_id_view_SpawnList_Options = pViewMenu->insertItem( "Spawn &List", m_spawnListMenu);
-    pViewMenu->setItemEnabled(m_id_view_SpawnList_Options, (m_spawnList != NULL));
+    pViewMenu->setItemEnabled(m_id_view_SpawnList_Options, (m_spawnList != 0));
     m_spawnListMenu->setCheckable(TRUE);
 
     m_id_view_SpawnList_Cols[tSpawnColName] = m_spawnListMenu->insertItem("&Name");
@@ -582,7 +800,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // NOTE: Always insert Map docking options at the end of the Docked menu
    for (int i = 0; i < maxNumMaps; i++)
    {     
-        QString mapName = "Map";
+        QString mapName = "Map ";
         if (i > 0)
             mapName += QString::number(i + 1);
         x = m_dockedWinMenu->insertItem(mapName);
@@ -591,6 +809,119 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    }
     
    connect (m_dockedWinMenu, SIGNAL(activated(int)), this, SLOT(toggle_view_DockedWin(int)));
+
+   // View -> DockableWin
+   m_dockableWinMenu = new QPopupMenu;
+   pViewMenu->insertItem( "&Dockable", m_dockableWinMenu);
+   m_dockableWinMenu->setCheckable(true);
+    
+   x = m_dockableWinMenu->insertItem("Spawn &List");
+   m_dockableWinMenu->setItemParameter(x, 0);
+   m_dockableWinMenu->setItemChecked(x, 
+				     pSEQPrefs->getPrefBool("DockableSpawnList",
+							    section, true));
+
+   x = m_dockableWinMenu->insertItem("Spawn &List 2");
+   m_dockableWinMenu->setItemParameter(x, 6);
+   m_dockableWinMenu->setItemChecked(x,  
+				     pSEQPrefs->getPrefBool("DockableSpawnList2",
+							    section, true));
+    
+   x = m_dockableWinMenu->insertItem("Spawn P&oint List");
+   m_dockableWinMenu->setItemParameter(x, 5);
+   m_dockableWinMenu->setItemChecked(x,  
+				     pSEQPrefs->getPrefBool("DockableSpawnPointList",
+							    section, true));
+    
+   x = m_dockableWinMenu->insertItem("&Player Stats");
+   m_dockableWinMenu->setItemParameter(x, 1);
+   m_dockableWinMenu->setItemChecked(x,  
+				     pSEQPrefs->getPrefBool("DockablePlayerStats",
+							    section, true));
+    
+   x = m_dockableWinMenu->insertItem("Player &Skills");
+   m_dockableWinMenu->setItemParameter(x, 2);
+   m_dockableWinMenu->setItemChecked(x,  
+				     pSEQPrefs->getPrefBool("DockablePlayerSkills",
+							    section, true));
+    
+   x = m_dockableWinMenu->insertItem("Sp&ell List");
+   m_dockableWinMenu->setItemParameter(x, 3);
+   m_dockableWinMenu->setItemChecked(x,  
+				     pSEQPrefs->getPrefBool("DockableSpellList",
+							    section, true));
+    
+   x = m_dockableWinMenu->insertItem("&Compass");
+   m_dockableWinMenu->setItemParameter(x, 4);
+   m_dockableWinMenu->setItemChecked(x,  
+				     pSEQPrefs->getPrefBool("DockableCompass",
+							    section, true));
+
+   x = m_dockableWinMenu->insertItem("E&xperience Window");
+   m_dockableWinMenu->setItemParameter(x, 7);
+   m_dockableWinMenu->setItemChecked(x,  
+				     pSEQPrefs->getPrefBool("DockableExperienceWindow",
+							    section, false));
+
+   x = m_dockableWinMenu->insertItem("Com&bat Window");
+   m_dockableWinMenu->setItemParameter(x, 8);
+   m_dockableWinMenu->setItemChecked(x,  
+				     pSEQPrefs->getPrefBool("DockableCombatWindow",
+							    section, false));
+
+   x = m_dockableWinMenu->insertItem("&Guild List");
+   m_dockableWinMenu->setItemParameter(x, 9);
+   m_dockableWinMenu->setItemChecked(x,  
+				     pSEQPrefs->getPrefBool("DockableGuildListWindow",
+							    section, true));
+
+   x = m_dockableWinMenu->insertItem("&Net Diag");
+   m_dockableWinMenu->setItemParameter(x, 10);
+   m_dockableWinMenu->setItemChecked(x,  
+				     pSEQPrefs->getPrefBool("DockableNetDiag",
+							    section, true));
+
+   // insert Map docking options 
+   subMenu = new QPopupMenu;
+   for (int i = 0; i < maxNumMaps; i++)
+   {     
+        QString mapName = "Map ";
+	QString mapPrefName = "Map";
+        if (i > 0)
+	{
+            mapName += QString::number(i + 1);
+	    mapPrefName + QString::number(i + 1);
+	}
+        x = subMenu->insertItem(mapName);
+        subMenu->setItemParameter(x, i + mapDockBase);
+	subMenu->setItemChecked(x, pSEQPrefs->getPrefBool(QString("Dockable")
+							  + mapName,
+							  section, true));
+   }
+   connect (subMenu, SIGNAL(activated(int)), this, 
+	    SLOT(toggle_view_DockableWin(int)));
+   m_dockableWinMenu->insertItem("Maps", subMenu);
+
+   // insert Message Window docking options 
+   subMenu = new QPopupMenu;
+   QString messagePrefName = "DockableMessageWindow";
+   for (int i = 0; i < maxNumMessageWindows; i++)
+   {     
+        QString messageWindowName = "Channel Messages ";
+	if (i > 0)
+	  messageWindowName += QString::number(i + 1);
+        x = subMenu->insertItem(messageWindowName);
+        subMenu->setItemParameter(x, i + messageWindowDockBase);
+	subMenu->setItemChecked(x, pSEQPrefs->getPrefBool(messagePrefName + 
+							  QString::number(i),
+							  section, false));
+   }
+   connect (subMenu, SIGNAL(activated(int)), this, 
+	    SLOT(toggle_view_DockableWin(int)));
+   m_dockableWinMenu->insertItem("Channel Messages", subMenu);
+    
+   connect (m_dockableWinMenu, SIGNAL(activated(int)), this, SLOT(toggle_view_DockableWin(int)));
+
 
    // view menu checks are set by init_view_menu
   connect(pViewMenu, SIGNAL(aboutToShow()),
@@ -607,15 +938,14 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_id_opt_KeepSelectedVisible =
                   pOptMenu->insertItem("Keep Selected Visible?"  , this, SLOT(toggle_opt_KeepSelectedVisible()));
    m_id_opt_LogSpawns = pOptMenu->insertItem("Log Spawns", this, SLOT(toggle_opt_LogSpawns()));
+   m_id_opt_BazaarData    = pOptMenu->insertItem("Bazaar Searches", this, SLOT(toggle_opt_BazaarData()), Key_F11);
+   menuBar()->setItemChecked (m_id_opt_BazaarData, (m_bazaarLog != 0));
    m_id_opt_ResetMana = pOptMenu->insertItem("Reset Max Mana", this, SLOT(resetMaxMana()));
    m_id_opt_PvPTeams  = pOptMenu->insertItem("PvP Teams", this, SLOT(toggle_opt_PvPTeams()));
    m_id_opt_PvPDeity  = pOptMenu->insertItem("PvP Deity", this, SLOT(toggle_opt_PvPDeity()));
    x = pOptMenu->insertItem("Create Unknown Spawns", 
 			    this, SLOT(toggle_opt_CreateUnknownSpawns(int)));
    menuBar()->setItemChecked (x, showeq_params->createUnknownSpawns);
-   x = pOptMenu->insertItem("Show Spell Messages", 
-			    this, SLOT(toggle_opt_ShowSpellMessages(int)));
-   menuBar()->setItemChecked (x, showeq_params->showSpellMsgs);
    x = pOptMenu->insertItem("Use EQ Retarded Coordinates", 
 			    this, SLOT(toggle_opt_RetardedCoords(int)));
    menuBar()->setItemChecked (x, showeq_params->retarded_coords);
@@ -626,7 +956,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 			    this, SLOT(toggle_opt_WalkPathRecord(int)));
    menuBar()->setItemChecked (x, showeq_params->walkpathrecord);
 
-   QPopupMenu* subMenu = new QPopupMenu;
+   subMenu = new QPopupMenu;
    QSpinBox* walkPathLengthSpinBox = new QSpinBox(0, 8192, 1, subMenu);
    walkPathLengthSpinBox->setValue(showeq_params->walkpathlength);
    connect(walkPathLengthSpinBox, SIGNAL(valueChanged(int)),
@@ -636,8 +966,8 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 			subMenu);
    
    menuBar()->setItemChecked (m_id_opt_Fast, showeq_params->fast_machine);
-   menuBar()->setItemChecked (m_id_opt_ConSelect, showeq_params->con_select);
-   menuBar()->setItemChecked (m_id_opt_TarSelect, showeq_params->tar_select);
+   menuBar()->setItemChecked (m_id_opt_ConSelect, m_selectOnConsider);
+   menuBar()->setItemChecked (m_id_opt_TarSelect, m_selectOnTarget);
    menuBar()->setItemChecked (m_id_opt_KeepSelectedVisible, showeq_params->keep_selected_visible);
    menuBar()->setItemChecked (m_id_opt_LogSpawns, (m_spawnLogger != 0));
    menuBar()->setItemChecked (m_id_opt_PvPTeams, showeq_params->pvp);
@@ -700,11 +1030,9 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_netMenu->insertItem("Monitor EQ Client &MAC Address...", this, SLOT(set_net_client_MAC_address()));
    m_netMenu->insertItem("Set &Device...", this, SLOT(set_net_device()));
    m_id_net_sessiontrack = m_netMenu->insertItem("Session Tracking", this, SLOT(toggle_net_session_tracking()));
-   m_netMenu->setItemChecked(m_id_net_sessiontrack, showeq_params->session_tracking);
+   m_netMenu->setItemChecked(m_id_net_sessiontrack, m_packet->session_tracking());
    x = m_netMenu->insertItem("&Real Time Thread", this, SLOT(toggle_net_real_time_thread(int)));
-   m_netMenu->setItemChecked(x, showeq_params->realtime);
-   x = m_netMenu->insertItem("&Broken Decode", this, SLOT(toggle_net_broken_decode(int)));
-   m_netMenu->setItemChecked(x, showeq_params->broken_decode);
+   m_netMenu->setItemChecked(x, m_packet->realtime());
 
    m_netMenu->insertSeparator(-1);
 
@@ -715,7 +1043,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    m_id_log_AllPackets  = pLogMenu->insertItem("All Packets", this, SLOT(toggle_log_AllPackets()), Key_F5);
    m_id_log_WorldData   = pLogMenu->insertItem("World Data", this, SLOT(toggle_log_WorldData()), Key_F6);
    m_id_log_ZoneData    = pLogMenu->insertItem("Zone Data", this, SLOT(toggle_log_ZoneData()), Key_F7);
-   m_id_log_UnknownData = pLogMenu->insertItem("Unknown Zone Data", this, SLOT(toggle_log_UnknownData()), Key_F8);
+   m_id_log_UnknownData = pLogMenu->insertItem("Unknown Data", this, SLOT(toggle_log_UnknownData()), Key_F8);
    m_id_view_UnknownData = pLogMenu->insertItem("View Unknown Data", this, 
 						 SLOT(toggle_view_UnknownData()) , 
 						 Key_F9);
@@ -768,36 +1096,37 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 			  SLOT(select_opcode_file()));
    m_netMenu->insertSeparator(-1);
 
+   section = "Interface";
+
    // Advanced menu
    subMenu = new QPopupMenu;
    QPopupMenu* subSubMenu = new QPopupMenu;
    QSpinBox* arqSeqGiveUpSpinBox = new QSpinBox(32, 1024, 8, subSubMenu);
-   arqSeqGiveUpSpinBox->setValue(showeq_params->arqSeqGiveUp);
+   arqSeqGiveUpSpinBox->setValue(m_packet->arqSeqGiveUp());
    connect(arqSeqGiveUpSpinBox, SIGNAL(valueChanged(int)),
 	   this, SLOT(set_net_arq_giveup(int)));
    subSubMenu->insertItem(arqSeqGiveUpSpinBox);
    subMenu->insertItem("Arq Seq Give Up", 
 			 subSubMenu);
    m_netMenu->insertItem("Advanced", subMenu);
-   if(showeq_params->session_tracking)
-      m_packet->session_tracking();
 
    // Character Menu 
    m_charMenu = new QPopupMenu;
    menuBar()->insertItem("&Character", m_charMenu);
-   int yx = m_charMenu->insertItem("Auto Detect Settings", this, SLOT(toggleAutoDetectCharSettings(int)));
-   m_charMenu->setItemChecked(yx, showeq_params->AutoDetectCharSettings);
+   int yx = m_charMenu->insertItem("Use Auto Detected Settings", this, 
+				   SLOT(toggleAutoDetectPlayerSettings(int)));
+   m_charMenu->setItemChecked(yx, m_player->useAutoDetectedSettings());
 
    // Character -> Level
    m_charLevelMenu = new QPopupMenu;
    m_charMenu->insertItem("Choose &Level", m_charLevelMenu);
-   m_levelSpinBox = new QSpinBox(1, 65, 1, this, "m_levelSpinBox");
+   m_levelSpinBox = new QSpinBox(1, 70, 1, this, "m_levelSpinBox");
    m_charLevelMenu->insertItem( m_levelSpinBox );
    m_levelSpinBox->setWrapping( true );
    m_levelSpinBox->setButtonSymbols(QSpinBox::PlusMinus);
    m_levelSpinBox->setPrefix("Level: ");
    connect(m_levelSpinBox, SIGNAL(valueChanged(int)), this, SLOT(SetDefaultCharacterLevel(int)));
-   m_levelSpinBox->setValue(showeq_params->defaultLevel);
+   m_levelSpinBox->setValue(m_player->defaultLevel());
 
    // Character -> Class
    m_charClassMenu = new QPopupMenu;
@@ -806,7 +1135,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    {
        char_ClassID[i] = m_charClassMenu->insertItem(player_classes[i]);
        m_charClassMenu->setItemParameter(char_ClassID[i],i+1);
-       if(i+1 == showeq_params->defaultClass)
+       if(i+1 == m_player->defaultClass())
           m_charMenu->setItemChecked(char_ClassID[i], true);
    }
    connect (m_charClassMenu, SIGNAL(activated(int)), this, SLOT(SetDefaultCharacterClass(int)));
@@ -823,8 +1152,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
           m_charRaceMenu->setItemParameter(char_RaceID[i],128);
        else if(i == 13)
           m_charRaceMenu->setItemParameter(char_RaceID[i],130);
+       else if(i == 14)
+          m_charRaceMenu->setItemParameter(char_RaceID[i],330);
 
-       if(m_charRaceMenu->itemParameter(char_RaceID[i]) == showeq_params->defaultRace)
+       if(m_charRaceMenu->itemParameter(char_RaceID[i]) == m_player->defaultRace())
           m_charRaceMenu->setItemChecked(char_RaceID[i], true);
    }
    connect (m_charRaceMenu, SIGNAL(activated(int)), this, SLOT(SetDefaultCharacterRace(int)));
@@ -836,8 +1167,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
    filterMenu->insertItem("&Reload Filters", m_filterMgr, SLOT(loadFilters()), Key_F3);
    filterMenu->insertItem("&Save Filters", m_filterMgr, SLOT(saveFilters()), Key_F4);
-   if (!shortZoneName.isEmpty())
-      filterMenu->insertItem("Save &Zone Filter", this, SLOT(save_as_filter_file()));
    filterMenu->insertItem("&Edit Filters", this, SLOT(launch_editor_filters()));
    filterMenu->insertItem("Select Fil&ter File", this, SLOT(select_filter_file()));
 
@@ -851,25 +1180,30 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    x = filterMenu->insertItem("&Display Alert Info", this, SLOT(toggle_filter_AlertInfo(int)));
    filterMenu->setItemChecked(x, 
 			      pSEQPrefs->getPrefBool("AlertInfo", "Filters"));
-   x = filterMenu->insertItem("&Use Audio Device", this, SLOT(toggle_filter_Audio(int)));
-   filterMenu->setItemChecked(x, showeq_params->spawnfilter_audio);
+   x = filterMenu->insertItem("&Use System Beep", this, SLOT(toggle_filter_UseSystemBeep(int)));
+   filterMenu->setItemChecked(x, m_filterNotifications->useSystemBeep());
+   x = filterMenu->insertItem("Use &Commands", this, SLOT(toggle_filter_UseCommands(int)));
+   filterMenu->setItemChecked(x, m_filterNotifications->useCommands());
 
    // Filter -> Log
    QPopupMenu* filterLogMenu = new QPopupMenu;
    filterLogMenu->setCheckable(true);
    filterMenu->insertItem("&Log", filterLogMenu);
+   x = filterLogMenu->insertItem( "Alerts");
+   filterLogMenu->setItemParameter(x, FILTER_FLAG_ALERT);
+   filterLogMenu->setItemChecked(x, ((filters & FILTER_FLAG_ALERT) != 0));
    x = filterLogMenu->insertItem( "Locates");
-   filterLogMenu->setItemParameter(x, 1);
-   filterLogMenu->setItemChecked(x, showeq_params->spawnfilter_loglocates);
+   filterLogMenu->setItemParameter(x, FILTER_FLAG_LOCATE);
+   filterLogMenu->setItemChecked(x, ((filters & FILTER_FLAG_LOCATE) != 0));
    x = filterLogMenu->insertItem( "Hunts");
-   filterLogMenu->setItemParameter(x, 2);
-   filterLogMenu->setItemChecked(x, showeq_params->spawnfilter_loghunts);
+   filterLogMenu->setItemParameter(x, FILTER_FLAG_HUNT);
+   filterLogMenu->setItemChecked(x, ((filters & FILTER_FLAG_HUNT) != 0));
    x = filterLogMenu->insertItem( "Cautions");
-   filterLogMenu->setItemParameter(x, 3);
-   filterLogMenu->setItemChecked(x, showeq_params->spawnfilter_logcautions);
+   filterLogMenu->setItemParameter(x, FILTER_FLAG_CAUTION);
+   filterLogMenu->setItemChecked(x, ((filters & FILTER_FLAG_CAUTION) != 0));
    x = filterLogMenu->insertItem( "Dangers");
-   filterLogMenu->setItemParameter(x, 4);
-   filterLogMenu->setItemChecked(x, showeq_params->spawnfilter_logdangers);
+   filterLogMenu->setItemParameter(x, FILTER_FLAG_DANGER);
+   filterLogMenu->setItemChecked(x, ((filters & FILTER_FLAG_DANGER) != 0));
    connect(filterLogMenu, SIGNAL(activated(int)),
 	   this, SLOT(toggle_filter_Log(int)));
 
@@ -926,10 +1260,154 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
    setTheme(pSEQPrefs->getPrefInt("Theme", section, 2));
 
+   // Interface -> Status Bar
+   QPopupMenu* statusBarMenu = new QPopupMenu;
+   statusBarMenu->setCheckable(true);
+   pInterfaceMenu->insertItem("&Status Bar", statusBarMenu);
+   statusBarMenu->insertItem("Show/Hide", 
+			      this, SLOT(toggle_view_statusbar()));
+   x = statusBarMenu->insertItem( "Status");
+   statusBarMenu->setItemParameter(x, 1);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowStatus",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "Zone");
+   statusBarMenu->setItemParameter(x, 2);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowZone",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "Spawns");
+   statusBarMenu->setItemParameter(x, 3);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowSpawns",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "Experience");
+   statusBarMenu->setItemParameter(x, 4);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowExp",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "AA Experience");
+   statusBarMenu->setItemParameter(x, 5);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowExpAA",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "Packet Counter");
+   statusBarMenu->setItemParameter(x, 6);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowPacketCounter",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "EQ Time");
+   statusBarMenu->setItemParameter(x, 7);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowEQTime",
+							   "Interface_StatusBar", false));
+   x = statusBarMenu->insertItem( "Run Speed");
+   statusBarMenu->setItemParameter(x, 8);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowSpeed",
+							   "Interface_StatusBar", false));
+   // ZEM code
+   x = statusBarMenu->insertItem( "ZEM");
+   statusBarMenu->setItemParameter(x, 9);
+   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowZEM",
+							   "Interface_StatusBar", false));
+    
+   connect (statusBarMenu, SIGNAL(activated(int)), 
+	    this, SLOT(toggle_main_statusbar_Window(int)));
+
+   m_terminalMenu = new QPopupMenu;
+   pInterfaceMenu->insertItem("&Terminal", m_terminalMenu);
+
+   m_terminalTypeFilterMenu = new QPopupMenu;
+   m_terminalMenu->insertItem("MessageTypeFilter", m_terminalTypeFilterMenu);
+   m_terminalTypeFilterMenu->insertItem("&Enable All", 
+					this, SLOT(enableAllTypeFilters()), 0, 64);
+   m_terminalTypeFilterMenu->insertItem("&Disable All", 
+					this, SLOT(disableAllTypeFilters()), 0, 65);
+  
+   m_terminalTypeFilterMenu->insertSeparator(-1);
+
+   QString typeName;
+   uint64_t enabledTypes = m_terminal->enabledTypes();
+
+   // iterate over the message types, filling in various menus and getting 
+   // font color preferences
+   for (int i = MT_Guild; i <= MT_Max; i++)
+   {
+     typeName = MessageEntry::messageTypeString((MessageType)i);
+     if (!typeName.isEmpty())
+     {
+       m_terminalTypeFilterMenu->insertItem(typeName, i);
+       m_terminalTypeFilterMenu->setItemChecked(i, (((uint64_t(1) << i) & enabledTypes) != 0));
+     }
+   }
+
+   connect(m_terminalTypeFilterMenu, SIGNAL(activated(int)),
+	   this, SLOT(toggleTypeFilter(int)));
+
+  m_terminalShowUserFilterMenu = new QPopupMenu;
+  m_terminalMenu->insertItem("User Message Filter - &Show", m_terminalShowUserFilterMenu);
+
+  m_terminalShowUserFilterMenu->insertItem("&Enable All", 
+			       this, SLOT(enableAllShowUserFilters()), 0, 66);
+  m_terminalShowUserFilterMenu->insertItem("&Disable All", 
+			       this, SLOT(disableAllShowUserFilters()), 0, 67);
+  m_terminalShowUserFilterMenu->insertSeparator(-1);
+
+  m_terminalHideUserFilterMenu = new QPopupMenu;
+  m_terminalMenu->insertItem("User Message Filter - &Hide", m_terminalHideUserFilterMenu);
+
+  m_terminalHideUserFilterMenu->insertItem("&Enable All", 
+			       this, SLOT(enableAllHideUserFilters()), 0, 66);
+  m_terminalHideUserFilterMenu->insertItem("&Disable All", 
+			       this, SLOT(disableAllHideUserFilters()), 0, 67);
+  m_terminalHideUserFilterMenu->insertSeparator(-1);
+
+  uint32_t enabledShowUserFilters = m_terminal->enabledShowUserFilters();
+  uint32_t enabledHideUserFilters = m_terminal->enabledHideUserFilters();
+  const MessageFilter* filter;
+  for(int i = 0; i < maxMessageFilters; i++)
+  {
+    filter = m_messageFilters->filter(i);
+    if (filter)
+    {
+      m_terminalShowUserFilterMenu->insertItem(filter->name(), i);
+      m_terminalShowUserFilterMenu->setItemChecked(i, (1 << i) & enabledShowUserFilters);
+
+      m_terminalHideUserFilterMenu->insertItem(filter->name(), i);
+      m_terminalHideUserFilterMenu->setItemChecked(i, (1 << i) & enabledHideUserFilters);
+    }
+  }
+
+  connect(m_terminalShowUserFilterMenu, SIGNAL(activated(int)),
+	  this, SLOT(toggleShowUserFilter(int)));
+  connect(m_terminalHideUserFilterMenu, SIGNAL(activated(int)),
+	  this, SLOT(toggleHideUserFilter(int)));
+  m_terminalMenu->insertItem("Edit User &Message Filters...", 
+			     this, SLOT(showMessageFilterDialog()));
+
+   m_terminalMenu->insertSeparator(-1);
+
+   x = m_terminalMenu->insertItem("&Display Type", this, SLOT(toggleDisplayType(int)));
+   m_terminalMenu->setItemChecked(x, m_terminal->displayType());
+   x = m_terminalMenu->insertItem("Display T&ime/Date", this,
+				  SLOT(toggleDisplayTime(int)));
+   m_terminalMenu->setItemChecked(x, m_terminal->displayDateTime());
+   x = m_terminalMenu->insertItem("Display &EQ Date/Time", this,
+				  SLOT(toggleEQDisplayTime(int)));
+   m_terminalMenu->setItemChecked(x, m_terminal->displayEQDateTime());
+   x = m_terminalMenu->insertItem("&Use Color", this,
+				  SLOT(toggleUseColor(int)));
+   m_terminalMenu->setItemChecked(x, m_terminal->useColor());
+
+
+   pInterfaceMenu->insertItem( "Formatted Messages File...", 
+			       this, SLOT(select_main_FormatFile(int)));
+   pInterfaceMenu->insertItem( "Spells File...", 
+			       this, SLOT(select_main_SpellsFile(int)));
+
+   // insert Window menu
+   menuBar()->insertItem("&Window", m_windowMenu);
+
+   // All of the Window menu items that don't automatically get inserted
+   // have to be manually placed in the right positions.
+
    // Interface -> WindowCaption
    m_windowCaptionMenu = new QPopupMenu;
-   pInterfaceMenu->insertItem( "Window &Caption", m_windowCaptionMenu);
-    
+   m_windowMenu->insertItem( "Window &Caption", m_windowCaptionMenu, -1, 0);
+   
    x = m_windowCaptionMenu->insertItem("&Main Window...");
    m_windowCaptionMenu->setItemParameter(x, 5);
     
@@ -979,7 +1457,7 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
    // Interface -> Window Font
    QPopupMenu* windowFontMenu = new QPopupMenu;
-   pInterfaceMenu->insertItem( "&Font", windowFontMenu);
+   m_windowMenu->insertItem( "&Font", windowFontMenu, -1, 1);
     
    windowFontMenu->insertItem( "&Applicatoin Default...", 
 			       this, SLOT(set_main_Font(int)));
@@ -1034,101 +1512,40 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	    this, SLOT(set_main_WindowFont(int)));
 
 
-   // Interface -> Status Bar
-   QPopupMenu* statusBarMenu = new QPopupMenu;
-   statusBarMenu->setCheckable(true);
-   pInterfaceMenu->insertItem("&Status Bar", statusBarMenu);
-   statusBarMenu->insertItem("Show/Hide", 
-			      this, SLOT(toggle_view_statusbar()));
-   x = statusBarMenu->insertItem( "Status");
-   statusBarMenu->setItemParameter(x, 1);
-   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowStatus",
-							   "Interface_StatusBar", false));
-   x = statusBarMenu->insertItem( "Zone");
-   statusBarMenu->setItemParameter(x, 2);
-   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowZone",
-							   "Interface_StatusBar", false));
-   x = statusBarMenu->insertItem( "Spawns");
-   statusBarMenu->setItemParameter(x, 3);
-   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowSpawns",
-							   "Interface_StatusBar", false));
-   x = statusBarMenu->insertItem( "Experience");
-   statusBarMenu->setItemParameter(x, 4);
-   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowExp",
-							   "Interface_StatusBar", false));
-   x = statusBarMenu->insertItem( "AA Experience");
-   statusBarMenu->setItemParameter(x, 5);
-   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowExpAA",
-							   "Interface_StatusBar", false));
-   x = statusBarMenu->insertItem( "Packet Counter");
-   statusBarMenu->setItemParameter(x, 6);
-   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowPacketCounter",
-							   "Interface_StatusBar", false));
-   x = statusBarMenu->insertItem( "EQ Time");
-   statusBarMenu->setItemParameter(x, 7);
-   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowEQTime",
-							   "Interface_StatusBar", false));
-   x = statusBarMenu->insertItem( "Run Speed");
-   statusBarMenu->setItemParameter(x, 8);
-   statusBarMenu->setItemChecked(x, pSEQPrefs->getPrefBool("ShowSpeed",
-							   "Interface_StatusBar", false));
-    
-   connect (statusBarMenu, SIGNAL(activated(int)), 
-	    this, SLOT(toggle_main_statusbar_Window(int)));
-
-
-   x = pInterfaceMenu->insertItem("Save Window Sizes & Positions", 
-				  this, SLOT(toggle_main_SavePosition(int)));
-   menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("SavePosition", 
+   x = m_windowMenu->insertItem("Save Window Sizes && Positions", 
+				  this, SLOT(toggle_main_SavePosition(int)),
+				  0, -1, 2);
+   m_windowMenu->setItemChecked (x, pSEQPrefs->getPrefBool("SavePosition", 
 							"Interface",
 							true));
-   x = pInterfaceMenu->insertItem("Restore Window Positions", 
-				  this, SLOT(toggle_main_UseWindowPos(int)));
-   menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("UseWindowPos", 
+   x = m_windowMenu->insertItem("Restore Window Positions", 
+				  this, SLOT(toggle_main_UseWindowPos(int)),
+				  0, -1, 3);
+   m_windowMenu->setItemChecked (x, pSEQPrefs->getPrefBool("UseWindowPos", 
 							"Interface",
 							true));
-   x = pInterfaceMenu->insertItem("Use Stdout", 
-				  this, SLOT(toggle_main_UseStdout(int)));
-   menuBar()->setItemChecked (x, pSEQPrefs->getPrefBool("UseStdout", 
-							"Interface",
-							true));
-   x = pInterfaceMenu->insertItem("No Bank", 
-				  this, SLOT(toggle_main_NoBank(int)));
-   menuBar()->setItemChecked (x, showeq_params->no_bank); 
 
-   pInterfaceMenu->insertItem( "Formatted Messages File...", 
-			       this, SLOT(select_main_FormatFile(int)));
-   pInterfaceMenu->insertItem( "Spells File...", 
-			       this, SLOT(select_main_SpellsFile(int)));
+   m_windowMenu->insertSeparator(4);
 
    // Debug menu
    QPopupMenu* pDebugMenu = new QPopupMenu;
    menuBar()->insertItem("&Debug", pDebugMenu);
+   pDebugMenu->insertItem("List I&nterface", this, SLOT(listInterfaceInfo()));
    pDebugMenu->insertItem("List S&pawns", this, SLOT(listSpawns()), ALT+CTRL+Key_P);
    pDebugMenu->insertItem("List &Drops", this, SLOT(listDrops()), ALT+CTRL+Key_D);
    pDebugMenu->insertItem("List &Map Info", this, SLOT(listMapInfo()), ALT+CTRL+Key_M);
-   pDebugMenu->insertItem("List Guild Info", m_guildmgr, SLOT(listGuildInfo()));
-   pDebugMenu->insertItem("Dump S&pawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_P);
-   pDebugMenu->insertItem("Dump &Drops", this, SLOT(dumpDrops()), ALT+SHIFT+CTRL+Key_D);
-   pDebugMenu->insertItem("Dump Map &Info", this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
+   pDebugMenu->insertItem("List G&uild Info", m_guildmgr, SLOT(listGuildInfo()));
+   pDebugMenu->insertItem("List &Group", this, SLOT(listGroup()), ALT+CTRL+Key_G);
+   pDebugMenu->insertItem("List Guild M&embers", this, SLOT(listGuild()), ALT+CTRL+Key_E);
+   pDebugMenu->insertItem("Dump Spawns", this, SLOT(dumpSpawns()), ALT+SHIFT+CTRL+Key_P);
+   pDebugMenu->insertItem("Dump Drops", this, SLOT(dumpDrops()), ALT+SHIFT+CTRL+Key_D);
+   pDebugMenu->insertItem("Dump Map Info", this, SLOT(dumpMapInfo()), ALT+SHIFT+CTRL+Key_M);
    pDebugMenu->insertItem("Dump Guild Info", this , SLOT(dumpGuildInfo()));
    pDebugMenu->insertItem("Dump SpellBook Info", this , SLOT(dumpSpellBook()));
+   pDebugMenu->insertItem("Dump Group", this, SLOT(dumpGroup()), ALT+CTRL+SHIFT+Key_G);
+   pDebugMenu->insertItem("Dump Guild Members", this, SLOT(dumpGuild()), ALT+CTRL+SHIFT+Key_E);
    pDebugMenu->insertItem("List &Filters", m_filterMgr, SLOT(listFilters()), ALT+CTRL+Key_F);
    pDebugMenu->insertItem("List &Zone Filters", m_filterMgr, SLOT(listZoneFilters()));
-
-   // Tools menu
-   QPopupMenu* pToolsMenu = new QPopupMenu;
-   menuBar()->insertItem("&Tools", pToolsMenu);
-
-   // Map conversions submenu
-   QPopupMenu* pConversionsMenu = new QPopupMenu;
-   pToolsMenu->insertItem( "&Map Conversions", pConversionsMenu);
-   pToolsMenu->setCheckable(TRUE);
-
-   // SOE->SEQ
-   pConversionsMenu->insertItem("S&OE to SEQ", m_mapMgr, SLOT(convertSOE()));
-   // SEQ->SOE
-   pConversionsMenu->insertItem("SE&Q to SOE", m_mapMgr, SLOT(convertSEQ()));
 
 ////////////////////
 // QStatusBar creation
@@ -1177,6 +1594,12 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
      m_stsbarSpeed->setText("Run Speed:");
      statusBar()->addWidget(m_stsbarSpeed, 1);
 
+   // ZEM code
+   // Zone Exp Mult widget
+     m_stsbarZEM = new QLabel(statusBar(), "ZEM");
+     m_stsbarZEM->setText("ZEM: [unknown]");
+     statusBar()->addWidget(m_stsbarZEM, 1);
+
      // setup the status fonts correctly
      restoreStatusFont();
 
@@ -1220,6 +1643,12 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    else
      sts_widget_count++;
 
+   // ZEM code
+   if (!pSEQPrefs->getPrefBool("ShowZEM", statusBarSection, false))
+     m_stsbarZEM->hide();
+   else
+     sts_widget_count++;
+
 
    //hide the statusbar if no visible widgets
    if (!sts_widget_count || !pSEQPrefs->getPrefBool("StatusBarActive", statusBarSection, 1))
@@ -1240,33 +1669,48 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    connect(this, SIGNAL(saveAllPrefs(void)),
 	   m_categoryMgr, SLOT(savePrefs(void)));
 
-   if (m_itemDB != NULL)
+   if (m_itemDB != 0)
    {
      // connect ItemDB slots to EQPacket signals
-     connect(m_packet, SIGNAL(item(const itemPacketStruct*, uint32_t, uint8_t)),
-	     m_itemDB, SLOT(item(const itemPacketStruct*, uint32_t, uint8_t)));
-     connect(m_packet, SIGNAL(playerItem(const char*, uint32_t, uint8_t)),
-	     m_itemDB, SLOT(playerItem(const char*, uint32_t, uint8_t)));
-     connect(m_packet, SIGNAL(itemInfo(const itemInfoStruct*, uint32_t, uint8_t)),
-	     m_itemDB, SLOT(itemInfo(const itemInfoStruct*, uint32_t, uint8_t)));
+     m_packet->connect2("OP_ItemPacket", SP_Zone, DIR_Server,
+			"itemPacketStruct", SZC_None,
+			m_itemDB, SLOT(item(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_ItemPlayerPacket", SP_Zone, DIR_Server,
+			"char", SZC_None, m_itemDB, 
+			SLOT(playerItem(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_ItemLinkResponse", SP_Zone, DIR_Server,
+			"itemInfoStruct", SZC_None, m_itemDB, 
+			SLOT(itemInfo(const uint8_t*, size_t, uint8_t)));
    }
 
-   if (m_groupMgr != NULL)
+   if (m_groupMgr != 0)
    {
-     // connect GroupMgr slots to EQPacket signals
-     connect(m_packet, SIGNAL(groupInfo(const groupMemberStruct*, uint32_t, uint8_t)),
-	     m_groupMgr, SLOT(handleGroupInfo(const groupMemberStruct*)));
-     
+     m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
+			"charProfileStruct", SZC_Match,
+			m_groupMgr, SLOT(player(const uint8_t*)));
+     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
+			"groupUpdateStruct", SZC_Match,
+			m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));
+     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
+			"groupFullUpdateStruct", SZC_Match,
+			m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));
+     // connect GroupMgr slots to SpawnShell signals
+     connect(m_spawnShell, SIGNAL(addItem(const Item*)),
+	     m_groupMgr, SLOT(addItem(const Item*)));
      // connect GroupMgr slots to SpawnShell signals
      connect(m_spawnShell, SIGNAL(delItem(const Item*)),
 	     m_groupMgr, SLOT(delItem(const Item*)));
+     // connect GroupMgr slots to SpawnShell signals
+     connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
+	     m_groupMgr, SLOT(killSpawn(const Item*)));
    }
 
    if (m_dateTimeMgr)
    {
      // connect DateTimeMgr slots to EQPacket signals
-     connect(m_packet, SIGNAL(timeOfDay(const timeOfDayStruct*, uint32_t, uint8_t)),
-	     m_dateTimeMgr, SLOT(timeOfDay(const timeOfDayStruct*)));
+     m_packet->connect2("OP_TimeOfDay", SP_Zone, DIR_Server,
+			"timeOfDayStruct", SZC_Match, 
+			m_dateTimeMgr, SLOT(timeOfDay(const uint8_t*)));
 
      // connect interface slots to DateTimeMgr signals
      connect(m_dateTimeMgr, SIGNAL(updatedDateTime(const QDateTime&)),
@@ -1276,73 +1720,233 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	     this, SLOT(syncDateTime(const QDateTime&)));
    }
 
+   if (m_zoneMgr)
+   {
+     m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Client,
+			"ClientZoneEntryStruct", SZC_Match,
+			m_zoneMgr, SLOT(zoneEntryClient(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Server,
+			"ServerZoneEntryStruct", SZC_Match,
+			m_zoneMgr, SLOT(zoneEntryServer(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
+			"charProfileStruct", SZC_Match,
+			m_zoneMgr, SLOT(zonePlayer(const uint8_t*)));
+     m_packet->connect2("OP_ZoneChange", SP_Zone, DIR_Client|DIR_Server,
+			"zoneChangeStruct", SZC_Match,
+			m_zoneMgr, SLOT(zoneChange(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_NewZone", SP_Zone, DIR_Server,
+			"newZoneStruct", SZC_Match,
+			m_zoneMgr, SLOT(zoneNew(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_SendZonePoints", SP_Zone, DIR_Server,
+			"zonePointsStruct", SZC_None,
+			m_zoneMgr, SLOT(zonePoints(const uint8_t*, size_t, uint8_t)));
+   }
+
+   if (m_filterMgr)
+   {
+     connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
+	     m_filterMgr, SLOT(loadZone(const QString&)));
+     connect(m_zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)),
+	     m_filterMgr, SLOT(loadZone(const QString&)));
+     connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
+	     m_filterMgr, SLOT(loadZone(const QString&)));
+   }
+
+   if (m_guildmgr)
+   {
+     m_packet->connect2("OP_GuildList", SP_World, DIR_Server, 
+			"worldGuildListStruct", SZC_Match,
+			m_guildmgr, 
+			SLOT(worldGuildList(const uint8_t*, size_t)));
+
+     connect(this, SIGNAL(guildList2text(QString)),
+	     m_guildmgr, SLOT(guildList2text(QString)));
+   }
+
+   if (m_guildShell)
+   {
+     m_packet->connect2("OP_GuildMemberList", SP_Zone, DIR_Server,
+			"uint8_t", SZC_None,
+			m_guildShell,
+			SLOT(guildMemberList(const uint8_t*, size_t)));
+     m_packet->connect2("OP_GuildMemberUpdate", SP_Zone, DIR_Server,
+			"GuildMemberUpdate", SZC_Match,
+			m_guildShell,
+			SLOT(guildMemberUpdate(const uint8_t*, size_t)));
+   }
+
+   if (m_messageShell)
+   {
+     m_packet->connect2("OP_CommonMessage", SP_Zone, DIR_Client|DIR_Server,
+			"channelMessageStruct", SZC_None,
+			m_messageShell,
+			SLOT(channelMessage(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_FormattedMessage", SP_Zone, DIR_Server,
+			"formattedMessageStruct", SZC_None,
+			m_messageShell,
+			SLOT(formattedMessage(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_SimpleMessage", SP_Zone, DIR_Server,
+			"simpleMessageStruct", SZC_Match,
+			m_messageShell,
+			SLOT(simpleMessage(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_SpecialMesg", SP_Zone, DIR_Server,
+			"specialMessageStruct", SZC_None,
+			m_messageShell,
+			SLOT(specialMessage(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_GuildMOTD", SP_Zone, DIR_Server,
+			"guildMOTDStruct", SZC_None,
+			m_messageShell,
+			SLOT(guildMOTD(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_RandomReq", SP_Zone, DIR_Client,
+			"randomReqStruct", SZC_Match,
+			m_messageShell, SLOT(randomRequest(const uint8_t*)));
+     m_packet->connect2("OP_RandomReply", SP_Zone, DIR_Server,
+			"randomStruct", SZC_Match,
+			m_messageShell, SLOT(random(const uint8_t*)));
+     m_packet->connect2("OP_ConsentResponse", SP_Zone, DIR_Server,
+			"consentResponseStruct", SZC_Match,
+			m_messageShell, SLOT(consent(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_DenyResponse", SP_Zone, DIR_Server,
+			"consentResponseStruct", SZC_Match,
+			m_messageShell, SLOT(consent(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_Emote", SP_Zone, DIR_Server|DIR_Client,
+			"emoteTextStruct", SZC_None,
+			m_messageShell, SLOT(emoteText(const uint8_t*)));
+     m_packet->connect2("OP_InspectAnswer", SP_Zone, DIR_Server,
+			"inspectDataStruct", SZC_Match,
+			m_messageShell, SLOT(inspectData(const uint8_t*)));
+     m_packet->connect2("OP_MoneyOnCorpse", SP_Zone, DIR_Server,
+			"moneyOnCorpseStruct", SZC_Match,
+			m_messageShell, SLOT(moneyOnCorpse(const uint8_t*)));
+     m_packet->connect2("OP_Logout", SP_Zone, DIR_Server,
+			"none", SZC_Match,
+			m_messageShell, SLOT(logOut(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_NewZone", SP_Zone, DIR_Server,
+			"newZoneStruct", SZC_Match,
+			m_messageShell, SLOT(zoneNew(const uint8_t*, size_t, uint8_t)));
+     connect(m_zoneMgr, SIGNAL(zoneBegin(const ClientZoneEntryStruct*, size_t, uint8_t)),
+	     m_messageShell, SLOT(zoneEntryClient(const ClientZoneEntryStruct*)));
+     connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, size_t, uint8_t)),
+	     m_messageShell, SLOT(zoneEntryServer(const ServerZoneEntryStruct*)));
+     connect(m_zoneMgr, SIGNAL(zoneChanged(const zoneChangeStruct*, size_t, uint8_t)),
+	     m_messageShell, SLOT(zoneChanged(const zoneChangeStruct*, size_t, uint8_t)));
+     connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
+	     m_messageShell, SLOT(zoneBegin(const QString&)));
+     connect(m_zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)),
+	     m_messageShell, SLOT(zoneEnd(const QString&, const QString&)));
+     connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
+	     m_messageShell, SLOT(zoneChanged(const QString&)));
+
+     m_packet->connect2("OP_MOTD", SP_World, DIR_Server,
+			"worldMOTDStruct", SZC_None,
+			m_messageShell, SLOT(worldMOTD(const uint8_t*)));
+     m_packet->connect2("OP_MemorizeSpell", SP_Zone, DIR_Server|DIR_Client,
+			"memSpellStruct", SZC_Match,
+			m_messageShell, SLOT(handleSpell(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_BeginCast", SP_Zone, DIR_Server|DIR_Client,
+			"beginCastStruct", SZC_Match,
+			m_messageShell, SLOT(beginCast(const uint8_t*)));
+     m_packet->connect2("OP_BuffFadeMsg", SP_Zone, DIR_Server|DIR_Client,
+			"spellFadedStruct", SZC_None,
+			m_messageShell, SLOT(spellFaded(const uint8_t*)));
+     m_packet->connect2("OP_CastSpell", SP_Zone, DIR_Server|DIR_Client,
+			"startCastStruct", SZC_Match,
+			m_messageShell, SLOT(startCast(const uint8_t*)));
+     m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
+			"charProfileStruct", SZC_Match,
+			m_messageShell, SLOT(player(const uint8_t*)));
+     m_packet->connect2("OP_SkillUpdate", SP_Zone, DIR_Server,
+			"skillIncStruct", SZC_Match,
+			m_messageShell, SLOT(increaseSkill(const uint8_t*)));
+     m_packet->connect2("OP_LevelUpdate", SP_Zone, DIR_Server,
+			"levelUpUpdateStruct", SZC_Match,
+			m_messageShell, SLOT(updateLevel(const uint8_t*)));
+
+     m_packet->connect2("OP_Consider", SP_Zone, DIR_Server,
+			"considerStruct", SZC_Match,
+			m_messageShell, SLOT(consMessage(const uint8_t*, size_t, uint8_t)));
+
+     connect(m_player, SIGNAL(setExp(uint32_t, uint32_t, uint32_t, uint32_t, 
+				     uint32_t)),
+	     m_messageShell, SLOT(setExp(uint32_t, uint32_t, uint32_t, 
+					 uint32_t, uint32_t)));
+     connect(m_player, SIGNAL(newExp(uint32_t, uint32_t, uint32_t, uint32_t, 
+				     uint32_t, uint32_t)),
+	     m_messageShell, SLOT(newExp(uint32_t, uint32_t, uint32_t,  
+					 uint32_t, uint32_t, uint32_t)));
+     connect(m_player, SIGNAL(setAltExp(uint32_t, uint32_t, uint32_t, uint32_t)),
+	     m_messageShell, SLOT(setAltExp(uint32_t, uint32_t, uint32_t, uint32_t)));
+     connect(m_player, SIGNAL(newAltExp(uint32_t, uint32_t, uint32_t, uint32_t,
+					uint32_t, uint32_t)),
+	     m_messageShell, SLOT(newAltExp(uint32_t, uint32_t, uint32_t, uint32_t,
+					    uint32_t, uint32_t)));
+
+     connect(m_spawnShell, SIGNAL(addItem(const Item*)),
+	     m_messageShell, SLOT(addItem(const Item*)));
+     connect(m_spawnShell, SIGNAL(delItem(const Item*)),
+	     m_messageShell, SLOT(delItem(const Item*)));
+     connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
+	     m_messageShell, SLOT(killSpawn(const Item*)));
+
+     connect(m_dateTimeMgr, SIGNAL(syncDateTime(const QDateTime&)),
+	     m_messageShell, SLOT(syncDateTime(const QDateTime&)));
+
+     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
+			"groupUpdateStruct", SZC_Match,
+			m_messageShell, SLOT(groupUpdate(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
+			"groupFullUpdateStruct", SZC_Match,
+			m_messageShell, SLOT(groupUpdate(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Server|DIR_Client,
+			"groupInviteStruct", SZC_Match,
+			m_messageShell, SLOT(groupInvite(const uint8_t*)));
+     m_packet->connect2("OP_GroupFollow", SP_Zone, DIR_Server|DIR_Client,
+			"groupFollowStruct", SZC_Match,
+			m_messageShell, SLOT(groupFollow(const uint8_t*)));
+     m_packet->connect2("OP_GroupDisband", SP_Zone, DIR_Server,
+			"groupDisbandStruct", SZC_Match,
+            m_messageShell, SLOT(groupDisband(const uint8_t*, size_t, uint8_t)));
+
+     m_packet->connect2("OP_GroupCancelInvite", SP_Zone, DIR_Server|DIR_Client,
+			"groupDeclineStruct", SZC_Match,
+			m_messageShell, SLOT(groupDecline(const uint8_t*)));
+   }
+
+   if (m_filterNotifications)
+   {
+     connect(m_spawnShell, SIGNAL(addItem(const Item*)),
+	     m_filterNotifications, SLOT(addItem(const Item*)));
+     connect(m_spawnShell, SIGNAL(delItem(const Item*)),
+	     m_filterNotifications, SLOT(delItem(const Item*)));
+     connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
+	     m_filterNotifications, SLOT(killSpawn(const Item*)));
+     connect(m_spawnShell, SIGNAL(changeItem(const Item*, uint32_t)),
+	     m_filterNotifications, 
+	     SLOT(changeItem(const Item*, uint32_t)));
+   }
+
    // connect interface slots to Packet signals
-   connect(m_packet, SIGNAL(clientTarget(const clientTargetStruct*, uint32_t, uint8_t)),
-	   this, SLOT(clientTarget(const clientTargetStruct*)));
-   connect(m_packet, SIGNAL(attack2Hand1(const attack2Struct*, uint32_t, uint8_t)), 
-	   this, SLOT(attack2Hand1(const attack2Struct*)));
-   connect(m_packet, SIGNAL(action2Message(const action2Struct*, uint32_t, uint8_t)),
-           this, SLOT(action2Message(const action2Struct*)));
-   connect(m_packet, SIGNAL(killSpawn(const newCorpseStruct*, uint32_t, uint8_t)),
-	   this, SLOT(combatKillSpawn(const newCorpseStruct*)));
-   connect(m_packet, SIGNAL(moneyOnCorpse(const moneyOnCorpseStruct*, uint32_t, uint8_t)),
-	   this, SLOT(moneyOnCorpse(const moneyOnCorpseStruct*)));
-   connect(m_packet, SIGNAL(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)),
-	   this, SLOT(channelMessage(const channelMessageStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(formattedMessage(const formattedMessageStruct*, uint32_t, uint8_t)),
-	   this, SLOT(formattedMessage(const formattedMessageStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(simpleMessage(const simpleMessageStruct*, uint32_t, uint8_t)),
-	   this, SLOT(simpleMessage(const simpleMessageStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(specialMessage(const specialMessageStruct*, uint32_t, uint8_t)),
-	   this, SLOT(specialMessage(const specialMessageStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(guildMOTD(const guildMOTDStruct*, uint32_t, uint8_t)),
-	   this, SLOT(guildMOTD(const guildMOTDStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(item(const itemPacketStruct*, uint32_t, uint8_t)),
-	   this, SLOT(item(const itemPacketStruct*)));
-   connect(m_packet, SIGNAL(random(const randomReqStruct*, uint32_t, uint8_t)),
-	   this, SLOT(random(const randomReqStruct*)));
-   connect(m_packet, SIGNAL(random(const randomStruct*, uint32_t, uint8_t)),
-	   this, SLOT(random(const randomStruct*)));
-   connect(m_packet, SIGNAL(logOut(const uint8_t*, uint32_t, uint8_t)),
-	   this, SLOT(logOut(const uint8_t*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(emoteText(const emoteTextStruct*, uint32_t, uint8_t)),
-	   this, SLOT(emoteText(const emoteTextStruct*)));
-   connect(m_packet, SIGNAL(newGroundItem(const makeDropStruct*, uint32_t, uint8_t)),
-	   this, SLOT(newGroundItem(const makeDropStruct *, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(inspectData(const inspectDataStruct*, uint32_t, uint8_t)),
-	   this, SLOT(inspectData(const inspectDataStruct*)));
-   connect(m_packet, SIGNAL(spMessage(const spMesgStruct*, uint32_t, uint8_t)),
-	   this, SLOT(spMessage(const spMesgStruct*)));
-   connect(m_packet, SIGNAL(handleSpell(const memSpellStruct*, uint32_t, uint8_t)),
-	   this, SLOT(handleSpell(const memSpellStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(beginCast(const beginCastStruct*, uint32_t, uint8_t)),
-	   this, SLOT(beginCast(const beginCastStruct*)));
-   connect(m_packet, SIGNAL(spellFaded(const spellFadedStruct*, uint32_t, uint8_t)),
-	   this, SLOT(spellFaded(const spellFadedStruct*)));
-   connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *, uint32_t, uint8_t)),
-	   this, SLOT(interruptSpellCast(const badCastStruct *)));
-   connect(m_packet, SIGNAL(startCast(const startCastStruct*, uint32_t, uint8_t)),
-	   this, SLOT(startCast(const startCastStruct*)));
-   connect(m_packet, SIGNAL(systemMessage(const sysMsgStruct*, uint32_t, uint8_t)),
-	   this, SLOT(systemMessage(const sysMsgStruct*)));
-   connect(m_packet, SIGNAL(moneyUpdate(const moneyUpdateStruct*, uint32_t, uint8_t)),
-	   this, SLOT(moneyUpdate(const moneyUpdateStruct*)));
-   connect(m_packet, SIGNAL(moneyThing(const moneyThingStruct*, uint32_t, uint8_t)),
-	   this, SLOT(moneyThing(const moneyThingStruct*)));
-   connect(m_packet, SIGNAL(groupInfo(const groupMemberStruct*, uint32_t, uint8_t)),
-	   this, SLOT(groupInfo(const groupMemberStruct*)));
-   connect(m_packet, SIGNAL(groupInvite(const groupInviteStruct*, uint32_t, uint8_t)),
-	   this, SLOT(groupInvite(const groupInviteStruct*)));
-   connect(m_packet, SIGNAL(groupDecline(const groupDeclineStruct*, uint32_t, uint8_t)),
-	   this, SLOT(groupDecline(const groupDeclineStruct*)));
-   connect(m_packet, SIGNAL(groupAccept(const groupAcceptStruct*, uint32_t, uint8_t)),
-	   this, SLOT(groupAccept(const groupAcceptStruct*)));
-   connect(m_packet, SIGNAL(groupDelete(const groupDeleteStruct*, uint32_t, uint8_t)),
-	   this, SLOT(groupDelete(const groupDeleteStruct*)));
-   connect(m_packet, SIGNAL(zoneNew(const newZoneStruct*, uint32_t, uint8_t)),
-	   this, SLOT(zoneNew(const newZoneStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(worldMOTD(const worldMOTDStruct*, uint32_t, uint8_t)),
-	   this, SLOT(worldMOTD(const worldMOTDStruct*)));
+   m_packet->connect2("OP_TargetMouse", SP_Zone, DIR_Client|DIR_Server,
+		      "clientTargetStruct", SZC_Match,
+		      this, SLOT(clientTarget(const uint8_t*)));
+#if 0 // ZBTEMP
+   connect(m_packet, SIGNAL(attack2Hand1(const uint8_t*, size_t, uint8_t)), 
+	   this, SLOT(attack2Hand1(const uint8_t*)));
+#endif
+   m_packet->connect2("OP_Action2", SP_Zone, DIR_Client|DIR_Server,
+		      "action2Struct", SZC_Match,
+		      this, SLOT(action2Message(const uint8_t*)));
+   m_packet->connect2("OP_Death", SP_Zone, DIR_Server,
+		      "newCorpseStruct", SZC_Match,
+		      this, SLOT(combatKillSpawn(const uint8_t*)));
+#if 0 // ZBTEMP
+   connect(m_packet, SIGNAL(interruptSpellCast(const uint8_t*, size_t, uint8_t)),
+	   this, SLOT(interruptSpellCast(const uint8_t*)));
+   connect(m_packet, SIGNAL(moneyUpdate(const uint8_t*, size_t, uint8_t)),
+	   this, SLOT(moneyUpdate(const uint8_t*)));
+   connect(m_packet, SIGNAL(moneyThing(const uint8_t*, size_t, uint8_t)),
+	   this, SLOT(moneyThing(const uint8_t*)));
+#endif // ZBTEMP
 
    connect(m_packet, SIGNAL(toggle_session_tracking()),
 	   this, SLOT(toggle_net_session_tracking()));
@@ -1350,16 +1954,10 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // connect EQInterface slots to ZoneMgr signals
   connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
 	  this, SLOT(zoneBegin(const QString&)));
-  connect(m_zoneMgr, SIGNAL(zoneChanged(const zoneChangeStruct*, uint32_t, uint8_t)),
-	  this, SLOT(zoneChanged(const zoneChangeStruct*, uint32_t, uint8_t)));
-  connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
-	  this, SLOT(zoneChanged(const QString&)));
   connect(m_zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)),
 	  this, SLOT(zoneEnd(const QString&, const QString&)));
-  connect(m_zoneMgr, SIGNAL(zoneBegin(const ClientZoneEntryStruct*, uint32_t, uint8_t)),
-          this, SLOT(zoneEntry(const ClientZoneEntryStruct*)));
-  connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, uint32_t, uint8_t)),
-          this, SLOT(zoneEntry(const ServerZoneEntryStruct*)));
+  connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
+	  this, SLOT(zoneChanged(const QString&)));
 
    // connect the SpellShell slots to EQInterface signals
    connect(this, SIGNAL(spellMessage(QString&)),
@@ -1368,100 +1966,147 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    // connect EQInterface slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(addItem(const Item*)),
 	   this, SLOT(addItem(const Item*)));
-   connect(m_spawnShell, SIGNAL(handleAlert(const Item*, alertType)),
-	   this, SLOT(handleAlert(const Item*, alertType)));
-   connect(m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
-	   this, SLOT(spawnConsidered(const Item*)));
    connect(m_spawnShell, SIGNAL(delItem(const Item*)),
 	   this, SLOT(delItem(const Item*)));
    connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
 	   this, SLOT(killSpawn(const Item*)));
    connect(m_spawnShell, SIGNAL(changeItem(const Item*, uint32_t)),
 	   this, SLOT(changeItem(const Item*)));
+   connect(m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
+	   this, SLOT(spawnConsidered(const Item*)));
 
    // connect the SpawnShell slots to Packet signals
-   connect(m_packet, SIGNAL(newGroundItem(const makeDropStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(newGroundItem(const makeDropStruct *, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(removeGroundItem(const remDropStruct *, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(removeGroundItem(const remDropStruct *, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(newDoorSpawn(const doorStruct *, uint32_t, uint8_t)),
-           m_spawnShell, SLOT(newDoorSpawn(const doorStruct *, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(newSpawn(const newSpawnStruct*)));
-   connect(m_packet, SIGNAL(updateSpawns(const spawnPositionUpdate *, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(updateSpawns(const spawnPositionUpdate *)));
-   connect(m_packet, SIGNAL(updateSpawnInfo(const SpawnUpdateStruct *, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(updateSpawnMaxHP(const SpawnUpdateStruct *)));
-   connect(m_packet, SIGNAL(updateNpcHP(const hpNpcUpdateStruct*, uint32_t, uint8_t)),
-           m_spawnShell, SLOT(updateNpcHP(const hpNpcUpdateStruct*)));
-  // connect the SpellShell slot to Player Signal
-   connect(m_player, SIGNAL(buffLoad(const spellBuff *)), m_spellShell, SLOT(buffLoad(const spellBuff *)));
+   m_packet->connect2("OP_GroundSpawn", SP_Zone, DIR_Server,
+		      "makeDropStruct", SZC_Match,
+		      m_spawnShell, SLOT(newGroundItem(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_ClickObject", SP_Zone, DIR_Server,
+		      "remDropStruct", SZC_Match,
+		      m_spawnShell, SLOT(removeGroundItem(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_SpawnDoor", SP_Zone, DIR_Server,
+		      "doorStruct", SZC_Modulus,
+		      m_spawnShell, SLOT(newDoorSpawns(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
+		      "spawnStruct", SZC_Match,
+		      m_spawnShell, SLOT(newSpawn(const uint8_t*)));
+   m_packet->connect2("OP_MobUpdate", SP_Zone, DIR_Server|DIR_Client,
+		      "spawnPositionUpdate", SZC_Match,
+		      m_spawnShell, SLOT(updateSpawns(const uint8_t*)));
+   m_packet->connect2("OP_WearChange", SP_Zone, DIR_Server|DIR_Client,
+		      "SpawnUpdateStruct", SZC_Match,
+		      m_spawnShell, SLOT(updateSpawnInfo(const uint8_t*)));
+   m_packet->connect2("OP_InitialHPUpdate", SP_Zone, DIR_Server|DIR_Client,
+		      "hpNpcUpdateStruct", SZC_Match,
+		      m_spawnShell, SLOT(updateNpcHP(const uint8_t*)));
+   m_packet->connect2("OP_HPUpdate", SP_Zone, DIR_Server|DIR_Client,
+		      "hpNpcUpdateStruct", SZC_Match,
+		      m_spawnShell, SLOT(updateNpcHP(const uint8_t*)));
+   m_packet->connect2("OP_DeleteSpawn", SP_Zone, DIR_Server|DIR_Client,
+		      "deleteSpawnStruct", SZC_Match,
+		      m_spawnShell, SLOT(deleteSpawn(const uint8_t*)));
+   m_packet->connect2("OP_SpawnRename", SP_Zone, DIR_Server,
+		      "spawnRenameStruct", SZC_Match,
+		      m_spawnShell, SLOT(renameSpawn(const uint8_t*)));
+   m_packet->connect2("OP_Illusion", SP_Zone, DIR_Server|DIR_Client,
+		      "spawnIllusionStruct", SZC_Match,
+		      m_spawnShell, SLOT(illusionSpawn(const uint8_t*)));
+   m_packet->connect2("OP_SpawnAppearance", SP_Zone, DIR_Server|DIR_Client,
+		      "spawnAppearanceStruct", SZC_Match,
+		      m_spawnShell, SLOT(updateSpawnAppearance(const uint8_t*)));
+   m_packet->connect2("OP_Death", SP_Zone, DIR_Server,
+		      "newCorpseStruct", SZC_Match,
+		      m_spawnShell, SLOT(killSpawn(const uint8_t*)));
+#if 0 // ZBTEMP
+   connect(m_packet, SIGNAL(spawnWearingUpdate(const uint8_t*, size_t, uint8_t)),
+	   m_spawnShell, SLOT(spawnWearingUpdate(const uint8_t*)));
+#endif
+   m_packet->connect2("OP_Consider", SP_Zone, DIR_Server|DIR_Client,
+		      "considerStruct", SZC_Match,
+		      m_spawnShell, SLOT(consMessage(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_ClientUpdate", SP_Zone, DIR_Server,
+		      "playerSpawnPosStruct", SZC_Match,
+		      m_spawnShell, SLOT(playerUpdate(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_CorpseLocResponse", SP_Zone, DIR_Server,
+		      "corpseLocStruct", SZC_Match,
+		      m_spawnShell, SLOT(corpseLoc(const uint8_t*)));
+   m_packet->connect2("OP_ZoneSpawns", SP_Zone, DIR_Server,
+		      "spawnStruct", SZC_Modulus,
+		      m_spawnShell, SLOT(zoneSpawns(const uint8_t*, size_t)));
 
-   connect(m_packet, SIGNAL(deleteSpawn(const deleteSpawnStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(deleteSpawn(const deleteSpawnStruct*)));
-   connect(m_packet, SIGNAL(killSpawn(const newCorpseStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(killSpawn(const newCorpseStruct*)));
-   connect(m_packet, SIGNAL(spawnWearingUpdate(const wearChangeStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(spawnWearingUpdate(const wearChangeStruct*)));
-   connect(m_packet, SIGNAL(consMessage(const considerStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(consMessage(const considerStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(playerUpdate(const playerSpawnPosStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(playerUpdate(const playerSpawnPosStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(corpseLoc(const corpseLocStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(corpseLoc(const corpseLocStruct*)));
-   connect(m_packet, SIGNAL(zoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)),
-	   m_spawnShell, SLOT(zoneSpawns(const zoneSpawnsStruct*, uint32_t)));
+   // connect the SpellShell slots to ZoneMgr signals
+   connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
+	   m_spellShell, SLOT(zoneChanged()));
+   
+   // connect the SpellShell slots to SpawnShell signals
+   connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
+	   m_spellShell, SLOT(killSpawn(const Item*)));
+   
+   // connect the SpellShell slots to Player signals
+   connect(m_player, SIGNAL(newPlayer(void)),
+	   m_spellShell, SLOT(clear()));
+   connect(m_player, SIGNAL(buffLoad(const spellBuff *)), 
+	   m_spellShell, SLOT(buffLoad(const spellBuff *)));
 
    // connect the SpellShell slots to EQPacket signals
-   connect(m_packet, SIGNAL(startCast(const startCastStruct *, uint32_t, uint8_t)),
-	   m_spellShell, SLOT(selfStartSpellCast(const startCastStruct *)));
-   connect(m_packet, SIGNAL(handleSpell(const memSpellStruct *, uint32_t, uint8_t)),
-	   m_spellShell, SLOT(selfFinishSpellCast(const memSpellStruct *)));
-   connect(m_packet, SIGNAL(interruptSpellCast(const badCastStruct *, uint32_t, uint8_t)),
-	   m_spellShell, SLOT(interruptSpellCast(const badCastStruct *)));
-   connect(m_packet, SIGNAL(buff(const buffStruct *, uint32_t, uint8_t)),
-	   m_spellShell, SLOT(buff(const buffStruct *, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(action(const actionStruct *, uint32_t, uint8_t)),
-	   m_spellShell, SLOT(action(const actionStruct *, uint32_t, uint8_t)));
+   m_packet->connect2("OP_CastSpell", SP_Zone, DIR_Server|DIR_Client,
+		      "startCastStruct", SZC_Match,
+		      m_spellShell, SLOT(selfStartSpellCast(const uint8_t*)));
+   m_packet->connect2("OP_Buff", SP_Zone, DIR_Server|DIR_Client,
+		      "buffStruct", SZC_Match,
+		      m_spellShell, SLOT(buff(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_Action", SP_Zone, DIR_Server|DIR_Client,
+		      "actionStruct", SZC_Match,
+		      m_spellShell, SLOT(action(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_SimpleMessage", SP_Zone, DIR_Server,
+		      "simpleMessageStruct", SZC_Match,
+		      m_spellShell,
+		      SLOT(simpleMessage(const uint8_t*, size_t, uint8_t)));
+
 
    // connect Player slots to EQPacket signals
-   connect(m_packet, SIGNAL(backfillPlayer(const charProfileStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(backfill(const charProfileStruct*)));
-   connect(m_packet, SIGNAL(increaseSkill(const skillIncStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(increaseSkill(const skillIncStruct*)));
-   connect(m_packet, SIGNAL(manaChange(const manaDecrementStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(manaChange(const manaDecrementStruct*)));
-   connect(m_packet, SIGNAL(playerUpdate(const playerSelfPosStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(playerUpdate(const playerSelfPosStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(setPlayerID(uint16_t)), 
-	   m_player, SLOT(setPlayerID(uint16_t)));
-   connect(m_packet, SIGNAL(updateAltExp(const altExpUpdateStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(updateAltExp(const altExpUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateExp(const expUpdateStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(updateExp(const expUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateLevel(const levelUpUpdateStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(updateLevel(const levelUpUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateNpcHP(const hpNpcUpdateStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(updateNpcHP(const hpNpcUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateSpawnMaxHP(const SpawnUpdateStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(updateSpawnMaxHP(const SpawnUpdateStruct*)));
-   connect(m_packet, SIGNAL(updateStamina(const staminaStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(updateStamina(const staminaStruct*)));
-   connect(m_packet, SIGNAL(consMessage(const considerStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(consMessage(const considerStruct*, uint32_t, uint8_t)));
-   connect(m_packet, SIGNAL(tradeSpellBookSlots(const tradeSpellBookSlotsStruct*, uint32_t, uint8_t)),
-	   m_player, SLOT(tradeSpellBookSlots(const tradeSpellBookSlotsStruct*, uint32_t, uint8_t)));
+   m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
+		      "charProfileStruct", SZC_Match,
+		      m_player, SLOT(player(const uint8_t*)));
+   m_packet->connect2("OP_SkillUpdate", SP_Zone, DIR_Server,
+		      "skillIncStruct", SZC_Match,
+		      m_player, SLOT(increaseSkill(const uint8_t*)));
+   m_packet->connect2("OP_ManaChange", SP_Zone, DIR_Server,
+		      "manaDecrementStruct", SZC_Match,
+		      m_player, SLOT(manaChange(const uint8_t*)));
+   m_packet->connect2("OP_ClientUpdate", SP_Zone, DIR_Server|DIR_Client,
+		      "playerSelfPosStruct", SZC_Match,
+		      m_player, SLOT(playerUpdateSelf(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_ExpUpdate", SP_Zone, DIR_Server,
+		      "expUpdateStruct", SZC_Match,
+		      m_player, SLOT(updateExp(const uint8_t*)));
+   m_packet->connect2("OP_AAExpUpdate", SP_Zone, DIR_Server,
+		      "altExpUpdateStruct", SZC_Match,
+		      m_player, SLOT(updateAltExp(const uint8_t*)));
+   m_packet->connect2("OP_LevelUpdate", SP_Zone, DIR_Server,
+		      "levelUpUpdateStruct", SZC_Match,
+		      m_player, SLOT(updateLevel(const uint8_t*)));
+   m_packet->connect2("OP_InitialHPUpdate", SP_Zone, DIR_Server|DIR_Client,
+		      "hpNpcUpdateStruct", SZC_Match,
+		      m_player, SLOT(updateNpcHP(const uint8_t*)));
+   m_packet->connect2("OP_HPUpdate", SP_Zone, DIR_Server|DIR_Client,
+		      "hpNpcUpdateStruct", SZC_Match,
+		      m_player, SLOT(updateNpcHP(const uint8_t*)));
+   m_packet->connect2("OP_WearChange", SP_Zone, DIR_Server|DIR_Client,
+		      "SpawnUpdateStruct", SZC_Match,
+		      m_player, SLOT(updateSpawnInfo(const uint8_t*)));
+   m_packet->connect2("OP_Stamina", SP_Zone, DIR_Server,
+		      "staminaStruct", SZC_Match,
+		      m_player, SLOT(updateStamina(const uint8_t*)));
+   m_packet->connect2("OP_Consider", SP_Zone, DIR_Server|DIR_Client,
+		      "considerStruct", SZC_Match,
+		      m_player, SLOT(consMessage(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_SwapSpell", SP_Zone, DIR_Server,
+		      "tradeSpellBookSlotsStruct", SZC_Match,
+	   m_player, SLOT(tradeSpellBookSlots(const uint8_t*, size_t, uint8_t)));
 
    // interface statusbar slots
    connect (this, SIGNAL(newZoneName(const QString&)),
             m_stsbarZone, SLOT(setText(const QString&)));
-   connect (m_player, SIGNAL(expChangedStr(const QString&)),
-            m_stsbarExp, SLOT(setText(const QString&)));
-   connect (m_player, SIGNAL(expAltChangedStr(const QString&)),
-            m_stsbarExpAA, SLOT(setText(const QString&)));
    connect (m_packet, SIGNAL(stsMessage(const QString &, int)),
-            this, SLOT(stsMessage(const QString &, int)));
-   connect (m_player, SIGNAL(stsMessage(const QString &, int)),
             this, SLOT(stsMessage(const QString &, int)));
    connect (m_spawnShell, SIGNAL(numSpawns(int)),
             this, SLOT(numSpawns(int)));
@@ -1469,14 +2114,32 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
             this, SLOT(numPacket(int, int)));
    connect (m_packet, SIGNAL(resetPacket(int, int)),
             this, SLOT(resetPacket(int, int)));
-   connect (m_player, SIGNAL(newSpeed(int)),
-            this, SLOT(newSpeed(int)));
-   
-   if (m_expWindow != NULL)
+   connect (m_player, SIGNAL(newSpeed(double)),
+            this, SLOT(newSpeed(double)));
+   connect(m_player, SIGNAL(setExp(uint32_t, uint32_t, uint32_t, uint32_t, 
+				   uint32_t)),
+	   this, SLOT(setExp(uint32_t, uint32_t, uint32_t, 
+			     uint32_t, uint32_t)));
+   connect(m_player, SIGNAL(newExp(uint32_t, uint32_t, uint32_t, uint32_t, 
+				   uint32_t, uint32_t)),
+	   this, SLOT(newExp(uint32_t, uint32_t, uint32_t,  
+			     uint32_t, uint32_t, uint32_t)));
+   connect(m_player, SIGNAL(setAltExp(uint32_t, uint32_t, uint32_t, uint32_t)),
+	   this, SLOT(setAltExp(uint32_t, uint32_t, uint32_t, uint32_t)));
+   connect(m_player, SIGNAL(newAltExp(uint32_t, uint32_t, uint32_t, uint32_t,
+				      uint32_t, uint32_t)),
+	   this, SLOT(newAltExp(uint32_t, uint32_t, uint32_t, uint32_t,
+				uint32_t, uint32_t)));
+   connect(m_player, SIGNAL(levelChanged(uint8_t)),
+	   this, SLOT(levelChanged(uint8_t)));
+
+   if (m_expWindow != 0)
    {
      // connect ExperienceWindow slots to Player signals
-     connect (m_player, SIGNAL(expGained(const QString &, int, long, QString )),
-	      m_expWindow, SLOT(addExpRecord(const QString &, int, long,QString )));
+     connect(m_player, SIGNAL(newPlayer(void)),
+	     m_expWindow, SLOT(clear(void)));
+     connect(m_player, SIGNAL(expGained(const QString &, int, long, QString )),
+	     m_expWindow, SLOT(addExpRecord(const QString &, int, long,QString )));
      
      // connect ExperienceWindow slots to EQInterface signals
      connect(this, SIGNAL(restoreFonts(void)),
@@ -1485,9 +2148,11 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	     m_expWindow, SLOT(savePrefs(void)));
    }
 
-   if (m_combatWindow != NULL)
+   if (m_combatWindow != 0)
    {
      // connect CombatWindow slots to the signals
+     connect(m_player, SIGNAL(newPlayer(void)),
+	     m_combatWindow, SLOT(clear(void)));
      connect (this, SIGNAL(combatSignal(int, int, int, int, int, QString, QString)),
 	      m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int, QString, QString)));
      connect (m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
@@ -1498,59 +2163,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 	     m_combatWindow, SLOT(savePrefs(void)));
    }
 
-   // Create message boxes defined in config preferences
-   m_msgDialogList.setAutoDelete(true);
-   QString title;
-   int i = 0;
-   MsgDialog* pMsgDlg;
-   QString msgSection;
-   bool haveMsgDialogs = false;
-   for(i = 1; i < 15; i++)
-   {
-      // attempt to pull a button title from the preferences
-     msgSection.sprintf("MessageBox%d", i);
-     if (pSEQPrefs->isSection(msgSection))
-     {
-       haveMsgDialogs = true;
-       pMsgDlg = new MsgDialog(parentWidget(), msgSection, msgSection, 
-			       m_StringList);
-       m_msgDialogList.append(pMsgDlg);
-
-       // connect signal for new messages
-       connect (this, SIGNAL (newMessage(int)),
-		pMsgDlg, SLOT (newMessage(int)));
-       connect (this, SIGNAL(saveAllPrefs()),
-		pMsgDlg, SLOT(savePrefs()));
-       connect (pMsgDlg, SIGNAL(toggle_view_ChannelMsgs()),
-		this, SLOT(toggle_view_ChannelMsgs()));
-
-       pMsgDlg->restoreSize();
-       if (pSEQPrefs->getPrefBool("UseWindowPos", section, true))
-	 pMsgDlg->restorePosition();
-     } // end if dialog config section found
-     else 
-       break;
-   } // for all message boxes defined in pref file
-   m_viewChannelMsgs = pSEQPrefs->getPrefBool("ShowChannel", section, 
-					      haveMsgDialogs);
-   for(MsgDialog *diag=m_msgDialogList.first(); 
-       diag != 0; 
-       diag=m_msgDialogList.next() ) 
-   {
-     if (m_viewChannelMsgs)
-       diag->show();
-     else
-       diag->hide();
-   }
-
-   // connect signals for receiving string messages
-   connect (m_packet, SIGNAL (msgReceived(const QString &)),
-            this, SLOT (msgReceived(const QString &)));
-   connect (m_player, SIGNAL (msgReceived(const QString &)),
-            this, SLOT (msgReceived(const QString &)));
-   connect (m_spawnShell, SIGNAL (msgReceived(const QString &)),
-            this, SLOT (msgReceived(const QString &)));
-
    //
    // Geometry Configuration
    //
@@ -1560,48 +2172,6 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
 
    // interface components
-
-   // Restore splitter sizes
-   QValueList<int> list;
-   i = 0;
-   for(;;) 
-   {
-      i++;
-      tempStr.sprintf("SplitVSize%d", i);
-      if (pSEQPrefs->isPreference(tempStr, section)) {
-         x = pSEQPrefs->getPrefInt(tempStr, section);
-         list.append(x);
-      } else break;
-   }
-   m_splitV->setSizes(list);
-
-   list.clear();
-   i = 0;
-   for(;;) 
-   {
-      i++;
-      tempStr.sprintf("SplitHSize%d", i);
-      if (pSEQPrefs->isPreference(tempStr, section)) {
-         x = pSEQPrefs->getPrefInt(tempStr, section);
-         list.append(x);
-      } else break;
-   }
-   m_splitH->setSizes(list);
-
-   list.clear();
-   i = 0;
-   for(;;) 
-   {
-      i++;
-      tempStr.sprintf("SplitTSize%d", i);
-      if (pSEQPrefs->isPreference(tempStr, section)) 
-      {
-         x = pSEQPrefs->getPrefInt(tempStr, section);
-         list.append(x);
-      } else break;
-   }
-   m_splitT->setSizes(list);
-
 
    // set mainwindow Geometry
    section = "Interface";
@@ -1617,7 +2187,16 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
    QAccel *accel = new QAccel(this);
    accel->connectItem( accel->insertItem(CTRL+ALT+Key_S), this, SLOT(toggle_view_statusbar()));
    accel->connectItem( accel->insertItem(CTRL+ALT+Key_T), this, SLOT(toggle_view_menubar()));
-   
+
+   // load in the docking preferences if any have been saved
+   QString dockPrefs = pSEQPrefs->getPrefString("DockingInfo", section, 
+						QString());
+   if (!dockPrefs.isEmpty())
+   {
+     QTextStream ts(&dockPrefs, IO_ReadOnly);
+     ts >> *this;
+   }
+
    // Set main window title
    // TODO: Add % replacement values and a signal to update, for ip address currently
    // TODO: being monitored.
@@ -1635,78 +2214,94 @@ EQInterface::EQInterface (QWidget * parent, const char *name)
 
 EQInterface::~EQInterface()
 {
-  m_formattedMessageStrings.clear();
-  m_msgDialogList.clear();
-
-  if (m_netDiag != NULL)
+  if (m_netDiag != 0)
     delete m_netDiag;
 
-  if (m_spawnPointList != NULL)
+  if (m_spawnPointList != 0)
     delete m_spawnPointList;
 
-  if (m_statList != NULL)
+  if (m_statList != 0)
     delete m_statList;
 
-  if (m_skillList != NULL)
+  if (m_guildListWindow != 0)
+    delete m_guildListWindow;
+
+  if (m_skillList != 0)
     delete m_skillList;
 
-  if (m_spellList != NULL)
+  if (m_spellList != 0)
     delete m_spellList;
 
-  if (m_spawnList2 != NULL)
+  if (m_spawnList2 != 0)
     delete m_spawnList2;
 
-  if (m_spawnList != NULL)
+  if (m_spawnList != 0)
     delete m_spawnList;
 
   for (int i = 0; i < maxNumMaps; i++)
-    if (m_map[i] != NULL)
+    if (m_map[i] != 0)
       delete m_map[i];
 
-  if (m_combatWindow != NULL)
+  for (int i = 0; i < maxNumMessageWindows; i++)
+    if (m_messageWindow[i] != 0)
+      delete m_messageWindow[i];
+
+  if (m_combatWindow != 0)
     delete m_combatWindow;
 
-  if (m_expWindow != NULL)
+  if (m_expWindow != 0)
     delete m_expWindow;
 
-  if (m_spawnLogger != NULL)
+  if (m_spawnLogger != 0)
     delete m_spawnLogger;
 
-  if (m_spawnMonitor != NULL)
+  if (m_spawnMonitor != 0)
     delete m_spawnMonitor;
 
-  if (m_groupMgr != NULL)
+  if (m_groupMgr != 0)
     delete m_groupMgr;
 
-  if (m_spellShell != NULL)
+  if (m_spellShell != 0)
     delete m_spellShell;
+  
+  if (m_spells != 0)
+    delete m_spells;
 
-  if (m_mapMgr != NULL)
+  if (m_mapMgr != 0)
     delete m_mapMgr;
 
-  if (m_spawnShell != NULL)
+  if (m_spawnShell != 0)
     delete m_spawnShell;
 
-  if (m_categoryMgr != NULL)
+  if (m_categoryMgr != 0)
     delete m_categoryMgr;
 
-  if (m_filterMgr != NULL)
+  if (m_filterMgr != 0)
     delete m_filterMgr;
 
+  if (m_dateTimeMgr != 0)
+    delete m_dateTimeMgr;
+
+  if (m_eqStrings != 0)
+    delete m_eqStrings;
+
   // Shutdown the Item DB before any other cleanup
-  if (m_itemDB != NULL)
+  if (m_itemDB != 0)
      m_itemDB->Shutdown();
 
   // delete the ItemDB before application exit
   delete m_itemDB;
 
-  if (m_player != NULL)
+  if (m_player != 0)
     delete m_player;
 
-  if (m_zoneMgr != NULL)
+  if (m_guildShell != 0)
+    delete m_guildShell;
+
+  if (m_zoneMgr != 0)
     delete m_zoneMgr;
   
-  if (m_packet != NULL)
+  if (m_packet != 0)
     delete m_packet;
 }
 
@@ -1736,6 +2331,9 @@ void EQInterface::restoreStatusFont()
    m_stsbarEQTime->setFixedHeight(statusFixedHeight);
    m_stsbarSpeed->setFont(statusFont);
    m_stsbarSpeed->setFixedHeight(statusFixedHeight);
+   // ZEM code
+   m_stsbarZEM->setFont(statusFont);
+   m_stsbarZEM->setFixedHeight(statusFixedHeight);
 }
 
 void EQInterface::toggle_view_StatWin( int id )
@@ -1747,13 +2345,13 @@ void EQInterface::toggle_view_StatWin( int id )
    if (m_statWinMenu->isItemChecked(id))
    {
        m_statWinMenu->setItemChecked(id, FALSE);
-       if (m_statList != NULL)
+       if (m_statList != 0)
 	 m_statList->statList()->enableStat(statnum, false);
    }
    else
    {
        m_statWinMenu->setItemChecked(id, TRUE);
-       if (m_statList != NULL)
+       if (m_statList != 0)
 	 m_statList->statList()->enableStat(statnum, true);
    }
 }
@@ -1769,7 +2367,7 @@ void EQInterface::toggle_view_SkillWin( int id )
     m_skillWinMenu->setItemChecked(id, FALSE);
 
     if ((id == m_id_view_PlayerSkills_Languages) &&
-	(m_skillList != NULL))
+	(m_skillList != 0))
       m_skillList->skillList()->showLanguages(false);
    }
    else
@@ -1777,7 +2375,7 @@ void EQInterface::toggle_view_SkillWin( int id )
        m_skillWinMenu->setItemChecked(id, TRUE);
 
     if ((id == m_id_view_PlayerSkills_Languages) &&
-	(m_skillList != NULL))
+	(m_skillList != 0))
       m_skillList->skillList()->showLanguages(true);
    }
 }
@@ -1792,23 +2390,21 @@ void EQInterface::toggle_view_SpawnListCol( int id )
   {
     m_spawnListMenu->setItemChecked(id, FALSE);
     
-    if (m_spawnList != NULL)
+    if (m_spawnList != 0)
       m_spawnList->spawnList()->setColumnVisible(colnum, false);
   }
   else
   {
     m_spawnListMenu->setItemChecked(id, TRUE);
     
-    if (m_spawnList != NULL)
+    if (m_spawnList != 0)
       m_spawnList->spawnList()->setColumnVisible(colnum, true);
    }
 }
 
 void EQInterface::toggle_view_DockedWin( int id )
 {
-  QPoint point;
-  QWidget* widget = NULL;
-  QWidget* newParent = NULL;
+  SEQWindow* widget = 0;
   int winnum;
   QString preference;
 
@@ -1821,16 +2417,9 @@ void EQInterface::toggle_view_DockedWin( int id )
   // flip the menu item state
   m_dockedWinMenu->setItemChecked(id, !checked);
 
-  // new parent is none, or the vertical T splitter, 
-  // unless theres an override in a specific case
-  newParent = checked ? NULL : m_splitT;
-
   switch(winnum)
   {
   case 0: // Spawn List
-    // new parent is none, or the vertical splitter
-    newParent = checked ? NULL : m_splitV;
-
     // note the new setting
     m_isSpawnListDocked = !checked;
 
@@ -1861,9 +2450,6 @@ void EQInterface::toggle_view_DockedWin( int id )
     preference = "DockedPlayerSkills";
     break;
   case 3: // Spell List
-    // new parent is none, or the vertical splitter
-    newParent = checked ? NULL : m_splitV;
-
     // note the new setting
     m_isSpellListDocked = !checked;
     
@@ -1884,9 +2470,6 @@ void EQInterface::toggle_view_DockedWin( int id )
     preference = "DockedCompass";
     break;
   case 5: // Spawn Point List
-    // new parent is none, or the vertical splitter
-    newParent = checked ? NULL : m_splitV;
-
     // note the new setting
     m_isSpawnPointListDocked = !checked;
 
@@ -1897,9 +2480,6 @@ void EQInterface::toggle_view_DockedWin( int id )
     preference = "DockedSpawnPointList";
     break;
   case 6: // Spawn List 2
-    // new parent is none, or the vertical splitter
-    newParent = checked ? NULL : m_splitV;
-
     // note the new setting
     m_isSpawnList2Docked = !checked;
 
@@ -1914,9 +2494,6 @@ void EQInterface::toggle_view_DockedWin( int id )
     // constant (maxNumMaps)
     if ((winnum >= mapDockBase) && (winnum < (mapDockBase + maxNumMaps)))
     {
-      // new parent is none, or the horizontal splitter
-      newParent = checked ? NULL : m_splitH;
-      
       int i = winnum - mapDockBase;
 
       // note the new setting
@@ -1940,25 +2517,144 @@ void EQInterface::toggle_view_DockedWin( int id )
   pSEQPrefs->setPrefBool(preference, "Interface", !checked);
 
   // attempt to undock the window
-  if (widget != NULL)
+  if (widget)
   {
-    // fist hide the widget
-    widget->hide();
-
-    // then reparent the widget
-    widget->reparent(newParent, point, true);
-
-    // then show the widget again
-    widget->show();
+    if (checked)
+      widget->undock();
+    else
+      widget->dock();
 
     // make the widget update it's geometry
     widget->updateGeometry();
   }
 }
 
+
+void EQInterface::toggle_view_DockableWin( int id )
+{
+  SEQWindow* widget = 0;
+  int winnum;
+  QString preference;
+
+  // get the window number parameter
+  winnum = m_dockableWinMenu->itemParameter(id);
+
+  // get the current menu item state
+  bool dockable = !m_dockableWinMenu->isItemChecked(id);
+
+  // flip the menu item state
+  m_dockableWinMenu->setItemChecked(id, dockable);
+
+  switch(winnum)
+  {
+  case 0: // Spawn List
+    widget = m_spawnList;
+
+    // preference
+    preference = "DockableSpawnList";
+    break;
+  case 1: // Player Stats
+    widget = m_statList;
+
+    // preference
+    preference = "DockablePlayerStats";
+    break;
+  case 2: // Player Skills
+    widget = m_skillList;
+
+    // preference
+    preference = "DockablePlayerSkills";
+    break;
+  case 3: // Spell List
+    widget = m_spellList;
+
+    // preference
+    preference = "DockableSpellList";
+    break;
+  case 4: // Compass
+    widget = m_compass;
+
+    // preference
+    preference = "DockableCompass";
+    break;
+  case 5: // Spawn Point List
+    widget = m_spawnPointList;
+
+    // preference
+    preference = "DockableSpawnPointList";
+    break;
+  case 6: // Spawn List 2
+    widget = m_spawnList2;
+
+    // preference
+    preference = "DockableSpawnList2";
+    break;
+  case 7: // Experience Window
+    widget = m_expWindow;
+
+    preference = "DockableExperienceWindow";
+    break;
+  case 8: // Combat Window
+    widget = m_combatWindow;
+
+    preference = "DockableCombatWindow";
+    break;
+  case 9: // Guild List Window
+    widget = m_guildListWindow;
+
+    preference = "DockableGuildListWindow";
+    break;
+  case 10: // NetDiag
+    widget = m_netDiag;
+    
+    preference = "DockableNetDiag";
+    break;
+  default:
+    // use default for maps since the number of them can be changed via a 
+    // constant (maxNumMaps)
+    if ((winnum >= mapDockBase) && (winnum < (mapDockBase + maxNumMaps)))
+    {
+      int i = winnum - mapDockBase;
+
+      // reparent teh appropriate map
+      widget = m_map[i];
+
+      QString tmpPrefSuffix = "";
+      if (i > 0)
+	tmpPrefSuffix = QString::number(i + 1);
+
+      // preference
+      preference = "DockableMap" + tmpPrefSuffix;
+    }
+    else if ((winnum >= messageWindowDockBase) && 
+	     (winnum < (messageWindowDockBase + maxNumMessageWindows)))
+    {
+      int i = winnum - messageWindowDockBase;
+
+      // reparent teh appropriate map
+      widget = m_messageWindow[i];
+
+      QString tmpPrefSuffix = "";
+      tmpPrefSuffix = QString::number(i);
+
+      // preference
+      preference = "DockableMessageWindow" + tmpPrefSuffix;
+    }
+
+    break;
+    };
+
+  // save new setting
+  pSEQPrefs->setPrefBool(preference, "Interface", dockable);
+
+  // attempt to undock the window
+  if (widget)
+    setDockEnabled(widget, dockable);
+}
+
 void EQInterface::set_main_WindowCaption( int id )
 {
-  QWidget* widget = NULL;
+  QWidget* widget = 0;
   int winnum;
   QString window;
 
@@ -2035,7 +2731,7 @@ void EQInterface::set_main_WindowCaption( int id )
   };
 
   // attempt to undock the window
-  if (widget != NULL)
+  if (widget != 0)
   {
     bool ok = false;
     QString caption = 
@@ -2060,7 +2756,7 @@ void EQInterface::set_main_WindowFont( int id )
 
   bool ok = false;
   QFont newFont;
-  SEQWindow* window = NULL;
+  SEQWindow* window = 0;
   QString title;
   
   //
@@ -2136,7 +2832,7 @@ void EQInterface::set_main_WindowFont( int id )
     break;
   };
 
-  if (window != NULL)
+  if (window != 0)
   {
     // get a new font
     newFont = QFontDialog::getFont(&ok, window->font(), 
@@ -2178,10 +2874,13 @@ void EQInterface::set_main_Font(int id)
 void EQInterface::select_main_FormatFile(int id)
 {
   QString formatFile = pSEQPrefs->getPrefString("FormatFile", "Interface", 
-						    LOGDIR "/eqstr_us.txt");
+						"eqstr_us.txt");
+
+  QFileInfo fileInfo = m_dataLocationMgr->findExistingFile(".", formatFile);
+
   QString newFormatFile = 
-    QFileDialog::getOpenFileName(formatFile, "*.txt", this, "FormatFile",
-				 "Select Format File");
+    QFileDialog::getOpenFileName(fileInfo.absFilePath(), "*.txt", 
+				 this, "FormatFile", "Select Format File");
 
   // if the newFormatFile name is not empty, then the user selected a file
   if (!newFormatFile.isEmpty())
@@ -2197,10 +2896,13 @@ void EQInterface::select_main_FormatFile(int id)
 void EQInterface::select_main_SpellsFile(int id)
 {
   QString spellsFile = pSEQPrefs->getPrefString("SpellsFile", "Interface", 
-						LOGDIR "/spells_us.txt");
+						"spells_us.txt");
+
+  QFileInfo fileInfo = m_dataLocationMgr->findExistingFile(".", spellsFile);
+
   QString newSpellsFile = 
-    QFileDialog::getOpenFileName(spellsFile, "*.txt", this, "FormatFile",
-				 "Select Format File");
+    QFileDialog::getOpenFileName(fileInfo.absFilePath(), "*.txt", 
+				 this, "FormatFile", "Select Format File");
 
   // if the newFormatFile name is not empty, then the user selected a file
   if (!newSpellsFile.isEmpty())
@@ -2215,7 +2917,7 @@ void EQInterface::select_main_SpellsFile(int id)
 
 void EQInterface::toggle_main_statusbar_Window(int id)
 {
-  QWidget* window = NULL;
+  QWidget* window = 0;
   QString preference;
 
   switch (menuBar()->itemParameter(id))
@@ -2260,12 +2962,18 @@ void EQInterface::toggle_main_statusbar_Window(int id)
 
     preference = "ShowSpeed";
     break;
+  // ZEM code
+  case 9:
+    window = m_stsbarZEM;
+
+    preference = "ShowZEM";
+    break;
 
   default:
     return;
   }
 
-  if (window == NULL)
+  if (window == 0)
     return;
 
   // should the window be visible
@@ -2319,7 +3027,8 @@ EQInterface::toggle_main_SavePosition (int id)
     pSEQPrefs->setPrefBool("SavePosition", "Interface", 
 			   !pSEQPrefs->getPrefBool("SavePosition", 
 						   "Interface"));
-    menuBar()->setItemChecked(id, pSEQPrefs->getPrefBool("SavePosition", 
+
+    m_windowMenu->setItemChecked(id, pSEQPrefs->getPrefBool("SavePosition", 
 							 "Interface"));
 }
 
@@ -2329,26 +3038,8 @@ EQInterface::toggle_main_UseWindowPos (int id)
     pSEQPrefs->setPrefBool("UseWindowPos", "Interface", 
 			   !pSEQPrefs->getPrefBool("UseWindowPos", 
 						   "Interface"));
-    menuBar()->setItemChecked(id, pSEQPrefs->getPrefBool("UseWindowPos", 
+    m_windowMenu->setItemChecked(id, pSEQPrefs->getPrefBool("UseWindowPos", 
 							 "Interface"));
-}
-
-void
-EQInterface::toggle_main_UseStdout (int id)
-{
-    pSEQPrefs->setPrefBool("UseStdout", "Interface", 
-			   !pSEQPrefs->getPrefBool("UseStdout", 
-						   "Interface"));
-    menuBar()->setItemChecked(id, pSEQPrefs->getPrefBool("UseStdout", 
-							 "Interface"));
-}
-
-void
-EQInterface::toggle_main_NoBank (int id)
-{
-  showeq_params->no_bank = !showeq_params->no_bank;
-  pSEQPrefs->setPrefBool("NoBank", "Interface", showeq_params->no_bank);
-  menuBar()->setItemChecked(id, showeq_params->no_bank);
 }
 
 //
@@ -2357,59 +3048,49 @@ EQInterface::toggle_main_NoBank (int id)
 void
 EQInterface::savePrefs(void)
 {
-  int i;
-   printf("==> EQInterface::savePrefs()\n");
-   if( isVisible() ) {
+  seqDebug("==> EQInterface::savePrefs()");
+   
+   if( isVisible() ) 
+   {
+     seqDebug("\tisVisible()");
      QString section;
      QString interfaceSection = "Interface";
      QString tempStr;
 
-      // send savePrefs signal out
-      emit saveAllPrefs();
+     QString dockPrefs;
+     QTextStream ts(&dockPrefs, IO_WriteOnly);
 
-      section = "Interface";
-      if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
-      {
-	pSEQPrefs->setPrefPoint("WindowPos", section, 
-			      topLevelWidget()->pos());
-	pSEQPrefs->setPrefSize("WindowSize", section, 
-			       topLevelWidget()->size());
-      }
+     ts << *this;
 
-      QValueList<int> list = m_splitV->sizes();
-      QValueList<int>::Iterator it = list.begin();
-      i = 0;
-      while(it != list.end()) {
-         i++;
-         tempStr.sprintf("SplitVSize%d", i);
-         pSEQPrefs->setPrefInt(tempStr, section, (*it));
-         ++it;
-      }
+     pSEQPrefs->setPrefString("DockingInfo", interfaceSection, dockPrefs);
 
-      list = m_splitH->sizes();
-      it = list.begin();
-      i = 0;
-      while(it != list.end()) {
-         i++;
-         tempStr.sprintf("SplitHSize%d", i);
-         pSEQPrefs->setPrefInt(tempStr, section, (*it));
-         ++it;
-      }
-
-      list = m_splitT->sizes();
-      it = list.begin();
-      i = 0;
-      while(it != list.end()) {
-         i++;
-         tempStr.sprintf("SplitT_Size%d", i);
-         pSEQPrefs->setPrefInt(tempStr, section, (*it));
-         ++it;
-      }
-
-      // save prefs to file
-      pSEQPrefs->save();
+     // send savePrefs signal out
+     emit saveAllPrefs();
+     
+     section = "Interface";
+     if (pSEQPrefs->getPrefBool("SavePosition", interfaceSection, true)) 
+     {
+       pSEQPrefs->setPrefPoint("WindowPos", section, 
+			       topLevelWidget()->pos());
+       pSEQPrefs->setPrefSize("WindowSize", section, 
+			      topLevelWidget()->size());
+     }
+     
+     // save prefs to file
+     pSEQPrefs->save();
    }
 } // end savePrefs
+
+void EQInterface::saveDockAreaPrefs(QDockArea* a, Dock edge)
+{
+  QPtrList<QDockWindow> l = a->dockWindowList();
+  for (QDockWindow *dw = l.first(); dw; dw = l.next())
+  {
+    if (dw->inherits("SEQWindow"))
+      pSEQPrefs->setPrefInt("Dock", ((SEQWindow*)dw)->preferenceName(), edge);
+  }
+}
+
 
 void EQInterface::setCaption(const QString& text)
 {
@@ -2421,96 +3102,27 @@ void EQInterface::setCaption(const QString& text)
 
 void EQInterface::loadFormatStrings()
 {
-  // clear out any existing contents
-  m_formattedMessageStrings.setAutoDelete(true);
-  m_formattedMessageStrings.clear();
-
   // get the name of the format file
   QString formatFileName = pSEQPrefs->getPrefString("FormatFile", "Interface", 
-						    LOGDIR "/eqstr_us.txt");
+						    "eqstr_us.txt");
 
-  // create a QFile on the file
-  QFile formatFile(formatFileName);
+  QFileInfo fileInfo = m_dataLocationMgr->findExistingFile(".", 
+							   formatFileName);
 
-  // open the file read only
-  if (formatFile.open(IO_ReadOnly))
-  {
-    // allocate a QCString large enough to hold the entire file
-    QCString textData(formatFile.size() + 1);
-
-    // read in the entire file
-    formatFile.readBlock(textData.data(), textData.size());
-
-    // construct a regex to deal with either style line termination
-    QRegExp lineTerm("[\r\n]{1,2}");
-
-    // split the data into lines at the line termination
-    QStringList lines = QStringList::split(lineTerm, 
-					   QString::fromUtf8(textData), false);
-
-    // start iterating over the lines
-    QStringList::Iterator it = lines.begin();
-
-    // first is the magic id string
-    QString magicString = (*it++);
-    int spc;
-    uint32_t formatId;
-    QString formatString;
-    uint32_t maxFormatId = 0;
-
-    // next skip over the count, etc...
-    ++it;
-
-    // now iterate over the format lines
-    for (; it != lines.end(); ++it)
-    {
-      // find the beginning space
-      spc = (*it).find(' ');
-
-      // convert the beginnign of the string to a ULong
-      formatId = (*it).left(spc).toULong();
-      
-      if (formatId > maxFormatId) 
-	maxFormatId = formatId;
-
-      // insert the format string into the dictionary.
-      m_formattedMessageStrings.insert(formatId, new QString((*it).mid(spc+1)));    }
-
-    fprintf(stderr,
-	    "Loaded %d message strings from '%s' maxFormat=%d\n",
-	    m_formattedMessageStrings.count(), formatFileName.latin1(),
-	    maxFormatId);
-  }
-  else
-    fprintf(stderr,
-	    "EQInterface::loadFormatStrings(): Failed to open '%s'\n",
-	    formatFileName.latin1());
-}
-
-/* Capture resize events and reset the geometry */
-void
-EQInterface::resizeEvent (QResizeEvent *e)
-{
+  // load the strings
+  m_eqStrings->load(fileInfo.absFilePath());
 }
 
 void
 EQInterface::select_filter_file(void)
 {
-  QString filterFile = QFileDialog::getOpenFileName( QString(LOGDIR),
-                                                     QString("ShowEQ Filter Files (*.conf)"),
+  QString filterFile = QFileDialog::getOpenFileName(m_filterMgr->filterFile(),
+                                                     QString("ShowEQ Filter Files (*.xml)"),
                                                      0,
                                                      "Select Filter Config..."
                                                    );
   if (!filterFile.isEmpty())
     m_filterMgr->loadFilters(filterFile);
-}
-
-void
-EQInterface::save_as_filter_file(void)
-{
-   QString shortZoneName = m_zoneMgr->shortZoneName();
-   if (!shortZoneName.isEmpty())
-      m_filterMgr->saveAsFilters(shortZoneName);
 }
 
 void EQInterface::toggle_filter_Case(int id)
@@ -2529,51 +3141,35 @@ void EQInterface::toggle_filter_AlertInfo(int id)
 			    pSEQPrefs->getPrefBool("AlertInfo", "Filters"));
 }
 
-void EQInterface::toggle_filter_Audio(int id)
+void EQInterface::toggle_filter_UseSystemBeep(int id)
 {
-  showeq_params->spawnfilter_audio = !showeq_params->spawnfilter_audio;
-  menuBar()->setItemChecked(id, showeq_params->spawnfilter_audio);
-  pSEQPrefs->setPrefBool("Audio", "Filters", 
-			 showeq_params->spawnfilter_audio);
+  m_filterNotifications->setUseSystemBeep(!m_filterNotifications->useSystemBeep());
+  menuBar()->setItemChecked(id, m_filterNotifications->useSystemBeep());
+}
+
+void EQInterface::toggle_filter_UseCommands(int id)
+{
+  m_filterNotifications->setUseCommands(!m_filterNotifications->useCommands());
+  menuBar()->setItemChecked(id, m_filterNotifications->useCommands());
 }
 
 void EQInterface::toggle_filter_Log(int id)
 {
-  bool value;
-  QString logName;
-  switch (menuBar()->itemParameter(id))
-  {
-  case 1:
-    value = showeq_params->spawnfilter_loglocates = 
-      !showeq_params->spawnfilter_loglocates;
+  if (!m_filteredSpawnLog)
+    createFilteredSpawnLog();
 
-    logName = "LogLocates";
-    break;
-  case 2:
-    value = showeq_params->spawnfilter_loghunts = 
-      !showeq_params->spawnfilter_loghunts;
+  uint32_t filters = m_filteredSpawnLog->filters();
+  uint32_t filter = menuBar()->itemParameter(id);
+  
+  if (filters & filter)
+    filters &= ~filter;
+  else
+    filters |= filter;
 
-    logName = "LogHunts";
-    break;
-  case 3:
-    value = showeq_params->spawnfilter_logcautions = 
-      !showeq_params->spawnfilter_logcautions;
+  m_filteredSpawnLog->setFilters(filters);
 
-    logName = "LogCautions";
-    break;
-  case 4:
-    value = showeq_params->spawnfilter_logdangers = 
-      !showeq_params->spawnfilter_logdangers;
-
-    logName = "LogDangers";
-    break;
-  default:
-    return;
-  }
-
-  menuBar()->setItemChecked(id, value);
-  pSEQPrefs->setPrefBool(logName, "Filters", 
-			 value);
+  menuBar()->setItemChecked(id, ((filters & filter) != 0));
+  pSEQPrefs->setPrefBool("Log", "Filters", filters);
 }
 
 void EQInterface::set_filter_AudioCommand(int id)
@@ -2615,7 +3211,7 @@ void EQInterface::set_filter_AudioCommand(int id)
   }
 
   QString value = pSEQPrefs->getPrefString(property, "Filters",
-					   "/usr/bin/esdplay " LOGDIR "/spawn.wav &");
+					   "/usr/bin/esdplay " PKGDATADIR "/spawn.wav &");
 
   bool ok = false;
   QString command = 
@@ -2634,11 +3230,15 @@ void EQInterface::listSpawns (void)
   debug ("listSpawns()");
 #endif /* DEBUG */
 
+  QString outText;
+
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
+  QTextStream out(&outText, IO_WriteOnly);
   
    // dump the spawns 
   m_spawnShell->dumpSpawns(tSpawn, out);
+
+  seqInfo((const char*)outText);
 }
 
 void EQInterface::listDrops (void)
@@ -2646,12 +3246,15 @@ void EQInterface::listDrops (void)
 #ifdef DEBUG
   debug ("listDrops()");
 #endif /* DEBUG */
+  QString outText;
 
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
+  QTextStream out(&outText, IO_WriteOnly);
 
   // dump the drops
   m_spawnShell->dumpSpawns(tDrop, out);
+
+  seqInfo((const char*)outText);
 }
 
 void EQInterface::listMapInfo(void)
@@ -2659,9 +3262,10 @@ void EQInterface::listMapInfo(void)
 #ifdef DEBUG
   debug ("listMapInfo()");
 #endif /* DEBUG */
+  QString outText;
 
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
+  QTextStream out(&outText, IO_WriteOnly);
 
   // dump map managers info
   m_mapMgr->dumpInfo(out);
@@ -2670,9 +3274,64 @@ void EQInterface::listMapInfo(void)
   for (int i = 0; i < maxNumMaps; i++)
   {
     // if this map has been instantiated, dump it's info
-    if (m_map[i] != NULL)
+    if (m_map[i] != 0)
       m_map[i]->dumpInfo(out);
   }
+
+  seqInfo((const char*)outText);
+}
+
+void EQInterface::listInterfaceInfo(void)
+{
+#ifdef DEBUG
+  debug ("listMapInfo()");
+#endif /* DEBUG */
+
+  QString outText;
+
+  // open the output data stream
+  QTextStream out(&outText, IO_WriteOnly);
+
+  out << "Map window layout info:" << endl;
+  out << "-----------------------" << endl;
+  out << *this;
+  out << "-----------------------" << endl;
+
+
+  seqInfo((const char*)outText);
+}
+
+void EQInterface::listGroup(void)
+{
+#ifdef DEBUG
+  debug ("listGroup()");
+#endif /* DEBUG */
+  QString outText;
+
+  // open the output data stream
+  QTextStream out(&outText, IO_WriteOnly);
+
+  // dump the drops
+  m_groupMgr->dumpInfo(out);
+
+  seqInfo((const char*)outText);
+}
+
+
+void EQInterface::listGuild(void)
+{
+#ifdef DEBUG
+  debug ("listGuild()");
+#endif /* DEBUG */
+  QString outText;
+
+  // open the output data stream
+  QTextStream out(&outText, IO_WriteOnly);
+
+  // dump the drops
+  m_guildShell->dumpMembers(out);
+
+  seqInfo((const char*)outText);
 }
 
 void EQInterface::dumpSpawns (void)
@@ -2681,9 +3340,13 @@ void EQInterface::dumpSpawns (void)
   debug ("dumpSpawns()");
 #endif /* DEBUG */
   
+  QString logFile = pSEQPrefs->getPrefString("DumpSpawnsFilename", "Interface",
+					     "dumpspawns.txt");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("dumps", logFile);
+
   // open the output data stream
-  QFile file(pSEQPrefs->getPrefString("DumpSpawnsFilename", "Interface",
-				      LOGDIR "/dumpspawns.txt"));
+  QFile file(logFileInfo.absFilePath());
   file.open(IO_WriteOnly);
   QTextStream out(&file);
   
@@ -2696,10 +3359,14 @@ void EQInterface::dumpDrops (void)
 #ifdef DEBUG
   debug ("dumpDrops()");
 #endif /* DEBUG */
-  
+
+  QString logFile = pSEQPrefs->getPrefString("DumpDropsFilename", "Interface",
+					     "dumpdrops.txt");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("dumps", logFile);
+
   // open the output data stream
-  QFile file(pSEQPrefs->getPrefString("DumpDropsFilename", "Interface",
-				      LOGDIR "/dumpdrops.txt"));
+  QFile file(logFileInfo.absFilePath());
   file.open(IO_WriteOnly);
   QTextStream out(&file);
 
@@ -2713,9 +3380,14 @@ void EQInterface::dumpMapInfo(void)
   debug ("dumpMapInfo()");
 #endif /* DEBUG */
 
+  QString logFile = pSEQPrefs->getPrefString("DumpMapInfoFilename", 
+					     "Interface",
+					     "mapinfo.txt");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("dumps", logFile);
+
   // open the output data stream
-  QFile file(pSEQPrefs->getPrefString("DumpMapInfoFilename", "Interface",
-				      LOGDIR "/mapinfo.txt"));
+  QFile file(logFileInfo.absFilePath());
   file.open(IO_WriteOnly);
   QTextStream out(&file);
 
@@ -2726,14 +3398,20 @@ void EQInterface::dumpMapInfo(void)
   for (int i = 0; i < maxNumMaps; i++)
   {
     // if this map has been instantiated, dump it's info
-    if (m_map[i] != NULL)
+    if (m_map[i] != 0)
       m_map[i]->dumpInfo(out);
   }
 }
 
 void EQInterface::dumpGuildInfo(void)
 {
-  emit guildList2text(pSEQPrefs->getPrefString("GuildsDumpFile", "Interface", LOGDIR "/guilds.txt"));
+  QString logFile = pSEQPrefs->getPrefString("GuildsDumpFile", 
+					     "Interface", 
+					     "guilds.txt");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("dumps", logFile);
+
+  emit guildList2text(logFileInfo.absFilePath());
 }
 
 void EQInterface::dumpSpellBook(void)
@@ -2742,14 +3420,20 @@ void EQInterface::dumpSpellBook(void)
   debug ("dumpSpellBook");
 #endif /* DEBUG */
 
+  QString logFile = pSEQPrefs->getPrefString("DumpSpellBookFilename", 
+					     "Interface", 
+					     "spellbook.txt");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("dumps", logFile);
+
   // open the output data stream
-  QString fileName = pSEQPrefs->getPrefString("DumpSpellBookFilename", "Interface", LOGDIR "/spellbook.txt");
-  QFile file(fileName);
+  QFile file(logFileInfo.absFilePath());
   file.open(IO_WriteOnly);
   QTextStream out(&file);
   QString txt;
 
-  fprintf(stderr, "Dumping Spell Book to '%s'\n", fileName.latin1());
+  seqInfo("Dumping Spell Book to '%s'\n", 
+	  (const char*)file.name().utf8());
   out << "Spellbook of " << m_player->name() << " a level " 
       << m_player->level() << " " << m_player->raceString() 
       << " " << m_player->classString()
@@ -2787,6 +3471,46 @@ void EQInterface::dumpSpellBook(void)
   }
 }
 
+void EQInterface::dumpGroup(void)
+{
+#ifdef DEBUG
+  debug ("dumpGroup()");
+#endif /* DEBUG */
+
+  QString logFile = pSEQPrefs->getPrefString("DumpGroupFilename", "Interface",
+					     "dumpgroup.txt");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("dumps", logFile);
+
+  // open the output data stream
+  QFile file(logFileInfo.absFilePath());
+  file.open(IO_WriteOnly);
+  QTextStream out(&file);
+
+  // dump the drops
+  m_groupMgr->dumpInfo(out);
+}
+
+void EQInterface::dumpGuild(void)
+{
+#ifdef DEBUG
+  debug ("dumpGuild()");
+#endif /* DEBUG */
+
+  QString logFile = pSEQPrefs->getPrefString("DumpGuildFilename", "Interface",
+					     "dumpguild.txt");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("dumps", logFile);
+
+  // open the output data stream
+  QFile file(logFileInfo.absFilePath());
+  file.open(IO_WriteOnly);
+  QTextStream out(&file);
+
+  // dump the drops
+  m_guildShell->dumpMembers(out);
+}
+
 void
 EQInterface::launch_editor_filters(void)
 {
@@ -2806,17 +3530,17 @@ EQInterface::launch_editor_zoneFilters(void)
 void
 EQInterface::toggle_opt_ConSelect (void)
 {
-  showeq_params->con_select = !(showeq_params->con_select);
-  menuBar()->setItemChecked (m_id_opt_ConSelect, showeq_params->con_select);
-  pSEQPrefs->setPrefBool("SelectOnCon", "Interface", showeq_params->con_select);
+  m_selectOnConsider = !(m_selectOnConsider);
+  menuBar()->setItemChecked (m_id_opt_ConSelect, m_selectOnConsider);
+  pSEQPrefs->setPrefBool("SelectOnCon", "Interface", m_selectOnConsider);
 }
 
 void
 EQInterface::toggle_opt_TarSelect (void)
 {
-  showeq_params->tar_select = !(showeq_params->tar_select);
-  menuBar()->setItemChecked (m_id_opt_TarSelect, showeq_params->tar_select);
-  pSEQPrefs->setPrefBool("SelectOnTarget", "Interface", showeq_params->tar_select);
+  m_selectOnTarget = !(m_selectOnTarget);
+  menuBar()->setItemChecked (m_id_opt_TarSelect, m_selectOnTarget);
+  pSEQPrefs->setPrefBool("SelectOnTarget", "Interface", m_selectOnTarget);
 }
 
 void
@@ -2882,6 +3606,22 @@ void EQInterface::toggle_log_ZoneData (void)
   pSEQPrefs->setPrefBool("LogZonePackets", "PacketLogging", state);
 }
 
+void EQInterface::toggle_opt_BazaarData (void)
+{
+  if (m_bazaarLog)
+  {
+    disconnect(m_bazaarLog,0,0,0);
+    delete m_bazaarLog;
+    m_bazaarLog = 0;
+  }
+  else
+    createBazaarLog();
+
+  bool state = (m_bazaarLog != 0);
+  menuBar()->setItemChecked(m_id_opt_BazaarData, state);
+  pSEQPrefs->setPrefBool("LogBazaarPackets", "PacketLogging", state);
+}
+
 void EQInterface::toggle_log_UnknownData (void)
 {
   if (m_unknownZoneLog)
@@ -2929,22 +3669,40 @@ void EQInterface::toggle_log_ItemPacketData (void)
 
 /* Check and uncheck View menu options */
 void
-EQInterface::toggle_view_ChannelMsgs (void)
+EQInterface::toggle_view_ChannelMsgs(int id)
 {
-  m_viewChannelMsgs = !m_viewChannelMsgs;
-  menuBar()->setItemChecked (m_id_view_ChannelMsgs, m_viewChannelMsgs);
-  /* From Daisy, hide Channel Messages if the view flag is false */
-  for(MsgDialog *diag=m_msgDialogList.first(); 
-      diag != 0;
-      diag=m_msgDialogList.next() ) 
+  int winNum = menuBar()->itemParameter(id);
+
+  bool wasVisible = ((m_messageWindow[winNum] != 0) && 
+		     (m_messageWindow[winNum]->isVisible()));
+
+  if (!wasVisible)
+    showMessageWindow(winNum);
+  else
   {
-    if (m_viewChannelMsgs)
-      diag->show();
-    else
-      diag->hide();
+    // save any preference changes
+    m_messageWindow[winNum]->savePrefs();
+
+    // hide it 
+    m_messageWindow[winNum]->hide();
+
+    // remove its window menu
+    removeWindowMenu(m_messageWindow[winNum]);
+
+    // then delete it
+    delete m_messageWindow[winNum];
+
+    // make sure to clear it's variable
+    m_messageWindow[winNum] = 0;
   }
-  // set the preference
-  pSEQPrefs->setPrefBool("ShowChannel", "Interface", m_viewChannelMsgs);
+
+  QString tmpPrefSuffix = "";
+  if (winNum > 0)
+    tmpPrefSuffix = QString::number(winNum + 1);
+  
+  QString tmpPrefName = QString("ShowMessageWindow") + tmpPrefSuffix;
+
+  pSEQPrefs->setPrefBool(tmpPrefName, "Interface", !wasVisible); 
 }
 
 void
@@ -2985,7 +3743,7 @@ void EQInterface::toggle_view_CombatWindow (void)
 void
 EQInterface::toggle_view_SpawnList(void)
 {
-  bool wasVisible = ((m_spawnList != NULL) && m_spawnList->isVisible());
+  bool wasVisible = ((m_spawnList != 0) && m_spawnList->isVisible());
 
   if (!wasVisible)
   {
@@ -3005,11 +3763,14 @@ EQInterface::toggle_view_SpawnList(void)
     // disable it's options sub-menu
     menuBar()->setItemEnabled(m_id_view_SpawnList_Options, false);
 
+    // remove its window menu
+    removeWindowMenu(m_spawnList);
+
     // delete the window
     delete m_spawnList;
 
     // make sure to clear it's variable
-    m_spawnList = NULL;
+    m_spawnList = 0;
   }
 
   pSEQPrefs->setPrefBool("ShowSpawnList", "Interface", !wasVisible);
@@ -3018,7 +3779,7 @@ EQInterface::toggle_view_SpawnList(void)
 void
 EQInterface::toggle_view_SpawnList2(void)
 {
-  bool wasVisible = ((m_spawnList2 != NULL) && m_spawnList2->isVisible());
+  bool wasVisible = ((m_spawnList2 != 0) && m_spawnList2->isVisible());
 
   if (!wasVisible)
     showSpawnList2();
@@ -3030,11 +3791,14 @@ EQInterface::toggle_view_SpawnList2(void)
     // hide it
     m_spawnList2->hide();
 
+    // remove its window menu
+    removeWindowMenu(m_spawnList2);
+
     // delete the window
     delete m_spawnList2;
 
     // make sure to clear it's variable
-    m_spawnList2 = NULL;
+    m_spawnList2 = 0;
   }
 
   pSEQPrefs->setPrefBool("ShowSpawnList2", "Interface", !wasVisible);
@@ -3043,7 +3807,7 @@ EQInterface::toggle_view_SpawnList2(void)
 void
 EQInterface::toggle_view_SpawnPointList(void)
 {
-  bool wasVisible = ((m_spawnPointList != NULL) && 
+  bool wasVisible = ((m_spawnPointList != 0) && 
 		     m_spawnPointList->isVisible());
 
   if (!wasVisible)
@@ -3056,11 +3820,14 @@ EQInterface::toggle_view_SpawnPointList(void)
     // hide it
     m_spawnPointList->hide();
 
+    // remove its window menu
+    removeWindowMenu(m_spawnPointList);
+
     // delete the window
     delete m_spawnPointList;
 
     // make sure to clear it's variable
-    m_spawnPointList = NULL;
+    m_spawnPointList = 0;
   }
 
   pSEQPrefs->setPrefBool("ShowSpawnPointList", "Interface", !wasVisible);
@@ -3068,7 +3835,7 @@ EQInterface::toggle_view_SpawnPointList(void)
 
 void EQInterface::toggle_view_SpellList(void)
 {
-  bool wasVisible = ((m_spellList != NULL) && (m_spellList->isVisible()));
+  bool wasVisible = ((m_spellList != 0) && (m_spellList->isVisible()));
 
   if (!wasVisible)
     showSpellList();
@@ -3080,11 +3847,14 @@ void EQInterface::toggle_view_SpellList(void)
     // hide it
     m_spellList->hide();
 
+    // remove its window menu
+    removeWindowMenu(m_spellList);
+
     // delete it
     delete m_spellList;
     
     // make sure to clear it's variable
-    m_spellList = NULL;
+    m_spellList = 0;
   }
 
   pSEQPrefs->setPrefBool("ShowSpellList", "Interface", !wasVisible); 
@@ -3092,7 +3862,7 @@ void EQInterface::toggle_view_SpellList(void)
 
 void EQInterface::toggle_view_PlayerStats(void)
 {
-  bool wasVisible = ((m_statList != NULL) && m_statList->isVisible());
+  bool wasVisible = ((m_statList != 0) && m_statList->isVisible());
 
   if (!wasVisible)
   {
@@ -3112,11 +3882,14 @@ void EQInterface::toggle_view_PlayerStats(void)
     // disable it's options sub-menu
     menuBar()->setItemEnabled(m_id_view_PlayerStats_Options, false);
 
+    // remove its window menu
+    removeWindowMenu(m_statList);
+
     // then delete it
     delete m_statList;
 
     // make sure to clear it's variable
-    m_statList = NULL;
+    m_statList = 0;
   }
   
   pSEQPrefs->setPrefBool("ShowPlayerStats", "Interface", !wasVisible);
@@ -3124,7 +3897,7 @@ void EQInterface::toggle_view_PlayerStats(void)
 
 void EQInterface::toggle_view_PlayerSkills(void)
 {
-  bool wasVisible = ((m_skillList != NULL) && m_skillList->isVisible());
+  bool wasVisible = ((m_skillList != 0) && m_skillList->isVisible());
 
   if (!wasVisible)
   {
@@ -3143,11 +3916,14 @@ void EQInterface::toggle_view_PlayerSkills(void)
     // disable it's options sub-menu
     menuBar()->setItemEnabled(m_id_view_PlayerSkills_Options, false);
 
+    // remove its window menu
+    removeWindowMenu(m_skillList);
+
     // then delete it
     delete m_skillList;
 
     // make sure to clear it's variable
-    m_skillList = NULL;
+    m_skillList = 0;
   }
 
   pSEQPrefs->setPrefBool("ShowPlayerSkills", "Interface", !wasVisible);
@@ -3156,7 +3932,7 @@ void EQInterface::toggle_view_PlayerSkills(void)
 void
 EQInterface::toggle_view_Compass(void)
 {
-  bool wasVisible = ((m_compass != NULL) && (m_compass->isVisible()));
+  bool wasVisible = ((m_compass != 0) && (m_compass->isVisible()));
 
   if (!wasVisible)
     showCompass();
@@ -3165,11 +3941,14 @@ EQInterface::toggle_view_Compass(void)
     // if it's not visible, hide it
     m_compass->hide();
 
+    // remove its window menu
+    removeWindowMenu(m_compass);
+
     // then delete it
     delete m_compass;
 
     // make sure to clear it's variable
-    m_compass = NULL;
+    m_compass = 0;
   }
 
   pSEQPrefs->setPrefBool("ShowCompass", "Interface", !wasVisible);
@@ -3179,7 +3958,7 @@ void EQInterface::toggle_view_Map(int id)
 {
   int mapNum = menuBar()->itemParameter(id);
 
-  bool wasVisible = ((m_map[mapNum] != NULL) && 
+  bool wasVisible = ((m_map[mapNum] != 0) && 
 		     (m_map[mapNum]->isVisible()));
 
   if (!wasVisible)
@@ -3192,11 +3971,14 @@ void EQInterface::toggle_view_Map(int id)
     // hide it 
     m_map[mapNum]->hide();
 
+    // remove its window menu
+    removeWindowMenu(m_map[mapNum]);
+
     // then delete it
     delete m_map[mapNum];
 
     // make sure to clear it's variable
-    m_map[mapNum] = NULL;
+    m_map[mapNum] = 0;
   }
 
   QString tmpPrefSuffix = "";
@@ -3211,7 +3993,7 @@ void EQInterface::toggle_view_Map(int id)
 void
 EQInterface::toggle_view_NetDiag(void)
 {
-  bool wasVisible = ((m_netDiag != NULL) && (m_netDiag->isVisible()));
+  bool wasVisible = ((m_netDiag != 0) && (m_netDiag->isVisible()));
 
   if (!wasVisible)
     showNetDiag();
@@ -3220,14 +4002,43 @@ EQInterface::toggle_view_NetDiag(void)
     // if it's not visible, hide it
     m_netDiag->hide();
 
+    // remove its window menu
+    removeWindowMenu(m_netDiag);
+
     // then delete it
     delete m_netDiag;
 
     // make sure to clear it's variable
-    m_netDiag = NULL;
+    m_netDiag = 0;
   }
 
   pSEQPrefs->setPrefBool("ShowNetStats", "Interface", !wasVisible);
+}
+
+void
+EQInterface::toggle_view_GuildList(void)
+{
+  bool wasVisible = ((m_guildListWindow != 0) && 
+		     (m_guildListWindow->isVisible()));
+
+  if (!wasVisible)
+    showGuildList();
+  else
+  {
+    // if it's not visible, hide it
+    m_guildListWindow->hide();
+
+    // remove its window menu
+    removeWindowMenu(m_guildListWindow);
+
+    // then delete it
+    delete m_guildListWindow;
+
+    // make sure to clear it's variable
+    m_guildListWindow = 0;
+  }
+
+  pSEQPrefs->setPrefBool("ShowGuildList", "Interface", !wasVisible);
 }
 
 bool 
@@ -3290,7 +4101,7 @@ EQInterface::toggle_opcode_monitoring(int id)
       pSEQPrefs->setPrefString("OpCodeList", section, opCodeList);
       
 
-      printf("OpCode monitoring is now ENABLED...\nUsing list:\t%s\n", 
+      seqInfo("OpCode monitoring is now ENABLED...\nUsing list:\t%s", 
 	     (const char*)opCodeList);
     }
   }
@@ -3299,7 +4110,7 @@ EQInterface::toggle_opcode_monitoring(int id)
     delete m_opcodeMonitorLog;
     m_opcodeMonitorLog = 0;
 
-    printf("OpCode monitoring has been DISABLED...\n");
+    seqInfo("OpCode monitoring has been DISABLED...");
   }
 
   bool state = (m_opcodeMonitorLog != 0);
@@ -3318,7 +4129,7 @@ void EQInterface::set_opcode_monitored_list(void)
   {
     m_opcodeMonitorLog->init(opCodeList);
     
-    printf("The monitored OpCode list has been reloaded...\nUsing list:\t%s\n", 
+    seqInfo("The monitored OpCode list has been reloaded...\nUsing list:\t%s", 
 	   (const char*)opCodeList);
     
     // set the list of monitored opcodes
@@ -3333,7 +4144,11 @@ void EQInterface::toggle_opcode_log(int id)
   bool state = !pSEQPrefs->getPrefBool("Log", section, false);
 
   if (m_opcodeMonitorLog)
+  {
     m_opcodeMonitorLog->setLog(state);
+
+    state = m_opcodeMonitorLog->log();
+  }
 
   menuBar()->setItemChecked (id, state);
   pSEQPrefs->setPrefBool("Log", section, state);
@@ -3356,25 +4171,27 @@ void
 EQInterface::select_opcode_file(void)
 {
   QString section = "OpCodeMonitoring";
-  QString logFile = 
-    QFileDialog::getSaveFileName(pSEQPrefs->getPrefString("LogFilename",
-							  section,
-							  LOGDIR "/opcodemonitor.log"),
+
+  QString logFile = pSEQPrefs->getPrefString("LogFilename",
+					     section,
+					     "opcodemonitor.log");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
+  
+  logFile = 
+    QFileDialog::getSaveFileName(logFileInfo.absFilePath(),
 				 "*.log",
 				 this,
 				 "ShowEQ - OpCode Log File");
 
+  // set log filename
   if (!logFile.isEmpty())
-  {
-    // set log filename
-    pSEQPrefs->setPrefString("LogFilename", section,
-			     logFile);
-  }
+    pSEQPrefs->setPrefString("LogFilename", section, logFile);
 }
 
 void EQInterface::resetMaxMana(void)
 {
-  if (m_statList != NULL)
+  if (m_statList != 0)
     m_statList->statList()->resetMaxMana();
 }
 
@@ -3391,7 +4208,7 @@ EQInterface::toggle_opt_LogSpawns (void)
       delete m_spawnLogger;
 
       // make sure to clear it's varialbe
-      m_spawnLogger = NULL;
+      m_spawnLogger = 0;
     }
 
     menuBar()->setItemChecked (m_id_opt_LogSpawns, state);
@@ -3423,14 +4240,6 @@ EQInterface::toggle_opt_CreateUnknownSpawns (int id)
 }
 
 void
-EQInterface::toggle_opt_ShowSpellMessages (int id)
-{
-    showeq_params->showSpellMsgs = !showeq_params->showSpellMsgs;
-    menuBar()->setItemChecked(id, showeq_params->showSpellMsgs);
-    pSEQPrefs->setPrefBool("ShowSpellMessages", "Misc", showeq_params->showSpellMsgs);
-}
-
-void
 EQInterface::toggle_opt_WalkPathRecord (int id)
 {
     showeq_params->walkpathrecord = !showeq_params->walkpathrecord;
@@ -3444,7 +4253,7 @@ EQInterface::set_opt_WalkPathLength(int len)
   if ((len > 0) && (len <= 8192))
     showeq_params->walkpathlength = len;
 
-    pSEQPrefs->setPrefInt("WalkPathLength", "Misc", showeq_params->walkpathrecord);
+    pSEQPrefs->setPrefInt("WalkPathLength", "Misc", showeq_params->walkpathlength);
 }
 
 void
@@ -3452,7 +4261,7 @@ EQInterface::toggle_opt_RetardedCoords (int id)
 {
     showeq_params->retarded_coords = !showeq_params->retarded_coords;
     menuBar()->setItemChecked(id, showeq_params->retarded_coords);
-    pSEQPrefs->setPrefBool("RetardedCoords", "Interface", showeq_params->walkpathrecord);
+    pSEQPrefs->setPrefBool("RetardedCoords", "Interface", showeq_params->retarded_coords);
 }
 
 void
@@ -3460,7 +4269,7 @@ EQInterface::toggle_opt_SystimeSpawntime (int id)
 {
     showeq_params->systime_spawntime = !showeq_params->systime_spawntime;
     menuBar()->setItemChecked(id, showeq_params->systime_spawntime);
-    pSEQPrefs->setPrefBool("SystimeSpawntime", "Interface", showeq_params->walkpathrecord);
+    pSEQPrefs->setPrefBool("SystimeSpawntime", "Interface", showeq_params->systime_spawntime);
 }
 
 void 
@@ -3485,67 +4294,97 @@ EQInterface::select_opt_conColorBase(int id)
   }
 }
 
-void
-EQInterface::createMessageBox(void)
+void EQInterface::setExp(uint32_t totalExp, uint32_t totalTick,
+			  uint32_t minExpLevel, uint32_t maxExpLevel, 
+			  uint32_t tickExpLevel)
 {
-  QString msgSection;
-  msgSection.sprintf("MessageBox%d", m_msgDialogList.count() + 1);
-  MsgDialog* pMsgDlg = new MsgDialog(parentWidget(), 
-				     msgSection, msgSection, m_StringList);
-  m_msgDialogList.append(pMsgDlg);
-
-  // connect signal for new messages
-  connect (this, SIGNAL (newMessage(int)), pMsgDlg, SLOT (newMessage(int)));
-  connect (this, SIGNAL(saveAllPrefs()), pMsgDlg, SLOT(savePrefs()));
-
-  pMsgDlg->show();
-}
-
-
-void
-EQInterface::msgReceived(const QString &instring)
-{
-  //
-  // getting reports of a lot of blank lines being spammed about....
-  // thinking its CR's in the msgs themselves.  Putting a CR/LF stripper here
-  // WARNING:  If you send a msg with a CR or LF in the middle of it, this will
-  // replace it with a space.  So far, I don't think we do that anywhere.
-  //  - Maerlyn 3/28
-  QString string(instring);
-  int index = 0;
-
-  if (string.left(28) != "System: Players in EverQuest") {
-  while( -1 != (index = string.find('\n')) )
-    string.replace(index, 1, " ");
-  //  string.remove(index);
-  while( -1 != (index = string.find('\r')) )
-    string.replace(index, 1, " ");
-  //  string.remove(index);
-   }
-
-  if (pSEQPrefs->getPrefBool("UseStdout", "Interface")) 
+  if (m_stsbarExp)
   {
-    	if (!strncmp(string.ascii(), "Guild", 5)) fprintf(stdout, "\e[1;32m"); // Light Green
-	if (!strncmp(string.ascii(), "Group", 5)) fprintf(stdout, "\e[0;36m"); // Cyan
-	if (!strncmp(string.ascii(), "Shout", 5)) fprintf(stdout, "\e[1;31m"); // Light Red
-	if (!strncmp(string.ascii(), "Aucti", 5)) fprintf(stdout, "\e[1;42m"); // Light White on Green Background
-	if (!strncmp(string.ascii(), "OOC",   3)) fprintf(stdout, "\e[0;32m"); // Green
-	if (!strncmp(string.ascii(), "Tell",  4)) fprintf(stdout, "\e[0;35m"); // Magenta
-	if (!strncmp(string.ascii(), "Say",   3)) fprintf(stdout, "\e[1;37m"); // White
-	if (!strncmp(string.ascii(), "GM-Te", 5)) fprintf(stdout, "\e[5;31m"); // Blinking Red
-	if (!strncmp(string.ascii(), "Raid",  4)) fprintf(stdout, "\e[1;36m"); // Cyan
+    char expperc[5];
+    sprintf(expperc, "%.2f", totalTick*100.0/330.0);
 
-	fprintf(stdout, "%s", string.ascii());
-	fprintf(stdout, "\e[0;0m\n"); // Shut off all ANSI
-    	fflush(stdout);
+    m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")
+      .arg(Commanate(totalExp)).arg(totalTick).arg(expperc));
   }
-
-  m_StringList.append(string);
-
-  emit 
-    newMessage(m_StringList.count() - 1);
 }
 
+void EQInterface::newExp(uint32_t newExp, uint32_t totalExp, 
+			 uint32_t totalTick,
+			 uint32_t minExpLevel, uint32_t maxExpLevel, 
+			 uint32_t tickExpLevel)
+{
+  uint32_t leftExp = maxExpLevel - totalExp;
+
+  if (newExp)
+  {
+    uint32_t needKills = leftExp / newExp;
+    // format a string for the status bar
+    if (m_stsbarStatus)
+      m_stsbarStatus->setText(QString("Exp: %1; %2 (%3/330); %4 left [~ %5 kills]")
+			      .arg(Commanate(newExp))
+			      .arg(Commanate(totalExp - minExpLevel))
+			      .arg(totalTick)
+			      .arg(Commanate(leftExp))
+			      .arg(needKills));
+
+    if (m_stsbarExp)
+    {
+      char expperc[5];
+      sprintf(expperc, "%.2f", totalTick*100.0/330.0);
+
+      m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")
+        .arg(Commanate(totalExp)).arg(totalTick).arg(expperc));
+    }
+  }
+  else
+  {
+    if (m_stsbarStatus)
+      m_stsbarStatus->setText(QString("Exp: <%1; %2 (%3/330); %4 left")
+			      .arg(Commanate(tickExpLevel))
+			      .arg(Commanate(totalExp - minExpLevel))
+			      .arg(totalTick).arg(Commanate(leftExp)));
+
+    if (m_stsbarExp)
+    {
+      char expperc[5];
+      sprintf(expperc, "%.2f", totalTick*100.0/330.0);
+
+      m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")
+        .arg(Commanate(totalExp)).arg(totalTick).arg(expperc));
+    }
+  }
+}
+
+void EQInterface::setAltExp(uint32_t totalExp,
+			    uint32_t maxExp, uint32_t tickExp, 
+			    uint32_t aapoints)
+{
+  if (m_stsbarExpAA)
+    m_stsbarExpAA->setText(QString("ExpAA: %1").arg(totalExp));
+}
+
+void EQInterface::newAltExp(uint32_t newExp, uint32_t totalExp, 
+			    uint32_t totalTick, 
+			    uint32_t maxExp, uint32_t tickExp, 
+			    uint32_t aapoints)
+{
+  if (m_stsbarExpAA)
+  {
+    char aaperc[5];
+    sprintf(aaperc, "%.2f", totalTick*100.0/330.0);
+
+    m_stsbarExpAA->setText(QString("ExpAA: %1 (%2/330, %3%)")
+        .arg(Commanate(totalExp)).arg(totalTick).arg(aaperc));
+  }
+}
+
+void EQInterface::levelChanged(uint8_t level)
+{
+  QString tempStr;
+  tempStr.sprintf("New Level: %u", level);
+  if (m_stsbarStatus)
+    m_stsbarStatus->setText(tempStr);
+}
 
 //
 // TODO:  clear after timeout miliseconds
@@ -3572,7 +4411,7 @@ EQInterface::numSpawns(int num)
 }
 
 void
-EQInterface::newSpeed(int speed)
+EQInterface::newSpeed(double speed)
 {
   // update twice per sec
   static int lastupdate = 0;
@@ -3581,7 +4420,7 @@ EQInterface::newSpeed(int speed)
   lastupdate = mTime();
 
    QString tempStr;
-   tempStr.sprintf("Run Speed: %d", speed);
+   tempStr.sprintf("Run Speed: %3.1f", speed);
    m_stsbarSpeed->setText(tempStr);
 }
 
@@ -3622,402 +4461,36 @@ EQInterface::numPacket(int num, int stream)
    m_stsbarPkt->setText(tempStr);
 }
 
-void EQInterface::attack2Hand1(const attack2Struct * atk2)
+void EQInterface::attack2Hand1(const uint8_t* data)
 {
+  // const attack2Struct * atk2 = (const attack2Struct*)data;
 }
 
-void EQInterface::action2Message(const action2Struct *action2)
+void EQInterface::action2Message(const uint8_t* data)
 {
-	const Item* target = m_spawnShell->findID(tSpawn, action2->target);
-	const Item* source = m_spawnShell->findID(tSpawn, action2->source);
-	emit combatSignal(action2->target, action2->source, action2->type, action2->spell, action2->damage, 
-		(target != NULL) ? target->name() : QString("Unknown"), (source != NULL) ? source->name() : QString("Unknown"));
+  action2Struct *action2 = (action2Struct*)data;
+  const Item* target = m_spawnShell->findID(tSpawn, action2->target);
+  const Item* source = m_spawnShell->findID(tSpawn, action2->source);
+  emit combatSignal(action2->target, action2->source, action2->type, action2->spell, action2->damage, 
+		    (target != 0) ? target->name() : QString("Unknown"), (source != 0) ? source->name() : QString("Unknown"));
 }
 
 // belith - combatKillSpawn, fix for the combat window
 //          this displays a killing shot on a mob in combat records
-void EQInterface::combatKillSpawn(const newCorpseStruct *deadspawn)
+void EQInterface::combatKillSpawn(const uint8_t* data)
 {
-	// only show my kills
-	if (deadspawn && deadspawn->killerId == m_player->id())
-	{
-		const Item* target = m_spawnShell->findID(tSpawn, deadspawn->spawnId);
-		const Item* source = m_spawnShell->findID(tSpawn, deadspawn->killerId);
-		emit combatSignal(deadspawn->spawnId, deadspawn->killerId,
-			(deadspawn->type == -25) ? 231 : deadspawn->type,
-			deadspawn->spellId, deadspawn->damage,
-			(target != NULL) ? target->name() : QString("Unknown"),
-			(source != NULL) ? source->name() : QString("Unknown"));
-	}
-}
-
-void EQInterface::moneyOnCorpse(const moneyOnCorpseStruct* money)
-{
-  QString tempStr;
-
-  if( money->platinum || money->gold || money->silver || money->copper )
+  const newCorpseStruct *deadspawn = (const newCorpseStruct *)data;
+  // only show my kills
+  if (deadspawn && deadspawn->killerId == m_player->id())
   {
-    bool bneedComma = false;
-    
-    tempStr = "Money: You receive ";
-    
-    if(money->platinum)
-    {
-      tempStr += QString::number(money->platinum) + " platinum";
-      bneedComma = true;
-    }
-    
-    if(money->gold)
-    {
-      if(bneedComma)
-	tempStr += ", ";
-      
-      tempStr += QString::number(money->gold) + " gold";
-      bneedComma = true;
-    }
-    
-    if(money->silver)
-    {
-      if(bneedComma)
-	tempStr += ", ";
-      
-      tempStr += QString::number(money->silver) + " silver";
-      bneedComma = true;
-    }
-    
-    if(money->copper)
-      {
-	if(bneedComma)
-	  tempStr += ", ";
-	
-	tempStr += QString::number(money->copper) + " copper";
-      }
-    
-    tempStr += " from the corpse";
-    
-    emit msgReceived(tempStr);
+    const Item* target = m_spawnShell->findID(tSpawn, deadspawn->spawnId);
+    const Item* source = m_spawnShell->findID(tSpawn, deadspawn->killerId);
+    emit combatSignal(deadspawn->spawnId, deadspawn->killerId,
+		      (deadspawn->type == -25) ? 231 : deadspawn->type,
+		      deadspawn->spellId, deadspawn->damage,
+		      (target != 0) ? target->name() : QString("Unknown"),
+		      (source != 0) ? source->name() : QString("Unknown"));
   }
-}
-
-void EQInterface::channelMessage(const channelMessageStruct* cmsg, uint32_t, uint8_t dir)
-{
-  QString tempStr;
-
-  // avoid client chatter and do nothing if not viewing channel messages
-  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
-    return;
-
-  bool target = false;
-  switch (cmsg->chanNum)
-  {
-  case 0:
-    tempStr.sprintf("Guild");
-    break;
-    
-  case 2:
-    tempStr.sprintf("Group");
-    break;
-    
-  case 3:
-    tempStr.sprintf("Shout");
-    break;
-    
-  case 4:
-    tempStr.sprintf("Auction");
-    break;
-    
-  case 5:
-    tempStr.sprintf("OOC");
-    break;
-    
-  case 7:
-    tempStr.sprintf("Tell");
-    target = true;
-    break;
-    
-  case 8:
-    tempStr.sprintf("Say");
-    target = true;
-    break;
-    
-  case 11:
-    tempStr.sprintf("GMSAY");
-    target = true;
-    break;
-
-  case 14:
-    tempStr.sprintf("GM-Tell");
-    target = true;
-    break;
-
-  case 15:
-    tempStr.sprintf("Raid");
-    target = true;
-    break;
-
-  default:
-    tempStr.sprintf("Chan%02x", cmsg->chanNum);
-    target = true;
-    break;
-  }
-  
-  if (cmsg->language)
-  {
-    if ((cmsg->target[0] != 0) && target)
-    {
-      tempStr.sprintf( "%s: '%s' -> '%s' - %s {%s}",
-		       tempStr.ascii(),
-		       cmsg->sender,
-		       cmsg->target,
-		       cmsg->message,
-		       (const char*)language_name(cmsg->language)
-		       );
-    }
-    else
-    {
-      tempStr.sprintf( "%s: '%s' - %s {%s}",
-		       tempStr.ascii(),
-		       cmsg->sender,
-		       cmsg->message,
-		       (const char*)language_name(cmsg->language)
-		       );
-    }
-  }
-  else // Don't show common, its obvious
-  {
-    if ((cmsg->target[0] != 0) && target)
-    {
-      tempStr.sprintf( "%s: '%s' -> '%s' - %s",
-		       tempStr.ascii(),
-		       cmsg->sender,
-		       cmsg->target,
-		       cmsg->message
-		       );
-    }
-    else
-    {
-      tempStr.sprintf( "%s: '%s' - %s",
-		       tempStr.ascii(),
-		       cmsg->sender,
-		       cmsg->message
-		       );
-    }
-  }
-  
-  emit msgReceived(tempStr);
-}
-
-void EQInterface::formattedMessage(const formattedMessageStruct* fmsg, uint32_t len, uint8_t dir)
-{
-  QString tempStr;
-
-  // avoid client chatter and do nothing if not viewing channel messages
-  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
-    return;
-
-  int messagesLen = 
-    len
-    - ((uint8_t*)&fmsg->messages[0] - (uint8_t*)fmsg) 
-    - sizeof(fmsg->unknownXXXX);
-
-  QString* formatStringRes = m_formattedMessageStrings.find(fmsg->messageFormat);
-
-  if (formatStringRes == NULL)
-  {
-    tempStr.sprintf( "Formatted: %04x: ",
-		     fmsg->messageFormat);
-    tempStr += QString::fromUtf8(fmsg->messages);
-
-    int totalArgsLen = strlen(fmsg->messages) + 1;
-    
-    const char* curMsg;
-    while (totalArgsLen < messagesLen)
-    {
-      curMsg = fmsg->messages + totalArgsLen;
-      tempStr += QString(", ") + QString::fromUtf8(curMsg);
-      totalArgsLen += strlen(curMsg) + 1;
-    }
-  }
-  else
-  {
-    QValueVector<QString> argList;
-    argList.reserve(5); // reserve space for 5 elements to handle most common sizes
-    
-    // 
-    int totalArgsLen = 0;
-    const char* curArg;
-    while (totalArgsLen < messagesLen)
-    {
-      curArg = fmsg->messages + totalArgsLen;
-      // insert argument into the argument list
-      argList.push_back(QString::fromUtf8(curArg));
-      totalArgsLen += strlen(curArg) + 1;
-    }
-
-    bool ok;
-    int curPos;
-    size_t substArg;
-    int substArgValue;
-    QString* substFormatStringRes;
-    QString substFormatString;
-
-    ////////////////////////////
-    // replace template (%T) arguments in formatted string
-    QString formatString = *formatStringRes;
-    QRegExp rxt("%T(\\d{1,3})", true, false);
-
-    // find first template substitution
-    curPos = rxt.search(formatString, 0);
-
-    while (curPos != -1)
-    {
-      substFormatStringRes = NULL;
-      substArg = rxt.cap(1).toInt(&ok);
-      if (ok && (substArg <= argList.size()))
-      {
-	substArgValue = argList[substArg-1].toInt(&ok);
-
-	if (ok)
-	  substFormatStringRes = m_formattedMessageStrings.find(substArgValue);
-      }
-      
-      // replace template argument with subst string
-      if (substFormatStringRes != NULL)
-	formatString.replace(curPos, rxt.matchedLength(), *substFormatStringRes);
-      else
-	curPos += rxt.matchedLength(); // if no replacement string, skip over
-      
-      // find next substitution
-      curPos = rxt.search(formatString, curPos);
-    }
-
-    ////////////////////////////
-    // now replace substitution arguments in formatted string
-    // NOTE: not using QString::arg() because not all arguments are always used
-    //       and it will do screwy stuff in this situation
-    QRegExp rx("%(\\d{1,3})", true, false);
-
-    // find first template substitution
-    curPos = rx.search(formatString, 0);
-
-    while (curPos != -1)
-    {
-      substArg = rx.cap(1).toInt(&ok);
-
-      // replace substitution argument with argument from list
-      if (ok && (substArg <= argList.size()))
-	formatString.replace(curPos, rx.matchedLength(), argList[substArg-1]);
-      else
-	curPos += rx.matchedLength(); // if no such argument, skip over
-
-      // find next substitution
-      curPos = rx.search(formatString, curPos);
-    }
-    
-    
-    tempStr = QString("Formatted: ") + formatString;
-  }
-
-  emit msgReceived(tempStr);
-}
-
-void EQInterface::simpleMessage(const simpleMessageStruct* smsg, uint32_t len, uint8_t dir)
-{
-  QString tempStr;
-
-  // avoid client chatter and do nothing if not viewing channel messages
-  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
-    return;
-
-  QString* formatStringRes = m_formattedMessageStrings.find(smsg->messageFormat);
-
-  if (formatStringRes == NULL)
-  {
-    tempStr.sprintf( "Formatted:Simple: %04x: %04x",
-		     smsg->messageFormat,
-		     smsg->color);
-  }
-  else
-  {
-    tempStr = QString("Formatted: ") + *formatStringRes;
-  }
-
-  emit msgReceived(tempStr);
-}
-
-void EQInterface::specialMessage(const specialMessageStruct* smsg, uint32_t, uint8_t dir)
-{
-  // avoid client chatter and do nothing if not viewing channel messages
-  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
-    return;
-
-  const Item* target = NULL;
-  
-  if (smsg->target)
-    target = m_spawnShell->findID(tSpawn, smsg->target);
-
-  // calculate the message position
-  const char* message = smsg->source + strlen(smsg->source) + 1 
-    + sizeof(smsg->unknown0xxx);
-  
-  if (target)
-    emit msgReceived(QString("Formatted:Special: '%1' -> '%2' - %3")
-		     .arg(smsg->source)
-		     .arg(target->name())
-		     .arg(message));
-  else
-    emit msgReceived(QString("Formatted:Special: '%1' - %2")
-		     .arg(smsg->source)
-		     .arg(message));
-}
-
-void EQInterface::guildMOTD(const guildMOTDStruct* gmotd, uint32_t, uint8_t dir)
-{
-  // avoid client chatter and do nothing if not viewing channel messages
-  if ((dir == DIR_CLIENT) || !m_viewChannelMsgs)
-    return;
-
-  emit msgReceived(QString("Guild:MOTD: %1 - %2")
-		   .arg(QString::fromUtf8(gmotd->sender))
-		   .arg(QString::fromUtf8(gmotd->message)));
-
-  ;
-}
-
-void EQInterface::random(const randomReqStruct* randr)
-{
-  QString tempStr;
-
-  tempStr.sprintf("RANDOM: Request random number between %d and %d\n",
-		  randr->bottom,
-		  randr->top);
-  
-  emit msgReceived(tempStr);
-}
-
-void EQInterface::random(const randomStruct* randr)
-{
-  QString tempStr;
-
-  tempStr.sprintf("RANDOM: Random number %d rolled between %d and %d by %s\n",
-		  randr->result,
-		  randr->bottom,
-		  randr->top,
-		  randr->name);
-  
-  emit msgReceived(tempStr);
-}
-
-void EQInterface::emoteText(const emoteTextStruct* emotetext)
-{
-  QString tempStr;
-
-  if (!m_viewChannelMsgs)
-    return;
-
-  tempStr.sprintf("Emote: %s", emotetext->text);
-
-  emit msgReceived(tempStr);
 }
 
 void EQInterface::updatedDateTime(const QDateTime& dt)
@@ -4030,527 +4503,29 @@ void EQInterface::syncDateTime(const QDateTime& dt)
 {
   QString dateString = dt.toString(pSEQPrefs->getPrefString("DateTimeFormat", "Interface", "ddd MMM dd,yyyy - hh:mm ap"));
 
-  emit msgReceived(QString("EQTime: ") + dateString);
-
   m_stsbarEQTime->setText(dateString);
-}
-
-void EQInterface::item(const itemPacketStruct* item)
-{
-#if 0 // ZBTEMP
-  QString tempStr;
-  QString slotName = slot_to_name(itemp->item.equipSlot);
-
-  if (!showeq_params->no_bank)
-  {
-    tempStr = QString("Item: ") + itemp->item.lore
-      + "(" + QString::number(itemp->item.itemNr)
-      + "), Slot: " + slotName
-      + ", Value: " + reformatMoney(itemp->item.cost);
-    
-    emit msgReceived(tempStr);
-  }
-
-  QFile bankfile(QString("/tmp/bankfile.") + QString::number(getpid()));
-  if (bankfile.open(IO_Append | IO_WriteOnly))
-  {
-    QTextStream out(&bankfile);
-    out << "Item: " << itemp->item.name;
-    if (itemp->item.stackable ==  1) out << "x" << itemp->item.number;
-    out << ",(" << itemp->item.lore << "), Slot: " << slotName
-        << " (" << itemp->item.equipSlot << ")" << " (HP/Mana: "
-        << itemp->item.HP << " / " << itemp->item.MANA << ")"
-        << endl;
-    }
-#endif // ZBTEMP
-}
-
-#if 0 // ZBTEMP
-void EQInterface::playerBook(const playerBookStruct* bookp)
-{
-  QString tempStr;
-  QString slotName = slot_to_name(bookp->item.equipSlot);
-
-  if (!showeq_params->no_bank)
-  {
-    tempStr = QString("Item: Book: ") + bookp->item.name
-      + ", " + bookp->item.lore
-      + ", File" + bookp->book.file
-      + ", Slot: " + slotName
-      + ", Value: " + reformatMoney(bookp->item.cost);
-    emit msgReceived(tempStr);
-  }
-    
-  QFile bankfile(QString("/tmp/bankfile.") + QString::number(getpid()));
-  if (bankfile.open(IO_Append | IO_WriteOnly))
-  {
-    QTextStream out(&bankfile);
-    out << "Item: Book:" << bookp->item.name;
-    out << ",(" << bookp->item.lore << "), Slot: " 
-	<< slotName << endl;
-  }
-}
-
-void EQInterface::playerContainer(const playerContainerStruct *containp)
-{
-  QString tempStr;
-  QString slotName = slot_to_name(containp->item.equipSlot);
-
-  if (!showeq_params->no_bank)
-  {
-    tempStr = QString("Item: Container: ") + containp->item.lore
-      + "(" + QString::number(containp->item.itemNr)
-      + "), Slot: " + slotName
-      + ", Value: " + reformatMoney(containp->item.cost);
-    
-    emit msgReceived(tempStr);
-    
-    tempStr = QString("Item: Container: Slots: ") 
-      + QString::number(containp->container.numSlots)
-      + ", Size Capacity: " 
-      + size_name(containp->container.sizeCapacity)
-      + ", Weight Reduction: " 
-      + QString::number(containp->container.weightReduction)
-      + "%";
-    emit msgReceived(tempStr);
-  }    
-
-  QFile bankfile(QString("/tmp/bankfile.") + QString::number(getpid()));
-  if (bankfile.open(IO_Append | IO_WriteOnly))
-  {
-    QTextStream out(&bankfile);
-    out << "Item: Container: " << containp->item.name 
-	<< ",(" << containp->item.lore << "), Slot: " 
-	<< slotName
-	<< ", Slots: " << containp->container.numSlots
-	<< ", Size Capacity: " << size_name(containp->container.sizeCapacity) 
-	<< ", Weight Reduction: " << containp->container.weightReduction 
-	<< "%: " << endl;
-   }
-}
-#endif // ZBTEMP:
-
-void EQInterface::inspectData(const inspectDataStruct *inspt)
-{
-  for (int inp = 0; inp < 21; inp ++)
-    printf("He has %s (icn:%i)\n", inspt->itemNames[inp], inspt->icons[inp]);
-  
-  printf("His info: %s\n", inspt->mytext);
-}
-
-void EQInterface::spMessage(const spMesgStruct *spmsg)
-{
-  QString tempStr;
-
-  // Seems to be lots of blanks
-  if (!spmsg->message[0])
-    return;
-  
-  //printf("== msgType=%d, msg='%s'\n", spmsg->msgType, spmsg->message);
-  // This seems to be several type of message...
-  // CJD - why was there no breaks in each case?
-  switch(spmsg->msgType)
-  {
-  case 13:
-  {
-    if (!strncmp(spmsg->message, "Your target is too far away", 20))
-      tempStr.sprintf("Attack: %s", spmsg->message);
-    
-    else if (!strncmp(spmsg->message, "You can't see your target", 18))
-      tempStr.sprintf("Attack: %s", spmsg->message);
-    
-    // CJD - is this resist any longer type 13, or was it
-    // moved to 289 (what I see from some brief logging)?
-    else if (!strncmp(spmsg->message, "Your target resisted", 18))
-    {
-      printf("== let cjd1@users.sourceforge.net know if you ever see this message.\n");
-      tempStr.sprintf("Spell: %s", spmsg->message);
-    }
-    else
-      tempStr.sprintf("Special: %s (%d)", spmsg->message, spmsg->msgType);
-    break;
-  }
-  case 15:
-    tempStr.sprintf("\e[0;33mExp: %s\e[0;0m", spmsg->message);
-    break;
-    
-    // CJD TODO - make these signals themselves? or just one
-    // spellMessage(QString&) and let spellshell split them up...
-  case 284: // Your xxx spell has worn off.
-    // CJD - No way with this to tell which spell wore off
-    // if the same spell is on two different targets...
-    tempStr.sprintf("Spell: %s", spmsg->message);
-    break;
-    
-    // Your target resisted the xxx spell.  OR
-    // Your spell fizzles.
-  case 289:
-    tempStr.sprintf("Spell: %s", spmsg->message);
-    break;
-    
-  default:
-    tempStr.sprintf("Special: %s (%d)", spmsg->message, spmsg->msgType);
-  }
-  
-  if (tempStr.left(6) == "Spell:")
-    emit spellMessage(tempStr);
-  
-  emit msgReceived(tempStr);
-}
-
-void EQInterface::handleSpell(const memSpellStruct* mem, uint32_t, uint8_t dir)
-{
-  QString tempStr;
-
-  if (!showeq_params->showSpellMsgs)
-    return;
-  
-  bool client = (dir == DIR_CLIENT);
-
-  tempStr = "";
-  
-  switch (mem->param1)
-  {
-  case 0:
-    {
-      if (!client)
-	tempStr = "You have finished scribing '";
-      break;
-    }
-    
-  case 1:
-    {
-      if (!client)
-	tempStr = "You have finished memorizing '";
-      break;
-    }
-    
-  case 2:
-    {
-      if (!client)
-	tempStr = "You forget '";
-      break;
-    }
-    
-  case 3:
-    {
-      if (!client)
-	tempStr = "You finish casting '";
-      break;
-    }
-    
-  default:
-    {
-      tempStr.sprintf( "Unknown Spell Event ( %s ) - '",
-		       client  ?
-		     "Client --> Server"   :
-		       "Server --> Client"
-		       );
-      break;
-    }
-  }
-  
-  
-  if (!tempStr.isEmpty())
-  {
-    QString spellName;
-    const Spell* spell = m_spells->spell(mem->spellId);
-    
-    if (spell)
-      spellName = spell->name();
-    else
-      spellName = spell_name(mem->spellId);
-
-    if (mem->param1 != 3)
-      tempStr.sprintf("SPELL: %s%s', slot %d.", 
-		      tempStr.ascii(), 
-		      (const char*)spellName, 
-		      mem->slotId);
-    else 
-    {
-      tempStr.sprintf("SPELL: %s%s'.", 
-		      tempStr.ascii(), 
-		      (const char*)spellName);
-    }
-
-    emit msgReceived(tempStr);
-  }
-}
-
-void EQInterface::beginCast(const beginCastStruct *bcast)
-{
-  QString tempStr;
-
-  if (!showeq_params->showSpellMsgs)
-    return;
-  
-  tempStr = "";
-
-  if (bcast->spawnId == m_player->id())
-    tempStr = "You begin casting '";
-  else
-  {
-    const Item* item = m_spawnShell->findID(tSpawn, bcast->spawnId);
-    if (item != NULL)
-      tempStr = item->name();
-    
-    if (tempStr == "" || tempStr.isEmpty())
-      tempStr.sprintf("UNKNOWN (ID: %d)", bcast->spawnId);
-    
-    tempStr += " has begun casting '";
-  }
-  float casttime = ((float)bcast->param1 / 1000);
-  
-  QString spellName;
-  const Spell* spell = m_spells->spell(bcast->spellId);
-  
-  if (spell)
-    spellName = spell->name();
-  else
-    spellName = spell_name(bcast->spellId);
-  
-  tempStr.sprintf( "SPELL: %s%s' - Casting time is %g Second%s", 
-		   tempStr.ascii(),
-		   (const char*)spellName, casttime,
-		   casttime == 1 ? "" : "s"
-		   );
-  emit msgReceived(tempStr);
-}
-
-void EQInterface::spellFaded(const spellFadedStruct *sf)
-{
-  QString tempStr;
-
-  if (!showeq_params->showSpellMsgs)
-    return;
-  
-  tempStr.sprintf( "SPELL: Faded: %s", 
-		   sf->message);
-
-  emit msgReceived(tempStr);
-}
-
-void EQInterface::interruptSpellCast(const badCastStruct *icast)
-{
-  const Item* item = m_spawnShell->findID(tSpawn, icast->spawnId);
-
-  if (item != NULL)
-    printf("SPELL: %s(%d): %s\n", 
-	   (const char*)item->name(), icast->spawnId, icast->message);
-  else
-    printf("SPELL: spawn(%d): %s\n", 
-	   icast->spawnId, icast->message);
-}
-
-void EQInterface::startCast(const startCastStruct* cast)
-{
-  QString spellName;
-  const Spell* spell = m_spells->spell(cast->spellId);
-  
-  if (spell)
-    spellName = spell->name();
-  else
-    spellName = spell_name(cast->spellId);
-
-  printf("SPELL: You begin casting %s.  Current Target is ", 
-	 (const char*)spellName);
-  
-  const Item* item = m_spawnShell->findID(tSpawn, cast->targetId);
-
-  if (item != NULL)
-    printf("%s(%d)", (const char*)item->name(), cast->targetId);
-  else
-    printf("spawn(%d)", cast->targetId);
-  
-  printf("\n");
-}
-
-void EQInterface::systemMessage(const sysMsgStruct* smsg)
-{
-  QString tempStr;
-
-  // Seems to be lots of blanks
-  if (!smsg->message[0])
-    return;
-  
-  // This seems to be several type of message...
-  if (!strncmp(smsg->message, "Your faction", 12))
-    tempStr.sprintf("Faction: %s", smsg->message);
-  else
-    tempStr.sprintf("System: %s", smsg->message);
-  
-  emit msgReceived(tempStr);
-}
-
-void EQInterface::newGroundItem(const makeDropStruct* adrop, uint32_t len, uint8_t dir)
-{
-#if 0 // ZBTEMP
-  QString tempStr;
-
-  if (dir != DIR_CLIENT)
-    return;
-
-  if (len == 0)
-    return;
-
-  /* If the packet is outbound  ( Client --> Server ) then it
-     should not be added to the spawn list... The server will
-     send the client a packet when it has actually placed the
-     item on the ground.
-  */
-  if (m_itemDB != NULL) 
-    tempStr = m_itemDB->GetItemLoreName(adrop->itemNr);
-  else
-    tempStr = "";
-  
-  //if (tempStr != "")
-  if (tempStr)
-  {
-    tempStr.prepend("Item: Drop: You have dropped your '");
-    tempStr.append("' on the ground!");
-    tempStr.append(" location %1, %2, %3").arg(adrop->y).arg(adrop->x).arg(adrop->z);
-  }
-  else
-    tempStr = QString("Item: Drop: You have dropped your *UNKNOWN ITEM* (ID: %1)  on the ground!\nNOTE:\tIn order for ShowEQ to know the name of the item you dropped it is suggested that you pickup and drop the item again...").arg(adrop->itemNr);
-  
-  emit msgReceived(tempStr);
-#endif
-}
-
-void EQInterface::worldMOTD(const worldMOTDStruct* motd)
-{ 
-  QString tempStr = "Formatted:MOTD: ";
-  tempStr.append(QString::fromUtf8(motd->message));
-
-  emit msgReceived(tempStr);
-}
-
-void EQInterface::moneyUpdate(const moneyUpdateStruct* money)
-{
-  emit msgReceived("Money: Update");
-}
-
-void EQInterface::moneyThing(const moneyThingStruct* money)
-{
-  emit msgReceived("Money: Thing");
-}
-
-void EQInterface::groupInfo(const groupMemberStruct* gmem)
-{
-  printf ("Member: %s - %s\n", 
-	  gmem->yourname, gmem->membername);
-}
-
-void EQInterface::groupInvite(const groupInviteStruct* gmem)
-{
-  printf ("Group Invite: %s invites %s\n", 
-	  gmem->membername, gmem->yourname);
-}
-
-void EQInterface::groupDecline(const groupDeclineStruct* gmem)
-{
-  printf ("Group Invite: %s declines invite from %s (%i)\n", 
-	  gmem->membername, gmem->yourname, gmem->reason);
-}
-
-void EQInterface::groupAccept(const groupAcceptStruct* gmem)
-{
-  printf ("Group Invite: %s accepts invite from %s\n", 
-	  gmem->membername, gmem->yourname);
-}
-
-void EQInterface::groupDelete(const groupDeleteStruct* gmem)
-{
-  printf ("Group Delete: %s - %s\n", 
-	  gmem->membername, gmem->yourname);
-}
-
-void EQInterface::logOut(const uint8_t*, uint32_t, uint8_t)
-{
-#ifdef ZONE_ORDER_DIAG
-  QString tempStr;
-  tempStr = "Zone: LogoutCode: Client logged out of server";
-  emit msgReceived(tempStr);
-#endif
-}
-
-void EQInterface::zoneEntry(const ClientZoneEntryStruct* zsentry)
-{
-#ifdef ZONE_ORDER_DIAG
-  QString tempStr;
-  tempStr = "Zone: EntryCode: Client";
-  emit msgReceived(tempStr);
-#endif
-}
-
-void EQInterface::zoneEntry(const ServerZoneEntryStruct* zsentry)
-{
-#ifdef ZONE_ORDER_DIAG
-  QString tempStr;
-
-  tempStr = "Zone: EntryCode: Server, Zone: ";
-  emit msgReceived(tempStr);
-#endif
-}
-
-void EQInterface::zoneChanged(const zoneChangeStruct* zoneChange, uint32_t, uint8_t dir)
-{
-#ifdef ZONE_ORDER_DIAG
-  QString tempStr;
-
-  if (dir == DIR_CLIENT)
-  {
-    tempStr = "Zone: ChangeCode: Client, Zone: ";
-    tempStr += m_zoneMgr->zoneNameFromID(zoneChange->zoneId);
-    emit msgReceived(tempStr);
-  }
-  else
-  {
-    tempStr = "Zone: ChangeCode: Server, Zone:";
-    tempStr += m_zoneMgr->zoneNameFromID(zoneChange->zoneId);
-    emit msgReceived(tempStr);
-  }
-#endif
-}
-
-void EQInterface::zoneNew(const newZoneStruct* zoneNew, uint32_t, uint8_t dir)
-{
-#ifdef ZONE_ORDER_DIAG
-  QString tempStr;
-  tempStr = "Zone: NewCode: Zone: ";
-  tempStr += QString(zoneNew->shortName) + " ("
-    + zoneNew->longName + ")";
-  emit msgReceived(tempStr);
-#endif
 }
 
 void EQInterface::zoneBegin(const QString& shortZoneName)
 {
-  QString tempStr;
-  tempStr = QString("Zone: Zoning, Please Wait...\t(Zone: '")
-    + shortZoneName + "')";
-  emit msgReceived(tempStr);
   emit newZoneName(shortZoneName);
-
-  m_filterMgr->loadZone(shortZoneName);
+  float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
+  QString tempStr;
+  tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
+  if (m_stsbarZEM)
+    m_stsbarZEM->setText(tempStr);
 }
 
 void EQInterface::zoneEnd(const QString& shortZoneName, 
 			  const QString& longZoneName)
 {
-  QString tempStr;
-  tempStr = QString("Zone: Entered: ShortName = '") + shortZoneName +
-                    "' LongName = " + longZoneName;
-  emit msgReceived(tempStr);
-
-   if (pSEQPrefs->getPrefBool("UseStdout", "Interface"))
-       printf("Loading Complete...\t(Zone: '%s')\n", 
-	      (const char*)shortZoneName);
-
   emit newZoneName(longZoneName);
   stsMessage("");
-
-  m_filterMgr->loadZone(shortZoneName);
+  float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
+  QString tempStr;
+  tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
+  if (m_stsbarZEM)
+    m_stsbarZEM->setText(tempStr);
 }
 
 void EQInterface::zoneChanged(const QString& shortZoneName)
@@ -4558,19 +4533,18 @@ void EQInterface::zoneChanged(const QString& shortZoneName)
   QString tempStr;
   stsMessage("- Busy Zoning -");
   emit newZoneName(shortZoneName);
-  printf("Loading, Please Wait...\t(Zone: \'%s\')\n", 
-	 (const char*)shortZoneName);
-  tempStr = QString("Zone: Zoning, Please Wait...\t(Zone: '")
-    + shortZoneName + "')";
-  emit msgReceived(tempStr);
-  
-  m_filterMgr->loadZone(shortZoneName);
+  float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
+  tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
+  if (m_stsbarZEM)
+    m_stsbarZEM->setText(tempStr);
 }
 
-void EQInterface::clientTarget(const clientTargetStruct* cts)
+void EQInterface::clientTarget(const uint8_t* data)
 {
-  if (!showeq_params->tar_select)
+  if (!m_selectOnTarget)
     return;
+
+  const clientTargetStruct* cts = (const clientTargetStruct*)data;
 
   // try to find the targeted spawn in the spawn shell
   const Item* item = m_spawnShell->findID(tSpawn, cts->newTarget);
@@ -4591,7 +4565,7 @@ void EQInterface::clientTarget(const clientTargetStruct* cts)
 
 void EQInterface::spawnSelected(const Item* item)
 {
-  if (item == NULL)
+  if (item == 0)
     return;
 
   // note the new selection
@@ -4606,10 +4580,10 @@ void EQInterface::spawnSelected(const Item* item)
 
 void EQInterface::spawnConsidered(const Item* item)
 {
-  if (item == NULL)
+  if (item == 0)
     return;
 
-  if (!showeq_params->con_select)
+  if (!m_selectOnConsider)
     return;
 
   // note the new selection
@@ -4628,20 +4602,6 @@ void EQInterface::addItem(const Item* item)
 
   if (filterFlags & FILTER_FLAG_LOCATE)
   {
-    printf ("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
-    printf ("LocateSpawn: %s spawned LOC %dy, %dx, %dz at %s",
-	    (const char*)item->name(), 
-	    item->y(), item->x(), item->z(),
-	    (const char*)item->spawnTimeStr());
-    printf ("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n\n");
-    
-    if (showeq_params->spawnfilter_loglocates)
-      logFilteredSpawn(item, FILTER_FLAG_LOCATE);
-
-    // Deside how to handle audio alerts
-    //
-    makeNoise(item, "LocateSpawnAudioCommand", "Locate Spawned");
-    
     // note the new selection
     m_selectedSpawn = item;
     
@@ -4651,53 +4611,6 @@ void EQInterface::addItem(const Item* item)
     // update the spawn status
     updateSelectedSpawnStatus(m_selectedSpawn);
   } // End LOCATE Filter alerting
-  
-  if (filterFlags & FILTER_FLAG_CAUTION)
-  {
-    printf ("CautionSpawn: %s spawned LOC %dy, %dx, %dz at %s\n", 
-	    (const char*)item->name(), 
-	    item->y(), item->x(), item->z(),
-	    (const char*)item->spawnTimeStr());
-    
-    if (showeq_params->spawnfilter_logcautions)
-      logFilteredSpawn(item, FILTER_FLAG_CAUTION);
-
-    // Deside how to handle audio alerts
-    //
-    makeNoise(item, "CautionSpawnAudioCommand", "Caution Spawned");
-
-  } // End CAUTION Filter alerting
-  
-  if (filterFlags & FILTER_FLAG_HUNT)
-  {
-    printf ("HuntSpawn: %s spawned LOC %dy, %dx, %dz at %s\n", 
-	    (const char*)item->name(), 
-	    item->y(), item->x(), item->z(),
-	    (const char*)item->spawnTimeStr());
-    
-    if (showeq_params->spawnfilter_loghunts)
-      logFilteredSpawn(item, FILTER_FLAG_HUNT);
-
-    // Deside how to handle audio alerts
-    //
-    makeNoise(item, "HuntSpawnAudioCommand", "Hunt Spawned");
-
-  } // End HUNT Filter alerting
-  
-  if (filterFlags & FILTER_FLAG_DANGER)
-  {
-    printf ("DangerSpawn: %s spawned LOC %dy, %dx, %dz at %s", 
-	    (const char*)item->name(), 
-	    item->y(), item->x(), item->z(),
-	    (const char*)item->spawnTimeStr());
-    
-    if (showeq_params->spawnfilter_logdangers)
-      logFilteredSpawn(item, FILTER_FLAG_DANGER);
-
-    // Deside how to handle audio alerts
-    //
-    makeNoise(item, "DangerSpawnAudioCommand", "Danger Spawned");
-  } // End DANGER Filter alerting
 }
 
 
@@ -4706,7 +4619,7 @@ void EQInterface::delItem(const Item* item)
   // if this is the selected spawn, then there isn't a selected spawn anymore
   if (m_selectedSpawn == item)
   {
-    m_selectedSpawn = NULL;
+    m_selectedSpawn = 0;
   
     // notify others of the new selected spawn
     emit selectSpawn(m_selectedSpawn);
@@ -4715,13 +4628,6 @@ void EQInterface::delItem(const Item* item)
 
 void EQInterface::killSpawn(const Item* item)
 {
-  if (item == NULL)
-    return;
-
-  if (item->id() == m_player->id())
-    printf("Player died at y:%d, x:%d, z:%d\n", item->y(), item->x(),
-      item->z());
-
   if (m_selectedSpawn != item)
     return;
 
@@ -4740,180 +4646,19 @@ void EQInterface::changeItem(const Item* item)
   updateSelectedSpawnStatus(item);
 }
 
-void EQInterface::handleAlert(const Item* item, 
-			      alertType type)
-{
-  QString prefix;
-  switch (type)
-    {
-    case tNewSpawn:
-      prefix = "Spawn:";
-      break;
-    case tFilledSpawn:
-      prefix = "Filled:";
-      break;
-    case tKillSpawn:
-      prefix = "Died:";
-      break;
-    case tDelSpawn:
-      prefix = "DeSpawn:";
-      break;
-    default:
-      prefix = "WTF:";
-    }
-
-  QString msg;
-  if (pSEQPrefs->getPrefBool("AlertInfo", "Filters"))
-  {
-    long timeval;
-    struct tm *tp;
-    
-    time(&timeval);
-    tp=localtime(&timeval);
-
-    QString temp;
-
-    msg = prefix + item->name() + "/" + item->raceString() 
-      + "/" + item->classString();
-
-    const Spawn* spawn = spawnType(item);
-
-    if (spawn)
-      msg += QString("/") + spawn->lightName();
-
-    // aditional info or new spawns
-    if (type == tNewSpawn)
-    {
-      if (spawn)
-	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%d) LVL %d, HP %d/%d", 
-		     1900 + tp->tm_year, tp->tm_mon, tp->tm_mday,
-		     tp->tm_hour, tp->tm_min, tp->tm_sec,
-		     item->x(), item->y(), item->z(),
-		     spawn->level(), spawn->HP(), spawn->maxHP());
-      else
-	temp.sprintf(" [%d-%d-%d %d:%d:%d] (%d,%d,%d)", 
-		     1900 + tp->tm_year, tp->tm_mon, tp->tm_mday,
-		     tp->tm_hour, tp->tm_min, tp->tm_sec,
-		     item->x(), item->y(), item->z());
-    }
-    else
-      temp.sprintf(" [%d-%d-%d %d:%d:%d]", 
-		    1900 + tp->tm_year, tp->tm_mon, tp->tm_mday,
-		    tp->tm_hour, tp->tm_min, tp->tm_sec);
-      
-    msg += temp;
-  }
-  else
-    msg = prefix + item->name();
-
-  emit msgReceived(msg);
-
-  // Gereric system beep for those without a soundcard
-  //
-  if (!pSEQPrefs->getPrefBool("Audio", "Filters"))
-  {
-    fprintf( stderr, "\a");
-    fflush( stderr);
-  }
-  else
-  {
-    // execute a command
-    QString command;
-    QString audioCmd;
-    QString audioCue;
-    switch (type)
-    {
-    case tNewSpawn:
-      audioCmd = "SpawnAudioCommand";
-      audioCue = "Spawned";
-      break;
-    case tFilledSpawn:
-      audioCmd = "SpawnAudioCommand";
-      audioCue = "Filled";
-      break;
-    case tKillSpawn:
-      audioCmd = "DeathAudioCommand";
-      audioCue = "Died";
-      break;
-    case tDelSpawn:
-      audioCmd = "DeSpawnAudioCommand";
-      audioCue = "Despawned";
-      break;
-    }
-    
-    doAlertCommand(item, pSEQPrefs->getPrefString(audioCmd, "Filters"), audioCue);
-  }
-}
-
-// Deside how to handle audio alerts
-//
-void EQInterface::makeNoise( const Item* item, 
-			     char* szAudioCmd, 
-			     char* szSoundType)
-{
-  if (!showeq_params->spawnfilter_audio)
-  {
-    fprintf(stderr,"\a");
-    fflush(stderr);
-  }
-  else
-    doAlertCommand(item, 
-		   pSEQPrefs->getPrefString(szAudioCmd, "Filters"),
-		   szSoundType);
-}
-
-void EQInterface::doAlertCommand(const Item* item, 
-				 const QString& rawCommand, 
-				 const QString& audioCue)
-{
-  if (rawCommand.isEmpty())
-    return;
-
-  // time to cook the command line
-  QString command = rawCommand;
-
-  QRegExp nameExp("%n");
-  QRegExp cueExp("%c");
-  
-  // get the name, and replace all occurrances of %n with the name
-  QString name = item->transformedName();
-  command.replace(nameExp, name);
-  
-  // now, replace all occurrances of %c with the audio cue
-  command.replace(cueExp, audioCue);
-  
-  // fire off the command
-  system ((const char*)command);
-}
-
-void EQInterface::logFilteredSpawn(const Item* item, uint32_t flag)
-{
-  FILE *rar;
-  rar = fopen(LOGDIR "/filtered.spawns","at");
-  if (rar) 
-  {
-    fprintf (rar, "%s %s spawned LOC %dy, %dx, %dz at %s\n", 
-	     (const char*)m_filterMgr->filterString(flag),
-	     (const char*)item->name(), 
-	     item->y(), item->x(), item->z(),
-	     (const char*)item->spawnTimeStr());
-    fclose(rar);
-  }
-}
-
 void EQInterface::updateSelectedSpawnStatus(const Item* item)
 {
-  if (item == NULL)
+  if (item == 0)
     return;
 
-  const Spawn* spawn = NULL;
+  const Spawn* spawn = 0;
 
   if ((item->type() == tSpawn) || (item->type() == tPlayer))
     spawn = (const Spawn*)item;
 
   // construct a message for the status message display
   QString string("");
-  if (spawn != NULL)
+  if (spawn != 0)
     string.sprintf("%d: %s:%d (%d/%d) Pos:", // "%d/%d/%d (%d) %s %s Item:%s", 
 		   item->id(),
 		   (const char*)item->name().utf8(),
@@ -4979,27 +4724,33 @@ void EQInterface::selectPrev(void)
 void EQInterface::saveSelectedSpawnPath(void)
 {
   QString fileName;
-  fileName.sprintf(MAPDIR "/%s_mobpath.map", 
+  fileName.sprintf("%s_mobpath.map", 
 		   (const char*)m_zoneMgr->shortZoneName());
 
-  QFile mobPathFile(fileName);
+  QFileInfo fileInfo = m_dataLocationMgr->findWriteFile("maps", fileName, 
+							false);
+
+  QFile mobPathFile(fileInfo.absFilePath());
   if (mobPathFile.open(IO_Append | IO_WriteOnly))
   {
     QTextStream out(&mobPathFile);
     // append the selected spawns path to the end
     saveSpawnPath(out, m_selectedSpawn);
 
-    fprintf(stderr, "Finished appending '%s'!\n", (const char*)fileName);
+    seqInfo("Finished appending '%s'!\n", (const char*)fileName);
   }
 }
 
 void EQInterface::saveSpawnPaths(void)
 {
   QString fileName;
-  fileName.sprintf(MAPDIR "/%s_mobpath.map", 
+  fileName.sprintf("%s_mobpath.map", 
 		   (const char*)m_zoneMgr->shortZoneName());
 
-  QFile mobPathFile(fileName);
+  QFileInfo fileInfo = m_dataLocationMgr->findWriteFile("maps", fileName, 
+							false);
+
+  QFile mobPathFile(fileInfo.absFilePath());
   if (mobPathFile.open(IO_Truncate | IO_WriteOnly))
   {
     QTextStream out(&mobPathFile);
@@ -5010,7 +4761,7 @@ void EQInterface::saveSpawnPaths(void)
     // iterate over the spawns adding their paths to the file
     ItemConstIterator it(m_spawnShell->getConstMap(tSpawn));
     const Item* item;
-    for (item = it.current(); item != NULL; item = ++it)
+    for (item = it.current(); item != 0; item = ++it)
     {
       if ((item->NPC() == SPAWN_NPC) || 
 	  (item->NPC() == SPAWN_NPC_CORPSE) ||
@@ -5018,18 +4769,18 @@ void EQInterface::saveSpawnPaths(void)
 	saveSpawnPath(out, it.current());
     }
 
-    fprintf(stderr, "Finished writing '%s'!\n", (const char*)fileName);
+    seqInfo("Finished writing '%s'!\n", (const char*)fileName);
   }
 }
 
 void EQInterface::saveSpawnPath(QTextStream& out, const Item* item)
 {
-  if (item == NULL)
+  if (item == 0)
     return;
 
   const Spawn* spawn = spawnType(item);
 
-  if (spawn == NULL)
+  if (spawn == 0)
     return;
 
    const SpawnTrackList& trackList = spawn->trackList();
@@ -5057,16 +4808,10 @@ void EQInterface::saveSpawnPath(QTextStream& out, const Item* item)
 
 void EQInterface::toggle_net_real_time_thread(int id)
 {
-   showeq_params->realtime = !showeq_params->realtime;
-   m_netMenu->setItemChecked(id, showeq_params->realtime);
-   pSEQPrefs->setPrefBool("RealTimeThread", "Network", showeq_params->realtime);
-}
-
-void EQInterface::toggle_net_broken_decode(int id)
-{
-   showeq_params->broken_decode = !showeq_params->broken_decode;
-   m_netMenu->setItemChecked(id, showeq_params->broken_decode);
-   pSEQPrefs->setPrefBool("BrokenDecode", "Network", showeq_params->broken_decode);
+  bool realtime = !m_packet->realtime();
+  m_packet->setRealtime(realtime);
+   m_netMenu->setItemChecked(id, realtime);
+   pSEQPrefs->setPrefBool("RealTimeThread", "Network", realtime);
 }
 
 void EQInterface::set_net_monitor_next_client()
@@ -5075,51 +4820,58 @@ void EQInterface::set_net_monitor_next_client()
   m_packet->monitorNextClient();
 
   // set it as the address to monitor next session
-  pSEQPrefs->setPrefString("IP", "Network", showeq_params->ip);
+  pSEQPrefs->setPrefString("IP", "Network", m_packet->ip());
 }
 
 void EQInterface::set_net_client_IP_address()
 {
+  QStringList iplst;
+  for( int l = 0; l < 5; l++)
+  iplst += ipstr[l];    
   bool ok = false;
   QString address = 
-    QInputDialog::getText("ShowEQ - EQ Client IP Address",
-			  "Enter IP address of EQ client:",
-			  QLineEdit::Normal, showeq_params->ip,
-			  &ok, this);
-
+     QInputDialog::getItem("ShowEQ - EQ Client IP Address",
+      			   "Enter IP address of EQ client",
+			    iplst, 0, TRUE, &ok, this );
   if (ok)
   {
+	for (int i = 4; i > 0; i--)
+	ipstr[i] = ipstr[ i - 1 ];
+	ipstr[0] = address;
     // start monitoring the new address
     m_packet->monitorIPClient(address);
 
     // set it as the address to monitor next session
-    pSEQPrefs->setPrefString("IP", "Network", showeq_params->ip);
+    pSEQPrefs->setPrefString("IP", "Network", m_packet->ip());
   }
 }
 
 void EQInterface::set_net_client_MAC_address()
 {
+  QStringList maclst;
+  for( int l = 0; l < 5; l++)  
+  maclst += macstr[l];
   bool ok = false;
   QString address = 
-    QInputDialog::getText("ShowEQ - Client MAC Address",
-			  "Enter MAC address of EQ client:",
-			  QLineEdit::Normal, showeq_params->mac_address,
-			  &ok, this);
-
+     QInputDialog::getItem("ShowEQ - EQ Client MAC Address",
+     			   "Enter MAC address of EQ client",
+			    maclst, 0, TRUE, &ok, this );
   if (ok)
   {
     if (address.length() != 17)
     {
-      fprintf(stderr, "Invalid MAC Address (%s)! Ignoring!",
+      seqWarn("Invalid MAC Address (%s)! Ignoring!",
 	      (const char*)address);
       return;
     }
-
+ 	for (int i = 4; i > 0; i--)
+	macstr[i] = macstr[ i - 1 ];
+	macstr[0] = address;
     // start monitoring the new address
     m_packet->monitorMACClient(address);
 
     // set it as the address to monitor next session
-    pSEQPrefs->setPrefString("MAC", "Network", showeq_params->mac_address);
+    pSEQPrefs->setPrefString("MAC", "Network", m_packet->mac());
   }
 }
 
@@ -5129,7 +4881,7 @@ void EQInterface::set_net_device()
   QString dev = 
     QInputDialog::getText("ShowEQ - Device",
 			  "Enter the device to sniff for EQ Packets:",
-			  QLineEdit::Normal, showeq_params->device,
+			  QLineEdit::Normal, m_packet->device(),
 			  &ok, this);
 
   if (ok)
@@ -5138,59 +4890,54 @@ void EQInterface::set_net_device()
     m_packet->monitorDevice(dev);
 
     // set it as the device to monitor next session
-    pSEQPrefs->setPrefString("Device", "Network", showeq_params->device);
+    pSEQPrefs->setPrefString("Device", "Network", m_packet->device());
   }
 }
 
 void EQInterface::set_net_arq_giveup(int giveup)
 {
   // set the Arq Seq Give Up length
-  m_packet->setArqSeqGiveUp(giveup);
+  m_packet->setArqSeqGiveUp(uint16_t(giveup));
 
   // set it as the value to use next session
-  pSEQPrefs->setPrefInt("ArqSeqGiveUp", "Network", showeq_params->arqSeqGiveUp);
+  pSEQPrefs->setPrefInt("ArqSeqGiveUp", "Network", m_packet->arqSeqGiveUp());
 }
 
 void EQInterface::toggle_net_session_tracking()
 {
-   showeq_params->session_tracking = !showeq_params->session_tracking;
-   m_netMenu->setItemChecked(m_id_net_sessiontrack, showeq_params->session_tracking);
-   pSEQPrefs->setPrefBool("SessionTracking", "Network", showeq_params->session_tracking);
-   m_packet->session_tracking();
+  bool enable = !m_packet->session_tracking();
+
+  m_packet->session_tracking(enable);
+  m_netMenu->setItemChecked(m_id_net_sessiontrack, enable);
+  pSEQPrefs->setPrefBool("SessionTracking", "Network", enable);
 }
 
-void EQInterface::toggleAutoDetectCharSettings (int id)
+void EQInterface::toggleAutoDetectPlayerSettings (int id)
 {
-    showeq_params->AutoDetectCharSettings = !showeq_params->AutoDetectCharSettings;
-    menuBar()->setItemChecked (id, showeq_params->AutoDetectCharSettings);
-    pSEQPrefs->setPrefBool("AutoDetectCharSettings", "Defaults", showeq_params->AutoDetectCharSettings);
+  m_player->setUseAutoDetectedSettings(!m_player->useAutoDetectedSettings());
+  menuBar()->setItemChecked (id, m_player->useAutoDetectedSettings());
 }
 
 /* Choose the character's level */
 void EQInterface::SetDefaultCharacterLevel(int level)
 {
-    showeq_params->defaultLevel = level;
-    pSEQPrefs->setPrefInt("DefaultLevel", "Defaults", level);
+  m_player->setDefaultLevel(level);
 }
 
 /* Choose the character's class */
 void EQInterface::SetDefaultCharacterClass(int id)
 {
    for (int i = 0; i < PLAYER_CLASSES; i++)
-       m_charClassMenu->setItemChecked(char_ClassID[i], false );
-   m_charClassMenu->setItemChecked(id, true);
-   showeq_params->defaultClass = m_charClassMenu->itemParameter(id);
-   pSEQPrefs->setPrefInt("DefaultClass", "Defaults", m_charClassMenu->itemParameter(id));
+       m_charClassMenu->setItemChecked(char_ClassID[i], char_ClassID[i] == id);
+   m_player->setDefaultClass(m_charClassMenu->itemParameter(id));
 }
 
 /* Choose the character's race */
 void EQInterface::SetDefaultCharacterRace(int id)
 {   
    for (int i = 0; i < PLAYER_RACES; i++)
-       m_charRaceMenu->setItemChecked(char_RaceID[i], false );
-   m_charRaceMenu->setItemChecked(id, true);
-   showeq_params->defaultRace = m_charRaceMenu->itemParameter(id);
-   pSEQPrefs->setPrefInt("DefaultRace", "Defaults", m_charRaceMenu->itemParameter(id));
+     m_charRaceMenu->setItemChecked(char_RaceID[i], char_RaceID[i] == id);
+   m_player->setDefaultRace(m_charRaceMenu->itemParameter(id));
 }
 
 void EQInterface::toggle_view_menubar()
@@ -5212,53 +4959,59 @@ void EQInterface::toggle_view_statusbar()
 
 void EQInterface::init_view_menu()
 {
-  // need to check for NULL before checking if is visible for dynamicly
+  // need to check for 0 before checking if is visible for dynamicly
   // created windows
   menuBar()->setItemChecked(m_id_view_PlayerSkills, 
-			    (m_skillList != NULL) && 
+			    (m_skillList != 0) && 
 			    m_skillList->isVisible());
   menuBar()->setItemChecked(m_id_view_PlayerStats, 
-			    (m_statList != NULL) && 
+			    (m_statList != 0) && 
 			    m_statList->isVisible());
   menuBar()->setItemChecked(m_id_view_SpawnList, 
-			    (m_spawnList != NULL) && 
+			    (m_spawnList != 0) && 
 			    m_spawnList->isVisible());
   menuBar()->setItemChecked(m_id_view_SpawnList2, 
-			    (m_spawnList2 != NULL) && 
+			    (m_spawnList2 != 0) && 
 			    m_spawnList2->isVisible());
   menuBar()->setItemChecked(m_id_view_SpawnPointList, 
-			    (m_spawnPointList != NULL) &&
+			    (m_spawnPointList != 0) &&
 			    m_spawnPointList->isVisible());
   menuBar()->setItemChecked(m_id_view_Compass, 
-			    (m_compass != NULL) &&
+			    (m_compass != 0) &&
 			    m_compass->isVisible());
   menuBar()->setItemChecked(m_id_view_NetDiag, 
-			    (m_netDiag != NULL) &&
+			    (m_netDiag != 0) &&
 			    m_netDiag->isVisible());
+  menuBar()->setItemChecked(m_id_view_GuildListWindow, 
+			    (m_guildListWindow != 0) &&
+			    m_guildListWindow->isVisible());
   menuBar()->setItemChecked (m_id_view_SpellList, 
-			     (m_spellList != NULL) &&
+			     (m_spellList != 0) &&
 			     m_spellList->isVisible());
 
   // loop over the maps
   for (int i = 0; i < maxNumMaps; i++)
     menuBar()->setItemChecked(m_id_view_Map[i], 
-			      (m_map[i] != NULL) &&
+			      (m_map[i] != 0) &&
 			      m_map[i]->isVisible());
 
-  // check variable for channel message windows (they're wierd)
-  menuBar()->setItemChecked (m_id_view_ChannelMsgs, m_viewChannelMsgs);
+  // loop over the message windows
+  for (int i = 0; i < maxNumMessageWindows; i++)
+    menuBar()->setItemChecked(m_id_view_MessageWindow[i], 
+			      (m_messageWindow[i] != 0) &&
+			      m_messageWindow[i]->isVisible());
 
   // set the checkmarks for windows that are always created, but not always
   // visible
   menuBar()->setItemChecked(m_id_view_ExpWindow, 
-			    (m_expWindow != NULL) && 
+			    (m_expWindow != 0) && 
 			    m_expWindow->isVisible()); 
   menuBar()->setItemChecked (m_id_view_CombatWindow, 
-			     (m_combatWindow != NULL) &&
+			     (m_combatWindow != 0) &&
 			     m_combatWindow->isVisible());
    
    // set initial view options
-  if (m_spawnList != NULL)
+  if (m_spawnList != 0)
   {
     SEQListView* spawnList = m_spawnList->spawnList();
 
@@ -5268,7 +5021,7 @@ void EQInterface::init_view_menu()
 				      spawnList->columnVisible(i));
   }
 
-  if (m_statList != NULL)
+  if (m_statList != 0)
   {
     StatList* statList = m_statList->statList();
     // make sure the menu items are checked
@@ -5278,7 +5031,7 @@ void EQInterface::init_view_menu()
 
   }
 
-  if (m_skillList != NULL)
+  if (m_skillList != 0)
   {
     // make sure the proper menu items are checked
     menuBar()->setItemChecked(m_id_view_PlayerSkills_Languages, 
@@ -5340,14 +5093,200 @@ void EQInterface::set_opt_save_BaseFilename()
 
 void EQInterface::opt_clearChannelMsgs(int id)
 {
-  // clear out the list of channel messages
-  m_StringList.clear();
+  // clear the messages
+  m_messages->clear();
+}
 
-  // refresh all the channel message dialogs
-  for(MsgDialog *diag=m_msgDialogList.first(); 
-      diag != 0; 
-      diag=m_msgDialogList.next() ) 
-    diag->refresh();
+
+void EQInterface::showMessageFilterDialog(void)
+{
+  // create the filter dialog, if necessary
+  if (!m_messageFilterDialog)
+    m_messageFilterDialog = new MessageFilterDialog(m_messageFilters, 
+						    "ShowEQ Message Filters",
+						    this, "messagefilterdialog");
+
+  // show the message filter dialog
+  m_messageFilterDialog->show();
+}
+
+void EQInterface::toggleTypeFilter(int id)
+{
+  uint64_t enabledTypes = m_terminal->enabledTypes();
+
+  if (((uint64_t(1) << id) & enabledTypes) != 0)
+    enabledTypes &= ~(uint64_t(1) << id);
+  else
+    enabledTypes |= (uint64_t(1) << id);
+
+  m_terminal->setEnabledTypes(enabledTypes);
+
+  // (un)check the appropriate menu item
+  m_terminalTypeFilterMenu->setItemChecked(id, ((enabledTypes & (uint64_t(1) << id))));
+}
+
+void EQInterface::disableAllTypeFilters()
+{
+  m_terminal->setEnabledTypes(0);
+  // make sure the All menu items are unchecked
+  m_terminalTypeFilterMenu->setItemChecked(64, false);
+  m_terminalTypeFilterMenu->setItemChecked(65, false);
+
+  // uncheck all the menu items
+  QString typeName;
+  for (int i = MT_Guild; i <= MT_Max; i++)
+  {
+    typeName = MessageEntry::messageTypeString((MessageType)i);
+    if (!typeName.isEmpty())
+      m_terminalTypeFilterMenu->setItemChecked(i, false);
+  }
+}
+
+void EQInterface::enableAllTypeFilters()
+{
+  m_terminal->setEnabledTypes(0xFFFFFFFFFFFFFFFFULL);
+
+  // make sure the All menu items are unchecked
+  m_terminalTypeFilterMenu->setItemChecked(64, false);
+  m_terminalTypeFilterMenu->setItemChecked(65, false);
+
+  // check all the menu items
+  QString typeName;
+  for (int i = MT_Guild; i <= MT_Max; i++)
+  {
+    typeName = MessageEntry::messageTypeString((MessageType)i);
+    if (!typeName.isEmpty())
+      m_terminalTypeFilterMenu->setItemChecked(i, true);
+  }
+}
+
+void EQInterface::toggleShowUserFilter(int id)
+{
+  uint32_t enabledShowUserFilters = m_terminal->enabledShowUserFilters();
+  // toggle whether the filter is enabled/disabled
+  if (((1 << id) & enabledShowUserFilters) != 0)
+    enabledShowUserFilters &= ~(1 << id);
+  else
+    enabledShowUserFilters |= (1 << id);
+
+  m_terminal->setEnabledShowUserFilters(enabledShowUserFilters);
+ 
+  // (un)check the appropriate menu item
+  m_terminalShowUserFilterMenu->setItemChecked(id, ((enabledShowUserFilters & (1 << id)) != 0));
+}
+
+void EQInterface::disableAllShowUserFilters()
+{
+  // set and save all filters disabled setting
+  m_terminal->setEnabledShowUserFilters(0);
+  
+  // make sure the All menu items are unchecked
+  m_terminalShowUserFilterMenu->setItemChecked(66, false);
+  m_terminalShowUserFilterMenu->setItemChecked(67, false);
+
+  // uncheck all the menu items
+  QString typeName;
+  for (int i = 0; i <= maxMessageFilters; i++)
+  {
+    if (m_messageFilters->filter(i))
+      m_terminalShowUserFilterMenu->setItemChecked(i, false);
+  }
+}
+
+void EQInterface::enableAllShowUserFilters()
+{
+  // set and save all filters enabled flag
+  m_terminal->setEnabledShowUserFilters(0xFFFFFFFF);
+
+  // make sure the All menu items are unchecked
+  m_terminalShowUserFilterMenu->setItemChecked(66, false);
+  m_terminalShowUserFilterMenu->setItemChecked(67, false);
+
+  // check all the menu items
+  QString typeName;
+  for (int i = 0; i <= maxMessageFilters; i++)
+  {
+    if (m_messageFilters->filter(i))
+      m_terminalShowUserFilterMenu->setItemChecked(i, true);
+  }
+}
+
+void EQInterface::toggleHideUserFilter(int id)
+{
+  uint32_t enabledHideUserFilters = m_terminal->enabledHideUserFilters();
+
+  // toggle whether the filter is enabled/disabled
+  if (((1 << id) & enabledHideUserFilters) != 0)
+    enabledHideUserFilters &= ~(1 << id);
+  else
+    enabledHideUserFilters |= (1 << id);
+
+  m_terminal->setEnabledHideUserFilters(enabledHideUserFilters);
+
+  // (un)check the appropriate menu item
+  m_terminalHideUserFilterMenu->setItemChecked(id, ((enabledHideUserFilters & (1 << id)) != 0));
+}
+
+void EQInterface::disableAllHideUserFilters()
+{
+  // set and save all filters disabled setting
+  m_terminal->setEnabledHideUserFilters(0);
+  
+  // make sure the All menu items are unchecked
+  m_terminalHideUserFilterMenu->setItemChecked(66, false);
+  m_terminalHideUserFilterMenu->setItemChecked(67, false);
+
+  // uncheck all the menu items
+  QString typeName;
+  for (int i = 0; i <= maxMessageFilters; i++)
+  {
+    if (m_messageFilters->filter(i))
+      m_terminalHideUserFilterMenu->setItemChecked(i, false);
+  }
+}
+
+void EQInterface::enableAllHideUserFilters()
+{
+  // set and save all filters enabled flag
+  m_terminal->setEnabledHideUserFilters(0xFFFFFFFF);
+
+  // make sure the All menu items are unchecked
+  m_terminalHideUserFilterMenu->setItemChecked(66, false);
+  m_terminalHideUserFilterMenu->setItemChecked(67, false);
+
+  // check all the menu items
+  QString typeName;
+  for (int i = 0; i <= maxMessageFilters; i++)
+  {
+    if (m_messageFilters->filter(i))
+      m_terminalHideUserFilterMenu->setItemChecked(i, true);
+  }
+}
+
+void EQInterface::toggleDisplayType(int id)
+{
+  // toggle the display of message types
+  m_terminal->setDisplayType(m_terminal->displayType());
+  m_terminalMenu->setItemChecked(id, m_terminal->displayType());
+}
+
+void EQInterface::toggleDisplayTime(int id)
+{
+  // toggle the display of message time
+  m_terminal->setDisplayDateTime(!m_terminal->displayDateTime());
+  m_terminalMenu->setItemChecked(id, m_terminal->displayDateTime());  
+}
+
+void EQInterface::toggleEQDisplayTime(int id)
+{
+  m_terminal->setDisplayEQDateTime(!m_terminal->displayEQDateTime());
+  m_terminalMenu->setItemChecked(id, m_terminal->displayEQDateTime());
+}
+
+void EQInterface::toggleUseColor(int id)
+{
+  m_terminal->setUseColor(!m_terminal->useColor());
+  m_terminalMenu->setItemChecked(id, m_terminal->useColor());
 }
 
 int EQInterface::setTheme(int id)
@@ -5367,21 +5306,13 @@ int EQInterface::setTheme(int id)
     case 1: // platinum
     {
       QPalette p( QColor( 239, 239, 239 ) );
-#if QT_VERSION >= 0x030000
       qApp->setStyle("platinum");
-#else
-      qApp->setStyle( (QStyle *) new QPlatinumStyle );
-#endif
       qApp->setPalette( p, TRUE );
     }
     break;
     case 2: // windows
     {
-#if QT_VERSION >= 0x030000
       qApp->setStyle("windows");
-#else
-      qApp->setStyle( (QStyle *) new QWindowsStyle );
-#endif
       qApp->setFont( OrigFont, TRUE );
       qApp->setPalette( OrigPalette, TRUE );
     }
@@ -5390,11 +5321,7 @@ int EQInterface::setTheme(int id)
     case 4: // cde polished
     {
       QPalette p( QColor( 75, 123, 130 ) );
-#if QT_VERSION >= 0x030000
       qApp->setStyle("cde");
-#else
-      qApp->setStyle( (QStyle *) new QCDEStyle( theme == 3 ? TRUE : FALSE ) );
-#endif
       p.setColor( QPalette::Active, QColorGroup::Base, QColor( 55, 77, 78 ) );
       p.setColor( QPalette::Inactive, QColorGroup::Base, QColor( 55, 77, 78 ) );
       p.setColor( QPalette::Disabled, QColorGroup::Base, QColor( 55, 77, 78 ) );
@@ -5420,11 +5347,7 @@ int EQInterface::setTheme(int id)
     case 5: // motif
     {
       QPalette p( QColor( 192, 192, 192 ) );
-#if QT_VERSION >= 0x030000
       qApp->setStyle("motif");
-#else
-      qApp->setStyle( (QStyle *) new QMotifStyle );
-#endif
       qApp->setPalette( p, TRUE );
       qApp->setFont( OrigFont, TRUE );
     }
@@ -5432,11 +5355,7 @@ int EQInterface::setTheme(int id)
     case 6: // SGI
     {
       //QPalette p( QColor( 192, 192, 192 ) );
-#if QT_VERSION >= 0x030000
       qApp->setStyle("sgi");
-#else
-      qApp->setStyle( (QStyle *) new QSGIStyle( FALSE ) );
-#endif
       qApp->setPalette( OrigPalette, TRUE );
       qApp->setFont( OrigFont, TRUE );
     }
@@ -5444,11 +5363,7 @@ int EQInterface::setTheme(int id)
     default: // system default
     {
       QPalette p( QColor( 192, 192, 192 ) );
-#if QT_VERSION >= 0x030000
       qApp->setStyle("motif");
-#else
-      qApp->setStyle( (QStyle *) new QMotifStyle );
-#endif
       qApp->setPalette( p, TRUE );
       qApp->setFont( OrigFont, TRUE );
       theme = 2;
@@ -5474,7 +5389,7 @@ void EQInterface::showMap(int i)
     return;
 
   // if it doesn't exist, create it
-  if (m_map[i] == NULL)
+  if (m_map[i] == 0)
   {
     int mapNum = i + 1;
     QString mapPrefName = "Map";
@@ -5487,31 +5402,30 @@ void EQInterface::showMap(int i)
       mapCaption += QString::number(mapNum);
     }
 
-    if (m_isMapDocked[i])
-      m_map[i] = new MapFrame(m_filterMgr,
-			      m_mapMgr,
-			      m_player, 
-			      m_spawnShell, 
-			      m_zoneMgr,
-			      m_spawnMonitor,
-			      mapPrefName, 
-			      mapCaption,
-			      mapName, 
-			      m_splitH);
-    else
-      m_map[i] = new MapFrame(m_filterMgr,
-			      m_mapMgr,
-			      m_player, 
-			      m_spawnShell, 
-			      m_zoneMgr,
-			      m_spawnMonitor,
-			      mapPrefName, 
-			      mapCaption,
-			      mapName, 
-			      NULL);
-      
+    m_map[i] = new MapFrame(m_filterMgr,
+			    m_mapMgr,
+			    m_player, 
+			    m_spawnShell, 
+			    m_zoneMgr,
+			    m_spawnMonitor,
+			    mapPrefName, 
+			    mapCaption,
+			    mapName, 
+			    0);
+
+
+   setDockEnabled(m_map[i], 
+		  pSEQPrefs->getPrefBool(QString("Dockable") + mapPrefName,
+					 "Interface", true));
+
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", m_map[i]->preferenceName(),
+					    Left);
+    addDockWindow(m_map[i], mapName, edge, true);
+    if (!m_isMapDocked[i])
+      m_map[i]->undock();
+
     connect(this, SIGNAL(saveAllPrefs(void)),
-	    m_map[i], SLOT(savePrefs(void)));
+	    m_map[i], SLOT(savePrefs()));
     connect(this, SIGNAL(restoreFonts(void)),
 	    m_map[i], SLOT(restoreFont(void)));
     
@@ -5529,26 +5443,83 @@ void EQInterface::showMap(int i)
     m_map[i]->restoreSize();
 
     // restore it's position if necessary and practical
-    if (!m_isMapDocked[i] && 
-	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
+    if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
       m_map[i]->restorePosition();
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_map[i]);
   }
       
   // make sure it's visible
   m_map[i]->show();
 }
 
+void EQInterface::showMessageWindow(int i)
+{
+  if ((i > maxNumMessageWindows) || (i < 0))
+    return;
+
+  // if it doesn't exist, create it
+  if (m_messageWindow[i] == 0)
+  {
+    int winNum = i + 1;
+    QString prefName = "MessageWindow" + QString::number(winNum);
+    QString name = QString("messageWindow") + QString::number(winNum);
+    QString caption = "Channel Messages ";
+
+    if (i != 0)
+      caption += QString::number(winNum);
+
+    m_messageWindow[i] = new MessageWindow(m_messages, m_messageFilters,
+					   prefName, caption,
+					   0, name);
+
+   setDockEnabled(m_messageWindow[i], 
+		  pSEQPrefs->getPrefBool(QString("Dockable") + prefName,
+					 "Interface", false));
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					    m_messageWindow[i]->preferenceName(),
+					    Left);
+    addDockWindow(m_messageWindow[i], edge, false);
+    if (!m_isMessageWindowDocked[i])
+      m_messageWindow[i]->undock();
+
+    connect(this, SIGNAL(saveAllPrefs(void)),
+	    m_messageWindow[i], SLOT(savePrefs(void)));
+    connect(this, SIGNAL(restoreFonts(void)),
+	    m_messageWindow[i], SLOT(restoreFont(void)));
+    
+    m_messageWindow[i]->restoreSize();
+
+    // restore it's position if necessary and practical
+    if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
+      m_messageWindow[i]->restorePosition();
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_messageWindow[i]);
+  }
+      
+  // make sure it's visible
+  m_messageWindow[i]->show();
+}
+
 void EQInterface::showSpawnList(void)
 {
   // if it doesn't exist, create it.
-  if (m_spawnList == NULL)
+  if (m_spawnList == 0)
   {
+    m_spawnList = new SpawnListWindow (m_player, m_spawnShell, m_categoryMgr,
+				       0, "spawnlist");
+    setDockEnabled(m_spawnList, 
+		   pSEQPrefs->getPrefBool("DockableSpawnList",
+					  "Interface", true));
+
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					    m_spawnList->preferenceName(),
+					    Left);
+    addDockWindow(m_spawnList, edge, false);
     if (m_isSpawnListDocked)
-      m_spawnList = new SpawnListWindow (m_player, m_spawnShell, m_categoryMgr,
-					 m_packet, m_splitV, "spawnlist");
-    else
-      m_spawnList = new SpawnListWindow(m_player, m_spawnShell, m_categoryMgr,
-					m_packet, NULL, "spawnlist");
+      m_spawnList->undock();
 
     // restore the size of the spawn list
     m_spawnList->restoreSize();
@@ -5570,6 +5541,9 @@ void EQInterface::showSpawnList(void)
 	     m_spawnList, SLOT(savePrefs(void)));
      connect(this, SIGNAL(restoreFonts(void)),
 	     m_spawnList, SLOT(restoreFont(void)));
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_spawnList);
   }
 
   // make sure it's visible
@@ -5579,16 +5553,20 @@ void EQInterface::showSpawnList(void)
 void EQInterface::showSpawnList2(void)
 {
   // if it doesn't exist, create it.
-  if (m_spawnList2 == NULL)
+  if (m_spawnList2 == 0)
   {
-    if (m_isSpawnList2Docked)
-      m_spawnList2 = new SpawnListWindow2(m_player, m_spawnShell, 
-					  m_categoryMgr, m_packet, 
-					  m_splitV, "spawnlist");
-    else
-      m_spawnList2 = new SpawnListWindow2(m_player, m_spawnShell, 
-					  m_categoryMgr, m_packet, 
-					  NULL, "spawnlist");
+    m_spawnList2 = new SpawnListWindow2(m_player, m_spawnShell, 
+					m_categoryMgr,
+					0, "spawnlist");
+   setDockEnabled(m_spawnList2, 
+		  pSEQPrefs->getPrefBool("DockableSpawnList2",
+					 "Interface", true));
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					    m_spawnList2->preferenceName(),
+					    Left);
+    addDockWindow(m_spawnList2, edge, false);
+    if (!m_isSpawnList2Docked)
+      m_spawnList2->undock();
 
     // restore the size of the spawn list
     m_spawnList2->restoreSize();
@@ -5610,6 +5588,9 @@ void EQInterface::showSpawnList2(void)
 	     m_spawnList2, SLOT(savePrefs(void)));
      connect(this, SIGNAL(restoreFonts(void)),
 	     m_spawnList2, SLOT(restoreFont(void)));
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_spawnList2);
   }
 
   // make sure it's visible
@@ -5619,14 +5600,20 @@ void EQInterface::showSpawnList2(void)
 void EQInterface::showSpawnPointList(void)
 {
   // if it doesn't exist, create it.
-  if (m_spawnPointList == NULL)
+  if (m_spawnPointList == 0)
   {
-    if (m_isSpawnPointListDocked)
       m_spawnPointList = new SpawnPointWindow(m_spawnMonitor,
-					      m_splitV, "spawnlist");
-    else
-      m_spawnPointList = new SpawnPointWindow(m_spawnMonitor,
-					      NULL, "spawnlist");
+					      0, "spawnlist");
+      setDockEnabled(m_spawnPointList, 
+		     pSEQPrefs->getPrefBool("DockableSpawnPointList",
+					    "Interface", true));
+      Dock edge = 
+	(Dock)pSEQPrefs->getPrefInt("Dock", 
+				    m_spawnPointList->preferenceName(),
+				    Left);
+      addDockWindow(m_spawnPointList, edge, false);
+      if (!m_isSpawnPointListDocked)
+	m_spawnPointList->undock();
 
     // restore the size of the spawn list
     m_spawnPointList->restoreSize();
@@ -5642,6 +5629,9 @@ void EQInterface::showSpawnPointList(void)
 	     m_spawnPointList, SLOT(savePrefs(void)));
      connect(this, SIGNAL(restoreFonts(void)),
 	     m_spawnPointList, SLOT(restoreFont(void)));
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_spawnPointList);
   }
 
   // make sure it's visible
@@ -5651,12 +5641,18 @@ void EQInterface::showSpawnPointList(void)
 void EQInterface::showStatList(void)
 {
   // if it doesn't exist, create it
-  if (m_statList == NULL)
+  if (m_statList == 0)
   {
-    if (m_isStatListDocked)
-      m_statList = new StatListWindow(m_player, m_splitT, "stats");
-    else
-      m_statList = new StatListWindow(m_player, NULL, "stats");
+    m_statList = new StatListWindow(m_player, 0, "stats");
+    setDockEnabled(m_statList, 
+		   pSEQPrefs->getPrefBool("DockablePlayerStats",
+					  "Interface", true));
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					    m_statList->preferenceName(),
+					    Left);
+    addDockWindow(m_statList, edge, false);
+    if (!m_isStatListDocked)
+      m_statList->undock();
 
     // connect stat list slots to interface signals
     connect(this, SIGNAL(saveAllPrefs(void)),
@@ -5672,6 +5668,9 @@ void EQInterface::showStatList(void)
     if (!m_isStatListDocked &&
 	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
       m_statList->restorePosition();
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_statList);
   }
 
   // make sure it's visible
@@ -5681,12 +5680,18 @@ void EQInterface::showStatList(void)
 void EQInterface::showSkillList(void)
 {
   // if it doesn't exist, create it
-  if (m_skillList == NULL)
+  if (m_skillList == 0)
   {
-    if (m_isSkillListDocked)
-      m_skillList = new SkillListWindow(m_player, m_splitT, "skills");
-    else
-      m_skillList = new SkillListWindow(m_player, NULL, "skills");
+    m_skillList = new SkillListWindow(m_player, 0, "skills");
+    setDockEnabled(m_skillList, 
+		   pSEQPrefs->getPrefBool("DockablePlayerSkills",
+					  "Interface", true));
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					    m_skillList->preferenceName(),
+					    Left);
+    addDockWindow(m_skillList, edge, false);
+    if (!m_isSkillListDocked)
+      m_skillList->undock();
 
     // connect skill list slots to interfaces signals
     connect(this, SIGNAL(saveAllPrefs(void)),
@@ -5702,6 +5707,9 @@ void EQInterface::showSkillList(void)
     if (!m_isSkillListDocked &&
 	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
       m_skillList->restorePosition();
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_skillList);
   }
 
   // make sure it's visible
@@ -5711,12 +5719,18 @@ void EQInterface::showSkillList(void)
 void EQInterface::showSpellList(void)
 {
   // if it doesn't exist, create it
-  if (m_spellList == NULL)
+  if (m_spellList == 0)
   {
-    if (m_isSpellListDocked)
-      m_spellList = new SpellListWindow(m_spellShell, m_splitV, "spelllist");
-    else
-      m_spellList = new SpellListWindow(m_spellShell, NULL, "spelllist");
+    m_spellList = new SpellListWindow(m_spellShell, this, "spelllist");
+    setDockEnabled(m_spellList, 
+		   pSEQPrefs->getPrefBool("DockableSpellList",
+					  "Interface", true));
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					    m_spellList->preferenceName(),
+					    Left);
+    addDockWindow(m_spellList, edge, false);
+    if (!m_isSpellListDocked)
+      m_spellList->undock();
 
     SpellList* spellList = m_spellList->spellList();
 
@@ -5742,6 +5756,9 @@ void EQInterface::showSpellList(void)
     if (!m_isSpellListDocked &&
 	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
       m_spellList->restorePosition();
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_spellList);
   }
 
   // make sure it's visible
@@ -5751,12 +5768,18 @@ void EQInterface::showSpellList(void)
 void EQInterface::showCompass(void)
 {
   // if it doesn't exist, create it.
-  if (m_compass == NULL)
+  if (m_compass == 0)
   {
-    if (m_isCompassDocked)
-      m_compass = new CompassFrame(m_player, m_splitT, "compass");
-    else
-      m_compass = new CompassFrame(m_player, NULL, "compass");
+    m_compass = new CompassFrame(m_player, 0, "compass");
+    setDockEnabled(m_compass, 
+		   pSEQPrefs->getPrefBool("DockableCompass",
+					  "Interface", true));
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					    m_compass->preferenceName(),
+					    Left);
+    addDockWindow(m_compass, edge, false);
+    if (!m_isCompassDocked)
+      m_compass->undock();
 
     // supply the compass slots with EQInterface signals
     connect (this, SIGNAL(selectSpawn(const Item*)),
@@ -5771,6 +5794,9 @@ void EQInterface::showCompass(void)
     // move window to new position
     if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
       m_compass->restorePosition(); 
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_compass);
  }
 
   // make sure it's visible
@@ -5779,16 +5805,88 @@ void EQInterface::showCompass(void)
 
 void EQInterface::showNetDiag()
 {
-  if (m_netDiag == NULL)
+  if (m_netDiag == 0)
   {
-    m_netDiag = new NetDiag(m_packet, NULL, "NetDiag");
-    
+    m_netDiag = new NetDiag(m_packet, 0, "NetDiag");
+    setDockEnabled(m_netDiag, 
+		   pSEQPrefs->getPrefBool("DockableNetDiag",
+					  "Interface", true));
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					    m_netDiag->preferenceName(),
+					    Bottom);
+    addDockWindow(m_netDiag, edge, true);
+    m_netDiag->undock();
+
     connect(this, SIGNAL(restoreFonts(void)),
 	    m_netDiag, SLOT(restoreFont(void)));
+    connect(this, SIGNAL(saveAllPrefs(void)),
+	    m_netDiag, SLOT(savePrefs(void)));
+
+    m_netDiag->restoreSize();
+    
+    // move window to new position
+    if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
+      m_netDiag->restorePosition(); 
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_netDiag);
   }
 
   // make sure it's visible
   m_netDiag->show();
+}
+
+void EQInterface::showGuildList(void)
+{
+  if (!m_guildListWindow)
+  {
+    m_guildListWindow = new GuildListWindow(m_player, m_guildShell, 
+					    0, "GuildList");
+    setDockEnabled(m_guildListWindow, 
+		   pSEQPrefs->getPrefBool("DockableGuildListWindow",
+					  "Interface", true));
+    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+					    m_guildListWindow->preferenceName(),
+					    Bottom);
+    addDockWindow(m_guildListWindow, edge, true);
+    m_guildListWindow->undock();
+
+    connect(this, SIGNAL(restoreFonts(void)),
+	    m_guildListWindow, SLOT(restoreFont(void)));
+    connect(this, SIGNAL(saveAllPrefs(void)),
+	    m_guildListWindow, SLOT(savePrefs(void)));
+
+    m_guildListWindow->restoreSize();
+    
+    // move window to new position
+    if (pSEQPrefs->getPrefBool("UseWindowPos", "Interface", true))
+      m_guildListWindow->restorePosition(); 
+
+    // insert its menu into the window menu
+    insertWindowMenu(m_guildListWindow);
+  }
+
+  // make sure it's visible
+  m_guildListWindow->show();
+}
+
+void EQInterface::createFilteredSpawnLog(void)
+{
+  if (m_filteredSpawnLog)
+    return;
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs",
+							   "filtered_spawns.log");
+  
+  m_filteredSpawnLog = new FilteredSpawnLog(m_dateTimeMgr, m_filterMgr,
+					    logFileInfo.absFilePath());
+
+  connect(m_spawnShell, SIGNAL(addItem(const Item*)),
+	  m_filteredSpawnLog, SLOT(addItem(const Item*)));
+  connect(m_spawnShell, SIGNAL(delItem(const Item*)),
+	  m_filteredSpawnLog, SLOT(delItem(const Item*)));
+  connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
+	  m_filteredSpawnLog, SLOT(killSpawn(const Item*)));
 }
 
 void EQInterface::createSpawnLog(void)
@@ -5797,11 +5895,16 @@ void EQInterface::createSpawnLog(void)
   if (m_spawnLogger)
     return;
 
+  QString logFile = pSEQPrefs->getPrefString("SpawnLogFilename",
+					     "Misc", 
+					     "spawnlog.txt");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
+  
+  logFile = logFileInfo.absFilePath();
+
    // create the spawn logger
-   m_spawnLogger = new SpawnLog(m_dateTimeMgr, 
-				pSEQPrefs->getPrefString("SpawnLogFilename",
-							 "Misc", 
-							 LOGDIR "/spawnlog.txt"));
+   m_spawnLogger = new SpawnLog(m_dateTimeMgr, logFile);
 
    // initialize it with the current state
    QString shortZoneName = m_zoneMgr->shortZoneName();
@@ -5813,10 +5916,12 @@ void EQInterface::createSpawnLog(void)
 	   m_spawnLogger, SLOT(logNewZone(const QString&)));
 
    // Connect SpawnLog slots to EQPacket signals
-   connect(m_packet, SIGNAL(zoneSpawns(const zoneSpawnsStruct*, uint32_t, uint8_t)),
-	   m_spawnLogger, SLOT(logZoneSpawns(const zoneSpawnsStruct*, uint32_t)));
-   connect(m_packet, SIGNAL(newSpawn(const newSpawnStruct*, uint32_t, uint8_t)),
-	   m_spawnLogger, SLOT(logNewSpawn(const newSpawnStruct*)));
+   m_packet->connect2("OP_ZoneSpawns", SP_Zone, DIR_Server,
+		      "spawnStruct", SZC_Modulus,
+		      m_spawnLogger, SLOT(logZoneSpawns(const uint8_t*, size_t)));
+   m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
+		      "spawnStruct", SZC_Match,
+		      m_spawnLogger, SLOT(logNewSpawn(const uint8_t*)));
    
    // Connect SpawnLog slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(delItem(const Item*)),
@@ -5829,11 +5934,15 @@ void EQInterface::createGlobalLog(void)
 {
   if (m_globalLog)
     return;
+
+  QString logFile = pSEQPrefs->getPrefString("GlobalLogFilename",
+					     "PacketLogging",
+					     "global.log");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
   
   m_globalLog = new PacketLog(*m_packet, 
-			      pSEQPrefs->getPrefString("GlobalLogFilename",
-						       "PacketLogging",
-						       LOGDIR "/global.log"),
+			      logFileInfo.absFilePath(),
 			      this, "GlobalLog");
 
   connect(m_packet, SIGNAL(newPacket(const EQUDPIPPacketFormat&)),
@@ -5844,20 +5953,24 @@ void EQInterface::createWorldLog(void)
 {
   if (m_worldLog)
     return;
+
+  QString logFile = pSEQPrefs->getPrefString("WorldLogFilename",
+					     "PacketLogging",
+					     "world.log");
+  
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
   
   m_worldLog = new PacketStreamLog(*m_packet, 
-				   pSEQPrefs->getPrefString("WorldLogFilename",
-							    "PacketLogging",
-							    LOGDIR "/world.log"),
-			      this, "WorldLog");
+				   logFileInfo.absFilePath(),
+				   this, "WorldLog");
 
   m_worldLog->setRaw(pSEQPrefs->getPrefBool("LogRawPackets", "PacketLogging",
 					   false));
 
   connect(m_packet, SIGNAL(rawWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
 	  m_worldLog, SLOT(rawStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
-  connect(m_packet, SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
-	  m_worldLog, SLOT(decodedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
+  connect(m_packet, SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
+	  m_worldLog, SLOT(decodedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
 }
 
 void EQInterface::createZoneLog(void)
@@ -5865,38 +5978,72 @@ void EQInterface::createZoneLog(void)
   if (m_zoneLog)
     return;
   
+  QString logFile = pSEQPrefs->getPrefString("ZoneLogFilename",
+					     "PacketLogging",
+					     "zone.log");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
+  
   m_zoneLog = new PacketStreamLog(*m_packet, 
-				   pSEQPrefs->getPrefString("ZoneLogFilename",
-							    "PacketLogging",
-							    LOGDIR "/zone.log"),
-			      this, "ZoneLog");
+				  logFileInfo.absFilePath(),
+				  this, "ZoneLog");
 
   m_zoneLog->setRaw(pSEQPrefs->getPrefBool("LogRawPackets", "PacketLogging",
 					   false));
 
   connect(m_packet, SIGNAL(rawZonePacket(const uint8_t*, size_t, uint8_t, uint16_t)),
 	  m_zoneLog, SLOT(rawStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
-  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t)),
-	  m_zoneLog, SLOT(decodedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
+  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
+	  m_zoneLog, SLOT(decodedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
+}
+
+void EQInterface::createBazaarLog(void)
+{
+  if (m_bazaarLog)
+    return;
+  
+  QString logFile = pSEQPrefs->getPrefString("BazaarLogFilename",
+					     "PacketLogging",
+					     "bazaar.log");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
+  
+  m_bazaarLog = new BazaarLog(*m_packet,
+			      logFileInfo.absFilePath(),
+			      this,
+			      *m_spawnShell,
+			      "BazaarLog");
+  m_packet->connect2("OP_BazaarSearch", SP_Zone, DIR_Server,
+		     "bazaarSearchResponseStruct", SZC_Modulus,
+		     m_bazaarLog, SLOT(bazaarSearch(const uint8_t*, size_t, uint8_t)));
 }
 
 void EQInterface::createUnknownZoneLog(void)
 {
   if (m_unknownZoneLog)
     return;
-  
+
   QString section = "PacketLogging";
+
+  QString logFile = pSEQPrefs->getPrefString("UnknownZoneLogFilename",
+					     section,
+					     "unknownzone.log");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
+  
+  logFile = logFileInfo.absFilePath();
+
   m_unknownZoneLog = new UnknownPacketLog(*m_packet, 
-					  pSEQPrefs->getPrefString("UnknownZoneLogFilename",
-								   section,
-								   LOGDIR "/unknownzone.log"),
-			      this, "ZoneLog");
+					  logFile,
+					  this, "UnknownLog");
 
   m_unknownZoneLog->setView(pSEQPrefs->getPrefBool("ViewUnknown", section, 
 						   false));
 
-  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, bool)),
-	  m_unknownZoneLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, bool)));
+  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+	  m_unknownZoneLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
+  connect(m_packet, SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+	  m_unknownZoneLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
 }
 
 void EQInterface::createOPCodeMonitorLog(const QString& opCodeList)
@@ -5905,16 +6052,62 @@ void EQInterface::createOPCodeMonitorLog(const QString& opCodeList)
     return;
   
   QString section = "OpCodeMonitoring";
+
+  QString logFile = pSEQPrefs->getPrefString("LogFilename", 
+					     section, 
+					     "opcodemonitor.log");
+
+  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
+  
+  logFile = logFileInfo.absFilePath();
+
   m_opcodeMonitorLog = new OPCodeMonitorPacketLog(*m_packet, 
-						  pSEQPrefs->getPrefString("LogFilename", 
-									   section, 
-									   LOGDIR "/opcodemonitor.log"),
+						  logFile,
 						  this, "OpCodeMonitorLog");
   
   m_opcodeMonitorLog->init(opCodeList);
   m_opcodeMonitorLog->setLog(pSEQPrefs->getPrefBool("Log", section, false));
   m_opcodeMonitorLog->setView(pSEQPrefs->getPrefBool("View", section, false));
   
-  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, bool)),
-	  m_opcodeMonitorLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, bool)));
+  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+	  m_opcodeMonitorLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
 }
+
+
+void EQInterface::insertWindowMenu(SEQWindow* window)
+{
+  QPopupMenu* menu = window->menu();
+  if (menu)
+  {
+    // insert the windows menu into the window menu
+    int id = m_windowMenu->insertItem(window->caption(), menu);
+
+    // insert it into the window to window menu id dictionary
+    m_windowsMenus.insert((void*)window, new int(id));
+  }
+}
+
+void EQInterface::removeWindowMenu(SEQWindow* window)
+{
+  // find the windows menu id
+  int* id = m_windowsMenus.find((void*)window);
+
+  // if the window had a menu, then remove it
+  if (id)
+  {
+    m_windowMenu->removeItem(*id);
+
+    // remove the item from the list
+    m_windowsMenus.remove(window);
+  }
+}
+
+void EQInterface::setDockEnabled(QDockWindow* dw, bool enable)
+{
+  QMainWindow::setDockEnabled(dw, DockTop, enable);
+  QMainWindow::setDockEnabled(dw, DockBottom, enable);
+  QMainWindow::setDockEnabled(dw, DockLeft, enable);
+  QMainWindow::setDockEnabled(dw, DockRight, enable);
+}
+
+#include "interface.moc"

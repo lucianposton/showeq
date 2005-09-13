@@ -4,6 +4,8 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  */
+ 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     NULL,                 // 0x00
     NULL,                 // 0x01
     NULL,                 // 0x02
@@ -165,22 +167,6 @@
     NULL,                 // 0x9d
     NULL,                 // 0x9e
     NULL,                 // 0x9f
-    NULL,                 // 0x90
-    NULL,                 // 0x91
-    NULL,                 // 0x92
-    NULL,                 // 0x93
-    NULL,                 // 0x94
-    NULL,                 // 0x95
-    NULL,                 // 0x96
-    NULL,                 // 0x97
-    NULL,                 // 0x98
-    NULL,                 // 0x99
-    NULL,                 // 0x9a
-    NULL,                 // 0x9b
-    NULL,                 // 0x9c
-    NULL,                 // 0x9d
-    NULL,                 // 0x9e
-    NULL,                 // 0x9f
     NULL,                 // 0xa0
     NULL,                 // 0xa1
     NULL,                 // 0xa2
@@ -277,3 +263,5 @@
     NULL,                 // 0xfd
     NULL,                 // 0xfe
     NULL,                 // 0xff
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+

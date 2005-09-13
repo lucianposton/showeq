@@ -4,6 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  */
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 /* Maps class numbers to strings, included from util.cpp */
   "0",                  // 0 is unknown
@@ -41,7 +42,7 @@
   "Magician GM",        // 32
   "Enchanter GM",       // 33
   "Beastlord GM",       // 34
-  NULL,                 // 35
+  "Berserker GM",       // 35
   NULL,                 // 36
   NULL,                 // 37
   NULL,                 // 38
@@ -65,7 +66,13 @@
   NULL,                 // 56
   NULL,                 // 57
   NULL,                 // 58
-  NULL,                 // 59
+  "Discord Merchant",   // 59
   "LDoN Recruiter",     // 60
   "LDoN Merchant",      // 61
   "LDoN Object",        // 62
+  "Tribute Master",     // 63
+  "Guild Tribute Master", // 64
+  NULL,                 // 65
+  "Guild Banker",       // 66
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+

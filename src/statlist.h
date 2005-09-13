@@ -41,7 +41,7 @@ class StatList : public SEQListView
    void expAltChanged(int val, int min, int max);
    void hpChanged(int16_t val, int16_t max);
    void manaChanged(uint32_t val, uint32_t max);
-   void stamChanged(int Sval, int Smax, int Fval, int Fmax, int Wval, int Wmax);
+   void stamChanged(int Fval, int Fmax, int Wval, int Wmax);
    void statChanged (int statNum, int val, int max);
    void resetMaxMana(void);
    void enableStat(uint8_t stat, bool enable);
@@ -49,7 +49,7 @@ class StatList : public SEQListView
 
  private:
    // the player this skill list is monitoring
-   Player* m_pPlayer;
+   Player* m_player;
 
    QListViewItem* m_statList[LIST_MAXLIST]; 
 

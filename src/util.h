@@ -35,12 +35,11 @@ char *print_addr (unsigned long addr);
 
 QString Commanate (uint32_t number);
 
+QString classString(uint8_t classVal);
 QString spell_name (uint16_t spellId);
 QString language_name (uint8_t langId);
 QString skill_name (uint16_t skillId);
 QString size_name (uint8_t size);
-void spawndb (const dbSpawnStruct *spawn);
-void petdb(const petStruct *spawn);
 
 QString print_classes (uint16_t);
 QString print_races (uint16_t);
@@ -65,8 +64,8 @@ void fprintData(FILE* fp,
 void diagFileWriteFail(QString filename);
 void diagFileReadFail(QString filename);
 
-uint32_t calcCRC32(const uint8_t* p,
-		   uint32_t length);
+uint32_t calcCRC32(const uint8_t* p, uint32_t length);
+uint16_t calcCRC16(uint8_t* p, uint32_t length, uint32_t seed);
 
 // Templatized function to generate a string representing the bit pattern 
 // of the passed in value.  
@@ -96,7 +95,5 @@ QString bitstring(T value)
 
   return bitstring;
 }
-
-bool findFile( QString& fileName );
 
 #endif // EQUTIL_U

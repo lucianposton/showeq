@@ -72,6 +72,18 @@ QString print_item (uint16_t item)
 #include "weapons28.h"
   };
 
+  // sparse array of item names (in 0x29 range), some are NULL
+  static const char*  itemnames29[] = 
+  {
+#include "weapons29.h"
+  };
+
+  // sparse array of item names (in 0x2a range), some are NULL
+  static const char*  itemnames2a[] = 
+  {
+#include "weapons2a.h"
+  };
+
   // sparse array of item names (in 0x2b range), some are NULL
   static const char*  itemnames2b[] = 
   {
@@ -107,6 +119,18 @@ QString print_item (uint16_t item)
     // retrieve pointer to item name
     if (itemLo < (sizeof(itemnames28) / sizeof (char*)))
       itemStr = itemnames28[itemLo];
+  }
+  else if (itemHi == 0x29)
+  {
+    // retrieve pointer to item name
+    if (itemLo < (sizeof(itemnames29) / sizeof (char*)))
+      itemStr = itemnames29[itemLo];
+  }
+  else if (itemHi == 0x2a)
+  {
+    // retrieve pointer to item name
+    if (itemLo < (sizeof(itemnames2a) / sizeof (char*)))
+      itemStr = itemnames2a[itemLo];
   }
   else if (itemHi == 0x2b)
   {
@@ -218,6 +242,7 @@ Spawn::Spawn()
   : Item(tSpawn, 0)
 {
   m_name = "fake";
+  m_lastName = "";
   setNPC(SPAWN_NPC_UNKNOWN);
 
   Item::setPos(0, 0, 0);
@@ -255,9 +280,6 @@ Spawn::Spawn(const spawnStruct* s)
 
   // have update initialize everything
   update(s);
-
-  // turn on auto delete for the track list
-  m_spawnTrackList.setAutoDelete(true);
 }
 
 Spawn::Spawn(uint16_t id, 
@@ -269,6 +291,7 @@ Spawn::Spawn(uint16_t id,
 {
   // apply the unknown mob values
   m_name = "unknown";
+  m_lastName = "";
   setNPC(SPAWN_NPC_UNKNOWN);
 
   // set what is known
@@ -287,6 +310,8 @@ Spawn::Spawn(uint16_t id,
   setHP(0);
   setMaxHP(0);
   setLevel(0);
+  setGuildID(0xffff);
+  setGuildTag(NULL);
   for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
   setTypeflag(0);
@@ -295,6 +320,9 @@ Spawn::Spawn(uint16_t id,
 
   // turn on auto delete for the track list
   m_spawnTrackList.setAutoDelete(true);
+
+  // Finally, note when this update ocurred
+  updateLast();
 }
 		  
 Spawn::Spawn(QDataStream& d, uint16_t id)
@@ -335,7 +363,7 @@ Spawn::Spawn(Spawn& s, uint16_t id)
   setClassVal(s.classVal());
   setHP(s.HP());
   setMaxHP(s.maxHP());
-  setGuildID(s.GuildID());
+  setGuildID(s.guildID());
   setLevel(s.level());
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s.equipment(i));
@@ -780,17 +808,7 @@ uint8_t Spawn::classVal() const
 
 QString Spawn::classString() const
 {
-  // a non-sparse array of class names
-  static const char*  classnames[] = 
-  {
-#include "classes.h"
-  };
-
-  // return class name from list if it's within range
-  if (classVal() < (sizeof(classnames) / sizeof (char*)))
-    return classnames[classVal()];
-  else
-    return QString::number(classVal());
+  return ::classString(classVal());
 }
 
 QString Spawn::info() const
@@ -842,10 +860,12 @@ QString Spawn::typeString() const
 
 QString Spawn::filterString() const
 {
+  QString name = transformedName();
+
   QString buff;
   buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
 	       "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:",
-	       (const char*)transformedName().utf8(),
+	       (const char*)name.utf8(),
 	       level(),
 	       (const char*)raceString(),
 	       (const char*)classString(),
@@ -857,7 +877,7 @@ QString Spawn::filterString() const
 	       deityTeam(),
 	       (const char*)typeString(),
 	       (const char*)lastName().utf8(),
-               (const char*)GuildTag().utf8());
+               (const char*)guildTag().utf8());
 
   if (gm())
     buff += QString("GM:") + QString::number(gm()) + ":";
@@ -883,7 +903,7 @@ QString Spawn::dumpString() const
     + ":RTeam:" + QString::number(raceTeam())
     + ":DTeam:" + QString::number(deityTeam())
     + ":Type:" + typeString()
-    + ":Guild:" + GuildTag()
+    + ":Guild:" + guildTag()
     + ":FilterFlags:" + QString::number(filterFlags())
     + ":";
 }
@@ -959,6 +979,7 @@ void Door::update(const doorStruct* d)
 	 (int16_t)(d->z * 10.0));
   setHeading((int8_t)lrintf(d->heading));
   m_name.sprintf("Door: %s (%d) ", d->name, d->doorId);
+  setZonePoint(d->zonePoint);
   updateLast();
 }
 
@@ -1020,8 +1041,6 @@ void Drop::update(const makeDropStruct* d, const QString& name)
       buff.append(print_item(itemId));
     else 
       buff.append(d->idFile);
-
-    //    buff.append(QString(" (") + QString::number(d->itemNr) + ")");
   }
   else
     buff = QString("Drop: '") + name + "'";
