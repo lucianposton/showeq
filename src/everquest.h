@@ -463,6 +463,20 @@ struct TributeStruct
 /*008*/
 };
 
+/**
+ * A bind point.
+ * Size: 20 Octets
+ */
+struct BindStruct
+{
+/*000*/ uint32_t zoneId;
+/*004*/ float x;
+/*008*/ float y;
+/*012*/ float z;
+/*016*/ float heading;
+/*020*/
+};
+
 /*
 ** Type:   Zone Change Request (before hand)
 ** Length: 88 Octets
@@ -510,7 +524,7 @@ struct ClientZoneEntryStruct
 
 /*
 ** New Zone Code
-** Length: 696 Octets
+** Length: 700 Octets
 ** OpCode: NewZoneCode
 */
 struct newZoneStruct
@@ -535,159 +549,157 @@ struct newZoneStruct
 /*0516*/ float   maxclip;                  // Maximum view distance
 /*0520*/ uint8_t unknown0520[172];         // *** Placeholder
 /*0692*/ uint8_t unknown0692[4];           // *** Placeholder (06/29/2005)
-};
+/*0696*/ uint8_t unknown0696[4];           // *** Placeholder (09/13/2005)
+}; /*0700*/
 
 
 /*
 ** Player Profile
-** Length: 19560 Octets
+** Length: 19584 Octets
 ** OpCode: CharProfileCode
 */
 struct charProfileStruct
 {
-/*0000*/ uint32_t  checksum;           //
-/*0004*/ char      name[64];           // Name of player
-/*0068*/ char      lastName[32];       // Last name of player
-/*0100*/ uint32_t  gender;             // Player Gender - 0 Male, 1 Female
-/*0104*/ uint32_t  race;               // Player race
-/*0108*/ uint32_t  class_;             // Player class
-/*0112*/ uint32_t  unknown0112;        // *** Placeholder
-/*0116*/ uint32_t  level;              // Level of player (might be one byte)
-/*0120*/ uint32_t  bind_zone_id[5];    // Bind info (zone, x, y, z, heading)
-/*0140*/ float     bind_x[5];          // 0 is normal bind
-/*0160*/ float     bind_y[5];          // 5 is some weird point in newbie zone
-/*0180*/ float     bind_z[5];          // (which is secondary bind for wiz/dru?)
-/*0200*/ float     bind_heading[5];    // Unused slots show newbie bind
-/*0220*/ uint32_t  deity;              // deity
-/*0224*/ int32_t   guildID;            // guildID
-/*0228*/ uint32_t  birthdayTime;       // character birthday
-/*0232*/ uint32_t  lastSaveTime;       // character last save time
-/*0236*/ uint32_t  timePlayedMin;      // time character played
+/*00000*/ uint32_t  checksum;          //
+/*00004*/ uint32_t  gender;            // Player Gender - 0 Male, 1 Female
+/*00008*/ uint32_t  race;              // Player race
+/*00012*/ uint32_t  class_;            // Player class
+/*00016*/ uint32_t  unknown00016;      // ***Placeholder
+/*00020*/ uint8_t   level;             // Level of player
+/*00021*/ uint8_t   level1;            // Level of player (again?)
+/*00022*/ uint8_t   unknown00022[2];   // ***Placeholder
+/*00024*/ BindStruct binds[5];         // Bind points (primary is first)
+/*00124*/ uint32_t  deity;             // deity
+/*00128*/ uint8_t unknown00128[60];
+/*00188*/ uint32_t  item_material[9];  // Item texture/material of worn items
+/*00224*/ uint8_t unknown00224[48];
+/*00272*/ Color_Struct item_tint[9];   // RR GG BB 00
+/*00308*/ AA_Array   aa_array[MAX_AA]; // AAs
+
+#if 0
+    // aa_array and points overlap... %%%
+/*02224*/ uint32_t  points;             // Unspent Practice points
+#endif
+/*02228*/ uint32_t  MANA;               // Current MANA
+/*02232*/ uint32_t  curHp;              // Current HP without +HP equipment
+/*02236*/ uint32_t  STR;                // Strength
+/*02240*/ uint32_t  STA;                // Stamina
+/*02244*/ uint32_t  CHA;                // Charisma
+/*02248*/ uint32_t  DEX;                // Dexterity
+/*02252*/ uint32_t  INT;                // Intelligence
+/*02256*/ uint32_t  AGI;                // Agility
+/*02260*/ uint32_t  WIS;                // Wisdom
+/*02264*/ uint8_t unknown02264[48];
+/*02312*/ int32_t   sSpellBook[400];    // List of the Spells in spellbook
+/*03912*/ uint8_t   unknown4184[448];   // all 0xff after last spell    
+/*04360*/ int32_t   sMemSpells[MAX_SPELL_SLOTS]; // List of spells memorized
+/*04396*/ uint8_t unknown04396[32];
+/*04428*/ uint32_t  platinum;           // Platinum Pieces on player
+/*04432*/ uint32_t  gold;               // Gold Pieces on player
+/*04436*/ uint32_t  silver;             // Silver Pieces on player
+/*04440*/ uint32_t  copper;             // Copper Pieces on player
+/*04444*/ uint32_t  platinum_cursor;    // Platinum Pieces on cursor
+/*04448*/ uint32_t  gold_cursor;        // Gold Pieces on cursor
+/*04452*/ uint32_t  silver_cursor;      // Silver Pieces on cursor
+/*04456*/ uint32_t  copper_cursor;      // Copper Pieces on cursor
+/*04460*/ uint32_t  skills[MAX_KNOWN_SKILLS]; // List of skills 
+/*04760*/ uint8_t unknown04760[748];
+/*05508*/ spellBuff buffs[MAX_BUFFS];   // Buffs currently on the player
+/*06008*/ uint8_t unknown06008[144];
+/*06152*/ uint32_t aa_spent;           // Number of spent AA points
+/*06156*/ uint32_t aa_unspent;         // Unspent AA points
+/*06160*/ uint8_t unknown06160[4];
+/*06164*/ BandolierStruct bandoliers[MAX_BANDOLIERS]; // bandolier contents
+/*07444*/ uint8_t unknown07444[5120];
+/*12564*/ InlineItem potionBelt[MAX_POTIONS_IN_BELT]; // potion belt
+/*12852*/ uint8_t unknown12852[88];
+/*12940*/ char      name[64];           // Name of player
+/*13004*/ char      lastName[32];       // Last name of player
+/*13036*/ int32_t   guildID;            // guildID
+/*13040*/ uint32_t  birthdayTime;       // character birthday
+/*13044*/ uint32_t  lastSaveTime;       // character last save time
+/*13048*/ uint32_t  timePlayedMin;      // time character played
+/*13052*/ uint8_t unknown13052[32];
+/*13084*/ uint8_t   languages[MAX_KNOWN_LANGS]; // List of languages
+/*13109*/ uint8_t   unknown13109[7];    // All 0x00 (language buffer?)
+/*13116*/ float     x;                  // Players x position
+/*13120*/ float     y;                  // Players y position
+/*13124*/ float     z;                  // Players z position
+/*13128*/ float     heading;            // Players heading   
+/*13132*/ uint8_t   unknown13132[4];    // ***Placeholder
+/*13136*/ uint32_t  platinum_bank;      // Platinum Pieces in Bank
+/*13140*/ uint32_t  gold_bank;          // Gold Pieces in Bank
+/*13144*/ uint32_t  silver_bank;        // Silver Pieces in Bank
+/*13148*/ uint32_t  copper_bank;        // Copper Pieces in Bank
+/*13152*/ uint32_t  platinum_shared;    // Shared platinum pieces
+/*13156*/ uint8_t unknown13156[84];
+/*13240*/ uint32_t  expansions;         // Bitmask for expansions
+/*13244*/ uint8_t unknown13244[32];
+/*13276*/ uint16_t  zoneId;             // see zones.h
+/*13278*/ uint16_t  zoneInstance;       // Instance id
+/*13280*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
+/*13664*/ char      groupLeader[64];    // Leader of the group ?
+/*13728*/ uint8_t unknown13728[668];
+/*14396*/ uint32_t  ldon_guk_points;    // Earned GUK points
+/*14400*/ uint32_t  ldon_mir_points;    // Earned MIR points
+/*14404*/ uint32_t  ldon_mmc_points;    // Earned MMC points
+/*14408*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
+/*14412*/ uint32_t  ldon_tak_points;    // Earned TAK points
+/*14416*/ uint32_t  ldon_avail_points;  // Available LDON points
+/*14420*/ uint8_t unknown14420[132];
+/*14552*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)
+/*14556*/ uint32_t  careerTribute;      // Total favor points for this char
+/*14560*/ uint32_t  unknown7208;        // *** Placeholder
+/*14564*/ uint32_t  currentTribute;     // Current tribute points
+/*14568*/ uint32_t  unknown7216;        // *** Placeholder
+/*14572*/ uint32_t  tributeActive;      // 0 = off, 1=on
+/*14576*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout
+/*14616*/ uint8_t unknown14616[4940];
+/*19556*/ uint32_t currentRadCrystals; // Current count of radiant crystals
+/*19560*/ uint32_t careerRadCrystals;  // Total count of radiant crystals ever
+/*19564*/ uint32_t currentEbonCrystals;// Current count of ebon crystals
+/*19568*/ uint32_t careerEbonCrystals; // Total count of ebon crystals ever
+/*19572*/ uint8_t  groupAutoconsent;   // 0=off, 1=on
+/*19573*/ uint8_t  raidAutoconsent;    // 0=off, 1=on
+/*19574*/ uint8_t  guildAutoconsent;   // 0=off, 1=on
+/*19575*/ uint8_t  unknown19575[5];    // ***Placeholder (6/29/2005)
+/*19580*/ uint32_t unknown19580;       // *** Placeholder
+/*19584*/
+};
+
+#if 0
 /*0240*/ uint8_t   pvp;                // 1=pvp, 0=not pvp
-/*0241*/ uint8_t   level1;             // Level of Player
 /*0242*/ uint8_t   anon;               // 2=roleplay, 1=anon, 0=not anon     
 /*0243*/ uint8_t   gm;                 // 0=no, 1=yes
 /*0244*/ int8_t    guildstatus;        // 0=member, 1=officer, 2=guildleader
-/*0245*/ uint8_t   unknown0245[7];     // *** Placeholder
 /*0252*/ uint32_t  intoxication;       // Alcohol level (in ticks till sober?)
 /*0256*/ uint32_t  spellSlotRefresh[MAX_SPELL_SLOTS]; // Refresh time (millis)
-/*0292*/ uint8_t   unknown0292[4];     // *** Placeholder
 /*0296*/ uint8_t   haircolor;          // Player hair color
 /*0297*/ uint8_t   beardcolor;         // Player beard color
 /*0298*/ uint8_t   eyecolor1;          // Player left eye color
 /*0299*/ uint8_t   eyecolor2;          // Player right eye color
 /*0300*/ uint8_t   hairstyle;          // Player hair style
 /*0301*/ uint8_t   beard;              // Player beard type
-/*0302*/ uint8_t   unknown0302[10];    // *** Placeholder
-/*0312*/ uint32_t  item_material[9];   // Item texture/material of worn items
-/*0348*/ uint8_t   unknown0348[48];    // *** Placeholder
-/*0396*/ Color_Struct item_tint[9];    // RR GG BB 00
-/*0432*/ AA_Array  aa_array[MAX_AA];   // AAs
-/*2352*/ char      servername[32];     // server the char was created on
 /*2384*/ char      title[32];          // Current character title
+/*2352*/ char      servername[32];     // server the char was created on
 /*2416*/ char      suffix[32];         // Current character suffix
-/*2448*/ uint8_t   unknown2448[4];     // *** Placeholder
 /*2452*/ uint32_t  exp;                // Current Experience
-/*2456*/ uint32_t  unknown2456;        // *** Placeholder
-/*2460*/ uint32_t  points;             // Unspent Practice points
-/*2464*/ uint32_t  MANA;               // Current MANA
-/*2468*/ uint32_t  curHp;              // Current HP without +HP equipment
-/*2472*/ uint32_t  unknown1512;        // 0x05
-/*2476*/ uint32_t  STR;                // Strength
-/*2480*/ uint32_t  STA;                // Stamina
-/*2484*/ uint32_t  CHA;                // Charisma
-/*2488*/ uint32_t  DEX;                // Dexterity
-/*2492*/ uint32_t  INT;                // Intelligence
-/*2496*/ uint32_t  AGI;                // Agility
-/*2500*/ uint32_t  WIS;                // Wisdom
 /*2504*/ uint8_t   face;               // Player face
-/*2505*/ uint8_t   unknown2505[47];    // *** Placeholder
-/*2552*/ uint8_t   languages[25];      // List of languages (MAX_KNOWN_LANGS)
-/*2577*/ uint8_t   unknown2577[7];     // All 0x00 (language buffer?)
-/*2584*/ int32_t   sSpellBook[400];    // List of the Spells in spellbook
-/*4184*/ uint8_t   unknown4184[448];   // all 0xff after last spell    
-/*4632*/ int32_t   sMemSpells[MAX_SPELL_SLOTS]; // List of spells memorized
-/*4668*/ uint8_t   unknown4668[32];    // *** Placeholder
-/*4700*/ float     x;                  // Players x position
-/*4704*/ float     y;                  // Players y position
-/*4708*/ float     z;                  // Players z position
-/*4712*/ float     heading;            // Players heading   
-/*4716*/ uint8_t   unknown4716[4];     // *** Placeholder    
-/*4720*/ uint32_t  platinum;           // Platinum Pieces on player
-/*4724*/ uint32_t  gold;               // Gold Pieces on player
-/*4728*/ uint32_t  silver;             // Silver Pieces on player
-/*4732*/ uint32_t  copper;             // Copper Pieces on player
-/*4736*/ uint32_t  platinum_bank;      // Platinum Pieces in Bank
-/*4740*/ uint32_t  gold_bank;          // Gold Pieces in Bank
-/*4744*/ uint32_t  silver_bank;        // Silver Pieces in Bank
-/*4748*/ uint32_t  copper_bank;        // Copper Pieces in Bank
-/*4752*/ uint32_t  platinum_cursor;    // Platinum Pieces on cursor
-/*4756*/ uint32_t  gold_cursor;        // Gold Pieces on cursor
-/*4760*/ uint32_t  silver_cursor;      // Silver Pieces on cursor
-/*4764*/ uint32_t  copper_cursor;      // Copper Pieces on cursor
-/*4768*/ uint32_t  platinum_shared;    // Shared platinum pieces
-/*4772*/ uint8_t   unknown4772[24];    // Unknown - all zero
-/*4796*/ uint32_t  skills[75];         // List of skills (MAX_KNOWN_SKILLS)
-/*5096*/ uint8_t   unknown5096[312];   // *** Placeholder
 /*5408*/ uint32_t  autosplit;          // 0 = off, 1 = on
-/*5412*/ uint8_t   unknown5412[8];     // *** Placeholder
 /*5420*/ uint32_t  saveCounter;        // Number of times your char has saved
-/*5424*/ uint8_t   unknown5424[28];    // *** Placeholder
-/*5452*/ uint32_t  expansions;         // Bitmask for expansions
 /*5456*/ uint32_t  toxicity;           // Potion Toxicity (15=too toxic, each potion adds 3)
-/*5460*/ uint8_t   unknown5460[16];    // *** Placeholder
 /*5476*/ uint32_t  hunger;             // Food (ticks till next eat)
 /*5480*/ uint32_t  thirst;             // Drink (ticks till next drink)
-/*5484*/ uint8_t   unknown5484[20];    // *** Placeholder
-/*5504*/ uint16_t  zoneId;             // see zones.h
-/*5506*/ uint16_t  zoneInstance;       // Instance id
-/*5508*/ spellBuff buffs[MAX_BUFFS];   // Buffs currently on the player
-/*6008*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
-/*6392*/ uint8_t   unknown6392[668];   // *** Placeholder
-/*7060*/ uint32_t  ldon_guk_points;    // Earned GUK points
-/*7064*/ uint32_t  ldon_mir_points;    // Earned MIR points
-/*7068*/ uint32_t  ldon_mmc_points;    // Earned MMC points
-/*7072*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
-/*7076*/ uint32_t  ldon_tak_points;    // Earned TAK points
-/*7080*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*7084*/ uint8_t   unknown7084[112];   // *** Placeholder
-/*7196*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)
-/*7200*/ uint32_t  unknown7200;        // *** Placeholder
-/*7204*/ uint32_t  careerTribute;      // Total favor points for this char
-/*7208*/ uint32_t  unknown7208;        // *** Placeholder
-/*7212*/ uint32_t  currentTribute;     // Current tribute points
-/*7216*/ uint32_t  unknown7216;        // *** Placeholder
-/*7220*/ uint32_t  tributeActive;      // 0 = off, 1=on
-/*7224*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout
 /*7264*/ uint32_t  disciplines[MAX_DISCIPLINES]; // Known disciplines
-/*7464*/ uint8_t   unknown7464[440];   // *** Placeholder
 /*7904*/ uint32_t  endurance;          // Current endurance
 /*7908*/ uint32_t  expGroupLeadAA;     // Current group lead AA exp (0-1000)
 /*7912*/ uint32_t  expRaidLeadAA;      // Current raid lead AA exp (0-2000)
 /*7916*/ uint32_t  groupLeadAAUnspent; // Unspent group lead AA points
 /*7920*/ uint32_t  raidLeadAAUnspent;  // Unspent raid lead AA points
 /*7924*/ uint32_t  leadershipAAs[MAX_LEAD_AA]; // Leader AA ranks
-/*8052*/ uint8_t   unknown8052[132];   // *** Placeholder
 /*8184*/ uint32_t  airRemaining;       // Air supply (seconds)
-/*8188*/ uint8_t   unknown8188[4608];  // *** Placeholder
-/*12796*/ uint32_t aa_spent;           // Number of spent AA points
 /*12800*/ uint32_t expAA;              // Exp earned in current AA point
-/*12804*/ uint32_t aa_unspent;         // Unspent AA points
-/*12808*/ uint8_t  unknown12808[36];   // *** Placeholder
-/*12844*/ BandolierStruct bandoliers[MAX_BANDOLIERS]; // bandolier contents
-/*14124*/ uint8_t  unknown14124[5120]; // *** Placeholder 
-/*19244*/ InlineItem potionBelt[MAX_POTIONS_IN_BELT]; // potion belt
-/*19532*/ uint8_t  unknown19532[8];    // *** Placeholder
-/*19540*/ uint32_t currentRadCrystals; // Current count of radiant crystals
-/*19544*/ uint32_t careerRadCrystals;  // Total count of radiant crystals ever
-/*19548*/ uint32_t currentEbonCrystals;// Current count of ebon crystals
-/*19552*/ uint32_t careerEbonCrystals; // Total count of ebon crystals ever
-/*19556*/ uint8_t  groupAutoconsent;   // 0=off, 1=on
-/*19557*/ uint8_t  raidAutoconsent;    // 0=off, 1=on
-/*19558*/ uint8_t  guildAutoconsent;   // 0=off, 1=on
-/*19559*/ uint8_t  unknown19559[5];    // ***Placeholder (6/29/2005)
-/*19564*/ uint32_t unknown19564;       // *** Placeholder
-}; /* 19568 */
+#endif
 
 #if 1
 struct playerAAStruct {
@@ -855,7 +867,7 @@ struct playerAAStruct {
 
 /* 
 ** Generic Spawn Struct 
-** Length: 383 Octets 
+** Length: 384 Octets 
 ** Used in: 
 **   spawnZoneStruct
 **   dbSpawnStruct
@@ -864,115 +876,112 @@ struct playerAAStruct {
 */ 
 struct spawnStruct
 {
-/*0000*/ uint8_t  NPC;            // 0=player,1=npc,2=pc corpse,3=npc corpse,a
-/*0001*/ uint8_t unknown0001[8];  // ***Placeholder (all ff)
-/*0009*/ uint8_t  curHp;          // Current hp
-/*0010*/ char    lastName[32];    // Player's Lastname
-/*0042*/ uint8_t  bodytype;       // Bodytype
-/*0043*/ uint8_t unknown0042[7];  // ***Placeholder
-/*0050*/ uint32_t petOwnerId;     // If this is a pet, the spawn id of owner
-/*0054*/ signed   deltaHeading:10;// change in heading
-         signed   x:19;           // x coord
-         signed   padding0054:3;  // ***Placeholder
-/*0058*/ signed   y:19;           // y coord
-         signed   animation:10;   // animation
-         signed   padding0058:3;  // ***Placeholder
-/*0062*/ signed   z:19;           // z coord
-         signed   deltaY:13;      // change in y
-/*0066*/ signed   deltaX:13;      // change in x
-         unsigned heading:12;     // heading
-         signed   padding0066:7;  // ***Placeholder
-/*0070*/ signed   deltaZ:13;      // change in z
-         signed   padding0070:19; // ***Placeholder
-/*0074*/ int16_t  deity;          // Player's Deity
-/*0076*/ uint8_t unknown[2];
-/*0078*/ union 
-         {
-             struct 
-             {
-               /*0078*/ uint32_t equip_helmet;    // Equipment: Helmet Visual
-               /*0082*/ uint32_t equip_chest;     // Equipment: Chest Visual
-               /*0086*/ uint32_t equip_arms;      // Equipment: Arms Visual
-               /*0090*/ uint32_t equip_bracers;   // Equipment: Bracers Visual
-               /*0094*/ uint32_t equip_hands;     // Equipment: Hands Visual
-               /*0098*/ uint32_t equip_legs;      // Equipment: Legs Visual
-               /*0102*/ uint32_t equip_feet;      // Equipment: Feet Visual
-               /*0106*/ uint32_t equip_primary;   // Equipment: Primary Visual
-               /*0110*/ uint32_t equip_secondary; // Equipment: Secondary Visual
-             } equip;
-             /*0078*/ uint32_t equipment[9];  // Array elements correspond to struct equipment above
-         };
-/*0114*/ uint8_t unknown0114[5];
-/*0119*/ uint8_t  afk;            // 0=no, 1=afk
-/*0120*/ uint32_t spawnId;        // Spawn Id
-/*0124*/ uint8_t unknown0124;
-/*0125*/ uint8_t  gm;             // 0=no, 1=gm
-/*0126*/ uint8_t unknown0126[4];
-/*0130*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
-/*0131*/ uint8_t unknown0132[24];
-/*0155*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
-/*0156*/ uint8_t unknown0156;
-/*0157*/ uint8_t  face;	          // Face id for players
-/*0158*/ uint8_t unknown0158[2];
-/*0160*/ float    runspeed;       // Speed when running
-/*0164*/ uint8_t  eyecolor1;      // Player's left eye color
-/*0165*/ uint8_t unknown0165;
-/*0166*/ uint8_t  is_npc;         // 0=no, 1=yes
+/*0000*/ uint8_t  invis;          // Invis (0=not, 1=invis)
+/*0001*/ uint32_t spawnId;        // Spawn Id
+/*0005*/ uint8_t  lfg;            // 0=off, 1=lfg on
+/*0006*/ uint8_t  beard;          // Beard style (not totally, sure but maybe!)
+/*0007*/ uint8_t  eyecolor1;      // Player's left eye color
+/*0008*/ uint8_t  is_pet;         // 0=no, 1=yes
+/*0009*/ uint32_t petOwnerId;     // If this is a pet, the spawn id of owner
+/*0013*/ uint8_t  gm;             // 0=no, 1=gm %%% Wrong but compile...
+/*0014*/ uint8_t unknown0013[22];
+/*0036*/ uint8_t  afk;            // 0=no, 1=afk
+/*0037*/ uint8_t  eyecolor2;      // Left eye color
+/*0038*/ uint8_t  NPC;            // 0=player,1=npc,2=pc corpse,3=npc corpse,a
+/*0039*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
+/*0040*/ uint32_t race;           // Spawn race
+/*0044*/ uint8_t unknown0040[5];
+/*0049*/ uint8_t  bodytype;       // Bodytype
+/*0050*/ uint8_t unknown0050[3];
+/*0053*/ uint8_t  max_hp;         // (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
+/*0054*/ uint8_t  is_npc;         // 0=no, 1=yes
+/*0055*/ uint8_t  class_;         // Player's class
+/*0056*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
+/*0088*/ uint8_t  haircolor;      // Hair color
+/*0089*/ int16_t  deity;          // Player's Deity
+/*0091*/ uint8_t unknown0091[2];
+/*0093*/ uint8_t  face;	          // Face id for players
+/*0094*/ uint8_t unknown0094[2];
+/*0096*/ uint8_t  light;          // Spawn's lightsource
+/*0097*/ uint8_t  curHp;          // Current hp
+/*0098*/ char     lastName[32];   // Player's Lastname
+/*0130*/ uint8_t  beardcolor;     // Beard color
+/*0131*/ uint8_t unknown0131;
+/*0132*/ float    size;           // Model size
+/*0136*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
+/*0137*/ uint8_t  gender;         // Gender (0=male, 1=female)
+/*0138*/ uint8_t unknown0138[7];
+/*0145*/ uint32_t guildID;        // Current guild
+/*0149*/ uint8_t unknown149[4];
+/*0153*/ float    walkspeed;      // Speed when walking
+/*0157*/ uint8_t  hairstyle;      // Hair style
+/*0158*/ uint8_t unknown0157[6];
+/*0164*/ int8_t   guildrank;      // 0=normal, 1=officer, 2=leader
+/*0165*/ uint8_t unknown0165[10];
 union 
 {
-/*0167*/ int8_t equip_chest2;     // Second place in packet for chest texture (usually 0xFF in live packets)
+/*0175*/ int8_t equip_chest2;     // Second place in packet for chest texture (usually 0xFF in live packets)
                                   // Not sure why there are 2 of them, but it effects chest texture!
-/*0167*/ int8_t mount_color;      // drogmor: 0=white, 1=black, 2=green, 3=red
+/*0175*/ int8_t mount_color;      // drogmor: 0=white, 1=black, 2=green, 3=red
                                   // horse: 0=brown, 1=white, 2=black, 3=tan
 };
-/*0168*/ uint32_t guildID;        // Current guild
-/*0172*/ union 
+/*0176*/ float    runspeed;       // Speed when running
+/*0180*/ union 
          {
              struct 
              {
-                 /*0172*/ Color_Struct color_helmet;    // Color of helmet item
-                 /*0176*/ Color_Struct color_chest;     // Color of chest item
-                 /*0180*/ Color_Struct color_arms;      // Color of arms item
-                 /*0184*/ Color_Struct color_bracers;   // Color of bracers item
-                 /*0188*/ Color_Struct color_hands;     // Color of hands item
-                 /*0192*/ Color_Struct color_legs;      // Color of legs item
-                 /*0196*/ Color_Struct color_feet;      // Color of feet item
-                 /*0200*/ Color_Struct color_primary;   // Color of primary item
-                 /*0204*/ Color_Struct color_secondary; // Color of secondary item
+                 /*0180*/ Color_Struct color_helmet;    // Color of helmet item
+                 /*0184*/ Color_Struct color_chest;     // Color of chest item
+                 /*0188*/ Color_Struct color_arms;      // Color of arms item
+                 /*0192*/ Color_Struct color_bracers;   // Color of bracers item
+                 /*0196*/ Color_Struct color_hands;     // Color of hands item
+                 /*0200*/ Color_Struct color_legs;      // Color of legs item
+                 /*0204*/ Color_Struct color_feet;      // Color of feet item
+                 /*0208*/ Color_Struct color_primary;   // Color of primary item
+                 /*0212*/ Color_Struct color_secondary; // Color of secondary item
              } equipment_colors;
-             /*0172*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
+             /*0180*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
          };
-/*0208*/ uint8_t unknown0208;
-/*0209*/ float    walkspeed;      // Speed when walking
-/*0213*/ uint8_t unknown0213[3];
-/*0216*/ uint8_t  class_;         // Player's class
-/*0217*/ uint8_t  beardcolor;     // Beard color
-/*0218*/ float    size;           // Model size
-/*0222*/ uint8_t  findable;       // 0=can't be found, 1=can be found
-/*0223*/ uint8_t unknown0222[4];
-/*0227*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
-/*0259*/ uint8_t unknown0259[4];
-/*0263*/ int8_t   guildrank;      // 0=normal, 1=officer, 2=leader
-/*0264*/ uint8_t unknown0264[3];
-/*0267*/ uint8_t  is_pet;         // 0=no, 1=yes
-/*0268*/ uint32_t race;           // Spawn race
-/*0272*/ uint8_t  invis;          // Invis (0=not, 1=invis)
-/*0273*/ uint8_t unknown0276[5];
-/*0278*/ uint8_t  lfg;            // 0=off, 1=lfg on
-/*0279*/ uint8_t  level;          // Spawn Level
-/*0280*/ uint8_t  haircolor;      // Hair color
-/*0281*/ uint8_t unknown0281;     // ***Placeholder (maxhp?)
-/*0282*/ uint8_t  light;          // Spawn's lightsource
-/*0283*/ uint8_t  gender;         // Gender (0=male, 1=female)
-/*0284*/ char     name[64];       // Player's Name
-/*0348*/ uint8_t  eyecolor2;      // Left eye color
-/*0349*/ char     title[32];      // Title
-/*0381*/ uint8_t unknown0381[2];
-}; /*0383*/
+/*0216*/ uint8_t  findable;       // 0=can't be found, 1=can be found
+/*0217*/ union 
+         {
+             struct 
+             {
+               /*0217*/ uint32_t equip_helmet;    // Equipment: Helmet Visual
+               /*0221*/ uint32_t equip_chest;     // Equipment: Chest Visual
+               /*0225*/ uint32_t equip_arms;      // Equipment: Arms Visual
+               /*0229*/ uint32_t equip_bracers;   // Equipment: Bracers Visual
+               /*0233*/ uint32_t equip_hands;     // Equipment: Hands Visual
+               /*0237*/ uint32_t equip_legs;      // Equipment: Legs Visual
+               /*0241*/ uint32_t equip_feet;      // Equipment: Feet Visual
+               /*0245*/ uint32_t equip_primary;   // Equipment: Primary Visual
+               /*0249*/ uint32_t equip_secondary; // Equipment: Secondary Visual
+             } equip;
+             /*0217*/ uint32_t equipment[9];  // Array elements correspond to struct equipment above
+         };
+/*0253*/ uint8_t  set_to_0xFF[8]; // ***Placeholder (all ff)
+/*0261*/ uint8_t  level;          // Spawn Level
+/*0262*/ uint8_t unknown0262;
+/*0263*/ char     title[32];      // Title
+/*0295*/ char     name[64];       // Player's Name
+/*0359*/ uint8_t  unknown0259[4]; // ***Placeholder
+/*0363*/ uint8_t  helm;           // Helm texture
+/*0364*/ signed   deltaHeading:10;// change in heading
+         signed   x:19;           // x coord
+         signed   padding0054:3;  // ***Placeholder
+/*0368*/ signed   y:19;           // y coord
+         signed   animation:10;   // animation
+         signed   padding0058:3;  // ***Placeholder
+/*0372*/ signed   z:19;           // z coord
+         signed   deltaY:13;      // change in y
+/*0376*/ signed   deltaX:13;      // change in x
+         unsigned heading:12;     // heading
+         signed   padding0066:7;  // ***Placeholder
+/*0380*/ signed   deltaZ:13;      // change in z
+         signed   padding0070:19; // ***Placeholder
+}; /*0384*/
 
-#if 0  
-/*0010*/ uint8_t  hairstyle;      // Hair style
-/*0321*/ uint8_t  helm;            // Helm texture
+#if 0
 /*122*/ uint8_t pvp; // 0=Not pvp,1=pvp
 #endif
 

@@ -20,7 +20,7 @@
 
 use Unicode::String qw(latin1 utf16 ucs2 utf8);
 
-$infile = "spells_en.txt";
+$infile = "spells_us.txt";
 $outfile = "/tmp/staticspells.h";
 
 # file fields

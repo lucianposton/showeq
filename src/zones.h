@@ -354,28 +354,28 @@
 { "guildlobby", "Guild Lobby" }, // 344
 { "guildhall", "Guild Hall" }, // 345
 { "barter", "Barter Hall" }, // 346
-{ "Illsalin", "The Ruins of Illsalin" }, // 347
-{ "IllsalinA", "Illsalin Marketplace" }, // 348
-{ "IllsalinB", "Temple of the Korlach" }, // 349
-{ "IllsalinC", "The Nargilor Pits" }, // 350
-{ "Dreadspire", "Dreadspire Keep" }, // 351
-{ "DreadspireA", "The Torture Chamber" }, // 352
-{ "DreadspireB", "The Artifact Room" }, // 353
-{ "DrachnidHive", "The Hive" }, // 354
-{ "DrachnidHiveA", "The Hatchery" }, // 355
-{ "DrachnidHiveB", "The Cocoons" }, // 356
-{ "DrachnidHiveC", "The Queen's Lair" }, // 357
-{ "WestKorlach", "Stoneroot Falls" }, // 358
-{ "WestKorlachA", "Prince's Manor" }, // 359
-{ "WestKorlachB", "Caverns of the Lost" }, // 360
-{ "WestKorlachC", "Lair of the Korlach" }, // 361
-{ "EastKorlach", "The Undershore" }, // 362
-{ "EastKorlachA", "Snarlstone Dens" }, // 363
-{ "EastKorlachB", "Shadowspine" }, // 364
-{ "Corathus", "Corathus Creep" }, // 365
-{ "CorathusA", "Sporali Caverns" }, // 366
-{ "CorathusB", "Corathus Lair" }, // 367
-{ "NektulosA", "Shadowed Grove" }, // 368
+{ "illsalin", "The Ruins of Illsalin" }, // 347
+{ "illsalina", "Imperial Bazaar" }, // 348
+{ "illsalinb", "Temple of the Korlach" }, // 349
+{ "illsalinc", "The Nargilor Pits" }, // 350
+{ "dreadspire", "Dreadspire Keep" }, // 351
+{ "dreadspirea", "The Torture Chamber" }, // 352 (removed before launch)
+{ "dreadspireb", "The Artifact Room" }, // 353 (removed before launch)
+{ "drachnidhive", "The Hive" }, // 354
+{ "drachnidhivea", "Living Larder" }, // 355
+{ "drachnidhiveb", "Coven of the Skinwalkers" }, // 356
+{ "drachnidhivec", "Queen Sendaii's Lair" }, // 357
+{ "westkorlach", "Stoneroot Falls" }, // 358
+{ "westkorlacha", "Chambers of Xill" }, // 359
+{ "westkorlachb", "Caverns of the Lost" }, // 360
+{ "westkorlachc", "Lair of the Korlach" }, // 361
+{ "eastkorlach", "Undershore" }, // 362
+{ "eastkorlacha", "Snarlstone Dens" }, // 363
+{ "shadowspine", "Shadowspine" }, // 364
+{ "corathus", "Corathus Creep" }, // 365
+{ "corathusa", "Sporali Caverns" }, // 366
+{ "corathusb", "Corathus Lair" }, // 367
+{ "nektulosa", "Shadowed Grove" }, // 368
 { NULL, NULL }, // 369
 { NULL, NULL }, // 370
 { NULL, NULL }, // 371

@@ -689,10 +689,17 @@ void MessageShell::player(const uint8_t* data)
   const charProfileStruct* player = (const charProfileStruct*)data;
   QString message;
 
+#if 0
   message.sprintf("Name: '%s' Last: '%s' Title: '%s' Suffix: '%s'", 
 		  player->name, player->lastName, player->title, player->suffix);
   m_messages->addMessage(MT_Player, message);
-  
+#else
+  //%%% title and suffix gone 9/13/2005?
+  message.sprintf("Name: '%s' Last: '%s'", 
+		  player->name, player->lastName);
+  m_messages->addMessage(MT_Player, message);
+#endif
+
   message.sprintf("Level: %d", player->level);
   m_messages->addMessage(MT_Player, message);
   
@@ -719,6 +726,8 @@ void MessageShell::player(const uint8_t* data)
           player->currentRadCrystals, player->currentEbonCrystals);
   m_messages->addMessage(MT_Player, message);
 
+#if 0
+  // Exp gone from PP 9/13/2005? %%%
   message = "Exp: " + Commanate(player->exp);
   m_messages->addMessage(MT_Player, message);
 
@@ -733,7 +742,7 @@ void MessageShell::player(const uint8_t* data)
   message.sprintf("RaidLeadAA: %.1f%% (unspent: %d)",
       (player->expRaidLeadAA)/20.0, player->raidLeadAAUnspent);
   m_messages->addMessage(MT_Player, message);
-
+#endif
   message.sprintf("Group: %s %s %s %s %s %s", player->groupMembers[0],
     player->groupMembers[1],
     player->groupMembers[2],

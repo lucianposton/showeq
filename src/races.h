@@ -462,5 +462,22 @@
     NULL,                     // 453
     NULL,                     // 454
     "Kobold",                 // 455
+    NULL,                     // 456
+    NULL,                     // 457
+    NULL,                     // 458
+    NULL,                     // 459
+    NULL,                     // 460
+    NULL,                     // 461
+    NULL,                     // 462
+    NULL,                     // 463
+    NULL,                     // 464
+    NULL,                     // 465
+    NULL,                     // 466
+    NULL,                     // 467
+    NULL,                     // 468
+    NULL,                     // 469
+    NULL,                     // 470
+    NULL,                     // 471
+    "Clockwork Boar",         // 472
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 

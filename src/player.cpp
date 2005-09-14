@@ -280,13 +280,11 @@ void Player::player(const uint8_t* data)
 	 showeq_params->walkpathlength
         );
   setDeltas(0,0,0);
-#if 1 // ZBTEMP
   seqDebug("Player::backfill(): Pos (%f/%f/%f) Heading: %f",
 	   player->x, player->y, player->z, player->heading);
   seqDebug("Player::backfill(bind): Pos (%f/%f/%f) Heading: %f",
-	   player->bind_x[0], player->bind_y[0], player->bind_z[0], 
-       player->bind_heading[0]);
-#endif // ZBTEMP  
+	   player->binds[0].x, player->binds[0].y, player->binds[0].z, 
+       player->binds[9].heading);
   setHeading((int8_t)lrintf(player->heading), 0);
   m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
   m_validPos = true;
@@ -353,8 +351,11 @@ void Player::player(const uint8_t* data)
   m_maxExp = calc_exp(m_level, m_race, m_class);
   m_tickExp = (m_maxExp - m_minExp) / 330;
 
+#if 0
+  // Removed from PP 9/13/2005? %%%
   m_currentExp = player->exp;
   m_currentAltExp = player->expAA;
+#endif
   m_currentAApts = player->aa_spent;
   
   emit expChangedInt (m_currentExp, m_minExp, m_maxExp);

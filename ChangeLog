@@ -2,11 +2,14 @@ Version: $Id$ $Name$
 
 purple (09/13/05)
 -------------------
-+ Updated version to 5.1.0.0
++ Updated version to 5.1.0.0-pre1
 + Branched 4.x off the trunk to v4 branch
 + Merged pre_5_0_beta branch down to the trunk. The trunk will be used for
 	development now
 + Updated zones to reflect new .exe
++ Reworked spawnStruct
++ Reworked some of charProfileStruct
++ Regenerated staticspells.h
 
 purple (07/22/05)
 -------------------

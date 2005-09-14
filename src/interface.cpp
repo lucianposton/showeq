@@ -1459,7 +1459,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    QPopupMenu* windowFontMenu = new QPopupMenu;
    m_windowMenu->insertItem( "&Font", windowFontMenu, -1, 1);
     
-   windowFontMenu->insertItem( "&Applicatoin Default...", 
+   windowFontMenu->insertItem( "&Application Default...", 
 			       this, SLOT(set_main_Font(int)));
 
    windowFontMenu->insertItem( "Main Window Status Font...", 
