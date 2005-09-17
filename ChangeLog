@@ -1,5 +1,14 @@
 Version: $Id$ $Name$
 
+purple (09/16/05)
+-------------------
++ Updated version to 5.1.0.0
++ Found GM flag in spawnStruct
++ Implemented PvP map option for current Zek rules (+/-4 are triangles,
+	flashing circle is blue for lower level, white for same level, yellow
+	for higher level. All spawns outside +/-4 are normal. Pets are circled
+	according to their owners)
+
 purple (09/13/05)
 -------------------
 + Updated version to 5.1.0.0-pre1

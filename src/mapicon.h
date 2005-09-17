@@ -81,6 +81,8 @@ enum MapIconType
   tIconTypeSpawnPlayerCorpse, 
   tIconTypeSpawnUnknown,
   tIconTypeSpawnConsidered,
+  tIconTypeSpawnPlayerPvPEnabled,
+  tIconTypeSpawnPetPvPEnabled,
   tIconTypeSpawnPlayerTeamBase,
   tIconTypeSpawnPlayerTeam1 = tIconTypeSpawnPlayerTeamBase,
   tIconTypeSpawnPlayerTeam2,

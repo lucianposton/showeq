@@ -59,6 +59,8 @@ static const QString iconTypePrefBaseNames[] =
   "SpawnPlayerCorpse",
   "SpawnUnknown",
   "SpawnConsidered",
+  "SpawnPlayerPvPEnabled",
+  "SpawnPetPvPEnabled",
   "SpawnPlayerTeam1",
   "SpawnPlayerTeam2",
   "SpawnPlayerTeam3",
@@ -95,6 +97,8 @@ static const QString iconTypeNames[] =
   "Spawn Player Corpse",
   "Spawn Unknown",
   "Spawn Considered",
+  "Spawn PvP Enabled Player",
+  "Spawn PvP Enabled Pet",
   "Spawn Player Team 1",
   "Spawn Player Team 2",
   "Spawn Player Team 3",
@@ -597,6 +601,18 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
     .setHighlight(QBrush(NoBrush), QPen(red, 1, SolidLine, cap, join),
 		  tIconStyleSquare, tIconSizeLarge,
 		  true, false, false, false);
+  m_mapIcons[tIconTypeSpawnPlayerPvPEnabled]
+    .setHighlight(QBrush(NoBrush), QPen(red, 1, SolidLine, cap, join),
+		  tIconStyleCircle, tIconSizeXLarge,
+		  true, false, false, true);
+  m_mapIcons[tIconTypeSpawnPlayerPvPEnabled]
+    .setImage(QBrush(SolidPattern), QPen(magenta, 1, SolidLine, cap, join), 
+	      tIconStyleUpTriangle, tIconSizeRegular,
+	      true, false, true, false);
+  m_mapIcons[tIconTypeSpawnPetPvPEnabled]
+    .setHighlight(QBrush(NoBrush), QPen(red, 1, SolidLine, cap, join),
+		  tIconStyleCircle, tIconSizeXLarge,
+		  true, false, false, true);
   m_mapIcons[tIconTypeSpawnPlayerTeam1]
     .setImage(QBrush(SolidPattern), QPen(magenta, 1, SolidLine, cap, join), 
 	      tIconStyleUpTriangle, tIconSizeRegular,

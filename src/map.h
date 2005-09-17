@@ -240,6 +240,7 @@ class MapMenu : public QPopupMenu
   void toggle_highlightConsideredSpawns(int itemId);
   void toggle_spawnNames(int itemId);
   void toggle_mapImage(int itemId);
+  void toggle_pvp(int itemId);
   void toggle_deityPvP(int itemId);
   void toggle_racePvP(int itemId);
   void toggle_walkPath(int itemId);
@@ -305,6 +306,7 @@ class MapMenu : public QPopupMenu
   int m_id_npcWalkPaths;
   int m_id_mapImage;
   int m_id_deityPvP;
+  int m_id_pvp;
   int m_id_racePvP;
   int m_id_zoneSafePoint;
 #ifdef DEBUG
@@ -408,6 +410,7 @@ class Map :public QWidget
   bool highlightConsideredSpawns() const { return m_highlightConsideredSpawns; }
   bool showTooltips() const { return m_showTooltips; }
   bool walkPathShowSelect() const { return m_walkpathshowselect; }
+  bool pvp() const { return m_pvp; }
   bool deityPvP() const { return m_deityPvP; }
   bool racePvP() const { return m_racePvP; }
   bool showZoneSafePoint() const { return m_showZoneSafePoint; }
@@ -504,6 +507,7 @@ class Map :public QWidget
   void setHighlightConsideredSpawns(bool val);
   void setShowTooltips(bool val);
   void setWalkPathShowSelect(bool val);
+  void setPvP(bool val);
   void setDeityPvP(bool val);
   void setRacePvP(bool val);
   
@@ -643,6 +647,7 @@ private:
    bool m_highlightConsideredSpawns;
    bool m_showTooltips;
    bool m_walkpathshowselect;
+   bool m_pvp;
    bool m_deityPvP;
    bool m_racePvP;
    bool m_showZoneSafePoint;

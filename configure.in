@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 dnl $Id$ $Name$
 
 AC_PREREQ(2.59)
-AC_INIT(showeq, 5.1.0.0-pre1)
+AC_INIT(showeq, 5.1.0.0)
 AC_CONFIG_SRCDIR(src/main.cpp)
 AC_CANONICAL_SYSTEM
 

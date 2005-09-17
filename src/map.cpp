@@ -170,8 +170,8 @@ void CLineDlg::changeColor(const QString &color)
 // MapLabel
 MapLabel::MapLabel( Map* map )
   : QLabel(map, "mapLabel", 
-	   WStyle_Customize + WStyle_NoBorderEx + WStyle_Tool + WType_TopLevel
-	   + WStyle_Dialog + WX11BypassWM)
+       WStyle_Customize + WStyle_NoBorderEx + WStyle_Tool + WType_TopLevel
+       + WStyle_Dialog + WX11BypassWM)
 {
   m_Map = map;
   setMargin( 1 );
@@ -227,8 +227,8 @@ void MapLabel::mousePressEvent(QMouseEvent*)
 //----------------------------------------------------------------------
 // MapMgr
 MapMgr::MapMgr(const DataLocationMgr* dataLocMgr, 
-	       SpawnShell* spawnShell, Player* player, ZoneMgr* zoneMgr,
-	       QWidget* dialogParent, QObject* parent, const char* name)
+           SpawnShell* spawnShell, Player* player, ZoneMgr* zoneMgr,
+           QWidget* dialogParent, QObject* parent, const char* name)
   : QObject(parent, name),
     m_dataLocMgr(dataLocMgr),
     m_spawnShell(spawnShell),
@@ -241,27 +241,27 @@ MapMgr::MapMgr(const DataLocationMgr* dataLocMgr,
   m_curLineColor = pSEQPrefs->getPrefString("DefaultLineColor", "MapMgr", "gray");
   m_curLineName = pSEQPrefs->getPrefString("DefaultLineName", "MapMgr", "line");
   m_curLocationColor = pSEQPrefs->getPrefString("DefaultLocationColor", "MapMgr", 
-						"white");
+                        "white");
 
   // supply the MapMgr slots with signals from SpawnShell
   connect (m_spawnShell, SIGNAL(addItem(const Item*)),
-	   this, SLOT(addItem(const Item*)));
+       this, SLOT(addItem(const Item*)));
   connect (m_spawnShell, SIGNAL(delItem(const Item*)),
-	   this, SLOT(delItem(const Item*)));
+       this, SLOT(delItem(const Item*)));
   connect (m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
-	   this, SLOT(killSpawn(const Item*)));
+       this, SLOT(killSpawn(const Item*)));
   connect (m_spawnShell, SIGNAL(changeItem(const Item*, uint32_t)),
-	   this, SLOT(changeItem(const Item*, uint32_t)));
+       this, SLOT(changeItem(const Item*, uint32_t)));
   connect(m_spawnShell, SIGNAL(clearItems()),
-	  this, SLOT(clearItems()));
+       this, SLOT(clearItems()));
 
   // supply the MapMgr slots with signals from ZoneMgr
   connect(zoneMgr, SIGNAL(zoneBegin(const QString&)),
-	  this, SLOT(zoneBegin(const QString&)));
+      this, SLOT(zoneBegin(const QString&)));
   connect(zoneMgr, SIGNAL(zoneChanged(const QString&)),
-	  this, SLOT(zoneChanged(const QString&)));
+      this, SLOT(zoneChanged(const QString&)));
   connect(zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)),
-	  this, SLOT(zoneEnd(const QString&, const QString&)));
+      this, SLOT(zoneEnd(const QString&, const QString&)));
 
   // if there is a short zone name already, try to load its map
   QString shortZoneName = zoneMgr->shortZoneName();
@@ -283,7 +283,7 @@ void MapMgr::zoneBegin(const QString& shortZoneName)
 {
 #ifdef DEBUGMAP
   debug ("zoneBegin(%s)", 
-	 shortZoneName);
+     shortZoneName);
 #endif /* DEBUGMAP */
   
   // clear the map data
@@ -300,7 +300,7 @@ void MapMgr::zoneChanged(const QString& shortZoneName)
 {
 #ifdef DEBUGMAP
   debug ("zoneChanged(%s)", 
-	 (const char*)shortZoneName);
+     (const char*)shortZoneName);
 #endif /* DEBUGMAP */
 
   // clear the map data
@@ -317,7 +317,7 @@ void MapMgr::zoneEnd(const QString& shortZoneName, const QString& longZoneName)
 {
 #ifdef DEBUGMAP
   debug ("zoneEnd(%s, %s)", 
-	 (const char*)longZoneName, (const char*)shortZoneName);
+     (const char*)longZoneName, (const char*)shortZoneName);
 #endif /* DEBUGMAP */
 
   // atttempt to load the new map
@@ -328,17 +328,17 @@ void MapMgr::loadZoneMap(const QString& shortZoneName)
 {
   // first attempt to find map with .map suffix
   QFileInfo fileInfo = m_dataLocMgr->findExistingFile("maps", 
-						      shortZoneName + ".map");
+                              shortZoneName + ".map");
   
   // if that file doesn't exist, try a straight .txt suffix
   if (!fileInfo.exists())
     fileInfo = m_dataLocMgr->findExistingFile("maps", 
-					      shortZoneName + ".txt");
+                          shortZoneName + ".txt");
 
   // if that file doesn't exist, try a  _1.txt suffix
   if (!fileInfo.exists())
     fileInfo = m_dataLocMgr->findExistingFile("maps", 
-					      shortZoneName + "_1.txt");
+                          shortZoneName + "_1.txt");
 
   if (fileInfo.exists())
   {
@@ -350,11 +350,11 @@ void MapMgr::loadZoneMap(const QString& shortZoneName)
   {
     seqInfo("No Map found for zone '%s'!", (const char*)shortZoneName);
     seqInfo("    Checked for all variants of '%s.map', '%s.txt', and '%s_1.txt'",
-	    (const char*)shortZoneName, 
-	    (const char*)shortZoneName, (const char*)shortZoneName);
+        (const char*)shortZoneName, 
+        (const char*)shortZoneName, (const char*)shortZoneName);
     seqInfo("    in directories '%s' and '%s'!",
-	    (const char*)m_dataLocMgr->userDataDir("maps").absPath(),
-	    (const char*)m_dataLocMgr->pkgDataDir("maps").absPath());
+        (const char*)m_dataLocMgr->userDataDir("maps").absPath(),
+        (const char*)m_dataLocMgr->pkgDataDir("maps").absPath());
   }
 }
 
@@ -467,7 +467,7 @@ void MapMgr::saveMap ()
   QFileInfo fileInfo(m_mapData.fileName());
 
   fileInfo = m_dataLocMgr->findWriteFile("maps", fileInfo.baseName() + ".map", 
-					 false);
+                     false);
 
   m_mapData.saveMap(fileInfo.absFilePath());
 }
@@ -480,7 +480,7 @@ void MapMgr::saveSOEMap ()
   QFileInfo fileInfo(m_mapData.fileName());
 
   fileInfo = m_dataLocMgr->findWriteFile("maps", fileInfo.baseName() + "_2.txt", 
-					 false);
+                     false);
 
   m_mapData.saveSOEMap(fileInfo.absFilePath());
 }
@@ -564,18 +564,18 @@ void MapMgr::addLocation(QWidget* parent, const MapPoint& point)
   // ZBTEMP: Should create a real dialog to enter location info
   bool ok;
   QString name = QInputDialog::getText("Location Name",
-				       "Please enter a location name",
-				       QLineEdit::Normal,
-				       QString::null, &ok, parent);
+                       "Please enter a location name",
+                       QLineEdit::Normal,
+                       QString::null, &ok, parent);
 
   // if the user clicked ok, and actually gave a name, add it
   if (ok && !name.isEmpty())
     m_mapData.addLocation(name, m_curLocationColor, 
-			  QPoint(point.x(), point.y()));
+              QPoint(point.x(), point.y()));
   
 #ifdef DEBUGMAP
   seqDebug("addLocation(): Location x added at %d/%d", 
-	 point.x(), point.y()); 
+     point.x(), point.y()); 
 #endif
 }
 
@@ -724,7 +724,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_followMenu_None = subMenu->insertItem("None");
   subMenu->setItemParameter(m_id_followMenu_None, tFollowNone);
   connect(subMenu, SIGNAL(activated(int)),
-	  this, SLOT(select_follow(int)));
+      this, SLOT(select_follow(int)));
   m_id_followMenu = insertItem("Follow", subMenu);
 
   subMenu = new QPopupMenu(m_map);
@@ -732,18 +732,18 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
 
   key = pSEQPrefs->getPrefKey("AddLocationKey", preferenceName, "Ctrl+O");
   m_id_addLocation = subMenu->insertItem("Add Location...",
-					 m_map, SLOT(addLocation()), key);
+                     m_map, SLOT(addLocation()), key);
   key = pSEQPrefs->getPrefKey("StartLineKey", preferenceName, "Ctrl+L");
   m_id_startLine = subMenu->insertItem("Start Line",
-				       m_map, SLOT(startLine()), key);
+                       m_map, SLOT(startLine()), key);
   key = pSEQPrefs->getPrefKey("AddLinePointKey", preferenceName, "Ctrl+P");
   m_id_addLinePoint = subMenu->insertItem("Add Line Point",
-					  m_map, SLOT(addLinePoint()), key);
+                      m_map, SLOT(addLinePoint()), key);
   key = pSEQPrefs->getPrefKey("DelLinePointKey", preferenceName, "Ctrl+D");
   m_id_delLinePoint = subMenu->insertItem("Delete Line Point",
-					  m_map, SLOT(delLinePoint()), key);
+                      m_map, SLOT(delLinePoint()), key);
   m_id_showLineDlg = subMenu->insertItem("Show Line Dialog...",
-					 m_map, SLOT(showLineDlg()));
+                     m_map, SLOT(showLineDlg()));
   subSubMenu = new QPopupMenu(m_map);
   int x;
   x = subSubMenu->insertItem("Down 8", m_map, SLOT(scaleDownZ(int)));
@@ -773,11 +773,11 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   key = pSEQPrefs->getPrefKey("MapLineFadedFloorsKey", preferenceName, "Alt+3");
   subMenu->setAccel(key, m_id_mapLineStyle_FadedFloors);
   connect(subMenu, SIGNAL(activated(int)),
-	  this, SLOT(select_mapLine(int)));
+      this, SLOT(select_mapLine(int)));
   m_id_mapLineStyle = insertItem("Map Line Display", subMenu);
 
   m_id_spawnDepthFilter = insertItem("Spawn Depth Filter", 
-				     this, SLOT(toggle_spawnDepthFilter(int)));
+                     this, SLOT(toggle_spawnDepthFilter(int)));
   key = pSEQPrefs->getPrefKey("SpawnDepthFilteredKey", preferenceName, "Alt+5");
   setAccel(key, m_id_spawnDepthFilter);
 
@@ -787,7 +787,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_tooltip = subMenu->insertItem("Tooltips", this, SLOT(toggle_tooltip(int)));;
   m_id_filtered = subMenu->insertItem("Filtered", this, SLOT(toggle_filtered(int)));
   m_id_map = subMenu->insertItem("Map Lines", this, SLOT(toggle_map(int)));
-  m_id_velocity = subMenu->insertItem("Velocity Lines",	this, SLOT(toggle_velocity(int)));
+  m_id_velocity = subMenu->insertItem("Velocity Lines",    this, SLOT(toggle_velocity(int)));
   m_id_animate = subMenu->insertItem("Animate Spawns", this, SLOT(toggle_animate(int)));
   m_id_player = subMenu->insertItem("Player", this, SLOT(toggle_player(int)));
   m_id_playerBackground = subMenu->insertItem("Player Background", this, SLOT(toggle_playerBackground(int)));
@@ -797,7 +797,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_locations = subMenu->insertItem("Locations", this, SLOT(toggle_locations(int)));
   m_id_spawns = subMenu->insertItem("Spawns", this, SLOT(toggle_spawns(int)));
   m_id_unknownSpawns = subMenu->insertItem("Unknown Spawns", 
-					   this, SLOT(toggle_unknownSpawns(int)));
+                       this, SLOT(toggle_unknownSpawns(int)));
   m_id_spawnPoints = subMenu->insertItem("Spawn Points", this, SLOT( toggle_spawnPnts(int) ));
   m_id_drops = subMenu->insertItem("Drops", this, SLOT(toggle_drops(int)));
   m_id_doors = subMenu->insertItem("Doors", this, SLOT(toggle_doors(int)));
@@ -810,6 +810,8 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
     subMenu->insertItem("NPC Walk Paths", this, SLOT(toggle_npcWalkPaths(int)));
   m_id_mapImage =
     subMenu->insertItem("Map Image", this, SLOT(toggle_mapImage(int)));
+  m_id_pvp = 
+    subMenu->insertItem("PvP", this, SLOT(toggle_pvp(int)));
   m_id_deityPvP = 
     subMenu->insertItem("Deity PvP", this, SLOT(toggle_deityPvP(int)));
   m_id_racePvP = 
@@ -831,25 +833,25 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_mapOptimization_Best = subMenu->insertItem("Speed");
   subMenu->setItemParameter(m_id_mapOptimization_Best, tMap_BestOptim);
   connect(subMenu, SIGNAL(activated(int)),
-	  this, SLOT(select_mapOptimization(int)));
+      this, SLOT(select_mapOptimization(int)));
   m_id_mapOptimization = insertItem("Map Optimization", subMenu);
 
   m_id_gridTickColor = insertItem("Grid Tick Color...",
-			      this, SLOT(select_gridTickColor(int)));
+                  this, SLOT(select_gridTickColor(int)));
   m_id_gridLineColor = insertItem("Grid Line Color...",
-			      this, SLOT(select_gridLineColor(int)));
+                  this, SLOT(select_gridLineColor(int)));
   m_id_backgroundColor = insertItem("Background Color...",
-				    this, SLOT(select_backgroundColor(int)));
+                    this, SLOT(select_backgroundColor(int)));
   m_id_font = insertItem("Font...",
-			 this, SLOT(select_font(int)));
+             this, SLOT(select_font(int)));
   insertItem("Edit Map Icons...",
-	     m_map, SLOT(showMapIconDialog()));
+         m_map, SLOT(showMapIconDialog()));
 
   subMenu = new QPopupMenu;
   m_drawSizeSpinBox = new QSpinBox(1, 6, 1, subMenu);
   m_drawSizeSpinBox->setValue(m_mapIcons->drawSize());
   connect(m_drawSizeSpinBox, SIGNAL(valueChanged(int)),
-	  m_mapIcons, SLOT(setDrawSize(int)));
+      m_mapIcons, SLOT(setDrawSize(int)));
   m_id_drawSize = subMenu->insertItem(m_drawSizeSpinBox);
   m_id_drawSizeMenu = insertItem("Draw Size", subMenu);
 
@@ -859,10 +861,10 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_fovSpinBox = new QSpinBox(20, 1200, 20, tmpHBox, "FOV");
   m_fovSpinBox->setValue(m_mapIcons->fovDistance());
   connect(m_fovSpinBox, SIGNAL(valueChanged(int)),
-	  m_mapIcons, SLOT(setFOVDistance(int)));
+      m_mapIcons, SLOT(setFOVDistance(int)));
   m_id_FOVDistance = subMenu->insertItem(tmpHBox);
   m_id_FOVColor = subMenu->insertItem("Color...",
-				      this, SLOT(select_fovColor(int)));
+                      this, SLOT(select_fovColor(int)));
 
   subSubMenu = new QPopupMenu;
   subMenu->setCheckable(true);
@@ -897,7 +899,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_FOVDiagCrossPattern = subSubMenu->insertItem("Diagonal crossing lines");
   subSubMenu->setItemParameter(m_id_FOVDiagCrossPattern, Qt::DiagCrossPattern); 
   connect(subSubMenu, SIGNAL(activated(int)),
-	  this, SLOT(select_fovStyle(int)));
+      this, SLOT(select_fovStyle(int)));
   subMenu->insertItem("FOV Style", subSubMenu);
 
   subSubMenu = new QPopupMenu;
@@ -909,7 +911,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_FOVClassic = subSubMenu->insertItem("Classic");
   subSubMenu->setItemParameter(m_id_FOVClassic, tFOVClassic); 
   connect(subSubMenu, SIGNAL(activated(int)),
-	  this, SLOT(select_fovMode(int)));
+      this, SLOT(select_fovMode(int)));
   subMenu->insertItem("FOV Mode", subSubMenu);
 
   m_id_FOV = insertItem("Player FOV", subMenu);
@@ -918,23 +920,23 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_zoomDefaultSpinBox = new QSpinBox(1, 32, 1, subMenu);
   m_zoomDefaultSpinBox->setValue(m_mapIcons->drawSize());
   connect(m_zoomDefaultSpinBox, SIGNAL(valueChanged(int)),
-	  m_map, SLOT(setZoomDefault(int)));
+      m_map, SLOT(setZoomDefault(int)));
   m_id_zoomDefault = subMenu->insertItem(m_zoomDefaultSpinBox);
   m_id_zoomDefaultMenu = insertItem("Default Zoom", subMenu);
 
   m_id_cacheAlwaysRepaint = insertItem("Always Repaint Map Cache",
-				       this, 
-				       SLOT(toggle_cacheAlwaysRepaint()));
+                       this, 
+                       SLOT(toggle_cacheAlwaysRepaint()));
 
   m_id_cacheChanges = insertItem("Cache Changes",
-				 this, 
-				 SLOT(toggle_cacheChanges()));
+                 this, 
+                 SLOT(toggle_cacheChanges()));
 
   insertItem("Save Map Image...",
-	     m_map, SLOT(saveMapImage()));
+         m_map, SLOT(saveMapImage()));
 
   connect(this, SIGNAL(aboutToShow()),
-	  this, SLOT(init_Menu()));
+      this, SLOT(init_Menu()));
 }
 
 MapMenu::~MapMenu()
@@ -950,7 +952,7 @@ void MapMenu::init_Menu(void)
   
   const Item* selectedItem = m_map->selectedItem();
   setItemEnabled(m_id_followMenu_Spawn, 
-		 ((selectedItem != NULL) && (selectedItem->type() == tSpawn)));
+         ((selectedItem != NULL) && (selectedItem->type() == tSpawn)));
 
   MapLineStyle style = m_map->mapLineStyle();
   setItemChecked(m_id_mapLineStyle_Normal, (style == tMap_Normal));
@@ -975,10 +977,11 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_doors, m_map->showDoors());
   setItemChecked(m_id_spawnNames, m_mapIcons->showSpawnNames());
   setItemChecked(m_id_highlightConsideredSpawns, 
-		 m_map->highlightConsideredSpawns());
+         m_map->highlightConsideredSpawns());
   setItemChecked(m_id_walkPath, m_map->walkPathShowSelect());
   setItemChecked(m_id_npcWalkPaths, m_mapIcons->showNPCWalkPaths());
   setItemChecked(m_id_mapImage, m_map->showBackgroundImage());
+  setItemChecked(m_id_pvp, m_map->pvp());
   setItemChecked(m_id_deityPvP, m_map->deityPvP());
   setItemChecked(m_id_racePvP, m_map->racePvP());
   setItemChecked(m_id_zoneSafePoint, m_map->showZoneSafePoint());
@@ -1077,6 +1080,11 @@ void MapMenu::toggle_filtered(int itemId)
 void MapMenu::toggle_map(int itemId)
 {
   m_map->setShowLines(!m_map->showLines());
+}
+
+void MapMenu::toggle_pvp(int itemId)
+{
+  m_map->setPvP(!m_map->pvp());
 }
 
 void MapMenu::toggle_deityPvP(int itemId)
@@ -1211,7 +1219,7 @@ void MapMenu::select_gridTickColor(int itemId)
   QString name = QString("ShowEQ - ") + m_map->preferenceName() 
     + " Grid Tick Color";
   QColor newColor = QColorDialog::getColor(m_map->gridTickColor(),
-					   m_map, (const char*)name);
+                       m_map, (const char*)name);
 
   if (newColor.isValid())
     m_map->setGridTickColor(newColor);
@@ -1222,7 +1230,7 @@ void MapMenu::select_gridLineColor(int itemId)
   QString name = QString("ShowEQ - ") + m_map->preferenceName() 
     + " Grid Tick Color";
   QColor newColor = QColorDialog::getColor(m_map->gridLineColor(),
-					   m_map, (const char*)name);
+                       m_map, (const char*)name);
 
   if (newColor.isValid())
     m_map->setGridLineColor(newColor);
@@ -1233,7 +1241,7 @@ void MapMenu::select_backgroundColor(int itemId)
   QString name = QString("ShowEQ - ") + m_map->preferenceName() 
     + " Background Color";
   QColor newColor = QColorDialog::getColor(m_map->backgroundColor(),
-					   m_map, (const char*)name);
+                       m_map, (const char*)name);
 
   if (newColor.isValid())
     m_map->setBackgroundColor(newColor);
@@ -1256,7 +1264,7 @@ void MapMenu::select_fovColor(int itemId)
   QString name = QString("ShowEQ - ") + m_map->preferenceName() 
     + " Player FOV Color";
   QColor newColor = QColorDialog::getColor(m_map->fovColor(),
-					   m_map, (const char*)name);
+                       m_map, (const char*)name);
 
   if (newColor.isValid())
     m_map->setFOVColor(newColor);
@@ -1277,7 +1285,7 @@ void MapMenu::select_fovMode(int itemId)
     // set the new FOV Mode
     uint16_t newFOVDistance = 0;
     if ((newFOVMode != tFOVDistanceBased) && 
-	(oldFOVMode == tFOVDistanceBased))
+    (oldFOVMode == tFOVDistanceBased))
       newFOVDistance = 40;
     else if (newFOVMode == tFOVDistanceBased)
       newFOVDistance = 200;
@@ -1294,14 +1302,14 @@ void MapMenu::select_fovMode(int itemId)
 //----------------------------------------------------------------------
 // Map
 Map::Map(MapMgr* mapMgr, 
-	 Player* player, 
-	 SpawnShell* spawnshell, 
-	 ZoneMgr* zoneMgr,
-	 SpawnMonitor* spawnMonitor,
-	 const QString& preferenceName, 
-	 uint32_t runtimeFilterFlagMask,
-	 QWidget * parent, 
-	 const char *name)
+     Player* player, 
+     SpawnShell* spawnshell, 
+     ZoneMgr* zoneMgr,
+     SpawnMonitor* spawnMonitor,
+     const QString& preferenceName, 
+     uint32_t runtimeFilterFlagMask,
+     QWidget * parent, 
+     const char *name)
   : QWidget (parent, name),
     m_preferenceName(preferenceName),
     m_param(mapMgr->mapData()),
@@ -1328,10 +1336,10 @@ Map::Map(MapMgr* mapMgr,
 
   // create the map icons object
   m_mapIcons = new MapIcons(player, preferenceName + "Icons", 
-			    this, "mapicons");
+                this, "mapicons");
 
   connect(m_mapIcons, SIGNAL(changed()),
-	  this, SLOT(reAdjustAndRefreshMap()));
+      this, SLOT(reAdjustAndRefreshMap()));
 
   // load the map icon information
   m_mapIcons->load();
@@ -1399,7 +1407,7 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "ShowUnknownSpawns";
   m_showUnknownSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, 
-					       showeq_params->createUnknownSpawns);
+                           showeq_params->createUnknownSpawns);
 
   tmpPrefString = "HighlightConsideredSpawns";
   m_highlightConsideredSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
@@ -1416,7 +1424,7 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "FOVMode";
   m_fovMode = (FOVMode)pSEQPrefs->getPrefInt(tmpPrefString, prefString, 
-					     tFOVDistanceBased);
+                         tFOVDistanceBased);
 
   tmpPrefString = "FOVStyle";
   m_fovStyle = pSEQPrefs->getPrefInt(tmpPrefString, prefString, QBrush::Dense7Pattern);
@@ -1437,7 +1445,7 @@ Map::Map(MapMgr* mapMgr,
   tmpPrefString = "MapLineStyle";
   if (pSEQPrefs->isPreference(tmpPrefString, prefString))
     m_param.setMapLineStyle((MapLineStyle)pSEQPrefs->getPrefInt(tmpPrefString, prefString,
-								tMap_Normal));
+                                tMap_Normal));
 
   tmpPrefString = "ShowMapPoints";
   m_param.setShowLocations(pSEQPrefs->getPrefBool(tmpPrefString, prefString, true));
@@ -1562,23 +1570,23 @@ Map::Map(MapMgr* mapMgr,
   
   m_timer = new QTimer(this);
   connect(m_timer, SIGNAL(timeout()), 
-	  this, SLOT(refreshMap()));
+      this, SLOT(refreshMap()));
   
   // supply the Map slots with signals from MapMgr
   connect(m_mapMgr, SIGNAL(mapLoaded()),
-	  this, SLOT(mapLoaded()));
+      this, SLOT(mapLoaded()));
   connect(m_mapMgr, SIGNAL(mapUnloaded()),
-	  this, SLOT(mapUnloaded()));
+      this, SLOT(mapUnloaded()));
   connect(m_mapMgr, SIGNAL(mapUpdated()),
-	  this, SLOT(mapUpdated()));
+      this, SLOT(mapUpdated()));
 
   // supply the Map slots with signals from SpawnShell
   connect(m_spawnShell, SIGNAL(delItem(const Item*)),
-	  this, SLOT(delItem(const Item*)));
+      this, SLOT(delItem(const Item*)));
   connect(m_spawnShell, SIGNAL(clearItems()),
-	  this, SLOT(clearItems()));
+      this, SLOT(clearItems()));
   connect (m_spawnShell,SIGNAL(changeItem(const Item*, uint32_t)),
-	   this, SLOT(changeItem(const Item*, uint32_t)));
+       this, SLOT(changeItem(const Item*, uint32_t)));
 
   m_timer->start(1000/m_frameRate, false);
 
@@ -1672,8 +1680,8 @@ void Map::mousePressEvent(QMouseEvent* me)
     if(f) 
     {
       fprintf (f,"%f, %f\n",
-	       (m_param.screenCenterX() - me->x()) * m_param.ratioX(),
-	       (m_param.screenCenterY() - me->y()) * m_param.ratioY());
+           (m_param.screenCenterX() - me->x()) * m_param.ratioX(),
+           (m_param.screenCenterY() - me->y()) * m_param.ratioY());
       fclose(f);
     }
 #endif /* DEBUGMAP */
@@ -1719,7 +1727,7 @@ void Map::mousePressEvent(QMouseEvent* me)
 
       // repaint if necessary
       if(!m_cacheChanges)
-	refreshMap ();
+        refreshMap ();
     }
   }
 }
@@ -1962,13 +1970,14 @@ void Map::viewLock()
        MapPoint location;
        if (m_selectedItem->type() == tSpawn)
        {
-	 const Spawn* spawn = (const Spawn*)m_selectedItem;
-	 
-	 spawn->approximatePosition(m_animate, QTime::currentTime(),
-				      location);
+         const Spawn* spawn = (const Spawn*)m_selectedItem;
+     
+         spawn->approximatePosition(m_animate, QTime::currentTime(),
+                      location);
        }
        else
-	 location.setPoint(*m_selectedItem);
+         location.setPoint(*m_selectedItem);
+
        m_param.setPan(location.x(), location.y());
        emit panXChanged(m_param.panOffsetX());
        emit panYChanged(m_param.panOffsetY());
@@ -1991,7 +2000,7 @@ void Map::viewLock()
        // retrieve the approximate current player position
        MapPoint targetPoint;
        m_player->approximatePosition(m_animate, QTime::currentTime(),
-				   targetPoint);
+                   targetPoint);
        
        // set the current pan to it's position to avoid jarring the user
        m_param.setPan(targetPoint.x(), targetPoint.y());
@@ -2040,7 +2049,7 @@ void Map::setFollowMode(FollowMode mode)
        // retrieve the approximate current player position
        MapPoint targetPoint;
        m_player->approximatePosition(m_animate, QTime::currentTime(),
-				   targetPoint);
+                   targetPoint);
        
        // set the current pan to it's position to avoid jarring the user
        m_param.setPan(targetPoint.x(), targetPoint.y());
@@ -2050,20 +2059,21 @@ void Map::setFollowMode(FollowMode mode)
        m_followMode = tFollowNone;
        if (m_selectedItem)
        {
-	 MapPoint location;
-	 if (m_selectedItem->type() == tSpawn)
-	 {
-	   const Spawn* spawn = 
-	     (const Spawn*)m_selectedItem;
-	   spawn->approximatePosition(m_animate, QTime::currentTime(),
-				      location);
-	 }
-	 else
-	   location.setPoint(*m_selectedItem);
-	 m_param.setPan(location.x(), location.y());
+         MapPoint location;
+         if (m_selectedItem->type() == tSpawn)
+         {
+           const Spawn* spawn = 
+             (const Spawn*)m_selectedItem;
+           spawn->approximatePosition(m_animate, QTime::currentTime(),
+                          location);
+         }
+         else
+           location.setPoint(*m_selectedItem);
+         
+         m_param.setPan(location.x(), location.y());
        }
        else
-	 m_param.clearPan();
+         m_param.clearPan();
     }
     else // in case someone adds a new mode and forgets us...
       m_param.clearPan();
@@ -2342,13 +2352,41 @@ void Map::setWalkPathShowSelect(bool val)
     refreshMap ();
 }
 
+void Map::setPvP(bool val) 
+{ 
+  m_pvp = val; 
+
+  pSEQPrefs->setPrefBool("PvP", preferenceName(), m_pvp);
+  
+  // Can only have one style of PvP on at once
+  if (val && m_deityPvP)
+  {
+    m_deityPvP = false;
+    pSEQPrefs->setPrefBool("DeityPvP", preferenceName(), m_deityPvP);
+  }
+  if (val && m_racePvP)
+  {
+    m_racePvP = false;
+    pSEQPrefs->setPrefBool("RacePvP", preferenceName(), m_racePvP);
+  }
+
+  if(!m_cacheChanges)
+    refreshMap ();
+}
+
 void Map::setDeityPvP(bool val) 
 { 
   m_deityPvP = val; 
 
   pSEQPrefs->setPrefBool("DeityPvP", preferenceName(), m_deityPvP);
   
-  if (m_deityPvP && m_racePvP)
+  // Can only have one style of PvP on at once
+  if (val && m_pvp)
+  {
+    m_pvp = false;
+    pSEQPrefs->setPrefBool("PvP", preferenceName(), m_pvp);
+  }
+  if (val && m_racePvP)
   {
     m_racePvP = false;
     pSEQPrefs->setPrefBool("RacePvP", preferenceName(), m_racePvP);
@@ -2364,7 +2402,12 @@ void Map::setRacePvP(bool val)
   
   pSEQPrefs->setPrefBool("RacePvP", preferenceName(), m_racePvP);
 
-  if (m_racePvP && m_deityPvP)
+  if (val && m_pvp)
+  {
+    m_pvp = false;
+    pSEQPrefs->setPrefBool("PvP", preferenceName(), m_pvp);
+  }
+  if (val && m_racePvP)
   {
     m_deityPvP = false;
     pSEQPrefs->setPrefBool("DeityPvP", preferenceName(), m_deityPvP);
@@ -2392,7 +2435,7 @@ void Map::setMapOptimization(MapOptimizationMethod method)
 
   QString tmpPrefString = "OptimizeMethod";
   pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(),  
-			  (int)m_param.mapOptimizationMethod());
+              (int)m_param.mapOptimizationMethod());
 
   // set the offscreen images optimization method
   m_offscreen.setOptimization(m_param.pixmapOptimizationMethod());
@@ -2410,7 +2453,7 @@ void Map::setZoom(int val)
       reAdjust();
       
       if (!m_cacheChanges)
-	refreshMap ();
+        refreshMap ();
     }
   }
 }
@@ -2424,7 +2467,7 @@ void Map::setZoomDefault(int val)
 
   QString tmpPrefString = "ZoomDefault";
   pSEQPrefs->setPrefInt(tmpPrefString, preferenceName(),  
-			m_param.zoomDefault());
+            m_param.zoomDefault());
 
   emit zoomDefaultChanged(val);
 }
@@ -2680,6 +2723,7 @@ void Map::dumpInfo(QTextStream& out)
   out << "playerFloorRoom: " << m_param.playerFloorRoom() << endl;
   out << "FollowMode: " << m_followMode << endl;
   out << "MapPanning: " << m_mapPanning << endl;
+  out << "PvP: " << m_pvp << endl;
   out << "DeityPvP: " << m_deityPvP << endl;
   out << "RacePvP: " << m_racePvP << endl;
   out << "CacheAlwaysRepaint: " << m_mapCache.alwaysRepaint() << endl;
@@ -2694,9 +2738,9 @@ void Map::dumpInfo(QTextStream& out)
     for (int i = 0; i < maxFrameTimes; i++)
       totalTime += m_frameTimes[i];
   
-  fps = float(maxFrameTimes) / (totalTime / 1000.0);
+    fps = float(maxFrameTimes) / (totalTime / 1000.0);
 
-  out << "Actual FPS: " << fps << endl;
+    out << "Actual FPS: " << fps << endl;
   }
   out << "Paint Count: " << m_paintCount << endl;
   out << "Cache Paint Count: " << m_mapCache.paintCount() << endl;
@@ -2715,7 +2759,7 @@ void Map::showMapIconDialog()
   {
     // first create the dialog
     m_mapIconDialog = new MapIconDialog(this, caption() + " Icon Dialog",
-					false);
+                    false);
     
     // then pass it this objects map icons object
     m_mapIconDialog->setMapIcons(m_mapIcons);
@@ -2767,8 +2811,8 @@ void Map::reAdjust()
       // following spawn, get it's approximate location
       EQPoint location;
       ((const Spawn*)m_selectedItem)->approximatePosition(m_animate,
-								    QTime::currentTime(),
-								    location);
+                                    QTime::currentTime(),
+                                    location);
 
       // adjust around it's location
       m_param.reAdjust(&location);
@@ -2784,7 +2828,7 @@ void Map::reAdjust()
     // retrieve the approximate current player position
     MapPoint targetPoint;
     m_player->approximatePosition(m_animate, QTime::currentTime(), 
-				  targetPoint);
+                  targetPoint);
 
     // adjust around players location
     m_param.reAdjust(&targetPoint);
@@ -2800,8 +2844,8 @@ void Map::reAdjust()
   case tFOVDistanceBased:
     // scaled FOV Distance (m_fovDistance * scale)
     m_scaledFOVDistance = fixPtMulII(m_param.ratioIFixPt(), 
-				     MapParameters::qFormat,
-				     m_mapIcons->fovDistance());
+                     MapParameters::qFormat,
+                     m_mapIcons->fovDistance());
     break;
   case tFOVScaledClassic:
     m_scaledFOVDistance = m_mapIcons->fovDistance() * m_param.zoom();
@@ -2958,7 +3002,7 @@ void Map::paintMap (QPainter * p)
   if ((m_param.zoom() > 1) &&
       ((m_followMode == tFollowPlayer) &&
        (!inRect(m_param.screenBounds(), 
-		playerPos.x(), playerPos.y()))))
+        playerPos.x(), playerPos.y()))))
     reAdjust();
 
   // if following a spawn, and there is a spawn, make sure it's visible.
@@ -2970,8 +3014,8 @@ void Map::paintMap (QPainter * p)
     EQPoint location;
     
     ((const Spawn*)m_selectedItem)->approximatePosition(m_animate, 
-							drawTime, 
-							location);
+                            drawTime, 
+                            location);
     
     if (!inRect(m_param.screenBounds(), playerPos.x(), playerPos.y()))
       reAdjust();
@@ -2980,8 +3024,8 @@ void Map::paintMap (QPainter * p)
   // copy the background
   const QPixmap& tmpPix = m_mapCache.getMapImage(m_param);
   bitBlt(&m_offscreen, 0, 0,
-	 &tmpPix, 0, 0, tmpPix.width(), tmpPix.height(),
-	 CopyROP, true);
+     &tmpPix, 0, 0, tmpPix.width(), tmpPix.height(),
+     CopyROP, true);
 
   //Now, if we're animating, allow player to walk off. Grr, centering issue.
 
@@ -3011,10 +3055,10 @@ void Map::paintMap (QPainter * p)
   {
     const Point3D<int16_t>& safePoint = m_zoneMgr->safePoint();
     m_mapIcons->paintIcon(m_param, tmp, 
-			  m_mapIcons->icon(tIconTypeZoneSafePoint),
-			  safePoint, QString("Safe Point"),
-			  QPoint(m_param.calcXOffsetI(safePoint.x()),
-				 m_param.calcYOffsetI(safePoint.y())));
+              m_mapIcons->icon(tIconTypeZoneSafePoint),
+              safePoint, QString("Safe Point"),
+              QPoint(m_param.calcXOffsetI(safePoint.x()),
+                 m_param.calcYOffsetI(safePoint.y())));
   }
 
   if (m_showDoors)
@@ -3067,8 +3111,8 @@ void Map::paintMap (QPainter * p)
    
    // draw to the widget
   bitBlt(this, 0, 0,
-	 &m_offscreen, 0, 0, m_offscreen.width(), m_offscreen.height(),
-	 CopyROP, true);
+     &m_offscreen, 0, 0, m_offscreen.width(), m_offscreen.height(),
+     CopyROP, true);
 }
 
 void Map::paintPlayerBackground(MapParameters& param, QPainter& p)
@@ -3087,8 +3131,8 @@ void Map::paintPlayerBackground(MapParameters& param, QPainter& p)
 
   // FOV Distance 
   p.drawEllipse (m_param.playerXOffset() - m_scaledFOVDistance, 
-		 m_param.playerYOffset() - m_scaledFOVDistance, 
-		 sizeWH, sizeWH);
+         m_param.playerYOffset() - m_scaledFOVDistance, 
+         sizeWH, sizeWH);
   
   if(m_fovStyle == Qt::SolidPattern) 
     p.setRasterOp(Qt::CopyROP);
@@ -3117,8 +3161,8 @@ void Map::paintPlayerView(MapParameters& param, QPainter& p)
     
     p.setPen(yellow); // color
     p.drawLine( m_param.playerXOffset(), m_param.playerYOffset(),
-		m_param.playerXOffset() + int (sin( angle ) * m_scaledFOVDistance),
-		m_param.playerYOffset() + int (cos( angle ) * m_scaledFOVDistance) );
+        m_param.playerXOffset() + int (sin( angle ) * m_scaledFOVDistance),
+        m_param.playerYOffset() + int (cos( angle ) * m_scaledFOVDistance) );
     
     p.setPen(red); // color
     for ( int n = 2; n--; )
@@ -3127,8 +3171,8 @@ void Map::paintPlayerView(MapParameters& param, QPainter& p)
       int const start_y = m_param.playerYOffset() + start_offset_y;
       
       p.drawLine( start_x, start_y,
-		  start_x + int (sin( angle - fox_angle_offset ) * m_scaledFOVDistance),
-		  start_y + int (cos( angle - fox_angle_offset ) * m_scaledFOVDistance) );
+          start_x + int (sin( angle - fox_angle_offset ) * m_scaledFOVDistance),
+          start_y + int (cos( angle - fox_angle_offset ) * m_scaledFOVDistance) );
       start_offset_x *= -1;
       start_offset_y *= -1;
       fox_angle_offset *= -1;
@@ -3144,11 +3188,11 @@ void Map::paintPlayer(MapParameters& param, QPainter& p)
   p.setPen(gray);
   p.setBrush(white);
   p.drawEllipse(m_param.playerXOffset() - 3, 
-		m_param.playerYOffset() - 3, 6, 6);
+        m_param.playerYOffset() - 3, 6, 6);
 }
 
 void Map::paintDrops(MapParameters& param,
-		     QPainter& p)
+             QPainter& p)
 {
 #ifdef DEBUGMAP
   seqDebug("Paint the dropped items");
@@ -3174,10 +3218,10 @@ void Map::paintDrops(MapParameters& param,
  
     // make sure drop is within bounds
     if (!inRect(screenBounds, item->x(), item->y()) ||
-	(m_spawnDepthFilter &&
-	 ((item->z() > m_param.playerHeadRoom()) ||
-	  (item->z() < m_param.playerFloorRoom()))) || 
-	(!m_showFiltered && (filterFlags & FILTER_FLAG_FILTERED)))
+        (m_spawnDepthFilter &&
+         ((item->z() > m_param.playerHeadRoom()) ||
+          (item->z() < m_param.playerFloorRoom()))) || 
+        (!m_showFiltered && (filterFlags & FILTER_FLAG_FILTERED)))
       continue;
 
     mapIcon = m_mapIcons->icon(tIconTypeDrop);
@@ -3187,9 +3231,9 @@ void Map::paintDrops(MapParameters& param,
     {
       for (int i = 0; i < SIZEOF_FILTERS; i++)
       {
- 	flag = m_filterCheckOrdering[i];
- 	if (filterFlags & (1 << flag))
- 	  mapIcon.combine(m_mapIcons->icon(tIconTypeFilterFlagBase + flag));
+        flag = m_filterCheckOrdering[i];
+        if (filterFlags & (1 << flag))
+          mapIcon.combine(m_mapIcons->icon(tIconTypeFilterFlagBase + flag));
       }
     }
     
@@ -3199,13 +3243,13 @@ void Map::paintDrops(MapParameters& param,
     
     // paint the icon
     m_mapIcons->paintItemIcon(param, p, mapIcon, item,
-			      QPoint(param.calcXOffsetI(item->x()),
-				     param.calcYOffsetI(item->y())));
+                  QPoint(param.calcXOffsetI(item->x()),
+                     param.calcYOffsetI(item->y())));
   }
 }
 
 void Map::paintDoors(MapParameters& param,
-		     QPainter& p)
+             QPainter& p)
 {
 #ifdef DEBUGMAP
   seqDebug("Paint the door items");
@@ -3231,10 +3275,10 @@ void Map::paintDoors(MapParameters& param,
 
     // make sure doors are within bounds
     if (!inRect(screenBounds, item->x(), item->y()) ||
-	(m_spawnDepthFilter &&
-	 ((item->z() > m_param.playerHeadRoom()) ||
-	  (item->z() < m_param.playerFloorRoom()))) || 
-	(!m_showFiltered && (filterFlags & FILTER_FLAG_FILTERED)))
+        (m_spawnDepthFilter &&
+         ((item->z() > m_param.playerHeadRoom()) ||
+          (item->z() < m_param.playerFloorRoom()))) || 
+        (!m_showFiltered && (filterFlags & FILTER_FLAG_FILTERED)))
       continue;
 
     mapIcon = m_mapIcons->icon(tIconTypeDoor);
@@ -3248,9 +3292,9 @@ void Map::paintDoors(MapParameters& param,
     {
       for (int i = 0; i < SIZEOF_FILTERS; i++)
       {
-	flag = m_filterCheckOrdering[i];
-	if (filterFlags & (1 << flag))
-	  mapIcon.combine(m_mapIcons->icon(tIconTypeFilterFlagBase + flag));
+        flag = m_filterCheckOrdering[i];
+        if (filterFlags & (1 << flag))
+          mapIcon.combine(m_mapIcons->icon(tIconTypeFilterFlagBase + flag));
       }
     }
 
@@ -3260,10 +3304,10 @@ void Map::paintDoors(MapParameters& param,
 
     // paint the icon
     m_mapIcons->paintItemIcon(param, p, mapIcon, item, 
-			      QPoint(param.calcXOffsetI(item->x()),
-				     param.calcYOffsetI(item->y())));
+                  QPoint(param.calcXOffsetI(item->x()),
+                     param.calcYOffsetI(item->y())));
   }
-}		     
+}             
 
 const QColor& Map::raceTeamHighlightColor(const Spawn* spawn) const
 {
@@ -3283,7 +3327,7 @@ const QColor& Map::raceTeamHighlightColor(const Spawn* spawn) const
     // they are in your range
     switch ( (spawn->level() - playerLevel) + 8)
     {
-      // easy
+    // easy
     case 0:  // you are 8 above them
     case 1:  // you are 7 above them
       return green; 
@@ -3293,28 +3337,28 @@ const QColor& Map::raceTeamHighlightColor(const Spawn* spawn) const
       return darkGreen; 
       break;
       
-      // moderate
+    // moderate
     case 4:  // you are 4 above them
     case 5:  // you are 3 above them
       return blue; 
       break;
-	      case 6:  // you are 2 above them
+    case 6:  // you are 2 above them
     case 7:  // you are 1 above them
       return darkBlue; 
       break;
       
-      // even
+    // even
     case 8:  // you are even with them
       return white; 
       break;
-		
-      // difficult 
+        
+    // difficult 
     case 9:  // you are 1 below them
     case 10:  // you are 2 below them
       return yellow; 
       break;
-		
-      // downright hard
+        
+    // downright hard
     case 11:  // you are 3 below them
     case 12:  // you are 4 below them
       return magenta; 
@@ -3351,7 +3395,7 @@ const QColor& Map::deityTeamHighlightColor(const Spawn* spawn) const
     // they are in your range
     switch ( (spawn->level() - playerLevel) + 5)
     {
-      // easy
+    // easy
     case 0:  // you are 5 above them
     case 1:  // you are 4 above them
       return green; 
@@ -3360,7 +3404,7 @@ const QColor& Map::deityTeamHighlightColor(const Spawn* spawn) const
       return darkGreen; 
       break;
       
-      // moderate
+    // moderate
     case 3:  // you are 2 above them
       return blue; 
       break;
@@ -3368,12 +3412,12 @@ const QColor& Map::deityTeamHighlightColor(const Spawn* spawn) const
       return darkBlue; 
       break;
       
-      // even
+    // even
     case 5:  // you are even with them
       return white; 
       break;
       
-      // difficult 
+    // difficult 
     case 6:  // you are 1 below them
       return yellow; 
       break;
@@ -3396,8 +3440,8 @@ const QColor& Map::deityTeamHighlightColor(const Spawn* spawn) const
 }
 
 void Map::paintSpawns(MapParameters& param,
-		      QPainter& p,
-		      const QTime& drawTime)
+              QPainter& p,
+              const QTime& drawTime)
 {
 #ifdef DEBUGMAP
   seqDebug("Paint the spawns");
@@ -3438,7 +3482,7 @@ void Map::paintSpawns(MapParameters& param,
     if (spawn == NULL)
     {
       seqWarn("Got non Spawn from iterator over type tSpawn (Tyep:%d ID: %d)!",
-	      item->type(), item->id());
+          item->type(), item->id());
       continue;
     }
 #else
@@ -3450,11 +3494,11 @@ void Map::paintSpawns(MapParameters& param,
     filterFlags = item->filterFlags();
 
     if (((m_spawnDepthFilter &&
-	  ((item->z() > m_param.playerHeadRoom()) ||
-	   (item->z() < m_param.playerFloorRoom()))) || 
-	 (!m_showFiltered && (filterFlags & FILTER_FLAG_FILTERED)) ||
-	 (!m_showUnknownSpawns && spawn->isUnknown())) &&
-	(item != m_selectedItem))
+         ((item->z() > m_param.playerHeadRoom()) ||
+          (item->z() < m_param.playerFloorRoom()))) || 
+        (!m_showFiltered && (filterFlags & FILTER_FLAG_FILTERED)) ||
+        (!m_showUnknownSpawns && spawn->isUnknown())) &&
+        (item != m_selectedItem))
       continue;
  
     // get the approximate position of the spawn
@@ -3476,13 +3520,13 @@ void Map::paintSpawns(MapParameters& param,
 #endif
     /* Draw velocities */
     if (m_showVelocityLines &&
-	(spawn->deltaX() || spawn->deltaY())) // only if has a delta
+        (spawn->deltaX() || spawn->deltaY())) // only if has a delta
     {
       p.setPen (darkGray);
       p.drawLine (spawnOffsetXPos,
-		  spawnOffsetYPos,
-		  spawnOffsetXPos - spawn->deltaX(),
-		  spawnOffsetYPos - spawn->deltaY());
+          spawnOffsetYPos,
+          spawnOffsetXPos - spawn->deltaX(),
+          spawnOffsetYPos - spawn->deltaY());
     }
     
     //
@@ -3504,25 +3548,25 @@ void Map::paintSpawns(MapParameters& param,
       // if aggro range is known (non-zero), draw the aggro range circle
       if (range != 0)
       {
-	scaledRange = fixPtMulII(m_param.ratioIFixPt(), 
- 				 MapParameters::qFormat, range);
- 	sizeWH = scaledRange << 1;
-  	
-  	p.setBrush(NoBrush);
- 	p.setPen(red); 
- 	
- 	p.drawEllipse(spawnOffsetXPos - scaledRange, 
- 		      spawnOffsetYPos - scaledRange, 
- 		      sizeWH, 
- 		      sizeWH);
+        scaledRange = fixPtMulII(m_param.ratioIFixPt(), 
+                     MapParameters::qFormat, range);
+        sizeWH = scaledRange << 1;
+        
+        p.setBrush(NoBrush);
+        p.setPen(red); 
+        
+        p.drawEllipse(spawnOffsetXPos - scaledRange, 
+                  spawnOffsetYPos - scaledRange, 
+                  sizeWH, 
+                  sizeWH);
       }
     }
     else if (spawn->isOtherPlayer())
     {
       if (!up2date)
- 	mapIcon = m_mapIcons->icon(tIconTypeSpawnPlayerOld);
+        mapIcon = m_mapIcons->icon(tIconTypeSpawnPlayerOld);
       else
- 	mapIcon = m_mapIcons->icon(tIconTypeSpawnPlayer);
+        mapIcon = m_mapIcons->icon(tIconTypeSpawnPlayer);
     }
     else if (spawn->NPC() == SPAWN_NPC_CORPSE) // x for NPC corpse
       mapIcon = m_mapIcons->icon(tIconTypeSpawnNPCCorpse);
@@ -3540,9 +3584,9 @@ void Map::paintSpawns(MapParameters& param,
     {
       for (int i = 0; i < SIZEOF_FILTERS; i++)
       {
-	flag = m_filterCheckOrdering[i];
-	if (filterFlags & (1 << flag))
-	  mapIcon.combine(m_mapIcons->icon(tIconTypeFilterFlagBase + flag));
+        flag = m_filterCheckOrdering[i];
+        if (filterFlags & (1 << flag))
+          mapIcon.combine(m_mapIcons->icon(tIconTypeFilterFlagBase + flag));
       }
     }
     
@@ -3552,7 +3596,7 @@ void Map::paintSpawns(MapParameters& param,
      
     // if PvP is not enabled, don't try to do it, 
     // paint the current spawn and continue to the next
-    if (!m_racePvP && !m_deityPvP)
+    if (! (m_racePvP || m_pvp || m_deityPvP))
     {
       m_mapIcons->paintSpawnIcon(param, p, mapIcon, spawn, location, point);
       continue;
@@ -3570,47 +3614,108 @@ void Map::paintSpawns(MapParameters& param,
     else 
       owner = NULL;
     
-    // if spawn is another pc, on a different team, and within 8 levels
-    // highlight it flashing
-    if (m_racePvP)
+    if (m_pvp)
     {
+      // New Combined Zek rules can only PvP +/- 4 levels from you. So
+      // if spawn isn't you...
       if (spawn->isOtherPlayer())
       {
-	mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamBase -1 +
-					 spawn->raceTeam()));
- 	
- 	// if not the same team as us
- 	if (!m_player->isSameRaceTeam(spawn))
-	{
-	  mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamOtherRace));
-	  QPen p2(mapIcon.highlightPen());
-	  p2.setColor(raceTeamHighlightColor(spawn));
-	  mapIcon.setHighlightPen(p2);
-	}
+        int levelDiff = m_player->level() - spawn->level();
+        
+        if (levelDiff < 5)
+        {
+          // Gank away!
+          mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerPvPEnabled));
+
+          QPen p2(mapIcon.highlightPen());
+          
+          if (levelDiff < 0)
+          {
+            p2.setColor(yellow);
+          }
+          else if (levelDiff > 0)
+          {
+            p2.setColor(blue);
+          }
+          else
+          {
+            p2.setColor(white);
+          }
+          mapIcon.setHighlightPen(p2);
+        }
+      }
+      else
+      {
+        // Pet owned by someone who is pvp?
+        if (owner != NULL)
+        {
+          int levelDiff = m_player->level() - owner->level();
+
+          if (levelDiff < 5)
+          {
+            // Gank away! Add color circle.
+            mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPetPvPEnabled));
+
+            QPen p2(mapIcon.highlightPen());
+            
+            if (levelDiff < 0)
+            {
+              p2.setColor(yellow);
+            }
+            else if (levelDiff > 0)
+            {
+              p2.setColor(blue);
+            }
+            else
+            {
+              p2.setColor(white);
+            }
+            mapIcon.setHighlightPen(p2);
+          }
+        }
+      }
+    }
+    else if (m_racePvP)
+    {
+      // if spawn is another pc, on a different team, and within 8 levels
+      // highlight it flashing
+      if (spawn->isOtherPlayer())
+      {
+        mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamBase -1 +
+                     spawn->raceTeam()));
+     
+        // if not the same team as us
+        if (!m_player->isSameRaceTeam(spawn))
+        {
+          mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamOtherRace));
+          QPen p2(mapIcon.highlightPen());
+          p2.setColor(raceTeamHighlightColor(spawn));
+          mapIcon.setHighlightPen(p2);
+        }
       } // if decorate pvp
       // circle around pvp pets
       else if ((owner != NULL) && !m_player->isSameRaceTeam(owner))
- 	mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamOtherRacePet));
+        mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamOtherRacePet));
     } // end racePvp
     else if (m_deityPvP)
     {
       if (spawn->isOtherPlayer())
       {
- 	mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamBase -1 + 
-					 spawn->deityTeam()));
- 	
- 	// if not the same team as us
- 	if (!m_player->isSameDeityTeam(spawn))
- 	{
- 	  mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamOtherDeity));
-	  QPen p2(mapIcon.highlightPen());
-	  p2.setColor(deityTeamHighlightColor(spawn));
- 	  mapIcon.setHighlightPen(p2);
- 	}
+        mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamBase -1 + 
+                         spawn->deityTeam()));
+     
+        // if not the same team as us
+        if (!m_player->isSameDeityTeam(spawn))
+        {
+          mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamOtherDeity));
+          QPen p2(mapIcon.highlightPen());
+          p2.setColor(deityTeamHighlightColor(spawn));
+          mapIcon.setHighlightPen(p2);
+        }
       } // if decorate pvp
- 	// circle around deity pvp pets
+     // circle around deity pvp pets
       else if ((owner != NULL) && !m_player->isSameDeityTeam(owner))
- 	mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamOtherDeityPet));
+        mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamOtherDeityPet));
     } // end if deityPvP
     
     // paint the spawn icon
@@ -3624,7 +3729,7 @@ void Map::paintSpawns(MapParameters& param,
 }
 
 void Map::paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
-				     const QTime& drawTime)
+                     const QTime& drawTime)
 {
   if (m_selectedItem == NULL)
     return;
@@ -3637,30 +3742,30 @@ void Map::paintSelectedSpawnSpecials(MapParameters& param, QPainter& p,
   if (m_selectedItem->type() == tSpawn)
   {
     ((const Spawn*)m_selectedItem)->approximatePosition(m_animate, 
-							drawTime, 
-							location);
+                            drawTime, 
+                            location);
     m_mapIcons->paintSpawnIcon(param, p, m_mapIcons->icon(tIconTypeItemSelected), 
-			      (Spawn*)m_selectedItem, location, 
-			      QPoint(m_param.calcXOffsetI(location.x()), 
-				     m_param.calcYOffsetI(location.y())));
+                  (Spawn*)m_selectedItem, location, 
+                  QPoint(m_param.calcXOffsetI(location.x()), 
+                     m_param.calcYOffsetI(location.y())));
   }
   else if (m_selectedItem->type() == tPlayer)
   {
     m_mapIcons->paintSpawnIcon(param, p, m_mapIcons->icon(tIconTypeItemSelected), 
-			      (Spawn*)m_selectedItem, *m_selectedItem, 
-			      QPoint(m_param.calcXOffsetI(m_selectedItem->x()), 
-				     m_param.calcYOffsetI(m_selectedItem->y())));
+                  (Spawn*)m_selectedItem, *m_selectedItem, 
+                  QPoint(m_param.calcXOffsetI(m_selectedItem->x()), 
+                     m_param.calcYOffsetI(m_selectedItem->y())));
   }
   else
     m_mapIcons->paintItemIcon(param, p, m_mapIcons->icon(tIconTypeItemSelected), 
-			      m_selectedItem, 
-			      QPoint(param.calcXOffsetI(m_selectedItem->x()),
-				     param.calcYOffsetI(m_selectedItem->y())));
+                  m_selectedItem, 
+                  QPoint(param.calcXOffsetI(m_selectedItem->x()),
+                     param.calcYOffsetI(m_selectedItem->y())));
 }
 
 void Map::paintSelectedSpawnPointSpecials(MapParameters& param, 
-					  QPainter& p,
-					  const QTime& drawTime)
+                      QPainter& p,
+                      const QTime& drawTime)
 {
   const SpawnPoint* sp;
 
@@ -3673,9 +3778,9 @@ void Map::paintSelectedSpawnPointSpecials(MapParameters& param,
     return;
 
   m_mapIcons->paintSpawnPointIcon(m_param, p, 
-				 m_mapIcons->icon(tIconTypeSpawnPointSelected), sp,
-				 QPoint(param.calcXOffsetI(sp->x()),
-					param.calcYOffsetI(sp->y())));
+                 m_mapIcons->icon(tIconTypeSpawnPointSelected), sp,
+                 QPoint(param.calcXOffsetI(sp->x()),
+                    param.calcYOffsetI(sp->y())));
 }
 
 void Map::paintSpawnPoints( MapParameters& param, QPainter& p )
@@ -3701,35 +3806,35 @@ void Map::paintSpawnPoints( MapParameters& param, QPainter& p )
 
     // make sure spawn point is within bounds
     if (!inRect(screenBounds, sp->x(), sp->y()) ||
-	(m_spawnDepthFilter &&
-	 ((sp->z() > m_param.playerHeadRoom()) ||
-	  (sp->z() < m_param.playerFloorRoom()))))
+        (m_spawnDepthFilter &&
+         ((sp->z() > m_param.playerHeadRoom()) ||
+          (sp->z() < m_param.playerFloorRoom()))))
       continue;
 
     m_mapIcons->paintSpawnPointIcon(m_param, p, mapIcon, sp,
-				   QPoint(param.calcXOffsetI(sp->x()),
-					  param.calcYOffsetI(sp->y())));
+                   QPoint(param.calcXOffsetI(sp->x()),
+                      param.calcYOffsetI(sp->y())));
   }
 }
 
 
 void Map::paintDebugInfo(MapParameters& param, 
-			 QPainter& p, 
-			 float fps, 
-			 int drawTime)
+             QPainter& p, 
+             float fps, 
+             int drawTime)
 {
   // show coords of upper left corner and lower right corner
   p.setPen( yellow );
   QString ts;
   ts.sprintf( "(%d, %d)", 
-	      (int)(param.screenCenterX() * param.ratioX()), 
-	      (int)(param.screenCenterY() * param.ratioY()));
+          (int)(param.screenCenterX() * param.ratioX()), 
+          (int)(param.screenCenterY() * param.ratioY()));
   p.drawText( 10, 8, ts );
   ts.sprintf( "(%d, %d)",
-	      (int)((param.screenCenterX() - param.screenLength().width()) * 
-		    param.ratioX()),
-	      (int)((param.screenCenterY() - param.screenLength().height()) *
-		    param.ratioY()));
+          (int)((param.screenCenterX() - param.screenLength().width()) * 
+            param.ratioX()),
+          (int)((param.screenCenterY() - param.screenLength().height()) *
+            param.ratioY()));
   p.drawText( width() - 90, height() - 14, ts );
   
   // show frame times
@@ -3781,7 +3886,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
   }
   
   emit mouseLocation(m_param.invertXOffset(event->x()),
-		     m_param.invertYOffset(event->y()));
+             m_param.invertYOffset(event->y()));
   
   if ( !m_showTooltips)
   {
@@ -3812,9 +3917,9 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       long secs = sp->secsLeft();
     
       if ( secs > 0 )
-	remaining.sprintf( "%2ld:%02ld", secs / 60, secs % 60  );
+    remaining.sprintf( "%2ld:%02ld", secs / 60, secs % 60  );
       else
-	remaining = "now"; 
+    remaining = "now"; 
     }
 
     // construct and set the spawned string
@@ -3831,18 +3936,18 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     
     QString string;
     string.sprintf("SpawnPoint: %s\n"
-		   "%.3s/Z: %5d/%5d/%5d\n"
-		   "Last: %s\n"
-		   "Spawned: %s\t Remaining: %s\t Count: %d", 
-		   (const char*)sp->name(),
-		   showeq_params->retarded_coords ? "Y/X" : "X/Y",
-		   showeq_params->retarded_coords ? sp->y() : sp->x(),
-		   showeq_params->retarded_coords ? sp->x() : sp->y(),
-		   sp->z(),
-		   (const char*)sp->last(), 
-		   (const char*)spawned,
-		   (const char*)remaining,
-		   sp->count());
+           "%.3s/Z: %5d/%5d/%5d\n"
+           "Last: %s\n"
+           "Spawned: %s\t Remaining: %s\t Count: %d", 
+           (const char*)sp->name(),
+           showeq_params->retarded_coords ? "Y/X" : "X/Y",
+           showeq_params->retarded_coords ? sp->y() : sp->x(),
+           showeq_params->retarded_coords ? sp->x() : sp->y(),
+           sp->z(),
+           (const char*)sp->last(), 
+           (const char*)spawned,
+           (const char*)remaining,
+           sp->count());
 
     m_mapTip->setText( string  );
     QPoint popPoint = mapToGlobal(event->pos());
@@ -3864,10 +3969,10 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       QString guild;
       if (spawn->guildID() < MAX_GUILDS)
       {
-	if (!spawn->guildTag().isEmpty())
-	  guild.sprintf("<%s>", (const char*)spawn->guildTag());
-	else
-	  guild = QString::number(spawn->guildID());
+        if (!spawn->guildTag().isEmpty())
+          guild.sprintf("<%s>", (const char*)spawn->guildTag());
+        else
+          guild = QString::number(spawn->guildID());
       }
       else
           guild = " ";
@@ -3875,74 +3980,74 @@ void Map::mouseMoveEvent( QMouseEvent* event )
       QString hp;
       
       if (spawn->HP() <= 0)
-	hp = "<= 0";
-      else
-	hp = QString::number(spawn->HP());
+        hp = "<= 0";
+          else
+        hp = QString::number(spawn->HP());
 
       QString lastName = spawn->lastName();
       if (!lastName.isEmpty())
       {
-	// if the spawn isn't a player enclose the name in parenthesis
-	if (!spawn->isPlayer())
-	{
-	  lastName.prepend("(");
-	  lastName.append(") ");
-	}
-	else
-	  lastName.append(" ");
+        // if the spawn isn't a player enclose the name in parenthesis
+        if (!spawn->isPlayer())
+        {
+          lastName.prepend("(");
+          lastName.append(") ");
+        }
+        else
+          lastName.append(" ");
       }
       else 
-	lastName = "";
+        lastName = "";
 
       string.sprintf("%s %s%s\n"
-		     "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5d\n"
-		     "Race: %s\t Class: %s", 
-		     (const char*)spawn->transformedName().utf8(),
-		     (const char*)lastName.utf8(),
-		     guild.latin1(),
-		     spawn->level(), (const char*)hp,
-		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
-		     showeq_params->retarded_coords ? spawn->y() : spawn->x(),
-		     showeq_params->retarded_coords ? spawn->x() : spawn->y(),
-		     item->z(),
-		     (const char*)spawn->raceString(), 
-		     (const char*)spawn->classString());
+             "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5d\n"
+             "Race: %s\t Class: %s", 
+             (const char*)spawn->transformedName().utf8(),
+             (const char*)lastName.utf8(),
+             guild.latin1(),
+             spawn->level(), (const char*)hp,
+             showeq_params->retarded_coords ? "Y/X" : "X/Y",
+             showeq_params->retarded_coords ? spawn->y() : spawn->x(),
+             showeq_params->retarded_coords ? spawn->x() : spawn->y(),
+             item->z(),
+             (const char*)spawn->raceString(), 
+             (const char*)spawn->classString());
       if (m_deityPvP)
-	string += " Deity: " + spawn->deityName();
+        string += " Deity: " + spawn->deityName();
 
       if (spawn->isNPC())
-	string += "\tType: " + spawn->typeString();
+        string += "\tType: " + spawn->typeString();
       else
-       	string += "\tGender: " + spawn->genderName();
+           string += "\tGender: " + spawn->genderName();
 
       string += "\nEquipment: " + spawn->info();
     }
     else
     {
       string.sprintf("%s\n"
-		     "%.3s/Z: %5d/%5d/%5d\n"
-		     "Race: %s\t Class: %s", 
-		     (const char*)item->transformedName().utf8(),
-		     showeq_params->retarded_coords ? "Y/X" : "X/Y",
-		     showeq_params->retarded_coords ? item->y() : item->x(),
-		     showeq_params->retarded_coords ? item->x() : item->y(),
-		     item->z(),
-		     (const char*)item->raceString(), 
-		     (const char*)item->classString());
+             "%.3s/Z: %5d/%5d/%5d\n"
+             "Race: %s\t Class: %s", 
+             (const char*)item->transformedName().utf8(),
+             showeq_params->retarded_coords ? "Y/X" : "X/Y",
+             showeq_params->retarded_coords ? item->y() : item->x(),
+             showeq_params->retarded_coords ? item->x() : item->y(),
+             item->z(),
+             (const char*)item->raceString(), 
+             (const char*)item->classString());
 
       if ((door) && (door->zonePoint() != 0xFFFFFFFF))
       {
-	const zonePointStruct* zp = m_zoneMgr->zonePoint(door->zonePoint());
-	if (zp)
-	{
-	  QString doorInfo("\nDestination Zone: %1 (%2/%3/%4 - %5)");
-	  if (showeq_params->retarded_coords)
-	    string += doorInfo.arg(m_zoneMgr->zoneNameFromID(zp->zoneId))
-	      .arg(zp->y).arg(zp->x).arg(zp->z).arg(zp->heading);
-	  else
-	    string += doorInfo.arg(m_zoneMgr->zoneNameFromID(zp->zoneId))
-	      .arg(zp->x).arg(zp->y).arg(zp->z).arg(zp->heading);
-	}
+        const zonePointStruct* zp = m_zoneMgr->zonePoint(door->zonePoint());
+        if (zp)
+        {
+          QString doorInfo("\nDestination Zone: %1 (%2/%3/%4 - %5)");
+          if (showeq_params->retarded_coords)
+            string += doorInfo.arg(m_zoneMgr->zoneNameFromID(zp->zoneId))
+              .arg(zp->y).arg(zp->x).arg(zp->z).arg(zp->heading);
+          else
+            string += doorInfo.arg(m_zoneMgr->zoneNameFromID(zp->zoneId))
+              .arg(zp->x).arg(zp->y).arg(zp->z).arg(zp->heading);
+        }
       }
     }
 
@@ -4017,20 +4122,20 @@ void Map::changeItem(const Item* item, uint32_t changeType)
       // follow mode is follow spawn, check if this is the selected spawn
       // and if so, reAdjust around it's position.
       if (item == m_selectedItem)
-	reAdjust();
+        reAdjust();
     }
     else if (m_followMode == tFollowPlayer)
     {
       // follow mode is follow player, check if this is the player spawn
       // and if so, reAdjust around it's position.
       if (item == (const Item*)m_player)
-	reAdjust();
+        reAdjust();
     }
   }
 }
 
 const Item* Map::closestSpawnToPoint(const QPoint& pt, 
-				     uint32_t& closestDistance) const
+                     uint32_t& closestDistance) const
 {
   const Item* closestItem = NULL;
 
@@ -4041,7 +4146,7 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
   const Item* item;
   spawnItemType itemTypes[] = { tSpawn, tDrop, tDoors, tPlayer };
   const bool* showType[] = { &m_showSpawns, &m_showDrops, 
-			     &m_showDoors, &m_showPlayer };
+                 &m_showDoors, &m_showPlayer };
   
   for (uint8_t i = 0; i < (sizeof(itemTypes) / sizeof(spawnItemType)); i++)
   {
@@ -4058,35 +4163,35 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
       item = it.current();
     
       if (m_spawnDepthFilter &&
-	  ((item->z() > m_param.playerHeadRoom()) ||
-	   (item->z() < m_param.playerFloorRoom())))
-	continue;
+          ((item->z() > m_param.playerHeadRoom()) ||
+           (item->z() < m_param.playerFloorRoom())))
+        continue;
 
       if (!m_showFiltered && (item->filterFlags() & FILTER_FLAG_FILTERED))
-	continue;
+        continue;
 
       if ((item->type() == tSpawn) || (item->type() == tPlayer))
       {
-	if (!m_showUnknownSpawns && ((const Spawn*)item)->isUnknown())
-	  continue;
+        if (!m_showUnknownSpawns && ((const Spawn*)item)->isUnknown())
+          continue;
 
-	((const Spawn*)item)->approximatePosition(m_animate, 
-						  QTime::currentTime(), 
-						  location);
+        ((const Spawn*)item)->approximatePosition(m_animate, 
+                              QTime::currentTime(), 
+                              location);
 
-	testPoint.setPoint(m_param.calcXOffsetI(location.x()), 
-			   m_param.calcYOffsetI(location.y()), 0);
+        testPoint.setPoint(m_param.calcXOffsetI(location.x()), 
+                   m_param.calcYOffsetI(location.y()), 0);
       }
       else
-	testPoint.setPoint(m_param.calcXOffsetI(item->x()), 
-			   m_param.calcYOffsetI(item->y()), 0);
+        testPoint.setPoint(m_param.calcXOffsetI(item->x()), 
+                   m_param.calcYOffsetI(item->y()), 0);
 
       distance = testPoint.calcDist2DInt(pt);
 
       if (distance < closestDistance)
       {
-	closestDistance = distance;
-	closestItem = item;
+        closestDistance = distance;
+        closestItem = item;
       }
     }
   }
@@ -4095,7 +4200,7 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
 }
 
 const SpawnPoint* Map::closestSpawnPointToPoint(const QPoint& pt, 
-						uint32_t& closestDistance) const
+                        uint32_t& closestDistance) const
 {
   const SpawnPoint* closestSP = NULL;
 
@@ -4110,12 +4215,12 @@ const SpawnPoint* Map::closestSpawnPointToPoint(const QPoint& pt,
     ++it;
 
     if (m_spawnDepthFilter &&
-	((sp->z() > m_param.playerHeadRoom()) ||
-	 (sp->z() < m_param.playerFloorRoom())))
+        ((sp->z() > m_param.playerHeadRoom()) ||
+         (sp->z() < m_param.playerFloorRoom())))
       continue;
 
     testPoint.setPoint(m_param.calcXOffsetI(sp->x()), 
-		       m_param.calcYOffsetI(sp->y()), 0);
+               m_param.calcYOffsetI(sp->y()), 0);
 
     distance = testPoint.calcDist2DInt(pt);
 
@@ -4206,21 +4311,21 @@ void Map::saveMapImage(void)
 
   if (!filename.isEmpty())
     m_offscreen.save(filename, 
-		     filter.left(filter.find(' ')));
+             filter.left(filter.find(' ')));
 }
 
 //----------------------------------------------------------------------
 // MapFrame
 MapFrame::MapFrame(FilterMgr* filterMgr,
-		   MapMgr* mapMgr,
-		   Player* player, 
-		   SpawnShell* spawnshell,
-		   ZoneMgr* zoneMgr,
-		   SpawnMonitor* spawnMonitor,
-		   const QString& prefName, 
-		   const QString& defCaption,
-		   const char* mapName,
-		   QWidget* parent, const char* name)
+           MapMgr* mapMgr,
+           Player* player, 
+           SpawnShell* spawnshell,
+           ZoneMgr* zoneMgr,
+           SpawnMonitor* spawnMonitor,
+           const QString& prefName, 
+           const QString& defCaption,
+           const char* mapName,
+           QWidget* parent, const char* name)
   : SEQWindow(prefName + "Frame", defCaption, parent, name),
     m_mapPreferenceName(prefName)
 {
@@ -4245,13 +4350,13 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 
   // setup runtime filter
   m_filterMgr->registerRuntimeFilter(m_mapPreferenceName, 
-				     m_runtimeFilterFlag,
-				     m_runtimeFilterFlagMask);
+                     m_runtimeFilterFlag,
+                     m_runtimeFilterFlagMask);
 
   // Create map
   m_map = new Map(mapMgr, player, spawnshell, zoneMgr, spawnMonitor,
-		  m_mapPreferenceName, m_runtimeFilterFlagMask, 
-		  this, mapName);
+          m_mapPreferenceName, m_runtimeFilterFlagMask, 
+          this, mapName);
   m_vertical->addWidget(m_map);
 
   // setup bottom control window
@@ -4277,9 +4382,9 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
     m_zoomBox->hide();
   connect(m_zoom, SIGNAL(valueChanged(int)),
-	  m_map, SLOT(setZoom(int)));
+      m_map, SLOT(setZoom(int)));
   connect(m_map, SIGNAL(zoomChanged(int)),
-	  m_zoom, SLOT(setValue(int)));
+      m_zoom, SLOT(setValue(int)));
 
   // setup Player Location display
   m_playerLocationBox = new QHBox(m_topControlBox);
@@ -4294,9 +4399,9 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, false))
     m_playerLocationBox->hide();
   connect (player, SIGNAL(posChanged(int16_t,int16_t,int16_t,
-					int16_t,int16_t,int16_t,int32_t)), 
-	   this, SLOT(setPlayer(int16_t,int16_t,int16_t,
-				int16_t,int16_t,int16_t,int32_t)));
+                    int16_t,int16_t,int16_t,int32_t)), 
+       this, SLOT(setPlayer(int16_t,int16_t,int16_t,
+                int16_t,int16_t,int16_t,int32_t)));
 
   // setup Mouse Location display
   m_mouseLocationBox = new QHBox(m_topControlBox);
@@ -4311,7 +4416,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
     m_mouseLocationBox->hide();
   connect (m_map, SIGNAL(mouseLocation(int16_t, int16_t)), 
-	   this, SLOT(mouseLocation(int16_t, int16_t)));
+       this, SLOT(mouseLocation(int16_t, int16_t)));
 
   // setup Filter
   m_filterBox = new QHBox(m_topControlBox);
@@ -4325,10 +4430,10 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
     m_filterBox->hide();
 #ifdef MAPFRAME_IMMEDIATE_REGEX
   connect (m_filter, SIGNAL(textChanged (const QString &)), 
-	   this, SLOT(setregexp(const QString &)));
+       this, SLOT(setregexp(const QString &)));
 #else
   connect (m_filter, SIGNAL(returnPressed()),
-	   this, SLOT(filterConfirmed()));
+       this, SLOT(filterConfirmed()));
 #endif
 
   // setup Frame Rate control
@@ -4345,9 +4450,9 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
     m_frameRateBox->hide();
   m_frameRate->setValue(m_map->frameRate());
   connect(m_frameRate, SIGNAL(valueChanged(int)),
-	  m_map, SLOT(setFrameRate(int)));
+      m_map, SLOT(setFrameRate(int)));
   connect(m_map, SIGNAL(frameRateChanged(int)),
-	  m_frameRate, SLOT(setValue(int)));
+      m_frameRate, SLOT(setValue(int)));
 
   // setup Pan Controls
   m_panBox = new QHBox(m_bottomControlBox);
@@ -4363,13 +4468,13 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 1))
     m_panBox->hide();
   connect(m_panX, SIGNAL(valueChanged(int)),
-	  m_map, SLOT(setPanOffsetX(int)));
+      m_map, SLOT(setPanOffsetX(int)));
   connect(m_panY, SIGNAL(valueChanged(int)),
-	  m_map, SLOT(setPanOffsetY(int)));
+      m_map, SLOT(setPanOffsetY(int)));
   connect(m_map, SIGNAL(panXChanged(int)),
-	  m_panX, SLOT(setValue(int)));
+      m_panX, SLOT(setValue(int)));
   connect(m_map, SIGNAL(panYChanged(int)),
-	  m_panY, SLOT(setValue(int)));
+      m_panY, SLOT(setValue(int)));
 
   m_depthControlBox = new QHBox(m_bottomControlBox);
   tmpLabel = new QLabel(m_depthControlBox);
@@ -4382,16 +4487,16 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_floor->setValue(m_map->floorRoom());
   tmpPrefString = "ShowDepthFilterControls";
   if (!pSEQPrefs->getPrefBool(tmpPrefString, prefString, 
-			      (m_map->mapLineStyle() == tMap_DepthFiltered)))
+                  (m_map->mapLineStyle() == tMap_DepthFiltered)))
     m_depthControlBox->hide();
   connect(m_head, SIGNAL(valueChanged(int)),
-	  m_map, SLOT(setHeadRoom(int)));
+      m_map, SLOT(setHeadRoom(int)));
   connect(m_map, SIGNAL(headRoomChanged(int)),
-	  m_head, SLOT(setValue(int)));
+      m_head, SLOT(setValue(int)));
   connect(m_floor, SIGNAL(valueChanged(int)),
-	  m_map, SLOT(setFloorRoom(int)));
+      m_map, SLOT(setFloorRoom(int)));
   connect(m_map, SIGNAL(floorRoomChanged(int)),
-	  m_floor, SLOT(setValue(int)));
+      m_floor, SLOT(setValue(int)));
 
   // add our own menu items to the maps menu
   QPopupMenu* mapMenu = m_map->menu();
@@ -4399,15 +4504,15 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   // insert a seperator to seperate our stuff from the rest
   mapMenu->insertSeparator(-1);
   m_id_topControl = mapMenu->insertItem("Show Top Controls",
-					this, SLOT(toggle_top_controls(int)));
+                    this, SLOT(toggle_top_controls(int)));
 
   m_id_bottomControl = mapMenu->insertItem("Show Bottom Controls",
-					   this, 
-					   SLOT(toggle_bottom_controls(int)));
+                       this, 
+                       SLOT(toggle_bottom_controls(int)));
 
   mapMenu->insertItem("Status Font...",
-		      this, 
-		      SLOT(set_font(int)));
+              this, 
+              SLOT(set_font(int)));
 
   // insert a seperator to seperate main controls from sub-menus
   mapMenu->insertSeparator(-1);
@@ -4416,33 +4521,33 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   subMenu = new QPopupMenu();
   subMenu->setCheckable(true);
   m_id_zoom = subMenu->insertItem("Show Zoom Controls", 
-				  this, SLOT(toggle_zoom(int)));
+                  this, SLOT(toggle_zoom(int)));
   m_id_playerLocation = subMenu->insertItem("Show Player Location",
-					    this, 
-					    SLOT(toggle_playerLocation(int)));
+                        this, 
+                        SLOT(toggle_playerLocation(int)));
   m_id_mouseLocation = subMenu->insertItem("Show Mouse Location",
-					   this, 
-					   SLOT(toggle_mouseLocation(int)));
+                       this, 
+                       SLOT(toggle_mouseLocation(int)));
 
   m_id_filter = subMenu->insertItem("Show Find",
-				    this, SLOT(toggle_filter(int)));
+                    this, SLOT(toggle_filter(int)));
 
   m_id_topControl_Options = mapMenu->insertItem("Top Controls", subMenu);
 
   subMenu = new QPopupMenu();
   subMenu->setCheckable(true);
   m_id_frameRate = subMenu->insertItem("Show Frame Rate",
-				       this, SLOT(toggle_frameRate(int)));
+                       this, SLOT(toggle_frameRate(int)));
   m_id_pan = subMenu->insertItem("Show Pan",
-				 this, SLOT(toggle_pan(int)));
+                 this, SLOT(toggle_pan(int)));
   m_id_depthControlRoom = subMenu->insertItem("Show Depth Filter Controls",
-					   this, 
-					   SLOT(toggle_depthControls(int)));
+                       this, 
+                       SLOT(toggle_depthControls(int)));
   m_id_bottomControl_Options = mapMenu->insertItem("Bottom Controls", subMenu);
 
   // setup signal to initialize menu items when the map is about to be displayeed
   connect(mapMenu, SIGNAL(aboutToShow()),
-	  this, SLOT(init_Menu()));
+      this, SLOT(init_Menu()));
 }
 
 MapFrame::~MapFrame()
@@ -4475,7 +4580,7 @@ void MapFrame::setregexp(const QString &str)
   if (!m_lastFilter.isEmpty())
   {
     m_filterMgr->runtimeFilterRemFilter(m_runtimeFilterFlag,
-					m_lastFilter);
+                    m_lastFilter);
     needCommit = true;
   }
 
@@ -4530,7 +4635,7 @@ void MapFrame::mouseLocation(int16_t x, int16_t y)
 }
 
 void MapFrame::setPlayer(int16_t x, int16_t y, int16_t z, 
-			 int16_t Dx, int16_t Dy, int16_t Dz, int32_t degrees)
+             int16_t Dx, int16_t Dy, int16_t Dz, int32_t degrees)
 {
   QString playerPos;
   playerPos.sprintf(" %+5hd, %+5hd, %+5hd", y, x, z);
@@ -4574,29 +4679,29 @@ void MapFrame::init_Menu(void)
 {
   QPopupMenu* mapMenu = m_map->menu();
   mapMenu->setItemEnabled(m_id_topControl_Options, 
-			  m_topControlBox->isVisible());
+              m_topControlBox->isVisible());
   mapMenu->setItemChecked(m_id_topControl,
-			  m_topControlBox->isVisible());
+              m_topControlBox->isVisible());
   if (m_topControlBox->isVisible())
   {
     mapMenu->setItemChecked(m_id_zoom, m_zoomBox->isVisible());
     mapMenu->setItemChecked(m_id_playerLocation, 
-			    m_playerLocationBox->isVisible());
+                m_playerLocationBox->isVisible());
     mapMenu->setItemChecked(m_id_mouseLocation, 
-			    m_mouseLocation->isVisible());
+                m_mouseLocation->isVisible());
     mapMenu->setItemChecked(m_id_filter, m_filterBox->isVisible());
   }
 
   mapMenu->setItemEnabled(m_id_bottomControl_Options,
-			  m_bottomControlBox->isVisible());
+              m_bottomControlBox->isVisible());
   mapMenu->setItemChecked(m_id_bottomControl,
-			  m_bottomControlBox->isVisible());
+              m_bottomControlBox->isVisible());
   if (m_bottomControlBox->isVisible())
   {
     mapMenu->setItemChecked(m_id_frameRate, m_frameRateBox->isVisible());
     mapMenu->setItemChecked(m_id_pan, m_panBox->isVisible());
     mapMenu->setItemChecked(m_id_depthControlRoom, 
-			    m_depthControlBox->isVisible());
+                m_depthControlBox->isVisible());
   }
 }
 
@@ -4641,8 +4746,8 @@ void MapFrame::set_font(int id)
 
   // get new status font
   newFont = QFontDialog::getFont(&ok, 
-				 font(),
-				 this, name);
+                 font(),
+                 this, name);
 
   // if the user clicked ok and selected a valid font, set it
   if (ok)

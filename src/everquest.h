@@ -883,8 +883,7 @@ struct spawnStruct
 /*0007*/ uint8_t  eyecolor1;      // Player's left eye color
 /*0008*/ uint8_t  is_pet;         // 0=no, 1=yes
 /*0009*/ uint32_t petOwnerId;     // If this is a pet, the spawn id of owner
-/*0013*/ uint8_t  gm;             // 0=no, 1=gm %%% Wrong but compile...
-/*0014*/ uint8_t unknown0013[22];
+/*0013*/ uint8_t unknown0013[23];
 /*0036*/ uint8_t  afk;            // 0=no, 1=afk
 /*0037*/ uint8_t  eyecolor2;      // Left eye color
 /*0038*/ uint8_t  NPC;            // 0=player,1=npc,2=pc corpse,3=npc corpse,a
@@ -917,7 +916,9 @@ struct spawnStruct
 /*0157*/ uint8_t  hairstyle;      // Hair style
 /*0158*/ uint8_t unknown0157[6];
 /*0164*/ int8_t   guildrank;      // 0=normal, 1=officer, 2=leader
-/*0165*/ uint8_t unknown0165[10];
+/*0165*/ uint8_t unknown0165[4];
+/*0169*/ uint8_t  gm;             // 0=no, 1=gm
+/*0170*/ uint8_t unknown0170[5];
 union 
 {
 /*0175*/ int8_t equip_chest2;     // Second place in packet for chest texture (usually 0xFF in live packets)
