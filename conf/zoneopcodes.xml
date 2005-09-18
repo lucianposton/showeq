@@ -763,4 +763,8 @@
     <opcode id="5e51" name="OP_TGB" updated="06/29/05">
         <comment>Client telling server to set targetgroupbuff</comment>
     </opcode>
+    <opcode id="7416" name="OP_LeaderExpUpdate" updated="06/29/05">
+        <comment>Leadership AA Exp Update</comment>
+        <payload dir="server" typename="leadExpUpdateStruct" sizechecktype="match"/>
+    </opcode>
 </seqopcodes>

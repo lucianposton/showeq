@@ -1,6 +1,6 @@
 Version: $Id$ $Name$
 
-purple (09/16/05)
+purple (09/17/05)
 -------------------
 + Updated version to 5.1.0.0
 + Found GM flag in spawnStruct
@@ -8,6 +8,11 @@ purple (09/16/05)
 	flashing circle is blue for lower level, white for same level, yellow
 	for higher level. All spawns outside +/-4 are normal. Pets are circled
 	according to their owners)
++ Finished mapping charProfileStruct for post 9/13
++ Removed output of leadership exp on zoning since the exp format changed and
+	wasn't immediately obvious
++ Added opcode for leadership exp update and simple struct. No handler.
++ Added some new stuff to charProfileStruct (timers, leadAAActive)
 
 purple (09/13/05)
 -------------------

@@ -351,11 +351,8 @@ void Player::player(const uint8_t* data)
   m_maxExp = calc_exp(m_level, m_race, m_class);
   m_tickExp = (m_maxExp - m_minExp) / 330;
 
-#if 0
-  // Removed from PP 9/13/2005? %%%
   m_currentExp = player->exp;
   m_currentAltExp = player->expAA;
-#endif
   m_currentAApts = player->aa_spent;
   
   emit expChangedInt (m_currentExp, m_minExp, m_maxExp);

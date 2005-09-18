@@ -689,16 +689,9 @@ void MessageShell::player(const uint8_t* data)
   const charProfileStruct* player = (const charProfileStruct*)data;
   QString message;
 
-#if 0
-  message.sprintf("Name: '%s' Last: '%s' Title: '%s' Suffix: '%s'", 
-		  player->name, player->lastName, player->title, player->suffix);
-  m_messages->addMessage(MT_Player, message);
-#else
-  //%%% title and suffix gone 9/13/2005?
   message.sprintf("Name: '%s' Last: '%s'", 
 		  player->name, player->lastName);
   m_messages->addMessage(MT_Player, message);
-#endif
 
   message.sprintf("Level: %d", player->level);
   m_messages->addMessage(MT_Player, message);
@@ -726,8 +719,6 @@ void MessageShell::player(const uint8_t* data)
           player->currentRadCrystals, player->currentEbonCrystals);
   m_messages->addMessage(MT_Player, message);
 
-#if 0
-  // Exp gone from PP 9/13/2005? %%%
   message = "Exp: " + Commanate(player->exp);
   m_messages->addMessage(MT_Player, message);
 
@@ -736,13 +727,17 @@ void MessageShell::player(const uint8_t* data)
       ", aa unspent: " + Commanate(player->aa_unspent) + ")";
   m_messages->addMessage(MT_Player, message);
 
-  message.sprintf("GroupLeadAA: %.1f%% (unspent: %d)",
-      (player->expGroupLeadAA)/10.0, player->groupLeadAAUnspent);
+#if 0 
+  // Format for the aa values used to 0-1000 for group, 0-2000 for raid,
+  // but now it's different. Just drop it for now. %%%
+  message = "GroupLeadAA: " + Commanate(player->expGroupLeadAA) + 
+      " (unspent: " + Commanate(player->groupLeadAAUnspent) + ")";
   m_messages->addMessage(MT_Player, message);
-  message.sprintf("RaidLeadAA: %.1f%% (unspent: %d)",
-      (player->expRaidLeadAA)/20.0, player->raidLeadAAUnspent);
+  message = "RaidLeadAA: " + Commanate(player->expRaidLeadAA) + 
+      " (unspent: " + Commanate(player->raidLeadAAUnspent) + ")";
   m_messages->addMessage(MT_Player, message);
 #endif
+
   message.sprintf("Group: %s %s %s %s %s %s", player->groupMembers[0],
     player->groupMembers[1],
     player->groupMembers[2],

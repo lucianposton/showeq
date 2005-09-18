@@ -1492,6 +1492,9 @@ Map::Map(MapMgr* mapMgr,
   tmpPrefString = "CacheAlwaysRepaint";
   m_mapCache.setAlwaysRepaint(pSEQPrefs->getPrefBool(tmpPrefString, prefString, false));
 
+  tmpPrefString = "PvP";
+  m_pvp = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
+
   tmpPrefString = "DeityPvP";
   m_deityPvP = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
@@ -3622,7 +3625,7 @@ void Map::paintSpawns(MapParameters& param,
       {
         int levelDiff = m_player->level() - spawn->level();
         
-        if (levelDiff < 5)
+        if (abs(levelDiff) < 5)
         {
           // Gank away!
           mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerPvPEnabled));
@@ -3651,7 +3654,7 @@ void Map::paintSpawns(MapParameters& param,
         {
           int levelDiff = m_player->level() - owner->level();
 
-          if (levelDiff < 5)
+          if (abs(levelDiff) < 5)
           {
             // Gank away! Add color circle.
             mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPetPvPEnabled));
