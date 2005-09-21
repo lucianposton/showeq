@@ -462,22 +462,24 @@
     NULL,                     // 453
     NULL,                     // 454
     "Kobold",                 // 455
-    NULL,                     // 456
-    NULL,                     // 457
-    NULL,                     // 458
-    NULL,                     // 459
-    NULL,                     // 460
-    NULL,                     // 461
-    NULL,                     // 462
-    NULL,                     // 463
-    NULL,                     // 464
-    NULL,                     // 465
-    NULL,                     // 466
-    NULL,                     // 467
-    NULL,                     // 468
-    NULL,                     // 469
-    NULL,                     // 470
-    NULL,                     // 471
+    "Sporali",                // 456
+    "Clockwork Gnome",        // 457
+    "Orc",                    // 458
+    "Corathus",               // 459
+    "Coral",                  // 460
+    "Drachnid",               // 461
+    "Drachnid Cocoon",        // 462
+    "Fungus Patch",           // 463
+    "Gargoyle",               // 464
+    "Witheran",               // 465
+    "Dark Lord",              // 466
+    "Shiliskin",              // 467
+    "Snake",                  // 468
+    "Evil Eye",               // 469
+    "Minotaur",               // 470
+    "Zombie",                 // 471
     "Clockwork Boar",         // 472
+    "Fairy",                  // 473
+    "Korlach Boss",           // 474
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 

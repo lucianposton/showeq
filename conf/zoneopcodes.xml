@@ -456,7 +456,7 @@
         <payload dir="both" typename="groupFollowStruct" sizechecktype="match"/>
         <comment>Accepting to join a group</comment>
     </opcode>
-    <opcode id="3397" name="OP_ItemPacket" updated="06/29/05">
+    <opcode id="41b9" name="OP_ItemPacket" updated="09/13/05">
         <comment>old ItemCode</comment>
         <payload dir="server" typename="itemPacketStruct" sizechecktype="none"/>
     </opcode>
