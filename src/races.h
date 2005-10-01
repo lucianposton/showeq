@@ -460,7 +460,7 @@
     NULL,                     // 451
     NULL,                     // 452
     NULL,                     // 453
-    NULL,                     // 454
+    "Werewolf",               // 454
     "Kobold",                 // 455
     "Sporali",                // 456
     "Clockwork Gnome",        // 457
