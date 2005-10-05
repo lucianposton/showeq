@@ -72,6 +72,7 @@ static const char *id="@(#) $Id$ $Name$";
 #define   DISABLE_SPAWNLOG_OPTION       24
 #define   ITEMDB_ENABLE                 25
 #define   PLAYBACK_TCPDUMP_FILE_OPTION  26
+#define   WORLD_LOG_OPTION              27
 #define   ITEMDB_DATA_FILENAME_OPTION   28
 #define   ITEMDB_RAW_FILENAME_OPTION    29
 #define   ITEMDB_DATABASES_ENABLED      30
@@ -133,6 +134,7 @@ static struct option option_list[] = {
   {"unknown-zone-log-filename",    required_argument,  NULL,  UNKNOWN_LOG_FILENAME_OPTION},
   {"log-all",                      no_argument,        NULL,  GLOBAL_LOG_OPTION},
   {"log-zone",                     no_argument,        NULL,  ZONE_LOG_OPTION},
+  {"log-world",                    no_argument,        NULL,  WORLD_LOG_OPTION},
   {"log-unknown-zone",             no_argument,        NULL,  UNKNOWN_ZONE_LOG_OPTION},
   {"log-raw",                      no_argument,        NULL,  RAW_LOG_OPTION},
   {"systime-spawntime",            no_argument,        NULL,  SYSTIME_SPAWNTIME_OPTION},
@@ -557,6 +559,14 @@ int main (int argc, char **argv)
 	   break;
          }
 
+         /* Log world packets */
+         case WORLD_LOG_OPTION:
+         {
+             pSEQPrefs->setPrefBool("LogWorldPackets", "PacketLogging", true,
+                     XMLPreferences::Runtime);
+             break;
+         }
+
 
          /* Log only unfamiliar zone change packets */
          case UNKNOWN_ZONE_LOG_OPTION:
@@ -808,10 +818,12 @@ void displayOptions(const char* progName)
   printf ("      --systime-spawntime               Show spawn time using UNIX systtem time\n");
   printf ("      --ip-address=IP                   Client IP address\n");
   printf ("      --mac-address=MAC                 Client MAC address as 00:00:00:00:00:00\n");
-  printf ("      --log-all                         Log all packets to global logfile\n");
+  printf ("      --log-all                         Log all packets before processing\n");
   printf ("      --global-log-filename=FILE        Use FILE for above packet logging\n");
-  printf ("      --log-zone                        Like --log-all, but only zone data\n");
+  printf ("      --log-zone                        Log post-processed zone data\n");
   printf ("      --zone-log-filename=FILE          Use FILE for above packet logging\n");
+  printf ("      --log-world                       Log post-processed world data\n");
+  printf ("      --world-log-filename=FILE         Use FILE for above packet logging\n");
   printf ("      --log-unknown-zone                Log only unrecognized zone data\n");
   printf ("      --unknown-zone-log-filename=FILE  Use FILE for above packet logging\n");
   printf ("      --log-raw                         Log some unprocessed raw data\n");

@@ -1,11 +1,13 @@
 Version: $Id$ $Name$
 
-purple (09/21/05)
+purple (10/05/05)
+-------------------
 + Fixed item links in the terminal and message window so they match correctly
 	based on the new item link format (thanks to ksmith and EQItems for
 	all their great open info about items in EQ and being very on the ball
 	with the last patch)
 + New races from .exe
++ Allow world logging from the commandline
 
 purple (09/17/05)
 -------------------
