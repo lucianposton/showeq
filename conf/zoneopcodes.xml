@@ -512,7 +512,7 @@
     <opcode id="524e" name="OP_BazaarSearch" updated="06/29/05">
         <payload dir="client" typename="bazaarSearchQueryStruct" sizechecktype="none"/>
         <payload dir="server" typename="bazaarSearchResponseStruct" sizechecktype="modulus"/>
-        <payload dir="server" typename="utf8" sizechecktype="none"/>
+        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
         <comment>Bazaar search tool</comment>
     </opcode>
     <opcode id="4f11" name="OP_NewSpawn" updated="06/29/05">
