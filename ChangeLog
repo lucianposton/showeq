@@ -2,12 +2,20 @@ Version: $Id$ $Name$
 
 purple (10/05/05)
 -------------------
++ Updated version 5.2.0.0
 + Fixed item links in the terminal and message window so they match correctly
 	based on the new item link format (thanks to ksmith and EQItems for
 	all their great open info about items in EQ and being very on the ball
 	with the last patch)
 + New races from .exe
 + Allow world logging from the commandline
++ Sanity check the max length specified in SessionRequest/Response so that
+	we don't malloc huge amounts for packets.
++ Check SessionRequest/Response length before assuming a packet that starts
+	with the correct opcode is an EQ packet. This should weed out MS Teredo
+	packets which were being seen as SessionRequests and causing all sorts
+	of havoc.
++ Got rid of the unknown payload type utf8 warning
 
 purple (09/17/05)
 -------------------

@@ -676,7 +676,7 @@ bool OPCodeXmlContentHandler::startElement(const QString&, const QString&,
       if (!value.isEmpty())
       {
 	if (!m_currentPayload->setType(m_typeDB, value))
-	  seqWarn("Warning: Unknown payload typename '%s' for opcode '%04x",
+	  seqWarn("Unknown payload typename '%s' for opcode '%04x'",
 		  value.latin1(), m_currentOPCode->opcode());
       }
     }

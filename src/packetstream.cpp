@@ -48,6 +48,12 @@ static const char* const EQStreamStr[] = {"client-world", "world-client", "clien
 // an arq sequence may be from a wrap and not just be really old.
 const int16_t arqSeqWrapCutoff = 1024;
 
+// Arbitrary cutoff for maximum packet sizes. Don't let little changes
+// in session request struct cause huge mallocs! EQ currently never sends
+// a packet larger than 512 bytes so this should be pretty safe. This is
+// applied before packets are recombined.
+const uint32_t maxPacketSize = 25600;
+
 //----------------------------------------------------------------------
 // EQPacketStream class methods
 
@@ -908,18 +914,47 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
     case OP_SessionRequest:
     {
       // Session request from client to server.
+      // 
+      // Sanity check the size. Don't assume any packet we see is an EQ
+      // session request, since we're gonna cause a huge freakin' malloc
+      // on the maxlength of the session which for some reason some people
+      // won't enjoy!
+      if (packet.payloadLength() != sizeof(SessionRequestStruct))
+      {
+          // Either SessionRequestStruct changed or this isn't a session
+          // request.
+#if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
+          seqDebug("EQPacket: Ignoring SessionRequest %s:%u->%s:%u with invalid size %d.",
+            ((EQUDPIPPacketFormat&) packet).getIPv4SourceA().ascii(),
+            ((EQUDPIPPacketFormat&) packet).getSourcePort(),
+            ((EQUDPIPPacketFormat&) packet).getIPv4DestA().ascii(),
+            ((EQUDPIPPacketFormat&) packet).getDestPort(),
+            packet.payloadLength());
+#endif
+          break;
+      }
+
+      // Pull off session request information
+      SessionRequestStruct* request = (SessionRequestStruct*) packet.payload();
+
+      m_sessionId = eqntohuint32((uint8_t*)&(request->sessionId));
+      m_maxLength = eqntohuint32((uint8_t*)&(request->maxLength));
+
+      // Sanity check the max length requested
+      if (m_maxLength > maxPacketSize)
+      {
+        seqWarn("EQPacket: SessionRequest wanted a max packet size of %d which is above our sane max packet size of %d. Using our max",
+          m_maxLength, maxPacketSize);
+
+        m_maxLength = maxPacketSize;
+      }
+
 #if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
       seqDebug("EQPacket: SessionRequest found, resetting expected seq, stream %s (%d) (session tracking %s)",
 	    EQStreamStr[m_streamid], m_streamid,
         (m_session_tracking_enabled == 2 ? "locked on" : 
           (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
 #endif
-      
-      // Pull off session request information
-      SessionRequestStruct* request = (SessionRequestStruct*) packet.payload();
-
-      m_sessionId = eqntohuint32((uint8_t*)&(request->sessionId));
-      m_maxLength = eqntohuint32((uint8_t*)&(request->maxLength));
 
 #if defined(PACKET_SESSION_DIAG)
       seqDebug("EQPacket: SessionRequest %s:%u->%s:%u, sessionId %u maxLength %u, awaiting key for stream %s (%d)",
@@ -959,6 +994,43 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
     case OP_SessionResponse:
     {
       // Session response from server
+
+      // Sanity check the size. Don't assume any packet we see is an EQ
+      // session response, since we're gonna cause a huge freakin' malloc
+      // on the maxlength of the session which for some reason some people
+      // won't enjoy!
+      if (packet.payloadLength() != sizeof(SessionResponseStruct))
+      {
+          // Either SessionResponseStruct changed or this isn't a session
+          // response.
+#if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
+          seqDebug("EQPacket: Ignoring SessionResponse %s:%u->%s:%u with invalid size %d.",
+            ((EQUDPIPPacketFormat&) packet).getIPv4SourceA().ascii(),
+            ((EQUDPIPPacketFormat&) packet).getSourcePort(),
+            ((EQUDPIPPacketFormat&) packet).getIPv4DestA().ascii(),
+            ((EQUDPIPPacketFormat&) packet).getDestPort(),
+            packet.payloadLength());
+#endif
+          break;
+      }
+
+      // Pull off session response information
+      SessionResponseStruct* response = 
+        (SessionResponseStruct*) packet.payload();
+
+      m_maxLength = eqntohuint32((uint8_t*)&(response->maxLength));
+      m_sessionKey = eqntohuint32((uint8_t*)&(response->key));
+      m_sessionId = eqntohuint32((uint8_t*)&(response->sessionId));
+
+      // Sanity check the max length requested
+      if (m_maxLength > maxPacketSize)
+      {
+        seqWarn("EQPacket: SessionResponse wanted a max packet size of %d which is above our sane max packet size of %d. Using our max",
+          m_maxLength, maxPacketSize);
+
+        m_maxLength = maxPacketSize;
+      }
+
 #if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
       seqDebug("EQPacket: SessionResponse found %s:%u->%s:%u, resetting expected seq, stream %s (%d) (session tracking %s)",
         ((EQUDPIPPacketFormat&) packet).getIPv4SourceA().ascii(),
@@ -970,14 +1042,6 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
 #endif
       
-      // Pull off session response information
-      SessionResponseStruct* response = 
-        (SessionResponseStruct*) packet.payload();
-
-      m_maxLength = eqntohuint32((uint8_t*)&(response->maxLength));
-      m_sessionKey = eqntohuint32((uint8_t*)&(response->key));
-      m_sessionId = eqntohuint32((uint8_t*)&(response->sessionId));
-
 #if defined(PACKET_SESSION_DIAG)
       seqDebug("EQPacket: SessionResponse sessionId %u maxLength %u, key is %u for stream %s (%d)",
         m_sessionId, m_maxLength, m_sessionKey, 
