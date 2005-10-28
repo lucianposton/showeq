@@ -1994,9 +1994,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_WearChange", SP_Zone, DIR_Server|DIR_Client,
 		      "SpawnUpdateStruct", SZC_Match,
 		      m_spawnShell, SLOT(updateSpawnInfo(const uint8_t*)));
-   m_packet->connect2("OP_InitialHPUpdate", SP_Zone, DIR_Server|DIR_Client,
-		      "hpNpcUpdateStruct", SZC_Match,
-		      m_spawnShell, SLOT(updateNpcHP(const uint8_t*)));
    m_packet->connect2("OP_HPUpdate", SP_Zone, DIR_Server|DIR_Client,
 		      "hpNpcUpdateStruct", SZC_Match,
 		      m_spawnShell, SLOT(updateNpcHP(const uint8_t*)));
@@ -2084,9 +2081,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_LevelUpdate", SP_Zone, DIR_Server,
 		      "levelUpUpdateStruct", SZC_Match,
 		      m_player, SLOT(updateLevel(const uint8_t*)));
-   m_packet->connect2("OP_InitialHPUpdate", SP_Zone, DIR_Server|DIR_Client,
-		      "hpNpcUpdateStruct", SZC_Match,
-		      m_player, SLOT(updateNpcHP(const uint8_t*)));
    m_packet->connect2("OP_HPUpdate", SP_Zone, DIR_Server|DIR_Client,
 		      "hpNpcUpdateStruct", SZC_Match,
 		      m_player, SLOT(updateNpcHP(const uint8_t*)));

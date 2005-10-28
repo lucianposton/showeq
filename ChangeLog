@@ -1,5 +1,12 @@
 Version: $Id$ $Name$
 
+purple (10/27/05)
+-------------------
++ Updated version to 5.2.1.0
++ Fixed all opcodes for patch on 10/27 (thanks ieatacid for help)
++ Redid spawnStruct for patch, added showhelm flag
++ Added 8 bytes to the end of charProfileStruct, including showhelm flag
+
 purple (10/05/05)
 -------------------
 + Updated version 5.2.0.0

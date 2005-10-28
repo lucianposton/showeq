@@ -205,7 +205,7 @@
     NULL,                 // 0xc4
     NULL,                 // 0xc5
     NULL,                 // 0xc6
-    NULL,                 // 0xc7
+    "IvoryBone",          // 0xc7
     NULL,                 // 0xc8
     NULL,                 // 0xc9
     NULL,                 // 0xca
