@@ -913,8 +913,9 @@ struct playerAAStruct {
 */ 
 struct spawnStruct
 {
-/*0000*/ uint8_t  gm;             // 0=no, 1=gm %%% wrong but compile...
-/*0001*/ uint8_t unknown0001[2];
+/*0000*/ uint8_t unknown0000;
+/*0001*/ uint8_t  gm;             // 0=no, 1=gm
+/*0002*/ uint8_t unknown0003;
 /*0003*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
 /*0004*/ uint8_t unknown0004;
 /*0005*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay

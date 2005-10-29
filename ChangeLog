@@ -1,5 +1,12 @@
 Version: $Id$ $Name$
 
+purple (10/29/05)
+------------------
++ Updated version to 5.2.2.0
++ Fixed guild member list parsing so include a new unknown flag (possibly 
+	will be prospective flag?)
++ Found gm flag in spawnStruct
+
 purple (10/27/05)
 -------------------
 + Updated version to 5.2.1.0

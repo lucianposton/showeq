@@ -58,6 +58,7 @@ class GuildMember
   uint8_t m_guildTributeOn; // 0 = off, 1 = on
   uint8_t m_guildTributeDonated;
   time_t m_guildTributeLastDonation;
+  uint32_t m_unknown1;
   QString m_publicNote;
   uint16_t m_zoneId;
   uint16_t m_zoneInstance;

@@ -56,6 +56,10 @@ GuildMember::GuildMember(NetStream& netStream)
   // 4 byte guild tribute last donation timestamp
   m_guildTributeLastDonation = time_t(netStream.readUInt32());
 
+  // 4 byte unknown. Maybe this will be a full member/prospect flag instead
+  // of using guild rank?
+  m_unknown1 = netStream.readUInt32();
+
   // Null-terminated public note
   m_publicNote = netStream.readText();
 
