@@ -717,11 +717,13 @@ fi;
 qt_target_version="3.2.0"
 
 if test $qt_major_version -le 2 ; then
-  AC_MSG_ERROR([Please Make sure qt $qt_target_version or later is installed!!!]);
-elif test $qt_major_version -le 3 ; then
+  AC_MSG_ERROR([ShowEQ requires qt $qt_target_version or later, but does not support qt 4 yet. Please make sure qt $qt_target_version or later is installed!!!]); 
+elif test $qt_major_version -eq 3 ; then
   if test $qt_minor_version -lt 2 ; then
-    AC_MSG_ERROR([Please Make sure qt $qt_target_version or later is installed!!!]);
+    AC_MSG_ERROR([ShowEQ requires qt $qt_target_version or later, but does not support qt 4 yet. Please make sure qt $qt_target_version or later is installed!!!]); 
   fi;
+else
+  AC_MSG_ERROR([ShowEQ requires qt $qt_target_version or later, but does not support qt 4 yet. Please make sure qt $qt_target_version or later is installed!!!]); 
 fi;
 
 dnl ************************************

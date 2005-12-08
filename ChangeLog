@@ -1,5 +1,13 @@
 Version: $Id$ $Name$
 
+purple (12/07/05)
+------------------
++ Updated version to 5.2.3.0
++ Beefed up configure checks for qt so people don't get qt4 when they
+	upgrade to the latest version
++ Redid most world opcodes, zone opcodes
++ Updated structs for 12/7 live
+
 purple (10/29/05)
 ------------------
 + Updated version to 5.2.2.0

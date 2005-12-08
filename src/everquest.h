@@ -552,33 +552,34 @@ struct ClientZoneEntryStruct
 
 /*
 ** New Zone Code
-** Length: 700 Octets
+** Length: 796 Octets
 ** OpCode: NewZoneCode
 */
 struct newZoneStruct
 {
 /*0000*/ char    name[64];                 // Character name
-/*0064*/ char    shortName[32];            // Zone Short Name
-/*0096*/ char    longName[278];            // Zone Long Name
-/*0374*/ uint8_t ztype;                    // Zone type
-/*0375*/ uint8_t fog_red[4];               // Zone fog (red)
-/*0379*/ uint8_t fog_green[4];             // Zone fog (green)
-/*0383*/ uint8_t fog_blue[4];              // Zone fog (blue)
-/*0387*/ uint8_t unknown0374[87];          // *** Placeholder
-/*0474*/ uint8_t sky;                      // Zone sky
-/*0475*/ uint8_t unknown0475[13];          // *** Placeholder
-/*0488*/ float   zone_exp_multiplier;      // Experience Multiplier
-/*0492*/ float   safe_y;                   // Zone Safe Y
-/*0496*/ float   safe_x;                   // Zone Safe X
-/*0500*/ float   safe_z;                   // Zone Safe Z
-/*0504*/ float   unknown0504;              // *** Placeholder
-/*0508*/ float   underworld;               // Underworld
-/*0512*/ float   minclip;                  // Minimum view distance
-/*0516*/ float   maxclip;                  // Maximum view distance
-/*0520*/ uint8_t unknown0520[172];         // *** Placeholder
-/*0692*/ uint8_t unknown0692[4];           // *** Placeholder (06/29/2005)
-/*0696*/ uint8_t unknown0696[4];           // *** Placeholder (09/13/2005)
-}; /*0700*/
+/*0064*/ char    shortName[32];            // Zone Short Name (maybe longer?)
+/*0096*/ char    unknown0096[96];
+/*0192*/ char    longName[278];            // Zone Long Name
+/*0470*/ uint8_t ztype;                    // Zone type
+/*0471*/ uint8_t fog_red[4];               // Zone fog (red)
+/*0475*/ uint8_t fog_green[4];             // Zone fog (green)
+/*0479*/ uint8_t fog_blue[4];              // Zone fog (blue)
+/*0483*/ uint8_t unknown0483[87];          // *** Placeholder
+/*0570*/ uint8_t sky;                      // Zone sky
+/*0571*/ uint8_t unknown0571[13];          // *** Placeholder
+/*0584*/ float   zone_exp_multiplier;      // Experience Multiplier
+/*0588*/ float   safe_y;                   // Zone Safe Y
+/*0592*/ float   safe_x;                   // Zone Safe X
+/*0596*/ float   safe_z;                   // Zone Safe Z
+/*0600*/ float   unknown0600;              // *** Placeholder
+/*0604*/ float   underworld;               // Underworld
+/*0608*/ float   minclip;                  // Minimum view distance
+/*0612*/ float   maxclip;                  // Maximum view distance
+/*0616*/ uint8_t unknown0616[172];         // *** Placeholder
+/*0788*/ uint8_t unknown0788[4];           // *** Placeholder (06/29/2005)
+/*0792*/ uint8_t unknown0792[4];           // *** Placeholder (09/13/2005)
+}; /*0796*/
 
 
 /*
@@ -904,7 +905,7 @@ struct playerAAStruct {
 
 /* 
 ** Generic Spawn Struct 
-** Length: 385 Octets 
+** Length: 582 Octets 
 ** Used in: 
 **   spawnZoneStruct
 **   dbSpawnStruct
@@ -913,116 +914,112 @@ struct playerAAStruct {
 */ 
 struct spawnStruct
 {
-/*0000*/ uint8_t unknown0000;
-/*0001*/ uint8_t  gm;             // 0=no, 1=gm
-/*0002*/ uint8_t unknown0003;
-/*0003*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
-/*0004*/ uint8_t unknown0004;
-/*0005*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
-/*0006*/ uint8_t  face;	          // Face id for players
-/*0007*/ char     name[64];       // Player's Name
-/*0071*/ int16_t  deity;          // Player's Deity
-/*0073*/ uint16_t unknown0073;
-/*0075*/ float    size;           // Model size
-/*0079*/ uint32_t unknown0079;
-/*0083*/ uint8_t  NPC;            // 0=player,1=npc,2=pc corpse,3=npc corpse,a
-/*0084*/ uint8_t  invis;          // Invis (0=not, 1=invis)
-/*0085*/ uint8_t  haircolor;      // Hair color
-/*0086*/ uint8_t  curHp;          // Current hp %%% wrong
-/*0087*/ uint8_t  max_hp;         // (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
-/*0088*/ uint8_t  findable;       // 0=can't be found, 1=can be found
-/*0089*/ uint8_t unknown0089[5];
-/*0094*/ signed   deltaHeading:10;// change in heading
+/*0000*/ uint8_t  invis;          // Invis (0=not, 1=invis)
+/*0001*/ uint8_t unknown0001[4];
+/*0005*/ uint8_t  helm;           // Helm texture
+/*0006*/ char     lastName[32];   // Player's Lastname
+/*0038*/ uint8_t  hairstyle;      // Hair style
+/*0039*/ uint32_t spawnId;        // Spawn Id
+/*0043*/ uint8_t  light;          // Spawn's lightsource
+/*0044*/ uint8_t  eyecolor2;      // Left eye color
+/*0045*/ uint8_t unknown0045[5];
+/*0050*/ uint8_t  afk;            // 0=no, 1=afk
+/*0051*/ uint32_t petOwnerId;     // If this is a pet, the spawn id of owner
+/*0055*/ uint8_t unknown0055;
+/*0056*/ uint8_t  set_to_0xFF[8]; // ***Placeholder (all ff)
+/*0064*/ uint8_t  is_npc;         // 0=no, 1=yes
+/*0065*/ uint8_t  face;	          // Face id for players
+/*0066*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
+/*0067*/ uint8_t  beardcolor;     // Beard color
+/*0068*/ uint8_t  is_pet;         // 0=no, 1=yes
+/*0069*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
+/*0101*/ uint8_t  curHp;          // Current hp
+/*0102*/ uint8_t unknown0102[72];
+/*0174*/ uint8_t  NPC;            // 0=player,1=npc,2=pc corpse,3=npc corpse,a
+/*0175*/ uint8_t  level;          // Spawn Level
+/*0176*/ uint32_t race;           // Spawn race
+/*0180*/ uint8_t  class_;         // Player's class
+/*0181*/ char     title[32];      // Title
+/*0213*/ uint8_t  beard;          // Beard style (not totally, sure but maybe!)
+/*0214*/ int8_t   guildrank;      // 0=normal, 1=officer, 2=leader
+/*0215*/ uint8_t unknown0215[3];
+/*0218*/ union 
+         {
+             struct 
+             {
+               /*0218*/ uint32_t equip_helmet;    // Equipment: Helmet Visual
+               /*0222*/ uint32_t equip_chest;     // Equipment: Chest Visual
+               /*0226*/ uint32_t equip_arms;      // Equipment: Arms Visual
+               /*0230*/ uint32_t equip_bracers;   // Equipment: Bracers Visual
+               /*0234*/ uint32_t equip_hands;     // Equipment: Hands Visual
+               /*0238*/ uint32_t equip_legs;      // Equipment: Legs Visual
+               /*0242*/ uint32_t equip_feet;      // Equipment: Feet Visual
+               /*0246*/ uint32_t equip_primary;   // Equipment: Primary Visual
+               /*0250*/ uint32_t equip_secondary; // Equipment: Secondary Visual
+             } equip;
+             /*0218*/ uint32_t equipment[9];  // Array elements correspond to struct equipment above
+         };
+/*0254*/ uint8_t  gm;             // 0=no, 1=gm
+/*0255*/ uint8_t  eyecolor1;      // Player's left eye color
+/*0256*/ uint8_t unknown0254[28];
+/*0284*/ float    size;           // Model size
+/*0288*/ signed   deltaHeading:10;// change in heading
          signed   x:19;           // x coord
          signed   padding0054:3;  // ***Placeholder
-/*0098*/ signed   y:19;           // y coord
+/*0292*/ signed   y:19;           // y coord
          signed   animation:10;   // animation
          signed   padding0058:3;  // ***Placeholder
-/*0102*/ signed   z:19;           // z coord
+/*0296*/ signed   z:19;           // z coord
          signed   deltaY:13;      // change in y
-/*0106*/ signed   deltaX:13;      // change in x
+/*0300*/ signed   deltaX:13;      // change in x
          unsigned heading:12;     // heading
          signed   padding0066:7;  // ***Placeholder
-/*0110*/ signed   deltaZ:13;      // change in z
+/*0304*/ signed   deltaZ:13;      // change in z
          signed   padding0070:19; // ***Placeholder
-/*0114*/ uint8_t  eyecolor1;      // Player's left eye color
-/*0115*/ uint8_t unknown0115[24];
-/*0139*/ uint8_t  showhelm;       // 0=no, 1=yes
-/*0140*/ uint8_t unknown0140[4];
-/*0144*/ uint8_t  is_npc;         // 0=no, 1=yes
-/*0145*/ uint8_t  hairstyle;      // Hair style
-/*0146*/ uint8_t  beard;          // Beard style (not totally, sure but maybe!)
-/*0147*/ uint8_t unknown0147[4];
-/*0151*/ uint8_t  level;          // Spawn Level
-/*0152*/ uint8_t  unknown0259[4]; // ***Placeholder
-/*0156*/ uint8_t  beardcolor;     // Beard color
-/*0157*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
-/*0189*/ uint32_t petOwnerId;     // If this is a pet, the spawn id of owner
-/*0193*/ int8_t   guildrank;      // 0=normal, 1=officer, 2=leader
-/*0194*/ uint8_t unknown0194[3];
-/*0197*/ union 
+/*0308*/ uint8_t  unknown0259[4]; // ***Placeholder
+/*0312*/ uint8_t  haircolor;      // Hair color
+/*0313*/ union 
          {
              struct 
              {
-               /*0197*/ uint32_t equip_helmet;    // Equipment: Helmet Visual
-               /*0201*/ uint32_t equip_chest;     // Equipment: Chest Visual
-               /*0205*/ uint32_t equip_arms;      // Equipment: Arms Visual
-               /*0209*/ uint32_t equip_bracers;   // Equipment: Bracers Visual
-               /*0213*/ uint32_t equip_hands;     // Equipment: Hands Visual
-               /*0217*/ uint32_t equip_legs;      // Equipment: Legs Visual
-               /*0221*/ uint32_t equip_feet;      // Equipment: Feet Visual
-               /*0225*/ uint32_t equip_primary;   // Equipment: Primary Visual
-               /*0229*/ uint32_t equip_secondary; // Equipment: Secondary Visual
-             } equip;
-             /*0197*/ uint32_t equipment[9];  // Array elements correspond to struct equipment above
+                 /*0313*/ Color_Struct color_helmet;    // Color of helmet item
+                 /*0317*/ Color_Struct color_chest;     // Color of chest item
+                 /*0321*/ Color_Struct color_arms;      // Color of arms item
+                 /*0325*/ Color_Struct color_bracers;   // Color of bracers item
+                 /*0329*/ Color_Struct color_hands;     // Color of hands item
+                 /*0333*/ Color_Struct color_legs;      // Color of legs item
+                 /*0337*/ Color_Struct color_feet;      // Color of feet item
+                 /*0341*/ Color_Struct color_primary;   // Color of primary item
+                 /*0345*/ Color_Struct color_secondary; // Color of secondary item
+             } equipment_colors;
+             /*0313*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
          };
-/*0233*/ float    runspeed;       // Speed when running
-/*0036*/ uint8_t  afk;            // 0=no, 1=afk
-/*0238*/ uint32_t guildID;        // Current guild
-/*0242*/ char     title[32];      // Title
-/*0274*/ uint8_t unknown0274;
-/*0275*/ uint8_t  set_to_0xFF[8]; // ***Placeholder (all ff)
-/*0283*/ uint8_t  helm;           // Helm texture
-/*0284*/ uint32_t race;           // Spawn race
-/*0288*/ uint32_t unknown0288;
-/*0292*/ char     lastName[32];   // Player's Lastname
-/*0324*/ float    walkspeed;      // Speed when walking
-/*0328*/ uint8_t unknown0328;
-/*0329*/ uint8_t  is_pet;         // 0=no, 1=yes
-/*0330*/ uint8_t  light;          // Spawn's lightsource %%% wrong
-/*0331*/ uint8_t  class_;         // Player's class
-/*0332*/ uint8_t  eyecolor2;      // Left eye color
-/*0333*/ uint8_t unknown0333;
-/*0334*/ uint8_t  gender;         // Gender (0=male, 1=female)
-/*0335*/ uint8_t  bodytype;       // Bodytype
-/*0336*/ uint8_t unknown0336[3];
+/*0349*/ uint32_t guildID;        // Current guild
+/*0353*/ uint8_t  max_hp;         // (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
+/*0354*/ uint8_t unknown0354[6];
+/*0360*/ char     name[64];       // Player's Name
+/*0424*/ uint8_t unknown0424[128];
+/*0552*/ uint8_t  findable;       // 0=can't be found, 1=can be found
 union 
 {
-/*0339*/ int8_t equip_chest2;     // Second place in packet for chest texture (usually 0xFF in live packets)
+/*0553*/ int8_t equip_chest2;     // Second place in packet for chest texture (usually 0xFF in live packets)
                                   // Not sure why there are 2 of them, but it effects chest texture!
-/*0339*/ int8_t mount_color;      // drogmor: 0=white, 1=black, 2=green, 3=red
+/*0553*/ int8_t mount_color;      // drogmor: 0=white, 1=black, 2=green, 3=red
                                   // horse: 0=brown, 1=white, 2=black, 3=tan
 };
-/*0340*/ uint32_t spawnId;        // Spawn Id
-/*0344*/ uint8_t unknown0344[4];
-/*0348*/ union 
-         {
-             struct 
-             {
-                 /*0348*/ Color_Struct color_helmet;    // Color of helmet item
-                 /*0352*/ Color_Struct color_chest;     // Color of chest item
-                 /*0356*/ Color_Struct color_arms;      // Color of arms item
-                 /*0360*/ Color_Struct color_bracers;   // Color of bracers item
-                 /*0364*/ Color_Struct color_hands;     // Color of hands item
-                 /*0368*/ Color_Struct color_legs;      // Color of legs item
-                 /*0372*/ Color_Struct color_feet;      // Color of feet item
-                 /*0376*/ Color_Struct color_primary;   // Color of primary item
-                 /*0380*/ Color_Struct color_secondary; // Color of secondary item
-             } equipment_colors;
-             /*0348*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
-         };
-/*0384*/ uint8_t  lfg;            // 0=off, 1=lfg on
-/*0385*/
+/*0554*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
+/*0555*/ uint8_t unknown0555;
+/*0556*/ uint8_t  bodytype;       // Bodytype
+/*0557*/ uint8_t unknown0557[9];
+/*0566*/ int16_t  deity;          // Player's Deity
+/*0568*/ uint8_t unknown0568[2];
+/*0570*/ uint8_t  gender;         // Gender (0=male, 1=female)
+/*0571*/ uint8_t  showhelm;       // 0=no, 1=yes
+/*0572*/ uint8_t  lfg;            // 0=off, 1=lfg on
+/*0573*/ uint8_t unknown0573;
+/*0574*/ float    walkspeed;      // Speed when walking
+/*0578*/ float    runspeed;       // Speed when running
+/*0582*/
 };
 
 #if 0
@@ -1042,9 +1039,9 @@ struct ServerZoneEntryStruct : public spawnStruct
 
 /*
 ** Generic Door Struct
-** Length: 80 Octets
+** Length: 88 Octets
 ** Used in: 
-**    cDoorSpawnsStruct(f721)
+**    OP_SpawnDoor
 **
 */
 
@@ -1066,7 +1063,8 @@ struct doorStruct
 /*0063*/ uint8_t holdstateforever;
 /*0064*/ uint32_t zonePoint;
 /*0068*/ uint8_t  unknown068[12]; // ***Placeholder
-/*0080*/
+/*0080*/ uint8_t unknown0080[8]; // ***Placeholder (12/07/2005)
+/*0088*/
 }; 
 
 /*
