@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+purple (12/08/05)
+-----------------
++ Updated version to 5.2.4.0
++ Regenerated races from dbstr_us.txt (thanks ksmith and uRit1u2CBBa)
++ Cleaned up zone opcodes a bit more 
+
 purple (12/07/05)
 ------------------
 + Updated version to 5.2.3.0
