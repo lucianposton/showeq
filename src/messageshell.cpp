@@ -693,12 +693,12 @@ void MessageShell::player(const uint8_t* data)
 		  player->name, player->lastName);
   m_messages->addMessage(MT_Player, message);
 
-  message.sprintf("Level: %d", player->level);
+  message.sprintf("Level: %d", player->profile.level);
   m_messages->addMessage(MT_Player, message);
   
   message.sprintf("PlayerMoney: P=%d G=%d S=%d C=%d",
-		 player->platinum, player->gold, 
-		 player->silver, player->copper);
+		 player->profile.platinum, player->profile.gold, 
+		 player->profile.silver, player->profile.copper);
   m_messages->addMessage(MT_Player, message);
   
   message.sprintf("BankMoney: P=%d G=%d S=%d C=%d",
@@ -707,8 +707,8 @@ void MessageShell::player(const uint8_t* data)
   m_messages->addMessage(MT_Player, message);
 
   message.sprintf("CursorMoney: P=%d G=%d S=%d C=%d",
-		  player->platinum_cursor, player->gold_cursor, 
-		  player->silver_cursor, player->copper_cursor);
+		  player->profile.platinum_cursor, player->profile.gold_cursor, 
+		  player->profile.silver_cursor, player->profile.copper_cursor);
   m_messages->addMessage(MT_Player, message);
 
   message.sprintf("SharedMoney: P=%d",
@@ -723,8 +723,8 @@ void MessageShell::player(const uint8_t* data)
   m_messages->addMessage(MT_Player, message);
 
   message = "ExpAA: " + Commanate(player->expAA) + 
-      " (aa spent: " + Commanate(player->aa_spent) + 
-      ", aa unspent: " + Commanate(player->aa_unspent) + ")";
+      " (aa spent: " + Commanate(player->profile.aa_spent) + 
+      ", aa unspent: " + Commanate(player->profile.aa_unspent) + ")";
   m_messages->addMessage(MT_Player, message);
 
 #if 0 
@@ -749,11 +749,12 @@ void MessageShell::player(const uint8_t* data)
   int buffnumber;
   for (buffnumber=0;buffnumber<MAX_BUFFS;buffnumber++)
   {
-    if (player->buffs[buffnumber].spellid && player->buffs[buffnumber].duration)
+    if (player->profile.buffs[buffnumber].spellid && 
+            player->profile.buffs[buffnumber].duration)
     {
       message.sprintf("You have buff %s duration left is %d in ticks.",
-		      (const char*)spell_name(player->buffs[buffnumber].spellid),
-		      player->buffs[buffnumber].duration);
+	      (const char*)spell_name(player->profile.buffs[buffnumber].spellid),
+	      player->profile.buffs[buffnumber].duration);
       m_messages->addMessage(MT_Player, message);
     }
   }

@@ -234,73 +234,31 @@ void Player::setDefaultDeity(uint16_t deity)
   pSEQPrefs->setPrefInt("DefaultDeity", "Defaults", deity);
 }
 
-void Player::player(const uint8_t* data)
+void Player::loadProfile(const playerProfileStruct& player)
 {
-  const charProfileStruct* player = (const charProfileStruct*)data;
-  QString messag;
+  setGender(player.gender);
+  setRace(player.race);
+  setClassVal(player.class_);
+  setLevel(player.level);
+  m_curHP = player.curHp;
 
-  if (m_name != player->name)
-    emit newPlayer();
-  
-  // fill in base Spawn class
-  // set the characteristics that probably haven't changed.
-  setNPC(SPAWN_SELF);
-  setGender(player->gender);
-  setRace(player->race);
-  setClassVal(player->class_);
-  setLevel(player->level);
-  m_curHP = player->curHp;
-
-  // save the raw name
-  setTypeflag(1);
-
-  Spawn::setName(player->name);
-
-  // if it's got a last name add it
-  setLastName(player->lastName);
 
   // set the player level
-  setLevel(player->level);
+  setLevel(player.level);
 
   // Stats hanling
   setUseDefaults(false);
-  setDeity(player->deity);
-  setGuildID(player->guildID);
-  setGuildTag(m_guildMgr->guildIdToName(guildID()));
-  emit guildChanged();
-
-#if 1 // ZBTEMP
-  seqDebug("charProfile(%f/%f/%f - %f)",
-	   player->x, player->y, player->z, player->heading);
-#endif
-  setPos((int16_t)lrintf(player->x), 
-         (int16_t)lrintf(player->y), 
-         (int16_t)lrintf(player->z),
-	 showeq_params->walkpathrecord,
-	 showeq_params->walkpathlength
-        );
-  setDeltas(0,0,0);
-  seqDebug("Player::backfill(): Pos (%f/%f/%f) Heading: %f",
-	   player->x, player->y, player->z, player->heading);
-  seqDebug("Player::backfill(bind): Pos (%f/%f/%f) Heading: %f",
-	   player->binds[0].x, player->binds[0].y, player->binds[0].z, 
-       player->binds[9].heading);
-  setHeading((int8_t)lrintf(player->heading), 0);
-  m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
-  m_validPos = true;
-  emit headingChanged(m_headingDegrees);
-  emit posChanged(x(), y(), z(), 
-		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
+  setDeity(player.deity);
 
   // Due to the delayed decode, we must reset
   // maxplayer on zone and accumulate all totals.
-  m_maxSTR += player->STR;
-  m_maxSTA += player->STA;
-  m_maxCHA += player->CHA;
-  m_maxDEX += player->DEX;
-  m_maxINT += player->INT;
-  m_maxAGI += player->AGI;
-  m_maxWIS += player->WIS;
+  m_maxSTR += player.STR;
+  m_maxSTA += player.STA;
+  m_maxCHA += player.CHA;
+  m_maxDEX += player.DEX;
+  m_maxINT += player.INT;
+  m_maxAGI += player.AGI;
+  m_maxWIS += player.WIS;
   
   emit statChanged (LIST_STR, m_maxSTR, m_maxSTR);
   emit statChanged (LIST_STA, m_maxSTA, m_maxSTA);
@@ -310,7 +268,11 @@ void Player::player(const uint8_t* data)
   emit statChanged (LIST_AGI, m_maxAGI, m_maxAGI);
   emit statChanged (LIST_WIS, m_maxWIS, m_maxWIS);
   
-  m_mana = player->MANA;
+  // Done with stats
+  m_validAttributes = true;
+
+  // Mana
+  m_mana = player.MANA;
 
   m_maxMana = calcMaxMana( m_maxINT, m_maxWIS,
                            m_class, m_level
@@ -318,14 +280,81 @@ void Player::player(const uint8_t* data)
   
   emit manaChanged(m_mana, m_maxMana);  // need max mana
 
-  
+  // done with mana
+  m_validMana = true;
+
+  seqDebug("Player::backfill(bind): Pos (%f/%f/%f) Heading: %f",
+	   player.binds[0].x, player.binds[0].y, player.binds[0].z, 
+       player.binds[0].heading);
+
   // Merge in our new skills...
   for (int a = 0; a < MAX_KNOWN_SKILLS; a++)
   {
-    m_playerSkills[a] = player->skills[a];
+    m_playerSkills[a] = player.skills[a];
 
     emit addSkill (a, m_playerSkills[a]);
   }
+
+  // copy in the spell book
+  memcpy (&m_spellBookSlots[0], &player.sSpellBook[0], sizeof(m_spellBookSlots));
+
+  m_currentAApts = player.aa_spent;
+
+  // Buffs
+  int buffnumber;
+  const struct spellBuff *buff;
+  for (buffnumber=0;buffnumber<MAX_BUFFS;buffnumber++)
+  {
+    if (player.buffs[buffnumber].spellid && player.buffs[buffnumber].duration)
+    {
+      buff = &(player.buffs[buffnumber]);
+      emit buffLoad(buff);
+    }
+  }
+}
+
+void Player::player(const uint8_t* data)
+{
+  const charProfileStruct* player = (const charProfileStruct*)data;
+  QString messag;
+
+  if (m_name != player->name)
+    emit newPlayer();
+
+  // fill in base Spawn class
+  // set the characteristics that probably haven't changed.
+  setNPC(SPAWN_SELF);
+
+  // save the raw name
+  setTypeflag(1);
+
+  Spawn::setName(player->name);
+
+  // if it's got a last name add it
+  setLastName(player->lastName);
+
+  // Load the profile
+  loadProfile(player->profile);
+
+  setGuildID(player->guildID);
+  setGuildTag(m_guildMgr->guildIdToName(guildID()));
+  emit guildChanged();
+
+  setPos((int16_t)lrintf(player->x), 
+         (int16_t)lrintf(player->y), 
+         (int16_t)lrintf(player->z),
+	 showeq_params->walkpathrecord,
+	 showeq_params->walkpathlength
+        );
+  setDeltas(0,0,0);
+  seqDebug("Player::backfill(): Pos (%f/%f/%f) Heading: %f",
+	   player->x, player->y, player->z, player->heading);
+  setHeading((int8_t)lrintf(player->heading), 0);
+  m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
+  m_validPos = true;
+  emit headingChanged(m_headingDegrees);
+  emit posChanged(x(), y(), z(), 
+		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
 
   // Merge in our new languages...
   for (int a = 0; a < MAX_KNOWN_LANGS; a++)
@@ -335,12 +364,7 @@ void Player::player(const uint8_t* data)
     emit addLanguage (a, m_playerLanguages[a]);
   }
 
-  // copy in the spell book
-  memcpy (&m_spellBookSlots[0], &player->sSpellBook[0], sizeof(m_spellBookSlots));
-
   // Move 
-  m_validAttributes = true;
-  m_validMana = true;
   m_validExp = true;
 
   // update the con table
@@ -353,7 +377,6 @@ void Player::player(const uint8_t* data)
 
   m_currentExp = player->exp;
   m_currentAltExp = player->expAA;
-  m_currentAApts = player->aa_spent;
   
   emit expChangedInt (m_currentExp, m_minExp, m_maxExp);
   emit expAltChangedInt(m_currentAltExp, 0, 15000000);
@@ -366,22 +389,6 @@ void Player::player(const uint8_t* data)
   updateLastChanged();
 
   emit changeItem(this, tSpawnChangedALL);
-
-  QDir tmp("/tmp/");
-  tmp.rename(QString("bankfile.") + QString::number(getpid()),
-	     QString("bankfile.") + player->name);
-
-  //Added by Halcyon
-  int buffnumber;
-  const struct spellBuff *buff;
-  for (buffnumber=0;buffnumber<MAX_BUFFS;buffnumber++)
-  {
-    if (player->buffs[buffnumber].spellid && player->buffs[buffnumber].duration)
-    {
-      buff = &(player->buffs[buffnumber]);
-      emit buffLoad(buff);
-    }
-  }
 }
 
 #if 0 // ZBTEMP

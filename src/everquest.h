@@ -582,14 +582,15 @@ struct newZoneStruct
 }; /*0796*/
 
 
-/*
-** Player Profile
-** Length: 19592 Octets
-** OpCode: CharProfileCode
-*/
-struct charProfileStruct
+/**
+ * Player Profile. Common part of charProfileStruct shared between
+ * shrouding and zoning profiles.
+ *
+ * NOTE: Offsets are kept in here relative to OP_PlayerProfile to ease in
+ *       diagnosing changes in that struct.
+ */
+struct playerProfileStruct
 {
-/*00000*/ uint32_t  checksum;           //
 /*00004*/ uint32_t  gender;             // Player Gender - 0 Male, 1 Female
 /*00008*/ uint32_t  race;               // Player race
 /*00012*/ uint32_t  class_;             // Player class
@@ -655,6 +656,17 @@ struct charProfileStruct
 /*07444*/ uint8_t unknown07444[5120];
 /*12564*/ InlineItem potionBelt[MAX_POTIONS_IN_BELT]; // potion belt
 /*12852*/ uint8_t unknown12852[88];
+};
+
+/*
+** Player Profile
+** Length: 19592 Octets
+** OpCode: CharProfileCode
+*/
+struct charProfileStruct
+{
+/*00000*/ uint32_t  checksum;           //
+/*00004*/ playerProfileStruct profile;  // Profile
 /*12940*/ char      name[64];           // Name of player
 /*13004*/ char      lastName[32];       // Last name of player
 /*13036*/ int32_t   guildID;            // guildID
@@ -1223,6 +1235,39 @@ struct spawnIllusionStruct
 /*0076*/ uint32_t   face;               // New face
 /*0080*/ uint8_t    unknown0082[88];    // ***Placeholder
 };
+
+/**
+ * Shroud spawn. For others shrouding, this has their spawnId and
+ * spawnStruct.
+ * 
+ * Length: 586
+ * OpCode: OP_Shroud
+ */
+struct spawnShroudOther
+{
+/*0000*/ uint32_t spawnId;          // Spawn Id of the shrouded player
+/*0004*/ spawnStruct spawn;         // Updated spawn struct for the player
+/*0586*/
+};
+
+/**
+ * Shroud yourself. For yourself shrouding, this has your spawnId, spawnStruct,
+ * bits of your charProfileStruct (no checksum, then charProfile up till
+ * but not including name), and an itemPlayerPacket for only items on the player
+ * and not the bank.
+ *
+ * Length: Variable
+ * OpCode: OP_Shroud
+ */
+struct spawnShroudSelf
+{
+/*00000*/ uint32_t spawnId;            // Spawn Id of you
+/*00004*/ spawnStruct spawn;           // Updated spawnStruct for you
+/*00586*/ playerProfileStruct profile; // Character profile for shrouded char
+/*13522*/ uint8_t items;               // Items on the player
+/*xxxxx*/
+};
+
 
 
 /*

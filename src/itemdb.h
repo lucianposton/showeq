@@ -110,6 +110,7 @@ class EQItemDB : public QObject, protected ITEMDBBASE
    void item(const uint8_t* item, size_t, uint8_t);
    void playerItem(const uint8_t* item, size_t, uint8_t);
    void itemInfo(const uint8_t* item, size_t, uint8_t);
+   void playerShroud(const uint8_t* shroudData, size_t, uint8_t);
 
  private:
    void logItem(const char* serializedItem, size_t len);

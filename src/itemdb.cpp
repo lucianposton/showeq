@@ -1963,6 +1963,20 @@ void EQItemDB::playerItem(const uint8_t* data, size_t size, uint8_t)
     fclose(lh);
 }
 
+void EQItemDB::playerShroud(const uint8_t* data, size_t size, uint8_t dir)
+{
+    if (size != sizeof(spawnShroudOther))
+    {
+        // Shrouding self has items on it. It's just a flat serialization
+        // like OP_ItemPlayerPacket
+        spawnShroudSelf* shroud = (spawnShroudSelf*) data;
+
+        playerItem(&shroud->items, 
+            size - (sizeof(spawnShroudOther) + sizeof(playerProfileStruct)),
+            dir);
+    }
+}
+
 void EQItemDB::itemInfo(const uint8_t* data, size_t size, uint8_t)
 {
   const itemInfoStruct* item = (const itemInfoStruct*)data;

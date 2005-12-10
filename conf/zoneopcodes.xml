@@ -767,4 +767,8 @@
     <opcode id="59e5" name="OP_GuildExtendedInfo" updated="12/07/05">
         <comment>Extra guild info (i.e. chat channel, url)</comment>
     </opcode>
+    <opcode id="4625" name="OP_Shroud" updated="12/07/05">
+        <comment>Server putting players into shroud form</comment>
+        <payload dir="server" typename="spawnShroudSelf" sizechecktype="none"/>
+    </opcode>
 </seqopcodes>

@@ -1681,6 +1681,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_ItemLinkResponse", SP_Zone, DIR_Server,
 			"itemInfoStruct", SZC_None, m_itemDB, 
 			SLOT(itemInfo(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_Shroud", SP_Zone, DIR_Server,
+            "spawnShroudOther", SZC_None, m_itemDB,
+            SLOT(playerShroud(const uint8_t*, size_t, uint8_t)));
    }
 
    if (m_groupMgr != 0)
@@ -2012,6 +2015,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Death", SP_Zone, DIR_Server,
 		      "newCorpseStruct", SZC_Match,
 		      m_spawnShell, SLOT(killSpawn(const uint8_t*)));
+   m_packet->connect2("OP_Shroud", SP_Zone, DIR_Server,
+              "spawnShroudSelf", SZC_None,
+              m_spawnShell, SLOT(shroudSpawn(const uint8_t*, size_t, uint8_t)));
 #if 0 // ZBTEMP
    connect(m_packet, SIGNAL(spawnWearingUpdate(const uint8_t*, size_t, uint8_t)),
 	   m_spawnShell, SLOT(spawnWearingUpdate(const uint8_t*)));

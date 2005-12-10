@@ -807,6 +807,30 @@ void SpawnShell::illusionSpawn(const uint8_t* data)
     }
 }
 
+void SpawnShell::shroudSpawn(const uint8_t* data, size_t len, uint8_t dir)
+{
+    if (len == sizeof(spawnShroudOther))
+    {
+        // Other person shrouding. newSpawn handled updates too.
+        spawnShroudOther* shroud = (spawnShroudOther*) data;
+        seqInfo("Shrouding %s (id=%d)",
+                shroud->spawn.name, shroud->spawn.spawnId);
+
+        newSpawn(shroud->spawn);
+    }
+    else
+    {
+        // Shrouding yourself.
+        spawnShroudSelf* shroud = (spawnShroudSelf*) data;
+
+        seqInfo("Shrouding %s (id=%d)",
+                shroud->spawn.name, shroud->spawn.spawnId);
+
+        m_player->zoneBegin((const ServerZoneEntryStruct*) &shroud->spawn);
+        m_player->loadProfile(shroud->profile);
+    }
+}
+
 void SpawnShell::updateSpawnAppearance(const uint8_t* data)
 {
     const spawnAppearanceStruct* app = (const spawnAppearanceStruct*)data;

@@ -59,6 +59,7 @@ public:
    void setDefaultDeity(uint16_t);
 
    void player(const uint8_t* player); 
+   void loadProfile(const playerProfileStruct& player);
    void increaseSkill(const uint8_t* skilli);
    void manaChange(const uint8_t* mana);
    void updateExp(const uint8_t* exp);
