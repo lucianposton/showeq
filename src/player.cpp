@@ -242,9 +242,13 @@ void Player::loadProfile(const playerProfileStruct& player)
   setLevel(player.level);
   m_curHP = player.curHp;
 
-
   // set the player level
   setLevel(player.level);
+
+  // update the con table
+  fillConTable();
+
+  emit levelChanged(level());
 
   // Stats hanling
   setUseDefaults(false);
@@ -286,6 +290,12 @@ void Player::loadProfile(const playerProfileStruct& player)
   seqDebug("Player::backfill(bind): Pos (%f/%f/%f) Heading: %f",
 	   player.binds[0].x, player.binds[0].y, player.binds[0].z, 
        player.binds[0].heading);
+
+
+  // Exp handling
+  m_minExp = calc_exp(m_level-1, m_race, m_class);
+  m_maxExp = calc_exp(m_level, m_race, m_class);
+  m_tickExp = (m_maxExp - m_minExp) / 330;
 
   // Merge in our new skills...
   for (int a = 0; a < MAX_KNOWN_SKILLS; a++)
@@ -336,10 +346,12 @@ void Player::player(const uint8_t* data)
   // Load the profile
   loadProfile(player->profile);
 
+  // Guild
   setGuildID(player->guildID);
   setGuildTag(m_guildMgr->guildIdToName(guildID()));
   emit guildChanged();
 
+  // Position
   setPos((int16_t)lrintf(player->x), 
          (int16_t)lrintf(player->y), 
          (int16_t)lrintf(player->z),
@@ -364,19 +376,10 @@ void Player::player(const uint8_t* data)
     emit addLanguage (a, m_playerLanguages[a]);
   }
 
-  // Move 
-  m_validExp = true;
-
-  // update the con table
-  fillConTable();
-
-  // Exp handling
-  m_minExp = calc_exp(m_level-1, m_race, m_class);
-  m_maxExp = calc_exp(m_level, m_race, m_class);
-  m_tickExp = (m_maxExp - m_minExp) / 330;
-
+  // Exp
   m_currentExp = player->exp;
   m_currentAltExp = player->expAA;
+  m_validExp = true;
   
   emit expChangedInt (m_currentExp, m_minExp, m_maxExp);
   emit expAltChangedInt(m_currentAltExp, 0, 15000000);

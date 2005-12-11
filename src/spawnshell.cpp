@@ -828,6 +828,12 @@ void SpawnShell::shroudSpawn(const uint8_t* data, size_t len, uint8_t dir)
 
         m_player->zoneBegin((const ServerZoneEntryStruct*) &shroud->spawn);
         m_player->loadProfile(shroud->profile);
+
+        // We just updated a lot of stuff.
+        updateFilterFlags(m_player);
+        updateRuntimeFilterFlags(m_player);
+        m_player->updateLastChanged();
+        emit changeItem(m_player, tSpawnChangedALL);
     }
 }
 
