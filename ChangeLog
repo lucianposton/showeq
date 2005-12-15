@@ -1,6 +1,6 @@
 Version: $Id$ $Name$
 
-purple (12/10/05)
+purple (12/14/05)
 -----------------
 + Split a lot of charProfileStruct out into playerProfileStruct
 + Added opcode OP_Shroud for when someone shrouds when you're in the zone
@@ -10,6 +10,8 @@ purple (12/10/05)
 	and others shrouding
 + Added an ItemDB handler for OP_Shroud so that it properly sees items
 	that come across when you shroud yourself
++ Fixed timestamps on the terminal to show up when you don't have
+	a preference set for the timestamp format
 
 purple (12/08/05)
 -----------------
