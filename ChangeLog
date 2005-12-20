@@ -1,6 +1,6 @@
 Version: $Id$ $Name$
 
-purple (12/14/05)
+purple (12/20/05)
 -----------------
 + Split a lot of charProfileStruct out into playerProfileStruct
 + Added opcode OP_Shroud for when someone shrouds when you're in the zone
@@ -12,6 +12,7 @@ purple (12/14/05)
 	that come across when you shroud yourself
 + Fixed timestamps on the terminal to show up when you don't have
 	a preference set for the timestamp format
++ Added session's max length to the network diagnostics window
 
 purple (12/08/05)
 -----------------

@@ -80,6 +80,7 @@ class EQPacket : public QObject
    int playbackPackets(void);
    int playbackSpeed(void);
    size_t currentCacheSize(int);
+   uint32_t currentMaxLength(int);
    uint16_t serverSeqExp(int);
    uint16_t arqSeqGiveUp(void);
    bool session_tracking(void);
@@ -114,6 +115,7 @@ class EQPacket : public QObject
    void seqReceive(int, int);
    void seqExpect(int, int);
    void numPacket(int, int);
+   void maxLength(int, int);
    void resetPacket(int, int);
    void playbackSpeedChanged(int);
    void clientChanged(in_addr_t);

@@ -79,6 +79,7 @@ class EQPacketStream : public QObject
   void close(uint32_t sessionId, EQStreamID streamid, uint8_t sessionTracking);
   uint16_t calculateCRC(EQProtocolPacket& packet);
   uint32_t getSessionKey() const { return m_sessionKey; }
+  uint32_t getMaxLength() const { return m_maxLength; }
   
  public slots:
   void handlePacket(EQUDPIPPacketFormat& pf);
@@ -108,6 +109,7 @@ class EQPacketStream : public QObject
   void seqExpect(int, int);
   void numPacket(int, int);
   void resetPacket(int, int);
+  void maxLength(int, int);
 
  protected:
   void resetCache();

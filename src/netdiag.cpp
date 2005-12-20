@@ -88,7 +88,14 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 
   for (int a = 0; a < MAXSTREAMS; a++)
   {
-      tmpGrid->addWidget(new QLabel(eqStreams[a], this), row++, col);
+     tmpGrid->addWidget(new QLabel(eqStreams[a], this), row, col++);
+     tmpGrid->addWidget(new QLabel("Max Length:", this), row, col++);
+     m_maxLength[a] = new QLabel(this, "unknown");
+     m_maxLength[a]->setNum((int)m_packet->currentMaxLength(a));
+     tmpGrid->addWidget(m_maxLength[a], row, col++);
+     col++;
+
+     row++; col = 0;
 
      // packet throughput
      tmpGrid->addWidget(new QLabel("Packets ", this), row, col++);
@@ -167,6 +174,8 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 	   this, SLOT(resetPacket(int, int)));
   connect (m_packet, SIGNAL(filterChanged()),
 	   this, SLOT(filterChanged()));
+  connect (m_packet, SIGNAL(maxLength(int, int)),
+	   this, SLOT(maxLength(int, int)));
 
   if (m_playbackSpeed)
   {
@@ -303,6 +312,11 @@ void NetDiag::numPacket(int num, int stream)
 void NetDiag::cacheSize(int size, int stream)
 {
   m_cache[stream]->setNum(size);
+}
+
+void NetDiag::maxLength(int len, int streamId)
+{
+  m_maxLength[streamId]->setNum(len);
 }
 
 QString NetDiag::print_addr(in_addr_t  addr)

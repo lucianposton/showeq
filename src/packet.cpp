@@ -561,6 +561,10 @@ void EQPacket::connectStream(EQPacketStream* stream)
       SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
       this,
       SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
+  connect(stream,
+      SIGNAL(maxLength(int, int)),
+      this,
+      SIGNAL(maxLength(int, int)));
 }
 
 ////////////////////////////////////////////////////
@@ -1129,6 +1133,11 @@ uint8_t EQPacket::session_tracking_enabled(void)
 size_t EQPacket::currentCacheSize(int stream)
 {
   return m_streams[stream]->currentCacheSize();
+}
+
+uint32_t EQPacket::currentMaxLength(int streamId)
+{
+    return m_streams[streamId]->getMaxLength();
 }
 
 uint16_t EQPacket::serverSeqExp(int stream)

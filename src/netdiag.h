@@ -47,6 +47,7 @@ class NetDiag : public SEQWindow
    void seqReceive             (int, int);
    void seqExpect              (int, int);
    void cacheSize              (int, int);
+   void maxLength              (int, int);
 
  protected:
    QString print_addr(in_addr_t);
@@ -64,6 +65,7 @@ class NetDiag : public SEQWindow
   QLabel* m_serverPortLabel;
   QLabel* m_clientPortLabel;
   QLabel* m_cache[MAXSTREAMS];
+  QLabel* m_maxLength[MAXSTREAMS];
   QLabel* m_filterLabel;
 
   int  m_packetStartTime[MAXSTREAMS];

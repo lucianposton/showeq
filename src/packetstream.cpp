@@ -949,6 +949,8 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         m_maxLength = maxPacketSize;
       }
 
+      emit maxLength((int) m_maxLength, (int) m_streamid);
+
 #if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
       seqDebug("EQPacket: SessionRequest found, resetting expected seq, stream %s (%d) (session tracking %s)",
 	    EQStreamStr[m_streamid], m_streamid,
@@ -1030,6 +1032,8 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
 
         m_maxLength = maxPacketSize;
       }
+
+      emit maxLength((int) m_maxLength, (int) m_streamid);
 
 #if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
       seqDebug("EQPacket: SessionResponse found %s:%u->%s:%u, resetting expected seq, stream %s (%d) (session tracking %s)",
