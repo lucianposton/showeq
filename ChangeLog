@@ -1,7 +1,8 @@
 Version: $Id$ $Name$
 
-purple (12/20/05)
+purple (1/18/06)
 -----------------
++ Updated version to 5.2.5.0
 + Split a lot of charProfileStruct out into playerProfileStruct
 + Added opcode OP_Shroud for when someone shrouds when you're in the zone
 	or you shroud yourself
@@ -13,6 +14,7 @@ purple (12/20/05)
 + Fixed timestamps on the terminal to show up when you don't have
 	a preference set for the timestamp format
 + Added session's max length to the network diagnostics window
++ Updated charProfileStruct for 1/18/2006 Live Compatibility
 
 purple (12/08/05)
 -----------------
