@@ -31,6 +31,7 @@ class Player;
 
 struct ClientZoneEntryStruct;
 struct ServerZoneEntryStruct;
+struct charProfileStruct;
 struct zoneChangeStruct;
 
 //----------------------------------------------------------------------
@@ -61,7 +62,6 @@ class MessageShell : public QObject
 
    void logOut(const uint8_t*, size_t, uint8_t);
    void zoneEntryClient(const ClientZoneEntryStruct* zsentry);
-   void zoneEntryServer(const ServerZoneEntryStruct* zsentry);
    void zoneNew(const uint8_t* zoneNew, size_t, uint8_t);
    void zoneChanged(const zoneChangeStruct*, size_t, uint8_t);
    void zoneBegin(const QString& shortZoneName);
@@ -84,7 +84,7 @@ class MessageShell : public QObject
 
    void syncDateTime(const QDateTime&);
 
-   void player(const uint8_t* data);
+   void player(const charProfileStruct* player);
    void increaseSkill(const uint8_t* data);
    void updateLevel(const uint8_t* data);
    void consMessage(const uint8_t* data, size_t, uint8_t dir);

@@ -1669,6 +1669,25 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect(this, SIGNAL(saveAllPrefs(void)),
 	   m_categoryMgr, SLOT(savePrefs(void)));
 
+   if (m_zoneMgr)
+   {
+     m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Client,
+			"ClientZoneEntryStruct", SZC_Match,
+			m_zoneMgr, SLOT(zoneEntryClient(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
+			"charProfileStruct", SZC_Match,
+			m_zoneMgr, SLOT(zonePlayer(const uint8_t*)));
+     m_packet->connect2("OP_ZoneChange", SP_Zone, DIR_Client|DIR_Server,
+			"zoneChangeStruct", SZC_Match,
+			m_zoneMgr, SLOT(zoneChange(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_NewZone", SP_Zone, DIR_Server,
+			"newZoneStruct", SZC_Match,
+			m_zoneMgr, SLOT(zoneNew(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_SendZonePoints", SP_Zone, DIR_Server,
+			"zonePointsStruct", SZC_None,
+			m_zoneMgr, SLOT(zonePoints(const uint8_t*, size_t, uint8_t)));
+   }
+
    if (m_itemDB != 0)
    {
      // connect ItemDB slots to EQPacket signals
@@ -1688,9 +1707,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    if (m_groupMgr != 0)
    {
-     m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
-			"charProfileStruct", SZC_Match,
-			m_groupMgr, SLOT(player(const uint8_t*)));
+     connect(m_zoneMgr, SIGNAL(playerProfile(const charProfileStruct*)),
+        m_groupMgr, SLOT(player(const charProfileStruct*)));
      m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
 			"groupUpdateStruct", SZC_Match,
 			m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));
@@ -1721,28 +1739,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
      connect(m_dateTimeMgr, SIGNAL(syncDateTime(const QDateTime&)),
 	     this, SLOT(syncDateTime(const QDateTime&)));
-   }
-
-   if (m_zoneMgr)
-   {
-     m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Client,
-			"ClientZoneEntryStruct", SZC_Match,
-			m_zoneMgr, SLOT(zoneEntryClient(const uint8_t*, size_t, uint8_t)));
-     m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Server,
-			"ServerZoneEntryStruct", SZC_Match,
-			m_zoneMgr, SLOT(zoneEntryServer(const uint8_t*, size_t, uint8_t)));
-     m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
-			"charProfileStruct", SZC_Match,
-			m_zoneMgr, SLOT(zonePlayer(const uint8_t*)));
-     m_packet->connect2("OP_ZoneChange", SP_Zone, DIR_Client|DIR_Server,
-			"zoneChangeStruct", SZC_Match,
-			m_zoneMgr, SLOT(zoneChange(const uint8_t*, size_t, uint8_t)));
-     m_packet->connect2("OP_NewZone", SP_Zone, DIR_Server,
-			"newZoneStruct", SZC_Match,
-			m_zoneMgr, SLOT(zoneNew(const uint8_t*, size_t, uint8_t)));
-     m_packet->connect2("OP_SendZonePoints", SP_Zone, DIR_Server,
-			"zonePointsStruct", SZC_None,
-			m_zoneMgr, SLOT(zonePoints(const uint8_t*, size_t, uint8_t)));
    }
 
    if (m_filterMgr)
@@ -1829,8 +1825,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			m_messageShell, SLOT(zoneNew(const uint8_t*, size_t, uint8_t)));
      connect(m_zoneMgr, SIGNAL(zoneBegin(const ClientZoneEntryStruct*, size_t, uint8_t)),
 	     m_messageShell, SLOT(zoneEntryClient(const ClientZoneEntryStruct*)));
-     connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, size_t, uint8_t)),
-	     m_messageShell, SLOT(zoneEntryServer(const ServerZoneEntryStruct*)));
      connect(m_zoneMgr, SIGNAL(zoneChanged(const zoneChangeStruct*, size_t, uint8_t)),
 	     m_messageShell, SLOT(zoneChanged(const zoneChangeStruct*, size_t, uint8_t)));
      connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
@@ -1855,9 +1849,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_CastSpell", SP_Zone, DIR_Server|DIR_Client,
 			"startCastStruct", SZC_Match,
 			m_messageShell, SLOT(startCast(const uint8_t*)));
-     m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
-			"charProfileStruct", SZC_Match,
-			m_messageShell, SLOT(player(const uint8_t*)));
+     connect(m_zoneMgr, SIGNAL(playerProfile(const charProfileStruct*)),
+        m_messageShell, SLOT(player(const charProfileStruct*)));
      m_packet->connect2("OP_SkillUpdate", SP_Zone, DIR_Server,
 			"skillIncStruct", SZC_Match,
 			m_messageShell, SLOT(increaseSkill(const uint8_t*)));
@@ -1991,6 +1984,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
 		      "spawnStruct", SZC_Match,
 		      m_spawnShell, SLOT(newSpawn(const uint8_t*)));
+//   m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Server,
+//		      "ServerZoneEntryStruct", SZC_Match,
+//		      m_spawnShell, SLOT(newSpawn(const uint8_t*)));
    m_packet->connect2("OP_MobUpdate", SP_Zone, DIR_Server|DIR_Client,
 		      "spawnPositionUpdate", SZC_Match,
 		      m_spawnShell, SLOT(updateSpawns(const uint8_t*)));
@@ -2066,9 +2062,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
 
    // connect Player slots to EQPacket signals
-   m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
-		      "charProfileStruct", SZC_Match,
-		      m_player, SLOT(player(const uint8_t*)));
+   connect(m_zoneMgr, SIGNAL(playerProfile(const charProfileStruct*)),
+       m_player, SLOT(player(const charProfileStruct*)));
    m_packet->connect2("OP_SkillUpdate", SP_Zone, DIR_Server,
 		      "skillIncStruct", SZC_Match,
 		      m_player, SLOT(increaseSkill(const uint8_t*)));

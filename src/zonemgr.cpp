@@ -34,7 +34,7 @@ const float defaultZoneExperienceMultiplier = 0.75;
 // EQPacket                              ZoneMgr                       isZoning
 // ----------                            -------                       --------
 // zoneEntry(ClientZoneEntryStruct)      zoneBegin()                   true
-// zoneEntry(ServerZoneEntryStruct)      zoneBegin(shortName)          false
+// PlayerProfile(charProfileStruct)      zoneBegin(shortName)          false
 // zoneNew(newZoneStruct)                zoneEnd(shortName, longName)  false
 //
 // Sequence of signals on when zoning from zone A to zone B
@@ -43,7 +43,7 @@ const float defaultZoneExperienceMultiplier = 0.75;
 // zoneChange(zoneChangeStruct, client)                                true
 // zoneChange(zoneChangeStruct, server)  zoneChanged(shortName)        true
 // zoneEntry(ClientZoneEntryStruct)      zoneBegin()                   false
-// zoneEntry(ServerZoneEntryStruct)      zoneBegin(shortName)          false
+// PlayerProfile(charProfileStruct)      zoneBegin(shortName)          false
 // zoneNew(newZoneStruct)                zoneEnd(shortName, longName)  false
 //
 ZoneMgr::ZoneMgr(QObject* parent, const char* name)
@@ -189,19 +189,9 @@ void ZoneMgr::zonePlayer(const uint8_t* data)
   m_longZoneName = zoneLongNameFromID(player->zoneId);
   m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
   m_zoning = false;
-  emit zoneBegin(m_shortZoneName);
 
-  if (showeq_params->saveZoneState)
-    saveZoneState();
-}
-
-void ZoneMgr::zoneEntryServer(const uint8_t* data, size_t len, uint8_t dir)
-{
-  const ServerZoneEntryStruct* zsentry = (const ServerZoneEntryStruct*)data;
-  m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
-  m_zoning = false;
   emit zoneBegin(m_shortZoneName);
-  emit zoneBegin(zsentry, len, dir);
+  emit playerProfile(player);
 
   if (showeq_params->saveZoneState)
     saveZoneState();

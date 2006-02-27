@@ -39,10 +39,8 @@ GroupMgr::~GroupMgr()
   }
 }
 
-void GroupMgr::player(const uint8_t* data)
+void GroupMgr::player(const charProfileStruct* player)
 {
-  const charProfileStruct* player = (const charProfileStruct*)data;
-
   // reset counters
   m_memberCount = 0;
   m_membersInZoneCount = 0;

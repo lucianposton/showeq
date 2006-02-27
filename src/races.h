@@ -482,14 +482,48 @@
     "Fairy",                      // 473
     "Witheran",                   // 474
     "Air Elemental",              // 475
-    "Alligator",                  // 476
-    "Bear",                       // 477
-    "Earth Elemental",            // 478
-    "Fire Elemental",             // 479
-    "Scaled Wolf",                // 480
-    "Skeleton",                   // 481
-    "Spectre",                    // 482
+    "Earth Elemental",            // 476
+    "Fire Elemental",             // 477
+    "Water Elemental",            // 478
+    "Alligator",                  // 479
+    "Bear",                       // 480
+    "Scaled Wolf",                // 481
+    "Wolf",                       // 482
     "Spirit Wolf",                // 483
-    "Water Elemental",            // 484
-    "Wolf",                       // 485
+    "Skeleton",                   // 484
+    "Spectre",                    // 485
+    "Bolvirk",                    // 486
+    "Banshee",                    // 487
+    "Banshee",                    // 488
+    "Elddar",                     // 489
+    "Forest Giant",               // 490
+    "Bone Golem",                 // 491
+    "Horse",                      // 492
+    "Pegasus",                    // 493
+    "Shambling Mound",            // 494
+    "Scrykin",                    // 495
+    "Treant",                     // 496
+    "Vampire",                    // 497
+    "Ayonae Ro",                  // 498
+    "Sullon Zek",                 // 499
+    "Banner",                     // 500
+    "Flag",                       // 501
+    "Rowboat",                    // 502
+    "Bear Trap",                  // 503
+    "Clockwork Bomb",             // 504
+    "Dynamite Keg",               // 505
+    "Pressure Plate",             // 506
+    "Puffer Spore",               // 507
+    "Stone Ring",                 // 508
+    "Root Tentacle",              // 509
+    "Runic Symbol",               // 510
+    "Saltpetter Bomb",            // 511
+    "Floating Skull",             // 512
+    "Spike Trap",                 // 513
+    "Totem",                      // 514
+    "Web",                        // 515
+    "Wicker Basket",              // 516
+    "Nightmare/Unicorn",          // 517
+    "Horse",                      // 518
+    "Nightmare/Unicorn",          // 519
 #endif

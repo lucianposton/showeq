@@ -376,31 +376,31 @@
 { "corathusa", "Sporali Caverns" }, // 366
 { "corathusb", "Corathus Lair" }, // 367
 { "nektulosa", "Shadowed Grove" }, // 368
-{ NULL, NULL }, // 369
-{ NULL, NULL }, // 370
-{ NULL, NULL }, // 371
-{ NULL, NULL }, // 372
-{ NULL, NULL }, // 373
-{ NULL, NULL }, // 374
-{ NULL, NULL }, // 375
-{ NULL, NULL }, // 376
-{ NULL, NULL }, // 377
-{ NULL, NULL }, // 378
-{ NULL, NULL }, // 379
-{ NULL, NULL }, // 380
-{ NULL, NULL }, // 381
-{ NULL, NULL }, // 382
-{ NULL, NULL }, // 383
-{ NULL, NULL }, // 384
-{ NULL, NULL }, // 385
-{ NULL, NULL }, // 386
-{ NULL, NULL }, // 387
-{ NULL, NULL }, // 388
-{ NULL, NULL }, // 389
-{ NULL, NULL }, // 390
-{ NULL, NULL }, // 391
-{ NULL, NULL }, // 392
-{ NULL, NULL }, // 393
+{ "arcstone", "Arcstone"}, // 369
+{ "relic", "Relic"}, // 370
+{ "skylance", "Skylance"}, // 371
+{ "devastation", "The Devastation"}, // 372
+{ "devastationa", "The Seething Wall"}, // 373
+{ "rage", "Sverag, Stronghold of Rage"}, // 374
+{ "ragea", "Razorthorn, Tower of Sullon Zek"}, // 375
+{ "takishruins", "Ruins of Takish-Hiz"}, // 376
+{ "takishruinsa", "The Root of Ro"}, // 377
+{ "elddar", "The Elddar Forest"}, // 378
+{ "elddara", "Tunare's Shrine"}, // 379
+{ "theater", "Theater of Blood"}, // 380
+{ "theatera", "Deathknell, Tower of Dissonance"}, // 381
+{ "freeporteast", "Freeport East"}, // 382
+{ "freeportwest", "Freeport West"}, // 383
+{ "freeportsewers", "Freeport Sewers"}, // 384
+{ "freeportacademy", "Academy of Arcane Sciences"}, // 385
+{ "freeporttemple", "Temple of Marr"}, // 386
+{ "freeportmilitia", "Freeport Militia House"}, // 387
+{ "freeportarena", "Arena"}, // 388
+{ "freeportcityhall", "City Hall"}, // 389
+{ "freeporttheater", "Theater"}, // 390
+{ "freeporthall", "Hall of Truth"}, // 391
+{ "northro", "North Ro"}, // 392
+{ "southro", "South Ro"}, // 393
 { NULL, NULL }, // 394
 { NULL, NULL }, // 395
 { NULL, NULL }, // 396

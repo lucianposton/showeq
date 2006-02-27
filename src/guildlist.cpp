@@ -69,12 +69,23 @@ int GuildListItem::compare(QListViewItem *o, int col, bool ascending) const
       return 0;
     else 
       return m_member->level() > otherMember->level() ? 1 : -1;
-  case 3: // Rank
+  case 3: // Guild Rank
     if (m_member->guildRank() == otherMember->guildRank())
       return 0;
     else
       return m_member->guildRank() > otherMember->guildRank() ? 1 : -1;
-  case 4: // Last On
+  case 4: // Banker Rank
+    if (m_member->bankRank() == otherMember->bankRank())
+      return 0;
+    else
+      return m_member->bankRank() > otherMember->bankRank() ? 1 : -1;
+
+  case 5: // Alt rank
+    if (m_member->altRank() == otherMember->altRank())
+      return 0;
+    else
+      return m_member->altRank() > otherMember->altRank() ? 1 : -1;
+  case 6: // Last On
     if (m_member->lastOn() == otherMember->lastOn())
       return 0;
     else
@@ -95,6 +106,8 @@ void GuildListItem::update(const GuildShell* guildShell)
   setText(tGuildListColLevel, QString::number(m_member->level()));
   setText(tGuildListColClass, m_member->classString());
   setText(tGuildListColRank, m_member->guildRankString());
+  setText(tGuildListColBank, m_member->bankRankString());
+  setText(tGuildListColAlt, m_member->altRankString());
   QDateTime dt;
   dt.setTime_t(m_member->lastOn());
   setText(tGuildListColLastOn, dt.toString(dateFormat));
@@ -136,6 +149,8 @@ GuildListWindow::GuildListWindow(Player* player,
   // get whether to keep the list sorted or not
   m_keepSorted = pSEQPrefs->getPrefBool("KeepSorted", preferenceName(), false);
 
+  m_showAlts = pSEQPrefs->getPrefBool("ShowAlts", preferenceName(), true);
+
   QBoxLayout* vLayout = new QVBoxLayout(boxLayout());
   QHBoxLayout* hLayout= new QHBoxLayout(vLayout);
 
@@ -168,6 +183,8 @@ GuildListWindow::GuildListWindow(Player* player,
   m_guildList->addColumn("Level");
   m_guildList->addColumn("Class");
   m_guildList->addColumn("Rank");
+  m_guildList->addColumn("Banker");
+  m_guildList->addColumn("Alt");
   m_guildList->addColumn("Last On", "LastOn");
   m_guildList->addColumn("Zone");
   m_guildList->addColumn("Public Note", "PublicNote");
@@ -218,6 +235,14 @@ QPopupMenu* GuildListWindow::menu()
     guildListColMenu->insertItem("&Rank");
   guildListColMenu->setItemParameter(m_id_guildList_Cols[tGuildListColRank], 
 				     tGuildListColRank);
+  m_id_guildList_Cols[tGuildListColBank] = 
+    guildListColMenu->insertItem("&Banker");
+  guildListColMenu->setItemParameter(m_id_guildList_Cols[tGuildListColBank], 
+				     tGuildListColBank);
+  m_id_guildList_Cols[tGuildListColAlt] = 
+    guildListColMenu->insertItem("&Alt");
+  guildListColMenu->setItemParameter(m_id_guildList_Cols[tGuildListColAlt], 
+				     tGuildListColAlt);
   m_id_guildList_Cols[tGuildListColLastOn] = 
     guildListColMenu->insertItem("Last &On");
   guildListColMenu->setItemParameter(m_id_guildList_Cols[tGuildListColLastOn], 
@@ -239,6 +264,9 @@ QPopupMenu* GuildListWindow::menu()
   x = m_menu->insertItem("Show Offline", 
 			 this, SLOT(toggle_showOffline(int)));
   m_menu->setItemChecked(x, m_showOffline);
+  x = m_menu->insertItem("Show Alts", 
+			 this, SLOT(toggle_showAlts(int)));
+  m_menu->setItemChecked(x, m_showAlts);
   x = m_menu->insertItem("Keep Sorted", 
 			 this, SLOT(toggle_keepSorted(int)));
   m_menu->setItemChecked(x, m_keepSorted);
@@ -267,40 +295,76 @@ void GuildListWindow::updated(const GuildMember* member)
 {
   GuildListItem* memberItem = m_guildListItemDict.find((void*)member);
 
-  // what to do if their is a member already
   if (memberItem)
   {
+    // We have them in our list already. Need to update.
+    bool bRemove = false;
+
+    if (! m_showAlts && member->altRank())
+    {
+        // This is an alt and we're not showing alts
+        bRemove = true;
+    }
+
     // if not-showing offline users and this user has become offline,
     // then remove it
-    if (!member->zoneId())
+    if (! m_showOffline && ! member->zoneId())
     {
-      // decrement members on count
-      m_membersOn--;
+        // This dude is offline and we're not showing offline.
+        bRemove = true;
+    }
 
-      if (!m_showOffline)
-      {
-	// remove the item from the item dictionary
-	m_guildListItemDict.remove((void*)member);
+    // If we got an update for someone we had, but now they are offline,
+    // make them offline
+    if (! member->zoneId())
+    {
+        m_membersOn--;
+    }
+
+    if (bRemove)
+    {
+        // remove the item from the item dictionary
+        m_guildListItemDict.remove((void*)member);
 	
-	// delete the item
-	delete memberItem;
-      }
+        // delete the item
+        delete memberItem;
     }
     else
-      memberItem->update(m_guildShell);
-  } // 
+    {
+        memberItem->update(m_guildShell);
+    }
+  }
   else 
   {
+    // Not in list yet.
     if (member->zoneId())
-      m_membersOn++;
-
-    if (m_showOffline || (!m_showOffline && member->zoneId()))
     {
-      // add the new guild member item
-      memberItem = new GuildListItem(m_guildList, member, m_guildShell);
+        // Online.
+        m_membersOn++;
+    }
+
+    // Assume we should add them.
+    bool bAdd = true;
+
+    // Don't add ignored offliners.
+    if (! m_showOffline && ! member->zoneId())
+    {
+        bAdd = false;
+    }
+
+    // Don't add ignored alts.
+    if (! m_showAlts && member->altRank())
+    {
+        bAdd = false;
+    }
+
+    if (bAdd)
+    {
+        // add the new guild member item
+        memberItem = new GuildListItem(m_guildList, member, m_guildShell);
       
-      // insert it into the dictionary
-      m_guildListItemDict.insert((void*)member, memberItem);
+        // insert it into the dictionary
+        m_guildListItemDict.insert((void*)member, memberItem);
     }
   }
 
@@ -334,6 +398,18 @@ void GuildListWindow::toggle_showOffline(int id)
   m_menu->setItemChecked(id, m_showOffline);
   pSEQPrefs->setPrefBool("ShowOffline", preferenceName(), 
 			 m_showOffline);
+
+  // re-populate the window
+  populate();
+}
+
+void GuildListWindow::toggle_showAlts(int id)
+{
+  // toggle immediate update value
+  m_showAlts = !m_showAlts;
+  m_menu->setItemChecked(id, m_showAlts);
+  pSEQPrefs->setPrefBool("ShowAlts", preferenceName(), 
+			 m_showAlts);
 
   // re-populate the window
   populate();
@@ -419,46 +495,37 @@ void GuildListWindow::populate(void)
   // iterate over the members
   GuildMemberDictIterator it(m_guildShell->members());
 
-  // if showing offline members just insert them all
-  if (m_showOffline)
-  {
     // iterate over all the members
     while ((member = it.current()))
     {
-      // increment members on count for each member on
-      if (member->zoneId())
-	m_membersOn++;
+        // increment members on count for each member on
+        if (member->zoneId())
+        {
+	        m_membersOn++;
+        }
 
-      // add the new guild member item
-      memberItem = new GuildListItem(m_guildList, member, m_guildShell);
+        bool bAdd = true;
+
+        if (member->altRank() && ! m_showAlts)
+        {
+            bAdd = false;
+        }
+
+        if (! member->zoneId() && ! m_showOffline)
+        {
+            bAdd = false;
+        }
+
+        if (bAdd)
+        {
+            memberItem = new GuildListItem(m_guildList, member, m_guildShell);
       
-      // insert it into the dictionary
-      m_guildListItemDict.insert((void*)member, memberItem);
+            // insert it into the dictionary
+            m_guildListItemDict.insert((void*)member, memberItem);
+        }
 
-      ++it;
+        ++it;
     }  
-  }
-  else
-  {
-    // iterate over all the members
-    while ((member = it.current()))
-    {
-      // all online members will have a non-zero zone id.
-      if (member->zoneId())
-      {
-	// increment members on count for each member on
-	m_membersOn++;
-
-	// add the new guild member item
-	memberItem = new GuildListItem(m_guildList, member, m_guildShell);
-	
-	// insert it into the dictionary
-	m_guildListItemDict.insert((void*)member, memberItem);
-      }
-
-      ++it;
-    }  
-  }
 
   // make sure the guild list is sorted
   m_guildList->sort();

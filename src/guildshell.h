@@ -43,6 +43,12 @@ class GuildMember
   QString classString() const;
   uint32_t guildRank() const { return m_guildRank; }
   const QString& guildRankString() const;
+  uint32_t bankRank() const { return m_banker; }
+  const QString& bankRankString() const;
+  uint32_t altRank() const { return m_alt; }
+  const QString& altRankString() const;
+  uint32_t memberRank() const { return m_fullmember; }
+  const QString& memberRankString() const;
   time_t lastOn() const { return m_lastOn; }
   const QString& publicNote() const { return m_publicNote; }
   uint16_t zoneId() const { return m_zoneId; }
@@ -58,7 +64,8 @@ class GuildMember
   uint8_t m_guildTributeOn; // 0 = off, 1 = on
   uint8_t m_guildTributeDonated;
   time_t m_guildTributeLastDonation;
-  uint32_t m_unknown1;
+  uint32_t m_alt; // 0 = no, 1 = alt
+  uint32_t m_fullmember; // 0 = prospect, 1 = fullmember
   QString m_publicNote;
   uint16_t m_zoneId;
   uint16_t m_zoneInstance;

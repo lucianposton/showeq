@@ -605,19 +605,19 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
     struct pos
 {
 /*0000*/ uint16_t spawnId;          // spawn id of the thing moving
-/*0002*/ signed   deltaHeading:10;  // change in heading
-         signed   x:19;             // x coord
-         signed   padding0002:3;    // ***Placeholder
-/*0006*/ signed   y:19;             // y coord
-         signed   animation:10;     // ***Placeholder (seems like speed)
-         signed   padding0006:3;    // animation
-/*0010*/ signed   z:19;             // z coord
-         signed   deltaY:13;        // change in y
-/*0014*/ signed   deltaX:13;        // change in x
-         unsigned heading:12;       // heading
-         signed   padding0014:7;    // ***Placeholder
-/*0018*/ signed   deltaZ:13;        // change in z
-         signed   padding0018:19;   // ***Placeholder
+/*0002*/ signed   deltaY:13;      // change in y
+         signed   x:19;           // x coord
+/*0006*/ signed   deltaHeading:10;// change in heading
+         signed   z:19;           // z coord
+         signed   padding0054:3;  // ***Placeholder
+/*0010*/ signed   deltaZ:13;      // change in z
+         signed   deltaX:13;      // change in x
+         signed   padding0070:6; // ***Placeholder
+/*0014*/ signed   animation:10;   // animation
+         signed   y:19;           // y coord
+         signed   padding0058:3;  // ***Placeholder
+/*0018*/ unsigned heading:12;     // heading
+         signed   padding0066:20; // ***Placeholder
 /*0022*/
 };
 #pragma pack(0)
@@ -627,8 +627,8 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
             float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
             float(p->deltaZ)/4.0, 
             float(p->heading), float(p->deltaHeading),
-            p->animation, p->padding0002, p->padding0006, 
-            p->padding0014, p->padding0018);
+            p->animation, p->padding0054, p->padding0070, 
+            p->padding0058, p->padding0066);
 #endif
 
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,
@@ -826,7 +826,6 @@ void SpawnShell::shroudSpawn(const uint8_t* data, size_t len, uint8_t dir)
         seqInfo("Shrouding %s (id=%d)",
                 shroud->spawn.name, shroud->spawn.spawnId);
 
-        m_player->zoneBegin((const ServerZoneEntryStruct*) &shroud->spawn);
         m_player->loadProfile(shroud->profile);
 
         // We just updated a lot of stuff.

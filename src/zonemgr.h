@@ -24,6 +24,7 @@
 // forward declarations
 struct ClientZoneEntryStruct;
 struct ServerZoneEntryStruct;
+struct charProfileStruct;
 struct zoneChangeStruct;
 struct newZoneStruct;
 struct zonePointsStruct;
@@ -53,7 +54,6 @@ class ZoneMgr : public QObject
  protected slots:
   void zoneEntryClient(const uint8_t* zsentry, size_t, uint8_t);
   void zonePlayer(const uint8_t* zsentry);
-  void zoneEntryServer(const uint8_t* zsentry, size_t, uint8_t);
   void zoneChange(const uint8_t* zoneChange, size_t, uint8_t);
   void zoneNew(const uint8_t* zoneNew, size_t, uint8_t);
   void zonePoints(const uint8_t* zp, size_t, uint8_t);
@@ -62,7 +62,7 @@ class ZoneMgr : public QObject
   void zoneBegin();
   void zoneBegin(const QString& shortZoneName);
   void zoneBegin(const ClientZoneEntryStruct* zsentry, size_t len, uint8_t dir);
-  void zoneBegin(const ServerZoneEntryStruct* zsentry, size_t len, uint8_t dir);
+  void playerProfile(const charProfileStruct* player);
   void zoneChanged(const QString& shortZoneName);
   void zoneChanged(const zoneChangeStruct*, size_t, uint8_t);
   void zoneEnd(const QString& shortZoneName, const QString& longZoneName);

@@ -53,8 +53,6 @@ Player::Player (QObject* parent,
   debug("Player()");
 #endif
 
-  connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, size_t, uint8_t)),
-          this, SLOT(zoneBegin(const ServerZoneEntryStruct*)));
   connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
           this, SLOT(zoneChanged()));
   
@@ -236,23 +234,18 @@ void Player::setDefaultDeity(uint16_t deity)
 
 void Player::loadProfile(const playerProfileStruct& player)
 {
+  setUseDefaults(false);
+
   setGender(player.gender);
   setRace(player.race);
   setClassVal(player.class_);
-  setLevel(player.level);
-  m_curHP = player.curHp;
-
-  // set the player level
-  setLevel(player.level);
-
-  // update the con table
-  fillConTable();
-
-  emit levelChanged(level());
-
-  // Stats hanling
-  setUseDefaults(false);
   setDeity(player.deity);
+  m_curHP = player.curHp;
+  setLevel(player.level);
+
+  // Update con table
+  fillConTable();
+  emit levelChanged(level());
 
   // Due to the delayed decode, we must reset
   // maxplayer on zone and accumulate all totals.
@@ -291,7 +284,6 @@ void Player::loadProfile(const playerProfileStruct& player)
 	   player.binds[0].x, player.binds[0].y, player.binds[0].z, 
        player.binds[0].heading);
 
-
   // Exp handling
   m_minExp = calc_exp(m_level-1, m_race, m_class);
   m_maxExp = calc_exp(m_level, m_race, m_class);
@@ -323,9 +315,8 @@ void Player::loadProfile(const playerProfileStruct& player)
   }
 }
 
-void Player::player(const uint8_t* data)
+void Player::player(const charProfileStruct* player)
 {
-  const charProfileStruct* player = (const charProfileStruct*)data;
   QString messag;
 
   if (m_name != player->name)
@@ -388,8 +379,6 @@ void Player::player(const uint8_t* data)
 
   if (showeq_params->savePlayerState)
     savePlayerState();
-
-  updateLastChanged();
 
   emit changeItem(this, tSpawnChangedALL);
 }
@@ -800,45 +789,6 @@ void Player::zoneChanged()
   clear();
 }
 
-void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
-{
-  Spawn::setName(zsentry->name);
-  Spawn::setLastName(zsentry->lastName);
-  setDeity(zsentry->deity);
-  setLevel(zsentry->level);
-  setClassVal(zsentry->class_);
-  setRace(zsentry->race);
-  setGender(zsentry->gender);
-  setGuildID(zsentry->guildID);
-  setGuildTag(m_guildMgr->guildIdToName(guildID()));
-  emit guildChanged();
-  setPos(zsentry->x >> 3, 
-         zsentry->y >> 3, 
-         zsentry->z >> 3,
-	 showeq_params->walkpathrecord,
-	 showeq_params->walkpathlength);
-  seqDebug("Player::zoneBegin(): Pos (%f/%f/%f) Heading %f",
-	   float(zsentry->x)/8.0, float(zsentry->y)/8.0, float(zsentry->z)/8.0,
-       float(zsentry->heading));
-  setHeading(zsentry->heading, 0);
-  m_validPos = true;
-
-  m_headingDegrees = 360 - ((((int8_t)lrintf(zsentry->heading)) * 360) >> 11);
-  emit headingChanged(m_headingDegrees);
-  emit posChanged(x(), y(), z(), 
-		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
-
-  setUseDefaults(false);
-  
-  if (showeq_params->savePlayerState)
-    savePlayerState();
-
-  // update the con table
-  fillConTable();
-
-  emit changeItem(this, tSpawnChangedALL);
-}
-
 void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
 {
   const playerSelfPosStruct *pupdate = (const playerSelfPosStruct*)data;
@@ -869,7 +819,9 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
       {
           printf(" ");
       }
+
   }
+  printf("\n");
 #endif
 
 #if 0
@@ -879,18 +831,18 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
 {
 /*0000*/ uint16_t spawnId;        // Player's spawn id
 /*0002*/ uint8_t unknown0002[2];  // ***Placeholder (update time counter?)
-/*0004*/ float y;                 // y coord
+/*0004*/ signed deltaHeading:10;  // change in heading
+         signed padding0004:6;    // ***Placeholder (mostly 1)
+/*0006*/ uint8_t unknown0006[2];  // ***Placeholder
 /*0008*/ float deltaZ;            // Change in z
-/*0016*/ float deltaX;            // Change in x
-/*0012*/ float deltaY;            // Change in y
-/*0020*/ signed animation:10;     // animation
-         signed deltaHeading:10;  // change in heading
-         signed padding0020:12;   // ***Placeholder (mostly 1)
-/*0024*/ float x;                 // x coord
-/*0028*/ float z;                 // z coord
-/*0034*/ unsigned heading:12;     // Directional heading
-         unsigned padding0004:4;  // ***Placeholder
-/*0032*/ uint8_t unknown0006[2];  // ***Placeholder
+/*0012*/ float y;                 // y coord
+/*0016*/ signed animation:10;     // animation
+         unsigned heading:12;     // Directional heading
+         unsigned padding0016:10; // ***Placeholder
+/*0020*/ float x;                 // x coord
+/*0024*/ float deltaX;            // Change in x
+/*0028*/ float deltaY;            // Change in y
+/*0032*/ float z;                 // z coord
 /*0036*/
 };
 #pragma pack(0)
@@ -899,8 +851,8 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
             p->spawnId, p->x, p->y, p->z, 
             p->deltaX, p->deltaY, p->deltaZ, 
             float(p->heading), float(p->deltaHeading),
-            p->animation, *(uint16_t*) p->unknown0002, p->padding0020, 
-            p->padding0004, *(uint16_t*) p->unknown0006);
+            p->animation, *(uint16_t*) p->unknown0002, p->padding0004, 
+            p->padding0016, *(uint16_t*) p->unknown0006);
 #endif
 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);

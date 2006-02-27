@@ -364,14 +364,6 @@ void MessageShell::zoneEntryClient(const ClientZoneEntryStruct* zsentry)
   m_messages->addMessage(MT_Zone, "EntryCode: Client");
 }
 
-void MessageShell::zoneEntryServer(const ServerZoneEntryStruct* zsentry)
-{
-  QString tempStr;
-
-  tempStr = "EntryCode: Server";
-  m_messages->addMessage(MT_Zone, tempStr);
-}
-
 void MessageShell::zoneChanged(const zoneChangeStruct* zoneChange, size_t, uint8_t dir)
 {
   QString tempStr;
@@ -560,10 +552,12 @@ void MessageShell::spellFaded(const uint8_t* data)
   const spellFadedStruct *sf = (const spellFadedStruct *)data;
   QString tempStr;
 
-  tempStr.sprintf( "Faded: %s", 
-		   sf->message);
+  if (strlen(sf->message) > 0)
+  {
+      tempStr.sprintf( "Faded: %s", sf->message);
 
-  m_messages->addMessage(MT_Spell, tempStr);
+      m_messages->addMessage(MT_Spell, tempStr);
+  }
 }
 
 void MessageShell::interruptSpellCast(const uint8_t* data)
@@ -684,9 +678,8 @@ void MessageShell::groupDisband(const uint8_t* data, size_t, uint8_t dir)
   m_messages->addMessage(MT_Group, tempStr);
 }
 
-void MessageShell::player(const uint8_t* data)
+void MessageShell::player(const charProfileStruct* player)
 {
-  const charProfileStruct* player = (const charProfileStruct*)data;
   QString message;
 
   message.sprintf("Name: '%s' Last: '%s'", 

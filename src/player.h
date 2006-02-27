@@ -58,7 +58,7 @@ public:
    void setDefaultClass(uint8_t);
    void setDefaultDeity(uint16_t);
 
-   void player(const uint8_t* player); 
+   void player(const charProfileStruct* player); 
    void loadProfile(const playerProfileStruct& player);
    void increaseSkill(const uint8_t* skilli);
    void manaChange(const uint8_t* mana);
@@ -70,7 +70,6 @@ public:
    void updateStamina(const uint8_t* stam);
    void setLastKill(const QString& name, uint8_t level);
    void zoneChanged(void);
-   void zoneBegin(const ServerZoneEntryStruct* zsentry);
    void playerUpdateSelf(const uint8_t* pupdate, size_t, uint8_t);
    void consMessage(const uint8_t* con, size_t, uint8_t dir);
    void tradeSpellBookSlots(const uint8_t*, size_t, uint8_t);

@@ -41,10 +41,12 @@ const int tGuildListColName = 0;
 const int tGuildListColLevel = 1;
 const int tGuildListColClass = 2;
 const int tGuildListColRank = 3;
-const int tGuildListColLastOn = 4;
-const int tGuildListColZone = 5;
-const int tGuildListColPublicNote = 6;
-const int tGuildListColMaxCols = 7;
+const int tGuildListColBank = 4;
+const int tGuildListColAlt = 5;
+const int tGuildListColLastOn = 6;
+const int tGuildListColZone = 7;
+const int tGuildListColPublicNote = 8;
+const int tGuildListColMaxCols = 9;
 
 //----------------------------------------------------------------------
 // GuildListItem
@@ -95,7 +97,8 @@ class GuildListWindow : public SEQWindow
   void init_Menu(void);
   void toggle_showOffline(int id);
   void toggle_keepSorted(int id);
-  void toggle_guildListCol( int id );
+  void toggle_showAlts(int id);
+  void toggle_guildListCol(int id);
   void set_font(int id);
   void set_caption(int id);
 
@@ -116,6 +119,7 @@ class GuildListWindow : public SEQWindow
 
   uint32_t m_membersOn;
   bool m_showOffline;
+  bool m_showAlts;
   bool m_keepSorted;
 };
 

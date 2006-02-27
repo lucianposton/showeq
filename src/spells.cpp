@@ -202,11 +202,13 @@ int16_t Spell::calcDuration(uint8_t level) const
     return min(level * 3 + 10, m_buffDurationArgument);
   case 50:
     return 65535; // as close to permanent as I can get
+  case 51:
+    return m_buffDurationArgument; // auras? What to do?
   case 3600:
     return 3600;
   default:
-    seqInfo("Spell::calcDuration(): Unknown formula for spell %.04x",
-	    m_spell);
+    seqInfo("Spell::calcDuration(): Unknown formula for spell %.04x (%d)",
+	    m_spell, m_buffDurationArgument);
     return m_buffDurationArgument;
   }
 }

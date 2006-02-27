@@ -43,7 +43,7 @@ class GroupMgr: public QObject
   unsigned long totalLevels();
   
  public slots:
-  void player(const uint8_t* player); 
+  void player(const charProfileStruct* player); 
   void groupUpdate(const uint8_t* data, size_t size);
   void addItem(const Item* item);
   void delItem(const Item* item);

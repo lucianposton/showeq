@@ -22,8 +22,10 @@
 // #define GUILDSHELL_DIAG 1
 
 //----------------------------------------------------------------------
-// constants
-static const QString guildRanks[] = { "M", "O", "L", "?", "MB", "OB", "LB", "?B" };
+static const QString guildRanks[] = { "M", "O", "L", "?" };
+static const QString bankRanks[] = { " ", "B" };
+static const QString altRanks[] = { " ", "A" };
+static const QString memberRanks[] = { "P", " " };
 
 //----------------------------------------------------------------------
 // GuildMember implementation
@@ -35,8 +37,17 @@ GuildMember::GuildMember(NetStream& netStream)
   // 4 byte level
   m_level = uint8_t(netStream.readUInt32());
 
-  // 4 byte banker flag (0 = no, 1 = banker)
+  // 4 byte banker flag (0 = no, 1 = banker, 2 = alt, 3 = alt banker)
   m_banker = uint8_t(netStream.readUInt32());
+  if (m_banker > 1)
+  {
+      m_alt = 1;
+  }
+  else
+  {
+      m_alt = 0;
+  }
+  m_banker = m_banker % 2;
 
   // 4 byte class
   m_class = uint8_t(netStream.readUInt32());
@@ -56,9 +67,8 @@ GuildMember::GuildMember(NetStream& netStream)
   // 4 byte guild tribute last donation timestamp
   m_guildTributeLastDonation = time_t(netStream.readUInt32());
 
-  // 4 byte unknown. Maybe this will be a full member/prospect flag instead
-  // of using guild rank?
-  m_unknown1 = netStream.readUInt32();
+  // 4 byte prospective member? flag (0=prospective, 1=full member) ??
+  m_fullmember = netStream.readUInt32();
 
   // Null-terminated public note
   m_publicNote = netStream.readText();
@@ -99,9 +109,45 @@ QString GuildMember::classString() const
 const QString& GuildMember::guildRankString() const
 {
   if (m_guildRank <= 2)
-    return guildRanks[m_guildRank + 4*m_banker];
+    return guildRanks[m_guildRank];
   else
-    return guildRanks[3 + 4*m_banker]; // return the unknown rank character
+    return guildRanks[3]; // return the unknown rank character
+}
+ 
+const QString& GuildMember::bankRankString() const
+{
+    if (m_banker > 0)
+    {
+        return bankRanks[1];
+    }
+    else
+    {
+        return bankRanks[0];
+    }
+}
+
+const QString& GuildMember::altRankString() const
+{
+    if (m_alt > 0)
+    {
+        return altRanks[1];
+    }
+    else
+    {
+        return altRanks[0];
+    }
+}
+
+const QString& GuildMember::memberRankString() const
+{
+    if (m_fullmember > 0)
+    {
+        return memberRanks[1];
+    }
+    else
+    {
+        return memberRanks[0];
+    }
 }
 
 //----------------------------------------------------------------------
@@ -134,7 +180,7 @@ void GuildShell::dumpMembers(QTextStream& out)
   GuildMemberDictIterator it(m_members);
   GuildMember* member;
 
-  QString format("%1 %2  %3 %4  %5  %6");
+  QString format("%1 %2  %3 %4%5%6%7  %8  %9");
   QString dateFormat("ddd MMM dd hh:mm:ss yyyy");
   
   // calculate the maximum class name width
@@ -151,6 +197,9 @@ void GuildShell::dumpMembers(QTextStream& out)
   out << format.arg("Members", nameFieldWidth)
     .arg("Lv", 2).arg("Class", classFieldWidth)
     .arg("R", 1)
+    .arg("B", 1)
+    .arg("A", 1)
+    .arg("P", 1)
     .arg("Last On", -24)
     .arg("Zone", -18);
   out << " Public Note" << endl;
@@ -165,6 +214,9 @@ void GuildShell::dumpMembers(QTextStream& out)
     out << format.arg(member->name(), nameFieldWidth)
       .arg(member->level(), 2).arg(member->classString(), classFieldWidth)
       .arg(member->guildRankString(), 1)
+      .arg(member->bankRankString(), 1)
+      .arg(member->altRankString(), 1)
+      .arg(member->memberRankString(), 1)
       .arg(dt.toString(dateFormat), -24)
       .arg(zone, -18);
 

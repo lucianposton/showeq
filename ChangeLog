@@ -1,5 +1,22 @@
 Version: $Id$ $Name$
 
+purple (2/23/06)
+----------------
++ Updated version to 5.3.0.0
++ Updated most opcodes for 2/21 live
++ Updated position structs for 2/21 live
++ Updated spawnStruct for 2/21 live. Missing light, gm still.
++ Updated zones.h for expansion
++ Regenerated races.h and staticspells.h for expansion
++ Fixed the Guild Member list so it parses correctly (fixes a crash when
+	someone has an alt flag on in your guild)
++ Added Banker and Alt columns to Guild Window
++ Moved all actions taked on OP_ZoneEntry when from the server to be taken
+	instead on OP_PlayerProfile. This is because the new auras seem to
+	cause OP_ZoneEntry when you join a group that is effected by an
+	aura. I'd imagine whatever OP_ZoneEntry really is, it is poorly named!
+
+
 purple (1/18/06)
 -----------------
 + Updated version to 5.2.5.0
