@@ -475,7 +475,7 @@
         <comment>old ZoneChangeCode</comment>
         <payload dir="both" typename="zoneChangeStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6d1c" name="OP_RequestZoneChange" updated="12/07/05">
+    <opcode id="0468" name="OP_RequestZoneChange" updated="02/21/06">
         <comment>Send by server when a click causes zone. Also, origin</comment>
         <payload dir="server" typename="requestZoneChangeStruct" sizechecktype="match"/>
     </opcode>
