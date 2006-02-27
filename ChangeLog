@@ -15,6 +15,8 @@ purple (2/23/06)
 	instead on OP_PlayerProfile. This is because the new auras seem to
 	cause OP_ZoneEntry when you join a group that is effected by an
 	aura. I'd imagine whatever OP_ZoneEntry really is, it is poorly named!
++ Made OP_BuffFadeMsg not shown on console if the message is zero length.
+	This suppresses the constant wear off messages for auras.
 
 
 purple (1/18/06)
