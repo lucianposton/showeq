@@ -996,7 +996,9 @@ union
 /*0499*/ uint8_t  gender;         // Gender (0=male, 1=female)
 /*0500*/ uint8_t  showhelm;       // 0=no, 1=yes
 /*0501*/ uint8_t  helm;           // Helm texture
-/*0502*/ uint8_t unknown0502[135];
+/*0502*/ uint8_t unknown0502[128];
+/*0630*/ uint8_t  light;          // Spawn's lightsource
+/*0631*/ uint8_t unknown0631[6];
 /*0637*/ uint8_t  eyecolor1;      // Player's left eye color
 /*0638*/ float    size;           // Model size
 /*0642*/ uint8_t unknown0642[4];
@@ -1006,20 +1008,14 @@ union
 /*0660*/ uint8_t  hairstyle;      // Hair style
 /*0661*/ uint32_t race;           // Spawn race
 /*0665*/ int16_t  deity;          // Player's Deity
-/*0667*/ uint8_t unknown0667[3];
+/*0667*/ uint8_t unknown0667[2];
+/*0669*/ uint8_t  gm;             // 0=no, 1=gm
 /*0670*/ uint8_t  findable;       // 0=can't be found, 1=can be found
 /*0671*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
 /*0672*/ uint8_t unknown0672[4];
 /*0676*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
 /*0708*/ uint8_t  curHp;          // Current hp
-
-//wrong but compile
-/*0709*/ uint8_t  light;          // Spawn's lightsource
-/*0710*/ uint8_t  gm;             // 0=no, 1=gm
-//end wrong
-//
-
-/*0711*/ uint8_t unknown0711[2];
+/*0709*/ uint8_t unknown0709[4];
 /*0713*/ uint32_t petOwnerId;     // If this is a pet, the spawn id of owner
 /*0717*/ uint8_t  bodytype;       // Bodytype
 /*0718*/ uint8_t unknown0718[8];

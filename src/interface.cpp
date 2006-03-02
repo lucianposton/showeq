@@ -2055,6 +2055,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Action", SP_Zone, DIR_Server|DIR_Client,
 		      "actionStruct", SZC_Match,
 		      m_spellShell, SLOT(action(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_Action", SP_Zone, DIR_Server|DIR_Client,
+		      "actionAltStruct", SZC_Match,
+		      m_spellShell, SLOT(action(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_SimpleMessage", SP_Zone, DIR_Server,
 		      "simpleMessageStruct", SZC_Match,
 		      m_spellShell,

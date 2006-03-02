@@ -526,7 +526,7 @@
     <opcode id="4653" name="OP_Action" updated="02/21/06">
         <comment></comment>
         <payload dir="both" typename="actionStruct" sizechecktype="match"/>
-        <payload dir="server" typename="actionAltStruct" sizechecktype="match"/>
+        <payload dir="both" typename="actionAltStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="195b" name="OP_SpecialMesg" updated="02/21/06">
         <comment>Communicate textual info to client</comment>
@@ -647,7 +647,7 @@
         <comment>old RandomReqCode</comment>
         <payload dir="client" typename="randomReqStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="304b" name="OP_CastSpell" updated="12/07/05">
+    <opcode id="4ef9" name="OP_CastSpell" updated="02/21/06">
         <comment>old StartCastCode</comment>
         <payload dir="both" typename="startCastStruct" sizechecktype="match"/>
     </opcode>

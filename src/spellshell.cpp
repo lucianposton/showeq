@@ -20,7 +20,7 @@
 #include "spawn.h"
 #include "diagnosticmessages.h"
 
-// #define DIAG_SPELLSHELL 1 
+//#define DIAG_SPELLSHELL 1 
 
 SpellItem::SpellItem()
   : m_duration(0),

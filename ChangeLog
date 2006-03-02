@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+purple (3/1/06)
+---------------
++ Updated version to 5.3.1.0
++ Wired up new larger OP_Action to SpellShell so buffs cast by you are seen
++ Fixed light and gm in spawnStruct
+
 purple (2/23/06)
 ----------------
 + Updated version to 5.3.0.0
