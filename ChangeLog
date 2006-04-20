@@ -1,5 +1,10 @@
 Version: $Id$ $Name$
 
+purple (4/19/06)
+----------------
++ Updated version to 5.4.0.0
++ Fixed opcodes for 4/19 live patch
+
 purple (3/1/06)
 ---------------
 + Updated version to 5.3.1.0

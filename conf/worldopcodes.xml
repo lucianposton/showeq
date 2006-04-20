@@ -12,48 +12,48 @@
 -->
 
 
-    <opcode id="1f5e" name="OP_SendLoginInfo" updated="02/21/06">
+    <opcode id="032f" name="OP_SendLoginInfo" updated="04/19/06">
         <comment>Client starting world session by asking for login information</comment>
     </opcode>
-    <opcode id="779a" name="OP_GuildList" updated="02/21/06">
+    <opcode id="4591" name="OP_GuildList" updated="04/19/06">
         <comment>old GuildListCode</comment>
         <payload dir="server" typename="worldGuildListStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6bd5" name="OP_LogServer" updated="02/21/06">
+    <opcode id="6b98" name="OP_LogServer" updated="04/19/06">
         <comment></comment>
     </opcode>
-    <opcode id="42c2" name="OP_ApproveWorld" updated="02/21/06">
+    <opcode id="49da" name="OP_ApproveWorld" updated="04/19/06">
         <comment></comment>
     </opcode>
-    <opcode id="1151" name="OP_EnterWorld" updated="02/21/06">
+    <opcode id="6f38" name="OP_EnterWorld" updated="04/19/06">
         <comment>Server approval for client to enter world</comment>
     </opcode>
-    <opcode id="04ec" name="OP_ExpansionInfo" updated="12/07/05">
+    <opcode id="7af3" name="OP_ExpansionInfo" updated="04/19/06">
         <comment>Which expansions user has</comment>
     </opcode>
-    <opcode id="6526" name="OP_SendCharInfo" updated="02/21/06">
+    <opcode id="1393" name="OP_SendCharInfo" updated="04/19/06">
         <comment>Send all chars visible @ char select</comment>
     </opcode>
-    <opcode id="207c" name="OP_World_Client_CRC1" updated="02/21/06">
+    <opcode id="4913" name="OP_World_Client_CRC1" updated="04/19/06">
         <comment>Contains a snippet of spell data</comment>
     </opcode>
-    <opcode id="5894" name="OP_World_Client_CRC2" updated="02/21/06">
+    <opcode id="2710" name="OP_World_Client_CRC2" updated="04/19/06">
         <comment>Second client verification packet</comment>
     </opcode>
-    <opcode id="275e" name="OP_MOTD" updated="02/21/06">
+    <opcode id="7ec2" name="OP_MOTD" updated="04/19/06">
         <comment>old MOTDCode Server message of the day</comment>
         <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="1e34" name="OP_SetChatServer" updated="02/21/06">
+    <opcode id="13b1" name="OP_SetChatServer" updated="04/19/06">
         <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
-    <opcode id="452d" name="OP_SetChatServer2" updated="02/21/06">
+    <opcode id="531f" name="OP_SetChatServer2" updated="04/19/06">
         <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
-    <opcode id="7ca3" name="OP_ZoneServerInfo" updated="02/21/06">
+    <opcode id="654c" name="OP_ZoneServerInfo" updated="04/19/06">
         <comment>old ZoneServerInfo</comment>
     </opcode>
-    <opcode id="3fe1" name="OP_WorldComplete" updated="02/21/06">
+    <opcode id="032b" name="OP_WorldComplete" updated="04/19/06">
         <comment>Client telling world server it is done. World replies by disconnecting.</comment>
     </opcode>
 
