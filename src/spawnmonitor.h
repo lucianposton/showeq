@@ -98,7 +98,7 @@ class SpawnMonitor: public QObject
 {
 Q_OBJECT
 public:
-  SpawnMonitor::SpawnMonitor(const DataLocationMgr* dataLocMgr, 
+  SpawnMonitor(const DataLocationMgr* dataLocMgr, 
 			     ZoneMgr* zoneMgr, SpawnShell* spawnShell, 
 			     QObject* parent = 0, 
 			     const char* name = "spawnmonitor" );

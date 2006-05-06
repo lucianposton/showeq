@@ -532,7 +532,7 @@
         <comment>Communicate textual info to client</comment>
         <payload dir="server" typename="specialMessageStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="39c6" name="OP_TargetMouse" updated="04/19/06">
+    <opcode id="38c6" name="OP_TargetMouse" updated="04/19/06">
         <comment>Targeting a person - old ClientTargetCode</comment>
         <payload dir="both" typename="clientTargetStruct" sizechecktype="match"/>
     </opcode>
@@ -732,7 +732,7 @@
         <comment>Spawns getting renamed after initial NewSpawn</comment>
         <payload dir="server" typename="spawnRenameStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6d44" name="OP_LevelUpdate" updated="06/29/05">
+    <opcode id="74d8" name="OP_LevelUpdate" updated="04/19/06">
         <comment>old LevelUpUpdateCode</comment>
         <payload dir="server" typename="levelUpUpdateStruct" sizechecktype="match"/>
     </opcode>

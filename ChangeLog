@@ -1,5 +1,10 @@
 Version: $Id$ $Name$
 
+purple (4/6/06)
+---------------
++ Fixed opcodes for OP_TargetMouse, OP_LevelUpdate (thanks ieatacid)
++ Fixed gcc 4 compiliation issue in SpawnMonitor
+
 purple (4/19/06)
 ----------------
 + Updated version to 5.4.0.0
