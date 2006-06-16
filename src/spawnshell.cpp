@@ -604,20 +604,26 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 #pragma pack(1)
     struct pos
 {
-/*0000*/ uint16_t spawnId;          // spawn id of the thing moving
-/*0002*/ signed   deltaY:13;      // change in y
-         signed   x:19;           // x coord
-/*0006*/ signed   deltaHeading:10;// change in heading
-         signed   z:19;           // z coord
-         signed   padding0054:3;  // ***Placeholder
-/*0010*/ signed   deltaZ:13;      // change in z
-         signed   deltaX:13;      // change in x
-         signed   padding0070:6; // ***Placeholder
-/*0014*/ signed   animation:10;   // animation
+/*0000*/ uint16_t spawnId;        // spawn id of the thing moving
+
+         signed   deltaZ:13;      // change in z
          signed   y:19;           // y coord
-         signed   padding0058:3;  // ***Placeholder
-/*0018*/ unsigned heading:12;     // heading
-         signed   padding0066:20; // ***Placeholder
+
+         signed   z:19;           // z coord
+         signed   animation:10;   // animation
+         signed   padding0054:3;  // ***Placeholder
+
+         signed   deltaHeading:10;// change in heading
+         signed   deltaX:13;      // change in x
+         signed   padding0070:3; // ***Placeholder
+         signed   padding00xx:6;  // ***Placeholder
+
+         signed   x:19;           // x coord
+         signed   padding0058:1;  // ***Placeholder
+         unsigned heading:12;     // heading
+
+         signed   deltaY:13;      // change in y
+         signed   padding0066:19;  // ***Placeholder
 /*0022*/
 };
 #pragma pack(0)

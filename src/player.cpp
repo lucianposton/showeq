@@ -807,7 +807,7 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
 
 #if 0 
   // Dump position updates for debugging client update changes
-  for (int i=0; i<36; i++)
+  for (int i=0; i<sizeof(playerSelfPosStruct); i++)
   {
       printf("%.2x", data[i]);
 
@@ -831,28 +831,30 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
 {
 /*0000*/ uint16_t spawnId;        // Player's spawn id
 /*0002*/ uint8_t unknown0002[2];  // ***Placeholder (update time counter?)
-/*0004*/ signed deltaHeading:10;  // change in heading
-         signed padding0004:6;    // ***Placeholder (mostly 1)
-/*0006*/ uint8_t unknown0006[2];  // ***Placeholder
-/*0008*/ float deltaZ;            // Change in z
-/*0012*/ float y;                 // y coord
-/*0016*/ signed animation:10;     // animation
-         unsigned heading:12;     // Directional heading
-         unsigned padding0016:10; // ***Placeholder
+/*0004*/ unsigned heading:12;     // Directional heading
+         unsigned padding0004:20; // ***Placeholder
+/*0008*/ float deltaX;            // Change in x
+/*0012*/ signed animation:10;     // animation
+         unsigned padding0012:22; // ***Placeholder
+/*0016*/ float deltaY;            // Change in y
 /*0020*/ float x;                 // x coord
-/*0024*/ float deltaX;            // Change in x
-/*0028*/ float deltaY;            // Change in y
+/*0024*/ signed deltaHeading:10;  // change in heading
+         signed padding0024:6;    // ***Placeholder (mostly 1)
+/*0026*/ uint8_t unknown0026[2];  // ***Placeholder
+/*0028*/ float deltaZ;            // Change in z
 /*0032*/ float z;                 // z coord
-/*0036*/
+/*0036*/ float y;                 // y coord
+/*0040*/
 };
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
-    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x, %x)\n",
             p->spawnId, p->x, p->y, p->z, 
             p->deltaX, p->deltaY, p->deltaZ, 
             float(p->heading), float(p->deltaHeading),
             p->animation, *(uint16_t*) p->unknown0002, p->padding0004, 
-            p->padding0016, *(uint16_t*) p->unknown0006);
+            p->padding0012,
+            p->padding0024, *(uint16_t*) p->unknown0026);
 #endif
 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);

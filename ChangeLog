@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+purple (6/15/06)
+----------------
++ Updated version to 5.5.0.0-pre1
++ Updated necessary opcodes for map, zoning, spawn list
++ Updated structs for live compatibility (NewZone, movement, spawnStruct)
+
 purple (4/6/06)
 ---------------
 + Fixed opcodes for OP_TargetMouse, OP_LevelUpdate (thanks ieatacid)
