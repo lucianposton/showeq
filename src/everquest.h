@@ -986,7 +986,7 @@ union
          };
 /*0216*/ uint8_t unknown0216[41];
 /*0257*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
-/*0258*/ uint8_t unknown0216[12];
+/*0258*/ uint8_t unknown0258[12];
 /*0270*/ float    runspeed;       // Speed when running
 /*0274*/ uint8_t unknown0274[4];
 /*0278*/ float    size;           // Model size
