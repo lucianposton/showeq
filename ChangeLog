@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+purple (6/17/06)
+----------------
++ Updated version to 5.5
++ Updated most of the rest of the opcodes
++ Updated a little more of spawnStruct
+
 purple (6/15/06)
 ----------------
 + Updated version to 5.5.0.0-pre1

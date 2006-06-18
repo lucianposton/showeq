@@ -984,15 +984,19 @@ union
              } equipment_colors;
              /*0180*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
          };
-/*0216*/ uint8_t unknown0216[54];
+/*0216*/ uint8_t unknown0216[41];
+/*0257*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
+/*0258*/ uint8_t unknown0216[12];
 /*0270*/ float    runspeed;       // Speed when running
 /*0274*/ uint8_t unknown0274[4];
 /*0278*/ float    size;           // Model size
 /*0282*/ uint8_t unknown0282[194];
 /*0476*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
-/*0508*/ uint8_t unknown0508;
+/*0508*/ uint8_t  gender;         // Gender (0=male, 1=female)
 /*0509*/ char     title[32];      // Title
-/*0541*/ uint8_t unknown0541[6];
+/*0541*/ uint8_t unknown0541;
+/*0542*/ uint8_t  eyecolor2;      // Left eye color
+/*0543*/ uint8_t unknown0543[4];
 /*0547*/ uint8_t  haircolor;      // Hair color
 /*0548*/ signed   deltaZ:13;      // change in z
          signed   y:19;           // y coord
@@ -1009,7 +1013,11 @@ union
          signed   padding0054:19;  // ***Placeholder
 /*0568*/ uint8_t unknown0568[5];
 /*0573*/ uint8_t  class_;         // Player's class
-/*0574*/ uint8_t unknown0574[139];
+/*0574*/ uint8_t  is_npc;         // 0=no, 1=yes
+/*0575*/ uint8_t  findable;       // 0=can't be found, 1=can be found
+/*0576*/ uint8_t unknown0576[135];
+/*0711*/ uint8_t  max_hp;         // (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
+/*0712*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
 /*0713*/ uint8_t  beard;          // Beard style (not totally, sure but maybe!)
 /*0714*/ uint8_t unknown0714[6];
 /*0720*/ uint32_t race;           // Spawn race
@@ -1019,20 +1027,16 @@ union
 /*0761*/ uint8_t  bodytype;       // Bodytype
 
 //%%% wrong but need to compile
-/*0499*/ uint8_t  gender;         // Gender (0=male, 1=female)
 /*0669*/ uint8_t  gm;             // 0=no, 1=gm
 /*0630*/ uint8_t  light;          // Spawn's lightsource
 /*0708*/ uint8_t  curHp;          // Current hp
-/*0766*/ uint8_t unknown0766[7];
+/*0766*/ uint8_t unknown0766[8];
 }; 
 /*0773*/
 
 
 #if 0
-/*0032*/ uint8_t  max_hp;         // (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
-/*0042*/ uint8_t  is_npc;         // 0=no, 1=yes
 /*0074*/ uint8_t  invis;          // Invis (0=not, 1=invis)
-/*0116*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
 /*0117*/ uint8_t  lfg;            // 0=off, 1=lfg on
 /*0196*/ uint8_t  afk;            // 0=no, 1=afk
 /*0207*/ int8_t   guildrank;      // 0=normal, 1=officer, 2=leader
@@ -1042,9 +1046,6 @@ union
 /*0500*/ uint8_t  showhelm;       // 0=no, 1=yes
 /*0501*/ uint8_t  helm;           // Helm texture
 /*0660*/ uint8_t  hairstyle;      // Hair style
-/*0670*/ uint8_t  findable;       // 0=can't be found, 1=can be found
-/*0671*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
-/*0727*/ uint8_t  eyecolor2;      // Left eye color
 
 /*122*/ uint8_t pvp; // 0=Not pvp,1=pvp
 #endif
