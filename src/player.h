@@ -25,14 +25,15 @@ const int maxSpawnLevel = 100;
 
 enum ColorLevel
 {
-  tGreenSpawn = 0,
-  tCyanSpawn = 1,
-  tBlueSpawn = 2,
-  tEvenSpawn = 3,
-  tYellowSpawn = 4,
-  tRedSpawn = 5,
-  tUnknownSpawn = 6,
-  tMaxColorLevels = 7
+  tGraySpawn = 0,
+  tGreenSpawn = 1,
+  tCyanSpawn = 2,
+  tBlueSpawn = 3,
+  tEvenSpawn = 4,
+  tYellowSpawn = 5,
+  tRedSpawn = 6,
+  tUnknownSpawn = 7,
+  tMaxColorLevels = 8
 };
 
 //----------------------------------------------------------------------

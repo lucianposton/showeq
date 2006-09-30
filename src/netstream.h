@@ -40,6 +40,31 @@ class NetStream
   const uint8_t* m_pos;
 };
 
+/**
+ * A network stream that manages data by the bit. This is useful for
+ * unpacking non-byte-aligned data.
+ */
+class BitStream
+{
+public:
+    BitStream(const uint8_t* data, size_t length);
+    ~BitStream();
+
+    const uint8_t* data() { return m_data; }
+    size_t length() { return m_totalBits >> 3; }
+    void reset();
+    bool end() { return (m_currentBit >= m_totalBits); }
+
+    bool readBit();
+    uint32_t readUInt(size_t bitCount);
+    int32_t readInt(size_t bitCount);
+
+protected:
+    const uint8_t* m_data;
+    size_t m_totalBits;
+    size_t m_currentBit;
+};
+
 #endif // _NETSTREAM_H_
 
 

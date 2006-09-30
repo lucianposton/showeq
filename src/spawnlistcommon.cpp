@@ -387,6 +387,7 @@ void SpawnListItem::pickTextColor(const Item* item,
     return;
   case 66:
   case 67:
+  case 100:
     m_textColor = Qt::darkMagenta;
     return;
   }

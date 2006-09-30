@@ -1,5 +1,21 @@
 Version: $Id$ $Name$
 
+purple (9/30/06)
+----------------
++ Updated version to 5.6
++ Serpent Spine compatibility
++ Upped max level to 75 (showeq42)
++ Realigned structs (showeq42)
++ New variable length movement op (showeq42)
++ Updated yellow con range to 3 levels (showeq42)
++ Updated cons to be consistent with in game (showeq42)
++ Cleaned up showeq42's patch. Thanks to ksmith for help on the 
+	positioning packet cleanup.
++ Regenerated staticspells.h 
++ Updated zones.h
++ Updated races.h
++ Named some weapon materials (uRit1u2CBBa)
+
 purple (6/17/06)
 ----------------
 + Updated version to 5.5

@@ -233,7 +233,7 @@ class Spawn : public Item
   int16_t deityTeam() const { return m_deityTeam; }
   int16_t raceTeam() const { return m_raceTeam; }
   bool considered() const { return m_considered; }
-  uint16_t equipment(uint8_t wearingSlot) const 
+  EquipStruct equipment(uint8_t wearingSlot) const 
     { return m_equipment[wearingSlot]; }
   QString equipmentStr(uint8_t wearingSlot) const;
   uint8_t typeflag() const { return m_typeflag; }
@@ -317,8 +317,8 @@ class Spawn : public Item
   void setGuildID(uint16_t GuildID) { m_guildID = GuildID; }
   void setGuildTag(QString GuildTag) { m_guildTag = GuildTag; }
   void setLevel(uint8_t level) { m_level = level; }
-  void setEquipment(uint8_t wearSlot, uint16_t itemID)
-    { if (wearSlot < tNumWearSlots) { m_equipment[wearSlot] = itemID; } }
+  void setEquipment(uint8_t wearSlot, EquipStruct item)
+    { if (wearSlot < tNumWearSlots) { m_equipment[wearSlot] = item; } }
   void setNPC(uint8_t NPC) { m_NPC = NPC; }
   void setTypeflag(uint8_t typeflag) { m_typeflag = typeflag; }
   void setGM(uint8_t gm) { m_gm = gm; }
@@ -353,7 +353,7 @@ class Spawn : public Item
   uint16_t m_guildID;
   uint16_t m_deity;
   int16_t m_deityTeam;
-  uint16_t m_equipment[tNumWearSlots];
+  EquipStruct m_equipment[tNumWearSlots];
   uint16_t m_race;
   int16_t m_raceTeam;
   uint8_t m_level;

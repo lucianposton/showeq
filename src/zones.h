@@ -401,20 +401,20 @@
 { "freeporthall", "Hall of Truth"}, // 391
 { "northro", "North Ro"}, // 392
 { "southro", "South Ro"}, // 393
-{ NULL, NULL }, // 394
-{ NULL, NULL }, // 395
-{ NULL, NULL }, // 396
-{ NULL, NULL }, // 397
-{ NULL, NULL }, // 398
-{ NULL, NULL }, // 399
-{ NULL, NULL }, // 400
-{ NULL, NULL }, // 401
-{ NULL, NULL }, // 402
-{ NULL, NULL }, // 403
-{ NULL, NULL }, // 404
-{ NULL, NULL }, // 405
-{ NULL, NULL }, // 406
-{ NULL, NULL }, // 407
+{ "crescent", "Crescent Reach" }, // 394
+{ "moors", "Blightfire Moors" }, // 395
+{ "stonehive", "Stone Hive" }, // 396
+{ "mesa", "Koru`kar Mesa" }, // 397
+{ "roost", "Blackfeather Roost" }, // 398
+{ "steppes", "The Steppes" }, // 399
+{ "icefall", "Icefall Glacier" }, // 400
+{ "valdeholm", "Valdeholm" }, // 401
+{ "frostcrypt", "Frostcrypt, Throne of the Shade King" }, // 402
+{ "sunderock", "Sunderock Springs" }, // 403
+{ "vergalid", "Vergalid Mines" }, // 404
+{ "direwind", "Direwind Cliffs" }, // 405
+{ "ashengate", "Ashengate, Reliquary of the Scale" }, // 406
+{ "highpasshold", "Highpass Hold" }, // 407
 { NULL, NULL }, // 408
 { NULL, NULL }, // 409
 { NULL, NULL }, // 410

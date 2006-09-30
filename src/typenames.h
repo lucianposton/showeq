@@ -75,5 +75,37 @@
     "Timer",			// 66
     "EventTrigger",		// 67
     NULL,			// 68
+    NULL,			// 69
+    NULL,			// 70
+    NULL,			// 71
+    NULL,			// 72
+    NULL,			// 73
+    NULL,			// 74
+    NULL,			// 75
+    NULL,			// 76
+    NULL,			// 77
+    NULL,			// 78
+    NULL,			// 79
+    NULL,			// 80
+    NULL,			// 81
+    NULL,			// 82
+    NULL,			// 83
+    NULL,			// 84
+    NULL,			// 85
+    NULL,			// 86
+    NULL,			// 87
+    NULL,			// 88
+    NULL,			// 89
+    NULL,			// 90
+    NULL,			// 91
+    NULL,			// 92
+    NULL,			// 93
+    NULL,			// 94
+    NULL,			// 95
+    NULL,			// 96
+    NULL,			// 97
+    NULL,			// 968
+    NULL,			// 99
+    "None",			// 100
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 

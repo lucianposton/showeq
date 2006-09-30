@@ -865,12 +865,6 @@ void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
   if (!deity.isEmpty())
     msg += QString(" [") + deity + "]";
 
-  if (con->maxHp || con->curHp)
-  {
-    lvl.sprintf(" (%i/%i HP)", con->curHp, con->maxHp);
-    msg += lvl;
-  }
-  
   msg += QString(" is: ") + print_faction(con->faction) + " (" 
     + QString::number(con->faction) + ")!";
 

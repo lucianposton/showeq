@@ -43,6 +43,8 @@ const float animationCoefficient = 0.0013;
 const int animationCoefficientFixPt = 
    fixPtToFixed<int, float>(animationCoefficient, qFormat);
 
+const EquipStruct SlotEmpty = { 0, 0, 0 };
+
 //----------------------------------------------------------------------
 // Handy utility functions
 // static 
@@ -263,7 +265,7 @@ Spawn::Spawn()
   setTypeflag(0);
   setGM(0);
   for (int i = 0; i < tNumWearSlots; i++)
-    setEquipment(i, 0);
+    setEquipment(i, SlotEmpty);
 
   // just clear the considred flag since data would be outdated
   setConsidered(false);
@@ -313,7 +315,7 @@ Spawn::Spawn(uint16_t id,
   setGuildID(0xffff);
   setGuildTag(NULL);
   for (int i = 0; i < tNumWearSlots; i++)
-    setEquipment(i, 0);
+    setEquipment(i, SlotEmpty);
   setTypeflag(0);
   setGM(0);
   setConsidered(false);
@@ -367,7 +369,7 @@ Spawn::Spawn(Spawn& s, uint16_t id)
   setLevel(s.level());
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s.equipment(i));
-  setEquipment(tUnknown1, 0);
+  setEquipment(tUnknown1, SlotEmpty);
   setTypeflag(s.typeflag());
   setGM(s.gm());
   setNPC(s.NPC());
@@ -411,7 +413,7 @@ void Spawn::update(const spawnStruct* s)
   setLevel(s->level);
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s->equipment[i]);
-  setEquipment(tUnknown1, 0);
+  setEquipment(tUnknown1, SlotEmpty);
 
   setTypeflag(s->bodytype);
   setGM(s->gm);
@@ -424,8 +426,8 @@ void Spawn::update(const spawnStruct* s)
 
   setAnimation(s->animation);
 
-  // only non corpses and things with animation != 66 move
-  if (!isCorpse() && (s->animation != 66))
+  // only non corpses move
+  if (!isCorpse())
   {
     setDeltas(s->deltaX >> 2, s->deltaY >> 2, s->deltaZ >> 2);
     setHeading(s->heading, s->deltaHeading);
@@ -498,7 +500,7 @@ void Spawn::backfill(const spawnStruct* s)
 
   // only change unknown equipment
   for (i = 0; i <= tLastCoreWearSlot; i++)
-    if (equipment(i) == 0)
+    if (equipment(i).itemId == SlotEmpty.itemId)
       setEquipment(i, s->equipment[i]);
 
   // only change unknown or no light
@@ -605,11 +607,11 @@ QString Spawn::lightName() const
 QString Spawn::equipmentStr(uint8_t wearingSlot) const
 {
   if (wearingSlot <= tLastMaterial)
-    return print_material(equipment(wearingSlot));
+    return print_material(equipment(wearingSlot).itemId);
   else if (wearingSlot <= tLastWeapon)
-    return print_item(equipment(wearingSlot));
+    return print_item(equipment(wearingSlot).itemId);
   else if (wearingSlot < tNumWearSlots)
-    return print_material(equipment(wearingSlot));
+    return print_material(equipment(wearingSlot).itemId);
   else
     return "";
 }
@@ -824,22 +826,22 @@ QString Spawn::info() const
 
   // Worn stuff
   for (i = tFirstMaterial; i <= tLastMaterial ; i++)
-    if (equipment(i))
-      temp += QString(locs[i]) + ":" + print_material(equipment(i)) + " ";
+    if (equipment(i).itemId != SlotEmpty.itemId)
+      temp += QString(locs[i]) + ":" + print_material(equipment(i).itemId) + " ";
  
  // Worn weapons
   for (i = tFirstWeapon; i <= tLastWeapon; i++)
-    if (equipment(i))
-      temp += QString(locs[i]) + ":" +  + print_item(equipment(i)) + " ";
+    if (equipment(i).itemId != SlotEmpty.itemId)
+      temp += QString(locs[i]) + ":" +  + print_item(equipment(i).itemId) + " ";
 
   // Worn stuff -- Current best quess is that this may be material?
   i = tUnknown1;
-  if (equipment(i))
-    temp += QString(locs[i]) + ":" + print_material(equipment(i)) + " "; 
+  if (equipment(i).itemId != SlotEmpty.itemId)
+    temp += QString(locs[i]) + ":" + print_material(equipment(i).itemId) + " "; 
 
 #if 1 // print also as slot U1 (Unknown1) until we're positive
-  if (equipment(i))
-    temp += QString("U1:U") + QString::number(equipment(i), 16) + " ";
+  if (equipment(i).itemId != SlotEmpty.itemId)
+    temp += QString("U1:U") + QString::number(equipment(i).itemId, 16) + " ";
 #endif
 
   return temp;

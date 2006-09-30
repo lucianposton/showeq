@@ -22,6 +22,7 @@
 #include "guild.h"
 #include "packetcommon.h"
 #include "diagnosticmessages.h"
+#include "netstream.h"
 
 #include <qfile.h>
 #include <qdatastream.h>
@@ -642,6 +643,113 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
   }
 }
 
+void SpawnShell::npcMoveUpdate(const uint8_t* data, size_t len, uint8_t dir)
+{
+/*
+ * Wire format:
+ * 2 bytes - spawnId
+ * 6 bit - fieldSpecifier bitmask
+ * 19 bit - y
+ * 19 bit - x
+ * 19 bit - z
+ * 12 bit - heading
+ * [Variable fields]
+ *
+ * Depending on bits set in fields:
+ * 1 = 12 bit pitch
+ * 2 = 10 bit delta heading  
+ * 4 = 10 bit velocity
+ * 8 = 13 bit delta y
+ * 16= 13 bit delta x
+ * 32 = 13 bit delta z
+ *
+ * Fields are in that order. For example, if the fieldSpecifier is
+ * 1, then there is just 12 bits of pitch. If the fieldSpecifier is
+ * 7, then there will be 10 bits of delta heading, 10 bits of animation,
+ * and 13 bits of delta y. Other non-specified values are 0.
+ *
+ * Oh and the byte order needs to be converted too. How nice.
+ */
+#define MASK_PITCH 0x01
+#define MASK_DELTA_HEADING 0x02
+#define MASK_ANIMATION 0x04
+#define MASK_DELTA_Y 0x08
+#define MASK_DELTA_X 0x10
+#define MASK_DELTA_Z 0x20
+
+    // Variable length movement packet. Sanity check.
+	if ((len < 13) || (len > 21)) 
+    {
+        // Ignore it.
+		seqWarn("Ignoring invalid length %d for movement packet", len);
+		return;
+	}
+
+    // if zoning, then don't do anything
+    if (m_zoneMgr->isZoning())
+    {
+        return;
+    }
+
+    // Pull data from the header.
+    BitStream stream(data, len);
+    
+    // spawnId.
+    uint16_t spawnId = stream.readUInt(16);
+
+    // 6 bit field specifier.
+    uint8_t fieldSpecifier = stream.readUInt(6);
+
+    // 19 bit coords. 12 bit heading. All signed.
+    int16_t y = stream.readInt(19) >> 3;
+    int16_t x = stream.readInt(19) >> 3;
+    int16_t z = stream.readInt(19) >> 3;
+    int16_t heading = stream.readInt(12);
+
+    // Variable fields are 0 unless specified.
+    int16_t deltaX = 0;
+    int16_t deltaY = 0;
+    int16_t deltaZ = 0;
+    int8_t deltaHeading = 0;
+    int16_t velocity = 0;
+    int16_t pitch = 0;
+    
+    if (fieldSpecifier & MASK_PITCH)
+    {
+        // Pull off pitch. Seq doesn't pay attention to this.
+        pitch = stream.readInt(12);
+    }
+    if (fieldSpecifier & MASK_DELTA_HEADING)
+    {
+        // Pull off deltaHeading. It is 10 bits in length. Signed.
+        deltaHeading = stream.readInt(10) >> 2;
+    }
+    if (fieldSpecifier & MASK_ANIMATION)
+    {
+        // Pull off velocity. It is 10 bits in length.
+        velocity = stream.readInt(10) >> 2;
+    }
+    if (fieldSpecifier & MASK_DELTA_Y)
+    {
+        // Pull off deltaY. It is 13 bits in length. Signed.
+        deltaY = stream.readInt(13) >> 2;
+    }
+    if (fieldSpecifier & MASK_DELTA_X)
+    {
+        // Pull off deltaX. It is 13 bits in length. Signed,
+        deltaX = stream.readInt(13) >> 2;
+    }
+    if (fieldSpecifier & MASK_DELTA_Z)
+    {
+        // Pull off deltaZ. It is 13 bits in length. Signed.
+        deltaZ = stream.readInt(13) >> 2;
+    }
+
+    // And send the update.
+	updateSpawn(spawnId, x, y, z, 
+        deltaX, deltaY, deltaZ, heading, deltaHeading, velocity);
+}
+
 void SpawnShell::updateSpawn(uint16_t id, 
 			     int16_t x, int16_t y, int16_t z,
 			     int16_t xVel, int16_t yVel, int16_t zVel,
@@ -662,16 +770,9 @@ void SpawnShell::updateSpawn(uint16_t id,
 		   showeq_params->walkpathrecord,
 		   showeq_params->walkpathlength);
      spawn->setAnimation(animation);
-     if ((animation != 0) && (animation != 66))
-     {
-       spawn->setDeltas(xVel, yVel, zVel);
-       spawn->setHeading(heading, deltaHeading);
-     } 
-    else
-     {
-       spawn->setDeltas(0, 0, 0);
-       spawn->setHeading(heading, 0);
-     }
+
+     spawn->setDeltas(xVel, yVel, zVel);
+     spawn->setHeading(heading, deltaHeading);
 
      // Distance
      if (!showeq_params->fast_machine)
@@ -961,39 +1062,6 @@ void SpawnShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
     {
       // yes
       Spawn* spawn = (Spawn*)item;
-
-      int changed = tSpawnChangedNone;
-
-      /* maxhp and curhp are available when considering players, */
-      /* but not when considering mobs. */
-      if (con->maxHp || con->curHp)
-      {
-         if (spawn->NPC() == SPAWN_NPC_UNKNOWN)
-         {
-	   spawn->setNPC(SPAWN_PLAYER);        // player
-	   changed |= tSpawnChangedNPC;
-         }
-         spawn->setMaxHP(con->maxHp);
-         spawn->setHP(con->curHp);
-         changed |= tSpawnChangedHP;
-      }
-      else if (item->NPC() == SPAWN_NPC_UNKNOWN)
-      {
-         spawn->setNPC(SPAWN_NPC);
-         changed |= tSpawnChangedNPC;
-      }
-
-      // note the updates if any
-      if (changed != tSpawnChangedNone)
-      {
-        if (updateFilterFlags(item))
-           changed |= tSpawnChangedFilter;
-        if (updateRuntimeFilterFlags(item))
-           changed |= tSpawnChangedRuntimeFilter;
-
-	item->updateLastChanged();
-        emit changeItem(item, changed);
-      }
 
       // note that this spawn has been considered
       spawn->setConsidered(true);

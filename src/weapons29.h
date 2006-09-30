@@ -155,8 +155,8 @@
     NULL,                 // 0x92
     NULL,                 // 0x93
     NULL,                 // 0x94
-    NULL,                 // 0x95
-    NULL,                 // 0x96
+    "Book",               // 0x95
+    "Book",               // 0x96
     NULL,                 // 0x97
     NULL,                 // 0x98
     NULL,                 // 0x99

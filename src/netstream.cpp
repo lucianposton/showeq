@@ -157,5 +157,98 @@ QString NetStream::readText()
     return QString();
 }
 
+BitStream::BitStream(const uint8_t* data, size_t length)
+  : m_data(data)
+{
+    // Length in bits.
+    m_totalBits = length * 8;
 
+    reset();
+}
+
+BitStream::~BitStream()
+{
+}
+
+void BitStream::reset()
+{
+    m_currentBit = 0;
+}
+
+uint32_t BitStream::readUInt(size_t bitCount)
+{
+    // Make sure we have the bits first.
+    if (m_currentBit + bitCount > m_totalBits)
+    {
+        return 0;
+    }
+
+    const uint8_t* currentByte = m_data + (m_currentBit >> 3);
+    uint32_t out = 0;
+
+    // Partial bytes in the lead and end. Full bytes in the middle.
+    size_t leadPartialBitCount = 8 - (m_currentBit % 8);
+    size_t middleByteCount;
+    size_t tailPartialBitCount;
+
+    if (leadPartialBitCount == 8)
+    {
+        // Lead partial is a byte. So just put it in the middle.
+        leadPartialBitCount = 0;
+    }
+
+    if (leadPartialBitCount > bitCount)
+    {
+        // All the bits we need are in the lead partial. Note that when
+        // the lead partial is byte aligned, this won't process it. Instead
+        // it will be handled by the tailPartialBitCount.
+        out = *currentByte & ((1 << leadPartialBitCount) - 1);
+        m_currentBit += bitCount;
+
+        return out >> (leadPartialBitCount - bitCount);
+    }
+    else
+    {
+        // Spanning multiple bytes. leadPartialBitCount is correct.
+        // Calculate middle and tail.
+        middleByteCount = (bitCount - leadPartialBitCount) / 8;
+        tailPartialBitCount = 
+            bitCount - (leadPartialBitCount + middleByteCount*8);
+    }
+
+    if (leadPartialBitCount > 0)
+    {
+        // Pull in partial from the lead byte
+        out |= *currentByte & ((1 << leadPartialBitCount) - 1);
+        currentByte++;
+    }
+
+    // Middle
+    for (size_t i=0; i<middleByteCount; i++)
+    {
+        out = (out << 8) | *currentByte;
+        currentByte++;
+    }
+
+    // And the end.
+    if (tailPartialBitCount > 0)
+    {
+        out = (out << tailPartialBitCount) | 
+            (*currentByte >> (8 - tailPartialBitCount));
+    }
+
+    // Update the current bit
+    m_currentBit += bitCount;
+
+    return out;
+}
+
+int32_t BitStream::readInt(size_t bitCount)
+{
+    // Sign
+    uint32_t sign = readUInt(1);
+    uint32_t retval = readUInt(bitCount - 1);
+
+    return retval * (sign ? -1 : 1);
+}
 

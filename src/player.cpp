@@ -30,6 +30,7 @@ static const uint32_t* magic = (uint32_t*)magicStr;
 
 static const char* conColorBasePrefNames[] =
 {
+  "GrayBase",
   "GreenBase",
   "CyanBase",
   "BlueBase",
@@ -74,6 +75,10 @@ Player::Player (QObject* parent,
   // set the name to the default name
   Spawn::setName(m_defaultName);
 
+  m_conColorBases[tGraySpawn] = 
+    pSEQPrefs->getPrefColor(conColorBasePrefNames[tGraySpawn],
+			    "Player",
+			    QColor(140, 140, 140));
   m_conColorBases[tGreenSpawn] = 
     pSEQPrefs->getPrefColor(conColorBasePrefNames[tGreenSpawn],
 			    "Player",
@@ -1048,150 +1053,132 @@ void Player::setConColorBase(ColorLevel level, const QColor& color)
 
 void Player::fillConTable()
 {
-// keep around for historical giggles
-//
-// to make changes here, simply alter greenRange and cyanRange
-//
-// Levels	Green	Cyan    Red
-// 1-7		-4      n/a	+3
-// 8-?          -5      -4      +3
-// 11-?         -6      -5      +3
-// 13-22	-7      -5	+3
-// 23-24	-10?    -7?  	+3
-// 25-34	-13     -10	+3
-// 35-40	-14?	-10?	+3
-// 41-42	-15?	-11?	+3
-// 43-44	-16?	-12?	+3
-// 45-48	-17?	-13?	+3
-// 49-51	-18	-14?    +3
-// 52-54        -19?	-15?    +3
-// 55-57	-20?	-16?	+3
-// 58-60        -21     -16     +3
-// 61           -13	-17	+3
-
+  int grayRange = 0;
   int greenRange = 0; 
-  int cyanRange = 0; 
 
-  if (level() < 8) 
-  { // 1 - 7 
-    greenRange = -4;
-    cyanRange = -8;
+  if (level() < 9) 
+  { // 1 - 8 
+    grayRange = -4;
+    greenRange = -8;
   } 
   else if (level() < 13) 
-  { // 8 - 12 
+  { // 9 - 12 
+    grayRange = -6;
+    greenRange = -4;
+  }
+  else if (level() < 17)
+  { // 13-16
+    grayRange = -7;
     greenRange = -5;
-    cyanRange = -4;
   }
-  else if (level() < 23) 
-  { // 
-    greenRange = -8;
-    cyanRange = -6;
+  else if (level() < 21) 
+  { // 17-20 
+    grayRange = -8;
+    greenRange = -6;
   }
-  else if (level() < 27) 
-  { //
-    greenRange = -10;
-    cyanRange = -8;
+  else if (level() < 25) 
+  { // 21-24
+    grayRange = -9;
+    greenRange = -7;
   }
   else if (level() < 29)
-  { //
-    greenRange = -11;
-    cyanRange = -8;
+  { // 25-28
+    grayRange = -10;
+    greenRange = -8;
   }
-  else if (level() < 34) 
-  { // 
-    greenRange = -12;
-    cyanRange = -9;
+  else if (level() < 33) 
+  { // 29-32
+    grayRange = -11;
+    greenRange = -9;
   }
   else if (level() < 37) 
-  { // 
-    greenRange = -13;
-    cyanRange = -10;
+  { // 33-36
+    grayRange = -13;
+    greenRange = -10;
   }
   else if (level() < 41)
   { // 37 - 40
-  	greenRange = -14;
-	cyanRange = -11;
+  	grayRange = -14;
+	greenRange = -11;
   }
   else if (level() < 45)
   { // 41 - 44
-  	greenRange = -16;
-	cyanRange = -12;
+  	grayRange = -16;
+	greenRange = -12;
   }
   else if (level() < 49) 
   { // 45 - 48
-    greenRange = -17;
-    cyanRange = -13;
+    grayRange = -17;
+    greenRange = -13;
   }
   else if (level() < 53) 
   { // 49 - 52
-    greenRange = -18;
-    cyanRange = -14;
-  }
-  else if (level() < 55) 
-  { // 52 - 54
-    greenRange = -19;
-    cyanRange = -15;
+    grayRange = -18;
+    greenRange = -14;
   }
   else if (level() < 57) 
-  { // 55 - 56
-    greenRange = -20;
-    cyanRange = -15;
+  { // 53 - 56
+    grayRange = -20;
+    greenRange = -15;
   }
-  else if (level() < 71)
-  { //57 - 70
-    greenRange = -21;
-    cyanRange = -16;
+  else
+  { // 57+
+    grayRange = -21;
+    greenRange = -16;
   }
 
   uint8_t spawnLevel = 1; 
   uint8_t scale;
 
-  uint8_t greenBase = m_conColorBases[tGreenSpawn].green();
-  uint8_t greenScale = 255 - greenBase;
-  for (; spawnLevel <= (greenRange + level()); spawnLevel++)
-  { // this loop handles all GREEN cons
-    if (spawnLevel <= (greenRange + level() - 5))
-      m_conTable[spawnLevel] = m_conColorBases[tGreenSpawn];
-    else
-    {
-      scale = greenScale/(greenRange + level() - spawnLevel + 1);
-      m_conTable[spawnLevel] = QColor(m_conColorBases[tGreenSpawn].red(), 
-				 (greenBase + scale), 
-				 m_conColorBases[tGreenSpawn].blue());
-    }
+  // Gray spawns. No gradient.
+  for (; spawnLevel <= grayRange + level(); spawnLevel++)
+  {
+    m_conTable[spawnLevel] = m_conColorBases[tGraySpawn];
   }
 
-  for (; spawnLevel <= cyanRange + level(); spawnLevel++)
-  { // light blue cons, no need to gradient a small range
+  // Green spawns. No gradient since green is small.
+  for (; spawnLevel <= greenRange + level(); spawnLevel++)
+  {
+    m_conTable[spawnLevel] = m_conColorBases[tGreenSpawn];
+  }
+
+  // Light blue spawns. Again, no gradient. Light blue is 
+  // blue, but under 5 levels below, so for levels where there is
+  // no light blue, this is negative.
+  for (; spawnLevel < level() - 5; spawnLevel++)
+  {
     m_conTable[spawnLevel] = m_conColorBases[tCyanSpawn];
   }
 
-  uint8_t blueBase = m_conColorBases[tBlueSpawn].blue();
-  uint8_t blueScale = 255 - blueBase;
+  // Blue spawns. Just 5 levels in here. So again, no gradient.
   for (; spawnLevel < level(); spawnLevel++)
-  { // blue cons here
-    scale = blueScale/(level() - spawnLevel);
-    m_conTable[spawnLevel] = QColor(m_conColorBases[tBlueSpawn].red(), 
-			       m_conColorBases[tBlueSpawn].green(), 
-			       (blueBase + scale));
+  {
+    m_conTable[spawnLevel] = m_conColorBases[tBlueSpawn];
   }
 
-  m_conTable[spawnLevel++] = m_conColorBases[tEvenSpawn]; // even con
-  m_conTable[spawnLevel++] = m_conColorBases[tYellowSpawn];   // yellow con
-  m_conTable[spawnLevel++] = QColor(m_conColorBases[tYellowSpawn].red(), 
-			       m_conColorBases[tYellowSpawn].green() - 30,
-			       m_conColorBases[tYellowSpawn].blue());   // yellow con
+  // Even is our level, natch.
+  m_conTable[spawnLevel++] = m_conColorBases[tEvenSpawn];
+
+  // 3 levels of yellow.
+  for (; spawnLevel < level() + 4; spawnLevel++)
+  {
+    m_conTable[spawnLevel++] = m_conColorBases[tYellowSpawn];
+  }
   
+  // Finally, red spawns. Gradient this.
   uint8_t redBase = m_conColorBases[tRedSpawn].red();
   uint8_t redScale = 255 - redBase;
+
   for (; spawnLevel < maxSpawnLevel; spawnLevel++)
-  { // red cons
-    if (spawnLevel > level() + 13) 
+  {
+    if (spawnLevel > level() + 9) 
+    {
       m_conTable[spawnLevel] = m_conColorBases[tRedSpawn];
+    }
     else
     {
-      scale = redScale/(spawnLevel - level() - 2);
-      m_conTable[spawnLevel] = QColor((redBase + scale), 
+      scale = redScale*(spawnLevel - level() - 4) / 6;
+      m_conTable[spawnLevel] = QColor((255 - scale),
 				 m_conColorBases[tRedSpawn].green(), 
 				 m_conColorBases[tRedSpawn].blue());
     }

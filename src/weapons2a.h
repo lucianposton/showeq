@@ -61,7 +61,7 @@
     "Forge",              // 0x34
     "BrewBarrel",         // 0x35
     NULL,                 // 0x36
-    NULL,                 // 0x37
+    "BlueBottle",         // 0x37
     NULL,                 // 0x38
     NULL,                 // 0x39
     NULL,                 // 0x3a
@@ -117,9 +117,9 @@
     NULL,                 // 0x6c
     NULL,                 // 0x6d
     NULL,                 // 0x6e
-    NULL,                 // 0x6f
-    NULL,                 // 0x70
-    NULL,                 // 0x71
+    "Forge",              // 0x6f
+    "Forge",              // 0x70
+    "Oven",               // 0x71
     NULL,                 // 0x72
     NULL,                 // 0x73
     NULL,                 // 0x74
@@ -172,8 +172,8 @@
     NULL,                 // 0xa3
     NULL,                 // 0xa4
     NULL,                 // 0xa5
-    NULL,                 // 0xa6
-    NULL,                 // 0xa7
+    "Sabre",              // 0xa6
+    "Sabre",              // 0xa7
     NULL,                 // 0xa8
     NULL,                 // 0xa9
     NULL,                 // 0xaa

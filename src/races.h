@@ -526,4 +526,34 @@
     "Nightmare/Unicorn",          // 517
     "Horse",                      // 518
     "Nightmare/Unicorn",          // 519
+    "Bixie",                      // 520
+    "Centaur",                    // 521
+    "Drakkin",                    // 522
+    "Giant",                      // 523
+    "Gnoll",                      // 524
+    "Griffin",                    // 525
+    "Giant Shade",                // 526
+    "Harpy",                      // 527
+    "Mammoth",                    // 528
+    "Satyr",                      // 529
+    "Dragon",                     // 530
+    "Dragon",                     // 531
+    "Dyn'Leth",                   // 532
+    "Boat",                       // 533
+    "Weapon Rack",                // 534
+    "Armor Rack",                 // 535
+    "Honey Pot",                  // 536
+    "Jum Jum Bucket",             // 537
+    "Plant",                      // 538
+    "Plant",                      // 539
+    "Plant",                      // 540
+    "Toolbox",                    // 541
+    "Wine Cask",                  // 542
+    "Stone Jug",                  // 543
+    "Elven Boat",                 // 544
+    "Gnomish Boat",               // 545
+    "Undead Boat",                // 546
+    "Goo",                        // 547
+    "Goo",                        // 548
+    "Goo",                        // 549
 #endif

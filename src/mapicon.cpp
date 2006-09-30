@@ -701,7 +701,7 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
 		  true, false, false, true);
   m_mapIcons[tIconTypeSpawnPoint]
     .setImage(QBrush(SolidPattern), QPen(darkGray, 1, SolidLine, cap, join),
-	      tIconStylePlus, tIconSizeSmall,
+	      tIconStylePlus, tIconSizeRegular,
 	      true, true, false, false);
   m_mapIcons[tIconTypeSpawnPointSelected]
     .setHighlight(QBrush(NoBrush), QPen(blue, 1, SolidLine, cap, join),
@@ -1273,6 +1273,7 @@ QColor MapIcons::pickSpawnColor(const Spawn* spawn)
     return Qt::magenta;
   case 66:
   case 67:
+  case 100:
     return Qt::darkMagenta;
   default:
     break;

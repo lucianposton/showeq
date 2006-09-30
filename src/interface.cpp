@@ -1004,9 +1004,11 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    // Con Color base menu
    QPopupMenu* conColorBaseMenu = new QPopupMenu;
+   x = conColorBaseMenu->insertItem("Gray Spawn Base...");
+   conColorBaseMenu->setItemParameter(x, tGraySpawn);
    x = conColorBaseMenu->insertItem("Green Spawn Base...");
    conColorBaseMenu->setItemParameter(x, tGreenSpawn);
-   x = conColorBaseMenu->insertItem("Cyan Spawn Base...");
+   x = conColorBaseMenu->insertItem("Light Blue Spawn Base...");
    conColorBaseMenu->setItemParameter(x, tCyanSpawn);
    x = conColorBaseMenu->insertItem("Blue Spawn Base...");
    conColorBaseMenu->setItemParameter(x, tBlueSpawn);
@@ -1120,7 +1122,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    // Character -> Level
    m_charLevelMenu = new QPopupMenu;
    m_charMenu->insertItem("Choose &Level", m_charLevelMenu);
-   m_levelSpinBox = new QSpinBox(1, 70, 1, this, "m_levelSpinBox");
+   m_levelSpinBox = new QSpinBox(1, 75, 1, this, "m_levelSpinBox");
    m_charLevelMenu->insertItem( m_levelSpinBox );
    m_levelSpinBox->setWrapping( true );
    m_levelSpinBox->setButtonSymbols(QSpinBox::PlusMinus);
@@ -2021,6 +2023,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Consider", SP_Zone, DIR_Server|DIR_Client,
 		      "considerStruct", SZC_Match,
 		      m_spawnShell, SLOT(consMessage(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_NpcMoveUpdate", SP_Zone, DIR_Server,
+		      "uint8_t", SZC_None,
+		      m_spawnShell, SLOT(npcMoveUpdate(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_ClientUpdate", SP_Zone, DIR_Server,
 		      "playerSpawnPosStruct", SZC_Match,
 		      m_spawnShell, SLOT(playerUpdate(const uint8_t*, size_t, uint8_t)));

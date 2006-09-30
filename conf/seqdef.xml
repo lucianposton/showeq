@@ -3212,8 +3212,11 @@ If any argument is left blank, it is filled in with its default...
  </section>
 <!-- ============================================================= -->
  <section name="Player" >
+  <property name="GrayBase" >
+   <color blue="77" red="77" green="98" />
+  </property>
   <property name="GreenBase" >
-   <color blue="0" red="0" green="95" />
+   <color blue="0" red="0" green="232" />
   </property>
   <property name="CyanBase" >
    <color blue="255" red="0" green="255" />
@@ -3231,7 +3234,7 @@ If any argument is left blank, it is filled in with its default...
    <color blue="0" red="127" green="0" />
   </property>
   <property name="Unknown" >
-   <color blue="164" red="160" green="160" />
+   <color blue="104" red="100" green="100" />
   </property>
  </section>
 <!-- ============================================================= -->

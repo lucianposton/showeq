@@ -106,6 +106,7 @@ public slots:
    void newSpawn(const uint8_t* spawn);
    void newSpawn(const spawnStruct& s);
    void playerUpdate(const uint8_t*pupdate, size_t, uint8_t);
+   void npcMoveUpdate(const uint8_t*npcupdate, size_t, uint8_t);
    void updateSpawn(uint16_t id, 
 		    int16_t x, int16_t y, int16_t z,
 		    int16_t xVel, int16_t yVel, int16_t zVel,

@@ -54,15 +54,15 @@
     NULL,                 // 0x2d
     NULL,                 // 0x2e
     NULL,                 // 0x2f
-    NULL,                 // 0x30
+    "Plant",              // 0x30
     NULL,                 // 0x31
-    NULL,                 // 0x32
-    NULL,                 // 0x33
-    NULL,                 // 0x34
+    "Bone",               // 0x32
+    "Books",              // 0x33
+    "Leaf",               // 0x34
     NULL,                 // 0x35
     NULL,                 // 0x36
     NULL,                 // 0x37
-    NULL,                 // 0x38
+    "Rock",               // 0x38
     NULL,                 // 0x39
     NULL,                 // 0x3a
     NULL,                 // 0x3b
@@ -71,7 +71,7 @@
     NULL,                 // 0x3e
     NULL,                 // 0x3f
     NULL,                 // 0x40
-    NULL,                 // 0x41
+    "Books",              // 0x41
     NULL,                 // 0x42
     NULL,                 // 0x43
     NULL,                 // 0x44

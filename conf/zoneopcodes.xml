@@ -122,6 +122,14 @@
         <payload dir="server" typename="playerSpawnPosStruct" sizechecktype="match"/>
         <payload dir="both" typename="playerSelfPosStruct" sizechecktype="match"/>
     </opcode>
+    <opcode id="5f33" name="OP_NpcMoveUpdate" updated="08/13/06">
+        <comment>Position updates</comment>
+        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
+    </opcode>
+    <opcode id="1399" name="OP_MobUpdate" updated="09/23/06">
+        <comment>old MobUpdateCode</comment>
+        <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
+    </opcode>
     <opcode id="6f3b" name="OP_NewSpawn" updated="06/13/06">
         <comment>old NewSpawnCode</comment>
         <payload dir="server" typename="spawnStruct" sizechecktype="match"/>
@@ -583,10 +591,6 @@
      handlers. These need to be refound again, but we'd see errors if they
      were commented out. If you're looking for opcodes, find these first
      if you're so inclined! -->
-    <opcode id="003e" name="OP_MobUpdate" implicitlen="12" updated="05/26/04">
-        <comment>old MobUpdateCode</comment>
-        <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
-    </opcode>
     <opcode id="00d0" name="OP_CorpseLocResponse" updated="05/26/04">
         <comment>old CorpseLocCode:</comment>
         <payload dir="server" typename="corpseLocStruct" sizechecktype="match"/>
