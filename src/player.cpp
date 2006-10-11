@@ -1128,7 +1128,6 @@ void Player::fillConTable()
   }
 
   uint8_t spawnLevel = 1; 
-  uint8_t scale;
 
   // Gray spawns. No gradient.
   for (; spawnLevel <= grayRange + level(); spawnLevel++)
@@ -1162,26 +1161,36 @@ void Player::fillConTable()
   // 3 levels of yellow.
   for (; spawnLevel < level() + 4; spawnLevel++)
   {
-    m_conTable[spawnLevel++] = m_conColorBases[tYellowSpawn];
+    m_conTable[spawnLevel] = m_conColorBases[tYellowSpawn];
   }
   
-  // Finally, red spawns. Gradient this.
+  // Finally, red spawns. Gradient this light to dark. 4 chunks then
+  // we just go dark.
   uint8_t redBase = m_conColorBases[tRedSpawn].red();
-  uint8_t redScale = 255 - redBase;
+  uint8_t redStep = 25;
+
+  // See if redBase is closer to light to choose whether we're going up
+  // or down.
+  if (redBase > 155)
+  {
+    redStep = - redStep;
+  }
+  uint8_t redColor = redBase + redStep*4;
+
+  for (; spawnLevel < level() + 8; spawnLevel++)
+  {
+      m_conTable[spawnLevel] = QColor(redColor,
+				 m_conColorBases[tRedSpawn].green(), 
+				 m_conColorBases[tRedSpawn].blue());
+      
+      redColor -= redStep;
+  }
 
   for (; spawnLevel < maxSpawnLevel; spawnLevel++)
   {
-    if (spawnLevel > level() + 9) 
-    {
-      m_conTable[spawnLevel] = m_conColorBases[tRedSpawn];
-    }
-    else
-    {
-      scale = redScale*(spawnLevel - level() - 4) / 6;
-      m_conTable[spawnLevel] = QColor((255 - scale),
+      m_conTable[spawnLevel] = QColor(redColor,
 				 m_conColorBases[tRedSpawn].green(), 
 				 m_conColorBases[tRedSpawn].blue());
-    }
   }
 
   // level 0 is unknown, and thus gray

@@ -1,5 +1,10 @@
 Version: $Id$ $Name$
 
+purple (10/10/06)
+-----------------
++ Fixed con range. Stupid double ++ error.
++ Redid gradients for red con colors
+
 purple (9/30/06)
 ----------------
 + Updated version to 5.6
