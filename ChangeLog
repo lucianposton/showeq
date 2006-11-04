@@ -1,9 +1,16 @@
 Version: $Id$ $Name$
 
-purple (10/10/06)
+purple (11/04/06)
 -----------------
++ Updated version to 5.6.1
 + Fixed con range. Stupid double ++ error.
 + Redid gradients for red con colors
++ Cleaned up the hover-mode death handling by making movements valid, changing
+	icon to a corpse, and made handling the respawn not cause unknowns
++ Added a hack for kernel versions after 2.6.18 that moved UTS_RELEASE
++ Fixed auras so they shouldn't show up unknown as much. New auras for people
+	who are not in your group will still show as unknown, since the server
+	doesn't announce them until you join the group.
 
 purple (9/30/06)
 ----------------

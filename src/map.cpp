@@ -3037,14 +3037,12 @@ void Map::paintMap (QPainter * p)
   tmp.setPen (NoPen);
   tmp.setFont (m_param.font());
 
-  if ((m_player->validPos()) ||
-      ((!m_zoneMgr->isZoning()) && 
-       (m_player->id() != 0)))
+  if (m_player->validPos() && !m_zoneMgr->isZoning() && m_player->id() != 0)
   {
     if (m_showPlayerBackground)
       paintPlayerBackground(m_param, tmp);
     
-    if (m_showPlayerView)
+    if (m_showPlayerView && ! m_player->isCorpse())
       paintPlayerView(m_param, tmp);
     
     if (m_showPlayer)
@@ -3186,12 +3184,28 @@ void Map::paintPlayerView(MapParameters& param, QPainter& p)
 void Map::paintPlayer(MapParameters& param, QPainter& p)
 {
 #ifdef DEBUGMAP
-  seqDebug("Paint player position");
+    seqDebug("Paint player position");
 #endif
-  p.setPen(gray);
-  p.setBrush(white);
-  p.drawEllipse(m_param.playerXOffset() - 3, 
-        m_param.playerYOffset() - 3, 6, 6);
+
+    if (! m_player->isCorpse())
+    {
+        // White dot for non-corpse
+        p.setPen(gray);
+        p.setBrush(white);
+        p.drawEllipse(m_param.playerXOffset() - 3, 
+            m_param.playerYOffset() - 3, 6, 6);
+    }
+    else
+    {
+        // Corpse icon for a corpse.
+        MapIcon mapIcon = m_mapIcons->icon(tIconTypeSpawnPlayerCorpse);
+
+        p.setPen(mapIcon.highlightPen());
+        p.setBrush(mapIcon.highlightBrush());
+
+        m_mapIcons->paintItemIcon(param, p, mapIcon, m_player,
+            param.playerOffset());
+    }
 }
 
 void Map::paintDrops(MapParameters& param,

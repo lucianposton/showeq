@@ -13,6 +13,11 @@
 
 #ifdef __linux__
 #include <linux/version.h>
+
+// Newer kernel versions put this in utsversion
+#ifndef UTS_RELEASE
+#include <linux/utsversion.h>
+#endif
 #endif
 
 #include <sys/utsname.h>

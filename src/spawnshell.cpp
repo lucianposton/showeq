@@ -481,6 +481,32 @@ void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
   }
 }
 
+void SpawnShell::zoneEntry(const uint8_t* data)
+{
+    const spawnStruct* spawn = (const spawnStruct*)data;
+
+#ifdef SPAWNSHELL_DIAG
+    seqDebug("SpawnShell::zoneEntry(spawnStruct *(name='%s'))", spawn->name);
+#endif
+
+    // Zone Entry. This is a semi-filled in spawnStruct that we
+    // see for ourself when entering a zone. We also get sent this
+    // when shrouding and when respawning from corpse hover mode. Auras
+    // also get sent this sometimes.
+    if (spawn->NPC == 0)
+    {
+        // Align the player instance with these values
+        m_player->update(spawn);
+
+        emit changeItem(m_player, tSpawnChangedALL);
+    }
+    else
+    {
+        // Auras.
+        newSpawn(data);
+    }
+}
+
 void SpawnShell::newSpawn(const uint8_t* data)
 {
   // if zoning, then don't do anything
@@ -589,8 +615,7 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 
   const playerSpawnPosStruct *pupdate = (const playerSpawnPosStruct *)data;
 
-  if ((dir != DIR_Client) && 
-      (pupdate->spawnId != m_player->id())) // PC Corpse Movement
+  if (dir != DIR_Client)
   {
     int16_t y = pupdate->y >> 3;
     int16_t x = pupdate->x >> 3;
@@ -757,63 +782,77 @@ void SpawnShell::updateSpawn(uint16_t id,
 			     uint8_t animation)
 {
 #ifdef SPAWNSHELL_DIAG
-   seqDebug("SpawnShell::updateSpawn(id=%d, x=%d, y=%d, z=%d, xVel=%d, yVel=%d, zVel=%d)", id, x, y, z, xVel, yVel, zVel);
+    seqDebug("SpawnShell::updateSpawn(id=%d, x=%d, y=%d, z=%d, xVel=%d, yVel=%d, zVel=%d)", 
+        id, x, y, z, xVel, yVel, zVel);
 #endif
 
-   Item* item = m_spawns.find(id);
+    Item* item;
+   
+    if (id == m_player->id())
+    {
+        item = m_player;
+    }
+    else
+    {
+        item = m_spawns.find(id);
+    }
 
-   if (item != NULL)
-   {
-     Spawn* spawn = (Spawn*)item;
+    if (item != NULL)
+    {
+        Spawn* spawn = (Spawn*)item;
 
-     spawn->setPos(x, y, z,
-		   showeq_params->walkpathrecord,
-		   showeq_params->walkpathlength);
-     spawn->setAnimation(animation);
+        spawn->setPos(x, y, z,
+		    showeq_params->walkpathrecord,
+		    showeq_params->walkpathlength);
+        spawn->setAnimation(animation);
 
-     spawn->setDeltas(xVel, yVel, zVel);
-     spawn->setHeading(heading, deltaHeading);
+        spawn->setDeltas(xVel, yVel, zVel);
+        spawn->setHeading(heading, deltaHeading);
 
-     // Distance
-     if (!showeq_params->fast_machine)
-        item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
-     else
-        item->setDistanceToPlayer(m_player->calcDist(*item));
+        // Distance
+        if (!showeq_params->fast_machine)
+            item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
+        else
+            item->setDistanceToPlayer(m_player->calcDist(*item));
         
-     spawn->updateLast();
-     item->updateLastChanged();
-     emit changeItem(item, tSpawnChangedPosition);
-   }
-   else if (showeq_params->createUnknownSpawns)
-   {
-     // not the player, so check if it's a recently deleted spawn
-     for (int i =0; i < m_cntDeadSpawnIDs; i++)
-     {
-       // check dead spawn list for spawnID, if it was deleted, shouldn't
-       // see new position updates, so therefore this is probably 
-       // for a new spawn (spawn ID being reused)
-       if ((m_deadSpawnID[i] != 0) && (m_deadSpawnID[i] == id))
-       {
-	 // found a match, ignore it
-	 m_deadSpawnID[i] = 0;
+        spawn->updateLast();
+        item->updateLastChanged();
+        emit changeItem(item, tSpawnChangedPosition);
+    }
+    else if (showeq_params->createUnknownSpawns)
+    {
+        // not the player, so check if it's a recently deleted spawn
+        for (int i =0; i < m_cntDeadSpawnIDs; i++)
+        {
+            // check dead spawn list for spawnID, if it was deleted, shouldn't
+            // see new position updates, so therefore this is probably 
+            // for a new spawn (spawn ID being reused)
+            if ((m_deadSpawnID[i] != 0) && (m_deadSpawnID[i] == id))
+            {
+                // found a match, ignore it
+                m_deadSpawnID[i] = 0;
 
-	 seqInfo("(%d) had been removed from the zone, but saw a position update on it, so assuming bogus update.", 
-		id);
+                seqInfo("(%d) had been removed from the zone, but saw a position update on it, so assuming bogus update.", 
+                    id);
 
-	 return;
-       }
-     }
+                return;
+            }
+        }
 
-     item = new Spawn(id, x, y, z, xVel, yVel, zVel, 
-		      heading, deltaHeading, animation);
-     updateFilterFlags(item);
-     updateRuntimeFilterFlags(item);
-     m_spawns.insert(id, item);
-     emit addItem(item);
+        item = new Spawn(id, x, y, z, xVel, yVel, zVel, 
+            heading, deltaHeading, animation);
+        updateFilterFlags(item);
+        updateRuntimeFilterFlags(item);
+        m_spawns.insert(id, item);
+        emit addItem(item);
 
-     // send notification of new spawn count
-     emit numSpawns(m_spawns.count());
-   }
+#ifdef SPAWNSHELL_DIAG
+        seqDebug("SpawnShell::updateSpawn created unknown spawn (id=%u)", id);
+#endif
+
+        // send notification of new spawn count
+        emit numSpawns(m_spawns.count());
+    }
 }
 
 void SpawnShell::updateSpawns(const uint8_t* data)
@@ -1099,7 +1138,15 @@ void SpawnShell::killSpawn(const uint8_t* data)
 #endif
    Item* item;
 
-   item = m_spawns.find(deadspawn->spawnId);
+   if (deadspawn->spawnId != m_player->id())
+   {
+       item = m_spawns.find(deadspawn->spawnId);
+   }
+   else
+   {
+       item = m_player;
+   }
+
    if (item != NULL)
    {
      Spawn* spawn = (Spawn*)item;
@@ -1117,6 +1164,43 @@ void SpawnShell::killSpawn(const uint8_t* data)
      killer = m_spawns.find(deadspawn->killerId);
      emit killSpawn(item, killer, deadspawn->killerId);
    }
+}
+
+void SpawnShell::respawnFromHover(const uint8_t* data)
+{
+#ifdef SPAWNSHELL_DIAG
+    seqDebug("SpawnShell::respawnFromHover()");
+#endif
+
+    // Our old player is a corpse, but we're rising from the dead. So
+    // we need to pop a corpse to represent our deadselves, invalidate
+    // the player, and then let the OP_ZoneEntry that is coming for the repop
+    // fix the player.
+    uint16_t corpseId = m_player->id();
+
+    // invalidate the player by severing it from its Id.
+    m_player->setID(0);
+
+    // Pop a corpse
+    Spawn* corpse = new Spawn((Spawn*) m_player, corpseId);
+
+    updateFilterFlags(corpse);
+    updateRuntimeFilterFlags(corpse);
+    m_spawns.insert(corpse->id(), corpse);
+
+    if (corpse->guildID() < MAX_GUILDS)
+    {
+        corpse->setGuildTag(m_guildMgr->guildIdToName(corpse->guildID()));
+    }
+    else
+    {
+        corpse->setGuildTag("");
+    }
+
+    emit addItem(corpse);
+
+    // send notification of new spawn count
+    emit numSpawns(m_spawns.count());
 }
 
 void SpawnShell::corpseLoc(const uint8_t* data)

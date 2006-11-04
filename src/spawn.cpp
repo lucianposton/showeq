@@ -351,38 +351,37 @@ Spawn::Spawn(QDataStream& d, uint16_t id)
   setConsidered(false);
 }
 
-Spawn::Spawn(Spawn& s, uint16_t id)
-  : Item(tSpawn, id)
+Spawn::Spawn(Spawn* s, uint16_t id) : Item(tSpawn, id)
 {
-  setName(s.name());
-  setLastName(s.lastName());
-  Item::setPoint(s.x(), s.y(), s.z());
-  setPetOwnerID(s.petOwnerID());
-  setLight(s.light());
-  setGender(s.gender());
-  setDeity(s.deity());
-  setRace(s.race());
-  setClassVal(s.classVal());
-  setHP(s.HP());
-  setMaxHP(s.maxHP());
-  setGuildID(s.guildID());
-  setLevel(s.level());
-  for (int i = 0; i <= tLastCoreWearSlot; i++)
-    setEquipment(i, s.equipment(i));
-  setEquipment(tUnknown1, SlotEmpty);
-  setTypeflag(s.typeflag());
-  setGM(s.gm());
-  setNPC(s.NPC());
-  setAnimation(s.animation());
-  setDeltas(s.deltaX(), s.deltaY(), s.deltaZ());
-  setHeading(s.heading(), s.deltaHeading());
-  setConsidered(s.considered());
+    setName(s->name());
+    setLastName(s->lastName());
+    Item::setPoint(s->x(), s->y(), s->z());
+    setPetOwnerID(s->petOwnerID());
+    setLight(s->light());
+    setGender(s->gender());
+    setDeity(s->deity());
+    setRace(s->race());
+    setClassVal(s->classVal());
+    setHP(s->HP());
+    setMaxHP(s->maxHP());
+    setGuildID(s->guildID());
+    setLevel(s->level());
+    for (int i = 0; i <= tLastCoreWearSlot; i++)
+    setEquipment(i, s->equipment(i));
+    setEquipment(tUnknown1, SlotEmpty);
+    setTypeflag(s->typeflag());
+    setGM(s->gm());
+    setNPC(s->NPC());
+    setAnimation(s->animation());
+    setDeltas(s->deltaX(), s->deltaY(), s->deltaZ());
+    setHeading(s->heading(), s->deltaHeading());
+    setConsidered(s->considered());
 
-  // the new copy will own the spawn track list
-  m_spawnTrackList.setAutoDelete(false);
-  m_spawnTrackList = s.m_spawnTrackList;
-  s.m_spawnTrackList.setAutoDelete(false);
-  m_spawnTrackList.setAutoDelete(true);
+    // the new copy will own the spawn track list
+    m_spawnTrackList.setAutoDelete(false);
+    m_spawnTrackList = s->m_spawnTrackList;
+    s->m_spawnTrackList.setAutoDelete(false);
+    m_spawnTrackList.setAutoDelete(true);
 }
 
 Spawn::~Spawn()
@@ -393,11 +392,8 @@ Spawn::~Spawn()
 
 void Spawn::update(const spawnStruct* s)
 {
-  if (m_name.find(Spawn_Corpse_Designator) == -1)
-  {
-    setName(s->name);
-    setLastName(s->lastName);
-  }
+  setName(s->name);
+  setLastName(s->lastName);
 
   setPos(s->x >> 3, s->y >> 3, s->z >> 3);
   setPetOwnerID(s->petOwnerId);

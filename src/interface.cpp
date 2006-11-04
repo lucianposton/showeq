@@ -1986,9 +1986,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
 		      "spawnStruct", SZC_Match,
 		      m_spawnShell, SLOT(newSpawn(const uint8_t*)));
-//   m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Server,
-//		      "ServerZoneEntryStruct", SZC_Match,
-//		      m_spawnShell, SLOT(newSpawn(const uint8_t*)));
+   m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Server,
+		      "ServerZoneEntryStruct", SZC_Match,
+		      m_spawnShell, SLOT(zoneEntry(const uint8_t*)));
    m_packet->connect2("OP_MobUpdate", SP_Zone, DIR_Server|DIR_Client,
 		      "spawnPositionUpdate", SZC_Match,
 		      m_spawnShell, SLOT(updateSpawns(const uint8_t*)));
@@ -2013,6 +2013,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Death", SP_Zone, DIR_Server,
 		      "newCorpseStruct", SZC_Match,
 		      m_spawnShell, SLOT(killSpawn(const uint8_t*)));
+   m_packet->connect2("OP_RespawnFromHover", SP_Zone, DIR_Server,
+		      "uint8_t", SZC_None,
+		      m_spawnShell, SLOT(respawnFromHover(const uint8_t*)));
    m_packet->connect2("OP_Shroud", SP_Zone, DIR_Server,
               "spawnShroudSelf", SZC_None,
               m_spawnShell, SLOT(shroudSpawn(const uint8_t*, size_t, uint8_t)));

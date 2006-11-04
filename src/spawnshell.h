@@ -103,6 +103,7 @@ public slots:
    void newDoorSpawns(const uint8_t*, size_t, uint8_t);
    void newDoorSpawn(const doorStruct&, size_t, uint8_t);
    void zoneSpawns(const uint8_t* zspawns, size_t len);
+   void zoneEntry(const uint8_t* spawn);
    void newSpawn(const uint8_t* spawn);
    void newSpawn(const spawnStruct& s);
    void playerUpdate(const uint8_t*pupdate, size_t, uint8_t);
@@ -123,6 +124,7 @@ public slots:
    void consMessage(const uint8_t* con, size_t, uint8_t);
    void deleteSpawn(const uint8_t* delspawn);
    void killSpawn(const uint8_t* deadspawn);
+   void respawnFromHover(const uint8_t* respawn);
    void corpseLoc(const uint8_t* corpseLoc);
 
    void playerChangedID(uint16_t playerID);

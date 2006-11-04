@@ -96,6 +96,8 @@ public:
    uint16_t defaultRace() const { return m_defaultRace; }
    uint8_t defaultClass() const { return m_defaultClass; }
 
+   virtual void killSpawn();
+
    // ZBTEMP: compatibility code
    uint16_t getPlayerID() const { return id(); }
    int16_t headingDegrees() const { return m_headingDegrees; }

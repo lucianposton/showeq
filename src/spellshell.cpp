@@ -468,28 +468,44 @@ void SpellShell::zoneChanged(void)
 
 void SpellShell::killSpawn(const Item* deceased)
 {
-  uint16_t id = deceased->id();
-  SpellItem* spell;
+    uint16_t id = deceased->id();
 
-  if (m_lastPlayerSpell && (m_lastPlayerSpell->targetId() == id))
-    m_lastPlayerSpell = 0;
-
-  QValueList<SpellItem*>::Iterator it = m_spellList.begin();
-  while(it != m_spellList.end())
-  {
-    spell = *it;
-    if (spell->targetId() == id)
+    if (id == m_player->id())
     {
-      it = m_spellList.remove(it);
-      emit delSpell(spell);
-      delete spell;
+        // We're dead. No more buffs for us.
+        clear();
     }
     else
-      ++it;
-  }
+    {
+        SpellItem* spell;
 
-  if (m_spellList.count() == 0)
-    m_timer->stop();
+        if (m_lastPlayerSpell && (m_lastPlayerSpell->targetId() == id))
+        {
+            m_lastPlayerSpell = 0;
+        }
+
+        QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+        while(it != m_spellList.end())
+        {
+            spell = *it;
+            if (spell->targetId() == id)
+            {
+                it = m_spellList.remove(it);
+                emit delSpell(spell);
+                delete spell;
+            }
+            else
+            {
+                ++it;
+            }
+        }
+
+        if (m_spellList.count() == 0)
+        {
+            m_timer->stop();
+        }
+    }
+
 }
 
 void SpellShell::timeout()

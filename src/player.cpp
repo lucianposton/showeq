@@ -21,7 +21,7 @@
 #include <qdatastream.h>
 
 
-//#define DEBUG_PLAYER
+#define DEBUG_PLAYER
 
 //----------------------------------------------------------------------
 // constants
@@ -190,6 +190,17 @@ void Player::reset()
   fillConTable();
 
   updateLastChanged();
+}
+
+void Player::killSpawn()
+{
+#ifdef DEBUG_PLAYER
+    seqDebug("Player: killSpawn()");
+#endif
+    // We're dead. No buffs for us.
+    
+    // Call our parent.
+    Spawn::killSpawn();
 }
 
 void Player::setUseAutoDetectedSettings(bool enable)

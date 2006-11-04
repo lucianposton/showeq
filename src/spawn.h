@@ -208,7 +208,7 @@ class Spawn : public Item
 
   // restore spawn from QDataStream
   Spawn(QDataStream&, uint16_t id);
-  Spawn(Spawn&, uint16_t id);
+  Spawn(Spawn*, uint16_t id);
   virtual ~Spawn();
 
   // save spawn to QDataStream
@@ -297,7 +297,7 @@ class Spawn : public Item
   void backfill(const spawnStruct* s);
 
   // change spawn state
-  void killSpawn();
+  virtual void killSpawn();
 
   // spawn specific set methods
   void setDeltas(int16_t deltaX, int16_t deltaY, int16_t deltaZ);

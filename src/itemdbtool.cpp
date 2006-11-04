@@ -7,6 +7,11 @@
 
 #ifdef __linux__
 #include <linux/version.h>
+
+// Newer kernel versions move this to utsversion.h
+#ifndef UTS_RELEASE
+#include <linux/utsversion.h>
+#endif
 #endif
 
 #include <sys/utsname.h>
