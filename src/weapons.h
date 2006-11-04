@@ -143,7 +143,7 @@
     NULL,                   // 0x86 - Unknown Weapon
     NULL,                   // 0x87 - Unknown Weapon
     "Claw",                 // 0x88
-    NULL,                   // 0x89 - Unknown Weapon
+    "Tambourine",           // 0x89 - Unknown Weapon
     NULL,                   // 0x8a - Unknown Weapon
     NULL,                   // 0x8b - Unknown Weapon
     "Ragebringer",          // 0x8c
@@ -256,7 +256,7 @@
     NULL,                   // 0xf7 - Unknown Weapon
     NULL,                   // 0xf8 - Unknown Weapon
     NULL,                   // 0xf9 - Unknown Weapon
-    NULL,                   // 0xfa - Unknown Weapon
+    "Lollipop",             // 0xfa - Unknown Weapon
     NULL,                   // 0xfb - Unknown Weapon
     NULL,                   // 0xfc - Unknown Weapon
     NULL,                   // 0xfd - Unknown Weapon

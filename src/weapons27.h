@@ -134,7 +134,6 @@
     "Bone Spear",         // 0x7d
     NULL,                 // 0x7e
     NULL,                 // 0x7f
-
     NULL,                 // 0x80
     NULL,                 // 0x81
     NULL,                 // 0x82

@@ -2,6 +2,10 @@ Version: $Id$ $Name$
 
 purple (11/04/06)
 -----------------
++ Added some more weapon descriptions (from uRit12cBBa)
+
+purple (11/04/06)
+-----------------
 + Updated version to 5.6.1
 + Fixed con range. Stupid double ++ error.
 + Redid gradients for red con colors
