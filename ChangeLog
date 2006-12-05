@@ -1,8 +1,10 @@
 Version: $Id$ $Name$
 
-purple (11/04/06)
+purple (12/05/06)
 -----------------
++ Updated version to 5.7
 + Added some more weapon descriptions (from uRit12cBBa)
++ Added unknowns to balance newZoneStruct
 
 purple (11/04/06)
 -----------------

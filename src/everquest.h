@@ -589,12 +589,16 @@ struct newZoneStruct
 /*0604*/ float   underworld;               // Underworld
 /*0608*/ float   minclip;                  // Minimum view distance
 /*0612*/ float   maxclip;                  // Maximum view distance
-/*0616*/ uint8_t unknown0616[172];         // *** Placeholder
-/*0788*/ uint8_t unknown0788[4];           // *** Placeholder (06/29/2005)
-/*0792*/ uint8_t unknown0792[4];           // *** Placeholder (09/13/2005)
-/*0796*/ uint8_t unknown0796[4];           // *** Placeholder (02/21/2006)
-/*0800*/ uint8_t unknown0800[36];          // *** Placeholder (06/13/2006)
-}; /*0836*/
+/*0616*/ uint8_t unknown0616[84];          // *** Placeholder
+/*0700*/ char    zonefile[64];             // Zone file name?
+/*0764*/ uint8_t unknown0764[36];          // *** Placeholder (12/05/2006)
+/*0800*/ uint8_t unknown0800[12];          // *** Placeholder 
+/*0812*/ uint8_t unknown0812[4];           // *** Placeholder (06/29/2005)
+/*0816*/ uint8_t unknown0816[4];           // *** Placeholder (09/13/2005)
+/*0820*/ uint8_t unknown0620[4];           // *** Placeholder (02/21/2006)
+/*0824*/ uint8_t unknown0824[36];          // *** Placeholder (06/13/2006)
+/*0860*/ uint8_t unknown0860[12];          // *** Placeholder (12/05/2006)
+}; /*0872*/
 
 
 /**
