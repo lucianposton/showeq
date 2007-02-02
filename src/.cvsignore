@@ -1,9 +1,0 @@
-Makefile
-Makefile.in
-.libs
-m_*.cpp
-showeq
-showeqitemdbtool
-sortitem
-*~
-.*.swp
