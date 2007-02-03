@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  * 
- * Portions Copyright 2003-2004 Zaphod (dohpaz@users.sourceforge.net). 
+ * Portions Copyright 2003-2007 Zaphod (dohpaz@users.sourceforge.net). 
  * 
  */
 
@@ -1282,4 +1282,7 @@ QColor MapIcons::pickSpawnColor(const Spawn* spawn)
   return m_player->pickConColor(spawn->level());
 }
 
+#ifndef QMAKEBUILD
 #include "mapicon.moc"
+#endif
+

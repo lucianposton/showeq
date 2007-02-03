@@ -3,6 +3,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 #include "combatlog.h"
@@ -987,4 +989,7 @@ void CombatWindow::clear(void)
   resetDPS();
 }
 
+#ifndef QMAKEBUILD
 #include "combatlog.moc"
+#endif
+

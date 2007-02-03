@@ -4,7 +4,7 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  *
- * Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net)
+ * Copyright 2002-2003,2007 Zaphod (dohpaz@users.sourceforge.net)
  *
  */
 
@@ -82,4 +82,7 @@ void Messages::addedFilter(uint32_t mask, uint8_t filterid,
       (*it).setFilterFlags((*it).filterFlags() | mask);
 }
 
+#ifndef QMAKEBUILD
 #include "messages.moc"
+#endif
+

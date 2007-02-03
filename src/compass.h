@@ -3,6 +3,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://seq.sf.net/
+ *
+ *  Copyright 2002-2007 by the respective ShowEQ Developers
  */
 
 //
@@ -20,9 +22,14 @@
 #include <stdint.h>
 #endif
 
+#include "point.h"
+
 #include <qwidget.h>
 #include <qsize.h>
-#include <qpoint.h>
+
+///////////////////////////////////////////
+// type definitions
+typedef Point3D<int16_t> CompassPoint;
 
 class Compass : public QWidget
 {
@@ -35,8 +42,8 @@ class Compass : public QWidget
 
  public slots:
    void setHeading(int32_t degrees);
-   void setPos(int16_t x, int16_t y);
-   void setTargetPos(int x, int y);
+   void setPos(int16_t x, int16_t y, int16_t z);
+   void setTargetPos(int x, int y, int z);
    void clearTarget(void);
 
  signals:
@@ -49,10 +56,10 @@ class Compass : public QWidget
    void paintCompass ( QPainter * );
    void calcTargetHeading();
    QRect compassRect() const;
-   int ang;
+   int m_ang;
    double m_dSpawnAngle;
-   QPoint m_cPlayer;
-   QPoint m_cTarget;
+   CompassPoint m_cPlayer;
+   CompassPoint m_cTarget;
 };
 
 #endif // EQCOMPASS_H

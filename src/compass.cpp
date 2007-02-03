@@ -3,6 +3,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://seq.sf.net/
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 //
@@ -22,7 +24,7 @@
 Compass::Compass (QWidget *parent, const char *name)
   : QWidget ( parent, name )
 {
-   ang = 0;
+   m_ang = 0;
    m_dSpawnAngle = -1;
 }
 
@@ -71,29 +73,27 @@ QRect Compass::compassRect() const
 
 void Compass::setHeading(int32_t degrees)
 {
-   if (ang == ((360-degrees)+90))
+   if (m_ang == ((360-degrees)+90))
      return;
-   ang = (360-degrees)+90;
+   m_ang = (360-degrees)+90;
    repaint ( compassRect(), FALSE);
-   emit angleChanged(ang);
+   emit angleChanged(m_ang);
 }
 
-void Compass::setPos(int16_t x, int16_t y)
+void Compass::setPos(int16_t x, int16_t y, int16_t z)
 {
-   m_cPlayer.setX(x);
-   m_cPlayer.setY(y);
-
+   m_cPlayer.setPoint(x, y, z);
+   
    if (m_dSpawnAngle > 0)
    {
       calcTargetHeading();
    }
 }
 
-void Compass::setTargetPos(int x,int y)
+void Compass::setTargetPos(int x,int y, int z)
 {
    // Recalc the mob heading
-   m_cTarget.setX(x);
-   m_cTarget.setY(y);
+   m_cTarget.setPoint(x,y,z);
 
    calcTargetHeading();
 }
@@ -128,7 +128,7 @@ void Compass::paintCompass ( QPainter *p )
 		pwd4, pix.height()-(phd4));
    tmp.translate(pwd2, phd2);
 
-   tmp.rotate (-ang);
+   tmp.rotate (-m_ang);
    tmp.setBrush(blue);
    tmp.setPen(blue);
    tmp.drawLine(0-pwd4, 0, pwd2, 0);
@@ -168,4 +168,7 @@ void Compass::paintEvent ( QPaintEvent *e )
    p.end();
 }
 
+#ifndef QMAKEBUILD
 #include "compass.moc"
+#endif
+

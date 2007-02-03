@@ -6,6 +6,8 @@
  *
  * Copyright 2001 Fee (fee@users.sourceforge.net). All Rights Reserved.
  *
+ * Portions Copyright 2001-2007 by the respective ShowEQ Developers
+ *
  * Contributed to ShowEQ by fee (fee@users.sourceforge.net)
  * for use under the terms of the GNU General Public License,
  * incorporated herein by reference.
@@ -145,4 +147,7 @@ void GuildMgr::listGuildInfo()
    }
 }
 
+#ifndef QMAKEBUILD
 #include "guild.moc"
+#endif
+

@@ -917,4 +917,6 @@ void XMLPreferences::setPrefVariant(const QString& inName,
   setPref(inName, inSection, inValue, pers);
 }
 
+#ifndef QMAKEBUILD
 #include "xmlpreferences.moc"
+#endif

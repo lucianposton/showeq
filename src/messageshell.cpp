@@ -4,7 +4,7 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  *
- * Copyright 2002-2003 Zaphod (dohpaz@users.sourceforge.net)
+ * Copyright 2002-2003,2007 Zaphod (dohpaz@users.sourceforge.net)
  *
  */
 
@@ -1022,4 +1022,7 @@ void MessageShell::filterMessage(const QString& prefix, MessageType type,
 			 .arg(spawnInfo));
 }
 
+#ifndef QMAKEBUILD
 #include "messageshell.moc"
+#endif
+

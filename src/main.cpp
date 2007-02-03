@@ -772,11 +772,14 @@ void displayVersion(void)
   printf ("\t\tUsing headers from linux version: %s\n",
 	  UTS_RELEASE);
 #endif
+#ifdef ITEMDB
   printf ("\t\tUsing EQItemDB: %s\n", EQItemDB::Version());
   printf ("\tUsing GDBM: %s\n", GDBMConvenience::Version());
 #ifdef USE_DB3
   printf ("\tUsing DB3: %s\n", DB3Convenience::Version());
 #endif
+#endif
+
   /////////////////////////////////
   // Display current system environment information
   struct utsname utsbuff;

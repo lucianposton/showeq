@@ -3,6 +3,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
+ *
+ *  Copyright 2000-2007 by the respective ShowEQ Developers
  */
 
 #include "interface.h"
@@ -32,7 +34,6 @@
 #include "packetlog.h"
 #include "bazaarlog.h"
 #include "category.h"
-#include "itemdb.h"
 #include "guild.h"
 #include "guildshell.h"
 #include "guildlist.h"
@@ -107,7 +108,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
     m_spellShell(0),
     m_groupMgr(0),
     m_spawnMonitor(0),
-    m_itemDB(0),
     m_guildmgr(0),
     m_guildShell(0),
     m_dateTimeMgr(0),
@@ -267,38 +267,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    // Create our player object
    m_player = new Player(this, m_zoneMgr, m_guildmgr);
-
-   section = "ItemDB";
-   if (pSEQPrefs->getPrefBool("Enabled", section, false))
-   {
-     seqDebug("ItemDB: Enabled");
-
-     // Create an instance of the ItemDB
-     m_itemDB = new EQItemDB(m_dataLocationMgr);
-
-     // make it's parameters match those set via the config file and 
-     // command line
-     fileName = pSEQPrefs->getPrefString("DataDBFilename", section, 
-					 "itemdata2");
-
-     fileInfo = m_dataLocationMgr->findWriteFile(".", fileName);
-
-     m_itemDB->SetDBFile(EQItemDB::DATA_DB, fileInfo.absFilePath());
-
-     fileName = pSEQPrefs->getPrefString("RawDataDBFilename", section, 
-					 "itemrawdata2");
-
-     m_itemDB->SetDBFile(EQItemDB::RAW_DATA_DB, fileInfo.absFilePath());
-     m_itemDB->SetEnabledDBTypes(pSEQPrefs->getPrefInt("DatabasesEnabled",
-						       section, 
-						       (EQItemDB::DATA_DB|EQItemDB::RAW_DATA_DB)));
-     m_itemDB->SetItemLogging(pSEQPrefs->getPrefBool("ItemLogging", "ItemDB", false));
-     m_itemDB->SetItemPacketLogging(pSEQPrefs->getPrefBool("ItemPackingLogging", "ItemDB", false));
-     // Make sure the databases are upgraded to the current format
-     m_itemDB->Upgrade();
-   }
-   else
-     seqDebug("ItemDB: Disabled");
 
    // Create the filter manager
    m_filterMgr = new FilterMgr(m_dataLocationMgr,
@@ -1050,11 +1018,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 						 SLOT(toggle_view_UnknownData()) , 
 						 Key_F9);
    m_id_log_RawData     = pLogMenu->insertItem("Raw Data", this, SLOT(toggle_log_RawData()), Key_F10);
-   if (m_itemDB)			      
-   {
-     m_id_log_Items  = pLogMenu->insertItem("Item Data", this, SLOT(toggle_log_ItemData()));
-     m_id_log_ItemPackets   = pLogMenu->insertItem("Item Packet Data", this, SLOT(toggle_log_ItemPacketData()));
-   }
    menuBar()->setItemChecked (m_id_log_AllPackets, (m_globalLog != 0));
    menuBar()->setItemChecked (m_id_log_WorldData, (m_worldLog != 0));
    menuBar()->setItemChecked (m_id_log_ZoneData, (m_zoneLog != 0));
@@ -1067,12 +1030,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			      pSEQPrefs->getPrefBool("LogRawPackets", 
 						     "PacketLogging",
 						     false));
-
-   if (m_itemDB)			      
-   {
-     menuBar()->setItemChecked (m_id_log_Items, m_itemDB->GetItemLogging());
-     menuBar()->setItemChecked (m_id_log_ItemPackets, m_itemDB->GetItemPacketLogging());
-   }
 
    // OpCode Monitor
    QPopupMenu* pOpCodeMenu = new QPopupMenu;
@@ -1690,23 +1647,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			m_zoneMgr, SLOT(zonePoints(const uint8_t*, size_t, uint8_t)));
    }
 
-   if (m_itemDB != 0)
-   {
-     // connect ItemDB slots to EQPacket signals
-     m_packet->connect2("OP_ItemPacket", SP_Zone, DIR_Server,
-			"itemPacketStruct", SZC_None,
-			m_itemDB, SLOT(item(const uint8_t*, size_t, uint8_t)));
-     m_packet->connect2("OP_ItemPlayerPacket", SP_Zone, DIR_Server,
-			"char", SZC_None, m_itemDB, 
-			SLOT(playerItem(const uint8_t*, size_t, uint8_t)));
-     m_packet->connect2("OP_ItemLinkResponse", SP_Zone, DIR_Server,
-			"itemInfoStruct", SZC_None, m_itemDB, 
-			SLOT(itemInfo(const uint8_t*, size_t, uint8_t)));
-     m_packet->connect2("OP_Shroud", SP_Zone, DIR_Server,
-            "spawnShroudOther", SZC_None, m_itemDB,
-            SLOT(playerShroud(const uint8_t*, size_t, uint8_t)));
-   }
-
    if (m_groupMgr != 0)
    {
      connect(m_zoneMgr, SIGNAL(playerProfile(const charProfileStruct*)),
@@ -2290,13 +2230,6 @@ EQInterface::~EQInterface()
 
   if (m_eqStrings != 0)
     delete m_eqStrings;
-
-  // Shutdown the Item DB before any other cleanup
-  if (m_itemDB != 0)
-     m_itemDB->Shutdown();
-
-  // delete the ItemDB before application exit
-  delete m_itemDB;
 
   if (m_player != 0)
     delete m_player;
@@ -3657,21 +3590,6 @@ void EQInterface::toggle_log_RawData (void)
   menuBar()->setItemChecked(m_id_log_RawData, state);
   pSEQPrefs->setPrefBool("LogRawPackets", "PacketLogging", state);
 }
-
-void EQInterface::toggle_log_ItemData (void)
-{
-  m_itemDB->SetItemLogging(!m_itemDB->GetItemLogging());
-  menuBar()->setItemChecked (m_id_log_Items, m_itemDB->GetItemLogging());
-  pSEQPrefs->setPrefBool("ItemLogging", "ItemDB", m_itemDB->GetItemLogging());
-}
-
-void EQInterface::toggle_log_ItemPacketData (void)
-{
-  m_itemDB->SetItemPacketLogging(!m_itemDB->GetItemPacketLogging());
-  menuBar()->setItemChecked (m_id_log_ItemPackets, m_itemDB->GetItemPacketLogging());
-  pSEQPrefs->setPrefBool("ItemPacketLogging", "ItemDB", m_itemDB->GetItemPacketLogging());
-}
-
 
 /* Check and uncheck View menu options */
 void
@@ -6116,4 +6034,7 @@ void EQInterface::setDockEnabled(QDockWindow* dw, bool enable)
   QMainWindow::setDockEnabled(dw, DockRight, enable);
 }
 
+#ifndef QMAKEBUILD
 #include "interface.moc"
+#endif
+

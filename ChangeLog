@@ -1,5 +1,17 @@
 Version: $Id$ $Name$
 
+dohpaZ (2/2/07)
+------------------------
++ Updated version to 5.7.0.1
++ Assorted minor tweaks
++ Initial attempt to build with qmake
++ Fix odd crash in packet handling. 
++ Normalize some data type usage.
++ Remove ItemDB and related utilities from build since they haven't worked 
+  in a while and would really need a rewrite.  
++ Remove gdbm/db3 requirements
++ Update some copyright info.
+	
 purple (12/05/06)
 -----------------
 + Updated version to 5.7

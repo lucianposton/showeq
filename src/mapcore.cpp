@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sf.net/
  * 
- * Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ * Portions Copyright 2001-2007 Zaphod (dohpaz@users.sourceforge.net). 
  * 
  */
 
@@ -2223,7 +2223,9 @@ MapCache::MapCache(const MapData& mapData)
   : m_mapData(mapData),
     m_lastParam(mapData)
 {
+#ifdef DEBUG
   m_paintCount = 0;
+#endif
   m_painted = false;
   m_alwaysRepaint = false;
 }
@@ -2268,9 +2270,10 @@ const QPixmap& MapCache::getMapImage(MapParameters& param)
   if (!needRepaint(param))
     return m_mapImage;
 
+#ifdef DEBUG
   // increment paint count
   m_paintCount++;
-
+#endif
   // set pixmap optimization if it's changed
   if (m_lastParam.mapOptimizationMethod() !=
       param.mapOptimizationMethod())

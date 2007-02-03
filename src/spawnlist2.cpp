@@ -1,4 +1,11 @@
-
+/*
+ * spawnlist2.cpp
+ *
+ *  ShowEQ Distributed under GPL
+ *  http://www.sourceforge.net/projects/seq
+ *
+ *  Copyright 2000-2007 by the respective ShowEQ Developers
+ */
 #include "spawnlist2.h"
 #include "category.h"
 #include "spawnshell.h"
@@ -947,4 +954,7 @@ void SpawnListWindow2::populateSpawns(void)
 #endif 
 }
 
+#ifndef QMAKEBUILD
 #include "spawnlist2.moc"
+#endif
+

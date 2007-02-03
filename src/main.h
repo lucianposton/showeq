@@ -19,8 +19,6 @@
 #include "xmlpreferences.h"
 extern class XMLPreferences *pSEQPrefs;
 
-class EQItemDB;
-
 #include "config.h"
 
 //----------------------------------------------------------------------

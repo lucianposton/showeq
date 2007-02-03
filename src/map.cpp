@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  * 
- * Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
+ * Portions Copyright 2001-2007 Zaphod (dohpaz@users.sourceforge.net). 
  * 
  */
 
@@ -1187,12 +1187,12 @@ void MapMenu::toggle_mapImage(int itemId)
   m_map->setShowBackgroundImage(!m_map->showBackgroundImage());
 }
 
-#ifdef DEBUG
 void MapMenu::toggle_debugInfo(int itemId)
 {
+#ifdef DEBUG
   m_map->setShowDebugInfo(!m_map->showDebugInfo());
-}
 #endif
+}
 
 void MapMenu::toggle_cacheAlwaysRepaint()
 {
@@ -2272,9 +2272,9 @@ void Map::setShowVelocityLines(bool val)
     refreshMap ();
 }
 
-#ifdef DEBUG
 void Map::setShowDebugInfo(bool val) 
 { 
+#ifdef DEBUG
   m_showDebugInfo = val; 
   
   QString tmpPrefString = "ShowDebugInfo";
@@ -2282,8 +2282,8 @@ void Map::setShowDebugInfo(bool val)
 
   if(!m_cacheChanges)
     refreshMap ();
-}
 #endif
+}
 
 void Map::setAnimate(bool val) 
 { 
@@ -4877,4 +4877,7 @@ void MapFrame::toggle_depthControls(int id)
 }
 
 
+#ifndef QMAKEBUILD
 #include "map.moc"
+#endif
+

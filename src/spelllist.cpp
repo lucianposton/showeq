@@ -3,6 +3,8 @@
  *
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
+ *
+ *  Copyright 2001-2007 by the respective ShowEQ Developers
  */
  
 /*
@@ -394,4 +396,6 @@ void SpellListWindow::savePrefs(void)
   m_spellList->savePrefs();
 }
 
+#ifndef QMAKEBUILD
 #include "spelllist.moc"
+#endif

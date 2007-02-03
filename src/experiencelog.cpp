@@ -3,6 +3,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 
@@ -705,4 +707,7 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
    seqInfo("ZEM - ZEM - ZEM ===== %d ", ZEM);
 }
 
+#ifndef QMAKEBUILD
 #include "experiencelog.moc"
+#endif
+

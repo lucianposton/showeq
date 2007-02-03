@@ -3,6 +3,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
+ *
+ *  Copyright 2000-2007 by the respective ShowEQ Developers
  */
 
 #include "player.h"
@@ -1470,4 +1472,7 @@ void Player::restorePlayerState(void)
   }
 }
 
+#ifndef QMAKEBUILD
 #include "player.moc"
+#endif
+

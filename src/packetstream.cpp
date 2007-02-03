@@ -5,7 +5,7 @@
  *  http://www.sourceforge.net/projects/seq
  *
  *  Copyright 2000-2003 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Portions Copyright 2001-2003,2007 Zaphod (dohpaz@users.sourceforge.net). 
  */
 
 /* Implementation of EQPacketStream class */
@@ -1220,4 +1220,7 @@ uint16_t EQPacketStream::calculateCRC(EQProtocolPacket& packet)
     m_sessionKey);
 }
 
+#ifndef QMAKEBUILD
 #include "packetstream.moc"
+#endif
+

@@ -5,6 +5,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 #include <stdio.h>
@@ -140,4 +142,7 @@ void SEQLogger::outputData(uint32_t len,
   fprintf (m_fp, "%03d | %-48s | %s \n\n", c, hex, asc);
 }
 
+#ifndef QMAKEBUILD
 #include "logger.moc"
+#endif
+

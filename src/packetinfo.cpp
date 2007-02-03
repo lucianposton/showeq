@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2004 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Copyright 2003-2004,2007 Zaphod (dohpaz@users.sourceforge.net). 
  *
  */
 
@@ -741,4 +741,7 @@ bool OPCodeXmlContentHandler::endDocument()
   return true;
 }
 
+#ifndef QMAKEBUILD
 #include "packetinfo.moc"
+#endif
+

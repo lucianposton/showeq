@@ -3,6 +3,8 @@
  *
  * ShowEQ Distributed under GPL
  * http://seq.sf.net/
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 #include "messagefilterdialog.h"
@@ -1175,4 +1177,7 @@ void MessageWindow::addedFilter(uint32_t mask, uint8_t filterid,
   m_hideUserFilterMenu->insertItem(filter.name(), filterid);
 }
 
+#ifndef QMAKEBUILD
 #include "messagewindow.moc"
+#endif
+

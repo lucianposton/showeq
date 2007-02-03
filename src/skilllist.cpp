@@ -3,6 +3,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 #include "player.h"
@@ -263,4 +265,7 @@ void SkillListWindow::savePrefs(void)
   m_skillList->savePrefs();
 }
 
+#ifndef QMAKEBUILD
 #include "skilllist.moc"
+#endif
+

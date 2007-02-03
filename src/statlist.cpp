@@ -3,6 +3,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
+ *
+ *  Copyright 2000-2007 by the respective ShowEQ Developers
  */
 
 #include <qlayout.h>
@@ -352,4 +354,7 @@ void StatListWindow::savePrefs(void)
   m_statList->savePrefs();
 }
 
+#ifndef QMAKEBUILD
 #include "statlist.moc"
+#endif
+

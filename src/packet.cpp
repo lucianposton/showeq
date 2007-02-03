@@ -5,7 +5,7 @@
  *  http://www.sourceforge.net/projects/seq
  *
  *  Copyright 2000-2004 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Portions Copyright 2001-2004,2007 Zaphod (dohpaz@users.sourceforge.net). 
  */
 
 /* Implementation of Packet class */
@@ -1145,4 +1145,7 @@ uint16_t EQPacket::serverSeqExp(int stream)
   return m_streams[stream]->arqSeqExp();
 }
 
+#ifndef QMAKEBUILD
 #include "packet.moc"
+#endif
+

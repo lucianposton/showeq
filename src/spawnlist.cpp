@@ -3,6 +3,8 @@
  *
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
+ *
+ *  Copyright 2000-2007 by the respective ShowEQ Developers
  */
 
 /*
@@ -1175,4 +1177,7 @@ void SpawnListWindow::savePrefs(void)
   m_spawnList->savePrefs();
 }
 
+#ifndef QMAKEBUILD
 #include "spawnlist.moc"
+#endif
+

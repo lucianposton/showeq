@@ -3,6 +3,8 @@
  *
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 #include "group.h"
@@ -372,4 +374,7 @@ const Spawn* GroupMgr::memberBySlot(uint16_t slot )
   return m_members[slot]->m_spawn;
 }
 
+#ifndef QMAKEBUILD
 #include "group.moc"
+#endif
+

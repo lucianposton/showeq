@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  * 
- * Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
+ * Portions Copyright 2001-2007 Zaphod (dohpaz@users.sourceforge.net). 
  * 
  */
 
@@ -245,9 +245,7 @@ class MapMenu : public QPopupMenu
   void toggle_racePvP(int itemId);
   void toggle_walkPath(int itemId);
   void toggle_npcWalkPaths(int itemId);
-#ifdef DEBUG
   void toggle_debugInfo(int itemId);
-#endif
   void toggle_cacheAlwaysRepaint();
   void toggle_cacheChanges();
   void toggle_zoneSafePoint(int itemId);

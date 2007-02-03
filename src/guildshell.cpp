@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2004 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Copyright 2004-2007 Zaphod (dohpaz@users.sourceforge.net). 
  *
  */
 
@@ -323,7 +323,10 @@ void GuildShell::guildMemberUpdate(const uint8_t* data, size_t len)
   }
 }
 
+#ifndef QMAKEBUILD
 #include "guildshell.moc"
+#endif
+
 
 
 

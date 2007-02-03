@@ -7,7 +7,7 @@
  * Crazy Joe Divola (cjd1@users.sourceforge.net)
  * September 5, 2001
  * 
- * Portions Copyright 2003 Zaphod (dohpaz@users.sourceforge.net). 
+ * Portions Copyright 2003-2007 Zaphod (dohpaz@users.sourceforge.net). 
  * 
  */
 
@@ -540,4 +540,7 @@ void SpellShell::timeout()
     m_timer->stop();
 }
 
+#ifndef QMAKEBUILD
 #include "spellshell.moc"
+#endif
+

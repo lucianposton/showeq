@@ -3,6 +3,8 @@
  * 
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 static char* itemdbid = "@(#) $Id$ $Name$";
@@ -2542,4 +2544,7 @@ bool   EQItemDBEntry::IsContainer()
   return (((EQItemDBEntryData_3*)m_itemEntryData)->m_itemType == ItemTypeContainer);
 }
 	  
+#ifndef QMAKEBUILD
 #include "itemdb.moc"
+#endif
+

@@ -4,6 +4,8 @@
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
  *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *
  */
 
 #include <qpushbutton.h>
@@ -336,4 +338,7 @@ QString NetDiag::print_addr(in_addr_t  addr)
    return paddr;
 }
 
+#ifndef QMAKEBUILD
 #include "netdiag.moc"
+#endif
+

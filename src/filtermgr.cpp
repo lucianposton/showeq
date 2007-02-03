@@ -3,6 +3,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 //
@@ -316,4 +318,7 @@ void FilterMgr::runtimeFilterCommit(uint8_t type)
   emit runtimeFiltersChanged(type);
 }
 
+#ifndef QMAKEBUILD
 #include "filtermgr.moc"
+#endif
+

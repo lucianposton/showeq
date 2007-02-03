@@ -21,10 +21,6 @@ compile ShowEQ:
    *** 3rd party libraries ***                        
    qt         3.2   Compiled with -thread) http://www.trolltech.com)
    libpcap    0.62                         http://www.tcpdump.org/
-   gdbm       1.8.0                        http://www.gnu.org/software/gdbm/
-
-   *** Optional 3rd party libraries ***
-   db3        3.2.9  3.3 (Not db4)          http://www.sleepycat.com/
 
    *** C++ Compilation ***
    glibc      2.2  2.3.2                    http://www.gnu.org/software/libc/

@@ -6,6 +6,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
+ *
+ *  Copyright 2002-2007 by the respective ShowEQ Developers
  */
 
 /* Implementation of text editor class */
@@ -224,5 +226,6 @@ EditorWindow::EditorWindow(const char *fileName)
      }
  }
 
- #include "editor.moc"
- 
+#ifndef QMAKEBUILD
+#include "editor.moc"
+#endif 

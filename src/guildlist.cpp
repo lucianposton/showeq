@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2004 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Copyright 2004-2007 Zaphod (dohpaz@users.sourceforge.net). 
  *
  */
 
@@ -544,4 +544,7 @@ void GuildListWindow::updateCount(void)
   m_guildTotals->setText(text.arg(m_membersOn).arg(m_guildShell->members().count()));
 }
 
+#ifndef QMAKEBUILD
 #include "guildlist.moc"
+#endif
+

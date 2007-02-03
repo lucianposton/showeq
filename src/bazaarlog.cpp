@@ -4,7 +4,7 @@
  *  ShowEQ Distributed under GPL
  *  http://www.sourceforge.net/projects/seq
  *
- *  Copyright 2003-2004 by the respective ShowEQ Developers
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 #include <qdatetime.h>
@@ -65,5 +65,8 @@ void BazaarLog::bazaarSearch(const uint8_t* data, size_t len, uint8_t dir)
   flush();
 }
 
+#ifndef QMAKEBUILD
 #include "bazaarlog.moc"
+#endif
+
 

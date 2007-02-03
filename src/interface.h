@@ -175,8 +175,6 @@ class EQInterface:public QMainWindow
    void toggle_opt_BazaarData();
    void toggle_log_UnknownData();
    void toggle_log_RawData();
-   void toggle_log_ItemData();
-   void toggle_log_ItemPacketData();
    void listSpawns(void);
    void listDrops(void);
    void listMapInfo(void);
@@ -352,7 +350,6 @@ class EQInterface:public QMainWindow
    SpellShell* m_spellShell;
    GroupMgr* m_groupMgr;
    SpawnMonitor* m_spawnMonitor;
-   EQItemDB* m_itemDB;
    GuildMgr* m_guildmgr; 
    GuildShell* m_guildShell;
    DateTimeMgr* m_dateTimeMgr;

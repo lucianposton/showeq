@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 dnl $Id$ $Name$
 
 AC_PREREQ(2.59)
-AC_INIT(showeq, 5.7.0.0)
+AC_INIT(showeq, 5.7.0.1)
 AC_CONFIG_SRCDIR(src/main.cpp)
 AC_CANONICAL_SYSTEM
 
@@ -220,9 +220,6 @@ AC_CHECK_LIB(gd, gdImagePng,
 AC_CHECK_LIB(z, inflate,
 	, 
 	AC_MSG_ERROR(cannot find compresion library functions. Make sure libz is installed) )
-AC_CHECK_LIB(gdbm, gdbm_open,
-	, 
-	AC_MSG_ERROR(cannot find gdbm library functions. Make sure libgdbm is installed) )
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -438,82 +435,6 @@ AC_ARG_ENABLE(profiling,
 	]
 )
 AC_SUBST(PROFILE_LIBS)
-
-AC_ARG_WITH(db3-dir,
-	[  --with-db3-dir=DIR      where the root of Berkeley DB3 is installed. ],
-	[  db3_includes="$withval"/include
-	   db3_libs="$withval"/lib
-	])
-
-AC_ARG_WITH(db3-includes,
-	[  --with-db3-includes=DIR where the Berkeley DB3 includes are. ],
-	[  db3_includes="$withval"
-	])
-
-AC_ARG_WITH(db3-libraries,
-	[  --with-db3-libraries=DIR where the Berkeley DB3 libraries are. ],
-	[  db3_libs="$withval"
-	])
-
-AC_SUBST(db3_includes)
-AC_SUBST(db3_libs)
-
-if [[ -z "$db3_includes" ]]; then
- DB3_INCLUDES=""
-else
- DB3_INCLUDES="-I$db3_includes"
- all_includes="$DB3_INCLUDES $all_includes"
-fi
-
-if [[ -z "$db3_libs" ]]; then
- DB3_LDFLAGS=""
-else
- DB3_LDFLAGS="-L$db3_libs"
- all_libraries="$all_libraries $DB3_LDFLAGS"
-fi
-
-AC_SUBST(DB3_INCLUDES)
-AC_SUBST(DB3_LDFLAGS)
-
-AC_MSG_CHECKING(whether to build with Berkeley DB3)
-AC_ARG_WITH(db3,
-	[  --with-db3              Build with Berkeley DB 3],
-        [ AC_MSG_RESULT(yes)
-	  AC_LANG_SAVE
-	  db3_save_CPPFLAGS="$CPPFLAGS"
-	  CPPFLAGS="$CFLAGS $all_includes"
-          db3_save_LIBS="$LIBS"
-	  LIBS="$all_libraries -ldb_cxx"
-	  AC_LANG_CPLUSPLUS
-	  AC_CHECK_HEADER(db_cxx.h,,AC_MSG_ERROR(cannot find db_cxx.h, necessary for compilation with Berkeley DB 3 support))
-
-	  AC_MSG_CHECKING([for DbEnv::version in -ldb_cxx])
-	  AC_TRY_LINK([
-#include <stdio.h>
-#include <db_cxx.h>
-],
-[
-	printf("DB3: %s\n", DbEnv::version(NULL, NULL, NULL));
-],
-        db3_have_dbenv=yes,
-        db3_have_dbenv=no
-)
-	AC_MSG_RESULT($db3_have_dbenv)
-	if test "db3_have_dbenv" = "no"; then
-	 AC_MSG_ERROR([cannot find Berkeley DB3 C++ library functions.  Make sure libdb_cxx is installed])
-	else
-         AC_DEFINE(USE_DB3, 1, Define if using Berkeley DB3 for database operations)
-	fi
-dnl	  AC_CHECK_LIB(db_cxx, DbEnv::version,, AC_MSG_ERROR(cannot find Berkeley DB3 library functions. Make sure libdb_cxx is installed) )
-	 CPPFLAGS="$db3_save_CPPFLAGS"
-	 LIBS="$db3_save_LIBS"
-	  db3=true
-	 AC_LANG_RESTORE
-	],
-	[ AC_MSG_RESULT(no)
-	  db3=false ] 
-)
-AM_CONDITIONAL(USEDB3, test x$db3 = xtrue)
 
 AC_MSG_CHECKING(whether to build for use with the test server)
 AC_ARG_WITH(test-server,

@@ -5,7 +5,7 @@
  *  http://www.sourceforge.net/projects/seq
  *
  *  Copyright 2000-2004 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2004 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Portions Copyright 2001-2004,2007 Zaphod (dohpaz@users.sourceforge.net). 
  */
 
 #include <qdatetime.h>
@@ -508,4 +508,7 @@ void OPCodeMonitorPacketLog::packet(const uint8_t* data, size_t len,
   }
 }
 
+#ifndef QMAKEBUILD
 #include "packetlog.moc"
+#endif
+

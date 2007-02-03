@@ -94,8 +94,6 @@ zlib
 zlib-devel 
 gd 
 gd-devel 
-gdbm 
-gdbm-devel 
 glibc-kernheaders
 glibc-devel 
 xorg-x11-libs

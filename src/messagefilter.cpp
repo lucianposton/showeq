@@ -4,7 +4,7 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  *
- * Copyright 2003 Zaphod (dohpaz@users.sourceforge.net)
+ * Copyright 2003-2007 Zaphod (dohpaz@users.sourceforge.net)
  *
  */
 
@@ -190,4 +190,7 @@ uint32_t MessageFilters::filterMessage(uint64_t messageTypeMask,
   return mask;
 }
 
+#ifndef QMAKEBUILD
 #include "messagefilter.moc"
+#endif
+

@@ -3,6 +3,8 @@
  * 
  * ShowEQ Distributed under GPL
  * http://seq.sf.net/
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 // Author: Zaphod (dohpaz@users.sourceforge.net)
@@ -379,4 +381,7 @@ void CategoryMgr::savePrefs(void)
   }
 }
 
+#ifndef QMAKEBUILD
 #include "category.moc"
+#endif
+

@@ -4,6 +4,8 @@
  * ShowEQ Distributed under GPL
  * http://seq.sf.net/
  *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
+ *
  */
 
 #include "messagefilterdialog.h"
@@ -467,4 +469,6 @@ void MessageFilterDialog::checkState()
   m_delete->setEnabled(m_currentFilter != 0);
 }
 
+#ifndef QMAKEBUILD
 #include "messagefilterdialog.moc"
+#endif

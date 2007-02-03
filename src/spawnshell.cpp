@@ -4,7 +4,7 @@
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
  * 
- * Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ * Portions Copyright 2001-2003,2007 Zaphod (dohpaz@users.sourceforge.net). 
  * 
  */
 
@@ -1461,4 +1461,7 @@ void SpawnShell::restoreSpawns(void)
   }
 }
 
+#ifndef QMAKEBUILD
 #include "spawnshell.moc"
+#endif
+

@@ -3,6 +3,9 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://seq.sourceforge.net/
+ *
+ *  Copyright 2000-2007 by the respective ShowEQ Developers
+ *
  */
 
 #include "util.h"
@@ -579,7 +582,7 @@ QString slot_to_name(int16_t slotnr)
   return slotname;
 }
 
-uint32_t calc_exp (int level, uint16_t race, uint8_t class_)
+uint32_t calc_exp (int32_t level, uint16_t race, uint8_t class_)
 {
 
   float exp=level*level*level;
@@ -646,7 +649,7 @@ uint32_t calc_exp (int level, uint16_t race, uint8_t class_)
   default : exp*=10;
   }
   
-  return (unsigned long)(exp);
+  return (uint32_t)(exp);
 }
 
 //
@@ -968,7 +971,7 @@ uint32_t calcCRC32(const uint8_t* p,
 uint16_t calcCRC16(uint8_t* p, uint32_t length, uint32_t seed)
 {
 #include "crctab.h"
-   unsigned long crc = 0L ^ 0xffffffff;
+   uint32_t crc = 0L ^ 0xffffffff;
 
    // CRC each byte of the seed
    crc = crc >> 8 ^ crctab[(seed       ^ crc) & 0xFF];
@@ -978,9 +981,7 @@ uint16_t calcCRC16(uint8_t* p, uint32_t length, uint32_t seed)
 
    // Then crc the buffer
    while(length--)
-   {                
       crc = crc >> 8 ^ crctab[(*(p++) ^ crc) & 0xFF];
-   } 
 
    return crc ^ 0xffffffffL; 
 }

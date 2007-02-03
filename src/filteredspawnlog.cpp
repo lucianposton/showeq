@@ -5,7 +5,7 @@
  *  http://www.sourceforge.net/projects/seq
  *
  *  Copyright 2001-2003 by the respective ShowEQ Developers
- *  Portions Copyright 2001-2003 Zaphod (dohpaz@users.sourceforge.net). 
+ *  Portions Copyright 2001-2007 Zaphod (dohpaz@users.sourceforge.net). 
  */
 
 #include "filteredspawnlog.h"
@@ -89,4 +89,7 @@ void FilteredSpawnLog::logSpawn(const Item* item, const char* action,
   flush();
 }
 
+#ifndef QMAKEBUILD
 #include "filteredspawnlog.moc"
+#endif
+

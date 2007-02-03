@@ -3,6 +3,8 @@
  *
  *  ShowEQ Distributed under GPL
  *  http://seq.sf.net/
+ *
+ *  Copyright 2003-2007 by the respective ShowEQ Developers
  */
 
 #include <qfont.h>
@@ -69,7 +71,7 @@ CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
 				int16_t,int16_t,int16_t,int32_t)));
 
   // initialize compass
-  m_compass->setPos(player->x(), player->y());
+  m_compass->setPos(player->x(), player->y(), player->z());
   m_compass->setHeading(player->headingDegrees());
 }
 
@@ -80,7 +82,7 @@ CompassFrame::~CompassFrame()
 void CompassFrame::selectSpawn(const Item* item)
 {
    if (item)
-     m_compass->setTargetPos(item->x(), item->y());
+     m_compass->setTargetPos(item->x(), item->y(), item->z());
    else
      m_compass->clearTarget();
 }
@@ -90,7 +92,7 @@ void CompassFrame::posChanged(int16_t x, int16_t y, int16_t z,
 			      int32_t heading)
 {
   // set compass info
-  m_compass->setPos(x, y);
+  m_compass->setPos(x, y, z);
   m_compass->setHeading(heading);
 
   // set position labels
@@ -99,4 +101,7 @@ void CompassFrame::posChanged(int16_t x, int16_t y, int16_t z,
   m_z->setText(QString::number(z));
 }
 
+#ifndef QMAKEBUILD
 #include "compassframe.moc"
+#endif
+
