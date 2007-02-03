@@ -60,23 +60,23 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   // create the spawn list combo box
   m_categoryCombo = new QComboBox(false, this, "spawnlistcombo");
   m_categoryCombo->setDuplicatesEnabled(false);
-  hLayout->addWidget(m_categoryCombo, 0, AlignLeft);
+  hLayout->addWidget(m_categoryCombo, 0, Qt::AlignLeft);
   connect(m_categoryCombo, SIGNAL(activated(int)),
 	  this, SLOT(categorySelected(int)));
 
   // Create the Spawn Counter
   m_totalSpawns = new QLineEdit(this);
   m_totalSpawns->setReadOnly(TRUE);
-  m_totalSpawns->setAlignment(AlignCenter);
+  m_totalSpawns->setAlignment(Qt::AlignCenter);
   m_totalSpawns->setMinimumWidth(5);
   m_totalSpawns->setMaximumWidth(50);
-  hLayout->addWidget(m_totalSpawns, 0, AlignCenter);  
+  hLayout->addWidget(m_totalSpawns, 0, Qt::AlignCenter);  
 
   // setup spinbox to control frame rate (FPM)
   m_fpmSpinBox = new QSpinBox(5, 60, 1, this, "fpmSpinBox");
   m_fpmSpinBox->setValue(fpm);
   m_fpmSpinBox->setSuffix("FPM");
-  hLayout->addWidget(m_fpmSpinBox, 0, AlignRight);
+  hLayout->addWidget(m_fpmSpinBox, 0, Qt::AlignRight);
   connect(m_fpmSpinBox, SIGNAL(valueChanged(int)),
 	  this, SLOT(setFPM(int)));
 
@@ -508,7 +508,7 @@ void SpawnListWindow2::playerLevelChanged(uint8_t)
 }
 
 void SpawnListWindow2::setPlayer(int16_t x, int16_t y, int16_t z, 
-			   int16_t deltaX, int16_t deltaY, int16_t deltaZ, 
+				 int16_t /*deltaX*/, int16_t /*deltaY*/, int16_t /*deltaZ*/, 
 			   int32_t degrees)
 {
   Q3ListViewItemIterator it(m_spawnList);
@@ -749,14 +749,14 @@ void SpawnListWindow2::selChanged(Q3ListViewItem* litem)
 }
 
 void SpawnListWindow2::mousePressEvent(int button, Q3ListViewItem* litem,
-				       const QPoint &point, int col)
+				       const QPoint &point, int /*col*/)
 {
   // Left Mouse Button Events
-  if (button  == LeftButton && litem != NULL)
+  if (button  == Qt::LeftButton && litem != NULL)
   {
     m_spawnList->setSelected(litem, true);
   } // Right Mouse Button Events
-  else if (button == RightButton)
+  else if (button == Qt::RightButton)
   {
     const Item* item = NULL;
     if (litem != NULL)

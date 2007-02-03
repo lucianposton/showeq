@@ -275,7 +275,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
       // Must appear befire next call to getPrefString, which uses a static string
       seqInfo("Recording packets to '%s' for future playback", filename);
       
-      if (pSEQPrefs->getPrefString("FlushPackets", section))
+      if (pSEQPrefs->getPrefBool("FlushPackets", section))
 	m_vPacket->setFlushPacket(true);
     }
     else if (m_playbackPackets == PLAYBACK_FORMAT_SEQ)

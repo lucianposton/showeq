@@ -35,12 +35,12 @@ CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
       QLabel *labelx = new QLabel(showeq_params->retarded_coords?"E/W:":"X:",
 				  coordsbox);
       labelx->setFixedHeight(labelx->sizeHint().height());
-      labelx->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+      labelx->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
       
       // Create the xpos label
       m_x = new QLabel("----",coordsbox);
       m_x->setFixedHeight(m_x->sizeHint().height());
-      m_x->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+      m_x->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     } 
     else 
     {
@@ -48,24 +48,24 @@ CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
       QLabel *labely = new QLabel(showeq_params->retarded_coords?"N/S:":"Y:",
 				  coordsbox);
       labely->setFixedHeight(labely->sizeHint().height());
-      labely->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+      labely->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
       
       // Create the ypos label
       m_y = new QLabel("----",coordsbox);
       m_y->setFixedHeight(m_y->sizeHint().height());
-      m_y->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+      m_y->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     }
    }
   
   // Create the z: label
   QLabel *labelz = new QLabel("Z:",coordsbox);
   labelz->setFixedHeight(labelz->sizeHint().height());
-  labelz->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+  labelz->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
   
   // Create the zpos label
   m_z = new QLabel("----",coordsbox);
   m_z->setFixedHeight(m_z->sizeHint().height());      
-  m_z->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+  m_z->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
   // connect
   connect(player, SIGNAL(posChanged(int16_t,int16_t,int16_t,
@@ -91,7 +91,7 @@ void CompassFrame::selectSpawn(const Item* item)
 }
 
 void CompassFrame::posChanged(int16_t x, int16_t y, int16_t z,
-			      int16_t deltaX, int16_t deltaY, int16_t deltaZ,
+			      int16_t /*deltaX*/, int16_t /*deltaY*/, int16_t /*deltaZ*/,
 			      int32_t heading)
 {
   // set compass info

@@ -15,7 +15,8 @@
 #include "everquest.h"
 #include "diagnosticmessages.h"
 
-#include <qdatetime.h>
+#include <QDateTime>
+#include <QTextStream>
 
 //----------------------------------------------------------------------
 // diagnostic defines
@@ -174,7 +175,7 @@ QString GuildShell::zoneString(uint16_t zoneid) const
     return m_zoneMgr->zoneNameFromID(zoneid);
 }
 
-void GuildShell::dumpMembers(Q3TextStream& out)
+void GuildShell::dumpMembers(QTextStream& out)
 {
   QDateTime dt;
   GuildMemberDictIterator it(m_members);
@@ -184,8 +185,8 @@ void GuildShell::dumpMembers(Q3TextStream& out)
   QString dateFormat("ddd MMM dd hh:mm:ss yyyy");
   
   // calculate the maximum class name width
-  size_t maxClassNameLength = 0;
-  for (uint8_t i = 1; i <= PLAYER_CLASSES; i++)
+  int maxClassNameLength = 0;
+  for (int i = 1; i <= PLAYER_CLASSES; i++)
     if (classString(i).length() > maxClassNameLength)
       maxClassNameLength = classString(i).length();
     
@@ -291,7 +292,7 @@ void GuildShell::guildMemberList(const uint8_t* data, size_t len)
 #endif // 
 }
 
-void GuildShell::guildMemberUpdate(const uint8_t* data, size_t len)
+void GuildShell::guildMemberUpdate(const uint8_t* data, size_t /*len*/)
 {
   const GuildMemberUpdate* gmu = (const GuildMemberUpdate*)data;
 

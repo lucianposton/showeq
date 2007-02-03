@@ -37,6 +37,8 @@
 
 //----------------------------------------------------------------------
 // forward declarations
+class QTextStream;
+
 class Player;
 class ZoneMgr;
 class FilterMgr;
@@ -78,7 +80,7 @@ public:
 			       double& minDistance);
    Spawn* findSpawnByName(const QString& name);
 
-   void dumpSpawns(spawnItemType type, Q3TextStream& out);
+   void dumpSpawns(spawnItemType type, QTextStream& out);
    FilterMgr* filterMgr(void) { return &m_filterMgr; }
    const ItemMap& getConstMap(spawnItemType type) const;
    const ItemMap& spawns(void) const;

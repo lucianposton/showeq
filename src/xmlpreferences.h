@@ -97,10 +97,10 @@ class XMLPreferences
 		 int def = -1, Persistence pers = Any);
   uint getPrefUInt(const QString& inName, const QString& inSection, 
 		   uint def = 0, Persistence pers = Any);
-  int64_t getPrefInt64(const QString& inName, const QString& inSection, 
-		       int64_t def = -1, Persistence pers = Any);
-  uint64_t getPrefUInt64(const QString& inName, const QString& inSection, 
-			 uint64_t def = 0, Persistence pers = Any);
+  qlonglong getPrefInt64(const QString& inName, const QString& inSection, 
+		       qlonglong def = -1, Persistence pers = Any);
+  qulonglong getPrefUInt64(const QString& inName, const QString& inSection, 
+			 qulonglong def = 0, Persistence pers = Any);
   double getPrefDouble(const QString& inName, const QString& inSection, 
 		       double def = -0.0, Persistence pers = Any);
   bool getPrefBool(const QString& inName, const QString& inSection, 
@@ -147,9 +147,9 @@ class XMLPreferences
   void setPrefUInt(const QString& inName, const QString& inSection, 
 		   uint inValue, Persistence pers = User);
   void setPrefInt64(const QString& inName, const QString& inSection, 
-		    int64_t inValue, Persistence pers = User);
+		    qlonglong inValue, Persistence pers = User);
   void setPrefUInt64(const QString& inName, const QString& inSection, 
-		     uint64_t inValue, Persistence pers = User);
+		     qulonglong inValue, Persistence pers = User);
   void setPrefDouble(const QString& inName, const QString& inSection, 
 		     double inValue, Persistence pers = User);
   void setPrefBool(const QString& inName, const QString& inSection, 

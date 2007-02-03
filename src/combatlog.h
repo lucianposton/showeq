@@ -53,7 +53,7 @@ public:
 	int		getMaxDamage() { return m_iMaxDamage; };
 	int		getTotalDamage() { return m_iTotalDamage; };
 
-	void	addMiss(int iMissReason) { m_iMisses++; };
+	void	addMiss(int /*iMissReason*/) { m_iMisses++; };
 	void	addHit(int iDamage);
 
 private:

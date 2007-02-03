@@ -840,12 +840,12 @@ QString Spawn::info() const
  // Worn weapons
   for (i = tFirstWeapon; i <= tLastWeapon; i++)
     if (equipment(i).itemId != SlotEmpty.itemId)
-      temp += QString(locs[i]) + ":" +  + print_item(equipment(i).itemId) + " ";
+      temp += QString("%1:%2 ").arg(locs[i]).arg(print_item(equipment(i).itemId));
 
   // Worn stuff -- Current best quess is that this may be material?
   i = tUnknown1;
   if (equipment(i).itemId != SlotEmpty.itemId)
-    temp += QString(locs[i]) + ":" + print_material(equipment(i).itemId) + " "; 
+    temp += QString("%1:%2 ").arg(locs[i]).arg(print_material(equipment(i).itemId)); 
 
 #if 1 // print also as slot U1 (Unknown1) until we're positive
   if (equipment(i).itemId != SlotEmpty.itemId)

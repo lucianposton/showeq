@@ -126,8 +126,8 @@ SpawnList::SpawnList(Player* player,
 }
 
 void SpawnList::setPlayer(int16_t x, int16_t y, int16_t z, 
-			   int16_t deltaX, int16_t deltaY, int16_t deltaZ, 
-			   int32_t degrees)
+			  int16_t /*deltaX*/, int16_t /*deltaY*/, int16_t /*deltaZ*/, 
+			  int32_t /*degrees*/)
 {
 //   seqDebug("SpawnList::setPlayer()");
    char buff[200];  
@@ -1046,16 +1046,16 @@ void SpawnList::selChanged(Q3ListViewItem* litem)
 }
 
 void SpawnList::mousePressEvent(int button, Q3ListViewItem* litem,
-		                   const QPoint &point, int col)
+				const QPoint &point, int /*col*/)
 {
   // Left Mouse Button Events
-  if (button  == LeftButton && litem != NULL)
+  if (button  == Qt::LeftButton && litem != NULL)
   {
       setSelected(litem, TRUE);
   }
 
   // Right Mouse Button Events
-  if (button == RightButton)
+  if (button == Qt::RightButton)
   {
     SpawnListItem* slitem = (SpawnListItem*)litem;
     const Item* item = NULL;
@@ -1081,7 +1081,7 @@ void SpawnList::mouseDoubleClickEvent(Q3ListViewItem* litem)
   }
 }
 
-QString SpawnList::filterString(const Item* item, int flags)
+QString SpawnList::filterString(const Item* item, int /*flags*/)
 {
    if (item == NULL)
      return "";

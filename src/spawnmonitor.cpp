@@ -21,7 +21,7 @@
 #include <qdir.h>
 #include <qfile.h>
 #include <qfileinfo.h>
-#include <q3textstream.h>
+#include <QTextStream>
 
 
 SpawnPoint::SpawnPoint(uint16_t spawnID, 
@@ -135,7 +135,7 @@ void SpawnMonitor::setName(const SpawnPoint* csp, const QString& name)
   setModified(sp);
 }
 
-void SpawnMonitor::setModified( SpawnPoint* changedSp )
+void SpawnMonitor::setModified( SpawnPoint* /*changedSp*/ )
 {
   m_modified = true;
 }
@@ -291,7 +291,7 @@ void SpawnMonitor::saveSpawnPoints()
     return;
   }
   
-  Q3TextStream output(&spFile);
+  QTextStream output(&spFile);
   
   Q3AsciiDictIterator<SpawnPoint> it( m_points );
   SpawnPoint* sp;
@@ -366,7 +366,7 @@ void SpawnMonitor::loadSpawnPoints()
     return;
   }
   
-  Q3TextStream input( &spFile );
+  QTextStream input( &spFile );
   
   int16_t x, y, z;
   unsigned long diffTime;

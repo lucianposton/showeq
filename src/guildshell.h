@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------
 // forward declarations
-class Q3TextStream;
+class QTextStream;
 
 class NetStream;
 class ZoneMgr;
@@ -85,9 +85,9 @@ class GuildShell : public QObject
   GuildShell(ZoneMgr* zoneMgr, QObject* parent = 0, const char* name = 0);
   ~GuildShell();
   const GuildMemberDict& members() { return m_members; }
-  size_t maxNameLength() { return m_maxNameLength; }
+  int maxNameLength() { return m_maxNameLength; }
 
-  void dumpMembers(Q3TextStream& out);
+  void dumpMembers(QTextStream& out);
   
   QString zoneString(uint16_t zoneid) const;
 
@@ -105,7 +105,7 @@ class GuildShell : public QObject
  protected:
 
   GuildMemberDict m_members;
-  size_t m_maxNameLength;
+  int m_maxNameLength;
   ZoneMgr* m_zoneMgr;
 };
 

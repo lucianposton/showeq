@@ -11,7 +11,8 @@
 #ifndef _PACKET_H_
 #define _PACKET_H_
 
-#include <qobject.h>
+#include <QObject>
+#include <QTimer>
 #include "packetcommon.h"
 #include "packetinfo.h"
 

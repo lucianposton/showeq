@@ -34,6 +34,7 @@
 class QPainter;
 class QPoint;
 class QTimer;
+class QTextStream;
 
 class MapParameters;
 class SpawnPoint;
@@ -300,7 +301,7 @@ class MapIcons : public QObject
   void setIcon(int iconType, const MapIcon& icon);
 
   // dump debug info
-  void dumpInfo(Q3TextStream& out);
+  void dumpInfo(QTextStream& out);
 
   // painting slots
   void paintIcon(MapParameters& param, 

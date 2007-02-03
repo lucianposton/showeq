@@ -26,7 +26,7 @@
 #include <qfileinfo.h>
 #include <qregexp.h>
 #include <qkeysequence.h>
-#include <q3textstream.h>
+#include <QTextStream>
 
 
 const float seqPrefVersion = 1.0;
@@ -456,23 +456,15 @@ void XMLPreferences::savePreferences(const QString& filename,
 	     (const char*)filename);
   }
 
-  // open a Text Stream on the file
-  Q3TextStream out(&f);
-
-  // make sure stream is UTF8 encoded
-  out.setEncoding(Q3TextStream::UnicodeUTF8);
-
   // save the document to the text stream
-  QString docText;
-  Q3TextStream docTextStream(&docText, QIODevice::WriteOnly);
-  doc.save(docTextStream, 4);
+  QString docText = doc.toString(2);
 
   // put newlines after comments (which unfortunately Qt's DOM doesn't track)
   QRegExp commentEnd("-->");
   docText.replace(commentEnd, "-->\n");
 
   // write the fixed document out to the file
-  out << docText;
+  f.write(docText.toUtf8());
 
   // close the file
   f.close();
@@ -655,7 +647,7 @@ bool XMLPreferences::isPreference(const QString& inName,
     QVariant* preference = getPref(inName, inSection, pers); \
     \
     if (preference) \
-      return preference->to##Type(); \
+      return preference->value<retType>(); \
     \
     return def; \
   } 
@@ -861,6 +853,8 @@ QVariant XMLPreferences::getPrefVariant(const QString& inName,
 setPrefMethod(String, const QString&);
 setPrefMethod(Int, int);
 setPrefMethod(UInt, uint);
+setPrefMethod(Int64, qlonglong);
+setPrefMethod(UInt64, qulonglong);
 setPrefMethod(Double, double);
 setPrefMethod(Color, const QColor&);
 setPrefMethod(Pen, const QPen&);
@@ -885,28 +879,7 @@ void XMLPreferences::setPrefKey(const QString& inName,
 				int inValue,
 				Persistence pers)
 {
-  setPref(inName, inSection, QVariant(QKeySequence(inValue)), pers);
-}
-
-void XMLPreferences::setPrefInt64(const QString& inName,
-				  const QString& inSection,
-				  int64_t inValue,
-				  Persistence pers)
-{
-  QByteArray ba;
-  ba.duplicate((const char*)&inValue, sizeof(int64_t));
-  setPref(inName, inSection, ba, pers);
-}
-
-
-void XMLPreferences::setPrefUInt64(const QString& inName,
-				   const QString& inSection,
-				   uint64_t inValue,
-				   Persistence pers)
-{
-  QByteArray ba;
-  ba.duplicate((const char*)&inValue, sizeof(uint64_t));
-  setPref(inName, inSection, ba, pers);
+  setPref(inName, inSection, QKeySequence(inValue), pers);
 }
 
 void XMLPreferences::setPrefVariant(const QString& inName, 

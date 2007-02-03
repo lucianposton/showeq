@@ -20,7 +20,7 @@
 
 #include <qfile.h>
 #include <qdatastream.h>
-#include <q3textstream.h>
+#include <QTextStream>
 
 GuildMgr::GuildMgr(QString fn, QObject* parent, const char* name)
   : QObject(parent, name)
@@ -49,7 +49,7 @@ void GuildMgr::worldGuildList(const uint8_t* data, size_t len)
   readGuildList();
 }
 
-void GuildMgr::writeGuildList(const worldGuildListStruct* gls, size_t len)
+void GuildMgr::writeGuildList(const worldGuildListStruct* gls, size_t /*len*/)
 {
   QFile guildsfile(guildsFileName);
 
@@ -110,7 +110,7 @@ void GuildMgr::readGuildList()
 void GuildMgr::guildList2text(QString fn)
 {
   QFile guildsfile(fn);
-  Q3TextStream guildtext(&guildsfile);
+  QTextStream guildtext(&guildsfile);
 
     if (guildsfile.exists()) {
          if (!guildsfile.remove()) {
@@ -128,7 +128,7 @@ void GuildMgr::guildList2text(QString fn)
 
    for (unsigned int i =0 ; i < m_guildMap.size(); i++) 
    {
-       if (m_guildMap[i])
+       if (!m_guildMap[i].isEmpty())
           guildtext << i << "\t" << m_guildMap[i] << endl;
    }
 
@@ -142,7 +142,7 @@ void GuildMgr::listGuildInfo()
 {
    for (unsigned int i = 0; i < m_guildMap.size(); i++) 
    {
-     if (m_guildMap[i])
+     if (!m_guildMap[i].isEmpty())
        seqInfo("%d\t%s", i, (const char*)m_guildMap[i]);
    }
 }

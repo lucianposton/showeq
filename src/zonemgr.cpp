@@ -213,7 +213,7 @@ void ZoneMgr::zoneChange(const uint8_t* data, size_t len, uint8_t dir)
     saveZoneState();
 }
 
-void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
+void ZoneMgr::zoneNew(const uint8_t* data, size_t /*len*/, uint8_t /*dir*/)
 {
   const newZoneStruct* zoneNew = (const newZoneStruct*)data;
   m_safePoint.setPoint(lrintf(zoneNew->safe_x), lrintf(zoneNew->safe_y),
@@ -255,7 +255,7 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
     saveZoneState();
 }
 
-void ZoneMgr::zonePoints(const uint8_t* data, size_t len, uint8_t)
+void ZoneMgr::zonePoints(const uint8_t* data, size_t /*len*/, uint8_t)
 {
   const zonePointsStruct* zp = (const zonePointsStruct*)data;
   // note the zone point count

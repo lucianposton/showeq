@@ -189,7 +189,7 @@ class MapMgr : public QObject
   void savePrefs(void);
 
   // dump debug info
-  void dumpInfo(Q3TextStream& out);
+  void dumpInfo(QTextStream& out);
 
  signals:
   void mapLoaded(void);
@@ -256,7 +256,6 @@ class MapMenu : public Q3PopupMenu
   void toggle_cacheAlwaysRepaint();
   void toggle_cacheChanges();
   void toggle_zoneSafePoint(int itemId);
-  void select_mapOptimization(int itemId);
   void select_gridTickColor(int itemId);
   void select_gridLineColor(int itemId);
   void select_backgroundColor(int itemId);
@@ -318,10 +317,6 @@ class MapMenu : public Q3PopupMenu
   int m_id_debugInfo;
 #endif
   int m_id_showSub;
-  int m_id_mapOptimization;
-  int m_id_mapOptimization_Memory;
-  int m_id_mapOptimization_Normal;
-  int m_id_mapOptimization_Best;
   int m_id_gridTickColor;
   int m_id_gridLineColor;
   int m_id_backgroundColor;
@@ -381,10 +376,6 @@ class Map :public QWidget
   unsigned char getZEM (void);
   void          setZEM (unsigned char newZEM);
   
-  // old methods
-  MapOptimizationMethod getMapOptimization(void) 
-    { return m_param.mapOptimizationMethod(); }
-  
   MapMenu* menu();
   
   // get methods
@@ -421,7 +412,6 @@ class Map :public QWidget
   bool showZoneSafePoint() const { return m_showZoneSafePoint; }
   
   MapLineStyle mapLineStyle() { return m_param.mapLineStyle(); }
-  MapOptimizationMethod mapOptimization() { return m_param.mapOptimizationMethod(); }
   int zoom() const { return m_param.zoom(); }
   int zoomDefault() const { return m_param.zoomDefault(); }
   int panOffsetX() const { return m_param.panOffsetX(); }
@@ -517,7 +507,6 @@ class Map :public QWidget
   void setRacePvP(bool val);
   
   void setMapLineStyle(MapLineStyle style);
-  void setMapOptimization(MapOptimizationMethod method);
   void setZoom(int val);
   void setZoomDefault(int val);
   void setPanOffsetX(int val);
@@ -539,7 +528,7 @@ class Map :public QWidget
   void setShowZoneSafePoint(bool val);
 
   // dump debug info
-  void dumpInfo(Q3TextStream& out);
+  void dumpInfo(QTextStream& out);
 
   void showMapIconDialog();
 
@@ -576,8 +565,8 @@ protected:
 				   const QTime& drawTime);
    void paintSelectedSpawnPointSpecials(MapParameters& param, QPainter& p,
 					const QTime& drawTime);
-   const QColor& raceTeamHighlightColor(const Spawn* spawn) const;
-   const QColor& deityTeamHighlightColor(const Spawn* spawn) const;
+   QColor raceTeamHighlightColor(const Spawn* spawn) const;
+   QColor deityTeamHighlightColor(const Spawn* spawn) const;
    void paintSpawns(MapParameters& param, QPainter& p, 
 		    const QTime& drawTime);
    void paintSpawnPoints(MapParameters& param, QPainter& p);
@@ -668,7 +657,7 @@ class MapFilterLineEdit : public QLineEdit
   ~MapFilterLineEdit() {} ;
 
  protected:
-  virtual void leaveEvent(QEvent* ev) { emit returnPressed(); }
+  virtual void leaveEvent(QEvent* /*ev*/) { emit returnPressed(); }
 };
 
 //----------------------------------------------------------------------
@@ -705,7 +694,7 @@ class MapFrame : public SEQWindow
    virtual void savePrefs(void);
 
   // dump debug info
-  void dumpInfo(Q3TextStream& out);
+  void dumpInfo(QTextStream& out);
 
  protected slots:
    void init_Menu(void);

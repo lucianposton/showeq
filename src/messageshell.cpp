@@ -179,7 +179,7 @@ void MessageShell::formattedMessage(const uint8_t* data, size_t len, uint8_t dir
 						    messagesLen));
 }
 
-void MessageShell::simpleMessage(const uint8_t* data, size_t len, uint8_t dir)
+void MessageShell::simpleMessage(const uint8_t* data, size_t /*len*/, uint8_t dir)
 {
   // avoid client chatter and do nothing if not viewing channel messages
   if (dir == DIR_Client)
@@ -287,13 +287,13 @@ void MessageShell::moneyOnCorpse(const uint8_t* data)
   }
 }
 
-void MessageShell::moneyUpdate(const uint8_t* data)
+void MessageShell::moneyUpdate(const uint8_t* /*data*/)
 {
   //  const moneyUpdateStruct* money = (const moneyUpdateStruct*)data;
   m_messages->addMessage(MT_Money, "Update");
 }
 
-void MessageShell::moneyThing(const uint8_t* data)
+void MessageShell::moneyThing(const uint8_t* /*data*/)
 {
   //  const moneyUpdateStruct* money = (const moneyUpdateStruct*)data;
   m_messages->addMessage(MT_Money, "Thing");
@@ -359,7 +359,7 @@ void MessageShell::logOut(const uint8_t*, size_t, uint8_t)
   m_messages->addMessage(MT_Zone, "LogoutCode: Client logged out of server");
 }
 
-void MessageShell::zoneEntryClient(const ClientZoneEntryStruct* zsentry)
+void MessageShell::zoneEntryClient(const ClientZoneEntryStruct* /*zsentry*/)
 {
   m_messages->addMessage(MT_Zone, "EntryCode: Client");
 }
@@ -382,7 +382,7 @@ void MessageShell::zoneChanged(const zoneChangeStruct* zoneChange, size_t, uint8
   m_messages->addMessage(MT_Zone, tempStr);
 }
 
-void MessageShell::zoneNew(const uint8_t* data, size_t, uint8_t dir)
+void MessageShell::zoneNew(const uint8_t* data, size_t, uint8_t /*dir*/)
 {
   const newZoneStruct* zoneNew = (const newZoneStruct*)data;
   QString tempStr;
@@ -606,7 +606,7 @@ void MessageShell::startCast(const uint8_t* data)
 }
 
 
-void MessageShell::groupUpdate(const uint8_t* data, size_t size, uint8_t dir)
+void MessageShell::groupUpdate(const uint8_t* data, size_t size, uint8_t /*dir*/)
 {
   if (size != sizeof(groupUpdateStruct))
   {
@@ -670,7 +670,7 @@ void MessageShell::groupFollow(const uint8_t* data)
   m_messages->addMessage(MT_Group, tempStr);
 }
 
-void MessageShell::groupDisband(const uint8_t* data, size_t, uint8_t dir)
+void MessageShell::groupDisband(const uint8_t* data, size_t, uint8_t /*dir*/)
 {
   const groupDisbandStruct* gmem = (const groupDisbandStruct*)data;
   QString tempStr;
@@ -784,7 +784,7 @@ void MessageShell::updateLevel(const uint8_t* data)
   m_messages->addMessage(MT_Player, tempStr);
 }
   
-void MessageShell::consent(const uint8_t* data, size_t, uint8_t dir)
+void MessageShell::consent(const uint8_t* data, size_t, uint8_t /*dir*/)
 {
   const consentResponseStruct* consent = (const consentResponseStruct*)data;
 
@@ -797,7 +797,7 @@ void MessageShell::consent(const uint8_t* data, size_t, uint8_t dir)
 }
 
 
-void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t dir) 
+void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t /*dir*/) 
 {
   const considerStruct * con = (const considerStruct*)data;
   const Item* item;
@@ -911,8 +911,8 @@ void MessageShell::newExp(uint32_t newExp, uint32_t totalExp,
 }
 
 void MessageShell::setAltExp(uint32_t totalExp,
-			     uint32_t maxExp, uint32_t tickExp, 
-			     uint32_t aaPoints)
+			     uint32_t /*maxExp*/, uint32_t /*tickExp*/, 
+			     uint32_t /*aaPoints*/)
 {
   QString tempStr;
   tempStr.sprintf("ExpAA: Set: %u total, with %u aapoints",

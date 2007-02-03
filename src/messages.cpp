@@ -64,7 +64,7 @@ void Messages::clear(void)
   emit cleared();
 }
 
-void Messages::removedFilter(uint32_t mask, uint8_t filter)
+void Messages::removedFilter(uint32_t mask, uint8_t /*filter*/)
 {
   // filter has been removed, remove its mask from all the messages
   MessageList::iterator it;
@@ -72,7 +72,7 @@ void Messages::removedFilter(uint32_t mask, uint8_t filter)
     (*it).setFilterFlags((*it).filterFlags() & ~mask);
 }
 
-void Messages::addedFilter(uint32_t mask, uint8_t filterid, 
+void Messages::addedFilter(uint32_t mask, uint8_t /*filterid*/, 
 			   const MessageFilter& filter)
 {
   // filter has been added, filter all messages against it

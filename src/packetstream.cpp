@@ -576,7 +576,7 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
 // Handle a protocol level packet. This could be either a top-level
 // EQUDPIPPacket or a subpacket that is just an EQProtocolPacket. Either way
 // we use net opcodes here.
-void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
+void EQPacketStream::processPacket(EQProtocolPacket& packet, bool /*isSubpacket*/)
 {
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
   seqDebug("-->EQPacketStream::processPacket, subpacket=%s on stream %s (%d)",
@@ -1196,7 +1196,7 @@ void EQPacketStream::receiveSessionKey(uint32_t sessionId,
 
 ///////////////////////////////////////////////////////////////
 // Process a session disconnect if it is for us
-void EQPacketStream::close(uint32_t sessionId, EQStreamID streamId,
+void EQPacketStream::close(uint32_t sessionId, EQStreamID /*streamId*/,
   uint8_t sessionTracking)
 {
   if (sessionId == m_sessionId)

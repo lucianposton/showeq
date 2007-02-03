@@ -111,7 +111,7 @@ void SpawnPointListItem::paintCell(QPainter* p, const QColorGroup& cg,
   
   if (m_spawnPoint->age() > 220)
   {
-    newCg.setColor(QColorGroup::Text, red);
+    newCg.setColor(QColorGroup::Text, Qt::red);
     font.setBold(true);
   }
   else
@@ -472,12 +472,12 @@ void SpawnPointListMenu::init_menu()
 		   m_spawnPointList->columnVisible(i));
 }
 
-void SpawnPointListMenu::rename_item(int id)
+void SpawnPointListMenu::rename_item(int /*id*/)
 {
   m_spawnPointList->renameItem(m_currentItem);
 }
 
-void SpawnPointListMenu::delete_item(int id)
+void SpawnPointListMenu::delete_item(int /*id*/)
 {
   m_spawnPointList->deleteItem(m_currentItem);
 }
@@ -494,7 +494,7 @@ void SpawnPointListMenu::toggle_col(int id)
     m_spawnPointList->setColumnVisible(colnum, true);
 }
 
-void SpawnPointListMenu::set_font(int id)
+void SpawnPointListMenu::set_font(int /*id*/)
 {
   QFont newFont;
   bool ok = false;
@@ -510,7 +510,7 @@ void SpawnPointListMenu::set_font(int id)
       window->setWindowFont(newFont);
 }
 
-void SpawnPointListMenu::set_caption(int id)
+void SpawnPointListMenu::set_caption(int /*id*/)
 {
   bool ok = false;
   SEQWindow* window = (SEQWindow*)m_spawnPointList->parent();

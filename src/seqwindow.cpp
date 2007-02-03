@@ -141,7 +141,7 @@ void SEQWindow::savePrefs(void)
 
 void SEQWindow::mousePressEvent(QMouseEvent* e)
 {
-  if (e->button() == RightButton)
+  if (e->button() == Qt::RightButton)
   {
     Q3PopupMenu* popupMenu = menu();
     if (popupMenu)

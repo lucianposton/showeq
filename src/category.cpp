@@ -30,6 +30,7 @@
 #include <Q3HBoxLayout>
 #include <QLabel>
 #include <Q3VBoxLayout>
+#include <QTextStream>
 
 // ------------------------------------------------------
 // Category
@@ -95,8 +96,8 @@ CategoryDlg::CategoryDlg(QWidget *parent, QString name)
 
    QLabel *colorLabel = new QLabel ("Color", this);
    colorLabel->setFont(labelFont);
-   colorLabel->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
-   row1Layout->addWidget(colorLabel, 0, AlignLeft);
+   colorLabel->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+   row1Layout->addWidget(colorLabel, 0, Qt::AlignLeft);
 
    m_Color = new QPushButton(this, "color");
    m_Color->setText("...");
@@ -107,7 +108,7 @@ CategoryDlg::CategoryDlg(QWidget *parent, QString name)
 
    QLabel *nameLabel = new QLabel ("Name", this);
    nameLabel->setFont(labelFont);
-   nameLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+   nameLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
    row4Layout->addWidget(nameLabel);
 
    m_Name = new QLineEdit(this, "Name");
@@ -116,7 +117,7 @@ CategoryDlg::CategoryDlg(QWidget *parent, QString name)
 
    QLabel *filterLabel = new QLabel ("Filter", this);
    filterLabel->setFont(labelFont);
-   filterLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+   filterLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
    row3Layout->addWidget(filterLabel);
 
    m_Filter  = new QLineEdit(this, "Filter");
@@ -125,7 +126,7 @@ CategoryDlg::CategoryDlg(QWidget *parent, QString name)
 
    QLabel *filteroutLabel = new QLabel ("FilterOut", this);
    filteroutLabel->setFont(labelFont);
-   filteroutLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+   filteroutLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
    row2Layout->addWidget(filteroutLabel);
 
    m_FilterOut  = new QLineEdit(this, "FilterOut");
@@ -133,10 +134,10 @@ CategoryDlg::CategoryDlg(QWidget *parent, QString name)
    row2Layout->addWidget(m_FilterOut);
 
    QPushButton *ok = new QPushButton("OK", this);
-   row0Layout->addWidget(ok, 0, AlignLeft);
+   row0Layout->addWidget(ok, 0, Qt::AlignLeft);
 
    QPushButton *cancel = new QPushButton("Cancel", this);
-   row0Layout->addWidget(cancel, 0, AlignRight);
+   row0Layout->addWidget(cancel, 0, Qt::AlignRight);
 
    // Hook on pressing the buttons
    connect(ok, SIGNAL(clicked()), SLOT(accept()));

@@ -238,7 +238,7 @@ void SpellList::DeleteItem(const SpellItem *item)
 //{
 //}
 
-QColor SpellList::pickSpellColor(const SpellItem *item, QColor def) const
+QColor SpellList::pickSpellColor(const SpellItem* /*item*/, QColor /*def*/) const
 {
    return Qt::black;
 }
@@ -322,8 +322,8 @@ void SpellList::mouseDoubleClicked(Q3ListViewItem *item)
     m_spellShell->deleteSpell(j);
 }
 
-void SpellList::rightButtonClicked(Q3ListViewItem *item, const QPoint& pos,
-      int col)
+void SpellList::rightButtonClicked(Q3ListViewItem* /*item*/, const QPoint& pos,
+				   int /*col*/)
 {
   Q3PopupMenu* slMenu = menu();
 

@@ -26,7 +26,7 @@
 #include <q3groupbox.h>
 #include <q3filedialog.h>
 #include <qfile.h>
-#include <q3textstream.h>
+#include <QTextStream>
 //Added by qt3to4:
 #include <Q3HBoxLayout>
 #include <QKeyEvent>
@@ -56,7 +56,7 @@ bool MessageBrowser::eventFilter(QObject *o, QEvent *e)
 
   QMouseEvent* m = (QMouseEvent*)e;
 
-  if (m->button() == RightButton)
+  if (m->button() == Qt::RightButton)
   {
     emit rightClickedMouse(m);
 
@@ -71,20 +71,20 @@ void MessageBrowser::keyPressEvent(QKeyEvent* e)
   //fprintf(stderr, "MessageBrowser::keyPressEvent(%x)\n", e->key());
   switch (e->key())
   {
-  case Key_R:
-    if (e->state() == ControlButton)
+  case Qt::Key_R:
+    if (e->state() == Qt::ControlButton)
     {
       emit refreshRequest();
       return;
     }
-  case Key_F:
-    if (e->state() == ControlButton)
+  case Qt::Key_F:
+    if (e->state() == Qt::ControlButton)
     {
       emit findRequest();
       return;
     }
-  case Key_L:
-    if (e->state() == ControlButton)
+  case Qt::Key_L:
+    if (e->state() == Qt::ControlButton)
     {
       emit lockRequest();
       return;
@@ -286,7 +286,7 @@ MessageTypeStyleDialog::MessageTypeStyleDialog(MessageTypeStyle& style,
 
   grid->addRowSpacing(3, 10);
 
-  Q3GroupBox* exampleBox = new Q3GroupBox(1, Horizontal, "Example", 
+  Q3GroupBox* exampleBox = new Q3GroupBox(1, Qt::Horizontal, "Example", 
 					this, "examplebox");
   grid->addMultiCellWidget(exampleBox, 4, 4, 0, 2);
 
@@ -476,7 +476,7 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
   m_messageWindow->setUndoDepth(0);
   m_messageWindow->setUndoRedoEnabled(false);
 
-  m_messageWindow->setTextFormat(PlainText);
+  m_messageWindow->setTextFormat(Qt::PlainText);
 
   // set it to read only
   m_messageWindow->setReadOnly(true);
@@ -586,15 +586,15 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
 
   m_menu->insertSeparator(-1);
   m_menu->insertItem("&Find...", this, SLOT(findDialog()), 
-		     CTRL+Key_F);
+		     Qt::CTRL+Qt::Key_F);
   m_menu->insertSeparator(-1);
   m_id_lockText = m_menu->insertItem("&Lock Text", this,
-				     SLOT(toggleLockedText()), CTRL+Key_L);
+				     SLOT(toggleLockedText()), Qt::CTRL+Qt::Key_L);
   int x;
   x = m_menu->insertItem("Refresh Messages...", this, SLOT(refreshMessages()),
-			 CTRL+Key_R);
+			 Qt::CTRL+Qt::Key_R);
   m_menu->insertItem("Save Message Text...", this, SLOT(saveText()),
-		     CTRL+Key_S);
+		     Qt::CTRL+Qt::Key_S);
   m_menu->insertSeparator(-1);
   m_menu->setItemChecked(x, m_lockedText);
   m_menu->insertSeparator(-1);
@@ -815,7 +815,7 @@ void MessageWindow::saveText(void)
   QFile file( fileName ); // Write the text to a file
   if ( file.open( QIODevice::WriteOnly ) ) 
   {
-    Q3TextStream stream( &file );
+    QTextStream stream( &file );
 
     // save all the paragraphs
     //   ZBNOTE: unfortunately just using ->text() doesn't work.

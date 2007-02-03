@@ -1,4 +1,3 @@
-
 /*
  * editor.cpp
  *
@@ -25,7 +24,7 @@
 #include <q3mainwindow.h> 
 #include <q3filedialog.h> 
 #include <qtoolbutton.h> 
-#include <q3textstream.h> 
+#include <QTextStream> 
 #include <qpaintdevice.h> 
 #include <qobject.h> 
 #include <q3multilineedit.h>
@@ -107,13 +106,13 @@ EditorWindow::EditorWindow(const char *fileName)
      menuBar()->insertItem( "&File", file );
  
      id = file->insertItem( openIcon, "&Open",
-                            this, SLOT(load()), CTRL+Key_O );
+                            this, SLOT(load()), Qt::CTRL+Qt::Key_O );
  
      id = file->insertItem( saveIcon, "&Save",
-                            this, SLOT(save()), CTRL+Key_S );
+                            this, SLOT(save()), Qt::CTRL+Qt::Key_S );
 
      file->insertSeparator();
-     file->insertItem( "&Close Editor", this, SLOT(close()), CTRL+Key_W );
+     file->insertItem( "&Close Editor", this, SLOT(close()), Qt::CTRL+Qt::Key_W );
 
      e = new Q3MultiLineEdit( this, "editor" );
      e->setFocus();
@@ -149,8 +148,8 @@ EditorWindow::EditorWindow(const char *fileName)
      e->setAutoUpdate( FALSE );
      e->clear();
 
-     Q3TextStream t(&f);
-     while ( !t.eof() ) {
+     QTextStream t(&f);
+     while ( !t.atEnd() ) {
          QString s = t.readLine();
          e->append( s );
      }
@@ -180,7 +179,7 @@ EditorWindow::EditorWindow(const char *fileName)
          return;
      }
 
-     Q3TextStream t( &f );
+     QTextStream t( &f );
      t << text;
      f.close();
 

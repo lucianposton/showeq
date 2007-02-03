@@ -159,22 +159,22 @@ GuildListWindow::GuildListWindow(Player* player,
 
   // Guild Name
   m_guildName = new QLabel("Guild", this);
-  m_guildName->setAlignment(AlignLeft|AlignVCenter|SingleLine);
+  m_guildName->setAlignment(Qt::AlignLeft|Qt::AlignVCenter|SingleLine);
   m_guildName->setFrameShape(LineEditPanel);
   m_guildName->setFrameShadow(Sunken);
   m_guildName->setMinimumWidth(50);
   m_guildName->setMaximumWidth(300);
-  hLayout->addWidget(m_guildName, 1, AlignLeft);
+  hLayout->addWidget(m_guildName, 1, Qt::AlignLeft);
   guildChanged();
 
   // Guild Totals
   m_guildTotals = new QLabel("", this);
-  m_guildTotals->setAlignment(AlignRight|AlignVCenter|SingleLine);
+  m_guildTotals->setAlignment(Qt::AlignRight|Qt::AlignVCenter|SingleLine);
   m_guildTotals->setFrameShape(LineEditPanel);
   m_guildTotals->setFrameShadow(Sunken);
   m_guildTotals->setMinimumWidth(30);
   m_guildTotals->setMaximumWidth(120);
-  hLayout->addWidget(m_guildTotals, 0, AlignRight);
+  hLayout->addWidget(m_guildTotals, 0, Qt::AlignRight);
 
   // create the spawn listview
   m_guildList = new SEQListView(preferenceName(), 
@@ -441,7 +441,7 @@ void GuildListWindow::toggle_guildListCol( int id )
     m_guildList->setColumnVisible(colnum, true);
 }
 
-void GuildListWindow::set_font(int id)
+void GuildListWindow::set_font(int /*id*/)
 {
   QFont newFont;
   bool ok = false;
@@ -455,7 +455,7 @@ void GuildListWindow::set_font(int id)
       setWindowFont(newFont);
 }
 
-void GuildListWindow::set_caption(int id)
+void GuildListWindow::set_caption(int /*id*/)
 {
   bool ok = false;
 

@@ -85,7 +85,7 @@ class CategoryDlg : public QDialog
   QLineEdit* m_Name;
   QLineEdit* m_Filter;
   QLineEdit* m_FilterOut;
-  QButton* m_Color;
+  QPushButton* m_Color;
 };
 
 typedef QList<Category> CategoryList;

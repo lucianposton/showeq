@@ -9,7 +9,6 @@
 
 
 #include "experiencelog.h"
-#include "map.h"
 #include "util.h"
 #include "group.h"
 #include "player.h"
@@ -533,7 +532,7 @@ void ExperienceWindow::updateAverage( )
 
 }
 
-void ExperienceWindow::resizeEvent ( QResizeEvent *e ) 
+void ExperienceWindow::resizeEvent ( QResizeEvent* /*e*/ ) 
 {
   //   int mh = m_menu_bar->height() + 4;
 

@@ -70,7 +70,6 @@ MapParameters::MapParameters(const MapData& mapData)
   m_showLines = true;
   m_showGridLines = true;
   m_showGridTicks = true;
-  m_optimization = tMap_NormalOptim;
 
   reset();
 }
@@ -220,33 +219,6 @@ void MapParameters::reAdjust()
   // adjust pre-calculate player offsets
   m_curPlayerOffset.setX(calcXOffset(m_curPlayer.x()));
   m_curPlayerOffset.setY(calcYOffset(m_curPlayer.y()));
-}
-
-QPixmap::Optimization MapParameters::pixmapOptimizationMethod()
-{
-  switch (m_optimization)
-  {
-  case tMap_MemoryOptim:  
-    return QPixmap::MemoryOptim; 
-  case tMap_NoOptim:
-    return QPixmap::NoOptim; 
-  case tMap_NormalOptim:  
-    return QPixmap::NormalOptim;
-  case tMap_BestOptim:  
-    return QPixmap::BestOptim;
-  case tMap_DefaultOptim:
-  default: 
-    return QPixmap::DefaultOptim;
-  }
-   /* Optimization Methods:
-        DefaultOptim - A pixmap with this optimization mode set always has the default optimization type
-               - default optimization type for qPixMap is NormalOptim
-        NoOptim      - no optimization (currently the same as MemoryOptim).
-        MemoryOptim  - optimize for minimal memory use. 
-        NormalOptim  - optimize for typical usage. Often uses more memory than MemoryOptim, and often faster. 
-        BestOptim    - optimize for pixmaps that are drawn very often and where performance is critical.
-                       Generally uses more memory than NormalOptim and may provide a little better speed
-   */
 }
 
 void MapParameters::setPlayer(const MapPoint& pos)
@@ -1002,7 +974,7 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
     // get the field count
     count = fields.count();
 
-    switch (entryType) 
+    switch (entryType.toAscii()) 
     {
     case 'L':
       {
@@ -2278,20 +2250,15 @@ const QPixmap& MapCache::getMapImage(MapParameters& param)
   // increment paint count
   m_paintCount++;
 #endif
-  // set pixmap optimization if it's changed
-  if (m_lastParam.mapOptimizationMethod() !=
-      param.mapOptimizationMethod())
-    m_mapImage.setOptimization(param.pixmapOptimizationMethod());
-
   // make sure the map is the correct size
   m_mapImage.resize(param.screenLength());
 
   QPainter tmp;
 
   // Begin Painting
-  tmp.begin (&m_mapImage);
-  tmp.setPen (QPen::NoPen);
-  tmp.setFont (param.font());
+  tmp.begin(&m_mapImage);
+  tmp.setPen(Qt::NoPen);
+  tmp.setFont(param.font());
 
   // load the background image or paint the background
   if (!m_mapData.imageLoaded() || 

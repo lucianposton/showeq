@@ -213,7 +213,7 @@ int SpawnListItem::compare(Q3ListViewItem *i, int col, bool ascending) const
 
 }
 
-void SpawnListItem::update(Player* player, uint32_t changeType)
+void SpawnListItem::update(Player* /*player*/, uint32_t changeType)
 {
 //   seqDebug("SpawnListItem::update()\n");
    QString buff;
@@ -270,7 +270,7 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
        setText(tSpawnColBodyType, spawn->typeString());
        if (spawn->guildID() < MAX_GUILDS)
        {  
-          if(spawn->guildTag())
+          if(!spawn->guildTag().isEmpty())
             setText(tSpawnColGuildID, spawn->guildTag());
           else
             setText(tSpawnColGuildID, QString::number(spawn->guildID()));
@@ -444,7 +444,8 @@ SpawnListMenu::SpawnListMenu(SEQListView* spawnlist,
 			     FilterMgr* filterMgr,
 			     CategoryMgr* categoryMgr,
 		             QWidget* parent, const char* name)
-  : m_spawnlist(spawnlist),
+  : Q3PopupMenu(parent, name),
+    m_spawnlist(spawnlist),
     m_spawnlistWindow(spawnlistWindow),
     m_filterMgr(filterMgr),
     m_categoryMgr(categoryMgr)
@@ -682,19 +683,19 @@ void SpawnListMenu::add_zoneFilter(int id)
     m_filterMgr->addZoneFilter(filter, filterString);
 }
 
-void SpawnListMenu::add_category(int id)
+void SpawnListMenu::add_category(int /*id*/)
 {
   // add a category to the category manager
   m_categoryMgr->addCategory(m_spawnlist);
 }
 
-void SpawnListMenu::edit_category(int id)
+void SpawnListMenu::edit_category(int /*id*/)
 {
   // edit the current category
   m_categoryMgr->editCategories(m_currentCategory, m_spawnlist);
 }
 
-void SpawnListMenu::delete_category(int id)
+void SpawnListMenu::delete_category(int /*id*/)
 {
   // confirm that the user wants to delete the category
   QMessageBox mb("Are you sure?",
@@ -711,14 +712,14 @@ void SpawnListMenu::delete_category(int id)
     m_categoryMgr->remCategory(m_currentCategory);
 }
 
-void SpawnListMenu::reload_categories(int id)
+void SpawnListMenu::reload_categories(int /*id*/)
 {
   // reload the categories
   m_categoryMgr->reloadCategories();
 }
 
 
-void SpawnListMenu::set_font(int id)
+void SpawnListMenu::set_font(int /*id*/)
 {
   QFont newFont;
   bool ok = false;
@@ -732,7 +733,7 @@ void SpawnListMenu::set_font(int id)
       m_spawnlistWindow->setWindowFont(newFont);
 }
 
-void SpawnListMenu::set_caption(int id)
+void SpawnListMenu::set_caption(int /*id*/)
 {
   bool ok = false;
 

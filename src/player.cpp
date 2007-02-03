@@ -53,7 +53,7 @@ Player::Player (QObject* parent,
     m_guildMgr(guildMgr)
 {
 #ifdef DEBUG_PLAYER
-  debug("Player()");
+  seqDebug("Player()");
 #endif
 
   connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
@@ -108,7 +108,7 @@ Player::Player (QObject* parent,
   m_conColorBases[tUnknownSpawn] = 
     pSEQPrefs->getPrefColor(conColorBasePrefNames[tUnknownSpawn],
 			    "Player",
-			    gray);
+			    Qt::gray);
 						 
   // restore the player state if the user requested it...
   if (showeq_params->restorePlayerState)

@@ -24,8 +24,9 @@
 #include "diagnosticmessages.h"
 #include "netstream.h"
 
-#include <qfile.h>
-#include <qdatastream.h>
+#include <QFile>
+#include <QDataStream>
+#include <QTextStream>
 
 #ifdef __FreeBSD__
 #include <sys/types.h>
@@ -311,7 +312,7 @@ bool SpawnShell::updateRuntimeFilterFlags(Item* item)
   return false;
 }
 
-void SpawnShell::dumpSpawns(spawnItemType type, Q3TextStream& out)
+void SpawnShell::dumpSpawns(spawnItemType type, QTextStream& out)
 {
    ItemIterator it(getMap(type));
 
@@ -389,7 +390,7 @@ void SpawnShell::newDoorSpawns(const uint8_t* data, size_t len, uint8_t dir)
     newDoorSpawn(doors[i], sizeof(doorStruct), dir);
 }
 
-void SpawnShell::newDoorSpawn(const doorStruct& d, size_t len, uint8_t dir)
+void SpawnShell::newDoorSpawn(const doorStruct& d, size_t /*len*/, uint8_t /*dir*/)
 {
 #ifdef SPAWNSHELL_DIAG
    seqDebug("SpawnShell::newDoorSpawn(doorStruct*)");
@@ -589,7 +590,7 @@ void SpawnShell::newSpawn(const spawnStruct& s)
    }
 }
 
-void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
+void SpawnShell::playerUpdate(const uint8_t* data, size_t /*len*/, uint8_t dir)
 {
   // if zoning, then don't do anything
   if (m_zoneMgr->isZoning())
@@ -668,7 +669,7 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
   }
 }
 
-void SpawnShell::npcMoveUpdate(const uint8_t* data, size_t len, uint8_t dir)
+void SpawnShell::npcMoveUpdate(const uint8_t* data, size_t len, uint8_t /*dir*/)
 {
 /*
  * Wire format:
@@ -953,7 +954,7 @@ void SpawnShell::illusionSpawn(const uint8_t* data)
     }
 }
 
-void SpawnShell::shroudSpawn(const uint8_t* data, size_t len, uint8_t dir)
+void SpawnShell::shroudSpawn(const uint8_t* data, size_t len, uint8_t /*dir*/)
 {
     if (len == sizeof(spawnShroudOther))
     {
@@ -1166,7 +1167,7 @@ void SpawnShell::killSpawn(const uint8_t* data)
    }
 }
 
-void SpawnShell::respawnFromHover(const uint8_t* data)
+void SpawnShell::respawnFromHover(const uint8_t* /*data*/)
 {
 #ifdef SPAWNSHELL_DIAG
     seqDebug("SpawnShell::respawnFromHover()");

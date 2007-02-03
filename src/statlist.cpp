@@ -154,7 +154,7 @@ void StatList::manaChanged (uint32_t val, uint32_t max)
     return;
 
   char buf[64];
-  if (val >= 0)
+  if (val > 0)
     sprintf(buf, "%d", val);
   else
     sprintf(buf, "N/A");
@@ -168,8 +168,8 @@ void StatList::manaChanged (uint32_t val, uint32_t max)
       m_guessMaxMana = max;
    }
 
-   if (m_guessMaxMana < 0)
-     m_guessMaxMana = 0;
+//   if (m_guessMaxMana < 0)
+//     m_guessMaxMana = 0;
 
    if (m_guessMaxMana == 0)
      return;
@@ -273,8 +273,8 @@ void StatList::updateStat(uint8_t stat)
 	    if (max > m_guessMaxMana)
 	      m_guessMaxMana = max;
 
-	    if (m_guessMaxMana < 0)
-	      m_guessMaxMana = 0;
+//	    if (m_guessMaxMana < 0)
+//	      m_guessMaxMana = 0;
 
 	    // if it's non-zero, we'll use the guess for display
 	    if (m_guessMaxMana != 0)

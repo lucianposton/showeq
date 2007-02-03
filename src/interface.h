@@ -168,7 +168,7 @@ class EQInterface:public Q3MainWindow
    void selectPrev(void);
    void saveSelectedSpawnPath(void);
    void saveSpawnPaths(void);
-   void saveSpawnPath(Q3TextStream& out, const Item* item);
+   void saveSpawnPath(QTextStream& out, const Item* item);
    void toggle_log_AllPackets();
    void toggle_log_WorldData();
    void toggle_log_ZoneData();

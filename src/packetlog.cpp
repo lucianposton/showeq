@@ -428,7 +428,7 @@ void OPCodeMonitorPacketLog::init(QString monitoredOPCodes)
     
     uiIterationID = 0;
     
-    uint8_t uiColonCount = qsCommaBuffer.contains(":");
+    int uiColonCount = qsCommaBuffer.count(":");
     iColonPos = qsCommaBuffer.find (":");
     
     if (iColonPos == -1)

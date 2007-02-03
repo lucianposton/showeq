@@ -314,6 +314,7 @@ EQUDPIPPacketFormat::EQUDPIPPacketFormat(uint8_t* data,
 
 EQUDPIPPacketFormat::EQUDPIPPacketFormat(EQUDPIPPacketFormat& packet,
 					 bool copy)
+    : EQProtocolPacket()
 {
   // note whether or not this object ownw the memory
   m_ownCopy = copy;

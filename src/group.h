@@ -10,13 +10,16 @@
 
 #include <stdint.h>
 
-#include <qobject.h>
-#include <qstring.h>
+#include <QObject>
+#include <QString>
+
 #include "everquest.h"
 
 
 //----------------------------------------------------------------------
 // forward declarations
+class QTextStream;
+
 class Player;
 class SpawnShell;
 class Item;
@@ -50,7 +53,7 @@ class GroupMgr: public QObject
   void killSpawn(const Item* item);
 
   // dump debug info
-  void dumpInfo(Q3TextStream& out);
+  void dumpInfo(QTextStream& out);
 
  signals:
   void added(const QString& name, const Spawn* mem);

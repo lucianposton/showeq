@@ -119,9 +119,9 @@ void Compass::paintCompass ( QPainter *p )
    tmp.begin (&pix);
 
    tmp.setBrush(QColor(64, 64, 64));
-   tmp.setPen(darkGray);
+   tmp.setPen(Qt::darkGray);
    tmp.drawEllipse(0,0,pix.width(), pix.height());
-   tmp.setPen(gray);
+   tmp.setPen(Qt::gray);
    tmp.drawLine(0,phd2, pix.width(), phd2);
    tmp.drawLine(pwd2,0, pwd2, pix.height());
    tmp.drawLine(pwd4, phd4, 
@@ -131,19 +131,19 @@ void Compass::paintCompass ( QPainter *p )
    tmp.translate(pwd2, phd2);
 
    tmp.rotate (-m_ang);
-   tmp.setBrush(blue);
-   tmp.setPen(blue);
+   tmp.setBrush(Qt::blue);
+   tmp.setPen(Qt::blue);
    tmp.drawLine(0-pwd4, 0, pwd2, 0);
    tmp.drawLine(0,0-phd4, 0, phd4);
-   tmp.setBrush(red);
-   tmp.setPen(red);
+   tmp.setBrush(Qt::red);
+   tmp.setPen(Qt::red);
    tmp.drawLine(0, 1, pwd2, 1);
    tmp.drawLine(0, -1, pwd4, -1);
-   tmp.setBrush(blue);
-   tmp.setPen(red);
+   tmp.setBrush(Qt::blue);
+   tmp.setPen(Qt::red);
    tmp.drawEllipse (0-5, 0-5, 10, 10);
-   tmp.setBrush(red);
-   tmp.setPen(red);
+   tmp.setBrush(Qt::red);
+   tmp.setPen(Qt::red);
    tmp.drawEllipse ((pwd2) -2, -2, 4, 4);
 
    if (m_dSpawnAngle > 0)
@@ -151,8 +151,8 @@ void Compass::paintCompass ( QPainter *p )
       tmp.resetXForm();
       tmp.translate(pwd2, phd2);
       tmp.rotate(-m_dSpawnAngle);
-      tmp.setPen(green);
-      tmp.setBrush(green);
+      tmp.setPen(Qt::green);
+      tmp.setBrush(Qt::green);
       tmp.drawEllipse(pwd2 -2, -2, 4, 4);
    }
 

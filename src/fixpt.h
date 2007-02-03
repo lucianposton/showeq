@@ -80,13 +80,13 @@ _T fixPtSubI(_T a, qType q, _I b)
 }
 
 template <class _T, class _I> inline
-_T fixPtMulI(_T a, qType q, _I b) 
+_T fixPtMulI(_T a, qType /*q*/, _I b) 
 { 
   return (a * b); 
 }
 
 template <class _T, class _I> inline
-_T fixPtDivI(_T a, qType q, _I b) 
+_T fixPtDivI(_T a, qType /*q*/, _I b) 
 { 
   return (a / b); 
 }

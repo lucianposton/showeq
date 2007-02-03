@@ -193,7 +193,7 @@ bool EQPacketPayload::setType(const EQPacketTypeDB& db,
   return true;
 }
 
-bool EQPacketPayload::match(const uint8_t* data, size_t size, 
+bool EQPacketPayload::match(const uint8_t* /*data*/, size_t size, 
 			    uint8_t dir) const
 {
   switch(m_sizeCheckType)
@@ -232,7 +232,8 @@ EQPacketOPCode::EQPacketOPCode(uint16_t opcode, const QString& name)
 }
 
 EQPacketOPCode::EQPacketOPCode(const EQPacketOPCode& opcode)
-  : m_opcode(opcode.m_opcode),
+  : EQPayloadList(opcode),
+    m_opcode(opcode.m_opcode),
     m_implicitLen(opcode.m_implicitLen),
     m_name(opcode.m_name),
     m_updated(opcode.m_updated)
@@ -312,13 +313,13 @@ bool EQPacketOPCodeDB::save(const QString& filename)
     return false;
 
   // create a QTextStream object on the QFile object
-  Q3TextStream out(&file);
+  QTextStream out(&file);
   
   // set the output encoding to be UTF8
-  out.setEncoding(Q3TextStream::UnicodeUTF8);
+  out.setEncoding(QTextStream::UnicodeUTF8);
 
   // set the number output to be left justified decimal
-  out.setf(Q3TextStream::dec | Q3TextStream::left);
+  out.setf(QTextStream::dec | QTextStream::left);
 
   // print document header
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl
