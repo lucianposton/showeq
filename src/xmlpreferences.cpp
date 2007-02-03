@@ -21,12 +21,12 @@
 
 #include <qfile.h>
 #include <qnamespace.h>
-#include <qaccel.h>
+#include <q3accel.h>
 #include <qdir.h>
 #include <qfileinfo.h>
 #include <qregexp.h>
 #include <qkeysequence.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 
 const float seqPrefVersion = 1.0;
@@ -107,7 +107,7 @@ void XMLPreferences::loadPreferences(const QString& filename,
 {
   QDomDocument doc(seqPrefName);
   QFile f(filename);
-  if (!f.open(IO_ReadOnly))
+  if (!f.open(QIODevice::ReadOnly))
   {
     qWarning("Unable to open file: %s!", 
 	     (const char*)filename);
@@ -276,7 +276,7 @@ void XMLPreferences::savePreferences(const QString& filename,
   QDomDocument doc;
   QFile f(filename);
   bool loaded = false;
-  if (f.open(IO_ReadOnly))
+  if (f.open(QIODevice::ReadOnly))
   {
     QString errorMsg;
     int errorLine = 0;
@@ -327,7 +327,7 @@ void XMLPreferences::savePreferences(const QString& filename,
 
   sectionList = docElem.elementsByTagName("section");
 
-  QDictIterator<PreferenceDict> sdit(dict);
+  Q3DictIterator<PreferenceDict> sdit(dict);
   for (; sdit.current(); ++sdit)
   {
     QDomElement section;
@@ -369,7 +369,7 @@ void XMLPreferences::savePreferences(const QString& filename,
     }
 
     // iterate over all the properties in the section
-    QDictIterator<QVariant> pdit(*sectionDict);
+    Q3DictIterator<QVariant> pdit(*sectionDict);
     for (; pdit.current(); ++pdit)
     {
       QDomElement property;
@@ -450,21 +450,21 @@ void XMLPreferences::savePreferences(const QString& filename,
   }
 
   // write the modified DOM to disk
-  if (!f.open(IO_WriteOnly))
+  if (!f.open(QIODevice::WriteOnly))
   {
     qWarning("Unable to open file for writing: %s!", 
 	     (const char*)filename);
   }
 
   // open a Text Stream on the file
-  QTextStream out(&f);
+  Q3TextStream out(&f);
 
   // make sure stream is UTF8 encoded
-  out.setEncoding(QTextStream::UnicodeUTF8);
+  out.setEncoding(Q3TextStream::UnicodeUTF8);
 
   // save the document to the text stream
   QString docText;
-  QTextStream docTextStream(&docText, IO_WriteOnly);
+  Q3TextStream docTextStream(&docText, QIODevice::WriteOnly);
   doc.save(docTextStream, 4);
 
   // put newlines after comments (which unfortunately Qt's DOM doesn't track)
@@ -684,7 +684,7 @@ int XMLPreferences::getPrefKey(const QString& inName,
 			       Persistence pers)
 {
   return getPrefKey(inName, inSection, 
-		    QAccel::stringToKey(def) & ~Qt::UNICODE_ACCEL, pers);
+		    Q3Accel::stringToKey(def) & ~Qt::UNICODE_ACCEL, pers);
 }
 
 int XMLPreferences::getPrefKey(const QString& inName, 
@@ -707,7 +707,7 @@ int XMLPreferences::getPrefKey(const QString& inName,
       break;
     case QVariant::String:
       // convert it to a key
-      key = QAccel::stringToKey(preference->toString());
+      key = Q3Accel::stringToKey(preference->toString());
       break;
     case QVariant::Int:
     case QVariant::UInt:

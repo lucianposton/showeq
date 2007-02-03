@@ -21,7 +21,7 @@
 #include <qdir.h>
 #include <qfile.h>
 #include <qfileinfo.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 
 SpawnPoint::SpawnPoint(uint16_t spawnID, 
@@ -181,7 +181,7 @@ void SpawnMonitor::newSpawn(const Item* item)
 
 void SpawnMonitor::killSpawn(const Item* killedSpawn)
 {
-  QAsciiDictIterator<SpawnPoint>		it( m_points );
+  Q3AsciiDictIterator<SpawnPoint>		it( m_points );
   
   SpawnPoint*		sp;
   while ( ( sp = it.current() ) )
@@ -285,15 +285,15 @@ void SpawnMonitor::saveSpawnPoints()
   QString newName = fileName + ".new";
   QFile spFile( newName );
   
-  if (!spFile.open(IO_WriteOnly))
+  if (!spFile.open(QIODevice::WriteOnly))
   {
     seqWarn("Failed to open %s for writing", (const char*)newName);
     return;
   }
   
-  QTextStream output(&spFile);
+  Q3TextStream output(&spFile);
   
-  QAsciiDictIterator<SpawnPoint> it( m_points );
+  Q3AsciiDictIterator<SpawnPoint> it( m_points );
   SpawnPoint* sp;
   
   while ((sp = it.current()))
@@ -360,13 +360,13 @@ void SpawnMonitor::loadSpawnPoints()
 
   QFile spFile(fileName);
   
-  if (!spFile.open(IO_ReadOnly))
+  if (!spFile.open(QIODevice::ReadOnly))
   {
     seqWarn( "Can't open spawn point file %s", (const char*)fileName );
     return;
   }
   
-  QTextStream input( &spFile );
+  Q3TextStream input( &spFile );
   
   int16_t x, y, z;
   unsigned long diffTime;

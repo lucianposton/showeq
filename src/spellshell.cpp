@@ -19,6 +19,8 @@
 #include "packetcommon.h"
 #include "spawn.h"
 #include "diagnosticmessages.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 //#define DIAG_SPELLSHELL 1 
 
@@ -125,7 +127,7 @@ SpellShell::~SpellShell()
 SpellItem* SpellShell::findSpell(uint16_t spellId, 
 				 uint16_t targetId, const QString& targetName)
 {
-  for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+  for(Q3ValueList<SpellItem*>::Iterator it = m_spellList.begin();
       it != m_spellList.end(); 
       it++) 
   {
@@ -143,7 +145,7 @@ SpellItem* SpellShell::findSpell(uint16_t spellId,
 
 SpellItem* SpellShell::findSpell(int spell_id)
 {
-  for(QValueList<SpellItem*>::Iterator it = m_spellList.begin(); 
+  for(Q3ValueList<SpellItem*>::Iterator it = m_spellList.begin(); 
       it != m_spellList.end(); 
       it++)
   {      
@@ -161,7 +163,7 @@ void SpellShell::clear()
    emit clearSpells();
 
    m_lastPlayerSpell = 0;
-   for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+   for(Q3ValueList<SpellItem*>::Iterator it = m_spellList.begin();
          it != m_spellList.end(); it++)
       delete (*it);
 
@@ -441,7 +443,7 @@ void SpellShell::spellMessage(QString &str)
 
    if (b) {
       // Can't really tell which spell/target, so just delete the last one
-      for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+      for(Q3ValueList<SpellItem*>::Iterator it = m_spellList.begin();
          it != m_spellList.end(); it++) {
          if ((*it)->spellName() == spell) {
             (*it)->setDuration(0);
@@ -455,7 +457,7 @@ void SpellShell::zoneChanged(void)
 {
   m_lastPlayerSpell = 0;
   SpellItem* spell;
-  for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+  for(Q3ValueList<SpellItem*>::Iterator it = m_spellList.begin();
       it != m_spellList.end(); it++) 
   {
     spell = *it;
@@ -484,7 +486,7 @@ void SpellShell::killSpawn(const Item* deceased)
             m_lastPlayerSpell = 0;
         }
 
-        QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+        Q3ValueList<SpellItem*>::Iterator it = m_spellList.begin();
         while(it != m_spellList.end())
         {
             spell = *it;
@@ -512,7 +514,7 @@ void SpellShell::timeout()
 {
   SpellItem* spell;
 
-  QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+  Q3ValueList<SpellItem*>::Iterator it = m_spellList.begin();
   while (it != m_spellList.end()) 
   {
     spell = *it;

@@ -18,6 +18,10 @@
 #include <qspinbox.h>
 #include <qtimer.h>
 #include <qlayout.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3PopupMenu>
+#include <Q3VBoxLayout>
 
 SpawnListWindow2::SpawnListWindow2(Player* player, 
 				   SpawnShell* spawnShell,
@@ -50,8 +54,8 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   int fpm = pSEQPrefs->getPrefInt("FPM", preferenceName(), 10);
   m_delay = 60000L / fpm;
 
-  QBoxLayout* vLayout = new QVBoxLayout(boxLayout());
-  QHBoxLayout* hLayout= new QHBoxLayout(vLayout);
+  Q3BoxLayout* vLayout = new Q3VBoxLayout(boxLayout());
+  Q3HBoxLayout* hLayout= new Q3HBoxLayout(vLayout);
 
   // create the spawn list combo box
   m_categoryCombo = new QComboBox(false, this, "spawnlistcombo");
@@ -116,12 +120,12 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   m_timer = new QTimer(this, "spawnlist2timer");
 
   // connect a QListView signal to ourselves
-  connect(m_spawnList, SIGNAL(selectionChanged(QListViewItem*)),
-	  this, SLOT(selChanged(QListViewItem*)));
-  connect (m_spawnList, SIGNAL(mouseButtonPressed(int, QListViewItem*, const QPoint&, int)),
-	   this, SLOT(mousePressEvent(int, QListViewItem*, const QPoint&, int)));
-  connect (m_spawnList, SIGNAL(doubleClicked(QListViewItem*)),
-	   this, SLOT(mouseDoubleClickEvent(QListViewItem*)));
+  connect(m_spawnList, SIGNAL(selectionChanged(Q3ListViewItem*)),
+	  this, SLOT(selChanged(Q3ListViewItem*)));
+  connect (m_spawnList, SIGNAL(mouseButtonPressed(int, Q3ListViewItem*, const QPoint&, int)),
+	   this, SLOT(mousePressEvent(int, Q3ListViewItem*, const QPoint&, int)));
+  connect (m_spawnList, SIGNAL(doubleClicked(Q3ListViewItem*)),
+	   this, SLOT(mouseDoubleClickEvent(Q3ListViewItem*)));
 
   // connect SpawnList slots to SpawnShell signals
   connect(m_spawnShell, SIGNAL(addItem(const Item *)),
@@ -204,7 +208,7 @@ QString SpawnListWindow2::filterString(const Item* item)
    return text;
 }
 
-QPopupMenu* SpawnListWindow2::menu()
+Q3PopupMenu* SpawnListWindow2::menu()
 {
   if (m_menu != NULL)
   {
@@ -483,7 +487,7 @@ void SpawnListWindow2::playerLevelChanged(uint8_t)
   if (m_currentCategory == NULL)
     return;
 
-  QListViewItemIterator it(m_spawnList);
+  Q3ListViewItemIterator it(m_spawnList);
   SpawnListItem* slitem = NULL;
   const Item* item;
 
@@ -507,7 +511,7 @@ void SpawnListWindow2::setPlayer(int16_t x, int16_t y, int16_t z,
 			   int16_t deltaX, int16_t deltaY, int16_t deltaZ, 
 			   int32_t degrees)
 {
-  QListViewItemIterator it(m_spawnList);
+  Q3ListViewItemIterator it(m_spawnList);
   SpawnListItem* litem;
   QString buff;
 
@@ -732,7 +736,7 @@ void SpawnListWindow2::categorySelected(int index)
   populateSpawns();
 }
 
-void SpawnListWindow2::selChanged(QListViewItem* litem)
+void SpawnListWindow2::selChanged(Q3ListViewItem* litem)
 {
   if (litem == NULL)
     return;
@@ -744,7 +748,7 @@ void SpawnListWindow2::selChanged(QListViewItem* litem)
     emit spawnSelected(m_selectedItem);
 }
 
-void SpawnListWindow2::mousePressEvent(int button, QListViewItem* litem,
+void SpawnListWindow2::mousePressEvent(int button, Q3ListViewItem* litem,
 				       const QPoint &point, int col)
 {
   // Left Mouse Button Events
@@ -766,7 +770,7 @@ void SpawnListWindow2::mousePressEvent(int button, QListViewItem* litem,
   }
 }
 
-void SpawnListWindow2::mouseDoubleClickEvent(QListViewItem* litem)
+void SpawnListWindow2::mouseDoubleClickEvent(Q3ListViewItem* litem)
 {
    //print spawn info to console
   if (litem == NULL)
@@ -831,14 +835,14 @@ void SpawnListWindow2::toggle_keepSelectedVisible(int id)
 			 m_keepSelectedVisible);
 }
 
-void SpawnListWindow2::setSelectedQuiet(QListViewItem* item, bool selected)
+void SpawnListWindow2::setSelectedQuiet(Q3ListViewItem* item, bool selected)
 {
   if (!item || (item->isSelected() == selected) ||
       !item->isSelectable())
     return;
 
   // get the old selection
-  QListViewItem *oldItem = m_spawnList->selectedItem();
+  Q3ListViewItem *oldItem = m_spawnList->selectedItem();
 
   // unselect the old selected item if any
   if ((oldItem != item) && (oldItem != NULL) && (oldItem->isSelected()))

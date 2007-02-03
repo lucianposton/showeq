@@ -9,7 +9,7 @@
 #define EQSTATLIST_H
 
 #include <qwidget.h>
-#include <qlistview.h>
+#include <q3listview.h>
 
 #include "seqwindow.h"
 #include "seqlistview.h"
@@ -51,7 +51,7 @@ class StatList : public SEQListView
    // the player this skill list is monitoring
    Player* m_player;
 
-   QListViewItem* m_statList[LIST_MAXLIST]; 
+   Q3ListViewItem* m_statList[LIST_MAXLIST]; 
 
    uint32_t  m_guessMaxMana;
    bool m_showStat[LIST_MAXLIST];

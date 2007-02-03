@@ -28,9 +28,9 @@
 #include <stdio.h>
 #include <math.h>
 
-#include <qintdict.h>
+#include <q3intdict.h>
 #include <qtimer.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 #include "everquest.h"
 #include "spawn.h"
@@ -55,9 +55,9 @@ const int MAX_DEAD_SPAWNIDS = 50;
 
 //----------------------------------------------------------------------
 // type definitions
-typedef QIntDict<Item> ItemMap;
-typedef QIntDictIterator<Item> ItemIterator;
-typedef QIntDictIterator<Item> ItemConstIterator;
+typedef Q3IntDict<Item> ItemMap;
+typedef Q3IntDictIterator<Item> ItemIterator;
+typedef Q3IntDictIterator<Item> ItemConstIterator;
 
 //----------------------------------------------------------------------
 // SpawnShell
@@ -78,7 +78,7 @@ public:
 			       double& minDistance);
    Spawn* findSpawnByName(const QString& name);
 
-   void dumpSpawns(spawnItemType type, QTextStream& out);
+   void dumpSpawns(spawnItemType type, Q3TextStream& out);
    FilterMgr* filterMgr(void) { return &m_filterMgr; }
    const ItemMap& getConstMap(spawnItemType type) const;
    const ItemMap& spawns(void) const;

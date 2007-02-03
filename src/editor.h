@@ -11,13 +11,16 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-#include <qmainwindow.h>
+#include <q3mainwindow.h>
+//Added by qt3to4:
+#include <QCloseEvent>
+#include <Q3PopupMenu>
 
-class QMultiLineEdit;
-class QToolBar;
-class QPopupMenu;
+class Q3MultiLineEdit;
+class Q3ToolBar;
+class Q3PopupMenu;
 
-class EditorWindow: public QMainWindow
+class EditorWindow: public Q3MainWindow
 {
     Q_OBJECT
 public:
@@ -35,8 +38,8 @@ private slots:
     void saveAs();
 
 private:
-    QMultiLineEdit *e;
-    QToolBar *fileTools;
+    Q3MultiLineEdit *e;
+    Q3ToolBar *fileTools;
     QString filename;
 };
 

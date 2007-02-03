@@ -12,9 +12,11 @@
 
 #include <qobject.h>
 #include <qmetaobject.h>
-#include <qstrlist.h>
+#include <q3strlist.h>
 #include <qfile.h>
 #include <qxml.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 #include <map>
 
@@ -112,7 +114,7 @@ void EQPacketTypeDB::list(void) const
   seqInfo("EQPacketTypeDB contains %d types (in %d buckets)",
 	  m_typeSizeDict.count(), m_typeSizeDict.size());
 
-  QAsciiDictIterator<size_t> it(m_typeSizeDict);
+  Q3AsciiDictIterator<size_t> it(m_typeSizeDict);
 
   while (it.current())
   {
@@ -306,17 +308,17 @@ bool EQPacketOPCodeDB::save(const QString& filename)
   QFile file(filename);
 
   // open the file for write only
-  if (!file.open(IO_WriteOnly))
+  if (!file.open(QIODevice::WriteOnly))
     return false;
 
   // create a QTextStream object on the QFile object
-  QTextStream out(&file);
+  Q3TextStream out(&file);
   
   // set the output encoding to be UTF8
-  out.setEncoding(QTextStream::UnicodeUTF8);
+  out.setEncoding(Q3TextStream::UnicodeUTF8);
 
   // set the number output to be left justified decimal
-  out.setf(QTextStream::dec | QTextStream::left);
+  out.setf(Q3TextStream::dec | Q3TextStream::left);
 
   // print document header
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl
@@ -333,7 +335,7 @@ bool EQPacketOPCodeDB::save(const QString& filename)
   OrderedMap orderedOPCodes;
 
   // iterate over all the opcodes, inserting them into the ordered map
-  QIntDictIterator<EQPacketOPCode> it(m_opcodes);
+  Q3IntDictIterator<EQPacketOPCode> it(m_opcodes);
   while ((currentOPCode = it.current()) != NULL)
   {
     // insert into the ordered opcode map
@@ -345,7 +347,7 @@ bool EQPacketOPCodeDB::save(const QString& filename)
   }
 
   OrderedMap::iterator oit;
-  QCString opcodeString(256);
+  Q3CString opcodeString(256);
   static const char* dirStrs[] = { "client", "server", "both", };
   static const char* sztStrs[] = { "none", "match", "modulus", };
 
@@ -373,11 +375,11 @@ bool EQPacketOPCodeDB::save(const QString& filename)
 	 cit != comments.end(); ++cit)
       out << indent << "<comment>" << *cit << "</comment>" << endl;
 
-    QCString dirStr;
-    QCString sztStr;
+    Q3CString dirStr;
+    Q3CString sztStr;
 
     // iterate over the payloads
-    QPtrListIterator<EQPacketPayload> pit(*currentOPCode);
+    Q3PtrListIterator<EQPacketPayload> pit(*currentOPCode);
     while ((currentPayload = pit.current()) != 0)
     {
       // output the payload
@@ -429,7 +431,7 @@ void EQPacketOPCodeDB::list(void) const
   EQPacketPayload* currentPayload;
 
   // iterate over all the opcodes
-  QIntDictIterator<EQPacketOPCode> it(m_opcodes);
+  Q3IntDictIterator<EQPacketOPCode> it(m_opcodes);
   while ((current = it.current()) != NULL)
   {
     fprintf(stderr, "\tkey=%04lx opcode=%04x",
@@ -455,7 +457,7 @@ void EQPacketOPCodeDB::list(void) const
     
     fprintf(stderr, "\t\t%d payload(s)\n", current->count());
     
-    QPtrListIterator<EQPacketPayload> pit(*current);
+    Q3PtrListIterator<EQPacketPayload> pit(*current);
     while ((currentPayload = pit.current()) != 0)
     {
       seqInfo("\t\t\tdir=%d typename=%s size=%d sizechecktype=%d",

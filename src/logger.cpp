@@ -55,7 +55,7 @@ bool SEQLogger::open()
  
   m_errOpen = false;
 
-  if (!m_file.open(IO_Append | IO_WriteOnly, m_fp))
+  if (!m_file.open(QIODevice::Append | QIODevice::WriteOnly, m_fp))
     return false;
   
   m_out.setDevice(&m_file);

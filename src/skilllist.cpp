@@ -103,7 +103,7 @@ void SkillList::addSkill (int skillId, int value)
    */
   if (!m_skillList[skillId])
     m_skillList[skillId] =
-      new QListViewItem (this, skill_name (skillId), str);
+      new Q3ListViewItem (this, skill_name (skillId), str);
   else
     m_skillList[skillId]->setText (1, str);
 }
@@ -126,7 +126,7 @@ void SkillList::changeSkill (int skillId, int value)
   // create skill entry if needed or set the value of the existing item
   if (!m_skillList[skillId])
     m_skillList[skillId] =
-      new QListViewItem (this, skill_name (skillId), str);
+      new Q3ListViewItem (this, skill_name (skillId), str);
   else
     m_skillList[skillId]->setText (1, str);
 }
@@ -173,7 +173,7 @@ void SkillList::addLanguage (int langId, int value)
   // add it to the list
   if (!m_languageList[langId])
     m_languageList[langId] =
-      new QListViewItem (this, language_name(langId), str);
+      new Q3ListViewItem (this, language_name(langId), str);
   else
       m_languageList[langId]->setText (1, str);
 }
@@ -201,7 +201,7 @@ void SkillList::changeLanguage (int langId, int value)
   // create language entry if needed or set the value of the existing item
   if (!m_languageList[langId])
     m_languageList[langId] =
-      new QListViewItem (this, language_name (langId), str);
+      new Q3ListViewItem (this, language_name (langId), str);
   else
     m_languageList[langId]->setText (1, str);
 }

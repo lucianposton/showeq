@@ -20,9 +20,12 @@
 #include "seqwindow.h"
 #include "seqlistview.h" 
 
-#include <qlistview.h>
-#include <qptrdict.h>
+#include <q3listview.h>
+#include <q3ptrdict.h>
 #include <qstring.h>
+//Added by qt3to4:
+#include <QLabel>
+#include <Q3PopupMenu>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -33,7 +36,7 @@ class GuildShell;
 
 class QLabel;
 class QLineEdit;
-class QPopupMenu;
+class Q3PopupMenu;
 
 //--------------------------------------------------
 // constants
@@ -50,10 +53,10 @@ const int tGuildListColMaxCols = 9;
 
 //----------------------------------------------------------------------
 // GuildListItem
-class GuildListItem : public QListViewItem
+class GuildListItem : public Q3ListViewItem
 {
  public:
-  GuildListItem(QListView* parent,
+  GuildListItem(Q3ListView* parent,
 		const GuildMember* member, 
 		const GuildShell* guildShell);
   virtual ~GuildListItem();
@@ -61,7 +64,7 @@ class GuildListItem : public QListViewItem
    virtual void paintCell( QPainter *p, const QColorGroup &cg,
                            int column, int width, int alignment );
 
-   virtual int compare(QListViewItem *i, int col, bool ascending) const;
+   virtual int compare(Q3ListViewItem *i, int col, bool ascending) const;
 
    void update(const GuildShell* guildShell);
 
@@ -85,7 +88,7 @@ class GuildListWindow : public SEQWindow
 		  QWidget* parent = 0, const char* name = 0);
   ~GuildListWindow();
 
-  virtual QPopupMenu* menu();
+  virtual Q3PopupMenu* menu();
 
  public slots: 
   void cleared();
@@ -113,8 +116,8 @@ class GuildListWindow : public SEQWindow
   QLabel* m_guildName;
   QLabel* m_guildTotals;
   SEQListView* m_guildList;
-  QPtrDict<GuildListItem> m_guildListItemDict;
-  QPopupMenu* m_menu;
+  Q3PtrDict<GuildListItem> m_guildListItemDict;
+  Q3PopupMenu* m_menu;
   int m_id_guildList_Cols[tGuildListColMaxCols];
 
   uint32_t m_membersOn;

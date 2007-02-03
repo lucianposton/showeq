@@ -15,6 +15,8 @@
 #include "diagnosticmessages.h"
 
 #include <stdio.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 //----------------------------------------------------------------------
 // Macros
@@ -143,7 +145,7 @@ bool EQPacketStream::connect2(const QString& opcodeName,
   if (!dispatch)
   {
     // construct a name for the dispatch
-    QCString dispatchName(256);
+    Q3CString dispatchName(256);
     dispatchName.sprintf("PacketDispatch:%s:%s:%d:%s:%d",
 			 (const char*)name(), (const char*)opcodeName,
 			 payload->dir(), (const char*)payload->typeName(), 

@@ -23,8 +23,10 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qfile.h>
-#include <qptrqueue.h>
+#include <q3ptrqueue.h>
 #include <qregexp.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 static inline int16_t min(const int16_t& __a,  const int16_t& __b)
 {
@@ -242,14 +244,14 @@ void Spells::loadSpells(const QString& spellsFileName)
   QFile spellsFile(spellsFileName);
 
   // open the spell file if possible
-  if (spellsFile.open(IO_ReadOnly))
+  if (spellsFile.open(QIODevice::ReadOnly))
   {
     // QPtrQueue to temporarily store our Spells until we know the maxSpell
-    QPtrQueue<Spell> spellQueue;
+    Q3PtrQueue<Spell> spellQueue;
     spellQueue.setAutoDelete(false);
     
     // allocate memory in a QCString to hold the entire file contents
-    QCString textData(spellsFile.size() + 1);
+    Q3CString textData(spellsFile.size() + 1);
 
     // read the file as one big chunk
     spellsFile.readBlock(textData.data(), textData.size());

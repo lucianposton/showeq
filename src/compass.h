@@ -26,6 +26,8 @@
 
 #include <qwidget.h>
 #include <qsize.h>
+//Added by qt3to4:
+#include <QPaintEvent>
 
 ///////////////////////////////////////////
 // type definitions

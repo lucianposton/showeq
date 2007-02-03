@@ -9,6 +9,9 @@
 
 #include <qfont.h>
 #include <qlayout.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
+#include <QLabel>
 
 #include "main.h"
 #include "compassframe.h"
@@ -16,10 +19,10 @@
 CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
   : SEQWindow("Compass", "ShowEQ - Compass", parent, name)
 {
-  QVBoxLayout* layout = new QVBoxLayout(boxLayout());
+  Q3VBoxLayout* layout = new Q3VBoxLayout(boxLayout());
   m_compass = new Compass (this, "compass");
   layout->addWidget(m_compass);
-  QHBox* coordsbox = new QHBox(this);
+  Q3HBox* coordsbox = new Q3HBox(this);
   layout->addWidget(coordsbox);
   m_compass->setFixedWidth(120);
   m_compass->setFixedHeight(120);

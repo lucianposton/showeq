@@ -20,7 +20,7 @@
 #include <qlist.h>
 #include <qregexp.h>
 #include <qxml.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 #include <map>
 
@@ -47,7 +47,7 @@ public:
   FilterItem(const QString& filterPattern, bool caseSensitive, 
 	     uint8_t minLevel, uint8_t maxLevel);
   ~FilterItem(void);
-   bool save(QString& indent, QTextStream& out);
+   bool save(QString& indent, Q3TextStream& out);
 
   bool isFiltered(const QString& filterString, uint8_t level) const;
 
@@ -76,7 +76,7 @@ public:
    Filter(bool caseSensitive = 0);
    ~Filter();
 
-   bool save(QString& indent, QTextStream& out);
+   bool save(QString& indent, Q3TextStream& out);
    bool isFiltered(const QString& filterString, uint8_t level);
    bool addFilter(const QString& filterPattern);
    bool addFilter(const QString& filterPattern, uint8_t minLevel, uint8_t maxLevel);

@@ -18,7 +18,7 @@
 
 #include <qobject.h>
 #include <qstring.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -26,7 +26,7 @@ class DateTimeMgr;
 
 //----------------------------------------------------------------------
 // MessageList
-typedef QValueList<MessageEntry> MessageList;
+typedef Q3ValueList<MessageEntry> MessageList;
 
 //----------------------------------------------------------------------
 // Messages

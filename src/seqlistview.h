@@ -15,17 +15,17 @@
 #ifndef SEQLISTVIEW_H
 #define SEQLISTVIEW_H
 
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qstring.h>
 #include <qstringlist.h>
 
-class SEQListView : public QListView
+class SEQListView : public Q3ListView
 {
    Q_OBJECT
 
  public:
   SEQListView(const QString prefName, 
-	      QWidget* parent = 0, const char* name = 0, WFlags f = 0);
+	      QWidget* parent = 0, const char* name = 0, Qt::WFlags f = 0);
   ~SEQListView();
 
   const QString& preferenceName() const { return m_preferenceName; }

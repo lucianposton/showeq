@@ -13,9 +13,9 @@
 #ifndef SPELLLIST_H
 #define SPELLLIST_H
 
-#include <qvaluelist.h>
-#include <qlistview.h>
-#include <qpopupmenu.h>
+#include <q3valuelist.h>
+#include <q3listview.h>
+#include <q3popupmenu.h>
 #include <time.h>
 #include <sys/time.h>
 
@@ -33,11 +33,11 @@
 #define SPELLCOL_CASTTIME   6
 #define SPELLCOL_DURATION   7
 
-class SpellListItem : public QListViewItem 
+class SpellListItem : public Q3ListViewItem 
 {
  public:
-  SpellListItem(QListViewItem *parent);
-  SpellListItem(QListView *parent = NULL);
+  SpellListItem(Q3ListViewItem *parent);
+  SpellListItem(Q3ListView *parent = NULL);
   virtual void paintCell( QPainter *p, const QColorGroup &cg,
 			  int column, int width, int alignment );
   const QColor textColor();
@@ -59,7 +59,7 @@ class SpellList : public SEQListView
   Q_OBJECT
  public:
   SpellList(SpellShell* sshell, QWidget *parent = 0, const char *name = 0);
-  QPopupMenu* menu();
+  Q3PopupMenu* menu();
   void SelectItem(const SpellItem *item);
   SpellListItem* Selected();
   SpellListItem* InsertSpell(const SpellItem *item);
@@ -83,8 +83,8 @@ class SpellList : public SEQListView
   void selectSpell(const SpellItem *);
   void clear();
 
-  void mouseDoubleClicked(QListViewItem *item);
-  void rightButtonClicked(QListViewItem *, const QPoint&, int);
+  void mouseDoubleClicked(Q3ListViewItem *item);
+  void rightButtonClicked(Q3ListViewItem *, const QPoint&, int);
   void activated(int);
 
  protected slots:  
@@ -93,9 +93,9 @@ class SpellList : public SEQListView
  private:
   void selectAndOpen(SpellListItem *);
   SpellShell* m_spellShell;
-  QValueList<QString> m_categoryList;
-  QValueList<SpellListItem *> m_spellList;
-  QPopupMenu *m_menu;
+  Q3ValueList<QString> m_categoryList;
+  Q3ValueList<SpellListItem *> m_spellList;
+  Q3PopupMenu *m_menu;
   
   int mid_spellName, mid_spellId;
   int mid_casterId, mid_casterName;
@@ -110,7 +110,7 @@ class SpellListWindow : public SEQWindow
  public:
   SpellListWindow(SpellShell* sshell, QWidget* parent = 0, const char* name = 0);
   ~SpellListWindow();
-  virtual QPopupMenu* menu();
+  virtual Q3PopupMenu* menu();
 
   SpellList* spellList() { return m_spellList; }
 

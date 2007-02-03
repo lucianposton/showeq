@@ -25,7 +25,7 @@
 #include <qrect.h>
 #include <qsize.h>
 #include <qsizepolicy.h>
-#include <qaccel.h>
+#include <q3accel.h>
 #include <qcursor.h>
 #include <qstringlist.h>
 
@@ -200,7 +200,7 @@ bool DomConvenience::elementToVariant(const QDomElement& e,
     int key;
     if (e.hasAttribute("sequence"))
     {
-      key = QAccel::stringToKey(e.attribute("sequence"));
+      key = Q3Accel::stringToKey(e.attribute("sequence"));
 
       // fix the key code (deal with Qt brain death)
       key &= ~Qt::UNICODE_ACCEL;
@@ -376,18 +376,18 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
     {
       e.setTagName("color");
       QColor color = v.toColor();
-      e.setAttribute("red", color.red());
-      e.setAttribute("green", color.green());
-      e.setAttribute("blue", color.blue());
+      e.setAttribute("red", color.Qt::red());
+      e.setAttribute("green", color.Qt::green());
+      e.setAttribute("blue", color.Qt::blue());
     }
     break;
   case QVariant::Pen:
     {
       e.setTagName("pen");
       QPen pen = v.toPen();
-      e.setAttribute("red", pen.color().red());
-      e.setAttribute("green", pen.color().green());
-      e.setAttribute("blue", pen.color().blue());
+      e.setAttribute("red", pen.color().Qt::red());
+      e.setAttribute("green", pen.color().Qt::green());
+      e.setAttribute("blue", pen.color().Qt::blue());
       e.setAttribute("style", pen.style());
       e.setAttribute("cap", pen.capStyle());
       e.setAttribute("join", pen.joinStyle());
@@ -397,9 +397,9 @@ bool DomConvenience::variantToElement(const QVariant& v, QDomElement& e)
     {
       e.setTagName("brush");
       QBrush brush = v.toBrush();
-      e.setAttribute("red", brush.color().red());
-      e.setAttribute("green", brush.color().green());
-      e.setAttribute("blue", brush.color().blue());
+      e.setAttribute("red", brush.color().Qt::red());
+      e.setAttribute("green", brush.color().Qt::green());
+      e.setAttribute("blue", brush.color().Qt::blue());
       e.setAttribute("style", brush.style());
     }
     break;

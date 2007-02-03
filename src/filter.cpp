@@ -197,7 +197,7 @@ FilterItem::~FilterItem(void)
 {
 }
 
-bool FilterItem::save(QString& indent, QTextStream& out)
+bool FilterItem::save(QString& indent, Q3TextStream& out)
 {
   out << indent << "<oldfilter>";
 
@@ -289,7 +289,7 @@ bool Filter::isFiltered(const QString& filterString, uint8_t level)
 //
 // parses the filter file and builds filter list
 //
-bool Filter::save(QString& indent, QTextStream& out)
+bool Filter::save(QString& indent, Q3TextStream& out)
 {
   FilterItem *re;
 
@@ -512,17 +512,17 @@ bool Filters::save(const QString& filename) const
   QFile file(filename);
 
   // open the file for write only
-  if (!file.open(IO_WriteOnly))
+  if (!file.open(QIODevice::WriteOnly))
     return false;
 
   // create a QTextStream object on the QFile object
-  QTextStream out(&file);
+  Q3TextStream out(&file);
   
   // set the output encoding to be UTF8
-  out.setEncoding(QTextStream::UnicodeUTF8);
+  out.setEncoding(Q3TextStream::UnicodeUTF8);
 
   // set the number output to be left justified decimal
-  out.setf(QTextStream::dec | QTextStream::left);
+  out.setf(Q3TextStream::dec | Q3TextStream::left);
 
   // print document header
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl

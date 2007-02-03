@@ -20,7 +20,7 @@
 
 #include <qfile.h>
 #include <qdatastream.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 GuildMgr::GuildMgr(QString fn, QObject* parent, const char* name)
   : QObject(parent, name)
@@ -62,7 +62,7 @@ void GuildMgr::writeGuildList(const worldGuildListStruct* gls, size_t len)
      }
   }
 
-  if(!guildsfile.open(IO_WriteOnly))
+  if(!guildsfile.open(QIODevice::WriteOnly))
     seqWarn("GuildMgr: Could not open %s for writing, unable to replace with server data!",
              guildsFileName.latin1());
 
@@ -79,7 +79,7 @@ void GuildMgr::readGuildList()
   QFile guildsfile(guildsFileName);
 
   m_guildMap.clear();
-  if (guildsfile.open(IO_ReadOnly))
+  if (guildsfile.open(QIODevice::ReadOnly))
   {
     worldGuildListStruct tmp;
      if (guildsfile.size() != sizeof(tmp.guilds))
@@ -110,7 +110,7 @@ void GuildMgr::readGuildList()
 void GuildMgr::guildList2text(QString fn)
 {
   QFile guildsfile(fn);
-  QTextStream guildtext(&guildsfile);
+  Q3TextStream guildtext(&guildsfile);
 
     if (guildsfile.exists()) {
          if (!guildsfile.remove()) {
@@ -120,7 +120,7 @@ void GuildMgr::guildList2text(QString fn)
         }
    }
 
-   if (!guildsfile.open(IO_WriteOnly)) {
+   if (!guildsfile.open(QIODevice::WriteOnly)) {
      seqWarn("GuildMgr: Could not open %s for writing, unable to process request!",
               fn.latin1());
       return;

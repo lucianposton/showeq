@@ -14,17 +14,20 @@
 
 #include <qpainter.h>
 #include <qlayout.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PopupMenu>
 
 #include "spelllist.h"
 #include "main.h"
 
-SpellListItem::SpellListItem(QListViewItem *parent) : QListViewItem(parent)
+SpellListItem::SpellListItem(Q3ListViewItem *parent) : Q3ListViewItem(parent)
 {
    m_textColor = Qt::black;
    m_item = NULL;
 }
 
-SpellListItem::SpellListItem(QListView *parent) : QListViewItem(parent)
+SpellListItem::SpellListItem(Q3ListView *parent) : Q3ListViewItem(parent)
 {
    m_textColor = Qt::black;
    m_item = NULL;
@@ -46,7 +49,7 @@ void SpellListItem::paintCell( QPainter *p, const QColorGroup &cg,
   QFont font = this->listView()->font();
   p->setFont(font);
   
-  QListViewItem::paintCell( p, newCg, column, width, alignment );
+  Q3ListViewItem::paintCell( p, newCg, column, width, alignment );
 }
 
 const QColor SpellListItem::textColor()
@@ -126,19 +129,19 @@ SpellList::SpellList(SpellShell* sshell, QWidget *parent, const char *name)
 
    restoreColumns();
 
-   connect (this, SIGNAL(doubleClicked(QListViewItem*)),
-	    this, SLOT(mouseDoubleClicked(QListViewItem*)));
-   connect(this, SIGNAL(rightButtonClicked(QListViewItem*, const QPoint&, int)),
-	   this, SLOT(rightButtonClicked(QListViewItem*, const QPoint&, int)));
+   connect (this, SIGNAL(doubleClicked(Q3ListViewItem*)),
+	    this, SLOT(mouseDoubleClicked(Q3ListViewItem*)));
+   connect(this, SIGNAL(rightButtonClicked(Q3ListViewItem*, const QPoint&, int)),
+	   this, SLOT(rightButtonClicked(Q3ListViewItem*, const QPoint&, int)));
 }
 
-QPopupMenu* SpellList::menu()
+Q3PopupMenu* SpellList::menu()
 {
   // if the menu already exists, return it
   if (m_menu)
     return m_menu;
   
-  m_menu = new QPopupMenu(this);
+  m_menu = new Q3PopupMenu(this);
   m_menu->setCheckable(true);
   
   mid_spellName = m_menu->insertItem("Spell Name");
@@ -181,7 +184,7 @@ SpellListItem* SpellList::InsertSpell(const SpellItem *item)
    if (!item)
       return NULL;
 
-   QValueList<SpellListItem *>::Iterator it;
+   Q3ValueList<SpellListItem *>::Iterator it;
    for(it = m_spellList.begin(); it != m_spellList.end(); it++) {
       if ((*it)->item() == item)
          break;
@@ -243,7 +246,7 @@ QColor SpellList::pickSpellColor(const SpellItem *item, QColor def) const
 SpellListItem* SpellList::Find(const SpellItem *item)
 {
    if (item) {
-      QValueList<SpellListItem*>::Iterator it;
+      Q3ValueList<SpellListItem*>::Iterator it;
       for(it = m_spellList.begin(); it != m_spellList.end(); ++it) {
          if ((*it)->item() == item)
             return (*it);
@@ -286,14 +289,14 @@ void SpellList::changeSpell(const SpellItem *item)
 
 void SpellList::clear()
 {
-   QListView::clear();
+   Q3ListView::clear();
    m_spellList.clear();
    // rebuild categories...
 }
 
 void SpellList::selectAndOpen(SpellListItem *item)
 {
-   QListViewItem *i = item;
+   Q3ListViewItem *i = item;
    while(i) {
       item->setOpen(true);
       item = (SpellListItem *)item->parent();
@@ -308,7 +311,7 @@ void SpellList::selectAndOpen(SpellListItem *item)
 //void interruptSpellCast(struct interruptCastStruct *);
 //void spellMessage(QString&);
 
-void SpellList::mouseDoubleClicked(QListViewItem *item) 
+void SpellList::mouseDoubleClicked(Q3ListViewItem *item) 
 {
   if (!item)
     return;
@@ -319,10 +322,10 @@ void SpellList::mouseDoubleClicked(QListViewItem *item)
     m_spellShell->deleteSpell(j);
 }
 
-void SpellList::rightButtonClicked(QListViewItem *item, const QPoint& pos,
+void SpellList::rightButtonClicked(Q3ListViewItem *item, const QPoint& pos,
       int col)
 {
-  QPopupMenu* slMenu = menu();
+  Q3PopupMenu* slMenu = menu();
 
   if (slMenu)
     slMenu->popup(pos);
@@ -382,7 +385,7 @@ SpellListWindow::~SpellListWindow()
   delete m_spellList;
 }
 
-QPopupMenu* SpellListWindow::menu()
+Q3PopupMenu* SpellListWindow::menu()
 {
   return m_spellList->menu();
 }

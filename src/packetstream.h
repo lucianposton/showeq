@@ -121,7 +121,7 @@ class EQPacketStream : public QObject
 
 
   EQPacketOPCodeDB& m_opcodeDB;
-  QPtrDict<EQPacketDispatch> m_dispatchers;
+  Q3PtrDict<EQPacketDispatch> m_dispatchers;
   EQStreamID m_streamid;
   uint8_t m_dir;
   int m_packetCount;

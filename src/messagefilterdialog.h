@@ -11,6 +11,8 @@
 #include <stdint.h>
 
 #include <qdialog.h>
+//Added by qt3to4:
+#include <QLabel>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -21,9 +23,9 @@ class QComboBox;
 class QLineEdit;
 class QLabel;
 class QPushButton;
-class QListBox;
-class QListBoxItem;
-class QGroupBox;
+class Q3ListBox;
+class Q3ListBoxItem;
+class Q3GroupBox;
 
 //----------------------------------------------------------------------
 // MessageFilterDialog
@@ -44,7 +46,7 @@ class MessageFilterDialog : public QDialog
  protected slots:
    void anyTextChanged(const QString& newText);
    void messageTypeSelectionChanged();
-   void existingFilterSelectionChanged(QListBoxItem * item);
+   void existingFilterSelectionChanged(Q3ListBoxItem * item);
    void removedFilter(uint32_t mask, uint8_t filter);
    void addedFilter(uint32_t mask, uint8_t filter, const MessageFilter& filter);
 
@@ -53,12 +55,12 @@ class MessageFilterDialog : public QDialog
    void checkState();
 
   MessageFilters* m_filters;
-  QListBox* m_existingFilters;
+  Q3ListBox* m_existingFilters;
   QPushButton* m_new;
-  QGroupBox* m_filterGroup;
+  Q3GroupBox* m_filterGroup;
   QLineEdit* m_name;
   QLineEdit* m_pattern;
-  QListBox* m_messageTypes;
+  Q3ListBox* m_messageTypes;
   QPushButton* m_add;
   QPushButton* m_update;
   QPushButton* m_delete;

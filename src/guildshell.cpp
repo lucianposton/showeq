@@ -174,7 +174,7 @@ QString GuildShell::zoneString(uint16_t zoneid) const
     return m_zoneMgr->zoneNameFromID(zoneid);
 }
 
-void GuildShell::dumpMembers(QTextStream& out)
+void GuildShell::dumpMembers(Q3TextStream& out)
 {
   QDateTime dt;
   GuildMemberDictIterator it(m_members);

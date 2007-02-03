@@ -12,12 +12,17 @@
 #include "util.h"
 #include "diagnosticmessages.h"
 
-#include <qgrid.h>
+#include <q3grid.h>
 #include <qtimer.h>
-#include <qhbox.h>
-#include <qvgroupbox.h>
+#include <q3hbox.h>
+#include <q3vgroupbox.h>
 #include <qmessagebox.h>
 #include <qlayout.h>
+//Added by qt3to4:
+#include <QLabel>
+#include <Q3GridLayout>
+#include <Q3PopupMenu>
+#include <Q3VBoxLayout>
 #include <stdio.h>
 #include <time.h>
 
@@ -250,7 +255,7 @@ void CombatWindow::initUI()
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::initUI: starting...");
 #endif
-	QVBoxLayout* layout = new QVBoxLayout(boxLayout());
+	Q3VBoxLayout* layout = new Q3VBoxLayout(boxLayout());
 
 	m_menu_bar = new QMenuBar(this);
 	layout->addWidget(m_menu_bar);
@@ -267,7 +272,7 @@ void CombatWindow::initUI()
 	m_widget_mob = initMobWidget();
 	m_tab->addTab(m_widget_mob, "&Mobs");
 
-	m_clear_menu = new QPopupMenu(this);
+	m_clear_menu = new Q3PopupMenu(this);
 	m_clear_menu->insertItem("Clear Offense Stats", this, SLOT(clearOffense()));
 	m_clear_menu->insertItem("Clear Mob Stats", this, SLOT(clearMob()));
 
@@ -286,9 +291,9 @@ QWidget* CombatWindow::initOffenseWidget()
 {
 	QWidget *pWidget = new QWidget(m_tab);
 
-	m_layout_offense = new QVBoxLayout(pWidget);
+	m_layout_offense = new Q3VBoxLayout(pWidget);
 
-	QGroupBox *listGBox = new QVGroupBox(pWidget);
+	Q3GroupBox *listGBox = new Q3VGroupBox(pWidget);
 	m_layout_offense->addWidget(listGBox);
 
 	m_listview_offense = new SEQListView(preferenceName(), listGBox);
@@ -313,10 +318,10 @@ QWidget* CombatWindow::initOffenseWidget()
 
 	m_listview_offense->setMinimumSize(m_listview_offense->sizeHint().width(), 200);
 
-	QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
+	Q3GroupBox *summaryGBox = new Q3VGroupBox("Summary", pWidget);
 	m_layout_offense->addWidget(summaryGBox);
 
-	QGrid *summaryGrid = new QGrid(4, summaryGBox);
+	Q3Grid *summaryGrid = new Q3Grid(4, summaryGBox);
 
 	new QLabel("Total Damage:", summaryGrid);
 	m_label_offense_totaldamage = new QLabel(summaryGrid);
@@ -336,8 +341,8 @@ QWidget* CombatWindow::initOffenseWidget()
 	new QLabel("Avg NonMelee:", summaryGrid);
 	m_label_offense_avgnonmelee = new QLabel(summaryGrid);
 
-	((QGridLayout *)summaryGrid->layout())->setColStretch(1, 1);
-	((QGridLayout *)summaryGrid->layout())->setColStretch(3, 1);
+	((Q3GridLayout *)summaryGrid->layout())->setColStretch(1, 1);
+	((Q3GridLayout *)summaryGrid->layout())->setColStretch(3, 1);
 	summaryGrid->layout()->setSpacing(5);
 
 	return pWidget;
@@ -346,12 +351,12 @@ QWidget* CombatWindow::initOffenseWidget()
 QWidget* CombatWindow::initDefenseWidget()
 {
 	QWidget *pWidget = new QWidget(m_tab);
-	m_layout_defense = new QVBoxLayout(pWidget);
+	m_layout_defense = new Q3VBoxLayout(pWidget);
 
-	QGroupBox *avoidanceGBox = new QVGroupBox("Avoidance", pWidget);
+	Q3GroupBox *avoidanceGBox = new Q3VGroupBox("Avoidance", pWidget);
 	m_layout_defense->addWidget(avoidanceGBox);
 
-	QGrid *avoidanceGrid = new QGrid(6, avoidanceGBox);
+	Q3Grid *avoidanceGrid = new Q3Grid(6, avoidanceGBox);
 
 	new QLabel("Misses:", avoidanceGrid);
 	m_label_defense_avoid_misses = new QLabel(avoidanceGrid);
@@ -371,15 +376,15 @@ QWidget* CombatWindow::initDefenseWidget()
 	new QLabel("Total:", avoidanceGrid);
 	m_label_defense_avoid_total = new QLabel(avoidanceGrid);
 
-	((QGridLayout *)avoidanceGrid->layout())->setColStretch(1, 1);
-	((QGridLayout *)avoidanceGrid->layout())->setColStretch(3, 1);
-	((QGridLayout *)avoidanceGrid->layout())->setColStretch(5, 1);
+	((Q3GridLayout *)avoidanceGrid->layout())->setColStretch(1, 1);
+	((Q3GridLayout *)avoidanceGrid->layout())->setColStretch(3, 1);
+	((Q3GridLayout *)avoidanceGrid->layout())->setColStretch(5, 1);
 	avoidanceGrid->layout()->setSpacing(5);
 
-	QGroupBox *mitigationGBox = new QVGroupBox("Mitigation", pWidget);
+	Q3GroupBox *mitigationGBox = new Q3VGroupBox("Mitigation", pWidget);
 	m_layout_defense->addWidget(mitigationGBox);
 
-	QGrid *mitigationGrid = new QGrid(6, mitigationGBox);
+	Q3Grid *mitigationGrid = new Q3Grid(6, mitigationGBox);
 
 	new QLabel("Avg. Hit:", mitigationGrid);
 	m_label_defense_mitigate_avghit = new QLabel(mitigationGrid);
@@ -390,15 +395,15 @@ QWidget* CombatWindow::initDefenseWidget()
 	new QLabel("Max:", mitigationGrid);
 	m_label_defense_mitigate_maxhit = new QLabel(mitigationGrid);
 
-	((QGridLayout *)mitigationGrid->layout())->setColStretch(1, 1);
-	((QGridLayout *)mitigationGrid->layout())->setColStretch(3, 1);
-	((QGridLayout *)mitigationGrid->layout())->setColStretch(5, 1);
+	((Q3GridLayout *)mitigationGrid->layout())->setColStretch(1, 1);
+	((Q3GridLayout *)mitigationGrid->layout())->setColStretch(3, 1);
+	((Q3GridLayout *)mitigationGrid->layout())->setColStretch(5, 1);
 	mitigationGrid->layout()->setSpacing(5);
 
-	QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
+	Q3GroupBox *summaryGBox = new Q3VGroupBox("Summary", pWidget);
 	m_layout_defense->addWidget(summaryGBox);
 
-	QGrid *summaryGrid = new QGrid(6, summaryGBox);
+	Q3Grid *summaryGrid = new Q3Grid(6, summaryGBox);
 
 	new QLabel("Mob Attacks:", summaryGrid);
 	m_label_defense_summary_mobattacks = new QLabel(summaryGrid);
@@ -409,9 +414,9 @@ QWidget* CombatWindow::initDefenseWidget()
 	new QLabel("Total Damage:", summaryGrid);
 	m_label_defense_summary_totaldamage = new QLabel(summaryGrid);
 
-	((QGridLayout *)summaryGrid->layout())->setColStretch(1, 1);
-	((QGridLayout *)summaryGrid->layout())->setColStretch(3, 1);
-	((QGridLayout *)summaryGrid->layout())->setColStretch(5, 1);
+	((Q3GridLayout *)summaryGrid->layout())->setColStretch(1, 1);
+	((Q3GridLayout *)summaryGrid->layout())->setColStretch(3, 1);
+	((Q3GridLayout *)summaryGrid->layout())->setColStretch(5, 1);
 	summaryGrid->layout()->setSpacing(5);
 
 	return pWidget;
@@ -421,9 +426,9 @@ QWidget* CombatWindow::initMobWidget()
 {
 	QWidget *pWidget = new QWidget(m_tab);
 
-	m_layout_mob = new QVBoxLayout(pWidget);
+	m_layout_mob = new Q3VBoxLayout(pWidget);
 
-	QGroupBox *listGBox = new QVGroupBox(pWidget);
+	Q3GroupBox *listGBox = new Q3VGroupBox(pWidget);
 	m_layout_mob->addWidget(listGBox);
 
 	m_listview_mob = new SEQListView(preferenceName(), listGBox);
@@ -448,10 +453,10 @@ QWidget* CombatWindow::initMobWidget()
 
 	m_listview_mob->setMinimumSize(m_listview_mob->sizeHint().width(), 200);
 
-	QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
+	Q3GroupBox *summaryGBox = new Q3VGroupBox("Summary", pWidget);
 	m_layout_mob->addWidget(summaryGBox);
 
-	QGrid *summaryGrid = new QGrid(4, summaryGBox);
+	Q3Grid *summaryGrid = new Q3Grid(4, summaryGBox);
 
 	new QLabel("Total Mobs", summaryGrid);
 	m_label_mob_totalmobs = new QLabel(summaryGrid);
@@ -465,8 +470,8 @@ QWidget* CombatWindow::initMobWidget()
 	new QLabel("Last DPS:", summaryGrid);
 	m_label_mob_lastdps = new QLabel(summaryGrid);
 
-	((QGridLayout *)summaryGrid->layout())->setColStretch(1, 1);
-	((QGridLayout *)summaryGrid->layout())->setColStretch(3, 1);
+	((Q3GridLayout *)summaryGrid->layout())->setColStretch(1, 1);
+	((Q3GridLayout *)summaryGrid->layout())->setColStretch(3, 1);
 	summaryGrid->layout()->setSpacing(5);
 
 
@@ -586,7 +591,7 @@ void CombatWindow::updateOffense()
 		QString s_damage;
 		s_damage.setNum(iDamage);
 
-		QListViewItem *pItem = new QListViewItem(m_listview_offense,
+		Q3ListViewItem *pItem = new Q3ListViewItem(m_listview_offense,
 			s_type, s_hits, s_misses, s_ratio,
 			s_avgdamage, s_mindamage, s_maxdamage, s_damage);
 
@@ -726,7 +731,7 @@ void CombatWindow::updateMob()
 		QString s_mobdps = QString::number(dMobDPS);
 
 
-		QListViewItem *pItem = new QListViewItem(m_listview_mob,
+		Q3ListViewItem *pItem = new Q3ListViewItem(m_listview_mob,
 			s_time, s_name, s_id, s_duration, s_damagegiven,
 			s_dps, s_iDamageTaken, s_mobdps);
 

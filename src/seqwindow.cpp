@@ -15,15 +15,17 @@
 #include "seqwindow.h"
 #include "main.h"
 
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
+//Added by qt3to4:
+#include <QMouseEvent>
 
 SEQWindow::SEQWindow(const QString prefName, const QString caption,
-		     QWidget* parent, const char* name, WFlags f)
-  : QDockWindow(parent, name, f),
+		     QWidget* parent, const char* name, Qt::WFlags f)
+  : Q3DockWindow(parent, name, f),
     m_preferenceName(prefName)
 {
   // set the windows caption
-  QDockWindow::setCaption(pSEQPrefs->getPrefString("Caption", preferenceName(),
+  Q3DockWindow::setCaption(pSEQPrefs->getPrefString("Caption", preferenceName(),
 					       caption));
 
   // windows default to resizable
@@ -40,7 +42,7 @@ SEQWindow::~SEQWindow()
 {
 }
 
-QPopupMenu* SEQWindow::menu()
+Q3PopupMenu* SEQWindow::menu()
 {
   return 0;
 }
@@ -48,7 +50,7 @@ QPopupMenu* SEQWindow::menu()
 void SEQWindow::setCaption(const QString& text)
 {
   // set the caption
-  QDockWindow::setCaption(text);
+  Q3DockWindow::setCaption(text);
   setName((const char*)caption());
 
   // set the preference
@@ -141,14 +143,14 @@ void SEQWindow::mousePressEvent(QMouseEvent* e)
 {
   if (e->button() == RightButton)
   {
-    QPopupMenu* popupMenu = menu();
+    Q3PopupMenu* popupMenu = menu();
     if (popupMenu)
       popupMenu->popup(mapToGlobal(e->pos()));
     else
-      QDockWindow::mousePressEvent(e);
+      Q3DockWindow::mousePressEvent(e);
   }
   else
-    QDockWindow::mousePressEvent(e);
+    Q3DockWindow::mousePressEvent(e);
 }
 
 #ifndef QMAKEBUILD

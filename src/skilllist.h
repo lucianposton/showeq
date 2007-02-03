@@ -9,7 +9,7 @@
 #define EQSKILLLIST_H
 
 #include <qwidget.h>
-#include <qlistview.h>
+#include <q3listview.h>
 
 #include "seqlistview.h"
 #include "seqwindow.h"
@@ -48,10 +48,10 @@ class SkillList : public SEQListView
    Player* m_pPlayer;
 
    // the list view items related to skills
-   QListViewItem* m_skillList[MAX_KNOWN_SKILLS];
+   Q3ListViewItem* m_skillList[MAX_KNOWN_SKILLS];
 
    // the list view items related to languages
-   QListViewItem* m_languageList[MAX_KNOWN_LANGS];
+   Q3ListViewItem* m_languageList[MAX_KNOWN_LANGS];
 
    // whether or not to show languages
    bool m_showLanguages;

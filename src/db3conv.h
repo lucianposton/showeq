@@ -23,7 +23,7 @@
 
 #include <db_cxx.h>
 
-#include <qdict.h>
+#include <q3dict.h>
 #include <qstring.h>
 
 #include "dbcommon.h"
@@ -75,7 +75,7 @@ class DB3Convenience
    Db* GetDatabase(QString dbName);
 
    DbEnv* m_dbEnv;
-   QDict<Db> m_dbDict;
+   Q3Dict<Db> m_dbDict;
 
    // declare friend
    friend class DB3Iterator;

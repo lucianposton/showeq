@@ -18,18 +18,21 @@
 #include <errno.h>
 
 #include <qapplication.h>
-#include <qtoolbar.h> 
+#include <q3toolbar.h> 
 #include <qstatusbar.h> 
-#include <qpopupmenu.h> 
+#include <q3popupmenu.h> 
 #include <qmenubar.h> 
-#include <qmainwindow.h> 
-#include <qfiledialog.h> 
+#include <q3mainwindow.h> 
+#include <q3filedialog.h> 
 #include <qtoolbutton.h> 
-#include <qtextstream.h> 
+#include <q3textstream.h> 
 #include <qpaintdevice.h> 
 #include <qobject.h> 
-#include <qmultilineedit.h>
+#include <q3multilineedit.h>
 #include <qmessagebox.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <QCloseEvent>
 
 #include "util.h"
 
@@ -82,13 +85,13 @@ static const char *fileopen[] = {
 };
 
 EditorWindow::EditorWindow(const char *fileName)
-     : QMainWindow( 0, "ShowEQ - Editor", WDestructiveClose )
+     : Q3MainWindow( 0, "ShowEQ - Editor", Qt::WDestructiveClose )
  {
      int id;
   
      QPixmap openIcon, saveIcon;
  
-     fileTools = new QToolBar( this, "file operations" );
+     fileTools = new Q3ToolBar( this, "file operations" );
 
      fileTools->setLabel( tr( "File Operations" ) );
  
@@ -100,7 +103,7 @@ EditorWindow::EditorWindow(const char *fileName)
         new QToolButton( saveIcon, "Save File", QString::null,
                                this, SLOT(save()), fileTools, "save file" );
  
-     QPopupMenu * file = new QPopupMenu( this );
+     Q3PopupMenu * file = new Q3PopupMenu( this );
      menuBar()->insertItem( "&File", file );
  
      id = file->insertItem( openIcon, "&Open",
@@ -112,7 +115,7 @@ EditorWindow::EditorWindow(const char *fileName)
      file->insertSeparator();
      file->insertItem( "&Close Editor", this, SLOT(close()), CTRL+Key_W );
 
-     e = new QMultiLineEdit( this, "editor" );
+     e = new Q3MultiLineEdit( this, "editor" );
      e->setFocus();
      setCentralWidget( e );
 
@@ -129,7 +132,7 @@ EditorWindow::EditorWindow(const char *fileName)
 
  void EditorWindow::load()
  {
-     QString fn = QFileDialog::getOpenFileName( QString::null, QString::null,
+     QString fn = Q3FileDialog::getOpenFileName( QString::null, QString::null,
                                                 this);
      if ( !fn.isEmpty() )
          load( fn );
@@ -140,13 +143,13 @@ EditorWindow::EditorWindow(const char *fileName)
  void EditorWindow::load( const char *fileName )
  {
      QFile f( fileName );
-     if ( !f.open( IO_ReadOnly ) )
+     if ( !f.open( QIODevice::ReadOnly ) )
          return;
 
      e->setAutoUpdate( FALSE );
      e->clear();
 
-     QTextStream t(&f);
+     Q3TextStream t(&f);
      while ( !t.eof() ) {
          QString s = t.readLine();
          e->append( s );
@@ -171,13 +174,13 @@ EditorWindow::EditorWindow(const char *fileName)
 
      QString text = e->text();
      QFile f( filename );
-     if ( !f.open( IO_WriteOnly ) ) {
+     if ( !f.open( QIODevice::WriteOnly ) ) {
          statusBar()->message( QString("Could not write to %1").arg(filename),
                                2000 );
          return;
      }
 
-     QTextStream t( &f );
+     Q3TextStream t( &f );
      t << text;
      f.close();
 
@@ -190,7 +193,7 @@ EditorWindow::EditorWindow(const char *fileName)
 
  void EditorWindow::saveAs()
  {
-     QString fn = QFileDialog::getSaveFileName( QString::null, QString::null,
+     QString fn = Q3FileDialog::getSaveFileName( QString::null, QString::null,
                                                 this );
      if ( !fn.isEmpty() ) {
          filename = fn;

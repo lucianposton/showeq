@@ -17,20 +17,23 @@
 
 #include <qwidget.h>
 #include <qstring.h>
-#include <qdockwindow.h>
+#include <q3dockwindow.h>
+//Added by qt3to4:
+#include <Q3PopupMenu>
+#include <QMouseEvent>
 
-class QPopupMenu;
+class Q3PopupMenu;
 
-class SEQWindow : public QDockWindow
+class SEQWindow : public Q3DockWindow
 {
    Q_OBJECT
 
  public:
    SEQWindow(const QString prefName, const QString caption,
-	    QWidget* parent = 0, const char* name = 0, WFlags f = 0);
+	    QWidget* parent = 0, const char* name = 0, Qt::WFlags f = 0);
   ~SEQWindow();
 
-  virtual QPopupMenu* menu();
+  virtual Q3PopupMenu* menu();
 
   const QString& preferenceName() const { return m_preferenceName; }
 

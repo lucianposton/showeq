@@ -18,6 +18,8 @@
 #include <qpainter.h>
 #include <qpoint.h>
 #include <qtimer.h>
+//Added by qt3to4:
+#include <Q3PointArray>
 
 //----------------------------------------------------------------------
 // constants
@@ -490,7 +492,7 @@ void MapIcon::paintX(QPainter&p, const QPoint& point, int size, int sizeWH)
 void MapIcon::paintUpTriangle(QPainter&p, const QPoint& point, 
 			      int size, int sizeWH)
 {
-  QPointArray atri(3);
+  Q3PointArray atri(3);
   atri.setPoint(0, point.x(), point.y() - size);
   atri.setPoint(1, point.x() + size, point.y() + size);
   atri.setPoint(2, point.x() - size, point.y() + size);
@@ -500,7 +502,7 @@ void MapIcon::paintUpTriangle(QPainter&p, const QPoint& point,
 void MapIcon::paintRightTriangle(QPainter&p, const QPoint& point,
 				 int size, int sizeWH)
 {
-  QPointArray atri(3);
+  Q3PointArray atri(3);
   atri.setPoint(0, point.x() + size, point.y());
   atri.setPoint(1, point.x() - size,  point.y() + size);
   atri.setPoint(2, point.x() - size,  point.y() - size);
@@ -510,7 +512,7 @@ void MapIcon::paintRightTriangle(QPainter&p, const QPoint& point,
 void MapIcon::paintDownTriangle(QPainter&p, const QPoint& point, 
 				int size, int sizeWH)
 {
-  QPointArray atri(3);
+  Q3PointArray atri(3);
   atri.setPoint(0, point.x(), point.y() + size);
   atri.setPoint(1, point.x() + size, point.y() - size);
   atri.setPoint(2, point.x() - size, point.y() - size);
@@ -520,7 +522,7 @@ void MapIcon::paintDownTriangle(QPainter&p, const QPoint& point,
 void MapIcon::paintLeftTriangle(QPainter&p, const QPoint& point, 
 				int size, int sizeWH)
 {
-  QPointArray atri(3);
+  Q3PointArray atri(3);
   atri.setPoint(0, point.x() - size, point.y());
   atri.setPoint(1, point.x() + size, point.y() + size);
   atri.setPoint(2, point.x() + size, point.y() - size);
@@ -540,7 +542,7 @@ void MapIcon::paintStar(QPainter&p, const QPoint& point, int size, int sizeWH)
 void MapIcon::paintDiamond(QPainter&p, const QPoint& point, 
 			   int size, int sizeWH)
 {
-  QPointArray diamond(4);
+  Q3PointArray diamond(4);
   diamond.setPoint(0, point.x(), point.y() +  size);
   diamond.setPoint(1, point.x() + size, point.y());
   diamond.setPoint(2, point.x(), point.y() - size);
@@ -785,7 +787,7 @@ void MapIcons::save()
     m_mapIcons[k].save(iconTypePrefBaseNames[k], preferenceName());
 }
 
-void MapIcons::dumpInfo(QTextStream& out)
+void MapIcons::dumpInfo(Q3TextStream& out)
 {
   out << "[" << preferenceName() << " MapIcons]" << endl;
   out << "ShowSpawnNames: " << m_showSpawnNames << endl;
@@ -1172,7 +1174,7 @@ void MapIcons::paintSpawnPointIcon(MapParameters& param,
     
     QFontMetrics fm(param.font());
     int width = fm.width(spawnNameText);
-    p.setPen(gray);
+    p.setPen(Qt::gray);
     p.drawText(point.x() - (width / 2),
 	       point.y() + fm.height() + 1, spawnNameText);
   }

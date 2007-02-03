@@ -8,8 +8,8 @@
 #ifndef _COMPASSFRAME_H_
 #define _COMPASSFRAME_H_
 
-#include <qhbox.h>
-#include <qvbox.h>
+#include <q3hbox.h>
+#include <q3vbox.h>
 #include <qlabel.h>
 
 #include "player.h"

@@ -24,7 +24,7 @@
 #include <qobject.h>
 #include <qstring.h>
 #include <qvariant.h>
-#include <qdict.h>
+#include <q3dict.h>
 #include <qdom.h>
 #include <qcolor.h>
 #include <qpen.h>
@@ -48,11 +48,11 @@
 //         TRUE value overrides this.  This is usefull for command line args 
 //         which should override config file prefs but not overwrite them  
 
-typedef QDict<QVariant> PreferenceDict;
-typedef QDict<PreferenceDict> PrefSectionDict;
+typedef Q3Dict<QVariant> PreferenceDict;
+typedef Q3Dict<PreferenceDict> PrefSectionDict;
 
-typedef QDict<QString> CommentDict;
-typedef QDict<CommentDict> CommentSectionDict;
+typedef Q3Dict<QString> CommentDict;
+typedef Q3Dict<CommentDict> CommentSectionDict;
 
 // PreferenceFile
 // A File comprised of NameValuePair Items

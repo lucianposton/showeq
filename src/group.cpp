@@ -268,7 +268,7 @@ void GroupMgr::killSpawn(const Item* item)
   }
 }
 
-void GroupMgr::dumpInfo(QTextStream& out)
+void GroupMgr::dumpInfo(Q3TextStream& out)
 {
   // dump general group manager information
   out << "[GroupMgr]" << endl;

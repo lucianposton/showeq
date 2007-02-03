@@ -17,8 +17,8 @@
 #define SPELLSHELL_H
 
 #include <qtimer.h>
-#include <qvaluelist.h>
-#include <qlistview.h>
+#include <q3valuelist.h>
+#include <q3listview.h>
 #include <time.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -205,7 +205,7 @@ class SpellShell : public QObject
   Player* m_player;
   SpawnShell* m_spawnShell;
   Spells* m_spells;
-  QValueList<SpellItem *> m_spellList;
+  Q3ValueList<SpellItem *> m_spellList;
   SpellItem* m_lastPlayerSpell;
   QTimer *m_timer;
 };

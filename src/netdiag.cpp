@@ -10,7 +10,10 @@
 
 #include <qpushbutton.h>
 #include <qlcdnumber.h>
-#include <qaccel.h>
+#include <q3accel.h>
+//Added by qt3to4:
+#include <Q3GridLayout>
+#include <QLabel>
 
 #include "main.h"
 #include "netdiag.h"
@@ -24,7 +27,7 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 {
   //  setResizeEnabled(false);
   // get preferences
-  QGridLayout* tmpGrid = new QGridLayout(boxLayout(), 26, 9);
+  Q3GridLayout* tmpGrid = new Q3GridLayout(boxLayout(), 26, 9);
   tmpGrid->addColSpacing(3, 5);
   tmpGrid->addColSpacing(6, 5);
   tmpGrid->addRowSpacing(1, 5);
@@ -147,7 +150,7 @@ NetDiag::NetDiag(EQPacket* packet, QWidget* parent, const char* name = NULL)
 
     m_playbackSpeed->setValue(m_packet->playbackSpeed());
 
-    QAccel* accel = new QAccel(this);
+    Q3Accel* accel = new Q3Accel(this);
     int key;
     key = pSEQPrefs->getPrefKey("IncPlaybackSpeedKey", preferenceName(), "Ctrl+X");
     accel->connectItem(accel->insertItem(key), m_packet, SLOT(incPlayback()));

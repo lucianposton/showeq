@@ -16,6 +16,8 @@
 #include <qpainter.h>
 #include <qpixmap.h>
 #include <qfont.h>
+//Added by qt3to4:
+#include <QPaintEvent>
 
 #include <math.h>
 #include <stdlib.h>

@@ -310,7 +310,7 @@ void StatList::updateStat(uint8_t stat)
       percentStr += " %";
 
       // create the statistic item
-      m_statList[stat] = new QListViewItem(this,
+      m_statList[stat] = new Q3ListViewItem(this,
 					   statNames[stat] , 
 					   valStr, maxStr, percentStr);
       

@@ -18,17 +18,20 @@
 #include <qpainter.h>
 #include <qfontdialog.h>
 #include <qinputdialog.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 #include <qlineedit.h>
 #include <qlabel.h>
 #include <qlayout.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
 
 //----------------------------------------------------------------------
 // GuildListItem
-GuildListItem::GuildListItem(QListView* parent,
+GuildListItem::GuildListItem(Q3ListView* parent,
 			     const GuildMember* member, 
 			     const GuildShell* guildShell)
-  : QListViewItem(parent),
+  : Q3ListViewItem(parent),
     m_member(member)
 {
   update(guildShell);
@@ -51,10 +54,10 @@ void GuildListItem::paintCell( QPainter *p, const QColorGroup &cg,
 
   p->setFont(font);
 
-  QListViewItem::paintCell( p, cg, column, width, alignment );
+  Q3ListViewItem::paintCell( p, cg, column, width, alignment );
 }
 
-int GuildListItem::compare(QListViewItem *o, int col, bool ascending) const
+int GuildListItem::compare(Q3ListViewItem *o, int col, bool ascending) const
 {
   if (!m_member)
     return -1;
@@ -91,7 +94,7 @@ int GuildListItem::compare(QListViewItem *o, int col, bool ascending) const
     else
       return m_member->lastOn() > otherMember->lastOn() ? 1 : -1;
   default:
-    return QListViewItem::compare(o, col, ascending);
+    return Q3ListViewItem::compare(o, col, ascending);
   }
 }
 
@@ -151,8 +154,8 @@ GuildListWindow::GuildListWindow(Player* player,
 
   m_showAlts = pSEQPrefs->getPrefBool("ShowAlts", preferenceName(), true);
 
-  QBoxLayout* vLayout = new QVBoxLayout(boxLayout());
-  QHBoxLayout* hLayout= new QHBoxLayout(vLayout);
+  Q3BoxLayout* vLayout = new Q3VBoxLayout(boxLayout());
+  Q3HBoxLayout* hLayout= new Q3HBoxLayout(vLayout);
 
   // Guild Name
   m_guildName = new QLabel("Guild", this);
@@ -210,13 +213,13 @@ GuildListWindow::~GuildListWindow()
 {
 }
 
-QPopupMenu* GuildListWindow::menu()
+Q3PopupMenu* GuildListWindow::menu()
 {
   if (m_menu)
     return m_menu;
 
-  m_menu = new QPopupMenu;
-  QPopupMenu* guildListColMenu = new QPopupMenu;
+  m_menu = new Q3PopupMenu;
+  Q3PopupMenu* guildListColMenu = new Q3PopupMenu;
   m_menu->insertItem( "Show &Column", guildListColMenu);
   guildListColMenu->setCheckable(true);
   m_id_guildList_Cols[tGuildListColName] = 

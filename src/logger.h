@@ -10,7 +10,7 @@
 
 #include <qobject.h>
 #include <qfile.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 #ifdef __FreeBSD__ 
 // since they are incapable of following standards
@@ -37,7 +37,7 @@ class SEQLogger : public QObject
  protected:
    FILE* m_fp;
    QFile m_file;
-   QTextStream m_out;
+   Q3TextStream m_out;
    QString m_filename;
    bool m_errOpen;
 };

@@ -20,12 +20,18 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <qgrid.h>
+#include <q3grid.h>
 #include <qtimer.h>
-#include <qhbox.h>
-#include <qvgroupbox.h>
+#include <q3hbox.h>
+#include <q3vgroupbox.h>
 #include <qmessagebox.h>
 #include <qfileinfo.h>
+//Added by qt3to4:
+#include <QResizeEvent>
+#include <Q3GridLayout>
+#include <QLabel>
+#include <Q3PopupMenu>
+#include <Q3VBoxLayout>
 
 #define DEBUGEXP
 
@@ -157,7 +163,7 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_calcZEM=0;
    m_ZEMviewtype = 0;
 
-   m_view_menu = new QPopupMenu( this );
+   m_view_menu = new Q3PopupMenu( this );
    m_view_menu->insertItem( "&All Mobs", this, SLOT(viewAll()) );
    m_view_menu->insertItem( "Previous &15 Minutes", this, SLOT(view15Minutes()) );
    m_view_menu->insertItem( "Previous &30 Minutes", this, SLOT(view30Minutes()) );
@@ -165,7 +171,7 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_view_menu->setItemChecked( m_view_menu->idAt(0), true );
 
    m_view_menu->insertSeparator();
-   m_exp_rate_menu = new QPopupMenu( this );
+   m_exp_rate_menu = new Q3PopupMenu( this );
    m_exp_rate_menu->insertItem( "per &minute", this, SLOT(viewRatePerMinute()) );
    m_exp_rate_menu->insertItem( "per &hour", this, SLOT(viewRatePerHour()) );
    m_exp_rate_menu->setItemChecked( m_exp_rate_menu->idAt(0), true );
@@ -175,7 +181,7 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_view_menu->insertItem( "Clear Kills", this, SLOT(viewClear()) );
 
    m_view_menu->insertSeparator();
-   m_ZEM_menu = new QPopupMenu( this );
+   m_ZEM_menu = new Q3PopupMenu( this );
    m_ZEM_menu->insertItem( "Calculated Value", this, SLOT(viewZEMcalculated()) );
    m_ZEM_menu->insertItem( "Raw Value", this, SLOT(viewZEMraw()) );
    m_ZEM_menu->insertItem( "Percent Bonus", this, SLOT(viewZEMpercent()) );
@@ -183,14 +189,14 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_view_menu->insertItem( "ZEM View Options", m_ZEM_menu );
    m_view_menu->insertItem( "Calculate ZEM on next kill", this, SLOT(calcZEMNextKill()) );
 
-   m_layout = new QVBoxLayout(boxLayout());
+   m_layout = new Q3VBoxLayout(boxLayout());
 
    m_menu_bar = new QMenuBar( this );
    m_menu_bar->insertItem( "&View", m_view_menu );
    //m_layout->addSpacing( m_menu_bar->height() + 5 );
    m_layout->addWidget(m_menu_bar);
 
-   QGroupBox *listGBox = new QVGroupBox( "Experience Log", this );
+   Q3GroupBox *listGBox = new Q3VGroupBox( "Experience Log", this );
    m_layout->addWidget( listGBox );
 
    m_exp_listview = new SEQListView(preferenceName(), listGBox);
@@ -208,10 +214,10 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_exp_listview->setMinimumSize( m_exp_listview->sizeHint().width(),
       200 );
 
-   QGroupBox *statsGBox = new QVGroupBox( "Statistics", this );
+   Q3GroupBox *statsGBox = new Q3VGroupBox( "Statistics", this );
    m_layout->addWidget( statsGBox );
    
-   QGrid *statsGrid = new QGrid( 4, statsGBox );
+   Q3Grid *statsGrid = new Q3Grid( 4, statsGBox );
 
    new QLabel( "Total Experience Received:",
       statsGrid );
@@ -243,8 +249,8 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_time_to_level = new QLabel( statsGrid );
 
    // ewww, why can't we just get it from QGrid? :(
-   ((QGridLayout *)statsGrid->layout())->setColStretch( 1, 1 );
-   ((QGridLayout *)statsGrid->layout())->setColStretch( 3, 1 );
+   ((Q3GridLayout *)statsGrid->layout())->setColStretch( 1, 1 );
+   ((Q3GridLayout *)statsGrid->layout())->setColStretch( 3, 1 );
    statsGrid->layout()->setSpacing( 5 );
 
    updateAverage( );
@@ -338,8 +344,8 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    strftime(s_time, 64, "%m/%d %H:%M:%S", localtime( &timev ));
 
    /* Update suggested by Shag */
-   QListViewItem *new_exp_entry = 
-     new QListViewItem( m_exp_listview, s_time, s_mob_name, 
+   Q3ListViewItem *new_exp_entry = 
+     new Q3ListViewItem( m_exp_listview, s_time, s_mob_name, 
 			s_mob_level, s_xp_value, s_xp_valueZEM,
 			s_xp_valuep, s_xp_valueg, s_xp_gained );
 

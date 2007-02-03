@@ -29,15 +29,17 @@
 #include <qmessagebox.h>
 #include <qfont.h>
 #include <qpainter.h>
+//Added by qt3to4:
+#include <Q3PopupMenu>
 
-SpawnListItem::SpawnListItem(QListViewItem *parent) : QListViewItem(parent)
+SpawnListItem::SpawnListItem(Q3ListViewItem *parent) : Q3ListViewItem(parent)
 {
   m_textColor = Qt::black;
   m_item = NULL;
   m_npc = 0;
 }
 
-SpawnListItem::SpawnListItem(QListView *parent) : QListViewItem(parent)
+SpawnListItem::SpawnListItem(Q3ListView *parent) : Q3ListViewItem(parent)
 {
   m_textColor = Qt::black; 
   m_item = NULL;
@@ -103,7 +105,7 @@ void SpawnListItem::paintCell( QPainter *p, const QColorGroup &cg,
   
   p->setFont(font);
   
-  QListViewItem::paintCell( p, newCg, column, width, alignment );
+  Q3ListViewItem::paintCell( p, newCg, column, width, alignment );
 }
 
 spawnItemType SpawnListItem::type()
@@ -111,7 +113,7 @@ spawnItemType SpawnListItem::type()
    return item() ? item()->type() : tUnknown;
 }
 
-int SpawnListItem::compare(QListViewItem *i, int col, bool ascending) const
+int SpawnListItem::compare(Q3ListViewItem *i, int col, bool ascending) const
 {
   if (col == 0) // Name
      return key( col, ascending ).compare( i->key( col, ascending) );
@@ -448,7 +450,7 @@ SpawnListMenu::SpawnListMenu(SEQListView* spawnlist,
     m_categoryMgr(categoryMgr)
 {
   // Show Columns
-  QPopupMenu* spawnListColMenu = new QPopupMenu;
+  Q3PopupMenu* spawnListColMenu = new Q3PopupMenu;
   insertItem( "Show &Column", spawnListColMenu);
   spawnListColMenu->setCheckable(true);
   m_id_spawnList_Cols[tSpawnColName] = 
@@ -505,7 +507,7 @@ SpawnListMenu::SpawnListMenu(SEQListView* spawnlist,
 	   this, SLOT(toggle_spawnListCol(int)));
 
   int x;
-  QPopupMenu* filterMenu = new QPopupMenu;
+  Q3PopupMenu* filterMenu = new Q3PopupMenu;
   m_id_filterMenu = insertItem("Add &Filter", filterMenu);
   setItemEnabled(m_id_filterMenu, false);
   x = filterMenu->insertItem("&Hunt...");
@@ -525,7 +527,7 @@ SpawnListMenu::SpawnListMenu(SEQListView* spawnlist,
   connect (filterMenu, SIGNAL(activated(int)), 
 	   this, SLOT(add_filter(int)));
 
-  QPopupMenu* zoneFilterMenu = new QPopupMenu;
+  Q3PopupMenu* zoneFilterMenu = new Q3PopupMenu;
   m_id_zoneFilterMenu = insertItem("Add &Zone Filter", zoneFilterMenu);
   setItemEnabled(m_id_zoneFilterMenu, false);
   x = zoneFilterMenu->insertItem("&Hunt...");

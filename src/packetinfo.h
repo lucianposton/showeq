@@ -14,15 +14,15 @@
 #include <stdint.h>
 
 #include <qobject.h>
-#include <qptrdict.h>
-#include <qptrlist.h>
-#include <qasciidict.h>
-#include <qintdict.h>
-#include <qcstring.h>
-#include <qstrlist.h>
+#include <q3ptrdict.h>
+#include <q3ptrlist.h>
+#include <q3asciidict.h>
+#include <q3intdict.h>
+#include <q3cstring.h>
+#include <q3strlist.h>
 #include <qstringlist.h>
-#include <qdict.h>
-#include <qtextstream.h>
+#include <q3dict.h>
+#include <q3textstream.h>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -57,7 +57,7 @@ class EQPacketTypeDB
  protected:
   void addStruct(const char* typeName, size_t);
 
-  QAsciiDict<size_t> m_typeSizeDict;
+  Q3AsciiDict<size_t> m_typeSizeDict;
 };
 
 //----------------------------------------------------------------------
@@ -92,7 +92,7 @@ class EQPacketPayload
   EQPacketPayload();
   ~EQPacketPayload();
   
-  const QCString& typeName() const;
+  const Q3CString& typeName() const;
   bool setType(const EQPacketTypeDB& db, const char* typeName);
   size_t typeSize() const;
   EQSizeCheckType sizeCheckType() const;
@@ -103,17 +103,17 @@ class EQPacketPayload
   bool match(const uint8_t* data, size_t size, uint8_t dir) const;
 
  protected:
-  QCString m_typeName;
+  Q3CString m_typeName;
   size_t m_typeSize;
   EQSizeCheckType m_sizeCheckType;
   uint8_t m_dir;
 };
 
 // Payload list typedef
-typedef QPtrList<EQPacketPayload> EQPayloadList;
-typedef QPtrListIterator<EQPacketPayload> EQPayloadListIterator;
+typedef Q3PtrList<EQPacketPayload> EQPayloadList;
+typedef Q3PtrListIterator<EQPacketPayload> EQPayloadListIterator;
 
-inline const QCString& EQPacketPayload::typeName() const
+inline const Q3CString& EQPacketPayload::typeName() const
 {
   return m_typeName;
 }
@@ -271,11 +271,11 @@ class EQPacketOPCodeDB
   bool move(const QString& oldOPCodeName, const QString& newOPCodeName);
   const EQPacketOPCode* find(uint16_t opcode) const;
   const EQPacketOPCode* find(const QString& opcodeName) const;
-  const QIntDict<EQPacketOPCode> opcodes() const;
+  const Q3IntDict<EQPacketOPCode> opcodes() const;
 
  protected:
-  QIntDict<EQPacketOPCode> m_opcodes;
-  QDict<EQPacketOPCode> m_opcodesByName;
+  Q3IntDict<EQPacketOPCode> m_opcodes;
+  Q3Dict<EQPacketOPCode> m_opcodesByName;
 };
 
 inline void EQPacketOPCodeDB::clear(void)
@@ -308,7 +308,7 @@ inline const EQPacketOPCode* EQPacketOPCodeDB::find(const QString& opcode) const
   return m_opcodesByName.find(opcode);
 }
 
-inline const QIntDict<EQPacketOPCode> EQPacketOPCodeDB::opcodes() const
+inline const Q3IntDict<EQPacketOPCode> EQPacketOPCodeDB::opcodes() const
 {
   return m_opcodes;
 }

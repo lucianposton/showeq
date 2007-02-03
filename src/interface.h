@@ -11,24 +11,24 @@
 #include <qwidget.h>
 #include <qpushbutton.h>
 #include <qlcdnumber.h>
-#include <qframe.h>
+#include <q3frame.h>
 #include <qlabel.h>
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qlayout.h>
 #include <qmenubar.h>
-#include <qpopupmenu.h>
-#include <qmainwindow.h>
-#include <qhbox.h>
-#include <qvbox.h>
+#include <q3popupmenu.h>
+#include <q3mainwindow.h>
+#include <q3hbox.h>
+#include <q3vbox.h>
 #include <qsplitter.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qtimer.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qmessagebox.h>
-#include <qtabdialog.h>
+#include <q3tabdialog.h>
 #include <qspinbox.h>
-#include <qintdict.h>
-#include <qptrdict.h>
+#include <q3intdict.h>
+#include <q3ptrdict.h>
 #include "everquest.h"
 #include "spawnlist.h"
 #include "spawnshell.h"
@@ -82,7 +82,7 @@ class BazaarLog;
 
 //--------------------------------------------------
 // typedefs
-typedef QValueList<int> MenuIDList;
+typedef Q3ValueList<int> MenuIDList;
 
 //--------------------------------------------------
 // constants
@@ -109,7 +109,7 @@ const int messageWindowDockBase = 16;
 /*!
   \brief QMainWindow from Hell!  Also known as ShowEQ's main window.
 */
-class EQInterface:public QMainWindow
+class EQInterface:public Q3MainWindow
 {
    Q_OBJECT
 
@@ -159,7 +159,7 @@ class EQInterface:public QMainWindow
    void updateSelectedSpawnStatus(const Item* item);
 
    void savePrefs(void);
-   void saveDockAreaPrefs(QDockArea* a, Dock edge);
+   void saveDockAreaPrefs(Q3DockArea* a, Qt::ToolBarDock edge);
 
    void addCategory(void);
    void reloadCategories(void);
@@ -168,7 +168,7 @@ class EQInterface:public QMainWindow
    void selectPrev(void);
    void saveSelectedSpawnPath(void);
    void saveSpawnPaths(void);
-   void saveSpawnPath(QTextStream& out, const Item* item);
+   void saveSpawnPath(Q3TextStream& out, const Item* item);
    void toggle_log_AllPackets();
    void toggle_log_WorldData();
    void toggle_log_ZoneData();
@@ -326,7 +326,7 @@ class EQInterface:public QMainWindow
    void createOPCodeMonitorLog(const QString&);
    void insertWindowMenu(SEQWindow* window);
    void removeWindowMenu(SEQWindow* window);
-   void setDockEnabled(QDockWindow* dw, bool enable);
+   void setDockEnabled(Q3DockWindow* dw, bool enable);
 
  public:
    Player* m_player;
@@ -371,25 +371,25 @@ class EQInterface:public QMainWindow
 
    const Item* m_selectedSpawn;
    
-   QPopupMenu* m_netMenu;
-   QPopupMenu* m_decoderMenu;
-   QPopupMenu* m_statWinMenu;
-   QPopupMenu* m_skillWinMenu;
-   QPopupMenu* m_spawnListMenu;
-   QPopupMenu* m_dockedWinMenu;
-   QPopupMenu* m_dockableWinMenu;
-   QPopupMenu* m_windowCaptionMenu;
-   QPopupMenu* m_charMenu;
-   QPopupMenu* m_charLevelMenu;
+   Q3PopupMenu* m_netMenu;
+   Q3PopupMenu* m_decoderMenu;
+   Q3PopupMenu* m_statWinMenu;
+   Q3PopupMenu* m_skillWinMenu;
+   Q3PopupMenu* m_spawnListMenu;
+   Q3PopupMenu* m_dockedWinMenu;
+   Q3PopupMenu* m_dockableWinMenu;
+   Q3PopupMenu* m_windowCaptionMenu;
+   Q3PopupMenu* m_charMenu;
+   Q3PopupMenu* m_charLevelMenu;
    QSpinBox* m_levelSpinBox;
-   QPopupMenu* m_charClassMenu;
-   QPopupMenu* m_charRaceMenu;
-   QPopupMenu* m_terminalMenu;
-   QPopupMenu* m_terminalTypeFilterMenu;
-   QPopupMenu* m_terminalShowUserFilterMenu;
-   QPopupMenu* m_terminalHideUserFilterMenu;
-   QPopupMenu* m_windowMenu;
-   QPtrDict<int> m_windowsMenus;
+   Q3PopupMenu* m_charClassMenu;
+   Q3PopupMenu* m_charRaceMenu;
+   Q3PopupMenu* m_terminalMenu;
+   Q3PopupMenu* m_terminalTypeFilterMenu;
+   Q3PopupMenu* m_terminalShowUserFilterMenu;
+   Q3PopupMenu* m_terminalHideUserFilterMenu;
+   Q3PopupMenu* m_windowMenu;
+   Q3PtrDict<int> m_windowsMenus;
 
    CompassFrame* m_compass;
    MessageWindow* m_messageWindow[maxNumMessageWindows];
@@ -415,7 +415,7 @@ class EQInterface:public QMainWindow
    QString ipstr[5];
    QString macstr[5];   
    
-   QIntDict<QString> m_formattedMessageStrings;
+   Q3IntDict<QString> m_formattedMessageStrings;
 
    int char_ClassID[PLAYER_CLASSES];
    int char_RaceID[PLAYER_RACES];

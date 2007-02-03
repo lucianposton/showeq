@@ -63,26 +63,29 @@
 #include <qapplication.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
-#include <qvaluelist.h>
-#include <qvaluevector.h>
+#include <q3valuelist.h>
+#include <q3valuevector.h>
 #include <qstatusbar.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qlineedit.h>
 #include <qmessagebox.h>
-#include <qfiledialog.h>
-#include <qaccel.h>
+#include <q3filedialog.h>
+#include <q3accel.h>
 #include <qfileinfo.h>
 #include <qfile.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 #include <qinputdialog.h>
 #include <qfontdialog.h>
 #include <qcolordialog.h>
-#include <qdockarea.h>
+#include <q3dockarea.h>
 #include <qwindowsstyle.h>
 #include <qplatinumstyle.h>
 #include <qmotifstyle.h>
 #include <qcdestyle.h>
 #include <qsgistyle.h>
+//Added by qt3to4:
+#include <Q3PtrList>
+#include <Q3PopupMenu>
 
 // this define is used to diagnose the order with which zone packets are rcvd
 #define ZONE_ORDER_DIAG
@@ -90,7 +93,7 @@
 /* The main interface widget */
 EQInterface::EQInterface(DataLocationMgr* dlm, 
 			 QWidget * parent, const char *name) 
-  : QMainWindow (parent, name),
+  : Q3MainWindow (parent, name),
     m_player(0),
     m_dataLocationMgr(dlm),
     m_mapMgr(0),
@@ -348,7 +351,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    section = "Interface";
 
    // create window menu
-   m_windowMenu = new QPopupMenu;
+   m_windowMenu = new Q3PopupMenu;
 
    // Initialize the experience window;
    m_expWindow = new ExperienceWindow(m_dataLocationMgr, m_player, m_groupMgr,
@@ -356,7 +359,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    setDockEnabled(m_expWindow, 
 		  pSEQPrefs->getPrefBool("DockableExperienceWindow",
 					 section, false));
-   Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+   Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 					   m_expWindow->preferenceName(),
 					   DockUnmanaged);
    addDockWindow(m_expWindow, edge, false);
@@ -379,7 +382,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    setDockEnabled(m_combatWindow, 
 		  pSEQPrefs->getPrefBool("DockableCombatWindow",
 					 section, false));
-   edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+   edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 				      m_combatWindow->preferenceName(),
 				      DockUnmanaged);
    addDockWindow(m_combatWindow, edge, false);
@@ -514,7 +517,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    // File Menu
    //pFileMenu = new QPopupMenu;
-   QPopupMenu* pFileMenu = new QPopupMenu;
+   Q3PopupMenu* pFileMenu = new Q3PopupMenu;
    menuBar()->insertItem("&File", pFileMenu);
    pFileMenu->insertItem("&Save Preferences", this, SLOT(savePrefs()), CTRL+Key_S);
    pFileMenu->insertItem("Open &Map", m_mapMgr, SLOT(loadMap()), Key_F1);
@@ -539,7 +542,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    pFileMenu->insertItem("&Quit", qApp, SLOT(quit()));
 
    // View menu
-   QPopupMenu* pViewMenu = new QPopupMenu;
+   Q3PopupMenu* pViewMenu = new Q3PopupMenu;
    menuBar()->insertItem("&View", pViewMenu);
    pViewMenu->setCheckable(true);
    m_id_view_ExpWindow = pViewMenu->insertItem("Experience Window", this, SLOT(toggle_view_ExpWindow()));
@@ -554,7 +557,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_id_view_Compass = pViewMenu->insertItem("Compass", this, SLOT(toggle_view_Compass()));
    menuBar()->setItemChecked(m_id_view_PlayerStats, (m_statList != 0));
 
-   QPopupMenu* subMenu = new QPopupMenu;
+   Q3PopupMenu* subMenu = new Q3PopupMenu;
    for (int i = 0; i < maxNumMaps; i++)
    {     
         QString mapName = "Map ";
@@ -566,7 +569,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    }
    pViewMenu->insertItem("Maps", subMenu);
 
-   subMenu = new QPopupMenu;
+   subMenu = new Q3PopupMenu;
    QString messageWindowName;
    for (int i = 0; i < maxNumMessageWindows; i++)
    {     
@@ -590,7 +593,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    pViewMenu->insertSeparator(-1);
 
    // View -> PlayerStats
-   m_statWinMenu = new QPopupMenu;
+   m_statWinMenu = new Q3PopupMenu;
    m_id_view_PlayerStats_Options = pViewMenu->insertItem( "&Player Stats", m_statWinMenu);
    m_statWinMenu->setCheckable(TRUE);
 
@@ -668,7 +671,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect (m_statWinMenu, SIGNAL(activated(int)), this, SLOT(toggle_view_StatWin(int)));
 
    // View -> PlayerSkills
-   m_skillWinMenu = new QPopupMenu;
+   m_skillWinMenu = new Q3PopupMenu;
    m_id_view_PlayerSkills_Options = pViewMenu->insertItem( "Player &Skills", m_skillWinMenu);
    pViewMenu->setItemEnabled(m_id_view_PlayerSkills_Options, (m_skillList != 0));
    m_skillWinMenu->setCheckable(TRUE);
@@ -679,7 +682,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect (m_skillWinMenu, SIGNAL(activated(int)), this, SLOT(toggle_view_SkillWin(int)));
 
    // View -> SpawnList
-    m_spawnListMenu = new QPopupMenu;
+    m_spawnListMenu = new Q3PopupMenu;
     m_id_view_SpawnList_Options = pViewMenu->insertItem( "Spawn &List", m_spawnListMenu);
     pViewMenu->setItemEnabled(m_id_view_SpawnList_Options, (m_spawnList != 0));
     m_spawnListMenu->setCheckable(TRUE);
@@ -732,7 +735,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    int x;
    // View -> DockedWin
-   m_dockedWinMenu = new QPopupMenu;
+   m_dockedWinMenu = new Q3PopupMenu;
    pViewMenu->insertItem( "&Docked", m_dockedWinMenu);
    m_dockedWinMenu->setCheckable(true);
     
@@ -779,7 +782,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect (m_dockedWinMenu, SIGNAL(activated(int)), this, SLOT(toggle_view_DockedWin(int)));
 
    // View -> DockableWin
-   m_dockableWinMenu = new QPopupMenu;
+   m_dockableWinMenu = new Q3PopupMenu;
    pViewMenu->insertItem( "&Dockable", m_dockableWinMenu);
    m_dockableWinMenu->setCheckable(true);
     
@@ -850,7 +853,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 							    section, true));
 
    // insert Map docking options 
-   subMenu = new QPopupMenu;
+   subMenu = new Q3PopupMenu;
    for (int i = 0; i < maxNumMaps; i++)
    {     
         QString mapName = "Map ";
@@ -871,7 +874,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_dockableWinMenu->insertItem("Maps", subMenu);
 
    // insert Message Window docking options 
-   subMenu = new QPopupMenu;
+   subMenu = new Q3PopupMenu;
    QString messagePrefName = "DockableMessageWindow";
    for (int i = 0; i < maxNumMessageWindows; i++)
    {     
@@ -897,7 +900,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
 
    // Options Menu
-   QPopupMenu* pOptMenu = new QPopupMenu;
+   Q3PopupMenu* pOptMenu = new Q3PopupMenu;
    menuBar()->insertItem("&Options", pOptMenu);
    pOptMenu->setCheckable(TRUE);
    m_id_opt_Fast     = pOptMenu->insertItem("Fast Machine?", this, SLOT(toggle_opt_Fast()));
@@ -924,7 +927,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			    this, SLOT(toggle_opt_WalkPathRecord(int)));
    menuBar()->setItemChecked (x, showeq_params->walkpathrecord);
 
-   subMenu = new QPopupMenu;
+   subMenu = new Q3PopupMenu;
    QSpinBox* walkPathLengthSpinBox = new QSpinBox(0, 8192, 1, subMenu);
    walkPathLengthSpinBox->setValue(showeq_params->walkpathlength);
    connect(walkPathLengthSpinBox, SIGNAL(valueChanged(int)),
@@ -942,7 +945,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    menuBar()->setItemChecked (m_id_opt_PvPDeity, showeq_params->deitypvp);
 
    // SaveState SubMenu
-   QPopupMenu* pSaveStateMenu = new QPopupMenu;
+   Q3PopupMenu* pSaveStateMenu = new Q3PopupMenu;
    pOptMenu->insertItem("&Save State", pSaveStateMenu);
    pSaveStateMenu->setCheckable(true);
    x = pSaveStateMenu->insertItem("&Player", this, 
@@ -958,7 +961,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			      SLOT(set_opt_save_BaseFilename(void)));
 
    pSaveStateMenu->insertSeparator(-1);
-   subMenu = new QPopupMenu;
+   subMenu = new Q3PopupMenu;
    QSpinBox* saveFrequencySpinBox = new QSpinBox(1, 320, 1, subMenu);
    saveFrequencySpinBox->setValue(showeq_params->saveSpawnsFrequency / 1000);
    connect(saveFrequencySpinBox, SIGNAL(valueChanged(int)),
@@ -971,7 +974,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			this, SLOT(opt_clearChannelMsgs(int)));
 
    // Con Color base menu
-   QPopupMenu* conColorBaseMenu = new QPopupMenu;
+   Q3PopupMenu* conColorBaseMenu = new Q3PopupMenu;
    x = conColorBaseMenu->insertItem("Gray Spawn Base...");
    conColorBaseMenu->setItemParameter(x, tGraySpawn);
    x = conColorBaseMenu->insertItem("Green Spawn Base...");
@@ -993,7 +996,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    pOptMenu->insertItem("Con &Colors", conColorBaseMenu);
 
    // Network Menu
-   m_netMenu = new QPopupMenu;
+   m_netMenu = new Q3PopupMenu;
    menuBar()->insertItem("&Network", m_netMenu);
    m_netMenu->insertItem("Monitor &Next EQ Client Seen", this, SLOT(set_net_monitor_next_client()));
    m_netMenu->insertItem("Monitor EQ Client &IP Address...", this, SLOT(set_net_client_IP_address()));
@@ -1007,7 +1010,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_netMenu->insertSeparator(-1);
 
    // Log menu
-   QPopupMenu* pLogMenu = new QPopupMenu;
+   Q3PopupMenu* pLogMenu = new Q3PopupMenu;
    m_netMenu->insertItem("Lo&g", pLogMenu);
    pLogMenu->setCheckable(true);
    m_id_log_AllPackets  = pLogMenu->insertItem("All Packets", this, SLOT(toggle_log_AllPackets()), Key_F5);
@@ -1032,10 +1035,10 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 						     false));
 
    // OpCode Monitor
-   QPopupMenu* pOpCodeMenu = new QPopupMenu;
+   Q3PopupMenu* pOpCodeMenu = new Q3PopupMenu;
    m_netMenu->insertItem("OpCode Monitor", pOpCodeMenu);
    x = pOpCodeMenu->insertItem("&OpCode Monitoring", this,
-			      SLOT(toggle_opcode_monitoring(int)), CTRL+ALT+Key_O);
+			      SLOT(toggle_opcode_monitoring(int)), Qt::CTRL+Qt::ALT+Qt::Key_O);
    
    pOpCodeMenu->setItemChecked(x, (m_opcodeMonitorLog != 0));
    pOpCodeMenu->insertItem("&Reload Monitored OpCode List..", this,
@@ -1058,8 +1061,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    section = "Interface";
 
    // Advanced menu
-   subMenu = new QPopupMenu;
-   QPopupMenu* subSubMenu = new QPopupMenu;
+   subMenu = new Q3PopupMenu;
+   Q3PopupMenu* subSubMenu = new Q3PopupMenu;
    QSpinBox* arqSeqGiveUpSpinBox = new QSpinBox(32, 1024, 8, subSubMenu);
    arqSeqGiveUpSpinBox->setValue(m_packet->arqSeqGiveUp());
    connect(arqSeqGiveUpSpinBox, SIGNAL(valueChanged(int)),
@@ -1070,14 +1073,14 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_netMenu->insertItem("Advanced", subMenu);
 
    // Character Menu 
-   m_charMenu = new QPopupMenu;
+   m_charMenu = new Q3PopupMenu;
    menuBar()->insertItem("&Character", m_charMenu);
    int yx = m_charMenu->insertItem("Use Auto Detected Settings", this, 
 				   SLOT(toggleAutoDetectPlayerSettings(int)));
    m_charMenu->setItemChecked(yx, m_player->useAutoDetectedSettings());
 
    // Character -> Level
-   m_charLevelMenu = new QPopupMenu;
+   m_charLevelMenu = new Q3PopupMenu;
    m_charMenu->insertItem("Choose &Level", m_charLevelMenu);
    m_levelSpinBox = new QSpinBox(1, 75, 1, this, "m_levelSpinBox");
    m_charLevelMenu->insertItem( m_levelSpinBox );
@@ -1088,7 +1091,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_levelSpinBox->setValue(m_player->defaultLevel());
 
    // Character -> Class
-   m_charClassMenu = new QPopupMenu;
+   m_charClassMenu = new Q3PopupMenu;
    m_charMenu->insertItem("Choose &Class", m_charClassMenu);
    for( int i = 0; i < PLAYER_CLASSES; i++)
    {
@@ -1100,7 +1103,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect (m_charClassMenu, SIGNAL(activated(int)), this, SLOT(SetDefaultCharacterClass(int)));
 
    // Character -> Race
-   m_charRaceMenu = new QPopupMenu;
+   m_charRaceMenu = new Q3PopupMenu;
    m_charMenu->insertItem("Choose &Race", m_charRaceMenu);
    for( int i = 0; i < PLAYER_RACES; i++)
    {
@@ -1120,7 +1123,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect (m_charRaceMenu, SIGNAL(activated(int)), this, SLOT(SetDefaultCharacterRace(int)));
 
    // Filters Menu
-   QPopupMenu* filterMenu = new QPopupMenu;
+   Q3PopupMenu* filterMenu = new Q3PopupMenu;
    menuBar()->insertItem( "Fi&lters" , filterMenu);
    filterMenu->setCheckable(true);
 
@@ -1145,7 +1148,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    filterMenu->setItemChecked(x, m_filterNotifications->useCommands());
 
    // Filter -> Log
-   QPopupMenu* filterLogMenu = new QPopupMenu;
+   Q3PopupMenu* filterLogMenu = new Q3PopupMenu;
    filterLogMenu->setCheckable(true);
    filterMenu->insertItem("&Log", filterLogMenu);
    x = filterLogMenu->insertItem( "Alerts");
@@ -1167,7 +1170,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	   this, SLOT(toggle_filter_Log(int)));
 
    // Filter -> Commands
-   QPopupMenu* filterCmdMenu = new QPopupMenu;
+   Q3PopupMenu* filterCmdMenu = new Q3PopupMenu;
    filterMenu->insertItem("&Audio Commands", filterCmdMenu);
    x = filterCmdMenu->insertItem( "Spawn...");
    filterCmdMenu->setItemParameter(x, 1);
@@ -1187,14 +1190,14 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	   this, SLOT(set_filter_AudioCommand(int)));
 
    // Interface Menu
-   QPopupMenu* pInterfaceMenu = new QPopupMenu;
+   Q3PopupMenu* pInterfaceMenu = new Q3PopupMenu;
    menuBar()->insertItem( "&Interface" , pInterfaceMenu);
 
    pInterfaceMenu->insertItem("Hide MenuBar", this, SLOT(toggle_view_menubar()));
 
    // Interface -> Style
    //pStyleMenu = new QPopupMenu;
-   QPopupMenu* pStyleMenu = new QPopupMenu;
+   Q3PopupMenu* pStyleMenu = new Q3PopupMenu;
    pInterfaceMenu->insertItem( "&Style", pStyleMenu);
    pStyleMenu->setCheckable(TRUE);
    x = pStyleMenu->insertItem( "Platinum (Macintosh)");
@@ -1220,7 +1223,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    setTheme(pSEQPrefs->getPrefInt("Theme", section, 2));
 
    // Interface -> Status Bar
-   QPopupMenu* statusBarMenu = new QPopupMenu;
+   Q3PopupMenu* statusBarMenu = new Q3PopupMenu;
    statusBarMenu->setCheckable(true);
    pInterfaceMenu->insertItem("&Status Bar", statusBarMenu);
    statusBarMenu->insertItem("Show/Hide", 
@@ -1266,10 +1269,10 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect (statusBarMenu, SIGNAL(activated(int)), 
 	    this, SLOT(toggle_main_statusbar_Window(int)));
 
-   m_terminalMenu = new QPopupMenu;
+   m_terminalMenu = new Q3PopupMenu;
    pInterfaceMenu->insertItem("&Terminal", m_terminalMenu);
 
-   m_terminalTypeFilterMenu = new QPopupMenu;
+   m_terminalTypeFilterMenu = new Q3PopupMenu;
    m_terminalMenu->insertItem("MessageTypeFilter", m_terminalTypeFilterMenu);
    m_terminalTypeFilterMenu->insertItem("&Enable All", 
 					this, SLOT(enableAllTypeFilters()), 0, 64);
@@ -1296,7 +1299,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect(m_terminalTypeFilterMenu, SIGNAL(activated(int)),
 	   this, SLOT(toggleTypeFilter(int)));
 
-  m_terminalShowUserFilterMenu = new QPopupMenu;
+  m_terminalShowUserFilterMenu = new Q3PopupMenu;
   m_terminalMenu->insertItem("User Message Filter - &Show", m_terminalShowUserFilterMenu);
 
   m_terminalShowUserFilterMenu->insertItem("&Enable All", 
@@ -1305,7 +1308,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			       this, SLOT(disableAllShowUserFilters()), 0, 67);
   m_terminalShowUserFilterMenu->insertSeparator(-1);
 
-  m_terminalHideUserFilterMenu = new QPopupMenu;
+  m_terminalHideUserFilterMenu = new Q3PopupMenu;
   m_terminalMenu->insertItem("User Message Filter - &Hide", m_terminalHideUserFilterMenu);
 
   m_terminalHideUserFilterMenu->insertItem("&Enable All", 
@@ -1364,7 +1367,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    // have to be manually placed in the right positions.
 
    // Interface -> WindowCaption
-   m_windowCaptionMenu = new QPopupMenu;
+   m_windowCaptionMenu = new Q3PopupMenu;
    m_windowMenu->insertItem( "Window &Caption", m_windowCaptionMenu, -1, 0);
    
    x = m_windowCaptionMenu->insertItem("&Main Window...");
@@ -1415,7 +1418,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	    this, SLOT(set_main_WindowCaption(int)));
 
    // Interface -> Window Font
-   QPopupMenu* windowFontMenu = new QPopupMenu;
+   Q3PopupMenu* windowFontMenu = new Q3PopupMenu;
    m_windowMenu->insertItem( "&Font", windowFontMenu, -1, 1);
     
    windowFontMenu->insertItem( "&Application Default...", 
@@ -1487,7 +1490,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_windowMenu->insertSeparator(4);
 
    // Debug menu
-   QPopupMenu* pDebugMenu = new QPopupMenu;
+   Q3PopupMenu* pDebugMenu = new Q3PopupMenu;
    menuBar()->insertItem("&Debug", pDebugMenu);
    pDebugMenu->insertItem("List I&nterface", this, SLOT(listInterfaceInfo()));
    pDebugMenu->insertItem("List S&pawns", this, SLOT(listSpawns()), ALT+CTRL+Key_P);
@@ -2130,7 +2133,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    }
    show();
 
-   QAccel *accel = new QAccel(this);
+   Q3Accel *accel = new Q3Accel(this);
    accel->connectItem( accel->insertItem(CTRL+ALT+Key_S), this, SLOT(toggle_view_statusbar()));
    accel->connectItem( accel->insertItem(CTRL+ALT+Key_T), this, SLOT(toggle_view_menubar()));
 
@@ -2139,7 +2142,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 						QString());
    if (!dockPrefs.isEmpty())
    {
-     QTextStream ts(&dockPrefs, IO_ReadOnly);
+     Q3TextStream ts(&dockPrefs, QIODevice::ReadOnly);
      ts >> *this;
    }
 
@@ -2147,7 +2150,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    // TODO: Add % replacement values and a signal to update, for ip address currently
    // TODO: being monitored.
 
-   QMainWindow::setCaption(pSEQPrefs->getPrefString("Caption", section, 
+   Q3MainWindow::setCaption(pSEQPrefs->getPrefString("Caption", section, 
 						    "ShowEQ - Main (ctrl+alt+t to toggle menubar)"));
 
    // load the format strings for display
@@ -2818,7 +2821,7 @@ void EQInterface::select_main_FormatFile(int id)
   QFileInfo fileInfo = m_dataLocationMgr->findExistingFile(".", formatFile);
 
   QString newFormatFile = 
-    QFileDialog::getOpenFileName(fileInfo.absFilePath(), "*.txt", 
+    Q3FileDialog::getOpenFileName(fileInfo.absFilePath(), "*.txt", 
 				 this, "FormatFile", "Select Format File");
 
   // if the newFormatFile name is not empty, then the user selected a file
@@ -2840,7 +2843,7 @@ void EQInterface::select_main_SpellsFile(int id)
   QFileInfo fileInfo = m_dataLocationMgr->findExistingFile(".", spellsFile);
 
   QString newSpellsFile = 
-    QFileDialog::getOpenFileName(fileInfo.absFilePath(), "*.txt", 
+    Q3FileDialog::getOpenFileName(fileInfo.absFilePath(), "*.txt", 
 				 this, "FormatFile", "Select Format File");
 
   // if the newFormatFile name is not empty, then the user selected a file
@@ -2997,7 +3000,7 @@ EQInterface::savePrefs(void)
      QString tempStr;
 
      QString dockPrefs;
-     QTextStream ts(&dockPrefs, IO_WriteOnly);
+     Q3TextStream ts(&dockPrefs, QIODevice::WriteOnly);
 
      ts << *this;
 
@@ -3020,10 +3023,10 @@ EQInterface::savePrefs(void)
    }
 } // end savePrefs
 
-void EQInterface::saveDockAreaPrefs(QDockArea* a, Dock edge)
+void EQInterface::saveDockAreaPrefs(Q3DockArea* a, Qt::ToolBarDock edge)
 {
-  QPtrList<QDockWindow> l = a->dockWindowList();
-  for (QDockWindow *dw = l.first(); dw; dw = l.next())
+  Q3PtrList<Q3DockWindow> l = a->dockWindowList();
+  for (Q3DockWindow *dw = l.first(); dw; dw = l.next())
   {
     if (dw->inherits("SEQWindow"))
       pSEQPrefs->setPrefInt("Dock", ((SEQWindow*)dw)->preferenceName(), edge);
@@ -3033,7 +3036,7 @@ void EQInterface::saveDockAreaPrefs(QDockArea* a, Dock edge)
 
 void EQInterface::setCaption(const QString& text)
 {
-  QMainWindow::setCaption(text);
+  Q3MainWindow::setCaption(text);
 
   pSEQPrefs->setPrefString("Caption", "Interface", caption());
 }
@@ -3055,7 +3058,7 @@ void EQInterface::loadFormatStrings()
 void
 EQInterface::select_filter_file(void)
 {
-  QString filterFile = QFileDialog::getOpenFileName(m_filterMgr->filterFile(),
+  QString filterFile = Q3FileDialog::getOpenFileName(m_filterMgr->filterFile(),
                                                      QString("ShowEQ Filter Files (*.xml)"),
                                                      0,
                                                      "Select Filter Config..."
@@ -3172,7 +3175,7 @@ void EQInterface::listSpawns (void)
   QString outText;
 
   // open the output data stream
-  QTextStream out(&outText, IO_WriteOnly);
+  Q3TextStream out(&outText, QIODevice::WriteOnly);
   
    // dump the spawns 
   m_spawnShell->dumpSpawns(tSpawn, out);
@@ -3188,7 +3191,7 @@ void EQInterface::listDrops (void)
   QString outText;
 
   // open the output data stream
-  QTextStream out(&outText, IO_WriteOnly);
+  Q3TextStream out(&outText, QIODevice::WriteOnly);
 
   // dump the drops
   m_spawnShell->dumpSpawns(tDrop, out);
@@ -3204,7 +3207,7 @@ void EQInterface::listMapInfo(void)
   QString outText;
 
   // open the output data stream
-  QTextStream out(&outText, IO_WriteOnly);
+  Q3TextStream out(&outText, QIODevice::WriteOnly);
 
   // dump map managers info
   m_mapMgr->dumpInfo(out);
@@ -3229,7 +3232,7 @@ void EQInterface::listInterfaceInfo(void)
   QString outText;
 
   // open the output data stream
-  QTextStream out(&outText, IO_WriteOnly);
+  Q3TextStream out(&outText, QIODevice::WriteOnly);
 
   out << "Map window layout info:" << endl;
   out << "-----------------------" << endl;
@@ -3248,7 +3251,7 @@ void EQInterface::listGroup(void)
   QString outText;
 
   // open the output data stream
-  QTextStream out(&outText, IO_WriteOnly);
+  Q3TextStream out(&outText, QIODevice::WriteOnly);
 
   // dump the drops
   m_groupMgr->dumpInfo(out);
@@ -3265,7 +3268,7 @@ void EQInterface::listGuild(void)
   QString outText;
 
   // open the output data stream
-  QTextStream out(&outText, IO_WriteOnly);
+  Q3TextStream out(&outText, QIODevice::WriteOnly);
 
   // dump the drops
   m_guildShell->dumpMembers(out);
@@ -3286,8 +3289,8 @@ void EQInterface::dumpSpawns (void)
 
   // open the output data stream
   QFile file(logFileInfo.absFilePath());
-  file.open(IO_WriteOnly);
-  QTextStream out(&file);
+  file.open(QIODevice::WriteOnly);
+  Q3TextStream out(&file);
   
   // dump the spawns 
   m_spawnShell->dumpSpawns(tSpawn, out);
@@ -3306,8 +3309,8 @@ void EQInterface::dumpDrops (void)
 
   // open the output data stream
   QFile file(logFileInfo.absFilePath());
-  file.open(IO_WriteOnly);
-  QTextStream out(&file);
+  file.open(QIODevice::WriteOnly);
+  Q3TextStream out(&file);
 
   // dump the drops
   m_spawnShell->dumpSpawns(tDrop, out);
@@ -3327,8 +3330,8 @@ void EQInterface::dumpMapInfo(void)
 
   // open the output data stream
   QFile file(logFileInfo.absFilePath());
-  file.open(IO_WriteOnly);
-  QTextStream out(&file);
+  file.open(QIODevice::WriteOnly);
+  Q3TextStream out(&file);
 
   // dump map managers info
   m_mapMgr->dumpInfo(out);
@@ -3367,8 +3370,8 @@ void EQInterface::dumpSpellBook(void)
 
   // open the output data stream
   QFile file(logFileInfo.absFilePath());
-  file.open(IO_WriteOnly);
-  QTextStream out(&file);
+  file.open(QIODevice::WriteOnly);
+  Q3TextStream out(&file);
   QString txt;
 
   seqInfo("Dumping Spell Book to '%s'\n", 
@@ -3423,8 +3426,8 @@ void EQInterface::dumpGroup(void)
 
   // open the output data stream
   QFile file(logFileInfo.absFilePath());
-  file.open(IO_WriteOnly);
-  QTextStream out(&file);
+  file.open(QIODevice::WriteOnly);
+  Q3TextStream out(&file);
 
   // dump the drops
   m_groupMgr->dumpInfo(out);
@@ -3443,8 +3446,8 @@ void EQInterface::dumpGuild(void)
 
   // open the output data stream
   QFile file(logFileInfo.absFilePath());
-  file.open(IO_WriteOnly);
-  QTextStream out(&file);
+  file.open(QIODevice::WriteOnly);
+  Q3TextStream out(&file);
 
   // dump the drops
   m_guildShell->dumpMembers(out);
@@ -4103,7 +4106,7 @@ EQInterface::select_opcode_file(void)
   QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
   
   logFile = 
-    QFileDialog::getSaveFileName(logFileInfo.absFilePath(),
+    Q3FileDialog::getSaveFileName(logFileInfo.absFilePath(),
 				 "*.log",
 				 this,
 				 "ShowEQ - OpCode Log File");
@@ -4655,9 +4658,9 @@ void EQInterface::saveSelectedSpawnPath(void)
 							false);
 
   QFile mobPathFile(fileInfo.absFilePath());
-  if (mobPathFile.open(IO_Append | IO_WriteOnly))
+  if (mobPathFile.open(QIODevice::Append | QIODevice::WriteOnly))
   {
-    QTextStream out(&mobPathFile);
+    Q3TextStream out(&mobPathFile);
     // append the selected spawns path to the end
     saveSpawnPath(out, m_selectedSpawn);
 
@@ -4675,9 +4678,9 @@ void EQInterface::saveSpawnPaths(void)
 							false);
 
   QFile mobPathFile(fileInfo.absFilePath());
-  if (mobPathFile.open(IO_Truncate | IO_WriteOnly))
+  if (mobPathFile.open(QIODevice::Truncate | QIODevice::WriteOnly))
   {
-    QTextStream out(&mobPathFile);
+    Q3TextStream out(&mobPathFile);
     // map header line
     out << m_zoneMgr->longZoneName() << ","
 	<< m_zoneMgr->shortZoneName() << ",0,0" << endl;
@@ -4697,7 +4700,7 @@ void EQInterface::saveSpawnPaths(void)
   }
 }
 
-void EQInterface::saveSpawnPath(QTextStream& out, const Item* item)
+void EQInterface::saveSpawnPath(Q3TextStream& out, const Item* item)
 {
   if (item == 0)
     return;
@@ -5001,7 +5004,7 @@ void EQInterface::set_opt_save_SpawnFrequency(int frequency)
 void EQInterface::set_opt_save_BaseFilename()
 {
   QString fileName = 
-    QFileDialog::getSaveFileName(showeq_params->saveRestoreBaseFilename, 
+    Q3FileDialog::getSaveFileName(showeq_params->saveRestoreBaseFilename, 
 				 QString::null, this, "SaveBaseFilename",
 				 "Save State Base Filename");
   if (!fileName.isEmpty())
@@ -5342,7 +5345,7 @@ void EQInterface::showMap(int i)
 		  pSEQPrefs->getPrefBool(QString("Dockable") + mapPrefName,
 					 "Interface", true));
 
-    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", m_map[i]->preferenceName(),
+    Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", m_map[i]->preferenceName(),
 					    Left);
     addDockWindow(m_map[i], mapName, edge, true);
     if (!m_isMapDocked[i])
@@ -5401,7 +5404,7 @@ void EQInterface::showMessageWindow(int i)
    setDockEnabled(m_messageWindow[i], 
 		  pSEQPrefs->getPrefBool(QString("Dockable") + prefName,
 					 "Interface", false));
-    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+    Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 					    m_messageWindow[i]->preferenceName(),
 					    Left);
     addDockWindow(m_messageWindow[i], edge, false);
@@ -5438,7 +5441,7 @@ void EQInterface::showSpawnList(void)
 		   pSEQPrefs->getPrefBool("DockableSpawnList",
 					  "Interface", true));
 
-    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+    Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 					    m_spawnList->preferenceName(),
 					    Left);
     addDockWindow(m_spawnList, edge, false);
@@ -5485,7 +5488,7 @@ void EQInterface::showSpawnList2(void)
    setDockEnabled(m_spawnList2, 
 		  pSEQPrefs->getPrefBool("DockableSpawnList2",
 					 "Interface", true));
-    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+    Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 					    m_spawnList2->preferenceName(),
 					    Left);
     addDockWindow(m_spawnList2, edge, false);
@@ -5532,7 +5535,7 @@ void EQInterface::showSpawnPointList(void)
 		     pSEQPrefs->getPrefBool("DockableSpawnPointList",
 					    "Interface", true));
       Dock edge = 
-	(Dock)pSEQPrefs->getPrefInt("Dock", 
+	(Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 				    m_spawnPointList->preferenceName(),
 				    Left);
       addDockWindow(m_spawnPointList, edge, false);
@@ -5571,7 +5574,7 @@ void EQInterface::showStatList(void)
     setDockEnabled(m_statList, 
 		   pSEQPrefs->getPrefBool("DockablePlayerStats",
 					  "Interface", true));
-    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+    Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 					    m_statList->preferenceName(),
 					    Left);
     addDockWindow(m_statList, edge, false);
@@ -5610,7 +5613,7 @@ void EQInterface::showSkillList(void)
     setDockEnabled(m_skillList, 
 		   pSEQPrefs->getPrefBool("DockablePlayerSkills",
 					  "Interface", true));
-    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+    Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 					    m_skillList->preferenceName(),
 					    Left);
     addDockWindow(m_skillList, edge, false);
@@ -5649,7 +5652,7 @@ void EQInterface::showSpellList(void)
     setDockEnabled(m_spellList, 
 		   pSEQPrefs->getPrefBool("DockableSpellList",
 					  "Interface", true));
-    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+    Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 					    m_spellList->preferenceName(),
 					    Left);
     addDockWindow(m_spellList, edge, false);
@@ -5698,7 +5701,7 @@ void EQInterface::showCompass(void)
     setDockEnabled(m_compass, 
 		   pSEQPrefs->getPrefBool("DockableCompass",
 					  "Interface", true));
-    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+    Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 					    m_compass->preferenceName(),
 					    Left);
     addDockWindow(m_compass, edge, false);
@@ -5735,7 +5738,7 @@ void EQInterface::showNetDiag()
     setDockEnabled(m_netDiag, 
 		   pSEQPrefs->getPrefBool("DockableNetDiag",
 					  "Interface", true));
-    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+    Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 					    m_netDiag->preferenceName(),
 					    Bottom);
     addDockWindow(m_netDiag, edge, true);
@@ -5769,7 +5772,7 @@ void EQInterface::showGuildList(void)
     setDockEnabled(m_guildListWindow, 
 		   pSEQPrefs->getPrefBool("DockableGuildListWindow",
 					  "Interface", true));
-    Dock edge = (Dock)pSEQPrefs->getPrefInt("Dock", 
+    Dock edge = (Qt::ToolBarDock)pSEQPrefs->getPrefInt("Dock", 
 					    m_guildListWindow->preferenceName(),
 					    Bottom);
     addDockWindow(m_guildListWindow, edge, true);
@@ -6000,7 +6003,7 @@ void EQInterface::createOPCodeMonitorLog(const QString& opCodeList)
 
 void EQInterface::insertWindowMenu(SEQWindow* window)
 {
-  QPopupMenu* menu = window->menu();
+  Q3PopupMenu* menu = window->menu();
   if (menu)
   {
     // insert the windows menu into the window menu
@@ -6026,12 +6029,12 @@ void EQInterface::removeWindowMenu(SEQWindow* window)
   }
 }
 
-void EQInterface::setDockEnabled(QDockWindow* dw, bool enable)
+void EQInterface::setDockEnabled(Q3DockWindow* dw, bool enable)
 {
-  QMainWindow::setDockEnabled(dw, DockTop, enable);
-  QMainWindow::setDockEnabled(dw, DockBottom, enable);
-  QMainWindow::setDockEnabled(dw, DockLeft, enable);
-  QMainWindow::setDockEnabled(dw, DockRight, enable);
+  Q3MainWindow::setDockEnabled(dw, DockTop, enable);
+  Q3MainWindow::setDockEnabled(dw, DockBottom, enable);
+  Q3MainWindow::setDockEnabled(dw, DockLeft, enable);
+  Q3MainWindow::setDockEnabled(dw, DockRight, enable);
 }
 
 #ifndef QMAKEBUILD

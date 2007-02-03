@@ -1249,7 +1249,7 @@ uint8_t Player::classVal() const
 void Player::savePlayerState(void)
 {
   QFile keyFile(showeq_params->saveRestoreBaseFilename + "Player.dat");
-  if (keyFile.open(IO_WriteOnly))
+  if (keyFile.open(QIODevice::WriteOnly))
   {
     QDataStream d(&keyFile);
 
@@ -1333,7 +1333,7 @@ void Player::restorePlayerState(void)
 {
   QString fileName = showeq_params->saveRestoreBaseFilename + "Player.dat";
   QFile keyFile(fileName);
-  if (keyFile.open(IO_ReadOnly))
+  if (keyFile.open(QIODevice::ReadOnly))
   {
     int i;
     size_t testVal;

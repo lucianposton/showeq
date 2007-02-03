@@ -19,12 +19,14 @@
 #include <qfontdialog.h>
 #include <qpainter.h>
 #include <qlayout.h>
+//Added by qt3to4:
+#include <Q3PopupMenu>
 
 #include "spawnpointlist.h"
 #include "main.h"
 
-SpawnPointListItem::SpawnPointListItem(QListView* parent, const SpawnPoint* sp)
-  : QListViewItem( parent )
+SpawnPointListItem::SpawnPointListItem(Q3ListView* parent, const SpawnPoint* sp)
+  : Q3ListViewItem( parent )
 {
 #ifdef DEBUG
 //      debug( "SpawnItem::SpawnItem()" );
@@ -117,7 +119,7 @@ void SpawnPointListItem::paintCell(QPainter* p, const QColorGroup& cg,
   
   p->setFont(font);
   
-  QListViewItem::paintCell(p, newCg, column, width, alignment);
+  Q3ListViewItem::paintCell(p, newCg, column, width, alignment);
 }
 
 SpawnPointList::SpawnPointList(SpawnMonitor* spawnMonitor, 
@@ -156,7 +158,7 @@ SpawnPointList::SpawnPointList(SpawnMonitor* spawnMonitor,
 
   // put in all the spawn points that might already be present in
   // the spawn monitor
-  QAsciiDictIterator<SpawnPoint> it( m_spawnMonitor->spawnPoints() );
+  Q3AsciiDictIterator<SpawnPoint> it( m_spawnMonitor->spawnPoints() );
   SpawnPoint*             sp;
   while ((sp = it.current()))
   {
@@ -175,10 +177,10 @@ SpawnPointList::SpawnPointList(SpawnMonitor* spawnMonitor,
 	  this, SLOT(clear()));
   connect(m_spawnMonitor, SIGNAL(selectionChanged(const SpawnPoint*)),
 	  this, SLOT(handleSelChanged(const SpawnPoint*)));
-  connect(this, SIGNAL(rightButtonClicked(QListViewItem*, const QPoint&, int)),
-	  this, SLOT(rightButtonClicked(QListViewItem*, const QPoint&, int)));
-  connect(this, SIGNAL( selectionChanged(QListViewItem*)),
-	  this, SLOT(handleSelectItem(QListViewItem*)));
+  connect(this, SIGNAL(rightButtonClicked(Q3ListViewItem*, const QPoint&, int)),
+	  this, SLOT(rightButtonClicked(Q3ListViewItem*, const QPoint&, int)));
+  connect(this, SIGNAL( selectionChanged(Q3ListViewItem*)),
+	  this, SLOT(handleSelectItem(Q3ListViewItem*)));
   m_timer->start(10000L);
 }
 
@@ -189,7 +191,7 @@ void SpawnPointList::setKeepSorted(bool val)
 			 m_keepSorted);
 }
 
-void SpawnPointList::handleSelectItem(QListViewItem* item)
+void SpawnPointList::handleSelectItem(Q3ListViewItem* item)
 {
   const SpawnPoint* sp = NULL;
   
@@ -205,7 +207,7 @@ void SpawnPointList::handleSelectItem(QListViewItem* item)
 
 void SpawnPointList::handleSelChanged(const SpawnPoint* sp)
 {
-  QListViewItemIterator it(this);
+  Q3ListViewItemIterator it(this);
 
   SpawnPointListItem* splitem;
   
@@ -229,7 +231,7 @@ void SpawnPointList::handleSelChanged(const SpawnPoint* sp)
   }
 }
 
-void SpawnPointList::rightButtonClicked(QListViewItem* item, 
+void SpawnPointList::rightButtonClicked(Q3ListViewItem* item, 
 					const QPoint& point, int)
 {
   // popup a context-menu
@@ -339,7 +341,7 @@ void SpawnPointList::refresh()
   bool aboutToPop = false;
 
   // iterate over all the spawn point list items and update them
-  QListViewItemIterator lit(this);
+  Q3ListViewItemIterator lit(this);
   while(lit.current())
   {
     // update the current item
@@ -354,7 +356,7 @@ void SpawnPointList::refresh()
     sort();
 
   // iterate over all the spawn points and check how long till they pop
-  QAsciiDictIterator<SpawnPoint> it(m_spawnMonitor->spawnPoints());
+  Q3AsciiDictIterator<SpawnPoint> it(m_spawnMonitor->spawnPoints());
   SpawnPoint* sp;
   
   while ((sp = it.current()))
@@ -395,7 +397,7 @@ SpawnPointListMenu* SpawnPointList::menu()
 
 SpawnPointListMenu::SpawnPointListMenu(SpawnPointList* spawnPointList,
 				       QWidget* parent, const char* name)
-  : QPopupMenu(parent, name),
+  : Q3PopupMenu(parent, name),
     m_spawnPointList(spawnPointList),
     m_currentItem(NULL)
 {
@@ -406,7 +408,7 @@ SpawnPointListMenu::SpawnPointListMenu(SpawnPointList* spawnPointList,
   insertItem("&Clear Spawn Points...",
 	     m_spawnPointList, SLOT(clearItems(void)));
 
-  QPopupMenu* listColMenu = new QPopupMenu;
+  Q3PopupMenu* listColMenu = new Q3PopupMenu;
   insertItem("Show &Column", listColMenu);
   listColMenu->setCheckable(true);
 
@@ -547,7 +549,7 @@ SpawnPointWindow::~SpawnPointWindow()
 {
 }
 
-QPopupMenu* SpawnPointWindow::menu()
+Q3PopupMenu* SpawnPointWindow::menu()
 {
   // retrieve the spawn point list menu
   SpawnPointListMenu* splMenu = m_spawnPointList->menu();
@@ -556,7 +558,7 @@ QPopupMenu* SpawnPointWindow::menu()
   splMenu->setCurrentItem(0);
 
   // return the menu
-  return (QPopupMenu*)splMenu;
+  return (Q3PopupMenu*)splMenu;
 }
 
 void SpawnPointWindow::savePrefs(void)

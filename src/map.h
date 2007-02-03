@@ -26,21 +26,28 @@
 #include <qlabel.h>
 #include <qtooltip.h>
 #include <qregexp.h>
-#include <qintdict.h>
-#include <qtextstream.h>
+#include <q3intdict.h>
+#include <q3textstream.h>
 #include <qdatetime.h>
 #include <qpen.h>
 #include <qbrush.h>
 
 // includes required for MapMenu
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 
 // includes required for MapFrame
 #include <qlayout.h>
-#include <qvbox.h>
-#include <qhbox.h>
+#include <q3vbox.h>
+#include <q3hbox.h>
 #include <qspinbox.h>
 #include <qlist.h>
+//Added by qt3to4:
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QEvent>
+#include <Q3VBoxLayout>
+#include <Q3Frame>
+#include <QPaintEvent>
 
 #include <time.h>
 #include <sys/time.h>
@@ -102,7 +109,7 @@ class CLineDlg : public QDialog
 
    QComboBox *m_LineColor;
    QLineEdit *m_LineName;
-   QFrame    *m_ColorPreview;
+   Q3Frame    *m_ColorPreview;
  public slots:
    void changeColor(const QString &);
 };
@@ -182,7 +189,7 @@ class MapMgr : public QObject
   void savePrefs(void);
 
   // dump debug info
-  void dumpInfo(QTextStream& out);
+  void dumpInfo(Q3TextStream& out);
 
  signals:
   void mapLoaded(void);
@@ -196,7 +203,7 @@ class MapMgr : public QObject
   QWidget* m_dialogParent;
   CLineDlg *m_dlgLineProps;
   MapData m_mapData;
-  QIntDict<uint16_t> m_spawnAggroRange;
+  Q3IntDict<uint16_t> m_spawnAggroRange;
    
   QString m_curLineColor;
   QString m_curLineName;
@@ -205,7 +212,7 @@ class MapMgr : public QObject
 
 //----------------------------------------------------------------------
 // MapMenu
-class MapMenu : public QPopupMenu
+class MapMenu : public Q3PopupMenu
 {
   Q_OBJECT
 
@@ -532,7 +539,7 @@ class Map :public QWidget
   void setShowZoneSafePoint(bool val);
 
   // dump debug info
-  void dumpInfo(QTextStream& out);
+  void dumpInfo(Q3TextStream& out);
 
   void showMapIconDialog();
 
@@ -683,7 +690,7 @@ class MapFrame : public SEQWindow
 	    QWidget* parent = 0, const char* name = "mapframe");
    virtual ~MapFrame();
 
-   virtual QPopupMenu* menu();
+   virtual Q3PopupMenu* menu();
 
    Map* map() { return m_map; }
    const QString& mapPreferenceName() { return m_mapPreferenceName; }
@@ -698,7 +705,7 @@ class MapFrame : public SEQWindow
    virtual void savePrefs(void);
 
   // dump debug info
-  void dumpInfo(QTextStream& out);
+  void dumpInfo(Q3TextStream& out);
 
  protected slots:
    void init_Menu(void);
@@ -726,24 +733,24 @@ class MapFrame : public SEQWindow
 
    QString m_mapPreferenceName;
 
-   QVBoxLayout* m_vertical;
-   QHBox* m_topControlBox;
-   QHBox* m_zoomBox;
+   Q3VBoxLayout* m_vertical;
+   Q3HBox* m_topControlBox;
+   Q3HBox* m_zoomBox;
    QSpinBox* m_zoom;
-   QHBox* m_playerLocationBox;
+   Q3HBox* m_playerLocationBox;
    QLabel* m_playerLocation;
-   QHBox* m_mouseLocationBox;
+   Q3HBox* m_mouseLocationBox;
    QLabel* m_mouseLocation;
-   QHBox* m_filterBox;
+   Q3HBox* m_filterBox;
    MapFilterLineEdit* m_filter;
 
-   QHBox* m_bottomControlBox;
-   QHBox* m_frameRateBox;
+   Q3HBox* m_bottomControlBox;
+   Q3HBox* m_frameRateBox;
    QSpinBox* m_frameRate;
-   QHBox* m_panBox;
+   Q3HBox* m_panBox;
    QSpinBox* m_panX;
    QSpinBox* m_panY;
-   QHBox* m_depthControlBox;
+   Q3HBox* m_depthControlBox;
    QSpinBox* m_head;
    QSpinBox* m_floor;
    QList<QWidget> m_statusWidgets;

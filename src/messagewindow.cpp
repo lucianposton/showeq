@@ -13,7 +13,7 @@
 #include "messages.h"
 #include "main.h"
 
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 #include <qinputdialog.h>
 #include <qfontdialog.h>
 #include <qcolordialog.h>
@@ -23,15 +23,22 @@
 #include <qcheckbox.h>
 #include <qlabel.h>
 #include <qlineedit.h>
-#include <qgroupbox.h>
-#include <qfiledialog.h>
+#include <q3groupbox.h>
+#include <q3filedialog.h>
 #include <qfile.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <QKeyEvent>
+#include <Q3GridLayout>
+#include <Q3Frame>
+#include <QMouseEvent>
+#include <QEvent>
 
 //---------------------------------------------------------------------- 
 // MessageBrowser
 MessageBrowser::MessageBrowser(QWidget* parent, const char* name)
-  : QTextEdit(parent, name)
+  : Q3TextEdit(parent, name)
 {
 }
 
@@ -45,7 +52,7 @@ bool MessageBrowser::eventFilter(QObject *o, QEvent *e)
   }
 #endif // ZBTEPM
   if (e->type() != QEvent::MouseButtonPress)
-    return QTextEdit::eventFilter(o, e);
+    return Q3TextEdit::eventFilter(o, e);
 
   QMouseEvent* m = (QMouseEvent*)e;
 
@@ -56,7 +63,7 @@ bool MessageBrowser::eventFilter(QObject *o, QEvent *e)
     return true;
   }
 
-  return QTextEdit::eventFilter(o, e);
+  return Q3TextEdit::eventFilter(o, e);
 }
 
 void MessageBrowser::keyPressEvent(QKeyEvent* e)
@@ -84,7 +91,7 @@ void MessageBrowser::keyPressEvent(QKeyEvent* e)
     }
   };
   
-  QTextEdit::keyPressEvent(e);
+  Q3TextEdit::keyPressEvent(e);
 }
 
 //----------------------------------------------------------------------
@@ -100,7 +107,7 @@ MessageFindDialog::MessageFindDialog(MessageBrowser* messageWindow,
   setCaption(caption);
   
   // setup the GUI
-  QGridLayout* grid = new QGridLayout(this, 5, 2);
+  Q3GridLayout* grid = new Q3GridLayout(this, 5, 2);
 
   // sets margin around the grid
   grid->setMargin(5);
@@ -120,7 +127,7 @@ MessageFindDialog::MessageFindDialog(MessageBrowser* messageWindow,
   m_findBackwards = new QCheckBox("Find &Backwards", this);
   grid->addWidget(m_findBackwards, 3, 1);
 
-  QHBoxLayout* layout = new QHBoxLayout(grid);
+  Q3HBoxLayout* layout = new Q3HBoxLayout(grid);
   grid->addMultiCell(layout, 5, 5, 0, 2);
   layout->addStretch();
   m_find = new QPushButton("&Find", this);
@@ -233,7 +240,7 @@ MessageTypeStyleDialog::MessageTypeStyleDialog(MessageTypeStyle& style,
   setCaption(caption);
   
   // setup the GUI
-  QGridLayout* grid = new QGridLayout(this, 6, 2);
+  Q3GridLayout* grid = new Q3GridLayout(this, 6, 2);
 
   // sets margin around the grid
   grid->setMargin(10);
@@ -279,13 +286,13 @@ MessageTypeStyleDialog::MessageTypeStyleDialog(MessageTypeStyle& style,
 
   grid->addRowSpacing(3, 10);
 
-  QGroupBox* exampleBox = new QGroupBox(1, Horizontal, "Example", 
+  Q3GroupBox* exampleBox = new Q3GroupBox(1, Horizontal, "Example", 
 					this, "examplebox");
   grid->addMultiCellWidget(exampleBox, 4, 4, 0, 2);
 
   m_example = new QLabel(caption, exampleBox, "example");
-  m_example->setFrameShape(QFrame::Box);
-  m_example->setFrameShadow(QFrame::Sunken);
+  m_example->setFrameShape(Q3Frame::Box);
+  m_example->setFrameShadow(Q3Frame::Sunken);
   if (m_style.color().isValid())
     m_example->setPaletteForegroundColor(m_style.color());
   else
@@ -301,7 +308,7 @@ MessageTypeStyleDialog::MessageTypeStyleDialog(MessageTypeStyle& style,
 
   grid->addRowSpacing(5, 0);
 
-  QHBoxLayout* layout = new QHBoxLayout(grid);
+  Q3HBoxLayout* layout = new Q3HBoxLayout(grid);
   grid->addMultiCell(layout, 6, 6, 0, 2);
   layout->addStretch();
   QPushButton* ok = new QPushButton("OK", this);
@@ -401,8 +408,8 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
     m_enabledTypes(0xFFFFFFFFFFFFFFFFULL),
     m_enabledShowUserFilters(0),
     m_enabledHideUserFilters(0),
-    m_defaultColor(black),
-    m_defaultBGColor(white),
+    m_defaultColor(Qt::black),
+    m_defaultBGColor(Qt::white),
     m_dateTimeFormat("hh:mm"),
     m_eqDateTimeFormat("ddd M/d/yyyy h:mm"),
     m_typeStyles(0),
@@ -456,7 +463,7 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
   setWidget(m_messageWindow);
   
   // set the message window frame style
-  m_messageWindow->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+  m_messageWindow->setFrameStyle(Q3Frame::Panel | Q3Frame::Sunken);
 
   // set the current font
   m_messageWindow->setCurrentFont(font());
@@ -476,10 +483,10 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
 
   // set the word wrap 
   m_messageWindow->setWordWrap(m_wrapText ? 
-			       QTextEdit::WidgetWidth : QTextEdit::NoWrap);
+			       Q3TextEdit::WidgetWidth : Q3TextEdit::NoWrap);
 
   // set the wrap policy to break at space
-  m_messageWindow->setWrapPolicy(QTextEdit::AtWhiteSpace);
+  m_messageWindow->setWrapPolicy(Q3TextEdit::AtWhiteSpace);
 
   // connect to the Messages signal(s)
   connect(m_messages, SIGNAL(newMessage(const MessageEntry&)),
@@ -504,10 +511,10 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
   connect(m_messageWindow, SIGNAL(lockRequest()),
 	  this, SLOT(toggleLockedText()));
 
-  m_menu = new QPopupMenu;
-  QPopupMenu* typeStyleMenu = new QPopupMenu;
+  m_menu = new Q3PopupMenu;
+  Q3PopupMenu* typeStyleMenu = new Q3PopupMenu;
 
-  m_typeFilterMenu = new QPopupMenu;
+  m_typeFilterMenu = new Q3PopupMenu;
   m_menu->insertItem("Message &Type Filter - Show", m_typeFilterMenu);
 
   m_typeFilterMenu->insertItem("&Enable All", 
@@ -538,7 +545,7 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
   connect(typeStyleMenu, SIGNAL(activated(int)),
 	  this, SLOT(setTypeStyle(int)));
 
-  m_showUserFilterMenu = new QPopupMenu;
+  m_showUserFilterMenu = new Q3PopupMenu;
   m_menu->insertItem("User Message Filter - &Show", m_showUserFilterMenu);
 
   m_showUserFilterMenu->insertItem("&Enable All", 
@@ -547,7 +554,7 @@ MessageWindow::MessageWindow(Messages* messages, MessageFilters* filters,
 			       this, SLOT(disableAllShowUserFilters()), 0, 67);
   m_showUserFilterMenu->insertSeparator(-1);
 
-  m_hideUserFilterMenu = new QPopupMenu;
+  m_hideUserFilterMenu = new Q3PopupMenu;
   m_menu->insertItem("User Message Filter - &Hide", m_hideUserFilterMenu);
 
   m_hideUserFilterMenu->insertItem("&Enable All", 
@@ -618,7 +625,7 @@ MessageWindow::~MessageWindow()
   delete [] m_typeStyles;
 }
 
-QPopupMenu* MessageWindow::menu()
+Q3PopupMenu* MessageWindow::menu()
 {
   return m_menu;
 }
@@ -743,7 +750,7 @@ void MessageWindow::refreshMessages(void)
   m_messageWindow->setCursorPosition(0, 0);
 
   // move the cursor to the end of the document
-  m_messageWindow->moveCursor(QTextEdit::MoveEnd, false);
+  m_messageWindow->moveCursor(Q3TextEdit::MoveEnd, false);
 
   // iterate over the message list and add the messages
   MessageList::const_iterator it;
@@ -767,7 +774,7 @@ void MessageWindow::refreshMessages(void)
   m_messageWindow->unsetCursor();
 
   // move the cursor to the end of the document
-  m_messageWindow->moveCursor(QTextEdit::MoveEnd, false);
+  m_messageWindow->moveCursor(Q3TextEdit::MoveEnd, false);
 
   // move the cursor to the end of the document
   m_messageWindow->ensureCursorVisible();
@@ -799,16 +806,16 @@ void MessageWindow::messageFilterDialog(void)
 void MessageWindow::saveText(void)
 {
   QString fileName = 
-    QFileDialog::getSaveFileName("", "*.txt", this,
+    Q3FileDialog::getSaveFileName("", "*.txt", this,
 				 "ShowEQ - Message Text File");
 
   if (fileName.isEmpty())
     return;
 
   QFile file( fileName ); // Write the text to a file
-  if ( file.open( IO_WriteOnly ) ) 
+  if ( file.open( QIODevice::WriteOnly ) ) 
   {
-    QTextStream stream( &file );
+    Q3TextStream stream( &file );
 
     // save all the paragraphs
     //   ZBNOTE: unfortunately just using ->text() doesn't work.
@@ -1036,7 +1043,7 @@ void MessageWindow::toggleWrapText(int id)
 
   // set the wrap policy according to the setting
   m_messageWindow->setWordWrap(m_wrapText ? 
-			       QTextEdit::WidgetWidth : QTextEdit::NoWrap);
+			       Q3TextEdit::WidgetWidth : Q3TextEdit::NoWrap);
 }
 
 void MessageWindow::setTypeStyle(int id)

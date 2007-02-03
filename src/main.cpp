@@ -36,7 +36,7 @@
 #undef __GNU_LIBRARY__
 #endif
 
-#include <qaccel.h>
+#include <q3accel.h>
 #if 1 // ZBTEMP
 #include <qdir.h>
 #endif

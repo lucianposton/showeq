@@ -311,7 +311,7 @@ bool SpawnShell::updateRuntimeFilterFlags(Item* item)
   return false;
 }
 
-void SpawnShell::dumpSpawns(spawnItemType type, QTextStream& out)
+void SpawnShell::dumpSpawns(spawnItemType type, Q3TextStream& out)
 {
    ItemIterator it(getMap(type));
 
@@ -1344,7 +1344,7 @@ void SpawnShell::refilterSpawnsRuntime(spawnItemType type)
 void SpawnShell::saveSpawns(void)
 {
   QFile keyFile(showeq_params->saveRestoreBaseFilename + "Spawns.dat");
-  if (keyFile.open(IO_WriteOnly))
+  if (keyFile.open(QIODevice::WriteOnly))
   {
     QDataStream d(&keyFile);
 
@@ -1391,7 +1391,7 @@ void SpawnShell::restoreSpawns(void)
 {
   QString fileName = showeq_params->saveRestoreBaseFilename + "Spawns.dat";
   QFile keyFile(fileName);
-  if (keyFile.open(IO_ReadOnly))
+  if (keyFile.open(QIODevice::ReadOnly))
   {
     size_t i;
     size_t testVal;

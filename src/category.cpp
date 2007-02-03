@@ -26,6 +26,10 @@
 #include <stdio.h>
 
 #include<qcolordialog.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <QLabel>
+#include <Q3VBoxLayout>
 
 // ------------------------------------------------------
 // Category
@@ -82,12 +86,12 @@ CategoryDlg::CategoryDlg(QWidget *parent, QString name)
    QFont labelFont;
    labelFont.setBold(true);
 
-   QBoxLayout* topLayout = new QVBoxLayout(this);
-   QBoxLayout* row4Layout = new QHBoxLayout(topLayout);
-   QBoxLayout* row3Layout = new QHBoxLayout(topLayout);
-   QBoxLayout* row2Layout = new QHBoxLayout(topLayout);
-   QBoxLayout* row1Layout = new QHBoxLayout(topLayout);
-   QBoxLayout* row0Layout = new QHBoxLayout(topLayout);
+   Q3BoxLayout* topLayout = new Q3VBoxLayout(this);
+   Q3BoxLayout* row4Layout = new Q3HBoxLayout(topLayout);
+   Q3BoxLayout* row3Layout = new Q3HBoxLayout(topLayout);
+   Q3BoxLayout* row2Layout = new Q3HBoxLayout(topLayout);
+   Q3BoxLayout* row1Layout = new Q3HBoxLayout(topLayout);
+   Q3BoxLayout* row0Layout = new Q3HBoxLayout(topLayout);
 
    QLabel *colorLabel = new QLabel ("Color", this);
    colorLabel->setFont(labelFont);

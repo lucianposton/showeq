@@ -41,7 +41,7 @@
 
 #include <time.h>
 #include <qobject.h>
-#include <qasciidict.h>
+#include <q3asciidict.h>
 #include "spawn.h"
 #include "zonemgr.h"
 #include "spawnshell.h"
@@ -104,8 +104,8 @@ public:
 			     const char* name = "spawnmonitor" );
   virtual ~SpawnMonitor();
  
-  const QAsciiDict<SpawnPoint>& spawnPoints() { return m_points; }
-  const QAsciiDict<SpawnPoint>& spawns() { return m_spawns; }
+  const Q3AsciiDict<SpawnPoint>& spawnPoints() { return m_points; }
+  const Q3AsciiDict<SpawnPoint>& spawns() { return m_spawns; }
   const SpawnPoint* selected() { return m_selected; }
 
 public slots:
@@ -133,8 +133,8 @@ protected:
   const DataLocationMgr* m_dataLocMgr;
   SpawnShell* m_spawnShell;
   QString m_zoneName;
-  QAsciiDict<SpawnPoint> m_spawns;
-  QAsciiDict<SpawnPoint> m_points;
+  Q3AsciiDict<SpawnPoint> m_spawns;
+  Q3AsciiDict<SpawnPoint> m_points;
   const SpawnPoint* m_selected;
   bool m_modified;
 };

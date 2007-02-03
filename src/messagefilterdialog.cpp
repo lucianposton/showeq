@@ -18,21 +18,26 @@
 #include <qstring.h>
 #include <qregexp.h>
 #include <qlayout.h>
-#include <qgroupbox.h>
+#include <q3groupbox.h>
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qpushbutton.h>
-#include <qlistbox.h>
+#include <q3listbox.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3GridLayout>
+#include <Q3Frame>
+#include <Q3VBoxLayout>
 
 //----------------------------------------------------------------------
 // MessageFilterListBoxText
-class MessageFilterListBoxText : public QListBoxText
+class MessageFilterListBoxText : public Q3ListBoxText
 {
 public:
-  MessageFilterListBoxText(QListBox * listbox, 
+  MessageFilterListBoxText(Q3ListBox * listbox, 
 			   const QString & text = QString::null, 
 			   uint32_t data = 0);
-  MessageFilterListBoxText(QListBox * listbox, QListBoxItem* after,
+  MessageFilterListBoxText(Q3ListBox * listbox, Q3ListBoxItem* after,
 			   const QString & text = QString::null, 
 			   uint32_t data = 0);
   virtual ~MessageFilterListBoxText();
@@ -44,19 +49,19 @@ protected:
   uint32_t m_data;
 };
 
-MessageFilterListBoxText::MessageFilterListBoxText(QListBox * listbox, 
+MessageFilterListBoxText::MessageFilterListBoxText(Q3ListBox * listbox, 
 						   const QString & text, 
 						   uint32_t data)
-  : QListBoxText(listbox, text),
+  : Q3ListBoxText(listbox, text),
     m_data(data)
 {
 }
 
-MessageFilterListBoxText::MessageFilterListBoxText(QListBox* listbox, 
-						   QListBoxItem* after,
+MessageFilterListBoxText::MessageFilterListBoxText(Q3ListBox* listbox, 
+						   Q3ListBoxItem* after,
 						   const QString& text, 
 						   uint32_t data)
-  : QListBoxText(listbox, text, after),
+  : Q3ListBoxText(listbox, text, after),
     m_data(data)
 {
 }
@@ -71,7 +76,7 @@ MessageFilterDialog::MessageFilterDialog(MessageFilters* filters,
 					 const QString& caption,
 					 QWidget* parent,
 					 const char* name)
-  : QDialog(parent, name, false, WType_Dialog),
+  : QDialog(parent, name, false, Qt::WType_Dialog),
     m_filters(filters), 
     m_currentFilterNum(0xFF),
     m_currentFilter(0)
@@ -90,34 +95,34 @@ MessageFilterDialog::MessageFilterDialog(MessageFilters* filters,
 	  this, SLOT(addedFilter(uint32_t, uint8_t, const MessageFilter&)));
 
   // setup the dialog
-  QVBoxLayout* outerLayout = new QVBoxLayout(this, 5, -1, "outerlayout");
-  QHBoxLayout* columnLayout = new QHBoxLayout(outerLayout, -1, "columns");
-  QVBoxLayout* column1Layout = new QVBoxLayout(5, "column1");
+  Q3VBoxLayout* outerLayout = new Q3VBoxLayout(this, 5, -1, "outerlayout");
+  Q3HBoxLayout* columnLayout = new Q3HBoxLayout(outerLayout, -1, "columns");
+  Q3VBoxLayout* column1Layout = new Q3VBoxLayout(5, "column1");
   columnLayout->addLayout(column1Layout, 1);
 
   // layout 1st column
   QLabel* label = new QLabel("&Existing Filters", this);
   column1Layout->addWidget(label, 1, AlignCenter);
 
-  m_existingFilters = new QListBox(this, "existingfilters");
+  m_existingFilters = new Q3ListBox(this, "existingfilters");
   column1Layout->addWidget(m_existingFilters, 10);
   label->setBuddy(m_existingFilters);
-  m_existingFilters->setSelectionMode(QListBox::Single);
-  connect(m_existingFilters, SIGNAL(selectionChanged(QListBoxItem*)),
-	  this, SLOT(existingFilterSelectionChanged(QListBoxItem*))); 
+  m_existingFilters->setSelectionMode(Q3ListBox::Single);
+  connect(m_existingFilters, SIGNAL(selectionChanged(Q3ListBoxItem*)),
+	  this, SLOT(existingFilterSelectionChanged(Q3ListBoxItem*))); 
 
   m_new = new QPushButton("Ne&w", this);
   column1Layout->addWidget(m_new, 1, AlignCenter);
   connect(m_new, SIGNAL(clicked()),
 	  this, SLOT(newFilter()));
 
-  m_filterGroup = new QGroupBox(1, Vertical, 
+  m_filterGroup = new Q3GroupBox(1, Vertical, 
 				"New &Filter", this, "filtergroup");
   columnLayout->addWidget(m_filterGroup, 5);
 
-  QFrame* dummy = new QFrame(m_filterGroup, "dummy");
+  Q3Frame* dummy = new Q3Frame(m_filterGroup, "dummy");
 
-  QGridLayout* filterLayout = new QGridLayout(dummy, 8, 3, 5, -1, "filterlayout");
+  Q3GridLayout* filterLayout = new Q3GridLayout(dummy, 8, 3, 5, -1, "filterlayout");
   
   label = new QLabel("&Name", dummy);
   filterLayout->addWidget(label, 0, 0, AlignLeft | AlignVCenter);
@@ -137,10 +142,10 @@ MessageFilterDialog::MessageFilterDialog(MessageFilters* filters,
 
   label = new QLabel("&Message Types", dummy);
   filterLayout->addWidget(label, 2, 0, AlignLeft | AlignVCenter);
-  m_messageTypes = new QListBox(dummy, "messagetypes");
+  m_messageTypes = new Q3ListBox(dummy, "messagetypes");
   filterLayout->addMultiCellWidget(m_messageTypes, 2, 6, 1, 2);
   label->setBuddy(m_messageTypes);
-  m_messageTypes->setSelectionMode(QListBox::Multi);
+  m_messageTypes->setSelectionMode(Q3ListBox::Multi);
   connect(m_messageTypes, SIGNAL(selectionChanged()),
 	  this, SLOT(messageTypeSelectionChanged()));
 
@@ -208,7 +213,7 @@ void MessageFilterDialog::addFilter()
   uint64_t types = 0;
 
   // iterate over the message types
-  for (QListBoxItem* currentLBT = m_messageTypes->firstItem();
+  for (Q3ListBoxItem* currentLBT = m_messageTypes->firstItem();
        currentLBT;
        currentLBT = currentLBT->next())
   {
@@ -240,7 +245,7 @@ void MessageFilterDialog::addFilter()
     m_currentFilter = m_filters->filter(m_currentFilterNum);
 
     // iterate over the existing filters
-    for (QListBoxItem* currentLBT = m_existingFilters->firstItem();
+    for (Q3ListBoxItem* currentLBT = m_existingFilters->firstItem();
 	 currentLBT;
 	 currentLBT = currentLBT->next())
     {
@@ -302,7 +307,7 @@ void MessageFilterDialog::messageTypeSelectionChanged()
   checkState();
 }
 
-void MessageFilterDialog::existingFilterSelectionChanged(QListBoxItem * item)
+void MessageFilterDialog::existingFilterSelectionChanged(Q3ListBoxItem * item)
 {
   if (item)
   {
@@ -322,7 +327,7 @@ void MessageFilterDialog::existingFilterSelectionChanged(QListBoxItem * item)
     // select all the message types
     uint64_t messageTypes = m_currentFilter->types();
     uint32_t messageType;
-    for (QListBoxItem* currentLBT = m_messageTypes->firstItem();
+    for (Q3ListBoxItem* currentLBT = m_messageTypes->firstItem();
 	 currentLBT;
 	 currentLBT = currentLBT->next())
     {
@@ -340,7 +345,7 @@ void MessageFilterDialog::existingFilterSelectionChanged(QListBoxItem * item)
 void MessageFilterDialog::removedFilter(uint32_t mask, uint8_t filter)
 {
   // iterate over all the existing filters
-  for (QListBoxItem* currentLBT = m_existingFilters->firstItem();
+  for (Q3ListBoxItem* currentLBT = m_existingFilters->firstItem();
        currentLBT;
        currentLBT = currentLBT->next())
   {
@@ -368,7 +373,7 @@ void MessageFilterDialog::addedFilter(uint32_t mask, uint8_t filterid,
   }
 
   // iterate over all the existing filters
-  for (QListBoxItem* currentLBT = m_existingFilters->firstItem();
+  for (Q3ListBoxItem* currentLBT = m_existingFilters->firstItem();
        currentLBT;
        currentLBT = currentLBT->next())
   {
@@ -413,7 +418,7 @@ void MessageFilterDialog::checkState()
 	QRegExp(m_pattern->text()).isValid())
     {
       // iterate over all the message types
-      for (QListBoxItem* currentLBT = m_messageTypes->firstItem();
+      for (Q3ListBoxItem* currentLBT = m_messageTypes->firstItem();
 	   currentLBT;
 	   currentLBT = currentLBT->next())
       {
@@ -446,7 +451,7 @@ void MessageFilterDialog::checkState()
 	!m_pattern->text().isEmpty())
     {
       // iterate over all the message types
-      for (QListBoxItem* currentLBT = m_messageTypes->firstItem();
+      for (Q3ListBoxItem* currentLBT = m_messageTypes->firstItem();
 	   currentLBT;
 	   currentLBT = currentLBT->next())
       {

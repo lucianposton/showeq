@@ -16,7 +16,7 @@
 #define SPAWNPOINTLIST_H
 
 #include <qtimer.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 
 #include "seqlistview.h"
 #include "seqwindow.h"
@@ -39,10 +39,10 @@ class SpawnPointListItem;
 class SpawnPointListMenu;
 class SpawnPointWindow;
 
-class SpawnPointListItem: public QListViewItem
+class SpawnPointListItem: public Q3ListViewItem
 {
 public:
-  SpawnPointListItem(QListView* parent, const SpawnPoint* spawn);
+  SpawnPointListItem(Q3ListView* parent, const SpawnPoint* spawn);
   virtual ~SpawnPointListItem();
 
   void update(void);
@@ -61,7 +61,7 @@ public:
 
 //--------------------------------------------------
 // SpawnListMenu
-class SpawnPointListMenu : public QPopupMenu
+class SpawnPointListMenu : public Q3PopupMenu
 {
    Q_OBJECT
 
@@ -101,12 +101,12 @@ class SpawnPointList : public SEQListView
   void setKeepSorted(bool val);
 
  public slots:
-  void rightButtonClicked(QListViewItem*, const QPoint&, int);
+  void rightButtonClicked(Q3ListViewItem*, const QPoint&, int);
   void renameItem(const SpawnPointListItem* item);
   void deleteItem(const SpawnPointListItem* item);
   void clearItems(void);
   void refresh();
-  void handleSelectItem(QListViewItem* item);
+  void handleSelectItem(Q3ListViewItem* item);
   void newSpawnPoint(const SpawnPoint* sp);
   void clear();
   void handleSelChanged(const SpawnPoint* sp);
@@ -127,7 +127,7 @@ class SpawnPointWindow : public SEQWindow
   SpawnPointWindow(SpawnMonitor* spawnMonitor, 
 		   QWidget* parent = 0, const char* name = 0);
   ~SpawnPointWindow();
-  virtual QPopupMenu* menu();
+  virtual Q3PopupMenu* menu();
 
   SpawnPointList* spawnPointList() { return m_spawnPointList; }
 

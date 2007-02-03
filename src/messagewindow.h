@@ -12,9 +12,15 @@
 
 #include <stdint.h>
 
-#include <qtextedit.h>
+#include <q3textedit.h>
 #include <qregexp.h>
 #include <qdialog.h>
+//Added by qt3to4:
+#include <QLabel>
+#include <QMouseEvent>
+#include <Q3PopupMenu>
+#include <QKeyEvent>
+#include <QEvent>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -24,14 +30,14 @@ class MessageFilters;
 class Messages;
 class MessageFilterDialog;
 
-class QPopupMenu;
+class Q3PopupMenu;
 class QLineEdit;
 class QCheckBox;
 class QLabel;
 
 //----------------------------------------------------------------------
 // MessageBrowser
-class MessageBrowser : public QTextEdit
+class MessageBrowser : public Q3TextEdit
 {
   Q_OBJECT
  public:
@@ -148,7 +154,7 @@ class MessageWindow : public SEQWindow
 		QWidget* parent = 0, const char* name = 0);
   ~MessageWindow();
 
-  virtual QPopupMenu* menu();
+  virtual Q3PopupMenu* menu();
   
  public slots:
   void newMessage(const MessageEntry& message);
@@ -189,10 +195,10 @@ class MessageWindow : public SEQWindow
   Messages* m_messages;
   MessageFilters* m_messageFilters;
   MessageBrowser* m_messageWindow;
-  QPopupMenu* m_menu;
-  QPopupMenu* m_typeFilterMenu;
-  QPopupMenu* m_showUserFilterMenu;
-  QPopupMenu* m_hideUserFilterMenu;
+  Q3PopupMenu* m_menu;
+  Q3PopupMenu* m_typeFilterMenu;
+  Q3PopupMenu* m_showUserFilterMenu;
+  Q3PopupMenu* m_hideUserFilterMenu;
   int m_id_lockText;
   MessageFindDialog* m_findDialog;
   MessageFilterDialog* m_filterDialog;
