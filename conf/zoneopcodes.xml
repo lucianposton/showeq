@@ -11,7 +11,7 @@
         <comment>old CharProfileCode</comment>
         <payload dir="server" typename="charProfileStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="7772" name="OP_ZoneEntry" updated="06/13/06">
+    <opcode id="61d6" name="OP_ZoneEntry" updated="02/13/07">
         <comment>old ZoneEntryCode</comment>
         <payload dir="client" typename="ClientZoneEntryStruct" sizechecktype="match"/>
         <payload dir="server" typename="ServerZoneEntryStruct" sizechecktype="match"/>
@@ -19,7 +19,7 @@
     <opcode id="740b" name="OP_AckPacket" updated="06/13/06">
         <comment>Appears to be generic ack at the presentation level</comment>
     </opcode>
-    <opcode id="35c0" name="OP_ZoneSpawns" updated="06/13/06">
+    <opcode id="0e13" name="OP_ZoneSpawns" updated="02/13/07">
         <comment>old ZoneSpawnsCode</comment>
         <payload dir="server" typename="spawnStruct" sizechecktype="modulus"/>
     </opcode>
@@ -102,7 +102,7 @@
         <comment></comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="5026" name="OP_GuildMOTD" updated="06/13/06">
+    <opcode id="66a4" name="OP_GuildMOTD" updated="02/13/07">
         <comment>GuildMOTD</comment>
         <payload dir="server" typename="guildMOTDStruct" sizechecktype="none"/>
     </opcode>
@@ -130,11 +130,11 @@
         <comment>old MobUpdateCode</comment>
         <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
     </opcode>
-    <opcode id="6f3b" name="OP_NewSpawn" updated="06/13/06">
+    <opcode id="2bf1" name="OP_NewSpawn" updated="02/13/07">
         <comment>old NewSpawnCode</comment>
         <payload dir="server" typename="spawnStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="40d0" name="OP_DeleteSpawn" updated="06/13/06">
+    <opcode id="79a0" name="OP_DeleteSpawn" updated="02/13/07">
         <comment>old DeleteSpawnCode</comment>
         <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
     </opcode>
@@ -272,11 +272,11 @@
     <opcode id="4fc7" name="OP_LoadSpellSet" updated="06/13/05">
         <comment>/mem spellsetname</comment>
     </opcode>
-    <opcode id="181e" name="OP_SwapSpell" updated="06/13/06">
+    <opcode id="518a" name="OP_SwapSpell" updated="02/13/07">
         <comment>old TradeSpellBookSlotsCode</comment>
         <payload dir="both" typename="tradeSpellBookSlotsStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="5f68" name="OP_MemorizeSpell" updated="06/13/06">
+    <opcode id="509f" name="OP_MemorizeSpell" updated="02/13/07">
         <comment>old MemSpellCode</comment>
         <payload dir="both" typename="memSpellStruct" sizechecktype="match"/>
     </opcode>
@@ -289,7 +289,7 @@
         <payload dir="both" typename="inspectDataStruct" sizechecktype="match"/>
     </opcode>
 
-    <opcode id="5644" name="OP_Emote" updated="06/13/06">
+    <opcode id="40d0" name="OP_Emote" updated="02/13/07">
         <comment>old EmoteTextCode</comment>
         <payload dir="both" typename="emoteTextStruct" sizechecktype="none"/>
     </opcode>
@@ -297,11 +297,11 @@
         <comment>old SimpleMessageCode</comment>
         <payload dir="server" typename="simpleMessageStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="771d" name="OP_FormattedMessage" updated="06/13/06">
+    <opcode id="1dab" name="OP_FormattedMessage" updated="02/13/07">
         <comment>old FormattedMessageCode</comment>
         <payload dir="server" typename="formattedMessageStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="0b5a" name="OP_CommonMessage" updated="06/13/06">
+    <opcode id="0b5a" name="OP_CommonMessage" updated="02/13/07">
         <comment>old ChannelMessageCode</comment>
         <payload dir="both" typename="channelMessageStruct" sizechecktype="none"/>
     </opcode>
@@ -309,11 +309,11 @@
         <comment>Communicate textual info to client</comment>
         <payload dir="server" typename="specialMessageStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="3249" name="OP_RandomReq" updated="06/13/06">
+    <opcode id="7c7c" name="OP_RandomReq" updated="02/13/07">
         <comment>old RandomReqCode</comment>
         <payload dir="client" typename="randomReqStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="5e9c" name="OP_RandomReply" updated="06/13/06">
+    <opcode id="3c48" name="OP_RandomReply" updated="02/13/07">
         <comment>old RandomCode</comment>
         <payload dir="server" typename="randomStruct" sizechecktype="match"/>
     </opcode>
@@ -357,19 +357,19 @@
         <payload dir="server" typename="consentResponseStruct" sizechecktype="match"/>
     </opcode>
 
-    <opcode id="28c1" name="OP_ItemPacket" updated="06/13/06">
+    <opcode id="6bd7" name="OP_ItemPacket" updated="02/13/07">
         <comment>old ItemCode</comment>
         <payload dir="server" typename="itemPacketStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="63f9" name="OP_ItemLinkClick" updated="06/13/06">
+    <opcode id="63f9" name="OP_ItemLinkClick" updated="02/13/07">
         <comment></comment>
     </opcode>
-    <opcode id="4e56" name="OP_ItemLinkResponse" updated="06/13/05">
+    <opcode id="5dc5" name="OP_ItemLinkResponse" updated="02/13/07">
         <comment>old ItemInfoCode</comment>
         <payload dir="server" typename="itemInfoStruct" sizechecktype="none"/>
         <payload dir="client" typename="itemInfoReqStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="60f2" name="OP_ManaChange" updated="06/13/06">
+    <opcode id="60f2" name="OP_ManaChange" updated="02/13/07">
         <comment>Mana change. Bards send this up with no size. Casters receive this for mana updates.</comment>
         <payload dir="server" typename="manaDecrementStruct" sizechecktype="match"/>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
@@ -413,10 +413,10 @@
     <opcode id="5c06" name="OP_Save" updated="04/19/06">
         <comment>Client asking server to save user state</comment>
     </opcode>
-    <opcode id="2265" name="OP_Camp" updated="06/13/05">
+    <opcode id="2eeb" name="OP_Camp" updated="02/13/07">
         <comment>old cStartCampingCode</comment>
     </opcode>
-    <opcode id="0e13" name="OP_ShopPlayerSell" updated="10/27/05">
+    <opcode id="fe13" name="OP_ShopPlayerSell" updated="10/27/05">
         <comment>old SellItemCode</comment>
     </opcode>
     <opcode id="7a46" name="OP_AutoAttack" updated="06/13/06">
