@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE seqopcodes SYSTEM "seqopcodes.dtd">
 <seqopcodes>
-    <opcode id="147e" name="OP_SendAATable" updated="06/13/06">
+    <opcode id="3f32" name="OP_SendAATable" updated="02/13/07">
         <comment></comment>
     </opcode>
-    <opcode id="5471" name="OP_SendAAStats" updated="06/13/06">
+    <opcode id="1be9" name="OP_SendAAStats" updated="02/13/07">
         <comment></comment>
     </opcode>
-    <opcode id="4057" name="OP_PlayerProfile" updated="06/13/06">
+    <opcode id="4057" name="OP_PlayerProfile" updated="02/13/07">
         <comment>old CharProfileCode</comment>
         <payload dir="server" typename="charProfileStruct" sizechecktype="match"/>
     </opcode>
@@ -16,21 +16,21 @@
         <payload dir="client" typename="ClientZoneEntryStruct" sizechecktype="match"/>
         <payload dir="server" typename="ServerZoneEntryStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="740b" name="OP_AckPacket" updated="06/13/06">
+    <opcode id="740b" name="OP_AckPacket" updated="02/13/07">
         <comment>Appears to be generic ack at the presentation level</comment>
     </opcode>
     <opcode id="0e13" name="OP_ZoneSpawns" updated="02/13/07">
         <comment>old ZoneSpawnsCode</comment>
         <payload dir="server" typename="spawnStruct" sizechecktype="modulus"/>
     </opcode>
-    <opcode id="08cf" name="OP_TimeOfDay" updated="06/13/06">
+    <opcode id="08cf" name="OP_TimeOfDay" updated="02/13/07">
         <comment>old TimeOfDayCode</comment>
         <payload dir="server" typename="timeOfDayStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6ea7" name="OP_TributeUpdate" updated="06/13/06">
+    <opcode id="0e45" name="OP_TributeUpdate" updated="02/13/07">
         <comment>Tribute information</comment>
     </opcode>
-    <opcode id="4e7d" name="OP_ItemPlayerPacket" updated="10/22/06">
+    <opcode id="4d26" name="OP_ItemPlayerPacket" updated="02/13/07">
         <comment>Inventory/bank items coming over during zone</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
@@ -40,20 +40,20 @@
     <opcode id="3f0b" name="OP_TaskActivity" updated="06/13/06">
         <comment>Task activity descriptions coming down for task window</comment>
     </opcode>
-    <opcode id="4b90" name="OP_CompletedTasks" updated="06/13/06">
+    <opcode id="5226" name="OP_CompletedTasks" updated="02/13/07">
         <comment>Task history for task window</comment>
     </opcode>
-    <opcode id="3d4b" name="OP_Weather" updated="06/13/06">
+    <opcode id="09ea" name="OP_Weather" updated="02/13/07">
         <comment>old WeatherCode</comment>
     </opcode>
-    <opcode id="2ece" name="OP_ReqNewZone" updated="06/13/06">
+    <opcode id="02f4" name="OP_ReqNewZone" updated="02/13/07">
         <comment>Client requesting NewZone_Struct</comment>
     </opcode>
-    <opcode id="4a1a" name="OP_NewZone" updated="06/13/06">
+    <opcode id="5d3e" name="OP_NewZone" updated="02/13/07">
         <comment>old NewZoneCode</comment>
         <payload dir="server" typename="newZoneStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="36fc" name="OP_CustomTitles" updated="06/13/06">
+    <opcode id="3665" name="OP_CustomTitles" updated="02/13/07">
         <comment>List of available titles</comment>
     </opcode>
     <opcode id="7528" name="OP_ReqClientSpawn" updated="06/13/06">
@@ -63,42 +63,42 @@
         <comment>old DoorSpawnsCode</comment>
         <payload dir="server" typename="doorStruct" sizechecktype="modulus"/>
     </opcode>
-    <opcode id="76f0" name="OP_GroundSpawn" updated="06/13/06">
+    <opcode id="2f4b" name="OP_GroundSpawn" updated="02/13/07">
         <comment>old MakeDropCode</comment>
         <payload dir="server" typename="makeDropStruct" sizechecktype="match"/>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="3d4f" name="OP_SendZonePoints" updated="06/13/06">
+    <opcode id="4654" name="OP_SendZonePoints" updated="02/13/07">
         <comment>Coords in a zone that will port you to another zone</comment>
         <payload dir="server" typename="zonePointsStruct" sizechecktype="none"/>
     </opcode>
     <opcode id="5051" name="OP_SendExpZonein" updated="06/13/06">
         <comment>Both directions. Negotiating sending of exp info.</comment>
     </opcode>
-    <opcode id="78df" name="OP_AAExpUpdate" updated="06/13/06">
+    <opcode id="499e" name="OP_AAExpUpdate" updated="02/13/07">
       <comment>Receiving AA experience. Also when percent to AA changes.</comment>
       <payload dir="server" typename="altExpUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="1442" name="OP_ExpUpdate" updated="06/13/06">
+    <opcode id="4e0a" name="OP_ExpUpdate" updated="02/13/07">
         <comment>old ExpUpdateCode</comment>
         <payload dir="server" typename="expUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="077b" name="OP_AAAction" updated="06/13/06">
+    <opcode id="5f4f" name="OP_AAAction" updated="02/13/07">
         <comment>Used for changing percent, buying? and activating skills</comment>
     </opcode>
-    <opcode id="40b6" name="OP_SetServerFilter" updated="06/13/06">
+    <opcode id="1c3c" name="OP_SetServerFilter" updated="02/13/07">
         <comment>Client telling server /filter information</comment>
     </opcode>
-    <opcode id="443f" name="OP_ClientReady" updated="06/13/06">
+    <opcode id="5e9c" name="OP_ClientReady" updated="02/13/07">
         <comment></comment>
     </opcode>
     <opcode id="3afb" name="OP_TGB" updated="06/13/06">
         <comment>Client telling server to set targetgroupbuff</comment>
     </opcode>
-    <opcode id="76ba" name="OP_RaidJoin" updated="06/13/06">
+    <opcode id="2fd1" name="OP_RaidJoin" updated="02/13/07">
         <comment></comment>
     </opcode>
-    <opcode id="0cef" name="OP_GuildMemberList" updated="06/13/06">
+    <opcode id="0cef" name="OP_GuildMemberList" updated="02/13/07">
         <comment></comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
@@ -106,10 +106,10 @@
         <comment>GuildMOTD</comment>
         <payload dir="server" typename="guildMOTDStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="569e" name="OP_GuildExtendedInfo" updated="06/13/06">
+    <opcode id="3891" name="OP_GuildExtendedInfo" updated="02/13/07">
         <comment>Extra guild info (i.e. chat channel, url)</comment>
     </opcode>
-    <opcode id="07e5" name="OP_GuildTributeStatus" updated="06/13/06">
+    <opcode id="7049" name="OP_GuildTributeStatus" updated="02/13/07">
         <comment>Guild tribute stats send on zone</comment>
     </opcode>
     <opcode id="28c1" name="OP_GuildTributeInfo" updated="06/13/06">
@@ -117,16 +117,16 @@
     </opcode>
 
 
-    <opcode id="178a" name="OP_ClientUpdate" updated="06/13/06">
+    <opcode id="178a" name="OP_ClientUpdate" updated="02/13/07">
         <comment>Position updates</comment>
         <payload dir="server" typename="playerSpawnPosStruct" sizechecktype="match"/>
         <payload dir="both" typename="playerSelfPosStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="5f33" name="OP_NpcMoveUpdate" updated="08/13/06">
+    <opcode id="578a" name="OP_NpcMoveUpdate" updated="02/13/07">
         <comment>Position updates</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="1399" name="OP_MobUpdate" updated="09/23/06">
+    <opcode id="1399" name="OP_MobUpdate" updated="02/13/07">
         <comment>old MobUpdateCode</comment>
         <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
     </opcode>
@@ -138,7 +138,7 @@
         <comment>old DeleteSpawnCode</comment>
         <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="7941" name="OP_Death" updated="06/13/06">
+    <opcode id="1399" name="OP_Death" updated="02/13/07">
         <comment>old NewCorpseCode</comment>
         <payload dir="server" typename="newCorpseStruct" sizechecktype="match"/>
     </opcode>
@@ -149,22 +149,22 @@
       <comment>Server telling client that it is coming back from hover death</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="4195" name="OP_WearChange" updated="06/13/06">
+    <opcode id="1c8d" name="OP_WearChange" updated="02/13/07">
         <comment>old SpawnUpdateCode</comment>
         <payload dir="both" typename="SpawnUpdateStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="4341" name="OP_Animation" updated="06/13/06">
         <comment></comment>
     </opcode>
-    <opcode id="1d4c" name="OP_SpawnAppearance" updated="06/13/06">
+    <opcode id="0973" name="OP_SpawnAppearance" updated="02/13/07">
         <comment>old SpawnAppearanceCode</comment>
         <payload dir="both" typename="spawnAppearanceStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="3bb3" name="OP_Stamina" updated="06/13/05">
+    <opcode id="2cec" name="OP_Stamina" updated="02/13/07">
         <comment>Server updating on hunger/thirst</comment>
         <payload dir="server" typename="staminaStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="2660" name="OP_HPUpdate" updated="06/13/06">
+    <opcode id="1128" name="OP_HPUpdate" updated="02/13/07">
         <comment>old NpcHpUpdateCode Update HP % of a PC or NPC</comment>
         <payload dir="both" typename="hpNpcUpdateStruct" sizechecktype="match"/>
     </opcode>
@@ -177,7 +177,7 @@
     <opcode id="7b0f" name="OP_DeltaCheck" updated="06/13/06">
         <comment>Client sending server delta information.</comment>
     </opcode>
-    <opcode id="11e0" name="OP_GuildMemberUpdate" updated="06/13/06">
+    <opcode id="1f4b" name="OP_GuildMemberUpdate" updated="02/13/07">
         <comment></comment>
         <payload dir="server" typename="GuildMemberUpdate" sizechecktype="match"/>
     </opcode>
@@ -215,11 +215,11 @@
         <payload dir="server" typename="spawnShroudSelf" sizechecktype="none"/>
     </opcode>
 
-    <opcode id="7d52" name="OP_RequestZoneChange" updated="06/13/06">
+    <opcode id="3c27" name="OP_RequestZoneChange" updated="02/13/07">
         <comment>Send by server when a click causes zone. Also, origin</comment>
         <payload dir="server" typename="requestZoneChangeStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="3d48" name="OP_ZoneChange" updated="06/13/06">
+    <opcode id="273a" name="OP_ZoneChange" updated="02/13/07">
         <comment>old ZoneChangeCode</comment>
         <payload dir="both" typename="zoneChangeStruct" sizechecktype="match"/>
     </opcode>
@@ -438,7 +438,7 @@
         <comment>old CloseVendorCode</comment>
         <payload dir="both" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="36e2" name="OP_MoveDoor" updated="06/13/06">
+    <opcode id="0491" name="OP_MoveDoor" updated="02/13/07">
         <comment>old DoorClickCode</comment>
     </opcode>
     <opcode id="5666" name="OP_SenseTraps" updated="10/27/05">
