@@ -59,7 +59,7 @@
     <opcode id="7528" name="OP_ReqClientSpawn" updated="06/13/06">
         <comment>Client requesting spawn data</comment>
     </opcode>
-    <opcode id="0fa2" name="OP_SpawnDoor" updated="06/13/06">
+    <opcode id="6f73" name="OP_SpawnDoor" updated="02/13/07">
         <comment>old DoorSpawnsCode</comment>
         <payload dir="server" typename="doorStruct" sizechecktype="modulus"/>
     </opcode>
@@ -185,16 +185,16 @@
         <comment>old RemDropCode</comment>
         <payload dir="both" typename="remDropStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="1684" name="OP_Action" updated="06/13/06">
+    <opcode id="72d2" name="OP_Action" updated="02/13/07">
         <comment></comment>
         <payload dir="both" typename="actionStruct" sizechecktype="match"/>
         <payload dir="both" typename="actionAltStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="4ed2" name="OP_Action2" updated="06/13/06">
+    <opcode id="67b4" name="OP_Action2" updated="02/13/07">
         <comment>old ActionCode</comment>
         <payload dir="both" typename="action2Struct" sizechecktype="match"/>
     </opcode>
-    <opcode id="09ea" name="OP_Consider" updated="06/13/06">
+    <opcode id="02f8" name="OP_Consider" updated="02/13/07">
         <comment>old ConsiderCode</comment>
         <payload dir="both" typename="considerStruct" sizechecktype="match"/>
     </opcode>
@@ -538,7 +538,7 @@
     <opcode id="0375" name="OP_Report" updated="06/29/05">
         <comment></comment>
     </opcode>
-    <opcode id="7136" name="OP_TargetCommand" updated="06/13/06">
+    <opcode id="3d8e" name="OP_TargetCommand" updated="02/13/07">
         <comment>Target user</comment>
     </opcode>
     <opcode id="212d" name="OP_LFPGetMatchesResponse" updated="06/13/06">
