@@ -556,4 +556,22 @@
     "Goo",                        // 547
     "Goo",                        // 548
     "Goo",                        // 549
+    "Merchant Ship",              // 550
+    "Pirate Ship",                // 551
+    "Ghost Ship",                 // 552
+    "Banner",                     // 553
+    "Banner",                     // 554
+    "Banner",                     // 555
+    "Banner",                     // 556
+    "Banner",                     // 557
+    "Aviak",                      // 558
+    "Beetle",                     // 559
+    "Gorilla",                    // 560
+    "Kedge",                      // 561
+    "Kerran",                     // 562
+    "Shissar",                    // 563
+    "Siren",                      // 564
+    "Sphinx",                     // 565
+    "Human",                      // 566
+    "Campfire",                   // 567
 #endif
