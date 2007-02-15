@@ -415,34 +415,34 @@
 { "direwind", "Direwind Cliffs" }, // 405
 { "ashengate", "Ashengate, Reliquary of the Scale" }, // 406
 { "highpasshold", "Highpass Hold" }, // 407
-{ NULL, NULL }, // 408
-{ NULL, NULL }, // 409
-{ NULL, NULL }, // 410
-{ NULL, NULL }, // 411
-{ NULL, NULL }, // 412
-{ NULL, NULL }, // 413
-{ NULL, NULL }, // 414
-{ NULL, NULL }, // 415
-{ NULL, NULL }, // 416
-{ NULL, NULL }, // 417
-{ NULL, NULL }, // 418
-{ NULL, NULL }, // 419
-{ NULL, NULL }, // 420
-{ NULL, NULL }, // 421
-{ NULL, NULL }, // 422
-{ NULL, NULL }, // 423
-{ NULL, NULL }, // 424
-{ NULL, NULL }, // 425
-{ NULL, NULL }, // 426
-{ NULL, NULL }, // 427
-{ NULL, NULL }, // 428
-{ NULL, NULL }, // 429
-{ NULL, NULL }, // 430
-{ NULL, NULL }, // 431
-{ NULL, NULL }, // 432
-{ NULL, NULL }, // 433
-{ NULL, NULL }, // 434
-{ NULL, NULL }, // 435
+{ "commonlands", "Commonlands" }, // 408
+{ "oceanoftears", "Ocean of Tears" }, // 409
+{ "kithforest", "Kithicor Forest" }, // 410
+{ "befallenb", "Befallen" }, // 411
+{ "highpasskeep", "HighKeep" }, // 412
+{ "innothuleb", "Innothule Swamp" }, // 413
+{ "toxxulia", "Toxxulia Forest" }, // 414
+{ "mistythicket", "Misty Thicket" }, // 415
+{ "kattacastrum", "Katta Castrum" }, // 416
+{ "thalassius", "Thalassius, the Coral Keep" }, // 417
+{ "atiiki", "Jewel of Atiiki" }, // 418
+{ "zhisza", "Zhisza, the Shissar Sanctuary" }, // 419
+{ "silyssar", "Silyssar, New Chelsith" }, // 420
+{ "solteris", "Solteris, the Throne of Ro" }, // 421
+{ "barren", "Barren Coast" }, // 422
+{ "buriedsea", "The Buried Sea" }, // 423
+{ "jardelshook", "Jardel's Hook" }, // 424
+{ "monkeyrock", "Monkey Rock" }, // 425
+{ "suncrest", "Suncrest Isle" }, // 426
+{ "deadbone", "Deadbone Reef" }, // 427
+{ "blacksail", "Blacksail Folly" }, // 428
+{ "maidensgrave", "Maiden's Grave" }, // 429
+{ "redfeather", "Redfeather Isle" }, // 430
+{ "shipmvp", "The Open Sea" }, // 431
+{ "shipmvu", "The Open Sea" }, // 432
+{ "shippvu", "The Open Sea" }, // 433
+{ "shipuvu", "The Open Sea" }, // 434
+{ "shipmvm", "The Open Sea" }, // 435
 { NULL, NULL }, // 436
 { NULL, NULL }, // 437
 { NULL, NULL }, // 438
