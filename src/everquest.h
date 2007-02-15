@@ -2239,8 +2239,7 @@ struct buffStruct
 /*0020*/ uint32_t playerId;       // Player id who cast the buff
 /*0024*/ uint32_t spellslot;      // spellslot
 /*0028*/ uint32_t changetype;     // 1=buff fading,2=buff duration
-/*0032*/ uint8_t  unknown0032[12];
-/*0044*/
+/*0032*/ 
 };
 
 /*
