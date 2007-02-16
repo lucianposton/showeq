@@ -46,7 +46,9 @@
 #include "packetcommon.h"
 #include "xmlpreferences.h"      // prefrence file class
 #include "config.h"              // autoconf/configure definitions
+#ifdef ITEM_DB
 #include "itemdb.h"
+#endif
 #include "datalocationmgr.h"
 
 static const char *id="@(#) $Id$ $Name$";
@@ -144,11 +146,13 @@ static struct option option_list[] = {
   {"log-raw",                      no_argument,        NULL,  RAW_LOG_OPTION},
   {"systime-spawntime",            no_argument,        NULL,  SYSTIME_SPAWNTIME_OPTION},
   {"spawnlog-filename",            required_argument,  NULL,  SPAWNLOG_FILENAME_OPTION},
+#ifdef ITEM_DB
   {"itemdb-data-filename",         required_argument,  NULL, ITEMDB_DATA_FILENAME_OPTION},
   {"itemdb-raw-data-filename",     required_argument,  NULL, ITEMDB_RAW_FILENAME_OPTION},
   {"itemdb-databases-enabled",     required_argument,  NULL, ITEMDB_DATABASES_ENABLED},
   {"itemdb-disable",               no_argument,        NULL, ITEMDB_DISABLE},
   {"itemdb-enable",                no_argument,        NULL, ITEMDB_ENABLE},
+#endif
   {"restore-player-state",         no_argument,        NULL, RESTORE_PLAYER_STATE},
   {"restore-zone",                 no_argument,        NULL, RESTORE_ZONE_STATE},
   {"restore-spawns",               no_argument,        NULL, RESTORE_SPAWNS},
@@ -836,12 +840,14 @@ void displayOptions(const char* progName)
   printf ("      --unknown-zone-log-filename=FILE  Use FILE for above packet logging\n");
   printf ("      --log-raw                         Log some unprocessed raw data\n");
   printf ("      --spawnlog-filename=FILE          Use FILE instead of spawnlog.txt\n");
+#ifdef ITEM_DB
   printf ("      --itemdb-data-filename=FILE       Use FILE instead of itemdata\n");
   printf ("      --itemdb-raw-data-filename=FILE   Use FILE instead of itemrawdata\n");
   printf ("      --itemdb-databases-enabled=DBS    Use DBS to enable different item\n");
   printf ("                                        databases.\n");
   printf ("      --itemdb-disable                  Disable use of the item DB.\n");
   printf ("      --itemdb-enable                   Enable use of the item DB.\n");
+#endif
   printf ("  -W, --dont-autodetectcharsettings     Don't auto-detect your character's\n");
   printf ("                                        Level/Race/Class.\n");
   printf ("  -X, --default-level=##                Default player level. (1-70)\n");

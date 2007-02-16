@@ -18,7 +18,6 @@
 #include "zonemgr.h"
 #include "player.h"
 #include "util.h"
-#include "itemdb.h"
 #include "guild.h"
 #include "packetcommon.h"
 #include "diagnosticmessages.h"
