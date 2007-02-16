@@ -34,13 +34,13 @@
     <opcode id="66bd" name="OP_SendCharInfo" updated="02/13/07">
         <comment>Send all chars visible @ char select</comment>
     </opcode>
-    <opcode id="3d4b" name="OP_World_Client_CRC1" updated="02/13/07">
+    <opcode id="3d4b" name="OP_SendSpellChecksum" updated="02/13/07">
         <comment>Contains a snippet of spell data</comment>
     </opcode>
-    <opcode id="398d" name="OP_World_Client_CRC2" updated="02/13/07">
+    <opcode id="398d" name="OP_SendExeChecksum" updated="02/13/07">
         <comment>Second client verification packet</comment>
     </opcode>
-    <opcode id="2024" name="OP_World_Client_CRC3" updated="02/13/07">
+    <opcode id="2024" name="OP_UnknownChecksum" updated="02/13/07">
         <comment>Third client verification packet</comment>
     </opcode>
     <opcode id="2398" name="OP_MOTD" updated="02/13/07">

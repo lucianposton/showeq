@@ -564,7 +564,7 @@ struct ClientZoneEntryStruct
 
 /*
 ** New Zone Code
-** Length: 836 Octets
+** Length: 912 Octets
 ** OpCode: NewZoneCode
 */
 struct newZoneStruct
@@ -591,13 +591,15 @@ struct newZoneStruct
 /*0616*/ uint8_t unknown0616[84];          // *** Placeholder
 /*0700*/ char    zonefile[64];             // Zone file name?
 /*0764*/ uint8_t unknown0764[36];          // *** Placeholder (12/05/2006)
-/*0800*/ uint8_t unknown0800[12];          // *** Placeholder 
-/*0812*/ uint8_t unknown0812[4];           // *** Placeholder (06/29/2005)
-/*0816*/ uint8_t unknown0816[4];           // *** Placeholder (09/13/2005)
-/*0820*/ uint8_t unknown0620[4];           // *** Placeholder (02/21/2006)
-/*0824*/ uint8_t unknown0824[36];          // *** Placeholder (06/13/2006)
-/*0860*/ uint8_t unknown0860[12];          // *** Placeholder (12/05/2006)
-}; /*0872*/
+/*0800*/ uint8_t unknown0800[32];          // *** Placeholder (02/13/2007)
+/*0832*/ uint8_t unknown0832[12];          // *** Placeholder 
+/*0844*/ uint8_t unknown0844[4];           // *** Placeholder (06/29/2005)
+/*0848*/ uint8_t unknown0848[4];           // *** Placeholder (09/13/2005)
+/*0852*/ uint8_t unknown0852[4];           // *** Placeholder (02/21/2006)
+/*0856*/ uint8_t unknown0856[36];          // *** Placeholder (06/13/2006)
+/*0892*/ uint8_t unknown0892[12];          // *** Placeholder (12/05/2006)
+/*0904*/ uint8_t unknown0904[8];           // *** Placeholder (02/13/2007)
+}; /*0912*/
 
 
 /**
@@ -1077,7 +1079,7 @@ struct ServerZoneEntryStruct : public spawnStruct
 
 /*
 ** Generic Door Struct
-** Length: 88 Octets
+** Length: 92 Octets
 ** Used in: 
 **    OP_SpawnDoor
 **
@@ -1085,24 +1087,25 @@ struct ServerZoneEntryStruct : public spawnStruct
 
 struct doorStruct
 {
-/*0000*/ char     name[16];        // Filename of Door?
-/*0016*/ uint8_t  unknown016[16]; // ***Placeholder
-/*0032*/ float    y;               // y loc
-/*0036*/ float    x;               // x loc
-/*0040*/ float    z;               // z loc
-/*0044*/ float    heading;         // heading
-/*0048*/ uint8_t  unknown0028[7]; // ***Placeholder
-/*0055*/ int8_t   auto_return;
-/*0056*/ uint8_t  initialState;
-/*0057*/ uint8_t  unknown041[3];
-/*0060*/ uint8_t  doorId;          // door's id #
-/*0061*/ uint8_t  opentype;       
-/*0062*/ uint8_t  size;           // size of door
+/*0000*/ char    name[16];        // Filename of Door?
+/*0016*/ uint8_t unknown016[16];  // ***Placeholder
+/*0032*/ float   y;               // y loc
+/*0036*/ float   x;               // x loc
+/*0040*/ float   z;               // z loc
+/*0044*/ float   heading;         // heading
+/*0048*/ uint8_t unknown0028[7];  // ***Placeholder
+/*0055*/ int8_t  auto_return;
+/*0056*/ uint8_t initialState;
+/*0057*/ uint8_t unknown041[3];
+/*0060*/ uint8_t doorId;          // door's id #
+/*0061*/ uint8_t opentype;       
+/*0062*/ uint8_t size;            // size of door
 /*0063*/ uint8_t holdstateforever;
 /*0064*/ uint32_t zonePoint;
-/*0068*/ uint8_t  unknown068[12]; // ***Placeholder
+/*0068*/ uint8_t unknown068[12]; // ***Placeholder
 /*0080*/ uint8_t unknown0080[8]; // ***Placeholder (12/07/2005)
-/*0088*/
+/*0088*/ uint8_t unknown0088[4]; // ***Placeholder (2/13/2007)
+/*0092*/
 }; 
 
 /*
@@ -1747,7 +1750,7 @@ struct startCastStruct
 
 /*
 ** New Mana Amount
-** Length: 16 Octets
+** Length: 20 Octets
 ** OpCode: manaDecrementCode
 */
 
@@ -1757,7 +1760,8 @@ struct manaDecrementStruct
 /*0004*/ int32_t unknown;
 /*0008*/ int32_t spellId;                  // Last Spell Cast
 /*0012*/ uint8_t unknown0012[4];
-/*0016*/
+/*0016*/ uint8_t unknown0016[4];           //*** Placeholder (02/13/07)
+/*0020*/
 };
 
 /*
