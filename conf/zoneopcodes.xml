@@ -574,7 +574,7 @@
     <opcode id="4775" name="OP_TributeInfo" updated="02/13/07">
         <comment>Tribute information</comment>
     </opcode>
-    <opcode id="6a93" name="OP_SkillUpdate" updated="12/07/05">
+    <opcode id="03c0" name="OP_SkillUpdate" updated="02/13/07">
         <comment>old SkillIncCode</comment>
         <payload dir="server" typename="skillIncStruct" sizechecktype="match"/>
     </opcode>
