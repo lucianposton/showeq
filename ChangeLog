@@ -1,5 +1,12 @@
 Version: $Id$ $Name$
 
+purple (2/15/07)
++ Updated version to 5.8
++ Compatibility with TBS expansion
++ Opcodes updated (Zaphod, purple, ieatacid)
++ Structs updated (Zaphod, purple)
++ Regenerated zones, bodytypes, races, staticspells
+
 dohpaZ (2/2/07)
 ------------------------
 + Updated version to 5.7.0.1

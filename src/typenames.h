@@ -8,20 +8,20 @@
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     NULL,			// 0
     "Humanoid",			// 1
-    NULL,			// 2
+    "Lycanthrope",			// 2
     "Undead",			// 3
     "Giant",			// 4
-    "Golem",			// 5
-    NULL,			// 6
-    "Shissar",			// 7
+    "Construct",			// 5
+    "Extraplanar",			// 6
+    "Magical",			// 7
     "UndeadPet",		// 8
     "BaneGiant",		// 9
     NULL,			// 10
     "Untargetable",		// 11
     "Vampyre",			// 12
-    NULL,			// 13
+    "Atenha Ra",			// 13
     "Greater Akheva",		// 14
-    NULL,			// 15
+    "Khati Sha",			// 15
     "Seru",			// 16
     NULL,			// 17
     NULL,			// 18
@@ -29,10 +29,10 @@
     "Luggald",		// 20
     "Animal",			// 21
     "Insect",			// 22
-    "ExtraPlanar",		// 23
-    "Summoned",			// 24
+    "Monster",		// 23
+    "Elemental",			// 24
     "Plant",			// 25
-    "Dragonkin",		// 26
+    "Dragon",		// 26
     "Elemental",		// 27
     "Summoned Creature",		// 28
     "Dragon",			// 29
