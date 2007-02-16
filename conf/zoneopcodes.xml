@@ -578,7 +578,7 @@
         <comment>old SkillIncCode</comment>
         <payload dir="server" typename="skillIncStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="74d8" name="OP_LevelUpdate" updated="04/19/06">
+    <opcode id="1442" name="OP_LevelUpdate" updated="02/13/07">
         <comment>old LevelUpUpdateCode</comment>
         <payload dir="server" typename="levelUpUpdateStruct" sizechecktype="match"/>
     </opcode>
