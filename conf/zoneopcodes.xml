@@ -134,7 +134,7 @@
         <comment>old NewSpawnCode</comment>
         <payload dir="server" typename="spawnStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="2871" name="OP_DeleteSpawn" updated="03/14/07">
+    <opcode id="15da" name="OP_DeleteSpawn" updated="03/14/07">
         <comment>old DeleteSpawnCode</comment>
         <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
     </opcode>
