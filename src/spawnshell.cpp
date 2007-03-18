@@ -450,31 +450,32 @@ void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
 #pragma pack(1)
     struct pos
 {
-/*0054*/ signed   deltaHeading:10;  // change in heading
-         signed   x:19;             // x coord
-         signed   padding0054:3;    // ***Placeholder
-/*0058*/ signed   y:19;             // y coord
-         signed   animation:10;     // ***Placeholder (seems like speed)
-         signed   padding0058:3;    // animation
-/*0062*/ signed   z:19;             // z coord
-         signed   deltaY:13;        // change in y
-/*0066*/ signed   deltaX:13;        // change in x
-         unsigned heading:12;       // heading
-         signed   padding0066:7;    // ***Placeholder
-/*0070*/ signed   deltaZ:13;        // change in z
-         signed   padding0070:19;   // ***Placeholder
-/*0074*/
+/*0002*/ signed   padding0000:12; // ***Placeholder
+         signed   x:19;           // x coord
+         signed   padding0002:1; // ***Placeholder
+/*0006*/ signed   deltaX:13;      // change in x
+         signed   deltaY:13;      // change in y
+         signed   padding0006:6;  // ***Placeholder
+/*0010*/ signed   z:19;           // z coord
+         signed   deltaHeading:10;// change in heading
+         signed   padding0014:3;  // ***Placeholder
+/*0014*/ signed   y:19;           // y coord
+         signed   deltaZ:13;      // change in z
+/*0018*/ signed   animation:10;   // animation
+         unsigned heading:12;     // heading
+         signed   padding0018:10;  // ***Placeholder
+/*0022*/
 };
 #pragma pack(0)
-    struct pos *p = (struct pos *)(data + i*sizeof(spawnStruct) + 54);
-    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
+    struct pos *p = (struct pos *)(data + i*sizeof(spawnStruct) + 151);
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x, %x)\n",
             zspawns[i].spawnId, 
             float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0, 
             float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
             float(p->deltaZ)/4.0, 
             float(p->heading), float(p->deltaHeading),
-            p->animation, p->padding0054, p->padding0058, 
-            p->padding0066, p->padding0070);
+            p->animation, p->padding0000, 
+            p->padding0002, p->padding0006, p->padding0014, p->padding0018);
 #endif
     newSpawn(zspawns[i]);
   }
@@ -629,37 +630,32 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 #pragma pack(1)
     struct pos
 {
-/*0000*/ uint16_t spawnId;        // spawn id of the thing moving
-
-         signed   deltaZ:13;      // change in z
-         signed   y:19;           // y coord
-
-         signed   z:19;           // z coord
-         signed   animation:10;   // animation
-         signed   padding0054:3;  // ***Placeholder
-
-         signed   deltaHeading:10;// change in heading
-         signed   deltaX:13;      // change in x
-         signed   padding0070:3; // ***Placeholder
-         signed   padding00xx:6;  // ***Placeholder
-
+/*0000*/ uint16_t spawnId;
+/*0002*/ signed   padding0000:12; // ***Placeholder
          signed   x:19;           // x coord
-         signed   padding0058:1;  // ***Placeholder
-         unsigned heading:12;     // heading
-
+         signed   padding0002:1; // ***Placeholder
+/*0006*/ signed   deltaX:13;      // change in x
          signed   deltaY:13;      // change in y
-         signed   padding0066:19;  // ***Placeholder
+         signed   padding0006:6;  // ***Placeholder
+/*0010*/ signed   z:19;           // z coord
+         signed   deltaHeading:10;// change in heading
+         signed   padding0014:3;  // ***Placeholder
+/*0014*/ signed   y:19;           // y coord
+         signed   deltaZ:13;      // change in z
+/*0018*/ signed   animation:10;   // animation
+         unsigned heading:12;     // heading
+         signed   padding0018:10;  // ***Placeholder
 /*0022*/
 };
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
-    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x, %x)\n",
             p->spawnId, float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0, 
             float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
             float(p->deltaZ)/4.0, 
             float(p->heading), float(p->deltaHeading),
-            p->animation, p->padding0054, p->padding0070, 
-            p->padding0058, p->padding0066);
+            p->animation, p->padding0000, p->padding0002, 
+            p->padding0006, p->padding0014, p->padding0018);
 #endif
 
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,

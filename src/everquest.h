@@ -937,7 +937,7 @@ struct playerAAStruct {
 
 /* 
 ** Generic Spawn Struct 
-** Length: 900 Octets 
+** Length: 896 Octets 
 ** Used in: 
 **   dbSpawnStruct
 **   petStruct
@@ -947,98 +947,103 @@ struct playerAAStruct {
 
 struct spawnStruct
 {
-/*0000*/ uint8_t unknown0000[4];
-/*0004*/ float    size;           // Model size
-/*0008*/ uint8_t unknown0008[4];
-/*0012*/ char     lastName[32];   // Player's Lastname
-/*0044*/ uint32_t race;           // Spawn race
-/*0048*/ uint8_t unknown0048[7];
-/*0055*/ float    runspeed;       // Speed when running
-/*0059*/ uint8_t unknown0059[9];
-/*0068*/ float    walkspeed;      // Speed when walking
-/*0072*/ int16_t  deity;          // Player's Deity
-/*0074*/ uint8_t unknown0074[2];
-/*0076*/ uint8_t  curHp;          // Current hp
-/*0077*/ uint8_t unknown0077;
-/*0078*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
-/*0079*/ uint8_t unknown0079[26];
-/*0105*/ uint8_t  class_;         // Player's class
-/*0106*/ uint8_t unknown0106[16];
-/*0122*/ char     title[32];      // Title
-/*0154*/ uint8_t unknown0154;
-/*0155*/ union 
-         {
-             struct
-             {
-               /*0155*/ EquipStruct equip_helmet; // Equiptment: Helmet visual
-               /*0167*/ EquipStruct equip_chest; // Equiptment: Chest visual
-               /*0179*/ EquipStruct equip_arms; // Equiptment: Arms visual
-               /*0191*/ EquipStruct equip_bracers; // Equiptment: Wrist visual
-               /*0203*/ EquipStruct equip_hands; // Equiptment: Hands visual
-               /*0215*/ EquipStruct equip_legs; // Equiptment: Legs visual
-               /*0227*/ EquipStruct equip_feet; // Equiptment: Boots visual
-               /*0239*/ EquipStruct equip_primary; // Equiptment: Main visual
-               /*0251*/ EquipStruct equip_secondary; // Equiptment: Off visual
-             } equip;
-             /*0155*/ EquipStruct equipment[9];
-         };
-/*0263*/ uint8_t unknown0263[14];
-/*0277*/ uint32_t guildID;        // Current guild
-/*0281*/ uint8_t unknown0281[5];
-/*0286*/ signed   y:19;           // y coord
-         signed   deltaZ:13;      // change in z
-/*0290*/ signed   z:19;           // z coord
-         signed   animation:10;   // animation
-         signed   padding0290:3;  // ***Placeholder
-/*0294*/ signed   deltaHeading:10;// change in heading
+/*0000*/ float    walkspeed;      // Speed when walking
+/*0004*/ uint8_t unknown0004[4];
+/*0008*/ uint8_t  light;          // Spawn's lightsource
+/*0009*/ uint8_t unknown0009[142];
+/*0151*/ signed   padding0000:12; // ***Placeholder
+         signed   x:19;           // x coord
+         signed   padding0002:1; // ***Placeholder
+/*0155*/ signed   deltaX:13;      // change in x
          signed   deltaY:13;      // change in y
-         signed   padding0294:9; // ***Placeholder
-/*0298*/ signed   x:19;           // x coord
-         signed   padding0298:1;  // ***Placeholder
+         signed   padding0006:6;  // ***Placeholder
+/*0159*/ signed   z:19;           // z coord
+         signed   deltaHeading:10;// change in heading
+         signed   padding0014:3;  // ***Placeholder
+/*0163*/ signed   y:19;           // y coord
+         signed   deltaZ:13;      // change in z
+/*0167*/ signed   animation:10;   // animation
          unsigned heading:12;     // heading
-/*0302*/ signed   deltaX:13;      // change in x
-         signed   padding0302:19;  // ***Placeholder
-/*0306*/ uint8_t unknown0306[2];
-/*0308*/ uint8_t  gender;         // Gender (0=male, 1=female)
-/*0309*/ uint8_t unknown0309[138];
-/*0447*/ uint8_t  gm;             // 0=no, 1=gm
-/*0448*/ uint8_t unknown0448[11];
-/*0459*/ union 
+         signed   padding0018:10;  // ***Placeholder
+/*0171*/ union 
          {
              struct 
              {
-                 /*0459*/ Color_Struct color_helmet;    // Color of helmet item
-                 /*0463*/ Color_Struct color_chest;     // Color of chest item
-                 /*0467*/ Color_Struct color_arms;      // Color of arms item
-                 /*0471*/ Color_Struct color_bracers;   // Color of bracers item
-                 /*0475*/ Color_Struct color_hands;     // Color of hands item
-                 /*0479*/ Color_Struct color_legs;      // Color of legs item
-                 /*0483*/ Color_Struct color_feet;      // Color of feet item
-                 /*0487*/ Color_Struct color_primary;   // Color of primary item
-                 /*0491*/ Color_Struct color_secondary; // Color of secondary item
+                 /*0171*/ Color_Struct color_helmet;    // Color of helmet item
+                 /*0175*/ Color_Struct color_chest;     // Color of chest item
+                 /*0179*/ Color_Struct color_arms;      // Color of arms item
+                 /*0183*/ Color_Struct color_bracers;   // Color of bracers item
+                 /*0187*/ Color_Struct color_hands;     // Color of hands item
+                 /*0191*/ Color_Struct color_legs;      // Color of legs item
+                 /*0195*/ Color_Struct color_feet;      // Color of feet item
+                 /*0199*/ Color_Struct color_primary;   // Color of primary item
+                 /*0203*/ Color_Struct color_secondary; // Color of secondary item
              } equipment_colors;
-             /*0459*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
+             /*0171*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
          };
-/*0495*/ uint8_t unknown0495[200];
-/*0695*/ char     name[64];       // Player's Name
-/*0759*/ uint8_t  level;          // Spawn Level
-/*0760*/ uint8_t unknown0760;
-/*0761*/ uint32_t petOwnerId;     // If this is a pet, the spawn id of owner
-/*0765*/ uint8_t  NPC;            // 0=player,1=npc,2=pc corpse,3=npc corpse
-/*0766*/ uint8_t unknown0766[9];
-/*0775*/ uint32_t spawnId;        // Spawn Id
-/*0779*/ uint8_t unknown0779[40];
-/*0819*/ uint8_t  bodytype;       // Bodytype
-/*0820*/ uint8_t unknown0820[11];
-/*0831*/ uint8_t  light;          // Spawn's lightsource
-/*0832*/ uint8_t unknown0832[36];
-/*0868*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
-/*0900*/
+/*0207*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
+/*0239*/ uint8_t unknown0239[2];
+/*0241*/ char     name[64];       // Player's Name
+/*0305*/ uint8_t unknown0305[9];
+/*0314*/ char     title[32];      // Title
+/*0346*/ uint8_t unknown0346[1];
+/*0347*/ uint32_t spawnId;        // Spawn Id
+/*0351*/ uint8_t unknown0351[9];
+/*0360*/ uint8_t  bodytype;       // Bodytype
+/*0361*/ uint8_t unknown0361[43];
+/*0404*/ int16_t  deity;          // Player's Deity
+/*0406*/ uint8_t unknown0406[19];
+/*0425*/ uint32_t petOwnerId;     // If this is a pet, the spawn id of owner
+/*0429*/ uint8_t unknown0429[4];
+/*0433*/ uint8_t  gender;         // Gender (0=male, 1=female)
+/*0434*/ uint8_t unknown0434[3];
+/*0437*/ uint32_t guildID;        // Current guild
+/*0441*/ uint8_t unknown0441[28];
+/*0469*/ float    runspeed;       // Speed when running
+/*0473*/ uint8_t unknown0473[43];
+/*0516*/ union 
+         {
+             struct
+             {
+               /*0516*/ EquipStruct equip_helmet; // Equiptment: Helmet visual
+               /*0528*/ EquipStruct equip_chest; // Equiptment: Chest visual
+               /*0540*/ EquipStruct equip_arms; // Equiptment: Arms visual
+               /*0552*/ EquipStruct equip_bracers; // Equiptment: Wrist visual
+               /*0564*/ EquipStruct equip_hands; // Equiptment: Hands visual
+               /*0576*/ EquipStruct equip_legs; // Equiptment: Legs visual
+               /*0588*/ EquipStruct equip_feet; // Equiptment: Boots visual
+               /*0600*/ EquipStruct equip_primary; // Equiptment: Main visual
+               /*0612*/ EquipStruct equip_secondary; // Equiptment: Off visual
+             } equip;
+             /*0516*/ EquipStruct equipment[9];
+         };
+/*0624*/ uint8_t unknown0624[15];
+/*0639*/ uint8_t  curHp;          // Current hp
+/*0640*/ uint8_t  NPC;            // 0=player,1=npc,2=pc corpse,3=npc corpse
+/*0641*/ uint8_t unknown0641[135];
+/*0776*/ uint8_t  level;          // Spawn Level
+/*0777*/ uint8_t unknown0777[9];
+/*0786*/ char     lastName[32];   // Player's Lastname
+/*0818*/ uint8_t unknown818[72];
 
-}; 
+/*0889*/
+/*%%% gm wrong as usual.... */
+/*0447*/ uint8_t  gm;             // 0=no, 1=gm
+
+/*0891*/ uint32_t race;           // Spawn race
+/*0895*/ uint8_t  class_;         // Player's class
+/*0896*/
+};
+
+
+
 
 
 #if 0
+// Old stuff from spawnStruct seq doesn't actually use at all..
+//
+/*0004*/ float    size;           // Model size
+/*0078*/ int8_t   aa_title;       // 0=none, 1=general, 2=archtype, 3=class
 /*0074*/ uint8_t  invis;          // Invis (0=not, 1=invis)
 /*0117*/ uint8_t  lfg;            // 0=off, 1=lfg on
 /*0196*/ uint8_t  afk;            // 0=no, 1=afk
@@ -1496,7 +1501,7 @@ struct groupFullUpdateStruct
 
 /*
 ** Grouping Invite
-** Length 128 Octets
+** Length 128 Octets (or 132 sometimes)
 ** Opcode OP_GroupInvite
 */
 
@@ -1505,6 +1510,14 @@ struct groupInviteStruct
 /*0000*/ char     invitee[64];           // Invitee's Name
 /*0064*/ char     inviter[64];           // Inviter's Name
 /*0128*/
+};
+// Sometimes there's an extra byte on the end...
+struct groupAltInviteStruct
+{
+/*0000*/ char     invitee[64];           // Invitee's Name
+/*0064*/ char     inviter[64];           // Inviter's Name
+/*0128*/ uint8_t  unknown0132[4];        // ***Placeholder (not always there)
+/*0132*/
 };
 
 /*
@@ -1523,7 +1536,7 @@ struct groupDeclineStruct
 
 /*
 ** Grouping Invite Answer - Accept 
-** Length 128 Octets
+** Length 128 Octets (or sometimes 132)
 ** Opcode OP_GroupFollow
 */
 
@@ -1532,6 +1545,14 @@ struct groupFollowStruct
 /*0000*/ char     inviter[64];           // Inviter's Name
 /*0064*/ char     invitee[64];           // Invitee's Member Name
 /*0128*/
+};
+// Sometimes there's an extra 4 bytes on the end
+struct groupAltFollowStruct
+{
+/*0000*/ char     inviter[64];           // Inviter's Name
+/*0064*/ char     invitee[64];           // Invitee's Member Name
+/*0128*/ uint8_t  unknown0132[4];        // ***Placeholder (not always there)
+/*0132*/
 };
 
 /*
@@ -2019,30 +2040,28 @@ struct randomStruct
 
 /*
 ** Player Position Update
-** Length: 26 Octets
+** Length: 22 Octets
 ** OpCode: PlayerPosCode
 */
 
 struct playerSpawnPosStruct
 {
-/*0000*/ uint16_t spawnId;        // spawn id of the thing moving
-/*0002*/ signed   padding1:12;    // ***Placeholder
-         signed   deltaZ:13;      // change in z
-         signed   padding2:7;     // ***Placeholder
-/*0006*/ signed   y:19;           // y coord
-         signed   padding3:13;    // ***Placeholder
-/*0010*/ signed   z:19;           // z coord
-         signed   animation:10;   // animation
-         signed   padding4:3;     // ***Placeholder
-/*0014*/ signed   deltaHeading:10;// change in heading
+/*0000*/ uint16_t spawnId;
+/*0002*/ signed   padding0000:12; // ***Placeholder
+         signed   x:19;           // x coord
+         signed   padding0002:1; // ***Placeholder
+/*0006*/ signed   deltaX:13;      // change in x
          signed   deltaY:13;      // change in y
-         signed   padding5:9;     // ***Placeholder
-/*0018*/ signed   x:19;           // x coord
+         signed   padding0006:6;  // ***Placeholder
+/*0010*/ signed   z:19;           // z coord
+         signed   deltaHeading:10;// change in heading
+         signed   padding0014:3;  // ***Placeholder
+/*0014*/ signed   y:19;           // y coord
+         signed   deltaZ:13;      // change in z
+/*0018*/ signed   animation:10;   // animation
          unsigned heading:12;     // heading
-         signed   padding6:1;     // ***Placeholder
-/*0022*/ signed   deltaX:13;      // change in x
-         signed   padding7:19;    // ***Placeholder
-/*0026*/
+         signed   padding0018:10;  // ***Placeholder
+/*0022*/
 };
 
 /*
@@ -2055,20 +2074,18 @@ struct playerSelfPosStruct
 {
 /*0000*/ uint16_t spawnId;        // Player's spawn id
 /*0002*/ uint8_t unknown0002[2];  // ***Placeholder (update time counter?)
-/*0004*/ unsigned padding1:12;    // ***Placeholder
-         unsigned heading:12;     // Directional heading
-         unsigned padding2:8;     // ***Placeholder
-/*0008*/ float deltaY;            // Change in y
-/*0012*/ signed animation:10;     // animation
-         unsigned padding3:22;    // ***Placeholder
-/*0016*/ float deltaX;            // Change in x
-/*0020*/ float y;                 // y coord
-/*0024*/ signed deltaHeading:10;  // change in heading
-         signed padding4:6;       // ***Placeholder (mostly 1)
-/*0026*/ uint8_t unknown0026[2];  // ***Placeholder
-/*0028*/ float deltaZ;            // Change in z
-/*0032*/ float z;                 // z coord
-/*0036*/ float x;                 // x coord
+/*0004*/ uint8_t unknown0004[4];  // ***Placeholder
+/*0008*/ float deltaZ;            // Change in z
+/*0012*/ float x;                 // x coord (2nd loc value)
+/*0016*/ signed deltaHeading:10;  // change in heading
+         signed animation:10;     // animation
+         unsigned padding0016:12; // ***Placeholder
+/*0020*/ float y;                 // y coord (1st loc value)
+/*0024*/ float deltaX;            // Change in x
+/*0028*/ unsigned heading:12;     // Directional heading
+         unsigned padding0028:20; // ***Placeholder
+/*0032*/ float deltaY;            // Change in y
+/*0036*/ float z;                 // z coord (3rd loc value)
 /*0040*/
 };
 

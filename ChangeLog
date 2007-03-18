@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+purple (3/18/07)
+----------------
++ Udpated version to 5.9
++ Compatiblity with live 3/14
++ Redid spawnStruct, positioning struts, all opcodes
+
 purple (2/15/07)
 + Updated version to 5.8
 + Compatibility with TBS expansion
