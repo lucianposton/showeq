@@ -12,51 +12,51 @@
 -->
 
 
-    <opcode id="61c9" name="OP_SendLoginInfo" updated="02/13/07">
+    <opcode id="6c3c" name="OP_SendLoginInfo" updated="03/14/07">
         <comment>Client starting world session by asking for login information</comment>
     </opcode>
-    <opcode id="4465" name="OP_GuildList" updated="02/13/07">
+    <opcode id="04fb" name="OP_GuildList" updated="03/14/07">
         <comment>old GuildListCode</comment>
         <payload dir="server" typename="worldGuildListStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="050d" name="OP_LogServer" updated="02/13/07">
+    <opcode id="129a" name="OP_LogServer" updated="03/14/07">
         <comment></comment>
     </opcode>
-    <opcode id="3e54" name="OP_ApproveWorld" updated="02/13/07">
+    <opcode id="7fc0" name="OP_ApproveWorld" updated="03/14/07">
         <comment></comment>
     </opcode>
-    <opcode id="431e" name="OP_EnterWorld" updated="02/13/07">
+    <opcode id="1340" name="OP_EnterWorld" updated="03/14/07">
         <comment>Server approval for client to enter world</comment>
     </opcode>
-    <opcode id="4ed2" name="OP_ExpansionInfo" updated="02/13/07">
+    <opcode id="0a1b" name="OP_ExpansionInfo" updated="03/14/07">
         <comment>Which expansions user has</comment>
     </opcode>
-    <opcode id="66bd" name="OP_SendCharInfo" updated="02/13/07">
+    <opcode id="6040" name="OP_SendCharInfo" updated="03/14/07">
         <comment>Send all chars visible @ char select</comment>
     </opcode>
-    <opcode id="3d4b" name="OP_SendSpellChecksum" updated="02/13/07">
+    <opcode id="7a9e" name="OP_SendSpellChecksum" updated="03/14/07">
         <comment>Contains a snippet of spell data</comment>
     </opcode>
-    <opcode id="398d" name="OP_SendExeChecksum" updated="02/13/07">
+    <opcode id="3795" name="OP_SendExeChecksum" updated="03/14/07">
         <comment>Second client verification packet</comment>
     </opcode>
-    <opcode id="2024" name="OP_UnknownChecksum" updated="02/13/07">
+    <opcode id="45f9" name="OP_UnknownChecksum" updated="03/14/07">
         <comment>Third client verification packet</comment>
     </opcode>
-    <opcode id="2398" name="OP_MOTD" updated="02/13/07">
+    <opcode id="5711" name="OP_MOTD" updated="03/14/07">
         <comment>old MOTDCode Server message of the day</comment>
         <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="1007" name="OP_SetChatServer" updated="02/13/07">
+    <opcode id="71b8" name="OP_SetChatServer" updated="03/14/07">
         <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
-    <opcode id="07e5" name="OP_SetChatServer2" updated="02/13/07">
+    <opcode id="32cc" name="OP_SetChatServer2" updated="03/14/07">
         <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
-    <opcode id="7250" name="OP_ZoneServerInfo" updated="02/13/07">
+    <opcode id="18b1" name="OP_ZoneServerInfo" updated="03/14/07">
         <comment>old ZoneServerInfo</comment>
     </opcode>
-    <opcode id="69ef" name="OP_WorldComplete" updated="02/13/07">
+    <opcode id="2486" name="OP_WorldComplete" updated="03/14/07">
         <comment>Client telling world server it is done. World replies by disconnecting.</comment>
     </opcode>
 

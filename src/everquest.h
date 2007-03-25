@@ -1024,12 +1024,13 @@ struct spawnStruct
 /*0776*/ uint8_t  level;          // Spawn Level
 /*0777*/ uint8_t unknown0777[9];
 /*0786*/ char     lastName[32];   // Player's Lastname
-/*0818*/ uint8_t unknown818[72];
+/*0818*/ uint8_t unknown818[71];
 
-/*0889*/
 /*%%% gm wrong as usual.... */
-/*0447*/ uint8_t  gm;             // 0=no, 1=gm
+/*0889*/ uint8_t gm;
 
+
+/*0890*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
 /*0891*/ uint32_t race;           // Spawn race
 /*0895*/ uint8_t  class_;         // Player's class
 /*0896*/
@@ -1055,7 +1056,6 @@ struct spawnStruct
 /*0501*/ uint8_t  helm;           // Helm texture
 /*0660*/ uint8_t  hairstyle;      // Hair style
 /*0090*/ uint8_t  eyecolor1;      // Player's left eye color
-/*0729*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
 /*0542*/ uint8_t  eyecolor2;      // Left eye color
 /*0547*/ uint8_t  haircolor;      // Hair color
 /*0574*/ uint8_t  is_npc;         // 0=no, 1=yes

@@ -1,5 +1,13 @@
 Version: $Id$ $Name$
 
+purple (3/24/07)
+----------------
++ Updated version to 5.9.1
++ Fixed OP_DeleteSpawn
++ Moved gm flag to a less common place for less false positive *gm* marks. It
+  still isn't correct.
++ Updated all world opcodes. Guild List should build again.
+
 purple (3/18/07)
 ----------------
 + Udpated version to 5.9
