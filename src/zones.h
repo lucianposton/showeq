@@ -443,20 +443,20 @@
 { "shippvu", "The Open Sea" }, // 433
 { "shipuvu", "The Open Sea" }, // 434
 { "shipmvm", "The Open Sea" }, // 435
-{ NULL, NULL }, // 436
-{ NULL, NULL }, // 437
-{ NULL, NULL }, // 438
-{ NULL, NULL }, // 439
-{ NULL, NULL }, // 440
-{ NULL, NULL }, // 441
-{ NULL, NULL }, // 442
-{ NULL, NULL }, // 443
-{ NULL, NULL }, // 444
-{ NULL, NULL }, // 445
-{ NULL, NULL }, // 446
-{ NULL, NULL }, // 447
-{ NULL, NULL }, // 448
-{ NULL, NULL }, // 449
+{ "mechanotus", "Fortress Mechanotus" }, // 436
+{ "mansion", "Meldrath's Majestic Mansion" }, // 437
+{ "steamfactory", "The Steam Factory" }, // 438
+{ "shipworkshop", "S.H.I.P. Workshop" }, // 439
+{ "gyrospireb", "Gyrospire Beza" }, // 440
+{ "gyrospirez", "Gyrospire Zeka" }, // 441
+{ "dragonscale", "Dragonscale Hills" }, // 442
+{ "lopingplains", "Loping Plains" }, // 443
+{ "hillsofshade", "Hills of Shade" }, // 444
+{ "bloodmoon", "Bloodmoon Keep" }, // 445
+{ "crystallos", "Crystallos, Lair of the Awakened" }, // 446
+{ "guardian", "The Mechamatic Guardian" }, // 447
+{ "steamfontmts", "Steamfont Mountains" }, // 448
+{ "cryptofshade", "Crypt of Shade" }, // 449
 { NULL, NULL }, // 450
 { NULL, NULL }, // 451
 { NULL, NULL }, // 452

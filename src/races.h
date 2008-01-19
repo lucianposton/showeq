@@ -552,7 +552,7 @@
     "Stone Jug",                  // 543
     "Elven Boat",                 // 544
     "Gnomish Boat",               // 545
-    "Undead Boat",                // 546
+    "Barrel Barge Ship",          // 546
     "Goo",                        // 547
     "Goo",                        // 548
     "Goo",                        // 549
@@ -574,4 +574,25 @@
     "Sphinx",                     // 565
     "Human",                      // 566
     "Campfire",                   // 567
+    "Brownie",                    // 568
+    "Dragon",                     // 569
+    "Exoskeleton",                // 570
+    "Ghoul",                      // 571
+    "Clockwork Guardian",         // 572
+    "Mantrap",                    // 573
+    "Minotaur",                   // 574
+    "Scarecrow",                  // 575
+    "Shade",                      // 576
+    "Rotocopter",                 // 577
+    "Tentacle Terror",            // 578
+    "Wereorc",                    // 579
+    "Worg",                       // 580
+    "Wyvern",                     // 581
+    "Chimera",                    // 582
+    "Kirin",                      // 583
+    "Puma",                       // 584
+    "Boulder",                    // 585
+    "Banner",                     // 586
+    "Elven Ghost",                // 587
+    "Human Ghost",                // 588
 #endif

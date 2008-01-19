@@ -1,5 +1,12 @@
 Version: $Id$ $Name$
 
+BlueAdept (11/05/07)
+----------------
++ Updated version to 5.10.0
++ Added opcode decryption (purple, ieatacid)
++ Updated opcodes to current build
++ Changed version to correct numbering
+
 purple (3/24/07)
 ----------------
 + Updated version to 5.9.1

@@ -1145,6 +1145,134 @@ uint16_t EQPacket::serverSeqExp(int stream)
   return m_streams[stream]->arqSeqExp();
 }
 
+///////////////////////////////////////////////////////////////
+// These next two functions were made by purple to build 
+// our own version of the client's opcode table.
+// opcodetable.h was generated from eqgame.exe
+// with an IDA script - ieatacid
+void EQPacket::obfuscateOpCodeDB(const uint8_t* data)
+{
+	const worldObfuscatorStruct* obfs=(const worldObfuscatorStruct*) data;
+
+	//seqDebug("obfuscateOpCodeDB var1=%x",obfs->var1);
+	
+	int rawops[] =
+	{
+		#include "opcodetable.h"
+	};
+	
+	int32_t ecx;
+	int32_t eax;
+	int32_t edx;
+
+	int64_t qword = 0;
+
+	int32_t var2 = 0;
+	int32_t var3 = 0x18; // 7530 / opcodeCount; calculated in obfuscator constructor
+	int32_t var4 = 0;
+
+    // var2 = parm 1 from packet 0-3 0x077ffd18
+	var2 = obfs->var1;
+
+    // var4 = parm 2 from packet 16-19
+	var4 = obfs->var2;
+
+	edx = var4;
+	
+    // Process
+	for (int i=0; rawops[i]!=(int)0xFFFFFFFF; i++)
+	{
+		ecx = var2;
+		eax = 0x834e0b5f;
+
+		qword = (int64_t) eax * ecx;
+		eax = qword & 0xffffffff;
+		edx = qword >> 32;
+
+		edx = edx + ecx;
+
+		ecx = ecx * 0x41a7;
+		edx = edx / 65536;
+		eax = edx;
+		eax = eax >> 0x1f;
+
+
+		eax = eax + edx;
+		qword = (int64_t) eax * 0x7fffffff;
+		eax = qword & 0xffffffff;
+
+		ecx = ecx - eax;
+
+		var2 = ecx;
+
+		if (ecx < 0)
+		{
+			ecx = ecx + 0x7fffffff;
+			var2 = ecx;
+		}
+
+		double st0 = var2;
+
+		union
+		{
+			float flt;
+			uint32_t bits;
+		} constant;
+
+		constant.bits = 0x30000000;
+		st0 = st0 * (double) constant.flt;
+		st0 = st0 * var3;
+
+        // Convert top of fp stack to long. Assume float and not double
+        // so we can just cast...
+		eax = (long) st0;
+		edx = 0;
+
+		ecx = var4;
+		eax++;
+		ecx = ecx + eax;
+		var4 = ecx;
+		var4 &= 0xffff;
+
+        // Check for collision
+		var4 = incrementCollisions(var4, rawops);
+
+        // push new record
+		ecx = var4;
+
+		if(m_zoneOPCodeDB->find(rawops[i]))
+		{
+			//seqDebug("changing opcode %x to %x",rawops[i],ecx);
+			m_zoneOPCodeDB->move(rawops[i],ecx);
+		}
+
+		eax = var4;
+		if (eax != ecx)
+		{
+			/* commenting out this increment made it work, along
+			with starting the opcode table at the first opcode
+			instead of 12 bytes in - ieatacid
+			*/
+			//eax++;
+			var4 = eax;
+			var4 &= 0xffff;
+		}
+	}
+}
+
+uint32_t EQPacket::incrementCollisions(int inOp, int rawops[])
+{
+	for (int i=0; rawops[i]!=(int)0xFFFFFFFF; i++)
+	{
+		if (rawops[i] == inOp)
+		{
+			return incrementCollisions(++inOp, rawops);
+		}
+	}
+    // No collide
+	return inOp;
+}
+
 #ifndef QMAKEBUILD
 #include "packet.moc"
 #endif

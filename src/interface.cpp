@@ -2108,7 +2108,12 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      connect(this, SIGNAL(saveAllPrefs(void)),
 	     m_combatWindow, SLOT(savePrefs(void)));
    }
-
+   
+   // Connect obfuscator slot to obfuscator signal
+   m_packet->connect2("OP_ObfuscatorInfo", SP_Zone, DIR_Server,
+		      "worldObfuscatorStruct", SZC_Match,
+		      m_packet, SLOT(obfuscateOpCodeDB(const uint8_t*)));
+   
    //
    // Geometry Configuration
    //
