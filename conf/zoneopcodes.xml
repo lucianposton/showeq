@@ -604,7 +604,7 @@
      handlers. These need to be refound again, but we'd see errors if they
      were commented out. If you're looking for opcodes, find these first
      if you're so inclined! -->
-    <opcode id="00d0" name="OP_CorpseLocResponse" updated="05/26/04">
+    <opcode id="0292" name="OP_CorpseLocResponse" updated="05/26/04">
         <comment>old CorpseLocCode:</comment>
         <payload dir="server" typename="corpseLocStruct" sizechecktype="match"/>
     </opcode>

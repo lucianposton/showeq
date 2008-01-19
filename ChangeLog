@@ -1,5 +1,13 @@
 Version: $Id$ $Name$
 
+BlueAdept (11/27/07)
+----------------
++ Updated version to 5.11.1
++ Updated structs (BlueAdept, Markdark and ieatacid)
++ Changed Opcode for CoprseLocResponse (ieatacid)
++ Updated spellshell.h to reflect current spells
++ Re-added spells_en2spellsh.pl to keep spellshell.h updated
+
 BlueAdept (11/21/07)
 ----------------
 + Updated version to 5.11.0

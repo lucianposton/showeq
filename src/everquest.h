@@ -601,7 +601,8 @@ struct newZoneStruct
 /*0860*/ uint8_t unknown0856[36];          // *** Placeholder (06/13/2006)
 /*0896*/ uint8_t unknown0892[12];          // *** Placeholder (12/05/2006)
 /*0908*/ uint8_t unknown0904[8];           // *** Placeholder (02/13/2007)
-}; /*0916*/
+/*0916*/ uint8_t unknown0916[4];           // *** Placeholder (11/24/2007)
+}; /*0920*/
 
 /**
  * Player Profile. Common part of charProfileStruct shared between
@@ -1709,7 +1710,8 @@ struct action2Struct
 /*0005*/ int16_t  spell;                // SpellID
 /*0007*/ int32_t  damage;
 /*0011*/ uint8_t  unknown0011[13];  // ***Placeholder
-/*0024*/
+/*0024*/ uint8_t  unknown0024[4];	// ***Placeholder (11/24/07)
+/*0028*/
 };
 
 // This can be used to gather info on spells cast on us
