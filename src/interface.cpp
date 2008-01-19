@@ -226,7 +226,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 						  PLAYBACK_OFF),
 			   pSEQPrefs->getPrefInt("PlaybackRate", vpsection, 
 						 false),
-			   this, "packet");
+       			   this, "packet");
    
   ipstr[0] = m_packet->ip();	//Retrieves last IP used in previous session 
   for( int i = 1; i < 5; i++) 
@@ -2108,11 +2108,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      connect(this, SIGNAL(saveAllPrefs(void)),
 	     m_combatWindow, SLOT(savePrefs(void)));
    }
-   
-   // Connect obfuscator slot to obfuscator signal
-   m_packet->connect2("OP_ObfuscatorInfo", SP_Zone, DIR_Server,
-		      "worldObfuscatorStruct", SZC_Match,
-		      m_packet, SLOT(obfuscateOpCodeDB(const uint8_t*)));
+
    
    //
    // Geometry Configuration

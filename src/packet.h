@@ -25,7 +25,7 @@ typedef uint32_t in_addr_t;
 #endif
 
 #include <netinet/in.h>
-
+	 
 //----------------------------------------------------------------------
 // enumerated types
 enum EQStreamPairs
@@ -104,7 +104,6 @@ class EQPacket : public QObject
    void setRealtime(bool val);
    void dispatchSessionKey(uint32_t sessionId, EQStreamID streamid,
       uint32_t sessionKey);
-   void obfuscateOpCodeDB(const uint8_t* data);
 
  protected slots:
    void closeStream(uint32_t sessionId, EQStreamID streamId);
@@ -179,7 +178,6 @@ class EQPacket : public QObject
    void connectStream(EQPacketStream* stream);
    void dispatchPacket   (int size, unsigned char *buffer);
    void dispatchPacket(EQUDPIPPacketFormat& packet);
-   uint32_t incrementCollisions(int inOp, int rawops[]);
  protected slots:
    void resetEQPacket();
    void dispatchWorldChatData (size_t len, uint8_t* data, uint8_t direction = 0);

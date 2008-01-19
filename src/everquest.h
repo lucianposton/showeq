@@ -565,7 +565,7 @@ struct ClientZoneEntryStruct
 
 /*
 ** New Zone Code
-** Length: 916 Octets
+** Length: 920 Octets
 ** OpCode: NewZoneCode
 */
 struct newZoneStruct
@@ -976,7 +976,6 @@ struct spawnStruct
 /*0141*/ uint8_t  unknown0141[24];
 /*0165*/ uint8_t  class_;         // Player's class
 /*0166*/ uint8_t  unknown0166[201];
-/*%%% gm right this time? */
 /*0367*/ uint8_t  gm;
 /*0368*/ uint8_t  unknown0368[134];
 /*0502*/ float    runspeed;       // Speed when walking
@@ -1697,7 +1696,7 @@ struct staminaStruct
 
 /*
 ** Battle Code
-** Length: 24 Octets
+** Length: 28 Octets
 ** OpCode: ActionCode
 */
 

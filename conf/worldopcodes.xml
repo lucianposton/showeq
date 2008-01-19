@@ -11,14 +11,21 @@
     </opcode>
 -->
 
-
-    <opcode id="6c3c" name="OP_SendLoginInfo" updated="03/14/07">
-        <comment>Client starting world session by asking for login information</comment>
-    </opcode>
     <opcode id="04fb" name="OP_GuildList" updated="03/14/07">
         <comment>old GuildListCode</comment>
         <payload dir="server" typename="worldGuildListStruct" sizechecktype="match"/>
     </opcode>
+    <opcode id="5711" name="OP_MOTD" updated="03/14/07">
+        <comment>old MOTDCode Server message of the day</comment>
+        <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
+    </opcode>
+
+    
+<!-- Not necessary for SEQ to run but here to name packets in logs -->
+    <opcode id="6c3c" name="OP_SendLoginInfo" updated="03/14/07">
+        <comment>Client starting world session by asking for login information</comment>
+    </opcode>
+
     <opcode id="129a" name="OP_LogServer" updated="03/14/07">
         <comment></comment>
     </opcode>
@@ -43,10 +50,6 @@
     <opcode id="45f9" name="OP_UnknownChecksum" updated="03/14/07">
         <comment>Third client verification packet</comment>
     </opcode>
-    <opcode id="5711" name="OP_MOTD" updated="03/14/07">
-        <comment>old MOTDCode Server message of the day</comment>
-        <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
-    </opcode>
     <opcode id="71b8" name="OP_SetChatServer" updated="03/14/07">
         <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
@@ -60,8 +63,7 @@
         <comment>Client telling world server it is done. World replies by disconnecting.</comment>
     </opcode>
 
-
-    
+<!--
 
     <opcode id="26c9" name="OP_DeleteCharacter" updated="10/27/05">
         <comment>Delete character @ char select</comment>
@@ -75,4 +77,5 @@
     <opcode id="23d4" name="OP_RandomNameGenerator" updated="06/29/05">
         <comment>Returns a random name</comment>
     </opcode>
+-->
 </seqopcodes>
