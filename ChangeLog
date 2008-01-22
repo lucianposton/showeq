@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+ieatacid (1/21/08)
+----------------
++ Updated version to 5.12.1.0
++ Updated Opcodes
++ Updated structs (thanks ksmith for help with playerSpawnPosStruct bit fields)
+
 BlueAdept (12/16/07)
 ----------------
 + Updated version to 5.12.0
