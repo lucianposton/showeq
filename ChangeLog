@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+ieatacid (1/23/08)
+----------------
++ Updated version to 5.12.2
++ Updated the position structs that are used for debugging in
+	player.cpp and spawnshell.cpp
+
 ieatacid (1/21/08)
 ----------------
 + Updated version to 5.12.1.0

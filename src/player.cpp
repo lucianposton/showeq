@@ -845,22 +845,23 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
 #if 0
     // Debug positioning without having to recompile everything...
 #pragma pack(1)
-    struct pos
+struct pos
 {
 /*0000*/ uint16_t spawnId;        // Player's spawn id
 /*0002*/ uint8_t unknown0002[2];  // ***Placeholder (update time counter?)
 /*0004*/ uint8_t unknown0004[4];  // ***Placeholder
-/*0008*/ float deltaZ;            // Change in z
-/*0012*/ float x;                 // x coord (2nd loc value)
+/*0008*/ float x;                 // x coord (2nd loc value)
+/*0012*/ float y;                 // y coord (1st loc value)
 /*0016*/ signed deltaHeading:10;  // change in heading
-         signed animation:10;     // animation
-         unsigned padding0016:12; // ***Placeholder
-/*0020*/ float y;                 // y coord (1st loc value)
-/*0024*/ float deltaX;            // Change in x
-/*0028*/ unsigned heading:12;     // Directional heading
-         unsigned padding0028:20; // ***Placeholder
-/*0032*/ float deltaY;            // Change in y
-/*0036*/ float z;                 // z coord (3rd loc value)
+         unsigned animation:10;   // animation
+         unsigned padding0016:12; // ***Placeholder 
+/*0020*/ float deltaX;            // Change in x
+/*0024*/ float deltaY;            // Change in y
+/*0028*/ float z;                 // z coord (3rd loc value)
+/*0032*/ float deltaZ;            // Change in z
+/*0036*/ unsigned padding0036:10; // animation
+         unsigned heading:12;     // Directional heading
+         unsigned padding0037:10; // ***Placeholder 
 /*0040*/
 };
 #pragma pack(0)

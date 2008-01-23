@@ -448,34 +448,33 @@ void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
 #if 0
     // Debug positioning without having to recompile everything...
 #pragma pack(1)
-    struct pos
+struct pos
 {
 /*0002*/ signed   padding0000:12; // ***Placeholder
-         signed   x:19;           // x coord
-         signed   padding0002:1; // ***Placeholder
-/*0006*/ signed   deltaX:13;      // change in x
+         signed   deltaX:13;      // change in x
+         signed   padding0005:7;  // ***Placeholder
+/*0006*/ signed   deltaHeading:10;// change in heading
          signed   deltaY:13;      // change in y
-         signed   padding0006:6;  // ***Placeholder
-/*0010*/ signed   z:19;           // z coord
-         signed   deltaHeading:10;// change in heading
-         signed   padding0014:3;  // ***Placeholder
-/*0014*/ signed   y:19;           // y coord
+         signed   padding0006:9;  // ***Placeholder
+/*0010*/ signed   y:19;           // y coord
+         signed   animation:13;   // animation
+/*0014*/ unsigned heading:12;     // heading
+         signed   x:19;           // x coord
+         signed   padding0014:1;  // ***Placeholder
+/*0018*/ signed   z:19;           // z coord
          signed   deltaZ:13;      // change in z
-/*0018*/ signed   animation:10;   // animation
-         unsigned heading:12;     // heading
-         signed   padding0018:10;  // ***Placeholder
 /*0022*/
 };
 #pragma pack(0)
     struct pos *p = (struct pos *)(data + i*sizeof(spawnStruct) + 151);
-    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x, %x)\n",
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
             zspawns[i].spawnId, 
             float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0, 
             float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
             float(p->deltaZ)/4.0, 
             float(p->heading), float(p->deltaHeading),
             p->animation, p->padding0000, 
-            p->padding0002, p->padding0006, p->padding0014, p->padding0018);
+            p->padding0005, p->padding0006, p->padding0014);
 #endif
     newSpawn(zspawns[i]);
   }
@@ -632,30 +631,29 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 {
 /*0000*/ uint16_t spawnId;
 /*0002*/ signed   padding0000:12; // ***Placeholder
-         signed   x:19;           // x coord
-         signed   padding0002:1; // ***Placeholder
-/*0006*/ signed   deltaX:13;      // change in x
+         signed   deltaX:13;      // change in x
+         signed   padding0005:7;  // ***Placeholder
+/*0006*/ signed   deltaHeading:10;// change in heading
          signed   deltaY:13;      // change in y
-         signed   padding0006:6;  // ***Placeholder
-/*0010*/ signed   z:19;           // z coord
-         signed   deltaHeading:10;// change in heading
-         signed   padding0014:3;  // ***Placeholder
-/*0014*/ signed   y:19;           // y coord
+         signed   padding0006:9;  // ***Placeholder
+/*0010*/ signed   y:19;           // y coord
+         signed   animation:13;   // animation
+/*0014*/ unsigned heading:12;     // heading
+         signed   x:19;           // x coord
+         signed   padding0014:1;  // ***Placeholder
+/*0018*/ signed   z:19;           // z coord
          signed   deltaZ:13;      // change in z
-/*0018*/ signed   animation:10;   // animation
-         unsigned heading:12;     // heading
-         signed   padding0018:10;  // ***Placeholder
 /*0022*/
 };
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
-    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x, %x)\n",
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
             p->spawnId, float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0, 
             float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
             float(p->deltaZ)/4.0, 
             float(p->heading), float(p->deltaHeading),
-            p->animation, p->padding0000, p->padding0002, 
-            p->padding0006, p->padding0014, p->padding0018);
+            p->animation, p->padding0000, p->padding0005, 
+            p->padding0006, p->padding0014);
 #endif
 
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,
