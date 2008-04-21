@@ -9,7 +9,7 @@
     <opcode id="7901" name="OP_ZoneEntry" updated="01/17/08">
         <comment>old ZoneEntryCode</comment>
         <payload dir="client" typename="ClientZoneEntryStruct" sizechecktype="match"/>
-        <payload dir="server" typename="ServerZoneEntryStruct" sizechecktype="match"/>
+        <payload dir="server" typename="ServerZoneEntryStruct" sizechecktype="none"/>
     </opcode>
     <opcode id="72f8" name="OP_ZoneSpawns" updated="01/17/08">
         <comment>old ZoneSpawnsCode</comment>
@@ -71,7 +71,7 @@
     </opcode>
     <opcode id="3164" name="OP_DeleteSpawn" updated="01/17/08">
         <comment>old DeleteSpawnCode</comment>
-        <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
+        <payload dir="both" typename="deleteSpawnStruct" sizechecktype="none"/>
     </opcode>
     <opcode id="1B85" name="OP_Death" updated="01/17/08">
         <comment>old NewCorpseCode</comment>

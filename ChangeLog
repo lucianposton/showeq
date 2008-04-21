@@ -1,10 +1,16 @@
 Version: $Id$ $Name$
 
+ieatacid (4/20/08)
+----------------
++ Updated version to 5.12.3
++ Updated structs
++ Added option to the Option menu to disable the update radius (this is still buggy)
+
 ieatacid (1/23/08)
 ----------------
 + Updated version to 5.12.2
 + Updated the position structs that are used for debugging in
-	player.cpp and spawnshell.cpp
+  player.cpp and spawnshell.cpp
 
 ieatacid (1/21/08)
 ----------------

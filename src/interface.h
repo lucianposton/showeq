@@ -286,6 +286,7 @@ class EQInterface:public QMainWindow
    void set_opt_save_BaseFilename();
    void opt_clearChannelMsgs(int id);
    void init_view_menu();
+   void toggle_opt_UseUpdateRadius();
 
    void toggleTypeFilter(int);
    void disableAllTypeFilters();
@@ -459,6 +460,7 @@ class EQInterface:public QMainWindow
    int  m_id_net_sessiontrack;
    int  m_packetStartTime;
    int  m_initialcount;
+   int  m_id_opt_useUpdateRadius;
 
    MenuIDList IDList_StyleMenu;
 
@@ -477,6 +479,7 @@ class EQInterface:public QMainWindow
 
    bool m_selectOnConsider;
    bool m_selectOnTarget;
+   bool m_useUpdateRadius;
 };
 
 #endif // EQINT_H
