@@ -155,7 +155,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
   m_selectOnConsider = pSEQPrefs->getPrefBool("SelectOnCon", section, false);
   m_selectOnTarget = pSEQPrefs->getPrefBool("SelectOnTarget", section, false);
-  m_useUpdateRadius = pSEQPrefs->getPrefBool("UseUpdateRadius", section, true);
 
   const char* player_classes[] = {"Warrior", "Cleric", "Paladin", "Ranger",
 				  "Shadow Knight", "Druid", "Monk", "Bard",
@@ -284,7 +283,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    // Create the spawn shell
    m_spawnShell = new SpawnShell(*m_filterMgr, m_zoneMgr, m_player, m_guildmgr);
-   m_spawnShell->setUseUpdateRadius(m_useUpdateRadius);
 
    // Create the Category manager
    m_categoryMgr = new CategoryMgr();
@@ -993,9 +991,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	   this, SLOT(select_opt_conColorBase(int)));
    pOptMenu->insertItem("Con &Colors", conColorBaseMenu);
    
-   m_id_opt_useUpdateRadius = pOptMenu->insertItem("&Use Update Radius (buggy if disabled)",
+   m_id_opt_useUpdateRadius = pOptMenu->insertItem("&Use EQ's Update Radius",
        this, SLOT(toggle_opt_UseUpdateRadius()));
-   menuBar()->setItemChecked (m_id_opt_useUpdateRadius, m_useUpdateRadius);
+   menuBar()->setItemChecked (m_id_opt_useUpdateRadius, showeq_params->useUpdateRadius);
 
    // Network Menu
    m_netMenu = new QPopupMenu;
@@ -1944,8 +1942,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 		      "hpNpcUpdateStruct", SZC_Match,
 		      m_spawnShell, SLOT(updateNpcHP(const uint8_t*)));
    m_packet->connect2("OP_DeleteSpawn", SP_Zone, DIR_Server|DIR_Client,
-		      "deleteSpawnStruct", SZC_None,
-		      m_spawnShell, SLOT(deleteSpawn(const uint8_t*, size_t)));
+                      "deleteSpawnStruct", SZC_Match,
+                      m_spawnShell, SLOT(deleteSpawn(const uint8_t*)));
    m_packet->connect2("OP_SpawnRename", SP_Zone, DIR_Server,
 		      "spawnRenameStruct", SZC_Match,
 		      m_spawnShell, SLOT(renameSpawn(const uint8_t*)));
@@ -1964,6 +1962,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Shroud", SP_Zone, DIR_Server,
               "spawnShroudSelf", SZC_None,
               m_spawnShell, SLOT(shroudSpawn(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_RemoveSpawn", SP_Zone, DIR_Server,
+                      "removeSpawnStruct", SZC_None,
+                      m_spawnShell, SLOT(removeSpawn(const uint8_t*, size_t)));
 #if 0 // ZBTEMP
    connect(m_packet, SIGNAL(spawnWearingUpdate(const uint8_t*, size_t, uint8_t)),
 	   m_spawnShell, SLOT(spawnWearingUpdate(const uint8_t*)));
@@ -3507,10 +3508,9 @@ EQInterface::toggle_opt_KeepSelectedVisible (void)
 void
 EQInterface::toggle_opt_UseUpdateRadius (void)
 {
-  m_useUpdateRadius = !(m_useUpdateRadius);
-  m_spawnShell->toggleUseUpdateRadius();
-  menuBar()->setItemChecked (m_id_opt_useUpdateRadius, m_useUpdateRadius);
-  pSEQPrefs->setPrefBool("UseUpdateRadius", "Interface", m_useUpdateRadius);
+  showeq_params->useUpdateRadius = !(showeq_params->useUpdateRadius);
+  menuBar()->setItemChecked (m_id_opt_useUpdateRadius, showeq_params->useUpdateRadius);
+  pSEQPrefs->setPrefBool("UseUpdateRadius", "Interface", showeq_params->useUpdateRadius);
 }
 
 /* Check and uncheck Log menu options & set EQPacket logging flags */

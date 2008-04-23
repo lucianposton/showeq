@@ -84,8 +84,6 @@ public:
    const ItemMap& spawns(void) const;
    const ItemMap& drops(void) const;
    const ItemMap& doors(void) const;
-   void toggleUseUpdateRadius(void);
-   void setUseUpdateRadius(bool useUpdateRadius);
 signals:
    void addItem(const Item* item);
    void delItem(const Item* item);
@@ -124,7 +122,8 @@ public slots:
    void updateNpcHP(const uint8_t* hpupdate);
    void spawnWearingUpdate(const uint8_t* wearing);
    void consMessage(const uint8_t* con, size_t, uint8_t);
-   void deleteSpawn(const uint8_t* delspawn, size_t len);
+   void removeSpawn(const uint8_t* rmSpawn, size_t len);
+   void deleteSpawn(const uint8_t* delSpawn);
    void killSpawn(const uint8_t* deadspawn);
    void respawnFromHover(const uint8_t* respawn);
    void corpseLoc(const uint8_t* corpseLoc);
@@ -163,9 +162,6 @@ public slots:
 
    // timer for saving spawns
    QTimer* m_timer;
-   
-   // flag for using the update radius
-   bool m_useUpdateRadius;
 };
 
 inline
@@ -220,18 +216,6 @@ inline
 const ItemMap& SpawnShell::doors(void) const
 {
   return m_doors; 
-}
-
-inline
-void SpawnShell::toggleUseUpdateRadius(void)
-{
-  m_useUpdateRadius=!m_useUpdateRadius;
-}
-
-inline
-void SpawnShell::setUseUpdateRadius(bool useUpdateRadius)
-{
-  m_useUpdateRadius=useUpdateRadius;
 }
 
 //--------------------------------------------------

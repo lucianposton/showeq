@@ -245,6 +245,7 @@ class Spawn : public Item
   bool approximatePosition(bool animating, 
 			   const QTime& curTime,
 			   EQPoint& newPos) const;
+  bool isNotUpdated() const { return m_notUpdated; }
 
   // spawn related methods that sub-classes may override
   virtual QString lastName() const;
@@ -325,9 +326,9 @@ class Spawn : public Item
   void setID(uint16_t id) { m_ID = id; }
   void setLastName(const char * lastName)
     { m_lastName = QString::fromUtf8(lastName); }
-
   void setLastName(const QString& lastName)
     { m_lastName = lastName; }
+  void setNotUpdated(bool notUpdated) { m_notUpdated = notUpdated; }
 
 
  protected:
@@ -364,6 +365,7 @@ class Spawn : public Item
   uint8_t m_animation;
   uint8_t m_gm;
   bool m_considered;
+  bool m_notUpdated;
 };
 
 

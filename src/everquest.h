@@ -1589,21 +1589,21 @@ struct groupDisbandStruct
 /*
 ** Delete Self
 ** Length: 4 Octets
-** OpCode: DeleteSpawnCode
+** OpCode: OP_DeleteSpawn
 */
 
-struct deleteSpawnSelfStruct
+struct deleteSpawnStruct
 {
 /*0000*/ uint32_t spawnId;                // Spawn ID to delete
 };
 
 /*
-** Delete Spawn
+** Remove Spawn
 ** Length: 5 Octets
-** OpCode: DeleteSpawnCode
+** OpCode: OP_RemoveSpawn
 */
 
-struct deleteSpawnStruct
+struct removeSpawnStruct
 {
 /*0000*/ uint32_t spawnId;                // Spawn ID to delete
 /*0004*/ uint8_t  removeSpawn;            // 0 if spawn is not in your update radius

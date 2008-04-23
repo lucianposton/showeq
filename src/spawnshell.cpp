@@ -96,8 +96,7 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
     m_spawns(701),
     m_drops(211),
     m_doors(307),
-    m_players(2),
-    m_useUpdateRadius(0)
+    m_players(2)
 {
    m_cntDeadSpawnIDs = 0;
    m_posDeadSpawnIDs = 0;
@@ -483,10 +482,10 @@ struct pos
 
 void SpawnShell::zoneEntry(const uint8_t* data, size_t len)
 {
-    const spawnStruct* spawn = (const spawnStruct*)data;
+  const spawnStruct* spawn = (const spawnStruct*)data;
 
 #ifdef SPAWNSHELL_DIAG
-    seqDebug("SpawnShell::zoneEntry(spawnStruct *(name='%s'))", spawn->name);
+  seqDebug("SpawnShell::zoneEntry(spawnStruct *(name='%s'))", spawn->name);
 #endif
         // Zone Entry. This is a semi-filled in spawnStruct that we
         // see for ourself when entering a zone. We also get sent this
@@ -494,33 +493,42 @@ void SpawnShell::zoneEntry(const uint8_t* data, size_t len)
         // also get sent this sometimes.
 
         /* Now all PCs are 0, including self
-        if (spawn->NPC==0)
-        {
+  if (spawn->NPC==0)
+  {
           // Align the player instance with these values
-          m_player->update(spawn);
+  m_player->update(spawn);
 
-          emit changeItem(m_player, tSpawnChangedALL);
-        }*/
-
-    if(len==sizeof(spawnStruct) || len==sizeof(spawnCampfire))
+  emit changeItem(m_player, tSpawnChangedALL);
+}*/
+  Item *item;
+  if(len==sizeof(spawnStruct) || len==sizeof(spawnCampfire))
+  {
+    if(!strcmp(spawn->name,m_player->name()))
     {
-        if(!strcmp(spawn->name,m_player->name()))
-        {
-          // Multiple zoneEntry packets are received for your spawn after you zone.
-          m_player->update(spawn);
-          emit changeItem(m_player, tSpawnChangedALL);
-        }
-        else
-        {
-          // Auras, all other PCs and NPCs
-          newSpawn(data);
-        }
+        // Multiple zoneEntry packets are received for your spawn after you zone.
+      m_player->update(spawn);
+      emit changeItem(m_player, tSpawnChangedALL);
     }
     else
     {
-      seqWarn("OP_ZoneEntry (datalen: %d) doesn't match: sizeof(spawnStruct):%d or sizeof(spawnCampfire):%d",
-              len,sizeof(spawnStruct),sizeof(spawnCampfire));
+      if((item=m_spawns.find(spawn->spawnId)))
+      {
+          // Update existing spawn
+        Spawn *s=(Spawn*)item;
+        s->update(spawn);
+      }
+      else
+      {
+          // Create a new spawn
+        newSpawn(data);
+      }
     }
+  }
+  else
+  {
+    seqWarn("OP_ZoneEntry (datalen: %d) doesn't match: sizeof(spawnStruct):%d or sizeof(spawnCampfire):%d",
+            len,sizeof(spawnStruct),sizeof(spawnCampfire));
+  }
 }
 
 void SpawnShell::newSpawn(const uint8_t* data)
@@ -1120,41 +1128,58 @@ void SpawnShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
   } // else not yourself
 } // end consMessage()
 
-void SpawnShell::deleteSpawn(const uint8_t* data, size_t len)
+void SpawnShell::removeSpawn(const uint8_t* data, size_t len)
 {
-  const deleteSpawnStruct* delSpawn = (const deleteSpawnStruct*)data;
+  const removeSpawnStruct* rmSpawn = (const removeSpawnStruct*)data;
 #ifdef SPAWNSHELL_DIAG
-   seqDebug("SpawnShell::deleteSpawn(id=%d)", delSpawn->spawnId);
+  seqDebug("SpawnShell::removeSpawn(id=%d)", rmSpawn->spawnId);
 #endif
-   if(len==sizeof(deleteSpawnStruct) || len==sizeof(deleteSpawnSelfStruct))
-   {
-     if(len==sizeof(deleteSpawnStruct))
-     {
-       if(delSpawn->removeSpawn)
-       {
-         if (m_posDeadSpawnIDs < (MAX_DEAD_SPAWNIDS - 1))
-           m_posDeadSpawnIDs++;
-         else
-           m_posDeadSpawnIDs = 0;
+  Item *item;
+  if(len==sizeof(removeSpawnStruct))
+  {
+    if(!rmSpawn->removeSpawn)
+    {
+      // Remove a spawn from outside the update radius
+      if(showeq_params->useUpdateRadius)
+      {
+        // Remove it
+        deleteItem(tSpawn, rmSpawn->spawnId);
+      }
+      else
+      {
+        // Set flag to change its icon
+        if((item=m_spawns.find(rmSpawn->spawnId)))
+        {
+          Spawn *s=(Spawn*)item;
+          s->setNotUpdated(true);
+        }
+      }
+    }
+  }
+  else if((len+1)!=sizeof(removeSpawnStruct))
+  {
+    seqWarn("OP_RemoveSpawn (dataLen: %d) doesn't match: sizeof(removeSpawnStruct): %d",
+            len,sizeof(removeSpawnStruct));
+  }
+}
 
-         if (m_cntDeadSpawnIDs < MAX_DEAD_SPAWNIDS)
-           m_cntDeadSpawnIDs++;
+void SpawnShell::deleteSpawn(const uint8_t* data)
+{
+  const deleteSpawnStruct* delspawn = (const deleteSpawnStruct*)data;
+#ifdef SPAWNSHELL_DIAG
+  seqDebug("SpawnShell::deleteSpawn(id=%d)", delspawn->spawnId);
+#endif
+  if (m_posDeadSpawnIDs < (MAX_DEAD_SPAWNIDS - 1))
+    m_posDeadSpawnIDs++;
+  else
+    m_posDeadSpawnIDs = 0;
 
-         m_deadSpawnID[m_posDeadSpawnIDs] = delSpawn->spawnId;
+  if (m_cntDeadSpawnIDs < MAX_DEAD_SPAWNIDS)
+    m_cntDeadSpawnIDs++;
 
-         deleteItem(tSpawn, delSpawn->spawnId);
-       }
-       else if(!delSpawn->removeSpawn && m_useUpdateRadius)
-       {
-         deleteItem(tSpawn, delSpawn->spawnId);
-       }
-     }
-   }
-   else
-   {
-     seqWarn("OP_DeleteSpawn (datalen: %d) doesn't match: sizeof(deleteSpawnStruct):%d or sizeof(deleteSpawnSelfStruct):%d",
-             len,sizeof(deleteSpawnStruct),sizeof(deleteSpawnSelfStruct));
-   }
+  m_deadSpawnID[m_posDeadSpawnIDs] = delspawn->spawnId;
+
+  deleteItem(tSpawn, delspawn->spawnId);
 }
 
 void SpawnShell::killSpawn(const uint8_t* data)

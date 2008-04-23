@@ -3591,7 +3591,15 @@ void Map::paintSpawns(MapParameters& param,
       mapIcon = m_mapIcons->icon(tIconTypeSpawnPlayerCorpse);
     else if (spawn->isUnknown())
       mapIcon = m_mapIcons->icon(tIconTypeSpawnUnknown);
-    
+
+    if (spawn->isNotUpdated())
+    {
+      if(spawn->isNPC())
+        mapIcon = m_mapIcons->icon(tIconTypeSpawnNPCNoUpdate);
+      else if (spawn->isOtherPlayer())
+        mapIcon = m_mapIcons->icon(tIconTypeSpawnPlayerNoUpdate);
+    }
+
     // if the spawn was considered, note it.
     if (m_highlightConsideredSpawns && spawn->considered())
       mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnConsidered));

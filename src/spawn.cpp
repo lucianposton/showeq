@@ -449,6 +449,8 @@ void Spawn::update(const spawnStruct* s)
 
   // just clear the considred flag since data would be outdated
   setConsidered(false);
+  
+  setNotUpdated(false);
 
   // finally, note when this update occurred.
   updateLast();

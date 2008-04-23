@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+ieatacid (4/22/08)
+----------------
++ Updated version to 5.12.3.1
++ Some fixes for the handling of spawns outside of your update radius
++ Made it so that spawns outside your update radius have dark gray-colored icons (you can change this in the icon editor)
+
 ieatacid (4/20/08)
 ----------------
 + Updated version to 5.12.3

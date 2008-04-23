@@ -44,6 +44,7 @@ struct ShowEQParams
   bool           restoreZoneState;
   bool           restoreSpawns;
   QString        saveRestoreBaseFilename;
+  bool           useUpdateRadius;
 };
  
 extern struct ShowEQParams *showeq_params;

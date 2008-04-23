@@ -83,6 +83,8 @@ static const QString iconTypePrefBaseNames[] =
   "SpawnPoint",
   "SpawnPointSelected",
   "ZoneSafePoint",
+  "SpawnPlayerNoUpdate",
+  "SpawnNPCNoUpdate",
 };
 
 static const QString iconTypeNames[] = 
@@ -121,6 +123,8 @@ static const QString iconTypeNames[] =
   "Spawn Point",
   "Selected Spawn Point",
   "Zone Safe Point",
+  "Spawn Player No Update",
+  "Spawn NPC No Update",
 };
 
 //----------------------------------------------------------------------
@@ -714,6 +718,14 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
 	      tIconStyleX, tIconSizeSmall,
 	      true, false, false, false);
   m_mapIcons[tIconTypeZoneSafePoint].setShowName(true);
+  m_mapIcons[tIconTypeSpawnPlayerNoUpdate]
+      .setImage(QBrush(gray), QPen(darkGray, 1, SolidLine, cap, join),
+                tIconStyleSquare, tIconSizeRegular,
+                true, false, false, false);
+  m_mapIcons[tIconTypeSpawnNPCNoUpdate]
+      .setImage(QBrush(gray), QPen(NoPen, 1, SolidLine, cap, join), 
+                tIconStyleCircle, tIconSizeRegular,
+                true, false, false, false);
 
   // setup icon size maps
   m_mapIconSizes[tIconSizeNone] = &m_markerNSize; // none should never be drawn
