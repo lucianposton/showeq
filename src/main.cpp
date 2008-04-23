@@ -15,9 +15,9 @@
 #include <linux/version.h>
 
 // Newer kernel versions put this in utsversion
-#ifndef UTS_RELEASE
-#include <linux/utsversion.h>
-#endif
+//#ifndef UTS_RELEASE
+//#include <linux/utsversion.h>
+//#endif
 #endif
 
 #include <sys/utsname.h>
@@ -772,10 +772,10 @@ void displayVersion(void)
 #ifdef QT_VERSION_STR
   printf ("\t\tUsing Qt version: %s\n", QT_VERSION_STR);
 #endif
-#ifdef __linux__
-  printf ("\t\tUsing headers from linux version: %s\n",
-	  UTS_RELEASE);
-#endif
+//#ifdef __linux__
+//  printf ("\t\tUsing headers from linux version: %s\n",
+//	  UTS_RELEASE);
+//#endif
 #ifdef ITEMDB
   printf ("\t\tUsing EQItemDB: %s\n", EQItemDB::Version());
   printf ("\tUsing GDBM: %s\n", GDBMConvenience::Version());
