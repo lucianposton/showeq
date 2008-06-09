@@ -32,6 +32,7 @@ AddStruct(playerProfileStruct);
 AddStruct(charProfileStruct);
 AddStruct(playerAAStruct);
 AddStruct(spawnStruct);
+AddStruct(spawnStruct);
 AddStruct(ServerZoneEntryStruct);
 AddStruct(doorStruct);
 AddStruct(makeDropStruct);

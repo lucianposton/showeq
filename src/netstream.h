@@ -24,6 +24,7 @@ class NetStream
   size_t length() { return m_length; }
   void reset();
   bool end() { return (m_pos >= m_lastPos); }
+  const uint8_t* pos() { return m_pos; }
 
   uint8_t readUInt8();
   int8_t readInt8();
@@ -32,6 +33,9 @@ class NetStream
   uint32_t readUInt32();
   int32_t readInt32();
   QString readText();
+  uint16_t readUInt16NC();
+  uint32_t readUInt32NC();
+  void skipBytes(size_t byteCount);
 
  protected:
   const uint8_t* m_data;

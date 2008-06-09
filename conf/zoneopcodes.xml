@@ -11,9 +11,9 @@
         <payload dir="client" typename="ClientZoneEntryStruct" sizechecktype="match"/>
         <payload dir="server" typename="ServerZoneEntryStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="72f8" name="OP_ZoneSpawns" updated="01/17/08">
+    <opcode id="1900" name="OP_ZoneSpawns" updated="05/29/08">
         <comment>old ZoneSpawnsCode</comment>
-        <payload dir="server" typename="spawnStruct" sizechecktype="modulus"/>
+        <payload dir="server" typename="spawnStruct" sizechecktype="none"/>
     </opcode>
     <opcode id="6015" name="OP_TimeOfDay" updated="01/17/08">
         <comment>old TimeOfDayCode</comment>
@@ -74,7 +74,7 @@
         <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="3164" name="OP_RemoveSpawn" updated="04/17/08">
-        <comment>Remove spawn from update radius</comment>
+        <comment>Remove spawn from zone</comment>
 	<payload dir="server" typename="removeSpawnStruct" sizechecktype="none"/>
     </opcode>
     <opcode id="1B85" name="OP_Death" updated="01/17/08">

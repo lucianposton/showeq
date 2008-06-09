@@ -157,6 +157,48 @@ QString NetStream::readText()
     return QString();
 }
 
+uint16_t NetStream::readUInt16NC()
+{
+    uint16_t val;
+
+  // make sure there is enough data left
+    if ((m_lastPos - m_pos) >= 2)
+    {
+    // convert the data and increment past it
+        val = eqtohuint16(m_pos);
+        m_pos += 2;
+    }
+    else 
+        val = 0; // just return 0 if no data left
+
+    return val;
+}
+
+uint32_t NetStream::readUInt32NC()
+{
+  uint32_t val;
+
+  // make sure there is enough data left
+  if ((m_lastPos - m_pos) >= 4)
+  {
+    // convert the data and increment past it
+    val = eqtohuint32(m_pos);
+    m_pos += 4;
+  }
+  else 
+    val = 0; // just return 0 if no data left
+
+  return val;
+}
+
+void NetStream::skipBytes(size_t byteCount)
+{
+  if ((m_lastPos - m_pos) >= byteCount)
+  {
+    m_pos += byteCount;
+  }
+}
+
 BitStream::BitStream(const uint8_t* data, size_t length)
   : m_data(data)
 {

@@ -421,113 +421,212 @@ void SpawnShell::newDoorSpawn(const doorStruct& d, size_t len, uint8_t dir)
 
 void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
 {
-  int spawndatasize = len / sizeof(spawnStruct);
+   NetStream netStream(data,len);
+   spawnStruct *spawn = new spawnStruct;
+   uint32_t spawnStructSize;
+   uint16_t parm1;
 
-  const spawnStruct* zspawns = (const spawnStruct*)data;
+   while(!netStream.end())
+   {
+      memset(spawn,0,sizeof(spawnStruct));
+      parm1=netStream.readUInt16NC();
+      if(parm1==0x1ff)
+         parm1=netStream.readUInt16NC();
 
-  for (int i = 0; i < spawndatasize; i++)
-  {
-#if 0
-  // Dump position updates for debugging spawn struct position changes
-  for (int j=54; j<70; i++)
-  {
-      printf("%.2x", zspawns[i][j]);
+      netStream.skipBytes(1);
+      spawnStructSize=fillSpawnStruct(spawn,netStream.pos(),len,false);
+      newSpawn(*spawn);
+      netStream.skipBytes(spawnStructSize);
+   }
+}
 
-      if ((j+1) % 8 == 0)
-      {
-          printf("    ");
-      }
-      else
-      {
-          printf(" ");
-      }
-  }
-  printf("\n");
-#endif
-
-#if 0
-    // Debug positioning without having to recompile everything...
-#pragma pack(1)
-struct pos
+uint32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, size_t len, bool checkLen)
 {
-/*0002*/ signed   padding0000:12; // ***Placeholder
-         signed   deltaX:13;      // change in x
-         signed   padding0005:7;  // ***Placeholder
-/*0006*/ signed   deltaHeading:10;// change in heading
-         signed   deltaY:13;      // change in y
-         signed   padding0006:9;  // ***Placeholder
-/*0010*/ signed   y:19;           // y coord
-         signed   animation:13;   // animation
-/*0014*/ unsigned heading:12;     // heading
-         signed   x:19;           // x coord
-         signed   padding0014:1;  // ***Placeholder
-/*0018*/ signed   z:19;           // z coord
-         signed   deltaZ:13;      // change in z
-/*0022*/
-};
-#pragma pack(0)
-    struct pos *p = (struct pos *)(data + i*sizeof(spawnStruct) + 151);
-    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
-            zspawns[i].spawnId, 
-            float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0, 
-            float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
-            float(p->deltaZ)/4.0, 
-            float(p->heading), float(p->deltaHeading),
-            p->animation, p->padding0000, 
-            p->padding0005, p->padding0006, p->padding0014);
-#endif
-    newSpawn(zspawns[i]);
-  }
+   NetStream netStream(data,len);
+
+   QString name=netStream.readText();
+
+   if(name.length())
+      strcpy(spawn->name,name.latin1());
+//   seqDebug("name=%s",spawn->name);
+
+   spawn->spawnId=netStream.readUInt32NC();
+//   seqDebug("id=%d (%x)",spawn->spawnId,spawn->spawnId);
+
+   spawn->level=netStream.readUInt8();
+//   seqDebug("level=%d",spawn->level);
+
+   // skip the next 4 bytes
+   netStream.skipBytes(4);
+
+   spawn->NPC=netStream.readUInt8();
+//   seqDebug("NPC=%d",spawn->NPC);
+
+   spawn->miscData=netStream.readUInt32NC();
+
+   spawn->hasTitleOrSuffix=netStream.readUInt8();
+
+//   seqDebug("miscData: %x hasTitleOrSuffix: %x",spawn->miscData,spawn->hasTitleOrSuffix);
+
+//   seqDebug("buyer=%d trader=%d TC=%d T=%d BB=%d LD=%d gen=%d anon=%d gm=%d invis=%d LFG=%d sneak=%d AFK=%d",
+//            spawn->buyer,spawn->trader,spawn->targetcyclable,spawn->targetable,spawn->betabuffed,
+//            spawn->linkdead,spawn->gender,spawn->anon,spawn->gm,spawn->invis,spawn->LFG,spawn->sneak,spawn->AFK);
+
+   if(spawn->hasTitleOrSuffix & 1)
+   {
+      // it's a chest.  skip usual 21 plus extra 56
+      netStream.skipBytes(77);
+   }
+   else
+   {
+      // skip facestyle, walk/run speeds, unknowns
+      netStream.skipBytes(21);
+   }
+
+   spawn->race=netStream.readUInt32NC();
+//   seqDebug("race=%d",spawn->race);
+
+   spawn->charProperties=netStream.readUInt8();
+//   seqDebug("charProperties=%d",spawn->charProperties);
+
+   if(spawn->charProperties)
+   {
+      spawn->bodytype=netStream.readUInt32NC();
+//       seqDebug("bodytype=%d",spawn->bodytype);
+      for(int i=1; i < spawn->charProperties; i++)
+      {
+         // extra character properties
+         int j=netStream.readUInt32NC();
+//          netStream.skipBytes(4);
+      }
+   }
+
+   spawn->curHp=netStream.readUInt8();
+//   seqDebug("curHp=%d",spawn->curHp);
+
+   // skip hair and face stuff
+   netStream.skipBytes(18);
+
+   spawn->holding=netStream.readUInt8();
+   spawn->deity=netStream.readUInt32NC();
+   spawn->guildID=netStream.readUInt32NC();
+   spawn->guildstatus=netStream.readUInt32NC();
+   spawn->class_=netStream.readUInt8();
+//   seqDebug("holding=%d deity=%d guildID=%d guildstatus=%d class_=%d",spawn->holding,
+//            spawn->deity,spawn->guildID,spawn->guildstatus,spawn->class_);
+
+   netStream.skipBytes(1);
+
+   spawn->state=netStream.readUInt8();
+   spawn->light=netStream.readUInt8();
+
+   netStream.skipBytes(5);
+
+   name=netStream.readText();
+
+   if(name.length())
+   {
+      strcpy(spawn->lastName,name.latin1());
+//     seqDebug("surname=%s",spawn->lastName);
+   }
+
+   netStream.skipBytes(5);
+
+   spawn->petOwnerId=netStream.readUInt32NC();
+//   seqDebug("petOwnerId=%d",spawn->petOwnerId);
+
+   netStream.skipBytes(25);
+
+   spawn->posData[0]=netStream.readUInt32NC();
+   spawn->posData[1]=netStream.readUInt32NC();
+   spawn->posData[2]=netStream.readUInt32NC();
+   spawn->posData[3]=netStream.readUInt32NC();
+   spawn->posData[4]=netStream.readUInt32NC();
+
+//    seqDebug("%x %x %x %x %x",spawn->posData[0],spawn->posData[1],spawn->posData[2],spawn->posData[3],spawn->posData[4]);
+
+//   seqDebug("%d %d %d | %d %d %d | %d %d | %d",spawn->y>>3,spawn->x>>3,spawn->z>>3,
+//            spawn->deltaY>>2,spawn->deltaX>>2,spawn->deltaZ>>2,
+//            spawn->heading,spawn->deltaHeading,spawn->animation);
+
+   // skip color
+   netStream.skipBytes(36);
+
+   uint32_t race=spawn->race;
+
+   // this is how the client checks if equipment should be read.
+   if(spawn->NPC==0 || race <= 12 || race==128 || race==130 || race==330 || race==522)
+   {
+      for(int i=0; i<9; i++)
+      {
+         spawn->equipment[i].itemId=netStream.readUInt32NC();
+         spawn->equipment[i].equip1=netStream.readUInt32NC();
+         spawn->equipment[i].equip0=netStream.readUInt32NC();
+      }
+   }
+
+   if(spawn->hasTitleOrSuffix & 4)
+   {
+      name=netStream.readText();
+      strcpy(spawn->title,name.latin1());
+//     seqDebug("title=%s",spawn->title);
+   }
+
+   if(spawn->hasTitleOrSuffix & 8)
+   {
+      name=netStream.readText();
+      strcpy(spawn->suffix,name.latin1());
+//     seqDebug("suffix=%s",spawn->suffix);
+   }
+
+   netStream.skipBytes(32);
+
+   // now we're at the end
+
+   uint32_t retVal=netStream.pos()-netStream.data();
+
+   if(checkLen && (int32_t)len!=retVal)
+   {
+      seqDebug("SpawnShell::fillSpawnStruct - expected length: %d, read: %d",len,retVal);
+   }
+   return retVal;
 }
 
 void SpawnShell::zoneEntry(const uint8_t* data, size_t len)
 {
-  const spawnStruct* spawn = (const spawnStruct*)data;
+  // Zone Entry. Sent when players are added to the zone.
+
+  spawnStruct *spawn = new spawnStruct;
+
+  memset(spawn,0,sizeof(spawnStruct));
+
+  fillSpawnStruct(spawn,data,len,true);
 
 #ifdef SPAWNSHELL_DIAG
   seqDebug("SpawnShell::zoneEntry(spawnStruct *(name='%s'))", spawn->name);
 #endif
-        // Zone Entry. This is a semi-filled in spawnStruct that we
-        // see for ourself when entering a zone. We also get sent this
-        // when shrouding and when respawning from corpse hover mode. Auras
-        // also get sent this sometimes.
 
-        /* Now all PCs are 0, including self
-  if (spawn->NPC==0)
-  {
-          // Align the player instance with these values
-  m_player->update(spawn);
-
-  emit changeItem(m_player, tSpawnChangedALL);
-}*/
   Item *item;
-  if(len==sizeof(spawnStruct) || len==sizeof(spawnCampfire))
+
+  if(!strcmp(spawn->name,m_player->name()))
   {
-    if(!strcmp(spawn->name,m_player->name()))
-    {
-        // Multiple zoneEntry packets are received for your spawn after you zone.
-      m_player->update(spawn);
-      emit changeItem(m_player, tSpawnChangedALL);
-    }
-    else
-    {
-      if((item=m_spawns.find(spawn->spawnId)))
-      {
-          // Update existing spawn
-        Spawn *s=(Spawn*)item;
-        s->update(spawn);
-      }
-      else
-      {
-          // Create a new spawn
-        newSpawn(data);
-      }
-    }
+      // Multiple zoneEntry packets are received for your spawn after you zone.
+    m_player->update(spawn);
+    emit changeItem(m_player, tSpawnChangedALL);
   }
   else
   {
-    seqWarn("OP_ZoneEntry (datalen: %d) doesn't match: sizeof(spawnStruct):%d or sizeof(spawnCampfire):%d",
-            len,sizeof(spawnStruct),sizeof(spawnCampfire));
+    if((item=m_spawns.find(spawn->spawnId)))
+    {
+        // Update existing spawn
+      Spawn *s=(Spawn*)item;
+      s->update(spawn);
+    }
+    else
+    {
+        // Create a new spawn
+      newSpawn(*spawn);
+    }
   }
 }
 
@@ -538,7 +637,6 @@ void SpawnShell::newSpawn(const uint8_t* data)
     return;
 
   const spawnStruct* spawn = (const spawnStruct*)data;
-
 
   newSpawn(*spawn);
 }
@@ -560,12 +658,18 @@ void SpawnShell::newSpawn(const spawnStruct& s)
        // found a match, remove it from the deleted spawn list
        m_deadSpawnID[i] = 0;
 
+       /* Commented this out because it wasn't adding shrouded spawns.
+          Shrouded spawns get deleted from the zone first then added
+          as a new spawn.  leaving this here in case another work-around
+          needs to be found. (ieatacid - 6-8-2008)
+
        // let the user know what's going on
        seqInfo("%s(%d) has already been removed from the zone before we processed it.", 
 	      s.name, s.spawnId);
-       
+
        // and stop the attempt to add the spawn.
        return;
+       */
      }
    }
 
@@ -973,22 +1077,31 @@ void SpawnShell::illusionSpawn(const uint8_t* data)
 
 void SpawnShell::shroudSpawn(const uint8_t* data, size_t len, uint8_t dir)
 {
-    if (len == sizeof(spawnShroudOther))
-    {
-        // Other person shrouding. newSpawn handled updates too.
-        spawnShroudOther* shroud = (spawnShroudOther*) data;
-        seqInfo("Shrouding %s (id=%d)",
-                shroud->spawn.name, shroud->spawn.spawnId);
+    // Self or other person shrouding. newSpawn handled updates too.
 
+    NetStream netStream(data,len);
+
+    uint32_t spawnID=netStream.readUInt32NC();
+    uint16_t spawnStructSize=netStream.readUInt16NC();
+    spawnStructSize-=6;
+
+    if(spawnID!=m_player->id())
+    {
+        // Shrouding other player
+        spawnShroudOther *shroud = new spawnShroudOther;
+        fillSpawnStruct(&shroud->spawn,netStream.pos(),spawnStructSize,true);
+        seqInfo("Shrouding %s (id=%d)", shroud->spawn.name, shroud->spawn.spawnId);
         newSpawn(shroud->spawn);
     }
     else
     {
         // Shrouding yourself.
-        spawnShroudSelf* shroud = (spawnShroudSelf*) data;
+        spawnShroudSelf *shroud = new spawnShroudSelf;
 
-        seqInfo("Shrouding %s (id=%d)",
-                shroud->spawn.name, shroud->spawn.spawnId);
+        fillSpawnStruct(&shroud->spawn,netStream.pos(),spawnStructSize,true);
+        netStream.skipBytes(spawnStructSize);
+        memcpy(&shroud->profile,netStream.pos(),sizeof(playerProfileStruct));
+        seqInfo("Shrouding %s (id=%d)", shroud->spawn.name, shroud->spawn.spawnId);
 
         m_player->loadProfile(shroud->profile);
 
@@ -1154,6 +1267,10 @@ void SpawnShell::removeSpawn(const uint8_t* data, size_t len)
           s->setNotUpdated(true);
         }
       }
+    }
+    else
+    {
+       
     }
   }
   else if((len+1)!=sizeof(removeSpawnStruct))

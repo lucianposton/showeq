@@ -140,6 +140,7 @@ public slots:
    void deleteItem(spawnItemType type, int id);
    bool updateFilterFlags(Item* item);
    bool updateRuntimeFilterFlags(Item* item);
+   uint32_t fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, size_t len, bool checkLen);
 
    ItemMap& getMap(spawnItemType type);
 

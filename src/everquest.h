@@ -939,109 +939,251 @@ struct playerAAStruct {
 };
 #endif
 
-/* 
+/*
 ** Generic Spawn Struct 
-** Length: 532 Octets 
+** Length: Variable.
 ** Used in: 
 **   dbSpawnStruct
 **   petStruct
 **   spawnShroudOther
 **   spawnShroudSelf
-*/ 
+*/
 
+// Fixed-length struct that we'll fill with data from the variable-length packet,
+// unnecessary fields removed, arranged in order with the packet.
 struct spawnStruct
 {
-/*0000*/ uint8_t  unknown0000[6];
-/*0006*/ uint8_t  bodytype;       // Bodytype
-/*0007*/ uint8_t  unknown0007[40];
-/*0047*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
-/*0079*/ char     lastName[32];   // Player's Lastname
-/*0111*/ int16_t  deity;          // Player's Deity
-/*0113*/ uint8_t  unknown0113[2];
-/*0115*/ uint8_t  state;          // stand state
-/*0116*/ uint8_t  unknown0116[9];
-/*0125*/ char     title[32];      // Title
-/*0157*/ uint8_t  unknown0157[4];
-/*0161*/ signed   padding0000:12; // ***Placeholder
-         signed   deltaX:13;      // change in x
-         signed   padding0005:7;  // ***Placeholder
-/*0165*/ signed   deltaHeading:10;// change in heading
-         signed   deltaY:13;      // change in y
-         signed   padding0006:9;  // ***Placeholder
-/*0169*/ signed   y:19;           // y coord
-         signed   animation:13;   // animation
-/*0173*/ unsigned heading:12;     // heading
-         signed   x:19;           // x coord
-         signed   padding0014:1;  // ***Placeholder
-/*0177*/ signed   z:19;           // z coord
-         signed   deltaZ:13;      // change in z
-/*0181*/ uint8_t  unknown0181[25];
-/*0206*/ char     name[64];//       // Player's Name
-/*0270*/ uint8_t  unknown0270[4];
-/*0274*/ uint8_t  light;          // Spawn's lightsource
-/*0275*/ uint8_t  unknown0275[5];
-/*0280*/ uint8_t  NPC;            // 0=player,1=npc,2=pc corpse,3=npc corpse
-/*0281*/ uint8_t  unknown0281[11];
-/*0292*/ uint8_t  level;          // Spawn Level
-/*0293*/ uint8_t  unknown0293;
-/*0294*/ uint8_t  gender;         // Gender (0=male, 1=female)
-/*0295*/ uint8_t  unknown0295[3];
-/*0298*/ uint32_t guildID;        // Current guild
-/*0302*/ uint8_t  unknown0302[15];
-/*0317*/ uint8_t  anon;           // 0=normal, 1=anon, 2=roleplay
-/*0318*/ uint8_t  unknown0318[5];
-/*0323*/ uint32_t petOwnerId;     // If this is a pet, the spawn id of owner
-/*0327*/ uint8_t  class_;         // Player's class
-/*0328*/ uint8_t  unknown0328[15];
-/*0343*/ uint32_t spawnId;        // Spawn Id
-/*0347*/ uint8_t  unknown0347;
-/*0348*/ union
+/*0000*/ char     name[64];
+/*0000*/ uint32_t spawnId;
+/*0000*/ uint8_t  level;
+/*0000*/ uint8_t  NPC;       // 0=player,1=npc,2=pc corpse,3=npc corpse
+/*0000*/ union
          {
-            struct
-            {
-               /*0348*/ EquipStruct equip_helmet;     // Equiptment: Helmet visual
-               /*0360*/ EquipStruct equip_chest;      // Equiptment: Chest visual
-               /*0372*/ EquipStruct equip_arms;       // Equiptment: Arms visual
-               /*0384*/ EquipStruct equip_bracers;    // Equiptment: Wrist visual
-               /*0396*/ EquipStruct equip_hands;      // Equiptment: Hands visual
-               /*0408*/ EquipStruct equip_legs;       // Equiptment: Legs visual
-               /*0420*/ EquipStruct equip_feet;       // Equiptment: Boots visual
-               /*0432*/ EquipStruct equip_primary;    // Equiptment: Main visual
-               /*0444*/ EquipStruct equip_secondary;  // Equiptment: Off visual
-            } equip;
-            /*0348*/ EquipStruct equipment[9];
+           struct
+           {
+             unsigned   padding7:1;
+             unsigned   AFK:1;
+             unsigned   sneak:1;
+             unsigned   LFG:1;
+             unsigned   padding6:1;
+             unsigned   invis:1;
+             unsigned   padding5:11;
+             unsigned   gm:1;
+             unsigned   anon:1;        // 0=normal, 1=anon, 2=roleplay
+             unsigned   padding4:1;
+             unsigned   gender:1;      // Gender (0=male, 1=female)
+             unsigned   padding3:1;
+             unsigned   linkdead:1;
+             unsigned   betabuffed:1;
+             unsigned   padding2:2;
+             unsigned   targetable:1;
+             unsigned   targetcyclable:1;
+             unsigned   padding1:2;
+             unsigned   trader:1;
+             unsigned   buyer:1;
+           };
+           int32_t miscData;
          };
-/*0456*/ uint8_t  unknown0465[11];
-/*0467*/ uint8_t  gm;
-/*0468*/ float    runspeed;       // Speed when running
-/*0472*/ uint8_t  unknown0472[3];
-/*0475*/ union
+/*0000*/ uint8_t  hasTitleOrSuffix;
+/*0000*/ uint32_t race;
+/*0000*/ uint8_t  charProperties;
+/*0000*/ uint32_t bodytype;
+/*0000*/ uint32_t bodytype2;
+/*0000*/ uint8_t  curHp;
+/*0000*/ uint8_t  holding;
+/*0000*/ uint32_t deity;
+/*0000*/ uint32_t guildID;
+/*0000*/ uint32_t guildstatus;   // 0=member, 1=officer, 2=leader, -1=not guilded
+/*0000*/ uint8_t  class_;
+/*0000*/ uint8_t  state;         // stand state 
+/*0000*/ uint8_t  light;
+/*0000*/ char     lastName[32];
+/*0000*/ uint32_t petOwnerId;
+         union
          {
-            struct
-            {
-               /*0475*/ Color_Struct color_helmet;    // Color of helmet item
-               /*0479*/ Color_Struct color_chest;     // Color of chest item
-               /*0483*/ Color_Struct color_arms;      // Color of arms item
-               /*0487*/ Color_Struct color_bracers;   // Color of bracers item
-               /*0491*/ Color_Struct color_hands;     // Color of hands item
-               /*0495*/ Color_Struct color_legs;      // Color of legs item
-               /*0499*/ Color_Struct color_feet;      // Color of feet item
-               /*0503*/ Color_Struct color_primary;   // Color of primary item
-               /*0507*/ Color_Struct color_secondary; // Color of secondary item
-            } equipment_colors;
-            /*0475*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
+           struct
+           {
+/*0000*/     signed   padding0000:12; // ***Placeholder
+             signed   deltaX:13;      // change in x
+             signed   padding0005:7;  // ***Placeholder
+/*0000*/     signed   deltaHeading:10;// change in heading
+             signed   deltaY:13;      // change in y
+             signed   padding0006:9;  // ***Placeholder
+/*0000*/     signed   y:19;           // y coord
+             signed   animation:13;   // animation
+/*0000*/     unsigned heading:12;     // heading
+             signed   x:19;           // x coord
+             signed   padding0014:1;  // ***Placeholder
+/*0000*/     signed   z:19;           // z coord
+             signed   deltaZ:13;      // change in z
+           };
+           int32_t posData[5];
          };
-/*0511*/ uint32_t race;           // Spawn race
-/*0515*/ uint8_t  unknown0515;
-/*0516*/ uint8_t  curHp;          // Current hp
-/*0517*/ uint8_t  unknown0517[15];
-/*0532*/
-
-/*0891*/ //float    walkspeed;      // Speed when walking  (couldn't find for 4/17/2008 patch - ieatacid)
+/*0000*/ union
+         {
+           struct
+           {
+               /*0000*/ Color_Struct color_helmet;    // Color of helmet item
+               /*0000*/ Color_Struct color_chest;     // Color of chest item
+               /*0000*/ Color_Struct color_arms;      // Color of arms item
+               /*0000*/ Color_Struct color_bracers;   // Color of bracers item
+               /*0000*/ Color_Struct color_hands;     // Color of hands item
+               /*0000*/ Color_Struct color_legs;      // Color of legs item
+               /*0000*/ Color_Struct color_feet;      // Color of feet item
+               /*0000*/ Color_Struct color_primary;   // Color of primary item
+               /*0000*/ Color_Struct color_secondary; // Color of secondary item
+           } equipment_colors;
+            /*0000*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
+         };
+/*0000*/ union
+         {
+           struct
+           {
+               /*0000*/ EquipStruct equip_helmet;     // Equiptment: Helmet visual
+               /*0000*/ EquipStruct equip_chest;      // Equiptment: Chest visual
+               /*0000*/ EquipStruct equip_arms;       // Equiptment: Arms visual
+               /*0000*/ EquipStruct equip_bracers;    // Equiptment: Wrist visual
+               /*0000*/ EquipStruct equip_hands;      // Equiptment: Hands visual
+               /*0000*/ EquipStruct equip_legs;       // Equiptment: Legs visual
+               /*0000*/ EquipStruct equip_feet;       // Equiptment: Boots visual
+               /*0000*/ EquipStruct equip_primary;    // Equiptment: Main visual
+               /*0000*/ EquipStruct equip_secondary;  // Equiptment: Off visual
+           } equip;
+            /*0000*/ EquipStruct equipment[9];
+         };
+/*0000*/ char title[32];
+/*0000*/ char suffix[32];
 };
 
+#if 0
+// Basic structure of how the packet looks on the wire, for reference.
+// May 29, 2008 eqgame.exe
+struct spawnStruct
+{
+/*0000*/ char     name[0];
+/*0000*/ uint32_t spawnId;
+/*0000*/ uint8_t  level;
+/*0000*/ float    unknown1;
+/*0000*/ uint8_t  NPC;           // 0=player,1=npc,2=pc corpse,3=npc corpse
+/*0000*/ unsigned   padding7:1;
+         unsigned   AFK:1;
+         unsigned   sneak:1;
+         unsigned   LFG:1;
+         unsigned   padding6:1;
+         unsigned   invis:1;
+         unsigned   padding5:11;
+         unsigned   gm:1;
+         unsigned   anon:1;        // 0=normal, 1=anon, 2=roleplay
+         unsigned   padding4:1;
+         unsigned   gender:1;      // Gender (0=male, 1=female)
+         unsigned   padding3:1;
+         unsigned   linkdead:1;
+         unsigned   betabuffed:1;
+         unsigned   padding2:2;
+         unsigned   targetable:1;
+         unsigned   targetcyclable:1;
+         unsigned   padding1:2;
+         unsigned   trader:1;
+         unsigned   buyer:1;
+/*0000*/ uint8_t  hasTitleOrSuffix; // & 4=title, & 8=suffix, & 1 - it's a chest
+/*0000*/ uint32_t unknown3;
+/*0000*/ uint32_t unknown4;
+/*0000*/ uint32_t unknown5;
+/*0000*/ uint8_t  facestyle;
+/*0000*/ float    walkspeed;
+/*0000*/ float    runspeed;
+/*0000*/ uint32_t race;
+/*0000*/ uint8_t  charProperties; // for body types
+/*0000*/ uint32_t bodytype;
+/*0000*/ uint32_t bodytype2;      // this is only present if charProperties==2
+                                  // are there more than two possible properties?
+/*0000*/ uint8_t  curHp;
+/*0000*/ uint8_t  haircolor;
+/*0000*/ uint8_t  facialhaircolor;
+/*0000*/ uint8_t  eyecolor1;
+/*0000*/ uint8_t  eyecolor2;
+/*0000*/ uint8_t  hairstyle;
+/*0000*/ uint8_t  facialhair;
+/*0000*/ uint32_t heritage;
+/*0000*/ uint32_t tattoo;
+/*0000*/ uint32_t details;
+/*0000*/ uint8_t  holding;
+/*0000*/ uint32_t deity;
+/*0000*/ uint32_t guildID;
+/*0000*/ uint32_t guildstatus;   // 0=member, 1=officer, 2=leader, -1=not guilded
+/*0000*/ uint8_t  class_;
+/*0000*/ uint8_t  PVP;
+/*0000*/ uint8_t  state;         // stand state 
+/*0000*/ uint8_t  light;
+/*0000*/ uint8_t  unknown7;
+/*0000*/ uint8_t  unknown8;
+/*0000*/ uint8_t  unknown9;
+/*0000*/ uint8_t  unknown10;
+/*0000*/ uint8_t  unknown11;
+/*0000*/ char     lastName[0];
+/*0000*/ uint32_t AARank;
+/*0000*/ uint8_t  unknown12;
+/*0000*/ uint32_t petOwnerId;
+/*0000*/ uint8_t  unknown13;
+/*0000*/ uint32_t unknown14;
+/*0000*/ uint32_t unknown15;
+/*0000*/ uint32_t unknown16;
+/*0000*/ uint32_t unknown17;
+/*0000*/ uint32_t unknown18;
+/*0000*/ uint32_t unknown19;
+/*0000*/ signed   padding0000:12; // ***Placeholder
+         signed   deltaX:13;      // change in x
+         signed   padding0005:7;  // ***Placeholder
+/*0000*/ signed   deltaHeading:10;// change in heading
+         signed   deltaY:13;      // change in y
+         signed   padding0006:9;  // ***Placeholder
+/*0000*/ signed   y:19;           // y coord
+         signed   animation:13;   // animation
+/*0000*/ unsigned heading:12;     // heading
+         signed   x:19;           // x coord
+         signed   padding0014:1;  // ***Placeholder
+/*0000*/ signed   z:19;           // z coord
+         signed   deltaZ:13;      // change in z
+/*0000*/ union
+         {
+           struct
+           {
+               /*0000*/ Color_Struct color_helmet;    // Color of helmet item
+               /*0000*/ Color_Struct color_chest;     // Color of chest item
+               /*0000*/ Color_Struct color_arms;      // Color of arms item
+               /*0000*/ Color_Struct color_bracers;   // Color of bracers item
+               /*0000*/ Color_Struct color_hands;     // Color of hands item
+               /*0000*/ Color_Struct color_legs;      // Color of legs item
+               /*0000*/ Color_Struct color_feet;      // Color of feet item
+               /*0000*/ Color_Struct color_primary;   // Color of primary item
+               /*0000*/ Color_Struct color_secondary; // Color of secondary item
+           } equipment_colors;
+            /*0000*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
+         };
 
+// skip these bytes if not a valid player race
+/*0000*/ union
+         {
+           struct
+           {
+               /*0000*/ EquipStruct equip_helmet;     // Equiptment: Helmet visual
+               /*0000*/ EquipStruct equip_chest;      // Equiptment: Chest visual
+               /*0000*/ EquipStruct equip_arms;       // Equiptment: Arms visual
+               /*0000*/ EquipStruct equip_bracers;    // Equiptment: Wrist visual
+               /*0000*/ EquipStruct equip_hands;      // Equiptment: Hands visual
+               /*0000*/ EquipStruct equip_legs;       // Equiptment: Legs visual
+               /*0000*/ EquipStruct equip_feet;       // Equiptment: Boots visual
+               /*0000*/ EquipStruct equip_primary;    // Equiptment: Main visual
+               /*0000*/ EquipStruct equip_secondary;  // Equiptment: Off visual
+           } equip;
+           /*0000*/ EquipStruct equipment[9];
+         };
 
+/*0000*/ char title[0];  // only read if(hasTitleOrSuffix & 4)
+/*0000*/ char suffix[0]; // only read if(hasTitleOrSuffix & 8)
+/*0000*/ char unknown20[32];
+};
+#endif
 
 
 #if 0
@@ -1280,15 +1422,15 @@ struct spawnIllusionStruct
  * Shroud spawn. For others shrouding, this has their spawnId and
  * spawnStruct.
  * 
- * Length: 586
+ * Length: variable
  * OpCode: OP_Shroud
  */
 struct spawnShroudOther
 {
 /*00000*/ uint32_t spawnId;          // Spawn Id of the shrouded player
-/*00004*/ spawnStruct spawn;         // Updated spawn struct for the player
-/*00536*/ uint8_t unknown00536[465];
-/*1001*/
+/*00004*/ uint16_t spawnStructSize;  // Size of spawnStruct (or start of)
+/*00006*/ spawnStruct spawn;         // Updated spawn struct for the player (variable length)
+/*xxxxx*/
 };
 
 /**
@@ -1303,10 +1445,10 @@ struct spawnShroudOther
 struct spawnShroudSelf
 {
 /*00000*/ uint32_t spawnId;            // Spawn Id of you
-/*00004*/ spawnStruct spawn;           // Updated spawnStruct for you
-/*00536*/ uint8_t unknown00536[465];
-/*01001*/ playerProfileStruct profile; // Character profile for shrouded char
-/*16153*/ uint8_t items;               // Items on the player
+/*00004*/ uint16_t ppStart;            // Start of playerProfile data (spawnId+ppStart+spawnStruct)
+/*00004*/ spawnStruct spawn;           // Updated spawnStruct for you (variable length)
+/*xxxxx*/ playerProfileStruct profile; // Character profile for shrouded char
+/*xxxxx*/ uint8_t items;               // Items on the player
 /*xxxxx*/
 };
 

@@ -1982,7 +1982,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 		      "corpseLocStruct", SZC_Match,
 		      m_spawnShell, SLOT(corpseLoc(const uint8_t*)));
    m_packet->connect2("OP_ZoneSpawns", SP_Zone, DIR_Server,
-		      "spawnStruct", SZC_Modulus,
+		      "spawnStruct", SZC_None,
 		      m_spawnShell, SLOT(zoneSpawns(const uint8_t*, size_t)));
 
    // connect the SpellShell slots to ZoneMgr signals
