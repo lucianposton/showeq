@@ -122,7 +122,7 @@ public slots:
    void updateNpcHP(const uint8_t* hpupdate);
    void spawnWearingUpdate(const uint8_t* wearing);
    void consMessage(const uint8_t* con, size_t, uint8_t);
-   void removeSpawn(const uint8_t* rmSpawn, size_t len);
+   void removeSpawn(const uint8_t* rmSpawn, size_t len, uint8_t dir);
    void deleteSpawn(const uint8_t* delSpawn);
    void killSpawn(const uint8_t* deadspawn);
    void respawnFromHover(const uint8_t* respawn);
@@ -140,7 +140,7 @@ public slots:
    void deleteItem(spawnItemType type, int id);
    bool updateFilterFlags(Item* item);
    bool updateRuntimeFilterFlags(Item* item);
-   uint32_t fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, size_t len, bool checkLen);
+   int32_t fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, size_t len, bool checkLen);
 
    ItemMap& getMap(spawnItemType type);
 

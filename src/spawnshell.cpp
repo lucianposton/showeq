@@ -423,7 +423,7 @@ void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
 {
    NetStream netStream(data,len);
    spawnStruct *spawn = new spawnStruct;
-   uint32_t spawnStructSize;
+   int32_t spawnStructSize;
    uint16_t parm1;
 
    while(!netStream.end())
@@ -433,16 +433,22 @@ void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
       if(parm1==0x1ff)
          parm1=netStream.readUInt16NC();
 
+      // skip 0x79 before name
       netStream.skipBytes(1);
+
       spawnStructSize=fillSpawnStruct(spawn,netStream.pos(),len,false);
       newSpawn(*spawn);
-      netStream.skipBytes(spawnStructSize);
+      if(spawnStructSize)
+         netStream.skipBytes(spawnStructSize);
    }
 }
 
-uint32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, size_t len, bool checkLen)
+int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, size_t len, bool checkLen)
 {
    NetStream netStream(data,len);
+   int32_t retVal;
+   uint32_t race;
+   uint8_t i;
 
    QString name=netStream.readText();
 
@@ -464,24 +470,48 @@ uint32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, si
 
    spawn->miscData=netStream.readUInt32NC();
 
-   spawn->hasTitleOrSuffix=netStream.readUInt8();
+   spawn->otherData=netStream.readUInt8();
 
-//   seqDebug("miscData: %x hasTitleOrSuffix: %x",spawn->miscData,spawn->hasTitleOrSuffix);
+//   seqDebug("miscData: %x otherData: %x",spawn->miscData,spawn->otherData);
 
 //   seqDebug("buyer=%d trader=%d TC=%d T=%d BB=%d LD=%d gen=%d anon=%d gm=%d invis=%d LFG=%d sneak=%d AFK=%d",
 //            spawn->buyer,spawn->trader,spawn->targetcyclable,spawn->targetable,spawn->betabuffed,
 //            spawn->linkdead,spawn->gender,spawn->anon,spawn->gm,spawn->invis,spawn->LFG,spawn->sneak,spawn->AFK);
 
-   if(spawn->hasTitleOrSuffix & 1)
+   // skip unknown3, unknown4
+   netStream.skipBytes(8);
+
+   if(spawn->otherData & 1)
    {
-      // it's a chest.  skip usual 21 plus extra 56
-      netStream.skipBytes(77);
+      // it's a chest or untargetable
+
+      do
+         i=netStream.readUInt8();
+      while(i);
+
+      do
+         i=netStream.readUInt8();
+      while(i);
+
+      do
+         i=netStream.readUInt8();
+      while(i);
+
+      // skip next 3 longs
+      netStream.skipBytes(12);
+
+      // next it loops through 9 longs, but we can just skip them
+      netStream.skipBytes(36);
+
+      // skip 1 byte
+      netStream.skipBytes(1);
+
+      // skip the last long
+      netStream.skipBytes(4);
    }
-   else
-   {
-      // skip facestyle, walk/run speeds, unknowns
-      netStream.skipBytes(21);
-   }
+
+   // skip facestyle, walk/run speeds, unknown5
+   netStream.skipBytes(13);
 
    spawn->race=netStream.readUInt32NC();
 //   seqDebug("race=%d",spawn->race);
@@ -493,11 +523,10 @@ uint32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, si
    {
       spawn->bodytype=netStream.readUInt32NC();
 //       seqDebug("bodytype=%d",spawn->bodytype);
-      for(int i=1; i < spawn->charProperties; i++)
+      for(i=1; i < spawn->charProperties; i++)
       {
          // extra character properties
-         int j=netStream.readUInt32NC();
-//          netStream.skipBytes(4);
+         netStream.skipBytes(4);
       }
    }
 
@@ -544,20 +573,19 @@ uint32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, si
    spawn->posData[4]=netStream.readUInt32NC();
 
 //    seqDebug("%x %x %x %x %x",spawn->posData[0],spawn->posData[1],spawn->posData[2],spawn->posData[3],spawn->posData[4]);
-
-//   seqDebug("%d %d %d | %d %d %d | %d %d | %d",spawn->y>>3,spawn->x>>3,spawn->z>>3,
+//    seqDebug("%d %d %d | %d %d %d | %d %d | %d",spawn->y>>3,spawn->x>>3,spawn->z>>3,
 //            spawn->deltaY>>2,spawn->deltaX>>2,spawn->deltaZ>>2,
 //            spawn->heading,spawn->deltaHeading,spawn->animation);
 
    // skip color
    netStream.skipBytes(36);
 
-   uint32_t race=spawn->race;
+   race=spawn->race;
 
    // this is how the client checks if equipment should be read.
    if(spawn->NPC==0 || race <= 12 || race==128 || race==130 || race==330 || race==522)
    {
-      for(int i=0; i<9; i++)
+      for(i=0; i<9; i++)
       {
          spawn->equipment[i].itemId=netStream.readUInt32NC();
          spawn->equipment[i].equip1=netStream.readUInt32NC();
@@ -565,14 +593,14 @@ uint32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, si
       }
    }
 
-   if(spawn->hasTitleOrSuffix & 4)
+   if(spawn->otherData & 4)
    {
       name=netStream.readText();
       strcpy(spawn->title,name.latin1());
 //     seqDebug("title=%s",spawn->title);
    }
 
-   if(spawn->hasTitleOrSuffix & 8)
+   if(spawn->otherData & 8)
    {
       name=netStream.readText();
       strcpy(spawn->suffix,name.latin1());
@@ -583,12 +611,13 @@ uint32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, si
 
    // now we're at the end
 
-   uint32_t retVal=netStream.pos()-netStream.data();
+   retVal=netStream.pos()-netStream.data();
 
    if(checkLen && (int32_t)len!=retVal)
    {
       seqDebug("SpawnShell::fillSpawnStruct - expected length: %d, read: %d",len,retVal);
    }
+
    return retVal;
 }
 
@@ -1241,13 +1270,17 @@ void SpawnShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
   } // else not yourself
 } // end consMessage()
 
-void SpawnShell::removeSpawn(const uint8_t* data, size_t len)
+void SpawnShell::removeSpawn(const uint8_t* data, size_t len, uint8_t dir)
 {
+  if(dir==DIR_Client)
+    return;
   const removeSpawnStruct* rmSpawn = (const removeSpawnStruct*)data;
 #ifdef SPAWNSHELL_DIAG
   seqDebug("SpawnShell::removeSpawn(id=%d)", rmSpawn->spawnId);
 #endif
+
   Item *item;
+
   if(len==sizeof(removeSpawnStruct))
   {
     if(!rmSpawn->removeSpawn)
@@ -1267,10 +1300,6 @@ void SpawnShell::removeSpawn(const uint8_t* data, size_t len)
           s->setNotUpdated(true);
         }
       }
-    }
-    else
-    {
-       
     }
   }
   else if((len+1)!=sizeof(removeSpawnStruct))

@@ -984,7 +984,7 @@ struct spawnStruct
            };
            int32_t miscData;
          };
-/*0000*/ uint8_t  hasTitleOrSuffix;
+/*0000*/ uint8_t  otherData; // & 4 - has title, & 8 - has suffix, & 1 - it's a chest or untargetable
 /*0000*/ uint32_t race;
 /*0000*/ uint8_t  charProperties;
 /*0000*/ uint32_t bodytype;
@@ -1085,7 +1085,7 @@ struct spawnStruct
          unsigned   padding1:2;
          unsigned   trader:1;
          unsigned   buyer:1;
-/*0000*/ uint8_t  hasTitleOrSuffix; // & 4=title, & 8=suffix, & 1 - it's a chest
+/*0000*/ uint8_t  otherData; // & 4 - has title, & 8 - has suffix, & 1 - it's a chest or untargetable
 /*0000*/ uint32_t unknown3;
 /*0000*/ uint32_t unknown4;
 /*0000*/ uint32_t unknown5;

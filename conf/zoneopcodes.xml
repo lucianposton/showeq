@@ -75,7 +75,7 @@
     </opcode>
     <opcode id="3164" name="OP_RemoveSpawn" updated="04/17/08">
         <comment>Remove spawn from zone</comment>
-	<payload dir="server" typename="removeSpawnStruct" sizechecktype="none"/>
+	<payload dir="both" typename="removeSpawnStruct" sizechecktype="none"/>
     </opcode>
     <opcode id="1B85" name="OP_Death" updated="01/17/08">
         <comment>old NewCorpseCode</comment>

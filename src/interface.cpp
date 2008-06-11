@@ -1962,9 +1962,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Shroud", SP_Zone, DIR_Server,
               "spawnShroudSelf", SZC_None,
               m_spawnShell, SLOT(shroudSpawn(const uint8_t*, size_t, uint8_t)));
-   m_packet->connect2("OP_RemoveSpawn", SP_Zone, DIR_Server,
+   m_packet->connect2("OP_RemoveSpawn", SP_Zone, DIR_Server|DIR_Client,
                       "removeSpawnStruct", SZC_None,
-                      m_spawnShell, SLOT(removeSpawn(const uint8_t*, size_t)));
+                      m_spawnShell, SLOT(removeSpawn(const uint8_t*, size_t, uint8_t)));
 #if 0 // ZBTEMP
    connect(m_packet, SIGNAL(spawnWearingUpdate(const uint8_t*, size_t, uint8_t)),
 	   m_spawnShell, SLOT(spawnWearingUpdate(const uint8_t*)));

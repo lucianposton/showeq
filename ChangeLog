@@ -1,5 +1,10 @@
 Version: $Id$ $Name$
 
+ieatacid (6/11/08)
+----------------
++ Updated version to 5.12.4.1
++ The variable-length spawn data should be handled properly now
+
 ieatacid (6/8/08)
 ----------------
 + Updated version to 5.12.4
