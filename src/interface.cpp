@@ -250,7 +250,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_spells = new Spells(fileInfo.absFilePath());
    
    // Create the EQStr storage
-   m_eqStrings = new EQStr(8009); // increase if the number of stings exeeds
+   m_eqStrings = new EQStr(8009); // increase if the number of strings exeeds
 
    // Create the Zone Manager
    m_zoneMgr = new ZoneMgr(this, "zonemgr");
@@ -1930,7 +1930,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 		      "spawnStruct", SZC_Match,
 		      m_spawnShell, SLOT(newSpawn(const uint8_t*)));
    m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Server,
-		      "ServerZoneEntryStruct", SZC_None,
+                      "uint8_t", SZC_None,
 		      m_spawnShell, SLOT(zoneEntry(const uint8_t*, size_t)));
    m_packet->connect2("OP_MobUpdate", SP_Zone, DIR_Server|DIR_Client,
 		      "spawnPositionUpdate", SZC_Match,
@@ -1981,10 +1981,12 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_CorpseLocResponse", SP_Zone, DIR_Server,
 		      "corpseLocStruct", SZC_Match,
 		      m_spawnShell, SLOT(corpseLoc(const uint8_t*)));
+#if 0 // No longer used as of 5-22-2008
    m_packet->connect2("OP_ZoneSpawns", SP_Zone, DIR_Server,
 		      "spawnStruct", SZC_None,
 		      m_spawnShell, SLOT(zoneSpawns(const uint8_t*, size_t)));
-
+#endif
+                            
    // connect the SpellShell slots to ZoneMgr signals
    connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
 	   m_spellShell, SLOT(zoneChanged()));

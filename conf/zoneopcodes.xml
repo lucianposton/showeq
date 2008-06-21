@@ -9,12 +9,12 @@
     <opcode id="7901" name="OP_ZoneEntry" updated="01/17/08">
         <comment>old ZoneEntryCode</comment>
         <payload dir="client" typename="ClientZoneEntryStruct" sizechecktype="match"/>
-        <payload dir="server" typename="ServerZoneEntryStruct" sizechecktype="none"/>
+	<payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="1900" name="OP_ZoneSpawns" updated="05/29/08">
+    <!--<opcode id="1900" name="OP_ZoneSpawns" updated="05/29/08">
         <comment>old ZoneSpawnsCode</comment>
         <payload dir="server" typename="spawnStruct" sizechecktype="none"/>
-    </opcode>
+    </opcode>-->
     <opcode id="6015" name="OP_TimeOfDay" updated="01/17/08">
         <comment>old TimeOfDayCode</comment>
         <payload dir="server" typename="timeOfDayStruct" sizechecktype="match"/>

@@ -93,7 +93,7 @@ EQProtocolPacket& EQProtocolPacket::operator=(const EQProtocolPacket& packet)
   return *this;
 }
 
-void EQProtocolPacket::init(uint8_t* packet, uint16_t length, 
+void EQProtocolPacket::init(uint8_t* packet, uint32_t length, 
   bool copy, bool subpacket)
 {
   m_subpacket = subpacket;

@@ -21,19 +21,19 @@
 
 // The following defines are used to diagnose packet handling behavior
 // this define is used to diagnose packet processing (in processPacket mostly)
-//#define PACKET_PROCESS_DIAG 3
+// #define PACKET_PROCESS_DIAG 3
 
 // this define is used to diagnose cache handling (in processPacket mostly)
-//#define PACKET_CACHE_DIAG 3
+// #define PACKET_CACHE_DIAG 3
 
 // this define is used to debug packet info (in dispatchPacket mostly)
-//#define PACKET_INFO_DIAG 3
+// #define PACKET_INFO_DIAG 3
 
 // this define is used to debug packet decode info (decompression)
-//#define PACKET_DECODE_DIAG 3
+// #define PACKET_DECODE_DIAG 3
 
 // this define is used to debug sessions (request, response, disconnect)
-//#define PACKET_SESSION_DIAG 3
+// #define PACKET_SESSION_DIAG 3
 
 // diagnose structure size changes
 #define PACKET_PAYLOAD_SIZE_DIAG 1
@@ -720,7 +720,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           // If original length is 0xff, it means it is a long one. The length
           // is 2 bytes and next.
           uint16_t longOne = eqntohuint16(subpacket);
- 
+
           // Move past the 2 byte length
           subpacket += 2;
 
@@ -735,7 +735,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
             longOne--;
             subOpCode = *(uint16_t*)(subpacket);
           }
-          
+
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
         seqDebug("EQPacket: unrolling length %d bytes from combined packet on stream %s (%d). Opcode %04x", 
           longOne, EQStreamStr[m_streamid], m_streamid, subOpCode);
@@ -877,12 +877,18 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
             dispatchPacket(&m_fragment.data()[3], m_fragment.size()-3,
               fragOpCode, m_opcodeDB.find(fragOpCode)); 
           }
+          else if (IS_NET_OPCODE(fragOpCode))
+          {
+#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
+             seqDebug("EQPacket: IS_NET_OPCODE(%04x), size = %d",fragOpCode,m_fragment.size());
+#endif
+             EQProtocolPacket spacket(m_fragment.data(), m_fragment.size(), false, true);
+             processPacket(spacket, true);
+          }
           else
           {
-            dispatchPacket(&m_fragment.data()[2], m_fragment.size()-2,
-              fragOpCode, m_opcodeDB.find(fragOpCode)); 
+            dispatchPacket(&m_fragment.data()[2], m_fragment.size()-2, fragOpCode, m_opcodeDB.find(fragOpCode));
           }
-
           m_fragment.reset();
         }
       }

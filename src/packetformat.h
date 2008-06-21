@@ -96,7 +96,7 @@ class EQProtocolPacket
       m_subpacket(false)
     {  }
     
-  EQProtocolPacket(uint8_t* packet, uint16_t length, 
+  EQProtocolPacket(uint8_t* packet, uint32_t length, 
     bool copy=false, bool subpacket=false)
   {
     init(packet, length, copy, subpacket);
@@ -172,7 +172,7 @@ class EQProtocolPacket
   // Payload is uncompressed (after decode is called) and aligned to the
   // beginning of the payload (after net op, flags, seq if applicable)
   uint8_t* payload() const { return m_payload; }
-  uint16_t payloadLength() const { return m_payloadLength; }
+  uint32_t payloadLength() const { return m_payloadLength; }
 
   // Raw Packet is compressed and aligned to the start of the net op. Length
   // includes CRC if applicable.
@@ -183,24 +183,24 @@ class EQProtocolPacket
   // the beginning of what was decompressed. This is what is alloced if
   // m_bAllocPayload is true.
   uint8_t* rawPayload() const { return m_rawPayload; }
-  uint16_t rawPayloadLength() const { return m_rawPayloadLength; }
+  uint32_t rawPayloadLength() const { return m_rawPayloadLength; }
 
  protected:
   void init();
-  void init(uint8_t* packet, uint16_t length, 
+  void init(uint8_t* packet, uint32_t length, 
     bool copy=false, bool subpacket=false);
 
  private:
   uint8_t* m_packet; // raw packet, untouched starting at net opcode
-  uint16_t m_length; // raw packet length
+  uint32_t m_length; // raw packet length
   uint16_t m_netOp; // protocol opcode
   uint8_t m_flags; // protocol flags
   uint8_t* m_payload; // packet payload. Aligned and uncompressed if necessary.
   bool m_bAllocedPayload; // Whether payload was alloced or not
   bool m_bDecoded; // Whether this packet has been decoded
-  uint16_t m_payloadLength; // length of payload
+  uint32_t m_payloadLength; // length of payload
   uint8_t* m_rawPayload; // decompressed but not aligned payload
-  uint16_t m_rawPayloadLength; // length of raw payload
+  uint32_t m_rawPayloadLength; // length of raw payload
   uint16_t m_arqSeq; // local copy to speed up comparisons
   bool m_ownCopy;
   bool m_subpacket;

@@ -421,26 +421,63 @@ void SpawnShell::newDoorSpawn(const doorStruct& d, size_t len, uint8_t dir)
 
 void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
 {
-   NetStream netStream(data,len);
-   spawnStruct *spawn = new spawnStruct;
-   int32_t spawnStructSize;
-   uint16_t parm1;
+  int spawndatasize = len / sizeof(spawnStruct);
 
-   while(!netStream.end())
-   {
-      memset(spawn,0,sizeof(spawnStruct));
-      parm1=netStream.readUInt16NC();
-      if(parm1==0x1ff)
-         parm1=netStream.readUInt16NC();
+  const spawnStruct* zspawns = (const spawnStruct*)data;
 
-      // skip 0x79 before name
-      netStream.skipBytes(1);
+  for (int i = 0; i < spawndatasize; i++)
+  {
+#if 0
+  // Dump position updates for debugging spawn struct position changes
+  for (int j=54; j<70; i++)
+  {
+      printf("%.2x", zspawns[i][j]);
 
-      spawnStructSize=fillSpawnStruct(spawn,netStream.pos(),len,false);
-      newSpawn(*spawn);
-      if(spawnStructSize)
-         netStream.skipBytes(spawnStructSize);
-   }
+      if ((j+1) % 8 == 0)
+      {
+          printf("    ");
+      }
+      else
+      {
+          printf(" ");
+      }
+  }
+  printf("\n");
+#endif
+
+#if 0
+    // Debug positioning without having to recompile everything...
+#pragma pack(1)
+struct pos
+{
+/*0002*/ signed   padding0000:12; // ***Placeholder
+         signed   deltaX:13;      // change in x
+         signed   padding0005:7;  // ***Placeholder
+/*0006*/ signed   deltaHeading:10;// change in heading
+         signed   deltaY:13;      // change in y
+         signed   padding0006:9;  // ***Placeholder
+/*0010*/ signed   y:19;           // y coord
+         signed   animation:13;   // animation
+/*0014*/ unsigned heading:12;     // heading
+         signed   x:19;           // x coord
+         signed   padding0014:1;  // ***Placeholder
+/*0018*/ signed   z:19;           // z coord
+         signed   deltaZ:13;      // change in z
+/*0022*/
+};
+#pragma pack(0)
+    struct pos *p = (struct pos *)(data + i*sizeof(spawnStruct) + 151);
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
+            zspawns[i].spawnId, 
+            float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0, 
+            float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
+            float(p->deltaZ)/4.0, 
+            float(p->heading), float(p->deltaHeading),
+            p->animation, p->padding0000, 
+            p->padding0005, p->padding0006, p->padding0014);
+#endif
+    newSpawn(zspawns[i]);
+  }
 }
 
 int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, size_t len, bool checkLen)
@@ -454,29 +491,19 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
 
    if(name.length())
       strcpy(spawn->name,name.latin1());
-//   seqDebug("name=%s",spawn->name);
 
    spawn->spawnId=netStream.readUInt32NC();
-//   seqDebug("id=%d (%x)",spawn->spawnId,spawn->spawnId);
 
    spawn->level=netStream.readUInt8();
-//   seqDebug("level=%d",spawn->level);
 
    // skip the next 4 bytes
    netStream.skipBytes(4);
 
    spawn->NPC=netStream.readUInt8();
-//   seqDebug("NPC=%d",spawn->NPC);
 
    spawn->miscData=netStream.readUInt32NC();
 
    spawn->otherData=netStream.readUInt8();
-
-//   seqDebug("miscData: %x otherData: %x",spawn->miscData,spawn->otherData);
-
-//   seqDebug("buyer=%d trader=%d TC=%d T=%d BB=%d LD=%d gen=%d anon=%d gm=%d invis=%d LFG=%d sneak=%d AFK=%d",
-//            spawn->buyer,spawn->trader,spawn->targetcyclable,spawn->targetable,spawn->betabuffed,
-//            spawn->linkdead,spawn->gender,spawn->anon,spawn->gm,spawn->invis,spawn->LFG,spawn->sneak,spawn->AFK);
 
    // skip unknown3, unknown4
    netStream.skipBytes(8);
@@ -514,15 +541,13 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    netStream.skipBytes(13);
 
    spawn->race=netStream.readUInt32NC();
-//   seqDebug("race=%d",spawn->race);
 
    spawn->charProperties=netStream.readUInt8();
-//   seqDebug("charProperties=%d",spawn->charProperties);
 
    if(spawn->charProperties)
    {
       spawn->bodytype=netStream.readUInt32NC();
-//       seqDebug("bodytype=%d",spawn->bodytype);
+
       for(i=1; i < spawn->charProperties; i++)
       {
          // extra character properties
@@ -531,7 +556,6 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    }
 
    spawn->curHp=netStream.readUInt8();
-//   seqDebug("curHp=%d",spawn->curHp);
 
    // skip hair and face stuff
    netStream.skipBytes(18);
@@ -541,8 +565,6 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->guildID=netStream.readUInt32NC();
    spawn->guildstatus=netStream.readUInt32NC();
    spawn->class_=netStream.readUInt8();
-//   seqDebug("holding=%d deity=%d guildID=%d guildstatus=%d class_=%d",spawn->holding,
-//            spawn->deity,spawn->guildID,spawn->guildstatus,spawn->class_);
 
    netStream.skipBytes(1);
 
@@ -556,13 +578,11 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    if(name.length())
    {
       strcpy(spawn->lastName,name.latin1());
-//     seqDebug("surname=%s",spawn->lastName);
    }
 
    netStream.skipBytes(5);
 
    spawn->petOwnerId=netStream.readUInt32NC();
-//   seqDebug("petOwnerId=%d",spawn->petOwnerId);
 
    netStream.skipBytes(25);
 
@@ -571,11 +591,6 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->posData[2]=netStream.readUInt32NC();
    spawn->posData[3]=netStream.readUInt32NC();
    spawn->posData[4]=netStream.readUInt32NC();
-
-//    seqDebug("%x %x %x %x %x",spawn->posData[0],spawn->posData[1],spawn->posData[2],spawn->posData[3],spawn->posData[4]);
-//    seqDebug("%d %d %d | %d %d %d | %d %d | %d",spawn->y>>3,spawn->x>>3,spawn->z>>3,
-//            spawn->deltaY>>2,spawn->deltaX>>2,spawn->deltaZ>>2,
-//            spawn->heading,spawn->deltaHeading,spawn->animation);
 
    // skip color
    netStream.skipBytes(36);
@@ -597,14 +612,12 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    {
       name=netStream.readText();
       strcpy(spawn->title,name.latin1());
-//     seqDebug("title=%s",spawn->title);
    }
 
    if(spawn->otherData & 8)
    {
       name=netStream.readText();
       strcpy(spawn->suffix,name.latin1());
-//     seqDebug("suffix=%s",spawn->suffix);
    }
 
    netStream.skipBytes(32);

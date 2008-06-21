@@ -1,5 +1,10 @@
 Version: $Id$ $Name$
 
+ieatacid (6/21/08)
+----------------
++ Updated version to 5.12.4.2
++ Fixed some net opcode handling (thanks to purple for all the help)
+
 ieatacid (6/11/08)
 ----------------
 + Updated version to 5.12.4.1
