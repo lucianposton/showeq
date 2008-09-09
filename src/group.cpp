@@ -13,6 +13,7 @@
 #include "spawnshell.h"
 #include "everquest.h"
 #include "diagnosticmessages.h"
+#include "netstream.h"
 
 GroupMgr::GroupMgr(SpawnShell* spawnShell, 
 		   Player* player,  
@@ -41,6 +42,8 @@ GroupMgr::~GroupMgr()
   }
 }
 
+// 9/3/2008 - Not used. Group data is no longer sent in charProfile
+#if 0
 void GroupMgr::player(const charProfileStruct* player)
 {
   // reset counters
@@ -52,7 +55,8 @@ void GroupMgr::player(const charProfileStruct* player)
   // initialize the array of members with information from the player profile
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
-    m_members[i]->m_name = player->groupMembers[i];
+//     so it compiles
+//     m_members[i]->m_name = player->groupMembers[i];
 
     if (!m_members[i]->m_name.isEmpty())
       m_memberCount++;
@@ -62,125 +66,134 @@ void GroupMgr::player(const charProfileStruct* player)
     else
     {
       m_members[i]->m_spawn = (const Spawn*)m_player;
-      
+
       m_membersInZoneCount++;
     }
 
     emit added(m_members[i]->m_name, m_members[i]->m_spawn);
   }
 }
- 
+#endif
+
 void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 {
-  const groupUpdateStruct* gupdate = 0;
-  const groupFullUpdateStruct* gfupdate = 0;
+  // it's a variable-length packet depending on number of group members and length of names
+  NetStream netStream(data, size);
+  uint32_t memCount, memNumber, level;
+  QString name;
 
-  if (size == sizeof(groupFullUpdateStruct))
+  netStream.skipBytes(4);
+
+  // number of group members
+  memCount = netStream.readUInt32NC();
+
+  // leader name
+  name = netStream.readText();
+
+  // reset counters
+  m_memberCount = 0;
+  m_membersInZoneCount = 0;
+
+  emit cleared();
+
+  // update group member information
+  for(uint32_t i = 0; i < memCount; i++)
   {
-    // got a full group update packet
-    gfupdate = (const groupFullUpdateStruct*)data;
+     memNumber = netStream.readUInt32NC();
+     name = netStream.readText();
+     netStream.skipBytes(3);
+     level = netStream.readUInt32NC();
 
-    // what action is this?
-    if (gfupdate->action == GUA_FullGroupInfo)
-    {
-      // reset counters
-      m_memberCount = 0;
-      m_membersInZoneCount = 0;
+     // copy the member name
+     m_members[i]->m_name = name;
 
-      emit cleared();
+     // increment the member count
+     m_memberCount++;
 
-      // ok, this is a full update of all group member information
-      for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
-      {
-	// copy the member name
-	m_members[i]->m_name = gfupdate->membernames[i];
+     // attempt to retrieve the members spawn
+     m_members[i]->m_spawn = m_spawnShell->findSpawnByName(m_members[i]->m_name);
 
-	// if their is a member, increment the member count
-	if (!m_members[i]->m_name.isEmpty()) 
-	  m_memberCount++;
+     // incremement the spawn count
+     if (m_members[i]->m_spawn)
+        m_membersInZoneCount++;
 
-	// attempt to retrieve the members spawn
-	m_members[i]->m_spawn = 
-	  m_spawnShell->findSpawnByName(m_members[i]->m_name);
-
-	// incremement the spawn count
-	if (m_members[i]->m_spawn)
-	  m_membersInZoneCount++;
-
-	emit added(m_members[i]->m_name, m_members[i]->m_spawn);
-      }
-    }
+     emit added(m_members[i]->m_name, m_members[i]->m_spawn);
   }
-  else
+
+  // clear the rest
+  for(uint32_t i = memCount; i < MAX_GROUP_MEMBERS; i++)
   {
-    gupdate = (const groupUpdateStruct*)data;
-
-    switch (gupdate->action)
-    {
-    case GUA_Started:
-    case GUA_Joined:
-      // iterate over all the slots until an empty one is found
-      for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
-      {
-	if (m_members[i]->m_name.isEmpty())
-	{
-	  // copy the member name
-	  m_members[i]->m_name = gupdate->membername;
-	  
-	  // if their is a member, increment the member count
-	  if (!m_members[i]->m_name.isEmpty()) 
-	    m_memberCount++;
-	  
-	  // attempt to retrieve the members spawn
-	  m_members[i]->m_spawn = 
-	    m_spawnShell->findSpawnByName(m_members[i]->m_name);
-	  
-	  // incremement the spawn count
-	  if (m_members[i]->m_spawn)
-	    m_membersInZoneCount++;
-
-	  // signal the addition
-	  emit added(m_members[i]->m_name, m_members[i]->m_spawn);
-
-	  // added it, so break
-	  break;
-	}	  
-      }
-      break;
-    case GUA_Left:
-      // iterate over all the slots until the member is found
-      for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
-      {
-	// is this the member?
-	if (m_members[i]->m_name == gupdate->membername)
-	{
-	  // yes, announce its removal
-	  emit removed(m_members[i]->m_name, m_members[i]->m_spawn);
-
-	  // clear it
-	  m_members[i]->m_name = "";
-	  m_members[i]->m_spawn = 0;
-	  break;
-	}
-      }
-      break;
-    case GUA_LastLeft:
-      // reset counters
-      m_memberCount = 0;
-      m_membersInZoneCount = 0;
-
-      // iterate over all the member slots and clear them
-      for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
-      {
-	// clear the member
-	m_members[i]->m_name = "";
-	m_members[i]->m_spawn = 0;
-      }
-
-      emit cleared();
-      break;
-    }
+     m_members[i]->m_name = "";
+     m_members[i]->m_spawn = 0;
   }
+
+// for debugging
+#if 0
+  for(uint32_t i = 0; i < MAX_GROUP_MEMBERS; i++)
+  {
+     if(!m_members[i]->m_name.isEmpty())
+        seqDebug("GroupMgr::groupUpdate '%s'", m_members[i]->m_name.latin1());
+  }
+#endif
+}
+
+void GroupMgr::addGroupMember(const uint8_t* data)
+{
+   const groupFollowStruct* gmem = (const groupFollowStruct*)data;
+
+   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+   {
+      if (m_members[i]->m_name.isEmpty())
+      {
+	 // copy the member name
+         m_members[i]->m_name = gmem->invitee;
+
+	 // if there is a member, increment the member count
+         if (!m_members[i]->m_name.isEmpty()) 
+            m_memberCount++;
+
+	 // attempt to retrieve the member's spawn
+         m_members[i]->m_spawn = m_spawnShell->findSpawnByName(m_members[i]->m_name);
+
+	 // incremement the spawn count
+         if (m_members[i]->m_spawn)
+            m_membersInZoneCount++;
+
+	 // signal the addition
+         emit added(m_members[i]->m_name, m_members[i]->m_spawn);
+
+	 // added it, so break
+         break;
+      }
+   }
+}
+
+void GroupMgr::removeGroupMember(const uint8_t* data)
+{
+   const groupDisbandStruct* gmem = (const groupDisbandStruct*)data;
+
+   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+   {
+      // is this the member?
+      if (m_members[i]->m_name == gmem->membername)
+      {
+         // yes, announce its removal
+         emit removed(m_members[i]->m_name, m_members[i]->m_spawn);
+
+         // decrement member count
+         m_memberCount--;
+
+         // if the member is in zone decrement zone count
+         m_members[i]->m_spawn = m_spawnShell->findSpawnByName(m_members[i]->m_name);
+         if(m_members[i]->m_spawn)
+            m_membersInZoneCount--;
+
+         // clear it
+         m_members[i]->m_name = "";
+         m_members[i]->m_spawn = 0;
+         break;
+      }
+   }
 }
 
 void GroupMgr::addItem(const Item* item)

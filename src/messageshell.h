@@ -41,9 +41,8 @@ class MessageShell : public QObject
   Q_OBJECT
  public:
   MessageShell(Messages* messages, EQStr* eqStrings, Spells* spells,
-	       ZoneMgr* zoneMgr, 
-	       SpawnShell* spawnShell, Player* player,
-	       QObject* parent = 0, const char* name = 0);
+	       ZoneMgr* zoneMgr, SpawnShell* spawnShell, 
+               Player* player, QObject* parent = 0, const char* name = 0);
 
  public slots:
    void channelMessage(const uint8_t* cmsg, size_t, uint8_t);
@@ -80,7 +79,8 @@ class MessageShell : public QObject
    void groupInvite(const uint8_t* gmem);
    void groupDecline(const uint8_t* gmem);
    void groupFollow(const uint8_t* gmem);
-   void groupDisband(const uint8_t* gmem, size_t, uint8_t);
+   void groupDisband(const uint8_t* gmem);
+   void groupLeaderChange(const uint8_t* gmem);
 
    void syncDateTime(const QDateTime&);
 

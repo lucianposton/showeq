@@ -1,5 +1,11 @@
 Version: $Id$ $Name$
 
+ieatacid (9/8/08)
+- Updated version to 5.12.5.0
+- Updated/added opcodes where necessary
+- Updated/added/removed code to handle how group member data is sent now
+- Added more item codes from uRit1u2CBBA
+
 ieatacid (6/21/08)
 ----------------
 + Updated version to 5.12.4.2

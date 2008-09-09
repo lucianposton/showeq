@@ -52,7 +52,7 @@
     NULL,                 // 0x2b
     NULL,                 // 0x2c
     NULL,                 // 0x2d
-    NULL,                 // 0x2e
+    "Box",                // 0x2e
     NULL,                 // 0x2f
     "Plant",              // 0x30
     NULL,                 // 0x31
@@ -158,7 +158,7 @@
     NULL,                 // 0x95
     NULL,                 // 0x96
     NULL,                 // 0x97
-    NULL,                 // 0x98
+    "Crystal",            // 0x98
     NULL,                 // 0x99
     NULL,                 // 0x9a
     NULL,                 // 0x9b

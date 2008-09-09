@@ -192,10 +192,10 @@ file COPYING.</description>
       <used>false</used>
       <version>3</version>
       <includestyle>3</includestyle>
-      <root>/usr/lib/qt-3.3</root>
+      <root>/usr/share/qt3</root>
       <designerintegration>EmbeddedKDevDesigner</designerintegration>
-      <qmake>/usr/lib/qt-3.3/bin/qmake</qmake>
-      <designer>/usr/lib/qt-3.3/bin/designer</designer>
+      <qmake>/usr/bin/qmake-qt3</qmake>
+      <designer></designer>
       <designerpluginpaths/>
     </qt>
   </kdevcppsupport>

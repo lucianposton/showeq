@@ -603,7 +603,8 @@ struct newZoneStruct
 /*0908*/ uint8_t unknown0904[8];           // *** Placeholder (02/13/2007)
 /*0916*/ uint8_t unknown0916[4];           // *** Placeholder (11/24/2007)
 /*0920*/ uint8_t unknown0920[4];           // *** Placeholder (01/17/2008)
-/*0924*/
+/*0924*/ uint8_t unknown0924[4];           // *** Placeholder (09/03/2008)
+/*0928*/
 };
 
 /**
@@ -724,10 +725,10 @@ struct charProfileStruct
 /*16116*/ uint8_t unknown16116[16];
 /*16132*/ uint16_t  zoneId;             // see zones.h
 /*16134*/ uint16_t  zoneInstance;       // Instance id
-/*16136*/ char      groupMembers[MAX_GROUP_MEMBERS][64];// all the members in group, including self 
-/*16520*/ char      groupLeader[64];    // Leader of the group ?
-/*16584*/ uint8_t unknown16584[792];
-/*17376*/ uint32_t  leadAAActive;       // 0 = leader AA off, 1 = leader AA on
+/*16136*/ //char      groupMembers[MAX_GROUP_MEMBERS][64]; // removed 9/3/2008
+/*16520*/ //char      groupLeader[64];  // removed 9/3/2008
+/*16136*/ uint8_t unknown16136[800];
+/*16936*/ uint32_t  leadAAActive;       // 0 = leader AA off, 1 = leader AA on
 /*17380*/ uint8_t unknown17380[4];
 /*17384*/ uint32_t  ldon_guk_points;    // Earned GUK points
 /*17388*/ uint32_t  ldon_mir_points;    // Earned MIR points
@@ -1638,12 +1639,13 @@ struct groupUpdateStruct
 /*0000*/ int32_t  action;           // Group update action
 /*0004*/ char     yourname[64];     // Group Member Names
 /*0068*/ char     membername[64];   // Group leader name
-/*0132*/ uint8_t  unknown0132[320]; // ***Placeholder
-/*452*/
+/*0132*/ uint8_t  unknown0132[324]; // ***Placeholder
+/*456*/
 };
 
 
 /*
+** DEPRECATED
 ** Grouping Infromation
 ** Length: 768 Octets
 ** OpCode: OP_GroupUpdate
@@ -1660,7 +1662,7 @@ struct groupFullUpdateStruct
 
 /*
 ** Grouping Invite
-** Length 128 Octets (or 132 sometimes)
+** Length 140 Octets (invite a player) or 144 (you get invited)
 ** Opcode OP_GroupInvite
 */
 
@@ -1668,20 +1670,21 @@ struct groupInviteStruct
 {
 /*0000*/ char     invitee[64];           // Invitee's Name
 /*0064*/ char     inviter[64];           // Inviter's Name
-/*0128*/
+/*0128*/ uint8_t  unknown0128[12];       // ***Placeholder
+/*0140*/
 };
-// Sometimes there's an extra byte on the end...
+
 struct groupAltInviteStruct
 {
 /*0000*/ char     invitee[64];           // Invitee's Name
 /*0064*/ char     inviter[64];           // Inviter's Name
-/*0128*/ uint8_t  unknown0132[4];        // ***Placeholder (not always there)
-/*0132*/
+/*0128*/ uint8_t  unknown0132[16];        // ***Placeholder
+/*0144*/
 };
 
 /*
 ** Grouping Invite Answer - Decline
-** Length 129 Octets
+** Length 144 Octets
 ** Opcode GroupDeclineCode
 */
 
@@ -1689,34 +1692,31 @@ struct groupDeclineStruct
 {
 /*0000*/ char     yourname[64];           // Player Name
 /*0064*/ char     membername[64];         // Invited Member Name
-/*0128*/ uint8_t  reason;                 // Already in Group = 1, Declined Invite = 3
-/*0129*/
+/*0128*/ uint8_t  unknown0128[12];        // ***Placeholder
+/*0140*/ uint8_t  reason;                 // Already in Group = 1, Declined Invite = 3
+/*0141*/ uint8_t  unknown0141[3];         // ***Placeholder
+/*0144*/
 };
 
 /*
 ** Grouping Invite Answer - Accept 
-** Length 128 Octets (or sometimes 132)
+** Length 140 Octets
 ** Opcode OP_GroupFollow
 */
 
 struct groupFollowStruct
 {
-/*0000*/ char     inviter[64];           // Inviter's Name
+/*0000*/ char     unknown0000[64];       // ***Placeholder (zeros)
 /*0064*/ char     invitee[64];           // Invitee's Member Name
-/*0128*/
-};
-// Sometimes there's an extra 4 bytes on the end
-struct groupAltFollowStruct
-{
-/*0000*/ char     inviter[64];           // Inviter's Name
-/*0064*/ char     invitee[64];           // Invitee's Member Name
-/*0128*/ uint8_t  unknown0132[4];        // ***Placeholder (not always there)
-/*0132*/
+/*0128*/ uint8_t  unknown0132[4];        // ***Placeholder
+/*0132*/ uint32_t level;                 // Invitee's level
+/*0136*/ uint8_t  unknown0136[4];        // ***Placeholder (zeros)
+/*0140*/
 };
 
 /*
 ** Group Disbanding
-** Length 128 Octets
+** Length 140 Octets
 ** Opcode 
 */
 
@@ -1724,9 +1724,23 @@ struct groupDisbandStruct
 {
 /*0000*/ char     yourname[64];           // Player Name
 /*0064*/ char     membername[64];         // Invited Member Name
-/*0128*/
+/*0128*/ uint8_t  unknown0128[12];        // ***Placeholder
+/*0140*/
 };
 
+/*
+** Group Leader Change
+** Length 140 Octets
+** Opcode OP_GroupLeader
+*/
+
+struct groupLeaderChangeStruct
+{
+/*0000*/ char     unknown0000[64];        // ***Placeholder
+/*0064*/ char     membername[64];         // Invited Member Name
+/*0128*/ uint8_t  unknown0128[12];        // ***Placeholder
+/*0140*/
+};
 
 /*
 ** Delete Self

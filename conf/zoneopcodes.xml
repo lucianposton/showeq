@@ -142,28 +142,42 @@
         <comment>old ZoneChangeCode</comment>
         <payload dir="both" typename="zoneChangeStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="5F51" name="OP_GroupInvite" updated="01/17/08">
-        <payload dir="both" typename="groupInviteStruct" sizechecktype="match"/>
-        <payload dir="both" typename="groupAltInviteStruct" sizechecktype="match"/>
-        <comment></comment>
+    <opcode id="5f51" name="OP_GroupInvite" updated="09/03/08">
+        <payload dir="client" typename="groupInviteStruct" sizechecktype="match"/>
+        <payload dir="server" typename="groupAltInviteStruct" sizechecktype="match"/>
+        <comment>You're inviting someone and you're not grouped</comment>
+    </opcode>
+    <opcode id="548c" name="OP_GroupInvite2" updated="09/03/08">
+        <payload dir="client" typename="groupInviteStruct" sizechecktype="match"/>
+        <comment>You're inviting someone and you are grouped</comment>
     </opcode>
     <opcode id="5251" name="OP_GroupCancelInvite" updated="01/17/08">
         <payload dir="both" typename="groupDeclineStruct" sizechecktype="match"/>
         <comment>Declining to join a group</comment>
     </opcode>
-    <opcode id="2736" name="OP_GroupFollow" updated="01/17/08">
-        <payload dir="both" typename="groupFollowStruct" sizechecktype="match"/>
-        <payload dir="both" typename="groupAltFollowStruct" sizechecktype="match"/>
-        <comment>Accepting to join a group</comment>
+    <opcode id="1842" name="OP_GroupFollow" updated="09/03/08">
+        <payload dir="server" typename="groupFollowStruct" sizechecktype="match"/>
+        <comment>You join a group</comment>
     </opcode>
-    <opcode id="4B61" name="OP_GroupUpdate" updated="01/17/08">
-        <payload dir="server" typename="groupFullUpdateStruct" sizechecktype="match"/>
-        <payload dir="server" typename="groupUpdateStruct" sizechecktype="match"/>
-        <comment></comment>
+    <!--<opcode id="1842" name="OP_GroupFollow2" updated="09/03/08">
+        <payload dir="server" typename="groupAltFollowStruct" sizechecktype="match"/>
+        <comment>Player joins your group</comment>
+    </opcode>-->
+    <opcode id="4036" name="OP_GroupUpdate" updated="09/03/08">
+        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
+        <comment>Variable length packet with group member names</comment>
     </opcode>
-    <opcode id="47E7" name="OP_GroupDisband" updated="01/17/08">
-        <comment>Disband from group</comment>
-        <payload dir="both" typename="groupDisbandStruct" sizechecktype="match"/>
+    <opcode id="7545" name="OP_GroupDisband" updated="09/03/08">
+        <comment>You disband from group</comment>
+        <payload dir="server" typename="groupDisbandStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="16be" name="OP_GroupDisband2" updated="09/03/08">
+        <comment>Other disbands from group</comment>
+        <payload dir="server" typename="groupDisbandStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="1560" name="OP_GroupLeader" updated="09/03/08">
+        <comment>Group leader change</comment>
+        <payload dir="server" typename="groupLeaderChangeStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="7EA8" name="OP_Buff" updated="01/17/08">
         <comment>old BuffDropCode</comment>

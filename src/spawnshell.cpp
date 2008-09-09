@@ -482,6 +482,10 @@ struct pos
 
 int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, size_t len, bool checkLen)
 {
+   /*
+   This reads data from the variable-length spawn struct
+   */
+
    NetStream netStream(data,len);
    int32_t retVal;
    uint32_t race;

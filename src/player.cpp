@@ -815,7 +815,7 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
     return;
   else if (dir == DIR_Client)
     setPlayerID(pupdate->spawnId);
-  
+
   int16_t py = int16_t(pupdate->y);
   int16_t px = int16_t(pupdate->x);
   int16_t pz = int16_t(pupdate->z);

@@ -24,8 +24,8 @@
 // MessageShell
 MessageShell::MessageShell(Messages* messages, EQStr* eqStrings,
 			   Spells* spells, ZoneMgr* zoneMgr, 
-			   SpawnShell* spawnShell, Player* player,
-			   QObject* parent, const char* name)
+			   SpawnShell* spawnShell, Player* player, 
+                           QObject* parent, const char* name)
   : QObject(parent, name),
     m_messages(messages),
     m_eqStrings(eqStrings),
@@ -605,7 +605,7 @@ void MessageShell::startCast(const uint8_t* data)
   m_messages->addMessage(MT_Spell, tempStr);
 }
 
-
+// 9/30/2008 - no longer used. Group info is sent differently now
 void MessageShell::groupUpdate(const uint8_t* data, size_t size, uint8_t dir)
 {
   if (size != sizeof(groupUpdateStruct))
@@ -613,6 +613,7 @@ void MessageShell::groupUpdate(const uint8_t* data, size_t size, uint8_t dir)
     // Ignore groupFullUpdateStruct
     return;
   }
+  return;
   const groupUpdateStruct* gmem = (const groupUpdateStruct*)data;
   QString tempStr;
 
@@ -656,26 +657,49 @@ void MessageShell::groupDecline(const uint8_t* data)
 {
   const groupDeclineStruct* gmem = (const groupDeclineStruct*)data;
   QString tempStr;
-  tempStr.sprintf("Invite: %s declines invite from %s (%i)", 
-		  gmem->membername, gmem->yourname, gmem->reason);
+  switch(gmem->reason)
+  {
+     case 1:
+        tempStr.sprintf("Invite: %s declines invite from %s (player is grouped)", 
+                        gmem->membername, gmem->yourname);
+        break;
+     case 3:
+        tempStr.sprintf("Invite: %s declines invite from %s", 
+                        gmem->membername, gmem->yourname);
+        break;
+     default:
+        tempStr.sprintf("Invite: %s declines invite from %s (unknown reason: %i)", 
+                        gmem->membername, gmem->yourname, gmem->reason);
+        break;
+  }
   m_messages->addMessage(MT_Group, tempStr);
 }
 
 void MessageShell::groupFollow(const uint8_t* data)
 {
-  const groupFollowStruct* gmem = (const groupFollowStruct*)data;
+  const groupFollowStruct* gFollow = (const groupFollowStruct*)data;
   QString tempStr;
-  tempStr.sprintf("Follow: %s accepts invite from %s", 
-		  gmem->invitee, gmem->inviter);
+
+  tempStr.sprintf("Follow: %s has joined the group", gFollow->invitee);
   m_messages->addMessage(MT_Group, tempStr);
 }
 
-void MessageShell::groupDisband(const uint8_t* data, size_t, uint8_t dir)
+void MessageShell::groupDisband(const uint8_t* data)
 {
   const groupDisbandStruct* gmem = (const groupDisbandStruct*)data;
   QString tempStr;
+
   tempStr.sprintf ("Disband: %s disbands from the group", gmem->membername);
   m_messages->addMessage(MT_Group, tempStr);
+}
+
+void MessageShell::groupLeaderChange(const uint8_t* data)
+{
+   const groupLeaderChangeStruct *gmem = (const groupLeaderChangeStruct*)data;
+   QString tempStr;
+   tempStr.sprintf("Update: %s is now the leader of the group", 
+                    gmem->membername);
+   m_messages->addMessage(MT_Group, tempStr);
 }
 
 void MessageShell::player(const charProfileStruct* player)
@@ -731,13 +755,14 @@ void MessageShell::player(const charProfileStruct* player)
   m_messages->addMessage(MT_Player, message);
 #endif
 
-  message.sprintf("Group: %s %s %s %s %s %s", player->groupMembers[0],
-    player->groupMembers[1],
-    player->groupMembers[2],
-    player->groupMembers[3],
-    player->groupMembers[4],
-    player->groupMembers[5]);
-  m_messages->addMessage(MT_Player, message);
+// 09/03/2008 patch - this is no longer sent in charProfile
+//   message.sprintf("Group: %s %s %s %s %s %s", player->groupMembers[0],
+//     player->groupMembers[1],
+//     player->groupMembers[2],
+//     player->groupMembers[3],
+//     player->groupMembers[4],
+//     player->groupMembers[5]);
+//   m_messages->addMessage(MT_Player, message);
 
   int buffnumber;
   for (buffnumber=0;buffnumber<MAX_BUFFS;buffnumber++)

@@ -1652,14 +1652,25 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    if (m_groupMgr != 0)
    {
-     connect(m_zoneMgr, SIGNAL(playerProfile(const charProfileStruct*)),
-        m_groupMgr, SLOT(player(const charProfileStruct*)));
+// 9/3/2008 - Group data is no longer sent in charProfile
+//      connect(m_zoneMgr, SIGNAL(playerProfile(const charProfileStruct*)),
+//         m_groupMgr, SLOT(player(const charProfileStruct*)));
+      //remove this
+//      m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
+// 			"groupUpdateStruct", SZC_None,
+// 			m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));
      m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
-			"groupUpdateStruct", SZC_Match,
-			m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));
-     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
-			"groupFullUpdateStruct", SZC_Match,
-			m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));
+                        "uint8_t", SZC_None,
+                        m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));
+     m_packet->connect2("OP_GroupFollow", SP_Zone, DIR_Server,
+                        "groupFollowStruct", SZC_Match,
+                        m_groupMgr, SLOT(addGroupMember(const uint8_t*)));
+     m_packet->connect2("OP_GroupDisband", SP_Zone, DIR_Server,
+                        "groupDisbandStruct", SZC_Match,
+                        m_groupMgr, SLOT(removeGroupMember(const uint8_t*)));
+     m_packet->connect2("OP_GroupDisband2", SP_Zone, DIR_Server,
+                        "groupDisbandStruct", SZC_Match,
+                        m_groupMgr, SLOT(removeGroupMember(const uint8_t*)));
      // connect GroupMgr slots to SpawnShell signals
      connect(m_spawnShell, SIGNAL(addItem(const Item*)),
 	     m_groupMgr, SLOT(addItem(const Item*)));
@@ -1832,25 +1843,34 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      connect(m_dateTimeMgr, SIGNAL(syncDateTime(const QDateTime&)),
 	     m_messageShell, SLOT(syncDateTime(const QDateTime&)));
 
-     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
-			"groupUpdateStruct", SZC_Match,
-			m_messageShell, SLOT(groupUpdate(const uint8_t*, size_t, uint8_t)));
-     m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
-			"groupFullUpdateStruct", SZC_Match,
-			m_messageShell, SLOT(groupUpdate(const uint8_t*, size_t, uint8_t)));
-     m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Server|DIR_Client,
+// 9/3/2008 - Removed.  Serialized packet now.
+//      m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
+// 			"groupUpdateStruct", SZC_None,
+// 			m_messageShell, SLOT(groupUpdate(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Client,
 			"groupInviteStruct", SZC_Match,
 			m_messageShell, SLOT(groupInvite(const uint8_t*)));
-     m_packet->connect2("OP_GroupFollow", SP_Zone, DIR_Server|DIR_Client,
+     m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Server,
+                        "groupAltInviteStruct", SZC_Match,
+                        m_messageShell, SLOT(groupInvite(const uint8_t*)));
+     m_packet->connect2("OP_GroupInvite2", SP_Zone, DIR_Client,
+                        "groupInviteStruct", SZC_Match,
+                        m_messageShell, SLOT(groupInvite(const uint8_t*)));
+     m_packet->connect2("OP_GroupFollow", SP_Zone, DIR_Server,
 			"groupFollowStruct", SZC_Match,
-			m_messageShell, SLOT(groupFollow(const uint8_t*)));
+                        m_messageShell, SLOT(groupFollow(const uint8_t*)));
      m_packet->connect2("OP_GroupDisband", SP_Zone, DIR_Server,
 			"groupDisbandStruct", SZC_Match,
-            m_messageShell, SLOT(groupDisband(const uint8_t*, size_t, uint8_t)));
-
+                        m_messageShell, SLOT(groupDisband(const uint8_t*)));
+     m_packet->connect2("OP_GroupDisband2", SP_Zone, DIR_Server,
+                        "groupDisbandStruct", SZC_Match,
+                        m_messageShell, SLOT(groupDisband(const uint8_t*)));
      m_packet->connect2("OP_GroupCancelInvite", SP_Zone, DIR_Server|DIR_Client,
 			"groupDeclineStruct", SZC_Match,
 			m_messageShell, SLOT(groupDecline(const uint8_t*)));
+     m_packet->connect2("OP_GroupLeader", SP_Zone, DIR_Server,
+                        "groupLeaderChangeStruct", SZC_Match,
+                        m_messageShell, SLOT(groupLeaderChange(const uint8_t*)));
    }
 
    if (m_filterNotifications)
