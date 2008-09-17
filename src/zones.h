@@ -457,34 +457,34 @@
 { "guardian", "The Mechamatic Guardian" }, // 447
 { "steamfontmts", "Steamfont Mountains" }, // 448
 { "cryptofshade", "Crypt of Shade" }, // 449
-{ NULL, NULL }, // 450
-{ NULL, NULL }, // 451
-{ NULL, NULL }, // 452
-{ NULL, NULL }, // 453
-{ NULL, NULL }, // 454
-{ NULL, NULL }, // 455
-{ NULL, NULL }, // 456
-{ NULL, NULL }, // 457
-{ NULL, NULL }, // 458
-{ NULL, NULL }, // 459
-{ NULL, NULL }, // 460
-{ NULL, NULL }, // 461
-{ NULL, NULL }, // 462
-{ NULL, NULL }, // 463
-{ NULL, NULL }, // 464
-{ NULL, NULL }, // 465
-{ NULL, NULL }, // 466
-{ NULL, NULL }, // 467
-{ NULL, NULL }, // 468
-{ NULL, NULL }, // 469
-{ NULL, NULL }, // 470
-{ NULL, NULL }, // 471
-{ NULL, NULL }, // 472
-{ NULL, NULL }, // 473
-{ NULL, NULL }, // 474
-{ NULL, NULL }, // 475
-{ NULL, NULL }, // 476
-{ NULL, NULL }, // 477
+{ "Tinmizer's Wunderwerks", "dragonscalea" }, // 450
+{ "Deepscar's Den", "dragonscaleb" }, // 451
+{ "Field of Scale", "oldfieldofbone" }, // 452
+{ "Kaesora Library", "oldkaesoraa" }, // 453
+{ "Hatchery Wing", "oldkaesorab" }, // 454
+{ "Kurn's Tower", "oldkurn" }, // 455
+{ "Bloody Kithicor", "oldkithicor" }, // 456
+{ "Old Commonlands", "oldcommons" }, // 457
+{ "Highpass Hold", "oldhighpass" }, // 458
+{ "The Void", "thevoida" }, // 459
+{ "The Void", "thevoidb" }, // 460
+{ "The Void", "thevoidc" }, // 461
+{ "The Void", "thevoidd" }, // 462
+{ "The Void", "thevoide" }, // 463
+{ "The Void", "thevoidf" }, // 464
+{ "The Void", "thevoidg" }, // 465
+{ "Oceangreen Hills", "oceangreenhills" }, // 466
+{ "Oceangreen Village", "oceangreenvillage" }, // 467
+{ "Blackburrow", "oldblackburrow" }, // 468
+{ "Temple of Bertoxxulous", "bertoxtemple" }, // 469
+{ "Korafax, Home of the Riders", "discord" }, // 470
+{ "Citadel of the Worldslayer", "discordtower" }, // 471
+{ "Old Bloodfields", "oldbloodfield" }, // 472
+{ "The Precipice of War", "precipiceofwar" }, // 473
+{ "City of Dranik", "olddranik" }, // 474
+{ "Toskirakk", "toskirakk" }, // 475
+{ "Korascian Warrens", "korascian" }, // 476
+{ "Rathe Council Chambers", "rathechamber" }, // 477
 { NULL, NULL }, // 478
 { NULL, NULL }, // 479
 { NULL, NULL }, // 480

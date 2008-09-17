@@ -173,13 +173,13 @@ void PacketCaptureThread::start(const char *device, const char *host,
 
     if (pcap_compile(m_pcache_pcap, &bpp, filter_buf, 1, net) == -1)
     {
-        pcap_perror (m_pcache_pcap, "pcap_error:pcap_compile");
+        pcap_perror (m_pcache_pcap, (char*)"pcap_error:pcap_compile");
         exit(0);
     }
 
     if (pcap_setfilter (m_pcache_pcap, &bpp) == -1)
     {
-        pcap_perror (m_pcache_pcap, "pcap_error:pcap_setfilter");
+        pcap_perror (m_pcache_pcap, (char*)"pcap_error:pcap_setfilter");
         exit(0);
     }
 
@@ -483,13 +483,13 @@ void PacketCaptureThread::setFilter (const char *device,
     if (pcap_compile (m_pcache_pcap, &bpp, filter_buf, 1, net) == -1)
     {
         seqWarn("%s",filter_buf);
-        pcap_perror(m_pcache_pcap, "pcap_error:pcap_compile_error");
+        pcap_perror(m_pcache_pcap, (char*)"pcap_error:pcap_compile_error");
         exit(0);
     }
 
     if (pcap_setfilter (m_pcache_pcap, &bpp) == -1)
     {
-        pcap_perror(m_pcache_pcap, "pcap_error:pcap_setfilter_error");
+        pcap_perror(m_pcache_pcap, (char*)"pcap_error:pcap_setfilter_error");
         exit (0);
     }
 

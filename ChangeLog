@@ -1,6 +1,12 @@
-Version: $Id$ $Name$
+ieatacid (9/16/08)
+----------------
+- Updated version to 5.12.5.1
+- Fixed problem with your player remaining a corpse after respawning in the same zone you died in
+- Added zones from the upcoming Seeds of Destruction expansion to zones.h
+- Fixed pcap_perror warnings in packetcapture.cpp
 
 ieatacid (9/8/08)
+----------------
 - Updated version to 5.12.5.0
 - Updated/added opcodes where necessary
 - Updated/added/removed code to handle how group member data is sent now

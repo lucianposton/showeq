@@ -95,6 +95,8 @@ public:
    uint16_t defaultDeity() const { return m_defaultDeity; }
    uint16_t defaultRace() const { return m_defaultRace; }
    uint8_t defaultClass() const { return m_defaultClass; }
+   QString realName() const { return m_realName; }
+   void setRealName(const QString& name) { m_realName = name; }
 
    virtual void killSpawn();
 
@@ -202,6 +204,7 @@ public:
   // We keep a second copy in case the player levels while playing.
   QString m_defaultName;
   QString m_defaultLastName;
+  QString m_realName;
   uint16_t m_mana;
   uint16_t m_defaultRace;
   uint16_t m_defaultDeity;

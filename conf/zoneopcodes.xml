@@ -83,7 +83,7 @@
     </opcode>
     <opcode id="72ad" name="OP_RespawnFromHover" updated="01/17/08">
       <comment>Server telling client that it is coming back from hover death</comment>
-        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
+        <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
     <opcode id="231F" name="OP_WearChange" updated="01/17/08">
         <comment>old SpawnUpdateCode</comment>

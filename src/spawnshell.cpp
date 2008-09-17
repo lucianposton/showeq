@@ -648,15 +648,15 @@ void SpawnShell::zoneEntry(const uint8_t* data, size_t len)
 
   fillSpawnStruct(spawn,data,len,true);
 
-#ifdef SPAWNSHELL_DIAG
+ #ifdef SPAWNSHELL_DIAG
   seqDebug("SpawnShell::zoneEntry(spawnStruct *(name='%s'))", spawn->name);
-#endif
+ #endif
 
   Item *item;
 
-  if(!strcmp(spawn->name,m_player->name()))
+  if(!strcmp(spawn->name,m_player->realName()))
   {
-      // Multiple zoneEntry packets are received for your spawn after you zone.
+    // Multiple zoneEntry packets are received for your spawn after you zone
     m_player->update(spawn);
     emit changeItem(m_player, tSpawnChangedALL);
   }
@@ -1382,10 +1382,12 @@ void SpawnShell::killSpawn(const uint8_t* data)
    }
 }
 
-void SpawnShell::respawnFromHover(const uint8_t* data)
+void SpawnShell::respawnFromHover(const uint8_t* data, size_t len, uint8_t dir)
 {
+   if(dir != DIR_Client)
+      return;
 #ifdef SPAWNSHELL_DIAG
-    seqDebug("SpawnShell::respawnFromHover()");
+   seqDebug("SpawnShell::respawnFromHover()");
 #endif
 
     // Our old player is a corpse, but we're rising from the dead. So

@@ -23,7 +23,7 @@
 #include <qdatastream.h>
 
 
-#define DEBUG_PLAYER
+// #define DEBUG_PLAYER
 
 //----------------------------------------------------------------------
 // constants
@@ -348,6 +348,7 @@ void Player::player(const charProfileStruct* player)
   setTypeflag(1);
 
   Spawn::setName(player->name);
+  setRealName(player->name);
 
   // if it's got a last name add it
   setLastName(player->lastName);

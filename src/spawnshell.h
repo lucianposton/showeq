@@ -125,7 +125,7 @@ public slots:
    void removeSpawn(const uint8_t* rmSpawn, size_t len, uint8_t dir);
    void deleteSpawn(const uint8_t* delSpawn);
    void killSpawn(const uint8_t* deadspawn);
-   void respawnFromHover(const uint8_t* respawn);
+   void respawnFromHover(const uint8_t* respawn, size_t len, uint8_t dir);
    void corpseLoc(const uint8_t* corpseLoc);
 
    void playerChangedID(uint16_t playerID);
