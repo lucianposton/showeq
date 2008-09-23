@@ -42,21 +42,28 @@ GroupMgr::~GroupMgr()
   }
 }
 
-// 9/3/2008 - Not used. Group data is no longer sent in charProfile
-#if 0
 void GroupMgr::player(const charProfileStruct* player)
 {
-  // reset counters
+  // We receive a groupUpdate packet after playerProfile so we'll clear the
+  // member list then repopulate it in case we lost someone during zoning
   m_memberCount = 0;
   m_membersInZoneCount = 0;
 
+  for(int i = 0; i < MAX_GROUP_MEMBERS; i++)
+  {
+     m_members[i]->m_name = "";
+     m_members[i]->m_spawn = 0;
+  }
+
   emit cleared();
 
+// 9/3/2008 - Not used. Group data is no longer sent in charProfile.  We still
+//            need to reset the data as done above.
+#if 0
   // initialize the array of members with information from the player profile
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
-//     so it compiles
-//     m_members[i]->m_name = player->groupMembers[i];
+     m_members[i]->m_name = player->groupMembers[i];
 
     if (!m_members[i]->m_name.isEmpty())
       m_memberCount++;
@@ -72,8 +79,8 @@ void GroupMgr::player(const charProfileStruct* player)
 
     emit added(m_members[i]->m_name, m_members[i]->m_spawn);
   }
-}
 #endif
+}
 
 void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 {
@@ -110,7 +117,7 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
      // increment the member count
      m_memberCount++;
 
-     // attempt to retrieve the members spawn
+     // attempt to retrieve the member's spawn
      m_members[i]->m_spawn = m_spawnShell->findSpawnByName(m_members[i]->m_name);
 
      // incremement the spawn count
@@ -172,26 +179,43 @@ void GroupMgr::removeGroupMember(const uint8_t* data)
 {
    const groupDisbandStruct* gmem = (const groupDisbandStruct*)data;
 
-   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+   // If we're disbanding, reset counters and clear member slots
+   if(!strcmp(gmem->membername, m_player->name()))
    {
-      // is this the member?
-      if (m_members[i]->m_name == gmem->membername)
+      m_memberCount = 0;
+      m_membersInZoneCount = 0;
+
+      for(int i = 0; i < MAX_GROUP_MEMBERS; i++)
       {
-         // yes, announce its removal
-         emit removed(m_members[i]->m_name, m_members[i]->m_spawn);
-
-         // decrement member count
-         m_memberCount--;
-
-         // if the member is in zone decrement zone count
-         m_members[i]->m_spawn = m_spawnShell->findSpawnByName(m_members[i]->m_name);
-         if(m_members[i]->m_spawn)
-            m_membersInZoneCount--;
-
-         // clear it
          m_members[i]->m_name = "";
          m_members[i]->m_spawn = 0;
-         break;
+      }
+
+      emit cleared();
+   }
+   else
+   {
+      for(int i = 0; i < MAX_GROUP_MEMBERS; i++)
+      {
+         // is this the member?
+         if(m_members[i]->m_name == gmem->membername)
+         {
+            // yes, announce its removal
+            emit removed(m_members[i]->m_name, m_members[i]->m_spawn);
+
+            // decrement member count
+            m_memberCount--;
+
+            // if the member is in zone decrement zone count
+            m_members[i]->m_spawn = m_spawnShell->findSpawnByName(m_members[i]->m_name);
+            if(m_members[i]->m_spawn)
+               m_membersInZoneCount--;
+
+            // clear it
+            m_members[i]->m_name = "";
+            m_members[i]->m_spawn = 0;
+            break;
+         }
       }
    }
 }

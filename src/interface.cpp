@@ -1652,13 +1652,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    if (m_groupMgr != 0)
    {
-// 9/3/2008 - Group data is no longer sent in charProfile
-//      connect(m_zoneMgr, SIGNAL(playerProfile(const charProfileStruct*)),
-//         m_groupMgr, SLOT(player(const charProfileStruct*)));
-      //remove this
-//      m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
-// 			"groupUpdateStruct", SZC_None,
-// 			m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));
+     connect(m_zoneMgr, SIGNAL(playerProfile(const charProfileStruct*)),
+                        m_groupMgr, SLOT(player(const charProfileStruct*)));
      m_packet->connect2("OP_GroupUpdate", SP_Zone, DIR_Server,
                         "uint8_t", SZC_None,
                         m_groupMgr, SLOT(groupUpdate(const uint8_t*, size_t)));

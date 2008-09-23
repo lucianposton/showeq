@@ -595,4 +595,42 @@
     "Banner",                     // 586
     "Elven Ghost",                // 587
     "Human Ghost",                // 588
+    "Chest",                      // 589
+    "Chest",                      // 590
+    "Crystal",                    // 591
+    "Coffin",                     // 592
+    "Guardian CPU",               // 593
+    "Worg",                       // 594
+    "Mansion",                    // 595
+    "Floating Island",            // 596
+    "Cragslither",                // 597
+    "Wrulon",                     // 598
+    "UNKNOWN RACE",               // 599
+    "UNKNOWN RACE",               // 600
+    "UNKNOWN RACE",               // 601
+    "Burynai",                    // 602
+    "Frog",                       // 603
+    "Dracolich",                  // 604
+    "Iksar Ghost",                // 605
+    "Iksar Skeleton",             // 606
+    "Mephit",                     // 607
+    "Muddite",                    // 608
+    "Raptor",                     // 609
+    "Sarnak",                     // 610
+    "Scorpion",                   // 611
+    "Tsetsian",                   // 612
+    "Wurm",                       // 613
+    "Balrog",                     // 614
+    "Hydra Crystal",              // 615
+    "Crystal Sphere",             // 616
+    "Gnoll",                      // 617
+    "Sokokar",                    // 618
+    "Stone Pylon",                // 619
+    "Demon Vulture",              // 620
+    "Wagon",                      // 621
+    "God of Discord",             // 622
+    "Wrulon Mount",               // 623
+    "UNKNOWN RACE",               // 624
+    "Sokokar Mount",              // 625
+    "UNKNOWN RACE",               // 626
 #endif
