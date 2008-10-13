@@ -624,7 +624,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       strcpy(spawn->suffix,name.latin1());
    }
 
-   netStream.skipBytes(32);
+   netStream.skipBytes(33);
 
    // now we're at the end
 

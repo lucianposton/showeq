@@ -604,7 +604,8 @@ struct newZoneStruct
 /*0916*/ uint8_t unknown0916[4];           // *** Placeholder (11/24/2007)
 /*0920*/ uint8_t unknown0920[4];           // *** Placeholder (01/17/2008)
 /*0924*/ uint8_t unknown0924[4];           // *** Placeholder (09/03/2008)
-/*0928*/
+/*0928*/ uint8_t unknown0928[4];           // *** Placeholder (10/07/2008)
+/*0932*/
 };
 
 /**
@@ -685,7 +686,7 @@ struct playerProfileStruct
 
 /*
 ** Player Profile
-** Length: 23608 Octets
+** Length: 23488 Octets
 ** OpCode: CharProfileCode
 */
 struct charProfileStruct
@@ -699,11 +700,12 @@ struct charProfileStruct
 /*15264*/ uint32_t  birthdayTime;       // character birthday
 /*15268*/ uint32_t  lastSaveTime;       // character last save time
 /*15272*/ uint32_t  timePlayedMin;      // time character played
-/*15276*/ uint8_t   pvp;                // 1=pvp, 0=not pvp
-/*15277*/ uint8_t   anon;               // 2=roleplay, 1=anon, 0=not anon     
-/*15278*/ uint8_t   gm;                 // 0=no, 1=yes (guessing!)
-/*15279*/ int8_t    guildstatus;        // 0=member, 1=officer, 2=guildleader
-/*15280*/ uint8_t unknown15280[12];
+/*15276*/ uint8_t unknown15276[4];
+/*15280*/ uint8_t   pvp;                // 1=pvp, 0=not pvp
+/*15281*/ uint8_t   anon;               // 2=roleplay, 1=anon, 0=not anon     
+/*15282*/ uint8_t   gm;                 // 0=no, 1=yes (guessing!)
+/*15283*/ int8_t    guildstatus;        // 0=member, 1=officer, 2=guildleader
+/*15284*/ uint8_t unknown15284[8];
 /*15292*/ uint32_t  exp;                // Current Experience
 /*15296*/ uint8_t unknown15296[12];
 /*15308*/ uint8_t   languages[MAX_KNOWN_LANGS]; // List of languages
@@ -712,61 +714,60 @@ struct charProfileStruct
 /*15344*/ float     x;                  // Players x position
 /*15348*/ float     z;                  // Players z position
 /*15352*/ float     heading;            // Players heading   
-/*15356*/ uint8_t   unknown15356[4];    // ***Placeholder
+/*15356*/ uint32_t  standState;         // 0x64 = stand
 /*15360*/ uint32_t  platinum_bank;      // Platinum Pieces in Bank
 /*15364*/ uint32_t  gold_bank;          // Gold Pieces in Bank
 /*15368*/ uint32_t  silver_bank;        // Silver Pieces in Bank
 /*15372*/ uint32_t  copper_bank;        // Copper Pieces in Bank
 /*15376*/ uint32_t  platinum_shared;    // Shared platinum pieces
-/*15380*/ uint8_t unknown15380[716];
-/*16096*/ uint32_t  expansions;         // Bitmask for expansions
-/*16100*/ uint8_t unknown16100[12];
-/*16112*/ uint32_t  autosplit;          // 0 = off, 1 = on
-/*16116*/ uint8_t unknown16116[16];
-/*16132*/ uint16_t  zoneId;             // see zones.h
-/*16134*/ uint16_t  zoneInstance;       // Instance id
-/*16136*/ //char      groupMembers[MAX_GROUP_MEMBERS][64]; // removed 9/3/2008
-/*16520*/ //char      groupLeader[64];  // removed 9/3/2008
-/*16136*/ uint8_t unknown16136[800];
-/*16936*/ uint32_t  leadAAActive;       // 0 = leader AA off, 1 = leader AA on
-/*17380*/ uint8_t unknown17380[4];
-/*17384*/ uint32_t  ldon_guk_points;    // Earned GUK points
-/*17388*/ uint32_t  ldon_mir_points;    // Earned MIR points
-/*17392*/ uint32_t  ldon_mmc_points;    // Earned MMC points
-/*17396*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
-/*17400*/ uint32_t  ldon_tak_points;    // Earned TAK points
-/*17404*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*17408*/ uint8_t unknown17408[136];
-/*17544*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)
-/*17548*/ uint32_t  careerTribute;      // Total favor points for this char
-/*17552*/ uint32_t  unknown17552;       // *** Placeholder
-/*17556*/ uint32_t  currentTribute;     // Current tribute points
-/*17560*/ uint32_t  unknown17560;       // *** Placeholder
-/*17564*/ uint32_t  tributeActive;      // 0 = off, 1=on
-/*17568*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout
-/*17608*/ uint8_t unknown17608[8];
-/*17616*/ float     expGroupLeadAA;     // Current group lead exp points
-/*17620*/ uint32_t unknown17620;
-/*17624*/ float     expRaidLeadAA;      // Current raid lead AA exp points
-/*17628*/ uint32_t  groupLeadAAUnspent; // Unspent group lead AA points
-/*17632*/ uint32_t  raidLeadAAUnspent;  // Unspent raid lead AA points
-/*17636*/ uint32_t  leadershipAAs[MAX_LEAD_AA]; // Leader AA ranks
-/*17764*/ uint8_t unknown17764[128];
-/*17892*/ uint32_t  airRemaining;       // Air supply (seconds)
-/*17896*/ uint8_t unknown17896[4608];
-/*22504*/ uint32_t  expAA;              // Exp earned in current AA point
-/*22508*/ uint8_t unknown22508[40];
-/*22548*/ uint32_t  currentRadCrystals; // Current count of radiant crystals
-/*22552*/ uint32_t  careerRadCrystals;  // Total count of radiant crystals ever
-/*22556*/ uint32_t  currentEbonCrystals;// Current count of ebon crystals
-/*22560*/ uint32_t  careerEbonCrystals; // Total count of ebon crystals ever
-/*22564*/ uint8_t   groupAutoconsent;   // 0=off, 1=on
-/*22565*/ uint8_t   raidAutoconsent;    // 0=off, 1=on
-/*22566*/ uint8_t   guildAutoconsent;   // 0=off, 1=on
-/*22567*/ uint8_t   unknown22567[5];    // ***Placeholder (6/29/2005)
-/*22572*/ uint32_t  showhelm;           // 0=no, 1=yes
-/*22576*/ uint8_t   unknown22576[1032]; // ***Placeholder (2/13/2007)
-/*23608*/
+/*15380*/ uint8_t unknown15380[1036];
+/*16416*/ uint32_t  expansions;         // Bitmask for expansions
+/*16420*/ uint8_t unknown16420[12];
+/*16432*/ uint32_t  autosplit;          // 0 = off, 1 = on
+/*16436*/ uint8_t unknown16436[16];
+/*16452*/ uint16_t  zoneId;             // see zones.h
+/*16454*/ uint16_t  zoneInstance;       // Instance id
+/*16456*/ uint8_t unknown16456[800];
+/*17256*/ uint32_t  leadAAActive;       // 0 = leader AA off, 1 = leader AA on
+/*17260*/ uint8_t unknown17260[4];
+/*17264*/ uint32_t  ldon_guk_points;    // Earned GUK points
+/*17268*/ uint32_t  ldon_mir_points;    // Earned MIR points
+/*17272*/ uint32_t  ldon_mmc_points;    // Earned MMC points
+/*17276*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
+/*17280*/ uint32_t  ldon_tak_points;    // Earned TAK points
+/*17284*/ uint32_t  ldon_avail_points;  // Available LDON points
+/*17288*/ uint8_t unknown17288[136];
+/*17424*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)
+/*17428*/ uint32_t  careerTribute;      // Total favor points for this char
+/*17432*/ uint32_t  unknown17432;       // *** Placeholder
+/*17436*/ uint32_t  currentTribute;     // Current tribute points
+/*17440*/ uint32_t  unknown17440;       // *** Placeholder
+/*17444*/ uint32_t  tributeActive;      // 0 = off, 1=on
+/*17448*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout
+/*17488*/ uint8_t unknown17488[4];
+/*17492*/ float     expGroupLeadAA;     // Current group lead exp points
+/*17496*/ uint32_t unknown17496;
+/*17500*/ float     expRaidLeadAA;      // Current raid lead AA exp points
+/*17504*/ uint32_t unknown17504;
+/*17508*/ uint32_t  groupLeadAAUnspent; // Unspent group lead AA points
+/*17512*/ uint32_t  raidLeadAAUnspent;  // Unspent raid lead AA points
+/*17516*/ uint32_t  leadershipAAs[MAX_LEAD_AA]; // Leader AA ranks
+/*17644*/ uint8_t unknown17644[128];
+/*17772*/ uint32_t  airRemaining;       // Air supply (seconds)
+/*17776*/ uint8_t unknown17776[4608];
+/*22384*/ uint32_t  expAA;              // Exp earned in current AA point
+/*22388*/ uint8_t unknown22388[40];
+/*22428*/ uint32_t  currentRadCrystals; // Current count of radiant crystals
+/*22432*/ uint32_t  careerRadCrystals;  // Total count of radiant crystals ever
+/*22436*/ uint32_t  currentEbonCrystals;// Current count of ebon crystals
+/*22440*/ uint32_t  careerEbonCrystals; // Total count of ebon crystals ever
+/*22444*/ uint8_t   groupAutoconsent;   // 0=off, 1=on
+/*22445*/ uint8_t   raidAutoconsent;    // 0=off, 1=on
+/*22446*/ uint8_t   guildAutoconsent;   // 0=off, 1=on
+/*22447*/ uint8_t   unknown22447[5];    // ***Placeholder (6/29/2005)
+/*22452*/ uint32_t  showhelm;           // 0=no, 1=yes
+/*22456*/ uint8_t   unknown22456[1032]; // ***Placeholder (2/13/2007)
+/*23488*/
 };
 
 #if 0
@@ -1662,7 +1663,7 @@ struct groupFullUpdateStruct
 
 /*
 ** Grouping Invite
-** Length 140 Octets (invite a player) or 144 (you get invited)
+** Length 148 Octets (invite a player) or 152 (you get invited)
 ** Opcode OP_GroupInvite
 */
 
@@ -1670,21 +1671,21 @@ struct groupInviteStruct
 {
 /*0000*/ char     invitee[64];           // Invitee's Name
 /*0064*/ char     inviter[64];           // Inviter's Name
-/*0128*/ uint8_t  unknown0128[12];       // ***Placeholder
-/*0140*/
+/*0128*/ uint8_t  unknown0128[20];       // ***Placeholder
+/*0148*/
 };
 
 struct groupAltInviteStruct
 {
 /*0000*/ char     invitee[64];           // Invitee's Name
 /*0064*/ char     inviter[64];           // Inviter's Name
-/*0128*/ uint8_t  unknown0132[16];        // ***Placeholder
-/*0144*/
+/*0128*/ uint8_t  unknown0128[24];       // ***Placeholder
+/*0152*/
 };
 
 /*
 ** Grouping Invite Answer - Decline
-** Length 144 Octets
+** Length 152 Octets
 ** Opcode GroupDeclineCode
 */
 
@@ -1692,15 +1693,15 @@ struct groupDeclineStruct
 {
 /*0000*/ char     yourname[64];           // Player Name
 /*0064*/ char     membername[64];         // Invited Member Name
-/*0128*/ uint8_t  unknown0128[12];        // ***Placeholder
-/*0140*/ uint8_t  reason;                 // Already in Group = 1, Declined Invite = 3
-/*0141*/ uint8_t  unknown0141[3];         // ***Placeholder
-/*0144*/
+/*0128*/ uint8_t  unknown0128[20];        // ***Placeholder
+/*0148*/ uint8_t  reason;                 // Already in Group = 1, Declined Invite = 3
+/*0149*/ uint8_t  unknown0141[3];         // ***Placeholder
+/*0152*/
 };
 
 /*
 ** Grouping Invite Answer - Accept 
-** Length 140 Octets
+** Length 148 Octets
 ** Opcode OP_GroupFollow
 */
 
@@ -1710,13 +1711,13 @@ struct groupFollowStruct
 /*0064*/ char     invitee[64];           // Invitee's Member Name
 /*0128*/ uint8_t  unknown0132[4];        // ***Placeholder
 /*0132*/ uint32_t level;                 // Invitee's level
-/*0136*/ uint8_t  unknown0136[4];        // ***Placeholder (zeros)
-/*0140*/
+/*0136*/ uint8_t  unknown0136[12];       // ***Placeholder (zeros)
+/*0148*/
 };
 
 /*
 ** Group Disbanding
-** Length 140 Octets
+** Length 148 Octets
 ** Opcode 
 */
 
@@ -1724,13 +1725,13 @@ struct groupDisbandStruct
 {
 /*0000*/ char     yourname[64];           // Player Name
 /*0064*/ char     membername[64];         // Invited Member Name
-/*0128*/ uint8_t  unknown0128[12];        // ***Placeholder
-/*0140*/
+/*0128*/ uint8_t  unknown0128[20];        // ***Placeholder
+/*0148*/
 };
 
 /*
 ** Group Leader Change
-** Length 140 Octets
+** Length 148 Octets
 ** Opcode OP_GroupLeader
 */
 
@@ -1738,8 +1739,8 @@ struct groupLeaderChangeStruct
 {
 /*0000*/ char     unknown0000[64];        // ***Placeholder
 /*0064*/ char     membername[64];         // Invited Member Name
-/*0128*/ uint8_t  unknown0128[12];        // ***Placeholder
-/*0140*/
+/*0128*/ uint8_t  unknown0128[20];        // ***Placeholder
+/*0148*/
 };
 
 /*

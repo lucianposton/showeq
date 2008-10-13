@@ -1854,6 +1854,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_GroupFollow", SP_Zone, DIR_Server,
 			"groupFollowStruct", SZC_Match,
                         m_messageShell, SLOT(groupFollow(const uint8_t*)));
+     m_packet->connect2("OP_GroupFollow2", SP_Zone, DIR_Server,
+                        "groupFollowStruct", SZC_Match,
+                        m_messageShell, SLOT(groupFollow(const uint8_t*)));
      m_packet->connect2("OP_GroupDisband", SP_Zone, DIR_Server,
 			"groupDisbandStruct", SZC_Match,
                         m_messageShell, SLOT(groupDisband(const uint8_t*)));

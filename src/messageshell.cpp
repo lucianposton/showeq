@@ -680,7 +680,10 @@ void MessageShell::groupFollow(const uint8_t* data)
   const groupFollowStruct* gFollow = (const groupFollowStruct*)data;
   QString tempStr;
 
-  tempStr.sprintf("Follow: %s has joined the group", gFollow->invitee);
+  if(!strcmp(gFollow->invitee, m_player->name()))
+     tempStr = "Follow: You have joined the group";
+  else
+     tempStr.sprintf("Follow: %s has joined the group", gFollow->invitee);
   m_messages->addMessage(MT_Group, tempStr);
 }
 
