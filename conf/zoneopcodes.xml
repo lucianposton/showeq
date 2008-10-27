@@ -2,6 +2,9 @@
 <!DOCTYPE seqopcodes SYSTEM "seqopcodes.dtd">
 <seqopcodes>
 
+    <!--
+        Critical opcodes used directly by ShowEQ
+    -->
     <opcode id="6022" name="OP_PlayerProfile" updated="01/17/08">
         <comment>old CharProfileCode</comment>
         <payload dir="server" typename="charProfileStruct" sizechecktype="match"/>
@@ -11,10 +14,6 @@
         <payload dir="client" typename="ClientZoneEntryStruct" sizechecktype="match"/>
 	<payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <!--<opcode id="1900" name="OP_ZoneSpawns" updated="05/29/08">
-        <comment>old ZoneSpawnsCode</comment>
-        <payload dir="server" typename="spawnStruct" sizechecktype="none"/>
-    </opcode>-->
     <opcode id="6015" name="OP_TimeOfDay" updated="01/17/08">
         <comment>old TimeOfDayCode</comment>
         <payload dir="server" typename="timeOfDayStruct" sizechecktype="match"/>
@@ -23,7 +22,7 @@
         <comment>old NewZoneCode</comment>
         <payload dir="server" typename="newZoneStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="1890" name="OP_SpawnDoor" updated="01/17/08">
+    <opcode id="102F" name="OP_SpawnDoor" updated="10/21/08">
         <comment>old DoorSpawnsCode</comment>
         <payload dir="server" typename="doorStruct" sizechecktype="modulus"/>
     </opcode>
@@ -32,7 +31,7 @@
         <payload dir="server" typename="makeDropStruct" sizechecktype="match"/>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="1932" name="OP_SendZonePoints" updated="01/17/08">
+    <opcode id="5821" name="OP_SendZonePoints" updated="10/21/08">
         <comment>Coords in a zone that will port you to another zone</comment>
         <payload dir="server" typename="zonePointsStruct" sizechecktype="none"/>
     </opcode>
@@ -65,10 +64,11 @@
         <comment>old MobUpdateCode</comment>
         <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
     </opcode>
+    <!-- Deprecated
     <opcode id="5C29" name="OP_NewSpawn" updated="01/17/08">
         <comment>old NewSpawnCode</comment>
         <payload dir="server" typename="spawnStruct" sizechecktype="match"/>
-    </opcode>
+    </opcode>-->
     <opcode id="4292" name="OP_DeleteSpawn" updated="10/07/08">
         <comment>old DeleteSpawnCode</comment>
         <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
@@ -81,7 +81,7 @@
         <comment>old NewCorpseCode</comment>
         <payload dir="server" typename="newCorpseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="72ad" name="OP_RespawnFromHover" updated="01/17/08">
+    <opcode id="268C" name="OP_RespawnFromHover" updated="10/21/08">
       <comment>Server telling client that it is coming back from hover death</comment>
         <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
@@ -93,15 +93,15 @@
         <comment>old SpawnAppearanceCode</comment>
         <payload dir="both" typename="spawnAppearanceStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="82D7" name="OP_Stamina" updated="01/17/08">
+    <opcode id="3E50" name="OP_Stamina" updated="10/21/08">
         <comment>Server updating on hunger/thirst</comment>
         <payload dir="server" typename="staminaStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="25F0" name="OP_HPUpdate" updated="01/17/08">
+    <opcode id="538F" name="OP_HPUpdate" updated="10/21/08">
         <comment>old NpcHpUpdateCode Update HP % of a PC or NPC</comment>
         <payload dir="both" typename="hpNpcUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="099D" name="OP_GuildMemberUpdate" updated="01/17/08">
+    <opcode id="41C0" name="OP_GuildMemberUpdate" updated="10/21/08">
         <comment></comment>
         <payload dir="server" typename="GuildMemberUpdate" sizechecktype="match"/>
     </opcode>
@@ -134,7 +134,7 @@
         <comment>Spawn being illusioned (changing forms)</comment>
         <payload dir="both" typename="spawnIllusionStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="53D4" name="OP_Shroud" updated="01/17/08">
+    <opcode id="6D1F" name="OP_Shroud" updated="10/07/08">
         <comment>Server putting players into shroud form</comment>
         <payload dir="server" typename="spawnShroudSelf" sizechecktype="none"/>
     </opcode>
@@ -203,7 +203,7 @@
         <comment>old MemSpellCode</comment>
         <payload dir="both" typename="memSpellStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="592D" name="OP_InspectAnswer" updated="01/17/08">
+    <opcode id="4938" name="OP_InspectAnswer" updated="10/07/08">
         <comment>old InspectDataCode</comment>
         <payload dir="both" typename="inspectDataStruct" sizechecktype="match"/>
     </opcode>
@@ -235,11 +235,11 @@
         <comment>old RandomCode</comment>
         <payload dir="server" typename="randomStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="4464" name="OP_ConsentResponse" updated="01/17/08">
+    <opcode id="6E47" name="OP_ConsentResponse" updated="10/21/08">
         <comment>Server replying with consent information after /consent</comment>
         <payload dir="server" typename="consentResponseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0DCD" name="OP_DenyResponse" updated="01/17/08">
+    <opcode id="7CE7" name="OP_DenyResponse" updated="10/21/08">
         <comment>Server replying with deny information after /deny</comment>
         <payload dir="server" typename="consentResponseStruct" sizechecktype="match"/>
     </opcode>
@@ -270,8 +270,7 @@
         <comment>old CorpseLocCode:</comment>
         <payload dir="server" typename="corpseLocStruct" sizechecktype="match"/>
     </opcode>
-    <!-- this might be wrong -->
-    <opcode id="07EE" name="OP_Logout" updated="01/17/08">
+    <opcode id="30E2" name="OP_Logout" updated="10/21/08">
         <comment></comment>
         <payload dir="server" typename="none" sizechecktype="match"/>
     </opcode>
@@ -620,6 +619,10 @@
      can find any of these in the current stream, please update them and let
      us know!
 
+    <opcode id="1900" name="OP_ZoneSpawns" updated="05/29/08">
+        <comment>old ZoneSpawnsCode</comment>
+        <payload dir="server" typename="spawnStruct" sizechecktype="none"/>
+    </opcode>
     <opcode id="0020" name="OP_GMServers" updated="05/26/04">
         <comment>GM /servers - ?</comment>
     </opcode>

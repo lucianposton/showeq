@@ -457,34 +457,34 @@
 { "guardian", "The Mechamatic Guardian" }, // 447
 { "steamfontmts", "Steamfont Mountains" }, // 448
 { "cryptofshade", "Crypt of Shade" }, // 449
-{ "Tinmizer's Wunderwerks", "dragonscalea" }, // 450
-{ "Deepscar's Den", "dragonscaleb" }, // 451
-{ "Field of Scale", "oldfieldofbone" }, // 452
-{ "Kaesora Library", "oldkaesoraa" }, // 453
-{ "Hatchery Wing", "oldkaesorab" }, // 454
-{ "Kurn's Tower", "oldkurn" }, // 455
-{ "Bloody Kithicor", "oldkithicor" }, // 456
-{ "Old Commonlands", "oldcommons" }, // 457
-{ "Highpass Hold", "oldhighpass" }, // 458
-{ "The Void", "thevoida" }, // 459
-{ "The Void", "thevoidb" }, // 460
-{ "The Void", "thevoidc" }, // 461
-{ "The Void", "thevoidd" }, // 462
-{ "The Void", "thevoide" }, // 463
-{ "The Void", "thevoidf" }, // 464
-{ "The Void", "thevoidg" }, // 465
-{ "Oceangreen Hills", "oceangreenhills" }, // 466
-{ "Oceangreen Village", "oceangreenvillage" }, // 467
-{ "Blackburrow", "oldblackburrow" }, // 468
-{ "Temple of Bertoxxulous", "bertoxtemple" }, // 469
-{ "Korafax, Home of the Riders", "discord" }, // 470
-{ "Citadel of the Worldslayer", "discordtower" }, // 471
-{ "Old Bloodfields", "oldbloodfield" }, // 472
-{ "The Precipice of War", "precipiceofwar" }, // 473
-{ "City of Dranik", "olddranik" }, // 474
-{ "Toskirakk", "toskirakk" }, // 475
-{ "Korascian Warrens", "korascian" }, // 476
-{ "Rathe Council Chambers", "rathechamber" }, // 477
+{ "dragonscalea", "Tinmizer's Wunderwerks" }, // 450
+{ "dragonscaleb", "Deepscar's Den" }, // 451
+{ "oldfieldofbone", "Field of Scale" }, // 452
+{ "oldkaesoraa", "Kaesora Library" }, // 453
+{ "oldkaesorab", "Hatchery Wing" }, // 454
+{ "oldkurn", "Kurn's Tower" }, // 455
+{ "oldkithicor", "Bloody Kithicor" }, // 456
+{ "oldcommons", "Old Commonlands" }, // 457
+{ "oldhighpass", "Highpass Hold" }, // 458
+{ "thevoida", "The Void" }, // 459
+{ "thevoidb", "The Void" }, // 460
+{ "thevoidc", "The Void" }, // 461
+{ "thevoidd", "The Void" }, // 462
+{ "thevoide", "The Void" }, // 463
+{ "thevoidf", "The Void" }, // 464
+{ "thevoidg", "The Void" }, // 465
+{ "oceangreenhills", "Oceangreen Hills" }, // 466
+{ "oceangreenvillage", "Oceangreen Village" }, // 467
+{ "oldblackburrow", "Blackburrow" }, // 468
+{ "bertoxtemple", "Temple of Bertoxxulous" }, // 469
+{ "discord", "Korafax, Home of the Riders" }, // 470
+{ "discordtower", "Citadel of the Worldslayer" }, // 471
+{ "oldbloodfield", "Old Bloodfields" }, // 472
+{ "precipiceofwar", "The Precipice of War" }, // 473
+{ "olddranik", "City of Dranik" }, // 474
+{ "toskirakk", "Toskirakk" }, // 475
+{ "korascian", "Korascian Warrens" }, // 476
+{ "rathechamber", "Rathe Council Chambers" }, // 477
 { NULL, NULL }, // 478
 { NULL, NULL }, // 479
 { NULL, NULL }, // 480

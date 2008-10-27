@@ -1944,9 +1944,10 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_SpawnDoor", SP_Zone, DIR_Server,
 		      "doorStruct", SZC_Modulus,
 		      m_spawnShell, SLOT(newDoorSpawns(const uint8_t*, size_t, uint8_t)));
-   m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
-		      "spawnStruct", SZC_Match,
-		      m_spawnShell, SLOT(newSpawn(const uint8_t*)));
+// OP_NewSpawn is deprecated in the client
+//    m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
+// 		      "spawnStruct", SZC_Match,
+// 		      m_spawnShell, SLOT(newSpawn(const uint8_t*)));
    m_packet->connect2("OP_ZoneEntry", SP_Zone, DIR_Server,
                       "uint8_t", SZC_None,
 		      m_spawnShell, SLOT(zoneEntry(const uint8_t*, size_t)));
@@ -5877,9 +5878,10 @@ void EQInterface::createSpawnLog(void)
    m_packet->connect2("OP_ZoneSpawns", SP_Zone, DIR_Server,
 		      "spawnStruct", SZC_Modulus,
 		      m_spawnLogger, SLOT(logZoneSpawns(const uint8_t*, size_t)));
-   m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
-		      "spawnStruct", SZC_Match,
-		      m_spawnLogger, SLOT(logNewSpawn(const uint8_t*)));
+// OP_NewSpawn is deprecated in the client
+//    m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
+// 		      "spawnStruct", SZC_Match,
+// 		      m_spawnLogger, SLOT(logNewSpawn(const uint8_t*)));
    
    // Connect SpawnLog slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(delItem(const Item*)),

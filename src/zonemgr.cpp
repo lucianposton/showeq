@@ -245,9 +245,9 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
 	 zoneNew->safe_x, zoneNew->safe_y, zoneNew->safe_z);
 #endif // ZBTEMP
   
-  // seqDebug("zoneNew: m_short(%s) m_long(%s)",
-  //    (const char*)m_shortZoneName,
-  //    (const char*)m_longZoneName);
+//   seqDebug("zoneNew: m_short(%s) m_long(%s)",
+//      (const char*)m_shortZoneName,
+//      (const char*)m_longZoneName);
   
   emit zoneEnd(m_shortZoneName, m_longZoneName);
 
