@@ -50,7 +50,7 @@
     NULL,                 // 0x29
     NULL,                 // 0x2a
     NULL,                 // 0x2b
-    NULL,                 // 0x2c
+    "Axe",                // 0x2c
     NULL,                 // 0x2d
     NULL,                 // 0x2e
     NULL,                 // 0x2f

@@ -175,7 +175,7 @@
     NULL,                 // 0xa6
     NULL,                 // 0xa7
     NULL,                 // 0xa8
-    NULL,                 // 0xa9
+    "Shield",             // 0xa9
     NULL,                 // 0xaa
     NULL,                 // 0xab
     NULL,                 // 0xac
@@ -217,7 +217,7 @@
     "ShortSword",         // 0xd0
     NULL,                 // 0xd1
     NULL,                 // 0xd2
-    NULL,                 // 0xd3
+    "SkullClub",          // 0xd3
     NULL,                 // 0xd4
     NULL,                 // 0xd5
     NULL,                 // 0xd6

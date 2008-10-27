@@ -114,7 +114,7 @@
     "Shan'Tok",             // 0x69
     NULL,                   // 0x6a - Unknown Weapon
     NULL,                   // 0x6b - Unknown Weapon
-    NULL,                   // 0x6c - Unknown Weapon
+    "Sword",                // 0x6c
     NULL,                   // 0x6d - Unknown Weapon
     "LegChopper",           // 0x6e
     NULL,                   // 0x6f - Unknown Weapon

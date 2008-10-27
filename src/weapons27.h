@@ -223,7 +223,7 @@
     NULL,                 // 0xd6
     NULL,                 // 0xd7
     "Luclin Staff",       // 0xd8
-    NULL,                 // 0xd9
+    "Book",               // 0xd9
     NULL,                 // 0xda
     "Horned Staff",       // 0xdb
     NULL,                 // 0xdc
