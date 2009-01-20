@@ -55,6 +55,7 @@ class PacketLog : public SEQLogger
  protected:
   QString m_timeDateFormat;
   EQPacket& m_packet;
+  uint8_t m_dir;
 };
 
 //----------------------------------------------------------------------
@@ -68,6 +69,8 @@ class PacketStreamLog : public PacketLog
 		  QObject* parent=0, const char* name = 0);
   bool raw();
   void setRaw(bool val);
+  uint8_t getDir() { return m_dir; }
+  void setDir(uint8_t direction) { m_dir = direction; }
   
  public slots:
    void rawStreamPacket(const uint8_t* data, size_t len, uint8_t dir, 

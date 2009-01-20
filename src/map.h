@@ -249,6 +249,7 @@ class MapMenu : public QPopupMenu
   void toggle_cacheAlwaysRepaint();
   void toggle_cacheChanges();
   void toggle_zoneSafePoint(int itemId);
+  void toggle_instanceLocationMarker(int itemId);
   void select_mapOptimization(int itemId);
   void select_gridTickColor(int itemId);
   void select_gridLineColor(int itemId);
@@ -307,6 +308,7 @@ class MapMenu : public QPopupMenu
   int m_id_pvp;
   int m_id_racePvP;
   int m_id_zoneSafePoint;
+  int m_id_instanceLocation;
 #ifdef DEBUG
   int m_id_debugInfo;
 #endif
@@ -412,7 +414,8 @@ class Map :public QWidget
   bool deityPvP() const { return m_deityPvP; }
   bool racePvP() const { return m_racePvP; }
   bool showZoneSafePoint() const { return m_showZoneSafePoint; }
-  
+  bool showInstanceLocationMarker() const { return m_showInstanceLocationMarker; }
+
   MapLineStyle mapLineStyle() { return m_param.mapLineStyle(); }
   MapOptimizationMethod mapOptimization() { return m_param.mapOptimizationMethod(); }
   int zoom() const { return m_param.zoom(); }
@@ -530,6 +533,7 @@ class Map :public QWidget
   void setShowGridTicks(bool val);
   void setCacheAlwaysRepaint(bool val);
   void setShowZoneSafePoint(bool val);
+  void setShowInstanceLocationMarker(bool val);
 
   // dump debug info
   void dumpInfo(QTextStream& out);
@@ -649,6 +653,7 @@ private:
    bool m_deityPvP;
    bool m_racePvP;
    bool m_showZoneSafePoint;
+   bool m_showInstanceLocationMarker;
 };
 
 //----------------------------------------------------------------------

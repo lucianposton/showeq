@@ -274,8 +274,15 @@
         <comment></comment>
         <payload dir="server" typename="none" sizechecktype="match"/>
     </opcode>
-    
-    
+    <opcode id="35D3" name="OP_DzSwitchInfo" updated="12/23/08">
+        <comment></comment>
+        <payload dir="server" typename="dzSwitchInfo" sizechecktype="none"/>
+    </opcode>
+    <opcode id="128E" name="OP_DzInfo" updated="12/23/08">
+        <comment></comment>
+        <payload dir="server" typename="dzInfo" sizechecktype="match"/>
+    </opcode>
+
     
     <!--
 	 Not necessary for SEQ to run but here to name packets in logs.

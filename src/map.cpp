@@ -818,6 +818,8 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
     subMenu->insertItem("Race PvP", this, SLOT(toggle_racePvP(int)));
   m_id_zoneSafePoint = 
     subMenu->insertItem("Zone Safe Point", this, SLOT(toggle_zoneSafePoint(int)));
+  m_id_instanceLocation =
+    subMenu->insertItem("Instance Location Marker", this, SLOT(toggle_instanceLocationMarker(int)));
 #ifdef DEBUG
   m_id_debugInfo = subMenu->insertItem("Debug Info", this, SLOT(toggle_debugInfo(int)));
 #endif
@@ -985,6 +987,7 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_deityPvP, m_map->deityPvP());
   setItemChecked(m_id_racePvP, m_map->racePvP());
   setItemChecked(m_id_zoneSafePoint, m_map->showZoneSafePoint());
+  setItemChecked(m_id_instanceLocation, m_map->showInstanceLocationMarker());
 #ifdef DEBUG
   setItemChecked(m_id_debugInfo, m_map->showDebugInfo());
 #endif
@@ -1207,6 +1210,11 @@ void MapMenu::toggle_cacheChanges()
 void MapMenu::toggle_zoneSafePoint(int itemId)
 {
   m_map->setShowZoneSafePoint(!m_map->showZoneSafePoint());
+}
+
+void MapMenu::toggle_instanceLocationMarker(int itemId)
+{
+  m_map->setShowInstanceLocationMarker(!m_map->showInstanceLocationMarker());
 }
 
 void MapMenu::select_mapOptimization(int itemId)
@@ -1503,6 +1511,9 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "ShowZoneSafePoint";
   m_showZoneSafePoint = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
+
+  tmpPrefString = "ShowInstanceLocationMarker";
+  m_showInstanceLocationMarker = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
 
   // Accelerators
   QAccel *accel = new QAccel(this);
@@ -2655,6 +2666,17 @@ void Map::setShowZoneSafePoint(bool val)
     refreshMap ();
 }
 
+void Map::setShowInstanceLocationMarker(bool val)
+{
+  m_showInstanceLocationMarker = val;
+
+  QString tmpPrefString = "ShowInstanceLocationMarker";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showInstanceLocationMarker);
+
+  if(!m_cacheChanges)
+    refreshMap ();
+}
+
 void Map::dumpInfo(QTextStream& out)
 {
   out << "[" << preferenceName() << "]" << endl;
@@ -3070,6 +3092,14 @@ void Map::paintMap (QPainter * p)
 
   if (m_showSpawns)
     paintSpawns(m_param, tmp, drawTime);
+
+  if(m_showInstanceLocationMarker && m_zoneMgr->dzID())
+  {
+     const Point3D<int16_t>& instancePoint = m_zoneMgr->dzPoint();
+     m_mapIcons->paintIcon(m_param, tmp, m_mapIcons->icon(tIconTypeDynamicZoneLocation),
+                           instancePoint, m_zoneMgr->dzLongName(), QPoint(m_param.calcXOffsetI(instancePoint.x()),
+                                 m_param.calcYOffsetI(instancePoint.y())));
+  }
 
   paintSelectedSpawnSpecials(m_param, tmp, drawTime);
   paintSelectedSpawnPointSpecials(m_param, tmp, drawTime);

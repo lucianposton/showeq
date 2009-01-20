@@ -29,6 +29,7 @@ struct zoneChangeStruct;
 struct newZoneStruct;
 struct zonePointsStruct;
 struct zonePointStruct;
+struct dzSwitchInfo;
 
 class ZoneMgr : public QObject
 {
@@ -46,6 +47,10 @@ class ZoneMgr : public QObject
   const Point3D<int16_t>& safePoint() const { return m_safePoint; }
   float zoneExpMultiplier() { return m_zone_exp_multiplier; }
   const zonePointStruct* zonePoint(uint32_t zoneTrigger);
+  uint32_t dzID() { return m_dzID; }
+  const Point3D<int16_t>& dzPoint() const { return m_dzPoint; }
+  QString dzLongName() { return m_dzLongName; }
+  uint32_t dzType() { return m_dzType; }
 
  public slots:
   void saveZoneState(void);
@@ -57,6 +62,8 @@ class ZoneMgr : public QObject
   void zoneChange(const uint8_t* zoneChange, size_t, uint8_t);
   void zoneNew(const uint8_t* zoneNew, size_t, uint8_t);
   void zonePoints(const uint8_t* zp, size_t, uint8_t);
+  void dynamicZonePoints(const uint8_t *data, size_t len, uint8_t);
+  void dynamicZoneInfo(const uint8_t *data, size_t len, uint8_t);
 
  signals:
   void zoneBegin();
@@ -75,6 +82,10 @@ class ZoneMgr : public QObject
   float m_zone_exp_multiplier;
   size_t m_zonePointCount;
   zonePointStruct* m_zonePoints;
+  Point3D<int16_t>  m_dzPoint;
+  uint32_t m_dzID;
+  QString m_dzLongName;
+  uint32_t m_dzType;
 };
 
 #endif // ZONEMGR

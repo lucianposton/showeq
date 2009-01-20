@@ -608,6 +608,42 @@ struct newZoneStruct
 /*0932*/
 };
 
+/*
+** Dynamic Zone Switch Info Struct
+** Length: 32 Octets
+** OpCode: DzSwitchInfo
+*/
+struct dzSwitchInfo
+{
+/*0000*/ uint32_t unknown0000;
+/*0004*/ uint32_t show;          // Show compass line
+/*0008*/ uint16_t zoneID;
+/*0010*/ uint16_t instanceID;
+/*0012*/ uint32_t type;          // if(type != 1 && type > 2 && type <= 5) { color = green; } else { color = pink; }
+/*0016*/ uint32_t unknown0016;
+/*0020*/ float    y;
+/*0024*/ float    x;
+/*0028*/ float    z;
+/*0032*/
+};
+
+/*
+** Dynamic Zone Info Struct
+** Length: 208 Octets
+** OpCode: DzInfo
+*/
+struct dzInfo
+{
+/*0000*/ uint32_t unknown0000;
+/*0004*/ uint32_t unknown0004;
+/*0008*/ uint8_t  newDZ;
+/*0009*/ uint8_t  padding0009[3];
+/*0012*/ uint32_t maxPlayers;
+/*0016*/ char     dzName[128];       // Instance name
+/*0144*/ char     name[64];          // Your player's name
+/*0208*/
+};
+
 /**
  * Player Profile. Common part of charProfileStruct shared between
  * shrouding and zoning profiles.

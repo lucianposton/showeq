@@ -21,7 +21,8 @@
 PacketLog::PacketLog(EQPacket& packet, const QString& fname, 
 		     QObject* parent, const char* name)
   : SEQLogger(fname, parent, name),
-    m_packet(packet)
+    m_packet(packet),
+    m_dir(0)
 {
   m_timeDateFormat = "MMM dd yyyy hh:mm:ss:zzz";
 }
@@ -156,6 +157,9 @@ void PacketLog::logData(const uint8_t* data,
   if (!open())
     return;
 
+  if (showeq_params->filterZoneDataLog && showeq_params->filterZoneDataLog != dir)
+     return;
+  
   // timestamp
   m_out << QDateTime::currentDateTime().toString(m_timeDateFormat) << " ";
 

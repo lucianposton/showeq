@@ -905,7 +905,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_id_opt_KeepSelectedVisible =
                   pOptMenu->insertItem("Keep Selected Visible?"  , this, SLOT(toggle_opt_KeepSelectedVisible()));
    m_id_opt_LogSpawns = pOptMenu->insertItem("Log Spawns", this, SLOT(toggle_opt_LogSpawns()));
-   m_id_opt_BazaarData    = pOptMenu->insertItem("Bazaar Searches", this, SLOT(toggle_opt_BazaarData()), Key_F11);
+   m_id_opt_BazaarData    = pOptMenu->insertItem("Bazaar Searches", this, SLOT(toggle_opt_BazaarData()));
    menuBar()->setItemChecked (m_id_opt_BazaarData, (m_bazaarLog != 0));
    m_id_opt_ResetMana = pOptMenu->insertItem("Reset Max Mana", this, SLOT(resetMaxMana()));
    m_id_opt_PvPTeams  = pOptMenu->insertItem("PvP Teams", this, SLOT(toggle_opt_PvPTeams()));
@@ -988,11 +988,10 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    x = conColorBaseMenu->insertItem("Unknown Spawn...");
    conColorBaseMenu->setItemParameter(x, tUnknownSpawn);
    connect(conColorBaseMenu, SIGNAL(activated(int)),
-	   this, SLOT(select_opt_conColorBase(int)));
+           this, SLOT(select_opt_conColorBase(int)));
    pOptMenu->insertItem("Con &Colors", conColorBaseMenu);
-   
-   m_id_opt_useUpdateRadius = pOptMenu->insertItem("&Use EQ's Update Radius",
-       this, SLOT(toggle_opt_UseUpdateRadius()));
+   m_id_opt_useUpdateRadius = pOptMenu->insertItem("Use EQ's Update Radius",
+           this, SLOT(toggle_opt_UseUpdateRadius()));
    menuBar()->setItemChecked (m_id_opt_useUpdateRadius, showeq_params->useUpdateRadius);
 
    // Network Menu
@@ -1021,6 +1020,14 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 						 SLOT(toggle_view_UnknownData()) , 
 						 Key_F9);
    m_id_log_RawData     = pLogMenu->insertItem("Raw Data", this, SLOT(toggle_log_RawData()), Key_F10);
+
+   m_filterZoneDataMenu = new QPopupMenu;
+   pLogMenu->insertItem("Filter Zone Data", m_filterZoneDataMenu);
+   m_id_log_Filter_ZoneData_Client = m_filterZoneDataMenu->insertItem("Client", this,
+         SLOT(toggle_log_Filter_ZoneData_Client()));
+   m_id_log_Filter_ZoneData_Server = m_filterZoneDataMenu->insertItem("Server", this,
+         SLOT(toggle_log_Filter_ZoneData_Server()));
+
    menuBar()->setItemChecked (m_id_log_AllPackets, (m_globalLog != 0));
    menuBar()->setItemChecked (m_id_log_WorldData, (m_worldLog != 0));
    menuBar()->setItemChecked (m_id_log_ZoneData, (m_zoneLog != 0));
@@ -1648,6 +1655,12 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_SendZonePoints", SP_Zone, DIR_Server,
 			"zonePointsStruct", SZC_None,
 			m_zoneMgr, SLOT(zonePoints(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_DzSwitchInfo", SP_Zone, DIR_Server,
+                        "dzSwitchInfo", SZC_None,
+                        m_zoneMgr, SLOT(dynamicZonePoints(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_DzInfo", SP_Zone, DIR_Server,
+                        "dzInfo", SZC_Match,
+                        m_zoneMgr, SLOT(dynamicZoneInfo(const uint8_t*, size_t, uint8_t)));
    }
 
    if (m_groupMgr != 0)
@@ -3578,6 +3591,38 @@ void EQInterface::toggle_log_ZoneData (void)
   bool state = (m_zoneLog != 0);
   menuBar()->setItemChecked (m_id_log_ZoneData, state);
   pSEQPrefs->setPrefBool("LogZonePackets", "PacketLogging", state);
+}
+
+void EQInterface::toggle_log_Filter_ZoneData_Client (void)
+{
+   bool state = true;
+   if(showeq_params->filterZoneDataLog == DIR_Client)
+   {
+      showeq_params->filterZoneDataLog = 0;
+      state = false;
+   }
+   else
+   {
+      showeq_params->filterZoneDataLog = DIR_Client;
+   }
+   m_filterZoneDataMenu->setItemChecked(m_id_log_Filter_ZoneData_Client, state);
+   m_filterZoneDataMenu->setItemChecked(m_id_log_Filter_ZoneData_Server, false);
+}
+
+void EQInterface::toggle_log_Filter_ZoneData_Server (void)
+{
+   bool state = true;
+   if(showeq_params->filterZoneDataLog == DIR_Server)
+   {
+      showeq_params->filterZoneDataLog = 0;
+      state = false;
+   }
+   else
+   {
+      showeq_params->filterZoneDataLog = DIR_Server;
+   }
+   m_filterZoneDataMenu->setItemChecked(m_id_log_Filter_ZoneData_Server, state);
+   m_filterZoneDataMenu->setItemChecked(m_id_log_Filter_ZoneData_Client, false);
 }
 
 void EQInterface::toggle_opt_BazaarData (void)
@@ -5950,6 +5995,8 @@ void EQInterface::createZoneLog(void)
 
   m_zoneLog->setRaw(pSEQPrefs->getPrefBool("LogRawPackets", "PacketLogging",
 					   false));
+  
+  m_zoneLog->setDir(0);
 
   connect(m_packet, SIGNAL(rawZonePacket(const uint8_t*, size_t, uint8_t, uint16_t)),
 	  m_zoneLog, SLOT(rawStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));

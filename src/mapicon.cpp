@@ -85,6 +85,7 @@ static const QString iconTypePrefBaseNames[] =
   "ZoneSafePoint",
   "SpawnPlayerNoUpdate",
   "SpawnNPCNoUpdate",
+  "InstanceLocation",
 };
 
 static const QString iconTypeNames[] = 
@@ -125,6 +126,7 @@ static const QString iconTypeNames[] =
   "Zone Safe Point",
   "Spawn Player No Update",
   "Spawn NPC No Update",
+  "Instance Location",
 };
 
 //----------------------------------------------------------------------
@@ -693,8 +695,8 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
 		  true, false, false, true);
   m_mapIcons[tIconTypeFilterFlagFiltered]
     .setImage(QBrush(Dense2Pattern), QPen(gray, 0, SolidLine, cap, join), 
-	      tIconStyleCircle, tIconSizeSmall,
-	      true, false, true, false);
+	          tIconStyleCircle, tIconSizeSmall,
+	          true, false, true, false);
   m_mapIcons[tIconTypeFilterFlagTracer]
     .setHighlight(QBrush(NoBrush), QPen(yellow, 1, SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeLarge,
@@ -705,8 +707,8 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
 		  true, false, false, true);
   m_mapIcons[tIconTypeSpawnPoint]
     .setImage(QBrush(SolidPattern), QPen(darkGray, 1, SolidLine, cap, join),
-	      tIconStylePlus, tIconSizeRegular,
-	      true, true, false, false);
+	          tIconStylePlus, tIconSizeRegular,
+	          true, true, false, false);
   m_mapIcons[tIconTypeSpawnPointSelected]
     .setHighlight(QBrush(NoBrush), QPen(blue, 1, SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeTiny,
@@ -715,17 +717,22 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
     .setLine0(true, QPen(blue));
   m_mapIcons[tIconTypeZoneSafePoint]
     .setImage(QBrush(), QPen(green, 1, SolidLine, cap, join),
-	      tIconStyleX, tIconSizeSmall,
-	      true, false, false, false);
+	          tIconStyleX, tIconSizeSmall,
+	          true, false, false, false);
   m_mapIcons[tIconTypeZoneSafePoint].setShowName(true);
   m_mapIcons[tIconTypeSpawnPlayerNoUpdate]
       .setImage(QBrush(gray), QPen(darkGray, 1, SolidLine, cap, join),
-                tIconStyleSquare, tIconSizeRegular,
-                true, false, false, false);
+                  tIconStyleSquare, tIconSizeRegular,
+                  true, false, false, false);
   m_mapIcons[tIconTypeSpawnNPCNoUpdate]
       .setImage(QBrush(gray), QPen(NoPen, 1, SolidLine, cap, join), 
-                tIconStyleCircle, tIconSizeRegular,
-                true, false, false, false);
+                  tIconStyleCircle, tIconSizeRegular,
+                  true, false, false, false);
+  m_mapIcons[tIconTypeDynamicZoneLocation]
+      .setImage(QBrush(magenta), QPen(magenta, 1, SolidLine, cap, join), 
+                tIconStyleX, tIconSizeLarge,
+                  true, false, false, false);
+  m_mapIcons[tIconTypeDynamicZoneLocation].setShowName(true);
 
   // setup icon size maps
   m_mapIconSizes[tIconSizeNone] = &m_markerNSize; // none should never be drawn

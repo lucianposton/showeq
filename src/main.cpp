@@ -235,7 +235,7 @@ int main (int argc, char **argv)
    showeq_params->pvp = pSEQPrefs->getPrefBool("PvPTeamColoring", section, false);
    showeq_params->deitypvp = pSEQPrefs->getPrefBool("DeityPvPTeamColoring", section, false);
    showeq_params->keep_selected_visible = pSEQPrefs->getPrefBool("KeepSelected", section, true);
-   showeq_params->useUpdateRadius = pSEQPrefs->getPrefBool("UseUpdateRadius", section, true);
+   showeq_params->useUpdateRadius = pSEQPrefs->getPrefBool("UseUpdateRadius", section, false);
 
    section = "Misc";
    showeq_params->fast_machine = pSEQPrefs->getPrefBool("FastMachine", section, true);
@@ -262,6 +262,7 @@ int main (int argc, char **argv)
    showeq_params->restoreZoneState = false;
    showeq_params->restoreSpawns = false;
    showeq_params->saveRestoreBaseFilename = dataLocMgr.findWriteFile("tmp", pSEQPrefs->getPrefString("BaseFilename", section, "last")).absFilePath();
+   showeq_params->filterZoneDataLog = 0;
 
    /* Parse the commandline for commandline parameters */
    while ((opt = getopt_long( argc,

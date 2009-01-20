@@ -28,6 +28,8 @@ AddStruct(zoneChangeStruct);
 AddStruct(requestZoneChangeStruct);
 AddStruct(ClientZoneEntryStruct);
 AddStruct(newZoneStruct);
+AddStruct(dzSwitchInfo);
+AddStruct(dzInfo);
 AddStruct(playerProfileStruct);
 AddStruct(charProfileStruct);
 AddStruct(playerAAStruct);

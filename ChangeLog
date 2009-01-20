@@ -1,3 +1,10 @@
+ieatacid (1/20/09)
+-----------------
+- Updated version to 5.13.0
+- Opcode updates from December
+- Added instance location marker.  Right-click map -> Show -> Instance Location Marker
+- Added option to filter client/server packets in the zone log file
+
 purple (11/21/08)
 -----------------
 - Fixed acincludes test for QT to use modern headers so we don't require

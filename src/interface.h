@@ -199,6 +199,8 @@ class EQInterface:public QMainWindow
    void toggle_view_SpawnListCol( int id );
    void toggle_view_DockedWin( int id );
    void toggle_view_DockableWin( int id );
+   void toggle_log_Filter_ZoneData_Client();
+   void toggle_log_Filter_ZoneData_Server();
    
    void selectTheme(int id);
    void toggle_opcode_monitoring (int id);
@@ -391,6 +393,7 @@ class EQInterface:public QMainWindow
    QPopupMenu* m_terminalHideUserFilterMenu;
    QPopupMenu* m_windowMenu;
    QPtrDict<int> m_windowsMenus;
+   QPopupMenu* m_filterZoneDataMenu;
 
    CompassFrame* m_compass;
    MessageWindow* m_messageWindow[maxNumMessageWindows];
@@ -461,6 +464,8 @@ class EQInterface:public QMainWindow
    int  m_packetStartTime;
    int  m_initialcount;
    int  m_id_opt_useUpdateRadius;
+   int  m_id_log_Filter_ZoneData_Client;
+   int  m_id_log_Filter_ZoneData_Server;
 
    MenuIDList IDList_StyleMenu;
 

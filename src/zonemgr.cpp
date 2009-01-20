@@ -56,6 +56,7 @@ ZoneMgr::ZoneMgr(QObject* parent, const char* name)
   m_shortZoneName = "unknown";
   m_longZoneName = "unknown";
   m_zoning = false;
+  m_dzID = 0;
 
   if (showeq_params->restoreZoneState)
     restoreZoneState();
@@ -271,6 +272,41 @@ void ZoneMgr::zonePoints(const uint8_t* data, size_t len, uint8_t)
   // copy the zone point information
   memcpy((void*)m_zonePoints, zp->zonePoints, 
 	 sizeof(zonePointStruct) * m_zonePointCount);
+}
+
+void ZoneMgr::dynamicZonePoints(const uint8_t *data, size_t len, uint8_t)
+{
+   const dzSwitchInfo *dz = (const dzSwitchInfo*)data;
+
+   if(len == sizeof(dzSwitchInfo))
+   {
+      m_dzPoint.setPoint(lrintf(dz->x), lrintf(dz->y), lrintf(dz->z));
+      m_dzID = dz->zoneID;
+      m_dzLongName = zoneLongNameFromID(m_dzID);
+      if(dz->type != 1 && dz->type > 2 && dz->type <= 5)
+         m_dzType = 0; // green
+      else
+         m_dzType = 1; // pink
+   }
+   else if(len == 8)
+   {
+      // we quit the expedition
+      m_dzPoint.setPoint(0, 0, 0);
+      m_dzID = 0;
+      m_dzLongName = "";
+   }
+}
+
+void ZoneMgr::dynamicZoneInfo(const uint8_t* data, size_t len, uint8_t)
+{
+   const dzInfo *dz = (const dzInfo*)data;
+
+   if(!dz->newDZ)
+   {
+      m_dzPoint.setPoint(0, 0, 0);
+      m_dzID = 0;
+      m_dzLongName = "";
+   }
 }
 
 #ifndef QMAKEBUILD

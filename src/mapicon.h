@@ -109,7 +109,8 @@ enum MapIconType
   tIconTypeZoneSafePoint,
   tIconTypeSpawnPlayerNoUpdate,
   tIconTypeSpawnNPCNoUpdate,
-  tIconTypeMax = tIconTypeSpawnNPCNoUpdate,
+  tIconTypeDynamicZoneLocation,
+  tIconTypeMax = tIconTypeDynamicZoneLocation,
 };
 
 //----------------------------------------------------------------------
