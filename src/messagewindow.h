@@ -180,7 +180,7 @@ class MessageWindow : public SEQWindow
   void setCaption();
   virtual void restoreFont();
   void removedFilter(uint32_t mask, uint8_t filter);
-  void addedFilter(uint32_t mask, uint8_t filter, const MessageFilter& filter);
+  void addedFilter(uint32_t mask, uint8_t filterid, const MessageFilter& filter);
 
  protected:
   void addMessage(const MessageEntry& message);

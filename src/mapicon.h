@@ -211,7 +211,7 @@ class MapIcon
  protected:
   // static paint methods
   typedef void (*IconImageFunction)(QPainter&p, const QPoint& point,
-				    int size, int size);
+				    int size, int sizeWH);
   static void paintNone(QPainter&p, const QPoint& point, 
 			int size, int sizeWH);
   static void paintCircle(QPainter&p, const QPoint& point, 

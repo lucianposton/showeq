@@ -1,3 +1,8 @@
+purple (1/25/09)
+---------------
+- Fixed some parameter naming things that cause problems with gcc 4.3 (thanks,
+Tanner)
+
 ieatacid (1/20/09)
 -----------------
 - Updated version to 5.13.0

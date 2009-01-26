@@ -49,7 +49,7 @@ class Messages : public QObject
 
  protected slots:
   void removedFilter(uint32_t mask, uint8_t filter);
-  void addedFilter(uint32_t mask, uint8_t filter, const MessageFilter& filter);
+  void addedFilter(uint32_t mask, uint8_t filterid, const MessageFilter& filter);
    
  signals:
   void newMessage(const MessageEntry& message);
