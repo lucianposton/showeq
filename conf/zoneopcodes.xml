@@ -5,6 +5,54 @@
     <!--
         Critical opcodes used directly by ShowEQ
     -->
+    <opcode id="032A" name="OP_NpcMoveUpdate" updated="02/11/09">
+        <comment>Position updates</comment>
+        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
+    </opcode>
+    <opcode id="1842" name="OP_DeleteSpawn" updated="02/11/09">
+        <comment>old DeleteSpawnCode</comment>
+        <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="1D3F" name="OP_RespawnFromHover" updated="02/11/09">
+      <comment>Server telling client that it is coming back from hover death</comment>
+        <payload dir="both" typename="uint8_t" sizechecktype="none"/>
+    </opcode>
+    <opcode id="189B" name="OP_Shroud" updated="02/11/09">
+        <comment>Server putting players into shroud form</comment>
+        <payload dir="server" typename="spawnShroudSelf" sizechecktype="none"/>
+    </opcode>
+    <opcode id="58E6" name="OP_GroupFollow" updated="02/11/09">
+        <payload dir="server" typename="groupFollowStruct" sizechecktype="match"/>
+        <comment>You join a group</comment>
+    </opcode>
+    <opcode id="C56C" name="OP_GroupFollow2" updated="02/11/09">
+        <payload dir="server" typename="groupFollowStruct" sizechecktype="match"/>
+        <comment>Player joins your group</comment>
+    </opcode>
+    <opcode id="2D08" name="OP_GroupUpdate" updated="02/11/09">
+        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
+        <comment>Variable length packet with group member names</comment>
+    </opcode>
+    <opcode id="4481" name="OP_GroupDisband" updated="02/11/09">
+        <comment>You disband from group</comment>
+        <payload dir="server" typename="groupDisbandStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="7545" name="OP_GroupDisband2" updated="02/11/09">
+        <comment>Other disbands from group</comment>
+        <payload dir="server" typename="groupDisbandStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="6193" name="OP_GroupLeader" updated="02/11/09">
+        <comment>Group leader change</comment>
+        <payload dir="server" typename="groupLeaderChangeStruct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="B72E" name="OP_DzSwitchInfo" updated="02/11/09">
+        <comment></comment>
+        <payload dir="server" typename="dzSwitchInfo" sizechecktype="none"/>
+    </opcode>
+    <opcode id="3657" name="OP_DzInfo" updated="02/11/09">
+        <comment></comment>
+        <payload dir="server" typename="dzInfo" sizechecktype="match"/>
+    </opcode>
     <opcode id="6022" name="OP_PlayerProfile" updated="01/17/08">
         <comment>old CharProfileCode</comment>
         <payload dir="server" typename="charProfileStruct" sizechecktype="match"/>
@@ -56,22 +104,9 @@
         <payload dir="server" typename="playerSpawnPosStruct" sizechecktype="match"/>
         <payload dir="both" typename="playerSelfPosStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="22A7" name="OP_NpcMoveUpdate" updated="10/07/08">
-        <comment>Position updates</comment>
-        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
-    </opcode>
     <opcode id="4656" name="OP_MobUpdate" updated="01/17/08">
         <comment>old MobUpdateCode</comment>
         <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
-    </opcode>
-    <!-- Deprecated
-    <opcode id="5C29" name="OP_NewSpawn" updated="01/17/08">
-        <comment>old NewSpawnCode</comment>
-        <payload dir="server" typename="spawnStruct" sizechecktype="match"/>
-    </opcode>-->
-    <opcode id="4292" name="OP_DeleteSpawn" updated="10/07/08">
-        <comment>old DeleteSpawnCode</comment>
-        <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="3164" name="OP_RemoveSpawn" updated="04/17/08">
         <comment>Remove spawn from zone</comment>
@@ -80,10 +115,6 @@
     <opcode id="1B85" name="OP_Death" updated="01/17/08">
         <comment>old NewCorpseCode</comment>
         <payload dir="server" typename="newCorpseStruct" sizechecktype="match"/>
-    </opcode>
-    <opcode id="268C" name="OP_RespawnFromHover" updated="10/21/08">
-      <comment>Server telling client that it is coming back from hover death</comment>
-        <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
     <opcode id="231F" name="OP_WearChange" updated="01/17/08">
         <comment>old SpawnUpdateCode</comment>
@@ -134,10 +165,6 @@
         <comment>Spawn being illusioned (changing forms)</comment>
         <payload dir="both" typename="spawnIllusionStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6D1F" name="OP_Shroud" updated="10/07/08">
-        <comment>Server putting players into shroud form</comment>
-        <payload dir="server" typename="spawnShroudSelf" sizechecktype="none"/>
-    </opcode>
     <opcode id="051B" name="OP_ZoneChange" updated="01/17/08">
         <comment>old ZoneChangeCode</comment>
         <payload dir="both" typename="zoneChangeStruct" sizechecktype="match"/>
@@ -154,30 +181,6 @@
     <opcode id="5251" name="OP_GroupCancelInvite" updated="01/17/08">
         <payload dir="both" typename="groupDeclineStruct" sizechecktype="match"/>
         <comment>Declining to join a group</comment>
-    </opcode>
-    <opcode id="21BE" name="OP_GroupFollow" updated="10/07/08">
-        <payload dir="server" typename="groupFollowStruct" sizechecktype="match"/>
-        <comment>You join a group</comment>
-    </opcode>
-    <opcode id="3E22" name="OP_GroupFollow2" updated="10/07/08">
-        <payload dir="server" typename="groupFollowStruct" sizechecktype="match"/>
-        <comment>Player joins your group</comment>
-    </opcode>
-    <opcode id="7351" name="OP_GroupUpdate" updated="10/07/08">
-        <payload dir="server" typename="uint8_t" sizechecktype="none"/>
-        <comment>Variable length packet with group member names</comment>
-    </opcode>
-    <opcode id="C56C" name="OP_GroupDisband" updated="10/07/08">
-        <comment>You disband from group</comment>
-        <payload dir="server" typename="groupDisbandStruct" sizechecktype="match"/>
-    </opcode>
-    <opcode id="162D" name="OP_GroupDisband2" updated="10/07/08">
-        <comment>Other disbands from group</comment>
-        <payload dir="server" typename="groupDisbandStruct" sizechecktype="match"/>
-    </opcode>
-    <opcode id="7545" name="OP_GroupLeader" updated="10/07/08">
-        <comment>Group leader change</comment>
-        <payload dir="server" typename="groupLeaderChangeStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="7EA8" name="OP_Buff" updated="01/17/08">
         <comment>old BuffDropCode</comment>
@@ -274,15 +277,11 @@
         <comment></comment>
         <payload dir="server" typename="none" sizechecktype="match"/>
     </opcode>
-    <opcode id="35D3" name="OP_DzSwitchInfo" updated="12/23/08">
-        <comment></comment>
-        <payload dir="server" typename="dzSwitchInfo" sizechecktype="none"/>
-    </opcode>
-    <opcode id="128E" name="OP_DzInfo" updated="12/23/08">
-        <comment></comment>
-        <payload dir="server" typename="dzInfo" sizechecktype="match"/>
-    </opcode>
-
+    <!-- Deprecated
+    <opcode id="5C29" name="OP_NewSpawn" updated="01/17/08">
+        <comment>old NewSpawnCode</comment>
+        <payload dir="server" typename="spawnStruct" sizechecktype="match"/>
+    </opcode>-->
     
     <!--
 	 Not necessary for SEQ to run but here to name packets in logs.
