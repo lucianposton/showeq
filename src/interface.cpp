@@ -1718,7 +1718,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    if (m_guildmgr)
    {
      m_packet->connect2("OP_GuildList", SP_World, DIR_Server, 
-			"worldGuildListStruct", SZC_Match,
+			"worldGuildListStruct", SZC_None,
 			m_guildmgr, 
 			SLOT(worldGuildList(const uint8_t*, size_t)));
 

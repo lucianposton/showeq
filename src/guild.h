@@ -44,7 +44,7 @@ class GuildMgr : public QObject
  private:
   std::vector<QString> m_guildMap;
  
-  void writeGuildList(const worldGuildListStruct*, size_t);
+  void writeGuildList(const uint8_t*, size_t);
 
   QString guildsFileName;
 

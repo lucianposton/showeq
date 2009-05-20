@@ -1989,8 +1989,9 @@ struct startCastStruct
 /*0004*/ uint32_t spellId;                // Spell ID
 /*0008*/ int32_t  inventorySlot;          // ***Placeholder
 /*0012*/ uint32_t targetId;               // The current selected target
-/*0016*/ uint8_t  unknown0018[4];         // ***Placeholder 
-/*0020*/
+/*0016*/ uint8_t  unknown0018[4];         // ***Placeholder
+/*0020*/ uint8_t  unknown0020[16];	  // ***Placeholder (4/7/2009)
+/*0036*/
 };
 
 /*
@@ -2554,23 +2555,25 @@ union bazaarSearchStruct
 
 /*
 ** Guild List (from world server)
-** Length: 96 Octets
+** Length: 68 Octets
 ** used in: worldGuildList
 */
 
 struct guildListStruct
 {
-/*0000*/ char     guildName[64];
+/*0000*/ uint32_t guildId;
+/*0004*/ char     guildName[64];
 };
 
 /*
 ** Guild List (from world server)
-** Length: 96064 Octets
+** Length: Variable (serialized)
 */
 struct worldGuildListStruct
 {
-/*000*/ guildListStruct dummy;
-/*064*/ guildListStruct guilds[MAX_GUILDS];
+/*000*/ uint8_t   unknown000[64];
+/*064*/ uint32_t  numberOfGuilds; // ?
+/*068*/ guildListStruct guilds[MAX_GUILDS]; // MAX_GUILDS varies by server now
 };
 
 struct worldMOTDStruct

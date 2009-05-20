@@ -17,6 +17,7 @@
 #include "guild.h"
 #include "packet.h"
 #include "diagnosticmessages.h"
+#include "netstream.h"
 
 #include <qfile.h>
 #include <qdatastream.h>
@@ -43,20 +44,17 @@ QString GuildMgr::guildIdToName(uint16_t guildID)
 
 void GuildMgr::worldGuildList(const uint8_t* data, size_t len)
 {
-  const worldGuildListStruct* gls = (const worldGuildListStruct*)data;
-
-  writeGuildList(gls, len);
+  writeGuildList(data, len);
   readGuildList();
 }
 
-void GuildMgr::writeGuildList(const worldGuildListStruct* gls, size_t len)
+void GuildMgr::writeGuildList(const uint8_t* data, size_t len)
 {
   QFile guildsfile(guildsFileName);
 
   if (guildsfile.exists()) {
      if (!guildsfile.remove()) {
-       seqWarn("GuildMgr: Could not remove old %s, unable to replace with server data!"
-,
+       seqWarn("GuildMgr: Could not remove old %s, unable to replace with server data!",
                 guildsFileName.latin1());
         return;
      }
@@ -68,7 +66,43 @@ void GuildMgr::writeGuildList(const worldGuildListStruct* gls, size_t len)
 
   QDataStream guildDataStream(&guildsfile);
 
-  guildDataStream.writeRawBytes((char *)gls->guilds, sizeof(gls->guilds));
+  NetStream netStream(data,len);
+  QString guildName;
+  uint32_t size = 0; // to keep track of how much we're reading from the packet
+
+  /*
+   0x48 in the packet starts the serialized list.  See guildListStruct
+   and worldGuildListStruct in everquest.h
+  */
+
+  // skip to the first guild in the list
+  netStream.skipBytes(0x44);
+  size += 0x44;
+
+  while(!netStream.end())
+  {
+     char szGuildName[64] = {0};
+
+     // skip guild ID
+     netStream.skipBytes(4);
+     guildName = netStream.readText();
+     size += 4; // four bytes for the guild ID
+
+     if(guildName.length())
+     {
+        strcpy(szGuildName, guildName.latin1());
+
+//         seqDebug("GuildMgr::writeGuildList - add guild '%s'", szGuildName);
+        guildDataStream.writeRawBytes(szGuildName, sizeof(szGuildName));
+
+        // add guild name length, plus one for the null character
+        size += guildName.length() + 1;
+     }
+
+     // there's an extra zero at the end of the packet
+     if(size + 1 == len)
+        break; // the end
+  }
 
   guildsfile.close();
   seqInfo("GuildMgr: New guildsfile written");
@@ -81,25 +115,15 @@ void GuildMgr::readGuildList()
   m_guildMap.clear();
   if (guildsfile.open(IO_ReadOnly))
   {
-    worldGuildListStruct tmp;
-     if (guildsfile.size() != sizeof(tmp.guilds))
-     {
-	seqWarn("GuildMgr: Guildsfile not loaded, expected size %d got %ld",
-                sizeof(worldGuildListStruct), guildsfile.size()); 
-	return;
-     }
-
-     struct guildListStruct gl;
-     
      while (!guildsfile.atEnd())
      {
-         guildsfile.readBlock(reinterpret_cast<char*>(&gl), sizeof(gl));
-        // Commented out until verified that this needs to actually be 
-		// removed. -- Ratt 
-		// if (strlen(gl.guildName) > 0)
-            m_guildMap.push_back(QString::fromUtf8(gl.guildName));
+        char szGuildName[64] = {0};
+
+        guildsfile.readBlock(szGuildName, sizeof(szGuildName));
+//         seqDebug("GuildMgr::readGuildList - read guild '%s'", szGuildName);
+        m_guildMap.push_back(QString::fromUtf8(szGuildName));
      }
-     
+
     guildsfile.close();
     seqInfo("GuildMgr: Guildsfile loaded");
   }

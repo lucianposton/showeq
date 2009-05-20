@@ -13,7 +13,7 @@
 
     <opcode id="5B0B" name="OP_GuildList" updated="01/17/08">
         <comment>old GuildListCode</comment>
-        <payload dir="server" typename="worldGuildListStruct" sizechecktype="match"/>
+        <payload dir="server" typename="worldGuildListStruct" sizechecktype="none"/>
     </opcode>
     <opcode id="192E" name="OP_MOTD" updated="01/17/08">
         <comment>old MOTDCode Server message of the day</comment>

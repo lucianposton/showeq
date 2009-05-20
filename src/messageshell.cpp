@@ -768,14 +768,20 @@ void MessageShell::player(const charProfileStruct* player)
 //   m_messages->addMessage(MT_Player, message);
 
   int buffnumber;
+  QString spellName;
+
   for (buffnumber=0;buffnumber<MAX_BUFFS;buffnumber++)
   {
     if (player->profile.buffs[buffnumber].spellid && 
             player->profile.buffs[buffnumber].duration)
     {
-      message.sprintf("You have buff %s duration left is %d in ticks.",
-	      (const char*)spell_name(player->profile.buffs[buffnumber].spellid),
-	      player->profile.buffs[buffnumber].duration);
+      const Spell* spell = m_spells->spell(player->profile.buffs[buffnumber].spellid);
+      if(spell)
+         spellName = spell->name();
+      else
+         spellName = spell_name(player->profile.buffs[buffnumber].spellid);
+      message.sprintf("You have buff %s duration left is %d in ticks.", spellName.latin1(),
+                      player->profile.buffs[buffnumber].duration);
       m_messages->addMessage(MT_Player, message);
     }
   }
