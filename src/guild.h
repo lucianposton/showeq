@@ -43,6 +43,7 @@ class GuildMgr : public QObject
 
  private:
   std::vector<QString> m_guildMap;
+  std::map<uint32_t, QString> m_guildList;
  
   void writeGuildList(const uint8_t*, size_t);
 

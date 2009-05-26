@@ -69,6 +69,7 @@ void GuildMgr::writeGuildList(const uint8_t* data, size_t len)
   NetStream netStream(data,len);
   QString guildName;
   uint32_t size = 0; // to keep track of how much we're reading from the packet
+  uint32_t guildId = 0;
 
   /*
    0x48 in the packet starts the serialized list.  See guildListStruct
@@ -81,27 +82,31 @@ void GuildMgr::writeGuildList(const uint8_t* data, size_t len)
 
   while(!netStream.end())
   {
-     char szGuildName[64] = {0};
-
-     // skip guild ID
-     netStream.skipBytes(4);
+     guildId = netStream.readUInt32NC();
      guildName = netStream.readText();
      size += 4; // four bytes for the guild ID
 
      if(guildName.length())
      {
-        strcpy(szGuildName, guildName.latin1());
-
-//         seqDebug("GuildMgr::writeGuildList - add guild '%s'", szGuildName);
-        guildDataStream.writeRawBytes(szGuildName, sizeof(szGuildName));
+        m_guildList[guildId] = guildName;
 
         // add guild name length, plus one for the null character
         size += guildName.length() + 1;
      }
 
-     // there's an extra zero at the end of the packet
      if(size + 1 == len)
         break; // the end
+  }
+
+  std::map<uint32_t, QString>::iterator it;
+
+  for(it = m_guildList.begin(); it != m_guildList.end(); it++)
+  {
+     char szGuildName[64] = {0};
+
+     strcpy(szGuildName, it->second.latin1());
+     //seqDebug("GuildMgr::writeGuildList - add guild '%s' (%d)", szGuildName, it->first);
+     guildDataStream.writeRawBytes(szGuildName, sizeof(szGuildName));
   }
 
   guildsfile.close();
@@ -120,7 +125,7 @@ void GuildMgr::readGuildList()
         char szGuildName[64] = {0};
 
         guildsfile.readBlock(szGuildName, sizeof(szGuildName));
-//         seqDebug("GuildMgr::readGuildList - read guild '%s'", szGuildName);
+        //seqDebug("GuildMgr::readGuildList - read guild '%s'", szGuildName);
         m_guildMap.push_back(QString::fromUtf8(szGuildName));
      }
 
