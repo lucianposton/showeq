@@ -1092,6 +1092,7 @@ struct spawnStruct
          };
 /*0000*/ char title[32];
 /*0000*/ char suffix[32];
+/*0000*/ uint8_t isMercenary;
 };
 
 #if 0
@@ -1220,7 +1221,9 @@ struct spawnStruct
 
 /*0000*/ char title[0];  // only read if(hasTitleOrSuffix & 4)
 /*0000*/ char suffix[0]; // only read if(hasTitleOrSuffix & 8)
-/*0000*/ char unknown20[32];
+/*0000*/ char unknown20[8];
+/*0000*/ uint8_t isMercenary;
+/*0000*/ char unknown20[24];
 };
 #endif
 

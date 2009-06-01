@@ -486,28 +486,28 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    This reads data from the variable-length spawn struct
    */
 
-   NetStream netStream(data,len);
+   NetStream netStream(data, len);
    int32_t retVal;
    uint32_t race;
    uint8_t i;
 
-   QString name=netStream.readText();
+   QString name = netStream.readText();
 
    if(name.length())
-      strcpy(spawn->name,name.latin1());
+      strcpy(spawn->name, name.latin1());
 
-   spawn->spawnId=netStream.readUInt32NC();
+   spawn->spawnId = netStream.readUInt32NC();
 
-   spawn->level=netStream.readUInt8();
+   spawn->level = netStream.readUInt8();
 
    // skip the next 4 bytes
    netStream.skipBytes(4);
 
-   spawn->NPC=netStream.readUInt8();
+   spawn->NPC = netStream.readUInt8();
 
-   spawn->miscData=netStream.readUInt32NC();
+   spawn->miscData = netStream.readUInt32NC();
 
-   spawn->otherData=netStream.readUInt8();
+   spawn->otherData = netStream.readUInt8();
 
    // skip unknown3, unknown4
    netStream.skipBytes(8);
@@ -517,15 +517,15 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       // it's a chest or untargetable
 
       do
-         i=netStream.readUInt8();
+         i = netStream.readUInt8();
       while(i);
 
       do
-         i=netStream.readUInt8();
+         i = netStream.readUInt8();
       while(i);
 
       do
-         i=netStream.readUInt8();
+         i = netStream.readUInt8();
       while(i);
 
       // skip next 3 longs
@@ -544,95 +544,101 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    // skip facestyle, walk/run speeds, unknown5
    netStream.skipBytes(13);
 
-   spawn->race=netStream.readUInt32NC();
+   spawn->race = netStream.readUInt32NC();
 
-   spawn->charProperties=netStream.readUInt8();
+   spawn->charProperties = netStream.readUInt8();
 
    if(spawn->charProperties)
    {
-      spawn->bodytype=netStream.readUInt32NC();
+      spawn->bodytype = netStream.readUInt32NC();
 
-      for(i=1; i < spawn->charProperties; i++)
+      for(i = 1; i < spawn->charProperties; i++)
       {
          // extra character properties
          netStream.skipBytes(4);
       }
    }
 
-   spawn->curHp=netStream.readUInt8();
+   spawn->curHp = netStream.readUInt8();
 
    // skip hair and face stuff
    netStream.skipBytes(18);
 
-   spawn->holding=netStream.readUInt8();
-   spawn->deity=netStream.readUInt32NC();
-   spawn->guildID=netStream.readUInt32NC();
-   spawn->guildstatus=netStream.readUInt32NC();
-   spawn->class_=netStream.readUInt8();
+   spawn->holding = netStream.readUInt8();
+   spawn->deity = netStream.readUInt32NC();
+   spawn->guildID = netStream.readUInt32NC();
+   spawn->guildstatus = netStream.readUInt32NC();
+   spawn->class_ = netStream.readUInt8();
 
    netStream.skipBytes(1);
 
-   spawn->state=netStream.readUInt8();
-   spawn->light=netStream.readUInt8();
+   spawn->state = netStream.readUInt8();
+   spawn->light = netStream.readUInt8();
 
    netStream.skipBytes(5);
 
-   name=netStream.readText();
+   name = netStream.readText();
 
    if(name.length())
    {
-      strcpy(spawn->lastName,name.latin1());
+      strcpy(spawn->lastName, name.latin1());
    }
 
    netStream.skipBytes(5);
 
-   spawn->petOwnerId=netStream.readUInt32NC();
+   spawn->petOwnerId = netStream.readUInt32NC();
 
    netStream.skipBytes(25);
 
-   spawn->posData[0]=netStream.readUInt32NC();
-   spawn->posData[1]=netStream.readUInt32NC();
-   spawn->posData[2]=netStream.readUInt32NC();
-   spawn->posData[3]=netStream.readUInt32NC();
-   spawn->posData[4]=netStream.readUInt32NC();
+   spawn->posData[0] = netStream.readUInt32NC();
+   spawn->posData[1] = netStream.readUInt32NC();
+   spawn->posData[2] = netStream.readUInt32NC();
+   spawn->posData[3] = netStream.readUInt32NC();
+   spawn->posData[4] = netStream.readUInt32NC();
 
    // skip color
    netStream.skipBytes(36);
 
-   race=spawn->race;
+   race = spawn->race;
 
    // this is how the client checks if equipment should be read.
-   if(spawn->NPC==0 || race <= 12 || race==128 || race==130 || race==330 || race==522)
+   if(spawn->NPC == 0 || race <= 12 || race == 128 || race == 130 || race == 330 || race == 522)
    {
-      for(i=0; i<9; i++)
+      for(i = 0; i < 9; i++)
       {
-         spawn->equipment[i].itemId=netStream.readUInt32NC();
-         spawn->equipment[i].equip1=netStream.readUInt32NC();
-         spawn->equipment[i].equip0=netStream.readUInt32NC();
+         spawn->equipment[i].itemId = netStream.readUInt32NC();
+         spawn->equipment[i].equip1 = netStream.readUInt32NC();
+         spawn->equipment[i].equip0 = netStream.readUInt32NC();
       }
    }
 
    if(spawn->otherData & 4)
    {
-      name=netStream.readText();
-      strcpy(spawn->title,name.latin1());
+      name = netStream.readText();
+      strcpy(spawn->title, name.latin1());
    }
 
    if(spawn->otherData & 8)
    {
-      name=netStream.readText();
-      strcpy(spawn->suffix,name.latin1());
+      name = netStream.readText();
+      strcpy(spawn->suffix, name.latin1());
    }
 
-   netStream.skipBytes(33);
+   // unknowns
+   netStream.skipBytes(8);
+
+   spawn->isMercenary = netStream.readUInt8();
+
+   // unknowns
+   netStream.skipBytes(24);
 
    // now we're at the end
 
-   retVal=netStream.pos()-netStream.data();
+   retVal = netStream.pos() - netStream.data();
 
-   if(checkLen && (int32_t)len!=retVal)
+   if(checkLen && (int32_t)len != retVal)
    {
-      seqDebug("SpawnShell::fillSpawnStruct - expected length: %d, read: %d",len,retVal);
+      seqDebug("SpawnShell::fillSpawnStruct - expected length: %d, read: %d", len, retVal);
    }
 
    return retVal;
