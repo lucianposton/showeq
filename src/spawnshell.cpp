@@ -638,7 +638,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
 
    if(checkLen && (int32_t)len != retVal)
    {
-      seqDebug("SpawnShell::fillSpawnStruct - expected length: %d, read: %d", len, retVal);
+      seqDebug("SpawnShell::fillSpawnStruct - expected length: %d, read: %d for spawn '%s'", len, retVal, spawn->name);
    }
 
    return retVal;
