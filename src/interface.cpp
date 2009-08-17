@@ -1858,9 +1858,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Client,
 			"groupInviteStruct", SZC_Match,
 			m_messageShell, SLOT(groupInvite(const uint8_t*)));
-     m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Server,
-                        "groupAltInviteStruct", SZC_Match,
-                        m_messageShell, SLOT(groupInvite(const uint8_t*)));
+//      m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Server,
+//                         "groupAltInviteStruct", SZC_Match,
+//                         m_messageShell, SLOT(groupInvite(const uint8_t*)));
      m_packet->connect2("OP_GroupInvite2", SP_Zone, DIR_Client,
                         "groupInviteStruct", SZC_Match,
                         m_messageShell, SLOT(groupInvite(const uint8_t*)));
@@ -1988,9 +1988,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Death", SP_Zone, DIR_Server,
 		      "newCorpseStruct", SZC_Match,
 		      m_spawnShell, SLOT(killSpawn(const uint8_t*)));
-   m_packet->connect2("OP_RespawnFromHover", SP_Zone, DIR_Server|DIR_Client,
-		      "uint8_t", SZC_None,
-                      m_spawnShell, SLOT(respawnFromHover(const uint8_t*, size_t, uint8_t)));
+//    m_packet->connect2("OP_RespawnFromHover", SP_Zone, DIR_Server|DIR_Client,
+// 		      "uint8_t", SZC_None,
+//                       m_spawnShell, SLOT(respawnFromHover(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_Shroud", SP_Zone, DIR_Server,
                       "spawnShroudSelf", SZC_None,
                       m_spawnShell, SLOT(shroudSpawn(const uint8_t*, size_t, uint8_t)));

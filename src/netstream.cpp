@@ -193,7 +193,7 @@ uint32_t NetStream::readUInt32NC()
 
 void NetStream::skipBytes(size_t byteCount)
 {
-  if ((m_lastPos - m_pos) >= byteCount)
+  if (uint32_t(m_lastPos - m_pos) >= byteCount)
   {
     m_pos += byteCount;
   }

@@ -1555,19 +1555,38 @@ struct emoteTextStruct
 
 /*
 ** Channel Message received or sent
-** Length: 148 Octets + Variable Length + 4 Octets
+** Length: Variable
 ** OpCode: ChannelMessageCode
+
+This is how channelMessageStruct looks on the wire, for reference (8/12/09 eqgame.exe)
+
+char            sender[0];             // Variable length senders name 
+char            target[0];             // Variable length target characters name
+uint32_t        unknown;
+uint32_t        language;              // Language
+uint32_t        chanNum;               // Channel
+uint32_t        unknown;
+uint8_t         unknown;
+uint32_t        skillInLanguage;       // senders skill in language
+char            message[0];            // Variable length message
+uint8_t         unknown;
+uint32_t        unknown;
+uint32_t        unknown;
+char            unknown[0];            // Variable legth unknown text
+uint8_t         unknown;
+uint32_t        unknown;
+
 */
 
+// This will get filled with data from the serialized packet
 struct channelMessageStruct
 {
-/*0000*/ char     target[64];             // the target characters name
-/*0064*/ char     sender[64];             // The senders name 
-/*0128*/ uint32_t language;               // Language
-/*0132*/ uint32_t chanNum;                // Channel
-/*0136*/ int8_t   unknown0136[8];        // ***Placeholder
-/*0144*/ uint32_t skillInLanguage;        // senders skill in language
-/*0148*/ char     message[0];             // Variable length message
+/*0000*/ char     sender[64];
+/*0064*/ char     target[64];
+/*0128*/ uint32_t language;
+/*0132*/ uint32_t chanNum;
+/*0144*/ uint32_t skillInLanguage;
+/*0148*/ char     message[2048];       // Maximum message size according to eqgame.exe
 };
 
 /*
@@ -1707,14 +1726,6 @@ struct groupFullUpdateStruct
 */
 
 struct groupInviteStruct
-{
-/*0000*/ char     invitee[64];           // Invitee's Name
-/*0064*/ char     inviter[64];           // Inviter's Name
-/*0128*/ uint8_t  unknown0128[20];       // ***Placeholder
-/*0148*/
-};
-
-struct groupAltInviteStruct
 {
 /*0000*/ char     invitee[64];           // Invitee's Name
 /*0064*/ char     inviter[64];           // Inviter's Name

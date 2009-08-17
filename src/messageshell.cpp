@@ -19,6 +19,7 @@
 #include "packetcommon.h"
 #include "filtermgr.h"
 #include "util.h"
+#include "netstream.h"
 
 //----------------------------------------------------------------------
 // MessageShell
@@ -36,9 +37,41 @@ MessageShell::MessageShell(Messages* messages, EQStr* eqStrings,
 {
 }
 
-void MessageShell::channelMessage(const uint8_t* data, size_t, uint8_t dir)
+void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
 {
-  const channelMessageStruct* cmsg = (const channelMessageStruct*)data;
+// Added for 8/12/09 patch for serialized message packet ----------------------
+   QString qTmp;
+   NetStream netStream(data, len);
+
+   channelMessageStruct *cmsg = new channelMessageStruct;
+   memset(cmsg, 0, sizeof(channelMessageStruct));
+
+   qTmp = netStream.readText(); // sender
+
+   if(qTmp.length())
+      strcpy(cmsg->sender, qTmp.latin1());
+
+   qTmp = netStream.readText(); // target
+
+   if(qTmp.length())
+      strcpy(cmsg->target, qTmp.latin1());
+
+   netStream.readUInt32(); // unknown
+
+   cmsg->language = netStream.readUInt32NC(); // language
+
+   cmsg->chanNum = netStream.readUInt32NC(); // channel
+
+   netStream.readUInt32(); // unknown
+   netStream.readUInt8(); // unknown
+
+   cmsg->skillInLanguage = netStream.readUInt32NC(); // skill
+
+   qTmp = netStream.readText(); // message
+   if(qTmp.length())
+      strcpy(cmsg->message, qTmp.latin1());
+
+//-----------------------------------------------------------------------------
 
   // Tells and Group by us happen twice *shrug*. Ignore the client->server one.
   if (dir == DIR_Client && 
@@ -93,6 +126,9 @@ void MessageShell::channelMessage(const uint8_t* data, size_t, uint8_t dir)
   }
 
   m_messages->addMessage((MessageType)cmsg->chanNum, tempStr);
+
+  delete cmsg;
+  cmsg = 0;
 }
 
 static MessageType chatColor2MessageType(ChatColor chatColor)
