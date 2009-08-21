@@ -291,12 +291,13 @@
     <!--
 	 Not necessary for SEQ to run but here to name packets in logs.
     -->
-    <opcode id="7598" name="OP_SendAATable" updated="06/12/09">
+    <opcode id="3B85" name="OP_SendAATable" updated="08/12/09">
         <comment></comment>
     </opcode>
-    <opcode id="1ce3" name="OP_SendAAStats" updated="06/12/09">
+    <opcode id="5832" name="OP_SendAAStats" updated="08/12/09">
         <comment></comment>
     </opcode>
+
         <!-- Below are unverified as of 12-1-2007 -->
     <opcode id="4d38" name="OP_AckPacket" updated="03/14/07">
         <comment>Appears to be generic ack at the presentation level</comment>

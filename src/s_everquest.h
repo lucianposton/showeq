@@ -65,7 +65,6 @@ AddStruct(consentResponseStruct);
 AddStruct(groupUpdateStruct);
 AddStruct(groupFullUpdateStruct);
 AddStruct(groupInviteStruct);
-AddStruct(groupAltInviteStruct);
 AddStruct(groupDeclineStruct);
 AddStruct(groupFollowStruct);
 AddStruct(groupDisbandStruct);
