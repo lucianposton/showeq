@@ -680,12 +680,16 @@ void MessageShell::groupUpdate(const uint8_t* data, size_t size, uint8_t dir)
   m_messages->addMessage(MT_Group, tempStr);
 }
 
-void MessageShell::groupInvite(const uint8_t* data)
+void MessageShell::groupInvite(const uint8_t* data, size_t len, uint8_t dir)
 {
   const groupInviteStruct* gmem = (const groupInviteStruct*)data;
   QString tempStr;
-  tempStr.sprintf("Invite: %s invites %s to join the group", 
-		  gmem->inviter, gmem->invitee);
+
+  if(dir == DIR_Client)
+     tempStr.sprintf("Invite: You invite %s to join the group", gmem->invitee);
+  else
+     tempStr.sprintf("Invite: %s invites %s to join the group", gmem->inviter, gmem->invitee);
+
   m_messages->addMessage(MT_Group, tempStr);
 }
 
