@@ -148,7 +148,7 @@
         <comment>Server updating on hunger/thirst</comment>
         <payload dir="server" typename="staminaStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="48B8" name="OP_Consider" updated="09/15/09">
+    <opcode id="3A18" name="OP_Consider" updated="09/15/09">
         <comment>old ConsiderCode</comment>
         <payload dir="both" typename="considerStruct" sizechecktype="match"/>
     </opcode>
