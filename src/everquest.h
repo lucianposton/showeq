@@ -1453,10 +1453,11 @@ struct spawnIllusionStruct
 /*0072*/ uint8_t    gender;             // New gender (0=male, 1=female)
 /*0073*/ uint8_t    texture;            // ???
 /*0074*/ uint8_t    helm;               // ???
-/*0075*/ uint8_t    unknown0077;        // ***Placeholder
-/*0076*/ uint32_t   face;               // New face
-/*0080*/ uint8_t    unknown0080[176];    // ***Placeholder
-/*0256*/
+/*0075*/ uint8_t    unknown0075;        // ***Placeholder
+/*0076*/ uint32_t   unknown0076;        // ***Placeholder
+/*0080*/ uint32_t   face;               // New face
+/*0084*/ uint8_t    unknown0084[176];   // ***Placeholder
+/*0260*/
 };
 
 /**
