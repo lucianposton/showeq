@@ -1,5 +1,5 @@
 /*
- * weapons2c.h
+ * weapons2d.h
  *
  * ShowEQ Distributed under GPL
  * http://seq.sourceforge.net/
