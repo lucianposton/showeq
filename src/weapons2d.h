@@ -6,7 +6,7 @@
  */
  
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-    "Pollen",             // 0x00
+    NULL,                 // 0x00
     NULL,                 // 0x01
     NULL,                 // 0x02
     NULL,                 // 0x03
@@ -28,8 +28,8 @@
     NULL,                 // 0x13
     NULL,                 // 0x14
     NULL,                 // 0x15
-    NULL,                 // 0x16
-    NULL,                 // 0x17
+    "FletchingTable",     // 0x16
+    "JewelryMakingTable", // 0x17
     NULL,                 // 0x18
     NULL,                 // 0x19
     NULL,                 // 0x1a
@@ -59,7 +59,7 @@
     NULL,                 // 0x32
     NULL,                 // 0x33
     NULL,                 // 0x34
-    "Mushroom",           // 0x35
+    NULL,                 // 0x35
     NULL,                 // 0x36
     NULL,                 // 0x37
     NULL,                 // 0x38
@@ -80,7 +80,7 @@
     NULL,                 // 0x47
     NULL,                 // 0x48
     NULL,                 // 0x49
-    "Spit",               // 0x4a
+    NULL,                 // 0x4a
     NULL,                 // 0x4b
     NULL,                 // 0x4c
     NULL,                 // 0x4d
@@ -202,7 +202,7 @@
     NULL,                 // 0xc1
     NULL,                 // 0xc2
     NULL,                 // 0xc3
-    "WhiteRose",          // 0xc4
+    NULL,                 // 0xc4
     NULL,                 // 0xc5
     NULL,                 // 0xc6
     NULL,                 // 0xc7
@@ -243,8 +243,8 @@
     NULL,                 // 0xea
     NULL,                 // 0xeb
     NULL,                 // 0xec
-    "Drum",               // 0xed
-    "Lute",               // 0xee
+    NULL,                 // 0xed
+    NULL,                 // 0xee
     NULL,                 // 0xef
     NULL,                 // 0xf0
     NULL,                 // 0xf1
@@ -263,4 +263,3 @@
     NULL,                 // 0xfe
     NULL,                 // 0xff
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-

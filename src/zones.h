@@ -485,24 +485,24 @@
 { "toskirakk", "Toskirakk" }, // 475
 { "korascian", "Korascian Warrens" }, // 476
 { "rathechamber", "Rathe Council Chambers" }, // 477
-{ NULL, NULL }, // 478
-{ NULL, NULL }, // 479
-{ NULL, NULL }, // 480
-{ NULL, NULL }, // 481
-{ NULL, NULL }, // 482
-{ NULL, NULL }, // 483
-{ NULL, NULL }, // 484
-{ NULL, NULL }, // 485
-{ NULL, NULL }, // 486
-{ NULL, NULL }, // 487
-{ NULL, NULL }, // 488
-{ NULL, NULL }, // 489
-{ NULL, NULL }, // 490
-{ NULL, NULL }, // 491
-{ NULL, NULL }, // 492
-{ NULL, NULL }, // 493
-{ NULL, NULL }, // 494
-{ NULL, NULL }, // 495
+{ "oldfieldofboneb", "Field of Scale" }, // 478
+{ "crafthalls", "Ngreth's Den" }, // 479
+{ "brellsrest", "Brell's Rest" }, // 480
+{ "fungalforest", "Fungal Forest" }, // 481
+{ "underquarry", "The Underquarry" }, // 482
+{ "coolingchamber", "The Cooling Chamber" }, // 483
+{ "shiningcity", "Kernagir, The Shining City" }, // 484
+{ "arthicrex", "Arthicrex" }, // 485
+{ "foundation", "The Foundation" }, // 486
+{ "lichencreep", "Lichen Creep" }, // 487
+{ "pellucid", "Pellucid Grotto" }, // 488
+{ "stonesnake", "Volska's Husk" }, // 489
+{ "brellstemple", "Brell's Temple" }, // 490
+{ "convorteum", "The Convorteum" }, // 491
+{ "brellsarena", "Brell's Arena" }, // 492
+{ "weddingchapel", "Wedding Chapel" }, // 493
+{ "weddingchapeldark", "Wedding Chapel" }, // 494
+{ "dragoncrypt", "Lair of the Fallen" }, // 495
 { NULL, NULL }, // 496
 { NULL, NULL }, // 497
 { NULL, NULL }, // 498
@@ -707,18 +707,18 @@
 { NULL, NULL }, // 697
 { NULL, NULL }, // 698
 { NULL, NULL }, // 699
-{ NULL, NULL }, // 700
-{ NULL, NULL }, // 701
-{ NULL, NULL }, // 702
-{ NULL, NULL }, // 703
-{ NULL, NULL }, // 704
-{ NULL, NULL }, // 705
-{ NULL, NULL }, // 706
-{ NULL, NULL }, // 707
-{ NULL, NULL }, // 708
-{ NULL, NULL }, // 709
-{ NULL, NULL }, // 710
-{ NULL, NULL }, // 711
+{ "feerrott2", "The Feerrott" }, // 700
+{ "thulehouse1", "Thule House 1" }, // 701
+{ "thulehouse2", "Thule House 2" }, // 702
+{ "housegarden", "House Garden" }, // 703
+{ "houselibrary", "House Library" }, // 704
+{ "well", "Well" }, // 705
+{ "fallen", "Fallen" }, // 706
+{ "morellcastle", "Morell's Castle" }, // 707
+{ "morelltower", "Morell's Tower" }, // 708
+{ "alkabormare", "Al'Kabor's Nightmare" }, // 709
+{ "miragulmare", "Miragul's Nightmare" }, // 710
+{ "thuledream", "Thule's Dream" }, // 711
 { NULL, NULL }, // 712
 { NULL, NULL }, // 713
 { NULL, NULL }, // 714

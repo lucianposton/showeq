@@ -1856,14 +1856,14 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 // 			"groupUpdateStruct", SZC_None,
 // 			m_messageShell, SLOT(groupUpdate(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Client|DIR_Server,
-			"groupInviteStruct", SZC_None,
-			m_messageShell, SLOT(groupInvite(const uint8_t*, size_t, uint8_t)));
+			               "groupInviteStruct", SZC_None,
+			               m_messageShell, SLOT(groupInvite(const uint8_t*, size_t, uint8_t)));
 //      m_packet->connect2("OP_GroupInvite", SP_Zone, DIR_Server,
 //                         "groupAltInviteStruct", SZC_Match,
 //                         m_messageShell, SLOT(groupInvite(const uint8_t*)));
      m_packet->connect2("OP_GroupInvite2", SP_Zone, DIR_Client,
                         "groupInviteStruct", SZC_Match,
-                        m_messageShell, SLOT(groupInvite(const uint8_t*)));
+                        m_messageShell, SLOT(groupInvite(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_GroupFollow", SP_Zone, DIR_Server,
 			"groupFollowStruct", SZC_Match,
                         m_messageShell, SLOT(groupFollow(const uint8_t*)));

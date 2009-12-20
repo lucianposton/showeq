@@ -630,7 +630,34 @@
     "Wagon",                      // 621
     "God of Discord",             // 622
     "Wrulon Mount",               // 623
-    "UNKNOWN RACE",               // 624
+    "Ogre NPC - Male",            // 624
     "Sokokar Mount",              // 625
-    "UNKNOWN RACE",               // 626
+    "Giant (Rallosian mats)",     // 626
+    "Sokokar (w saddle)",         // 627
+    "10th Anniversary Banner",    // 628
+    "10th Anniversary Cake",      // 629
+    "Wine Cask",                  // 630
+    "Hydra Mount",                // 631
+    "Hydra NPC",                  // 632
+    "Wedding Flowers",            // 633
+    "Wedding Arbor",              // 634
+    "Wedding Altar",              // 635
+    "Powder Keg",                 // 636
+    "Apexus",                     // 637
+    "Bellikos",                   // 638
+    "Brell's First Creation",     // 639
+    "Brell",                      // 640
+    "Crystalskin Ambuloid",       // 641
+    "Cliknar Queen",              // 642
+    "Cliknar Soldier",            // 643
+    "Cliknar Worker",             // 644
+    "Coldain",                    // 645
+    "Coldain",                    // 646
+    "Crystalskin Sessiloid",      // 647
+    "Genari",                     // 648
+    "Gigyn",                      // 649
+    "Greken - Young Adult",       // 650
+    "Greken - Young",             // 651
+    "Cliknar Mount",              // 652
+    "Telmira",                    // 653
 #endif
