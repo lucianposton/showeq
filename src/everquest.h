@@ -567,7 +567,7 @@ struct ClientZoneEntryStruct
 
 /*
 ** New Zone Code
-** Length: 924 Octets
+** Length: 944 Octets
 ** OpCode: NewZoneCode
 */
 struct newZoneStruct
@@ -608,7 +608,8 @@ struct newZoneStruct
 /*0924*/ uint8_t unknown0924[4];           // *** Placeholder (09/03/2008)
 /*0928*/ uint8_t unknown0928[4];           // *** Placeholder (10/07/2008)
 /*0932*/ uint8_t unknown0932[8];           // *** Placeholder (11/04/2009)
-/*0940*/
+/*0940*/ uint8_t unknown0940[4];           // *** Placeholder (12/15/2009)
+/*0944*/
 };
 
 /*
@@ -727,7 +728,7 @@ struct playerProfileStruct
 
 /*
 ** Player Profile
-** Length: 24856 Octets
+** Length: 25184 Octets
 ** OpCode: CharProfileCode
 */
 struct charProfileStruct
@@ -2502,9 +2503,10 @@ struct buffStruct
 /*0012*/ uint32_t duration;       // duration
 /*0016*/ uint8_t  unknown0012[8];
 /*0024*/ uint32_t playerId;       // Player id who cast the buff
-/*0028*/ uint32_t spellslot;      // spellslot
-/*0032*/ uint32_t changetype;     // 1=buff fading,2=buff duration
-/*0034*/ 
+/*0028*/ uint8_t  unknown0028[4]; 
+/*0032*/ uint32_t spellslot;      // spellslot
+/*0036*/ uint32_t changetype;     // 1=buff fading,2=buff duration
+/*0040*/ 
 };
 
 /*
