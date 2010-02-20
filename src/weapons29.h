@@ -29,7 +29,7 @@
     NULL,                 // 0x14
     NULL,                 // 0x15
     NULL,                 // 0x16
-    NULL,                 // 0x17
+    "Hammer",             // 0x17
     NULL,                 // 0x18
     NULL,                 // 0x19
     NULL,                 // 0x1a
@@ -241,7 +241,7 @@
     NULL,                 // 0xe8
     NULL,                 // 0xe9
     NULL,                 // 0xea
-    NULL,                 // 0xeb
+    "Wand",               // 0xeb
     NULL,                 // 0xec
     NULL,                 // 0xed
     NULL,                 // 0xee

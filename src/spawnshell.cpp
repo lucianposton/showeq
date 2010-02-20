@@ -319,27 +319,73 @@ void SpawnShell::dumpSpawns(spawnItemType type, QTextStream& out)
 }
 
 // same-name slots, connecting to Packet signals
-void SpawnShell::newGroundItem(const uint8_t* data, size_t, uint8_t dir)
+// this packet is variable in length.  everything is dwords except the "idFile" field
+// which can be variable
+void SpawnShell::newGroundItem(const uint8_t* data, size_t len, uint8_t dir)
 {
-  const makeDropStruct *d = (const makeDropStruct *)data;
+   if (m_zoneMgr->isZoning())
+      return;
+
+   if (dir != DIR_Server)
+      return;
+
+   if (!data)
+      return;
+
+   NetStream netStream(data, len);
+   makeDropStruct ds;
+   QString name;
+   union { uint32_t n; float f; } x;
+
+   // read drop id
+   ds.dropId = netStream.readUInt32NC();
+
+   // read name
+   name = netStream.readText();
+   strcpy(ds.idFile, name.latin1());
+
+   // read past zone id
+   netStream.readUInt32NC();
+
+   // read past zone instance
+   netStream.readUInt32NC();
+
+   // read past unknown dword field
+   netStream.readUInt32NC();
+
+   // read heading
+   x.n = netStream.readUInt32NC();
+   ds.heading = x.f;
+
+   // read past unknown dword field
+   netStream.readUInt32NC();
+
+   // read past unknown dword field
+   netStream.readUInt32NC();
+
+   // read past unknown dword field
+   netStream.readUInt32NC();
+
+   // read y pos
+   x.n = netStream.readUInt32NC();
+   ds.y = x.f;
+
+   // read x pos
+   x.n = netStream.readUInt32NC();
+   ds.x = x.f;
+
+   // read z pos
+   x.n = netStream.readUInt32NC();
+   ds.z = x.f;
+
 #ifdef SPAWNSHELL_DIAG
    seqDebug("SpawnShell::newGroundItem(makeDropStruct *)");
 #endif
-  // if zoning, then don't do anything
-  if (m_zoneMgr->isZoning())
-    return;
 
-  if (dir != DIR_Server)
-    return;
-
-  if (!d)
-    return;
-  
-  QString name;
-  Drop* item = (Drop*)m_drops.find(d->dropId);
+  Drop* item = (Drop*)m_drops.find(ds.dropId);
   if (item != NULL)
   {
-    item->update(d, name);
+    item->update(&ds, name);
     if (!showeq_params->fast_machine)
        item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
     else
@@ -350,13 +396,13 @@ void SpawnShell::newGroundItem(const uint8_t* data, size_t, uint8_t dir)
   }
   else
   {
-    item = new Drop(d, name);
+    item = new Drop(&ds, name);
     if (!showeq_params->fast_machine)
        item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
      else
        item->setDistanceToPlayer(m_player->calcDist(*item));
     updateFilterFlags(item);
-    m_drops.insert(d->dropId, item);
+    m_drops.insert(ds.dropId, item);
     emit addItem(item);
   }
 }

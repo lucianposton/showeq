@@ -72,7 +72,7 @@
     NULL,                 // 0x3f
     NULL,                 // 0x40
     NULL,                 // 0x41
-    NULL,                 // 0x42
+    "Dagger",             // 0x42
     NULL,                 // 0x43
     NULL,                 // 0x44
     NULL,                 // 0x45

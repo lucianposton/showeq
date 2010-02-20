@@ -179,7 +179,7 @@
     </opcode>
     <opcode id="5C85" name="OP_GroundSpawn" updated="06/12/09">
         <comment>old MakeDropCode</comment>
-        <payload dir="server" typename="makeDropStruct" sizechecktype="match"/>
+        <payload dir="server" typename="makeDropStruct" sizechecktype="none"/>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
     <opcode id="0555" name="OP_ExpUpdate" updated="06/12/09">

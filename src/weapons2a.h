@@ -44,7 +44,7 @@
     NULL,                 // 0x23
     NULL,                 // 0x24
     NULL,                 // 0x25
-    NULL,                 // 0x26
+    "Shield",             // 0x26
     NULL,                 // 0x27
     NULL,                 // 0x28
     NULL,                 // 0x29
@@ -164,7 +164,7 @@
     NULL,                 // 0x9b
     NULL,                 // 0x9c
     NULL,                 // 0x9d
-    NULL,                 // 0x9e
+    "Sabre",              // 0x9e
     NULL,                 // 0x9f
     NULL,                 // 0xa0
     NULL,                 // 0xa1

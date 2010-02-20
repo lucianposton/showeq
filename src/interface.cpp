@@ -1949,7 +1949,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
    // connect the SpawnShell slots to Packet signals
    m_packet->connect2("OP_GroundSpawn", SP_Zone, DIR_Server,
-		      "makeDropStruct", SZC_Match,
+		      "makeDropStruct", SZC_None,
 		      m_spawnShell, SLOT(newGroundItem(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_ClickObject", SP_Zone, DIR_Server,
 		      "remDropStruct", SZC_Match,

@@ -736,7 +736,7 @@ void displayVersion(void)
 {
    printf ("ShowEQ %s, released under the GPL.\n", VERSION);
    printf ("  SINS 0.5, released under the GPL.\n");
-   printf ("All ShowEQ source code is Copyright (C) 2000-2005 by the respective ShowEQ Developers\n");
+   printf ("All ShowEQ source code is Copyright (C) 2000-2010 by the respective ShowEQ Developers\n");
   
   printf ("ShowEQ comes with NO WARRANTY.\n\n");
   

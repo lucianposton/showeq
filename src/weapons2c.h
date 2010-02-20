@@ -44,7 +44,7 @@
     NULL,                 // 0x23
     NULL,                 // 0x24
     NULL,                 // 0x25
-    NULL,                 // 0x26
+    "Hammer",             // 0x26
     NULL,                 // 0x27
     NULL,                 // 0x28
     NULL,                 // 0x29
@@ -88,7 +88,7 @@
     NULL,                 // 0x4f
     NULL,                 // 0x50
     NULL,                 // 0x51
-    NULL,                 // 0x52
+    "Dagger",             // 0x52
     NULL,                 // 0x53
     NULL,                 // 0x54
     NULL,                 // 0x55

@@ -425,7 +425,7 @@ struct Color_Struct
 
 /*
 ** Buffs
-** Length: 28 Octets
+** Length: 32 Octets
 ** Used in:
 **    charProfileStruct(07012)
 */
@@ -435,13 +435,14 @@ struct spellBuff
 /*0001*/  int8_t      level;          // Level of person who cast buff
 /*0002*/  uint8_t     unknown0002;    //
 /*0003*/  uint8_t     unknown0003;    //
-/*0004*/  int32_t     spellid;        // Spell
-/*0008*/  int32_t     duration;       // Time remaining in ticks
-/*0012*/  int32_t     effect;         // holds the dmg absorb amount on runes
-/*0016*/  uint8_t     unknown0016[4]; // *** this might need to be swapped with playerId
-/*0020*/  uint32_t    playerId;       // Global id of caster (for wear off)
-/*0024*/  uint8_t     unknown0024[4];
-/*0028*/
+/*0004*/  float       unknown0004;
+/*0008*/  int32_t     spellid;        // Spell
+/*0012*/  int32_t     duration;       // Time remaining in ticks
+/*0016*/  int32_t     effect;         // holds the dmg absorb amount on runes
+/*0020*/  uint8_t     unknown0020[4]; // *** this might need to be swapped with playerId
+/*0024*/  uint32_t    playerId;       // Global id of caster (for wear off)
+/*0028*/  uint8_t     unknown0028[4];
+/*0032*/
 };
 
 
@@ -1959,12 +1960,13 @@ struct actionStruct
 /*0000*/ uint16_t target;                 // Target ID
 /*0002*/ uint16_t source;                 // SourceID
 /*0004*/ uint8_t  level;                  // Caster level
-/*0005*/ uint8_t  unknown0005[17];        // ***Placeholder
-/*0022*/ uint8_t  type;                   // Casts, Falls, Bashes, etc...
-/*0023*/ int32_t  damage;                 // Amount of Damage
-/*0027*/ int16_t  spell;                  // SpellID
-/*0029*/ uint8_t  unknown0029[2];         // ***Placeholder
-/*0031*/
+/*0005*/ uint8_t  unknown0005[21];        // ***Placeholder
+/*0026*/ uint8_t  type;                   // Casts, Falls, Bashes, etc...
+/*0027*/ int32_t  damage;                 // Amount of Damage
+/*0031*/ uint8_t  unknown0031[2];
+/*0033*/ int16_t  spell;                  // SpellID
+/*0035*/ uint8_t  unknown0035[2];         // ***Placeholder
+/*0037*/
 };
 
 // Starting with 2/21/2006, OP_Actions seem to come in pairs, duplicating
@@ -1975,14 +1977,15 @@ struct actionAltStruct
 /*0000*/ uint16_t target;                 // Target ID
 /*0002*/ uint16_t source;                 // SourceID
 /*0004*/ uint8_t  level;                  // Caster level
-/*0005*/ uint8_t  unknown0005[17];        // ***Placeholder
-/*0022*/ uint8_t  type;                   // Casts, Falls, Bashes, etc...
-/*0023*/ int32_t  damage;                 // Amount of Damage
-/*0027*/ int16_t  spell;                  // SpellID
-/*0029*/ uint8_t  unknown0029[2];         // ***Placeholder
-/*0031*/ uint32_t unknown0031;
-/*0035*/ uint8_t unknown0035[21];
-/*0056*/
+/*0005*/ uint8_t  unknown0005[21];        // ***Placeholder
+/*0026*/ uint8_t  type;                   // Casts, Falls, Bashes, etc...
+/*0027*/ int32_t  damage;                 // Amount of Damage
+/*0031*/ uint8_t  unknown0031[2];
+/*0033*/ int16_t  spell;                  // SpellID
+/*0035*/ uint8_t  unknown0035[2];         // ***Placeholder
+/*0037*/ uint32_t unknown0037;
+/*0041*/ uint8_t  unknown0041[23];
+/*0064*/
 };
 
 /*
@@ -2499,14 +2502,15 @@ struct buffStruct
 {
 /*0000*/ uint32_t spawnid;        //spawn id
 /*0004*/ uint8_t  unknown0004[4]; 
-/*0008*/ uint32_t spellid;        // spellid
-/*0012*/ uint32_t duration;       // duration
-/*0016*/ uint8_t  unknown0012[8];
-/*0024*/ uint32_t playerId;       // Player id who cast the buff
-/*0028*/ uint8_t  unknown0028[4]; 
-/*0032*/ uint32_t spellslot;      // spellslot
-/*0036*/ uint32_t changetype;     // 1=buff fading,2=buff duration
-/*0040*/ 
+/*0008*/ float    unknown0008;
+/*0012*/ uint32_t spellid;        // spellid
+/*0016*/ uint32_t duration;       // duration
+/*0024*/ uint8_t  unknown0024[8];
+/*0028*/ uint32_t playerId;       // Player id who cast the buff
+/*0032*/ uint8_t  unknown0032[4]; 
+/*0036*/ uint32_t spellslot;      // spellslot
+/*0040*/ uint32_t changetype;     // 1=buff fading,2=buff duration
+/*0044*/ 
 };
 
 /*

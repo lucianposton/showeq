@@ -181,13 +181,13 @@
     NULL,                 // 0xac
     NULL,                 // 0xad
     NULL,                 // 0xae
-    NULL,                 // 0xaf
+    "Shield",             // 0xaf
     NULL,                 // 0xb0
     NULL,                 // 0xb1
     NULL,                 // 0xb2
     NULL,                 // 0xb3
     NULL,                 // 0xb4
-    NULL,                 // 0xb5
+    "Shield",             // 0xb5
     NULL,                 // 0xb6
     NULL,                 // 0xb7
     NULL,                 // 0xb8
