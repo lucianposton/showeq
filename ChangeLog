@@ -1,4 +1,4 @@
-ieatacid (2/26/90)
+ieatacid (2/26/10)
 -----------------
 - Updated version to 5.13.10.1
 - Adjusted makeDropStruct.idFile size to 30 bytes which should fix an associated crash
