@@ -5,7 +5,7 @@ ieatacid (2/26/90)
 - Added sanity check for makeDropStruct.idFile string length in newGroundItem function
 - Removed unused members from makeDropStruct in everquest.h
 
-ieatacid (2/20/09)
+ieatacid (2/20/10)
 -----------------
 - Updated version to 5.13.10
 - Fixed structs
