@@ -1309,29 +1309,20 @@ struct doorStruct
 
 /*
 ** Drop Item On Ground
-** Length: 104 Octets
+** Length: Variable
 ** OpCode: MakeDropCode
 */
+// Note: Unknowns and other members removed that we don't use since we
+//       now only fill this with data we need from the serialized packet
 struct makeDropStruct
 {
-/*0000*/ uint32_t prevObject;             // Previous object in the linked list
-/*0004*/ uint32_t nextObject;             // Next object in the linked list
-/*0008*/ uint32_t unknown0008;            // ***Placeholder
-/*0012*/ uint32_t dropId;                 // DropID
-/*0016*/ uint16_t zoneId;                 // ZoneID
-/*0018*/ uint16_t zoneInstance;           // Zone instance id
-/*0020*/ uint8_t  unknown0020[8];         // ***Placeholder
-/*0028*/ uint8_t  unknown0028[12];        // ***Placeholder (9/23/2006)
-/*0040*/ float    heading;                // Heading
-/*0044*/ float    z;                      // Z Position
-/*0048*/ float    x;                      // X Position
-/*0052*/ float    y;                      // Y Position
-/*0056*/ char     idFile[16];             // ACTOR ID
-/*0072*/ uint32_t unknown0072[5];         // ***Placeholder
-/*0092*/ uint32_t dropType;               // drop type
-/*0096*/ uint32_t unknown0096;            // ***Placeholder
-/*0100*/ uint32_t userSpawnID;            // spawn id of the person using
-/*0104*/
+   uint32_t dropId;                 // DropID
+   float    heading;                // Heading
+   float    z;                      // Z Position
+   float    x;                      // X Position
+   float    y;                      // Y Position
+   char     idFile[30];             // ACTOR ID - The client reads 30 bytes from the packet
+                                    //          - 20100210 eqgame.exe in EQItemList::UnpackNetData
 };
 
 /*

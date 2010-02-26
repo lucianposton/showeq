@@ -336,13 +336,17 @@ void SpawnShell::newGroundItem(const uint8_t* data, size_t len, uint8_t dir)
    makeDropStruct ds;
    QString name;
    union { uint32_t n; float f; } x;
+   memset(&ds, 0, sizeof(makeDropStruct));
 
    // read drop id
    ds.dropId = netStream.readUInt32NC();
 
    // read name
    name = netStream.readText();
-   strcpy(ds.idFile, name.latin1());
+   if(name.length())
+   {
+      strcpy(ds.idFile, name.latin1());
+   }
 
    // read past zone id
    netStream.readUInt32NC();

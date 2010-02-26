@@ -1,3 +1,10 @@
+ieatacid (2/26/90)
+-----------------
+- Updated version to 5.13.10.1
+- Adjusted makeDropStruct.idFile size to 30 bytes which should fix an associated crash
+- Added sanity check for makeDropStruct.idFile string length in newGroundItem function
+- Removed unused members from makeDropStruct in everquest.h
+
 ieatacid (2/20/09)
 -----------------
 - Updated version to 5.13.10
