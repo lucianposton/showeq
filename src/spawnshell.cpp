@@ -346,6 +346,7 @@ void SpawnShell::newGroundItem(const uint8_t* data, size_t len, uint8_t dir)
    if(name.length())
    {
       strcpy(ds.idFile, name.latin1());
+      name.setLength(0);
    }
 
    // read past zone id

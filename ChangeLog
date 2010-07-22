@@ -1,3 +1,9 @@
+ieatacid (7/22/10)
+-----------------
+- Updated version to 5.13.10.2
+- Updated opcodes/structs
+- Changed m_curHP and m_maxHP in spawn.h to int32 types (instead of int16) -- spawns with 32K+ HPs should now display correctly in the status bar
+
 ieatacid (2/26/10)
 -----------------
 - Updated version to 5.13.10.1

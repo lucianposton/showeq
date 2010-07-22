@@ -5,7 +5,15 @@
     <!--
         Critical opcodes used directly by ShowEQ
     -->
-    <opcode id="292F" name="OP_NpcMoveUpdate" updated="10/21/09">
+    <opcode id="01CB" name="OP_DzSwitchInfo" updated="7/22/10">
+        <comment></comment>
+        <payload dir="server" typename="dzSwitchInfo" sizechecktype="none"/>
+    </opcode>
+    <opcode id="1150" name="OP_DzInfo" updated="7/22/10">
+        <comment></comment>
+        <payload dir="server" typename="dzInfo" sizechecktype="match"/>
+    </opcode>
+    <opcode id="0F3E" name="OP_NpcMoveUpdate" updated="3/10/10">
         <comment>Position updates</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
@@ -13,7 +21,7 @@
         <comment></comment>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="63F8" name="OP_DeleteSpawn" updated="10/21/09">
+    <opcode id="7351" name="OP_DeleteSpawn" updated="3/10/10">
         <comment>old DeleteSpawnCode</comment>
         <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
     </opcode>
@@ -65,14 +73,6 @@
     <opcode id="49F6" name="OP_GroupLeader" updated="10/21/09">
         <comment>Group leader change</comment>
         <payload dir="server" typename="groupLeaderChangeStruct" sizechecktype="match"/>
-    </opcode>
-    <opcode id="3BDD" name="OP_DzSwitchInfo" updated="10/21/09">
-        <comment></comment>
-        <payload dir="server" typename="dzSwitchInfo" sizechecktype="none"/>
-    </opcode>
-    <opcode id="4C14" name="OP_DzInfo" updated="10/21/09">
-        <comment></comment>
-        <payload dir="server" typename="dzInfo" sizechecktype="match"/>
     </opcode>
     <opcode id="3B52" name="OP_FormattedMessage" updated="10/21/09">
         <comment>old FormattedMessageCode</comment>

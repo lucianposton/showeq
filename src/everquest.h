@@ -425,9 +425,9 @@ struct Color_Struct
 
 /*
 ** Buffs
-** Length: 32 Octets
+** Length: 76 Octets
 ** Used in:
-**    charProfileStruct(07012)
+**    charProfileStruct
 */
 struct spellBuff
 {
@@ -441,8 +441,8 @@ struct spellBuff
 /*0016*/  int32_t     effect;         // holds the dmg absorb amount on runes
 /*0020*/  uint8_t     unknown0020[4]; // *** this might need to be swapped with playerId
 /*0024*/  uint32_t    playerId;       // Global id of caster (for wear off)
-/*0028*/  uint8_t     unknown0028[4];
-/*0032*/
+/*0028*/  uint8_t     unknown0028[48];
+/*0076*/
 };
 
 
@@ -712,105 +712,105 @@ struct playerProfileStruct
 /*07868*/ uint32_t  hunger;             // Food (ticks till next eat)
 /*07872*/ uint8_t unknown07872[20];
 /*07892*/ spellBuff buffs[MAX_BUFFS];   // Buffs currently on the player
-/*08732*/ uint32_t  disciplines[MAX_DISCIPLINES]; // Known disciplines
-/*09132*/ uint8_t unknown09132[560];
-/*09692*/ uint32_t recastTimers[MAX_RECAST_TYPES]; // Timers (GMT of last use)
-/*09772*/ uint32_t  endurance;          // Current endurance
-/*09776*/ uint32_t  aa_spent;           // Number of spent AA points (including glyphs)
-/*09780*/ uint32_t  aa_assigned;        // Number of points currently assigned to AAs
-/*09784*/ uint32_t unknown09784[4];
-/*09800*/ uint32_t  aa_unspent;         // Unspent AA points
-/*09804*/ uint8_t unknown09804[4];
-/*09808*/ BandolierStruct bandoliers[MAX_BANDOLIERS]; // bandolier contents
-/*16208*/ InlineItem potionBelt[MAX_POTIONS_IN_BELT]; // potion belt
-/*16568*/ uint8_t unknown16568[92];
-/*16660*/
+/*10172*/ uint32_t  disciplines[MAX_DISCIPLINES]; // Known disciplines
+/*10572*/ uint8_t unknown10572[560];
+/*11132*/ uint32_t recastTimers[MAX_RECAST_TYPES]; // Timers (GMT of last use)
+/*11212*/ uint32_t  endurance;          // Current endurance
+/*11216*/ uint32_t  aa_spent;           // Number of spent AA points (including glyphs)
+/*11220*/ uint32_t  aa_assigned;        // Number of points currently assigned to AAs
+/*11224*/ uint32_t unknown11224[4];
+/*11240*/ uint32_t  aa_unspent;         // Unspent AA points
+/*11244*/ uint8_t unknown11244[4];
+/*11248*/ BandolierStruct bandoliers[MAX_BANDOLIERS]; // bandolier contents
+/*17648*/ InlineItem potionBelt[MAX_POTIONS_IN_BELT]; // potion belt
+/*18008*/ uint8_t unknown18008[92];
+/*18100*/
 };
 
 /*
 ** Player Profile
-** Length: 25184 Octets
+** Length: 26640 Octets
 ** OpCode: CharProfileCode
 */
 struct charProfileStruct
 {
 /*00000*/ uint32_t  checksum;           //
 /*00004*/ playerProfileStruct profile;  // Profile
-/*16660*/ char      name[64];           // Name of player
-/*16724*/ char      lastName[32];       // Last name of player
-/*16756*/ uint8_t   unknown16756[8];    //***Placeholder (1/18/2006)
-/*16764*/ int32_t   guildID;            // guildID
-/*16768*/ uint32_t  birthdayTime;       // character birthday
-/*16772*/ uint32_t  lastSaveTime;       // character last save time
-/*16776*/ uint32_t  timePlayedMin;      // time character played
-/*16780*/ uint8_t unknown16780[4];
-/*16784*/ uint8_t   pvp;                // 1=pvp, 0=not pvp
-/*16785*/ uint8_t   anon;               // 2=roleplay, 1=anon, 0=not anon    
-/*16786*/ uint8_t   gm;                 // 0=no, 1=yes (guessing!)
-/*16787*/ int8_t    guildstatus;        // 0=member, 1=officer, 2=guildleader
-/*16788*/ uint8_t unknown16788[8];
-/*16796*/ uint32_t  exp;                // Current Experience
-/*16800*/ uint8_t unknown16800[12];
-/*16812*/ uint8_t   languages[MAX_KNOWN_LANGS]; // List of languages
-/*16837*/ uint8_t unknown16837[7];      // All 0x00 (language buffer?)
-/*16844*/ float     y;                  // Players y position
-/*16848*/ float     x;                  // Players x position
-/*16852*/ float     z;                  // Players z position
-/*16856*/ float     heading;            // Players heading  
-/*16860*/ uint32_t  standState;         // 0x64 = stand
-/*16864*/ uint32_t  platinum_bank;      // Platinum Pieces in Bank
-/*16868*/ uint32_t  gold_bank;          // Gold Pieces in Bank
-/*16872*/ uint32_t  silver_bank;        // Silver Pieces in Bank
-/*16876*/ uint32_t  copper_bank;        // Copper Pieces in Bank
-/*16880*/ uint32_t  platinum_shared;    // Shared platinum pieces
-/*16884*/ uint8_t unknown16884[1036];
-/*17920*/ uint32_t  expansions;         // Bitmask for expansions
-/*17924*/ uint8_t unknown17924[12];
-/*17936*/ uint32_t  autosplit;          // 0 = off, 1 = on
-/*17940*/ uint8_t unknown17940[16];
-/*17956*/ uint16_t  zoneId;             // see zones.h
-/*17958*/ uint16_t  zoneInstance;       // Instance id
-/*17960*/ uint8_t unknown17960[992];
-/*18952*/ uint32_t  leadAAActive;       // 0 = leader AA off, 1 = leader AA on
-/*18956*/ uint8_t unknown18956[4];
-/*18960*/ uint32_t  ldon_guk_points;    // Earned GUK points
-/*18964*/ uint32_t  ldon_mir_points;    // Earned MIR points
-/*18968*/ uint32_t  ldon_mmc_points;    // Earned MMC points
-/*18972*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
-/*18976*/ uint32_t  ldon_tak_points;    // Earned TAK points
-/*18980*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*18984*/ uint8_t unknown18984[136];
-/*19120*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)
-/*19124*/ uint32_t  careerTribute;      // Total favor points for this char
-/*19128*/ uint32_t  unknown18800;       // *** Placeholder
-/*19132*/ uint32_t  currentTribute;     // Current tribute points
-/*19136*/ uint32_t  unknown19136;       // *** Placeholder
-/*19140*/ uint32_t  tributeActive;      // 0 = off, 1=on
-/*19144*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout
-/*19184*/ uint8_t unknown19184[4];
-/*19188*/ float     expGroupLeadAA;     // Current group lead exp points
-/*19192*/ uint32_t unknown19192;
-/*19196*/ float     expRaidLeadAA;      // Current raid lead AA exp points
-/*19200*/ uint32_t unknown19200;
-/*19204*/ uint32_t  groupLeadAAUnspent; // Unspent group lead AA points
-/*19208*/ uint32_t  raidLeadAAUnspent;  // Unspent raid lead AA points
-/*19212*/ uint32_t  leadershipAAs[MAX_LEAD_AA]; // Leader AA ranks
-/*19340*/ uint8_t unknown19340[128];
-/*19468*/ uint32_t  airRemaining;       // Air supply (seconds)
-/*19472*/ uint8_t unknown19144[4608];
-/*24080*/ uint32_t  expAA;              // Exp earned in current AA point
-/*24084*/ uint8_t unknown24084[40];
-/*24124*/ uint32_t  currentRadCrystals; // Current count of radiant crystals
-/*24128*/ uint32_t  careerRadCrystals;  // Total count of radiant crystals ever
-/*24132*/ uint32_t  currentEbonCrystals;// Current count of ebon crystals
-/*24136*/ uint32_t  careerEbonCrystals; // Total count of ebon crystals ever
-/*24140*/ uint8_t   groupAutoconsent;   // 0=off, 1=on
-/*24141*/ uint8_t   raidAutoconsent;    // 0=off, 1=on
-/*24142*/ uint8_t   guildAutoconsent;   // 0=off, 1=on
-/*24143*/ uint8_t   unknown24143[5];    // ***Placeholder (6/29/2005)
-/*24148*/ uint32_t  showhelm;           // 0=no, 1=yes
-/*24152*/ uint8_t   unknown24152[1032]; // ***Placeholder (2/13/2007)
-/*25184*/
+/*18100*/ char      name[64];           // Name of player
+/*18164*/ char      lastName[32];       // Last name of player
+/*18196*/ uint8_t   unknown18196[8];    //***Placeholder (1/18/2006)
+/*18204*/ int32_t   guildID;            // guildID
+/*18208*/ uint32_t  birthdayTime;       // character birthday
+/*18212*/ uint32_t  lastSaveTime;       // character last save time
+/*18216*/ uint32_t  timePlayedMin;      // time character played
+/*18220*/ uint8_t unknown18220[4];
+/*18224*/ uint8_t   pvp;                // 1=pvp, 0=not pvp
+/*18225*/ uint8_t   anon;               // 2=roleplay, 1=anon, 0=not anon    
+/*18226*/ uint8_t   gm;                 // 0=no, 1=yes (guessing!)
+/*18227*/ int8_t    guildstatus;        // 0=member, 1=officer, 2=guildleader
+/*18228*/ uint8_t unknown18228[8];
+/*18236*/ uint32_t  exp;                // Current Experience
+/*18240*/ uint8_t unknown18240[12];
+/*18252*/ uint8_t   languages[MAX_KNOWN_LANGS]; // List of languages
+/*18277*/ uint8_t unknown18277[7];      // All 0x00 (language buffer?)
+/*18284*/ float     y;                  // Players y position
+/*18288*/ float     x;                  // Players x position
+/*18292*/ float     z;                  // Players z position
+/*18296*/ float     heading;            // Players heading  
+/*18300*/ uint32_t  standState;         // 0x64 = stand
+/*18304*/ uint32_t  platinum_bank;      // Platinum Pieces in Bank
+/*18308*/ uint32_t  gold_bank;          // Gold Pieces in Bank
+/*18312*/ uint32_t  silver_bank;        // Silver Pieces in Bank
+/*18316*/ uint32_t  copper_bank;        // Copper Pieces in Bank
+/*18320*/ uint32_t  platinum_shared;    // Shared platinum pieces
+/*18324*/ uint8_t unknown18324[1036];
+/*19360*/ uint32_t  expansions;         // Bitmask for expansions
+/*19364*/ uint8_t unknown19364[12];
+/*19376*/ uint32_t  autosplit;          // 0 = off, 1 = on
+/*19380*/ uint8_t unknown19380[16];
+/*19396*/ uint16_t  zoneId;             // see zones.h
+/*19398*/ uint16_t  zoneInstance;       // Instance id
+/*19400*/ uint8_t unknown19400[992];
+/*20392*/ uint32_t  leadAAActive;       // 0 = leader AA off, 1 = leader AA on
+/*20396*/ uint8_t unknown20396[4];
+/*20400*/ uint32_t  ldon_guk_points;    // Earned GUK points
+/*20404*/ uint32_t  ldon_mir_points;    // Earned MIR points
+/*20408*/ uint32_t  ldon_mmc_points;    // Earned MMC points
+/*20412*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
+/*20416*/ uint32_t  ldon_tak_points;    // Earned TAK points
+/*20420*/ uint32_t  ldon_avail_points;  // Available LDON points
+/*20424*/ uint8_t unknown20424[136];
+/*20560*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)
+/*20564*/ uint32_t  careerTribute;      // Total favor points for this char
+/*20568*/ uint32_t  unknown20566;       // *** Placeholder
+/*20572*/ uint32_t  currentTribute;     // Current tribute points
+/*20576*/ uint32_t  unknown20574;       // *** Placeholder
+/*20580*/ uint32_t  tributeActive;      // 0 = off, 1=on
+/*20584*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout
+/*20624*/ uint8_t unknown20624[4];
+/*20628*/ float     expGroupLeadAA;     // Current group lead exp points
+/*20632*/ uint32_t unknown20632;
+/*20636*/ float     expRaidLeadAA;      // Current raid lead AA exp points
+/*20640*/ uint32_t unknown20640;
+/*20644*/ uint32_t  groupLeadAAUnspent; // Unspent group lead AA points
+/*20648*/ uint32_t  raidLeadAAUnspent;  // Unspent raid lead AA points
+/*20652*/ uint32_t  leadershipAAs[MAX_LEAD_AA]; // Leader AA ranks
+/*20780*/ uint8_t unknown20780[128];
+/*20908*/ uint32_t  airRemaining;       // Air supply (seconds)
+/*20912*/ uint8_t unknown20912[4608];
+/*25520*/ uint32_t  expAA;              // Exp earned in current AA point
+/*25524*/ uint8_t unknown25524[40];
+/*25564*/ uint32_t  currentRadCrystals; // Current count of radiant crystals
+/*25568*/ uint32_t  careerRadCrystals;  // Total count of radiant crystals ever
+/*25572*/ uint32_t  currentEbonCrystals;// Current count of ebon crystals
+/*25576*/ uint32_t  careerEbonCrystals; // Total count of ebon crystals ever
+/*25580*/ uint8_t   groupAutoconsent;   // 0=off, 1=on
+/*25581*/ uint8_t   raidAutoconsent;    // 0=off, 1=on
+/*25582*/ uint8_t   guildAutoconsent;   // 0=off, 1=on
+/*25583*/ uint8_t   unknown25583[5];    // ***Placeholder (6/29/2005)
+/*25588*/ uint32_t  showhelm;           // 0=no, 1=yes
+/*25592*/ uint8_t   unknown25592[1048]; // ***Placeholder (2/13/2007)
+/*26640*/
 };
 
 #if 0
@@ -2208,7 +2208,7 @@ struct hpNpcUpdateStruct
 /*0004*/ int32_t maxHP;
 /*0008*/ uint16_t spawnId;
 /*0010*/ 
-}; 
+};
 
 /*
 ** Inspecting Information
