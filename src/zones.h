@@ -707,30 +707,29 @@
 { NULL, NULL }, // 697
 { NULL, NULL }, // 698
 { NULL, NULL }, // 699
-{ "feerrott2", "The Feerrott" }, // 700
-{ "thulehouse1", "Thule House 1" }, // 701
-{ "thulehouse2", "Thule House 2" }, // 702
-{ "housegarden", "House Garden" }, // 703
-{ "houselibrary", "House Library" }, // 704
-{ "well", "Well" }, // 705
-{ "fallen", "Fallen" }, // 706
+{ "thulehouse1", "House of Thule" }, // 701
+{ "thulehouse2", "House of Thule, Upper Floors" }, // 702
+{ "housegarden", "The Grounds" }, // 703
+{ "houselibrary", "The Library" }, // 704
+{ "well", "The Well" }, // 705
+{ "fallen", "Erudin Burning" }, // 706
 { "morellcastle", "Morell's Castle" }, // 707
-{ "morelltower", "Morell's Tower" }, // 708
+{ "somnium", "Sanctum Somnium" }, // 708
 { "alkabormare", "Al'Kabor's Nightmare" }, // 709
 { "miragulmare", "Miragul's Nightmare" }, // 710
-{ "thuledream", "Thule's Dream" }, // 711
-{ NULL, NULL }, // 712
-{ NULL, NULL }, // 713
-{ NULL, NULL }, // 714
-{ NULL, NULL }, // 715
-{ NULL, NULL }, // 716
-{ NULL, NULL }, // 717
-{ NULL, NULL }, // 718
-{ NULL, NULL }, // 719
-{ NULL, NULL }, // 720
+{ "thuledream", "Fear Itself" }, // 711
+{ "neighborhood", "Sunrise Hills" }, // 712
+{ "phylactery", "Miragul's Phylactery" }, // 713
+{ "phinterior3a1", "House Interior" }, // 714
+{ "phinterior1a1", "House Interior" }, // 715
+{ "phinterior3a2", "House Interior" }, // 716
+{ "phinterior3a3", "House Interior" }, // 717
+{ "phinterior1a2", "House Interior" }, // 718
+{ "phinterior1a3", "House Interior" }, // 719
+{ "phinterior1b1", "Dragon House Interior" }, // 720
 { NULL, NULL }, // 721
 { NULL, NULL }, // 722
-{ NULL, NULL }, // 723
+{ "phinterior1d1", "Dragon House Interior" }, // 723
 { NULL, NULL }, // 724
 { NULL, NULL }, // 725
 { NULL, NULL }, // 726

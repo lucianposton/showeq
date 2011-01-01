@@ -663,13 +663,13 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       }
    }
 
-   if(spawn->otherData & 4)
+   if(spawn->otherData & 8)
    {
       name = netStream.readText();
       strcpy(spawn->title, name.latin1());
    }
 
-   if(spawn->otherData & 8)
+   if(spawn->otherData & 16)
    {
       name = netStream.readText();
       strcpy(spawn->suffix, name.latin1());
@@ -681,7 +681,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->isMercenary = netStream.readUInt8();
 
    // unknowns
-   netStream.skipBytes(28);
+   netStream.skipBytes(54);
 
    // now we're at the end
 

@@ -1,3 +1,12 @@
+Razzle (1/1/11)
+-----------------
+- Updated version to 5.13.10.3
+- Updated opcodes/structs (ieatacid, sammie, uRit1u2CBBA=, Newby, jastur, Fluxcapacitor, plaisance)
+- Increased MAX_GUILDS to 8192
+- Updated races and zones for House of Thule (uRit1u2CBBA=)
+- Updated staticspells.h
+- Updated doorStruct (EQEmu Project)
+
 ieatacid (7/22/10)
 -----------------
 - Updated version to 5.13.10.2

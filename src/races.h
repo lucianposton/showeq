@@ -544,12 +544,12 @@
     "Armor Rack",                 // 535
     "Honey Pot",                  // 536
     "Jum Jum Bucket",             // 537
-    "Plant",                      // 538
-    "Plant",                      // 539
-    "Plant",                      // 540
-    "Toolbox",                    // 541
-    "Wine Cask",                  // 542
-    "Stone Jug",                  // 543
+    "Toolbox",                    // 538
+    "Stone Jug",                  // 539
+    "Small Plant",                // 540
+    "Medium Plant",               // 541
+    "Tall Plant",                 // 542
+    "Wine Cask",                  // 543
     "Elven Boat",                 // 544
     "Gnomish Boat",               // 545
     "Barrel Barge Ship",          // 546
@@ -605,9 +605,9 @@
     "Floating Island",            // 596
     "Cragslither",                // 597
     "Wrulon",                     // 598
-    "UNKNOWN RACE",               // 599
-    "UNKNOWN RACE",               // 600
-    "UNKNOWN RACE",               // 601
+    "Spell Particle 1",           // 599
+    "Invisible Man of Zomm",      // 600
+    "Robocopter of Zomm",         // 601
     "Burynai",                    // 602
     "Frog",                       // 603
     "Dracolich",                  // 604
@@ -660,4 +660,30 @@
     "Greken - Young",             // 651
     "Cliknar Mount",              // 652
     "Telmira",                    // 653
+    "Spider Mount",               // 654
+    "Bear Mount",                 // 655
+    "Rat Mount",                  // 656
+    "Sessiloid Mount",            // 657
+    "Morell Thule",               // 658
+    "Marionette",                 // 659
+    "Book Dervish",               // 660
+    "Topiary Lion",               // 661
+    "Rotdog",                     // 662
+    "Amygdalan",                  // 663
+    "Sandman",                    // 664
+    "Grandfather Clock",          // 665
+    "Gingerbread Man",            // 666
+    "Beefeater",                  // 667
+    "Rabbit",                     // 668
+    "Blind Dreamer",              // 669
+    "Cazic Thule",                // 670
+    "Topiary Lion Mount",         // 671
+    "Rot Dog Mount",              // 672
+    "Goral Mount",                // 673
+    "Selyran Mount",              // 674
+    "Sclera Mount",               // 675
+    "Braxy Mount",                // 676
+    "Kangon Mount",               // 677
+    "Erudite",                    // 678
+    "Wurm Mount",                 // 679
 #endif
