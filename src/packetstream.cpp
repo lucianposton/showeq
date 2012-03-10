@@ -529,6 +529,10 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
   if (packet.hasCRC())
   {
     uint16_t calcedCRC = calculateCRC(packet);
+// BSH
+ if((packet.getSourcePort() == 8066) || (packet.getSourcePort() == 8067) || (packet.getSourcePort() == 8242) || (packet.getSourcePort() == 1900) || (packet.getDestPort() == 8066) || (packet.getDestPort() == 8067) || (packet.getDestPort() == 8242) || (packet.getDestPort() == 1900))
+	return;
+// BSH
 
     if (calcedCRC != packet.crc())
     {

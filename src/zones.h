@@ -707,10 +707,11 @@
 { NULL, NULL }, // 697
 { NULL, NULL }, // 698
 { NULL, NULL }, // 699
+{ "feerrott2", "The Feerrott" }, // 700
 { "thulehouse1", "House of Thule" }, // 701
 { "thulehouse2", "House of Thule, Upper Floors" }, // 702
 { "housegarden", "The Grounds" }, // 703
-{ "houselibrary", "The Library" }, // 704
+{ "thulelibrary", "The Library" }, // 704
 { "well", "The Well" }, // 705
 { "fallen", "Erudin Burning" }, // 706
 { "morellcastle", "Morell's Castle" }, // 707
@@ -730,18 +731,18 @@
 { NULL, NULL }, // 721
 { NULL, NULL }, // 722
 { "phinterior1d1", "Dragon House Interior" }, // 723
-{ NULL, NULL }, // 724
-{ NULL, NULL }, // 725
-{ NULL, NULL }, // 726
-{ NULL, NULL }, // 727
-{ NULL, NULL }, // 728
-{ NULL, NULL }, // 729
-{ NULL, NULL }, // 730
-{ NULL, NULL }, // 731
-{ NULL, NULL }, // 732
-{ NULL, NULL }, // 733
-{ NULL, NULL }, // 734
-{ NULL, NULL }, // 735
+{ "argath", "Argatch, Bastion of Illdaera" }, // 724
+{ "arelis", "Valley of Lunanyn" }, // 725
+{ "sarithcity", "Sarith, City of Tides" }, // 726
+{ "rubak", "Rubak Oseka, Temple of the Sea" }, // 727
+{ "beastdomain", "Beasts' Domain" }, // 728
+{ "resplendent", "The Resplendent Temple" }, // 729
+{ "pillarsalra", "Pillars of Alra" }, // 730
+{ "windsong", "Windsong Sanctuary" }, // 731
+{ "cityofbronze", "Erillion, City of Bronze" }, // 732
+{ "sepulcher", "Sepulcher of Order" }, // 733
+{ "eastsepulcher", "Sepulcher East" }, // 734
+{ "westsepulcher", "Sepulcher West" }, // 735
 { NULL, NULL }, // 736
 { NULL, NULL }, // 737
 { NULL, NULL }, // 738

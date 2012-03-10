@@ -1,3 +1,14 @@
+Razzle (3/9/12)
+- Updated version to 5.13.10.4
+- Merged Fransick's patch
+
+Fransick (11/16/11)
+-----------------
+- Updated opcodes/structs for VOA launch (Newby, Fransick)
+- Increased MAX_KNOWN_LANGS to 26
+- Increased MAX_BUFFS to 42
+- Updated zones.h for VoA Launch
+
 Razzle (1/1/11)
 -----------------
 - Updated version to 5.13.10.3

@@ -579,6 +579,7 @@ void SpawnListWindow2::refresh(void)
 
   // types of items to populate category with
   spawnItemType types[] = { tSpawn, tDrop, tDoors, tPlayer };
+//  spawnItemType types[] = { tSpawn, tDrop, tPlayer };
 
   const Item* item;
   SpawnListItem* litem;
@@ -878,6 +879,7 @@ void SpawnListWindow2::populateSpawns(void)
 
   // types of items to populate category with
   spawnItemType types[] = { tSpawn, tDrop, tDoors, tPlayer };
+//  spawnItemType types[] = { tSpawn, tDrop, tPlayer };
 
   const Item* item;
   SpawnListItem* litem;

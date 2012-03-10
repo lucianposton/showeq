@@ -103,10 +103,10 @@
 //Maximum limits of certain types of data
 #define MAX_KNOWN_SKILLS                100
 #define MAX_SPELL_SLOTS                 12
-#define MAX_KNOWN_LANGS                 25
+#define MAX_KNOWN_LANGS                 26
 #define MAX_SPELLBOOK_SLOTS             400
 #define MAX_GROUP_MEMBERS               6
-#define MAX_BUFFS                       30
+#define MAX_BUFFS                       42
 #define MAX_GUILDS                      8192
 #define MAX_AA                          300
 #define MAX_BANDOLIERS                  20
@@ -391,6 +391,7 @@ struct SessionResponseStruct
 /*0010*/ uint8_t unknown0010;
 /*0011*/ uint32_t maxLength;
 /*0015*/ uint32_t unknown0015;
+/*0019*/
 };
 
 /**
@@ -402,6 +403,7 @@ struct SessionResponseStruct
 struct SessionDisconnectStruct
 {
 /*0000*/ uint8_t unknown[8];
+/*0008*/
 };
 
 /* 
@@ -425,7 +427,7 @@ struct Color_Struct
 
 /*
 ** Buffs
-** Length: 76 Octets
+** Length: 88 Octets
 ** Used in:
 **    charProfileStruct
 */
@@ -441,8 +443,8 @@ struct spellBuff
 /*0016*/  int32_t     effect;         // holds the dmg absorb amount on runes
 /*0020*/  uint8_t     unknown0020[4]; // *** this might need to be swapped with playerId
 /*0024*/  uint32_t    playerId;       // Global id of caster (for wear off)
-/*0028*/  uint8_t     unknown0028[48];
-/*0076*/
+/*0028*/  uint8_t     unknown0028[60];
+/*0088*/
 };
 
 
@@ -551,6 +553,7 @@ struct requestZoneChangeStruct
 /*0012*/ float z;               // Zone in z coord in next zone
 /*0016*/ float heading;               // Zone in heading in next zone
 /*0020*/ uint32_t unknown0020;  // *** Placeholder
+/*0024*/
 };
 
 /*
@@ -563,13 +566,14 @@ struct ClientZoneEntryStruct
 /*0000*/ uint32_t unknown0000;            // ***Placeholder
 /*0004*/ char     name[32];               // Player firstname
 /*0036*/ uint8_t  unknown0036[28];        // ***Placeholder
-/*0064*/ uint32_t unknown0064;            // unknown
+/*0064*/ uint32_t unknown0064[3];            // unknown
+/*0068*/
 };
 
 
 /*
 ** New Zone Code
-** Length: 944 Octets
+** Length: 948 Octets
 ** OpCode: NewZoneCode
 */
 struct newZoneStruct
@@ -611,7 +615,8 @@ struct newZoneStruct
 /*0928*/ uint8_t unknown0928[4];           // *** Placeholder (10/07/2008)
 /*0932*/ uint8_t unknown0932[8];           // *** Placeholder (11/04/2009)
 /*0940*/ uint8_t unknown0940[4];           // *** Placeholder (12/15/2009)
-/*0944*/
+/*0944*/ uint8_t unknown0944[4];           // *** Placeholder (11/15/2011)
+/*0948*/
 };
 
 /*
@@ -713,105 +718,106 @@ struct playerProfileStruct
 /*07868*/ uint32_t  hunger;             // Food (ticks till next eat)
 /*07872*/ uint8_t unknown07872[20];
 /*07892*/ spellBuff buffs[MAX_BUFFS];   // Buffs currently on the player
-/*10172*/ uint32_t  disciplines[MAX_DISCIPLINES]; // Known disciplines
-/*10572*/ uint8_t unknown10572[560];
-/*11132*/ uint32_t recastTimers[MAX_RECAST_TYPES]; // Timers (GMT of last use)
-/*11212*/ uint32_t  endurance;          // Current endurance
-/*11216*/ uint32_t  aa_spent;           // Number of spent AA points (including glyphs)
-/*11220*/ uint32_t  aa_assigned;        // Number of points currently assigned to AAs
-/*11224*/ uint32_t unknown11224[4];
-/*11240*/ uint32_t  aa_unspent;         // Unspent AA points
-/*11244*/ uint8_t unknown11244[4];
-/*11248*/ BandolierStruct bandoliers[MAX_BANDOLIERS]; // bandolier contents
-/*17648*/ InlineItem potionBelt[MAX_POTIONS_IN_BELT]; // potion belt
-/*18008*/ uint8_t unknown18008[92];
-/*18100*/
+/*11588*/ uint32_t  disciplines[MAX_DISCIPLINES]; // Known disciplines
+/*11988*/ uint8_t unknown10932[400];
+/*12188*/ uint32_t recastTimers[MAX_RECAST_TYPES]; // Timers (GMT of last use)
+/*12468*/ uint8_t unknown11412[480];
+/*12948*/ uint32_t  endurance;          // Current endurance
+/*12952*/ uint32_t  aa_spent;           // Number of spent AA points (including glyphs)
+/*12956*/ uint32_t  aa_assigned;        // Number of points currently assigned to AAs
+/*12960*/ uint32_t unknown11904[4];
+/*12976*/ uint32_t  aa_unspent;         // Unspent AA points
+/*12980*/ uint8_t unknown11924[4];
+/*12984*/ BandolierStruct bandoliers[MAX_BANDOLIERS]; // bandolier contents
+/*19384*/ InlineItem potionBelt[MAX_POTIONS_IN_BELT]; // potion belt
+/*19744*/ uint8_t unknown18008[92];
+/*19836*/
 };
 
 /*
 ** Player Profile
-** Length: 27816 Octets
+** Length: 29560 Octets
 ** OpCode: CharProfileCode
 */
 struct charProfileStruct
 {
 /*00000*/ uint32_t  checksum;           //
 /*00004*/ playerProfileStruct profile;  // Profile
-/*18100*/ char      name[64];           // Name of player
-/*18164*/ char      lastName[32];       // Last name of player
-/*18196*/ uint8_t   unknown18196[8];    //***Placeholder (1/18/2006)
-/*18204*/ int32_t   guildID;            // guildID
-/*18208*/ uint32_t  birthdayTime;       // character birthday
-/*18212*/ uint32_t  lastSaveTime;       // character last save time
-/*18216*/ uint32_t  timePlayedMin;      // time character played
-/*18220*/ uint8_t unknown18220[4];
-/*18224*/ uint8_t   pvp;                // 1=pvp, 0=not pvp
-/*18225*/ uint8_t   anon;               // 2=roleplay, 1=anon, 0=not anon    
-/*18226*/ uint8_t   gm;                 // 0=no, 1=yes (guessing!)
-/*18227*/ int8_t    guildstatus;        // 0=member, 1=officer, 2=guildleader
-/*18228*/ uint8_t unknown18228[8];
-/*18236*/ uint32_t  exp;                // Current Experience
-/*18240*/ uint8_t unknown18240[12];
-/*18252*/ uint8_t   languages[MAX_KNOWN_LANGS]; // List of languages
-/*18277*/ uint8_t unknown18277[7];      // All 0x00 (language buffer?)
-/*18284*/ float     y;                  // Players y position
-/*18288*/ float     x;                  // Players x position
-/*18292*/ float     z;                  // Players z position
-/*18296*/ float     heading;            // Players heading  
-/*18300*/ uint32_t  standState;         // 0x64 = stand
-/*18304*/ uint32_t  platinum_bank;      // Platinum Pieces in Bank
-/*18308*/ uint32_t  gold_bank;          // Gold Pieces in Bank
-/*18312*/ uint32_t  silver_bank;        // Silver Pieces in Bank
-/*18316*/ uint32_t  copper_bank;        // Copper Pieces in Bank
-/*18320*/ uint32_t  platinum_shared;    // Shared platinum pieces
-/*18324*/ uint8_t unknown18324[2124];   // Added 1088 for HoT
-/*20488*/ uint32_t  expansions;         // Bitmask for expansions
-/*20452*/ uint8_t unknown20452[12];
-/*20464*/ uint32_t  autosplit;          // 0 = off, 1 = on
-/*20468*/ uint8_t unknown20468[16];
-/*20484*/ uint16_t  zoneId;             // see zones.h
-/*20486*/ uint16_t  zoneInstance;       // Instance id
-/*20486*/ uint8_t unknown20486[992];
-/*21480*/ uint32_t  leadAAActive;       // 0 = leader AA off, 1 = leader AA on
-/*21484*/ uint8_t unknown21484[4];
-/*21488*/ uint32_t  ldon_guk_points;    // Earned GUK points
-/*21492*/ uint32_t  ldon_mir_points;    // Earned MIR points
-/*21496*/ uint32_t  ldon_mmc_points;    // Earned MMC points
-/*21500*/ uint32_t  ldon_ruj_points;    // Earned RUJ points
-/*21504*/ uint32_t  ldon_tak_points;    // Earned TAK points
-/*21508*/ uint32_t  ldon_avail_points;  // Available LDON points
-/*21512*/ uint8_t unknown21512[136];
-/*21648*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)
-/*21652*/ uint32_t  careerTribute;      // Total favor points for this char
-/*21656*/ uint32_t  unknown21656;       // *** Placeholder
-/*21660*/ uint32_t  currentTribute;     // Current tribute points
-/*21664*/ uint32_t  unknown21664;       // *** Placeholder
-/*21668*/ uint32_t  tributeActive;      // 0 = off, 1=on
-/*21672*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout
-/*21712*/ uint8_t unknown21712[92];    // Added 208 bytes for HoT BETA
-/*21804*/ float     expGroupLeadAA;     // Current group lead exp points
-/*21808*/ uint32_t unknown21808;
-/*21812*/ float     expRaidLeadAA;      // Current raid lead AA exp points
-/*21816*/ uint32_t unknown21816;
-/*21820*/ uint32_t  groupLeadAAUnspent; // Unspent group lead AA points
-/*21824*/ uint32_t  raidLeadAAUnspent;  // Unspent raid lead AA points
-/*21828*/ uint32_t  leadershipAAs[MAX_LEAD_AA]; // Leader AA ranks
-/*21956*/ uint8_t unknown21956[128];
-/*22084*/ uint32_t  airRemaining;       // Air supply (seconds)
-/*22088*/ uint8_t unknown22088[4608];
-/*26696*/ uint32_t  expAA;              // Exp earned in current AA point
-/*26700*/ uint8_t unknown26700[40];
-/*26740*/ uint32_t  currentRadCrystals; // Current count of radiant crystals
-/*26744*/ uint32_t  careerRadCrystals;  // Total count of radiant crystals ever
-/*26748*/ uint32_t  currentEbonCrystals;// Current count of ebon crystals
-/*26752*/ uint32_t  careerEbonCrystals; // Total count of ebon crystals ever
-/*26756*/ uint8_t   groupAutoconsent;   // 0=off, 1=on
-/*26757*/ uint8_t   raidAutoconsent;    // 0=off, 1=on
-/*26758*/ uint8_t   guildAutoconsent;   // 0=off, 1=on
-/*26759*/ uint8_t   unknown26759[5];    // ***Placeholder (6/29/2005)
-/*26764*/ uint32_t  showhelm;           // 0=no, 1=yes
-/*26768*/ uint8_t   unknown26768[1048]; // ***Placeholder (2/13/2007)
-/*27816*/
+/*19836*/ char      name[64];           // Name of player
+/*19900*/ char      lastName[32];       // Last name of player
+/*19932*/ uint8_t   unknown18196[8];    //***Placeholder (1/18/2006)
+/*19940*/ int32_t   guildID;            // guildID
+/*19944*/ uint32_t  birthdayTime;       // character birthday
+/*19948*/ uint32_t  lastSaveTime;       // character last save time
+/*19952*/ uint32_t  timePlayedMin;      // time character played
+/*19956*/ uint8_t unknown18220[4];
+/*19960*/ uint8_t   pvp;                // 1=pvp, 0=not pvp
+/*19961*/ uint8_t   anon;               // 2=roleplay, 1=anon, 0=not anon
+/*19962*/ uint8_t   gm;                 // 0=no, 1=yes (guessing!)
+/*19963*/ int8_t    guildstatus;        // 0=member, 1=officer, 2=guildleader
+/*19964*/ uint8_t unknown18228[16];
+/*19980*/ uint32_t  exp;                // Current Experience
+/*19984*/ uint8_t unknown18240[12];
+/*19996*/ uint8_t   languages[MAX_KNOWN_LANGS]; // List of languages	ccc
+/*20022*/ uint8_t unknown18277[6];      // All 0x00 (language buffer?)
+/*20028*/ float     y;                  // Players y position
+/*20032*/ float     x;                  // Players x position
+/*20036*/ float     z;                  // Players z position
+/*20040*/ float     heading;            // Players heading
+/*20044*/ uint32_t  standState;         // 0x64 = stand
+/*20048*/ uint32_t  platinum_bank;      // Platinum Pieces in Bank
+/*20052*/ uint32_t  gold_bank;          // Gold Pieces in Bank
+/*20056*/ uint32_t  silver_bank;        // Silver Pieces in Bank
+/*20060*/ uint32_t  copper_bank;        // Copper Pieces in Bank
+/*20064*/ uint32_t  platinum_shared;    // Shared platinum pieces	ccc
+/*20068*/ uint8_t unknown18324[2124];   // Added 1088 for HoT
+/*22192*/ uint32_t  expansions;         // Bitmask for expansions	ccc
+/*22196*/ uint8_t unknown20452[12];
+/*22208*/ uint32_t  autosplit;          // 0 = off, 1 = on		ccc
+/*22212*/ uint8_t unknown20468[16];
+/*22228*/ uint16_t  zoneId;             // see zones.h			ccc
+/*22230*/ uint16_t  zoneInstance;       // Instance id	ccc
+/*22232*/ uint8_t unknown20486[992];
+/*23224*/ uint32_t  leadAAActive;       // 0 = leader AA off, 1 = leader AA on	ccc
+/*23228*/ uint8_t unknown21484[4];
+/*23232*/ uint32_t  ldon_guk_points;    // Earned GUK points		ccc
+/*23236*/ uint32_t  ldon_mir_points;    // Earned MIR points		ccc
+/*23240*/ uint32_t  ldon_mmc_points;    // Earned MMC points		ccc
+/*23244*/ uint32_t  ldon_ruj_points;    // Earned RUJ points		ccc
+/*23248*/ uint32_t  ldon_tak_points;    // Earned TAK points		ccc
+/*23252*/ uint32_t  ldon_avail_points;  // Available LDON points	ccc
+/*23256*/ uint8_t unknown21512[144];
+/*23400*/ uint32_t  tributeTime;        // Time remaining on tribute (millisecs)	ccc
+/*23404*/ uint32_t  careerTribute;      // Total favor points for this char		ccc
+/*23408*/ uint32_t  unknown21656;       // *** Placeholder				ccc
+/*23412*/ uint32_t  currentTribute;     // Current tribute points			ccc
+/*23416*/ uint32_t  unknown21664;       // *** Placeholder
+/*23420*/ uint32_t  tributeActive;      // 0 = off, 1=on
+/*23424*/ TributeStruct tributes[MAX_TRIBUTES]; // Current tribute loadout		ccc
+/*23464*/ uint8_t unknown21712[84];    // Added 208 bytes for HoT BETA			ccc
+/*23548*/ float     expGroupLeadAA;     // Current group lead exp points		ccc
+/*23552*/ uint32_t unknown21808;
+/*23556*/ float     expRaidLeadAA;      // Current raid lead AA exp points		ccc
+/*23560*/ uint32_t unknown21816;
+/*23564*/ uint32_t  groupLeadAAUnspent; // Unspent group lead AA points			ccc
+/*23568*/ uint32_t  raidLeadAAUnspent;  // Unspent raid lead AA points			ccc
+/*23572*/ uint32_t  leadershipAAs[MAX_LEAD_AA]; // Leader AA ranks			ccc
+/*23700*/ uint8_t unknown21956[128];
+/*23828*/ uint32_t  airRemaining;       // Air supply (seconds)				ccc
+/*23832*/ uint8_t unknown22088[4608];
+/*28440*/ uint32_t  expAA;              // Exp earned in current AA point		ccc
+/*28444*/ uint8_t unknown26700[40];
+/*28484*/ uint32_t  currentRadCrystals; // Current count of radiant crystals		ccc
+/*28488*/ uint32_t  careerRadCrystals;  // Total count of radiant crystals ever		ccc
+/*28492*/ uint32_t  currentEbonCrystals;// Current count of ebon crystals		ccc
+/*28496*/ uint32_t  careerEbonCrystals; // Total count of ebon crystals ever		ccc
+/*28500*/ uint8_t   groupAutoconsent;   // 0=off, 1=on
+/*28501*/ uint8_t   raidAutoconsent;    // 0=off, 1=on
+/*28502*/ uint8_t   guildAutoconsent;   // 0=off, 1=on
+/*28503*/ uint8_t   unknown26759[5];    // ***Placeholder (6/29/2005)
+/*28508*/ uint32_t  showhelm;           // 0=no, 1=yes
+/*28512*/ uint8_t   unknown26768[1048]; // ***Placeholder (2/13/2007)
+/*29560*/
 };
 
 #if 0
@@ -1279,7 +1285,7 @@ struct ServerZoneEntryStruct : public spawnStruct
 
 /*
 ** Generic Door Struct
-** Length: 92 Octets
+** Length: 96 Octets
 ** Used in: 
 **    OP_SpawnDoor
 **
@@ -1287,8 +1293,8 @@ struct ServerZoneEntryStruct : public spawnStruct
 
 struct doorStruct
 {
-/*0000*/ char    name[16];        // Filename of Door?
-/*0016*/ uint8_t unknown016[16];  // ***Placeholder
+/*0000*/ char    name[32];        // Filename of Door?
+/*0016*/ // uint8_t unknown016[16];  // ***Placeholder
 /*0032*/ float   y;               // y loc
 /*0036*/ float   x;               // x loc
 /*0040*/ float   z;               // z loc
@@ -1385,6 +1391,7 @@ struct itemPacketStruct
 
 /*
 ** Item Info Request Struct 
+** Length: 72 Octets 
 ** OpCode: ItemInfoCode
 */
 struct itemInfoReqStruct
@@ -1413,13 +1420,15 @@ struct itemInfoStruct
 ** OpCode: MobUpdateCode
 */
 
+
 struct spawnPositionUpdate 
 {
 /*0000*/ int16_t  spawnId;
-/*0002*/ int64_t  y:19, z:19, x:19, u3:7;
+/*0002*/ uint8_t unk1[2];		// BSH 13 Apr 2011
+/*0004*/ int64_t  y:19, z:19, x:19, u3:7;
          unsigned heading:12;
          signed unused2:4;
-/*0010*/
+/*0014*/
 };
 
 /*
@@ -1434,6 +1443,8 @@ struct spawnRenameStruct
 /*128*/	char        new_name[64];
 /*192*/	uint32_t	unknown192;	        //set to 0
 /*196*/	uint32_t	unknown196;	        //set to 1
+/*200*/ uint8_t    unknown0084[32];     // ***Placeholder
+/*232*/
 };
 
 /*
@@ -1658,6 +1669,7 @@ struct corpseLocStruct
 /*0004*/ float    x;
 /*0008*/ float    y;
 /*0012*/ float    z;
+/*0018*/
 };
 
 /*
@@ -1685,8 +1697,8 @@ struct consentResponseStruct
 };
 
 /*
-** Grouping Infromation
-** Length: 452 Octets
+** Grouping Information
+** Length: 456 Octets
 ** OpCode: OP_GroupUpdate
 */
 
@@ -1702,7 +1714,7 @@ struct groupUpdateStruct
 
 /*
 ** DEPRECATED
-** Grouping Infromation
+** Grouping Information
 ** Length: 768 Octets
 ** OpCode: OP_GroupUpdate
 */
@@ -1799,6 +1811,7 @@ struct groupLeaderChangeStruct
 struct deleteSpawnStruct
 {
 /*0000*/ uint32_t spawnId;                // Spawn ID to delete
+/*0004*/
 };
 
 /*
@@ -1811,6 +1824,7 @@ struct removeSpawnStruct
 {
 /*0000*/ uint32_t spawnId;                // Spawn ID to delete
 /*0004*/ uint8_t  removeSpawn;            // 0 if spawn is not in your update radius
+/*0005*/
 };
 
 /*
@@ -1825,6 +1839,7 @@ struct remDropStruct
 /*0002*/ uint8_t  unknown0004[2];         // ***Placeholder
 /*0004*/ uint16_t spawnId;                // Pickup ID - Guess
 /*0006*/ uint8_t  unknown0008[2];         // ***Placeholder
+/*0008*/
 };
 
 /*
@@ -1858,6 +1873,7 @@ struct castOnStruct
 /*0008*/ uint8_t  unknown0008[24];        // might be some spell info?
 /*0032*/ uint16_t spellId;                // Spell Id
 /*0034*/ uint8_t  unknown0034[2];         // ***Placeholder
+/*0036*/
 };
 
 /*
@@ -1893,6 +1909,7 @@ struct environmentDamageStruct
 /*0010*/ uint8_t unknown0010[12];
 /*0022*/ uint8_t type;              // Damage type. FC = fall. FA = lava.
 /*0023*/ uint8_t unknown0023[8];
+/*0031*/
 };
 
 /*
@@ -1951,11 +1968,11 @@ struct actionStruct
 /*0004*/ uint8_t  level;                  // Caster level
 /*0005*/ uint8_t  unknown0005[21];        // ***Placeholder
 /*0026*/ uint8_t  type;                   // Casts, Falls, Bashes, etc...
-/*0027*/ int32_t  damage;                 // Amount of Damage
-/*0031*/ uint8_t  unknown0031[2];
+/*0027*/ uint8_t  unknown0031[6];
 /*0033*/ int16_t  spell;                  // SpellID
 /*0035*/ uint8_t  unknown0035[2];         // ***Placeholder
-/*0037*/
+/*0037*/ uint8_t  unknown0037[2];         // ***Placeholder
+/*0039*/
 };
 
 // Starting with 2/21/2006, OP_Actions seem to come in pairs, duplicating
@@ -1968,13 +1985,12 @@ struct actionAltStruct
 /*0004*/ uint8_t  level;                  // Caster level
 /*0005*/ uint8_t  unknown0005[21];        // ***Placeholder
 /*0026*/ uint8_t  type;                   // Casts, Falls, Bashes, etc...
-/*0027*/ int32_t  damage;                 // Amount of Damage
-/*0031*/ uint8_t  unknown0031[2];
+/*0027*/ uint8_t  unknown0031[6];
 /*0033*/ int16_t  spell;                  // SpellID
 /*0035*/ uint8_t  unknown0035[2];         // ***Placeholder
 /*0037*/ uint32_t unknown0037;
 /*0041*/ uint8_t  unknown0041[15];
-/*0064*/
+/*0056*/
 };
 
 /*
@@ -2092,7 +2108,7 @@ struct skillTrainStruct
 
 /*
 ** Skill Increment
-** Length: 8 Octets
+** Length: 12 Octets
 ** OpCode: SkillIncCode
 */
 
@@ -2100,7 +2116,8 @@ struct skillIncStruct
 {
 /*0000*/ uint32_t skillId;                // Id of skill
 /*0004*/ int32_t  value;                  // New value of skill
-/*0008*/
+/*0008*/ uint8_t  unknown0008[4];         // *** Placeholder
+/*0012*/
 };
 
 /*
@@ -2116,7 +2133,7 @@ struct wearChangeStruct
 /*0000*/ uint16_t spawnId;                // SpawnID
 /*0002*/ Color_Struct color;              // item color
 /*0006*/ uint8_t  wearSlotId;             // Slot ID
-/*0007*/ uint8_t  unknown0005[7];         // unknown
+/*0007*/ uint8_t  unknown0007[7];         // unknown
 /*0014*/
 };
 
@@ -2176,6 +2193,7 @@ struct leadExpUpdateStruct
 /*0020*/ uint32_t raidLeadExp;          // Raid leadership exp value
 /*0024*/ uint32_t unspentRaidPoints;    // Unspent raid points
 /*0028*/ uint32_t unknown0028;
+/*0032*/
 };
 
 /*
@@ -2259,6 +2277,7 @@ struct randomReqStruct
 {
 /*0000*/ uint32_t bottom;                 // Low number
 /*0004*/ uint32_t top;                    // High number
+/*0008*/
 };
 
 /*
@@ -2277,13 +2296,14 @@ struct randomStruct
 
 /*
 ** Player Position Update
-** Length: 22 Octets
+** Length: 24 Octets
 ** OpCode: PlayerPosCode
 */
 
 struct playerSpawnPosStruct
 {
 /*0000*/ uint16_t spawnId;
+	 uint8_t  unk[2];	  // BSH 13 Apr 2011
 /*0002*/ signed   padding0000:12; // ***Placeholder
          signed   deltaX:13;      // change in x
          signed   padding0005:7;  // ***Placeholder
@@ -2296,14 +2316,14 @@ struct playerSpawnPosStruct
 /*0014*/ unsigned heading:12;     // heading
          signed   x:19;           // x coord
          signed   padding0014:1;  // ***Placeholder
-/*0018*/ signed   z:19;           // z coord
+/*0020*/ signed   z:19;           // z coord
          signed   deltaZ:13;      // change in z
-/*0022*/
+/*0024*/
 };
 
 /*
 ** Self Position Update
-** Length: 40 Octets
+** Length: 42 Octets
 ** OpCode: PlayerPosCode
 */
 
@@ -2311,20 +2331,20 @@ struct playerSelfPosStruct
 {
 /*0000*/ uint16_t spawnId;        // Player's spawn id
 /*0002*/ uint8_t unknown0002[2];  // ***Placeholder (update time counter?)
-/*0004*/ uint8_t unknown0004[4];  // ***Placeholder
-/*0008*/ float x;                 // x coord (2nd loc value)
-/*0012*/ float y;                 // y coord (1st loc value)
-/*0016*/ signed deltaHeading:10;  // change in heading
+/*0004*/ uint8_t unknown0004[6];  // ***Placeholder -- BSH 13 Apr 2011
+/*0010*/ float x;                 // x coord (2nd loc value)
+/*0014*/ float y;                 // y coord (1st loc value)
+/*0018*/ signed deltaHeading:10;  // change in heading
          unsigned animation:10;   // animation
          unsigned padding0016:12; // ***Placeholder 
-/*0020*/ float deltaX;            // Change in x
-/*0024*/ float deltaY;            // Change in y
-/*0028*/ float z;                 // z coord (3rd loc value)
-/*0032*/ float deltaZ;            // Change in z
-/*0036*/ unsigned padding0036:10; // ***Placeholder 
+/*0022*/ float deltaX;            // Change in x
+/*0026*/ float deltaY;            // Change in y
+/*0030*/ float z;                 // z coord (3rd loc value)
+/*0034*/ float deltaZ;            // Change in z
+/*0038*/ unsigned padding0036:10; // ***Placeholder
          unsigned heading:12;     // Directional heading
          unsigned padding0037:10; // ***Placeholder 
-/*0040*/
+/*0042*/
 };
 
 
@@ -2484,7 +2504,7 @@ struct clientLFGStruct
 
 /*
 ** buffStruct
-** Length: 34 Octets
+** Length: 44 Octets
 ** 
 */
 

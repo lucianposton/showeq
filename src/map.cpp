@@ -3610,9 +3610,9 @@ void Map::paintSpawns(MapParameters& param,
     }
     else if (spawn->isOtherPlayer())
     {
-      if (!up2date)
-        mapIcon = m_mapIcons->icon(tIconTypeSpawnPlayerOld);
-      else
+//      if (!up2date)
+//       mapIcon = m_mapIcons->icon(tIconTypeSpawnPlayerOld);
+//      else
         mapIcon = m_mapIcons->icon(tIconTypeSpawnPlayer);
     }
     else if (spawn->NPC() == SPAWN_NPC_CORPSE) // x for NPC corpse

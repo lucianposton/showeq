@@ -175,6 +175,20 @@ int main (int argc, char **argv)
    
    bool          bOptionHelp = false;
         
+#undef OFFTEST
+#ifdef OFFTEST
+    {
+	struct charProfileStruct	cps;
+	char				*v0, *v1;
+
+	printf ("sizeof (charProfileStruct) = %d\n", sizeof (cps));
+	v0 = (char *) &cps;
+	v1 = (char *) &cps.leadershipAAs;
+	printf ("leadershipAAs=%d\n", v1 - v0);
+	exit (0);
+    }
+#endif
+
    /* Create application instance */
    //   QApplication::setStyle( new QWindowsStyle );
    QApplication qapp (argc, argv);

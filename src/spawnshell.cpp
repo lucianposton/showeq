@@ -592,6 +592,13 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       netStream.skipBytes(4);
    }
 
+   if(spawn->otherData & 2) {	// aura stuff
+       netStream.readText();	// skip 2 variable len strings
+       netStream.readText();
+       netStream.skipBytes(54);	// and 54 static bytes
+   }
+
+
    // skip facestyle, walk/run speeds, unknown5
    netStream.skipBytes(13);
 
@@ -635,7 +642,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       strcpy(spawn->lastName, name.latin1());
    }
 
-   netStream.skipBytes(5);
+   netStream.skipBytes(6);
 
    spawn->petOwnerId = netStream.readUInt32NC();
 
@@ -946,6 +953,9 @@ void SpawnShell::npcMoveUpdate(const uint8_t* data, size_t len, uint8_t dir)
     
     // spawnId.
     uint16_t spawnId = stream.readUInt(16);
+
+    // BSH 13 Apr 2011 -- garbage added in packet
+    uint16_t unk1 = stream.readUInt(16);
 
     // 6 bit field specifier.
     uint8_t fieldSpecifier = stream.readUInt(6);
@@ -1357,6 +1367,10 @@ void SpawnShell::removeSpawn(const uint8_t* data, size_t len, uint8_t dir)
 
   if(len==sizeof(removeSpawnStruct))
   {
+// BSH
+	deleteItem(tSpawn, rmSpawn->spawnId);
+// BSH
+
     if(!rmSpawn->removeSpawn)
     {
       // Remove a spawn from outside the update radius
@@ -1425,7 +1439,7 @@ void SpawnShell::killSpawn(const uint8_t* data)
      Spawn* spawn = (Spawn*)item;
      // ZBTEMP: This is temporary until we can find a better way
      // set the last kill info on the player (do this before changing name)
-     m_player->setLastKill(spawn->name(), spawn->level());
+     // m_player->setLastKill(spawn->name(), spawn->level());
 
      spawn->killSpawn();
      updateFilterFlags(item);

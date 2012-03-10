@@ -1070,16 +1070,21 @@ void Player::fillConTable()
   int grayRange = 0;
   int greenRange = 0; 
 
-  if (level() < 9) 
-  { // 1 - 8 
-    grayRange = -4;
-    greenRange = -8;
-  } 
-  else if (level() < 13) 
-  { // 9 - 12 
+  if (level() < 15) // BSH - new code due to low levels being way off
+  { // 1-14
     grayRange = -6;
-    greenRange = -4;
+    greenRange = -14;
   }
+//  if (level() < 9)
+//  { // 1 - 8
+//    grayRange = -4;
+//    greenRange = -8;
+//  }
+//  else if (level() < 13)
+//  { // 9 - 12
+//    grayRange = -6;
+//    greenRange = -4;
+//  }
   else if (level() < 17)
   { // 13-16
     grayRange = -7;

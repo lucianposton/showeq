@@ -75,7 +75,9 @@ void MessageShell::channelMessage(const uint8_t* data, size_t len, uint8_t dir)
 
   // Tells and Group by us happen twice *shrug*. Ignore the client->server one.
   if (dir == DIR_Client && 
-      (cmsg->chanNum == MT_Tell || cmsg->chanNum == MT_Group))
+      (cmsg->chanNum == MT_Tell || cmsg->chanNum == MT_Group || cmsg->chanNum == MT_Guild ||
+      cmsg->chanNum == MT_OOC || cmsg->chanNum == MT_Shout || cmsg->chanNum == MT_Auction ||
+      cmsg->chanNum == MT_System || cmsg->chanNum == MT_Raid))
   {
     return;
   }
