@@ -1,0 +1,59 @@
+<h2>first line</h2>
+
+<h3>"Long Zone Name,shortname, width, height"</h3>
+<h5>archaic form "Long Zone Name,shortZoneName,screenCenterX, screenCenterY, screenLengthX, screenLengthY, width, height"</h5>
+<p>Long Zone Name is the full name of the zone, shown to the player when they zone in and in the showeq status bar
+shortZoneName is the short name, shown in /who all and used as file names.  The width and height fields specify the size of the zone in EQ Units.  If they are smaller than the points supplied in the map file ShowEQ will expand their values to fit the entire map.  If they are larger then the points supplied in the map, the map will be treated as the size they specify.
+The archaic form containing screenCenterX, screenCenterY, screenLengthX, screenLengthY is deprecated as no known utility makes use of these values and this form has never been read properly by ShowEQ.  When 
+editing the map setting all values after the zone names to 0 is fine, showeq will automatically 
+fix them.</p>
+
+<h2>remaining lines</h2>
+<h3>"A,regexp,range"</h3>
+
+<p>A signals an Aggro line<p>
+
+<p>regexp is a regular expression to match against 
+all the spawns</p>
+
+<p>range is the aggro range specified in EQ units, to be drawn as a red circle around all matching spawns.  Note that aggro ranges for mobs typically depend on many factors, not all of which may be known by ShowEQ.  Don't expect this to
+be 100% accurate.</p>
+
+<h3>"Z,zem"</h3>
+<p>Z signals a ZEM line</p>
+
+<p>zem is the zone experience modifier, normally 75 
+but higher in some zones</p>
+
+<h3>"L,name,color,n,x1,y1,x2,y2,...,xn,yn"</h3>
+<p>L signals a 2d line line</p>
+<p>name is the name of the line</p>
+<p>color is the textual color fo the line, gray is the 
+default</p>
+<p>n is the number of points in the line</p>
+<p>x1,y1 is the first point</p>
+<p>x2,y2 is the second point, etc</p>
+<p>xn,yn is the last point (the Nth point)</p>
+
+<h3>"M,name,color,n,x1,y1,z1,x2,y2,z2,...,xn,yn,zn"</h3>
+<p>M signals a 3d line line</p>
+<p>same as L except every point has a z component</p>
+
+<h3>"H,height"</h3>
+<p>H signals a Height line</p>
+<p>height is the Z coordinate to assign to all 
+L lines until the next H line</p>
+
+<h3>"P,text,color,x,y"</h3>
+<p>P signals a point line</p>
+<p>text is the text to display at that point on the map 
+(someone needs to fix it so it puts the DOT on the map 
+and centers the text)</p>
+<p>color is the color for the text</p>
+<p>x,y is the location of the point</p>
+
+<p>thats about it, if youre still confused try editing 
+one of the maps and looking for yourself.  also 
+<code>MapData:loadMap(const QString& fileName)</code> in <code>mapcore.cpp</code>
+is a good reference (thats where I got the info for 
+this doc)</p>

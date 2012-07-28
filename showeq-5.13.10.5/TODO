@@ -1,0 +1,33 @@
+Version: $Id: TODO 614 2005-09-13 15:23:14Z cmmalone $
+
+To Do list
+----------
+A full "to do" list is maintained on SourceForge 
+(http://sourceforge.net/projects/seq) under the "Tasks" heading.
+
+* Maintain Gentoo ebuilds for showeq and showeq-maps.
+* Add version information to the XML based opcode files. Reasons:
+   1. To make it easier to diagnose when people have the incorrect versions installed and being loaded from one directory or another.
+   2. To support the possibility of automatic opcode file updates.
+* Split packet capture front end into a seperate program that communicates with ShowEQ either via pipe (local packet capture) or TCP/SSL connection (to allow remote packet capture). Reasons:
+   1. Make ShowEQ more flexible on the packet capture and network topology front.
+   2. Possible support for having the seperate program be setuid root without ShowEQ being...
+   3. Potential for supporting doing the package capture on a Windows box.
+* Make XML configuration file based EQ Network packet structure handling.
+   1. Eliminate the need to do a full new ShowEQ release every time SOE patches.
+   2. To support the possibility of automatic structure file updates.
+* Add the ability to automagically download updated opcode and structure configuration files. Do I really have to tell you the reason...
+* Organized packet capture display with the ability to filter in/out different packets. Potentially with support of live visual structure alignment and opcode map editing.
+   1. Make it easier to adapt to patches on patch day.
+   2. Make it easier to figure out what different opcodes/structures are used for/contain. Thus allowing developers to more readily add support for new features based on those findings.
+* More general packet system cleanup/optimization.
+* Move all non-GUI related stuff out of EQInterface.
+* Improved filtering system.
+* Better support for map editing.
+* Better support for map optimization.
+* Seperate UI from data storage/handling in Combat Window and Experience Window to make them easier to maintain.
+* Create new and improved item db support using sqlite/MySQL backends and the possibility to work with ksmith's eqitems database.
+* Actually add a menu-item for Help if and when certain suckers, err, volunteers write some help files for ShowEQ.
+* Find a sucker to write a real new INSTALL.newbies.
+* Include an up-to-date FAQ with the software where it belongs.
+* Coordinate with different volunteers on policies for maintaining packages for other Linux distributions (debian, Fedora, etc.).

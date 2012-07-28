@@ -1,0 +1,9 @@
+The file 'seqdef.xml' contains the default preferences for ShowEQ.  
+Almost nobody should need to modify it.
+
+If you do modify 'seqdef.xml' you will likely need to examine and incorporate 
+changes from the one in CVS whenever you update.
+
+The file 'filters.conf.dist' is an example of a filter configuration file
+used by ShowEQ, it includes documentation about filters within it.
+

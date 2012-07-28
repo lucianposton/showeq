@@ -1,0 +1,287 @@
+LIBTOOLIZE = libtoolize
+ACLOCAL = aclocal
+AUTOHEADER = autoheader
+AUTOMAKE = automake
+AUTOCONF = autoconf
+LIBTOOLIZE_ARGS = --force --copy --automake
+ACLOCAL_ARGS = -I m4
+AUTOHEADER_ARGS = --force
+AUTOMAKE_ARGS = --add-missing --copy --include-deps
+AUTOCONF_ARGS = 
+
+default: 
+	@echo "***************************************************************"
+	@echo "Are you really sure you want to be running this makefile?"
+	@echo "Unless your are a developer you probably don't want"
+	@echo "to use this file. "
+	@if [ -d CVS ]; then \
+	    echo ""; \
+	    echo "In which case you should probably just use the tarball."; \
+	    echo "and not a direct checkout from CVS like this."; \
+	fi
+	@if [ -f configure ]; then \
+	    echo ""; \
+	    echo "You probably just need to run './configure'."; \
+	fi
+	@echo ""
+	@echo "***************************************************************"
+	@echo ""
+	@echo ""
+	@echo "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+	@echo "If you are REALLY sure that you want to make/remake the build"
+	@echo "system you can do so by using the 'help' target of this "
+	@echo "makefile to see a list of its supported targets. "
+	@echo "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+
+help:
+	@echo "***************************************************************"
+	@echo "Makefile.dist accepts the following targets:"
+	@echo "    help       - display this help"
+	@echo "    all        - performs a 'backup', and then 'build'"
+	@echo "    backup     - backs up the existing 'showeq' executable"
+	@echo "    clean      - attempts to remove all generated files"
+	@echo "    build      - performs a 'clean', and then builds the"
+	@echo "                 entire configuration system"
+	@echo "    configure  - builds configure"
+	@echo "    autoconf   - alias for 'configure'"
+	@echo "    automake   - runs 'automake' to generate 'Makefile.in'"
+	@echo "    autoheader - runs 'autoheader' to generate 'config.h.in'"
+	@echo "    aclocal    - runs 'aclocal' to generate 'aclocal.m4'"
+	@echo "    libtoolize - runs 'libtoolize' to setup 'libtool' support"
+	@echo "***************************************************************"
+
+all: backup build
+
+no-backup: build
+
+build: clean configure
+# Pretty success message... Use of '&&' rather than ';' guarntees
+# that if one portion of the compile process fails, the successor
+# won't be executed.  Again, this is another case of common sense.
+
+	@echo ""                                           
+	@echo ""	                                   
+	@echo "******************************************"
+	@echo "Success!   Please type the following:"       
+	@echo ""                                           
+	@echo " ./configure && make && make install"
+	@echo ""                                            
+	@echo ""                                           
+	@echo "This will configure, compile, and install"
+	@echo "showeq     "
+	@echo "******************************************"
+	@echo ""
+
+autoconf: configure
+
+configure: install-sh missing Makefile.in src/Makefile.in conf/Makefile.in configure.in Makefile.dist
+	@echo -n "Generating configure from configure.in......................"
+	@echo -e "\n*!* autoconf *!*" >> Makefile.dist.dbg 
+	@-rm -f $@
+	@$(AUTOCONF) $(AUTOCONF_ARGS) >> Makefile.dist.dbg 2>&1;
+	@echo "!*! autoconf !*!" >> Makefile.dist.dbg
+	@if [ -s "$@" ]; then { \
+		echo " done!"; \
+	} else { \
+		 echo " failed! ";\
+		 echo "See Makefile.dist.dbg for details"; \
+		 exit -1; \
+	} fi 
+
+automake: install-sh missing Makefile.in src/Makefile.in conf/Makefile.in
+
+install-sh missing Makefile.in src/Makefile.in conf/Makefile.in: config.h.in aclocal.m4 Makefile.dist
+	@echo -n "Generating Makefile.in from Makefile.am....................."
+	@echo -e "\n*!* automake ... *!*" >> Makefile.dist.dbg
+	@$(AUTOMAKE) $(AUTOMAKE_ARGS) >> Makefile.dist.dbg 2>&1
+	@echo "!*! automake ... !*!" >> Makefile.dist.dbg
+	@if [ -s "$@" ]; then { \
+		echo " done!"; \
+	} else { \
+		 echo " failed! ";\
+		 echo "See Makefile.dist.dbg for details"; \
+		 exit -1; \
+	} fi 
+
+
+autoheader: config.h.in
+
+config.h.in: aclocal.m4 configure.in Makefile.dist
+	@echo -n "Generating configure headers (config.h.in).................."
+	@echo -e "\n*!* $$AUTOHEADER  $$AUTOHEADER_ARGS configure.in *!*" >> Makefile.dist.dbg 
+	@-rm -f config.h.in
+	@$(AUTOHEADER) $(AUTOHEADER_ARGS) configure.in >> Makefile.dist.dbg 2>&1;
+	@echo "!*! $$AUTOHEADER $$AUTOHEADER_ARGS configure.in !*!" >> Makefile.dist.dbg
+	@if [ -s "$@" ]; then { \
+		echo " done!"; \
+	} else { \
+		 echo " failed! ";\
+		 echo "See Makefile.dist.dbg for details"; \
+		 exit -1; \
+	} fi 
+
+aclocal: aclocal.m4
+
+aclocal.m4: config.guess config.sub ltmain.sh configure.in Makefile.dist
+	@echo -n "Generating aclocal.m4 from configure.in....................."
+	@echo -e "\n*!* aclocal *!*" >> Makefile.dist.dbg
+	@$(ACLOCAL) $(ACLOCAL_ARGS) >> Makefile.dist.dbg 2>&1
+	@echo "!*! aclocal !*!" >> Makefile.dist.dbg
+	@ if [ -s "$@" ]; then { \
+		echo " done!"; \
+	} else { \
+		 echo " failed! ";\
+		 echo "See Makefile.dist.dbg for details"; \
+		 exit -1; \
+	} fi 
+
+libtoolize: config.guess config.sub ltmain.sh
+
+config.guess config.sub ltmain.sh : configure.in Makefile.am Makefile.dist
+	@echo -n "Adding libtool support......................................"
+	@echo -e "\n*!* $$LIBTOOLIZE $$LIBTOOLIZE_ARGS *!*"              \
+                 >> Makefile.dist.dbg
+	@$(LIBTOOLIZE) $(LIBTOOLIZE_ARGS) >> Makefile.dist.dbg 2>&1
+	@echo "!*! $$LIBTOOLIZE $LIBTOOLIZE_ARGS !*!" >> Makefile.dist.dbg
+	@if [ -s "config.guess" -a "config.sub" -a "ltmain.sh" ]; then { \
+		echo " done!"; \
+	} else { \
+		 echo " failed! ";\
+		 echo "See Makefile.dist.dbg for details"; \
+		 exit -1; \
+	} fi 
+
+
+clean: 
+	@echo -n "Removing old files.........................................."
+	@if [ -f "Makefile" ]; then { \
+		$(MAKE) -skf Makefile maintainer-clean >/dev/null; \
+	} fi
+	@-rm -f Makefile.dist.dbg
+	@-rm -f configure
+	@-rm -f aclocal.m4 missing install-sh mkinstalldirs
+	@-rm -f Makefile Makefile.in src/Makefile src/Makefile.in conf/Makefile conf/Makefile.in
+	@-rm -fr autom4te.cache
+	@echo " done!"
+
+backup: 
+# Backup the users current binary and place it in BACKUP/ ...
+#
+# This fixes the annoying "Build such and such destroyed my working
+# copy of ShowEQ!" messages on the SEQ Dev forums :)
+	@if [ -x "src/showeq" ] && ! [ -e ".no-backup" ]; then		      \
+	{								      \
+		mkdir -p "BACKUP";					      \
+									      \
+		echo "*!* BACKUP debug info *!*" > BACKUP/debug;	      \
+									      \
+		COMPRESSION="";						      \
+									      \
+		function compression_test () {				      \
+			shift;						      \
+			for i						      \
+			do						      \
+			RESULTANT=`$$1 --help >> BACKUP/debug 2>&1;           \
+				       cat "BACKUP/debug"   |	      	      \
+					    grep "$$1: command not found"`;   \
+									      \
+			if [ -z "$$RESULTANT" ]; then			      \
+			{						      \
+				COMPRESSION="$$1";		      	      \
+				return;			      	      	      \
+			} else {					      \
+				COMPRESSION="";			      	      \
+			} fi;						      \
+			shift;						      \
+			done;						      \
+		};							      \
+									      \
+		if ! [ -e ".no-backup" ]; then				      \
+		{							      \
+			echo "";					      \
+									      \
+			BACKUP_STAMP=`date -r src/showeq +%a-%b-%Y_%T`;	      \
+			mkdir -p "BACKUP/$$BACKUP_STAMP";		      \
+			cp "src/showeq" "BACKUP/$$BACKUP_STAMP/showeq";	      \
+									      \
+			compression_test [ "bzip2" "gzip" ]; 		      \
+									      \
+			if [ -n "$$COMPRESSION" ]; then			      \
+			{						      \
+				COMPRESSION_FAILED="";			      \
+									      \
+				echo -n "Compressing and archiving your cur"; \
+				echo -n "rent binary using ";	      	      \
+				echo -n "$$COMPRESSION...";                   \
+									      \
+				if [ "$$COMPRESSION" == "bzip2" ]; then	      \
+				{					      \
+					EXTENSION=".bz2";		      \
+				} else {				      \
+					EXTENSION=".gz";		      \
+				} fi;					      \
+									      \
+				FILE="BACKUP/$$BACKUP_STAMP/showeq";	      \
+									      \
+				echo -e "*!* $$COMPRESSION's status *!*" >    \
+					BACKUP/debug;			      \
+									      \
+				$$COMPRESSION "$$FILE" >> BACKUP/dbg 2>&1;    \
+									      \
+				if [ -n "`cat BACKUP/dbg`" ]; then  	      \
+				{					      \
+					echo `cat BACKUP/dbg` >> BACKUP/debug;\
+									      \
+					COMPRESSION_FAILED="TRUE";	      \
+				} fi;					      \
+									      \
+				echo "!*! $$COMPRESSION's status !*!" >>      \
+					BACKUP/debug;			      \
+									      \
+				rm -f "BACKUP/dbg";			      \
+									      \
+			} else {					      \
+				echo -n "Archiving your current binary....."; \
+				echo -n "..........................";	      \
+			} fi;						      \
+		} fi;							      \
+									      \
+		if ! [ -e "BACKUP/$$BACKUP_STAMP/showeq$$EXTENSION" ] ||      \
+		     [ -n "$$COMPRESSION_FAILED" ]; then		      \
+		{							      \
+			echo " failure!";				      \
+			echo -e "\n*!* Misc. debug data *!*" >> BACKUP/debug; \
+			echo "COMPRESSION: $$COMPRESSION"    >> BACKUP/debug; \
+			echo "EXTENSION..: $$EXTENSION"      >> BACKUP/debug; \
+			echo "TIME STAMP.: $$BACKUP_STAMP"   >> BACKUP/debug; \
+			echo "!*! Misc. debug data !*!"      >> BACKUP/debug; \
+			echo -ne "\n\t >>! ";				      \
+			echo -n "Please see 'BACKUP/debug' for more details"; \
+			echo -e " !<<\n\n";				      \
+			break;						      \
+		} else {						      \
+			rm -f "src/showeq";				      \
+									      \
+			echo " done!";					      \
+			echo "";					      \
+			echo "";					      \
+			echo "Your old ShowEQ binary is backed up as:";	      \
+			echo "";					      \
+			echo "    BACKUP/$$BACKUP_STAMP/showeq$$EXTENSION";   \
+			echo "";					      \
+			echo "";					      \
+			echo -n "NOTE: This feature may be disabled by using";\
+			echo " the command:";				      \
+			echo "      'make -f Makefile.dist no-backup'";	      \
+			echo "";					      \
+			echo -n "To disable it without using a special comma";\
+			echo "nd... Add an empty"; 			      \
+			echo -n "file called:  '.no-backup'  to this directo";\
+			echo "ry, WITH the dot.";			      \
+			echo "";					      \
+			echo "";					      \
+			echo "";					      \
+		} fi;							      \
+									      \
+		echo "!*! BACKUP debug info !*!" >> Makefile.dist.dbg;	      \
+	} fi;

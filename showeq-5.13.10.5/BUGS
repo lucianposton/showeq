@@ -1,0 +1,14 @@
+
+Known bugs
+----------
+
+1) Multiple EQ Clients on the Same Box
+
+Running showeq to monitor an EQ client on a machine which has multiple EQ
+clients running on it can result in crashes and mixed sessions. It is possible
+that if both EQ clients zone at the same time, showeq can mix up the sessions
+resulting in either showeq swapping which session it is watching or something
+crashes resulting from processing both clients at the same time. Using session
+tracking might help, but there is no workaround at this time to make showeq work
+properly in this configuration.
+
