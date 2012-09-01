@@ -1,14 +1,14 @@
 ACLOCAL_AMFLAGS = -I m4
-AUTOMAKE_OPTIONS = 1.9 dist-bzip2
+AUTOMAKE_OPTIONS = 1.11 dist-bzip2
 
 SUBDIRS = src conf
 
-include doxygen.am
+# include doxygen.am
 
 EXTRA_DIST = BUGS ChangeLog FAQ INSTALL.newbies Makefile.dist README.libEQ \
 ROADMAP showeq.1 TODO showeq.kdevelop Doxyfile depcomp $(DX_CONFIG)
 
-MAINTAINERCLEANFILES = aclocal.m4 config.guess config.sub configure \
+MAINTAINERCLEANFILES = aclocal.m4 config.h.in config.sub configure \
 Makefile.in ltconfig libqt2.dbg libqt3.dbg Makefile.dist.dbg \
 configure.dbg config.log ltmain.sh stamp-h.in stamp-h qt.tag depcomp
 

@@ -27,7 +27,7 @@ const char* typeStyles[] =
     "\e[0;32m",   // 5 - OOC
     NULL,         // 6
     "\e[0;35m",   // 7 - Tell
-    "\e[1;37m",   // 8 - Say
+    "\e[1;38m",   // 8 - Say
     NULL,         // 9
     NULL,         // 10
     "\e[5;31m",   // 11 - GM Say

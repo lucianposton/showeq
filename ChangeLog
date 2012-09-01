@@ -1,4 +1,24 @@
+Fransick (08/17/12)
+-----------------
+- Updated version to 5.13.10.6
+- Updated opcodes/structs
+- Added support for Hero's Forge armor changes to spawnshell.cpp
+- Edited MAINTAINERCLEANFILES to work more relaibly with make -f Makefile.dist clean
+
+Fransick (07/18/12)
+-----------------
+- Updated version to 5.13.10.5
+- Updated opcodes/structs (fluxcapacitor, fransick)
+- Added new opcodes and annoted zoneopcodes.xml to include packet sizes for packets not handled by everquest.h to make updating easier
+- Commented out Doxygen support and removed Doxygen files to get Makefile.dist Build working more reliably for newer distros 
+
+Fransick (06/25/12)
+-----------------
+- Updated opcodes
+- Minor struct changes
+
 Razzle (3/9/12)
+-----------------
 - Updated version to 5.13.10.4
 - Merged Fransick's patch
 

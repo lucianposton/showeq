@@ -11,11 +11,11 @@
     </opcode>
 -->
 
-    <opcode id="5B0B" name="OP_GuildList" updated="01/17/08">
+    <opcode id="7529" name="OP_GuildList" updated="07/18/12">
         <comment>old GuildListCode</comment>
         <payload dir="server" typename="worldGuildListStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="D677" name="OP_MOTD" updated="11/07/10">
+    <opcode id="3eec" name="OP_MOTD" updated="08/17/12">
         <comment>old MOTDCode Server message of the day</comment>
         <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
     </opcode>
@@ -36,7 +36,7 @@
     <opcode id="1771" name="OP_ExpansionInfo" updated="11/07/10">
 	    <comment>Which expansions user has</comment>
     </opcode>
-    <opcode id="1B85" name="OP_SendCharInfo" updated="11/07/10">
+    <opcode id="6685" name="OP_SendCharInfo" updated="07/18/12">
 	    <comment>Send all chars visible @ char select</comment>
     </opcode>
     <opcode id="3C2D" name="OP_SendSpellChecksum" updated="11/07/10">
@@ -51,13 +51,13 @@
     <opcode id="2874" name="OP_SendSkillCapsChecksum" updated="11/07/10">
 	    <comment>Third client verification packet</comment>
     </opcode>
-    <opcode id="0A54" name="OP_SetChatServer" updated="11/07/10">
+    <opcode id="28d4" name="OP_SetChatServer" updated="06/27/12">
 	    <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
-    <opcode id="37DB" name="OP_SetChatServer2" updated="11/07/10">
+    <opcode id="75f5" name="OP_SetChatServer2" updated="06/27/12">
 	    <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
     </opcode>
-    <opcode id="0479" name="OP_ZoneServerInfo" updated="11/07/10">
+    <opcode id="777c" name="OP_ZoneServerInfo" updated="06/27/12">
 	    <comment>old ZoneServerInfo</comment>
     </opcode>
     <opcode id="72F3" name="OP_WorldComplete" updated="11/07/10">

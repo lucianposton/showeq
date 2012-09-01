@@ -56,8 +56,8 @@ protected:
 /* FilterItem Class - allows easy creation / deletion of regex types */
 FilterItem::FilterItem(const QString& filterPattern, bool caseSensitive)
 {
-  uint8_t minLevel = 0;
-  uint8_t maxLevel = 0;
+  uint32_t minLevel = 0;
+  uint32_t maxLevel = 0;
   
   QString workString = filterPattern;
   

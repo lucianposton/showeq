@@ -654,20 +654,32 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->posData[3] = netStream.readUInt32NC();
    spawn->posData[4] = netStream.readUInt32NC();
 
-   // skip color
-   netStream.skipBytes(36);
-
    race = spawn->race;
 
    // this is how the client checks if equipment should be read.
    if(spawn->NPC == 0 || race <= 12 || race == 128 || race == 130 || race == 330 || race == 522)
    {
+      // skip color
+      netStream.skipBytes(36);
       for(i = 0; i < 9; i++)
       {
+	 spawn->equipment[i].equip3 = netStream.readUInt32NC();
          spawn->equipment[i].itemId = netStream.readUInt32NC();
+         spawn->equipment[i].equip2 = netStream.readUInt32NC();
          spawn->equipment[i].equip1 = netStream.readUInt32NC();
          spawn->equipment[i].equip0 = netStream.readUInt32NC();
       }
+   } else {
+      netStream.skipBytes(28);
+      spawn->equipment[7].itemId = netStream.readUInt32NC();
+      spawn->equipment[7].equip2 = netStream.readUInt32NC();
+      spawn->equipment[7].equip1 = netStream.readUInt32NC();
+      spawn->equipment[7].equip0 = netStream.readUInt32NC();
+      // secondary
+      spawn->equipment[8].itemId = netStream.readUInt32NC();
+      spawn->equipment[8].equip2 = netStream.readUInt32NC();
+      spawn->equipment[8].equip1 = netStream.readUInt32NC();
+      spawn->equipment[8].equip0 = netStream.readUInt32NC();
    }
 
    if(spawn->otherData & 8)
