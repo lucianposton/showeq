@@ -19,6 +19,7 @@
 #include "main.h"
 #include "everquest.h"
 #include "diagnosticmessages.h"
+#include "netstream.h"
 
 #include <qfile.h>
 #include <qdatastream.h>
@@ -183,9 +184,335 @@ void ZoneMgr::zoneEntryClient(const uint8_t* data, size_t len, uint8_t dir)
     saveZoneState();
 }
 
-void ZoneMgr::zonePlayer(const uint8_t* data)
+int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *data, size_t len, bool checkLen)
 {
-  const charProfileStruct* player = (const charProfileStruct*)data;
+  /*
+  This reads data from the variable-length charPlayerProfile struct
+  */
+  NetStream netStream(data, len);
+  int32_t retVal;
+  QString name;
+
+  player->checksum = netStream.readUInt32NC();
+  
+  player->profile.gender = netStream.readUInt16();
+  player->profile.race = netStream.readUInt32NC();
+  player->profile.class_ = netStream.readUInt32NC();
+
+  // Unknown  
+  netStream.skipBytes(44);
+  
+  player->profile.level = netStream.readUInt8();
+  player->profile.level1 = netStream.readUInt8();
+
+  // Really, everything after the level is not critical for operation.  If 
+  // needed, skip the rest to get up and running quickly after patch day.
+#if 1
+  // Bind points
+  int bindCount = netStream.readUInt32NC();
+  for (int i = 0; i < bindCount; i++) {
+    memcpy(&player->profile.binds[i], netStream.pos(), sizeof(player->profile.binds[i]));
+    netStream.skipBytes(sizeof(player->profile.binds[i]));
+  }
+
+  player->profile.deity = netStream.readUInt32NC();
+  player->profile.intoxication = netStream.readUInt32NC();
+  
+  // Spell slot refresh
+  int spellRefreshCount = netStream.readUInt32NC();
+  for (int i = 0; i < spellRefreshCount; i++) {
+    player->profile.spellSlotRefresh[i] = netStream.readUInt32NC();
+  }
+  
+  player->profile.haircolor = netStream.readUInt8();
+  player->profile.beardcolor = netStream.readUInt8();
+
+  // Unknown
+  netStream.skipBytes(6);
+  
+  player->profile.eyecolor1 = netStream.readUInt8();
+  player->profile.eyecolor2 = netStream.readUInt8();
+  player->profile.hairstyle = netStream.readUInt8();
+  player->profile.beard = netStream.readUInt8();
+
+  // Unknown
+  netStream.skipBytes(11);
+
+  // Equipment
+  int equipCount = netStream.readUInt32NC();
+  for (int i = 0; i < equipCount; i++) {
+    memcpy(&player->profile.equipment[i], netStream.pos(), sizeof(player->profile.equipment[i]));
+    netStream.skipBytes(sizeof(player->profile.equipment[i]));
+  }
+
+  // Visible equipment tints (dye color)
+  int tintCount = netStream.readUInt32NC();
+  for (int i = 0; i < tintCount; i++) {
+    player->profile.item_tint[i].color = netStream.readUInt32NC();
+  }
+
+  // AAs
+  int aaCount = netStream.readUInt32NC();
+  for (int i = 0; i < aaCount; i++) {
+    player->profile.aa_array[i].AA = netStream.readUInt32NC();
+    player->profile.aa_array[i].value = netStream.readUInt32NC();
+    player->profile.aa_array[i].unknown008 = netStream.readUInt32NC();
+  }
+
+  player->profile.points = netStream.readUInt32NC();
+  player->profile.MANA = netStream.readUInt32NC();
+  player->profile.curHp = netStream.readUInt32NC();
+  player->profile.STR = netStream.readUInt32NC();
+  player->profile.STA = netStream.readUInt32NC();
+  player->profile.CHA = netStream.readUInt32NC();
+  player->profile.DEX = netStream.readUInt32NC();
+  player->profile.INT = netStream.readUInt32NC();
+  player->profile.AGI = netStream.readUInt32NC();
+  player->profile.WIS = netStream.readUInt32NC();
+
+  // Unknown
+  netStream.skipBytes(28);
+  
+  player->profile.face = netStream.readUInt32NC();
+
+  // Unknown
+  netStream.skipBytes(221);
+  
+  // Spellbook
+  int spellBookSlots = netStream.readUInt32NC();
+  for (int i = 0; i < spellBookSlots; i++) {
+    player->profile.sSpellBook[i] = netStream.readInt32();
+  }
+
+  int spellMemSlots = netStream.readUInt32NC();
+  for (int i = 0; i < spellMemSlots; i++) {
+    player->profile.sMemSpells[i] = netStream.readInt32();
+  }
+  
+  int coinCounts = netStream.readUInt8();
+  player->profile.platinum = netStream.readUInt32NC();
+  player->profile.gold = netStream.readUInt32NC();
+  player->profile.silver = netStream.readUInt32NC();
+  player->profile.copper = netStream.readUInt32NC();
+
+  player->profile.platinum_cursor = netStream.readUInt32NC();
+  player->profile.gold_cursor = netStream.readUInt32NC();
+  player->profile.silver_cursor = netStream.readUInt32NC();
+  player->profile.copper_cursor = netStream.readUInt32NC();
+
+  int skillCount = netStream.readUInt32NC();
+  for (int i = 0; i < skillCount; i++) {
+    player->profile.skills[i] = netStream.readUInt32NC();
+  }
+
+  int innateSkillCount = netStream.readUInt32NC();
+  for (int i = 0; i < innateSkillCount; i++) {
+    player->profile.innateSkills[i] = netStream.readUInt32NC();
+  }
+
+  // Unknown
+  netStream.skipBytes(16);
+  
+  player->profile.toxicity = netStream.readUInt32NC();
+  player->profile.thirst = netStream.readUInt32NC();
+  player->profile.hunger = netStream.readUInt32NC();
+
+  // Unknown
+  netStream.skipBytes(20);
+  
+  int buffCount = netStream.readUInt32NC();
+  for (int i = 0; i < buffCount; i++) {
+    netStream.skipBytes(80);
+  }
+
+  int disciplineCount = netStream.readUInt32NC();
+  for (int i = 0; i < disciplineCount; i++) {
+    player->profile.disciplines[i] = netStream.readUInt32NC();
+  }
+
+  int recastTypes = netStream.readUInt32NC();
+  for (int i = 0; i < recastTypes; i++) {
+    player->profile.recastTimers[i] = netStream.readUInt32NC();
+  }
+
+  int somethingCount = netStream.readUInt32NC();
+  for (int i = 0; i < somethingCount; i++) {
+    int something = netStream.readUInt32NC();
+  }
+
+  int somethingElseCount = netStream.readUInt32NC();
+  for (int i = 0; i < somethingElseCount; i++) {
+    int something = netStream.readUInt32NC();
+  }
+
+  player->profile.endurance = netStream.readUInt32NC();
+  player->profile.aa_spent = netStream.readUInt32NC();
+
+  // Unknown  
+  netStream.skipBytes(4);
+    
+  player->profile.aa_assigned = netStream.readUInt32NC();
+
+  // Unknown
+  netStream.skipBytes(22);
+  
+  int bandolierCount = netStream.readUInt32NC();
+  for (int i = 0; i < bandolierCount; i++) {
+    name = netStream.readText();
+    if(name.length()) {
+      strncpy(player->profile.bandoliers[i].bandolierName, name.latin1(), 32);
+    }
+
+    // Mainhand
+    name = netStream.readText();
+    if(name.length()) {
+      strncpy(player->profile.bandoliers[i].mainHand.itemName, name.latin1(), 64);
+    }
+    player->profile.bandoliers[i].mainHand.itemId = netStream.readUInt32NC();
+    player->profile.bandoliers[i].mainHand.icon = netStream.readUInt32NC();
+
+    // Offhand
+    name = netStream.readText();
+    if(name.length()) {
+      strncpy(player->profile.bandoliers[i].offHand.itemName, name.latin1(), 64);
+    }
+    player->profile.bandoliers[i].offHand.itemId = netStream.readUInt32NC();
+    player->profile.bandoliers[i].offHand.icon = netStream.readUInt32NC();
+
+    // Range
+    name = netStream.readText();
+    if(name.length()) {
+      strncpy(player->profile.bandoliers[i].range.itemName, name.latin1(), 64);
+    }
+    player->profile.bandoliers[i].range.itemId = netStream.readUInt32NC();
+    player->profile.bandoliers[i].range.icon = netStream.readUInt32NC();
+
+    // Ammo
+    name = netStream.readText();
+    if(name.length()) {
+      strncpy(player->profile.bandoliers[i].ammo.itemName, name.latin1(), 64);
+    }
+    player->profile.bandoliers[i].ammo.itemId = netStream.readUInt32NC();
+    player->profile.bandoliers[i].ammo.icon = netStream.readUInt32NC();
+  }
+
+  int potionCount = netStream.readUInt32NC();
+  for (int i = 0; i < potionCount; i++) {
+    name = netStream.readText();
+    if(name.length()) {
+      strncpy(player->profile.potionBelt[i].itemName, name.latin1(), 64);
+    }
+    player->profile.potionBelt[i].itemId = netStream.readUInt32NC();
+    player->profile.potionBelt[i].icon = netStream.readUInt32NC();
+  }
+
+  // Unknown
+  netStream.skipBytes(96);
+
+  memcpy(player->name, netStream.pos(), 64);
+  netStream.skipBytes(64);
+
+  memcpy(player->lastName, netStream.pos(), 32);
+  netStream.skipBytes(32);
+  
+  // Unknown
+  netStream.skipBytes(8);
+
+  player->guildID = netStream.readInt32();
+  player->birthdayTime = netStream.readUInt32NC();
+  player->lastSaveTime = netStream.readUInt32NC();
+  player->timePlayedMin = netStream.readUInt32NC();
+
+  // Unknown
+  netStream.skipBytes(4);
+  
+  player->pvp = netStream.readUInt8();
+  player->anon = netStream.readUInt8();
+  player->gm = netStream.readUInt8();
+  player->guildstatus = netStream.readInt8();
+  
+  // Unknown
+  netStream.skipBytes(14);
+
+  player->exp = netStream.readUInt32NC();
+
+  // Unknown
+  netStream.skipBytes(8);
+  
+  int langCount = netStream.readUInt32NC();
+  for (int i = 0; i < langCount; i++) {
+    player->languages[i] = netStream.readUInt8();
+  }
+
+  memcpy(&player->x, netStream.pos(), sizeof(player->x));
+  netStream.skipBytes(sizeof(player->x));
+
+  memcpy(&player->y, netStream.pos(), sizeof(player->y));
+  netStream.skipBytes(sizeof(player->y));
+
+  memcpy(&player->z, netStream.pos(), sizeof(player->z));
+  netStream.skipBytes(sizeof(player->z));
+
+  memcpy(&player->heading, netStream.pos(), sizeof(player->heading));
+  netStream.skipBytes(sizeof(player->heading));
+  
+  player->standState = netStream.readUInt8();
+  player->platinum_bank = netStream.readUInt32NC();
+  player->gold_bank = netStream.readUInt32NC();
+  player->silver_bank = netStream.readUInt32NC();
+  player->copper_bank = netStream.readUInt32NC();
+  player->platinum_shared = netStream.readUInt32NC();
+
+  // Unknown
+  netStream.skipBytes(12);
+
+  // Unknown (41)
+  int doubleIntCount = netStream.readUInt32NC();
+  for (int i = 0; i < doubleIntCount; i++) {
+    int something = netStream.readUInt32NC();
+    int somethingElse = netStream.readUInt32NC();
+  }
+
+  // Unknown (64)
+  int byteCount = netStream.readUInt32NC();
+  for (int i = 0; i < byteCount; i++) {
+    char something = netStream.readUInt8();
+  }
+  
+  player->expansions = netStream.readUInt32NC();
+
+  // Unknown
+  netStream.skipBytes(11);
+
+  player->autosplit = netStream.readUInt8();
+
+  // Unknown
+  netStream.skipBytes(14);
+
+  player->zoneId = netStream.readUInt16NC();
+  player->zoneInstance = netStream.readUInt16NC();
+
+  // Still more to do, but it's really of little value
+#endif
+
+  retVal = netStream.pos() - netStream.data();
+  if (checkLen && (int32_t)len != retVal)
+  {
+    seqDebug("SpawnShell::fillProfileStruct - expected length: %d, read: %d for player '%s'", len, retVal, player->name);
+  }
+
+  return retVal;
+}
+
+
+void ZoneMgr::zonePlayer(const uint8_t* data, size_t len)
+{
+  charProfileStruct *player = new charProfileStruct;
+
+  memset(player,0,sizeof(charProfileStruct));
+
+  fillProfileStruct(player,data,len,true);
+
   m_shortZoneName = zoneNameFromID(player->zoneId);
   m_longZoneName = zoneLongNameFromID(player->zoneId);
   m_zone_exp_multiplier = defaultZoneExperienceMultiplier;

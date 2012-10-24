@@ -102,9 +102,9 @@
 
 //Maximum limits of certain types of data
 #define MAX_KNOWN_SKILLS                100
-#define MAX_SPELL_SLOTS                 12
-#define MAX_KNOWN_LANGS                 26
-#define MAX_SPELLBOOK_SLOTS             400
+#define MAX_SPELL_SLOTS                 16
+#define MAX_KNOWN_LANGS                 32
+#define MAX_SPELLBOOK_SLOTS             720
 #define MAX_GROUP_MEMBERS               6
 #define MAX_BUFFS                       42
 #define MAX_GUILDS                      8192
@@ -112,7 +112,7 @@
 #define MAX_BANDOLIERS                  20
 #define MAX_POTIONS_IN_BELT             5
 #define MAX_TRIBUTES                    5
-#define MAX_DISCIPLINES                 100
+#define MAX_DISCIPLINES                 200
 
 //Item Flags
 #define ITEM_NORMAL                     0x0000
@@ -664,10 +664,10 @@ struct dzInfo
  */
 struct playerProfileStruct
 {
-/*00004*/ uint32_t  gender;                           // Player Gender - 0 Male, 1 Female
+/*00004*/ uint16_t  gender;                           // Player Gender - 0 Male, 1 Female
 /*00008*/ uint32_t  race;                             // Player race
 /*00012*/ uint32_t  class_;                           // Player class
-/*00016*/ uint8_t   unknown00016[40];                 // ***Placeholder
+/*00016*/ uint8_t   unknown00016[44];                 // ***Placeholder
 /*00056*/ uint8_t   level;                            // Level of player
 /*00057*/ uint8_t   level1;                           // Level of player (again?)
 /*00058*/ uint8_t   unknown00058[2];                  // ***Placeholder
@@ -697,9 +697,10 @@ struct playerProfileStruct
                /*00376*/ EquipStruct equip_primary;        // Equipment: Main visual
                /*00396*/ EquipStruct equip_secondary;      // Equipment: Off visual
            } equip;
-            /*00416*/ EquipStruct equipment[9];
+            /*00416*/ EquipStruct equipment[22];
          };
 /*00416*/ uint8_t   unknown00416[268];                // *** Placeholder
+/*00416*/ uint8_t   unknowntmp[30];                   // *** Placeholder
 /*00688*/ Color_Struct item_tint[9];                  // RR GG BB 00
 /*00724*/ AA_Array  aa_array[MAX_AA];                 // AAs
 /*04324*/ uint32_t  points;                           // Unspent Practice points
@@ -717,8 +718,8 @@ struct playerProfileStruct
 /*04396*/ uint8_t   unknown04396[180];                // *** Placeholder
 /*04576*/ int32_t   sSpellBook[729];                  // List of the Spells in spellbook
 /*07492*/ int32_t   sMemSpells[MAX_SPELL_SLOTS];      // List of spells memorized
-/*07540*/ uint8_t   unknown07540[20];                 // *** Placeholder
-/*07560*/ uint32_t  platinum;                         // Platinum Pieces on player
+/*07540*/ uint8_t   unknown07540[17];                 // *** Placeholder
+/*07585*/ uint32_t  platinum;                         // Platinum Pieces on player
 /*07564*/ uint32_t  gold;                             // Gold Pieces on player
 /*07568*/ uint32_t  silver;                           // Silver Pieces on player
 /*07572*/ uint32_t  copper;                           // Copper Pieces on player
@@ -752,8 +753,8 @@ struct playerProfileStruct
 
 /*
 ** Player Profile
-** Length: 33904 Octets
-** OpCode: CharProfileCode
+** Length: Variable
+** OpCode: OP_PlayerProfile
 */
 struct charProfileStruct
 {
@@ -1071,19 +1072,18 @@ struct spawnStruct
          {
            struct
            {
-/*0000*/     signed   padding0000:12;            // ***Placeholder
-             signed   deltaX:13;                 // change in x
-             signed   padding0005:7;             // ***Placeholder
-/*0000*/     signed   deltaHeading:10;           // change in heading
-             signed   deltaY:13;                 // change in y
-             signed   padding0006:9;             // ***Placeholder
-/*0000*/     signed   y:19;                      // y coord
-             signed   animation:13;              // animation
-/*0000*/     unsigned heading:12;                // heading
-             signed   x:19;                      // x coord
-             signed   padding0014:1;             // ***Placeholder
-/*0000*/     signed   z:19;                      // z coord
-             signed   deltaZ:13;                 // change in z
+             signed   padding0000:12;                // ***Placeholder
+             signed   deltaHeading:10;               // change in heading
+             signed   padding0005:10;                // ***Placeholder
+             signed   z:19;                          // z coord
+             signed   deltaZ:13;                     // change in z
+             signed   deltaY:13;                     // change in y
+             signed   y:19;                          // y coord
+             signed   x:19;                          // x coord
+             signed   deltaX:13;                     // change in x
+             unsigned heading:12;                    // heading
+             signed   animation:10;                  // animation
+             signed   padding0006:10;                // ***Placeholder
            };
            int32_t posData[5];
          };
@@ -2329,21 +2329,19 @@ struct randomStruct
 struct playerSpawnPosStruct
 {
 /*0000*/ uint16_t spawnId;
-	 uint8_t  unk[2];	                 // BSH 13 Apr 2011
-/*0002*/ signed   padding0000:12;                // ***Placeholder
-         signed   deltaX:13;                     // change in x
-         signed   padding0005:7;                 // ***Placeholder
-/*0006*/ signed   deltaHeading:10;               // change in heading
-         signed   deltaY:13;                     // change in y
-         signed   padding0006:9;                 // ***Placeholder
-/*0010*/ signed   y:19;                          // y coord
-         signed   animation:10;                  // animation
-         signed   padding0010:3;                 // ***Placeholder
-/*0014*/ unsigned heading:12;                    // heading
-         signed   x:19;                          // x coord
-         signed   padding0014:1;                 // ***Placeholder
-/*0020*/ signed   z:19;                          // z coord
+/*0002*/ uint8_t  unk[2];	                       // BSH 13 Apr 2011
+/*0004*/ signed   padding0000:12;                // ***Placeholder
+         signed   deltaHeading:10;               // change in heading
+         signed   padding0005:10;                // ***Placeholder
+/*0008*/ signed   z:19;                          // z coord
          signed   deltaZ:13;                     // change in z
+/*0012*/ signed   deltaY:13;                     // change in y
+         signed   y:19;                          // y coord
+/*0016*/ signed   x:19;                          // x coord
+         signed   deltaX:13;                     // change in x
+/*0020*/ unsigned heading:12;                    // heading
+         signed   animation:10;                  // animation
+         signed   padding0006:10;                // ***Placeholder
 /*0024*/
 };
 
@@ -2358,19 +2356,15 @@ struct playerSelfPosStruct
 /*0000*/ uint16_t spawnId;                       // Player's spawn id
 /*0002*/ uint8_t unknown0002[2];                 // ***Placeholder (update time counter?)
 /*0004*/ uint8_t unknown0004[6];                 // ***Placeholder -- BSH 13 Apr 2011
-/*0010*/ float x;                                // x coord (2nd loc value)
-/*0014*/ float y;                                // y coord (1st loc value)
-/*0018*/ signed deltaHeading:10;                 // change in heading
-         unsigned animation:10;                  // animation
-         unsigned padding0016:12;                // ***Placeholder 
-/*0022*/ float deltaX;                           // Change in x
-/*0026*/ float deltaY;                           // Change in y
-/*0030*/ float z;                                // z coord (3rd loc value)
-/*0034*/ float deltaZ;                           // Change in z
-/*0038*/ unsigned padding0036:10;                // ***Placeholder
+/*0010*/ float y;                                // y coord (1st loc value)
+/*0014*/ float deltaY;
+         signed deltaHeading:10;                 // change in heading
          unsigned heading:12;                    // Directional heading
-         unsigned padding0037:10;                // ***Placeholder 
-/*0042*/
+         unsigned animation:10;                  // animation
+/*0022*/ float deltaX;
+/*0026*/ float deltaZ;
+/*0030*/ float x;                                // x coord (2nd loc value)
+/*0034*/ float z;                                // z coord (3rd loc value)
 };
 
 

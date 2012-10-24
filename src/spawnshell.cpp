@@ -637,7 +637,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
 
    name = netStream.readText();
 
-   if(name.length())
+   if(name.length() > 0 && name.length() < sizeof(spawn->lastName))
    {
       strcpy(spawn->lastName, name.latin1());
    }

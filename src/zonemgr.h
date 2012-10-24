@@ -58,12 +58,13 @@ class ZoneMgr : public QObject
 
  protected slots:
   void zoneEntryClient(const uint8_t* zsentry, size_t, uint8_t);
-  void zonePlayer(const uint8_t* zsentry);
+  void zonePlayer(const uint8_t* zsentry, size_t len);
   void zoneChange(const uint8_t* zoneChange, size_t, uint8_t);
   void zoneNew(const uint8_t* zoneNew, size_t, uint8_t);
   void zonePoints(const uint8_t* zp, size_t, uint8_t);
   void dynamicZonePoints(const uint8_t *data, size_t len, uint8_t);
   void dynamicZoneInfo(const uint8_t *data, size_t len, uint8_t);
+  int32_t fillProfileStruct(charProfileStruct *player, const uint8_t *data, size_t len, bool checkLen);
 
  signals:
   void zoneBegin();

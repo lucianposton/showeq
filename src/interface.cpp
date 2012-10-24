@@ -1644,8 +1644,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			"ClientZoneEntryStruct", SZC_Match,
 			m_zoneMgr, SLOT(zoneEntryClient(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_PlayerProfile", SP_Zone, DIR_Server,
-			"charProfileStruct", SZC_Match,
-			m_zoneMgr, SLOT(zonePlayer(const uint8_t*)));
+			"uint8_t", SZC_None,
+			m_zoneMgr, SLOT(zonePlayer(const uint8_t*, size_t)));
      m_packet->connect2("OP_ZoneChange", SP_Zone, DIR_Client|DIR_Server,
 			"zoneChangeStruct", SZC_Match,
 			m_zoneMgr, SLOT(zoneChange(const uint8_t*, size_t, uint8_t)));

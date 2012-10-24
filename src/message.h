@@ -12,6 +12,7 @@
 #define _MESSAGE_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include <qstring.h>
 #include <qdatetime.h>
