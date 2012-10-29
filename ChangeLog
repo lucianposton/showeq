@@ -3,7 +3,7 @@ Fransick (08/17/12)
 - Updated version to 5.13.10.6
 - Updated opcodes/structs
 - Added support for Hero's Forge armor changes to spawnshell.cpp
-- Edited MAINTAINERCLEANFILES to work more relaibly with make -f Makefile.dist clean
+- Edited MAINTAINERCLEANFILES to work more reliably with make -f Makefile.dist clean
 
 Fransick (07/18/12)
 -----------------
