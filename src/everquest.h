@@ -1450,7 +1450,7 @@ struct spawnPositionUpdate
 {
 /*0000*/ int16_t  spawnId;
 /*0002*/ uint8_t unk1[2];		         // BSH 13 Apr 2011
-/*0004*/ int64_t  y:19, z:19, x:19, u3:7;
+/*0004*/ int64_t  y:19, z:19, u3:7,x:19;
          unsigned heading:12;
          signed unused2:4;
 /*0014*/

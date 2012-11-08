@@ -550,16 +550,13 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->spawnId = netStream.readUInt32NC();
 
    spawn->level = netStream.readUInt8();
-
    // skip the next 4 bytes
    netStream.skipBytes(4);
 
    spawn->NPC = netStream.readUInt8();
-
    spawn->miscData = netStream.readUInt32NC();
 
    spawn->otherData = netStream.readUInt8();
-
    // skip unknown3, unknown4
    netStream.skipBytes(8);
 
@@ -598,30 +595,19 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
        netStream.skipBytes(54);	// and 54 static bytes
    }
 
-
-   // skip facestyle, walk/run speeds, unknown5
-   netStream.skipBytes(13);
-
-   spawn->race = netStream.readUInt32NC();
-
    spawn->charProperties = netStream.readUInt8();
+   spawn->bodytype = netStream.readUInt32NC();
 
-   if(spawn->charProperties)
+   for(i = 0; i < spawn->charProperties; i++)
    {
-      spawn->bodytype = netStream.readUInt32NC();
-
-      for(i = 1; i < spawn->charProperties; i++)
-      {
-         // extra character properties
-         netStream.skipBytes(4);
-      }
+      // extra character properties
+      netStream.skipBytes(4);
    }
 
-   spawn->curHp = netStream.readUInt8();
+   // skip facestyle, walk/run speeds, unknown5
+   netStream.skipBytes(32);
 
-   // skip hair and face stuff
-   netStream.skipBytes(18);
-
+   spawn->race = netStream.readUInt32NC();
    spawn->holding = netStream.readUInt8();
    spawn->deity = netStream.readUInt32NC();
    spawn->guildID = netStream.readUInt32NC();
@@ -633,7 +619,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->state = netStream.readUInt8();
    spawn->light = netStream.readUInt8();
 
-   netStream.skipBytes(5);
+   netStream.skipBytes(1);
 
    name = netStream.readText();
 
@@ -647,13 +633,6 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->petOwnerId = netStream.readUInt32NC();
 
    netStream.skipBytes(25);
-
-   spawn->posData[0] = netStream.readUInt32NC();
-   spawn->posData[1] = netStream.readUInt32NC();
-   spawn->posData[2] = netStream.readUInt32NC();
-   spawn->posData[3] = netStream.readUInt32NC();
-   spawn->posData[4] = netStream.readUInt32NC();
-
    race = spawn->race;
 
    // this is how the client checks if equipment should be read.
@@ -663,7 +642,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       netStream.skipBytes(36);
       for(i = 0; i < 9; i++)
       {
-	 spawn->equipment[i].equip3 = netStream.readUInt32NC();
+         spawn->equipment[i].equip3 = netStream.readUInt32NC();
          spawn->equipment[i].itemId = netStream.readUInt32NC();
          spawn->equipment[i].equip2 = netStream.readUInt32NC();
          spawn->equipment[i].equip1 = netStream.readUInt32NC();
@@ -681,6 +660,12 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       spawn->equipment[8].equip1 = netStream.readUInt32NC();
       spawn->equipment[8].equip0 = netStream.readUInt32NC();
    }
+
+   spawn->posData[0] = netStream.readUInt32NC();
+   spawn->posData[1] = netStream.readUInt32NC();
+   spawn->posData[2] = netStream.readUInt32NC();
+   spawn->posData[3] = netStream.readUInt32NC();
+   spawn->posData[4] = netStream.readUInt32NC();
 
    if(spawn->otherData & 8)
    {

@@ -194,20 +194,19 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   QString name;
 
   player->checksum = netStream.readUInt32NC();
-  
-  player->profile.gender = netStream.readUInt16();
-  player->profile.race = netStream.readUInt32NC();
-  player->profile.class_ = netStream.readUInt32NC();
 
   // Unknown  
-  netStream.skipBytes(44);
+  netStream.skipBytes(12);
   
+  player->profile.gender = netStream.readUInt8();
+  player->profile.race = netStream.readUInt8();
+  player->profile.class_ = netStream.readUInt32NC();
   player->profile.level = netStream.readUInt8();
   player->profile.level1 = netStream.readUInt8();
 
   // Really, everything after the level is not critical for operation.  If 
   // needed, skip the rest to get up and running quickly after patch day.
-#if 1
+#if 0
   // Bind points
   int bindCount = netStream.readUInt32NC();
   for (int i = 0; i < bindCount; i++) {
