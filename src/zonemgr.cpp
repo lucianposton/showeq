@@ -223,25 +223,17 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     player->profile.spellSlotRefresh[i] = netStream.readUInt32NC();
   }
   
-  player->profile.haircolor = netStream.readUInt8();
-  player->profile.beardcolor = netStream.readUInt8();
-
-  // Unknown
-  netStream.skipBytes(6);
-  
-  player->profile.eyecolor1 = netStream.readUInt8();
-  player->profile.eyecolor2 = netStream.readUInt8();
-  player->profile.hairstyle = netStream.readUInt8();
-  player->profile.beard = netStream.readUInt8();
-
-  // Unknown
-  netStream.skipBytes(11);
-
   // Equipment
   int equipCount = netStream.readUInt32NC();
   for (int i = 0; i < equipCount; i++) {
     memcpy(&player->profile.equipment[i], netStream.pos(), sizeof(player->profile.equipment[i]));
     netStream.skipBytes(sizeof(player->profile.equipment[i]));
+  }
+  
+  // Something
+  int sCount = netStream.readUInt32NC();
+  for (int i = 0; i < sCount; i++) {
+    netStream.skipBytes(20);
   }
 
   // Visible equipment tints (dye color)
@@ -250,13 +242,14 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     player->profile.item_tint[i].color = netStream.readUInt32NC();
   }
 
-  // AAs
-  int aaCount = netStream.readUInt32NC();
-  for (int i = 0; i < aaCount; i++) {
-    player->profile.aa_array[i].AA = netStream.readUInt32NC();
-    player->profile.aa_array[i].value = netStream.readUInt32NC();
-    player->profile.aa_array[i].unknown008 = netStream.readUInt32NC();
+  // Something
+  int sCount2 = netStream.readUInt32NC();
+  for (int i = 0; i < sCount; i++) {
+    netStream.skipBytes(4);
   }
+
+  // Looks like face, haircolor, beardcolor, eyes, etc. Skipping over it.
+  netStream.skipBytes(52);
 
   player->profile.points = netStream.readUInt32NC();
   player->profile.MANA = netStream.readUInt32NC();
@@ -272,6 +265,16 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   // Unknown
   netStream.skipBytes(28);
   
+  // AAs
+  int aaCount = netStream.readUInt32NC();
+  for (int i = 0; i < aaCount; i++) {
+    player->profile.aa_array[i].AA = netStream.readUInt32NC();
+    player->profile.aa_array[i].value = netStream.readUInt32NC();
+    player->profile.aa_array[i].unknown008 = netStream.readUInt32NC();
+  }
+
+  // Everything after this has not yet been re-aligned for the 20121107 patch.
+
   player->profile.face = netStream.readUInt32NC();
 
   // Unknown

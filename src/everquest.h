@@ -374,7 +374,8 @@ struct SessionRequestStruct
 /*0000*/ uint32_t unknown0000;
 /*0004*/ uint32_t sessionId;
 /*0008*/ uint32_t maxLength;
-/*0012*/
+/*0012*/ uint8_t tag[10];  // "Everquest\0"
+/*0022*/
 };
 
 /**
@@ -2353,8 +2354,8 @@ struct playerSpawnPosStruct
 
 struct playerSelfPosStruct
 {
-/*0000*/ uint16_t spawnId;                       // Player's spawn id
-/*0002*/ uint8_t unknown0002[2];                 // ***Placeholder (update time counter?)
+/*0000*/ uint8_t unknown0002[2];                 // ***Placeholder (update time counter?)
+/*0002*/ uint16_t spawnId;                       // Player's spawn id
 /*0004*/ uint8_t unknown0004[6];                 // ***Placeholder -- BSH 13 Apr 2011
 /*0010*/ float y;                                // y coord (1st loc value)
 /*0014*/ float deltaY;

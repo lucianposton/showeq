@@ -536,11 +536,13 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
 
     if (calcedCRC != packet.crc())
     {
-      seqWarn("INVALID PACKET: Bad CRC [%s:%d -> %s:%d] netOp %04x seq %04x len %d crc (%04x != %04x)",
+#if (defined(PACKET_PROCESS_DIAG))
+      seqDebug("INVALID PACKET: Bad CRC [%s:%d -> %s:%d] netOp %04x seq %04x len %d crc (%04x != %04x)",
          (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
          (const char*)packet.getIPv4DestA(), packet.getDestPort(),
          packet.getNetOpCode(), packet.arqSeq(), packet.getUDPPayloadLength(),
          packet.crc(), calcedCRC);
+#endif
       return;
     }
   }
