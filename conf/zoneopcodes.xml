@@ -238,8 +238,8 @@
         <comment>ExpUpdateCode - opcode looks to be 67d1 as of 11/28/12 but that value causes seg faults for some reason</comment>
         <payload dir="server" typename="expUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="5777" name="OP_LevelUpdate" updated="11/28/12">
-        <comment>LevelUpUpdateCode</comment>
+    <opcode id="0000" name="OP_LevelUpdate" updated="11/28/12">
+        <comment>LevelUpUpdateCode - causing crashes as of 12/08/12  Investigating</comment>
         <payload dir="server" typename="levelUpUpdateStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="3798" name="OP_LeaderExpUpdate" updated="11/28/12">
