@@ -1,3 +1,24 @@
+Fransick (11/28/12)
+-----------------
+- Updated version to 5.13.10.8
+- Updated fillProfileStruct to map most of playerProfile (see comments in zonemgr.cpp for details)
+- Updated zones.h for Reign of Fear zones
+- Fixed several structs in everquest.h that were causing console to spit out garbage due to rearranged data
+- Zoneopcodes.xml updated
+
+r6express (11/24/12)
+-----------------
+- Updated version to 5.13.10.7
+- SessionRequestStruct has a new "Everquest" tag
+- playerSelfPosStruct spawnId and counter were swapped
+- Updated more of the fillProfileStruct() method, still more to do so it's remaining mostly disabled
+
+r6express (10/24/12)
+-----------------
+- Changed charProfileStruct population to be dynamic due to variable length
+- Updated positional structs
+- Message.h now included stddef.h
+
 Fransick (08/17/12)
 -----------------
 - Updated version to 5.13.10.6

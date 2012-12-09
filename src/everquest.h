@@ -428,22 +428,23 @@ struct Color_Struct
 
 /*
 * Used in charProfileStruct. Buffs
-* Length: 88 Octets
+* Length: 80 Octets
 */
 struct spellBuff
 {
-/*0000*/  uint8_t     unknown0000;               //
-/*0001*/  int8_t      level;                     // Level of person who cast buff
-/*0002*/  uint8_t     unknown0002;               //
-/*0003*/  uint8_t     unknown0003;               //
-/*0004*/  float       unknown0004;
-/*0008*/  int32_t     spellid;                   // Spell
-/*0012*/  int32_t     duration;                  // Time remaining in ticks
-/*0016*/  int32_t     effect;                    // holds the dmg absorb amount on runes
-/*0020*/  uint8_t     unknown0020[4];            // *** this might need to be swapped with playerId
-/*0024*/  uint32_t    playerId;                  // Global id of caster (for wear off)
-/*0028*/  uint8_t     unknown0028[60];
-/*0088*/
+/*0000*/ uint8_t unknown0000;                    //
+/*0001*/ uint8_t unknown0001;                    //
+/*0002*/ uint8_t unknown0002;                    //
+/*0003*/ uint8_t unknown0003;                    //
+/*0004*/ uint8_t unknown0004;                    //
+/*0005*/ uint32_t playerId;                      // Global id of caster (for wear off)
+/*0009*/ uint8_t unknown0009[5];                 //
+/*0014*/ int32_t duration;                       // Time remaining in ticks
+/*0018*/ int8_t level;                           // Level of person who cast buff
+/*0019*/ int32_t spellid;                        // Spell
+/*0023*/ int32_t effect;                         // holds the dmg absorb amount on runes
+/*0027*/ uint8_t unknown0027[53];
+/*0080*/
 };
 
 
@@ -763,7 +764,8 @@ struct charProfileStruct
 /*00004*/ playerProfileStruct profile;                // Profile
 /*20084*/ char      name[64];                         // Name of player
 /*20148*/ char      lastName[32];                     // Last name of player
-/*20180*/ uint8_t   unknown20180[8];                  // *** Placeholder
+/*20180*/ uint8_t   unknown20180[4];                  // *** Placeholder
+/*20184*/ uint32_t  accountCreateDate;                // Date account was created
 /*20188*/ int32_t   guildID;                          // guildID
 /*20192*/ uint32_t  birthdayTime;                     // character birthday
 /*20196*/ uint32_t  lastSaveTime;                     // character last save time
@@ -2095,10 +2097,10 @@ struct spellFadedStruct
 */
 struct beginCastStruct
 {
-/*0000*/ uint16_t spawnId;                       // Id of who is casting
-/*0002*/ uint16_t spellId;                       // Id of spell
-/*0004*/ int16_t  param1;                        // Paramater 1
-/*0006*/ int16_t  param2;                        // Paramater 2
+/*0000*/ uint16_t spellId;                       // Id of spell 
+/*0002*/ int16_t  param2;                        // Paramater 1
+/*0004*/ uint16_t spawnId;                       // Id of who is casting
+/*0006*/ int16_t  param1;                        // Paramater 2
 /*0008*/ int16_t  param3;                        // Paramater 3
 /*0010*/
 };
@@ -2553,7 +2555,7 @@ struct buffStruct
 
 /*
 ** Guild Member Update structure 
-** Length: 76 Octets
+** Length: 80 Octets
 **
 */
 
@@ -2564,7 +2566,8 @@ struct GuildMemberUpdate
 /*068*/ uint16_t zoneId;                         // zone id 
 /*070*/ uint16_t zoneInstance;                   // zone instance
 /*072*/ uint32_t lastOn;                         // time the player was last on.
-/*076*/
+/*076*/ uint8_t uknown076[4];                    // 4 bytes added 11/28/12
+/*080*/
 };
 
 /*

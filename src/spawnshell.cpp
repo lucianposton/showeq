@@ -589,7 +589,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       netStream.skipBytes(4);
    }
 
-   if(spawn->otherData & 2) {	// aura stuff
+   if(spawn->otherData & 4) {	// aura stuff
        netStream.readText();	// skip 2 variable len strings
        netStream.readText();
        netStream.skipBytes(54);	// and 54 static bytes
@@ -667,13 +667,13 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->posData[3] = netStream.readUInt32NC();
    spawn->posData[4] = netStream.readUInt32NC();
 
-   if(spawn->otherData & 8)
+   if(spawn->otherData & 16)
    {
       name = netStream.readText();
       strcpy(spawn->title, name.latin1());
    }
 
-   if(spawn->otherData & 16)
+   if(spawn->otherData & 32)
    {
       name = netStream.readText();
       strcpy(spawn->suffix, name.latin1());

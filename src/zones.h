@@ -12,7 +12,7 @@
 { "qeynos2", "North Qeynos" }, // 2
 { "qrg", "Surefall Glade" }, // 3
 { "qeytoqrg", "Qeynos Hills" }, // 4
-{ "highpass", "Highpass Hold" }, // 5
+{ NULL, NULL }, // 5
 { "highkeep", "HighKeep" }, // 6
 { NULL, NULL }, // 7
 { "freportn", "North Freeport" }, // 8
@@ -59,7 +59,7 @@
 { "oggok", "Oggok" }, // 49
 { "rathemtn", "Mountains of Rathe" }, // 50
 { "lakerathe", "Lake Rathetear" }, // 51
-{ "grobb", "Gukta" }, // 52
+{ "grobb", "Grobb" }, // 52
 { "aviak", "Aviak Village" }, // 53
 { "gfaydark", "Greater Faydark" }, // 54
 { "akanon", "Ak'Anon" }, // 55
@@ -229,7 +229,7 @@
 { "potimea", "Plane of Time" }, // 219
 { "hohonorb", "Temple of Marr" }, // 220
 { "nightmareb", "Lair of Terris Thule" }, // 221
-{ "poearthb", "Ragrax, Stronghold of the Twelve" }, // 222
+{ "poearthb", "Stronghold of the Twelve" }, // 222
 { "potimeb", "Plane of Time" }, // 223
 { "gunthak", "Gulf of Gunthak" }, // 224
 { "dulak", "Dulak's Harbor" }, // 225
@@ -306,7 +306,7 @@
 { "inktuta", "Inktu`Ta, The Unmasked Chapel" }, // 296
 { "txevu", "Txevu, Lair of the Elite" }, // 297
 { "tacvi", "Tacvi, Seat of the Slaver" }, // 298
-{ "qvicb", "Qvic, the Hiden Vault" }, // 299
+{ "qvicb", "Qvic, the Hidden Vault" }, // 299
 { "wallofslaughter", "Wall of Slaughter" }, // 300
 { "bloodfields", "The Bloodfields" }, // 301
 { "draniksscar", "Dranik's Scar" }, // 302
@@ -349,12 +349,12 @@
 { "stillmoonb", "The Ascent" }, // 339
 { "thundercrest", "Thundercrest Isles" }, // 340
 { "delvea", "Lavaspinner's Lair" }, // 341
-{ "delveb", "Tirranum's Delve"}, // 342
+{ "delveb", "Tirranun's Delve" }, // 342
 { "thenest", "The Accursed Nest" }, // 343
-{ "guildlobby", "Guild Lobby" }, // 344
+{ "guildlobby", "The Guild Lobby" }, // 344
 { "guildhall", "Guild Hall" }, // 345
-{ "barter", "Barter Hall" }, // 346
-{ "illsalin", "The Ruins of Illsalin" }, // 347
+{ "barter", "The Barter Hall" }, // 346
+{ "illsalin", "Ruins of Illsalin" }, // 347
 { "illsalina", "Imperial Bazaar" }, // 348
 { "illsalinb", "Temple of the Korlach" }, // 349
 { "illsalinc", "The Nargilor Pits" }, // 350
@@ -376,35 +376,35 @@
 { "corathusa", "Sporali Caverns" }, // 366
 { "corathusb", "Corathus Lair" }, // 367
 { "nektulosa", "Shadowed Grove" }, // 368
-{ "arcstone", "Arcstone"}, // 369
-{ "relic", "Relic"}, // 370
-{ "skylance", "Skylance"}, // 371
-{ "devastation", "The Devastation"}, // 372
-{ "devastationa", "The Seething Wall"}, // 373
-{ "rage", "Sverag, Stronghold of Rage"}, // 374
-{ "ragea", "Razorthorn, Tower of Sullon Zek"}, // 375
-{ "takishruins", "Ruins of Takish-Hiz"}, // 376
-{ "takishruinsa", "The Root of Ro"}, // 377
-{ "elddar", "The Elddar Forest"}, // 378
-{ "elddara", "Tunare's Shrine"}, // 379
-{ "theater", "Theater of Blood"}, // 380
-{ "theatera", "Deathknell, Tower of Dissonance"}, // 381
-{ "freeporteast", "Freeport East"}, // 382
-{ "freeportwest", "Freeport West"}, // 383
-{ "freeportsewers", "Freeport Sewers"}, // 384
-{ "freeportacademy", "Academy of Arcane Sciences"}, // 385
-{ "freeporttemple", "Temple of Marr"}, // 386
-{ "freeportmilitia", "Freeport Militia House"}, // 387
-{ "freeportarena", "Arena"}, // 388
-{ "freeportcityhall", "City Hall"}, // 389
-{ "freeporttheater", "Theater"}, // 390
-{ "freeporthall", "Hall of Truth"}, // 391
-{ "northro", "North Ro"}, // 392
-{ "southro", "South Ro"}, // 393
+{ "arcstone", "Arcstone" }, // 369
+{ "relic", "Relic" }, // 370
+{ "skylance", "Skylance" }, // 371
+{ "devastation", "The Devastation" }, // 372
+{ "devastationa", "The Seething Wall" }, // 373
+{ "rage", "Sverag, Stronghold of Rage" }, // 374
+{ "ragea", "Razorthorn, Tower of Sullon Zek" }, // 375
+{ "takishruins", "Ruins of Takish-Hiz" }, // 376
+{ "takishruinsa", "The Root of Ro" }, // 377
+{ "elddar", "The Elddar Forest" }, // 378
+{ "elddara", "Tunare's Shrine" }, // 379
+{ "theater", "Theater of Blood" }, // 380
+{ "theatera", "Deathknell, Tower of Dissonance" }, // 381
+{ "freeporteast", "East Freeport" }, // 382
+{ "freeportwest", "West Freeport" }, // 383
+{ "freeportsewers", "Freeport Sewers" }, // 384
+{ "freeportacademy", "Academy of Arcane Sciences" }, // 385
+{ "freeporttemple", "Temple of Marr" }, // 386
+{ "freeportmilitia", "Freeport Militia House" }, // 387
+{ "freeportarena", "Arena" }, // 388
+{ "freeportcityhall", "City Hall" }, // 389
+{ "freeporttheater", "Theater" }, // 390
+{ "freeporthall", "Hall of Truth" }, // 391
+{ "northro", "North Ro" }, // 392
+{ "southro", "South Ro" }, // 393
 { "crescent", "Crescent Reach" }, // 394
 { "moors", "Blightfire Moors" }, // 395
 { "stonehive", "Stone Hive" }, // 396
-{ "mesa", "Koru`kar Mesa" }, // 397
+{ "mesa", "Goru`kar Mesa" }, // 397
 { "roost", "Blackfeather Roost" }, // 398
 { "steppes", "The Steppes" }, // 399
 { "icefall", "Icefall Glacier" }, // 400
@@ -731,7 +731,7 @@
 { NULL, NULL }, // 721
 { NULL, NULL }, // 722
 { "phinterior1d1", "Dragon House Interior" }, // 723
-{ "argath", "Argatch, Bastion of Illdaera" }, // 724
+{ "argath", "Argath, Bastion of Illdaera" }, // 724
 { "arelis", "Valley of Lunanyn" }, // 725
 { "sarithcity", "Sarith, City of Tides" }, // 726
 { "rubak", "Rubak Oseka, Temple of the Sea" }, // 727
@@ -743,37 +743,37 @@
 { "sepulcher", "Sepulcher of Order" }, // 733
 { "eastsepulcher", "Sepulcher East" }, // 734
 { "westsepulcher", "Sepulcher West" }, // 735
-{ NULL, NULL }, // 736
-{ NULL, NULL }, // 737
-{ NULL, NULL }, // 738
-{ NULL, NULL }, // 739
-{ NULL, NULL }, // 740
-{ NULL, NULL }, // 741
-{ NULL, NULL }, // 742
-{ NULL, NULL }, // 743
-{ NULL, NULL }, // 744
-{ NULL, NULL }, // 745
-{ NULL, NULL }, // 746
-{ NULL, NULL }, // 747
-{ NULL, NULL }, // 748
-{ NULL, NULL }, // 749
-{ NULL, NULL }, // 750
-{ NULL, NULL }, // 751
-{ NULL, NULL }, // 752
-{ NULL, NULL }, // 753
-{ NULL, NULL }, // 754
-{ NULL, NULL }, // 755
-{ NULL, NULL }, // 756
-{ NULL, NULL }, // 757
-{ NULL, NULL }, // 758
-{ NULL, NULL }, // 759
-{ NULL, NULL }, // 760
-{ NULL, NULL }, // 761
-{ NULL, NULL }, // 762
-{ NULL, NULL }, // 763
-{ NULL, NULL }, // 764
-{ NULL, NULL }, // 765
-{ NULL, NULL }, // 766
+{ "shadowedmount", "Shadowed Mount" }, // 736
+{ "guildhalllrg", "Grand Guild Hall" }, // 737
+{ "guildhallsml", "Greater Guild Hall" }, // 738
+{ "plhogrinteriors1a1", "One Bedroom House Interior" }, // 739
+{ "plhogrinteriors1a2", "One Bedroom House Interior" }, // 740
+{ "plhogrinteriors3a1", "Three Bedroom House Interior" }, // 741
+{ "plhogrinteriors3a2", "Three Bedroom House Interior" }, // 742
+{ "plhogrinteriors3b1", "Three Bedroom House Interior" }, // 743
+{ "plhogrinteriors3b2", "Three Bedroom House Interior" }, // 744
+{ "plhdkeinteriors1a1", "One Bedroom House Interior" }, // 745
+{ "plhdkeinteriors1a2", "One Bedroom House Interior" }, // 746
+{ "plhdkeinteriors1a3", "One Bedroom House Interior" }, // 747
+{ "plhdkeinteriors3a1", "Three Bedroom House Interior" }, // 748
+{ "plhdkeinteriors3a2", "Three Bedroom House Interior" }, // 749
+{ "plhdkeinteriors3a3", "Three Bedroom House Interior" }, // 750
+{ "guildhall3", "Modest Guild Hall" }, // 751
+{ "shardslanding", "Shard's Landing" }, // 752
+{ "xorbb", "Valley of King Xorbb" }, // 753
+{ "kaelshard", "Kael Drakkel: The King's Madness" }, // 754
+{ "eastwastesshard", "East Wastes: Zeixshi-Kar's Awakening" }, // 755
+{ "crystalshard", "The Crystal Caverns: Fragment of Fear" }, // 756
+{ "breedinggrounds", "The Breeding Grounds" }, // 757
+{ "eviltree", "Evantil, the Vile Oak" }, // 758
+{ "grelleth", "Grelleth's Palace, the Chateau of Filth" }, // 759
+{ "chapterhouse", "Chapterhouse of the Fallen" }, // 760
+{ "pomischief", "The Plane of Mischief" }, // 761
+{ "burnedwoods", "The Burned Woods" }, // 762
+{ "chelsith", "Chelsith Reborn" }, // 763
+{ "poshadow", "Plane of Shadow" }, // 764
+{ "heartoffear", "Heart of Fear" }, // 765
+{ "phinteriortree", "Evantil's Abode" }, // 766
 { NULL, NULL }, // 767
 { NULL, NULL }, // 768
 { NULL, NULL }, // 769
@@ -1003,7 +1003,7 @@
 { NULL, NULL }, // 993
 { NULL, NULL }, // 994
 { NULL, NULL }, // 995
-{ NULL, NULL }, // 996
-{ "arttest", "Art Testing Domain" }, // 997
+{ "arttest", "Art Testing Domain" }, // 996
+{ NULL, NULL }, // 997
 { "fhalls", "The Forgotten Halls" }, // 998
 { "apprentice", "Designer Apprentice" }, // 999
