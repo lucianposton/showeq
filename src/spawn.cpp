@@ -418,8 +418,7 @@ void Spawn::update(const spawnStruct* s)
 {
   setName(s->name);
   setLastName(s->lastName);
-
-  setPos(s->x >> 3, s->y >> 3, s->z >> 3);
+  setPos(s->x >> 3, (s->y + s->y) >> 3, s->z >> 3);
   setPetOwnerID(s->petOwnerId);
   setLight(s->light);
   setGender(s->gender);

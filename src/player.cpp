@@ -660,7 +660,7 @@ void Player::updateExp(const uint8_t* data)
 	      m_minExp, m_maxExp, m_tickExp);
   
   emit expChangedInt (realExp, m_minExp, m_maxExp);
-    
+
   if(m_freshKill)
   {
      emit expGained( m_lastSpawnKilledName,

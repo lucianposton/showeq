@@ -1,3 +1,10 @@
+ieatacid (12/30/12)
+-----------------
+- Updated version to 5.13.10.9
+- Updated opcodes, merged in opcodes updated by Fransick
+- Updated structs
+- Updated source code to fix bugs, missing data, etc (it's still not 100%)
+
 Fransick (11/28/12)
 -----------------
 - Updated version to 5.13.10.8

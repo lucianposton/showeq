@@ -451,9 +451,22 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->zoneId = netStream.readUInt16NC();
   player->zoneInstance = netStream.readUInt16NC();
 
-  // Unknown
-  netStream.skipBytes(20);
+  memcpy(&player->x, netStream.pos(), sizeof(player->x));
+  netStream.skipBytes(sizeof(player->x));
 
+  memcpy(&player->y, netStream.pos(), sizeof(player->y));
+  netStream.skipBytes(sizeof(player->y));
+
+  memcpy(&player->z, netStream.pos(), sizeof(player->z));
+  netStream.skipBytes(sizeof(player->z));
+
+  memcpy(&player->heading, netStream.pos(), sizeof(player->heading));
+  netStream.skipBytes(sizeof(player->heading));
+  
+  player->standState = netStream.readUInt8();
+  
+  netStream.skipBytes(3);
+  
   player->guildID = netStream.readInt32();
 
   // Unknown
@@ -551,21 +564,6 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     player->languages[i] = netStream.readUInt8();
   }
 
-  memcpy(&player->x, netStream.pos(), sizeof(player->x));
-  netStream.skipBytes(sizeof(player->x));
-
-  memcpy(&player->y, netStream.pos(), sizeof(player->y));
-  netStream.skipBytes(sizeof(player->y));
-
-  memcpy(&player->z, netStream.pos(), sizeof(player->z));
-  netStream.skipBytes(sizeof(player->z));
-
-  memcpy(&player->heading, netStream.pos(), sizeof(player->heading));
-  netStream.skipBytes(sizeof(player->heading));
-  
-  player->standState = netStream.readUInt8();
-
-
    // Unknown (41)
   int doubleIntCount = netStream.readUInt32NC();
   for (int i = 0; i < doubleIntCount; i++) {
@@ -600,7 +598,7 @@ void ZoneMgr::zonePlayer(const uint8_t* data, size_t len)
 
   memset(player,0,sizeof(charProfileStruct));
 
-  fillProfileStruct(player,data,len,true);
+  fillProfileStruct(player,data,len,false); // don't bother checking the length since it's always going to not match up
 
   m_shortZoneName = zoneNameFromID(player->zoneId);
   m_longZoneName = zoneLongNameFromID(player->zoneId);

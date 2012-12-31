@@ -666,7 +666,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->posData[2] = netStream.readUInt32NC();
    spawn->posData[3] = netStream.readUInt32NC();
    spawn->posData[4] = netStream.readUInt32NC();
-
+   
    if(spawn->otherData & 16)
    {
       name = netStream.readText();
@@ -852,7 +852,7 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 
   if (dir != DIR_Client)
   {
-    int16_t y = pupdate->y >> 3;
+    int16_t y = (pupdate->y + pupdate->y) >> 3;
     int16_t x = pupdate->x >> 3;
     int16_t z = pupdate->z >> 3;
     
@@ -866,20 +866,21 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
     struct pos
 {
 /*0000*/ uint16_t spawnId;
-/*0002*/ signed   padding0000:12; // ***Placeholder
-         signed   deltaX:13;      // change in x
-         signed   padding0005:7;  // ***Placeholder
-/*0006*/ signed   deltaHeading:10;// change in heading
-         signed   deltaY:13;      // change in y
-         signed   padding0006:9;  // ***Placeholder
-/*0010*/ signed   y:19;           // y coord
-         signed   animation:13;   // animation
-/*0014*/ unsigned heading:12;     // heading
-         signed   x:19;           // x coord
-         signed   padding0014:1;  // ***Placeholder
-/*0018*/ signed   z:19;           // z coord
+/*0002*/ uint16_t spawnId2;
+/*0004*/ signed   padding0004:13;
+         signed   y:19;           // y coord
+/*0008*/ signed   deltaX:13;      // change in x
+         signed   deltaHeading:10;// change in heading   
+         signed   padding0008:9;
+/*0012*/ signed   deltaY:13;      // change in y
+         signed   z:19;           // z coord
+/*0016*/ signed   x:19;           // x coord
+         signed   animation:10;   // animation
+         signed   padding0016:3;
+/*0020*/ unsigned heading:12;     // heading
          signed   deltaZ:13;      // change in z
-/*0022*/
+         signed   padding0020:7;
+/*0024*/
 };
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
@@ -888,8 +889,8 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
             float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
             float(p->deltaZ)/4.0, 
             float(p->heading), float(p->deltaHeading),
-            p->animation, p->padding0000, p->padding0005, 
-            p->padding0006, p->padding0014);
+            p->animation, p->padding0004, p->padding0008, 
+            p->padding0016, p->padding0020);
 #endif
 
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,
@@ -1434,9 +1435,15 @@ void SpawnShell::killSpawn(const uint8_t* data)
    if (item != NULL)
    {
      Spawn* spawn = (Spawn*)item;
+     
      // ZBTEMP: This is temporary until we can find a better way
      // set the last kill info on the player (do this before changing name)
-     // m_player->setLastKill(spawn->name(), spawn->level());
+     
+     // only call setLastKill if *you* killed the spawn
+     if(deadspawn->killerId == m_player->id())
+     {
+         m_player->setLastKill(spawn->name(), spawn->level());
+     }
 
      spawn->killSpawn();
      updateFilterFlags(item);

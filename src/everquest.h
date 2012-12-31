@@ -527,7 +527,7 @@ struct EquipStruct
 
 /*
 ** Type:   Zone Change Request (before hand)
-** Length: 92 Octets
+** Length: 100 Octets
 ** OpCode: ZoneChangeCode
 */
 struct zoneChangeStruct
@@ -538,7 +538,8 @@ struct zoneChangeStruct
 /*0068*/ uint8_t  unknown0068[8];                // unknown
 /*0076*/ uint8_t  unknown0076[12];               // ***Placeholder (6/29/2005)
 /*0088*/ uint8_t  unknown0088[4];                // HoT Beta (9/7/2010)
-/*0092*/
+/*0092*/ uint8_t  unknown0092[8];                // RoF (12/12/2012)
+/*0100*/
 };
 
 /*
@@ -1075,18 +1076,23 @@ struct spawnStruct
          {
            struct
            {
-             signed   padding0000:12;                // ***Placeholder
-             signed   deltaHeading:10;               // change in heading
-             signed   padding0005:10;                // ***Placeholder
-             signed   z:19;                          // z coord
-             signed   deltaZ:13;                     // change in z
-             signed   deltaY:13;                     // change in y
-             signed   y:19;                          // y coord
-             signed   x:19;                          // x coord
-             signed   deltaX:13;                     // change in x
-             unsigned heading:12;                    // heading
-             signed   animation:10;                  // animation
-             signed   padding0006:10;                // ***Placeholder
+              signed   padding0004:13;
+              signed   y:19;           // y coord
+              
+              signed   deltaX:13;      // change in x
+              signed   deltaHeading:10;// change in heading   
+              signed   padding0008:9;
+              
+              signed   deltaY:13;      // change in y
+              signed   z:19;           // z coord
+              
+              signed   x:19;           // x coord
+              signed   animation:10;   // animation
+              signed   padding0016:3;
+              
+              unsigned heading:12;     // heading
+              signed   deltaZ:13;      // change in z
+              signed   padding0020:7;
            };
            int32_t posData[5];
          };
@@ -2332,19 +2338,20 @@ struct randomStruct
 struct playerSpawnPosStruct
 {
 /*0000*/ uint16_t spawnId;
-/*0002*/ uint8_t  unk[2];	                       // BSH 13 Apr 2011
-/*0004*/ signed   padding0000:12;                // ***Placeholder
-         signed   deltaHeading:10;               // change in heading
-         signed   padding0005:10;                // ***Placeholder
-/*0008*/ signed   z:19;                          // z coord
-         signed   deltaZ:13;                     // change in z
-/*0012*/ signed   deltaY:13;                     // change in y
-         signed   y:19;                          // y coord
-/*0016*/ signed   x:19;                          // x coord
-         signed   deltaX:13;                     // change in x
-/*0020*/ unsigned heading:12;                    // heading
-         signed   animation:10;                  // animation
-         signed   padding0006:10;                // ***Placeholder
+/*0002*/ uint16_t spawnId2;
+/*0004*/ signed   padding0004:13;
+         signed   y:19;           // y coord
+/*0008*/ signed   deltaX:13;      // change in x
+         signed   deltaHeading:10;// change in heading   
+         signed   padding0008:9;
+/*0012*/ signed   deltaY:13;      // change in y
+         signed   z:19;           // z coord
+/*0016*/ signed   x:19;           // x coord
+         signed   animation:10;   // animation
+         signed   padding0016:3;
+/*0020*/ unsigned heading:12;     // heading
+         signed   deltaZ:13;      // change in z
+         signed   padding0020:7;
 /*0024*/
 };
 
@@ -2356,18 +2363,22 @@ struct playerSpawnPosStruct
 
 struct playerSelfPosStruct
 {
-/*0000*/ uint8_t unknown0002[2];                 // ***Placeholder (update time counter?)
+/*0000*/ uint8_t unknown0000[2];                 // ***Placeholder (update time counter?)
 /*0002*/ uint16_t spawnId;                       // Player's spawn id
 /*0004*/ uint8_t unknown0004[6];                 // ***Placeholder -- BSH 13 Apr 2011
-/*0010*/ float y;                                // y coord (1st loc value)
-/*0014*/ float deltaY;
-         signed deltaHeading:10;                 // change in heading
-         unsigned heading:12;                    // Directional heading
+/*0010*/ float deltaY;                           // Change in x
+/*0014*/ float x;                                // x coord (1st loc value)
+/*0018*/ float y;                                // y coord (2nd loc value)
+/*0022*/ signed deltaHeading:10;                 // change in heading
          unsigned animation:10;                  // animation
-/*0022*/ float deltaX;
-/*0026*/ float deltaZ;
-/*0030*/ float x;                                // x coord (2nd loc value)
+         unsigned padding0024:12;                // ***Placeholder
+/*0026*/ float deltaZ;                           // Change in z
+/*0030*/ float deltaX;                           // Change in y
 /*0034*/ float z;                                // z coord (3rd loc value)
+/*0038*/ unsigned heading:12;                    // Directional heading
+         unsigned padding0040:10;                // ***Placeholder
+         unsigned padding0041:10;                // ***Placeholder
+/*0042*/
 };
 
 

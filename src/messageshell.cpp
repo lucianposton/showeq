@@ -781,12 +781,12 @@ void MessageShell::player(const charProfileStruct* player)
           player->currentRadCrystals, player->currentEbonCrystals);
   m_messages->addMessage(MT_Player, message);
 
-  message = "Exp: " + Commanate(player->exp);
-  m_messages->addMessage(MT_Player, message);
+// charProfileStruct.exp hasn't been found
+//   message = "Exp: " + Commanate(player->exp);
+//   m_messages->addMessage(MT_Player, message);
 
-  message = "ExpAA: " + Commanate(player->expAA) + 
-      " (aa spent: " + Commanate(player->profile.aa_spent) + 
-      ", aa unspent: " + Commanate(player->profile.aa_unspent) + ")";
+  message = "ExpAA: (spent: " + Commanate(player->profile.aa_spent) + 
+      ", unspent: " + Commanate(player->profile.aa_unspent) + ")";
   m_messages->addMessage(MT_Player, message);
 
 #if 0 
@@ -822,8 +822,12 @@ void MessageShell::player(const charProfileStruct* player)
          spellName = spell->name();
       else
          spellName = spell_name(player->profile.buffs[buffnumber].spellid);
-      message.sprintf("You have buff %s duration left is %d in ticks.", spellName.latin1(),
-                      player->profile.buffs[buffnumber].duration);
+
+      if(player->profile.buffs[buffnumber].duration == -1)
+        message.sprintf("You have buff %s (permanent).", spellName.latin1());
+      else
+        message.sprintf("You have buff %s duration left is %d in ticks.", spellName.latin1(), player->profile.buffs[buffnumber].duration);
+      
       m_messages->addMessage(MT_Player, message);
     }
   }
