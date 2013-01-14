@@ -249,7 +249,7 @@ class Spawn : public Item
 
   // spawn related methods that sub-classes may override
   virtual QString lastName() const;
-  virtual uint8_t level() const;
+  virtual int level() const;
   virtual uint16_t deity() const;
 
   // virtual get method overloads
@@ -317,7 +317,7 @@ class Spawn : public Item
   void setMaxHP(int32_t maxHP) { m_maxHP = maxHP; }
   void setGuildID(uint16_t GuildID) { m_guildID = GuildID; }
   void setGuildTag(QString GuildTag) { m_guildTag = GuildTag; }
-  void setLevel(uint8_t level) { m_level = level; }
+  void setLevel(int level) { m_level = level; }
   void setEquipment(uint8_t wearSlot, EquipStruct item)
     { if (wearSlot < tNumWearSlots) { m_equipment[wearSlot] = item; } }
   void setNPC(uint8_t NPC) { m_NPC = NPC; }
@@ -357,7 +357,7 @@ class Spawn : public Item
   EquipStruct m_equipment[tNumWearSlots];
   uint16_t m_race;
   int16_t m_raceTeam;
-  uint8_t m_level;
+  int m_level;
   uint8_t m_gender;
   uint8_t m_class;
   uint8_t m_light;

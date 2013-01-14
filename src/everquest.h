@@ -2256,10 +2256,10 @@ struct SpawnUpdateStruct
 
 struct hpNpcUpdateStruct
 {
-/*0000*/ int32_t curHP;
-/*0004*/ int32_t maxHP;
-/*0008*/ uint16_t spawnId;
-/*0010*/ 
+/*0000*/ uint16_t spawnId;
+/*0002*/ int32_t curHP;
+/*0006*/ int32_t maxHP;
+/*0010*/
 };
 
 /*

@@ -467,7 +467,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   
   netStream.skipBytes(3);
   
-  player->guildID = netStream.readInt32();
+  player->guildID = netStream.readUInt32NC();
 
   // Unknown
   netStream.skipBytes(19);

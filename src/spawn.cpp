@@ -426,8 +426,7 @@ void Spawn::update(const spawnStruct* s)
   setRace(s->race);
   setClassVal(s->class_);
   setHP(s->curHp);
-  //setMaxHP(s->maxHp);
-  setMaxHP(s->curHp); //maxHp is no longer part of the struct
+  setMaxHP(100); //the client sets this to 100
   setGuildID(s->guildID);
   setLevel(s->level);
   for (int i = 0; i <= tLastCoreWearSlot; i++)
@@ -749,7 +748,7 @@ QString Spawn::lastName() const
   return m_lastName;
 }
 
-uint8_t Spawn::level() const 
+int Spawn::level() const
 { 
   return m_level; 
 }

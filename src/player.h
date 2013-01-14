@@ -69,7 +69,7 @@ public:
    void updateNpcHP(const uint8_t* hpupdate);
    void updateSpawnInfo(const uint8_t* su);
    void updateStamina(const uint8_t* stam);
-   void setLastKill(const QString& name, uint8_t level);
+   void setLastKill(const QString& name, int level);
    void zoneChanged(void);
    void playerUpdateSelf(const uint8_t* pupdate, size_t, uint8_t);
    void consMessage(const uint8_t* con, size_t, uint8_t dir);
@@ -83,7 +83,7 @@ public:
  public:
    virtual QString name() const;
    virtual QString lastName() const;
-   virtual uint8_t level() const;
+   virtual int level() const;
    virtual uint16_t deity() const;
    virtual uint16_t race() const;
    virtual uint8_t classVal() const;
@@ -247,7 +247,7 @@ public:
   
   // last spawn this player killed
   QString m_lastSpawnKilledName;
-  uint8_t m_lastSpawnKilledLevel;
+  int m_lastSpawnKilledLevel;
   
   // is the kill information fresh
   bool m_freshKill;

@@ -11,11 +11,11 @@
     </opcode>
 -->
 
-    <opcode id="7529" name="OP_GuildList" updated="07/18/12">
+    <opcode id="2D38" name="OP_GuildList" updated="12/12/12">
         <comment>old GuildListCode</comment>
         <payload dir="server" typename="worldGuildListStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="3eec" name="OP_MOTD" updated="08/17/12">
+    <opcode id="08B3" name="OP_MOTD" updated="12/12/12">
         <comment>old MOTDCode Server message of the day</comment>
         <payload dir="server" typename="worldMOTDStruct" sizechecktype="none"/>
     </opcode>

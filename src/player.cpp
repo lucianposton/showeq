@@ -794,7 +794,7 @@ void Player::updateStamina(const uint8_t* data)
     savePlayerState();
 }
 
-void Player::setLastKill(const QString& name, uint8_t level)
+void Player::setLastKill(const QString& name, int level)
 {
   // note the last spawn this player killed
   m_lastSpawnKilledName = name;
@@ -1234,7 +1234,7 @@ uint16_t Player::deity() const
 	  m_defaultDeity : m_deity); 
 }
 
-uint8_t Player::level() const 
+int Player::level() const
 { 
   return (!m_useAutoDetectedSettings || m_useDefaults ? 
 	  m_defaultLevel : m_level);

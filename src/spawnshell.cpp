@@ -537,15 +537,22 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    This reads data from the variable-length spawn struct
    */
 
+	// uncomment for debug info
+//#define FILLSPAWNSTRUCT_DIAG
+
    NetStream netStream(data, len);
    int32_t retVal;
-   uint32_t race;
+   uint32_t race, nTmp;
    uint8_t i;
 
    QString name = netStream.readText();
 
    if(name.length())
       strcpy(spawn->name, name.latin1());
+
+#ifdef FILLSPAWNSTRUCT_DIAG
+   seqDebug("SpawnShell::fillSpawnStruct ---- %s", name.latin1());
+#endif
 
    spawn->spawnId = netStream.readUInt32NC();
 
@@ -557,6 +564,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->miscData = netStream.readUInt32NC();
 
    spawn->otherData = netStream.readUInt8();
+
    // skip unknown3, unknown4
    netStream.skipBytes(8);
 
@@ -589,23 +597,40 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       netStream.skipBytes(4);
    }
 
-   if(spawn->otherData & 4) {	// aura stuff
+   if(spawn->otherData & 4)	    // aura stuff
+   {
        netStream.readText();	// skip 2 variable len strings
        netStream.readText();
        netStream.skipBytes(54);	// and 54 static bytes
    }
 
    spawn->charProperties = netStream.readUInt8();
-   spawn->bodytype = netStream.readUInt32NC();
+#ifdef FILLSPAWNSTRUCT_DIAG
+		   seqDebug("charProperties = %X", spawn->charProperties);
+#endif
 
-   for(i = 0; i < spawn->charProperties; i++)
+   i = spawn->charProperties;
+   do
    {
-      // extra character properties
-      netStream.skipBytes(4);
+	   nTmp =  netStream.readUInt32NC();
+
+	   if(i == spawn->charProperties)
+	   {
+		   spawn->bodytype = nTmp;
+#ifdef FILLSPAWNSTRUCT_DIAG
+		   seqDebug("bodytype = %d", spawn->bodytype);
+#endif
+	   }
    }
+   while(--i);
+
+   spawn->curHp = netStream.readUInt8();
+#ifdef FILLSPAWNSTRUCT_DIAG
+   seqDebug("curHP=%d", spawn->curHp);
+#endif
 
    // skip facestyle, walk/run speeds, unknown5
-   netStream.skipBytes(32);
+   netStream.skipBytes(35);
 
    spawn->race = netStream.readUInt32NC();
    spawn->holding = netStream.readUInt8();
@@ -613,6 +638,11 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->guildID = netStream.readUInt32NC();
    spawn->guildstatus = netStream.readUInt32NC();
    spawn->class_ = netStream.readUInt8();
+
+#ifdef FILLSPAWNSTRUCT_DIAG
+   seqDebug("race=%08X holding=%02X deity=%08X guildID=%08X guildstatus=%08X class_=%02X ",
+		   spawn->race, spawn->holding, spawn->deity, spawn->guildID, spawn->guildstatus, spawn->class_);
+#endif
 
    netStream.skipBytes(1);
 
@@ -1563,8 +1593,8 @@ void SpawnShell::refilterSpawns(spawnItemType type)
        // update the flags, if they changed, send a notification
        if (updateFilterFlags(spawn))
        {
-	 spawn->updateLastChanged();
-	 emit changeItem(spawn, tSpawnChangedFilter);
+    	 spawn->updateLastChanged();
+    	 emit changeItem(spawn, tSpawnChangedFilter);
        }
      }
    }
@@ -1580,8 +1610,8 @@ void SpawnShell::refilterSpawns(spawnItemType type)
        // update the flags, if they changed, send a notification
        if (updateFilterFlags(item))
        {
-	 item->updateLastChanged();
-	 emit changeItem(item, tSpawnChangedFilter);
+		 item->updateLastChanged();
+		 emit changeItem(item, tSpawnChangedFilter);
        }
      }
    }
@@ -1610,8 +1640,8 @@ void SpawnShell::refilterSpawnsRuntime(spawnItemType type)
        // update the flags, if they changed, send a notification
        if (updateRuntimeFilterFlags(spawn))
        {
-	 spawn->updateLastChanged();
-	 emit changeItem(spawn, tSpawnChangedRuntimeFilter);
+		 spawn->updateLastChanged();
+		 emit changeItem(spawn, tSpawnChangedRuntimeFilter);
        }
      }
    }
@@ -1627,8 +1657,8 @@ void SpawnShell::refilterSpawnsRuntime(spawnItemType type)
        // update the flags, if they changed, send a notification
        if (updateRuntimeFilterFlags(item))
        {
-	 item->updateLastChanged();
-	 emit changeItem(item, tSpawnChangedRuntimeFilter);
+		 item->updateLastChanged();
+		 emit changeItem(item, tSpawnChangedRuntimeFilter);
        }
      }
    }

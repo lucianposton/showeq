@@ -240,6 +240,8 @@ void GuildShell::guildMemberList(const uint8_t* data, size_t len)
   // read the player name from the front of the stream
   QString player = gml.readText();
 
+  gml.skipBytes(4); // added 1/12/2013
+
   // read the player count from the stream
   uint32_t count;
   count = gml.readUInt32();

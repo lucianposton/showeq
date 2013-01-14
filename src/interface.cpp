@@ -1089,7 +1089,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    // Character -> Level
    m_charLevelMenu = new QPopupMenu;
    m_charMenu->insertItem("Choose &Level", m_charLevelMenu);
-   m_levelSpinBox = new QSpinBox(1, 80, 1, this, "m_levelSpinBox");
+   m_levelSpinBox = new QSpinBox(1, 100, 1, this, "m_levelSpinBox");
    m_charLevelMenu->insertItem( m_levelSpinBox );
    m_levelSpinBox->setWrapping( true );
    m_levelSpinBox->setButtonSymbols(QSpinBox::PlusMinus);

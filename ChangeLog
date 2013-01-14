@@ -1,3 +1,12 @@
+ieatacid (1/13/13)
+-----------------
+- Updated version to 5.13.10.10
+- Fixed crash from exp updates (hopefully. it works for me)
+- Fixed some guild stuff - guild tags should now be shown, guild member list is still broken
+- Changed some code in fillSpawnStruct to fix spawn HP percentages
+- Fixed player HP data - it shows current HPs as base HPs, which the client uses to calculate current HPs along with items and buffs (maybe someone feels like adding in item and buff calcs)
+- Updated hpNpcUpdateStruct
+
 ieatacid (12/30/12)
 -----------------
 - Updated version to 5.13.10.9
