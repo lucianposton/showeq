@@ -1,3 +1,15 @@
+ShortBuss (3/15/13)
+-----------------
+- Updated version to 5.13.10.11
+- Support EQ patch 03/13/13 including updates to op-codes by fransick, structs, and some other needed changes by showeq42.  Details follow.
+- Increased size and corrected locations within position structs including spawn struct.
+- Increased size of door struct, 4 bytes were added to the end.
+- Updated location of gender flag in spawn struct
+- Increased maxSpawnLevel to 255
+- Disabled fillSpawnStruct section looking for chest/untargetable.  &1 bit changed to offline trade and couldn't find chest/untargetable new location.
+- Handle body type 0 in fillSpawnStruct
+- 4 bytes added to position data in fillSpawnStruct
+
 ieatacid (1/13/13)
 -----------------
 - Updated version to 5.13.10.10

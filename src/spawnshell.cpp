@@ -568,6 +568,9 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    // skip unknown3, unknown4
    netStream.skipBytes(8);
 
+   /* & 1 is no longer chest/untargetable.  It is now bazaar /buyer flag as of 01/16/13.
+    * Not sure where chest/untargetable flag went, maybe combined with aura now.  Disabled to prevent crashes zoning into bazaar and seems
+    * to have no negative impact so far.
    if(spawn->otherData & 1)
    {
       // it's a chest or untargetable
@@ -596,6 +599,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
       // skip the last long
       netStream.skipBytes(4);
    }
+   */
 
    if(spawn->otherData & 4)	    // aura stuff
    {
@@ -610,19 +614,27 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
 #endif
 
    i = spawn->charProperties;
-   do
+   //Handle body type of 0.  Started seeing this in Field of Scale after 01/16/13 patch.
+   if(i == 0)
    {
-	   nTmp =  netStream.readUInt32NC();
-
-	   if(i == spawn->charProperties)
-	   {
-		   spawn->bodytype = nTmp;
-#ifdef FILLSPAWNSTRUCT_DIAG
-		   seqDebug("bodytype = %d", spawn->bodytype);
-#endif
-	   }
+      spawn->bodytype = 0;
    }
-   while(--i);
+   else
+   {
+      do
+      {
+           nTmp =  netStream.readUInt32NC();
+
+           if(i == spawn->charProperties)
+           {
+                   spawn->bodytype = nTmp;
+#ifdef FILLSPAWNSTRUCT_DIAG
+                   seqDebug("bodytype = %d", spawn->bodytype);
+#endif
+           }
+      }
+      while(--i);
+   }
 
    spawn->curHp = netStream.readUInt8();
 #ifdef FILLSPAWNSTRUCT_DIAG
@@ -696,6 +708,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->posData[2] = netStream.readUInt32NC();
    spawn->posData[3] = netStream.readUInt32NC();
    spawn->posData[4] = netStream.readUInt32NC();
+   spawn->posData[5] = netStream.readUInt32NC();
    
    if(spawn->otherData & 16)
    {
@@ -882,7 +895,7 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 
   if (dir != DIR_Client)
   {
-    int16_t y = (pupdate->y + pupdate->y) >> 3;
+    int16_t y = pupdate->y >> 3;
     int16_t x = pupdate->x >> 3;
     int16_t z = pupdate->z >> 3;
     
@@ -895,32 +908,35 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 #pragma pack(1)
     struct pos
 {
-/*0000*/ uint16_t spawnId;
-/*0002*/ uint16_t spawnId2;
-/*0004*/ signed   padding0004:13;
-         signed   y:19;           // y coord
-/*0008*/ signed   deltaX:13;      // change in x
-         signed   deltaHeading:10;// change in heading   
-         signed   padding0008:9;
-/*0012*/ signed   deltaY:13;      // change in y
-         signed   z:19;           // z coord
-/*0016*/ signed   x:19;           // x coord
-         signed   animation:10;   // animation
-         signed   padding0016:3;
-/*0020*/ unsigned heading:12;     // heading
-         signed   deltaZ:13;      // change in z
-         signed   padding0020:7;
-/*0024*/
+    	/*0000*/ uint16_t spawnId;
+    	/*0002*/ uint16_t spawnId2;
+    	/*0004*/ unsigned pitch:12;       // 
+    			 signed   deltaHeading:10;// change in heading
+    			 unsigned padding05:10;
+    	/*0008*/ signed   deltaZ:13;      // change in z
+    			 unsigned heading:12;     // heading
+    	    	 unsigned padding01:7;
+    	/*0012*/ signed   z:19;           // z coord
+    			 unsigned padding02:13;
+    	/*0016*/ signed   x:19;           // x coord
+    	         signed   deltaX:13;      // change in x
+    	/*0020*/ signed   y:19;           // y coord
+    	         signed   animation:10;   // velocity
+    	         unsigned padding04:3;
+    	/*0024*/ signed   deltaY:13;      // change in y
+    	         unsigned padding03:19;   //Unknown
+    	/*0028*/
 };
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
-    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
-            p->spawnId, float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0, 
-            float(p->deltaX)/4.0, float(p->deltaY)/4.0, 
-            float(p->deltaZ)/4.0, 
-            float(p->heading), float(p->deltaHeading),
-            p->animation, p->padding0004, p->padding0008, 
-            p->padding0016, p->padding0020);
+    if (p->spawnId == 0x1234)
+        printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f\n  head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x)\n",
+                p->spawnId, float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0,
+                float(p->deltaX)/4.0, float(p->deltaY)/4.0,
+                float(p->deltaZ)/4.0,
+                p->heading, p->deltaHeading,
+                p->animation, p->pitch,
+                p->padding01, p->padding02, p->padding03, p->padding04, p->padding05);
 #endif
 
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,

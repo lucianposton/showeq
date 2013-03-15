@@ -21,7 +21,7 @@ class ZoneMgr;
 
 //----------------------------------------------------------------------
 // constants
-const int maxSpawnLevel = 100;
+const int maxSpawnLevel = 255;
 
 enum ColorLevel
 {

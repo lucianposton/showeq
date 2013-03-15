@@ -848,32 +848,37 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
 #pragma pack(1)
 struct pos
 {
-/*0000*/ uint16_t spawnId;        // Player's spawn id
-/*0002*/ uint8_t unknown0002[2];  // ***Placeholder (update time counter?)
-/*0004*/ uint8_t unknown0004[4];  // ***Placeholder
-/*0008*/ float x;                 // x coord (2nd loc value)
-/*0012*/ float y;                 // y coord (1st loc value)
-/*0016*/ signed deltaHeading:10;  // change in heading
-         unsigned animation:10;   // animation
-         unsigned padding0016:12; // ***Placeholder 
-/*0020*/ float deltaX;            // Change in x
-/*0024*/ float deltaY;            // Change in y
-/*0028*/ float z;                 // z coord (3rd loc value)
-/*0032*/ float deltaZ;            // Change in z
-/*0036*/ unsigned padding0036:10; // animation
-         unsigned heading:12;     // Directional heading
-         unsigned padding0037:10; // ***Placeholder 
-/*0040*/
+	  /*0000*/ uint16_t unknown0000;                   // ***Placeholder (update time counter?)
+	  /*0002*/ uint16_t spawnId;                       // Player's spawn id
+	  /*0004*/ uint16_t unknown0004;                   // ***Placeholder
+	  /*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
+	           unsigned padding1:20;                    // ***Placeholder
+	  /*0010*/ float y;                                // y coord (2nd loc value)
+	  /*0014*/ unsigned heading:12;                    // Directional heading
+               unsigned padding2:10;                   // ***Placeholder
+               unsigned padding3:10;                   // ***Placeholder
+	  /*0018*/ float z;                                // z coord (3rd loc value)
+	  /*0022*/ signed animation:10;                    // velocity
+	           unsigned padding6:22;                   // **Placeholder
+	  /*0026*/ float deltaZ;                           // Change in z
+	  /*0030*/ float x;                                // x coord (1st loc value)
+	  /*0034*/ float deltaX;                           // Change in x
+	  /*0038*/ float deltaY;                           // Change in y
+	  /*0042*/ signed deltaHeading:10;                 // change in heading
+      	  	   unsigned padding4:10;                   // ***Placeholder
+      	  	   unsigned padding5:12;                   // ***Placeholder
+	  /*0046*/
 };
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
-    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
-            p->spawnId, p->x, p->y, p->z, 
-            p->deltaX, p->deltaY, p->deltaZ, 
-            float(p->heading), float(p->deltaHeading),
-            p->animation, *(uint16_t*) p->unknown0002, p->padding0016, 
-            p->padding0028,
-            *(uint32_t*) p->unknown0004);
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x, %x)\n",
+            p->spawnId, p->x, p->y, p->z,
+            p->deltaX, p->deltaY, p->deltaZ,
+            p->heading, p->deltaHeading,
+            p->animation, p->pitch,
+            p->padding1, p->padding2, p->padding3,
+            p->padding4, p->padding5, p->padding6 );
+
 #endif
 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);
