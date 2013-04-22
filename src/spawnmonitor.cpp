@@ -229,7 +229,7 @@ void SpawnMonitor::restartSpawnPoint( SpawnPoint* sp )
 void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
 {
   // ignore everything but mobs
-  if ( ( spawn->NPC() != SPAWN_NPC ) || ( spawn->petOwnerID() != 0 ) || (spawn->level() == 30 && spawn->race() == 216) )
+  if ( ( spawn->NPC() != SPAWN_NPC ) || ( spawn->petOwnerID() != 0 ) || spawn->isMount() || spawn->isAura() || spawn->isMercenary() )
     return;
   
   QString		key = SpawnPoint::key( *spawn );

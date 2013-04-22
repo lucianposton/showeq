@@ -1,3 +1,12 @@
+ShortBuss (4/22/13)
+-----------------
+- Updated version to 5.13.10.12
+- Support EQ patch 04/17/13. OpCodes by Fransick
+- 4 bytes removed from position data in fillSpawnStruct.
+- Identified bit flags in OtherData in SpawnStruct.
+- New function in Spawn.cpp to identify if a spawn is a mount.  Needs a better method but works for now.
+- Removed Auras, Mercenaries, and Mounts from spawn points.
+
 ShortBuss (3/15/13)
 -----------------
 - Updated version to 5.13.10.11

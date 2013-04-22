@@ -284,6 +284,12 @@ class Spawn : public Item
     { return (raceTeam() == spawn->raceTeam()); }
   bool isSameDeityTeam(const Spawn* spawn) const
     { return (deityTeam() == spawn->deityTeam()); }
+  bool isMount() const
+    { return m_isMount; }
+  bool isAura() const
+    { return m_isAura; }
+  bool isMercenary() const
+    { return m_isMercenary; }
 
   // virtual set method overload
   void setPos(int16_t x, int16_t Pos, int16_t z,
@@ -323,6 +329,9 @@ class Spawn : public Item
   void setNPC(uint8_t NPC) { m_NPC = NPC; }
   void setTypeflag(uint8_t typeflag) { m_typeflag = typeflag; }
   void setGM(uint8_t gm) { m_gm = gm; }
+  void setIsMount(bool isMount) { m_isMount = isMount; }
+  void setIsMercenary(uint8_t isMercenary) {m_isMercenary = (isMercenary != 0); }
+  void setIsAura(unsigned aura) {m_isAura = (aura != 0); }
   void setID(uint16_t id) { m_ID = id; }
   void setLastName(const char * lastName)
     { m_lastName = QString::fromUtf8(lastName); }
@@ -334,6 +343,7 @@ class Spawn : public Item
  protected:
   void calcRaceTeam();
   void calcDeityTeam();
+  bool calcIsMount(uint32_t, uint8_t);
 
   // spawn specific data
   QString m_lastName;
@@ -364,6 +374,9 @@ class Spawn : public Item
   uint8_t m_typeflag;
   uint8_t m_animation;
   uint8_t m_gm;
+  bool m_isMount;
+  bool m_isMercenary;
+  bool m_isAura;
   bool m_considered;
   bool m_notUpdated;
 };

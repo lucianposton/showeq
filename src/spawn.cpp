@@ -435,6 +435,9 @@ void Spawn::update(const spawnStruct* s)
 
   setTypeflag(s->bodytype);
   setGM(s->gm);
+  setIsMount(calcIsMount(s->race, s->level));
+  setIsMercenary(s->isMercenary);
+  setIsAura(s->aura);
 
   // If it is a corpse with Unknown (NPC) religion.
   if ((s->NPC == SPAWN_PC_CORPSE) && (s->deity == DEITY_UNKNOWN))
@@ -977,6 +980,63 @@ void Spawn::saveSpawn(QDataStream& d)
 		  ((char*)this + sizeof(Spawn)) - (char*)&m_petOwnerID);
   d << m_name;
   d << m_lastName;
+}
+
+bool Spawn::calcIsMount(uint32_t race, uint8_t level)
+{
+  //Best known method to identify a mount, for now.
+  //Some races can be both a mount and a non-mount NPC.  This is why the level = 30 check is needed.
+  //Mounts are always level 30.
+  bool isMountRace;
+  switch (race)
+  {
+	case 216: //Horse
+	case 348: //Drogmore
+	case 492: //Horse
+	case 517: //Nightmare/Unicorn
+	case 518: //Horse
+	case 519: //Nightmare/Unicorn
+	case 583: //Kirin
+	case 584: //Puma
+	case 594: //Worg
+	case 597: //Cragslither
+	case 598: //Wrulon
+	case 623: //Wrulon Mount
+	case 625: //Sokokar Mount
+	case 631: //Hydra Mount
+	case 652: //Cliknar Mount
+	case 654: //Spider Mount
+	case 655: //Bear Mount
+	case 656: //Rat Mount
+	case 657: //Sessiloid Mount
+	case 671: //Topiary Lion Mount
+	case 672: //Rot Dog Mount
+	case 673: //Goral Mount
+	case 674: //Selyran Mount
+	case 675: //Sclera Mount
+	case 676: //Braxy Mount
+	case 677: //Kangon Mount
+	case 679: //Wurm Mount
+	case 680: //???
+	case 682: //Helicopter backpack
+	case 684: //Steam Escalator
+	case 709: //Skystrider
+	case 720: //???
+	case 721: //Severed Hand
+      isMountRace = true;
+	  break;
+	default:
+	  isMountRace = false;
+	  break;
+  }
+  if (level == 30 && isMountRace)
+  {
+	  return true;
+  }
+  else
+  {
+	  return false;
+  }
 }
 
 //----------------------------------------------------------------------

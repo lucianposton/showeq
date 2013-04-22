@@ -853,20 +853,20 @@ struct pos
 	  /*0004*/ uint16_t unknown0004;                   // ***Placeholder
 	  /*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
 	           unsigned padding1:20;                    // ***Placeholder
-	  /*0010*/ float y;                                // y coord (2nd loc value)
-	  /*0014*/ unsigned heading:12;                    // Directional heading
-               unsigned padding2:10;                   // ***Placeholder
+	  /*0010*/ float deltaX;                           // Change in x
+	  /*0014*/ signed animation:10;                    // velocity
+               unsigned padding2:12;                   // ***Placeholder
                unsigned padding3:10;                   // ***Placeholder
-	  /*0018*/ float z;                                // z coord (3rd loc value)
-	  /*0022*/ signed animation:10;                    // velocity
-	           unsigned padding6:22;                   // **Placeholder
-	  /*0026*/ float deltaZ;                           // Change in z
-	  /*0030*/ float x;                                // x coord (1st loc value)
-	  /*0034*/ float deltaX;                           // Change in x
-	  /*0038*/ float deltaY;                           // Change in y
-	  /*0042*/ signed deltaHeading:10;                 // change in heading
+	  /*0018*/ float x;                                // x coord (1st loc value)
+	  /*0022*/ unsigned heading:12;                    // Directional heading
+	           unsigned padding6:20;                   // **Placeholder
+	  /*0026*/ float z;                                // z coord (3rd loc value)
+	  /*0030*/ signed deltaHeading:10;                 // change in heading
       	  	   unsigned padding4:10;                   // ***Placeholder
       	  	   unsigned padding5:12;                   // ***Placeholder
+	  /*0034*/ float deltaZ;                           // Change in z
+	  /*0038*/ float deltaY;                           // Change in y
+	  /*0042*/ float y;                                // y coord (2nd loc value)
 	  /*0046*/
 };
 #pragma pack(0)
