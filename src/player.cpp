@@ -852,32 +852,31 @@ struct pos
 	  /*0002*/ uint16_t spawnId;                       // Player's spawn id
 	  /*0004*/ uint16_t unknown0004;                   // ***Placeholder
 	  /*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
-	           unsigned padding1:20;                    // ***Placeholder
+	           signed animation:10;                    // velocity
+               unsigned padding5:10;
 	  /*0010*/ float deltaX;                           // Change in x
-	  /*0014*/ signed animation:10;                    // velocity
-               unsigned padding2:12;                   // ***Placeholder
+	  /*0014*/ float y;                                // y coord (2nd loc value)
+	  /*0018*/ float deltaZ;                           // Change in z
+	  /*0022*/ signed deltaHeading:10;                 // change in heading
+      	  	   unsigned padding4:12;                   // ***Placeholder
+      	  	   unsigned padding1:10;                    // ***Placeholder
+	  /*0026*/ float deltaY;                           // Change in y
+	  /*0030*/ unsigned heading:12;                    // Directional heading
+               unsigned padding2:10;                   // ***Placeholder
                unsigned padding3:10;                   // ***Placeholder
-	  /*0018*/ float x;                                // x coord (1st loc value)
-	  /*0022*/ unsigned heading:12;                    // Directional heading
-	           unsigned padding6:20;                   // **Placeholder
-	  /*0026*/ float z;                                // z coord (3rd loc value)
-	  /*0030*/ signed deltaHeading:10;                 // change in heading
-      	  	   unsigned padding4:10;                   // ***Placeholder
-      	  	   unsigned padding5:12;                   // ***Placeholder
-	  /*0034*/ float deltaZ;                           // Change in z
-	  /*0038*/ float deltaY;                           // Change in y
-	  /*0042*/ float y;                                // y coord (2nd loc value)
-	  /*0046*/
+	  /*0034*/ float z;                                // z coord (3rd loc value)
+	  /*0038*/ float x;                                // x coord (1st loc value)
+	  /*0042*/
 };
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
-    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x, %x)\n",
+    printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x)\n",
             p->spawnId, p->x, p->y, p->z,
             p->deltaX, p->deltaY, p->deltaZ,
             p->heading, p->deltaHeading,
             p->animation, p->pitch,
             p->padding1, p->padding2, p->padding3,
-            p->padding4, p->padding5, p->padding6 );
+            p->padding4, p->padding5 );
 
 #endif
 

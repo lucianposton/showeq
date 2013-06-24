@@ -1,3 +1,10 @@
+ShortBuss (6/24/13)
+-----------------
+- Updated version to 5.13.10.13
+- Support EQ patch 06/19/13
+- In fillSpawnStruct if spawn is NPC then now skips additional 12 bytes that were added with this patch.
+- Updated op-codes and position structs.
+
 ShortBuss (4/22/13)
 -----------------
 - Updated version to 5.13.10.12
