@@ -3,33 +3,33 @@
 <seqopcodes>
 
     <!-- Critical opcodes used directly by ShowEQ -->
-    <opcode id="1434" name="OP_PlayerProfile" updated="06/19/13">
+    <opcode id="7d34" name="OP_PlayerProfile" updated="07/16/13">
         <comment>CharProfileCode</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="64d6" name="OP_ZoneEntry" updated="06/19/13">
+    <opcode id="1438" name="OP_ZoneEntry" updated="07/16/13">
         <comment>ZoneEntryCode</comment>
         <payload dir="client" typename="ClientZoneEntryStruct" sizechecktype="match"/>
     <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="039e" name="OP_TimeOfDay" updated="06/19/13">
+    <opcode id="6319" name="OP_TimeOfDay" updated="07/16/13">
         <comment>TimeOfDayCode</comment>
         <payload dir="server" typename="timeOfDayStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="08f5" name="OP_NewZone" updated="06/19/13">
+    <opcode id="0428" name="OP_NewZone" updated="07/16/13">
         <comment>NewZoneCode</comment>
         <payload dir="server" typename="newZoneStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="12d8" name="OP_SpawnDoor" updated="06/19/13">
+    <opcode id="4003" name="OP_SpawnDoor" updated="07/16/13">
         <comment>DoorSpawnsCode</comment>
         <payload dir="server" typename="doorStruct" sizechecktype="modulus"/>
     </opcode>
-    <opcode id="0a1a" name="OP_GroundSpawn" updated="06/19/13">
+    <opcode id="5125" name="OP_GroundSpawn" updated="07/16/13">
         <comment>MakeDropCode</comment>
         <payload dir="server" typename="makeDropStruct" sizechecktype="none"/>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="1cb1" name="OP_SendZonePoints" updated="06/19/13">
+    <opcode id="1458" name="OP_SendZonePoints" updated="07/16/13">
         <comment>Coords in a zone that will port you to another zone</comment>
         <payload dir="server" typename="zonePointsStruct" sizechecktype="none"/>
     </opcode>
@@ -41,40 +41,40 @@
         <comment>ExpUpdateCode</comment>
         <payload dir="server" typename="expUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="3a96" name="OP_GuildMOTD" updated="06/19/13">
+    <opcode id="439c" name="OP_GuildMOTD" updated="07/16/13">
         <comment>GuildMOTD</comment>
         <payload dir="server" typename="guildMOTDStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="06c2" name="OP_ClientUpdate" updated="06/19/13">
+    <opcode id="2c9b" name="OP_ClientUpdate" updated="07/16/13">
         <comment>Position updates</comment>
         <payload dir="server" typename="playerSpawnPosStruct" sizechecktype="match"/>
         <payload dir="both" typename="playerSelfPosStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="38f4" name="OP_NpcMoveUpdate" updated="06/19/13">
+    <opcode id="2960" name="OP_NpcMoveUpdate" updated="07/16/13">
         <comment>Position updates</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="2239" name="OP_MobUpdate" updated="06/19/13">
+    <opcode id="6fdb" name="OP_MobUpdate" updated="07/16/13">
         <comment>MobUpdateCode</comment>
         <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
     </opcode>
-    <opcode id="4cb5" name="OP_DeleteSpawn" updated="06/19/13">
+    <opcode id="1852" name="OP_DeleteSpawn" updated="07/16/13">
         <comment>DeleteSpawnCode</comment>
         <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="05ed" name="OP_RemoveSpawn" updated="06/19/13">
+    <opcode id="7180" name="OP_RemoveSpawn" updated="07/16/13">
         <comment>Remove spawn from zone</comment>
     <payload dir="both" typename="removeSpawnStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="6438" name="OP_Death" updated="06/19/13">
+    <opcode id="444a" name="OP_Death" updated="07/16/13">
         <comment>old NewCorpseCode</comment>
         <payload dir="server" typename="newCorpseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6f8c" name="OP_WearChange" updated="06/19/13">
+    <opcode id="64b5" name="OP_WearChange" updated="07/16/13">
         <comment>SpawnUpdateCode</comment>
         <payload dir="both" typename="SpawnUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="3943" name="OP_SpawnAppearance" updated="06/19/13">
+    <opcode id="2a2e" name="OP_SpawnAppearance" updated="07/16/13">
         <comment>SpawnAppearanceCode</comment>
         <payload dir="both" typename="spawnAppearanceStruct" sizechecktype="match"/>
     </opcode>
@@ -86,28 +86,28 @@
         <comment>NpcHpUpdateCode Update HP % of a PC or NPC</comment>
         <payload dir="both" typename="hpNpcUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="4d7b" name="OP_GuildMemberUpdate" updated="06/19/13">
+    <opcode id="7bf7" name="OP_GuildMemberUpdate" updated="07/16/13">
         <comment>Info regarding guild members</comment>
         <payload dir="server" typename="GuildMemberUpdate" sizechecktype="match"/>
     </opcode>
-    <opcode id="6cb6" name="OP_ClickObject" updated="04/17/13">
+    <opcode id="6714" name="OP_ClickObject" updated="07/16/13">
         <comment>Items dropped on the ground</comment>
         <payload dir="both" typename="remDropStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="1e52" name="OP_Action" updated="06/19/13">
+    <opcode id="6777" name="OP_Action" updated="07/16/13">
         <comment>Spells cast etc</comment>
         <payload dir="both" typename="actionStruct" sizechecktype="match"/>
         <payload dir="both" typename="actionAltStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="59d4" name="OP_Action2" updated="06/19/13">
+    <opcode id="4f6c" name="OP_Action2" updated="07/16/13">
         <comment>Combat actions i.e. bash, kick etc</comment>
         <payload dir="both" typename="action2Struct" sizechecktype="match"/>
     </opcode>
-    <opcode id="73ac" name="OP_Consider" updated="06/19/13">
+    <opcode id="7107" name="OP_Consider" updated="07/16/13">
         <comment>ConsiderCode</comment>
         <payload dir="both" typename="considerStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="7c5c" name="OP_TargetMouse" updated="06/19/13">
+    <opcode id="2ff9" name="OP_TargetMouse" updated="07/16/13">
         <comment>Targeting a person - old ClientTargetCode</comment>
         <payload dir="both" typename="clientTargetStruct" sizechecktype="match"/>
     </opcode>

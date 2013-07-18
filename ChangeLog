@@ -1,3 +1,10 @@
+ShortBuss (7/18/13)
+-----------------
+- Updated version to 5.13.10.14
+- Support EQ patch 07/15/13
+- Updated op-codes and position structs.
+- 4 bytes added to position data again.
+
 ShortBuss (6/24/13)
 -----------------
 - Updated version to 5.13.10.13
