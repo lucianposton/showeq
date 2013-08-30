@@ -716,7 +716,6 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->posData[2] = netStream.readUInt32NC();
    spawn->posData[3] = netStream.readUInt32NC();
    spawn->posData[4] = netStream.readUInt32NC();
-   spawn->posData[5] = netStream.readUInt32NC();
    
    if(spawn->hasTitle)
    {
@@ -918,37 +917,35 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 {
     	/*0000*/ uint16_t spawnId;
     	/*0002*/ uint16_t spawnId2;
-    	/*0004*/ unsigned pitch:12;
-    	         signed   deltaX:13;      // change in x
-    	         unsigned padding01:07;
-    	/*0008*/ signed   x:19;           // x coord
-    	         unsigned padding06:13;
-    	/*0012*/ signed   z:19;           // z coord
-    	         signed   deltaHeading:10; // change in heading
-                 unsigned padding05:03;
-    	/*0016*/ signed   deltaZ:13;      // change in z
-    	         signed   animation:10;   // velocity
-    	         unsigned padding02:06;
-    	/*0020*/ unsigned padding04:3;
-                 unsigned heading:12;     // heading
-    	         signed   deltaY:13;      // change in y
-                 unsigned padding03:4;
-    	/*0024*/ unsigned padding07:03;
-                 signed   y:19;           // y coord
-                 unsigned padding08:10;
-        /*0028*/
+	/*0004*/ unsigned pitch:12;
+		 signed   z:19;           // z coord
+		 unsigned padding01:1;
+	/*0008*/ signed   animation:10;   // velocity
+		 unsigned padding04:3;
+                 signed   deltaHeading:10; // change in heading
+		 unsigned padding02:9;
+	/*0012*/ signed   x:19;           // x coord
+		 unsigned heading:12;     // heading
+		 unsigned padding03:01;
+	/*0016*/ signed   y:19;           // y coord
+		 signed   deltaX:13;      // change in x
+	/*0020*/ signed   deltaY:13;      // change in y
+		 signed   deltaZ:13;      // change in z
+		 unsigned padding05:2;
+		 unsigned padding06:4;
+	/*0024*/
 };
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
     if (p->spawnId == 0x1234)
-        printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f\n  head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x, %x, %x, %x)\n",
+        printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f\n  head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x, %x)\n",
                 p->spawnId, float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0,
                 float(p->deltaX)/4.0, float(p->deltaY)/4.0,
                 float(p->deltaZ)/4.0,
                 p->heading, p->deltaHeading,
                 p->animation, p->pitch,
-                p->padding01, p->padding02, p->padding03, p->padding04, p->padding05,
-                p->padding06, p->padding07, p->padding08);
+                p->padding01, p->padding02, p->padding03,
+                p->padding04, p->padding05, p->padding06);
 #endif
 
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,
