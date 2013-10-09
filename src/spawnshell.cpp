@@ -918,19 +918,19 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
     	/*0000*/ uint16_t spawnId;
     	/*0002*/ uint16_t spawnId2;
 	/*0004*/ unsigned pitch:12;
-		 signed   z:19;           // z coord
-		 unsigned padding01:1;
-	/*0008*/ signed   animation:10;   // velocity
-		 unsigned padding04:3;
-                 signed   deltaHeading:10; // change in heading
-		 unsigned padding02:9;
-	/*0012*/ signed   x:19;           // x coord
 		 unsigned heading:12;     // heading
-		 unsigned padding03:01;
-	/*0016*/ signed   y:19;           // y coord
-		 signed   deltaX:13;      // change in x
+		 unsigned padding04:1;
+		 unsigned padding01:7;
+	/*0008*/ signed   z:19;           // z coord
+                 signed   deltaZ:13;      // change in z
+	/*0012*/ signed   deltaHeading:10; // change in heading
+                 signed   y:19;           // y coord
+		 unsigned padding03:03;
+	/*0016*/ signed   x:19;           // x coord
+		 signed   animation:10;   // velocity
+		 unsigned padding02:3;
 	/*0020*/ signed   deltaY:13;      // change in y
-		 signed   deltaZ:13;      // change in z
+		 signed   deltaX:13;      // change in x
 		 unsigned padding05:2;
 		 unsigned padding06:4;
 	/*0024*/
@@ -1812,4 +1812,3 @@ void SpawnShell::restoreSpawns(void)
 #ifndef QMAKEBUILD
 #include "spawnshell.moc"
 #endif
-
