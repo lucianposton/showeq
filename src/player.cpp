@@ -852,23 +852,26 @@ struct pos
 	  /*0002*/ uint16_t spawnId;                       // Player's spawn id
 	  /*0004*/ uint16_t unknown0004;                   // ***Placeholder
 	  /*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
-	           unsigned padding4:10;
 	           unsigned padding1:10;
+	           unsigned padding2:10;
 	  /*0010*/ float z;                                // z coord (3rd loc value)
-	  /*0014*/ signed animation:10;                    // velocity
-                   unsigned heading:12;                    // Directional heading
-                   unsigned padding5:10;
-	  /*0018*/ float y;                                // y coord (2nd loc value)
-	  /*0022*/ float deltaX;                           // Change in x
-	  /*0026*/ float deltaZ;                           // Change in z
-	  /*0030*/ float deltaY;                           // Change in y
-	  /*0034*/ signed deltaHeading:10;                 // change in heading
+	  /*0014*/ signed deltaHeading:10;                 // change in heading
 	           unsigned padding3:10;
-	           unsigned padding2:12;                   // ***Placeholder
+	           unsigned padding4:12;                   
+	  /*0018*/ float deltaZ;                           // Change in z
+	  /*0022*/ float deltaY;                           // Change in y
+	  /*0026*/ float y;                                // y coord (2nd loc value)
+	  /*0030*/ float deltaX;                           // Change in x
+	  /*0034*/ unsigned heading:12;                    // Heading
+	           unsigned padding5:10;
+	           unsigned padding6:10;                   
 	  /*0038*/ float x;                                // x coord (1st loc value)
-          /*0042*/
+          /*0042*/ signed animation:10;                    // velocity
+                   unsigned padding7:10;
+                   unsigned padding8:12;
+          /*0046*/
 };
-#pragma pack(0)
+#pragma pack(1)
     struct pos *p = (struct pos *)data;
     printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x)\n",
             p->spawnId, p->x, p->y, p->z,
@@ -876,7 +879,8 @@ struct pos
             p->heading, p->deltaHeading,
             p->animation, p->pitch,
             p->padding1, p->padding2,
-            p->padding3, p->padding4, p->padding5 );
+            p->padding3, p->padding4, p->padding5,
+            p->padding6, p->padding7, p->padding8 );
 
 #endif
 

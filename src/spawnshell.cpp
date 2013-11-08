@@ -918,21 +918,18 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
     	/*0000*/ uint16_t spawnId;
     	/*0002*/ uint16_t spawnId2;
 	/*0004*/ unsigned pitch:12;
-		 unsigned heading:12;     // heading
-		 unsigned padding04:1;
-		 unsigned padding01:7;
-	/*0008*/ signed   z:19;           // z coord
-                 signed   deltaZ:13;      // change in z
-	/*0012*/ signed   deltaHeading:10; // change in heading
-                 signed   y:19;           // y coord
-		 unsigned padding03:03;
-	/*0016*/ signed   x:19;           // x coord
-		 signed   animation:10;   // velocity
-		 unsigned padding02:3;
-	/*0020*/ signed   deltaY:13;      // change in y
-		 signed   deltaX:13;      // change in x
-		 unsigned padding05:2;
-		 unsigned padding06:4;
+		 unsigned heading:12;                      // heading
+		 unsigned padding01:1;
+		 unsigned padding02:7;
+	/*0008*/ signed   deltaY:13;                       // change in y
+		 signed   x:19;                            // x coord
+	/*0012*/ signed   animation:10;                    // velocity
+		 signed   deltaHeading:10;                 // change in heading
+		 unsigned padding03:12;
+	/*0016*/ signed   y:19;                            // y coord
+                 signed   deltaZ:13;                       // change in z
+	/*0020*/ signed   deltaX:13;                       // change in x
+                 signed   z:19;                            // z coord
 	/*0024*/
 };
 #pragma pack(0)
@@ -944,8 +941,7 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
                 float(p->deltaZ)/4.0,
                 p->heading, p->deltaHeading,
                 p->animation, p->pitch,
-                p->padding01, p->padding02, p->padding03,
-                p->padding04, p->padding05, p->padding06);
+                p->padding01, p->padding02, p->padding03);
 #endif
 
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,
