@@ -119,7 +119,7 @@
         <comment>Spawn being illusioned (changing forms)</comment>
         <payload dir="both" typename="spawnIllusionStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="s6c4d" name="OP_Shroud" updated="1/22/14">
+    <opcode id="6c4d" name="OP_Shroud" updated="1/22/14">
         <comment>Server putting players into shroud form</comment>
         <payload dir="server" typename="spawnShroudSelf" sizechecktype="none"/>
     </opcode>
