@@ -915,24 +915,24 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 #pragma pack(1)
     struct pos
 {
-    	/*0000*/ uint16_t spawnId;
-    	/*0002*/ uint16_t spawnId2;
+	/*0000*/ uint16_t spawnId;
+	/*0002*/ uint16_t spawnId2;
 	/*0004*/ unsigned pitch:12;
-                 signed   y:19;                            // y coord (2nd loc value)
-                 unsigned padding01:1;	         
-        /*0008*/ signed   deltaY:13;                       // change in y
-                 signed   deltaZ:13;                       // change in z
-		 unsigned padding02:6;
-	/*0012*/ signed   z:19;                            // z coord (3rd loc value)
-                 signed   deltaHeading:10;                 // change in heading 
-		 unsigned padding03:3;
-        /*0016*/ signed   x:19;                            // x coord (1st loc value)
-                 unsigned heading:12;                      // heading 
-                 unsigned padding04:1;
-	/*0020*/ signed   deltaX:13;                       // change in x
-                 signed   animation:10;                    // velocity 
-                 unsigned padding05:9;
-	/*0024*/ 
+	         signed   y:19;                            // y coord (2nd loc value)
+	         unsigned padding01:1;	         
+	/*0008*/ signed   deltaX:13;                       // change in x
+	         signed   deltaZ:13;                       // change in z
+	         unsigned padding02:6;
+	/*0012*/ signed   deltaHeading:10;                 // change in heading 
+	         signed   x:19;                            // x coord (1st loc value)
+	         unsigned padding03:3;
+	/*0016*/ unsigned heading:12;                      // heading 
+	         signed   z:19;                            // z coord (3rd loc value)
+	         unsigned padding04:1;	         
+	/*0020*/ signed   deltaY:13;                       // change in y
+	         signed   animation:10;                    // velocity 
+	         unsigned padding05:9;
+	/*0024*/
 };
 #endif
 

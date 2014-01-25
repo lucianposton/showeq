@@ -850,22 +850,25 @@ struct pos
 {
 	  /*0000*/ uint16_t unknown0000;                   // ***Placeholder (update time counter?)
 	  /*0002*/ uint16_t spawnId;                       // Player's spawn id
-	  /*0004*/ uint16_t unknown0004;                   // ***Placeholder
-	  /*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
+	  /*0004*/ uint16_t unknown0001;                   // ***Placeholder
+	  /*0006*/ uint32_t unknown0002;                   // ***Placeholder
+	  /*0010*/ float deltaX;                           // Change in x
+	  /*0014*/ float x;                                // x coord (1st loc value)
+          /*0018*/ unsigned heading:12;                    // Heading
 	           unsigned padding1:10;
 	           unsigned padding2:10;
-	  /*0010*/ float deltaX;                           // Change in x
-	  /*0014*/ signed deltaHeading:10;                 // change in heading
-                   unsigned heading:12;                    // Heading
-                   signed animation:10;                    // velocity
-	  /*0018*/ float y;                                // y coord (2nd loc value)
-	  /*0022*/ float deltaZ;                           // Change in z
-	  /*0026*/ float z;                                // z coord (3rd loc value)
-	  /*0030*/ float x;                                // x coord (1st loc value)
-	  /*0034*/ float deltaY;                           // Change in y
-          /*0038*/
+	  /*0022*/ float y;                                // y coord (2nd loc value)
+	  /*0026*/ float deltaZ;                           // Change in z
+	  /*0030*/ float z;                                // z coord (3rd loc value)
+          /*0034*/ signed animation:10;                    // velocity
+	           signed deltaHeading:10;                 // change in heading
+	           unsigned pitch:12;                      // pitch (up/down heading)
+	  /*0038*/ float deltaY;                           // Change in y
+          /*0042*/
 };
+#endif
 
+#if 0
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
     printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x)\n",
