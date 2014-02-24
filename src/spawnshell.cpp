@@ -918,21 +918,18 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 	/*0000*/ uint16_t spawnId;
 	/*0002*/ uint16_t spawnId2;
 	/*0004*/ unsigned pitch:12;
-	         signed   y:19;                            // y coord (2nd loc value)
-	         unsigned padding01:1;	         
-	/*0008*/ signed   deltaX:13;                       // change in x
-	         signed   deltaZ:13;                       // change in z
-	         unsigned padding02:6;
-	/*0012*/ signed   deltaHeading:10;                 // change in heading 
-	         signed   x:19;                            // x coord (1st loc value)
-	         unsigned padding03:3;
-	/*0016*/ unsigned heading:12;                      // heading 
-	         signed   z:19;                            // z coord (3rd loc value)
-	         unsigned padding04:1;	         
-	/*0020*/ signed   deltaY:13;                       // change in y
-	         signed   animation:10;                    // velocity 
-	         unsigned padding05:9;
-	/*0024*/
+		 signed   animation:10;                    // velocity 
+		 signed   deltaHeading:10;                 // change in heading 
+	/*0008*/ signed   z:19;                            // z coord (3rd loc value)
+		 signed   deltaZ:13;                       // change in z
+	/*0012*/ signed   deltaY:13;                       // change in y
+		 unsigned heading:12;                      // heading 
+	         unsigned padding01:7;
+	/*0016*/ signed   y:19;                            // y coord (2nd loc value)
+		 signed   deltaX:13;                       // change in x
+	/*0020*/ signed   x:19;                            // x coord (1st loc value)
+		 unsigned padding02:13;
+	/*0024*/	         
 };
 #endif
 
@@ -946,8 +943,7 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
                 float(p->deltaZ)/4.0,
                 p->heading, p->deltaHeading,
                 p->animation, p->pitch,
-                p->padding01, p->padding02, p->padding03,
-                p->padding04, p->padding05 );
+                p->padding01, p->padding02 );
 #endif
 
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,

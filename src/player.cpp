@@ -848,23 +848,21 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
 #pragma pack(1)
 struct pos
 {
-	  /*0000*/ uint16_t unknown0000;                   // ***Placeholder (update time counter?)
-	  /*0002*/ uint16_t spawnId;                       // Player's spawn id
-	  /*0004*/ uint16_t unknown0001;                   // ***Placeholder
-	  /*0006*/ uint32_t unknown0002;                   // ***Placeholder
-	  /*0010*/ float deltaX;                           // Change in x
-	  /*0014*/ float x;                                // x coord (1st loc value)
-          /*0018*/ unsigned heading:12;                    // Heading
-	           unsigned padding1:10;
-	           unsigned padding2:10;
-	  /*0022*/ float y;                                // y coord (2nd loc value)
-	  /*0026*/ float deltaZ;                           // Change in z
-	  /*0030*/ float z;                                // z coord (3rd loc value)
-          /*0034*/ signed animation:10;                    // velocity
-	           signed deltaHeading:10;                 // change in heading
-	           unsigned pitch:12;                      // pitch (up/down heading)
-	  /*0038*/ float deltaY;                           // Change in y
-          /*0042*/
+        /*0000*/ uint16_t unknown0000;                   // ***Placeholder (update time counter?)
+	/*0002*/ uint16_t spawnId;                       // Player's spawn id
+	/*0004*/ uint16_t unknown0001;                   // ***Placeholder
+	/*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
+	         unsigned padding01:20;
+	/*0010*/ float deltaY;                           // Change in y
+	/*0014*/ float y;                                // y coord (2nd loc value)
+	/*0018*/ signed animation:10;                    // velocity
+	         unsigned heading:12;                    // Heading
+	         signed deltaHeading:10;                 // change in heading
+	/*0022*/ float z;                                // z coord (3rd loc value)
+	/*0026*/ float deltaX;                           // Change in x
+	/*0030*/ float x;                                // x coord (1st loc value)
+	/*0034*/ float deltaZ;                           // Change in z
+	/*0038*/
 };
 #endif
 
@@ -876,7 +874,7 @@ struct pos
             p->deltaX, p->deltaY, p->deltaZ,
             p->heading, p->deltaHeading,
             p->animation, p->pitch,
-            p->padding1, p->padding2 );
+            p->padding01 );
 #endif
 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);
