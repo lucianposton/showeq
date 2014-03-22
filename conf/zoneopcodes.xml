@@ -62,7 +62,7 @@
         <comment>DeleteSpawnCode</comment>
         <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="17b6" name="OP_RemoveSpawn" updated="2/21/14">
+    <opcode id="17b6" name="OP_RemoveSpawn" updated="3/12/14">
         <comment>Remove spawn from zone</comment>
     <payload dir="both" typename="removeSpawnStruct" sizechecktype="none"/>
     </opcode>
