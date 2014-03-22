@@ -200,7 +200,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   
   player->profile.gender = netStream.readUInt8();
   player->profile.race = netStream.readUInt32();
-  player->profile.class_ = netStream.readUInt8();
+  player->profile.class_ = netStream.readUInt32();
   player->profile.level = netStream.readUInt8();
   player->profile.level1 = netStream.readUInt8();
 
@@ -232,7 +232,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
    
   // Something (9 ints)
   int sCount = netStream.readUInt32NC();
-  for (int i = 0; i < sCount; i++) {
+  for (int i = 0; i < sCount; i++) {	
     netStream.skipBytes(20);
   }
 
@@ -285,7 +285,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     netStream.skipBytes(4);
   }
 
-  // Something (200 ints)
+  // Something (300 ints)
   int sCount5 = netStream.readUInt32NC();
   for (int i = 0; i < sCount5; i++) {
     netStream.skipBytes(4);
@@ -362,7 +362,14 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
 
   // Unknown
   netStream.skipBytes(2);
-  
+/*
+  // Bandolier
+  netStream.skipBytes(1319);
+
+  // Potion Belt
+  netStream.skipBytes(160);
+*/  
+
   int bandolierCount = netStream.readUInt32NC();
   for (int i = 0; i < bandolierCount; i++) {
     name = netStream.readText();
@@ -462,10 +469,12 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
 
   memcpy(&player->heading, netStream.pos(), sizeof(player->heading));
   netStream.skipBytes(sizeof(player->heading));
-  
+
+/*  
   player->standState = netStream.readUInt8();
-  
-  netStream.skipBytes(3);
+*/
+
+  netStream.skipBytes(4);
   
   player->guildID = netStream.readUInt32NC();
 
@@ -481,7 +490,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   // Unknown
   netStream.skipBytes(12);
 
-  // Something (120 ints)
+  // Something (142 ints)
   int sCount11 = netStream.readUInt32NC();
   for (int i = 0; i < sCount11; i++) {
     netStream.skipBytes(8);
@@ -508,7 +517,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   }
 
   // Unknown
-  netStream.skipBytes(237);
+  netStream.skipBytes(241);
 
   player->currentRadCrystals = netStream.readUInt32NC();
   player->careerRadCrystals = netStream.readUInt32NC();
@@ -516,7 +525,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->careerEbonCrystals = netStream.readUInt32NC();
 
   // Unknown
-  netStream.skipBytes(926);
+  netStream.skipBytes(149);
 
   player->ldon_guk_points = netStream.readUInt32NC();
   player->ldon_mir_points = netStream.readUInt32NC();

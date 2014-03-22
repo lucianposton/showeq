@@ -501,21 +501,24 @@ void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
 #pragma pack(1)
 struct pos
 {
-/*0002*/ signed   padding0000:12; // ***Placeholder
-         signed   deltaX:13;      // change in x
-         signed   padding0005:7;  // ***Placeholder
-/*0006*/ signed   deltaHeading:10;// change in heading
-         signed   deltaY:13;      // change in y
-         signed   padding0006:9;  // ***Placeholder
-/*0010*/ signed   y:19;           // y coord
-         signed   animation:13;   // animation
-/*0014*/ unsigned heading:12;     // heading
-         signed   x:19;           // x coord
-         signed   padding0014:1;  // ***Placeholder
-/*0018*/ signed   z:19;           // z coord
-         signed   deltaZ:13;      // change in z
-/*0022*/
+/*0004*/ unsigned pitch:12;
+	 signed   animation:10;                    // velocity 
+	 signed   deltaHeading:10;                 // change in heading 
+/*0008*/ signed   z:19;                            // z coord (3rd loc value)
+	 signed   deltaZ:13;                       // change in z
+/*0012*/ signed   deltaY:13;                       // change in y
+	 unsigned heading:12;                      // heading 
+         unsigned padding01:7;
+/*0016*/ signed   y:19;                            // y coord (2nd loc value)
+	 signed   deltaX:13;                       // change in x
+/*0020*/ signed   x:19;                            // x coord (1st loc value)
+	 unsigned padding02:13;
+/*0024*/ signed   unknown0001;                     // ***Placeholder
+/*0028*/	         
 };
+#endif
+
+#if 0
 #pragma pack(0)
     struct pos *p = (struct pos *)(data + i*sizeof(spawnStruct) + 151);
     printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f head %f dhead %f anim %d (%x, %x, %x, %x)\n",
@@ -649,7 +652,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->deity = netStream.readUInt32NC();
    spawn->guildID = netStream.readUInt32NC();
    spawn->guildstatus = netStream.readUInt32NC();
-   spawn->class_ = netStream.readUInt8();
+   spawn->class_ = netStream.readUInt32NC();
 
 #ifdef FILLSPAWNSTRUCT_DIAG
    seqDebug("race=%08X holding=%02X deity=%08X guildID=%08X guildstatus=%08X class_=%02X ",
@@ -716,6 +719,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->posData[2] = netStream.readUInt32NC();
    spawn->posData[3] = netStream.readUInt32NC();
    spawn->posData[4] = netStream.readUInt32NC();
+   spawn->posData[5] = netStream.readUInt32NC();
    
    if(spawn->hasTitle)
    {
@@ -918,32 +922,37 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 	/*0000*/ uint16_t spawnId;
 	/*0002*/ uint16_t spawnId2;
 	/*0004*/ unsigned pitch:12;
-		 signed   animation:10;                    // velocity 
-		 signed   deltaHeading:10;                 // change in heading 
-	/*0008*/ signed   z:19;                            // z coord (3rd loc value)
-		 signed   deltaZ:13;                       // change in z
-	/*0012*/ signed   deltaY:13;                       // change in y
-		 unsigned heading:12;                      // heading 
-	         unsigned padding01:7;
-	/*0016*/ signed   y:19;                            // y coord (2nd loc value)
+	         signed   animation:10;                    // velocity 
+	         unsigned padding01:10;
+	/*0008*/ unsigned heading:12;                      // heading 
+	         signed   x:19;                            // x coord (1st loc value)
+	         unsigned padding02:1;
+	/*0012*/ signed   deltaZ:13;                       // change in z
+	         signed   deltaY:13;                       // change in y
+	         unsigned padding03:6;
+	/*0016*/ signed   deltaHeading:10;                 // change in heading 
 		 signed   deltaX:13;                       // change in x
-	/*0020*/ signed   x:19;                            // x coord (1st loc value)
-		 unsigned padding02:13;
-	/*0024*/	         
+		 unsigned padding04:9;
+	/*0020*/ signed   y:19;                            // y coord (2nd loc value)
+	         unsigned padding05:13;
+	/*0024*/ signed   z:19;                            // z coord (3rd loc value)
+	         unsigned padding06:13;
+	/*0028*/
 };
 #endif
 
 #if 0
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
-    if (p->spawnId == 0x2843)
+    if (p->spawnId == 0x08f5)
         printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f\n  head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x, %x)\n",
                 p->spawnId, float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0,
                 float(p->deltaX)/4.0, float(p->deltaY)/4.0,
                 float(p->deltaZ)/4.0,
                 p->heading, p->deltaHeading,
                 p->animation, p->pitch,
-                p->padding01, p->padding02 );
+                p->padding01, p->padding02, p->padding03,
+		p->padding04, p->padding05, p->padding06 );
 #endif
 
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,

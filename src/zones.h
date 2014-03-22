@@ -47,10 +47,10 @@
 { "oasis", "Oasis of Marr" }, // 37
 { "tox", "Toxxulia Forest" }, // 38
 { "hole", "The Ruins of Old Paineel" }, // 39
-{ "neriaka", "Neriak Foreign Quarter" }, // 40
-{ "neriakb", "Neriak Commons" }, // 41
-{ "neriakc", "Neriak Third Gate" }, // 42
-{ "neriakd", "Neriak Palace" }, // 43
+{ "neriaka", "Neriak - Foreign Quarter" }, // 40
+{ "neriakb", "Neriak - Commons" }, // 41
+{ "neriakc", "Neriak - Third Gate" }, // 42
+{ "neriakd", "Neriak - Fourth Gate" }, // 43
 { "najena", "Najena" }, // 44
 { "qcat", "Qeynos Catacombs" }, // 45
 { "innothule", "Innothule Swamp" }, // 46
@@ -120,7 +120,7 @@
 { "iceclad", "Iceclad Ocean" }, // 110
 { "frozenshadow", "Tower of Frozen Shadow" }, // 111
 { "velketor", "Velketor's Labyrinth" }, // 112
-{ "kael", "Kael Drakkal" }, // 113
+{ "kael", "Kael Drakkel" }, // 113
 { "skyshrine", "Skyshrine" }, // 114
 { "thurgadina", "Thurgadin" }, // 115
 { "eastwastes", "Eastern Wastes" }, // 116
@@ -766,22 +766,22 @@
 { "crystalshard", "The Crystal Caverns: Fragment of Fear" }, // 756
 { "breedinggrounds", "The Breeding Grounds" }, // 757
 { "eviltree", "Evantil, the Vile Oak" }, // 758
-{ "grelleth", "Grelleth's Palace, the Chateau of Filth" }, // 759
+{ "grelleth", "Grelleth's Palace, the Chateau of Filth..." }, // 759
 { "chapterhouse", "Chapterhouse of the Fallen" }, // 760
 { "pomischief", "The Plane of Mischief" }, // 761
 { "burnedwoods", "The Burned Woods" }, // 762
-{ "chelsith", "Chelsith Reborn" }, // 763
+{ "chelsithreborn", "Chelsith Reborn" }, // 763
 { "poshadow", "Plane of Shadow" }, // 764
-{ "heartoffear", "Heart of Fear" }, // 765
+{ "heartoffear", "Heart of Fear: The Threshold" }, // 765
 { "phinteriortree", "Evantil's Abode" }, // 766
 { NULL, NULL }, // 767
-{ NULL, NULL }, // 768
-{ NULL, NULL }, // 769
-{ NULL, NULL }, // 770
-{ NULL, NULL }, // 771
-{ NULL, NULL }, // 772
-{ NULL, NULL }, // 773
-{ NULL, NULL }, // 774
+{ "heartoffearb", "Heart of Fear: The Rebirth" }, // 768
+{ "heartoffearc", "Heart of Fear: The Epicenter" }, // 769
+{ "bixiewarfront", "Bixie Warfront" }, // 770
+{ "deadhills", "The Dead Hills" }, // 771
+{ "ethernere", "Ethernere Tainted West Karana" }, // 772
+{ "thevoidh", "The Void" }, // 773
+{ "plhbixieint", "Bixie Hive" }, // 774
 { NULL, NULL }, // 775
 { NULL, NULL }, // 776
 { NULL, NULL }, // 777
