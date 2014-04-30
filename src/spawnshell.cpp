@@ -922,19 +922,19 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 	/*0000*/ uint16_t spawnId;
 	/*0002*/ uint16_t spawnId2;
 	/*0004*/ unsigned pitch:12;
-		 signed   deltaX:13;                       // change in x
-	         unsigned padding01:7;
-	/*0008*/ signed   z:19;                            // z coord (3rd loc value)
-	         signed   deltaHeading:10;                 // change in heading 
-	         unsigned padding02:3;
-	/*0012*/ signed   x:19;                            // x coord (1st loc value)
-	         signed   deltaZ:13;                       // change in z
-	/*0016*/ unsigned heading:12;                      // heading 
-	         signed   deltaY:13;                       // change in y
-	         unsigned padding03:7;
-	/*0020*/ signed   animation:10;                    // velocity 
 	         signed   y:19;                            // y coord (2nd loc value)
-	         unsigned padding04:3;
+	         unsigned padding01:1;
+	/*0008*/ signed   deltaZ:13;                       // change in z
+	         signed   deltaHeading:10;                 // change in heading 
+	         unsigned padding02:9;
+	/*0012*/ signed   z:19;                            // z coord (3rd loc value)
+		 signed   animation:10;                    // velocity 
+	         unsigned padding03:3;
+	/*0016*/ signed   deltaX:13;                       // change in x
+		 signed   x:19;                            // x coord (1st loc value)
+	/*0020*/ unsigned heading:12;                      // heading 
+	         signed   deltaY:13;                       // change in y
+	         unsigned padding04:7;
 	/*0024*/
 };
 #endif
@@ -942,7 +942,7 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 #if 0
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
-    if (p->spawnId == 0x3119)
+    if (p->spawnId == 0x247d)
         printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f\n  head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x, %x)\n",
                 p->spawnId, float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0,
                 float(p->deltaX)/4.0, float(p->deltaY)/4.0,
