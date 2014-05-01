@@ -86,7 +86,7 @@
         <comment>NpcHpUpdateCode Update HP % of a PC or NPC</comment>
         <payload dir="both" typename="hpNpcUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="4b67" name="OP_GuildMemberUpdate" updated="04/02/14">
+    <opcode id="6b7f" name="OP_GuildMemberUpdate" updated="04/29/14">
         <comment>Info regarding guild members</comment>
         <payload dir="server" typename="GuildMemberUpdate" sizechecktype="match"/>
     </opcode>
@@ -268,13 +268,13 @@
         <comment>old cRunToggleCode</comment>
         <payload dir="client" typename="cRunToggleStruct" sizechecktype="match"/>
     </opcode>
+    <opcode id="688f" name="OP_Trader" updated="04/29/14">
+        <comment>PC's turning trader on and off</comment>
+        <payload dir="server" typename="bazaarTraderRequest" sizechecktype="match"/>
+    </opcode>
     <opcode id="ffff" name="OP_CorpseLocResponse" updated="12/12/12">
         <comment>old CorpseLocCode:</comment>
         <payload dir="server" typename="corpseLocStruct" sizechecktype="match"/>
-    </opcode>
-    <opcode id="ffff" name="OP_Trader" updated="11/28/12">
-        <comment>PC's turning trader on and off</comment>
-        <payload dir="server" typename="bazaarTraderRequest" sizechecktype="match"/>
     </opcode>
     <opcode id="ffff" name="OP_ItemPacket" updated="11/28/12">
         <comment>ItemCode</comment>
@@ -583,7 +583,7 @@
         <comment>Server sending pending rewards - variable length</comment>
         <payload dir="both" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="2f8d" name="OP_FTPNags" updated="04/29/14">
+    <opcode id="21f5" name="OP_FTPNags" updated="04/29/14">
         <comment>Free to play nags and other data - 1852 bytes</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
