@@ -61,6 +61,9 @@ GuildMember::GuildMember(NetStream& netStream)
   // 4 byte guild tribute on/off (0 = off, 1 = on)
   m_guildTributeOn = netStream.readUInt32();
 
+  // 4 byte guild trophy on/off (0 = off, 1 = on) Added 4/29/14
+  m_guildTrophyOn = netStream.readUInt32();
+
   // 4 byte guild tribute total donated
   m_guildTributeDonated = netStream.readUInt32();
 
@@ -76,6 +79,9 @@ GuildMember::GuildMember(NetStream& netStream)
   // 2 byte zoneInstance and zoneId for current zone
   m_zoneInstance = netStream.readUInt16();
   m_zoneId = netStream.readUInt16();
+
+  // Unknown
+  netStream.skipBytes(8);
 }
 
 GuildMember::~GuildMember()

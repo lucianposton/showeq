@@ -62,6 +62,7 @@ class GuildMember
   uint32_t m_guildRank; // 0 = member, 1 = officer, 2 = leader
   time_t m_lastOn;
   uint8_t m_guildTributeOn; // 0 = off, 1 = on
+  uint8_t m_guildTrophyOn; // 0 = off, 1 = on
   uint8_t m_guildTributeDonated;
   time_t m_guildTributeLastDonation;
   uint32_t m_alt; // 0 = no, 1 = alt
