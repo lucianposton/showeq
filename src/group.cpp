@@ -137,7 +137,7 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
   }
 
 // for debugging
-#if 0
+#if 1
   for(uint32_t i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
      if(!m_members[i]->m_name.isEmpty())
