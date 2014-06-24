@@ -922,16 +922,16 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 	/*0000*/ uint16_t spawnId;
 	/*0002*/ uint16_t spawnId2;
 	/*0004*/ unsigned pitch:12;
-		 signed   x:19;                            // x coord (1st loc value)	         
-	         unsigned padding01:1;
-	/*0008*/ signed   deltaZ:13;                       // change in z
-		 signed   y:19;                            // y coord (2nd loc value)
-	/*0012*/ unsigned heading:12;                      // heading 
-		 signed   deltaY:13;                       // change in y		 
-	         unsigned padding02:7;
-	/*0016*/ signed   z:19;                            // z coord (3rd loc value)
+		 signed   deltaZ:13;                       // change in z
+	         unsigned padding01:7;
+	/*0008*/ signed   y:19;                            // y coord (2nd loc value)
 	         signed   deltaHeading:10;                 // change in heading 
-	         unsigned padding03:3;
+	         unsigned padding02:3;
+	/*0012*/ signed   z:19;                            // z coord (3rd loc value)
+		 signed   deltaY:13;                       // change in y		 
+	/*0016*/ unsigned heading:12;                      // heading 
+		 signed   x:19;                            // x coord (1st loc value)	         
+	         unsigned padding03:1;
 	/*0020*/ signed   deltaX:13;                       // change in x
 		 signed   animation:10;                    // velocity 		 
 	         unsigned padding04:9;		 
@@ -943,7 +943,7 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 #if 0
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
-    if (p->spawnId == 0x425d)
+    if (p->spawnId == 0x3ea1)
         printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f\n  head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x, %x)\n",
                 p->spawnId, float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0,
                 float(p->deltaX)/4.0, float(p->deltaY)/4.0,
