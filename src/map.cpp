@@ -326,13 +326,8 @@ void MapMgr::zoneEnd(const QString& shortZoneName, const QString& longZoneName)
 
 void MapMgr::loadZoneMap(const QString& shortZoneName)
 {
-  // first attempt to find map with .map suffix
-  QFileInfo fileInfo = m_dataLocMgr->findExistingFile("maps", 
-                              shortZoneName + ".map");
-  
   // if that file doesn't exist, try a straight .txt suffix
-  if (!fileInfo.exists())
-    fileInfo = m_dataLocMgr->findExistingFile("maps", 
+  QFileInfo fileInfo = m_dataLocMgr->findExistingFile("maps", 
                           shortZoneName + ".txt");
 
   // if that file doesn't exist, try a  _1.txt suffix
@@ -340,6 +335,11 @@ void MapMgr::loadZoneMap(const QString& shortZoneName)
     fileInfo = m_dataLocMgr->findExistingFile("maps", 
                           shortZoneName + "_1.txt");
 
+  // first attempt to find map with .map suffix
+  if (!fileInfo.exists())
+  fileInfo = m_dataLocMgr->findExistingFile("maps", 
+                              shortZoneName + ".map");
+  
   if (fileInfo.exists())
   {
     // load the map if it's not already loaded
