@@ -4303,8 +4303,8 @@ void EQInterface::setExp(uint32_t totalExp, uint32_t totalTick,
 {
   if (m_stsbarExp)
   {
-    char expperc[20];
-    sprintf(expperc, "%.2f", totalTick*100.0/330.0);
+    char expperc[50];
+    snprintf(expperc, sizeof(expperc), "%.2f", totalTick*100.0/330.0);
 
     m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")
       .arg(Commanate(totalExp)).arg(totalTick).arg(expperc));
@@ -4332,8 +4332,8 @@ void EQInterface::newExp(uint32_t newExp, uint32_t totalExp,
 
     if (m_stsbarExp)
     {
-      char expperc[20];
-      sprintf(expperc, "%.2f", totalTick*100.0/330.0);
+      char expperc[50];
+      snprintf(expperc, sizeof(expperc), "%.2f", totalTick*100.0/330.0);
 
       m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")
         .arg(Commanate(totalExp)).arg(totalTick).arg(expperc));
@@ -4349,8 +4349,8 @@ void EQInterface::newExp(uint32_t newExp, uint32_t totalExp,
 
     if (m_stsbarExp)
     {
-      char expperc[5];
-      sprintf(expperc, "%.2f", totalTick*100.0/330.0);
+      char expperc[50];
+      snprintf(expperc, sizeof(expperc), "%.2f", totalTick*100.0/330.0);
 
       m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")
         .arg(Commanate(totalExp)).arg(totalTick).arg(expperc));
@@ -4373,8 +4373,8 @@ void EQInterface::newAltExp(uint32_t newExp, uint32_t totalExp,
 {
   if (m_stsbarExpAA)
   {
-    char aaperc[5];
-    sprintf(aaperc, "%.2f", totalTick*100.0/330.0);
+    char aaperc[50];
+    snprintf(aaperc, sizeof(aaperc), "%.2f", totalTick*100.0/330.0);
 
     m_stsbarExpAA->setText(QString("ExpAA: %1 (%2/330, %3%)")
         .arg(Commanate(totalExp)).arg(totalTick).arg(aaperc));
