@@ -852,18 +852,19 @@ struct pos
 	/*0002*/ uint16_t spawnId;                       // Player's spawn id
 	/*0004*/ uint16_t unknown0001;                   // ***Placeholder
 	/*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
-		 unsigned heading:12;                    // Heading
-	         unsigned padding01:8;
-	/*0010*/ float deltaX;                           // Change in x
-	/*0014*/ float y;                                // y coord (2nd loc value)
-	/*0018*/ signed animation:10;                    // velocity
-		 signed deltaHeading:10;                 // change in heading
-		 unsigned padding02:12;  
-	/*0022*/ float z;                                // z coord (3rd loc value)
-	/*0026*/ float deltaZ;                           // Change in z
-	/*0030*/ float x;                                // x coord (1st loc value)
-	/*0034*/ float deltaY;                           // Change in y
-	/*0038*/ 		 
+	 	 unsigned padding01:20;
+	/*0010*/ float x;                                // x coord (1st loc value)
+	/*0014*/ unsigned heading:12;                    // Heading
+		 unsigned padding02:20;
+	/*0018*/ float z;                                // z coord (3rd loc value)
+	/*0022*/ signed deltaHeading:10;                 // change in heading
+		 unsigned padding03:22;
+	/*0026*/ float deltaY;                           // Change in y
+	/*0030*/ float y;                                // y coord (2nd loc value)
+	/*0034*/ float deltaZ;                           // Change in z
+	/*0038*/ signed animation:10;                    // velocity
+		 unsigned padding04:20;
+	/*0042*/ float deltaX;                           // Change in x
 };
 #endif
 
@@ -875,7 +876,7 @@ struct pos
             p->deltaX, p->deltaY, p->deltaZ,
             p->heading, p->deltaHeading,
             p->animation, p->pitch,
-            p->padding01, p->padding02 );
+            p->padding01, p->padding02, p->padding03, p->padding04 );
 #endif
 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);
