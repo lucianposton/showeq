@@ -782,8 +782,8 @@
 { "ethernere", "Ethernere Tainted West Karana" }, // 772
 { "thevoidh", "The Void" }, // 773
 { "plhbixieint", "Bixie Hive" }, // 774
-{ NULL, NULL }, // 775
-{ NULL, NULL }, // 776
+{ "towerofrot", "Tower of Rot" }, // 775
+{ "arginhiz", "Argin-Hiz" }, // 776
 { NULL, NULL }, // 777
 { NULL, NULL }, // 778
 { NULL, NULL }, // 779
