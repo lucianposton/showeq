@@ -1,0 +1,2 @@
+The static library libEQ.a is no longer required by ShowEQ.  The functionality
+previously provided by libEQ.a can now be found in the included libEQ.cpp.

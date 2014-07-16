@@ -1,0 +1,22 @@
+#
+# Master author manifest for bash
+#
+# Any files appearing in the bash distribution not listed in this file
+# are either of a mixed/unknown origin or I just haven't gotten to them yet.
+#
+# Filename      authors (first is original author)
+#
+README		?, Zaphod
+README.libEQ	Zaphod
+INSTALL		?, Zaphod
+INSTALL.newbies	?, Zaphod
+COPYING		FSF
+AUTHORS		Zaphod
+NEWS		Zaphod
+ChangeLog	Megaton, Zaphod, et. al.
+ROADMAP		Zaphod
+TODO		Zaphod
+BUGS		Zaphod
+m4/doxygen.m4   Oren Ben-Kiki <oren@ben-kiki.org>
+
+

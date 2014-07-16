@@ -1,0 +1,82 @@
+
+Experience modifiers derived from data below:
+
+Barbarian=10.5 DarkElf=10 Dwarf=10 Erudite=10 Gnome=10 HalfElf=10
+HalfLing=9.5 HighElf=10 Human=10 Ogre=11.5 Troll=12 WoofElf=10
+
+Bard=14 Cleric=10 Druid=10 Enchanter=11 Magician=11 Monk=12 Necromancer=11
+Paladin=14 Ranger=14 Rogue=9.05 ShadowKnight=14 Shaman=10 Warrior=9 Wizard=11
+
+Possible combinations, with verified exp modifier:
+
+HalfElf/Bard = 140
+Human/Bard = 140
+WoodElf/Bard = 140
+DarkElf/Cleric
+Dwarf/Cleric
+Erudite/Cleric
+Gnome/Cleric
+Halfling/Cleric = 95
+HighElf/Cleric = 100
+Human/Cleric
+HalfElf/Druid
+Halfling/Druid = 95
+Human/Druid = 100
+WoodElf/Druid = 100
+DarkElf/Enchanter
+Erudite/Enchanter
+Gnome/Enchanter
+HighElf/Enchanter
+Human/Enchanter
+DarkElf/Magician = 110
+Erudite/Magician = 110
+Gnome/Magician = 110
+HighElf/Magician = 110
+Human/Magician = 110
+Human/Monk = 120
+DarkElf/Necromancer = 110
+Erudite/Necromancer
+Gnome/Necromancer
+Human/Necromancer
+Dwarf/Paladin
+Erudite/Paladin
+Gnome/Paladin
+HalfElf/Paladin
+HighElf/Paladin
+Human/Paladin = 140
+HalfElf/Ranger
+Human/Ranger = 140
+WoodElf/Ranger
+Barbarian/Rogue
+DarkElf/Rogue
+Dwarf/Rogue
+Gnome/Rogue
+HalfElf/Rogue
+Halfling/Rogue = 85.975
+Human/Rogue = 90.5
+Woodelf/Rogue
+DarkElf/Shadowknight = 140
+Human/Shadowknight
+Ogre/Shadowknight = 161
+Troll/Shadowknight = 168
+Barbarian/Shaman
+Ogre/Shaman
+Troll/Shaman = 120
+Barbarian/Warrior
+DarkElf/Warrior = 90
+Dwarf/Warrior
+Gnome/Warrior
+HalfElf/Warrior
+Halfling/Warrior
+Human/Warrior = 90
+Ogre/Warrior = 103.5
+Troll/Warrior = 108
+WoodElf/Warrior
+DarkElf/Wizard
+Erudite/Wizard
+Gnome/Wizard
+HighElf/Wizard
+Human/Wizard = 110
+
+-
+Megaton

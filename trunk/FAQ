@@ -1,0 +1,124 @@
+ShowEQ Frequently Asked Questions
+
+1) Hit points always say 65536, 0, 100, etc, what is wrong
+2) Why wont ShowEQ show me the loot my mob will drop
+3) My faction is broken!  It used to tell me my faction numbers when i 
+   conned someone, now i get a number like 4 or 1.  
+4) What happened to experience?
+5) Seq keeps crashing with "!!!! EQPacketFragmentSequence::addFragment(): 
+   buffer overflow adding in new fragment". Why won't you fix this?
+
+
+1) Hit points always say 65536, 0, 100, etc, what is wrong
+
+ShowEQ does not recieve hit point numbers from the client as it once did.  
+We now only recieve a percentage of hit points, and only when you are close
+to the mob.  Before you get close enough the the mob, HP will reflect 65536
+or 0, which tells you you need to get closer.
+
+
+2) Why wont ShowEQ show me the loot my mob will drop
+
+Loot is not sent to your client until after you right click on its corpse.
+There is no guaranteed way of determining loot.  However, if your mob will
+carry the item he drops, you can narrow the possiblity by checking the type
+of model armor/weapons he carries, although this may not reflect at all on
+what is actually dropped.
+
+
+3) My faction is broken!  It used to tell me my faction numbers when i 
+   conned someone, now i get a number like 4 or 1.  
+
+Faction, just like HP, is sent in a representative value, rather than real
+value.  You are now only sent a number that reflects your faction status. 
+ie, whether the client should print "scowls", "threatening", "dubious",
+"indifferent", "ally", etc.  No more counting how many more orcs to kill
+to get that kelethin faction up.
+
+
+4) What happened to experience?
+
+Just like HP and faction, we no longer are sent the actual value.  We are 
+sent a number between 0 and 330 that reflects directly on how the client
+should draw the experience bar.  We do however know what mob you killed
+and experience formulas, so what you see in the experience window now will
+be close estimates of the real exp you have.  
+
+
+5) Seq keeps crashing with "!!!! EQPacketFragmentSequence::addFragment(): 
+   buffer overflow adding in new fragment". Why won't you fix this?
+
+This isn't actually a problem with seq, but rather the result of your
+configuration on your linux box. Your linux box is not handling all the packets
+it is receiving with its network card in promiscuous mode.
+
+In order to run, showeq needs the entire packet stream between the EQ client and
+the EQ servers. Packets are processed in order and if any packets are dropped,
+there may be problems decoding the stream causing showeq to crash or lose sync
+with the session. 
+
+Usually this condition is signalled by console messages like:
+Warning: SEQ: Giving up on finding arq 0085 in stream zone-client cache, skipping!
+Warning: SEQ: Giving up on finding arq 0086 in stream zone-client cache, skipping!
+Warning: SEQ: Giving up on finding arq 0087 in stream zone-client cache, skipping!
+Warning: SEQ: Giving up on finding arq 0088 in stream zone-client cache, skipping!
+
+This signifies packets being dropped and being skipped in processing, which may
+cause the session stream to corrupt if the skipped packets are important. Other
+messages which may result when the stream is corrupted are:
+
+Warning: Oversized packet fragment requested buffer of size 0 on stream 3 OpCode
+0000 seq 00a6
+
+Warning: !!!! EQPacketFragmentSequence::addFragment(): buffer overflow adding in
+new fragment to buffer with seq 00fb on stream 3, opcode 0000. Buffer is size 3
+8302 and has been filled up to 38302, but tried to add 505 more!
+
+Both these messages mean that packets are being dropped that are important to
+the reconstruction of oversized payloads in the session stream. These messages
+may appear like showeq is broken, but in reality, the problem is that packets
+are not being provided to showeq because they are being dropped by the kernel
+before being made available to the application layer.
+
+The kernel may drop packets when under heavy loads (either CPU loads or network
+loads). 
+
+When under high CPU utilization, the thread in showeq which reads from
+the kernel's receive buffers may be starved and not get enough processor time to
+empty the kernel receive buffers before those buffers run out of room and drop
+packets. To help this, you can set the showeq network thread to run "realtime"
+by turning on the Network->Real Time Thread option.
+
+When under high network traffic, the kernel's receive buffers may overflow
+before showeq gets a chance to empty the buffers, causing packets to be missed.
+This can happen when you have a lot of network traffic that is seen by the
+machine running showeq. The EQ client bursts a lot of traffic during zoning as
+well, so usually problems with high network traffic show themselves during
+zoning.
+
+To help this problem, try to narrow down the traffic that showeq watches by
+specifying the ip address of your EQ client on the commandline. Also, turn on
+Session Tracking using Network->Session Tracking. If problems persist after
+turning those options on, you may want to adjust kernel parameters to change how
+the kernel manages its receive buffers. Some parameters that may help you are:
+
+net.core.rmem_default (defaults to 65535, or 64k receive buffers)
+net.core.rmem_max (defaults to 131071, or 128k receive buffers)
+net.core.netdev_max_backlog (defaults to 300, or 300 packets can be input but
+    unprocessed before packets start being dropped)
+
+These parameters should be set with care, and take into account what other
+things the linux box you are running showeq on is used for. If it has a lot of
+server duties, setting rmem_default will increase system memory usage
+significantly.
+
+Suggested settings for a normally used machine are:
+net.core.rmem_default=524288 (512k for default receive buffers)
+net.core.rmem_max=2097152 (2M for max receive buffers)
+net.core.netdev_max_backlog=3000 (allow 3000 packets to be queued before
+    processing before dropping packets)
+
+If you still see problems, you may want to set these higher. Setting these may 
+be distribution specific. Check to see if you have sysctl (man sysctl) or 
+/etc/sysctl.conf, or these can be put directly into /proc by looking
+in /proc/sys/net/core.

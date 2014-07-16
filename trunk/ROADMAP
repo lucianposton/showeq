@@ -1,0 +1,493 @@
+Version: $Header$ $Name$
+
+Files:
+./ - Base directory of the ShowEQ CVS checkout
+ ROADMAP - This file
+ COPYING - The license file
+ CHANGES - Where we note the latest changes to ShowEQ
+ BUGS - An almost never up to date file to keep bug info in
+ FAQ - A brief FAQ
+ INSTALL - The install guide
+ INSTALL.newbies - The install guide for newbies that almost none of them read
+ README - The readme file (another one few tend to read)
+ README.libEQ - Gives information about where to get libEQ.a
+ TODO - A frequently out of data TODO list.
+ showeq.kdevprj - A KDevelop 2 project for ShowEQ
+ showeq.spec - A SRPM spec file
+ showeq.1 - A frequently grossly out of date man page for ShowEQ
+ Makefile.dist - Cleans things up, runs automake and autoconf
+ configure.in - Used by automake and autoconf to create the ./configure file
+ conf.h.in - Input file used to generate conf.h
+ Makefile.am - gets turned into Makefile.in by automake
+
+  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+./doc - Contains miscelaneous documents (frequently old outdated ones)
+
+  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+./conf - Contains assorted configuration files
+ Makefile.am - gets turned into Makefile.in by automake
+ README - a readme about configuration stuff
+ seqdef.xml - The default preferences file
+ seqpref.dtd - A DTD for the ShowEQ XML preference file format
+ filters.conf.dist - An example filter configuration file with docs inside
+ 
+  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+./maps - Contains the zone maps distributed with ShowEQ
+ Makefile.am - gets turned into Makefile.in by automake
+ {zoneShortName}.map - Maps for the various zones
+
+  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+./src - All the sources for all ShowEQ programs/tools
+ Makefile.am - gets turned into Makefile.in by automake
+
+ // Source/Headers for showeq executable (some shared w/ tools)
+ category.{h, cpp} - Category Manager
+ combatlog.{h, cpp} - Combat Log window
+ compas.{h, cpp} - Compass window
+ compassframe.{h, cpp} - Frame around the Compass window
+ db3conf.{h, cpp} - Berkeley DB3 database convenience classes
+ dbcommon.h - Common defines used by database convenience classes
+ decode.{h, cpp} - Contains EQDecode class (interfaces to libEQ.a)
+ editor.{h, cpp} - Text editor window
+ everquest.h - Defines packet structures used by EQ
+ experiencelog.{h, cpp} - Experience window
+ filter.{h, cpp} - Filter classes
+ filtermgr.{h, cpp} - Filter Manager
+ fixpt.h - Convenient fixed point math templates
+ gdbmconv.{h, cpp} - GDBM database convenience classes
+ group.{h, cpp} - Group management related classes
+ interface.{h, cpp} - EQInterface (The main window) - controls most of ShowEQ
+ itemdb.{h, cpp} - Item Database
+ itemdbtool.cpp - Command line tool for manipulating the Item Database
+ libeq.h - Header file defining entry points into libEQ.a
+ log2raw.c - ?
+ logger.{h, cpp} - Some logging related classes
+ main.h - common definitions and global variables
+ main.cpp - main(), QApplication, XMLPreferences, EQInterface, ShowEQParams
+            get created/managed here.
+ mapcore.{h, cpp} - Core map drawing classes
+ map.{h, cpp} - Map window, frame, manager, and menu classes
+ msgdlg.{h, cpp} - Channel Message windows
+ netdiag.{h, cpp} - Network diagnostic windows
+ opcodes.h - EQ network packet opcode definitions
+ packet.{h, cpp} - Monitors the EQ packet data stream
+ player.{h, cpp} - Manages Player state information
+ point.h - templatized 3D point class 
+ seqlistview.{h, cpp} - ListView convenience base classes
+ seqwindow.{h, cpp} - Convenience classes for top level windows.
+ skilllist.{h, cpp} - Skill List window
+ spawn.{h, cpp} - Item, Spawn, Drop, Coin, Door spawn classes 
+ spawnlist2.{h, cpp} - Spawn List 2 window
+ spawnlistcommon.{h, cpp} - Common Spawn List related classes
+ spawnlist.{h, cpp} - Classic Spawn List window
+ spawnmonitor.{h, cpp} - Spawn Monitor (manages Spawn Points)
+ spawnpointlist.{h, cpp} - Spawn Point List window
+ spelllist.{h, cpp} - Spell List window
+ spellshell.{h, cpp} - Spell Shell maintains current spell status info
+ statlist.{h, cpp} - Stat List window
+ util.{h, cpp} - Common utility routines used throughout
+ vpacket.{h, cpp} - Packet playback/recording class.
+ xmlconv.{h, cpp} - XML Convenience classes (Qt type <-> XML> conversion)
+ xmlpreferences.{h, cpp} - XML based preference system
+ zonemgr.{h, cpp} - Zone Manager
+
+ // The following header files are really data files that are #include'd in
+ // the code
+ classes.h - contains an ordered list of class names
+ crctab.h - Datafile used for CRC calculations on packets
+ deity.h - contains an ordered list of deity names
+ languages.h - contains an ordered list of language names
+ races.h - contains an ordered list of race names
+ skills.h - contains an ordered list of skill names
+ spells.h - contains an ordered list of spell information
+ typenames.h - contains an ordered list of spawn body type names
+ weapons.h - contains an ordered list of weapons (0x0000-0x00FF)
+ weapons27.h - contains an ordered list of weapons (0x2700-0x27FF)
+ weapons28.h - contains an ordered list of weapons (0x2800-0x28FF)
+ weapons2b.h - contains an ordered list of weapons (0x2b00-0x2bFF)
+ zones.h - contains an ordered list of zone names
+
+ // CGI classes for web access to ShowEQ gathered data
+ cgiconv.{h, cpp} - CGI convenience classes
+ drawmap.cpp - Source for drawmap.cgi
+ listitem.cpp - Source for listitem.cgi
+ listspawn.cpp - Source for listspawn.cgi
+ showitem.cpp - Source for showitem.cgi
+ showspawn.cpp - Source for showspawn.cgi
+
+ // Utility/tool programs
+ sortitem.cpp - Source for sortitem program
+ spells_en2spellsh.pl - Program to create spells.h from spells_en.txt
+
+//**********************************************************************
+Common Globals: (declared in main.h, managed in main.cpp by main() )
+ XMLPreferences* pSEQPrefs; // preference class (defined in xmlpreferences.h)
+ ShowEQParams* showeq_params // holds frequently used parameters
+
+//**********************************************************************
+Some Class Hierarchies:
++ Point3D<T> - Common 3D Point class (defined in point.h)
+  + EQPoint (really just typedef for Point3D<int16_t> in spawn.h)
+    + Item - Common base class used by all spawn items (defined in spawn.h)
+      + Door - Represents a door (defined in spawn.h)
+      + Drop - Represents an item on the ground (defined in spawn.h)
+      + Coin - Represents a pile of coins (defined in spawn.h)
+      + Spawn - Represents a MOB (PC/NPC/Corpse) (defined in spawn.h)
+        + Player - Represents the player (defined in player.h)
+    + SpawnPoint - Represents an NPC spawn point (defined in spawnmonitor.h)
+  + MapPoint (really just another typedef for Point3D<int16_t> in mapcore.h)  
+
++ MapCommon - Common Map element information (defined in mapcore.h)
+  + MapLineL - 2D line at a constant Z height (defined in mapcore.h)
+  + MapLineM - 3D line (defined in mapcore.h)
+  + MapLocation - A specific named 2D location on a map (defined in mapcore.h)
+
++ SEQListView - Common SEQ Listview class (defined in seqlistview.h)
+  + SkillList 
+  + SpawnList
+  + SpawnPointList
+  + SpellList
+  + StatList 
+
++ SEQWindow
+  + CombatWindow
+  + ExperienceWindow
+  + MapFrame
+  + MsgDialog
+  + NetDiag
+  + SkillListWindow
+  + SpawnListWindow
+  + SpawnListWindow2
+  + SpawnPointWindow
+  + SpellListWindow
+  + StatListWindow
+
+
+//**********************************************************************
+Relationships:
+
+main() (in main.cpp)
++ creates/destroys/manages
+ + XMLPreferences
+ + ShowEQParams
+ + EQInterface
+
+EQInterface (in interface.cpp)
++ creates/destroys/manages
+ + EQPacket
+ + ZoneMgr
+ + Player
+ + EQItemDB
+ + FilterMgr
+ + SpawnShell
+ + CategoryMgr
+ + MapMgr
+ + SpellShell
+ + SpawnMonitor
+ + GroupMgr
+ + PktLogger
+ + SpawnLogger
+ + ExperienceWindow
+ + CombatWindow
+ + MapFrame 
+ + CompassFrame
+ + SpellListWindow
+ + SkillListWindow
+ + StatListWindow
+ + SpawnListWindow
+ + SpawnListWindow2
+ + SpawnPointWindow
+ + NetDiag
++ uses
+ + XMLPreferences
+ + ShowEQParams
++ signaled by:
+ + EQInterface
+ + EQPacket
+ + ZoneMgr
+ + SpawnShell
+ + Player
+ + Map
+ + SpawnList
+ + SpawnListWindow2
+
+EQPacket (packet.cpp)
++ creates/destroys/manages:
+ + EQDecode
+ + PacketCaptureThread
+ + EQPacketMap
+ + VPacket
+ + EQPacketFormat
++ uses:
+ + XMLPreferences
+ + ShowEQParams
++ signaled by:
+ + EQDecode
+
+EQDecode (decode.cpp)
++ uses:
+ + libEQ.a
+
+ZoneMgr (zonemgr.cpp)
++ signaled by:
+ + EQPacket
++ uses:
+ + ShowEQParams
+
+Player (player.cpp)
++ uses:
+ + ZoneMgr
+ + ShowEQParams
+ + XMLPreferences
++ signaled by:
+ + EQPacket
+ + ZoneMgr
+
+ItemDB (itemdb.cpp)
++ signaled by:
+ + EQPacket
+
+FilterMgr (filtermgr.cpp)
++ creates/destroys/manages:
+ + Filter
++ uses:
+ + ShowEQParams
+
+SpawnShell (in spawnshell.cpp)
++ creates/destroys/manages:
+ + Spawn
+ + Drop
+ + Coin
+ + Door
+ + ItemMap (multiple one each for Spawns, Drops, Coin, Door, and Player)
++ uses
+ + ZoneMgr
+ + Player
+ + FilterMgr
+ + EQItemDB
+ + ShowEQParams
++ signaled by:
+ + FilterMgr
+ + ZoneMgr
+ + Player
+ + EQPacket
+
+CategoryMgr (category.cpp)
++ creates/destroys/manages
+ + Category
+ + CategoryList
++ uses:
+ + XMLPreferences
++ signaled by:
+ + EQInterface
+
+MapMgr (in map.cpp)
++ creates/destroys/manages
+ + MapData
+ + CLineDlg
++ uses
+ + SpawnShell
+ + Player
+ + ShowEQParams
+ + XMLPreferences
++ signaled by:
+ + ZoneMgr
+ + SpawnShell
+ + EQInterface
+ + Map
+
+SpellShell (spellshell.cpp)
++ creates/destroys/manages
+ + SpellItem
++ uses
+ + Player
+ + SpawnShell
+ + ShowEQParams
+ + XMLPreferences
++ signaled by:
+ + EQInterface
+ + EQPacket
+
+SpawnMonitor (spawnmonitor.cpp)
++ creates/destroys/manages
+ + SpawnPoint
++ uses
+ + SpawnShell
++ signaled by:
+ + SpawnShell
+
+GroupMgr (group.cpp)
++ signaled by:
+ + EQPacket
+ + SpawnShell
+
+PktLogger (logger.cpp)
++ signaled by:
+ + EQPacket
+
+SpawnLogger (logger.cpp)
++ signaled by:
+ + ZoneMgr
+ + EQPacket
+ + SpawnShell
+
+ExperienceWindow (experiencelog.cpp)
++ creates/destroys/manages:
+ + ExperienceRecord
++ uses:
+ + Player
+ + GroupMgr
+ + EQInterface
+ + MapMgr
++ signaled by:
+ + Player
+ + EQInterface
+
+CombatWindow (combatlog.cpp)
++ creates/destroys/manages:
+ + CombatOffenseRecord
+ + CombatDefenseRecord
+ + CombatMobRecord
++ uses:
+ + Player
++ signaled by:
+ + SpawnShell
+ + EQInterface
+
+MapData (in mapcore.cpp)
++ creates/destroys/manages:
+ + MapLineL
+ + MapLineM
+ + MapLocation
+ + MapAggro
++ uses:
+ + MapParameters
+
+MapCache (in mapcore.cpp)
++ creates/destroys/manages:
+ + MapParameters
++ uses
+ + MapData
+
+MapFrame (in map.cpp)
++ creates/destroys/manages:
+ + Map
+ + MapFilterLineEdit
++ uses:
+ + FilterMgr
+ + XMLPreferences
++ signaled by:
+ + Player
+ + Map
+ + MapFilterLineEdit
+ + EQInterface
+
+Map (in map.cpp)
++ creates/destroys/manages
+ + MapParameters
+ + MapCache
+ + MapMenu
+ + MapLabel 
++ uses
+ + MapMgr
+ + Player
+ + SpawnShell
+ + Item
+ + ZoneMgr
+ + SpawnMonitor
+ + ShowEQParams
+ + XMLPreferences
++ signaled by:
+ + MapMgr
+ + SpawnShell
+ + EQInterface
+
+MsgDialog (msgdlg.cpp)
++ uses:
+ + ShowEQParams
++ signaled by:
+ + EQInterface
+
+SpawnListWindow (spawnlist.cpp)
++ creates/destroys/manages:
+ + SpawnList
++ signaled by:
+ + EQInterface
+
+SpawnList (spawnlist.cpp)
++ creates/destroys/manages:
+ + SpawnListMenu
++ uses:
+ + CategoryMgr
+ + Player
+ + SpawnShell
+ + FilterMgr
+ + ShowEQParams
++ signaled by:
+ + EQInterface
+ + SpawnShell
+ + Player
+ + CategoryMgr
+ + SpawnListMenu
+
+SpawnListWindow2 (spawnlist2.cpp)
++ creates/destroys/manages
+ + SpawnList2
+ + SpawnListMenu
++ uses:
+ + Player
+ + CategoryMgr
+ + SpawnShell
+ + FilterMgr
+ + ShowEQParams
+ + XMLPreferences
++ signaled by:
+ + EQInterface
+ + SpawnShell
+ + CategoryMgr
+ + EQPacket
+ + SpawnListMenu
+ 
+SpawnPointWindow (spawnpointlist.cpp)
++ creates/destroys/manages:
+ + SpawnPointList
++ signaled by:
+ + EQInterface
+
+SpawnPointList (spawnpointlist.cpp)
++ creates/destroys/manages:
+ + SpawnPointListMenu
++ uses:
+ + SpawnMonitor
+ + ShowEQParams
+ + XMLPreferences
++ signaled by:
+ + SpawnMonitor
+ + SpawnPointListMenu
+
+SkillListWindow (skilllist.cpp)
++ creates/destroys/manages
+ + SkillList
++ signaled by:
+ + EQInterface
+
+SkillList (skilllist.cpp)
++ uses:
+ + Player
+ + XMLPreferences
++ signaled by:
+ + Player
+
+StatListWindow (statlist.cpp)
++ creates/destroys/manages:
+ + StatList
++ signaled by:
+ + EQInterface
+
+StatList (statlist.cpp)
++ uses:
+ + Player
+ + XMLPreferences
++ signaled by:
+ + Player
+
