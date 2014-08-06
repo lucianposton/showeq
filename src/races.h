@@ -101,7 +101,7 @@
     "Troll",                      // 92
     "Ogre",                       // 93
     "Dwarf",                      // 94
-    "Cazic Thule",                // 95
+    "Cazic-Thule",                // 95
     "Cockatrice",                 // 96
     "Daisy Man",                  // 97
     "Vampire",                    // 98
@@ -125,7 +125,7 @@
     "Seahorse",                   // 116
     "Ghost",                      // 117
     "Ghost",                      // 118
-    "Sabertooth",                 // 119
+    "Saber-toothed Cat",          // 119
     "Wolf",                       // 120
     "Gorgon",                     // 121
     "Dragon",                     // 122
@@ -263,7 +263,7 @@
     "Solusek Ro Guard",           // 254
     "Bertoxxulous",               // 255
     "The Tribunal",               // 256
-    "Terris Thule",               // 257
+    "Terris-Thule",               // 257
     "Vegerog",                    // 258
     "Crocodile",                  // 259
     "Bat",                        // 260
@@ -354,7 +354,7 @@
     "Luggald",                    // 345
     "Luggald",                    // 346
     "Luggalds",                   // 347
-    "Drogmore",                   // 348
+    "Drogmor",                    // 348
     "Froglok Skeleton",           // 349
     "Undead Froglok",             // 350
     "Knight of Hate",             // 351
@@ -362,8 +362,8 @@
     "Veksar",                     // 353
     "Veksar",                     // 354
     "Veksar",                     // 355
-    "Chokadai",                   // 356
-    "Undead Chokadai",            // 357
+    "Chokidai",                   // 356
+    "Undead Chokidai",            // 357
     "Undead Veksar",              // 358
     "Vampire",                    // 359
     "Vampire",                    // 360
@@ -435,7 +435,7 @@
     "Portal",                     // 426
     "Coin Purse",                 // 427
     "Rock Pile",                  // 428
-    "Murkglider Egg Sack",        // 429
+    "Murkglider Egg Sac",         // 429
     "Drake",                      // 430
     "Dervish",                    // 431
     "Drake",                      // 432
@@ -620,7 +620,7 @@
     "Scorpion",                   // 611
     "Tsetsian",                   // 612
     "Wurm",                       // 613
-    "Balrog",                     // 614
+    "Nekhon",                     // 614
     "Hydra Crystal",              // 615
     "Crystal Sphere",             // 616
     "Gnoll",                      // 617
@@ -629,7 +629,7 @@
     "Demon Vulture",              // 620
     "Wagon",                      // 621
     "God of Discord",             // 622
-    "Wrulon Mount",               // 623
+    "Feran Mount",                // 623
     "Ogre NPC - Male",            // 624
     "Sokokar Mount",              // 625
     "Giant (Rallosian mats)",     // 626
@@ -664,7 +664,7 @@
     "Bear Mount",                 // 655
     "Rat Mount",                  // 656
     "Sessiloid Mount",            // 657
-    "Morell Thule",               // 658
+    "Morell-Thule",               // 658
     "Marionette",                 // 659
     "Book Dervish",               // 660
     "Topiary Lion",               // 661
@@ -673,17 +673,120 @@
     "Sandman",                    // 664
     "Grandfather Clock",          // 665
     "Gingerbread Man",            // 666
-    "Beefeater",                  // 667
+    "Royal Guard",                // 667
     "Rabbit",                     // 668
     "Blind Dreamer",              // 669
-    "Cazic Thule",                // 670
+    "Cazic-Thule",                // 670
     "Topiary Lion Mount",         // 671
     "Rot Dog Mount",              // 672
     "Goral Mount",                // 673
-    "Selyran Mount",              // 674
+    "Selyrah Mount",              // 674
     "Sclera Mount",               // 675
-    "Braxy Mount",                // 676
+    "Braxi Mount",                // 676
     "Kangon Mount",               // 677
     "Erudite",                    // 678
     "Wurm Mount",                 // 679
+    "Raptor Mount",               // 680
+    "Invisible Man",              // 681
+    "Whirligig",                  // 682
+    "Gnomish Balloon",            // 683
+    "Gnomish Rocket Pack",        // 684
+    "Gnomish Hovering Transport", // 685
+    "Selyrah",                    // 686
+    "Goral",                      // 687
+    "Braxi",                      // 688
+    "Kangon",                     // 689
+    "Invisible Man",              // 690
+    "Floating Tower",             // 691
+    "Explosive Cart",             // 692
+    "Blimp Ship",                 // 693
+    "Tumbleweed",                 // 694
+    "Alaran",                     // 695
+    "Swinetor",                   // 696
+    "Triumvirate",                // 697
+    "Hadal",                      // 698
+    "Hovering Platform",          // 699
+    "Parasitic Scavenger",        // 700
+    "Grendlaen",                  // 701
+    "Ship in a Bottle",           // 702
+    "Alaran Sentry Stone",        // 703
+    "Dervish",                    // 704
+    "Regeneration Pool",          // 705
+    "Teleportation Stand",        // 706
+    "Relic Case",                 // 707
+    "Alaran Ghost",               // 708
+    "Skystrider",                 // 709
+    "Water Spout",                // 710
+    "Aviak Pull Along",           // 711
+    "Gelatinous Cube",            // 712
+    "Cat",                        // 713
+    "Elk Head",                   // 714
+    "Holgresh",                   // 715
+    "Beetle",                     // 716
+    "Vine Maw",                   // 717
+    "Ratman",                     // 718
+    "Fallen Knight",              // 719
+    "Flying Carpet",              // 720
+    "Carrier Hand",               // 721
+    "Akheva",                     // 722
+    "Servant of Shadow",          // 723
+    "Luclin",                     // 724
+    "Xaric the Unspoken",         // 725
+    "Dervish",                    // 726
+    "Dervish",                    // 727
+    "Luclin",                     // 728
+    "Luclin",                     // 729
+    "Orb",                        // 730
+    "Luclin",                     // 731
+    "Pegasus",                    // 732
+    "Gehein",                     // 733
+    "Tirun",                      // 734
+    "Orafik",                     // 735
+    "Skirth",                     // 736
+    "Xulous",                     // 737
+    "Fear Crystal",               // 738
+    "Fear Embryo",                // 739
+    "Golem",                      // 740
+    "Bixie",                      // 741
+    "Butterfly",                  // 742
+    "Ursarachnid",                // 743
+    "Gargoyle",                   // 744
+    "Molerat",                    // 745
+    "Bone Golem",                 // 746
+    "Palisade",                   // 747
+    "Honey Pot",                  // 748
+    "Plant Part",                 // 749
+    "Lendiniara",                 // 750
+    "Dragonfly Mount",            // 751
+    "Ruishi Mount",               // 752
+    "Komodo Dragon Mount",        // 753
+    "Raptor Mount",               // 754
+    "Clockwork Protector",        // 755
+    "Clockwork Soldier",          // 756
+    "Reindeer Mount",             // 757
+    "Clockwork Spider",           // 758
+    "Clockwork Copter",           // 759
+    "Book Minion",                // 760
+    "Broom Minion",               // 761
+    "Clockwork Worker",           // 762
+    "Clockwork Gnome",            // 763
+    "Clockwork Menace",           // 764
+    "Clockwork Bomb",             // 765
+    "Stone Worker",               // 766
+    "Imp",                        // 767
+    "Skeleton",                   // 768
+    "Siren",                      // 769
+    "Shissar",                    // 770
+    "Tyrannosaur",                // 771
+    "Book Minion",                // 772
+    "Broom Minion",               // 773
+    "Ankylosaurus",               // 774
+    "Fire Elf",                   // 775
+    "Fire Elf Royal",             // 776
+    "Triceratops",                // 777
+    "Angler Serpent",             // 778
+    "Skeleton",                   // 779
+    "Wolf",                       // 780
+    "Worg",                       // 781
+    "Interactive Object",         // 2250
 #endif
