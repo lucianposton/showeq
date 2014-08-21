@@ -248,7 +248,7 @@
         <comment>Skill up code</comment>
         <payload dir="server" typename="skillIncStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="50ff" name="OP_LevelUpdate" updated="07/16/14">
+    <opcode id="72e6" name="OP_LevelUpdate" updated="08/20/14">
         <comment>LevelUpUpdateCode</comment>
         <payload dir="server" typename="levelUpUpdateStruct" sizechecktype="match"/>
     </opcode>
