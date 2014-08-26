@@ -853,17 +853,17 @@ struct pos
 	/*0004*/ uint16_t unknown0001;                   // ***Placeholder
 	/*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
 	 	 unsigned padding01:20;
-	/*0010*/ float y;                                // y coord (2nd loc value)
-	/*0014*/ float z;                                // z coord (3rd loc value)
-	/*0018*/ float deltaY;                           // Change in y
-	/*0022*/ float deltaX;                           // Change in x
-	/*0026*/ float deltaZ;                           // Change in z
-	/*0030*/ unsigned heading:12;                    // Heading
+	/*0010*/ float deltaY;                           // Change in y
+	/*0014*/ signed animation:10;                    // velocity
 		 signed deltaHeading:10;                 // change in heading
-		 unsigned padding02:10;
+		 unsigned padding02:12;
+	/*0018*/ float z;                                // z coord (3rd loc value)
+	/*0022*/ float y;                                // y coord (2nd loc value)
+	/*0026*/ float deltaZ;                           // Change in z
+	/*0030*/ float deltaX;                           // Change in x
 	/*0034*/ float x;                                // x coord (1st loc value)
-	/*0038*/ signed animation:10;                    // velocity
-		 unsigned padding03:22;
+	/*0038*/ unsigned heading:12;                    // Heading
+		 unsigned padding03:20;
 	/*0042*/ 
 };
 #endif
