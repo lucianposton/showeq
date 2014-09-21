@@ -19,7 +19,7 @@
 #ifndef EQSTRUCT_H
 #define EQSTRUCT_H
 
-#include "config.h"
+//#include "config.h"
 
 #ifdef __FreeBSD__
 #include <sys/types.h>
