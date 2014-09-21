@@ -1,1565 +1,1290 @@
-<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
-<class>MapIconDialog</class>
-<widget class="QDialog">
-    <property name="name">
-        <cstring>MapIconDialog</cstring>
-    </property>
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0" stdsetdef="1">
+  <author></author>
+  <comment></comment>
+  <exportmacro></exportmacro>
+  <class>MapIconDialog</class>
+  <widget class="QDialog" name="MapIconDialog">
     <property name="geometry">
-        <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>557</width>
-            <height>306</height>
-        </rect>
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>557</width>
+        <height>306</height>
+      </rect>
     </property>
     <property name="sizePolicy">
-        <sizepolicy>
-            <hsizetype>5</hsizetype>
-            <vsizetype>5</vsizetype>
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-        </sizepolicy>
+      <sizepolicy>
+        <hsizetype>5</hsizetype>
+        <vsizetype>5</vsizetype>
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
     </property>
-    <property name="caption">
-        <string>Map Icon Config</string>
+    <property name="windowTitle">
+      <string>Map Icon Config</string>
     </property>
-    <widget class="QLabel">
-        <property name="name">
-            <cstring>TextLabel7</cstring>
-        </property>
+    <widget class="QLabel" name="TextLabel7">
+      <property name="geometry">
+        <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>60</width>
+          <height>20</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>&amp;Map Icon:</string>
+      </property>
+      <property name="buddy" stdset="0">
+        <cstring>m_mapIconCombo</cstring>
+      </property>
+      <property name="wordWrap">
+        <bool>false</bool>
+      </property>
+    </widget>
+    <widget class="Q3Frame" name="m_mapIconSettingsFrame">
+      <property name="geometry">
+        <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>540</width>
+          <height>260</height>
+        </rect>
+      </property>
+      <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QPushButton" name="m_revert">
         <property name="geometry">
-            <rect>
-                <x>10</x>
-                <y>10</y>
-                <width>60</width>
-                <height>20</height>
-            </rect>
+          <rect>
+            <x>283</x>
+            <y>231</y>
+            <width>60</width>
+            <height>22</height>
+          </rect>
         </property>
         <property name="text">
-            <string>&amp;Map Icon:</string>
+          <string>Revert</string>
         </property>
-        <property name="buddy" stdset="0">
-            <cstring>m_mapIconCombo</cstring>
-        </property>
-    </widget>
-    <widget class="QFrame">
-        <property name="name">
-            <cstring>m_mapIconSettingsFrame</cstring>
-        </property>
+      </widget>
+      <widget class="QPushButton" name="m_apply">
         <property name="geometry">
-            <rect>
+          <rect>
+            <x>171</x>
+            <y>231</y>
+            <width>60</width>
+            <height>22</height>
+          </rect>
+        </property>
+        <property name="text">
+          <string>Apply</string>
+        </property>
+      </widget>
+      <widget class="QTabWidget" name="m_tabWidget">
+        <property name="geometry">
+          <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>520</width>
+            <height>210</height>
+          </rect>
+        </property>
+        <widget class="QWidget" name="image">
+          <attribute name="title">
+            <string>&amp;Image</string>
+          </attribute>
+          <widget class="Q3Frame" name="frame4">
+            <property name="geometry">
+              <rect>
+                <x>8</x>
+                <y>24</y>
+                <width>500</width>
+                <height>40</height>
+              </rect>
+            </property>
+            <property name="frameShape">
+              <enum>QFrame::Box</enum>
+            </property>
+            <property name="frameShadow">
+              <enum>QFrame::Sunken</enum>
+            </property>
+            <widget class="QLabel" name="m_imageImageLabel">
+              <property name="geometry">
+                <rect>
+                  <x>10</x>
+                  <y>10</y>
+                  <width>40</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Image:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_imageImage</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel2_4">
+              <property name="geometry">
+                <rect>
+                  <x>240</x>
+                  <y>10</y>
+                  <width>30</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Size:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_imageSize</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_imageImage">
+              <property name="geometry">
+                <rect>
+                  <x>60</x>
+                  <y>10</y>
+                  <width>140</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_imageSize">
+              <property name="geometry">
+                <rect>
+                  <x>280</x>
+                  <y>10</y>
+                  <width>100</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+            <widget class="QCheckBox" name="m_imageFlash">
+              <property name="geometry">
+                <rect>
+                  <x>410</x>
+                  <y>10</y>
+                  <width>80</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Flash</string>
+              </property>
+            </widget>
+          </widget>
+          <widget class="Q3GroupBox" name="imageOutlineGroupBox_3">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>70</y>
+                <width>500</width>
+                <height>50</height>
+              </rect>
+            </property>
+            <property name="title">
+              <string>&amp;Outline</string>
+            </property>
+            <widget class="QLabel" name="TextLabel4_5_2">
+              <property name="geometry">
+                <rect>
+                  <x>410</x>
+                  <y>20</y>
+                  <width>40</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Width:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_imagePenWidth</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel5_5_2">
+              <property name="geometry">
+                <rect>
+                  <x>240</x>
+                  <y>20</y>
+                  <width>38</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Style:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_imagePenStyle</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="Q3Frame" name="m_imagePenColorSample">
+              <property name="geometry">
+                <rect>
+                  <x>210</x>
+                  <y>20</y>
+                  <width>20</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+              </property>
+            </widget>
+            <widget class="QCheckBox" name="m_imageUseSpawnColorPen">
+              <property name="geometry">
+                <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>130</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Use Spawn Color</string>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_imagePenStyle">
+              <property name="geometry">
+                <rect>
+                  <x>280</x>
+                  <y>20</y>
+                  <width>120</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+            <widget class="QSpinBox" name="m_imagePenWidth">
+              <property name="geometry">
+                <rect>
+                  <x>456</x>
+                  <y>20</y>
+                  <width>30</width>
+                  <height>23</height>
+                </rect>
+              </property>
+              <property name="maximum">
+                <number>5</number>
+              </property>
+            </widget>
+            <widget class="QPushButton" name="m_imagePenColor">
+              <property name="geometry">
+                <rect>
+                  <x>140</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Color...</string>
+              </property>
+            </widget>
+          </widget>
+          <widget class="Q3GroupBox" name="imageFillGroupBox_3">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>120</y>
+                <width>500</width>
+                <height>50</height>
+              </rect>
+            </property>
+            <property name="title">
+              <string>&amp;Fill</string>
+            </property>
+            <widget class="QLabel" name="TextLabel3_4_2">
+              <property name="geometry">
+                <rect>
+                  <x>240</x>
+                  <y>20</y>
+                  <width>38</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Style:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_imageBrushStyle</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QPushButton" name="m_imageBrushColor">
+              <property name="geometry">
+                <rect>
+                  <x>140</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Color...</string>
+              </property>
+            </widget>
+            <widget class="Q3Frame" name="m_imageBrushColorSample">
+              <property name="geometry">
+                <rect>
+                  <x>210</x>
+                  <y>20</y>
+                  <width>20</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+              </property>
+            </widget>
+            <widget class="QCheckBox" name="m_imageUseSpawnColorBrush">
+              <property name="geometry">
+                <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>130</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Use Spawn Color</string>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_imageBrushStyle">
+              <property name="geometry">
+                <rect>
+                  <x>280</x>
+                  <y>20</y>
+                  <width>170</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+          </widget>
+          <widget class="QCheckBox" name="m_useImage">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>0</y>
+                <width>100</width>
+                <height>20</height>
+              </rect>
+            </property>
+            <property name="text">
+              <string>&amp;Use Image</string>
+            </property>
+          </widget>
+        </widget>
+        <widget class="QWidget" name="highlight">
+          <attribute name="title">
+            <string>&amp;Highlight</string>
+          </attribute>
+          <widget class="QCheckBox" name="m_useHighlight">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>0</y>
+                <width>110</width>
+                <height>20</height>
+              </rect>
+            </property>
+            <property name="text">
+              <string>&amp;Use Highlight</string>
+            </property>
+          </widget>
+          <widget class="Q3Frame" name="frame6">
+            <property name="geometry">
+              <rect>
+                <x>8</x>
+                <y>24</y>
+                <width>500</width>
+                <height>40</height>
+              </rect>
+            </property>
+            <property name="frameShape">
+              <enum>QFrame::Box</enum>
+            </property>
+            <property name="frameShadow">
+              <enum>QFrame::Sunken</enum>
+            </property>
+            <widget class="QLabel" name="TextLabel1_2_2">
+              <property name="geometry">
+                <rect>
+                  <x>10</x>
+                  <y>10</y>
+                  <width>40</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Image:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_highlightImage</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QCheckBox" name="m_highlightFlash">
+              <property name="geometry">
+                <rect>
+                  <x>410</x>
+                  <y>10</y>
+                  <width>80</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Flash</string>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_highlightSize">
+              <property name="geometry">
+                <rect>
+                  <x>280</x>
+                  <y>10</y>
+                  <width>90</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel2_2_2">
+              <property name="geometry">
+                <rect>
+                  <x>240</x>
+                  <y>10</y>
+                  <width>30</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Size:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_highlightSize</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_highlightImage">
+              <property name="geometry">
+                <rect>
+                  <x>60</x>
+                  <y>10</y>
+                  <width>140</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+          </widget>
+          <widget class="Q3GroupBox" name="highlightFillGroupBox_2">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>120</y>
+                <width>500</width>
+                <height>50</height>
+              </rect>
+            </property>
+            <property name="title">
+              <string>&amp;Fill</string>
+            </property>
+            <widget class="QCheckBox" name="m_highlightUseSpawnColorBrush">
+              <property name="geometry">
+                <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>130</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Use Spawn Color</string>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel3_2_2_2">
+              <property name="geometry">
+                <rect>
+                  <x>240</x>
+                  <y>20</y>
+                  <width>38</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Style:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_highlightBrushStyle</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QPushButton" name="m_highlightBrushColor">
+              <property name="geometry">
+                <rect>
+                  <x>140</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Color...</string>
+              </property>
+            </widget>
+            <widget class="Q3Frame" name="m_highlightBrushColorSample">
+              <property name="geometry">
+                <rect>
+                  <x>210</x>
+                  <y>20</y>
+                  <width>20</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_highlightBrushStyle">
+              <property name="geometry">
+                <rect>
+                  <x>280</x>
+                  <y>20</y>
+                  <width>170</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+          </widget>
+          <widget class="Q3GroupBox" name="highlightOutlineGroupBox_2">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>70</y>
+                <width>500</width>
+                <height>50</height>
+              </rect>
+            </property>
+            <property name="title">
+              <string>&amp;Outline</string>
+            </property>
+            <widget class="QCheckBox" name="m_highlightUseSpawnColorPen">
+              <property name="geometry">
+                <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>130</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Use Spawn Color</string>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_highlightPenStyle">
+              <property name="geometry">
+                <rect>
+                  <x>280</x>
+                  <y>20</y>
+                  <width>120</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel5_2_2_2">
+              <property name="geometry">
+                <rect>
+                  <x>240</x>
+                  <y>20</y>
+                  <width>38</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Style:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_highlightPenStyle</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QPushButton" name="m_highlightPenColor">
+              <property name="geometry">
+                <rect>
+                  <x>140</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Color...</string>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel4_2_2_2">
+              <property name="geometry">
+                <rect>
+                  <x>410</x>
+                  <y>20</y>
+                  <width>40</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Width:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_highlightPenWidth</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="Q3Frame" name="m_highlightPenColorSample">
+              <property name="geometry">
+                <rect>
+                  <x>210</x>
+                  <y>20</y>
+                  <width>20</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+              </property>
+            </widget>
+            <widget class="QSpinBox" name="m_highlightPenWidth">
+              <property name="geometry">
+                <rect>
+                  <x>456</x>
+                  <y>20</y>
+                  <width>30</width>
+                  <height>23</height>
+                </rect>
+              </property>
+              <property name="maximum">
+                <number>5</number>
+              </property>
+            </widget>
+          </widget>
+        </widget>
+        <widget class="QWidget" name="lines">
+          <attribute name="title">
+            <string>&amp;Lines</string>
+          </attribute>
+          <widget class="Q3GroupBox" name="line2GroupBox_2">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>120</y>
+                <width>500</width>
+                <height>50</height>
+              </rect>
+            </property>
+            <property name="title">
+              <string>Line &amp;2</string>
+            </property>
+            <widget class="QLabel" name="TextLabel6_2_3_2">
+              <property name="geometry">
+                <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Distance:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_line2Distance</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QSpinBox" name="m_line2Distance">
+              <property name="geometry">
+                <rect>
+                  <x>70</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>23</height>
+                </rect>
+              </property>
+              <property name="specialValueText">
+                <string>Off</string>
+              </property>
+              <property name="maximum">
+                <number>2000</number>
+              </property>
+              <property name="singleStep">
+                <number>5</number>
+              </property>
+            </widget>
+            <widget class="QPushButton" name="m_line2PenColor">
+              <property name="geometry">
+                <rect>
+                  <x>140</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Color...</string>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel4_3_2_2_4_2">
+              <property name="geometry">
+                <rect>
+                  <x>410</x>
+                  <y>20</y>
+                  <width>40</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Width:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_line2PenWidth</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_line2PenStyle">
+              <property name="geometry">
+                <rect>
+                  <x>280</x>
+                  <y>20</y>
+                  <width>120</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel5_3_2_2_4_2">
+              <property name="geometry">
+                <rect>
+                  <x>240</x>
+                  <y>20</y>
+                  <width>38</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Style:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_line2PenStyle</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="Q3Frame" name="m_line2PenColorSample">
+              <property name="geometry">
+                <rect>
+                  <x>210</x>
+                  <y>20</y>
+                  <width>20</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+              </property>
+            </widget>
+            <widget class="QSpinBox" name="m_line2PenWidth">
+              <property name="geometry">
+                <rect>
+                  <x>456</x>
+                  <y>20</y>
+                  <width>30</width>
+                  <height>23</height>
+                </rect>
+              </property>
+              <property name="maximum">
+                <number>5</number>
+              </property>
+            </widget>
+          </widget>
+          <widget class="Q3GroupBox" name="line1GroupBox_2">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>70</y>
+                <width>500</width>
+                <height>50</height>
+              </rect>
+            </property>
+            <property name="title">
+              <string>Line &amp;1</string>
+            </property>
+            <widget class="QLabel" name="TextLabel6_4_2">
+              <property name="geometry">
+                <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Distance:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_line1Distance</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel4_3_2_4_2">
+              <property name="geometry">
+                <rect>
+                  <x>410</x>
+                  <y>20</y>
+                  <width>40</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Width:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_line1PenWidth</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_line1PenStyle">
+              <property name="geometry">
+                <rect>
+                  <x>280</x>
+                  <y>20</y>
+                  <width>120</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+            <widget class="QPushButton" name="m_line1PenColor">
+              <property name="geometry">
+                <rect>
+                  <x>140</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Color...</string>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel5_3_2_4_2">
+              <property name="geometry">
+                <rect>
+                  <x>240</x>
+                  <y>20</y>
+                  <width>38</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Style:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_line1PenStyle</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="Q3Frame" name="m_line1PenColorSample">
+              <property name="geometry">
+                <rect>
+                  <x>210</x>
+                  <y>20</y>
+                  <width>20</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+              </property>
+            </widget>
+            <widget class="QSpinBox" name="m_line1Distance">
+              <property name="geometry">
+                <rect>
+                  <x>70</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>23</height>
+                </rect>
+              </property>
+              <property name="specialValueText">
+                <string>Off</string>
+              </property>
+              <property name="maximum">
+                <number>2000</number>
+              </property>
+              <property name="singleStep">
+                <number>5</number>
+              </property>
+            </widget>
+            <widget class="QSpinBox" name="m_line1PenWidth">
+              <property name="geometry">
+                <rect>
+                  <x>456</x>
+                  <y>20</y>
+                  <width>30</width>
+                  <height>23</height>
+                </rect>
+              </property>
+              <property name="maximum">
+                <number>5</number>
+              </property>
+            </widget>
+          </widget>
+          <widget class="Q3GroupBox" name="line0GroupBox_2">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>20</y>
+                <width>500</width>
+                <height>50</height>
+              </rect>
+            </property>
+            <property name="title">
+              <string>Line &amp;0</string>
+            </property>
+            <widget class="QLabel" name="TextLabel4_3_4_2">
+              <property name="geometry">
+                <rect>
+                  <x>410</x>
+                  <y>20</y>
+                  <width>40</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Width:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_line0PenWidth</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel5_3_4_2">
+              <property name="geometry">
+                <rect>
+                  <x>240</x>
+                  <y>20</y>
+                  <width>38</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Style:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_line0PenStyle</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QPushButton" name="m_line0PenColor">
+              <property name="geometry">
+                <rect>
+                  <x>140</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Color...</string>
+              </property>
+            </widget>
+            <widget class="Q3Frame" name="m_line0PenColorSample">
+              <property name="geometry">
+                <rect>
+                  <x>210</x>
+                  <y>20</y>
+                  <width>20</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+              </property>
+            </widget>
+            <widget class="QCheckBox" name="m_showLine0">
+              <property name="geometry">
+                <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>120</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Show</string>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_line0PenStyle">
+              <property name="geometry">
+                <rect>
+                  <x>280</x>
+                  <y>20</y>
+                  <width>120</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+            <widget class="QSpinBox" name="m_line0PenWidth">
+              <property name="geometry">
+                <rect>
+                  <x>456</x>
+                  <y>20</y>
+                  <width>30</width>
+                  <height>23</height>
+                </rect>
+              </property>
+              <property name="maximum">
+                <number>5</number>
+              </property>
+            </widget>
+          </widget>
+        </widget>
+        <widget class="QWidget" name="other">
+          <attribute name="title">
+            <string>&amp;General</string>
+          </attribute>
+          <widget class="Q3GroupBox" name="walkPathLineGroupBox_2">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>70</y>
+                <width>500</width>
+                <height>50</height>
+              </rect>
+            </property>
+            <property name="title">
+              <string>Walk Path Line &amp;Override</string>
+            </property>
+            <widget class="QLabel" name="TextLabel4_3_2_2_2_2_2">
+              <property name="geometry">
+                <rect>
+                  <x>410</x>
+                  <y>20</y>
+                  <width>40</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Width:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_walkPathPenWidth</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QComboBox" name="m_walkPathPenStyle">
+              <property name="geometry">
+                <rect>
+                  <x>280</x>
+                  <y>20</y>
+                  <width>120</width>
+                  <height>22</height>
+                </rect>
+              </property>
+            </widget>
+            <widget class="QLabel" name="TextLabel5_3_2_2_2_2_2">
+              <property name="geometry">
+                <rect>
+                  <x>240</x>
+                  <y>20</y>
+                  <width>38</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Style:</string>
+              </property>
+              <property name="buddy" stdset="0">
+                <cstring>m_walkPathPenStyle</cstring>
+              </property>
+              <property name="wordWrap">
+                <bool>false</bool>
+              </property>
+            </widget>
+            <widget class="QPushButton" name="m_walkPathPenColor">
+              <property name="geometry">
+                <rect>
+                  <x>140</x>
+                  <y>20</y>
+                  <width>60</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Color...</string>
+              </property>
+            </widget>
+            <widget class="Q3Frame" name="m_walkPathPenColorSample">
+              <property name="geometry">
+                <rect>
+                  <x>210</x>
+                  <y>20</y>
+                  <width>20</width>
+                  <height>22</height>
+                </rect>
+              </property>
+              <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+              </property>
+            </widget>
+            <widget class="QCheckBox" name="m_useWalkPathPen">
+              <property name="geometry">
+                <rect>
+                  <x>10</x>
+                  <y>20</y>
+                  <width>100</width>
+                  <height>20</height>
+                </rect>
+              </property>
+              <property name="text">
+                <string>Use Override</string>
+              </property>
+            </widget>
+            <widget class="QSpinBox" name="m_walkPathPenWidth">
+              <property name="geometry">
+                <rect>
+                  <x>456</x>
+                  <y>20</y>
+                  <width>30</width>
+                  <height>23</height>
+                </rect>
+              </property>
+              <property name="maximum">
+                <number>5</number>
+              </property>
+            </widget>
+          </widget>
+          <widget class="QCheckBox" name="m_showName">
+            <property name="geometry">
+              <rect>
+                <x>10</x>
+                <y>10</y>
+                <width>90</width>
+                <height>20</height>
+              </rect>
+            </property>
+            <property name="text">
+              <string>Show &amp;Name</string>
+            </property>
+          </widget>
+          <widget class="QCheckBox" name="m_showWalkPath">
+            <property name="geometry">
+              <rect>
                 <x>10</x>
                 <y>40</y>
-                <width>540</width>
-                <height>260</height>
-            </rect>
-        </property>
-        <property name="frameShape">
-            <enum>StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-            <enum>Raised</enum>
-        </property>
-        <widget class="QPushButton">
-            <property name="name">
-                <cstring>m_revert</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>283</x>
-                    <y>231</y>
-                    <width>60</width>
-                    <height>22</height>
-                </rect>
+                <width>130</width>
+                <height>20</height>
+              </rect>
             </property>
             <property name="text">
-                <string>Revert</string>
+              <string>Show &amp;Walk Path</string>
             </property>
+          </widget>
         </widget>
-        <widget class="QPushButton">
-            <property name="name">
-                <cstring>m_apply</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>171</x>
-                    <y>231</y>
-                    <width>60</width>
-                    <height>22</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>Apply</string>
-            </property>
-        </widget>
-        <widget class="QTabWidget">
-            <property name="name">
-                <cstring>m_tabWidget</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>10</x>
-                    <y>10</y>
-                    <width>520</width>
-                    <height>210</height>
-                </rect>
-            </property>
-            <widget class="QWidget">
-                <property name="name">
-                    <cstring>image</cstring>
-                </property>
-                <attribute name="title">
-                    <string>&amp;Image</string>
-                </attribute>
-                <widget class="QFrame">
-                    <property name="name">
-                        <cstring>frame4</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>8</x>
-                            <y>24</y>
-                            <width>500</width>
-                            <height>40</height>
-                        </rect>
-                    </property>
-                    <property name="frameShape">
-                        <enum>GroupBoxPanel</enum>
-                    </property>
-                    <property name="frameShadow">
-                        <enum>Sunken</enum>
-                    </property>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>m_imageImageLabel</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>10</x>
-                                <y>10</y>
-                                <width>40</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Image:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_imageImage</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel2_4</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>240</x>
-                                <y>10</y>
-                                <width>30</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Size:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_imageSize</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_imageImage</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>60</x>
-                                <y>10</y>
-                                <width>140</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_imageSize</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>280</x>
-                                <y>10</y>
-                                <width>100</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                    <widget class="QCheckBox">
-                        <property name="name">
-                            <cstring>m_imageFlash</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>410</x>
-                                <y>10</y>
-                                <width>80</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Flash</string>
-                        </property>
-                    </widget>
-                </widget>
-                <widget class="QGroupBox">
-                    <property name="name">
-                        <cstring>imageOutlineGroupBox_3</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>70</y>
-                            <width>500</width>
-                            <height>50</height>
-                        </rect>
-                    </property>
-                    <property name="title">
-                        <string>&amp;Outline</string>
-                    </property>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel4_5_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>410</x>
-                                <y>20</y>
-                                <width>40</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Width:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_imagePenWidth</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel5_5_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>240</x>
-                                <y>20</y>
-                                <width>38</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Style:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_imagePenStyle</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QFrame">
-                        <property name="name">
-                            <cstring>m_imagePenColorSample</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>210</x>
-                                <y>20</y>
-                                <width>20</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="frameShape">
-                            <enum>LineEditPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                            <enum>Raised</enum>
-                        </property>
-                    </widget>
-                    <widget class="QCheckBox">
-                        <property name="name">
-                            <cstring>m_imageUseSpawnColorPen</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>10</x>
-                                <y>20</y>
-                                <width>130</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Use Spawn Color</string>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_imagePenStyle</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>280</x>
-                                <y>20</y>
-                                <width>120</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                    <widget class="QSpinBox">
-                        <property name="name">
-                            <cstring>m_imagePenWidth</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>456</x>
-                                <y>20</y>
-                                <width>30</width>
-                                <height>23</height>
-                            </rect>
-                        </property>
-                        <property name="maxValue">
-                            <number>5</number>
-                        </property>
-                    </widget>
-                    <widget class="QPushButton">
-                        <property name="name">
-                            <cstring>m_imagePenColor</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>140</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Color...</string>
-                        </property>
-                    </widget>
-                </widget>
-                <widget class="QGroupBox">
-                    <property name="name">
-                        <cstring>imageFillGroupBox_3</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>120</y>
-                            <width>500</width>
-                            <height>50</height>
-                        </rect>
-                    </property>
-                    <property name="title">
-                        <string>&amp;Fill</string>
-                    </property>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel3_4_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>240</x>
-                                <y>20</y>
-                                <width>38</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Style:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_imageBrushStyle</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QPushButton">
-                        <property name="name">
-                            <cstring>m_imageBrushColor</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>140</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Color...</string>
-                        </property>
-                    </widget>
-                    <widget class="QFrame">
-                        <property name="name">
-                            <cstring>m_imageBrushColorSample</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>210</x>
-                                <y>20</y>
-                                <width>20</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="frameShape">
-                            <enum>LineEditPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                            <enum>Raised</enum>
-                        </property>
-                    </widget>
-                    <widget class="QCheckBox">
-                        <property name="name">
-                            <cstring>m_imageUseSpawnColorBrush</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>10</x>
-                                <y>20</y>
-                                <width>130</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Use Spawn Color</string>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_imageBrushStyle</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>280</x>
-                                <y>20</y>
-                                <width>170</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                </widget>
-                <widget class="QCheckBox">
-                    <property name="name">
-                        <cstring>m_useImage</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>0</y>
-                            <width>100</width>
-                            <height>20</height>
-                        </rect>
-                    </property>
-                    <property name="text">
-                        <string>&amp;Use Image</string>
-                    </property>
-                </widget>
-            </widget>
-            <widget class="QWidget">
-                <property name="name">
-                    <cstring>highlight</cstring>
-                </property>
-                <attribute name="title">
-                    <string>&amp;Highlight</string>
-                </attribute>
-                <widget class="QCheckBox">
-                    <property name="name">
-                        <cstring>m_useHighlight</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>0</y>
-                            <width>110</width>
-                            <height>20</height>
-                        </rect>
-                    </property>
-                    <property name="text">
-                        <string>&amp;Use Highlight</string>
-                    </property>
-                </widget>
-                <widget class="QFrame">
-                    <property name="name">
-                        <cstring>frame6</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>8</x>
-                            <y>24</y>
-                            <width>500</width>
-                            <height>40</height>
-                        </rect>
-                    </property>
-                    <property name="frameShape">
-                        <enum>GroupBoxPanel</enum>
-                    </property>
-                    <property name="frameShadow">
-                        <enum>Sunken</enum>
-                    </property>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel1_2_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>10</x>
-                                <y>10</y>
-                                <width>40</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Image:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_highlightImage</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QCheckBox">
-                        <property name="name">
-                            <cstring>m_highlightFlash</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>410</x>
-                                <y>10</y>
-                                <width>80</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Flash</string>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_highlightSize</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>280</x>
-                                <y>10</y>
-                                <width>90</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel2_2_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>240</x>
-                                <y>10</y>
-                                <width>30</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Size:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_highlightSize</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_highlightImage</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>60</x>
-                                <y>10</y>
-                                <width>140</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                </widget>
-                <widget class="QGroupBox">
-                    <property name="name">
-                        <cstring>highlightFillGroupBox_2</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>120</y>
-                            <width>500</width>
-                            <height>50</height>
-                        </rect>
-                    </property>
-                    <property name="title">
-                        <string>&amp;Fill</string>
-                    </property>
-                    <widget class="QCheckBox">
-                        <property name="name">
-                            <cstring>m_highlightUseSpawnColorBrush</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>10</x>
-                                <y>20</y>
-                                <width>130</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Use Spawn Color</string>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel3_2_2_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>240</x>
-                                <y>20</y>
-                                <width>38</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Style:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_highlightBrushStyle</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QPushButton">
-                        <property name="name">
-                            <cstring>m_highlightBrushColor</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>140</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Color...</string>
-                        </property>
-                    </widget>
-                    <widget class="QFrame">
-                        <property name="name">
-                            <cstring>m_highlightBrushColorSample</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>210</x>
-                                <y>20</y>
-                                <width>20</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="frameShape">
-                            <enum>LineEditPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                            <enum>Raised</enum>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_highlightBrushStyle</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>280</x>
-                                <y>20</y>
-                                <width>170</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                </widget>
-                <widget class="QGroupBox">
-                    <property name="name">
-                        <cstring>highlightOutlineGroupBox_2</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>70</y>
-                            <width>500</width>
-                            <height>50</height>
-                        </rect>
-                    </property>
-                    <property name="title">
-                        <string>&amp;Outline</string>
-                    </property>
-                    <widget class="QCheckBox">
-                        <property name="name">
-                            <cstring>m_highlightUseSpawnColorPen</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>10</x>
-                                <y>20</y>
-                                <width>130</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Use Spawn Color</string>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_highlightPenStyle</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>280</x>
-                                <y>20</y>
-                                <width>120</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel5_2_2_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>240</x>
-                                <y>20</y>
-                                <width>38</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Style:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_highlightPenStyle</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QPushButton">
-                        <property name="name">
-                            <cstring>m_highlightPenColor</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>140</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Color...</string>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel4_2_2_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>410</x>
-                                <y>20</y>
-                                <width>40</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Width:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_highlightPenWidth</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QFrame">
-                        <property name="name">
-                            <cstring>m_highlightPenColorSample</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>210</x>
-                                <y>20</y>
-                                <width>20</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="frameShape">
-                            <enum>LineEditPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                            <enum>Raised</enum>
-                        </property>
-                    </widget>
-                    <widget class="QSpinBox">
-                        <property name="name">
-                            <cstring>m_highlightPenWidth</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>456</x>
-                                <y>20</y>
-                                <width>30</width>
-                                <height>23</height>
-                            </rect>
-                        </property>
-                        <property name="maxValue">
-                            <number>5</number>
-                        </property>
-                    </widget>
-                </widget>
-            </widget>
-            <widget class="QWidget">
-                <property name="name">
-                    <cstring>lines</cstring>
-                </property>
-                <attribute name="title">
-                    <string>&amp;Lines</string>
-                </attribute>
-                <widget class="QGroupBox">
-                    <property name="name">
-                        <cstring>line2GroupBox_2</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>120</y>
-                            <width>500</width>
-                            <height>50</height>
-                        </rect>
-                    </property>
-                    <property name="title">
-                        <string>Line &amp;2</string>
-                    </property>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel6_2_3_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>10</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Distance:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_line2Distance</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QSpinBox">
-                        <property name="name">
-                            <cstring>m_line2Distance</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>70</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>23</height>
-                            </rect>
-                        </property>
-                        <property name="specialValueText">
-                            <string>Off</string>
-                        </property>
-                        <property name="maxValue">
-                            <number>2000</number>
-                        </property>
-                        <property name="lineStep">
-                            <number>5</number>
-                        </property>
-                    </widget>
-                    <widget class="QPushButton">
-                        <property name="name">
-                            <cstring>m_line2PenColor</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>140</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Color...</string>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel4_3_2_2_4_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>410</x>
-                                <y>20</y>
-                                <width>40</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Width:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_line2PenWidth</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_line2PenStyle</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>280</x>
-                                <y>20</y>
-                                <width>120</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel5_3_2_2_4_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>240</x>
-                                <y>20</y>
-                                <width>38</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Style:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_line2PenStyle</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QFrame">
-                        <property name="name">
-                            <cstring>m_line2PenColorSample</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>210</x>
-                                <y>20</y>
-                                <width>20</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="frameShape">
-                            <enum>LineEditPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                            <enum>Raised</enum>
-                        </property>
-                    </widget>
-                    <widget class="QSpinBox">
-                        <property name="name">
-                            <cstring>m_line2PenWidth</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>456</x>
-                                <y>20</y>
-                                <width>30</width>
-                                <height>23</height>
-                            </rect>
-                        </property>
-                        <property name="maxValue">
-                            <number>5</number>
-                        </property>
-                    </widget>
-                </widget>
-                <widget class="QGroupBox">
-                    <property name="name">
-                        <cstring>line1GroupBox_2</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>70</y>
-                            <width>500</width>
-                            <height>50</height>
-                        </rect>
-                    </property>
-                    <property name="title">
-                        <string>Line &amp;1</string>
-                    </property>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel6_4_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>10</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Distance:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_line1Distance</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel4_3_2_4_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>410</x>
-                                <y>20</y>
-                                <width>40</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Width:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_line1PenWidth</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_line1PenStyle</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>280</x>
-                                <y>20</y>
-                                <width>120</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                    <widget class="QPushButton">
-                        <property name="name">
-                            <cstring>m_line1PenColor</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>140</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Color...</string>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel5_3_2_4_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>240</x>
-                                <y>20</y>
-                                <width>38</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Style:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_line1PenStyle</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QFrame">
-                        <property name="name">
-                            <cstring>m_line1PenColorSample</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>210</x>
-                                <y>20</y>
-                                <width>20</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="frameShape">
-                            <enum>LineEditPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                            <enum>Raised</enum>
-                        </property>
-                    </widget>
-                    <widget class="QSpinBox">
-                        <property name="name">
-                            <cstring>m_line1Distance</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>70</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>23</height>
-                            </rect>
-                        </property>
-                        <property name="specialValueText">
-                            <string>Off</string>
-                        </property>
-                        <property name="maxValue">
-                            <number>2000</number>
-                        </property>
-                        <property name="lineStep">
-                            <number>5</number>
-                        </property>
-                    </widget>
-                    <widget class="QSpinBox">
-                        <property name="name">
-                            <cstring>m_line1PenWidth</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>456</x>
-                                <y>20</y>
-                                <width>30</width>
-                                <height>23</height>
-                            </rect>
-                        </property>
-                        <property name="maxValue">
-                            <number>5</number>
-                        </property>
-                    </widget>
-                </widget>
-                <widget class="QGroupBox">
-                    <property name="name">
-                        <cstring>line0GroupBox_2</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>20</y>
-                            <width>500</width>
-                            <height>50</height>
-                        </rect>
-                    </property>
-                    <property name="title">
-                        <string>Line &amp;0</string>
-                    </property>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel4_3_4_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>410</x>
-                                <y>20</y>
-                                <width>40</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Width:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_line0PenWidth</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel5_3_4_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>240</x>
-                                <y>20</y>
-                                <width>38</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Style:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_line0PenStyle</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QPushButton">
-                        <property name="name">
-                            <cstring>m_line0PenColor</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>140</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Color...</string>
-                        </property>
-                    </widget>
-                    <widget class="QFrame">
-                        <property name="name">
-                            <cstring>m_line0PenColorSample</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>210</x>
-                                <y>20</y>
-                                <width>20</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="frameShape">
-                            <enum>LineEditPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                            <enum>Raised</enum>
-                        </property>
-                    </widget>
-                    <widget class="QCheckBox">
-                        <property name="name">
-                            <cstring>m_showLine0</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>10</x>
-                                <y>20</y>
-                                <width>120</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Show</string>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_line0PenStyle</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>280</x>
-                                <y>20</y>
-                                <width>120</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                    <widget class="QSpinBox">
-                        <property name="name">
-                            <cstring>m_line0PenWidth</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>456</x>
-                                <y>20</y>
-                                <width>30</width>
-                                <height>23</height>
-                            </rect>
-                        </property>
-                        <property name="maxValue">
-                            <number>5</number>
-                        </property>
-                    </widget>
-                </widget>
-            </widget>
-            <widget class="QWidget">
-                <property name="name">
-                    <cstring>other</cstring>
-                </property>
-                <attribute name="title">
-                    <string>&amp;General</string>
-                </attribute>
-                <widget class="QGroupBox">
-                    <property name="name">
-                        <cstring>walkPathLineGroupBox_2</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>70</y>
-                            <width>500</width>
-                            <height>50</height>
-                        </rect>
-                    </property>
-                    <property name="title">
-                        <string>Walk Path Line &amp;Override</string>
-                    </property>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel4_3_2_2_2_2_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>410</x>
-                                <y>20</y>
-                                <width>40</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Width:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_walkPathPenWidth</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>m_walkPathPenStyle</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>280</x>
-                                <y>20</y>
-                                <width>120</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                    </widget>
-                    <widget class="QLabel">
-                        <property name="name">
-                            <cstring>TextLabel5_3_2_2_2_2_2</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>240</x>
-                                <y>20</y>
-                                <width>38</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Style:</string>
-                        </property>
-                        <property name="buddy" stdset="0">
-                            <cstring>m_walkPathPenStyle</cstring>
-                        </property>
-                    </widget>
-                    <widget class="QPushButton">
-                        <property name="name">
-                            <cstring>m_walkPathPenColor</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>140</x>
-                                <y>20</y>
-                                <width>60</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Color...</string>
-                        </property>
-                    </widget>
-                    <widget class="QFrame">
-                        <property name="name">
-                            <cstring>m_walkPathPenColorSample</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>210</x>
-                                <y>20</y>
-                                <width>20</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="frameShape">
-                            <enum>LineEditPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                            <enum>Raised</enum>
-                        </property>
-                    </widget>
-                    <widget class="QCheckBox">
-                        <property name="name">
-                            <cstring>m_useWalkPathPen</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>10</x>
-                                <y>20</y>
-                                <width>100</width>
-                                <height>20</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Use Override</string>
-                        </property>
-                    </widget>
-                    <widget class="QSpinBox">
-                        <property name="name">
-                            <cstring>m_walkPathPenWidth</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>456</x>
-                                <y>20</y>
-                                <width>30</width>
-                                <height>23</height>
-                            </rect>
-                        </property>
-                        <property name="maxValue">
-                            <number>5</number>
-                        </property>
-                    </widget>
-                </widget>
-                <widget class="QCheckBox">
-                    <property name="name">
-                        <cstring>m_showName</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>10</y>
-                            <width>90</width>
-                            <height>20</height>
-                        </rect>
-                    </property>
-                    <property name="text">
-                        <string>Show &amp;Name</string>
-                    </property>
-                </widget>
-                <widget class="QCheckBox">
-                    <property name="name">
-                        <cstring>m_showWalkPath</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>40</y>
-                            <width>130</width>
-                            <height>20</height>
-                        </rect>
-                    </property>
-                    <property name="text">
-                        <string>Show &amp;Walk Path</string>
-                    </property>
-                </widget>
-            </widget>
-        </widget>
+      </widget>
     </widget>
-    <widget class="QComboBox">
-        <property name="name">
-            <cstring>m_mapIconCombo</cstring>
-        </property>
-        <property name="geometry">
-            <rect>
-                <x>80</x>
-                <y>10</y>
-                <width>240</width>
-                <height>22</height>
-            </rect>
-        </property>
+    <widget class="QComboBox" name="m_mapIconCombo">
+      <property name="geometry">
+        <rect>
+          <x>80</x>
+          <y>10</y>
+          <width>240</width>
+          <height>22</height>
+        </rect>
+      </property>
     </widget>
-    <widget class="QPushButton">
-        <property name="name">
-            <cstring>m_close</cstring>
-        </property>
-        <property name="geometry">
-            <rect>
-                <x>490</x>
-                <y>10</y>
-                <width>60</width>
-                <height>22</height>
-            </rect>
-        </property>
-        <property name="text">
-            <string>Close</string>
-        </property>
-        <property name="default">
-            <bool>true</bool>
-        </property>
+    <widget class="QPushButton" name="m_close">
+      <property name="geometry">
+        <rect>
+          <x>490</x>
+          <y>10</y>
+          <width>60</width>
+          <height>22</height>
+        </rect>
+      </property>
+      <property name="text">
+        <string>Close</string>
+      </property>
+      <property name="default">
+        <bool>true</bool>
+      </property>
     </widget>
-</widget>
-<connections>
-    <connection>
-        <sender>m_apply</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>apply()</slot>
-    </connection>
-    <connection>
-        <sender>m_revert</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>revert()</slot>
-    </connection>
-    <connection>
-        <sender>m_close</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>close()</slot>
-    </connection>
-    <connection>
-        <sender>m_mapIconCombo</sender>
-        <signal>activated(int)</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>mapIconCombo_activated(int)</slot>
-    </connection>
-    <connection>
-        <sender>m_imagePenColor</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>imagePenColor_clicked()</slot>
-    </connection>
-    <connection>
-        <sender>m_imageBrushColor</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>imageBrushColor_clicked()</slot>
-    </connection>
-    <connection>
-        <sender>m_highlightPenColor</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>highlightPenColor_clicked()</slot>
-    </connection>
-    <connection>
-        <sender>m_highlightBrushColor</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>highlightBrushColor_clicked()</slot>
-    </connection>
-    <connection>
-        <sender>m_line0PenColor</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>line0PenColor_clicked()</slot>
-    </connection>
-    <connection>
-        <sender>m_line1PenColor</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>line1PenColor_clicked()</slot>
-    </connection>
-    <connection>
-        <sender>m_line2PenColor</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>line2PenColor_clicked()</slot>
-    </connection>
-    <connection>
-        <sender>m_walkPathPenColor</sender>
-        <signal>clicked()</signal>
-        <receiver>MapIconDialog</receiver>
-        <slot>walkPathPenColor_clicked()</slot>
-    </connection>
-</connections>
-<tabstops>
+  </widget>
+  <layoutdefault spacing="6" margin="11"/>
+  <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+  <tabstops>
     <tabstop>m_mapIconCombo</tabstop>
     <tabstop>m_tabWidget</tabstop>
     <tabstop>m_useImage</tabstop>
@@ -1605,35 +1330,82 @@
     <tabstop>m_apply</tabstop>
     <tabstop>m_revert</tabstop>
     <tabstop>m_close</tabstop>
-</tabstops>
-<includes>
-    <include location="local" impldecl="in declaration">mapicon.h</include>
-    <include location="global" impldecl="in implementation">qcolordialog.h</include>
-    <include location="global" impldecl="in implementation">qpainter.h</include>
-    <include location="local" impldecl="in implementation">mapicondialog.ui.h</include>
-</includes>
-<variables>
-    <variable>MapIcons* m_mapIcons;</variable>
-    <variable>MapIcon m_currentMapIcon;</variable>
-    <variable>MapIcon m_currentMapIconBackup;</variable>
-    <variable>MapIconType m_currentMapIconType;</variable>
-</variables>
-<slots>
-    <slot>apply()</slot>
-    <slot>revert()</slot>
-    <slot>init()</slot>
-    <slot>destroy()</slot>
-    <slot>setMapIcons( MapIcons * mapIcons )</slot>
-    <slot>mapIconCombo_activated( int id )</slot>
-    <slot>imagePenColor_clicked()</slot>
-    <slot>imageBrushColor_clicked()</slot>
-    <slot>highlightPenColor_clicked()</slot>
-    <slot>highlightBrushColor_clicked()</slot>
-    <slot>line0PenColor_clicked()</slot>
-    <slot>line1PenColor_clicked()</slot>
-    <slot>line2PenColor_clicked()</slot>
-    <slot>walkPathPenColor_clicked()</slot>
-    <slot>setupMapIconDisplay()</slot>
-</slots>
-<layoutdefaults spacing="6" margin="11"/>
-</UI>
+  </tabstops>
+  <includes>
+    <include location="local">mapicon.h</include>
+  </includes>
+  <connections>
+    <connection>
+      <sender>m_apply</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>apply()</slot>
+    </connection>
+    <connection>
+      <sender>m_revert</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>revert()</slot>
+    </connection>
+    <connection>
+      <sender>m_close</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>close()</slot>
+    </connection>
+    <connection>
+      <sender>m_mapIconCombo</sender>
+      <signal>activated(int)</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>mapIconCombo_activated(int)</slot>
+    </connection>
+    <connection>
+      <sender>m_imagePenColor</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>imagePenColor_clicked()</slot>
+    </connection>
+    <connection>
+      <sender>m_imageBrushColor</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>imageBrushColor_clicked()</slot>
+    </connection>
+    <connection>
+      <sender>m_highlightPenColor</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>highlightPenColor_clicked()</slot>
+    </connection>
+    <connection>
+      <sender>m_highlightBrushColor</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>highlightBrushColor_clicked()</slot>
+    </connection>
+    <connection>
+      <sender>m_line0PenColor</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>line0PenColor_clicked()</slot>
+    </connection>
+    <connection>
+      <sender>m_line1PenColor</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>line1PenColor_clicked()</slot>
+    </connection>
+    <connection>
+      <sender>m_line2PenColor</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>line2PenColor_clicked()</slot>
+    </connection>
+    <connection>
+      <sender>m_walkPathPenColor</sender>
+      <signal>clicked()</signal>
+      <receiver>MapIconDialog</receiver>
+      <slot>walkPathPenColor_clicked()</slot>
+    </connection>
+  </connections>
+</ui>
