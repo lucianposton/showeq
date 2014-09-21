@@ -13,7 +13,7 @@
 
 #include <stdint.h>
 
-#include <qintdict.h>
+#include <q3intdict.h>
 #include <qstring.h>
 
 //----------------------------------------------------------------------
@@ -31,7 +31,7 @@ class EQStr
 			const char* arguments, size_t argslen) const;
 
  protected:
-   QIntDict<QString> m_messageStrings;
+   Q3IntDict<QString> m_messageStrings;
    bool m_loaded;
 };
 

@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include <qstring.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 #include "cgiconv.h"
 #include "util.h"
@@ -21,7 +21,7 @@
 #include "qmap.h"
 
 // forward declaration
-void displayForm(QTextStream& out, 
+void displayForm(Q3TextStream& out, 
 		 CGI& cgiconv, 
 		 bool displayIcon);
 
@@ -95,9 +95,9 @@ int main (int argc, char *argv[])
   }
 
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
-  out.setEncoding(QTextStream::Latin1);
-  out.flags(QTextStream::showbase | QTextStream::dec);
+  Q3TextStream out(stdout, QIODevice::WriteOnly);
+  out.setEncoding(Q3TextStream::Latin1);
+  out.flags(Q3TextStream::showbase | Q3TextStream::dec);
 
   const char* header =
     "Content-type: text/html; charset=iso-8859-1\n\n"
@@ -496,7 +496,7 @@ int main (int argc, char *argv[])
   out << "</HTML>";
 }
 
-void displaySelectOption(QTextStream& out, 
+void displaySelectOption(Q3TextStream& out, 
 			 const QString& value, 
 			 const QString& name,
 			 const QString currentChk)
@@ -507,7 +507,7 @@ void displaySelectOption(QTextStream& out,
   out << ">" << name << "</OPTION>\n";
 }
 
-void displayForm(QTextStream& out, 
+void displayForm(Q3TextStream& out, 
 		 CGI& cgiconv, 
 		 bool displayIcon)
 {

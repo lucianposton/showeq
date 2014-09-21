@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 #include "util.h"
 
@@ -18,7 +18,7 @@
 int main (int, char *[])
 {
   // open the data stream
-  QTextStream out(stdout, IO_WriteOnly);
+  Q3TextStream out(stdout, QIODevice::WriteOnly);
 
   // format that the text will be output to.
   QString format = "%1:%2:%3\n";

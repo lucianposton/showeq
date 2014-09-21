@@ -28,18 +28,20 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#include <qvaluelist.h>
-#include <qlistview.h>
-#include <qptrdict.h>
-#include <qtextstream.h>
+#include <q3valuelist.h>
+#include <q3listview.h>
+#include <q3ptrdict.h>
+#include <q3textstream.h>
+//Added by qt3to4:
+#include <Q3PopupMenu>
 
 // these are all used for the CFilterDlg
 #include <regex.h>
 
 #include <qlabel.h>
 #include <qlayout.h>
-#include <qhbox.h>
-#include <qvbox.h>
+#include <q3hbox.h>
+#include <q3vbox.h>
 #include <qpushbutton.h>
 
 #include "seqwindow.h"
@@ -72,7 +74,7 @@ public:
 	     QWidget *parent = 0, const char * name = 0);
 
    SpawnListItem* Selected();
-   SpawnListItem* Find(QListViewItemIterator& it, 
+   SpawnListItem* Find(Q3ListViewItemIterator& it, 
 		       const Item* item, 
 		       bool first = false);
 
@@ -108,13 +110,13 @@ public slots:
    void playerLevelChanged(uint8_t);
    
 private slots:
-   void selChanged(QListViewItem*);
+   void selChanged(Q3ListViewItem*);
 
-   void mousePressEvent (int button, QListViewItem *litem, const QPoint &point, int col);
-   void mouseDoubleClickEvent(QListViewItem *litem);
+   void mousePressEvent (int button, Q3ListViewItem *litem, const QPoint &point, int col);
+   void mouseDoubleClickEvent(Q3ListViewItem *litem);
 
 private:
-   void setSelectedQuiet(QListViewItem* item, bool selected);
+   void setSelectedQuiet(Q3ListViewItem* item, bool selected);
    void populateSpawns(void);
    void populateCategory(const Category* cat);
    QString filterString(const Item *item, int flags = 0);
@@ -125,7 +127,7 @@ private:
    SpawnShell* m_spawnShell;
 
    // category pointer used as keys to look up the associated SpawnListItem
-   QPtrDict<SpawnListItem> m_categoryListItems;
+   Q3PtrDict<SpawnListItem> m_categoryListItems;
 
    SpawnListMenu* m_menu;
 
@@ -141,7 +143,7 @@ class SpawnListWindow : public SEQWindow
 		  CategoryMgr* categoryMgr,
 		  QWidget* parent = 0, const char* name = 0);
   ~SpawnListWindow();
-  virtual QPopupMenu* menu();
+  virtual Q3PopupMenu* menu();
   SpawnList* spawnList() { return m_spawnList; }
 
  public slots:

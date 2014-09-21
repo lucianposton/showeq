@@ -489,6 +489,8 @@ cat > conftest.$ac_ext <<EOF
 #include "confdefs.h"
 #include <qglobal.h>
 #include <qapplication.h>
+#include <qapplication.h>
+#include <q3objectdict.h>
 #include <qstringlist.h>
 #include <qstyle.h>
 #include <qthread.h>

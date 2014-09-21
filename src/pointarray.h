@@ -24,17 +24,19 @@
 #else
 #include <stdint.h>
 #endif
-#include <qmemarray.h>
+#include <q3memarray.h>
 #include <qpoint.h>
+//Added by qt3to4:
+#include <Q3PointArray>
 
 // Point3DArray
 template <class _T>
-class Point3DArray : public QMemArray<Point3D<_T> >
+class Point3DArray : public Q3MemArray<Point3D<_T> >
 {
  public:
   Point3DArray() {};
-  Point3DArray(int size) : QMemArray<Point3D<_T> > (size) {}
-  Point3DArray(const Point3DArray<_T>& array) : QMemArray<Point3D<_T> > (array) {}
+  Point3DArray(int size) : Q3MemArray<Point3D<_T> > (size) {}
+  Point3DArray(const Point3DArray<_T>& array) : Q3MemArray<Point3D<_T> > (array) {}
   Point3DArray(uint32_t nPoints, const _T* points);
   ~Point3DArray() {};
 
@@ -53,7 +55,7 @@ class Point3DArray : public QMemArray<Point3D<_T> >
   bool setPoints(uint32_t nPoints, _T firstx, _T firsty, _T firstz, ...);
   bool putPoints(uint32_t index, uint32_t nPoints, const _T* points);
   bool putPoints(uint32_t index, uint32_t nPoints, _T firstx, _T firsty, _T firstz, ...);
-  QPointArray getQPointArray();
+  Q3PointArray getQPointArray();
 };
 
 template <class _T> inline 
@@ -65,10 +67,10 @@ Point3DArray<_T>::Point3DArray(uint32_t nPoints, const _T* points)
 template <class _T> inline
 QRect Point3DArray<_T>::boundingRect() const
 {
-  if (QMemArray<Point3D<_T> >::isEmpty())
+  if (Q3MemArray<Point3D<_T> >::isEmpty())
     return QRect(0, 0, 0, 0);
 
-  Point3D<_T>* d = QMemArray<Point3D<_T> >::data();
+  Point3D<_T>* d = Q3MemArray<Point3D<_T> >::data();
   _T minX, maxX, minY, maxY;
 
   minX = maxX = d->x();
@@ -76,7 +78,7 @@ QRect Point3DArray<_T>::boundingRect() const
   
   uint32_t i;
   for (++d, i = 1;
-       i < QMemArray<Point3D<_T> >::size();
+       i < Q3MemArray<Point3D<_T> >::size();
        i++, d++)
   {
     if (d->x() < minX)
@@ -95,7 +97,7 @@ QRect Point3DArray<_T>::boundingRect() const
 template <class _T> inline
 void Point3DArray<_T>::point(uint32_t index, _T* x, _T* y, _T* z) const
 {
-  Point3D<_T> p = QMemArray<Point3D<_T> >::at(index);
+  Point3D<_T> p = Q3MemArray<Point3D<_T> >::at(index);
   *x = p.x();
   *y = p. y();
   *z = p. z();
@@ -104,25 +106,25 @@ void Point3DArray<_T>::point(uint32_t index, _T* x, _T* y, _T* z) const
 template <class _T> inline 
 const Point3D<_T>& Point3DArray<_T>::point(uint32_t index) const
 {
-  return QMemArray<Point3D<_T> >::at(index);
+  return Q3MemArray<Point3D<_T> >::at(index);
 }
 
 template <class _T> inline
 void Point3DArray<_T>::setPoint(uint32_t index, _T x, _T y, _T z)
 {
-  QMemArray<Point3D<_T> >::at(index) = Point3D<_T>(x, y, z);
+  Q3MemArray<Point3D<_T> >::at(index) = Point3D<_T>(x, y, z);
 }
 
 template <class _T> inline 
 void Point3DArray<_T>::setPoint(uint32_t index, const Point3D<_T>& p)
 {
-  QMemArray<Point3D<_T> >::at(index) = p;
+  Q3MemArray<Point3D<_T> >::at(index) = p;
 }
 
 template <class _T> inline
 bool Point3DArray<_T>::setPoints(uint32_t nPoints, const _T* points)
 {
-  if (!QMemArray<Point3D<_T> >::resize(nPoints))
+  if (!Q3MemArray<Point3D<_T> >::resize(nPoints))
     return false;
 
   for (uint32_t i = 0; 
@@ -137,7 +139,7 @@ template <class _T> inline
 bool Point3DArray<_T>::setPoints(uint32_t nPoints, 
 				 _T firstx, _T firsty, _T firstz, ...)
 {
-  if (!QMemArray<Point3D<_T> >::resize(nPoints))
+  if (!Q3MemArray<Point3D<_T> >::resize(nPoints))
     return false;
 
   setPoint( 0, firstx, firsty, firstz);
@@ -167,8 +169,8 @@ bool Point3DArray<_T>::setPoints(uint32_t nPoints,
 template <class _T> inline
 bool Point3DArray<_T>::putPoints(uint32_t index, uint32_t nPoints, const _T* points)
 {
-  if ((index + nPoints) > QMemArray<Point3D<_T> >::size())
-    if (!QMemArray<Point3D<_T> >::resize(index + nPoints))
+  if ((index + nPoints) > Q3MemArray<Point3D<_T> >::size())
+    if (!Q3MemArray<Point3D<_T> >::resize(index + nPoints))
       return false;
 
   for (uint32_t i = index; 
@@ -183,8 +185,8 @@ template <class _T> inline
 bool Point3DArray<_T>::putPoints(uint32_t index, uint32_t nPoints, 
 			    _T firstx, _T firsty, _T firstz, ...)
 {
-  if ((index + nPoints) > QMemArray<Point3D<_T> >::size())
-    if (!QMemArray<Point3D<_T> >::resize(index + nPoints))
+  if ((index + nPoints) > Q3MemArray<Point3D<_T> >::size())
+    if (!Q3MemArray<Point3D<_T> >::resize(index + nPoints))
       return false;
 
   setPoint( 0, firstx, firsty, firstz);
@@ -212,13 +214,13 @@ bool Point3DArray<_T>::putPoints(uint32_t index, uint32_t nPoints,
 }
 
 template <class _T> inline
-QPointArray Point3DArray<_T>::getQPointArray()
+Q3PointArray Point3DArray<_T>::getQPointArray()
 {
   // create a temporary QPointArray of the same size as this array
-  QPointArray tmp(QMemArray<Point3D<_T> >::size());
+  Q3PointArray tmp(Q3MemArray<Point3D<_T> >::size());
 
   // copy each Point3D<_T> as a QPoint into the temporary QPointArray
-  for (uint32_t i = 0; i < QMemArray<Point3D<_T> >::size(); i++)
+  for (uint32_t i = 0; i < Q3MemArray<Point3D<_T> >::size(); i++)
     tmp.setPoint(i, point(i).qpoint());
 
   // return the temporary QPointArray

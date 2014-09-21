@@ -124,7 +124,7 @@
                         </rect>
                     </property>
                     <property name="frameShape">
-                        <enum>GroupBoxPanel</enum>
+                        <enum>QFrame::Box</enum>
                     </property>
                     <property name="frameShadow">
                         <enum>Sunken</enum>
@@ -276,7 +276,7 @@
                             </rect>
                         </property>
                         <property name="frameShape">
-                            <enum>LineEditPanel</enum>
+                            <enum>QFrame::StyledPanel</enum>
                         </property>
                         <property name="frameShadow">
                             <enum>Raised</enum>
@@ -407,7 +407,7 @@
                             </rect>
                         </property>
                         <property name="frameShape">
-                            <enum>LineEditPanel</enum>
+                            <enum>QFrame::StyledPanel</enum>
                         </property>
                         <property name="frameShadow">
                             <enum>Raised</enum>
@@ -496,7 +496,7 @@
                         </rect>
                     </property>
                     <property name="frameShape">
-                        <enum>GroupBoxPanel</enum>
+                        <enum>QFrame::Box</enum>
                     </property>
                     <property name="frameShadow">
                         <enum>Sunken</enum>
@@ -661,7 +661,7 @@
                             </rect>
                         </property>
                         <property name="frameShape">
-                            <enum>LineEditPanel</enum>
+                            <enum>QFrame::StyledPanel</enum>
                         </property>
                         <property name="frameShadow">
                             <enum>Raised</enum>
@@ -792,7 +792,7 @@
                             </rect>
                         </property>
                         <property name="frameShape">
-                            <enum>LineEditPanel</enum>
+                            <enum>QFrame::StyledPanel</enum>
                         </property>
                         <property name="frameShadow">
                             <enum>Raised</enum>
@@ -959,7 +959,7 @@
                             </rect>
                         </property>
                         <property name="frameShape">
-                            <enum>LineEditPanel</enum>
+                            <enum>QFrame::StyledPanel</enum>
                         </property>
                         <property name="frameShadow">
                             <enum>Raised</enum>
@@ -1096,7 +1096,7 @@
                             </rect>
                         </property>
                         <property name="frameShape">
-                            <enum>LineEditPanel</enum>
+                            <enum>QFrame::StyledPanel</enum>
                         </property>
                         <property name="frameShadow">
                             <enum>Raised</enum>
@@ -1223,7 +1223,7 @@
                             </rect>
                         </property>
                         <property name="frameShape">
-                            <enum>LineEditPanel</enum>
+                            <enum>QFrame::StyledPanel</enum>
                         </property>
                         <property name="frameShadow">
                             <enum>Raised</enum>
@@ -1378,7 +1378,7 @@
                             </rect>
                         </property>
                         <property name="frameShape">
-                            <enum>LineEditPanel</enum>
+                            <enum>QFrame::StyledPanel</enum>
                         </property>
                         <property name="frameShadow">
                             <enum>Raised</enum>

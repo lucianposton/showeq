@@ -19,9 +19,9 @@
 #include <stdint.h>
 #endif
 
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qstring.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 
 #include "spawn.h"
 
@@ -60,11 +60,11 @@ const int tSpawnColMaxCols = 16;
 
 //--------------------------------------------------
 // SpawnListItem
-class SpawnListItem : public QListViewItem
+class SpawnListItem : public Q3ListViewItem
 {
 public:
-   SpawnListItem(QListViewItem *parent);
-   SpawnListItem(QListView *parent);
+   SpawnListItem(Q3ListViewItem *parent);
+   SpawnListItem(Q3ListView *parent);
    virtual ~SpawnListItem();
 
    virtual void paintCell( QPainter *p, const QColorGroup &cg,
@@ -81,7 +81,7 @@ public:
    void updateTitle(const QString& name);
    void setShellItem(const Item *);
    spawnItemType type();
-   virtual int compare(QListViewItem *i, int col, bool ascending) const;
+   virtual int compare(Q3ListViewItem *i, int col, bool ascending) const;
 
    //--------------------------------------------------
    int m_npc;
@@ -93,7 +93,7 @@ private:
 
 //--------------------------------------------------
 // SpawnListMenu
-class SpawnListMenu : public QPopupMenu
+class SpawnListMenu : public Q3PopupMenu
 {
    Q_OBJECT
 

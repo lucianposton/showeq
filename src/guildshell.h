@@ -16,11 +16,13 @@
 
 #include <qstring.h>
 #include <qobject.h>
-#include <qdict.h>
+#include <q3dict.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 
 //----------------------------------------------------------------------
 // forward declarations
-class QTextStream;
+class Q3TextStream;
 
 class NetStream;
 class ZoneMgr;
@@ -66,8 +68,8 @@ class GuildMember
 
 //----------------------------------------------------------------------
 // GuildMemberDict
-typedef QDict<GuildMember> GuildMemberDict;
-typedef QDictIterator<GuildMember> GuildMemberDictIterator;
+typedef Q3Dict<GuildMember> GuildMemberDict;
+typedef Q3DictIterator<GuildMember> GuildMemberDictIterator;
 
 //----------------------------------------------------------------------
 // GuildShell
@@ -80,7 +82,7 @@ class GuildShell : public QObject
   const GuildMemberDict& members() { return m_members; }
   size_t maxNameLength() { return m_maxNameLength; }
 
-  void dumpMembers(QTextStream& out);
+  void dumpMembers(Q3TextStream& out);
   
   QString zoneString(uint16_t zoneid) const;
 

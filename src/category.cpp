@@ -24,6 +24,11 @@
 #include <stdio.h>
 
 #include<qcolordialog.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3BoxLayout>
+#include <QLabel>
+#include <Q3VBoxLayout>
 
 // ------------------------------------------------------
 // Category
@@ -80,16 +85,16 @@ CategoryDlg::CategoryDlg(QWidget *parent, QString name)
    QFont labelFont;
    labelFont.setBold(true);
 
-   QBoxLayout* topLayout = new QVBoxLayout(this);
-   QBoxLayout* row4Layout = new QHBoxLayout(topLayout);
-   QBoxLayout* row3Layout = new QHBoxLayout(topLayout);
-   QBoxLayout* row2Layout = new QHBoxLayout(topLayout);
-   QBoxLayout* row1Layout = new QHBoxLayout(topLayout);
-   QBoxLayout* row0Layout = new QHBoxLayout(topLayout);
+   Q3BoxLayout* topLayout = new Q3VBoxLayout(this);
+   Q3BoxLayout* row4Layout = new Q3HBoxLayout(topLayout);
+   Q3BoxLayout* row3Layout = new Q3HBoxLayout(topLayout);
+   Q3BoxLayout* row2Layout = new Q3HBoxLayout(topLayout);
+   Q3BoxLayout* row1Layout = new Q3HBoxLayout(topLayout);
+   Q3BoxLayout* row0Layout = new Q3HBoxLayout(topLayout);
 
    QLabel *colorLabel = new QLabel ("Color", this);
    colorLabel->setFont(labelFont);
-   colorLabel->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+   colorLabel->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
    row1Layout->addWidget(colorLabel, 0, AlignLeft);
 
    m_Color = new QPushButton(this, "color");
@@ -101,7 +106,7 @@ CategoryDlg::CategoryDlg(QWidget *parent, QString name)
 
    QLabel *nameLabel = new QLabel ("Name", this);
    nameLabel->setFont(labelFont);
-   nameLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+   nameLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
    row4Layout->addWidget(nameLabel);
 
    m_Name = new QLineEdit(this, "Name");
@@ -110,7 +115,7 @@ CategoryDlg::CategoryDlg(QWidget *parent, QString name)
 
    QLabel *filterLabel = new QLabel ("Filter", this);
    filterLabel->setFont(labelFont);
-   filterLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+   filterLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
    row3Layout->addWidget(filterLabel);
 
    m_Filter  = new QLineEdit(this, "Filter");
@@ -119,7 +124,7 @@ CategoryDlg::CategoryDlg(QWidget *parent, QString name)
 
    QLabel *filteroutLabel = new QLabel ("FilterOut", this);
    filteroutLabel->setFont(labelFont);
-   filteroutLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+   filteroutLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
    row2Layout->addWidget(filteroutLabel);
 
    m_FilterOut  = new QLineEdit(this, "FilterOut");

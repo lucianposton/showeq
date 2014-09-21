@@ -13,19 +13,19 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 #include "cgiconv.h"
 #include "util.h"
 #include "itemdb.h"
 
 // forward declarations
-void printdata (QTextStream& out, int len, char *data);
+void printdata (Q3TextStream& out, int len, char *data);
 
 int main (int argc, char *argv[])
 {
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
+  Q3TextStream out(stdout, QIODevice::WriteOnly);
   
   const char* header =
     "Content-type: text/html; charset=iso-8859-1\n\n"
@@ -389,7 +389,7 @@ int main (int argc, char *argv[])
   return 0;
 }
 
-void printdata (QTextStream& out, int len, char *data)
+void printdata (Q3TextStream& out, int len, char *data)
 {
   char asc[1024];
   uint8_t fieldCount = 1;

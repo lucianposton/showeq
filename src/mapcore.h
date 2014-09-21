@@ -32,8 +32,8 @@
 #include <qcolor.h>
 #include <qfont.h>
 #include <qpixmap.h>
-#include <qptrlist.h>
-#include <qpointarray.h>
+#include <q3ptrlist.h>
+#include <q3pointarray.h>
 
 #include "point.h"
 #include "pointarray.h"
@@ -424,7 +424,7 @@ inline QString MapCommon::colorName() const
 
 //----------------------------------------------------------------------
 // MapLineL
-class MapLineL : public MapCommon, public QPointArray
+class MapLineL : public MapCommon, public Q3PointArray
 {
  public:
   MapLineL();
@@ -438,7 +438,7 @@ class MapLineL : public MapCommon, public QPointArray
 
   void setZPos(uint16_t z)
     {  m_z = z; m_heightSet = true; }
-  void calcBounds() { m_bounds = QPointArray::boundingRect(); }
+  void calcBounds() { m_bounds = Q3PointArray::boundingRect(); }
 
  private:
   int16_t m_z;
@@ -531,10 +531,10 @@ class MapData
   int16_t minY() const { return m_minY; }
   int16_t maxX() const { return m_maxX; }
   int16_t maxY() const { return m_maxY; }
-  QPtrList<MapLineL>& lLines() { return m_lLines; }
-  QPtrList<MapLineM>& mLines() { return m_mLines; }
-  QPtrList<MapLocation>& locations() { return m_locations; }
-  QPtrList<MapAggro>& aggros() { return m_aggros; }
+  Q3PtrList<MapLineL>& lLines() { return m_lLines; }
+  Q3PtrList<MapLineM>& mLines() { return m_mLines; }
+  Q3PtrList<MapLocation>& locations() { return m_locations; }
+  Q3PtrList<MapAggro>& aggros() { return m_aggros; }
   const QPixmap& image() const { return m_image; }
   bool imageLoaded() const { return m_imageLoaded; }
   bool mapLoaded() const { return m_mapLoaded; }
@@ -579,12 +579,12 @@ class MapData
   QString m_fileName;
   QString m_zoneLongName;
   QString m_zoneShortName;
-  QPtrList<MapLineL> m_lLines;
-  QPtrList<MapLineM> m_mLines;
+  Q3PtrList<MapLineL> m_lLines;
+  Q3PtrList<MapLineM> m_mLines;
   MapLineM* m_editLineM;
-  QPtrList<MapLocation> m_locations;
+  Q3PtrList<MapLocation> m_locations;
   MapLocation* m_editLocation;
-  QPtrList<MapAggro> m_aggros;
+  Q3PtrList<MapAggro> m_aggros;
   uint8_t m_zoneZEM;
   QPixmap m_image;
   bool m_imageLoaded;

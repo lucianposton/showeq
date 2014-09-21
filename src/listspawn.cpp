@@ -4,7 +4,7 @@
 #include <errno.h>
 
 #include <qstring.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 #include <qregexp.h>
 
 #include "cgiconv.h"
@@ -58,9 +58,9 @@ int main (int argc, char *argv[])
   } 
 
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
-  out.setEncoding(QTextStream::Latin1);
-  out.flags(QTextStream::showbase | QTextStream::dec);
+  Q3TextStream out(stdout, QIODevice::WriteOnly);
+  out.setEncoding(Q3TextStream::Latin1);
+  out.flags(Q3TextStream::showbase | Q3TextStream::dec);
 
   const char* header =
     "Content-type: text/html; charset=iso-8859-1\n\n"

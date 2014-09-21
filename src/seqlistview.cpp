@@ -12,15 +12,15 @@
  *
  */
 
-#include <qheader.h>
+#include <q3header.h>
 #include <qsizepolicy.h>
 
 #include "seqlistview.h"
 #include "main.h"
 
 SEQListView::SEQListView(const QString prefName, 
-			 QWidget* parent, const char* name, WFlags f)
-  : QListView(parent, name, f),
+			 QWidget* parent, const char* name, Qt::WFlags f)
+  : Q3ListView(parent, name, f),
     m_preferenceName(prefName),
     m_sortColumn(0),
     m_sortIncreasing(true)
@@ -59,7 +59,7 @@ int SEQListView::addColumn(const QString& label,
 			   int width)
 {
   // add the column to the listview
-  int column = QListView::addColumn(label, width);
+  int column = Q3ListView::addColumn(label, width);
 
   // add the column to the list of preferences
   m_columns.append(preference);
@@ -71,7 +71,7 @@ int SEQListView::addColumn(const QString& label,
 void SEQListView::removeColumn(int column)
 {
   // remove the column from the listview
-  QListView::removeColumn(column);
+  Q3ListView::removeColumn(column);
   
   // remove the preference from the list
   m_columns.remove(m_columns.at(column));
@@ -84,7 +84,7 @@ void SEQListView::setSorting(int column, bool increasing)
   m_sortIncreasing = increasing;
 
   // set the sort order in the underlying listview
-  QListView::setSorting(column, increasing);
+  Q3ListView::setSorting(column, increasing);
 }
 
 void SEQListView::savePrefs()
@@ -149,14 +149,14 @@ void SEQListView::restoreColumns()
       {
 	// use the specified column width
 	width = pSEQPrefs->getPrefInt(columnName + "Width", preferenceName());
-	setColumnWidthMode(i, QListView::Manual);
+	setColumnWidthMode(i, Q3ListView::Manual);
 	setColumnWidth(i, width);
       }
     }
     else
     {
       // column is not visible, hide it.
-      setColumnWidthMode(i, QListView::Manual);
+      setColumnWidthMode(i, Q3ListView::Manual);
       setColumnWidth(i, 0);
     }
   }
@@ -211,7 +211,7 @@ void SEQListView::setColumnVisible(int column, bool visible)
   }
 
   // set the column width mode
-  setColumnWidthMode(column, QListView::Manual);
+  setColumnWidthMode(column, Q3ListView::Manual);
 
   // set the column width
   setColumnWidth(column, width);

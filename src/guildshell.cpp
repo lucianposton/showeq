@@ -16,6 +16,8 @@
 #include "diagnosticmessages.h"
 
 #include <qdatetime.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 
 //----------------------------------------------------------------------
 // diagnostic defines
@@ -128,7 +130,7 @@ QString GuildShell::zoneString(uint16_t zoneid) const
     return m_zoneMgr->zoneNameFromID(zoneid);
 }
 
-void GuildShell::dumpMembers(QTextStream& out)
+void GuildShell::dumpMembers(Q3TextStream& out)
 {
   QDateTime dt;
   GuildMemberDictIterator it(m_members);

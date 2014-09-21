@@ -415,9 +415,9 @@ struct Color_Struct
   {
     struct
     {
-/*0000*/uint8_t blue;
-/*0001*/uint8_t red;
-/*0002*/uint8_t green;
+/*0000*/uint8_t Qt::blue;
+/*0001*/uint8_t Qt::red;
+/*0002*/uint8_t Qt::green;
 /*0003*/uint8_t unknown0003;
     } rgb;
 /*0000*/uint32_t color;

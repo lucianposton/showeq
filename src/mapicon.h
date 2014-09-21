@@ -28,6 +28,8 @@
 #include <qpen.h>
 #include <qbrush.h>
 #include <qstring.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 
 //----------------------------------------------------------------------
 // forward declarations
@@ -300,7 +302,7 @@ class MapIcons : public QObject
   void setIcon(int iconType, const MapIcon& icon);
 
   // dump debug info
-  void dumpInfo(QTextStream& out);
+  void dumpInfo(Q3TextStream& out);
 
   // painting slots
   void paintIcon(MapParameters& param, 

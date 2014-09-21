@@ -12,11 +12,14 @@
 # include <qwidget.h>
 # include <qtabwidget.h>
 # include <qlist.h>
-# include <qlistview.h>
+# include <q3listview.h>
 # include <qcombobox.h>
 # include <qlabel.h>
 # include <qlayout.h>
 # include <qmenubar.h>
+//Added by qt3to4:
+#include <Q3PopupMenu>
+#include <Q3VBoxLayout>
 
 # include <sys/time.h>
 # include <sys/types.h>
@@ -194,9 +197,9 @@ private:
 	QWidget*	m_widget_mob;
 
 	QTabWidget*     m_tab;
-	QVBoxLayout*	m_layout_offense;
-	QVBoxLayout*	m_layout_defense;
-	QVBoxLayout*	m_layout_mob;
+	Q3VBoxLayout*	m_layout_offense;
+	Q3VBoxLayout*	m_layout_defense;
+	Q3VBoxLayout*	m_layout_mob;
 
 	SEQListView* 	m_listview_offense;
 	SEQListView* 	m_listview_mob;
@@ -232,7 +235,7 @@ private:
 	QList<CombatMobRecord> m_combat_mob_list;
 
 	QMenuBar	*m_menu_bar;
-	QPopupMenu	*m_clear_menu;
+	Q3PopupMenu	*m_clear_menu;
 
 	int		m_iCurrentDPSTotal;
 	int		m_iDPSStartTime;

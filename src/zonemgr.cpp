@@ -122,7 +122,7 @@ const zonePointStruct* ZoneMgr::zonePoint(uint32_t zoneTrigger)
 void ZoneMgr::saveZoneState(void)
 {
   QFile keyFile(showeq_params->saveRestoreBaseFilename + "Zone.dat");
-  if (keyFile.open(IO_WriteOnly))
+  if (keyFile.open(QIODevice::WriteOnly))
   {
     QDataStream d(&keyFile);
     // write the magic string
@@ -137,7 +137,7 @@ void ZoneMgr::restoreZoneState(void)
 {
   QString fileName = showeq_params->saveRestoreBaseFilename + "Zone.dat";
   QFile keyFile(fileName);
-  if (keyFile.open(IO_ReadOnly))
+  if (keyFile.open(QIODevice::ReadOnly))
   {
     QDataStream d(&keyFile);
 

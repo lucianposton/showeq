@@ -14,11 +14,16 @@
 # include <qobject.h>
 # include <qwidget.h>
 # include <qlist.h>
-# include <qlistview.h>
+# include <q3listview.h>
 # include <qcombobox.h>
 # include <qlabel.h>
 # include <qlayout.h>
 # include <qmenubar.h>
+//Added by qt3to4:
+#include <QResizeEvent>
+#include <Q3VBoxLayout>
+#include <Q3PopupMenu>
+#include <Q3PtrList>
 
 #include <stdint.h>
 # include <sys/time.h>
@@ -114,7 +119,7 @@ private:
    GroupMgr* m_group;
    ZoneMgr* m_zoneMgr;
 
-   QVBoxLayout *m_layout;
+   Q3VBoxLayout *m_layout;
 
    SEQListView *m_exp_listview;
 
@@ -123,10 +128,10 @@ private:
       *m_experience_remaining, *m_play_time,
       *m_experience_rate, *m_kills_to_level, *m_time_to_level;
 
-   QPtrList<ExperienceRecord> m_exp_list;
+   Q3PtrList<ExperienceRecord> m_exp_list;
 
    QMenuBar *m_menu_bar;
-   QPopupMenu *m_view_menu, *m_exp_rate_menu, *m_ZEM_menu;
+   Q3PopupMenu *m_view_menu, *m_exp_rate_menu, *m_ZEM_menu;
 
    int m_timeframe;
    int m_ratio;

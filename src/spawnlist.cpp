@@ -33,6 +33,8 @@
 #endif
 #include <math.h>
 #include <regex.h>
+//Added by qt3to4:
+#include <Q3PopupMenu>
 
 // ------------------------------------------------------
 SpawnList::SpawnList(Player* player, 
@@ -76,14 +78,14 @@ SpawnList::SpawnList(Player* player,
    restoreColumns();
 
    // connect a QListView signal to ourselves
-   connect(this, SIGNAL(selectionChanged(QListViewItem*)),
-	   this, SLOT(selChanged(QListViewItem*)));
+   connect(this, SIGNAL(selectionChanged(Q3ListViewItem*)),
+	   this, SLOT(selChanged(Q3ListViewItem*)));
 
-   connect (this, SIGNAL(mouseButtonPressed(int, QListViewItem*, const QPoint&, int)),
-            this, SLOT(mousePressEvent(int, QListViewItem*, const QPoint&, int)));
+   connect (this, SIGNAL(mouseButtonPressed(int, Q3ListViewItem*, const QPoint&, int)),
+            this, SLOT(mousePressEvent(int, Q3ListViewItem*, const QPoint&, int)));
 
-   connect (this, SIGNAL(doubleClicked(QListViewItem*)),
-            this, SLOT(mouseDoubleClickEvent(QListViewItem*)));
+   connect (this, SIGNAL(doubleClicked(Q3ListViewItem*)),
+            this, SLOT(mouseDoubleClickEvent(Q3ListViewItem*)));
 
    // connect SpawnList slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(addItem(const Item *)),
@@ -165,7 +167,7 @@ void SpawnList::changeItem(const Item* item, uint32_t changeItem)
   if (item == NULL)
     return;
 
-  QListViewItemIterator it(this);
+  Q3ListViewItemIterator it(this);
   SpawnListItem *i = Find(it, item);
   while (i) 
   {
@@ -208,7 +210,7 @@ void SpawnList::killSpawn(const Item* item)
   if (item == NULL)
     return;
 
-   QListViewItemIterator it(this);
+   Q3ListViewItemIterator it(this);
    const SpawnListItem *i = Find(it, item);
    // was this spawn in the list
    if (i) 
@@ -237,12 +239,12 @@ void SpawnList::killSpawn(const Item* item)
      addItem(item);
 }
 
-SpawnListItem* SpawnList::Find(QListViewItemIterator& it, 
+SpawnListItem* SpawnList::Find(Q3ListViewItemIterator& it, 
 				const Item* item, 
 				bool first)
 {
   if (first) 
-    it = QListViewItemIterator(this); // reset iterator to the beginning
+    it = Q3ListViewItemIterator(this); // reset iterator to the beginning
   else
     it++; // increment past the current item
 
@@ -274,7 +276,7 @@ void SpawnList::addItem(const Item* item)
   // ZB: Need to figure out how to derive flags
   int flags = 0;
 
-  QListViewItemIterator it(this);
+  Q3ListViewItemIterator it(this);
   const Item* i;
   SpawnListItem* j = NULL;
 
@@ -418,7 +420,7 @@ void SpawnList::delItem(const Item* item)
    SpawnListItem *j = NULL;
 
    // create a list of items to be deleted
-   QList<QListViewItem>* delList = new QList<QListViewItem>();
+   QList<Q3ListViewItem>* delList = new QList<Q3ListViewItem>();
 
    // set the list to automatically delete the items placed in it when it is
    // cleared/deleted...
@@ -433,7 +435,7 @@ void SpawnList::delItem(const Item* item)
    const Category* cat;
 
    // start at the top of the list
-   QListViewItemIterator it(this);
+   Q3ListViewItemIterator it(this);
    
    do 
    {
@@ -445,8 +447,8 @@ void SpawnList::delItem(const Item* item)
      {
        //       seqDebug("  Deleting...");
        // delete children
-       QListViewItem* child = j->firstChild();
-       QListViewItem* next;
+       Q3ListViewItem* child = j->firstChild();
+       Q3ListViewItem* next;
        while(child) 
        {
 	 // get the next child
@@ -494,7 +496,7 @@ void SpawnList::selectSpawn(const Item *item)
     return;
 
   // start iterator at the beginning of this QListView
-  QListViewItemIterator it(this);
+  Q3ListViewItemIterator it(this);
 
   SpawnListItem *j = NULL;
 
@@ -508,7 +510,7 @@ void SpawnList::selectSpawn(const Item *item)
     if (j) 
     {
       // get the parent
-      QListViewItem* litem = (SpawnListItem*) j->parent();
+      Q3ListViewItem* litem = (SpawnListItem*) j->parent();
       bool bOpen = true;
 
       // make sure the parent and all it's parents are open
@@ -564,7 +566,7 @@ SpawnListItem* SpawnList::Selected()
 void SpawnList::selectAndOpen(SpawnListItem *i)
 {
   // get the item
-  QListViewItem* item = i;
+  Q3ListViewItem* item = i;
   
   // loop over it's parents, opening all of them
   while (item) 
@@ -581,14 +583,14 @@ void SpawnList::selectAndOpen(SpawnListItem *i)
     ensureItemVisible(i);
 }
 
-void SpawnList::setSelectedQuiet(QListViewItem* item, bool selected)
+void SpawnList::setSelectedQuiet(Q3ListViewItem* item, bool selected)
 {
   if (!item || (item->isSelected() == selected) ||
       !item->isSelectable())
     return;
 
   // get the old selection
-  QListViewItem *oldItem = selectedItem();
+  Q3ListViewItem *oldItem = selectedItem();
 
   // unselect the old selected item if any
   if ((oldItem != item) && (oldItem != NULL) && (oldItem->isSelected()))
@@ -624,7 +626,7 @@ void SpawnList::selectNext(void)
     return;
 
   // start the iterator at the current item
-  QListViewItemIterator it(i);
+  Q3ListViewItemIterator it(i);
 
   // get the Item from the SpawnListItem
   item = i->item();
@@ -661,7 +663,7 @@ void SpawnList::selectPrev(void)
     return;
 
   // start the iterator at the current item
-  QListViewItemIterator it(i);
+  Q3ListViewItemIterator it(i);
 
   // get the SpawnShellitem from the SpawnListItem
   item = i->item();
@@ -701,7 +703,7 @@ void SpawnList::selectPrev(void)
 void SpawnList::clear(void)
 {
 //seqDebug("SpawnList::clear()");
-  QListView::clear();
+  Q3ListView::clear();
   m_categoryListItems.clear();
 
   // rebuild headers
@@ -784,7 +786,7 @@ void SpawnList::clearedCategories(void)
   m_categoryListItems.clear();
 
   // clear out the list
-  QListView::clear();
+  Q3ListView::clear();
 }
 
 void SpawnList::loadedCategories(void)
@@ -821,7 +823,7 @@ void SpawnList::rebuildSpawnList()
 
 void SpawnList::playerLevelChanged(uint8_t)
 {
-  QListViewItemIterator it(this);
+  Q3ListViewItemIterator it(this);
   SpawnListItem* slitem = NULL;
   const Category* cat = NULL;
   const Item* item = NULL;
@@ -837,7 +839,7 @@ void SpawnList::playerLevelChanged(uint8_t)
     if (slitem->parent() == NULL)
     {
       cat = NULL;
-      QPtrDictIterator<SpawnListItem> it(m_categoryListItems);
+      Q3PtrDictIterator<SpawnListItem> it(m_categoryListItems);
       
       for (it.toFirst(); it.current() != NULL; ++it)
       {
@@ -1029,7 +1031,7 @@ void SpawnList::populateSpawns(void)
   }
 }
 
-void SpawnList::selChanged(QListViewItem* litem)
+void SpawnList::selChanged(Q3ListViewItem* litem)
 {
   if (litem == NULL)
     return;
@@ -1041,17 +1043,17 @@ void SpawnList::selChanged(QListViewItem* litem)
     emit spawnSelected(item);
 }
 
-void SpawnList::mousePressEvent(int button, QListViewItem* litem,
+void SpawnList::mousePressEvent(int button, Q3ListViewItem* litem,
 		                   const QPoint &point, int col)
 {
   // Left Mouse Button Events
-  if (button  == LeftButton && litem != NULL)
+  if (button  == Qt::LeftButton && litem != NULL)
   {
       setSelected(litem, TRUE);
   }
 
   // Right Mouse Button Events
-  if (button == RightButton)
+  if (button == Qt::RightButton)
   {
     SpawnListItem* slitem = (SpawnListItem*)litem;
     const Item* item = NULL;
@@ -1064,7 +1066,7 @@ void SpawnList::mousePressEvent(int button, QListViewItem* litem,
   }
 }
 
-void SpawnList::mouseDoubleClickEvent(QListViewItem* litem)
+void SpawnList::mouseDoubleClickEvent(Q3ListViewItem* litem)
 {
    //print spawn info to console
   if (litem == NULL)
@@ -1113,7 +1115,7 @@ const Category* SpawnList::getCategory(SpawnListItem *item)
     // find that in m_categoryList
     if (j) 
     {
-      QPtrDictIterator<SpawnListItem> it(m_categoryListItems);
+      Q3PtrDictIterator<SpawnListItem> it(m_categoryListItems);
       
       for (it.toFirst(); it.current() != NULL; ++it)
       {
@@ -1153,7 +1155,7 @@ SpawnListWindow::~SpawnListWindow()
   delete m_spawnList;
 }
 
-QPopupMenu* SpawnListWindow::menu()
+Q3PopupMenu* SpawnListWindow::menu()
 {
   // retrieve the menu
   SpawnListMenu* spawnMenu = m_spawnList->menu();

@@ -404,7 +404,7 @@ void DB3Convenience::Close(QString dbName)
 void DB3Convenience::Shutdown()
 {
   // create an iterator over the dictionary of DB's
-  QDictIterator<Db> it(m_dbDict);
+  Q3DictIterator<Db> it(m_dbDict);
 
   // attempt to get the DB from the cache
   Db* db;

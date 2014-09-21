@@ -12,14 +12,14 @@
 
 #include <qstring.h>
 #include <qregexp.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 #include "cgiconv.h"
 #include "spawn.h"
 #include "util.h"
 
 // forward declarations
-void printdata (QTextStream& out, int len, unsigned char *data);
+void printdata (Q3TextStream& out, int len, unsigned char *data);
 
 int main (int argc, char *argv[])
 {
@@ -67,9 +67,9 @@ int main (int argc, char *argv[])
   } 
 
   // open the output data stream
-  QTextStream out(stdout, IO_WriteOnly);
-  out.setEncoding(QTextStream::Latin1);
-  out.flags(QTextStream::showbase | QTextStream::dec);
+  Q3TextStream out(stdout, QIODevice::WriteOnly);
+  out.setEncoding(Q3TextStream::Latin1);
+  out.flags(Q3TextStream::showbase | Q3TextStream::dec);
 
   const char* header =
     "Content-type: text/html; charset=iso-8859-1\n\n"
@@ -260,7 +260,7 @@ int main (int argc, char *argv[])
    out << footer;
 }
 
-void printdata (QTextStream& out, int len, unsigned char *data)
+void printdata (Q3TextStream& out, int len, unsigned char *data)
 {
   char hex[128];
   char asc[128];

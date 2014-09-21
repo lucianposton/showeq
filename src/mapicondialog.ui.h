@@ -1,3 +1,5 @@
+//Added by qt3to4:
+#include <QPixmap>
 /*
  * mapicondialog.ui.h
  *
@@ -30,12 +32,12 @@ void MapIconDialog::apply()
     m_currentMapIcon.setImageFlash(m_imageFlash->isChecked());
     m_currentMapIcon.setImageUseSpawnColorPen(m_imageUseSpawnColorPen->isChecked());
     pen = m_currentMapIcon.imagePen();
-    pen.setStyle(PenStyle(m_imagePenStyle->currentItem()));
+    pen.setStyle(Qt::PenStyle(m_imagePenStyle->currentItem()));
     pen.setWidth(m_imagePenWidth->value());
     m_currentMapIcon.setImagePen(pen);
     m_currentMapIcon.setImageUseSpawnColorBrush(m_imageUseSpawnColorBrush->isChecked());
     brush = m_currentMapIcon.imageBrush();
-    brush.setStyle(BrushStyle(m_imageBrushStyle->currentItem()));
+    brush.setStyle(Qt::BrushStyle(m_imageBrushStyle->currentItem()));
     m_currentMapIcon.setImageBrush(brush);
     
     // get highlight settings
@@ -45,28 +47,28 @@ void MapIconDialog::apply()
     m_currentMapIcon.setHighlightFlash(m_highlightFlash->isChecked());
     m_currentMapIcon.setHighlightUseSpawnColorPen(m_highlightUseSpawnColorPen->isChecked());
     pen = m_currentMapIcon.highlightPen();
-    pen.setStyle(PenStyle(m_highlightPenStyle->currentItem()));
+    pen.setStyle(Qt::PenStyle(m_highlightPenStyle->currentItem()));
     pen.setWidth(m_highlightPenWidth->value());
     m_currentMapIcon.setHighlightPen(pen);
     m_currentMapIcon.setHighlightUseSpawnColorBrush(m_highlightUseSpawnColorBrush->isChecked());
     brush = m_currentMapIcon.highlightBrush();
-    brush.setStyle(BrushStyle(m_highlightBrushStyle->currentItem()));
+    brush.setStyle(Qt::BrushStyle(m_highlightBrushStyle->currentItem()));
     m_currentMapIcon.setHighlightBrush(brush);
  
     // get line settings
     m_currentMapIcon.setShowLine0(m_showLine0->isChecked());
     pen = m_currentMapIcon.line0Pen();
-    pen.setStyle(PenStyle(m_line0PenStyle->currentItem()));
+    pen.setStyle(Qt::PenStyle(m_line0PenStyle->currentItem()));
     pen.setWidth(m_line0PenWidth->value());
     m_currentMapIcon.setLine0Pen(pen);
     m_currentMapIcon.setLine1Distance(m_line1Distance->value());
     pen = m_currentMapIcon.line1Pen();
-    pen.setStyle(PenStyle(m_line1PenStyle->currentItem()));
+    pen.setStyle(Qt::PenStyle(m_line1PenStyle->currentItem()));
     pen.setWidth(m_line1PenWidth->value());
     m_currentMapIcon.setLine1Pen(pen);
     m_currentMapIcon.setLine2Distance(m_line2Distance->value());
     pen = m_currentMapIcon.line2Pen();
-    pen.setStyle(PenStyle(m_line2PenStyle->currentItem()));
+    pen.setStyle(Qt::PenStyle(m_line2PenStyle->currentItem()));
     pen.setWidth(m_line2PenWidth->value());
     m_currentMapIcon.setLine2Pen(pen);
     
@@ -75,7 +77,7 @@ void MapIconDialog::apply()
     m_currentMapIcon.setShowWalkPath(m_showWalkPath->isChecked());
     m_currentMapIcon.setUseWalkPathPen(m_useWalkPathPen->isChecked());
     pen = m_currentMapIcon.walkPathPen();
-    pen.setStyle(PenStyle(m_walkPathPenStyle->currentItem()));
+    pen.setStyle(Qt::PenStyle(m_walkPathPenStyle->currentItem()));
     pen.setWidth(m_walkPathPenWidth->value());
     m_currentMapIcon.setWalkPathPen(pen);
 
@@ -116,13 +118,13 @@ void MapIconDialog::init()
     QPoint point(size, size);
     // setup the image styles
     QPixmap pix(QSize(sizeWH+1, sizeWH+1));
-    QPen pen(black, 0, SolidLine, SquareCap, BevelJoin);
+    QPen pen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin);
     for (int i = tIconStyleNone; i <= tIconStyleMax; i++)
     {
-	pix.fill(white);
+	pix.fill(Qt::white);
 	QPainter p(&pix);
 	p.setPen(pen);
-	p.setBrush(QBrush(gray));
+	p.setBrush(QBrush(Qt::gray));
 	MapIcon::paintIconImage(MapIconStyle(i), p, point, size, sizeWH);
 	p.end();
       
@@ -150,14 +152,14 @@ void MapIconDialog::init()
     };
     
     // setup pen style names
-    pen = QPen(black, 0, SolidLine, SquareCap, BevelJoin);
-    for (int i = NoPen; i <= DashDotDotLine; i++)
+    pen = QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin);
+    for (int i = Qt::NoPen; i <= Qt::DashDotDotLine; i++)
     {
-	pix.fill(white);
+	pix.fill(Qt::white);
 	QPainter p(&pix);
-	pen.setStyle(PenStyle(i));
+	pen.setStyle(Qt::PenStyle(i));
 	p.setPen(pen);
-	p.setBrush(QBrush(gray));
+	p.setBrush(QBrush(Qt::gray));
 	p.drawLine(point.x() - size, point.y() - size,
 		   point.x() + size, point.y() + size);
 	p.end();
@@ -190,14 +192,14 @@ void MapIconDialog::init()
     };
  
     // setup brush style names
-    pen = QPen(black, 0, SolidLine, SquareCap, BevelJoin);
+    pen = QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin);
     pen.setWidth(0);
-    for (int i = NoBrush; i <= DiagCrossPattern; i++)
+    for (int i = Qt::NoBrush; i <= Qt::DiagCrossPattern; i++)
     {
-	pix.fill(white);
+	pix.fill(Qt::white);
 	QPainter p(&pix);
 	p.setPen(pen);
-	p.setBrush(QBrush(BrushStyle(i)));
+	p.setBrush(QBrush(Qt::BrushStyle(i)));
 	p.drawRect(point.x() - size, point.y() - size, sizeWH, sizeWH);
 	p.end();
 

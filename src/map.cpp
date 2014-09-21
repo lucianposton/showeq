@@ -40,20 +40,32 @@
 #include <qpainter.h>
 #include <qpixmap.h>
 #include <qfont.h>
-#include <qfiledialog.h>
+#include <q3filedialog.h>
 #include <qevent.h>
 #include <qpushbutton.h>
 #include <qlayout.h>
-#include <qtoolbar.h>
-#include <qaccel.h>
+#include <q3toolbar.h>
+#include <q3accel.h>
 #include <qcolordialog.h>
 #include <qfontdialog.h>
 #include <qtimer.h>
-#include <qstrlist.h>
+#include <q3strlist.h>
 #include <qimage.h>
 
 #if 1 // ZBTEMP: Until we setup a better way to enter location name/color
 #include <qinputdialog.h>
+//Added by qt3to4:
+#include <Q3BoxLayout>
+#include <QPaintEvent>
+#include <Q3VBoxLayout>
+#include <Q3PointArray>
+#include <Q3Frame>
+#include <QResizeEvent>
+#include <QLabel>
+#include <Q3PopupMenu>
+#include <Q3HBoxLayout>
+#include <Q3TextStream>
+#include <QMouseEvent>
 #endif
 
 //----------------------------------------------------------------------
@@ -81,15 +93,15 @@ CLineDlg::CLineDlg(QWidget *parent, QString name, MapMgr *mapMgr)
   QFont labelFont;
   labelFont.setBold(true);
 
-  QBoxLayout *topLayout = new QVBoxLayout(this);
-  QBoxLayout *row2Layout = new QHBoxLayout(topLayout);
-  QBoxLayout *row1Layout = new QHBoxLayout(topLayout);
+  Q3BoxLayout *topLayout = new Q3VBoxLayout(this);
+  Q3BoxLayout *row2Layout = new Q3HBoxLayout(topLayout);
+  Q3BoxLayout *row1Layout = new Q3HBoxLayout(topLayout);
   
   QLabel *colorLabel = new QLabel ("Color", this);
   colorLabel->setFont(labelFont);
   colorLabel->setFixedHeight(colorLabel->sizeHint().height());
   colorLabel->setFixedWidth(colorLabel->sizeHint().width()+10);
-  colorLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+  colorLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
   row1Layout->addWidget(colorLabel);
   
   m_LineColor = new QComboBox(FALSE, this, "LineColor");
@@ -114,8 +126,8 @@ CLineDlg::CLineDlg(QWidget *parent, QString name, MapMgr *mapMgr)
   m_LineColor->setFixedWidth(m_LineColor->sizeHint().width());
   row1Layout->addWidget(m_LineColor, 0, AlignLeft);
   
-  m_ColorPreview = new QFrame(this);
-  m_ColorPreview->setFrameStyle(QFrame::Box|QFrame::Raised);
+  m_ColorPreview = new Q3Frame(this);
+  m_ColorPreview->setFrameStyle(Q3Frame::Box|Q3Frame::Raised);
   m_ColorPreview->setFixedWidth(50);
   m_ColorPreview->setFixedHeight(m_LineColor->sizeHint().height());
   m_ColorPreview->setPalette(QPalette(QColor(gray)));
@@ -129,7 +141,7 @@ CLineDlg::CLineDlg(QWidget *parent, QString name, MapMgr *mapMgr)
   nameLabel->setFont(labelFont);
   nameLabel->setFixedHeight(nameLabel->sizeHint().height());
   nameLabel->setFixedWidth(nameLabel->sizeHint().width()+5);
-  nameLabel->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+  nameLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
   row2Layout->addWidget(nameLabel);
 
   m_LineName  = new QLineEdit(this, "LineName");
@@ -170,16 +182,16 @@ void CLineDlg::changeColor(const QString &color)
 // MapLabel
 MapLabel::MapLabel( Map* map )
   : QLabel(map, "mapLabel", 
-       WStyle_Customize + WStyle_NoBorderEx + WStyle_Tool + WType_TopLevel
-       + WStyle_Dialog + WX11BypassWM)
+       Qt::WStyle_Customize + Qt::WStyle_NoBorder + Qt::WStyle_Tool + Qt::WType_TopLevel
+       + Qt::WType_Dialog + Qt::WX11BypassWM)
 {
   m_Map = map;
   setMargin( 1 );
   setIndent( 0 );
   setAutoMask( false );
-  setFrameStyle( QFrame::Plain | QFrame::Box );
+  setFrameStyle( Q3Frame::Plain | Q3Frame::Box );
   setLineWidth( 1 );
-  setAlignment( AlignLeft | AlignTop );
+  setAlignment( Qt::AlignLeft | Qt::AlignTop );
   polish();
   setText( "" );
   adjustSize();        
@@ -370,7 +382,7 @@ void MapMgr::loadMap ()
     fileName = m_dataLocMgr->findExistingFile("maps", fileName).absFilePath();
 
   // create a file dialog the defaults to the currently open map
-  fileName = QFileDialog::getOpenFileName(fileName, "*.map;*.txt");
+  fileName = Q3FileDialog::getOpenFileName(fileName, "*.map;*.txt");
 
   if (fileName.isEmpty ())
     return;
@@ -393,7 +405,7 @@ void MapMgr::importMap ()
     fileName = m_dataLocMgr->findExistingFile("maps", fileName).absFilePath();
 
   // create a file dialog the defaults to the currently open map
-  fileName = QFileDialog::getOpenFileName(fileName, "*.map;*.txt");
+  fileName = Q3FileDialog::getOpenFileName(fileName, "*.map;*.txt");
 
   if (fileName.isEmpty ())
     return;
@@ -674,7 +686,7 @@ void MapMgr::savePrefs(void)
 #endif
 }
 
-void MapMgr::dumpInfo(QTextStream& out)
+void MapMgr::dumpInfo(Q3TextStream& out)
 {
   out << "[MapMgr]" << endl;
   out << "DefaultLineColor: " << m_curLineColor << endl;
@@ -702,7 +714,7 @@ void MapMgr::dumpInfo(QTextStream& out)
 //----------------------------------------------------------------------
 // MapMenu
 MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
-  : QPopupMenu(parent, name),
+  : Q3PopupMenu(parent, name),
     m_map(map),
     m_mapIcons(map->mapIcons())
 {
@@ -712,10 +724,10 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   setCaption(preferenceName);
   setCheckable(true);
 
-  QPopupMenu* subMenu;
-  QPopupMenu* subSubMenu;
+  Q3PopupMenu* subMenu;
+  Q3PopupMenu* subSubMenu;
 
-  subMenu = new QPopupMenu;
+  subMenu = new Q3PopupMenu;
   subMenu->setCheckable(true);
   m_id_followMenu_Player = subMenu->insertItem("Player");
   subMenu->setItemParameter(m_id_followMenu_Player, tFollowPlayer);
@@ -727,7 +739,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
       this, SLOT(select_follow(int)));
   m_id_followMenu = insertItem("Follow", subMenu);
 
-  subMenu = new QPopupMenu(m_map);
+  subMenu = new Q3PopupMenu(m_map);
   int key; 
 
   key = pSEQPrefs->getPrefKey("AddLocationKey", preferenceName, "Ctrl+O");
@@ -744,7 +756,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
                       m_map, SLOT(delLinePoint()), key);
   m_id_showLineDlg = subMenu->insertItem("Show Line Dialog...",
                      m_map, SLOT(showLineDlg()));
-  subSubMenu = new QPopupMenu(m_map);
+  subSubMenu = new Q3PopupMenu(m_map);
   int x;
   x = subSubMenu->insertItem("Down 8", m_map, SLOT(scaleDownZ(int)));
   subSubMenu->setItemParameter(x, 8);
@@ -758,7 +770,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   subMenu->insertItem("Scale Map Z Coordinates", subSubMenu);
   m_id_editMap = insertItem("Edit", subMenu);
 
-  subMenu = new QPopupMenu(m_map);
+  subMenu = new Q3PopupMenu(m_map);
   subMenu->setCheckable(true);
   m_id_mapLineStyle_Normal = subMenu->insertItem("Normal");
   subMenu->setItemParameter(m_id_mapLineStyle_Normal, tMap_Normal);
@@ -781,7 +793,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   key = pSEQPrefs->getPrefKey("SpawnDepthFilteredKey", preferenceName, "Alt+5");
   setAccel(key, m_id_spawnDepthFilter);
 
-  subMenu = new QPopupMenu(m_map);
+  subMenu = new Q3PopupMenu(m_map);
   subMenu->setCheckable(true);
   
   m_id_tooltip = subMenu->insertItem("Tooltips", this, SLOT(toggle_tooltip(int)));;
@@ -824,7 +836,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_showSub = insertItem("Show", subMenu);
   
 
-  subMenu = new QPopupMenu;
+  subMenu = new Q3PopupMenu;
   subMenu->setCheckable(true);
   m_id_mapOptimization_Memory = subMenu->insertItem("Memory");
   subMenu->setItemParameter(m_id_mapOptimization_Memory, tMap_MemoryOptim); 
@@ -847,7 +859,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   insertItem("Edit Map Icons...",
          m_map, SLOT(showMapIconDialog()));
 
-  subMenu = new QPopupMenu;
+  subMenu = new Q3PopupMenu;
   m_drawSizeSpinBox = new QSpinBox(1, 6, 1, subMenu);
   m_drawSizeSpinBox->setValue(m_mapIcons->drawSize());
   connect(m_drawSizeSpinBox, SIGNAL(valueChanged(int)),
@@ -855,8 +867,8 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_drawSize = subMenu->insertItem(m_drawSizeSpinBox);
   m_id_drawSizeMenu = insertItem("Draw Size", subMenu);
 
-  subMenu = new QPopupMenu;
-  QHBox* tmpHBox = new QHBox(subMenu);
+  subMenu = new Q3PopupMenu;
+  Q3HBox* tmpHBox = new Q3HBox(subMenu);
   m_fovSpinBoxLabel = new QLabel("Distance:", tmpHBox);
   m_fovSpinBox = new QSpinBox(20, 1200, 20, tmpHBox, "FOV");
   m_fovSpinBox->setValue(m_mapIcons->fovDistance());
@@ -866,7 +878,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_FOVColor = subMenu->insertItem("Color...",
                       this, SLOT(select_fovColor(int)));
 
-  subSubMenu = new QPopupMenu;
+  subSubMenu = new Q3PopupMenu;
   subMenu->setCheckable(true);
   m_id_FOVNoBrush = subSubMenu->insertItem("No Background");
   subSubMenu->setItemParameter(m_id_FOVNoBrush, Qt::NoBrush); 
@@ -902,7 +914,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
       this, SLOT(select_fovStyle(int)));
   subMenu->insertItem("FOV Style", subSubMenu);
 
-  subSubMenu = new QPopupMenu;
+  subSubMenu = new Q3PopupMenu;
   subMenu->setCheckable(true);
   m_id_FOVDistanceBased = subSubMenu->insertItem("Distance Based");
   subSubMenu->setItemParameter(m_id_FOVDistanceBased, tFOVDistanceBased); 
@@ -916,7 +928,7 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
 
   m_id_FOV = insertItem("Player FOV", subMenu);
 
-  subMenu = new QPopupMenu;
+  subMenu = new Q3PopupMenu;
   m_zoomDefaultSpinBox = new QSpinBox(1, 32, 1, subMenu);
   m_zoomDefaultSpinBox->setValue(m_mapIcons->drawSize());
   connect(m_zoomDefaultSpinBox, SIGNAL(valueChanged(int)),
@@ -1427,7 +1439,7 @@ Map::Map(MapMgr* mapMgr,
                          tFOVDistanceBased);
 
   tmpPrefString = "FOVStyle";
-  m_fovStyle = pSEQPrefs->getPrefInt(tmpPrefString, prefString, QBrush::Dense7Pattern);
+  m_fovStyle = pSEQPrefs->getPrefInt(tmpPrefString, prefString, Qt::Dense7Pattern);
 
   tmpPrefString = "FOVColor";
   m_fovColor = pSEQPrefs->getPrefColor(tmpPrefString, prefString, QColor("#505050"));
@@ -1505,7 +1517,7 @@ Map::Map(MapMgr* mapMgr,
   m_showZoneSafePoint = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   // Accelerators
-  QAccel *accel = new QAccel(this);
+  Q3Accel *accel = new Q3Accel(this);
   int key;
   key = pSEQPrefs->getPrefKey("ZoomInKey", prefString, "+");
   accel->connectItem(accel->insertItem(key), this, SLOT(zoomIn()));
@@ -1655,7 +1667,7 @@ void Map::mouseDoubleClickEvent(QMouseEvent * me)
 #ifdef DEBUGMAP
   debug ("mouseDoubleClickEvent()");
 #endif /* DEBUGMAP */
-  if (me->button () == MidButton)
+  if (me->button () == Qt::MidButton)
     viewTarget();
 }
 
@@ -1664,7 +1676,7 @@ void Map::mouseReleaseEvent(QMouseEvent* me)
 #ifdef DEBUGMAP
   debug ("mouseReleaseEvent()");
 #endif /* DEBUGMAP */
-  if (me->button() == MidButton)
+  if (me->button() == Qt::MidButton)
     m_mapPanning = false;
 }
 
@@ -1673,7 +1685,7 @@ void Map::mousePressEvent(QMouseEvent* me)
 #ifdef DEBUGMAP
   debug ("mousePressEvent()");
 #endif /* DEBUGMAP */
-  if (me->button () == RightButton) 
+  if (me->button () == Qt::RightButton) 
   {
     // display the Map's menu
     menu()->popup(mapToGlobal(me->pos()));
@@ -1689,7 +1701,7 @@ void Map::mousePressEvent(QMouseEvent* me)
     }
 #endif /* DEBUGMAP */
   }
-  else if (me->button () == MidButton) 
+  else if (me->button () == Qt::MidButton) 
   {
     m_mapPanning = true;
     m_mapPanX     = me->x ();
@@ -2655,7 +2667,7 @@ void Map::setShowZoneSafePoint(bool val)
     refreshMap ();
 }
 
-void Map::dumpInfo(QTextStream& out)
+void Map::dumpInfo(Q3TextStream& out)
 {
   out << "[" << preferenceName() << "]" << endl;
   out << "Caption: " << caption() << endl;
@@ -3034,7 +3046,7 @@ void Map::paintMap (QPainter * p)
 
   /* Begin painting */
   tmp.begin (&m_offscreen);
-  tmp.setPen (NoPen);
+  tmp.setPen (Qt::NoPen);
   tmp.setFont (m_param.font());
 
   if ((m_player->validPos()) ||
@@ -3162,12 +3174,12 @@ void Map::paintPlayerView(MapParameters& param, QPainter& p)
     double const fov_angle = radians_per_circle * 0.25;
     double fox_angle_offset = fov_angle / 2;
     
-    p.setPen(yellow); // color
+    p.setPen(Qt::yellow); // color
     p.drawLine( m_param.playerXOffset(), m_param.playerYOffset(),
         m_param.playerXOffset() + int (sin( angle ) * m_scaledFOVDistance),
         m_param.playerYOffset() + int (cos( angle ) * m_scaledFOVDistance) );
     
-    p.setPen(red); // color
+    p.setPen(Qt::red); // color
     for ( int n = 2; n--; )
     {
       int const start_x = m_param.playerXOffset() + start_offset_x;
@@ -3188,8 +3200,8 @@ void Map::paintPlayer(MapParameters& param, QPainter& p)
 #ifdef DEBUGMAP
   seqDebug("Paint player position");
 #endif
-  p.setPen(gray);
-  p.setBrush(white);
+  p.setPen(Qt::gray);
+  p.setBrush(Qt::white);
   p.drawEllipse(m_param.playerXOffset() - 3, 
         m_param.playerYOffset() - 3, 6, 6);
 }
@@ -3209,7 +3221,7 @@ void Map::paintDrops(MapParameters& param,
   uint8_t flag;
 
   // all drops are the same color
-  p.setPen(yellow);
+  p.setPen(Qt::yellow);
 
   /* Paint the dropped items */
   for (; it.current(); ++it)
@@ -3317,9 +3329,9 @@ const QColor& Map::raceTeamHighlightColor(const Spawn* spawn) const
   uint8_t playerLevel = m_player->level();
   int diff = spawn->level() - playerLevel;
   if (diff < -8)  //They are much easier than you.
-    return green; 
+    return Qt::green; 
   if (diff > 8)  //They are much harder than you.
-    return darkRed; 
+    return Qt::darkRed; 
 
   if (diff < 0) 
     diff *= -1;
@@ -3333,51 +3345,51 @@ const QColor& Map::raceTeamHighlightColor(const Spawn* spawn) const
     // easy
     case 0:  // you are 8 above them
     case 1:  // you are 7 above them
-      return green; 
+      return Qt::green; 
       break;
     case 2:  // you are 6 above them
     case 3:  // you are 5 above them
-      return darkGreen; 
+      return Qt::darkGreen; 
       break;
       
     // moderate
     case 4:  // you are 4 above them
     case 5:  // you are 3 above them
-      return blue; 
+      return Qt::blue; 
       break;
     case 6:  // you are 2 above them
     case 7:  // you are 1 above them
-      return darkBlue; 
+      return Qt::darkBlue; 
       break;
       
     // even
     case 8:  // you are even with them
-      return white; 
+      return Qt::white; 
       break;
         
     // difficult 
     case 9:  // you are 1 below them
     case 10:  // you are 2 below them
-      return yellow; 
+      return Qt::yellow; 
       break;
         
     // downright hard
     case 11:  // you are 3 below them
     case 12:  // you are 4 below them
-      return magenta; 
+      return Qt::magenta; 
       break;
     case 13:  // you are 5 below them
     case 14:  // you are 6 below them
-      return red; 
+      return Qt::red; 
       break;
     case 15:  // you are 7 below them
     case 16:  // you are 8 below them
-      return darkRed; 
+      return Qt::darkRed; 
       break;
     }
   }
   
-  return black;
+  return Qt::black;
 }
 
 const QColor& Map::deityTeamHighlightColor(const Spawn* spawn) const
@@ -3385,9 +3397,9 @@ const QColor& Map::deityTeamHighlightColor(const Spawn* spawn) const
   uint8_t playerLevel = m_player->level();
   int diff = spawn->level() - playerLevel;
   if (diff < -5)  //They are much easier than you.
-    return green; 
+    return Qt::green; 
   if (diff > 5)  //They are much harder than you.
-    return darkRed; 
+    return Qt::darkRed; 
 
   if (diff < 0) 
     diff *= -1;
@@ -3401,45 +3413,45 @@ const QColor& Map::deityTeamHighlightColor(const Spawn* spawn) const
     // easy
     case 0:  // you are 5 above them
     case 1:  // you are 4 above them
-      return green; 
+      return Qt::green; 
       break;
     case 2:  // you are 3 above them
-      return darkGreen; 
+      return Qt::darkGreen; 
       break;
       
     // moderate
     case 3:  // you are 2 above them
-      return blue; 
+      return Qt::blue; 
       break;
     case 4:  // you are 1 above them
-      return darkBlue; 
+      return Qt::darkBlue; 
       break;
       
     // even
     case 5:  // you are even with them
-      return white; 
+      return Qt::white; 
       break;
       
     // difficult 
     case 6:  // you are 1 below them
-      return yellow; 
+      return Qt::yellow; 
       break;
       
       // downright hard
     case 7:  // you are 2 below them
     case 8:  // you are 3 below them
-      return magenta; 
+      return Qt::magenta; 
       break;
     case 9:  // you are 4 below them
-      return red; 
+      return Qt::red; 
       break;
     case 10:  // you are 5 below them
-      return darkRed; 
+      return Qt::darkRed; 
       break;
     }
   }
 
-  return black;
+  return Qt::black;
 }
 
 void Map::paintSpawns(MapParameters& param,
@@ -3452,7 +3464,7 @@ void Map::paintSpawns(MapParameters& param,
   const ItemMap& itemMap = m_spawnShell->spawns();
   ItemConstIterator it(itemMap);
   const Item* item;
-  QPointArray  atri(3);
+  Q3PointArray  atri(3);
   QString spawnNameText;
   QFontMetrics fm(param.font());
   EQPoint spawnOffset;
@@ -3525,7 +3537,7 @@ void Map::paintSpawns(MapParameters& param,
     if (m_showVelocityLines &&
         (spawn->deltaX() || spawn->deltaY())) // only if has a delta
     {
-      p.setPen (darkGray);
+      p.setPen (Qt::darkGray);
       p.drawLine (spawnOffsetXPos,
           spawnOffsetYPos,
           spawnOffsetXPos - spawn->deltaX(),
@@ -3555,8 +3567,8 @@ void Map::paintSpawns(MapParameters& param,
                      MapParameters::qFormat, range);
         sizeWH = scaledRange << 1;
         
-        p.setBrush(NoBrush);
-        p.setPen(red); 
+        p.setBrush(Qt::NoBrush);
+        p.setPen(Qt::red); 
         
         p.drawEllipse(spawnOffsetXPos - scaledRange, 
                   spawnOffsetYPos - scaledRange, 
@@ -3634,15 +3646,15 @@ void Map::paintSpawns(MapParameters& param,
           
           if (levelDiff < 0)
           {
-            p2.setColor(yellow);
+            p2.setColor(Qt::yellow);
           }
           else if (levelDiff > 0)
           {
-            p2.setColor(blue);
+            p2.setColor(Qt::blue);
           }
           else
           {
-            p2.setColor(white);
+            p2.setColor(Qt::white);
           }
           mapIcon.setHighlightPen(p2);
         }
@@ -3663,15 +3675,15 @@ void Map::paintSpawns(MapParameters& param,
             
             if (levelDiff < 0)
             {
-              p2.setColor(yellow);
+              p2.setColor(Qt::yellow);
             }
             else if (levelDiff > 0)
             {
-              p2.setColor(blue);
+              p2.setColor(Qt::blue);
             }
             else
             {
-              p2.setColor(white);
+              p2.setColor(Qt::white);
             }
             mapIcon.setHighlightPen(p2);
           }
@@ -3797,7 +3809,7 @@ void Map::paintSpawnPoints( MapParameters& param, QPainter& p )
     return;
   
   // get an iterator over the list of spawn points
-  QAsciiDictIterator<SpawnPoint> it( m_spawnMonitor->spawnPoints() );
+  Q3AsciiDictIterator<SpawnPoint> it( m_spawnMonitor->spawnPoints() );
   const SpawnPoint* sp;
 
   const MapIcon& mapIcon = m_mapIcons->icon(tIconTypeSpawnPoint);
@@ -3827,7 +3839,7 @@ void Map::paintDebugInfo(MapParameters& param,
              int drawTime)
 {
   // show coords of upper left corner and lower right corner
-  p.setPen( yellow );
+  p.setPen( Qt::yellow );
   QString ts;
   ts.sprintf( "(%d, %d)", 
           (int)(param.screenCenterX() * param.ratioX()), 
@@ -4210,7 +4222,7 @@ const SpawnPoint* Map::closestSpawnPointToPoint(const QPoint& pt,
   uint32_t distance;
   EQPoint testPoint;
 
-  QAsciiDictIterator<SpawnPoint> it(m_spawnMonitor->spawnPoints());
+  Q3AsciiDictIterator<SpawnPoint> it(m_spawnMonitor->spawnPoints());
   SpawnPoint* sp;
 
   while ((sp = it.current()))
@@ -4297,14 +4309,14 @@ void Map::mapUpdated(void)
 
 void Map::saveMapImage(void)
 {
-  QStrList formats(QImageIO::outputFormats());
+  Q3StrList formats(QImageIO::outputFormats());
   QString filters;
   for (char* tmp =formats.first(); tmp != 0; tmp = formats.next())
     filters += QString(tmp) + QString(" (*.") + QString(tmp) + ")\n";
   
-  QFileDialog fileDlg(QString::null, filters, this, "saveMapImage", true);
+  Q3FileDialog fileDlg(QString::null, filters, this, "saveMapImage", true);
   fileDlg.setCaption("Save Map Image Filename");
-  fileDlg.setMode(QFileDialog::AnyFile);
+  fileDlg.setMode(Q3FileDialog::AnyFile);
 
   if (fileDlg.exec() != QDialog::Accepted)
     return;
@@ -4340,10 +4352,10 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   QLabel* tmpLabel;
 
   // setup the vertical box
-  m_vertical = new QVBoxLayout(boxLayout());
+  m_vertical = new Q3VBoxLayout(boxLayout());
 
   // setup the top control window
-  m_topControlBox = new QHBox(this);
+  m_topControlBox = new Q3HBox(this);
   m_vertical->addWidget(m_topControlBox);
   m_topControlBox->setSpacing(1);
   m_topControlBox->setMargin(0);
@@ -4363,7 +4375,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   m_vertical->addWidget(m_map);
 
   // setup bottom control window
-  m_bottomControlBox = new QHBox(this);
+  m_bottomControlBox = new Q3HBox(this);
   m_vertical->addWidget(m_bottomControlBox);
   m_bottomControlBox->setSpacing(1);
   m_bottomControlBox->setMargin(0);
@@ -4373,7 +4385,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 
   
   // setup Zoom control
-  m_zoomBox = new QHBox(m_topControlBox);
+  m_zoomBox = new Q3HBox(m_topControlBox);
   tmpLabel = new QLabel(m_zoomBox);
   tmpLabel->setText("Zoom:");
   m_zoom = new QSpinBox(1, 32, 1, m_zoomBox);
@@ -4390,11 +4402,11 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
       m_zoom, SLOT(setValue(int)));
 
   // setup Player Location display
-  m_playerLocationBox = new QHBox(m_topControlBox);
+  m_playerLocationBox = new Q3HBox(m_topControlBox);
   tmpLabel = new QLabel(m_playerLocationBox);
   tmpLabel->setText("You:");
   m_playerLocation = new QLabel(m_playerLocationBox);
-  m_playerLocation->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+  m_playerLocation->setFrameStyle(Q3Frame::Panel | Q3Frame::Sunken);
   m_playerLocation->setText("0      0      0      ");
   m_playerLocation->setMinimumWidth(90);
   tmpLabel->setBuddy(m_playerLocation);
@@ -4407,11 +4419,11 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
                 int16_t,int16_t,int16_t,int32_t)));
 
   // setup Mouse Location display
-  m_mouseLocationBox = new QHBox(m_topControlBox);
+  m_mouseLocationBox = new Q3HBox(m_topControlBox);
   tmpLabel = new QLabel(m_mouseLocationBox);
   tmpLabel->setText("Cursor:");
   m_mouseLocation = new QLabel(m_mouseLocationBox);
-  m_mouseLocation->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+  m_mouseLocation->setFrameStyle(Q3Frame::Panel | Q3Frame::Sunken);
   m_mouseLocation->setText("0      0      ");
   m_mouseLocation->setMinimumWidth(70);
   tmpLabel->setBuddy(m_mouseLocationBox);
@@ -4422,7 +4434,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
        this, SLOT(mouseLocation(int16_t, int16_t)));
 
   // setup Filter
-  m_filterBox = new QHBox(m_topControlBox);
+  m_filterBox = new Q3HBox(m_topControlBox);
   tmpLabel = new QLabel(m_filterBox);
   tmpLabel->setText("Find:");
   m_filter = new MapFilterLineEdit(m_filterBox);
@@ -4440,7 +4452,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 #endif
 
   // setup Frame Rate control
-  m_frameRateBox = new QHBox(m_bottomControlBox);
+  m_frameRateBox = new Q3HBox(m_bottomControlBox);
   tmpLabel = new QLabel(m_frameRateBox);
   tmpLabel->setText("Frame Rate:");
   m_frameRate = new QSpinBox(1, 60, 1, m_frameRateBox);
@@ -4458,7 +4470,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
       m_frameRate, SLOT(setValue(int)));
 
   // setup Pan Controls
-  m_panBox = new QHBox(m_bottomControlBox);
+  m_panBox = new Q3HBox(m_bottomControlBox);
   tmpLabel = new QLabel(m_panBox);
   tmpLabel->setText("Pan X:");
   m_panX = new QSpinBox(-8192, 8192, 16, m_panBox);
@@ -4479,7 +4491,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   connect(m_map, SIGNAL(panYChanged(int)),
       m_panY, SLOT(setValue(int)));
 
-  m_depthControlBox = new QHBox(m_bottomControlBox);
+  m_depthControlBox = new Q3HBox(m_bottomControlBox);
   tmpLabel = new QLabel(m_depthControlBox);
   tmpLabel->setText("Head:");
   m_head = new QSpinBox(5, 3000, 10, m_depthControlBox);
@@ -4502,7 +4514,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
       m_floor, SLOT(setValue(int)));
 
   // add our own menu items to the maps menu
-  QPopupMenu* mapMenu = m_map->menu();
+  Q3PopupMenu* mapMenu = m_map->menu();
 
   // insert a seperator to seperate our stuff from the rest
   mapMenu->insertSeparator(-1);
@@ -4520,8 +4532,8 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
   // insert a seperator to seperate main controls from sub-menus
   mapMenu->insertSeparator(-1);
   
-  QPopupMenu* subMenu;
-  subMenu = new QPopupMenu();
+  Q3PopupMenu* subMenu;
+  subMenu = new Q3PopupMenu();
   subMenu->setCheckable(true);
   m_id_zoom = subMenu->insertItem("Show Zoom Controls", 
                   this, SLOT(toggle_zoom(int)));
@@ -4537,7 +4549,7 @@ MapFrame::MapFrame(FilterMgr* filterMgr,
 
   m_id_topControl_Options = mapMenu->insertItem("Top Controls", subMenu);
 
-  subMenu = new QPopupMenu();
+  subMenu = new Q3PopupMenu();
   subMenu->setCheckable(true);
   m_id_frameRate = subMenu->insertItem("Show Frame Rate",
                        this, SLOT(toggle_frameRate(int)));
@@ -4557,7 +4569,7 @@ MapFrame::~MapFrame()
 {
 }
 
-QPopupMenu* MapFrame::menu()
+Q3PopupMenu* MapFrame::menu()
 {
   return m_map->menu();
 }
@@ -4654,7 +4666,7 @@ void MapFrame::savePrefs(void)
     m_map->savePrefs();
 }
 
-void MapFrame::dumpInfo(QTextStream& out)
+void MapFrame::dumpInfo(Q3TextStream& out)
 {
   // first dump information about the map frame
   out << "[" << preferenceName() << "]" << endl;
@@ -4680,7 +4692,7 @@ void MapFrame::dumpInfo(QTextStream& out)
 
 void MapFrame::init_Menu(void)
 {
-  QPopupMenu* mapMenu = m_map->menu();
+  Q3PopupMenu* mapMenu = m_map->menu();
   mapMenu->setItemEnabled(m_id_topControl_Options, 
               m_topControlBox->isVisible());
   mapMenu->setItemChecked(m_id_topControl,

@@ -17,7 +17,9 @@
 #include <qregexp.h>
 #include <qfile.h>
 #include <qstringlist.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 EQStr::EQStr(int size)
   : m_messageStrings(size),
@@ -42,7 +44,7 @@ bool EQStr::load(const QString& fileName)
   QFile formatFile(fileName);
 
   // open the file read only
-  if (!formatFile.open(IO_ReadOnly))
+  if (!formatFile.open(QIODevice::ReadOnly))
   {
     seqWarn("EQStr: Failed to open '%s'",
 	    fileName.latin1());
@@ -50,7 +52,7 @@ bool EQStr::load(const QString& fileName)
   }
 
   // allocate a QCString large enough to hold the entire file
-  QCString textData(formatFile.size() + 1);
+  Q3CString textData(formatFile.size() + 1);
   
   // read in the entire file
   formatFile.readBlock(textData.data(), textData.size());
@@ -152,7 +154,7 @@ QString EQStr::formatMessage(uint32_t formatid,
   }
   else
   {
-    QValueVector<QString> argList;
+    Q3ValueVector<QString> argList;
     argList.reserve(5); // reserve space for 5 elements to handle most common sizes
     
     // 

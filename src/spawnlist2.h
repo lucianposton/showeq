@@ -8,7 +8,9 @@
 #ifndef SPAWNLIST2_H
 #define SPAWNLIST2_H
 
-#include <qptrdict.h>
+#include <q3ptrdict.h>
+//Added by qt3to4:
+#include <Q3PopupMenu>
 
 #include "seqwindow.h"
 #include "seqlistview.h"
@@ -37,7 +39,7 @@ class SpawnListWindow2 : public SEQWindow
 		   QWidget* parent = 0, const char* name = 0);
   ~SpawnListWindow2();
 
-   virtual QPopupMenu* menu();
+   virtual Q3PopupMenu* menu();
 
 
    SpawnListItem* selected();
@@ -80,10 +82,10 @@ public slots:
    void categorySelected(int index);
    
     // listview signals
-   void selChanged(QListViewItem*);
+   void selChanged(Q3ListViewItem*);
 
-   void mousePressEvent (int button, QListViewItem *litem, const QPoint &point, int col);
-   void mouseDoubleClickEvent(QListViewItem *litem);
+   void mousePressEvent (int button, Q3ListViewItem *litem, const QPoint &point, int col);
+   void mouseDoubleClickEvent(Q3ListViewItem *litem);
 
    // fpm spinbox signals
    void setFPM(int rate);
@@ -93,7 +95,7 @@ public slots:
    void toggle_keepSorted(int id);
    void toggle_keepSelectedVisible(int id);
  private:
-   void setSelectedQuiet(QListViewItem* item, bool selected);
+   void setSelectedQuiet(Q3ListViewItem* item, bool selected);
    void populateSpawns(void);
    void populateCategory(const Category* cat);
    void updateCount(void);
@@ -116,7 +118,7 @@ public slots:
    QLineEdit* m_totalSpawns;
 
    // index dictionary for retrieving SpawnListItems by Item
-   QPtrDict<SpawnListItem> m_spawnListItemDict;
+   Q3PtrDict<SpawnListItem> m_spawnListItemDict;
    
    // timer used
    QTimer* m_timer;

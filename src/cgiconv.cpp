@@ -16,7 +16,7 @@
 
 #include <qregexp.h>
 #include <qfile.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 #include "cgiconv.h"
 
@@ -43,10 +43,10 @@ void CGI::processCGIData()
     char* query_str = new char[content_length + 1];
 
     // open the data stream
-    QTextStream postStream(stdin, IO_ReadOnly);
+    Q3TextStream postStream(stdin, QIODevice::ReadOnly);
 
     // set the encoding (required for readRawBytes to work)
-    postStream.setEncoding(QTextStream::Latin1);
+    postStream.setEncoding(Q3TextStream::Latin1);
     
     // read the data into the allocated buffer
     postStream.readRawBytes(query_str, content_length);
@@ -134,10 +134,10 @@ void CGI::logCGIData(const QString& filename)
   QFile file(filename);
   
   // open the file
-  if (file.open(IO_WriteOnly))
+  if (file.open(QIODevice::WriteOnly))
   {
     // create a QTextStream object on the file
-    QTextStream textFile(&file);
+    Q3TextStream textFile(&file);
 
     // get the environment
     textFile << "REQUEST_METHOD=" << getenv("REQUEST_METHOD") << endl;

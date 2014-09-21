@@ -7,6 +7,9 @@
 
 #include <qfont.h>
 #include <qlayout.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
+#include <QLabel>
 
 #include "main.h"
 #include "compassframe.h"
@@ -14,10 +17,10 @@
 CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
   : SEQWindow("Compass", "ShowEQ - Compass", parent, name)
 {
-  QVBoxLayout* layout = new QVBoxLayout(boxLayout());
+  Q3VBoxLayout* layout = new Q3VBoxLayout(boxLayout());
   m_compass = new Compass (this, "compass");
   layout->addWidget(m_compass);
-  QHBox* coordsbox = new QHBox(this);
+  Q3HBox* coordsbox = new Q3HBox(this);
   layout->addWidget(coordsbox);
   m_compass->setFixedWidth(120);
   m_compass->setFixedHeight(120);
@@ -30,12 +33,12 @@ CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
       QLabel *labelx = new QLabel(showeq_params->retarded_coords?"E/W:":"X:",
 				  coordsbox);
       labelx->setFixedHeight(labelx->sizeHint().height());
-      labelx->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+      labelx->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
       
       // Create the xpos label
       m_x = new QLabel("----",coordsbox);
       m_x->setFixedHeight(m_x->sizeHint().height());
-      m_x->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+      m_x->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     } 
     else 
     {
@@ -43,24 +46,24 @@ CompassFrame::CompassFrame(Player* player, QWidget* parent, const char* name)
       QLabel *labely = new QLabel(showeq_params->retarded_coords?"N/S:":"Y:",
 				  coordsbox);
       labely->setFixedHeight(labely->sizeHint().height());
-      labely->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+      labely->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
       
       // Create the ypos label
       m_y = new QLabel("----",coordsbox);
       m_y->setFixedHeight(m_y->sizeHint().height());
-      m_y->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+      m_y->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     }
    }
   
   // Create the z: label
   QLabel *labelz = new QLabel("Z:",coordsbox);
   labelz->setFixedHeight(labelz->sizeHint().height());
-  labelz->setAlignment(QLabel::AlignLeft|QLabel::AlignVCenter);
+  labelz->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
   
   // Create the zpos label
   m_z = new QLabel("----",coordsbox);
   m_z->setFixedHeight(m_z->sizeHint().height());      
-  m_z->setAlignment(QLabel::AlignRight|QLabel::AlignVCenter);
+  m_z->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
   // connect
   connect(player, SIGNAL(posChanged(int16_t,int16_t,int16_t,

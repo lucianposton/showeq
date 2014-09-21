@@ -12,6 +12,8 @@
 
 #include <qobject.h>
 #include <qstring.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 #include "everquest.h"
 
 
@@ -50,7 +52,7 @@ class GroupMgr: public QObject
   void killSpawn(const Item* item);
 
   // dump debug info
-  void dumpInfo(QTextStream& out);
+  void dumpInfo(Q3TextStream& out);
 
  signals:
   void added(const QString& name, const Spawn* mem);
