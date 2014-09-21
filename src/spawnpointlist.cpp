@@ -571,7 +571,4 @@ void SpawnPointWindow::savePrefs(void)
     m_spawnPointList->savePrefs();
 }
 
-#ifndef QMAKEBUILD
-#include "spawnpointlist.moc"
-#endif
 

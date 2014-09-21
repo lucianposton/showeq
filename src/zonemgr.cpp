@@ -273,6 +273,3 @@ void ZoneMgr::zonePoints(const uint8_t* data, size_t /*len*/, uint8_t)
 	 sizeof(zonePointStruct) * m_zonePointCount);
 }
 
-#ifndef QMAKEBUILD
-#include "zonemgr.moc"
-#endif

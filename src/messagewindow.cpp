@@ -1184,7 +1184,4 @@ void MessageWindow::addedFilter(uint32_t mask, uint8_t filterid,
   m_hideUserFilterMenu->insertItem(filter.name(), filterid);
 }
 
-#ifndef QMAKEBUILD
-#include "messagewindow.moc"
-#endif
 

@@ -2544,7 +2544,4 @@ bool   EQItemDBEntry::IsContainer()
   return (((EQItemDBEntryData_3*)m_itemEntryData)->m_itemType == ItemTypeContainer);
 }
 	  
-#ifndef QMAKEBUILD
-#include "itemdb.moc"
-#endif
 

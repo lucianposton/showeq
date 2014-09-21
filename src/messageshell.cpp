@@ -1022,7 +1022,4 @@ void MessageShell::filterMessage(const QString& prefix, MessageType type,
 			 .arg(spawnInfo));
 }
 
-#ifndef QMAKEBUILD
-#include "messageshell.moc"
-#endif
 

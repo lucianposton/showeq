@@ -190,7 +190,4 @@ uint32_t MessageFilters::filterMessage(uint64_t messageTypeMask,
   return mask;
 }
 
-#ifndef QMAKEBUILD
-#include "messagefilter.moc"
-#endif
 

@@ -129,9 +129,6 @@ void FilterNotifications::executeCommand(const Item* item,
   system ((const char*)command);
 }
 
-#ifndef QMAKEBUILD
-#include "filternotifications.moc"
-#endif
 
 
 

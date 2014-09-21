@@ -994,7 +994,4 @@ void CombatWindow::clear(void)
   resetDPS();
 }
 
-#ifndef QMAKEBUILD
-#include "combatlog.moc"
-#endif
 

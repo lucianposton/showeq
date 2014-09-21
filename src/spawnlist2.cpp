@@ -958,7 +958,4 @@ void SpawnListWindow2::populateSpawns(void)
 #endif 
 }
 
-#ifndef QMAKEBUILD
-#include "spawnlist2.moc"
-#endif
 

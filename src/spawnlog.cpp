@@ -143,7 +143,4 @@ SpawnLog::logNewZone(const QString& zonename)
   zoneShortName = zonename;
 }
 
-#ifndef QMAKEBUILD
-#include "spawnlog.moc"
-#endif
 

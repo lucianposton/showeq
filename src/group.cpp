@@ -376,7 +376,4 @@ const Spawn* GroupMgr::memberBySlot(uint16_t slot )
   return m_members[slot]->m_spawn;
 }
 
-#ifndef QMAKEBUILD
-#include "group.moc"
-#endif
 

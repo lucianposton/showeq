@@ -542,7 +542,4 @@ void SpellShell::timeout()
     m_timer->stop();
 }
 
-#ifndef QMAKEBUILD
-#include "spellshell.moc"
-#endif
 

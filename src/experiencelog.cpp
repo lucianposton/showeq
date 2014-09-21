@@ -712,7 +712,4 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
    seqInfo("ZEM - ZEM - ZEM ===== %d ", ZEM);
 }
 
-#ifndef QMAKEBUILD
-#include "experiencelog.moc"
-#endif
 

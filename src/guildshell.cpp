@@ -324,9 +324,6 @@ void GuildShell::guildMemberUpdate(const uint8_t* data, size_t /*len*/)
   }
 }
 
-#ifndef QMAKEBUILD
-#include "guildshell.moc"
-#endif
 
 
 

@@ -73,7 +73,4 @@ void DateTimeMgr::update()
   }
 }
 
-#ifndef QMAKEBUILD
-#include "datetimemgr.moc"
-#endif
 

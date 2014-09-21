@@ -228,6 +228,3 @@ EditorWindow::EditorWindow(const char *fileName)
      }
  }
 
-#ifndef QMAKEBUILD
-#include "editor.moc"
-#endif 

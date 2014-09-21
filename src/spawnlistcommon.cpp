@@ -748,7 +748,4 @@ void SpawnListMenu::set_caption(int /*id*/)
     m_spawnlistWindow->setCaption(caption);
 }
 
-#ifndef QMAKEBUILD
-#include "spawnlistcommon.moc"
-#endif
 

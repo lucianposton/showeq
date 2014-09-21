@@ -406,6 +406,3 @@ void SpawnMonitor::loadSpawnPoints()
   m_modified = false;
 }
 
-#ifndef QMAKEBUILD
-#include "spawnmonitor.moc"
-#endif

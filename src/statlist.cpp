@@ -354,7 +354,4 @@ void StatListWindow::savePrefs(void)
   m_statList->savePrefs();
 }
 
-#ifndef QMAKEBUILD
-#include "statlist.moc"
-#endif
 

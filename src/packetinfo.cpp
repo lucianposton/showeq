@@ -744,7 +744,4 @@ bool OPCodeXmlContentHandler::endDocument()
   return true;
 }
 
-#ifndef QMAKEBUILD
-#include "packetinfo.moc"
-#endif
 

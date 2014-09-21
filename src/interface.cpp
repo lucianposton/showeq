@@ -6035,7 +6035,4 @@ void EQInterface::setDockEnabled(Q3DockWindow* dw, bool enable)
   Q3MainWindow::setDockEnabled(dw, Qt::DockRight, enable);
 }
 
-#ifndef QMAKEBUILD
-#include "interface.moc"
-#endif
 

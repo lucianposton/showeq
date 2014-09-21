@@ -265,7 +265,4 @@ void SkillListWindow::savePrefs(void)
   m_skillList->savePrefs();
 }
 
-#ifndef QMAKEBUILD
-#include "skilllist.moc"
-#endif
 

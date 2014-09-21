@@ -224,7 +224,4 @@ void SEQListView::setColumnVisible(int column, bool visible)
   triggerUpdate();
 }
 
-#ifndef QMAKEBUILD
-#include "seqlistview.moc"
-#endif
 

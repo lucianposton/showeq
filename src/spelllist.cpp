@@ -399,6 +399,3 @@ void SpellListWindow::savePrefs(void)
   m_spellList->savePrefs();
 }
 
-#ifndef QMAKEBUILD
-#include "spelllist.moc"
-#endif

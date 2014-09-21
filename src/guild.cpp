@@ -147,7 +147,4 @@ void GuildMgr::listGuildInfo()
    }
 }
 
-#ifndef QMAKEBUILD
-#include "guild.moc"
-#endif
 

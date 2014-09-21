@@ -214,7 +214,4 @@ void Terminal::newMessage(const MessageEntry& message)
   fputc('\n', stdout);
 }
 
-#ifndef QMAKEBUILD
-#include "terminal.moc"
-#endif
 

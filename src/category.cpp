@@ -386,7 +386,4 @@ void CategoryMgr::savePrefs(void)
   }
 }
 
-#ifndef QMAKEBUILD
-#include "category.moc"
-#endif
 

@@ -547,7 +547,4 @@ void GuildListWindow::updateCount(void)
   m_guildTotals->setText(text.arg(m_membersOn).arg(m_guildShell->members().count()));
 }
 
-#ifndef QMAKEBUILD
-#include "guildlist.moc"
-#endif
 

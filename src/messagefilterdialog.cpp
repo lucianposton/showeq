@@ -474,6 +474,3 @@ void MessageFilterDialog::checkState()
   m_delete->setEnabled(m_currentFilter != 0);
 }
 
-#ifndef QMAKEBUILD
-#include "messagefilterdialog.moc"
-#endif

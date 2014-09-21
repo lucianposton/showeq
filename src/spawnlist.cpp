@@ -1179,7 +1179,4 @@ void SpawnListWindow::savePrefs(void)
   m_spawnList->savePrefs();
 }
 
-#ifndef QMAKEBUILD
-#include "spawnlist.moc"
-#endif
 

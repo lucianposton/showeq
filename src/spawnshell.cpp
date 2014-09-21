@@ -1462,7 +1462,4 @@ void SpawnShell::restoreSpawns(void)
   }
 }
 
-#ifndef QMAKEBUILD
-#include "spawnshell.moc"
-#endif
 
