@@ -1092,19 +1092,20 @@ struct spawnStruct
            struct
            {
 		unsigned pitch:12;
-		signed   animation:10;                    // velocity 		
-		unsigned padding01:10;
-		signed   z:19;                            // z coord (3rd loc value)
-		signed   deltaY:13;                       // change in y
-		unsigned heading:12;                      // heading 
-		signed   deltaHeading:10;                 // change in heading 
-		unsigned padding02:10;
+	 	signed   z:19;                            // z coord (3rd loc value)
+         	unsigned padding01:1;
 		signed   x:19;                            // x coord (1st loc value)	 
-		unsigned padding03:13;
-		signed   y:19;                            // y coord (2nd loc value)
-		signed   deltaX:13;                       // change in x
-		signed   deltaZ:13;                       // change in z
-		unsigned padding04:19;
+	 	unsigned heading:12;                      // heading 
+         	unsigned padding02:1;
+		signed   deltaY:13;                       // change in y
+	 	signed   deltaX:13;                       // change in x
+         	unsigned padding03:6;
+		signed   deltaHeading:10;                 // change in heading 
+	 	signed   deltaZ:13;                       // change in z
+         	unsigned padding04:9;
+		signed   animation:10;                    // velocity
+	 	signed   y:19;                            // y coord (2nd loc value)
+         	unsigned padding05:3;
 	   };
            int32_t posData[5];
          };
@@ -2354,20 +2355,21 @@ struct playerSpawnPosStruct
 /*0000*/ uint16_t spawnId;
 /*0002*/ uint16_t spawnId2;
 /*0004*/ unsigned pitch:12;
-	 signed   animation:10;                    // velocity 		
-         unsigned padding01:10;
-/*0008*/ signed   z:19;                            // z coord (3rd loc value)
-	 signed   deltaY:13;                       // change in y
-/*0012*/ unsigned heading:12;                      // heading 
-	 signed   deltaHeading:10;                 // change in heading 
-         unsigned padding02:10;
-/*0016*/ signed   x:19;                            // x coord (1st loc value)	 
-         unsigned padding03:13;
-/*0020*/ signed   y:19;                            // y coord (2nd loc value)
+	 signed   z:19;                            // z coord (3rd loc value)
+         unsigned padding01:1;
+/*0008*/ signed   x:19;                            // x coord (1st loc value)	 
+	 unsigned heading:12;                      // heading 
+         unsigned padding02:1;
+/*0012*/ signed   deltaY:13;                       // change in y
 	 signed   deltaX:13;                       // change in x
-/*0024*/ signed   deltaZ:13;                       // change in z
-	 unsigned padding04:19;
-/*0028*/
+         unsigned padding03:6;
+/*0016*/ signed   deltaHeading:10;                 // change in heading 
+	 signed   deltaZ:13;                       // change in z
+         unsigned padding04:9;
+/*0020*/ signed   animation:10;                    // velocity
+	 signed   y:19;                            // y coord (2nd loc value)
+         unsigned padding05:3;
+/*0024*/ 
 };
 
 /*
@@ -2382,19 +2384,19 @@ struct playerSelfPosStruct
 /*0002*/ uint16_t spawnId;                       // Player's spawn id
 /*0004*/ uint16_t unknown0001;                   // ***Placeholder
 /*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
- 	 unsigned padding01:20;
-/*0010*/ float deltaY;                           // Change in y
-/*0014*/ signed animation:10;                    // velocity
-	 signed deltaHeading:10;                 // change in heading
-	 unsigned padding02:12;
-/*0018*/ float z;                                // z coord (3rd loc value)
-/*0022*/ float y;                                // y coord (2nd loc value)
-/*0026*/ float deltaZ;                           // Change in z
-/*0030*/ float deltaX;                           // Change in x
-/*0034*/ float x;                                // x coord (1st loc value)
-/*0038*/ unsigned heading:12;                    // Heading
+	 signed animation:10;                    // velocity
+ 	 unsigned padding01:10;
+/*0010*/ float deltaZ;                           // Change in z
+/*0014*/ float z;                                // z coord (3rd loc value)
+/*0018*/ signed deltaHeading:10;                 // change in heading
+	 unsigned padding02:22;
+/*0022*/ float x;                                // x coord (1st loc value)
+/*0026*/ float y;                                // y coord (2nd loc value)
+/*0030*/ unsigned heading:12;                    // Heading
 	 unsigned padding03:20;
-/*0042*/ 
+/*0034*/ float deltaY;                           // Change in y
+/*0038*/ float deltaX;                           // Change in x
+/*0042*/
 };
 
 /*
@@ -2560,23 +2562,22 @@ struct clientLFGStruct
 
 /*
 ** buffStruct
-** Length: 44 Octets
+** Length: 100 Octets
 ** 
 */
 
 struct buffStruct
 {
 /*0000*/ uint32_t spawnid;                       //spawn id
-/*0004*/ uint8_t  unknown0004[4]; 
-/*0008*/ float    unknown0008;
-/*0012*/ uint32_t spellid;                       // spellidbegin
+/*0004*/ uint8_t  unknown0004; 
+/*0005*/ int8_t   level;                         // Level of person who cast buff
+/*0006*/ uint8_t  unknown006[6];
+/*0012*/ uint32_t spellid;                       // spellid
 /*0016*/ uint32_t duration;                      // duration
-/*0024*/ uint8_t  unknown0024[8];
-/*0028*/ uint32_t playerId;                      // Player id who cast the buff
-/*0032*/ uint8_t  unknown0032[4]; 
-/*0036*/ uint32_t spellslot;                     // spellslot
-/*0040*/ uint32_t changetype;                    // 1=buff fading,2=buff duration
-/*0044*/ 
+/*0020*/ uint8_t  unknown020[72];
+/*0092*/ uint32_t spellslot;                     // spellslot
+/*0096*/ uint32_t changetype;                    // 1=buff fading,2=buff duration
+/*0100*/ 
 };
 
 /*

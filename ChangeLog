@@ -1,3 +1,11 @@
+Fransick (8/19/14)
+-----------------
+- Updated version to 5.13.10.28
+- Support EQ patch 9/19/14
+- Updated position structs
+- Updated Opcodes
+- Fixed playerStruct and groupStruct
+
 Fransick (8/20/14)
 -----------------
 - Updated version to 5.13.10.27

@@ -126,7 +126,7 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 
      emit added(m_members[i]->m_name, m_members[i]->m_spawn);
 
-     netStream.skipBytes(7);
+     netStream.skipBytes(12);
   }
 
   // clear the rest
