@@ -19,7 +19,7 @@
 #include "xmlpreferences.h"
 extern class XMLPreferences *pSEQPrefs;
 
-#include "config.h"
+//#include "config.h"
 
 //----------------------------------------------------------------------
 // bogus structure that should die soon
