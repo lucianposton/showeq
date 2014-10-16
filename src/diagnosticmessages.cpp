@@ -18,6 +18,11 @@
 
 #include <qstring.h>
 
+#define DEBUG_LEVEL 0
+#define INFO_LEVEL 0
+#define WARN_LEVEL 0
+#define FATAL_LEVEL 1
+
 //----------------------------------------------------------------------
 // constants
 static const int SEQ_BUFFER_LENGTH = 8196;       // internal buffer length
@@ -43,39 +48,55 @@ static int seqMessage(MessageType type, const char* format, va_list ap)
 // implementations
 int seqDebug(const char* format, ...)
 {
+#if DEBUG_LEVEL
   va_list ap;
   int ret;
   va_start(ap, format);
   ret = seqMessage(MT_Debug, format, ap);
   va_end(ap);
   return ret;
+#else
+  return 0;
+#endif
 }
 
 int seqInfo(const char* format, ...)
 {
+#if INFO_LEVEL
   va_list ap;
   va_start(ap, format);
   int ret = seqMessage(MT_Info, format, ap);
   va_end(ap);
   return ret;
+#else
+  return 0;
+#endif
 }
 
 int seqWarn(const char* format, ...)
 {
+#if WARN_LEVEL
   va_list ap;
   va_start(ap, format);
   int ret = seqMessage(MT_Warning, format, ap);
   va_end(ap);
   return ret;
+#else
+  return 0;
+#endif
 }
 
 void seqFatal(const char* format, ...)
 {
+#if FATAL_LEVEL
   va_list ap;
   va_start(ap, format);
   seqMessage(MT_Warning, format, ap);
   va_end(ap);
   exit (-1);
+#else
+  return 0;
+#endif
 }
 
 
