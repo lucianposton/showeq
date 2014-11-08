@@ -1,4 +1,12 @@
-Fransick (8/19/14)
+Fransick (10/28/14)
+-----------------
+- Updated version to 5.13.10.29
+- Support EQ patch 10/28/14
+- Updated position structs
+- Updated Opcodes
+- Updated races.h and zones.h for TDS launch
+
+Fransick (9/19/14)
 -----------------
 - Updated version to 5.13.10.28
 - Support EQ patch 9/19/14

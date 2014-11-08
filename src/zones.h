@@ -774,7 +774,7 @@
 { "poshadow", "Plane of Shadow" }, // 764
 { "heartoffear", "Heart of Fear: The Threshold" }, // 765
 { "phinteriortree", "Evantil's Abode" }, // 766
-{ NULL, NULL }, // 767
+{ "interiorwalltest", "Wall Wall Wall" }, // 767
 { "heartoffearb", "Heart of Fear: The Rebirth" }, // 768
 { "heartoffearc", "Heart of Fear: The Epicenter" }, // 769
 { "bixiewarfront", "Bixie Warfront" }, // 770
@@ -784,16 +784,16 @@
 { "plhbixieint", "Bixie Hive" }, // 774
 { "towerofrot", "Tower of Rot" }, // 775
 { "arginhiz", "Argin-Hiz" }, // 776
-{ NULL, NULL }, // 777
-{ NULL, NULL }, // 778
-{ NULL, NULL }, // 779
-{ NULL, NULL }, // 780
-{ NULL, NULL }, // 781
-{ NULL, NULL }, // 782
-{ NULL, NULL }, // 783
-{ NULL, NULL }, // 784
-{ NULL, NULL }, // 785
-{ NULL, NULL }, // 786
+{ "exalted", "Exalted Paineel" }, // 777
+{ "arxmentis", "Arx Mentis" }, // 778
+{  "brotherisland", "Brother Island" }, // 779
+{ "kattacastrumb", "Katta Castrum: Deluge" }, // 780
+{ "dredge", "Combine Dredge" }, // 781
+{ "endlesscaverns", "Caverns of Endless Song" }, // 782
+{ "thuliasaur", "Thuliasaur Island" }, // 783
+{ "degmar", "Degmar, the Lost Castle" }, // 784
+{ "tempesttemple", "Tempest Temple" }, // 785
+{ "plhpirateshipint", "Pirate Ship" }, // 786
 { NULL, NULL }, // 787
 { NULL, NULL }, // 788
 { NULL, NULL }, // 789

@@ -788,5 +788,15 @@
     "Skeleton",                   // 779
     "Wolf",                       // 780
     "Worg",                       // 781
+    "Skeleton",                   // 782
+    "Treant",                     // 783
+    "Naga",                       // 784
+    "Lizardman",                  // 785
+    "Cultist",                    // 786
+    "Clockwork Boss",             // 787
+    "Crab",                       // 788
+    "Octopus",                    // 789
+    "Elemental",                  // 790
+    "Avian",                      // 791
     "Interactive Object",         // 2250
 #endif
