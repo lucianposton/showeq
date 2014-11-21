@@ -862,19 +862,20 @@ struct pos
 	/*0002*/ uint16_t spawnId;                       // Player's spawn id
 	/*0004*/ uint16_t unknown0001;                   // ***Placeholder
 	/*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
-		 signed animation:10;                    // velocity
-	 	 unsigned padding01:10;
-	/*0010*/ float y;                                // y coord (2nd loc value)
+	 	 unsigned padding01:20;
+	/*0010*/ float deltaY;                           // Change in y
 	/*0014*/ unsigned heading:12;                    // Heading
 		 unsigned padding02:20;
-	/*0018*/ float deltaY;                           // Change in y
-	/*0022*/ float z;                                // z coord (3rd loc value)
-	/*0026*/ float deltaZ;                           // Change in z
-	/*0030*/ float deltaX;                           // Change in x
-	/*0034*/ float x;                                // x coord (1st loc value)
-	/*0038*/ signed deltaHeading:10;                 // change in heading
+	/*0018*/ float x;                                // x coord (1st loc value)
+	/*0022*/ float y;                                // y coord (2nd loc value)
+	/*0026*/ signed deltaHeading:10;                 // change in heading
 		 unsigned padding03:22;
-	/*0042*/
+	/*0030*/ float deltaX;                           // Change in x
+	/*0034*/ float deltaZ;                           // Change in z
+	/*0038*/ float z;                                // z coord (3rd loc value)
+	/*0042*/ signed animation:10;                    // velocity
+		 unsigned padding04:22;
+	/*0046*/
 };
 #endif
 
@@ -886,7 +887,7 @@ struct pos
             p->deltaX, p->deltaY, p->deltaZ,
             p->heading, p->deltaHeading,
             p->animation, p->pitch,
-            p->padding01, p->padding02, p->padding03 );
+            p->padding01, p->padding02, p->padding03, p->padding04 );
 #endif
 
   setPos(px, py, pz, showeq_params->walkpathrecord, showeq_params->walkpathlength);

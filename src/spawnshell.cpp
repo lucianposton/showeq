@@ -922,20 +922,21 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 	/*0000*/ uint16_t spawnId;
 	/*0002*/ uint16_t spawnId2;
 	/*0004*/ unsigned pitch:12;
-		 signed   z:19;                            // z coord (3rd loc value)
-	         unsigned padding01:1;
-	/*0008*/ signed   deltaHeading:10;                 // change in heading 
-		 signed   deltaZ:13;                       // change in z
-	         unsigned padding02:9;
-	/*0012*/ signed   animation:10;                    // velocity
-		 unsigned heading:12;                      // heading 
-	         unsigned padding03:10;
-	/*0016*/ signed   x:19;                            // x coord (1st loc value)	 
-	         unsigned padding04:13;
-	/*0020*/ signed   y:19;                            // y coord (2nd loc value)
+		 signed   animation:10;                    // velocity
+	         unsigned padding01:10;
+	/*0008*/ signed   deltaZ:13;                       // change in z 
 		 signed   deltaX:13;                       // change in x
-	/*0024*/ signed   deltaY:13;                       // change in y
-	         unsigned padding05:19;
+	         unsigned padding02:6;
+	/*0012*/ signed   deltaHeading:10;                 // change in heading 
+		 signed   deltaY:13;                       // change in y
+	         unsigned padding03:9;
+	/*0016*/ signed   y:19;                            // y coord (2nd loc value)
+	         unsigned padding04:13;
+	/*0020*/ signed   x:19;                            // x coord (1st loc value)	 
+		 unsigned heading:12;                      // heading 
+	         unsigned padding05:1;
+	/*0024*/ signed   z:19;                            // z coord (3rd loc value)
+	         unsigned padding06:13;
 };
 
 #endif
@@ -943,7 +944,7 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
 #if 0
 #pragma pack(0)
     struct pos *p = (struct pos *)data;
-    if (p->spawnId == 0x3a19)
+    if (p->spawnId == 0x4c26)
         printf("[%.2x](%f, %f, %f), dx %f dy %f dz %f\n  head %d dhead %d anim %d pitch %d (%x, %x, %x, %x, %x, %x)\n",
                 p->spawnId, float(p->x)/8.0, float(p->y/8.0), float(p->z)/8.0,
                 float(p->deltaX)/4.0, float(p->deltaY)/4.0,
@@ -951,7 +952,7 @@ void SpawnShell::playerUpdate(const uint8_t* data, size_t len, uint8_t dir)
                 p->heading, p->deltaHeading,
                 p->animation, p->pitch,
                 p->padding01, p->padding02, p->padding03,
-		p->padding04, p->padding05 );
+		p->padding04, p->padding05, p->padding06 );
 #endif
 
     updateSpawn(pupdate->spawnId, x, y, z, dx, dy, dz,
