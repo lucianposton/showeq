@@ -364,13 +364,14 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   // Unknown
   netStream.skipBytes(2);
 
+/*
   // Bandolier
   netStream.skipBytes(996);
 
   // Potion Belt
   netStream.skipBytes(153);
+*/
 
-/*
   int bandolierCount = netStream.readUInt32NC();
   for (int i = 0; i < bandolierCount; i++) {
     name = netStream.readText();
@@ -420,9 +421,9 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     player->profile.potionBelt[i].itemId = netStream.readUInt32NC();
     player->profile.potionBelt[i].icon = netStream.readUInt32NC();
   }
-*/  
+
   // Unknown
-  netStream.skipBytes(72);
+  netStream.skipBytes(84);
 
   player->profile.endurance = netStream.readUInt32NC();
 

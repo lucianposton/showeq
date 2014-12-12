@@ -3,111 +3,111 @@
 <seqopcodes>
 
     <!-- Critical opcodes used directly by ShowEQ -->
-    <opcode id="47de" name="OP_PlayerProfile" updated="11/19/14">
+    <opcode id="7248" name="OP_PlayerProfile" updated="12/11/14">
         <comment>CharProfileCode</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="7e5a" name="OP_ZoneEntry" updated="11/19/14">
+    <opcode id="4270" name="OP_ZoneEntry" updated="12/11/14">
         <comment>ZoneEntryCode</comment>
         <payload dir="client" typename="ClientZoneEntryStruct" sizechecktype="match"/>
     <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="1e3a" name="OP_TimeOfDay" updated="11/19/14">
+    <opcode id="005b" name="OP_TimeOfDay" updated="12/11/14">
         <comment>TimeOfDayCode</comment>
         <payload dir="server" typename="timeOfDayStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0d63" name="OP_NewZone" updated="11/19/14">
+    <opcode id="5fb8" name="OP_NewZone" updated="12/11/14">
         <comment>NewZoneCode</comment>
         <payload dir="server" typename="newZoneStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="2163" name="OP_SpawnDoor" updated="11/19/14">
+    <opcode id="5796" name="OP_SpawnDoor" updated="12/11/14">
         <comment>DoorSpawnsCode</comment>
         <payload dir="server" typename="doorStruct" sizechecktype="modulus"/>
     </opcode>
-    <opcode id="4705" name="OP_GroundSpawn" updated="11/19/14">
+    <opcode id="3114" name="OP_GroundSpawn" updated="12/11/14">
         <comment>MakeDropCode</comment>
         <payload dir="server" typename="makeDropStruct" sizechecktype="none"/>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="03c0" name="OP_SendZonePoints" updated="11/19/14">
+    <opcode id="86e2" name="OP_SendZonePoints" updated="12/11/14">
         <comment>Coords in a zone that will port you to another zone</comment>
         <payload dir="server" typename="zonePointsStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="3daf" name="OP_AAExpUpdate" updated="11/19/14">
+    <opcode id="0347" name="OP_AAExpUpdate" updated="12/11/14">
       <comment>Receiving AA experience. Also when percent to AA changes.</comment>
       <payload dir="server" typename="altExpUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0e43" name="OP_ExpUpdate" updated="11/19/14">
-        <comment>ExpUpdateCode</comment>
+    <opcode id="ffff" name="OP_ExpUpdate" updated="11/19/14">
+        <comment>ExpUpdateCode 233e as of 12/11/14</comment>
         <payload dir="server" typename="expUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="3ea9" name="OP_GuildMOTD" updated="11/19/14">
+    <opcode id="599f" name="OP_GuildMOTD" updated="12/11/14">
         <comment>GuildMOTD</comment>
         <payload dir="server" typename="guildMOTDStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="7ffe" name="OP_ClientUpdate" updated="11/19/14">
+    <opcode id="4796" name="OP_ClientUpdate" updated="12/11/14">
         <comment>Position updates</comment>
         <payload dir="server" typename="playerSpawnPosStruct" sizechecktype="match"/>
         <payload dir="both" typename="playerSelfPosStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="77bc" name="OP_NpcMoveUpdate" updated="11/19/14">
+    <opcode id="50e1" name="OP_NpcMoveUpdate" updated="12/11/14">
         <comment>Position updates</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="18dc" name="OP_MobUpdate" updated="11/19/14">
+    <opcode id="1606" name="OP_MobUpdate" updated="12/11/14">
         <comment>MobUpdateCode</comment>
         <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
     </opcode>
-    <opcode id="6f25" name="OP_DeleteSpawn" updated="11/19/14">
+    <opcode id="6d59" name="OP_DeleteSpawn" updated="12/11/14">
         <comment>DeleteSpawnCode</comment>
         <payload dir="both" typename="deleteSpawnStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6f61" name="OP_RemoveSpawn" updated="11/19/14">
+    <opcode id="0d93" name="OP_RemoveSpawn" updated="12/11/14">
         <comment>Remove spawn from zone</comment>
     <payload dir="both" typename="removeSpawnStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="0355" name="OP_Death" updated="11/19/14">
+    <opcode id="350c" name="OP_Death" updated="12/11/14">
         <comment>old NewCorpseCode</comment>
         <payload dir="server" typename="newCorpseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="3744" name="OP_WearChange" updated="11/19/14">
+    <opcode id="60d5" name="OP_WearChange" updated="12/11/14">
         <comment>SpawnUpdateCode</comment>
         <payload dir="both" typename="SpawnUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="326a" name="OP_SpawnAppearance" updated="11/19/14">
+    <opcode id="1dd2" name="OP_SpawnAppearance" updated="12/11/14">
         <comment>SpawnAppearanceCode</comment>
         <payload dir="both" typename="spawnAppearanceStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="2d75" name="OP_Stamina" updated="11/19/14">
+    <opcode id="7569" name="OP_Stamina" updated="12/11/14">
         <comment>Server updating on hunger/thirst</comment>
         <payload dir="server" typename="staminaStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="674a" name="OP_HPUpdate" updated="11/19/14">
+    <opcode id="7a65" name="OP_HPUpdate" updated="12/11/14">
         <comment>NpcHpUpdateCode Update HP % of a PC or NPC</comment>
         <payload dir="both" typename="hpNpcUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="60fe" name="OP_GuildMemberUpdate" updated="11/19/14">
+    <opcode id="243e" name="OP_GuildMemberUpdate" updated="12/11/14">
         <comment>Info regarding guild members</comment>
         <payload dir="server" typename="GuildMemberUpdate" sizechecktype="match"/>
     </opcode>
-    <opcode id="5c32" name="OP_ClickObject" updated="11/19/14">
+    <opcode id="68ee" name="OP_ClickObject" updated="12/11/14">
         <comment>Items dropped on the ground</comment>
         <payload dir="both" typename="remDropStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="1dae" name="OP_Action" updated="11/19/14">
+    <opcode id="265c" name="OP_Action" updated="12/11/14">
         <comment>Spells cast etc</comment>
         <payload dir="both" typename="actionStruct" sizechecktype="match"/>
         <payload dir="both" typename="actionAltStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6696" name="OP_Action2" updated="11/19/14">
+    <opcode id="3aea" name="OP_Action2" updated="12/11/14">
         <comment>Combat actions i.e. bash, kick etc</comment>
         <payload dir="both" typename="action2Struct" sizechecktype="match"/>
     </opcode>
-    <opcode id="522a" name="OP_Consider" updated="11/19/14">
+    <opcode id="6178" name="OP_Consider" updated="12/11/14">
         <comment>ConsiderCode</comment>
         <payload dir="both" typename="considerStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="1a9e" name="OP_TargetMouse" updated="11/19/14">
+    <opcode id="480d" name="OP_TargetMouse" updated="12/11/14">
         <comment>Targeting a person - old ClientTargetCode</comment>
         <payload dir="both" typename="clientTargetStruct" sizechecktype="match"/>
     </opcode>
@@ -115,136 +115,136 @@
         <comment>Spawns getting renamed after initial NewSpawn</comment>
         <payload dir="server" typename="spawnRenameStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="09e1" name="OP_Illusion" updated="11/19/14">
+    <opcode id="78c4" name="OP_Illusion" updated="12/11/14">
         <comment>Spawn being illusioned (changing forms)</comment>
         <payload dir="both" typename="spawnIllusionStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="12c2" name="OP_Shroud" updated="11/19/14">
+    <opcode id="32aa" name="OP_Shroud" updated="12/11/14">
         <comment>Server putting players into shroud form</comment>
         <payload dir="server" typename="spawnShroudSelf" sizechecktype="none"/>
     </opcode>
-    <opcode id="57cb" name="OP_ZoneChange" updated="11/19/14">
+    <opcode id="0c75" name="OP_ZoneChange" updated="12/11/14">
         <comment>old ZoneChangeCode</comment>
         <payload dir="both" typename="zoneChangeStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="7254" name="OP_GroupInvite" updated="11/19/14">
+    <opcode id="07ac" name="OP_GroupInvite" updated="12/11/14">
         <payload dir="both" typename="groupInviteStruct" sizechecktype="none"/>
         <comment>You invite someone while ungrouped or get invited by someone ungrouped </comment>
     </opcode>
-    <opcode id="645e" name="OP_GroupInvite2" updated="11/19/14">
+    <opcode id="2818" name="OP_GroupInvite2" updated="12/11/14">
         <payload dir="both" typename="groupInviteStruct" sizechecktype="none"/>
         <comment>You're inviting someone and you are grouped or get invited by a group</comment>
     </opcode>
-    <opcode id="7a53" name="OP_GroupCancelInvite" updated="11/19/14">
+    <opcode id="2a51" name="OP_GroupCancelInvite" updated="12/11/14">
         <payload dir="both" typename="groupDeclineStruct" sizechecktype="match"/>
         <comment>Declining to join a group</comment>
     </opcode>
-    <opcode id="5fbd" name="OP_GroupFollow" updated="11/19/14">
+    <opcode id="08c0" name="OP_GroupFollow" updated="12/11/14">
         <payload dir="server" typename="groupFollowStruct" sizechecktype="match"/>
         <comment>You join a group or player joins group</comment>
     </opcode>
-    <opcode id="7eea" name="OP_GroupFollow2" updated="11/19/14">
+    <opcode id="7c32" name="OP_GroupFollow2" updated="12/11/14">
         <payload dir="server" typename="groupFollowStruct" sizechecktype="match"/>
         <comment>Player joins your group</comment>
     </opcode>
-    <opcode id="0be5" name="OP_GroupUpdate" updated="11/19/14">
+    <opcode id="4753" name="OP_GroupUpdate" updated="12/11/14">
         <comment>Group updates</comment>
         <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="0deb" name="OP_GroupDisband" updated="11/19/14">
+    <opcode id="640b" name="OP_GroupDisband" updated="12/11/14">
         <comment>You disband from group</comment>
         <payload dir="server" typename="groupDisbandStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0098" name="OP_GroupDisband2" updated="11/19/14">
+    <opcode id="27af" name="OP_GroupDisband2" updated="12/11/14">
         <comment>Other disbands from group</comment>
         <payload dir="server" typename="groupDisbandStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="7700" name="OP_GroupLeader" updated="11/19/14">
+    <opcode id="42f0" name="OP_GroupLeader" updated="12/11/14">
         <comment>Group leader change</comment>
         <payload dir="server" typename="groupLeaderChangeStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="73ac" name="OP_Buff" updated="11/19/14">
+    <opcode id="0f13" name="OP_Buff" updated="12/11/14">
         <comment>old BuffDropCode</comment>
         <payload dir="both" typename="buffStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="1c64" name="OP_BuffFadeMsg" updated="11/19/14">
+    <opcode id="1ae5" name="OP_BuffFadeMsg" updated="12/11/14">
         <comment>SpellFadeCode</comment>
         <payload dir="both" typename="spellFadedStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="3818" name="OP_BeginCast" updated="11/19/14">
+    <opcode id="7ea7" name="OP_BeginCast" updated="12/11/14">
         <comment>BeginCastCode</comment>
         <payload dir="both" typename="beginCastStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="1a72" name="OP_CastSpell" updated="11/19/14">
+    <opcode id="327c" name="OP_CastSpell" updated="12/11/14">
         <comment>StartCastCode</comment>
         <payload dir="both" typename="startCastStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="2640" name="OP_SwapSpell" updated="11/19/14">
+    <opcode id="412c" name="OP_SwapSpell" updated="12/11/14">
         <comment>TradeSpellBookSlotsCode</comment>
         <payload dir="both" typename="tradeSpellBookSlotsStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="5067" name="OP_MemorizeSpell" updated="11/19/14">
+    <opcode id="1498" name="OP_MemorizeSpell" updated="12/11/14">
         <comment>MemSpellCode</comment>
         <payload dir="both" typename="memSpellStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="7c3b" name="OP_InspectAnswer" updated="11/19/14">
+    <opcode id="1209" name="OP_InspectAnswer" updated="12/11/14">
         <comment>InspectDataCode</comment>
         <payload dir="both" typename="inspectDataStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0392" name="OP_Emote" updated="11/19/14">
+    <opcode id="26e8" name="OP_Emote" updated="12/11/14">
         <comment>EmoteTextCode</comment>
         <payload dir="both" typename="emoteTextStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="3336" name="OP_SimpleMessage" updated="11/19/14">
+    <opcode id="0a25" name="OP_SimpleMessage" updated="12/11/14">
         <comment>SimpleMessageCode</comment>
         <payload dir="server" typename="simpleMessageStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="50df" name="OP_FormattedMessage" updated="11/19/14">
+    <opcode id="06fd" name="OP_FormattedMessage" updated="12/11/14">
         <comment>FormattedMessageCode i.e. pet dismissed etc</comment>
         <payload dir="server" typename="formattedMessageStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="34e5" name="OP_CommonMessage" updated="11/19/14">
+    <opcode id="713f" name="OP_CommonMessage" updated="12/11/14">
         <comment>ChannelMessageCode i.e. /tell /ooc /shout etc</comment>
         <payload dir="both" typename="channelMessageStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="06ea" name="OP_SpecialMesg" updated="11/19/14">
+    <opcode id="0748" name="OP_SpecialMesg" updated="12/11/14">
         <comment>Communicate textual info to client including hail responses etc</comment>
         <payload dir="server" typename="specialMessageStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="400f" name="OP_RandomReq" updated="11/19/14">
+    <opcode id="1e02" name="OP_RandomReq" updated="12/11/14">
         <comment>RandomReqCode</comment>
         <payload dir="client" typename="randomReqStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="2b15" name="OP_RandomReply" updated="11/19/14">
+    <opcode id="1198" name="OP_RandomReply" updated="12/11/14">
         <comment>RandomCode</comment>
         <payload dir="server" typename="randomStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="4422" name="OP_ConsentResponse" updated="11/19/14">
+    <opcode id="5abc" name="OP_ConsentResponse" updated="12/11/14">
         <comment>Server replying with consent information after /consent</comment>
         <payload dir="server" typename="consentResponseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="25af" name="OP_DenyResponse" updated="11/19/14">
+    <opcode id="57dd" name="OP_DenyResponse" updated="12/11/14">
         <comment>Server replying with deny information after /deny</comment>
         <payload dir="server" typename="consentResponseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="16b9" name="OP_ManaChange" updated="11/19/14">
+    <opcode id="65d8" name="OP_ManaChange" updated="12/11/14">
         <comment>Mana change. Bards send this up with no size. Casters receive this for mana updates.</comment>
         <payload dir="server" typename="manaDecrementStruct" sizechecktype="match"/>
         <payload dir="client" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="4b54" name="OP_BazaarSearchRequest" updated="11/19/14">
+    <opcode id="1047" name="OP_BazaarSearchRequest" updated="12/11/14">
         <comment>Bazaar search request </comment>
         <payload dir="client" typename="bazaarSearchQueryStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="79b8" name="OP_BazaarSearchResponse" updated="11/19/14">
+    <opcode id="54cd" name="OP_BazaarSearchResponse" updated="12/11/14">
          <comment>Bazaar search Response - Struct incorrect </comment>
          <payload dir="server" typename="bazaarSearchResponseStruct" sizechecktype="modulus"/>
     </opcode>
-    <opcode id="4b21" name="OP_MoneyOnCorpse" updated="11/19/14">
+    <opcode id="54b5" name="OP_MoneyOnCorpse" updated="12/11/14">
         <comment>MoneyOnCorpseCode</comment>
         <payload dir="server" typename="moneyOnCorpseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="316f" name="OP_SkillUpdate" updated="11/19/14">
+    <opcode id="2f89" name="OP_SkillUpdate" updated="12/11/14">
         <comment>Skill up code</comment>
         <payload dir="server" typename="skillIncStruct" sizechecktype="match"/>
     </opcode>
@@ -252,19 +252,19 @@
         <comment>LevelUpUpdateCode</comment>
         <payload dir="server" typename="levelUpUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="2345" name="OP_DzSwitchInfo" updated="11/19/14">
+    <opcode id="61ce" name="OP_DzSwitchInfo" updated="12/11/14">
         <comment>Expedition compass etc</comment>
         <payload dir="server" typename="dzSwitchInfo" sizechecktype="none"/>
     </opcode>
-    <opcode id="3102" name="OP_DzInfo" updated="11/19/14">
+    <opcode id="48df" name="OP_DzInfo" updated="12/11/14">
         <comment>Expedition Information</comment>
         <payload dir="server" typename="dzInfo" sizechecktype="match"/>
     </opcode>
-    <opcode id="4232" name="OP_EnvDamage" updated="11/19/14">
+    <opcode id="1a05" name="OP_EnvDamage" updated="12/11/14">
         <comment>Environmental Damage</comment>
         <payload dir="client" typename="environmentDamageStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="786d" name="OP_SetRunMode" updated="11/19/14">
+    <opcode id="4508" name="OP_SetRunMode" updated="12/11/14">
         <comment>old cRunToggleCode</comment>
         <payload dir="client" typename="cRunToggleStruct" sizechecktype="match"/>
     </opcode>
@@ -307,7 +307,7 @@
         <comment>List of group members -  Variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="6f70" name="OP_GuildMemberList" updated="11/19/14">
+    <opcode id="7f16" name="OP_GuildMemberList" updated="12/11/14">
         <comment>List of guild members - Variable length</comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
@@ -343,19 +343,19 @@
         <comment>Contents of claims window. /claim then refresh to capture packet - Guessing variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="3a10" name="OP_VoiceChat" updated="11/19/14">
+    <opcode id="0701" name="OP_VoiceChat" updated="12/11/14">
         <comment>Voice chat server info - Variable length (Data sent when joining group,raid etc)</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="7178" name="OP_PollQuestions" updated="11/19/14">
+    <opcode id="7624" name="OP_PollQuestions" updated="12/11/14">
         <comment>SOE in-game player poll questions - Variable length</comment>
         <payload dir="both" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="3e36" name="OP_PollResponses" updated="11/19/14">
+    <opcode id="09f6" name="OP_PollResponses" updated="12/11/14">
         <comment>Poll response choices - Variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="1617" name="OP_ShroudProgression" updated="11/19/14">
+    <opcode id="35ba" name="OP_ShroudProgression" updated="12/11/14">
         <comment>Unlocked shrouds - 293 bytes</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
@@ -363,15 +363,15 @@
         <comment>Shroud templates to choose from on shroud NPC - 18983 bytes</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="0bad" name="OP_Fellowship" updated="11/19/14">
+    <opcode id="3040" name="OP_Fellowship" updated="12/11/14">
         <comment>Fellowship information - 2564 bytes</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="c824" name="OP_ExpandedGuildInfo" updated="11/19/14">
+    <opcode id="101c" name="OP_ExpandedGuildInfo" updated="12/11/14">
         <comment>Guild ranks and other misc guild data - Variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="3d84" name="OP_GuildBank" updated="11/19/14">
+    <opcode id="5e21" name="OP_GuildBank" updated="12/11/14">
         <comment>Guild bank contents - Variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
@@ -395,23 +395,23 @@
         <comment>Tradeskill combine using old tradeskill window - 24 Bytes</comment>
         <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="3964" name="OP_ItemPlayerPacket" updated="10/28/14">
+    <opcode id="4815" name="OP_ItemPlayerPacket" updated="12/11/14">
         <comment>Inventory/bank items coming over during zone - Variable length</comment>
         <payload dir="both" typename="uint8_t" sizechecktype="none"/>
     </opcode>
-    <opcode id="1698" name="OP_TaskDescription" updated="11/19/14">
+    <opcode id="632b" name="OP_TaskDescription" updated="12/11/14">
         <comment>Task descriptions coming down for task window - Variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="0c4c" name="OP_TaskActivity" updated="11/19/14">
+    <opcode id="319b" name="OP_TaskActivity" updated="12/11/14">
         <comment>Task activity descriptions coming down for task window - Variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="1b95" name="OP_CompletedTasks" updated="11/19/14">
+    <opcode id="2d3e" name="OP_CompletedTasks" updated="12/11/14">
         <comment>Task history for task window - Variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="1dba" name="OP_CustomTitles" updated="11/19/14">
+    <opcode id="4eb5" name="OP_CustomTitles" updated="12/11/14">
         <comment>List of available titles - 1520 bytes</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
@@ -543,7 +543,7 @@
         <comment>LFG/LFP server response - Variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="4797" name="OP_MercenaryList" updated="11/19/14">
+    <opcode id="2ec4" name="OP_MercenaryList" updated="12/11/14">
         <comment>Listing of hired mercenaries - 648 bytes
         <payload dir="server" typename="unknown" sizechecktype="none"/></comment>
     </opcode>
@@ -563,11 +563,11 @@
         <comment>Client clicks off buff - 8 bytes</comment>
         <payload dir="client" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="1379" name="OP_HouseAddress" updated="11/19/14">
+    <opcode id="5768" name="OP_HouseAddress" updated="12/11/14">
         <comment>House and guildhall address information - Variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="37cd" name="OP_HouseContents" updated="10/28/14">
+    <opcode id="32a3" name="OP_HouseContents" updated="12/11/14">
         <comment>Server sending house information and contents - variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
@@ -583,11 +583,11 @@
         <comment>Server sending pending rewards - variable length</comment>
         <payload dir="both" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="5061" name="OP_FTPNags" updated="11/19/14">
+    <opcode id="3141" name="OP_FTPNags" updated="12/11/14">
         <comment>Free to play nags and other data - Variable length</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
-    <opcode id="1187" name="OP_Find" updated="11/19/14">
+    <opcode id="7a7e" name="OP_Find" updated="12/11/14">
         <comment>Find window data - 112 bytes</comment>
         <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
