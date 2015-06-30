@@ -236,7 +236,7 @@ void PacketLog::logData(const EQUDPIPPacketFormat& packet)
 
   if (! packet.hasCRC() || 
     packet.crc() == (calcedCRC = ::calcCRC16(
-      packet.rawPacket(), packet.rawPacketLength()-2, 
+      packet.rawPacket(), (packet.rawPacketLength() >= 2 ? packet.rawPacketLength()-2 : 0),
         packet.getSessionKey())))
   {
     m_out << "[OPCode: 0x" << QString::number(packet.getNetOpCode(), 16) << "]";
