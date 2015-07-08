@@ -149,7 +149,11 @@ void EQProtocolPacket::init()
     m_bAllocedPayload = false;
 
     // Total - net op - crc
-    m_rawPayloadLength = m_length - 2 - (hasCRC() ? 2 : 0);
+    if (m_length < 2 + (hasCRC() ? 2 : 0)) {
+        m_rawPayloadLength = 0;
+    } else {
+        m_rawPayloadLength = m_length - 2 - (hasCRC() ? 2 : 0);
+    }
 
     // Decoded since no flags
     m_payload = m_rawPayload;
@@ -178,7 +182,11 @@ void EQProtocolPacket::init()
     // Either way, let's start the payload at byte 4 for now. Decode may
     // change this. Length is total - netop - flags - crc.
     m_rawPayload = &m_packet[3];
-    m_rawPayloadLength = m_length - 2 - 1 - (hasCRC() ? 2 : 0);
+    if (m_length < 2 + 1 + (hasCRC() ? 2 : 0)) {
+        m_rawPayloadLength = 0;
+    } else {
+        m_rawPayloadLength = m_length - 2 - 1 - (hasCRC() ? 2 : 0);
+    }
     m_bAllocedPayload = false;
 
     if (! (m_flags & PROTOCOL_FLAG_COMPRESSED))
