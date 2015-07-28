@@ -297,6 +297,9 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     netStream.skipBytes(4);
   }
 
+  // Unknown
+  netStream.skipBytes (4);
+
   // Something (20 floats)
   int sCount7 = netStream.readUInt32NC();
   for (int i = 0; i < sCount7; i++) {

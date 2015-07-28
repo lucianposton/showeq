@@ -561,7 +561,7 @@ struct requestZoneChangeStruct
 
 /*
 ** Client Zone Entry struct
-** Length: 76 Octets
+** Length: 80 Octets
 ** OpCode: ZoneEntryCode (when direction == client)
 */
 struct ClientZoneEntryStruct
@@ -569,8 +569,8 @@ struct ClientZoneEntryStruct
 /*0000*/ uint32_t unknown0000;                   // ***Placeholder
 /*0004*/ char     name[32];                      // Player firstname
 /*0036*/ uint8_t  unknown0036[28];               // ***Placeholder
-/*0064*/ uint32_t unknown0064[3];                // unknown
-/*0076*/
+/*0064*/ uint32_t unknown0064[7];                // unknown
+/*0080*/
 };
 
 
@@ -1094,19 +1094,26 @@ struct spawnStruct
            {
 
 		unsigned pitch:12;
-		signed   x:19;                            // x coord (1st loc value)	 
-		unsigned padding01:1;
-		signed   deltaZ:13;                       // change in z 
-		signed   z:19;                            // z coord (3rd loc value)
-		signed   y:19;                            // y coord (2nd loc value)
-		signed   animation:10;                    // velocity
-		unsigned padding02:3;		 
 		signed   deltaX:13;                       // change in x
+		unsigned pad0:7;
+
+		signed   animation:10;                    // velocity
+		signed   deltaZ:13;                       // change in z 
+		unsigned pad1:9;		 
+
+		signed   y:19;                            // y coord (2nd loc value)
+		unsigned pad2:13;		 
+
+		signed   x:19;                            // x coord (1st loc value)	 
+		unsigned pad3:13;		 
+
+		signed   z:19;                            // z coord (3rd loc value)
 		signed   deltaY:13;                       // change in y
-		unsigned padding03:6;		 
-		signed   deltaHeading:10;                 // change in heading 
+
 		unsigned heading:12;                      // heading 
-		unsigned padding04:10;		 
+		signed   deltaHeading:10;                 // change in heading 
+		unsigned pad5:10;		 
+
 
 	   };
            int32_t posData[6];
@@ -1795,7 +1802,7 @@ struct groupInviteStruct
 
 /*
 ** Grouping Invite Answer - Decline
-** Length 152 Octets
+** Length 156 Octets
 ** Opcode GroupDeclineCode
 */
 
@@ -1803,10 +1810,10 @@ struct groupDeclineStruct
 {
 /*0000*/ char     yourname[64];                  // Player Name
 /*0064*/ char     membername[64];                // Invited Member Name
-/*0128*/ uint8_t  unknown0128[20];               // ***Placeholder
+/*0128*/ uint8_t  unknown0128[24];               // ***Placeholder
 /*0148*/ uint8_t  reason;                        // Already in Group = 1, Declined Invite = 3
 /*0149*/ uint8_t  unknown0141[3];                // ***Placeholder
-/*0152*/
+/*0156*/
 };
 
 /*
@@ -2348,7 +2355,7 @@ struct randomStruct
 
 /*
 ** Player Position Update
-** Length: 24 Octets
+** Length: 28 Octets
 ** OpCode: PlayerPosCode
 */
 
@@ -2356,21 +2363,28 @@ struct playerSpawnPosStruct
 {
 /*0000*/ uint16_t spawnId;
 /*0002*/ uint16_t spawnId2;
-/*0004*/ unsigned pitch:12;
-	 signed   x:19;                            // x coord (1st loc value)	 
-         unsigned padding01:1;
-/*0008*/ signed   deltaZ:13;                       // change in z 
-         signed   z:19;                            // z coord (3rd loc value)
-/*0012*/ signed   y:19;                            // y coord (2nd loc value)
+/*0004*/
+	 unsigned pitch:12;
+	 signed   deltaX:13;                       // change in x
+         unsigned pad0:7;
+/*0008*/
 	 signed   animation:10;                    // velocity
-         unsigned padding02:3;		 
-/*0016*/ signed   deltaX:13;                       // change in x
+	 signed   deltaZ:13;                       // change in z 
+         unsigned pad1:9;		 
+/*0012*/
+	 signed   y:19;                            // y coord (2nd loc value)
+         unsigned pad2:13;		 
+/*0016*/
+	 signed   x:19;                            // x coord (1st loc value)	 
+         unsigned pad3:13;		 
+/*0020*/
+         signed   z:19;                            // z coord (3rd loc value)
 	 signed   deltaY:13;                       // change in y
-         unsigned padding03:6;		 
-/*0020*/ signed   deltaHeading:10;                 // change in heading 
-	 unsigned heading:12;                      // heading 
-         unsigned padding04:10;		 
 /*0024*/ 
+	 unsigned heading:12;                      // heading 
+	 signed   deltaHeading:10;                 // change in heading 
+         unsigned pad5:10;		 
+/*0028*/ 
 };
 
 /*
@@ -2384,19 +2398,28 @@ struct playerSelfPosStruct
 /*0000*/ uint16_t unknown0000;                   // ***Placeholder (update time counter?)
 /*0002*/ uint16_t spawnId;                       // Player's spawn id
 /*0004*/ uint16_t unknown0001;                   // ***Placeholder
-/*0006*/ unsigned pitch:12;                      // pitch (up/down heading)
- 	 unsigned padding01:20;
-/*0010*/ float deltaZ;                           // Change in z
-/*0014*/ unsigned heading:12;                    // Heading
+/*0006*/
+	 unsigned pitch:12;                      // pitch (up/down heading)
+ 	 unsigned pad0:20;
+/*0010*/
+	 float x;                                // x coord (1st loc value)
+/*0014*/
+	 float deltaY;                           // Change in y
+/*0018*/
+	 unsigned heading:12;                    // Heading
+	 unsigned pad3:20;
+/*0022*/
+	 float deltaX;                           // Change in x
+/*0026*/
+	 float deltaZ;                           // Change in z
+/*0030*/
 	 signed animation:10;                    // velocity
-	 unsigned padding02:10;
-/*0018*/ float deltaX;                           // Change in x
-/*0022*/ float deltaY;                           // Change in y
-/*0026*/ float x;                                // x coord (1st loc value)
-/*0030*/ signed deltaHeading:10;                 // change in heading
-	 unsigned padding03:22;
-/*0034*/ float y;                                // y coord (2nd loc value)
-/*0038*/ float z;                                // z coord (3rd loc value)
+	 signed deltaHeading:10;                 // change in heading
+ 	 unsigned pad6:12;
+/*0034*/
+	 float z;                                // z coord (3rd loc value)
+/*0038*/
+	 float y;                                // y coord (2nd loc value)
 /*0042*/ 
 };
 
