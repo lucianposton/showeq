@@ -40,6 +40,7 @@
     </opcode>
     <opcode id="4dd0" name="OP_SendLoginInfo" updated="10/27/05">
         <comment>Client starting world session by asking for login information</comment>
+        <payload dir="client" typename="LoginInfo_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="509d" name="OP_WorldComplete" updated="10/27/05">
         <comment>Client telling world server it is done. World replies by disconnecting.</comment>

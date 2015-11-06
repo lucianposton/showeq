@@ -221,6 +221,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 						  false),
 			   pSEQPrefs->getPrefBool("SessionTracking", 
 						  section, false),
+			   pSEQPrefs->getPrefBool("PacketDecryption", 
+						  section, false),
 			   pSEQPrefs->getPrefBool("Record", vpsection, false),
 			   pSEQPrefs->getPrefInt("Playback", vpsection,
 						  PLAYBACK_OFF),
@@ -1108,6 +1110,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    subSubMenu->insertItem(arqSeqGiveUpSpinBox);
    subMenu->insertItem("Arq Seq Give Up", 
 			 subSubMenu);
+   x = subMenu->insertItem("Enable Packet Decryption",
+           this, SLOT(toggle_net_packet_decryption(int)));
+   subMenu->setItemChecked(x, m_packet->packet_decryption());
    m_netMenu->insertItem("Advanced", subMenu);
 
    // Character Menu 
@@ -1752,6 +1757,10 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	     m_filterMgr, SLOT(loadZone(const QString&)));
    }
 
+   m_packet->connect2("OP_SendLoginInfo", SP_World, DIR_Client,
+           "LoginInfo_Struct", SZC_Match,
+           this, SLOT(extractDecryptionKey(const uint8_t*)));
+
    if (m_guildmgr)
    {
      m_packet->connect2("OP_GuildList", SP_World, DIR_Server, 
@@ -1784,7 +1793,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_FormattedMessage", SP_Zone, DIR_Server,
 			"formattedMessageStruct", SZC_None,
 			m_messageShell,
-			SLOT(formattedMessage(const uint8_t*, size_t, uint8_t)));
+			SLOT(formattedMessage(const uint8_t*, size_t, uint8_t))); 
      m_packet->connect2("OP_SimpleMessage", SP_Zone, DIR_Server,
 			"simpleMessageStruct", SZC_Match,
 			m_messageShell,
@@ -4294,7 +4303,7 @@ void EQInterface::setExp(uint32_t totalExp, uint32_t totalTick,
 {
   if (m_stsbarExp)
   {
-    char expperc[5];
+    char expperc[20];
     sprintf(expperc, "%.2f", totalTick*100.0/330.0);
 
     m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")
@@ -4904,6 +4913,15 @@ void EQInterface::toggle_net_session_tracking()
   m_packet->session_tracking(enable);
   m_netMenu->setItemChecked(m_id_net_sessiontrack, enable);
   pSEQPrefs->setPrefBool("SessionTracking", "Network", enable);
+}
+
+void EQInterface::toggle_net_packet_decryption(int id)
+{
+  const bool enable = !m_packet->packet_decryption();
+
+  m_packet->packet_decryption(enable);
+  menuBar()->setItemChecked(id, enable);
+  pSEQPrefs->setPrefBool("PacketDecryption", "Network", enable);
 }
 
 void EQInterface::toggleAutoDetectPlayerSettings (int id)
@@ -6102,6 +6120,29 @@ void EQInterface::setDockEnabled(QDockWindow* dw, bool enable)
   QMainWindow::setDockEnabled(dw, DockBottom, enable);
   QMainWindow::setDockEnabled(dw, DockLeft, enable);
   QMainWindow::setDockEnabled(dw, DockRight, enable);
+}
+
+void EQInterface::extractDecryptionKey(const uint8_t* data)
+{
+    if (!m_packet->packet_decryption())
+    {
+        m_packet->setDecryptionKey(NULL);
+        return;
+    }
+
+    const LoginInfo_Struct* clis = (const LoginInfo_Struct*)data;
+    const int key_strlen = strnlen(clis->key, DECRYPTION_KEY_SIZE);
+    if (key_strlen == DECRYPTION_KEY_SIZE - 1)
+    {
+        seqDebug("Using decryption key: %s", clis->key);
+        m_packet->setDecryptionKey(clis->key);
+    }
+    else
+    {
+        seqWarn("Decryption disabled because key had unexpected length: %d",
+                key_strlen);
+        m_packet->setDecryptionKey(NULL);
+    }
 }
 
 #include "interface.moc"

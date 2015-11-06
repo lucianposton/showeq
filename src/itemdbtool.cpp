@@ -445,8 +445,6 @@ void displayVersion(EQItemDB* itemDB)
   printf ("\t\tUsing Qt version: %s\n", QT_VERSION_STR);
 #endif
 #ifdef __linux__
-  printf ("\t\tUsing headers from linux version: %s\n",
-	  UTS_RELEASE);
 #endif
   printf ("\tUsing GDBM: %s\n", GDBMConvenience::Version());
 #ifdef USE_DB3

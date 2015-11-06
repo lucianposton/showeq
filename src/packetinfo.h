@@ -97,6 +97,8 @@ class EQPacketPayload
   size_t typeSize() const;
   EQSizeCheckType sizeCheckType() const;
   void setSizeCheckType(EQSizeCheckType sizeCheckType);
+  bool decrypt() const;
+  void setDecrypt(bool);
   uint8_t dir() const;
   void setDir(uint8_t dir);
 
@@ -106,6 +108,7 @@ class EQPacketPayload
   QCString m_typeName;
   size_t m_typeSize;
   EQSizeCheckType m_sizeCheckType;
+  bool m_decrypt;
   uint8_t m_dir;
 };
 
@@ -131,6 +134,16 @@ inline EQSizeCheckType EQPacketPayload::sizeCheckType() const
 inline void EQPacketPayload::setSizeCheckType(EQSizeCheckType sizeCheckType)
 {
   m_sizeCheckType = sizeCheckType;
+}
+
+inline bool EQPacketPayload::decrypt() const
+{
+  return m_decrypt;
+}
+
+inline void EQPacketPayload::setDecrypt(bool value)
+{
+  m_decrypt = value;
 }
 
 inline uint8_t EQPacketPayload::dir() const

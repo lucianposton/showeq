@@ -59,6 +59,7 @@ class EQPacket : public QObject
 	    QString m_mac_address,
 	    bool m_realtime,
 	    bool m_session_tracking,
+	    bool m_packet_decryption,
 	    bool m_recordPackets,
 	    int m_playbackPackets,
 	    int8_t m_playbackSpeed, 
@@ -83,10 +84,12 @@ class EQPacket : public QObject
    uint16_t serverSeqExp(int);
    uint16_t arqSeqGiveUp(void);
    bool session_tracking(void);
+   bool packet_decryption(void);
    bool realtime(void);
    bool connect2(const QString& opcodeName, EQStreamPairs sp,
 		 uint8_t dir, const char* payload,  EQSizeCheckType szt, 
 		 const QObject* receiver, const char* member);
+   void setDecryptionKey(const char* key);
 
  public slots:
    void processPackets(void);
@@ -99,6 +102,7 @@ class EQPacket : public QObject
    void monitorNextClient();   
    void monitorDevice(const QString& dev);   
    void session_tracking(bool enable);
+   void packet_decryption(bool enable);
    void setArqSeqGiveUp(uint16_t giveUp);
    void setRealtime(bool val);
    void dispatchSessionKey(uint32_t sessionId, EQStreamID streamid,
@@ -159,6 +163,7 @@ class EQPacket : public QObject
    QString m_mac;
    bool m_realtime;
    bool m_session_tracking;
+   bool m_packet_decryption;
    bool m_recordPackets;
    int m_playbackPackets;
    int8_t m_playbackSpeed; // Should be signed since -1 is pause
@@ -204,6 +209,11 @@ inline uint16_t EQPacket::arqSeqGiveUp(void)
 inline bool EQPacket::session_tracking(void)
 {
   return m_session_tracking;
+}
+
+inline bool EQPacket::packet_decryption(void)
+{
+  return m_packet_decryption;
 }
 
 inline int EQPacket::playbackPackets(void)

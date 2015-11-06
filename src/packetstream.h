@@ -17,6 +17,7 @@
 #include "packetcommon.h"
 #include "packetfragment.h"
 #include "packetinfo.h"
+#include "everquest.h"
 
 #if (defined(__FreeBSD__) || defined(__linux__)) && defined(__GLIBC__) && (__GLIBC__ == 2) && (__GLIBC_MINOR__ < 2)
 typedef uint16_t in_port_t;
@@ -64,6 +65,7 @@ class EQPacketStream : public QObject
   void reset();
   uint8_t sessionTracking();
   void setSessionTracking(uint8_t);
+  void setPacketDecryption(bool);
   uint16_t arqSeqGiveUp();
   void setArqSeqGiveUp(uint16_t);
   int packetCount(void);
@@ -79,6 +81,7 @@ class EQPacketStream : public QObject
   void close(uint32_t sessionId, EQStreamID streamid, uint8_t sessionTracking);
   uint16_t calculateCRC(EQProtocolPacket& packet);
   uint32_t getSessionKey() const { return m_sessionKey; }
+  void setDecryptionKey(const char* key);
   
  public slots:
   void handlePacket(EQUDPIPPacketFormat& pf);
@@ -114,9 +117,8 @@ class EQPacketStream : public QObject
   void setCache(uint16_t serverArqSeq, EQProtocolPacket& packet);
   void processCache();
   void processPacket(EQProtocolPacket& packet, bool subpacket);
-  void dispatchPacket(const uint8_t* data, size_t len,
+  void dispatchPacket(uint8_t* data, size_t len,
 		      uint16_t opCode, const EQPacketOPCode* opcodeEntry);
-
 
   EQPacketOPCodeDB& m_opcodeDB;
   QPtrDict<EQPacketDispatch> m_dispatchers;
@@ -124,6 +126,7 @@ class EQPacketStream : public QObject
   uint8_t m_dir;
   int m_packetCount;
   uint8_t m_session_tracking_enabled;
+  bool m_packet_decryption_enabled;
 
   // ARQ cache handling
   EQPacketMap m_cache;
@@ -141,9 +144,9 @@ class EQPacketStream : public QObject
   in_port_t m_sessionClientPort;
   uint32_t m_maxLength;
 
-  // encryption
-  int64_t m_decodeKey;
-  bool m_validKey;
+ private:
+  char m_decryptionKey[DECRYPTION_KEY_SIZE];
+  bool m_hasValidDecryptionKey;
 };
 
 inline uint8_t EQPacketStream::sessionTracking()
@@ -154,6 +157,11 @@ inline uint8_t EQPacketStream::sessionTracking()
 inline void EQPacketStream::setSessionTracking(uint8_t val)
 {
   m_session_tracking_enabled = val;
+}
+
+inline void EQPacketStream::setPacketDecryption(bool val)
+{
+  m_packet_decryption_enabled = val;
 }
 
 inline uint16_t EQPacketStream::arqSeqGiveUp()

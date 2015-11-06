@@ -167,6 +167,7 @@ bool EQPacketDispatch::disconnect(const QObject* receiver, const char* member)
 EQPacketPayload::EQPacketPayload()
   : m_typeSize(0),
     m_sizeCheckType(SZC_None),
+    m_decrypt(false),
     m_dir(0x00)
 {
 }
@@ -695,6 +696,23 @@ bool OPCodeXmlContentHandler::startElement(const QString&, const QString&,
 	m_currentPayload->setSizeCheckType(SZC_Match);
       else if (value == "modulus")
 	m_currentPayload->setSizeCheckType(SZC_Modulus);
+    }
+
+    index = attr.index("decrypt");
+
+    if (index != -1)
+    {
+        QString value = attr.value(index);
+
+        if (value.isEmpty() || value == "false" || value == "0")
+            m_currentPayload->setDecrypt(false);
+        else if (value == "true" || value == "1")
+            m_currentPayload->setDecrypt(true);
+        else
+            seqWarn("OPCodeXmlContentHandler::startElement(): Unknown decrypt"
+                    " value (%s) in opcode payload for opcode %#04x",
+                    (const char*)value,
+                    m_currentOPCode->opcode());
     }
 
     return true;

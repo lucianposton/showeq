@@ -764,8 +764,8 @@ void displayVersion(void)
   printf ("\t\tUsing Qt version: %s\n", QT_VERSION_STR);
 #endif
 #ifdef __linux__
-  printf ("\t\tUsing headers from linux version: %s\n",
-	  UTS_RELEASE);
+  //printf ("\t\tUsing headers from linux version: %s\n",
+//	  UTS_RELEASE);
 #endif
   printf ("\t\tUsing EQItemDB: %s\n", EQItemDB::Version());
   printf ("\tUsing GDBM: %s\n", GDBMConvenience::Version());

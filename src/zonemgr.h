@@ -66,7 +66,6 @@ class ZoneMgr : public QObject
   void zoneChanged(const QString& shortZoneName);
   void zoneChanged(const zoneChangeStruct*, size_t, uint8_t);
   void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
-  
  private:
   QString m_longZoneName;
   QString m_shortZoneName;

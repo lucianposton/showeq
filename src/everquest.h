@@ -113,6 +113,7 @@
 #define MAX_POTIONS_IN_BELT             4
 #define MAX_TRIBUTES                    5
 #define MAX_DISCIPLINES                 50
+#define DECRYPTION_KEY_SIZE             11
 
 //Item Flags
 #define ITEM_NORMAL                     0x0000
@@ -2239,6 +2240,14 @@ struct worldMOTDStruct
 {
   /*002*/ char    message[0];
   /*???*/ uint8_t unknownXXX[3];
+};
+
+struct LoginInfo_Struct
+{
+/*000*/ char    uid[7];
+/*007*/ char    key[DECRYPTION_KEY_SIZE];
+/*018*/ uint8_t unknownXYZ[446];
+/*464*/
 };
 
 // Restore structure packing to default

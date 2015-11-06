@@ -433,7 +433,7 @@
     <opcode id="7213" name="OP_ZoneEntry" updated="10/27/05">
         <comment>old ZoneEntryCode</comment>
         <payload dir="client" typename="ClientZoneEntryStruct" sizechecktype="match"/>
-        <payload dir="server" typename="ServerZoneEntryStruct" sizechecktype="match"/>
+        <payload dir="server" typename="ServerZoneEntryStruct" sizechecktype="match" decrypt="true"/>
     </opcode>
     <opcode id="1de7" name="OP_FinishTrade" updated="05/11/05">
         <comment>Trade is over</comment>
@@ -447,7 +447,7 @@
     </opcode>
     <opcode id="2e78" name="OP_ZoneSpawns" updated="10/27/05">
         <comment>old ZoneSpawnsCode</comment>
-        <payload dir="server" typename="spawnStruct" sizechecktype="modulus"/>
+        <payload dir="server" typename="spawnStruct" sizechecktype="modulus" decrypt="true"/>
     </opcode>
     <opcode id="0f8e" name="OP_FaceChange" updated="10/27/05">
         <comment>/face</comment>
@@ -517,7 +517,7 @@
     </opcode>
     <opcode id="1860" name="OP_NewSpawn" updated="10/27/05">
         <comment>old NewSpawnCode</comment>
-        <payload dir="server" typename="spawnStruct" sizechecktype="match"/>
+        <payload dir="server" typename="spawnStruct" sizechecktype="match" decrypt="true"/>
     </opcode>
     <opcode id="7441" name="OP_WearChange" updated="10/27/05">
         <comment>old SpawnUpdateCode</comment>

@@ -85,6 +85,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 		   QString mac_address,
 		   bool realtime,
 		   bool sessionTrackingFlag,
+		   bool packetDecryption,
 		   bool recordPackets,
 		   int playbackPackets,
 		   int8_t playbackSpeed, 
@@ -100,6 +101,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     m_mac(mac_address),
     m_realtime(realtime),
     m_session_tracking(sessionTrackingFlag),
+    m_packet_decryption(packetDecryption),
     m_recordPackets(recordPackets),
     m_playbackPackets(playbackPackets),
     m_playbackSpeed(playbackSpeed)
@@ -238,6 +240,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 
   // Flag session tracking properly on streams
   session_tracking(sessionTrackingFlag);
+  packet_decryption(packetDecryption);
 
   // if running setuid root, then give up root access, since the PacketCapture
   // is the only thing that needed it.
@@ -1036,6 +1039,15 @@ void EQPacket::session_tracking(bool enable)
 
 }
 
+void EQPacket::packet_decryption(bool enable)
+{
+  m_packet_decryption = enable;
+  m_client2WorldStream->setPacketDecryption(enable);
+  m_world2ClientStream->setPacketDecryption(enable);
+  m_client2ZoneStream->setPacketDecryption(enable);
+  m_zone2ClientStream->setPacketDecryption(enable);
+}
+
 ///////////////////////////////////////////
 // Set the current ArqSeqGiveUp
 void EQPacket::setArqSeqGiveUp(uint16_t giveUp)
@@ -1136,4 +1148,11 @@ uint16_t EQPacket::serverSeqExp(int stream)
   return m_streams[stream]->arqSeqExp();
 }
 
+void EQPacket::setDecryptionKey(const char* key)
+{
+    m_client2WorldStream->setDecryptionKey(key);
+    m_world2ClientStream->setDecryptionKey(key);
+    m_client2ZoneStream->setDecryptionKey(key);
+    m_zone2ClientStream->setDecryptionKey(key);
+}
 #include "packet.moc"

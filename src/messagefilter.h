@@ -99,7 +99,7 @@ class MessageFilters : public QObject
 
  signals:
   void removed(uint32_t mask, uint8_t filter);
-  void added(uint32_t mask, uint8_t filter, const MessageFilter& filter);
+  void added(uint32_t mask, uint8_t filter, const MessageFilter& filter2);
 
  protected:
   MessageFilter* m_filters[maxMessageFilters];

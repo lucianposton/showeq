@@ -209,6 +209,7 @@ class EQInterface:public QMainWindow
    void toggle_opcode_log(int id);
    void select_opcode_file(void);
    void toggle_net_session_tracking(void);
+   void toggle_net_packet_decryption(int id);
    void toggle_net_real_time_thread(int id);
    void set_net_monitor_next_client();
    void set_net_client_IP_address();
@@ -302,6 +303,8 @@ class EQInterface:public QMainWindow
    void toggleDisplayTime(int);
    void toggleEQDisplayTime(int);
    void toggleUseColor(int);
+
+   void extractDecryptionKey(const uint8_t* data);
 
  protected:
    bool getMonitorOpCodeList(const QString& title, QString& opcodeList);
@@ -483,4 +486,3 @@ class EQInterface:public QMainWindow
 };
 
 #endif // EQINT_H
-
