@@ -3,11 +3,11 @@ ACLOCAL = aclocal
 AUTOHEADER = autoheader
 AUTOMAKE = automake
 AUTOCONF = autoconf
-LIBTOOLIZE_ARGS = --force --copy --automake
-ACLOCAL_ARGS = -I m4
+LIBTOOLIZE_ARGS = --force --copy
+ACLOCAL_ARGS =
 AUTOHEADER_ARGS = --force
 AUTOMAKE_ARGS = --add-missing --copy --include-deps
-AUTOCONF_ARGS = 
+AUTOCONF_ARGS =
 
 default: 
 	@echo "***************************************************************"
@@ -74,83 +74,49 @@ build: clean configure
 
 autoconf: configure
 
-configure: install-sh missing Makefile.in src/Makefile.in conf/Makefile.in configure.in Makefile.dist
+configure: install-sh missing Makefile.in src/Makefile.in conf/Makefile.in configure.in
 	@echo -n "Generating configure from configure.in......................"
 	@echo -e "\n*!* autoconf *!*" >> Makefile.dist.dbg 
-	@-rm -f $@
 	@$(AUTOCONF) $(AUTOCONF_ARGS) >> Makefile.dist.dbg 2>&1;
 	@echo "!*! autoconf !*!" >> Makefile.dist.dbg
-	@if [ -s "$@" ]; then { \
-		echo " done!"; \
-	} else { \
-		 echo " failed! ";\
-		 echo "See Makefile.dist.dbg for details"; \
-		 exit -1; \
-	} fi 
+	@echo " done!"
 
 automake: install-sh missing Makefile.in src/Makefile.in conf/Makefile.in
 
-install-sh missing Makefile.in src/Makefile.in conf/Makefile.in: config.h.in aclocal.m4 Makefile.dist
+install-sh missing Makefile.in src/Makefile.in conf/Makefile.in: ltmain.sh config.h.in aclocal.m4 Makefile.am
 	@echo -n "Generating Makefile.in from Makefile.am....................."
 	@echo -e "\n*!* automake ... *!*" >> Makefile.dist.dbg
 	@$(AUTOMAKE) $(AUTOMAKE_ARGS) >> Makefile.dist.dbg 2>&1
 	@echo "!*! automake ... !*!" >> Makefile.dist.dbg
-	@if [ -s "$@" ]; then { \
-		echo " done!"; \
-	} else { \
-		 echo " failed! ";\
-		 echo "See Makefile.dist.dbg for details"; \
-		 exit -1; \
-	} fi 
-
+	@echo " done!"
 
 autoheader: config.h.in
 
-config.h.in: aclocal.m4 configure.in Makefile.dist
+config.h.in: aclocal.m4 configure.in
 	@echo -n "Generating configure headers (config.h.in).................."
-	@echo -e "\n*!* $$AUTOHEADER  $$AUTOHEADER_ARGS configure.in *!*" >> Makefile.dist.dbg 
-	@-rm -f config.h.in
-	@$(AUTOHEADER) $(AUTOHEADER_ARGS) configure.in >> Makefile.dist.dbg 2>&1;
-	@echo "!*! $$AUTOHEADER $$AUTOHEADER_ARGS configure.in !*!" >> Makefile.dist.dbg
-	@if [ -s "$@" ]; then { \
-		echo " done!"; \
-	} else { \
-		 echo " failed! ";\
-		 echo "See Makefile.dist.dbg for details"; \
-		 exit -1; \
-	} fi 
+	@echo -e "\n*!* $$AUTOHEADER  $$AUTOHEADER_ARGS *!*" >> Makefile.dist.dbg 
+	@$(AUTOHEADER) $(AUTOHEADER_ARGS) >> Makefile.dist.dbg 2>&1;
+	@echo "!*! $$AUTOHEADER $$AUTOHEADER_ARGS !*!" >> Makefile.dist.dbg
+	@echo " done!"
 
 aclocal: aclocal.m4
 
-aclocal.m4: config.guess config.sub ltmain.sh configure.in Makefile.dist
+aclocal.m4: ltmain.sh configure.in
 	@echo -n "Generating aclocal.m4 from configure.in....................."
 	@echo -e "\n*!* aclocal *!*" >> Makefile.dist.dbg
 	@$(ACLOCAL) $(ACLOCAL_ARGS) >> Makefile.dist.dbg 2>&1
 	@echo "!*! aclocal !*!" >> Makefile.dist.dbg
-	@ if [ -s "$@" ]; then { \
-		echo " done!"; \
-	} else { \
-		 echo " failed! ";\
-		 echo "See Makefile.dist.dbg for details"; \
-		 exit -1; \
-	} fi 
+	@echo " done!"
 
-libtoolize: config.guess config.sub ltmain.sh
+libtoolize: ltmain.sh
 
-config.guess config.sub ltmain.sh : configure.in Makefile.am Makefile.dist
+ltmain.sh : configure.in
 	@echo -n "Adding libtool support......................................"
 	@echo -e "\n*!* $$LIBTOOLIZE $$LIBTOOLIZE_ARGS *!*"              \
                  >> Makefile.dist.dbg
 	@$(LIBTOOLIZE) $(LIBTOOLIZE_ARGS) >> Makefile.dist.dbg 2>&1
-	@echo "!*! $$LIBTOOLIZE $LIBTOOLIZE_ARGS !*!" >> Makefile.dist.dbg
-	@if [ -s "config.guess" -a "config.sub" -a "ltmain.sh" ]; then { \
-		echo " done!"; \
-	} else { \
-		 echo " failed! ";\
-		 echo "See Makefile.dist.dbg for details"; \
-		 exit -1; \
-	} fi 
-
+	@echo "!*! $$LIBTOOLIZE $$LIBTOOLIZE_ARGS !*!" >> Makefile.dist.dbg
+	@echo " done!"
 
 clean: 
 	@echo -n "Removing old files.........................................."
