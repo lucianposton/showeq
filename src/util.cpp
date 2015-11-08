@@ -967,6 +967,13 @@ uint32_t calcCRC32(const uint8_t* p,
 // Seeded CRC16 needed by the packet layer.
 uint16_t calcCRC16(uint8_t* p, uint32_t length, uint32_t seed)
 {
+   // sanity check
+   if(length > 65534)
+   {
+	seqWarn("calcCRC16 called for length > 65534");
+	return 0xDEAD;
+   }
+
 #include "crctab.h"
    unsigned long crc = 0L ^ 0xffffffff;
 

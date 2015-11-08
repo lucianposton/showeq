@@ -393,6 +393,13 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
 				    uint16_t opCode, 
 				    const EQPacketOPCode* opcodeEntry)
 {
+  // sanity check
+  if(len > 65534)
+  {
+	seqWarn("dispatchPacket: attempting to dispatch packet len > 65534, dropping...");
+	return;
+  }
+
   emit decodedPacket(data, len, m_dir, opCode, opcodeEntry);
 
   bool unknown = true;
