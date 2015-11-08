@@ -4332,7 +4332,7 @@ void EQInterface::newExp(uint32_t newExp, uint32_t totalExp,
 
     if (m_stsbarExp)
     {
-      char expperc[5];
+      char expperc[20];
       sprintf(expperc, "%.2f", totalTick*100.0/330.0);
 
       m_stsbarExp->setText(QString("Exp: %1 (%2/330, %3%)")

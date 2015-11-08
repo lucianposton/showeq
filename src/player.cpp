@@ -614,6 +614,7 @@ void Player::updateExp(const uint8_t* data)
 
   // if this is just setting the percentage, then do nothing (use info from
   //   player packet).
+#if 0
   if (exp->type == 0) 
   {
     // signal the setting of experience
@@ -622,7 +623,7 @@ void Player::updateExp(const uint8_t* data)
     // nothing more to do.
     return;
   }
-
+#endif
   uint32_t realExp = (m_tickExp * exp->exp) + m_minExp;
   uint32_t expIncrement;
   
@@ -654,10 +655,11 @@ void Player::updateExp(const uint8_t* data)
      m_freshKill = false;
   }
   else
-     emit expGained( "Unknown", // Randomly blessed with xp?
-                     0, // don't know what gave it so, level 0
-		     expIncrement,
-		     m_zoneMgr->longZoneName());
+    emit setExp(m_currentExp, exp->exp, m_minExp, m_maxExp, m_tickExp);
+//     emit expGained( "Unknown", // Randomly blessed with xp?
+//                     0, // don't know what gave it so, level 0
+//		     expIncrement,
+//		     m_zoneMgr->longZoneName());
 
   if (showeq_params->savePlayerState)
     savePlayerState();
