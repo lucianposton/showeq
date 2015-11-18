@@ -530,7 +530,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->careerEbonCrystals = netStream.readUInt32NC();
 
   // Unknown
-  netStream.skipBytes(149);
+  netStream.skipBytes(153);
 
   player->ldon_guk_points = netStream.readUInt32NC();
   player->ldon_mir_points = netStream.readUInt32NC();

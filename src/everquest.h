@@ -1094,26 +1094,25 @@ struct spawnStruct
            {
 
 		unsigned pitch:12;
-		signed   deltaX:13;                       // change in x
-		unsigned pad0:7;
-
 		signed   animation:10;                    // velocity
-		signed   deltaZ:13;                       // change in z 
-		unsigned pad1:9;		 
+		signed   deltaHeading:10;                 // change in heading 
 
-		signed   y:19;                            // y coord (2nd loc value)
-		unsigned pad2:13;		 
+		signed   deltaX:13;                       // change in x
+		unsigned heading:12;                      // heading 
+		unsigned pad1:7;		 
+
+		signed   deltaY:13;                       // change in y
+		signed   deltaZ:13;                       // change in z 
+		unsigned pad2:6;		 
 
 		signed   x:19;                            // x coord (1st loc value)	 
 		unsigned pad3:13;		 
 
 		signed   z:19;                            // z coord (3rd loc value)
-		signed   deltaY:13;                       // change in y
+		unsigned pad4:13;		 
 
-		unsigned heading:12;                      // heading 
-		signed   deltaHeading:10;                 // change in heading 
-		unsigned pad5:10;		 
-
+		signed   y:19;                            // y coord (2nd loc value)
+		unsigned pad5:13;		 
 
 	   };
            int32_t posData[6];
@@ -2365,25 +2364,25 @@ struct playerSpawnPosStruct
 /*0002*/ uint16_t spawnId2;
 /*0004*/
 	 unsigned pitch:12;
-	 signed   deltaX:13;                       // change in x
-         unsigned pad0:7;
-/*0008*/
 	 signed   animation:10;                    // velocity
-	 signed   deltaZ:13;                       // change in z 
-         unsigned pad1:9;		 
+	 signed   deltaHeading:10;                 // change in heading 
+/*0008*/
+	 signed   deltaX:13;                       // change in x
+	 unsigned heading:12;                      // heading 
+         unsigned pad1:7;		 
 /*0012*/
-	 signed   y:19;                            // y coord (2nd loc value)
-         unsigned pad2:13;		 
+	 signed   deltaY:13;                       // change in y
+	 signed   deltaZ:13;                       // change in z 
+         unsigned pad2:6;		 
 /*0016*/
 	 signed   x:19;                            // x coord (1st loc value)	 
          unsigned pad3:13;		 
 /*0020*/
          signed   z:19;                            // z coord (3rd loc value)
-	 signed   deltaY:13;                       // change in y
+         unsigned pad4:13;		 
 /*0024*/ 
-	 unsigned heading:12;                      // heading 
-	 signed   deltaHeading:10;                 // change in heading 
-         unsigned pad5:10;		 
+	 signed   y:19;                            // y coord (2nd loc value)
+         unsigned pad5:13;		 
 /*0028*/ 
 };
 
@@ -2402,24 +2401,24 @@ struct playerSelfPosStruct
 	 unsigned pitch:12;                      // pitch (up/down heading)
  	 unsigned pad0:20;
 /*0010*/
-	 float x;                                // x coord (1st loc value)
-/*0014*/
 	 float deltaY;                           // Change in y
-/*0018*/
-	 unsigned heading:12;                    // Heading
-	 unsigned pad3:20;
-/*0022*/
-	 float deltaX;                           // Change in x
-/*0026*/
-	 float deltaZ;                           // Change in z
-/*0030*/
-	 signed animation:10;                    // velocity
-	 signed deltaHeading:10;                 // change in heading
- 	 unsigned pad6:12;
-/*0034*/
-	 float z;                                // z coord (3rd loc value)
-/*0038*/
+/*0014*/
 	 float y;                                // y coord (2nd loc value)
+/*0018*/
+	 float x;                                // x coord (1st loc value)
+/*0022*/
+	 float z;                                // z coord (3rd loc value)
+/*0026*/
+	 signed animation:10;                    // velocity
+	 unsigned heading:12;                    // Heading
+	 unsigned pad5:10;
+/*0030*/
+	 float deltaZ;                           // Change in z
+/*0034*/
+	 signed deltaHeading:10;                 // change in heading
+ 	 unsigned pad7:22;
+/*0038*/
+	 float deltaX;                           // Change in x
 /*0042*/ 
 };
 
