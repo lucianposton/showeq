@@ -784,7 +784,7 @@
 { "plhbixieint", "Bixie Hive" }, // 774
 { "towerofrot", "Tower of Rot" }, // 775
 { "arginhiz", "Argin-Hiz" }, // 776
-{ "exalted", "Exalted Paineel" }, // 777
+{ "exalted", "Sul Vius: Demiplane of Life" }, // 777
 { "arxmentis", "Arx Mentis" }, // 778
 {  "brotherisland", "Brother Island" }, // 779
 { "kattacastrumb", "Katta Castrum: Deluge" }, // 780
@@ -794,18 +794,18 @@
 { "degmar", "Degmar, the Lost Castle" }, // 784
 { "tempesttemple", "Tempest Temple" }, // 785
 { "plhpirateshipint", "Pirate Ship" }, // 786
-{ NULL, NULL }, // 787
-{ NULL, NULL }, // 788
-{ NULL, NULL }, // 789
-{ NULL, NULL }, // 790
-{ NULL, NULL }, // 791
-{ NULL, NULL }, // 792
-{ NULL, NULL }, // 793
-{ NULL, NULL }, // 794
-{ NULL, NULL }, // 795
-{ NULL, NULL }, // 796
-{ NULL, NULL }, // 797
-{ NULL, NULL }, // 798
+{ "gnomemtn", "Gnome Memorial Mountain" }, // 787
+{ "drogab", "The Temple of Droga" }, // 788
+{ "charasisb", "The Howling Stones" }, // 789
+{ "scorchedwoods", "Scorched Woods" }, // 790
+{ "frontiermtnsb", "Frontier Mountains" }, // 791
+{ "gorowyn", "Gorowyn" }, // 792
+{ "korsha", "Kor'Sha Laboratory }, // 793
+{ "lceanium", "Lceanium" }, // 794
+{ "cosul", "Crypt of Sul" }, // 795
+{ "codecayb", "Ruins of Lxanvom" }, // 796
+{ "exaltedb", "Sul Vius: Demiplane of Decay" }, // 797
+{ "pohealth", "The Plane of Health" }, // 798
 { NULL, NULL }, // 799
 { NULL, NULL }, // 800
 { NULL, NULL }, // 801
