@@ -800,7 +800,7 @@
 { "scorchedwoods", "Scorched Woods" }, // 790
 { "frontiermtnsb", "Frontier Mountains" }, // 791
 { "gorowyn", "Gorowyn" }, // 792
-{ "korsha", "Kor'Sha Laboratory }, // 793
+{ "korsha", "Kor'Sha Laboratory" }, // 793
 { "lceanium", "Lceanium" }, // 794
 { "cosul", "Crypt of Sul" }, // 795
 { "codecayb", "Ruins of Lxanvom" }, // 796
