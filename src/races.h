@@ -632,9 +632,9 @@
     "Feran Mount",			// 623
     "Ogre NPC - Male",			// 624
     "Sokokar Mount",			// 625
-    "Giant (Rallosian mats)    "	// 626
+    "Giant (Rallosian mats)",		// 626
     "Sokokar (w saddle)",		// 627
-    "10th Anniversary Banner		// 628
+    "10th Anniversary Banner",		// 628
     "10th Anniversary Cake",		// 629
     "Wine Cask",			// 630
     "Hydra Mount",			// 631
@@ -645,7 +645,7 @@
     "Powder Keg",			// 636
     "Apexus",				// 637
     "Bellikos",				// 638
-    "Brell's First Creation    "	// 639
+    "Brell's First Creation",		// 639
     "Brell",				// 640
     "Crystalskin Ambuloid",		// 641
     "Cliknar Queen",			// 642
