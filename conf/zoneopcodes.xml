@@ -37,8 +37,8 @@
       <comment>Receiving AA experience. Also when percent to AA changes.</comment>
       <payload dir="server" typename="altExpUpdateStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="7aeb" name="OP_ExpUpdate" updated="07/23/15">
-        <comment>ExpUpdateCode 7aeb as of 07/23/15</comment>
+    <opcode id="2155" name="OP_ExpUpdate" updated="07/23/15">
+        <comment>ExpUpdateCode 2155 as of 11/20/15 - when set to the proper value you may experience random segfaults</comment>
         <payload dir="server" typename="expUpdateStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="3c6b" name="OP_GuildMOTD" updated="11/20/15">
@@ -119,7 +119,7 @@
         <comment>Spawn being illusioned (changing forms)</comment>
         <payload dir="both" typename="spawnIllusionStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="2802" name="OP_Shroud" updated="11/20/15">
+    <opcode id="62e3" name="OP_Shroud" updated="07/23/15">
         <comment>Server putting players into shroud form</comment>
         <payload dir="server" typename="spawnShroudSelf" sizechecktype="none"/>
     </opcode>
@@ -240,15 +240,15 @@
          <comment>Bazaar search Response - Struct incorrect </comment>
          <payload dir="server" typename="bazaarSearchResponseStruct" sizechecktype="modulus"/>
     </opcode>
-    <opcode id="37a4" name="OP_MoneyOnCorpse" updated="07/23/15">
+    <opcode id="3905" name="OP_MoneyOnCorpse" updated="11/20/15">
         <comment>MoneyOnCorpseCode</comment>
         <payload dir="server" typename="moneyOnCorpseStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="4eda" name="OP_SkillUpdate" updated="07/23/15">
+    <opcode id="1c5e" name="OP_SkillUpdate" updated="11/20/15">
         <comment>Skill up code</comment>
         <payload dir="server" typename="skillIncStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="2160" name="OP_LevelUpdate" updated="07/23/15">
+    <opcode id="26c2" name="OP_LevelUpdate" updated="11/20/15">
         <comment>LevelUpUpdateCode</comment>
         <payload dir="server" typename="levelUpUpdateStruct" sizechecktype="match"/>
     </opcode>
@@ -260,7 +260,7 @@
         <comment>Expedition Information</comment>
         <payload dir="server" typename="dzInfo" sizechecktype="match"/>
     </opcode>
-    <opcode id="1eae" name="OP_EnvDamage" updated="07/23/15">
+    <opcode id="783b" name="OP_EnvDamage" updated="11/20/15">
         <comment>Environmental Damage</comment>
         <payload dir="client" typename="environmentDamageStruct" sizechecktype="match"/>
     </opcode>
@@ -268,7 +268,7 @@
         <comment>old cRunToggleCode</comment>
         <payload dir="client" typename="cRunToggleStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="0265" name="OP_Trader" updated="07/23/15">
+    <opcode id="0113" name="OP_Trader" updated="11/20/15">
         <comment>PC's turning trader on and off</comment>
         <payload dir="server" typename="bazaarTraderRequest" sizechecktype="match"/>
     </opcode>
