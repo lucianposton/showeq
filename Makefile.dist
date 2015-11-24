@@ -74,8 +74,8 @@ build: clean configure
 
 autoconf: configure
 
-configure: install-sh missing Makefile.in src/Makefile.in conf/Makefile.in configure.in
-	@echo -n "Generating configure from configure.in......................"
+configure: install-sh missing Makefile.in src/Makefile.in conf/Makefile.in configure.ac
+	@echo -n "Generating configure from configure.ac......................"
 	@echo -e "\n*!* autoconf *!*" >> Makefile.dist.dbg 
 	@$(AUTOCONF) $(AUTOCONF_ARGS) >> Makefile.dist.dbg 2>&1;
 	@echo "!*! autoconf !*!" >> Makefile.dist.dbg
@@ -92,7 +92,7 @@ install-sh missing Makefile.in src/Makefile.in conf/Makefile.in: ltmain.sh confi
 
 autoheader: config.h.in
 
-config.h.in: aclocal.m4 configure.in
+config.h.in: aclocal.m4 configure.ac
 	@echo -n "Generating configure headers (config.h.in).................."
 	@echo -e "\n*!* $$AUTOHEADER  $$AUTOHEADER_ARGS *!*" >> Makefile.dist.dbg 
 	@$(AUTOHEADER) $(AUTOHEADER_ARGS) >> Makefile.dist.dbg 2>&1;
@@ -101,8 +101,8 @@ config.h.in: aclocal.m4 configure.in
 
 aclocal: aclocal.m4
 
-aclocal.m4: ltmain.sh configure.in
-	@echo -n "Generating aclocal.m4 from configure.in....................."
+aclocal.m4: ltmain.sh configure.ac
+	@echo -n "Generating aclocal.m4 from configure.ac....................."
 	@echo -e "\n*!* aclocal *!*" >> Makefile.dist.dbg
 	@$(ACLOCAL) $(ACLOCAL_ARGS) >> Makefile.dist.dbg 2>&1
 	@echo "!*! aclocal !*!" >> Makefile.dist.dbg
@@ -110,7 +110,7 @@ aclocal.m4: ltmain.sh configure.in
 
 libtoolize: ltmain.sh
 
-ltmain.sh : configure.in
+ltmain.sh : configure.ac
 	@echo -n "Adding libtool support......................................"
 	@echo -e "\n*!* $$LIBTOOLIZE $$LIBTOOLIZE_ARGS *!*"              \
                  >> Makefile.dist.dbg
