@@ -8661,7 +8661,16 @@
 /* 0x21c9 -  8649 */ { "Panic Animal" }, 
 /* 0x21ca -  8650 */ { "Jolt" }, 
 /* 0x21cb -  8651 */ { "Spirit of Wolf" }, 
+/* 0x21cc -  8652 */ { "See Invisible" }, 
+/* 0x21cd -  8653 */ { "Splurt" }, 
+/* 0x21ce -  8654 */ { "Rune III" }, 
+/* 0x21cf -  8655 */ { "Alter Plane: Sky" }, 
+/* 0x21d0 -  8656 */ { "Rune IV" }, 
+/* 0x21d1 -  8657 */ { "Shieldskin" }, 
+/* 0x21d2 -  8658 */ { "Elemental: Fire" }, 
+/* 0x21d3 -  8659 */ { "Invoke Shadow" }, 
+/* 0x21d4 -  8660 */ { "Breath of the Dead" }, 
 // 
-// Max SpellId: 0x21cc =  8652
-// Number of Spells: 8055
+// Max SpellId: 0x21d5 =  8661
+// Number of Spells: 8064
 // Empty Entries: 597
