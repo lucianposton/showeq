@@ -32,3 +32,5 @@ Usage:
 shows current command line arguments.  Also look at the 
 conf/seqdef.xml file for configuration file options and defaults.
 Most configuration changes can be done via the user interface.
+
+Join the chat at https://gitter.im/lucianposton/showeq
