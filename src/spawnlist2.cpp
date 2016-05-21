@@ -57,8 +57,8 @@ SpawnListWindow2::SpawnListWindow2(Player* player,
   m_totalSpawns = new QLineEdit(this);
   m_totalSpawns->setReadOnly(TRUE);
   m_totalSpawns->setAlignment(AlignCenter);
-  m_totalSpawns->setMinimumWidth(5);
-  m_totalSpawns->setMaximumWidth(50);
+  //m_totalSpawns->setMinimumWidth(5);
+  //m_totalSpawns->setMaximumWidth(50);
   hLayout->addWidget(m_totalSpawns, 0, AlignCenter);  
 
   // setup spinbox to control frame rate (FPM)

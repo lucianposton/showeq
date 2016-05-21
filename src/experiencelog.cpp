@@ -203,8 +203,8 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    
    m_exp_listview->restoreColumns();
 
-   m_exp_listview->setMinimumSize( m_exp_listview->sizeHint().width(),
-      200 );
+   //m_exp_listview->setMinimumSize( m_exp_listview->sizeHint().width(),
+   //   200 );
 
    QGroupBox *statsGBox = new QVGroupBox( "Statistics", this );
    m_layout->addWidget( statsGBox );

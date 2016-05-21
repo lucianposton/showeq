@@ -309,7 +309,7 @@ QWidget* CombatWindow::initOffenseWidget()
 
 	m_listview_offense->restoreColumns();
 
-	m_listview_offense->setMinimumSize(m_listview_offense->sizeHint().width(), 200);
+	//m_listview_offense->setMinimumSize(m_listview_offense->sizeHint().width(), 200);
 
 	QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
 	m_layout_offense->addWidget(summaryGBox);
@@ -444,7 +444,7 @@ QWidget* CombatWindow::initMobWidget()
 
 	m_listview_mob->restoreColumns();
 
-	m_listview_mob->setMinimumSize(m_listview_mob->sizeHint().width(), 200);
+	//m_listview_mob->setMinimumSize(m_listview_mob->sizeHint().width(), 200);
 
 	QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
 	m_layout_mob->addWidget(summaryGBox);
