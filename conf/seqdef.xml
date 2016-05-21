@@ -91,10 +91,6 @@
    <bool value="false" />
    <comment>set to true to log spawns</comment>
   </property>
-  <property name="SpawnLogFilename" >
-   <string value="/usr/local/share/showeq/spawnlog.txt" />
-   <comment>name of file to log spawns into</comment>
-  </property>
   <property name="ShowSpellMessages" >
    <bool value="true" />
    <comment>Enable / disable spell casting messages</comment>
