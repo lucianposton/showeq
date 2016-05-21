@@ -8670,7 +8670,8 @@
 /* 0x21d2 -  8658 */ { "Elemental: Fire" }, 
 /* 0x21d3 -  8659 */ { "Invoke Shadow" }, 
 /* 0x21d4 -  8660 */ { "Breath of the Dead" }, 
+/* 0x21d5 -  8661 */ { "Conjure Corpse" }, 
 // 
-// Max SpellId: 0x21d5 =  8661
-// Number of Spells: 8064
+// Max SpellId: 0x21d6 =  8662
+// Number of Spells: 8065
 // Empty Entries: 597
