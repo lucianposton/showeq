@@ -247,8 +247,10 @@ bool EQProtocolPacket::decode(uint32_t maxPayloadLength)
     m_bAllocedPayload = true;
 
     // Decompress
-    uint32_t retval = uncompress(m_rawPayload, (uLongf*)&m_rawPayloadLength,
+    uLongf destLen = m_rawPayloadLength;
+    uint32_t retval = uncompress(m_rawPayload, &destLen,
       m_payload, m_payloadLength);
+    m_rawPayloadLength = destLen;
 
     if (retval != 0)
     {
