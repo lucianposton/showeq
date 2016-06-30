@@ -535,7 +535,7 @@ void MessageShell::beginCast(const uint8_t* data)
     if (tempStr == "" || tempStr.isEmpty())
       tempStr.sprintf("UNKNOWN (ID: %d)", bcast->spawnId);
     
-    tempStr += " has begun casting '";
+    tempStr += " begins casting '";
   }
   float casttime = ((float)bcast->param1 / 1000);
   
@@ -547,7 +547,7 @@ void MessageShell::beginCast(const uint8_t* data)
   else
     spellName = spell_name(bcast->spellId);
   
-  tempStr.sprintf( "%s%s' - Casting time is %g Second%s", 
+  tempStr.sprintf( "%s%s' - %g second%s",
 		   tempStr.ascii(),
 		   (const char*)spellName, casttime,
 		   casttime == 1 ? "" : "s");
@@ -808,18 +808,14 @@ void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
   const considerStruct * con = (const considerStruct*)data;
   const Item* item;
 
-  QString lvl("");
   QString hps("");
-  QString cn("");
-  QString deity;
+  QString spawninfo("");
 
-  QString msg("Your faction standing with ");
+  QString msg("");
 
   // is it you that you've conned?
   if (con->playerid == con->targetid) 
   {
-    deity = m_player->deityName();
-    
     // well, this is You
     msg += m_player->name();
   }
@@ -833,8 +829,7 @@ void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
     {
       Spawn* spawn = (Spawn*)item;
 
-      // yes
-      deity = spawn->deityName();
+      spawninfo += QString("[%1 %2] (%3)").arg(spawn->level()).arg(spawn->classString()).arg(spawn->deityName());
 
       msg += item->name();
     } // end if spawn found
@@ -868,17 +863,16 @@ void MessageShell::consMessage(const uint8_t* data, size_t, uint8_t dir)
     break;
   }
 
-  if (!deity.isEmpty())
-    msg += QString(" [") + deity + "]";
+  msg += spawninfo;
 
   if (con->maxHp || con->curHp)
   {
-    lvl.sprintf(" (%i/%i HP)", con->curHp, con->maxHp);
-    msg += lvl;
+    hps.sprintf(" (%i/%i HP)", con->curHp, con->maxHp);
+    msg += hps;
   }
   
-  msg += QString(" is: ") + print_faction(con->faction) + " (" 
-    + QString::number(con->faction) + ")!";
+  msg += QString(" : ") + print_faction(con->faction) + " (" 
+    + QString::number(con->faction) + ")";
 
   m_messages->addMessage(MT_Consider, msg);
 } // end consMessage()

@@ -26,7 +26,7 @@ QString MessageEntry::s_messageTypeStrings[MT_Max+1] =
   "GMSay",
   "",
   "",
-  "GMTell",
+  "Tell", // GMTell is used for outgoing tells
   "Raid",
   "Debug",
   "Info",

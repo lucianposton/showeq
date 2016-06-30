@@ -19,41 +19,42 @@
 const char* defaultStyle = "\e[0m";
 const char* typeStyles[] = 
   {
-    "\e[1;32m",   // 0 - Guild
+    "\e[0;32m",   // 0 - Guild
     NULL,         // 1
     "\e[0;36m",   // 2 - Group
-    "\e[1;31m",   // 3 - Shout
-    "\e[1;42m",   // 4 - Auction
-    "\e[0;32m",   // 5 - OOC
+    "\e[3;37m",   // 3 - Shout
+    "\e[3;37m",   // 4 - Auction
+    "\e[0;37m",   // 5 - OOC
     NULL,         // 6
     "\e[0;35m",   // 7 - Tell
-    "\e[1;37m",   // 8 - Say
+    "\e[3;37m",   // 8 - Say
     NULL,         // 9
     NULL,         // 10
     "\e[5;31m",   // 11 - GM Say
     NULL,         // 12
     NULL,         // 13
-    "\e[5;31m",   // 14 - GM Tell 
+    "\e[0;35m",   // 14 - Tell (outbound)
     "\e[1;36m",   // 15 - Raid
     NULL,         // 16 - Debug
     NULL,         // 17 - Info
-    NULL,         // 18 - General
-    NULL,         // 19 - Motd
-    NULL,         // 20 - System
-    NULL,         // 21 - Money
-    NULL,         // 22 - Random
-    NULL,         // 23 - Emote
-    NULL,         // 24 - Time
-    NULL,         // 25 - Spell
-    NULL,         // 26 - Zone
-    NULL,         // 27 - Inspect
-    NULL,         // 28 - Player
-    NULL,         // 29 - Consider
-    "\e[1;37;45m",   // 30 - Alert
-    "\e[1;37;41m",   // 31 - Danger
-    "\e[1;37;43m",   // 32 - Caution
-    "\e[1;37;46m",   // 33 - Hunt
-    "\e[1;37;44m",   // 34 - Locate
+    "\e[1;37m",   // 18 - Warning
+    NULL,         // 19 - General
+    NULL,         // 20 - Motd
+    NULL,         // 21 - System
+    NULL,         // 22 - Money
+    NULL,         // 23 - Random
+    "\e[3;37m",   // 24 - Emote
+    NULL,         // 25 - Time
+    "\e[1;31m",   // 26 - Spell
+    NULL,         // 27 - Zone
+    NULL,         // 28 - Inspect
+    NULL,         // 29 - Player
+    "\e[1;44m",      // 30 - Consider
+    "\e[1;37;45m",   // 31 - Alert
+    "\e[1;37;41m",   // 32 - Danger
+    "\e[1;37;43m",   // 33 - Caution
+    "\e[1;37;46m",   // 34 - Hunt
+    "\e[1;37;44m",   // 35 - Locate
   };
 
 //----------------------------------------------------------------------
