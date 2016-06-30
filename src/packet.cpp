@@ -587,6 +587,31 @@ void EQPacket::dispatchPacket(int size, unsigned char *buffer)
 
 void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
 {
+  in_port_t destPort = packet.getDestPort();
+  if ((destPort < 1024) ||
+          (destPort == 1048) ||
+          (destPort == 1085) ||
+          (destPort == 1119) ||
+          (destPort == 1194) ||
+          (destPort == 1200) ||
+          (destPort == 1434) ||
+          (destPort == 1512) ||
+          (destPort == 1725) ||
+          (destPort == 1900) ||
+          (destPort == 3306) ||
+          (destPort == 3478) ||
+          (destPort == 3702) ||
+          (destPort == 5353) ||
+          (destPort == 5355) ||
+          (destPort == 8767) ||
+          (destPort == 8768))
+  {
+      // TODO: could check for multicast/broadcast addresses
+
+      // Drop obviously non-eq ports
+      return;
+  }
+
   // Detect client by world server port traffic...
   if (m_detectingClient && packet.getSourcePort() == WorldServerGeneralPort)
   {
