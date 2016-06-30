@@ -970,8 +970,7 @@ uint16_t calcCRC16(uint8_t* p, uint32_t length, uint32_t seed)
    // sanity check
    if(length > 65534)
    {
-	seqWarn("calcCRC16 called for length > 65534");
-	return 0xDEAD;
+	seqDebug("calcCRC16 called for length > 65534...");
    }
 
 #include "crctab.h"
