@@ -55,7 +55,8 @@ enum MessageType
   MT_Caution,
   MT_Hunt,
   MT_Locate,
-  MT_Max = MT_Locate,
+  MT_MySpell,
+  MT_Max = MT_MySpell,
 };
 
 //----------------------------------------------------------------------

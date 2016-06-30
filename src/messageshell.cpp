@@ -513,7 +513,7 @@ void MessageShell::handleSpell(const uint8_t* data, size_t, uint8_t dir)
 		      (const char*)spellName);
     }
 
-    m_messages->addMessage(MT_Spell, tempStr);
+    m_messages->addMessage(MT_MySpell, tempStr);
   }
 }
 
@@ -524,8 +524,12 @@ void MessageShell::beginCast(const uint8_t* data)
 
   tempStr = "";
 
+  enum MessageType msg_type = MT_Spell;
   if (bcast->spawnId == m_player->id())
+  {
     tempStr = "You begin casting '";
+    msg_type = MT_MySpell;
+  }
   else
   {
     const Item* item = m_spawnShell->findID(tSpawn, bcast->spawnId);
@@ -552,7 +556,7 @@ void MessageShell::beginCast(const uint8_t* data)
 		   (const char*)spellName, casttime,
 		   casttime == 1 ? "" : "s");
 
-  m_messages->addMessage(MT_Spell, tempStr);
+  m_messages->addMessage(msg_type, tempStr);
 }
 
 void MessageShell::spellFaded(const uint8_t* data)
@@ -563,7 +567,7 @@ void MessageShell::spellFaded(const uint8_t* data)
   tempStr.sprintf( "Faded: %s", 
 		   sf->message);
 
-  m_messages->addMessage(MT_Spell, tempStr);
+  m_messages->addMessage(MT_MySpell, tempStr);
 }
 
 void MessageShell::interruptSpellCast(const uint8_t* data)
@@ -608,7 +612,7 @@ void MessageShell::startCast(const uint8_t* data)
 		  (const char*)spellName, (const char*)targetName, 
 		  cast->targetId);
 
-  m_messages->addMessage(MT_Spell, tempStr);
+  m_messages->addMessage(MT_MySpell, tempStr);
 }
 
 

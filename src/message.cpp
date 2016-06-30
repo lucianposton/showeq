@@ -48,5 +48,6 @@ QString MessageEntry::s_messageTypeStrings[MT_Max+1] =
   "Caution",
   "Hunt",
   "Locate",
+  "MySpell",
 };
 
