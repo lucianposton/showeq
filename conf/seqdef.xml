@@ -2815,6 +2815,9 @@ If any argument is left blank, it is filled in with its default...
   <property name="MySpellColor">
    <color name="blue" />
   </property>
+  <property name="PCSpellColor">
+   <color name="blue" />
+  </property>
   <property name="AlertBGColor">
    <color name="magenta" />
   </property>
@@ -2879,6 +2882,9 @@ If any argument is left blank, it is filled in with its default...
    <color name="blue" />
   </property>
   <property name="MySpellColor">
+   <color name="blue" />
+  </property>
+  <property name="PCSpellColor">
    <color name="blue" />
   </property>
   <property name="AlertBGColor">
@@ -2947,6 +2953,9 @@ If any argument is left blank, it is filled in with its default...
   <property name="MySpellColor">
    <color name="blue" />
   </property>
+  <property name="PCSpellColor">
+   <color name="blue" />
+  </property>
   <property name="AlertBGColor">
    <color name="magenta" />
   </property>
@@ -3011,6 +3020,9 @@ If any argument is left blank, it is filled in with its default...
    <color name="blue" />
   </property>
   <property name="MySpellColor">
+   <color name="blue" />
+  </property>
+  <property name="PCSpellColor">
    <color name="blue" />
   </property>
   <property name="AlertBGColor">
@@ -3079,6 +3091,9 @@ If any argument is left blank, it is filled in with its default...
   <property name="MySpellColor">
    <color name="blue" />
   </property>
+  <property name="PCSpellColor">
+   <color name="blue" />
+  </property>
   <property name="AlertBGColor">
    <color name="magenta" />
   </property>
@@ -3143,6 +3158,9 @@ If any argument is left blank, it is filled in with its default...
    <color name="blue" />
   </property>
   <property name="MySpellColor">
+   <color name="blue" />
+  </property>
+  <property name="PCSpellColor">
    <color name="blue" />
   </property>
   <property name="AlertBGColor">

@@ -56,7 +56,8 @@ enum MessageType
   MT_Hunt,
   MT_Locate,
   MT_MySpell,
-  MT_Max = MT_MySpell,
+  MT_OtherPlayerSpell,
+  MT_Max = MT_OtherPlayerSpell,
 };
 
 //----------------------------------------------------------------------

@@ -45,7 +45,7 @@ const char* typeStyles[] =
     NULL,         // 23 - Random
     "\e[3;37m",   // 24 - Emote
     NULL,         // 25 - Time
-    "\e[1;31m",   // 26 - Spell
+    "\e[1;34m",   // 26 - Spell
     NULL,         // 27 - Zone
     NULL,         // 28 - Inspect
     NULL,         // 29 - Player
@@ -56,6 +56,7 @@ const char* typeStyles[] =
     "\e[1;37;46m",   // 34 - Hunt
     "\e[1;37;44m",   // 35 - Locate
     "\e[0;34m",      // 36 - MySpell
+    "\e[1;31m",      // 37 - OtherPlayerSpell
   };
 
 //----------------------------------------------------------------------

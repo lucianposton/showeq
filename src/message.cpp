@@ -49,5 +49,6 @@ QString MessageEntry::s_messageTypeStrings[MT_Max+1] =
   "Hunt",
   "Locate",
   "MySpell",
+  "PCSpell",
 };
 

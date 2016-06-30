@@ -534,7 +534,13 @@ void MessageShell::beginCast(const uint8_t* data)
   {
     const Item* item = m_spawnShell->findID(tSpawn, bcast->spawnId);
     if (item != NULL)
+    {
       tempStr = item->name();
+      Spawn* spawn = (Spawn*)item;
+      if (spawn->isOtherPlayer()) {
+          msg_type = MT_OtherPlayerSpell;
+      }
+    }
     
     if (tempStr == "" || tempStr.isEmpty())
       tempStr.sprintf("UNKNOWN (ID: %d)", bcast->spawnId);
