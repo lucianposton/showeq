@@ -3650,7 +3650,7 @@ void Map::paintSpawns(MapParameters& param,
       else
       {
         // Pet owned by someone who is pvp?
-        if (owner != NULL)
+        if (owner != NULL && owner->isOtherPlayer())
         {
           int levelDiff = m_player->level() - owner->level();
 
@@ -3697,7 +3697,7 @@ void Map::paintSpawns(MapParameters& param,
         }
       } // if decorate pvp
       // circle around pvp pets
-      else if ((owner != NULL) && !m_player->isSameRaceTeam(owner))
+      else if ((owner != NULL) && owner->isOtherPlayer() && !m_player->isSameRaceTeam(owner))
         mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamOtherRacePet));
     } // end racePvp
     else if (m_deityPvP)
@@ -3717,7 +3717,7 @@ void Map::paintSpawns(MapParameters& param,
         }
       } // if decorate pvp
      // circle around deity pvp pets
-      else if ((owner != NULL) && !m_player->isSameDeityTeam(owner))
+      else if ((owner != NULL) && owner->isOtherPlayer() && !m_player->isSameDeityTeam(owner))
         mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerTeamOtherDeityPet));
     } // end if deityPvP
     
