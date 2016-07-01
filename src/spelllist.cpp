@@ -38,10 +38,16 @@ void SpellListItem::paintCell( QPainter *p, const QColorGroup &cg,
                                int column, int width, int alignment )
 {
   QColorGroup newCg( cg );
-  
-  newCg.setColor( QColorGroup::Text, m_textColor);
-  
   QFont font = this->listView()->font();
+
+  if (m_isTextBackgroundColorSet) {
+      newCg.setColor( QColorGroup::Base, m_textBackgroundColor);
+  }
+  if (m_isTextBold) {
+      font.setBold(true);
+  }
+
+  newCg.setColor( QColorGroup::Text, m_textColor);
   p->setFont(font);
   
   QListViewItem::paintCell( p, newCg, column, width, alignment );
@@ -57,21 +63,48 @@ void SpellListItem::setTextColor(const QColor& color)
    m_textColor = color;
 }
 
+void SpellListItem::setTextBackgroundColor(const QColor& color)
+{
+   m_textBackgroundColor = color;
+   m_isTextBackgroundColorSet = true;
+}
+
+void SpellListItem::unsetTextBackgroundColor()
+{
+   m_isTextBackgroundColorSet = false;
+}
+
+void SpellListItem::setTextBold(bool isBold)
+{
+  m_isTextBold = isBold;
+}
+
 void SpellListItem::update()
 {
    //color change by Worried
    //change spell colors according to time remaining
 
-  if (m_item->duration() > 120)
-    this->setTextColor(Qt::black);
-  else if (m_item->duration() <= 120 and m_item->duration() > 60)
-    this->setTextColor(QColor(128,54,193));
-  else if (m_item->duration() <= 60 and m_item->duration() > 30)
+  this->unsetTextBackgroundColor();
+  this->setTextBold(false);
+  this->setTextColor(Qt::black);
+
+  if (m_item->duration() <= 120 and m_item->duration() > 60)
+  {
     this->setTextColor(Qt::blue);
-  else if (m_item->duration() <= 30 and m_item->duration() > 12)
-    this->setTextColor(Qt::magenta);
-  else if (m_item->duration() <= 12)
-    this->setTextColor(Qt::red);
+  }
+  else if (m_item->duration() <= 60 and m_item->duration() > 30)
+  {
+    this->setTextBackgroundColor(Qt::lightGray);
+  }
+  else if (m_item->duration() <= 30 and m_item->duration() > 18)
+  {
+    this->setTextBackgroundColor(Qt::yellow);
+  }
+  else if (m_item->duration() <= 18)
+  {
+    this->setTextBackgroundColor(Qt::red);
+    this->setTextBold(true);
+  }
 
    setText(SPELLCOL_SPELLID, QString("%1").arg(m_item->spellId()));
    setText(SPELLCOL_SPELLNAME, m_item->spellName());

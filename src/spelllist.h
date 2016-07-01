@@ -42,6 +42,9 @@ class SpellListItem : public QListViewItem
 			  int column, int width, int alignment );
   const QColor textColor();
   void setTextColor(const QColor &color);
+  void setTextBackgroundColor(const QColor &color);
+  void setTextBold(bool isBold);
+  void unsetTextBackgroundColor();
   void update();
   void setSpellItem(const SpellItem *);
   const SpellItem* item() const;
@@ -49,6 +52,9 @@ class SpellListItem : public QListViewItem
   void setCategory(QString& cat);
  private:
   QColor m_textColor;
+  QColor m_textBackgroundColor;
+  bool m_isTextBackgroundColorSet;
+  bool m_isTextBold;
   bool m_btextSet;
   const SpellItem *m_item;
   QString m_category;
