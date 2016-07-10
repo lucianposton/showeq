@@ -205,12 +205,7 @@ void MessageShell::formattedMessage(const uint8_t* data, size_t len, uint8_t dir
   const formattedMessageStruct* fmsg = (const formattedMessageStruct*)data;
   QString tempStr;
 
-
-  size_t messagesLen = 
-    len
-    - ((uint8_t*)&fmsg->messages[0] - (uint8_t*)fmsg) 
-    - sizeof(fmsg->unknownXXXX);
-
+  size_t messagesLen = len - ((uint8_t*)&fmsg->messages[0] - (uint8_t*)fmsg);
   m_messages->addMessage(chatColor2MessageType(fmsg->messageColor), 
 			 m_eqStrings->formatMessage(fmsg->messageFormat,
 						    fmsg->messages, 

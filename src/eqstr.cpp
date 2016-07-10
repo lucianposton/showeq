@@ -134,100 +134,100 @@ QString EQStr::formatMessage(uint32_t formatid,
 
   QString tempStr;
 
-  if (formatStringRes == NULL)
-  {
-    tempStr.sprintf( "Unknown: %04x: ",
-		     formatid);
-    tempStr += QString::fromUtf8(arguments);
-
-    size_t totalArgsLen = strlen(arguments) + 1;
-    
-    const char* curMsg;
-    while (totalArgsLen < argsLen)
+    if (formatStringRes == NULL)
     {
-      curMsg = arguments + totalArgsLen;
-      tempStr += QString(", ") + QString::fromUtf8(curMsg);
-      totalArgsLen += strlen(curMsg) + 1;
+	uint32_t arg_len;
+	unsigned char *cp;
+	tempStr.sprintf( "Unknown: %04x:", formatid);
+	cp = (unsigned char *) arguments;
+	while (cp < ((unsigned char *) &arguments[argsLen])) {
+	    arg_len = (cp[0] << 0) | (cp[1] << 8) | (cp[2] << 16) | (cp[3] << 24);
+	    cp += 4;
+	    if (arg_len == 0)
+		break;
+	    tempStr += " ";
+	    tempStr += QString::fromUtf8((const char *) cp, arg_len);
+	    cp += arg_len;
+	}
+	return tempStr;
     }
-  }
-  else
-  {
-    QValueVector<QString> argList;
-    argList.reserve(5); // reserve space for 5 elements to handle most common sizes
-    
-    // 
-    size_t totalArgsLen = 0;
-    const char* curArg;
-    while (totalArgsLen < argsLen)
+    else
     {
-      curArg = arguments + totalArgsLen;
-      // insert argument into the argument list
-      argList.push_back(QString::fromUtf8(curArg));
-      totalArgsLen += strlen(curArg) + 1;
+	QValueVector<QString> argList;
+	argList.reserve(5); // reserve space for 5 elements to handle most common sizes
+
+	// 
+	size_t totalArgsLen = 0;
+	const char* curArg;
+	while (totalArgsLen < argsLen)
+	{
+	    curArg = arguments + totalArgsLen;
+	    // insert argument into the argument list
+	    argList.push_back(QString::fromUtf8(curArg));
+	    totalArgsLen += strlen(curArg) + 1;
+	}
+
+	bool ok;
+	int curPos;
+	size_t substArg;
+	int substArgValue;
+	QString* substFormatStringRes;
+	QString substFormatString;
+
+	////////////////////////////
+	// replace template (%T) arguments in formatted string
+	QString formatString = *formatStringRes;
+	QRegExp rxt("%T(\\d{1,3})", true, false);
+
+	// find first template substitution
+	curPos = rxt.search(formatString, 0);
+
+	while (curPos != -1)
+	{
+	    substFormatStringRes = NULL;
+	    substArg = rxt.cap(1).toInt(&ok);
+	    if (ok && (substArg <= argList.size()))
+	    {
+		substArgValue = argList[substArg-1].toInt(&ok);
+
+		if (ok)
+		    substFormatStringRes = m_messageStrings.find(substArgValue);
+	    }
+
+	    // replace template argument with subst string
+	    if (substFormatStringRes != NULL)
+		formatString.replace(curPos, rxt.matchedLength(), *substFormatStringRes);
+	    else
+		curPos += rxt.matchedLength(); // if no replacement string, skip over
+
+	    // find next substitution
+	    curPos = rxt.search(formatString, curPos);
+	}
+
+	////////////////////////////
+	// now replace substitution arguments in formatted string
+	// NOTE: not using QString::arg() because not all arguments are always used
+	//       and it will do screwy stuff in this situation
+	QRegExp rx("%(\\d{1,3})", true, false);
+
+	// find first template substitution
+	curPos = rx.search(formatString, 0);
+
+	while (curPos != -1)
+	{
+	    substArg = rx.cap(1).toInt(&ok);
+
+	    // replace substitution argument with argument from list
+	    if (ok && (substArg <= argList.size()))
+		formatString.replace(curPos, rx.matchedLength(), argList[substArg-1]);
+	    else
+		curPos += rx.matchedLength(); // if no such argument, skip over
+
+	    // find next substitution
+	    curPos = rx.search(formatString, curPos);
+	}
+
+	return formatString;
     }
 
-    bool ok;
-    int curPos;
-    size_t substArg;
-    int substArgValue;
-    QString* substFormatStringRes;
-    QString substFormatString;
-
-    ////////////////////////////
-    // replace template (%T) arguments in formatted string
-    QString formatString = *formatStringRes;
-    QRegExp rxt("%T(\\d{1,3})", true, false);
-
-    // find first template substitution
-    curPos = rxt.search(formatString, 0);
-
-    while (curPos != -1)
-    {
-      substFormatStringRes = NULL;
-      substArg = rxt.cap(1).toInt(&ok);
-      if (ok && (substArg <= argList.size()))
-      {
-	substArgValue = argList[substArg-1].toInt(&ok);
-
-	if (ok)
-	  substFormatStringRes = m_messageStrings.find(substArgValue);
-      }
-      
-      // replace template argument with subst string
-      if (substFormatStringRes != NULL)
-	formatString.replace(curPos, rxt.matchedLength(), *substFormatStringRes);
-      else
-	curPos += rxt.matchedLength(); // if no replacement string, skip over
-      
-      // find next substitution
-      curPos = rxt.search(formatString, curPos);
-    }
-
-    ////////////////////////////
-    // now replace substitution arguments in formatted string
-    // NOTE: not using QString::arg() because not all arguments are always used
-    //       and it will do screwy stuff in this situation
-    QRegExp rx("%(\\d{1,3})", true, false);
-
-    // find first template substitution
-    curPos = rx.search(formatString, 0);
-
-    while (curPos != -1)
-    {
-      substArg = rx.cap(1).toInt(&ok);
-
-      // replace substitution argument with argument from list
-      if (ok && (substArg <= argList.size()))
-	formatString.replace(curPos, rx.matchedLength(), argList[substArg-1]);
-      else
-	curPos += rx.matchedLength(); // if no such argument, skip over
-
-      // find next substitution
-      curPos = rx.search(formatString, curPos);
-    }
-
-    return formatString;
-  }
-
-  return tempStr;
 }

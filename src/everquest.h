@@ -576,7 +576,7 @@ struct ClientZoneEntryStruct
 
 /*
 ** New Zone Code
-** Length: 956 Octets
+** Length: 928 Octets
 ** OpCode: NewZoneCode
 */
 struct newZoneStruct
@@ -589,39 +589,40 @@ struct newZoneStruct
 /*0471*/ uint8_t fog_red[4];                     // Zone fog (red)
 /*0475*/ uint8_t fog_green[4];                   // Zone fog (green)
 /*0479*/ uint8_t fog_blue[4];                    // Zone fog (blue)
-/*0483*/ uint8_t unknown0483[87];                // *** Placeholder
-/*0570*/ uint8_t sky;                            // Zone sky
-/*0571*/ uint8_t unknown0571[13];                // *** Placeholder
-/*0584*/ float   zone_exp_multiplier;            // Experience Multiplier
-/*0588*/ float   safe_y;                         // Zone Safe Y
-/*0592*/ float   safe_x;                         // Zone Safe X
-/*0596*/ float   safe_z;                         // Zone Safe Z
-/*0600*/ float   unknown0600;                    // *** Placeholder
-/*0604*/ float   unknown0604;                    // *** Placeholder
-/*0608*/ float   underworld;                     // Underworld
-/*0612*/ float   minclip;                        // Minimum view distance
-/*0616*/ float   maxclip;                        // Maximum view distance
-/*0620*/ uint8_t unknown0616[84];                // *** Placeholder
-/*0704*/ char    zonefile[64];                   // Zone file name?
-/*0768*/ uint8_t unknown0764[36];                // *** Placeholder (12/05/2006)
-/*0804*/ uint8_t unknown0800[32];                // *** Placeholder (02/13/2007)
-/*0836*/ uint8_t unknown0832[12];                // *** Placeholder 
-/*0848*/ uint8_t unknown0844[4];                 // *** Placeholder (06/29/2005)
-/*0852*/ uint8_t unknown0848[4];                 // *** Placeholder (09/13/2005)
-/*0856*/ uint8_t unknown0852[4];                 // *** Placeholder (02/21/2006)
-/*0860*/ uint8_t unknown0856[36];                // *** Placeholder (06/13/2006)
-/*0896*/ uint8_t unknown0892[12];                // *** Placeholder (12/05/2006)
-/*0908*/ uint8_t unknown0904[8];                 // *** Placeholder (02/13/2007)
-/*0916*/ uint8_t unknown0916[4];                 // *** Placeholder (11/24/2007)
-/*0920*/ uint8_t unknown0920[4];                 // *** Placeholder (01/17/2008)
-/*0924*/ uint8_t unknown0924[4];                 // *** Placeholder (09/03/2008)
-/*0928*/ uint8_t unknown0928[4];                 // *** Placeholder (10/07/2008)
-/*0932*/ uint8_t unknown0932[8];                 // *** Placeholder (11/04/2009)
-/*0940*/ uint8_t unknown0940[4];                 // *** Placeholder (12/15/2009)
-/*0944*/ uint8_t unknown0944[4];                 // *** Placeholder (11/15/2011)
-/*0948*/ uint8_t unknown0948[4];                 // *** Placeholder (04/29/2014)
-/*0952*/ uint8_t unknown0952[4];                 // *** Placeholder (10/28/2014)
-/*0956*/
+/*0483*/ uint8_t unknown0483[55];                // *** Placeholder
+/*0538*/ uint8_t sky;                            // Zone sky
+/*0539*/ uint8_t unknown0571[13];                // *** Placeholder
+/*0551*/ float   zone_exp_multiplier;            // Experience Multiplier
+/*0556*/ float   safe_y;                         // Zone Safe Y
+/*0560*/ float   safe_x;                         // Zone Safe X
+/*0564*/ float   safe_z;                         // Zone Safe Z
+/*0568*/ float   unknown0600;                    // *** Placeholder
+/*0572*/ float   unknown0604;                    // *** Placeholder
+/*0576*/ float   underworld;                     // Underworld
+/*0580*/ float   minclip;                        // Minimum view distance
+/*0584*/ float   maxclip;                        // Maximum view distance
+/*0588*/ uint8_t unknown0616[84];                // *** Placeholder
+/*0672*/ char    zonefile[64];                   // Zone file name?
+/*0736*/ uint8_t unknown0764[36];                // *** Placeholder (12/05/2006)
+/*0772*/ uint8_t unknown0800[32];                // *** Placeholder (02/13/2007)
+/*0804*/ uint8_t unknown0832[12];                // *** Placeholder 
+/*0816*/ uint8_t unknown0844[4];                 // *** Placeholder (06/29/2005)
+/*0820*/ uint8_t unknown0848[4];                 // *** Placeholder (09/13/2005)
+/*0824*/ uint8_t unknown0852[4];                 // *** Placeholder (02/21/2006)
+/*0828*/ uint8_t unknown0856[36];                // *** Placeholder (06/13/2006)
+/*0864*/ uint8_t unknown0892[12];                // *** Placeholder (12/05/2006)
+/*0876*/ uint8_t unknown0904[8];                 // *** Placeholder (02/13/2007)
+/*0884*/ uint8_t unknown0916[4];                 // *** Placeholder (11/24/2007)
+/*0888*/ uint8_t unknown0920[4];                 // *** Placeholder (01/17/2008)
+/*0892*/ uint8_t unknown0924[4];                 // *** Placeholder (09/03/2008)
+/*0896*/ uint8_t unknown0928[4];                 // *** Placeholder (10/07/2008)
+/*0900*/ uint8_t unknown0932[8];                 // *** Placeholder (11/04/2009)
+/*0908*/ uint8_t unknown0940[4];                 // *** Placeholder (12/15/2009)
+/*0912*/ uint8_t unknown0944[4];                 // *** Placeholder (11/15/2011)
+/*0916*/ uint8_t unknown0948[4];                 // *** Placeholder (04/29/2014)
+/*0920*/ uint8_t unknown0952[4];                 // *** Placeholder (10/28/2014)
+/*0924*/ uint8_t unknown0956[4];                 // *** Placeholder (03/16/2016)
+/*0928*/
 };
 
 /*
@@ -1097,20 +1098,19 @@ struct spawnStruct
          	signed   y:19;                            // y coord (2nd loc value)		 
 	 	unsigned padding00:1;
 
-         	signed   x:19;                            // x coord (1st loc value)	 
          	signed   deltaX:13;                       // change in x
-
          	signed   deltaHeading:10;                 // change in heading 
-         	signed   z:19;                            // z coord (3rd loc value)
-         	unsigned padding01:3;		 
+         	unsigned padding01:9;		 
 
-         	unsigned heading:12;                      // heading 
 	 	signed   animation:10;                    // velocity
+         	unsigned heading:12;                      // heading 
          	unsigned padding02:10;		 
 
-         	signed   deltaY:13;                       // change in y
+         	signed   x:19;                            // x coord (1st loc value)	 
          	signed   deltaZ:13;                       // change in z 
-         	unsigned padding03:6;		 
+
+         	signed   z:19;                            // z coord (3rd loc value)
+         	signed   deltaY:13;                       // change in y
 
 	   };
            int32_t posData[5];
@@ -1659,11 +1659,12 @@ struct channelMessageStruct
 
 struct formattedMessageStruct
 {
-/*0000*/ uint8_t  unknown0002[4];                // ***Placeholder
-/*0004*/ uint32_t messageFormat;                 // Indicates the message format
-/*0008*/ ChatColor messageColor;                 // Message color
-/*0012*/ char     messages[0];                   // messages(NULL delimited)
-/*0???*/ uint8_t  unknownXXXX[8];                // ***Placeholder
+/*0000*/ uint8_t  unknown0000;
+/*0001*/ uint8_t  unknown0002[4];                // ***Placeholder
+/*0005*/ uint32_t messageFormat;                 // Indicates the message format
+/*0009*/ ChatColor messageColor;                 // Message color
+/*0013*/ char     messages[0];                   // no longer null terminated
+						 // repeat (4-bytes len, string of len)
 };
 
 /*
@@ -2365,26 +2366,25 @@ struct playerSpawnPosStruct
 	 signed   y:19;                            // y coord (2nd loc value)		 
 	 unsigned padding00:1;
 /*0008*/
-	 signed   x:19;                            // x coord (1st loc value)	 
 	 signed   deltaX:13;                       // change in x
-/*0012*/
 	 signed   deltaHeading:10;                 // change in heading 
-	 signed   z:19;                            // z coord (3rd loc value)
-	 unsigned padding01:3;		 
-/*0016*/
-	 unsigned heading:12;                      // heading 
+	 unsigned padding01:9;		 
+/*0012*/
 	 signed   animation:10;                    // velocity
+	 unsigned heading:12;                      // heading 
 	 unsigned padding02:10;		 
-/*0020*/
-	 signed   deltaY:13;                       // change in y
+/*0016*/
+	 signed   x:19;                            // x coord (1st loc value)	 
 	 signed   deltaZ:13;                       // change in z 
-	 unsigned padding03:6;		 
+/*0020*/
+	 signed   z:19;                            // z coord (3rd loc value)
+	 signed   deltaY:13;                       // change in y
 /*0024*/ 
 };
 
 /*
 ** Self Position Update
-** Length: 46 Octets
+** Length: 38 Octets
 ** OpCode: PlayerPosCode
 */
 
@@ -2394,28 +2394,26 @@ struct playerSelfPosStruct
 /*0002*/ uint16_t spawnId;                       // Player's spawn id
 /*0004*/ uint16_t unknown0001;                   // ***Placeholder
 /*0006*/
+	 signed deltaHeading:10;                 // change in heading
 	 unsigned pitch:12;                      // pitch (up/down heading)
-	 unsigned padding01:20;
+	 unsigned padding00:10;
 /*0010*/
 	 float deltaX;                           // Change in x
 /*0014*/
-	 float deltaZ;                           // Change in z
-/*0018*/
 	 float x;                                // x coord (1st loc value)
+/*0018*/
+	 float deltaY;                           // Change in y
 /*0022*/
 	 float y;                                // y coord (2nd loc value)
 /*0026*/
-	 signed animation:10;                    // velocity
-	 unsigned padding02:22;
-/*0030*/
 	 float z;                                // z coord (3rd loc value)
+/*0030*/
+	 float deltaZ;                           // Change in z
 /*0034*/
-	 float deltaY;                           // Change in y
-/*0038*/
-	 signed deltaHeading:10;                 // change in heading
 	 unsigned heading:12;                    // Heading
-	 unsigned padding03:10;
-/*0042*/ 
+	 signed animation:10;                    // velocity
+	 unsigned padding07:10;
+/*0038*/
 };
 
 /*
