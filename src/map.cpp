@@ -816,6 +816,8 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
     subMenu->insertItem("Deity PvP", this, SLOT(toggle_deityPvP(int)));
   m_id_racePvP = 
     subMenu->insertItem("Race PvP", this, SLOT(toggle_racePvP(int)));
+  m_id_pvpEnableGuildmates = 
+    subMenu->insertItem("PvP Enable Guildmates", this, SLOT(toggle_pvp_enable_guildmates(int)));
   m_id_zoneSafePoint = 
     subMenu->insertItem("Zone Safe Point", this, SLOT(toggle_zoneSafePoint(int)));
 #ifdef DEBUG
@@ -984,6 +986,7 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_pvp, m_map->pvp());
   setItemChecked(m_id_deityPvP, m_map->deityPvP());
   setItemChecked(m_id_racePvP, m_map->racePvP());
+  setItemChecked(m_id_pvpEnableGuildmates, m_map->pvpEnableGuildmates());
   setItemChecked(m_id_zoneSafePoint, m_map->showZoneSafePoint());
 #ifdef DEBUG
   setItemChecked(m_id_debugInfo, m_map->showDebugInfo());
@@ -1100,6 +1103,11 @@ void MapMenu::toggle_racePvP(int itemId)
 void MapMenu::toggle_velocity(int itemId)
 {
   m_map->setShowVelocityLines(!m_map->showVelocityLines());
+}
+
+void MapMenu::toggle_pvp_enable_guildmates(int itemId)
+{
+  m_map->setPvPEnableGuildmates(!m_map->pvpEnableGuildmates());
 }
 
 void MapMenu::toggle_animate(int itemId)
@@ -1500,6 +1508,9 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "RacePvP";
   m_racePvP = pSEQPrefs->getPrefBool(tmpPrefString, prefString, false);
+
+  tmpPrefString = "PvPEnableGuildmates";
+  m_pvpEnableGuildmates = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "ShowZoneSafePoint";
   m_showZoneSafePoint = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
@@ -2272,6 +2283,17 @@ void Map::setShowVelocityLines(bool val)
     refreshMap ();
 }
 
+void Map::setPvPEnableGuildmates(bool val) 
+{ 
+  m_pvpEnableGuildmates = val; 
+  
+  QString tmpPrefString = "PvPEnableGuildmates";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_pvpEnableGuildmates);
+
+  if(!m_cacheChanges)
+    refreshMap ();
+}
+
 #ifdef DEBUG
 void Map::setShowDebugInfo(bool val) 
 { 
@@ -2660,6 +2682,7 @@ void Map::dumpInfo(QTextStream& out)
   out << "[" << preferenceName() << "]" << endl;
   out << "Caption: " << caption() << endl;
   out << "AnimateSpawnMovement: " << m_animate << endl;
+  out << "PvPEnableGuildmates: " << m_pvpEnableGuildmates << endl;
   out << "VelocityLines: " << m_showVelocityLines << endl;
   out << "SpawnDepthFilter: " << m_showVelocityLines << endl;
   out << "FrameRate: " << m_frameRate << endl;
@@ -3610,7 +3633,7 @@ void Map::paintSpawns(MapParameters& param,
     printf("PvP handling\n");
 #endif
     const bool spawn_is_in_players_guild = !m_player->guildTag().isEmpty() && spawn->guildID() == m_player->guildID();
-    if (spawn_is_in_players_guild)
+    if (spawn_is_in_players_guild && !m_pvpEnableGuildmates)
     {
       m_mapIcons->paintSpawnIcon(param, p, mapIcon, spawn, location, point);
       continue;

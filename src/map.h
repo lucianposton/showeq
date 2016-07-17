@@ -225,6 +225,7 @@ class MapMenu : public QPopupMenu
   void toggle_filtered(int itemId);
   void toggle_map(int itemId);
   void toggle_velocity(int itemId);
+  void toggle_pvp_enable_guildmates(int itemId);
   void toggle_animate(int itemId);
   void toggle_player(int itemId);
   void toggle_playerBackground(int itemId);
@@ -308,6 +309,7 @@ class MapMenu : public QPopupMenu
   int m_id_deityPvP;
   int m_id_pvp;
   int m_id_racePvP;
+  int m_id_pvpEnableGuildmates;
   int m_id_zoneSafePoint;
 #ifdef DEBUG
   int m_id_debugInfo;
@@ -401,6 +403,7 @@ class Map :public QWidget
   bool showDoors() const { return m_showDoors; }
   bool showFiltered() const { return m_showFiltered; }
   bool showVelocityLines() const { return m_showVelocityLines; }
+  bool pvpEnableGuildmates() const { return m_pvpEnableGuildmates; }
 #ifdef DEBUG
   bool showDebugInfo() const { return m_showDebugInfo; }
 #endif
@@ -500,6 +503,7 @@ class Map :public QWidget
   void setShowDrops(bool val);
   void setShowDoors(bool val);
   void setShowVelocityLines(bool val);
+  void setPvPEnableGuildmates(bool val);
   void setShowDebugInfo(bool val);
   void setCacheChanges(bool val);
   void setAnimate(bool val);
@@ -638,6 +642,7 @@ private:
    bool m_showSpawnNames;
    bool m_showFiltered;
    bool m_showVelocityLines;
+   bool m_pvpEnableGuildmates;
 #ifdef DEBUG
    bool m_showDebugInfo;
 #endif
