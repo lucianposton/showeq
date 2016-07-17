@@ -3609,6 +3609,12 @@ void Map::paintSpawns(MapParameters& param,
 #ifdef DEBUGMAP
     printf("PvP handling\n");
 #endif
+    const bool spawn_is_in_players_guild = !m_player->guildTag().isEmpty() && spawn->guildID() == m_player->guildID();
+    if (spawn_is_in_players_guild)
+    {
+      m_mapIcons->paintSpawnIcon(param, p, mapIcon, spawn, location, point);
+      continue;
+    }
     
     const Spawn* owner;
     
