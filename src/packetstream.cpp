@@ -393,10 +393,13 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
 				    uint16_t opCode, 
 				    const EQPacketOPCode* opcodeEntry)
 {
-  // sanity check
   if(len > 65534)
   {
-	seqDebug("dispatchPacket: attempting to dispatch packet len > 65534...");
+	seqDebug("dispatchPacket: attempting to dispatch packet len > 65534. opCode=%#04x. %#04x '%s' (size %zu)",
+	    (unsigned)opCode,
+        opcodeEntry ? opcodeEntry->opcode() : 0,
+        opcodeEntry ? (const char*)opcodeEntry->name() : "null opcodeEntry",
+        len);
   }
 
   emit decodedPacket(data, len, m_dir, opCode, opcodeEntry);
@@ -412,7 +415,7 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
 
 #ifdef PACKET_INFO_DIAG
     seqDebug(
-	    "dispatchPacket: attempting to dispatch opcode %#04x '%s' (size %d)",
+	    "dispatchPacket: attempting to dispatch opcode %#04x '%s' (size %zu)",
 	    opcodeEntry->opcode(), (const char*)opcodeEntry->name(),len);
 #endif
 
