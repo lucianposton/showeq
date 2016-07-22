@@ -236,6 +236,7 @@ class MapMenu : public QPopupMenu
   void toggle_spawns(int itemId);
   void toggle_spawnPnts(int itemId);
   void toggle_unknownSpawns(int itemId);
+  void toggle_corpses(int itemId);
   void toggle_drops(int itemId);
   void toggle_doors(int itemId);
   void toggle_highlightConsideredSpawns(int itemId);
@@ -299,6 +300,7 @@ class MapMenu : public QPopupMenu
   int m_id_spawns;
   int m_id_spawnPoints;
   int m_id_unknownSpawns;
+  int m_id_corpses;
   int m_id_drops;
   int m_id_doors;
   int m_id_spawnNames;
@@ -399,6 +401,7 @@ class Map :public QWidget
   bool showSpawns() const { return m_showSpawns; }
   bool showSpawnPoints() const { return m_showSpawnPoints; }
   bool showUnknownSpawns() const { return m_showUnknownSpawns; }
+  bool showCorpses() const { return m_showCorpses; }
   bool showDrops() const { return m_showDrops; }
   bool showDoors() const { return m_showDoors; }
   bool showFiltered() const { return m_showFiltered; }
@@ -500,6 +503,7 @@ class Map :public QWidget
   void setShowSpawns(bool val);
   void setShowSpawnPoints(bool val);
   void setShowUnknownSpawns(bool val);
+  void setShowCorpses(bool val);
   void setShowDrops(bool val);
   void setShowDoors(bool val);
   void setShowVelocityLines(bool val);
@@ -639,6 +643,7 @@ private:
    bool m_showSpawns;
    bool m_showSpawnPoints;
    bool m_showUnknownSpawns;
+   bool m_showCorpses;
    bool m_showSpawnNames;
    bool m_showFiltered;
    bool m_showVelocityLines;

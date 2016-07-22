@@ -798,6 +798,8 @@ MapMenu::MapMenu(Map* map, QWidget* parent, const char* name)
   m_id_spawns = subMenu->insertItem("Spawns", this, SLOT(toggle_spawns(int)));
   m_id_unknownSpawns = subMenu->insertItem("Unknown Spawns", 
                        this, SLOT(toggle_unknownSpawns(int)));
+  m_id_corpses = 
+    subMenu->insertItem("Corpses", this, SLOT(toggle_corpses(int)));
   m_id_spawnPoints = subMenu->insertItem("Spawn Points", this, SLOT( toggle_spawnPnts(int) ));
   m_id_drops = subMenu->insertItem("Drops", this, SLOT(toggle_drops(int)));
   m_id_doors = subMenu->insertItem("Doors", this, SLOT(toggle_doors(int)));
@@ -975,6 +977,7 @@ void MapMenu::init_Menu(void)
   setItemChecked(m_id_spawns, m_map->showSpawns());
   setItemChecked(m_id_spawnPoints, m_map->showSpawnPoints());
   setItemChecked(m_id_unknownSpawns, m_map->showUnknownSpawns());
+  setItemChecked(m_id_corpses, m_map->showCorpses());
   setItemChecked(m_id_drops, m_map->showDrops());
   setItemChecked(m_id_doors, m_map->showDoors());
   setItemChecked(m_id_spawnNames, m_mapIcons->showSpawnNames());
@@ -1148,6 +1151,11 @@ void MapMenu::toggle_locations(int itemId)
 void MapMenu::toggle_spawns(int itemId)
 {
   m_map->setShowSpawns(!m_map->showSpawns());
+}
+
+void MapMenu::toggle_corpses(int itemId)
+{
+  m_map->setShowCorpses(!m_map->showCorpses());
 }
 
 void MapMenu::toggle_spawnPnts(int itemId)
@@ -1409,6 +1417,9 @@ Map::Map(MapMgr* mapMgr,
 
   tmpPrefString = "ShowSpawns";
   m_showSpawns = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
+
+  tmpPrefString = "ShowCorpses";
+  m_showCorpses = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
 
   tmpPrefString = "ShowSpawnPoints";
   m_showSpawnPoints = pSEQPrefs->getPrefBool(tmpPrefString, prefString, true);
@@ -2228,6 +2239,18 @@ void Map::setShowSpawns(bool val)
     refreshMap ();
 }
 
+void Map::setShowCorpses(bool val) 
+{ 
+  m_showCorpses = val; 
+  
+  QString tmpPrefString = "ShowCorpses";
+  pSEQPrefs->setPrefBool(tmpPrefString, preferenceName(), m_showCorpses);
+
+  if(!m_cacheChanges)
+    refreshMap ();
+}
+
+
 void Map::setShowSpawnPoints(bool val) 
 { 
   m_showSpawnPoints = val; 
@@ -2695,6 +2718,7 @@ void Map::dumpInfo(QTextStream& out)
   out << "ShowDroppedItems: " << m_showDrops << endl;
   out << "ShowDoors: " << m_showDoors << endl;
   out << "ShowSpawns: " << m_showSpawns << endl;
+  out << "ShowCorpses: " << m_showCorpses << endl;
   out << "ShowFiltered: " << m_showFiltered << endl;
   out << "HighlightConsideredSpawns: " << m_highlightConsideredSpawns << endl;
   out << "ShowTooltips: " << m_showTooltips << endl;
@@ -3517,6 +3541,10 @@ void Map::paintSpawns(MapParameters& param,
     spawn = (const Spawn*)item;
 #endif
 
+    if (!m_showCorpses && spawn->isCorpse()) {
+      continue;
+    }
+
     filterFlags = item->filterFlags();
 
     if (((m_spawnDepthFilter &&
@@ -4204,6 +4232,10 @@ const Item* Map::closestSpawnToPoint(const QPoint& pt,
 
       if ((item->type() == tSpawn) || (item->type() == tPlayer))
       {
+        if (!m_showCorpses && ((const Spawn*)item)->isCorpse()) {
+          continue;
+        }
+
         if (!m_showUnknownSpawns && ((const Spawn*)item)->isUnknown())
           continue;
 
