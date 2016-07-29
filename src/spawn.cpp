@@ -749,17 +749,17 @@ QString Spawn::transformedName() const
   QString         temp = cleanedName();
   QString         article;
   
-  if (temp.startsWith( "a " ))
+  if (temp.startsWith( "a ", false ))
   {
     temp = temp.mid( 2 );
     article = "a";
   }
-  else if (temp.startsWith( "an " ))
+  else if (temp.startsWith( "an ", false ))
   {
     temp = temp.mid( 3 );
     article = "an";
   }
-  else if (temp.startsWith( "the " ))
+  else if (temp.startsWith( "the ", false ))
   {
     temp = temp.mid( 4 );
     article = "the";
