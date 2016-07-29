@@ -169,6 +169,10 @@ void FilterItem::init(const QString& regexString, bool caseSensitive,
   m_regexpOriginalPattern = QString(regexString.ascii());
 
   QString fixedFilterPattern = regexString;
+  fixedFilterPattern.replace("Name:#", "Name:", false);
+  fixedFilterPattern.replace("Name:the ", "Name:", false);
+  fixedFilterPattern.replace("Name:an ", "Name:", false);
+  fixedFilterPattern.replace("Name:a ", "Name:", false);
   fixedFilterPattern.replace("Name:", "Name:#?", false);
   m_regexp.setPattern(fixedFilterPattern);
 
