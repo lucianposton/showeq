@@ -916,26 +916,24 @@ bool Spawn::approximatePosition(bool animating,
   // default is the current location of the spawn
   newPos.setPoint(*this);
 
+  // get the amount of time since last update
+  int msec = m_lastUpdate.msecsTo(curTime);
+
+  if (msec < 0) // if passed midnight, adjust time accordingly
+      msec += 86400 * 1000;
+
+  // if it's been over 90 seconds, then don't adjust position
+  if (msec > (90 * 1000))
+  {
+      return false;
+  }
+
   // if animating calculate the current predicted position
   if (animating)
   {
-    // get the amount of time since last update
-    int msec = m_lastUpdate.msecsTo(curTime); 
-    
-    if (msec < 0) // if passed midnight, adjust time accordingly
-      msec += 86400 * 1000;
-    
-    // if it's been over 90 seconds, then don't adjust position
-    if (msec < (90 * 1000))
-    {
       newPos.addPoint(fixPtMulII(m_cookedDeltaXFixPt, qFormat, msec),
-		      fixPtMulII(m_cookedDeltaYFixPt, qFormat, msec),
-		      fixPtMulII(m_cookedDeltaZFixPt, qFormat, msec));
-
-      return true;
-    }
-    else
-      return false;
+              fixPtMulII(m_cookedDeltaYFixPt, qFormat, msec),
+              fixPtMulII(m_cookedDeltaZFixPt, qFormat, msec));
   }
 
   return true;
