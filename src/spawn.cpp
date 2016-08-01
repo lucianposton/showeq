@@ -922,8 +922,8 @@ bool Spawn::approximatePosition(bool animating,
   if (msec < 0) // if passed midnight, adjust time accordingly
       msec += 86400 * 1000;
 
-  // if it's been over 90 seconds, then don't adjust position
-  if (msec > (90 * 1000))
+  // if it's been over 18 seconds, then don't adjust position
+  if (msec > (18 * 1000))
   {
       return false;
   }
