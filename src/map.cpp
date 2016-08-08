@@ -3699,22 +3699,6 @@ void Map::paintSpawns(MapParameters& param,
           {
             // Gank away! Add color circle.
             mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPetPvPEnabled));
-
-            QPen p2(mapIcon.highlightPen());
-            
-            if (levelDiff < 0)
-            {
-              p2.setColor(yellow);
-            }
-            else if (levelDiff > 0)
-            {
-              p2.setColor(blue);
-            }
-            else
-            {
-              p2.setColor(white);
-            }
-            mapIcon.setHighlightPen(p2);
           }
         }
       }
