@@ -212,10 +212,14 @@ void MapIcon::combine(const MapIcon& mapIcon)
       m_imageStyle = mapIcon.m_imageStyle;
     if (mapIcon.m_imageSize != tIconSizeNone)
       m_imageSize = mapIcon.m_imageSize;
-    m_imageBrush = mapIcon.m_imageBrush;
-    m_imagePen = mapIcon.m_imagePen;
-    m_imageUseSpawnColorPen = mapIcon.m_imageUseSpawnColorPen;
-    m_imageUseSpawnColorBrush = mapIcon.m_imageUseSpawnColorBrush;
+    if (mapIcon.m_imageBrush != Qt::NoBrush) {
+      m_imageBrush = mapIcon.m_imageBrush;
+      m_imageUseSpawnColorBrush = mapIcon.m_imageUseSpawnColorBrush;
+    }
+    if (mapIcon.m_imagePen != Qt::NoPen) {
+      m_imagePen = mapIcon.m_imagePen;
+      m_imageUseSpawnColorPen = mapIcon.m_imageUseSpawnColorPen;
+    }
     if (mapIcon.m_imageFlash)
       m_imageFlash = mapIcon.m_imageFlash;
   }
@@ -228,10 +232,14 @@ void MapIcon::combine(const MapIcon& mapIcon)
       m_highlightStyle = mapIcon.m_highlightStyle;
     if (mapIcon.m_highlightSize != tIconSizeNone)
       m_highlightSize = mapIcon.m_highlightSize;
-    m_highlightBrush = mapIcon.m_highlightBrush;
-    m_highlightPen = mapIcon.m_highlightPen;
-    m_highlightUseSpawnColorPen = mapIcon.m_highlightUseSpawnColorPen;
-    m_highlightUseSpawnColorBrush = mapIcon.m_highlightUseSpawnColorBrush;
+    if (mapIcon.m_highlightBrush != Qt::NoBrush) {
+      m_highlightBrush = mapIcon.m_highlightBrush;
+      m_highlightUseSpawnColorBrush = mapIcon.m_highlightUseSpawnColorBrush;
+    }
+    if (mapIcon.m_highlightPen != Qt::NoPen) {
+      m_highlightPen = mapIcon.m_highlightPen;
+      m_highlightUseSpawnColorPen = mapIcon.m_highlightUseSpawnColorPen;
+    }
     if (mapIcon.m_highlightFlash)
       m_highlightFlash = mapIcon.m_highlightFlash;
   }
