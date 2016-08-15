@@ -815,6 +815,13 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
              app->spawnId, app->type, app->parameter);
 #endif
 
+    switch(app->type)
+    {
+        case 16: // player ID update
+            m_player->setPlayerID(app->parameter);
+            break;
+    }
+
    Item* item = m_spawns.find(app->spawnId);
 
    if (item != NULL)
