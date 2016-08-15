@@ -820,6 +820,13 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
   emit posChanged(x(), y(), z(), 
 		  deltaX(), deltaY(), deltaZ(), m_headingDegrees);
 
+  if (id() != zsentry->spawnId)
+  {
+     setID(zsentry->spawnId);
+     seqDebug("Set player's id to %i upon entering zone", id());
+     emit changedID(id());
+  }
+
   setUseDefaults(false);
   
   if (showeq_params->savePlayerState)
@@ -828,6 +835,7 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
   // update the con table
   fillConTable();
 
+  updateLastChanged();
   emit changeItem(this, tSpawnChangedALL);
 }
 
