@@ -501,6 +501,11 @@ void SpawnShell::newSpawn(const spawnStruct& s)
    if (s.NPC == SPAWN_SELF)
      return;
 
+   // When s.NPC is not set to SPAWN_SELF, check whether id matches known
+   // player id
+   if (s.spawnId == m_player->id())
+       return;
+
    // not the player, so check if it's a recently deleted spawn
    for (int i =0; i < m_cntDeadSpawnIDs; i++)
    {
