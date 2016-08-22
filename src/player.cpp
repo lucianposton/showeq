@@ -809,9 +809,13 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
          zsentry->z >> 3,
 	 showeq_params->walkpathrecord,
 	 showeq_params->walkpathlength);
-  seqDebug("Player::zoneBegin(): Pos (%f/%f/%f) Heading %f",
-	   float(zsentry->x)/8.0, float(zsentry->y)/8.0, float(zsentry->z)/8.0,
-       float(zsentry->heading));
+  for (int i = 0; i <= tLastCoreWearSlot; i++)
+    setEquipment(i, zsentry->equipment[i]);
+  setEquipment(tUnknown1, 0);
+  seqDebug("Player::zoneBegin(): playerid=%d Pos (%f/%f/%f) Heading %f",
+          zsentry->spawnId,
+          float(zsentry->x)/8.0, float(zsentry->y)/8.0, float(zsentry->z)/8.0,
+          float(zsentry->heading));
   setHeading(zsentry->heading, 0);
   m_validPos = true;
 
