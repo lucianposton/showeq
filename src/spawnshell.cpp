@@ -887,12 +887,17 @@ void SpawnShell::updateNpcHP(const uint8_t* data)
 void SpawnShell::spawnWearingUpdate(const uint8_t* data)
 {
   const wearChangeStruct *wearing = (const wearChangeStruct *)data;
+#ifdef SPAWNSHELL_DIAG
+   seqDebug("SpawnShell::spawnWearingUpdate(id=%d, slot=%d, material=%d)",
+           wearing->spawnId, wearing->wearSlotId, wearing->materialId);
+#endif
   Item* item = m_spawns.find(wearing->spawnId);
   if (item != NULL)
   {
     // ZBTEMP: Find newItemID
-    //Spawn* spawn = (Spawn*)item;
-    //    spawn->setEquipment(wearing->wearSlotId, wearing->newItemId);
+    Spawn* spawn = (Spawn*)item;
+    spawn->setEquipment(wearing->wearSlotId, wearing->materialId);
+
     uint32_t changeType = tSpawnChangedWearing;
     if (updateFilterFlags(item))
       changeType |= tSpawnChangedFilter;

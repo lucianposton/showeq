@@ -58,7 +58,7 @@ enum itemWearSlot
   tHead          = 0,
   tChest         = 1,
   tArms          = 2,
-  tWaist         = 3,
+  tWrist         = 3,
   tGloves        = 4,
   tLegs          = 5,
   tFeet          = 6,

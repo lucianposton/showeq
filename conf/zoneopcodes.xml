@@ -521,7 +521,7 @@
     </opcode>
     <opcode id="7441" name="OP_WearChange" updated="10/27/05">
         <comment>old SpawnUpdateCode</comment>
-        <payload dir="both" typename="SpawnUpdateStruct" sizechecktype="match"/>
+        <payload dir="both" typename="wearChangeStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="497c" name="OP_Action" updated="10/27/05">
         <comment></comment>

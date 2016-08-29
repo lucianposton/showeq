@@ -418,7 +418,7 @@ struct Color_Struct
 /*0000*/uint8_t blue;
 /*0001*/uint8_t red;
 /*0002*/uint8_t green;
-/*0003*/uint8_t unknown0003;
+/*0003*/uint8_t use_tint; // if there is a tint, this is 0xff
     } rgb;
 /*0000*/uint32_t color;
   };
@@ -1765,10 +1765,10 @@ struct skillIncStruct
 struct wearChangeStruct
 {
 /*0000*/ uint16_t spawnId;                // SpawnID
-/*0002*/ Color_Struct color;              // item color
-/*0006*/ uint8_t  wearSlotId;             // Slot ID
-/*0007*/ uint8_t  unknown0005[7];         // unknown
-/*0014*/
+/*0002*/ uint16_t materialId;             // Material ID
+/*0004*/ Color_Struct color;              // item color
+/*0008*/ uint8_t  wearSlotId;             // Slot ID
+/*0009*/
 };
 
 /*

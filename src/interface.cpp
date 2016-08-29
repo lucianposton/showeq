@@ -2001,8 +2001,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 		      "spawnPositionUpdate", SZC_Match,
 		      m_spawnShell, SLOT(updateSpawns(const uint8_t*)));
    m_packet->connect2("OP_WearChange", SP_Zone, DIR_Server|DIR_Client,
-		      "SpawnUpdateStruct", SZC_Match,
-		      m_spawnShell, SLOT(updateSpawnInfo(const uint8_t*)));
+		      "wearChangeStruct", SZC_Match,
+		      m_spawnShell, SLOT(spawnWearingUpdate(const uint8_t*)));
    m_packet->connect2("OP_HPUpdate", SP_Zone, DIR_Server|DIR_Client,
 		      "hpNpcUpdateStruct", SZC_Match,
 		      m_spawnShell, SLOT(updateNpcHP(const uint8_t*)));
@@ -2094,8 +2094,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 		      "hpNpcUpdateStruct", SZC_Match,
 		      m_player, SLOT(updateNpcHP(const uint8_t*)));
    m_packet->connect2("OP_WearChange", SP_Zone, DIR_Server|DIR_Client,
-		      "SpawnUpdateStruct", SZC_Match,
-		      m_player, SLOT(updateSpawnInfo(const uint8_t*)));
+		      "wearChangeStruct", SZC_Match,
+		      m_player, SLOT(spawnWearingUpdate(const uint8_t*)));
    m_packet->connect2("OP_Stamina", SP_Zone, DIR_Server,
 		      "staminaStruct", SZC_Match,
 		      m_player, SLOT(updateStamina(const uint8_t*)));

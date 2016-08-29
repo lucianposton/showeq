@@ -384,6 +384,21 @@ void Player::player(const uint8_t* data)
   }
 }
 
+void Player::spawnWearingUpdate(const uint8_t* data)
+{
+    const wearChangeStruct *wearing = (const wearChangeStruct *)data;
+#ifdef DEBUG_PLAYER
+    seqDebug("Player::spawnWearingUpdate(id=%d, slot=%d, material=%d)",
+            wearing->spawnId, wearing->wearSlotId, wearing->materialId);
+#endif
+    if (id() == wearing->spawnId)
+    {
+        setEquipment(wearing->wearSlotId, wearing->materialId);
+        updateLastChanged();
+        emit changeItem(this, tSpawnChangedWearing);
+    }
+}
+
 #if 0 // ZBTEMP
 void Player::wearItem(const playerItemStruct* itemp)
 {
