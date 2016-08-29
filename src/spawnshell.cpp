@@ -866,6 +866,26 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
    }
 }
 
+void SpawnShell::mobHealthUpdate(const uint8_t* data)
+{
+  const mobHealthStruct* hpupdate = (const mobHealthStruct*)data;
+#ifdef SPAWNSHELL_DIAG
+   seqDebug("SpawnShell::mobHealthUpdate(id=%d, hp=%d)",
+           hpupdate->spawnId, hpupdate->hp);
+#endif
+   Item* item = m_spawns.find(hpupdate->spawnId);
+   if (item != NULL)
+   {
+     Spawn* spawn = (Spawn*)item;
+     if (spawn->HP() != hpupdate->hp) {
+         spawn->setHP(hpupdate->hp);
+         spawn->setMaxHP(100);
+         emit changeItem(item, tSpawnChangedHP);
+     }
+     item->updateLastChanged();
+   }
+}
+
 void SpawnShell::updateNpcHP(const uint8_t* data)
 {
   const hpNpcUpdateStruct* hpupdate = (const hpNpcUpdateStruct*)data;

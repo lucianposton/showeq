@@ -1227,6 +1227,17 @@ struct spawnIllusionStruct
 /*0080*/ uint8_t    unknown0082[88];    // ***Placeholder
 };
 
+/*
+** Adjust hp of a spawn
+** Length: 3 Octets
+** OpCode: MobHealth
+*/
+struct mobHealthStruct {
+/*0000*/    uint16_t spawnId;           // spawn id of target
+/*0002*/    uint8_t  hp;                // hp percentage
+/*0003*/
+};
+
 
 /*
 **                 ShowEQ Specific Structures

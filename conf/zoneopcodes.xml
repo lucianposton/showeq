@@ -641,6 +641,7 @@
     </opcode>
     <opcode id="0695" name="OP_MobHealth" updated="10/27/05">
         <comment>health sent when a player clicks on the mob</comment>
+        <payload dir="server" typename="mobHealthStruct" sizechecktype="match"/>
     </opcode>
     <opcode id="5534" name="OP_RandomReq" updated="10/27/05">
         <comment>old RandomReqCode</comment>
