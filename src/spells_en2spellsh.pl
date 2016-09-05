@@ -80,7 +80,7 @@ while($line = <SPELLSEN>)
 }
 
 $emptyCount = 0;
-for ($spellId = 0; $spellId < $maxSpellId; $spellId++)
+for ($spellId = 0; $spellId <= $maxSpellId; $spellId++)
 {
     if ($records[$spellId]) 
     {
