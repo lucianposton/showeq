@@ -8671,7 +8671,9 @@
 /* 0x21d3 -  8659 */ { "Invoke Shadow" }, 
 /* 0x21d4 -  8660 */ { "Breath of the Dead" }, 
 /* 0x21d5 -  8661 */ { "Conjure Corpse" }, 
+/* 0x21d6 -  8662 */ { "Cancel Magic" }, 
+/* 0x21d7 -  8663 */ { "Egress" }, 
 // 
-// Max SpellId: 0x21d6 =  8662
-// Number of Spells: 8065
+// Max SpellId: 0x21d7 =  8663
+// Number of Spells: 8066
 // Empty Entries: 597
