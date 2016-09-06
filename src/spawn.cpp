@@ -748,27 +748,39 @@ QString Spawn::transformedName() const
 {
   QString         temp = cleanedName();
   QString         article;
-  
+  bool            leading_hash = false;
+
+  if (temp.startsWith( "#", false ))
+  {
+    temp.remove( 0, 1 );
+    leading_hash = true;
+  }
+
   if (temp.startsWith( "a ", false ))
   {
-    temp = temp.mid( 2 );
+    temp.remove( 0, 2 );
     article = "a";
   }
   else if (temp.startsWith( "an ", false ))
   {
-    temp = temp.mid( 3 );
+    temp.remove( 0, 3 );
     article = "an";
   }
   else if (temp.startsWith( "the ", false ))
   {
-    temp = temp.mid( 4 );
+    temp.remove( 0, 4 );
     article = "the";
   }
 
   if (!article.isEmpty())
   {
-    temp += ", ";
-    temp += article;
+    temp.append( ", " );
+    temp.append( article );
+  }
+
+  if (leading_hash)
+  {
+    temp.prepend('#');
   }
 
   return temp;
