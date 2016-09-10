@@ -230,6 +230,7 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
 		       lrintf(zoneNew->safe_z));
   m_zone_exp_multiplier = zoneNew->zone_exp_multiplier;
 
+#if 0 // ZBTEMP
   // ZBNOTE: Apparently these come in with the localized names, which means we 
   //         may not wish to use them for zone short names.  
   //         An example of this is: shortZoneName 'ecommons' in German comes 
@@ -244,13 +245,19 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
     QRegExp rx("_\\d+$");
     m_shortZoneName.replace( rx, "");
   }
+#else
+    m_shortZoneName = zoneNew->shortName;
+    // LDoN likes to append a _262 to the zonename. Get rid of it.
+    QRegExp rx("_\\d+$");
+    m_shortZoneName.replace( rx, "");
+#endif // ZBTEMP
 
   m_longZoneName = zoneNew->longName;
   m_zoning = false;
 
 #if 1 // ZBTEMP
-  seqDebug("Welcome to lovely downtown '%s' with an experience multiplier of %f",
-	 zoneNew->longName, zoneNew->zone_exp_multiplier);
+  seqDebug("Welcome to lovely downtown '%s' (%s) with an experience multiplier of %f",
+	 zoneNew->longName, zoneNew->shortName, zoneNew->zone_exp_multiplier);
   seqDebug("Safe Point (%f, %f, %f)", 
 	 zoneNew->safe_x, zoneNew->safe_y, zoneNew->safe_z);
 #endif // ZBTEMP
