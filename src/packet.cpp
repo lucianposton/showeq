@@ -995,6 +995,8 @@ void EQPacket::monitorDevice(const QString& dev)
 {
   // set the device to use
   m_device = dev;
+  m_ip = pSEQPrefs->getPrefString("IP", "Network", AUTOMATIC_CLIENT_IP);
+  m_mac = pSEQPrefs->getPrefString("MAC", "Network", "0");
 
   // make sure we aren't playing back packets
   if (m_playbackPackets != PLAYBACK_OFF)
