@@ -237,6 +237,8 @@ void PacketCaptureThread::startOffline(const char* filename, int playbackSpeed)
 void PacketCaptureThread::stop()
 {
     // close the pcap session
+    pcap_breakloop(m_pcache_pcap);
+    pthread_join(m_tid, NULL);
     pcap_close(m_pcache_pcap);
     m_pcache_pcap = NULL;
 }
@@ -244,7 +246,8 @@ void PacketCaptureThread::stop()
 void* PacketCaptureThread::loop (void *param)
 {
     PacketCaptureThread* myThis = (PacketCaptureThread*)param;
-    pcap_loop (myThis->m_pcache_pcap, -1, packetCallBack, (u_char*)param);
+    const int result = pcap_loop (myThis->m_pcache_pcap, -1, packetCallBack, (u_char*)param);
+    seqDebug("pcap_loop returned %d. pcap_geterr=%s", result, pcap_geterr(myThis->m_pcache_pcap));
     return NULL;
 }
 
