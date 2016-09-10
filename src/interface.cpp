@@ -4515,9 +4515,9 @@ void EQInterface::syncDateTime(const QDateTime& dt)
 void EQInterface::zoneBegin(const QString& shortZoneName)
 {
   emit newZoneName(shortZoneName);
-  float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
+  float percentZEM = m_zoneMgr->zoneExpMultiplier();
   QString tempStr;
-  tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
+  tempStr.sprintf("ZEM: %3.2f", percentZEM);
   if (m_stsbarZEM)
     m_stsbarZEM->setText(tempStr);
 }
@@ -4527,9 +4527,9 @@ void EQInterface::zoneEnd(const QString& shortZoneName,
 {
   emit newZoneName(longZoneName);
   stsMessage("");
-  float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
+  float percentZEM = m_zoneMgr->zoneExpMultiplier();
   QString tempStr;
-  tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
+  tempStr.sprintf("ZEM: %3.2f", percentZEM);
   if (m_stsbarZEM)
     m_stsbarZEM->setText(tempStr);
 }
@@ -4539,8 +4539,8 @@ void EQInterface::zoneChanged(const QString& shortZoneName)
   QString tempStr;
   stsMessage("- Busy Zoning -");
   emit newZoneName(shortZoneName);
-  float percentZEM = ((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100;
-  tempStr.sprintf("ZEM: %3.2f%%", percentZEM);
+  float percentZEM = m_zoneMgr->zoneExpMultiplier();
+  tempStr.sprintf("ZEM: %3.2f", percentZEM);
   if (m_stsbarZEM)
     m_stsbarZEM->setText(tempStr);
 }
