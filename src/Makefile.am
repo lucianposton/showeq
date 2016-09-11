@@ -31,7 +31,7 @@ showeq_moc_SRCS = bazaarlog.moc category.moc combatlog.moc compass.moc \
   guild.moc guildlist.moc guildshell.moc interface.moc itemdb.moc logger.moc \
   map.moc mapicon.moc messagefilter.moc messagefilterdialog.moc messages.moc \
   messageshell.moc messagewindow.moc netdiag.moc packet.moc packetinfo.moc \
-  packetlog.moc packetstream.moc player.moc seqlistview.moc \
+  packetcapture.moc packetlog.moc packetstream.moc player.moc seqlistview.moc \
   seqwindow.moc skilllist.moc spawnlist.moc spawnlist2.moc spawnlistcommon.moc \
   spawnlog.moc spawnmonitor.moc spawnpointlist.moc spawnshell.moc spelllist.moc \
   spellshell.moc statlist.moc terminal.moc xmlpreferences.moc zonemgr.moc
@@ -68,6 +68,7 @@ $(srcdir)/packet.cpp: packet.moc
 $(srcdir)/packetinfo.cpp: packetinfo.moc
 $(srcdir)/packetlog.cpp: packetlog.moc
 $(srcdir)/packetstream.cpp: packetstream.moc
+$(srcdir)/packetcapture.cpp: packetcapture.moc
 $(srcdir)/player.cpp: player.moc
 $(srcdir)/seqlistview.cpp: seqlistview.moc
 $(srcdir)/seqwindow.cpp: seqwindow.moc

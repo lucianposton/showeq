@@ -248,6 +248,9 @@ void* PacketCaptureThread::loop (void *param)
     PacketCaptureThread* myThis = (PacketCaptureThread*)param;
     const int result = pcap_loop (myThis->m_pcache_pcap, -1, packetCallBack, (u_char*)param);
     seqDebug("pcap_loop returned %d. pcap_geterr=%s", result, pcap_geterr(myThis->m_pcache_pcap));
+    if (result == -1) {
+        emit myThis->captureFailed();
+    }
     return NULL;
 }
 
@@ -517,4 +520,4 @@ const QString PacketCaptureThread::getFilter()
 {
   return m_pcapFilter;
 }
-
+#include "packetcapture.moc"

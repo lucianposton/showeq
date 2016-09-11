@@ -21,6 +21,7 @@ extern "C" { // fix for bpf not being c++ happy
 #include <pcap.h>
 }
 
+#include <qobject.h>
 #include <qstring.h>
 
 #include "packetcommon.h"
@@ -37,8 +38,9 @@ const uint8_t MAC_ADDRESS_TYPE =  12;
 
 //----------------------------------------------------------------------
 // PacketCaptureThread
-class PacketCaptureThread
+class PacketCaptureThread : public QObject
 {
+   Q_OBJECT
  public:
          PacketCaptureThread();
          ~PacketCaptureThread();
@@ -82,6 +84,8 @@ class PacketCaptureThread
      int m_playbackSpeed; // -1=paused, 0=max, 1=1x speed, 2=2x speed, up to 9
      timeval m_tvLastProcessedActual;
      timeval m_tvLastProcessedOriginal;
+ signals:
+     void captureFailed();
 };
 
 #endif // _PACKETCAPTURE_H_

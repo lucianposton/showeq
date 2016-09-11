@@ -223,6 +223,8 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
       m_packetCapture->start(m_device,
 			     m_ip, 
 			     m_realtime, IP_ADDRESS_TYPE );
+    connect(m_packetCapture, SIGNAL(captureFailed()),
+            this, SLOT(captureFailed()));
     emit filterChanged();
   }
   else if (m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
@@ -995,6 +997,11 @@ void EQPacket::monitorDevice(const QString& dev)
 {
   // set the device to use
   m_device = dev;
+  restartMonitor();
+}
+
+void EQPacket::restartMonitor()
+{
   m_ip = pSEQPrefs->getPrefString("IP", "Network", AUTOMATIC_CLIENT_IP);
   m_mac = pSEQPrefs->getPrefString("MAC", "Network", "0");
 
@@ -1051,6 +1058,26 @@ void EQPacket::monitorDevice(const QString& dev)
     m_packetCapture->start(m_device, m_ip, 
 			   m_realtime, IP_ADDRESS_TYPE );
   emit filterChanged();
+}
+
+namespace {
+
+void* restartAfterDelay(void* arg)
+{
+    EQPacket* myThis = (EQPacket*)arg;
+    sleep(15);
+    seqDebug("restarting capture");
+    myThis->restartMonitor();
+}
+
+}
+
+void EQPacket::captureFailed()
+{
+    // try restart after 15 sec
+    pthread_t p;
+    pthread_create(&p, NULL, restartAfterDelay, (void*)this);
+    pthread_detach(p);
 }
 
 ///////////////////////////////////////////

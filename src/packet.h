@@ -101,6 +101,8 @@ class EQPacket : public QObject
    void monitorMACClient(const QString& address);   
    void monitorNextClient();   
    void monitorDevice(const QString& dev);   
+   void restartMonitor();
+   void captureFailed();
    void session_tracking(bool enable);
    void packet_decryption(bool enable);
    void setArqSeqGiveUp(uint16_t giveUp);
