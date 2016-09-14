@@ -3,8 +3,6 @@ AUTOMAKE_OPTIONS = 1.9 dist-bzip2
 
 SUBDIRS = src conf
 
-include doxygen.am
-
 EXTRA_DIST = BUGS ChangeLog FAQ INSTALL.newbies Makefile.dist README.libEQ \
 ROADMAP showeq.1 TODO showeq.kdevelop Doxyfile depcomp $(DX_CONFIG)
 
