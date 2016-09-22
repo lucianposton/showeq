@@ -591,6 +591,8 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
 {
   in_port_t destPort = packet.getDestPort();
   if ((destPort < 1024) ||
+          (destPort == 9133) ||
+          (destPort == 9415) ||
           (destPort == 1048) ||
           (destPort == 1085) ||
           (destPort == 1119) ||
@@ -611,6 +613,13 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
       // TODO: could check for multicast/broadcast addresses
 
       // Drop obviously non-eq ports
+      return;
+  }
+
+  in_port_t srcPort = packet.getSourcePort();
+  if ((srcPort == 9133) ||
+          (srcPort == 9415))
+  {
       return;
   }
 
