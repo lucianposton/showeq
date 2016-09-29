@@ -1708,6 +1708,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      // connect GroupMgr slots to SpawnShell signals
      connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
 	     m_groupMgr, SLOT(killSpawn(const Item*)));
+     connect(m_spawnShell, SIGNAL(changeItem(const Item*, uint32_t)),
+	     m_groupMgr, SLOT(changeItem(const Item*, uint32_t)));
    }
 
    if (m_dateTimeMgr)

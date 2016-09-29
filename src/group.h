@@ -34,6 +34,7 @@ class GroupMgr: public QObject
   const Spawn* memberByID( uint16_t id );
   const Spawn* memberByName( const QString& name );
   const Spawn* memberBySlot( uint16_t slot );
+  const uint8_t memberLevelBySlot( uint16_t slot );
 
   size_t groupSize() { return m_memberCount; }
   size_t groupMemberCount() { return m_memberCount; }
@@ -48,6 +49,7 @@ class GroupMgr: public QObject
   void addItem(const Item* item);
   void delItem(const Item* item);
   void killSpawn(const Item* item);
+  void changeItem(const Item* item, uint32_t changeType);
 
   // dump debug info
   void dumpInfo(QTextStream& out);
@@ -63,6 +65,7 @@ class GroupMgr: public QObject
   struct GroupMember
   {
     QString m_name;
+    uint8_t m_level;
     const Spawn* m_spawn;
   }* m_members[MAX_GROUP_MEMBERS];
   size_t m_memberCount;

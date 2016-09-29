@@ -366,13 +366,13 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
               m_player->level(), 
               m_player->classVal(), m_group->groupSize());
 
-      const Spawn* spawn;
+      uint8_t memberLevel;
       // continue with info for group members
       for (int i=0; i < MAX_GROUP_MEMBERS; i++)
       {
-	spawn = m_group->memberBySlot(i);
-	if (spawn)
-	  fprintf(newlogfp, "\t%d", spawn->level());
+          memberLevel = m_group->memberLevelBySlot(i);
+          if (memberLevel)
+              fprintf(newlogfp, "\t%d", memberLevel);
       }
 
       // finish the record with a line

@@ -27,8 +27,10 @@ GroupMgr::GroupMgr(SpawnShell* spawnShell,
   }
 
   // clear the array of members
-  for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+  for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
     m_members[i]->m_spawn = 0;
+    m_members[i]->m_level = 0;
+  }
 }
 
 GroupMgr::~GroupMgr()
@@ -53,6 +55,7 @@ void GroupMgr::player(const uint8_t* data)
   for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
   {
     m_members[i]->m_name = player->groupMembers[i];
+    m_members[i]->m_level = 0;
 
     if (!m_members[i]->m_name.isEmpty())
       m_memberCount++;
@@ -62,6 +65,9 @@ void GroupMgr::player(const uint8_t* data)
     else
     {
       m_members[i]->m_spawn = (const Spawn*)m_player;
+      if (m_player) {
+          m_members[i]->m_level = m_player->level();
+      }
       
       m_membersInZoneCount++;
     }
@@ -94,6 +100,7 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
       {
 	// copy the member name
 	m_members[i]->m_name = gfupdate->membernames[i];
+    m_members[i]->m_level = 0;
 
 	// if their is a member, increment the member count
 	if (!m_members[i]->m_name.isEmpty()) 
@@ -104,8 +111,10 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 	  m_spawnShell->findSpawnByName(m_members[i]->m_name);
 
 	// incremement the spawn count
-	if (m_members[i]->m_spawn)
+	if (m_members[i]->m_spawn) {
 	  m_membersInZoneCount++;
+      m_members[i]->m_level = m_members[i]->m_spawn->level();
+    }
 
 	emit added(m_members[i]->m_name, m_members[i]->m_spawn);
       }
@@ -126,6 +135,7 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 	{
 	  // copy the member name
 	  m_members[i]->m_name = gupdate->membername;
+      m_members[i]->m_level = 0;
 	  
 	  // if their is a member, increment the member count
 	  if (!m_members[i]->m_name.isEmpty()) 
@@ -136,8 +146,10 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 	    m_spawnShell->findSpawnByName(m_members[i]->m_name);
 	  
 	  // incremement the spawn count
-	  if (m_members[i]->m_spawn)
+	  if (m_members[i]->m_spawn) {
 	    m_membersInZoneCount++;
+        m_members[i]->m_level = m_members[i]->m_spawn->level();
+      }
 
 	  // signal the addition
 	  emit added(m_members[i]->m_name, m_members[i]->m_spawn);
@@ -160,6 +172,7 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 	  // clear it
 	  m_members[i]->m_name = "";
 	  m_members[i]->m_spawn = 0;
+      m_members[i]->m_level = 0;
 	  break;
 	}
       }
@@ -175,6 +188,7 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 	// clear the member
 	m_members[i]->m_name = "";
 	m_members[i]->m_spawn = 0;
+    m_members[i]->m_level = 0;
       }
 
       emit cleared();
@@ -203,6 +217,7 @@ void GroupMgr::addItem(const Item* item)
     {
       // yes, so note its Spawn object
       m_members[i]->m_spawn = spawn;
+      m_members[i]->m_level = spawn->level();
 
       // decrement member in zone count
       m_membersInZoneCount++;
@@ -231,6 +246,7 @@ void GroupMgr::delItem(const Item* item)
     {
       // yes, so clear its Spawn object
       m_members[i]->m_spawn = 0;
+      m_members[i]->m_level = 0;
 
       // decrement member in zone count
       m_membersInZoneCount--;
@@ -259,6 +275,7 @@ void GroupMgr::killSpawn(const Item* item)
     {
       // yes, so clear its Spawn object
       m_members[i]->m_spawn = 0;
+      m_members[i]->m_level = 0;
 
       // decrement members in zone count
       m_membersInZoneCount--;
@@ -266,6 +283,32 @@ void GroupMgr::killSpawn(const Item* item)
       break;
     }
   }
+}
+
+void GroupMgr::changeItem(const Item* item, uint32_t changeType)
+{
+    if (! (changeType & tSpawnChangedLevel) ) {
+        return;
+    }
+
+    for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+    {
+        if (m_members[i]->m_spawn && m_members[i]->m_spawn == item) {
+            if ((item->type() != tSpawn) && (item->type() != tPlayer)) {
+                seqWarn("Unexpected spawn type (%d) received by GroupMgr::changeItem.",
+                        item->type());
+                continue;
+            }
+
+            const Spawn* spawn = (const Spawn*)item;
+            if (m_members[i]->m_name == spawn->name())
+            {
+                const uint8_t last = m_members[i]->m_level;
+                m_members[i]->m_level = spawn->level();
+                break;
+            }
+        }
+    }
 }
 
 void GroupMgr::dumpInfo(QTextStream& out)
@@ -289,7 +332,7 @@ void GroupMgr::dumpInfo(QTextStream& out)
     if (m_members[i]->m_name.isEmpty())
       continue;
 
-    out << "Member (" << i << "): " << m_members[i]->m_name;
+    out << "Member (" << i << "): " << m_members[i]->m_name << " lvl:" << m_members[i]->m_level;
 
     if (m_members[i]->m_spawn)
       out << " level " << m_members[i]->m_spawn->level()
@@ -326,7 +369,7 @@ unsigned long GroupMgr::totalLevels()
   {
     // add up the group member levels
     if (m_members[i]->m_spawn)
-      total += m_members[i]->m_spawn->level();
+      total += m_members[i]->m_level;
   }
 
   // shouldn't happen, but just in-case
@@ -372,6 +415,16 @@ const Spawn* GroupMgr::memberBySlot(uint16_t slot )
 
   // return the spawn object associated with the group slot, if any
   return m_members[slot]->m_spawn;
+}
+
+const uint8_t GroupMgr::memberLevelBySlot(uint16_t slot )
+{
+  // validate slot value
+  if (slot >= MAX_GROUP_MEMBERS)
+    return 0;
+
+  // return the spawn object associated with the group slot, if any
+  return m_members[slot]->m_level;
 }
 
 #include "group.moc"
