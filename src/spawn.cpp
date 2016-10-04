@@ -876,20 +876,21 @@ QString Spawn::filterString() const
 
   QString buff;
   buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
-	       "Light:%s:Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:",
+	       "Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:"
+           "Equipment:%s:",
 	       (const char*)name.utf8(),
 	       level(),
 	       (const char*)raceString(),
 	       (const char*)classString(),
 	       ((NPC() == 10) ? 0 : NPC()), 
 	       x(), y(), z(),
-	       (const char*)lightName(),
 	       (const char*)deityName(),
 	       raceTeam(), 
 	       deityTeam(),
 	       (const char*)typeString(),
 	       (const char*)lastName().utf8(),
-               (const char*)guildTag().utf8());
+               (const char*)guildTag().utf8(),
+               (const char*)info());
 
   if (gm())
     buff += QString("GM:") + QString::number(gm()) + ":";
