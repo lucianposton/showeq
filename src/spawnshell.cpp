@@ -843,25 +843,30 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
        }
 
       /* Other types for OP_SpawnAppearance (from eqemu guys)
-       0  - this causes the client to keel over and zone to bind point
-       1  - level, parm = spawn level
-       3  - 0 = visible, 1 = invisible
-       4  - 0 = blue, 1 = pvp (red)
-       5  - light type emitted by player (lightstone, shiny shield)
-       14 - anim, 100=standing, 110=sitting, 111=ducking, 115=feigned, 105=looting
-       15 - sneak, 0 = normal, 1 = sneaking
-       16 - server to client, sets player spawn id
-       17 - Client->Server, my HP has changed (like regen tic)
-       18 - linkdead, 0 = normal, 1 = linkdead
-       19 - lev, 0=off, 1=flymode, 2=levitate
-       20 - GM, 0 = normal, 1 = GM - all odd numbers seem to make it GM
-       21 - anon, 0 = normal, 1 = anon, 2 = roleplay
-       22 - guild id
-       23 - guild rank, 0=member, 1=officer, 2=leader
-       24 - afk, 0 = normal, 1 = afk
-       28 - autosplit, 0 = normal, 1 = autosplit on
-       29 - spawn's size
-       31 -change PC's name's color to NPC color 0 = normal, 1 = npc name
+#define AT_Die			0	// this causes the client to keel over and zone to bind point
+#define AT_WhoLevel		1	// the level that shows up on /who
+#define AT_Invis		3	// 0 = visible, 1 = invisible
+#define AT_PVP			4	// 0 = blue, 1 = pvp (red)
+#define AT_Light		5	// light type emitted by player (lightstone, shiny shield)
+#define AT_Anim			14	// 100=standing, 110=sitting, 111=ducking, 115=feigned, 105=looting
+#define AT_Sneak		15	// 0 = normal, 1 = sneaking
+#define AT_SpawnID		16	// server to client, sets player spawn id
+#define AT_HP			17	// Client->Server, my HP has changed (like regen tic)
+#define AT_Linkdead		18	// 0 = normal, 1 = linkdead
+#define AT_Levitate		19	// 0=off, 1=flymode, 2=levitate
+#define AT_GM			20	// 0 = normal, 1 = GM - all odd numbers seem to make it GM
+#define AT_Anon			21	// 0 = normal, 1 = anon, 2 = roleplay
+#define AT_GuildID		22
+#define AT_GuildRank	23	// 0=member, 1=officer, 2=leader
+#define AT_AFK			24	// 0 = normal, 1 = afk
+#define AT_Pet			25	// Param is EntityID of owner, or 0 for when charm breaks
+#define AT_Split		28	// 0 = normal, 1 = autosplit on
+#define AT_Size			29	// spawn's size
+#define AT_NPCName		31	// change PC's name's color to NPC color 0 = normal, 1 = npc name
+#define AT_ShowHelm		43	// 0 = do not show helmet graphic, 1 = show graphic
+#define AT_DamageState	44	// The damage state of a destructible object (0 through 4)
+//#define AT_Trader		300	// Bazzar Trader Mode
+#define AT_NameTagColor	1000	// 0xffffffff is reset/blue, 0xa51414 is pvp/red
        */
    }
 }
