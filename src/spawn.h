@@ -141,7 +141,7 @@ class Item : public EQPoint
   virtual QString raceString() const;
   virtual uint8_t classVal() const;
   virtual QString classString() const;
-  virtual QString info() const;
+  virtual QString info(const char* locationDelimiter = " ") const;
   virtual QString filterString() const;
   virtual QString dumpString() const;
 
@@ -257,7 +257,7 @@ class Spawn : public Item
   virtual QString raceString() const;
   virtual uint8_t classVal() const;
   virtual QString classString() const;
-  virtual QString info() const;
+  virtual QString info(const char* locationDelimiter = " ") const;
   virtual QString filterString() const;
   virtual QString dumpString() const;
 

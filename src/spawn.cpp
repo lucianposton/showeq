@@ -198,7 +198,7 @@ QString Item::classString() const
   return "Unknown";
 }
 
-QString Item::info() const
+QString Item::info(const char* locationDelimiter) const
 {
   return "";
 }
@@ -823,7 +823,7 @@ QString Spawn::classString() const
   return ::classString(classVal());
 }
 
-QString Spawn::info() const
+QString Spawn::info(const char* locationDelimiter) const
 {
   // Head, Chest, Arms, Waist, Gloves, Legs, Feet, Primary, Secondary
   static const char* locs[]={"H","C","A","W","G","L","F","1","2", "B"};
@@ -832,26 +832,26 @@ QString Spawn::info() const
   
   // Add the light source to the list if it has one
   if (light())
-    temp += QString("Light:") + lightName() + " ";
+    temp += QString("Light:") + lightName() + locationDelimiter;
 
   // Worn stuff
   for (i = tFirstMaterial; i <= tLastMaterial ; i++)
     if (equipment(i))
-      temp += QString(locs[i]) + ":" + print_material(equipment(i)) + " ";
+      temp += QString(locs[i]) + ":" + print_material(equipment(i)) + locationDelimiter;
  
  // Worn weapons
   for (i = tFirstWeapon; i <= tLastWeapon; i++)
     if (equipment(i))
-      temp += QString(locs[i]) + ":" +  + print_item(equipment(i)) + " ";
+      temp += QString(locs[i]) + ":" +  + print_item(equipment(i)) + locationDelimiter;
 
   // Worn stuff -- Current best quess is that this may be material?
   i = tUnknown1;
   if (equipment(i))
-    temp += QString(locs[i]) + ":" + print_material(equipment(i)) + " "; 
+    temp += QString(locs[i]) + ":" + print_material(equipment(i)) + locationDelimiter; 
 
 #if 1 // print also as slot U1 (Unknown1) until we're positive
   if (equipment(i))
-    temp += QString("U1:U") + QString::number(equipment(i), 16) + " ";
+    temp += QString("U1:U") + QString::number(equipment(i), 16) + locationDelimiter;
 #endif
 
   return temp;
@@ -890,7 +890,7 @@ QString Spawn::filterString() const
 	       (const char*)typeString(),
 	       (const char*)lastName().utf8(),
                (const char*)guildTag().utf8(),
-               (const char*)info());
+               (const char*)info(":"));
 
   if (gm())
     buff += QString("GM:") + QString::number(gm()) + ":";
