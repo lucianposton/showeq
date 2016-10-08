@@ -293,9 +293,6 @@ class Spawn : public Item
   // updates all of the, irregardless of existing values
   void update(const spawnStruct* s);
 
-  // updates the data, careful not to overwrite existing correct data
-  void backfill(const spawnStruct* s);
-
   // change spawn state
   void killSpawn();
 
