@@ -2621,7 +2621,7 @@ If any argument is left blank, it is filled in with its default...
 <!-- Category Manager Options -->
  <section name="CategoryMgr" >
   <property name="Category1_Name" >
-   <string value="All" />
+   <string value="all" />
    <comment>Category for all spawns but filtered</comment>
   </property>
   <property name="Category1_Filter" >
