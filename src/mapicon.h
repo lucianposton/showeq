@@ -103,6 +103,7 @@ enum MapIconType
   tIconTypeFilterFlagAlert,
   tIconTypeFilterFlagFiltered,
   tIconTypeFilterFlagTracer,
+  tIconTypeFilterFlagPvP,
   tIconTypeRuntimeFiltered,
   tIconTypeSpawnPoint,
   tIconTypeSpawnPointSelected,

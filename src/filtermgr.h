@@ -50,7 +50,8 @@ class DataLocationMgr;
 #define ALERT_FILTER 4
 #define FILTERED_FILTER 5
 #define TRACER_FILTER 6
-#define SIZEOF_FILTERS 7
+#define PVP_FILTER 7
+#define SIZEOF_FILTERS 8
 
 // max of 32 flags
 
@@ -61,6 +62,7 @@ class DataLocationMgr;
 #define FILTER_FLAG_ALERT		(1 << ALERT_FILTER)
 #define FILTER_FLAG_FILTERED		(1 << FILTERED_FILTER)
 #define FILTER_FLAG_TRACER		(1 << TRACER_FILTER)
+#define FILTER_FLAG_PVP		(1 << PVP_FILTER)
 
 //----------------------------------------------------------------------
 // FilterMgr

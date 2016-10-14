@@ -50,6 +50,7 @@ FilterMgr::FilterMgr(const DataLocationMgr* dataLocMgr,
   m_types->registerType("Alert", type, mask);
   m_types->registerType("Filtered", type, mask);
   m_types->registerType("Tracer", type, mask);
+  m_types->registerType("PvP", type, mask);
 
   // create global filters object
   m_filters = new Filters(*m_types);

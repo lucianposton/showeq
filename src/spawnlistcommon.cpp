@@ -67,6 +67,7 @@ void SpawnListItem::paintCell( QPainter *p, const QColorGroup &cg,
     filterFlags = m_item->filterFlags();
 
   if (!(filterFlags & (FILTER_FLAG_FILTERED |
+		       FILTER_FLAG_PVP |
 		       FILTER_FLAG_ALERT |
 		       FILTER_FLAG_LOCATE | 
 		       FILTER_FLAG_CAUTION |
@@ -82,7 +83,7 @@ void SpawnListItem::paintCell( QPainter *p, const QColorGroup &cg,
     if (filterFlags & FILTER_FLAG_FILTERED)
       newCg.setColor( QColorGroup::Text, Qt::gray);
     
-    if (filterFlags & FILTER_FLAG_ALERT)
+    if (filterFlags & (FILTER_FLAG_ALERT | FILTER_FLAG_PVP))
       font.setBold(true);
     else
       font.setBold(false);
@@ -515,6 +516,8 @@ SpawnListMenu::SpawnListMenu(SEQListView* spawnlist,
   filterMenu->setItemParameter(x, LOCATE_FILTER);
   x = filterMenu->insertItem("&Alert...");
   filterMenu->setItemParameter(x, ALERT_FILTER);
+  x = filterMenu->insertItem("&PvP...");
+  filterMenu->setItemParameter(x, PVP_FILTER);
   x = filterMenu->insertItem("&Filtered...");
   filterMenu->setItemParameter(x, FILTERED_FILTER);
   x = filterMenu->insertItem("&Tracer...");
@@ -535,6 +538,8 @@ SpawnListMenu::SpawnListMenu(SEQListView* spawnlist,
   zoneFilterMenu->setItemParameter(x, LOCATE_FILTER);
   x = zoneFilterMenu->insertItem("&Alert...");
   zoneFilterMenu->setItemParameter(x, ALERT_FILTER);
+  x = zoneFilterMenu->insertItem("&PvP...");
+  zoneFilterMenu->setItemParameter(x, PVP_FILTER);
   x = zoneFilterMenu->insertItem("&Filtered...");
   zoneFilterMenu->setItemParameter(x, FILTERED_FILTER);
   x = zoneFilterMenu->insertItem("&Tracer...");

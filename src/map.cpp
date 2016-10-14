@@ -1375,6 +1375,8 @@ Map::Map(MapMgr* mapMgr,
     pSEQPrefs->getPrefInt("Filter5", prefString, CAUTION_FILTER);
   m_filterCheckOrdering[6] = 
     pSEQPrefs->getPrefInt("Filter6", prefString, DANGER_FILTER);
+  m_filterCheckOrdering[7] = 
+    pSEQPrefs->getPrefInt("Filter7", prefString, PVP_FILTER);
 
   tmpPrefString = "Caption";
   tmpDefault = QString("ShowEQ - ") + prefString;

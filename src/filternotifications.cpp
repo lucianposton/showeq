@@ -57,6 +57,10 @@ void FilterNotifications::addItem(const Item* item)
   if (filterFlags & FILTER_FLAG_ALERT)
     handleAlert(item, "SpawnAudioCommand", "Spawned");
 
+  // then PvP
+  if (filterFlags & FILTER_FLAG_PVP)
+    handleAlert(item, "PvPSpawnAudioCommand", "PvP Spawned");
+
   // then the rest of the filters
   if (filterFlags & FILTER_FLAG_LOCATE)
     handleAlert(item, "LocateSpawnAudioCommand", "Locate Spawned");

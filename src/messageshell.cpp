@@ -969,6 +969,9 @@ void MessageShell::addItem(const Item* item)
   if (filterFlags & FILTER_FLAG_ALERT)
     filterMessage(prefix, MT_Alert, item);
 
+  if (filterFlags & FILTER_FLAG_PVP)
+    filterMessage(prefix, MT_PvP, item);
+
   if (filterFlags & FILTER_FLAG_DANGER)
     filterMessage(prefix, MT_Danger, item);
 

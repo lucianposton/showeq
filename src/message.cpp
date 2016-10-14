@@ -50,5 +50,6 @@ QString MessageEntry::s_messageTypeStrings[MT_Max+1] =
   "Locate",
   "MySpell",
   "PCSpell",
+  "PvP",
 };
 

@@ -2194,6 +2194,10 @@
    <string value="/usr/bin/esdplay /usr/local/share/showeq/death.wave &amp;" />
    <comment>Command line to exectue when an alertable spawn dies</comment>
   </property>
+  <property name="PvPSpawnAudioCommand" >
+   <string value="/usr/bin/esdplay /usr/local/share/showeq/pvp.wave &amp;" />
+   <comment>Command line to exectue when a new PvP spawn is seen</comment>
+  </property>
   <property name="LocateSpawnAudioCommand" >
    <string value="/usr/bin/esdplay /usr/local/share/showeq/locatespawn.wave &amp;" />
    <comment>Command line to exectue when a new Locate spawn is seen</comment>
@@ -2764,6 +2768,18 @@ If any argument is left blank, it is filled in with its default...
    <color name="black" />
    <comment></comment>
   </property>
+  <property name="Category13_Name" >
+   <string value="PvP" />
+   <comment>Category for all spawns matching PvP filters</comment>
+  </property>
+  <property name="Category13_Filter" >
+   <string value=":PvP:" />
+   <comment>Regular expression matching PvP filters</comment>
+  </property>
+  <property name="Category13_Color" >
+   <color name="red" />
+   <comment></comment>
+  </property>
  </section>
 <!-- ============================================================= -->
 <!-- Message Window 1 Options -->
@@ -2832,6 +2848,9 @@ If any argument is left blank, it is filled in with its default...
   </property>
   <property name="LocateBGColor">
    <color name="blue" />
+  </property>
+  <property name="PvPBGColor">
+   <color name="magenta" />
   </property>
  </section>
 <!-- ============================================================= -->
@@ -2902,6 +2921,9 @@ If any argument is left blank, it is filled in with its default...
   <property name="LocateBGColor">
    <color name="blue" />
   </property>
+  <property name="PvPBGColor">
+   <color name="magenta" />
+  </property>
  </section>
 <!-- ============================================================= -->
 <!-- Message Window 3 Options -->
@@ -2970,6 +2992,9 @@ If any argument is left blank, it is filled in with its default...
   </property>
   <property name="LocateBGColor">
    <color name="blue" />
+  </property>
+  <property name="PvPBGColor">
+   <color name="magenta" />
   </property>
  </section>
 <!-- ============================================================= -->
@@ -3040,6 +3065,9 @@ If any argument is left blank, it is filled in with its default...
   <property name="LocateBGColor">
    <color name="blue" />
   </property>
+  <property name="PvPBGColor">
+   <color name="magenta" />
+  </property>
  </section>
 <!-- ============================================================= -->
 <!-- Message Window 5 Options -->
@@ -3109,6 +3137,9 @@ If any argument is left blank, it is filled in with its default...
   <property name="LocateBGColor">
    <color name="blue" />
   </property>
+  <property name="PvPBGColor">
+   <color name="magenta" />
+  </property>
  </section>
 <!-- ============================================================= -->
 <!-- Message Window 6 Options -->
@@ -3177,6 +3208,9 @@ If any argument is left blank, it is filled in with its default...
   </property>
   <property name="LocateBGColor">
    <color name="blue" />
+  </property>
+  <property name="PvPBGColor">
+   <color name="magenta" />
   </property>
  </section>
 <!-- ============================================================= -->

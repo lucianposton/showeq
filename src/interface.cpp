@@ -1229,6 +1229,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    filterCmdMenu->setItemParameter(x, 6);
    x = filterCmdMenu->insertItem( "Danger...");
    filterCmdMenu->setItemParameter(x, 7);
+   x = filterCmdMenu->insertItem( "PvP...");
+   filterCmdMenu->setItemParameter(x, 8);
    connect(filterCmdMenu, SIGNAL(activated(int)),
 	   this, SLOT(set_filter_AudioCommand(int)));
 
@@ -3213,6 +3215,10 @@ void EQInterface::set_filter_AudioCommand(int id)
   case 7:
     property = "DangerSpawnAudioCommand";
     prettyName = "Danger Spawn";
+    break;
+  case 8:
+    property = "PvPSpawnAudioCommand";
+    prettyName = "PvP Spawn";
     break;
   default: 
     return;
