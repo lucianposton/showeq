@@ -628,8 +628,8 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
   }
   else if (((packet.getDestPort() >= LoginServerMinPort) &&
       (packet.getDestPort() <= LoginServerMaxPort)) ||
-      (packet.getSourcePort() >= LoginServerMinPort) &&
-      (packet.getSourcePort() <= LoginServerMaxPort))
+      ((packet.getSourcePort() >= LoginServerMinPort) &&
+      (packet.getSourcePort() <= LoginServerMaxPort)))
   {
     // Drop login server traffic
     return;

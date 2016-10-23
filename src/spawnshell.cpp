@@ -1012,7 +1012,7 @@ void SpawnShell::npcMoveUpdate(const uint8_t* data, size_t len, uint8_t dir)
     uint16_t spawnId = stream.readUInt(16);
 
     // BSH 13 Apr 2011 -- garbage added in packet
-    uint16_t unk1 = stream.readUInt(16);
+    stream.readUInt(16);
 
 
     // 6 bit field specifier.

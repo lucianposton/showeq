@@ -207,7 +207,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   // Really, everything after the level is not critical for operation.  If 
   // needed, skip the rest to get up and running quickly after patch day.
 
-  // Bind points
+  // Bind points (5 ints)
   int bindCount = netStream.readUInt32NC();
   for (int i = 0; i < bindCount; i++) {
     memcpy(&player->profile.binds[i], netStream.pos(), sizeof(player->profile.binds[i]));
@@ -217,13 +217,13 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->profile.deity = netStream.readUInt32NC();
   player->profile.intoxication = netStream.readUInt32NC();
 
-  // Spell slot refresh
+  // Spell slot refresh (10 ints)
   int spellRefreshCount = netStream.readUInt32NC();
   for (int i = 0; i < spellRefreshCount; i++) {
     player->profile.spellSlotRefresh[i] = netStream.readUInt32NC();
   }
 
-  // Equipment
+  // Equipment (22 ints)
   int equipCount = netStream.readUInt32NC();
   for (int i = 0; i < equipCount; i++) {
     memcpy(&player->profile.equipment[i], netStream.pos(), sizeof(player->profile.equipment[i]));
@@ -265,7 +265,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   // Unknown
   netStream.skipBytes(28);
 
-  // AAs
+  // AAs (300 ints)
   int aaCount = netStream.readUInt32NC();
   for (int i = 0; i < aaCount; i++) {
     player->profile.aa_array[i].AA = netStream.readUInt32NC();
@@ -273,10 +273,22 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     player->profile.aa_array[i].unknown008 = netStream.readUInt32NC();
   }
 
-  // Something (100 ints)
+  // Number of SKills (100 ints)
+  int skills = netStream.readUInt32NC();
+  for (int i = 0; i < skills; i++) {
+    netStream.skipBytes(4);
+  }
+
+  // Something (25 ints)
   int sCount3 = netStream.readUInt32NC();
   for (int i = 0; i < sCount3; i++) {
     netStream.skipBytes(4);
+  }
+
+  // Disciplines (300 ints)
+  int disciplineCount = netStream.readUInt32NC();
+  for (int i = 0; i < disciplineCount; i++) {
+    player->profile.disciplines[i] = netStream.readUInt32NC();
   }
 
   // Something (25 ints)
@@ -285,54 +297,43 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     netStream.skipBytes(4);
   }
 
-  // Something (300 ints)
+  // Unknown
+  netStream.skipBytes (4);
+
+  // Recast Timers (25 ints)
+  int recastTypes = netStream.readUInt32NC();
+  for (int i = 0; i < recastTypes; i++) {
+    player->profile.recastTimers[i] = netStream.readUInt32NC();
+  }
+
+  // Something (100 ints)
   int sCount5 = netStream.readUInt32NC();
   for (int i = 0; i < sCount5; i++) {
     netStream.skipBytes(4);
   }
 
-  // Something (20 ints)
-  int sCount6 = netStream.readUInt32NC();
-  for (int i = 0; i < sCount6; i++) {
-    netStream.skipBytes(4);
-  }
-
-  // Unknown
-  netStream.skipBytes (4);
-
-  // Something (20 floats)
-  int sCount7 = netStream.readUInt32NC();
-  for (int i = 0; i < sCount7; i++) {
-    netStream.skipBytes(4);
-  }
-
-  // Something (100 floats)
-  int sCount8 = netStream.readUInt32NC();
-  for (int i = 0; i < sCount8; i++) {
-    netStream.skipBytes(4);
-  }
-
-  // Spellbook
+  // Spellbook (800 ints)
   int spellBookSlots = netStream.readUInt32NC();
   for (int i = 0; i < spellBookSlots; i++) {
     player->profile.sSpellBook[i] = netStream.readInt32();
   }
 
-  // Mem Spell Slots
+  // Mem Spell Slots (16 ints)
   int spellMemSlots = netStream.readUInt32NC();
   for (int i = 0; i < spellMemSlots; i++) {
     player->profile.sMemSpells[i] = netStream.readInt32();
   }
 
-  // Something (13 ints)
-  int sCount9 = netStream.readUInt32NC();
-  for (int i = 0; i < sCount9; i++) {
-    netStream.skipBytes(4);
+  // Spell Slot Refresh Timers (13 ints)
+  int spellSlotRefreshTimer = netStream.readUInt32NC();
+  for (int i = 0; i < spellSlotRefreshTimer; i++) {
+    player->profile.spellSlotRefresh[i] = netStream.readInt32();
   }
 
   // Unknown
   netStream.skipBytes(1);
 
+  // Buff Count (42 ints)
   int buffCount = netStream.readUInt32NC();
   for (int i = 0; i < buffCount; i++) {
     memcpy(&player->profile.buffs[i], netStream.pos(), sizeof(player->profile.buffs[i]));
@@ -367,14 +368,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   // Unknown
   netStream.skipBytes(2);
 
-/*
-  // Bandolier
-  netStream.skipBytes(996);
-
-  // Potion Belt
-  netStream.skipBytes(153);
-*/
-
+  //Bandolier (20 ints)
   int bandolierCount = netStream.readUInt32NC();
   for (int i = 0; i < bandolierCount; i++) {
     name = netStream.readText();
@@ -415,6 +409,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
     player->profile.bandoliers[i].ammo.icon = netStream.readUInt32NC();
   }
 
+  //Potion Belt (5 ints)
   int potionCount = netStream.readUInt32NC();
   for (int i = 0; i < potionCount; i++) {
     name = netStream.readText();
@@ -426,21 +421,22 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   }
 
   // Unknown
-  netStream.skipBytes(84);
+  netStream.skipBytes(80);
 
   player->profile.endurance = netStream.readUInt32NC();
 
   // Unknown
   netStream.skipBytes(12);
 
+  // Name
+  int firstName = netStream.readUInt32NC();
   memcpy(player->name, netStream.pos(), 64);
-  netStream.skipBytes(64);
+  netStream.skipBytes(firstName);
 
-  // Unknown
-  netStream.skipBytes(4);
-
+  // Lastname
+  int lastName = netStream.readUInt32NC();
   memcpy(player->lastName, netStream.pos(), 32);
-  netStream.skipBytes(32);
+  netStream.skipBytes(lastName);
 
   player->birthdayTime = netStream.readUInt32NC();
   player->accountCreateDate = netStream.readUInt32NC();
@@ -448,17 +444,15 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->timePlayedMin = netStream.readUInt32NC();
 
   // Unknown
-  netStream.skipBytes(8);
+  netStream.skipBytes(4);
 
-/*
-  // Something (32 ints)  Think this is MAX_KNOWN_LANGS - cannot get this to skip the 36 bytes so added skip below
-  int sCount10 = netStream.readUInt8();
-  for (int i = 0; i < sCount10; i++) {
+  player->expansions = netStream.readUInt32NC();
+
+  // MAX_KNOWN_LANGS (32 ints)
+  int langCount = netStream.readUInt32NC();
+  for (int i = 0; i < langCount; i++) {
+    player->languages[i] = netStream.readUInt8();
   }
-*/
-
-  // Unknown
-  netStream.skipBytes(36);
 
   player->zoneId = netStream.readUInt16NC();
   player->zoneInstance = netStream.readUInt16NC();
@@ -475,12 +469,8 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   memcpy(&player->heading, netStream.pos(), sizeof(player->heading));
   netStream.skipBytes(sizeof(player->heading));
 
-/*  
-  player->standState = netStream.readUInt8();
-*/
-
-  netStream.skipBytes(4);
-  
+  player->standState = netStream.readUInt16();
+  player->anon = netStream.readUInt16();
   player->guildID = netStream.readUInt32NC();
 
   // Unknown
@@ -495,9 +485,9 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   // Unknown
   netStream.skipBytes(12);
 
-  // Something (164 ints)
-  int sCount11 = netStream.readUInt32NC();
-  for (int i = 0; i < sCount11; i++) {
+  // Something (236 ints)
+  int sCount6 = netStream.readUInt32NC();
+  for (int i = 0; i < sCount6; i++) {
     netStream.skipBytes(8);
   }
 
@@ -514,15 +504,21 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   // Unknown
   netStream.skipBytes(6);
 
-  // Tributes
+  // Tributes (5 ints)
   int tributeCount = netStream.readUInt32NC();
   for (int i = 0; i < tributeCount; i++) {
     memcpy(&player->tributes[i], netStream.pos(), sizeof(player->tributes[i]));
     netStream.skipBytes(sizeof(player->tributes[i]));
   }
 
+  // Something (10 ints)
+  int sCount7 = netStream.readUInt32NC();
+  for (int i = 0; i < sCount7; i++) {
+    netStream.skipBytes(8);
+  }
+
   // Unknown
-  netStream.skipBytes(229);
+  netStream.skipBytes(145);
 
   player->currentRadCrystals = netStream.readUInt32NC();
   player->careerRadCrystals = netStream.readUInt32NC();
@@ -530,7 +526,13 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->careerEbonCrystals = netStream.readUInt32NC();
 
   // Unknown
-  netStream.skipBytes(153);
+  netStream.skipBytes(91);
+
+  player->autosplit = netStream.readUInt8();
+
+  // Unknown
+  netStream.skipBytes(61);
+
 
   player->ldon_guk_points = netStream.readUInt32NC();
   player->ldon_mir_points = netStream.readUInt32NC();
@@ -543,11 +545,6 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   // Below are the structs still not found in the new playerpacket
 
 /*
-  int skillCount = netStream.readUInt32NC();
-  for (int i = 0; i < skillCount; i++) {
-    player->profile.skills[i] = netStream.readUInt32NC();
-  }
-
   int innateSkillCount = netStream.readUInt32NC();
   for (int i = 0; i < innateSkillCount; i++) {
     player->profile.innateSkills[i] = netStream.readUInt32NC();
@@ -557,26 +554,10 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->profile.thirst = netStream.readUInt32NC();
   player->profile.hunger = netStream.readUInt32NC();
 
-  int disciplineCount = netStream.readUInt32NC();
-  for (int i = 0; i < disciplineCount; i++) {
-    player->profile.disciplines[i] = netStream.readUInt32NC();
-  }
-
-  int recastTypes = netStream.readUInt32NC();
-  for (int i = 0; i < recastTypes; i++) {
-    player->profile.recastTimers[i] = netStream.readUInt32NC();
-  }
-
   player->pvp = netStream.readUInt8();
-  player->anon = netStream.readUInt8();
   player->gm = netStream.readUInt8();
   player->guildstatus = netStream.readInt8();
   player->exp = netStream.readUInt32NC();
-
-  int langCount = netStream.readUInt32NC();
-  for (int i = 0; i < langCount; i++) {
-    player->languages[i] = netStream.readUInt8();
-  }
 
    // Unknown (41)
   int doubleIntCount = netStream.readUInt32NC();
@@ -590,10 +571,6 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   for (int i = 0; i < byteCount; i++) {
     char something = netStream.readUInt8();
   }
-  
-  player->expansions = netStream.readUInt32NC();
-  player->autosplit = netStream.readUInt8();
-
 */
 
   retVal = netStream.pos() - netStream.data();

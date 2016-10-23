@@ -211,11 +211,11 @@
         <comment>Communicate textual info to client including hail responses etc</comment>
         <payload dir="server" typename="specialMessageStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="703a" name="OP_RandomReq" updated="11/20/15">
+    <opcode id="3715" name="OP_RandomReq" updated="10/19/16">
         <comment>RandomReqCode</comment>
         <payload dir="client" typename="randomReqStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="440d" name="OP_RandomReply" updated="11/20/15">
+    <opcode id="27a2" name="OP_RandomReply" updated="10/19/16">
         <comment>RandomCode</comment>
         <payload dir="server" typename="randomStruct" sizechecktype="match"/>
     </opcode>

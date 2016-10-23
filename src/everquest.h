@@ -104,7 +104,7 @@
 #define MAX_KNOWN_SKILLS                100
 #define MAX_SPELL_SLOTS                 16
 #define MAX_KNOWN_LANGS                 32
-#define MAX_SPELLBOOK_SLOTS             720
+#define MAX_SPELLBOOK_SLOTS             800
 #define MAX_GROUP_MEMBERS               6
 #define MAX_BUFFS                       42
 #define MAX_GUILDS                      8192
@@ -112,7 +112,7 @@
 #define MAX_BANDOLIERS                  20
 #define MAX_POTIONS_IN_BELT             5
 #define MAX_TRIBUTES                    5
-#define MAX_DISCIPLINES                 200
+#define MAX_DISCIPLINES                 300
 
 //Item Flags
 #define ITEM_NORMAL                     0x0000
@@ -561,7 +561,7 @@ struct requestZoneChangeStruct
 
 /*
 ** Client Zone Entry struct
-** Length: 80 Octets
+** Length: 88 Octets
 ** OpCode: ZoneEntryCode (when direction == client)
 */
 struct ClientZoneEntryStruct
@@ -569,8 +569,8 @@ struct ClientZoneEntryStruct
 /*0000*/ uint32_t unknown0000;                   // ***Placeholder
 /*0004*/ char     name[32];                      // Player firstname
 /*0036*/ uint8_t  unknown0036[28];               // ***Placeholder
-/*0064*/ uint32_t unknown0064[7];                // unknown
-/*0080*/
+/*0064*/ uint32_t unknown0064[6];                // unknown
+/*0088*/
 };
 
 
