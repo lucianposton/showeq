@@ -1936,6 +1936,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      connect(m_spawnShell, SIGNAL(changeItem(const Item*, uint32_t)),
 	     m_filterNotifications, 
 	     SLOT(changeItem(const Item*, uint32_t)));
+     connect(m_spawnShell, SIGNAL(initialZoneSpawn(bool)),
+	     m_filterNotifications, SLOT(initialZoneSpawn(bool)));
    }
 
    // connect interface slots to Packet signals

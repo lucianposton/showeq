@@ -22,7 +22,8 @@
 FilterNotifications::FilterNotifications(QObject* parent, const char* name)
   : QObject(parent, name),
     m_useSystemBeep(false),
-    m_useCommands(false)
+    m_useCommands(false),
+    m_isInitialZoneSpawn(false)
 {
   m_useSystemBeep = 
     pSEQPrefs->getPrefBool("SystemBeep", "Filters", m_useSystemBeep);
@@ -49,8 +50,16 @@ void FilterNotifications::setUseCommands(bool val)
   pSEQPrefs->setPrefBool("EnableCommands", "Filters", m_useCommands);
 }
 
+void FilterNotifications::initialZoneSpawn(bool isInitialZoneSpawn)
+{
+    m_isInitialZoneSpawn = isInitialZoneSpawn;
+}
+
 void FilterNotifications::addItem(const Item* item)
 {
+    if (m_isInitialZoneSpawn)
+        return;
+
   uint32_t filterFlags = item->filterFlags();
 
   // first handle alert

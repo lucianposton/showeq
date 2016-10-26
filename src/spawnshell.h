@@ -93,6 +93,7 @@ signals:
    void spawnConsidered(const Item* item);
    void clearItems();
    void numSpawns(int);
+   void initialZoneSpawn(bool);
 
 public slots: 
    void clear();

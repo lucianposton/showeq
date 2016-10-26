@@ -41,6 +41,7 @@ class FilterNotifications : public QObject
    void delItem(const Item* item);
    void killSpawn(const Item* item);
    void changeItem(const Item* item, uint32_t changeType);
+   void initialZoneSpawn(bool);
 
  protected:
    void handleAlert(const Item* item, 
@@ -53,6 +54,9 @@ class FilterNotifications : public QObject
  protected:
   bool m_useSystemBeep;
   bool m_useCommands;
+
+ private:
+  bool m_isInitialZoneSpawn;
 };
 
 #endif // _FILTERNOTIFICATIONS_H_

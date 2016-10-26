@@ -476,7 +476,9 @@ void SpawnShell::zoneSpawns(const uint8_t* data, size_t len)
             p->animation, p->padding0054, p->padding0058, 
             p->padding0066, p->padding0070);
 #endif
+    emit initialZoneSpawn(true);
     newSpawn(zspawns[i]);
+    emit initialZoneSpawn(false);
   }
 }
 
