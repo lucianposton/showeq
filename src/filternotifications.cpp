@@ -19,6 +19,11 @@
 #include <qregexp.h>
 #include <qapplication.h>
 
+bool isCommandActive(const QString& name)
+{
+    return pSEQPrefs->getPrefBool(name + "Enabled", "Filters", true);
+}
+
 FilterNotifications::FilterNotifications(QObject* parent, const char* name)
   : QObject(parent, name),
     m_useSystemBeep(false),
@@ -109,7 +114,7 @@ void FilterNotifications::handleAlert(const Item* item,
   if (m_useSystemBeep)
     beep();
 
-  if (m_useCommands)
+  if (m_useCommands && isCommandActive(commandPref))
     executeCommand(item, pSEQPrefs->getPrefString(commandPref, "Filters"), cue);
 }
 

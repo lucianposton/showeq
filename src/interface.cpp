@@ -1182,13 +1182,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    filterMenu->insertItem("Re&filter Spawns", m_spawnShell, SLOT(refilterSpawns()));
    x = filterMenu->insertItem("&Is Case Sensitive", this, SLOT(toggle_filter_Case(int)));
    filterMenu->setItemChecked(x, m_filterMgr->caseSensitive());
-   x = filterMenu->insertItem("&Display Alert Info", this, SLOT(toggle_filter_AlertInfo(int)));
-   filterMenu->setItemChecked(x, 
-			      pSEQPrefs->getPrefBool("AlertInfo", "Filters"));
-   x = filterMenu->insertItem("&Use System Beep", this, SLOT(toggle_filter_UseSystemBeep(int)));
-   filterMenu->setItemChecked(x, m_filterNotifications->useSystemBeep());
-   x = filterMenu->insertItem("Use &Commands", this, SLOT(toggle_filter_UseCommands(int)));
-   filterMenu->setItemChecked(x, m_filterNotifications->useCommands());
 
    // Filter -> Log
    QPopupMenu* filterLogMenu = new QPopupMenu;
@@ -1212,9 +1205,48 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect(filterLogMenu, SIGNAL(activated(int)),
 	   this, SLOT(toggle_filter_Log(int)));
 
+   x = filterMenu->insertItem("&Display Alert Info", this, SLOT(toggle_filter_AlertInfo(int)));
+   filterMenu->setItemChecked(x, 
+			      pSEQPrefs->getPrefBool("AlertInfo", "Filters"));
+   x = filterMenu->insertItem("&Use System Beep", this, SLOT(toggle_filter_UseSystemBeep(int)));
+   filterMenu->setItemChecked(x, m_filterNotifications->useSystemBeep());
+   x = filterMenu->insertItem("Enable Active &Commands", this, SLOT(toggle_filter_UseCommands(int)));
+   filterMenu->setItemChecked(x, m_filterNotifications->useCommands());
+
+   // Filter -> Enabled Commands
+   QPopupMenu* filterCmdToggleEnabled = new QPopupMenu;
+   filterCmdToggleEnabled->setCheckable(true);
+   filterMenu->insertItem("&Active Commands", filterCmdToggleEnabled);
+   x = filterCmdToggleEnabled->insertItem( "Spawn");
+   filterCmdToggleEnabled->setItemParameter(x, 1);
+   filterCmdToggleEnabled->setItemChecked(x, pSEQPrefs->getPrefBool("SpawnAudioCommandEnabled", "Filters", true));
+   x = filterCmdToggleEnabled->insertItem( "DeSpawn");
+   filterCmdToggleEnabled->setItemParameter(x, 2);
+   filterCmdToggleEnabled->setItemChecked(x, pSEQPrefs->getPrefBool("DeSpawnAudioCommandEnabled", "Filters", true));
+   x = filterCmdToggleEnabled->insertItem( "Death");
+   filterCmdToggleEnabled->setItemParameter(x, 3);
+   filterCmdToggleEnabled->setItemChecked(x, pSEQPrefs->getPrefBool("DeathAudioCommandEnabled", "Filters", true));
+   x = filterCmdToggleEnabled->insertItem( "Locate");
+   filterCmdToggleEnabled->setItemParameter(x, 4);
+   filterCmdToggleEnabled->setItemChecked(x, pSEQPrefs->getPrefBool("LocateSpawnAudioCommandEnabled", "Filters", true));
+   x = filterCmdToggleEnabled->insertItem( "Caution");
+   filterCmdToggleEnabled->setItemParameter(x, 5);
+   filterCmdToggleEnabled->setItemChecked(x, pSEQPrefs->getPrefBool("CautionSpawnAudioCommandEnabled", "Filters", true));
+   x = filterCmdToggleEnabled->insertItem( "Hunt");
+   filterCmdToggleEnabled->setItemParameter(x, 6);
+   filterCmdToggleEnabled->setItemChecked(x, pSEQPrefs->getPrefBool("HuntSpawnAudioCommandEnabled", "Filters", true));
+   x = filterCmdToggleEnabled->insertItem( "Danger");
+   filterCmdToggleEnabled->setItemParameter(x, 7);
+   filterCmdToggleEnabled->setItemChecked(x, pSEQPrefs->getPrefBool("DangerSpawnAudioCommandEnabled", "Filters", true));
+   x = filterCmdToggleEnabled->insertItem( "PvP");
+   filterCmdToggleEnabled->setItemParameter(x, 8);
+   filterCmdToggleEnabled->setItemChecked(x, pSEQPrefs->getPrefBool("PvPSpawnAudioCommandEnabled", "Filters", true));
+   connect(filterCmdToggleEnabled, SIGNAL(activated(int)),
+	   this, SLOT(toggle_AudioCommand(int)));
+
    // Filter -> Commands
    QPopupMenu* filterCmdMenu = new QPopupMenu;
-   filterMenu->insertItem("&Audio Commands", filterCmdMenu);
+   filterMenu->insertItem("&Set Commands", filterCmdMenu);
    x = filterCmdMenu->insertItem( "Spawn...");
    filterCmdMenu->setItemParameter(x, 1);
    x = filterCmdMenu->insertItem( "DeSpawn...");
@@ -3182,6 +3214,44 @@ void EQInterface::toggle_filter_Log(int id)
 
   menuBar()->setItemChecked(id, ((filters & filter) != 0));
   pSEQPrefs->setPrefBool("Log", "Filters", filters);
+}
+
+void EQInterface::toggle_AudioCommand(int id)
+{
+  QString property;
+  switch(menuBar()->itemParameter(id))
+  {
+  case 1:
+    property = "SpawnAudioCommand";
+    break;
+  case 2:
+    property = "DeSpawnAudioCommand";
+    break;
+  case 3:
+    property = "DeathAudioCommand";
+    break;
+  case 4:
+    property = "LocateSpawnAudioCommand";
+    break;
+  case 5:
+    property = "CautionSpawnAudioCommand";
+    break;
+  case 6:
+    property = "HuntSpawnAudioCommand";
+    break;
+  case 7:
+    property = "DangerSpawnAudioCommand";
+    break;
+  case 8:
+    property = "PvPSpawnAudioCommand";
+    break;
+  default:
+    return;
+  }
+
+  bool value = pSEQPrefs->getPrefBool(property, "Filters", true);
+  menuBar()->setItemChecked(id, !value);
+  pSEQPrefs->setPrefBool(property, "Filters", !value);
 }
 
 void EQInterface::set_filter_AudioCommand(int id)

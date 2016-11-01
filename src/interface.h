@@ -267,6 +267,7 @@ class EQInterface:public QMainWindow
    void toggle_filter_UseCommands(int id);
    void toggle_filter_Log(int id);
    void set_filter_AudioCommand(int id);
+   void toggle_AudioCommand(int id);
    void toggle_view_menubar();
    void toggle_view_statusbar();
    void set_main_WindowCaption(int id);
