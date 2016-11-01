@@ -283,6 +283,9 @@ class Spawn : public Item
     { return (raceTeam() == spawn->raceTeam()); }
   bool isSameDeityTeam(const Spawn* spawn) const
     { return (deityTeam() == spawn->deityTeam()); }
+  bool isPlayersGuildmate() const { return m_isPlayersGuildmate; }
+  bool isInPvPLevelRangeToPlayer() const
+  { return isOtherPlayer() && m_isInPvPLevelRangeToPlayer; }
 
   // virtual set method overload
   void setPos(int16_t x, int16_t Pos, int16_t z,
@@ -325,6 +328,8 @@ class Spawn : public Item
 
   void setLastName(const QString& lastName)
     { m_lastName = lastName; }
+  void setIsPlayersGuildmate(bool val) { m_isPlayersGuildmate = val; }
+  void setIsInPvPLevelRangeToPlayer(bool val) { m_isInPvPLevelRangeToPlayer = val; }
 
 
  protected:
@@ -361,6 +366,8 @@ class Spawn : public Item
   uint8_t m_animation;
   uint8_t m_gm;
   bool m_considered;
+  bool m_isPlayersGuildmate;
+  bool m_isInPvPLevelRangeToPlayer;
 };
 
 

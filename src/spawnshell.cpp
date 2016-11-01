@@ -120,6 +120,9 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
    connect(&m_filterMgr, SIGNAL(runtimeFiltersChanged(uint8_t)),
 	   this, SLOT(refilterSpawnsRuntime()));
 
+   connect(m_player, SIGNAL(levelChanged(uint8_t)),
+	   this, SLOT(playerLevelChanged(uint8_t)));
+
    // connect SpawnShell slots to ZoneMgr signals
    connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
 	   this, SLOT(clear(void)));
@@ -530,18 +533,17 @@ void SpawnShell::newSpawn(const spawnStruct& s)
    {
      Spawn* spawn = (Spawn*)item;
      spawn->update(&s);
-     updateFilterFlags(spawn);
-     updateRuntimeFilterFlags(spawn);
-     item->updateLastChanged();
 
-     if (spawn->guildID() < MAX_GUILDS)
-        spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
-     else
-        spawn->setGuildTag("");
+     spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
      if (!showeq_params->fast_machine)
         item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
      else
         item->setDistanceToPlayer(m_player->calcDist(*item));
+     spawn->setIsInPvPLevelRangeToPlayer(spawn->isOtherPlayer() && abs(m_player->level() - spawn->level()) < 5);
+     spawn->setIsPlayersGuildmate(!m_player->guildTag().isEmpty() && spawn->guildID() == m_player->guildID());
+     updateFilterFlags(spawn);
+     updateRuntimeFilterFlags(spawn);
+     item->updateLastChanged();
 
      emit changeItem(item, tSpawnChangedALL);
    }
@@ -549,18 +551,17 @@ void SpawnShell::newSpawn(const spawnStruct& s)
    {
      item = new Spawn(&s);
      Spawn* spawn = (Spawn*)item;
-     updateFilterFlags(spawn);
-     updateRuntimeFilterFlags(spawn);
-     m_spawns.insert(s.spawnId, item);
 
-     if (spawn->guildID() < MAX_GUILDS)
-        spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
-     else
-        spawn->setGuildTag("");
+     spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
      if (!showeq_params->fast_machine)
         item->setDistanceToPlayer(m_player->calcDist2DInt(*item));
      else
         item->setDistanceToPlayer(m_player->calcDist(*item));
+     spawn->setIsInPvPLevelRangeToPlayer(spawn->isOtherPlayer() && abs(m_player->level() - spawn->level()) < 5);
+     spawn->setIsPlayersGuildmate(!m_player->guildTag().isEmpty() && spawn->guildID() == m_player->guildID());
+     updateFilterFlags(spawn);
+     updateRuntimeFilterFlags(spawn);
+     m_spawns.insert(s.spawnId, item);
 
      emit addItem(item);
 
@@ -838,9 +839,32 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
        switch(app->type) 
        {
            case 1: // level update
+               {
                spawn->setLevel(app->parameter);
+               spawn->setIsInPvPLevelRangeToPlayer(spawn->isOtherPlayer() && abs(m_player->level() - spawn->level()) < 5);
+               int changed = tSpawnChangedLevel;
+               if (updateFilterFlags(spawn))
+                   changed |= tSpawnChangedFilter;
+               if (updateRuntimeFilterFlags(spawn))
+                   changed |= tSpawnChangedRuntimeFilter;
                spawn->updateLastChanged();
-               emit changeItem(spawn, tSpawnChangedLevel);
+               emit changeItem(spawn, changed);
+               }
+               break;
+           case 22: // guild update
+               {
+               spawn->setGuildID(app->parameter);
+               spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
+               spawn->setIsPlayersGuildmate(!m_player->guildTag().isEmpty() && spawn->guildID() == m_player->guildID());
+               int changed = tSpawnChangedNone;
+               if (updateFilterFlags(spawn))
+                   changed |= tSpawnChangedFilter;
+               if (updateRuntimeFilterFlags(spawn))
+                   changed |= tSpawnChangedRuntimeFilter;
+               spawn->updateLastChanged();
+               // TODO: Does this update guild tag in spawnlists?
+               emit changeItem(spawn, changed);
+               }
                break;
        }
 
@@ -1101,6 +1125,22 @@ void SpawnShell::playerChangedID(uint16_t playerID)
   m_players.replace(playerID, m_player);
 
   emit changeItem(m_player, tSpawnChangedALL);
+}
+
+void SpawnShell::playerLevelChanged(uint8_t playerLevel)
+{
+    ItemMap& theMap = getMap(tSpawn);
+    ItemIterator it(theMap);
+
+    Spawn* spawn;
+    for (; it.current(); ++it)
+    {
+        spawn = (Spawn*)it.current();
+        spawn->setIsInPvPLevelRangeToPlayer(spawn->isOtherPlayer() && abs(m_player->level() - spawn->level()) < 5);
+    }
+
+    refilterSpawns(tSpawn);
+    refilterSpawnsRuntime(tSpawn);
 }
 
 void SpawnShell::refilterSpawns()

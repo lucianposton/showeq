@@ -3662,7 +3662,7 @@ void Map::paintSpawns(MapParameters& param,
 #ifdef DEBUGMAP
     printf("PvP handling\n");
 #endif
-    const bool spawn_is_in_players_guild = !m_player->guildTag().isEmpty() && spawn->guildID() == m_player->guildID();
+    const bool spawn_is_in_players_guild = spawn->isPlayersGuildmate();
     if (spawn_is_in_players_guild && !m_pvpEnableGuildmates)
     {
       m_mapIcons->paintSpawnIcon(param, p, mapIcon, spawn, location, point);
@@ -3682,9 +3682,7 @@ void Map::paintSpawns(MapParameters& param,
       // if spawn isn't you...
       if (spawn->isOtherPlayer())
       {
-        int levelDiff = m_player->level() - spawn->level();
-        
-        if (abs(levelDiff) < 5)
+        if (spawn->isInPvPLevelRangeToPlayer())
         {
           // Gank away!
           mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPlayerPvPEnabled));
@@ -3695,9 +3693,7 @@ void Map::paintSpawns(MapParameters& param,
         // Pet owned by someone who is pvp?
         if (owner != NULL && owner->isOtherPlayer())
         {
-          int levelDiff = m_player->level() - owner->level();
-
-          if (abs(levelDiff) < 5)
+          if (owner->isInPvPLevelRangeToPlayer())
           {
             // Gank away! Add color circle.
             mapIcon.combine(m_mapIcons->icon(tIconTypeSpawnPetPvPEnabled));

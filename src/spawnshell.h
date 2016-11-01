@@ -130,6 +130,7 @@ public slots:
    void refilterSpawnsRuntime();
    void saveSpawns(void);
    void restoreSpawns(void);
+   void playerLevelChanged(uint8_t playerLevel);
 
  protected:
    void refilterSpawns(spawnItemType type);

@@ -262,6 +262,8 @@ Spawn::Spawn()
   setLevel(0);
   setTypeflag(0);
   setGM(0);
+  setIsPlayersGuildmate(0);
+  setIsInPvPLevelRangeToPlayer(0);
   for (int i = 0; i < tNumWearSlots; i++)
     setEquipment(i, 0);
 
@@ -317,6 +319,8 @@ Spawn::Spawn(uint16_t id,
   setTypeflag(0);
   setGM(0);
   setConsidered(false);
+  setIsPlayersGuildmate(0);
+  setIsInPvPLevelRangeToPlayer(0);
 
   // turn on auto delete for the track list
   m_spawnTrackList.setAutoDelete(true);
@@ -364,6 +368,7 @@ Spawn::Spawn(Spawn& s, uint16_t id)
   setHP(s.HP());
   setMaxHP(s.maxHP());
   setGuildID(s.guildID());
+  setGuildTag(s.guildTag());
   setLevel(s.level());
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s.equipment(i));
@@ -375,6 +380,8 @@ Spawn::Spawn(Spawn& s, uint16_t id)
   setDeltas(s.deltaX(), s.deltaY(), s.deltaZ());
   setHeading(s.heading(), s.deltaHeading());
   setConsidered(s.considered());
+  setIsPlayersGuildmate(s.isPlayersGuildmate());
+  setIsInPvPLevelRangeToPlayer(s.isInPvPLevelRangeToPlayer());
 
   // the new copy will own the spawn track list
   m_spawnTrackList.setAutoDelete(false);
@@ -805,7 +812,7 @@ QString Spawn::filterString() const
   QString buff;
   buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
 	       "Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:"
-           "Equipment:%s:",
+           "IsGuildmate:%d:InPvPLevelRange:%d:Equipment:%s:",
 	       (const char*)name.utf8(),
 	       level(),
 	       (const char*)raceString(),
@@ -818,6 +825,8 @@ QString Spawn::filterString() const
 	       (const char*)typeString(),
 	       (const char*)lastName().utf8(),
                (const char*)guildTag().utf8(),
+               isPlayersGuildmate(),
+               isInPvPLevelRangeToPlayer(),
                (const char*)info(":"));
 
   if (gm())
@@ -845,7 +854,9 @@ QString Spawn::dumpString() const
     + ":DTeam:" + QString::number(deityTeam())
     + ":Type:" + typeString()
     + ":Guild:" + guildTag()
-    + ":FilterFlags:" + QString::number(filterFlags())
+    + ":IsGuildmate:" + QString::number(isPlayersGuildmate())
+    + ":InPvPLevelRange:" + QString::number(isInPvPLevelRangeToPlayer())
+    + ":FilterFlags:" + QString::number(filterFlags(),2)
     + ":";
 }
 
