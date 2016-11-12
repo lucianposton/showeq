@@ -284,30 +284,7 @@ print_material (uint8_t material)
   // sparse array of material names, some are NULL
   static const char*  materialnames[] = 
   {
-    "None",             // 0x00
-    "Leather",          // 0x01
-    "Ringmail",         // 0x02
-    "Plate",            // 0x03
-    "Cured Silk",       // 0x04
-    "Chitin",           // 0x05
-    NULL,               // 0x06 - Unknown Material
-    "Scale/BlackIron?", // 0x07
-    NULL,               // 0x08 - Unknown Material
-    NULL,               // 0x09 - Unknown Material
-    "ElementRobe",      // 0x0A
-    "BlightedRobe",     // 0x0B
-    "Crystalline",      // 0x0C
-    "OracleRobe",       // 0x0D
-    "KedgeRobe",        // 0x0E
-    "MetallicRobe",     // 0x0F
-    "Robe",             // 0x10
-    "VeliousLeather",   // 0x11
-    "VeliousChain",     // 0x12
-    "PogPlate",         // 0x13
-    "Ulthork/Tizmak",   // 0x14
-    "Ry`Gorr",          // 0x15
-    "Kael/Guardian",    // 0x16
-    "VeliousMonk",      // 0x17
+#include "materials.h"
   };
 
   // assume no material name found
