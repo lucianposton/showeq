@@ -595,6 +595,7 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
           (destPort == 9415) ||
           (destPort == 56102) ||
           (destPort == 42045) ||
+          (destPort == 30303) ||
           (destPort == 1048) ||
           (destPort == 1085) ||
           (destPort == 1119) ||
@@ -622,7 +623,8 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
   if ((srcPort == 9133) ||
           (srcPort == 9415) ||
           (srcPort == 56102) ||
-          (srcPort == 42045))
+          (srcPort == 42045) ||
+          (srcPort == 30303))
   {
       return;
   }
