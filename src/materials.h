@@ -23,12 +23,12 @@
     "KedgeRobe",            // 0x0E
     "MetallicRobe",         // 0x0F
     "Robe",                 // 0x10
-    "VeliousLeather",       // 0x11
-    "VeliousChain",         // 0x12
-    "PogPlate",             // 0x13
-    "Ulthork/Tizmak",       // 0x14
-    "Ry`Gorr",              // 0x15
-    "Kael/Guardian",        // 0x16
+    "PoG Leather",          // 0x11
+    "PoG Chain",            // 0x12
+    "PoG Plate",            // 0x13
+    "Vel Leather",          // 0x14
+    "Vel Chain",            // 0x15
+    "Vel Plate",            // 0x16
     "VeliousMonk",          // 0x17
     NULL,                   // 0x18
     NULL,                   // 0x19
@@ -246,7 +246,7 @@
     NULL,                   // 0xed
     NULL,                   // 0xee
     NULL,                   // 0xef
-    NULL,                   // 0xf0
+    "Vel Helm",             // 0xf0
     NULL,                   // 0xf1
     NULL,                   // 0xf2
     NULL,                   // 0xf3
