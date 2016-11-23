@@ -89,7 +89,9 @@ enum changeType
   tSpawnChangedRuntimeFilter = 128,
   tSpawnChangedConsidered = 256,
   tSpawnChangedName = 512,
-  tSpawnChangedALL = 1023, // sum of all previous change types 
+  tSpawnChangedRace = 1024,
+  tSpawnChangedGuild = 2048,
+  tSpawnChangedALL = 4095, // sum of all previous change types 
 };
 
 

@@ -261,17 +261,21 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
        setText(tSpawnColMaxHP, buff);
      }
 
-     if (changeType == tSpawnChangedALL)
+     if (changeType & tSpawnChangedGuild)
      {
-       setText(tSpawnColDeity, spawn->deityName());
-       setText(tSpawnColBodyType, spawn->typeString());
        if (spawn->guildID() < MAX_GUILDS)
-       {  
+       {
           if(spawn->guildTag())
             setText(tSpawnColGuildID, spawn->guildTag());
           else
             setText(tSpawnColGuildID, QString::number(spawn->guildID()));
        }
+     }
+
+     if (changeType == tSpawnChangedALL)
+     {
+       setText(tSpawnColDeity, spawn->deityName());
+       setText(tSpawnColBodyType, spawn->typeString());
      }
    }
    else if (changeType == tSpawnChangedALL)
@@ -318,9 +322,6 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      buff.sprintf("%5d", item()->id());
      setText(tSpawnColID, buff);
      
-     // Race
-     setText(tSpawnColRace, item()->raceString());
-     
      // Class
      setText(tSpawnColClass, item()->classString());
      
@@ -328,6 +329,12 @@ void SpawnListItem::update(Player* player, uint32_t changeType)
      setText(tSpawnColSpawnTime, m_item->spawnTimeStr());
 
      // CJD TODO - Deity, PVP teams
+   }
+
+   if (changeType & tSpawnChangedRace)
+   {
+     // Race
+     setText(tSpawnColRace, item()->raceString());
    }
 
    if (changeType & tSpawnChangedWearing)

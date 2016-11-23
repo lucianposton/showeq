@@ -799,8 +799,13 @@ void SpawnShell::illusionSpawn(const uint8_t* data)
         spawn->setGender(illusion->gender);
         spawn->setRace(illusion->race);
 
+        int changed = tSpawnChangedRace;
+        if (updateFilterFlags(spawn))
+            changed |= tSpawnChangedFilter;
+        if (updateRuntimeFilterFlags(spawn))
+            changed |= tSpawnChangedRuntimeFilter;
         spawn->updateLastChanged();
-        emit changeItem(spawn, tSpawnChangedALL);
+        emit changeItem(spawn, changed);
 #ifdef SPAWNSHELL_DIAG
         seqDebug("SpawnShell: Illusioned %s (id=%d) into race %d",
                  illusion->name, illusion->spawnId, illusion->race);
@@ -856,7 +861,7 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
                spawn->setGuildID(app->parameter);
                spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
                spawn->setIsPlayersGuildmate(!m_player->guildTag().isEmpty() && spawn->guildID() == m_player->guildID());
-               int changed = tSpawnChangedNone;
+               int changed = tSpawnChangedGuild;
                if (updateFilterFlags(spawn))
                    changed |= tSpawnChangedFilter;
                if (updateRuntimeFilterFlags(spawn))
