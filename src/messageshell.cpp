@@ -956,6 +956,13 @@ void MessageShell::newAltExp(uint32_t newExp, uint32_t totalExp,
   m_messages->addMessage(MT_Player, tempStr);
 }
 
+void MessageShell::changeItem(const Item* item, uint32_t changeType)
+{
+  // if all has changed, it is effectively if not literally a new item
+  if (changeType == tSpawnChangedALL)
+    addItem(item);
+}
+
 void MessageShell::addItem(const Item* item)
 {
   uint32_t filterFlags = item->filterFlags();

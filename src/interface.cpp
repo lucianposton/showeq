@@ -1928,6 +1928,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 
      connect(m_spawnShell, SIGNAL(addItem(const Item*)),
 	     m_messageShell, SLOT(addItem(const Item*)));
+     connect(m_spawnShell, SIGNAL(changeItem(const Item*, uint32_t)),
+	     m_messageShell, SLOT(changeItem(const Item*, uint32_t)));
      connect(m_spawnShell, SIGNAL(delItem(const Item*)),
 	     m_messageShell, SLOT(delItem(const Item*)));
      connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),

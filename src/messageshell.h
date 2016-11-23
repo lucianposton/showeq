@@ -101,6 +101,7 @@ class MessageShell : public QObject
    void newAltExp(uint32_t newExp, uint32_t totalExp, uint32_t totalTick, 
 		  uint32_t maxExp, uint32_t tickExp, uint32_t aapoints);
 
+   void changeItem(const Item* item, uint32_t changeType);
    void addItem(const Item* item);
    void delItem(const Item* item);
    void killSpawn(const Item* item);
