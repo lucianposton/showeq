@@ -1711,10 +1711,11 @@ struct specialMessageStruct
 struct guildMOTDStruct
 {
   /*0000*/ uint32_t unknown0000;                 //***Placeholder
-  /*0004*/ char     target[64];                  // motd target
-  /*0068*/ char     sender[64];                  // motd "sender" (who set it)
-  /*0132*/ uint32_t unknown0132;                 //***Placeholder
-  /*0136*/ char     message[0];
+  /*0004*/ uint32_t unknown0004;		 // added 11/16/2016
+  /*0008*/ char     target[64];                  // motd target
+  /*0072*/ char     sender[64];                  // motd "sender" (who set it)
+  /*0136*/ uint32_t unknown0132;                 //***Placeholder
+  /*0140*/ char     message[0];
 };
 
 /*
@@ -2608,19 +2609,20 @@ struct buffStruct
 
 /*
 ** Guild Member Update structure 
-** Length: 80 Octets
+** Length: 88 Octets
 **
 */
 
 struct GuildMemberUpdate
 {
 /*000*/ uint32_t guildId;                        // guild id
-/*004*/ char     name[64];                       // member name
-/*068*/ uint16_t zoneId;                         // zone id 
-/*070*/ uint16_t zoneInstance;                   // zone instance
-/*072*/ uint32_t lastOn;                         // time the player was last on.
-/*076*/ uint8_t uknown076[4];                    // 4 bytes added 11/28/12
-/*080*/
+/*004*/ uint8_t  unknown004[4];			 // 4 bytes added 11/16/16
+/*008*/ char     name[64];                       // member name
+/*072*/ uint16_t zoneId;                         // zone id 
+/*074*/ uint16_t zoneInstance;                   // zone instance
+/*076*/ uint32_t lastOn;                         // time the player was last on.
+/*080*/ uint8_t  unknown080[8];                  // 4 bytes added 11/28/12, +4 added 11/16/16
+/*088*/
 };
 
 /*

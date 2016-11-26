@@ -157,6 +157,22 @@ QString NetStream::readText()
     return QString();
 }
 
+QString NetStream::readLPText()
+{
+    uint32_t i;
+    uint32_t len = readUInt32NC ();
+    QString r = "";
+    for (i = 0; i < len; i++) {
+	if (m_pos < m_lastPos) {
+	    r.append (*m_pos);
+	    m_pos++;
+	}
+	else
+	    break;
+    }
+    return (r);
+}
+
 uint16_t NetStream::readUInt16NC()
 {
     uint16_t val;

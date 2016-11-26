@@ -32,7 +32,8 @@ class NetStream
   int16_t readInt16();
   uint32_t readUInt32();
   int32_t readInt32();
-  QString readText();
+  QString readText();		// read null-terminated string
+  QString readLPText();		// read length-prefixed string
   uint16_t readUInt16NC();
   uint32_t readUInt32NC();
   void skipBytes(size_t byteCount);

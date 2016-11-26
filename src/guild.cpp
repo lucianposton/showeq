@@ -68,8 +68,13 @@ void GuildMgr::writeGuildList(const uint8_t* data, size_t len)
 
   NetStream netStream(data,len);
   QString guildName;
+  QString emptyName = "";
   uint32_t size = 0; // to keep track of how much we're reading from the packet
   uint32_t guildId = 0;
+
+  for (guildId = 0; guildId < 20000; guildId++)
+    m_guildList[guildId] = emptyName;
+  guildId = 0;
 
   /*
    0x48 in the packet starts the serialized list.  See guildListStruct
@@ -83,8 +88,10 @@ void GuildMgr::writeGuildList(const uint8_t* data, size_t len)
   while(!netStream.end())
   {
      guildId = netStream.readUInt32NC();
-     guildName = netStream.readText();
      size += 4; // four bytes for the guild ID
+     netStream.skipBytes(4);
+     size += 4; // four bytes added 11/16/2016
+     guildName = netStream.readText();
 
      if(guildName.length())
      {

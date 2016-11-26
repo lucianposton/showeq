@@ -31,14 +31,14 @@ static const QString memberRanks[] = { "P", " " };
 // GuildMember implementation
 GuildMember::GuildMember(NetStream& netStream)
 {
-  // Null-terminated name
-  m_name = netStream.readText();
+  // name
+  m_name = netStream.readLPText ();
 
   // 4 byte level
-  m_level = uint8_t(netStream.readUInt32());
+  m_level = uint8_t(netStream.readUInt32NC());
 
   // 4 byte banker flag (0 = no, 1 = banker, 2 = alt, 3 = alt banker)
-  m_banker = uint8_t(netStream.readUInt32());
+  m_banker = uint8_t(netStream.readUInt32NC());
   if (m_banker > 1)
   {
       m_alt = 1;
@@ -50,38 +50,38 @@ GuildMember::GuildMember(NetStream& netStream)
   m_banker = m_banker % 2;
 
   // 4 byte class
-  m_class = uint8_t(netStream.readUInt32());
+  m_class = uint8_t(netStream.readUInt32NC());
 
   // 4 byte rank (0 = member, 1 = officer, 2 = leader)
-  m_guildRank = netStream.readUInt32();
+  m_guildRank = netStream.readUInt32NC();
 
   // 4 byte date/time for last on
-  m_lastOn = time_t(netStream.readUInt32());
+  m_lastOn = time_t(netStream.readUInt32NC());
 
-  // 4 byte guild tribute on/off (0 = off, 1 = on)
-  m_guildTributeOn = netStream.readUInt32();
+  // 1 byte guild tribute on/off (0 = off, 1 = on)
+  m_guildTributeOn = netStream.readUInt8();
 
-  // 4 byte guild trophy on/off (0 = off, 1 = on) Added 4/29/14
-  m_guildTrophyOn = netStream.readUInt32();
+  // 1 byte guild trophy on/off (0 = off, 1 = on) Added 4/29/14
+  m_guildTrophyOn = netStream.readUInt8();
 
   // 4 byte guild tribute total donated
-  m_guildTributeDonated = netStream.readUInt32();
+  m_guildTributeDonated = netStream.readUInt32NC();
 
   // 4 byte guild tribute last donation timestamp
-  m_guildTributeLastDonation = time_t(netStream.readUInt32());
+  m_guildTributeLastDonation = time_t(netStream.readUInt32NC());
 
-  // 4 byte prospective member? flag (0=prospective, 1=full member) ??
-  m_fullmember = netStream.readUInt32();
+  // 1 byte prospective member? flag (0=prospective, 1=full member) ??
+  m_fullmember = netStream.readUInt8();
 
-  // Null-terminated public note
-  m_publicNote = netStream.readText();
+  // public note
+  m_publicNote = netStream.readLPText();
 
   // 2 byte zoneInstance and zoneId for current zone
-  m_zoneInstance = netStream.readUInt16();
-  m_zoneId = netStream.readUInt16();
+  m_zoneInstance = 0;
+  m_zoneId = 0;
 
   // Unknown
-  netStream.skipBytes(8);
+  netStream.skipBytes(6);
 }
 
 GuildMember::~GuildMember()
@@ -244,13 +244,16 @@ void GuildShell::guildMemberList(const uint8_t* data, size_t len)
   NetStream gml(data, len);
   
   // read the player name from the front of the stream
-  QString player = gml.readText();
+  QString player = gml.readLPText ();
+
 
   gml.skipBytes(4); // added 1/12/2013
+  gml.skipBytes(4); // added 11/16/2016
+  gml.skipBytes(1);
 
   // read the player count from the stream
   uint32_t count;
-  count = gml.readUInt32();
+  count = gml.readUInt32NC();
 
 #ifdef GUILDSHELL_DIAG
   seqDebug("Guild has %d members:", count);

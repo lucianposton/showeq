@@ -11,7 +11,7 @@
     </opcode>
 -->
 
-    <opcode id="2D38" name="OP_GuildList" updated="12/12/12">
+    <opcode id="3ad6" name="OP_GuildList" updated="11/16/16">
         <comment>old GuildListCode</comment>
         <payload dir="server" typename="worldGuildListStruct" sizechecktype="none"/>
     </opcode>
