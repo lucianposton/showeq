@@ -500,7 +500,7 @@ void SpawnShell::newSpawn(const uint8_t* data)
 void SpawnShell::newSpawn(const spawnStruct& s)
 {
 #ifdef SPAWNSHELL_DIAG
-   seqDebug("SpawnShell::newSpawn(spawnStruct *(name='%s'))", s.name);
+   seqDebug("SpawnShell::newSpawn(spawnStruct *(id=%d, name='%s'))", s.spawnId, s.name);
 #endif
    // if this is the SPAWN_SELF it's the player
    if (s.NPC == SPAWN_SELF)
@@ -532,6 +532,10 @@ void SpawnShell::newSpawn(const spawnStruct& s)
    if (item != NULL)
    {
      Spawn* spawn = (Spawn*)item;
+#ifdef SPAWNSHELL_DIAG
+     seqDebug("SpawnShell::newSpawn(): changeItem, before : %s", (const char*)spawn->dumpString());
+#endif
+
      spawn->update(&s);
 
      spawn->setGuildTag(m_guildMgr->guildIdToName(spawn->guildID()));
@@ -545,6 +549,9 @@ void SpawnShell::newSpawn(const spawnStruct& s)
      updateRuntimeFilterFlags(spawn);
      item->updateLastChanged();
 
+#ifdef SPAWNSHELL_DIAG
+     seqDebug("SpawnShell::newSpawn(): changeItem, after : %s", (const char*)spawn->dumpString());
+#endif
      emit changeItem(item, tSpawnChangedALL);
    }
    else
@@ -687,6 +694,9 @@ void SpawnShell::updateSpawn(uint16_t id,
    }
    else if (showeq_params->createUnknownSpawns)
    {
+#ifdef SPAWNSHELL_DIAG
+   seqDebug("SpawnShell::updateSpawn(id=%d): creating unknown spawn", id);
+#endif
      // not the player, so check if it's a recently deleted spawn
      for (int i =0; i < m_cntDeadSpawnIDs; i++)
      {
