@@ -151,7 +151,7 @@
     "WarEpic1hRed",         // 0x8e
     NULL,                   // 0x8f - Unknown Weapon
     NULL,                   // 0x90 - Unknown Weapon
-    NULL,                   // 0x91 - Unknown Weapon
+    "SKEpic",               // 0x91
     NULL,                   // 0x92 - Unknown Weapon
     NULL,                   // 0x93 - Unknown Weapon
     "BardEpic",             // 0x94

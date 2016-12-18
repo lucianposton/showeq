@@ -66,7 +66,7 @@
     NULL,                 // 0x39
     NULL,                 // 0x3a
     NULL,                 // 0x3b
-    NULL,                 // 0x3c
+    "VeliumSphere",       // 0x3c
     NULL,                 // 0x3d
     NULL,                 // 0x3e
     NULL,                 // 0x3f
