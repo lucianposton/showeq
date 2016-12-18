@@ -3662,20 +3662,23 @@ void Map::paintSpawns(MapParameters& param,
 #ifdef DEBUGMAP
     printf("PvP handling\n");
 #endif
-    const bool spawn_is_in_players_guild = spawn->isPlayersGuildmate();
-    if (spawn_is_in_players_guild && !m_pvpEnableGuildmates)
+    if (spawn->isPlayersGuildmate() && !m_pvpEnableGuildmates)
     {
       m_mapIcons->paintSpawnIcon(param, p, mapIcon, spawn, location, point);
       continue;
     }
-    
-    const Spawn* owner;
-    
+
+    const Spawn* owner = NULL;
     if (spawn->petOwnerID() != 0)
-      owner = spawnType(m_spawnShell->findID(tSpawn, spawn->petOwnerID()));
-    else 
-      owner = NULL;
-    
+    {
+        owner = spawnType(m_spawnShell->findID(tSpawn, spawn->petOwnerID()));
+        if (owner != NULL && owner->isPlayersGuildmate() && !m_pvpEnableGuildmates)
+        {
+            m_mapIcons->paintSpawnIcon(param, p, mapIcon, spawn, location, point);
+            continue;
+        }
+    }
+
     if (m_pvp)
     {
       // New Combined Zek rules can only PvP +/- 4 levels from you. So
