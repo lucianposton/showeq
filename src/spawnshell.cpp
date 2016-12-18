@@ -489,7 +489,13 @@ void SpawnShell::newSpawn(const uint8_t* data)
 {
   // if zoning, then don't do anything
   if (m_zoneMgr->isZoning())
+  {
+#ifdef SPAWNSHELL_DIAG
+    const spawnStruct* spawn = (const spawnStruct*)data;
+    seqDebug("SpawnShell::newSpawn(spawnStruct *(id=%d, name='%s')) DROPPED while zoning", spawn->spawnId, spawn->name);
+#endif
     return;
+  }
 
   const spawnStruct* spawn = (const spawnStruct*)data;
 

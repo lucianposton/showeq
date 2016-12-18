@@ -1781,6 +1781,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_SendZonePoints", SP_Zone, DIR_Server,
 			"zonePointsStruct", SZC_None,
 			m_zoneMgr, SLOT(zonePoints(const uint8_t*, size_t, uint8_t)));
+     connect(m_spawnShell, SIGNAL(initialZoneSpawn(bool)),
+             m_zoneMgr, SLOT(initialZoneSpawn(bool)));
    }
 
    if (m_filterMgr)

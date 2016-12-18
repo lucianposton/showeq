@@ -49,6 +49,7 @@ class ZoneMgr : public QObject
  public slots:
   void saveZoneState(void);
   void restoreZoneState(void);
+  void initialZoneSpawn(bool);
 
  protected slots:
   void zoneEntryClient(const uint8_t* zsentry, size_t, uint8_t);

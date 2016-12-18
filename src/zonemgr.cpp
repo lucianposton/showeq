@@ -166,6 +166,15 @@ void ZoneMgr::restoreZoneState(void)
   }
 }
 
+void ZoneMgr::initialZoneSpawn(bool isInitialZoneSpawn)
+{
+    if (isInitialZoneSpawn)
+    {
+        // Received initial zone spawn list, so no longer zoning.
+        m_zoning = false;
+    }
+}
+
 void ZoneMgr::zoneEntryClient(const uint8_t* data, size_t len, uint8_t dir)
 {
   const ClientZoneEntryStruct* zsentry = (const ClientZoneEntryStruct*)data;
