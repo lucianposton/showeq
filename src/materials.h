@@ -13,22 +13,22 @@
     "Cured Silk",           // 0x04
     "Chitin",               // 0x05
     NULL,                   // 0x06
-    "Scale/BlackIron?",     // 0x07
+    "Scale/Fungi",          // 0x07
     NULL,                   // 0x08
     NULL,                   // 0x09
     "ElementRobe",          // 0x0A
     "BlightedRobe",         // 0x0B
-    "Crystalline",          // 0x0C
+    "CryosilkRobe",         // 0x0C
     "OracleRobe",           // 0x0D
     "KedgeRobe",            // 0x0E
     "MetallicRobe",         // 0x0F
     "Robe",                 // 0x10
-    "PoG Leather",          // 0x11
-    "PoG Chain",            // 0x12
-    "PoG Plate",            // 0x13
-    "Vel Leather",          // 0x14
-    "Vel Chain",            // 0x15
-    "Vel Plate",            // 0x16
+    "PogLeather",           // 0x11
+    "PogChain",             // 0x12
+    "PogPlate",             // 0x13
+    "VelLeather",           // 0x14
+    "VelChain",             // 0x15
+    "VelPlate",             // 0x16
     "VeliousMonk",          // 0x17
     NULL,                   // 0x18
     NULL,                   // 0x19
