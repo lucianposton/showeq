@@ -904,9 +904,9 @@ struct pos
   updateLastChanged();
   emit changeItem(this, tSpawnChangedPosition);
 
-  emit newSpeed((int)lrint(hypot( hypot( (pupdate->deltaX*80), 
+  emit newSpeed(hypot( hypot( (pupdate->deltaX*80),
 					 (pupdate->deltaY*80)), 
-				  (pupdate->deltaZ*80))));
+                              (pupdate->deltaZ*80))/119.46664);
 
   static uint8_t count = 0;
 

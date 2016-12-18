@@ -4424,7 +4424,7 @@ EQInterface::newSpeed(double speed)
   lastupdate = mTime();
 
    QString tempStr;
-   tempStr.sprintf("Run Speed: %3.1f", speed);
+   tempStr.sprintf("Run Speed: %3.6f", speed);
    m_stsbarSpeed->setText(tempStr);
 }
 
