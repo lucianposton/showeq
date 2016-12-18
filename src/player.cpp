@@ -284,7 +284,7 @@ void Player::player(const uint8_t* data)
 	   player->x, player->y, player->z, player->heading);
   seqDebug("Player::backfill(bind): Pos (%f/%f/%f) Heading: %f",
 	   player->binds[0].x, player->binds[0].y, player->binds[0].z, 
-       player->binds[9].heading);
+       player->binds[0].heading);
   setHeading((int8_t)lrintf(player->heading), 0);
   m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
   m_validPos = true;

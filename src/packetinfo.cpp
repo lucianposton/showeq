@@ -448,7 +448,7 @@ void EQPacketOPCodeDB::list(void) const
 
     QStringList comments = current->comments();
     
-    fprintf(stderr, "\t\t%d comment(s)\n", comments.count());
+    fprintf(stderr, "\t\t%lu comment(s)\n", comments.count());
 
     for (QStringList::Iterator cit = comments.begin(); 
 	 cit != comments.end(); ++cit)

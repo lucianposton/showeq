@@ -618,7 +618,7 @@ void SpawnListWindow2::refresh(void)
 
 
       // if this item doesn't fit the filter
-      if (!m_currentCategory->isFiltered(filterString(item), 0))
+      if (!m_currentCategory->isFiltered(filterString(item), level))
       {
 	// delete the item (if it already existed)
 	if (litem != NULL)

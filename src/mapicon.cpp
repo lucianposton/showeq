@@ -705,7 +705,6 @@ MapIcons::MapIcons(Player* player, const QString& preferenceName,
     .setHighlight(QBrush(NoBrush), QPen(yellow, 1, SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeLarge,
 		  true, false, false, false);
-  m_mapIcons[tIconTypeFilterFlagPvP];
   m_mapIcons[tIconTypeRuntimeFiltered]
     .setHighlight(QBrush(NoBrush), QPen(white, 1, SolidLine, cap, join),
 		  tIconStyleCircle, tIconSizeLarge,

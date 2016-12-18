@@ -303,7 +303,6 @@ void GroupMgr::changeItem(const Item* item, uint32_t changeType)
             const Spawn* spawn = (const Spawn*)item;
             if (m_members[i]->m_name == spawn->name())
             {
-                const uint8_t last = m_members[i]->m_level;
                 m_members[i]->m_level = spawn->level();
                 break;
             }

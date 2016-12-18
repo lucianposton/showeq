@@ -42,7 +42,7 @@ class EQItemDB : public QObject, protected ITEMDBBASE
    Q_OBJECT
 
  public:
-   typedef enum 
+   enum
    {
      DATA_DB = 0, // is the db to store the data in ShowEQ format
      RAW_DATA_DB = 4 // contains the raw packet stream for an object

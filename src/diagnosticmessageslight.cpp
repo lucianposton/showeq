@@ -46,10 +46,9 @@ int seqWarn(const char* format, ...)
 
 void seqFatal(const char* format, ...)
 {
-  int ret;
   va_list ap;
   va_start(ap, format);
-  ret = vfprintf(stderr, format, ap);
+  vfprintf(stderr, format, ap);
   fputs("\n", stderr);
   va_end(ap);
   exit (-1);

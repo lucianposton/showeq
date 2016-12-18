@@ -250,14 +250,14 @@ void XMLPreferences::loadPreferences(const QString& filename,
        break;
      }
 
-#if 0 // ZBTEMP : Support properties without values to get comments?
      if (!foundValue)
      {
+#if 0 // ZBTEMP : Support properties without values to get comments?
        qWarning("property '%s' in section '%s' without value! Ignoring!",
 		(const char*)propertyName, (const char*)sectionName);
        continue;
-     }
 #endif
+     }
    }
  }
 

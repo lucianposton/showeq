@@ -82,8 +82,6 @@ static const char *fileopen[] = {
 EditorWindow::EditorWindow(const char *fileName)
      : QMainWindow( 0, "ShowEQ - Editor", WDestructiveClose )
  {
-     int id;
-  
      QPixmap openIcon, saveIcon;
  
      fileTools = new QToolBar( this, "file operations" );
@@ -101,10 +99,10 @@ EditorWindow::EditorWindow(const char *fileName)
      QPopupMenu * file = new QPopupMenu( this );
      menuBar()->insertItem( "&File", file );
  
-     id = file->insertItem( openIcon, "&Open",
+     file->insertItem( openIcon, "&Open",
                             this, SLOT(load()), CTRL+Key_O );
  
-     id = file->insertItem( saveIcon, "&Save",
+     file->insertItem( saveIcon, "&Save",
                             this, SLOT(save()), CTRL+Key_S );
 
      file->insertSeparator();

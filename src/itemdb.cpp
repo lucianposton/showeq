@@ -5,7 +5,7 @@
  * http://seq.sourceforge.net/
  */
 
-static char* itemdbid = "@(#) $Id$ $Name$";
+static const char* itemdbid = "@(#) $Id$ $Name$";
 
 #include <unistd.h>
 #include <stdio.h>
@@ -1537,7 +1537,7 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
 
   if (*curPos != '|')
   {
-    fprintf(stderr, "Level: %d: Expected '|' but found '%c' at pos %d field %d\n",
+    fprintf(stderr, "Level: %d: Expected '|' but found '%c' at pos %ld field %d\n",
 	    level, *curPos, (curPos - begPos), fieldCount);
     return false; // unknown state, so return false just to be safe
   }
@@ -1568,7 +1568,7 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
 
       if (!result)
       {
-	fprintf(stderr, "Level: %d: AddItem() Failed. Stopped processing sub-items at pos %d field %d container slot %d for safety!\n",
+	fprintf(stderr, "Level: %d: AddItem() Failed. Stopped processing sub-items at pos %ld field %d container slot %d for safety!\n",
 		level, (curPos - begPos), fieldCount, i);
 	return false; // unknown state, so return false just to be safe
       }
@@ -1576,7 +1576,7 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
       if (*curPos != '"')
       {
 	fprintf(stderr, 
-		"Level: %d: Expected '\"' but found '%c' at pos %d field %d\n",
+		"Level: %d: Expected '\"' but found '%c' at pos %ld field %d\n",
 		level, *curPos, (curPos - begPos), fieldCount);
 	return false; // unknown state, so return false just to be safe
       }
@@ -1591,7 +1591,7 @@ bool EQItemDB::AddItem(const char* serializedItem, int level)
     if ((*curPos != '|') && (*curPos != '\0'))
     {
       fprintf(stderr, 
-	      "Level: %d: Expected '|' or '\\0' but found '%c' at pos %d field %d\n",
+	      "Level: %d: Expected '|' or '\\0' but found '%c' at pos %ld field %d\n",
 	      level, *curPos, (curPos - begPos), fieldCount);
       return false; // unknown state, so return false just to be safe
     }
@@ -1859,7 +1859,7 @@ void EQItemDB::logItem(const char* serializedItem, size_t len)
   }
 
   fprintf(lh, "%s%*.*s\n\n",
-	  ctime(&now), len, len, serializedItem);
+	  ctime(&now), (int)len, (int)len, serializedItem);
   
   fclose(lh);
 }

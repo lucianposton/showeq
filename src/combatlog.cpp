@@ -496,7 +496,7 @@ void CombatWindow::updateOffense()
 	QString s_avgnonmelee;
 
 	int iTotalDamage = 0;
-	int iTotalHits = 0;
+	//int iTotalHits = 0;
 	double dPercentSpecial = 0.0;
 	double dPercentNonmelee = 0.0;
 	double dAvgMelee = 0.0;
@@ -628,7 +628,7 @@ void CombatWindow::updateOffense()
 	}
 
 	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage;
-	iTotalHits = iMeleeHits + iSpecialHits + iNonmeleeHits;
+	//iTotalHits = iMeleeHits + iSpecialHits + iNonmeleeHits;
 
 	dPercentSpecial = ((double)iSpecialDamage / (double)iTotalDamage) * 100.0;
 	dPercentNonmelee = ((double)iNonmeleeDamage / (double)iTotalDamage) * 100.0;

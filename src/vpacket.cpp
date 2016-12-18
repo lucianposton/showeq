@@ -148,7 +148,6 @@ VPacket::~VPacket(void)
 int
 VPacket::Record(const char *buff, int packetsize, time_t time, long version)
 {
-  int size;
   int bufsize;
   int headersize = sizeof(struct packet_struct);
   struct packet_struct *packet;
@@ -199,19 +198,17 @@ VPacket::Record(const char *buff, int packetsize, time_t time, long version)
   m_nBufIndex += packetsize;
   m_nSequence++;
 
-  size = packetsize;
-
 #ifdef DEBUG_VPACKET
 printf("Record: %06d:%06d: %04d bytes: 0x %02x%02x%02x%02x ... %02x%02x%02x%02x\n", 
-  packet->sequence, packet->ms, size, 
+  packet->sequence, packet->ms, packetsize, 
   (unsigned char) packet->buffer[0], 
   (unsigned char) packet->buffer[1],
   (unsigned char) packet->buffer[2], 
   (unsigned char) packet->buffer[3],
-  (unsigned char) packet->buffer[size - 4], 
-  (unsigned char) packet->buffer[size - 3],
-  (unsigned char) packet->buffer[size - 2], 
-  (unsigned char) packet->buffer[size - 1]);
+  (unsigned char) packet->buffer[packetsize - 4], 
+  (unsigned char) packet->buffer[packetsize - 3],
+  (unsigned char) packet->buffer[packetsize - 2], 
+  (unsigned char) packet->buffer[packetsize - 1]);
 #endif
 
   // flushes every packet

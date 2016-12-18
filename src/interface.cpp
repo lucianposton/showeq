@@ -2404,9 +2404,7 @@ void EQInterface::toggle_view_StatWin( int id )
 
 void EQInterface::toggle_view_SkillWin( int id )
 {
-  int skillnum;
-
-  skillnum = m_skillWinMenu->itemParameter(id);
+  m_skillWinMenu->itemParameter(id);
 
   if (m_skillWinMenu->isItemChecked(id))
   {

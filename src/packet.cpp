@@ -247,7 +247,13 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
   // if running setuid root, then give up root access, since the PacketCapture
   // is the only thing that needed it.
   if ((geteuid() == 0) && (getuid() != geteuid()))
-    setuid(getuid()); 
+  {
+    if (-1 == setuid(getuid()))
+    {
+        perror("EQPacket::EQPacket failed to setuid");
+        seqFatal("setuid failed");
+    }
+  }
 
   /* Create timer object */
   m_timer = new QTimer (this);
@@ -668,8 +674,8 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
   }
   else if (((packet.getDestPort() >= LoginServerMinPort) &&
       (packet.getDestPort() <= LoginServerMaxPort)) ||
-      (packet.getSourcePort() >= LoginServerMinPort) &&
-      (packet.getSourcePort() <= LoginServerMaxPort))
+      ((packet.getSourcePort() >= LoginServerMinPort) &&
+      (packet.getSourcePort() <= LoginServerMaxPort)))
   {
     // Drop login server traffic
     return;
@@ -1083,6 +1089,7 @@ void* restartAfterDelay(void* arg)
     sleep(15);
     seqDebug("restarting capture");
     myThis->restartMonitor();
+    return 0;
 }
 
 }

@@ -356,15 +356,20 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
       // append a new record entry
 
       fprintf(newlogfp, 
-              "0\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d", 
-              s_time, (const char*)s_mob_name, mob_level, 
-              (const char*)s_xp_value, (const char*)s_xp_valueZEM,
-              (const char*)s_xp_valuep, (const char*)s_xp_valueg,
-              (const char*)s_xp_gained, 
+              "0\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%lu",
+              s_time,
+              (const char*)s_mob_name,
+              mob_level,
+              (const char*)s_xp_value,
+              (const char*)s_xp_valueZEM,
+              (const char*)s_xp_valuep,
+              (const char*)s_xp_valueg,
+              (const char*)s_xp_gained,
               (const char*)m_player->name(),
               (const char*)m_player->lastName(),
-              m_player->level(), 
-              m_player->classVal(), m_group->groupSize());
+              m_player->level(),
+              m_player->classVal(),
+              m_group->groupSize());
 
       uint8_t memberLevel;
       // continue with info for group members
@@ -650,7 +655,7 @@ void ExperienceWindow::logexp(long xp_gained, int mob_level)
    if (!m_log_exp || (!m_log)) /* sanity */
       return;
 
-   fprintf(m_log, "1 %d %d %ld %d %d %d", 
+   fprintf(m_log, "1 %d %d %ld %d %d %lu", 
 	   (int)time(NULL), mob_level, 
       xp_gained, m_player->level(), 
       m_player->classVal(), m_group->groupSize());

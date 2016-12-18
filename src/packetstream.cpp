@@ -421,13 +421,17 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
 
     // iterate over the payloads in the opcode entry, and dispatch matches
     EQPayloadListIterator pit(*opcodeEntry);
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
     bool found = false;
+#endif
     while ((payload = pit.current()) != 0)
     {
       // see if this packet matches
       if (payload->match(data, len, m_dir))
       {
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
 	found = true;
+#endif
 	unknown = false; // 
 
 #ifdef PACKET_INFO_DIAG
@@ -478,11 +482,11 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
       ++pit;
     }
 
- #ifdef PACKET_PAYLOAD_SIZE_DIAG
+#ifdef PACKET_PAYLOAD_SIZE_DIAG
     if (!found && !opcodeEntry->isEmpty())
     {
       QString tempStr;
-      tempStr.sprintf("%s  (%#04x) (dataLen: %u) doesn't match:",
+      tempStr.sprintf("%s  (%#04x) (dataLen: %lu) doesn't match:",
 		      (const char*)opcodeEntry->name(), opcodeEntry->opcode(), 
 		      len);
       

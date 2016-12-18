@@ -12,6 +12,7 @@
 #include "filtermgr.h"
 #include "spawn.h"
 #include "main.h"
+#include "diagnosticmessages.h"
 
 #include <stdio.h>
 
@@ -144,7 +145,10 @@ void FilterNotifications::executeCommand(const Item* item,
   command.replace(cueExp, audioCue);
   
   // fire off the command
-  system ((const char*)command);
+  if (-1 == system((const char*)command))
+  {
+      seqWarn("FilterNotifications::executeCommand(): Failed to create child process");
+  }
 }
 
 #include "filternotifications.moc"
