@@ -655,12 +655,11 @@ void ExperienceWindow::logexp(long xp_gained, int mob_level)
       xp_gained, m_player->level(), 
       m_player->classVal(), m_group->groupSize());
 
-   const Spawn* spawn;
    for (int i=0; i < MAX_GROUP_MEMBERS; i++)
    {
-     spawn = m_group->memberBySlot(i);
-     if (spawn)
-       fprintf(m_log, " %d", spawn->level());
+     uint8_t memberLevel = m_group->memberLevelBySlot(i);
+     if (memberLevel)
+       fprintf(m_log, " %d", memberLevel);
    }
 
    fprintf(m_log, "\n"); 
