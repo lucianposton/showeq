@@ -122,6 +122,8 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
 
    connect(m_player, SIGNAL(levelChanged(uint8_t)),
 	   this, SLOT(playerLevelChanged(uint8_t)));
+   connect(m_player, SIGNAL(guildJoined(uint16_t)),
+	   this, SLOT(playerGuildChanged(uint16_t)));
 
    // connect SpawnShell slots to ZoneMgr signals
    connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
@@ -844,13 +846,6 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
              app->spawnId, app->type, app->parameter);
 #endif
 
-    switch(app->type)
-    {
-        case 16: // player ID update
-            m_player->setPlayerID(app->parameter);
-            break;
-    }
-
    Item* item = m_spawns.find(app->spawnId);
 
    if (item != NULL)
@@ -883,7 +878,6 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
                if (updateRuntimeFilterFlags(spawn))
                    changed |= tSpawnChangedRuntimeFilter;
                spawn->updateLastChanged();
-               // TODO: Does this update guild tag in spawnlists?
                emit changeItem(spawn, changed);
                }
                break;
@@ -1146,6 +1140,22 @@ void SpawnShell::playerChangedID(uint16_t playerID)
   m_players.replace(playerID, m_player);
 
   emit changeItem(m_player, tSpawnChangedALL);
+}
+
+void SpawnShell::playerGuildChanged(uint16_t guildID)
+{
+    ItemMap& theMap = getMap(tSpawn);
+    ItemIterator it(theMap);
+
+    Spawn* spawn;
+    for (; it.current(); ++it)
+    {
+        spawn = (Spawn*)it.current();
+        spawn->setIsPlayersGuildmate(!m_player->guildTag().isEmpty() && spawn->guildID() == m_player->guildID());
+    }
+
+    refilterSpawns(tSpawn);
+    refilterSpawnsRuntime(tSpawn);
 }
 
 void SpawnShell::playerLevelChanged(uint8_t playerLevel)

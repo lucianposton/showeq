@@ -980,6 +980,42 @@ void Player::tradeSpellBookSlots(const uint8_t* data, size_t, uint8_t dir)
   m_spellBookSlots[tsb->slot2] = spell1;
 }
 
+void Player::updateSpawnAppearance(const uint8_t* data)
+{
+    const spawnAppearanceStruct* app = (const spawnAppearanceStruct*)data;
+#ifdef DEBUG_PLAYER
+    seqDebug("Player::updateSpawnAppearance(id=%d, sub=%d, parm=%08x)",
+            app->spawnId, app->type, app->parameter);
+#endif
+
+    switch(app->type)
+    {
+        case 16: // player ID update
+            setPlayerID(app->parameter);
+            return;
+    }
+
+    if (app->spawnId == id())
+    {
+        switch(app->type)
+        {
+            case 22: // guild update
+                {
+                    const uint16_t guild_id = app->parameter;
+                    if (guild_id != guildID()) {
+                        setGuildID(guild_id);
+                        setGuildTag(m_guildMgr->guildIdToName(guild_id));
+                        emit guildChanged();
+                        updateLastChanged();
+                        emit changeItem(this, tSpawnChangedGuild);
+                        emit guildJoined(guild_id);
+                    }
+                }
+                break;
+        }
+    }
+}
+
 // setPlayer* only updates player*.  If you want to change and use the defaults you
 // must change showeq_params->default* and emit an checkDefaults signal.
 void Player::setPlayerID(uint16_t playerID)

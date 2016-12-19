@@ -74,6 +74,7 @@ public:
    void playerUpdateSelf(const uint8_t* pupdate, size_t, uint8_t);
    void consMessage(const uint8_t* con, size_t, uint8_t dir);
    void tradeSpellBookSlots(const uint8_t*, size_t, uint8_t);
+   void updateSpawnAppearance(const uint8_t*);
 
    void setPlayerID(uint16_t playerID);
    void savePlayerState(void);
@@ -187,6 +188,7 @@ public:
   void changeItem(const Item* item, uint32_t changeType);
   void headingChanged(int32_t heading);
   void levelChanged(uint8_t level);
+  void guildJoined(uint16_t guildID);
   void guildChanged();
 
  protected:

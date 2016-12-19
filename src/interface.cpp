@@ -2150,6 +2150,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_SwapSpell", SP_Zone, DIR_Server,
 		      "tradeSpellBookSlotsStruct", SZC_Match,
 	   m_player, SLOT(tradeSpellBookSlots(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_SpawnAppearance", SP_Zone, DIR_Server|DIR_Client,
+		      "spawnAppearanceStruct", SZC_Match,
+		      m_player, SLOT(updateSpawnAppearance(const uint8_t*)));
 
    // interface statusbar slots
    connect (this, SIGNAL(newZoneName(const QString&)),

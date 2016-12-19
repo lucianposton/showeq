@@ -130,6 +130,7 @@ public slots:
    void refilterSpawnsRuntime();
    void saveSpawns(void);
    void restoreSpawns(void);
+   void playerGuildChanged(uint16_t guildID);
    void playerLevelChanged(uint8_t playerLevel);
 
  protected:
