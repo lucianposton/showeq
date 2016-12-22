@@ -51,7 +51,7 @@ static inline int16_t min(const int16_t& __a,  const int16_t& __b)
 // 16  - Buff duration formula
 // 17  - Buff duration argument
 // 18  - Impact duration
-// 19  - Mana
+// 19  - Mana cost
 // 21  - Base
 // 22  - Base
 // 23  - Base
@@ -76,26 +76,26 @@ static inline int16_t min(const int16_t& __a,  const int16_t& __b)
 // 43  - Max
 // 44  - Icon
 // 45  - Mem Icon
-// 46  - Component
-// 47  - Component
-// 48  - Component
-// 49  - Component
-// 50  - Component counts
-// 51  - Component counts
-// 52  - Component counts
-// 53  - Component counts
-// 54  - No-expend reagent
-// 55  - No-expend reagent
-// 56  - No-expend reagent
-// 57  - No-expend reagent
-// 58  - Formula
-// 59  - Formula
-// 60  - Formula
-// 61  - Formula
-// 62  - Formula
-// 63  - Formula
-// 64  - Formula
-// 65  - Formula
+// 46  - 
+// 47  - 
+// 48  - 
+// 49  - 
+// 50  - 
+// 51  - 
+// 52  - 
+// 53  - 
+// 54  - 
+// 55  - 
+// 56  - 
+// 57  - 
+// 58  - Component
+// 59  - Component 2
+// 60  - 
+// 61  - 
+// 62  - Component amount
+// 63  - Component 2 amount
+// 64  - 
+// 65  - 
 // 66  - Formula
 // 67  - Formula
 // 68  - Formula

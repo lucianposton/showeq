@@ -51,6 +51,7 @@ class SpellItem
   SpellItem();
   
   // get accessors
+  bool isPlayerBuff() const;
   uint16_t spellId() const;
   uint16_t targetId() const;
   uint16_t casterId() const;
@@ -64,6 +65,7 @@ class SpellItem
   void setDuration(int);
   
   // set accessors
+  void setIsPlayerBuff(bool isPlayerBuff);
   void setSpellId(uint16_t spellid);
   void setTargetId(uint16_t target);
   void setCasterId(uint16_t caster);
@@ -74,7 +76,8 @@ class SpellItem
 
   void update(uint16_t spellId, const Spell* spell, int duration,
 	      uint16_t casterId, const QString& casterName,
-	      uint16_t targetId, const QString& targetName);
+	      uint16_t targetId, const QString& targetName,
+          bool isPlayerBuff, const QString& nameSuffix="");
   
  private:
   QString m_spellName;
@@ -83,6 +86,7 @@ class SpellItem
   int m_duration;
   timeval m_castTime;
 
+  bool m_isPlayerBuff;
   uint16_t m_spellId; 
   uint16_t m_casterId; 
   uint16_t m_targetId;
@@ -90,6 +94,11 @@ class SpellItem
   struct startCastStruct m_cast; // Needed?
 };
 
+
+inline bool SpellItem::isPlayerBuff() const
+{
+  return m_isPlayerBuff;
+}
 
 inline uint16_t SpellItem::spellId() const 
 {
@@ -136,6 +145,11 @@ inline const QString SpellItem::casterName() const
   return m_casterName;
 }
 
+inline void SpellItem::setIsPlayerBuff(bool isPlayerBuff)
+{
+    m_isPlayerBuff = isPlayerBuff;
+}
+
 inline void SpellItem::setSpellId(uint16_t spellid)
 {
   m_spellId = spellid;
@@ -173,6 +187,7 @@ class SpellShell : public QObject
   SpellShell(Player* player, SpawnShell* spawnshell, Spells* spells);
   virtual ~SpellShell();
   void deleteSpell(const SpellItem*);
+  bool isPlayerBuff(const Spell*, uint32_t, uint32_t) const;
   
  signals:
   void addSpell(const SpellItem *); // done
@@ -196,6 +211,7 @@ class SpellShell : public QObject
 
  protected:
   void deleteSpell(SpellItem *);
+  SpellItem* findPlayerBuff(uint16_t spellId);
   SpellItem* findSpell(uint16_t spellId, 
 		       uint16_t targetId, const QString& targetName);
   SpellItem* findSpell(int spell_id);

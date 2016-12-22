@@ -24,6 +24,7 @@
 
 SpellItem::SpellItem()
   : m_duration(0),
+    m_isPlayerBuff(0),
     m_spellId(0),
     m_casterId(0),
     m_targetId(0)
@@ -70,28 +71,37 @@ QString SpellItem::durationStr() const
 
 void SpellItem::update(uint16_t spellId, const Spell* spell, int duration,
 		       uint16_t casterId, const QString& casterName,
-		       uint16_t targetId, const QString& targetName)
+		       uint16_t targetId, const QString& targetName,
+               bool isPlayerBuff, const QString& nameSuffix)
 {
      setSpellId(spellId);
 
      setDuration(duration);
 
+     QString spellName;
      if (spell)
      {
-       setSpellName(spell->name());
+       spellName = spell->name();
 
-       if (spell->targetType() != 0x06)
-	 setTargetId(targetId);
+       if (spell->targetType() != Spell::SELF && spell->targetType() != Spell::GROUP)
+           setTargetId(targetId);
      }
      else
      {
-       setSpellName(spell_name(spellId));
+       seqWarn("SpellItem::update(): unknown spellId %d", spellId);
+       spellName = spell_name(spellId);
        setTargetId(targetId);
      }
 
+     if (!nameSuffix.isEmpty())
+     {
+         spellName.append(nameSuffix);
+     }
+     setSpellName(spellName);
+
      setCasterId(casterId);
 
-     if (!casterName.isEmpty())
+     if (!casterName.isEmpty() || isPlayerBuff)
        setCasterName(casterName);
      else
        setCasterName(QString("N/A"));
@@ -100,6 +110,8 @@ void SpellItem::update(uint16_t spellId, const Spell* spell, int duration,
        setTargetName(targetName);
      else
        setTargetName(QString("N/A"));
+
+     setIsPlayerBuff(isPlayerBuff);
 
      updateCastTime();
 }
@@ -122,6 +134,22 @@ SpellShell::~SpellShell()
   clear();
 }
 
+SpellItem* SpellShell::findPlayerBuff(uint16_t spellId)
+{
+    for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
+            it != m_spellList.end();
+            it++)
+    {
+        SpellItem *i = *it;
+        if (i->spellId() == spellId && i->isPlayerBuff())
+        {
+            return i;
+        }
+    }
+
+    return NULL;
+}
+
 SpellItem* SpellShell::findSpell(uint16_t spellId, 
 				 uint16_t targetId, const QString& targetName)
 {
@@ -133,6 +161,7 @@ SpellItem* SpellShell::findSpell(uint16_t spellId,
     if (i->spellId() == spellId)
     {
       if ((i->targetId() == targetId) || 
+              (targetId == m_player->id() && i->isPlayerBuff()) ||
 	  ((i->targetId() == 0) && (i->targetName() == targetName)))
 	return i;
     }
@@ -189,14 +218,30 @@ void SpellShell::deleteSpell(SpellItem *item)
    }
 }
 
+bool SpellShell::isPlayerBuff(const Spell* spell, uint32_t sourceID, uint32_t targetID) const
+{
+    const uint32_t player_id = m_player->id();
+    if (targetID == player_id)
+    {
+        return true;
+    }
+
+    if (spell && (spell->targetType() == Spell::SELF || spell->targetType() == Spell::GROUP))
+    {
+        return sourceID == player_id;
+    }
+
+    return false;
+}
+
 // slots
 
 void SpellShell::selfStartSpellCast(const uint8_t* data)
 {
   const startCastStruct *c = (const startCastStruct *)data;
 #ifdef DIAG_SPELLSHELL
-  seqDebug("selfStartSpellCast - id=%d (slot=%d, inv=%d) on spawnid=%d", 
-	   c->spellId, c->slot, c->inventorySlot, c->targetId);
+  seqDebug("SpellShell::selfStartSpellCast(): id=%d (me->%d) (slot=%d, inv=%d)",
+          c->spellId, c->targetId, c->slot, c->inventorySlot);
 #endif // DIAG_SPELLSHELL
 
   // get the target 
@@ -208,25 +253,24 @@ void SpellShell::selfStartSpellCast(const uint8_t* data)
   if (spell)
     duration = spell->calcDuration(m_player->level()) * 6;
 
-  if (!spell || spell->targetType() != 6)
+  if (isPlayerBuff(spell, m_player->id(), c->targetId))
   {
-    if (c->targetId && 
-	((s = m_spawnShell->findID(tSpawn, c->targetId))))
-      targetName = s->name();
-    
-    item = findSpell(c->spellId, c->targetId, targetName);
-  }
-  else
-  {
-    targetName = m_player->name();
-    item = findSpell(c->spellId);
+#ifdef DIAG_SPELLSHELL
+      seqDebug("-SpellShell::selfStartSpellCast(): DROPPED self-buff (id=%d).",
+              c->targetId);
+#endif // DIAG_SPELLSHELL
+      return;
   }
 
+  if (c->targetId && ((s = m_spawnShell->findID(tSpawn, c->targetId))))
+      targetName = s->name();
+
+  item = findSpell(c->spellId, c->targetId, targetName);
   if (item) 
   { // exists
     item->update(c->spellId, spell, duration,
 		 m_player->id(), m_player->name(),
-		 c->targetId, targetName);
+		 c->targetId, targetName, false);
     emit changeSpell(item);
   } 
   else 
@@ -234,7 +278,7 @@ void SpellShell::selfStartSpellCast(const uint8_t* data)
     item = new SpellItem();
     item->update(c->spellId, spell, duration,
 		 m_player->id(), m_player->name(),
-		 c->targetId, targetName);
+		 c->targetId, targetName, false);
     m_spellList.append(item);
     if ((m_spellList.count() > 0) && (!m_timer->isActive()))
       m_timer->start(1000 *
@@ -248,23 +292,25 @@ void SpellShell::selfStartSpellCast(const uint8_t* data)
 void SpellShell::buffLoad(const spellBuff* c)
 {
 #ifdef DIAG_SPELLSHELL
-  seqDebug("Loading buff - id=%d.",c->spellid);
+  seqDebug("SpellShell::buffLoad(): id=%d, duration=%d, dmg_rem=%d, persistant=%d, reserved=%d, playerId=%d, m_player->id()=%d.",
+          c->spellid, c->duration, c->dmg_shield_remaining, c->persistant_buff, c->reserved, c->playerId, m_player->id());
 #endif // DIAG_SPELLSHELL
 
   const Spell* spell = m_spells->spell(c->spellid);
   int duration = c->duration * 6;
-  SpellItem *item = findSpell(c->spellid, m_player->id(), m_player->name());
+  QString nameSuffix = c->dmg_shield_remaining ? QString(" - %1").arg(c->dmg_shield_remaining) : "";
+  SpellItem *item = findPlayerBuff(c->spellid);
   if (item) 
   { // exists
     item->update(c->spellid, spell, duration, 
-		 0, "Buff", m_player->id(), m_player->name());
+		 0, "", m_player->id(), m_player->name(), true, nameSuffix);
     emit changeSpell(item);
   } 
   else 
   { // new spell
     item = new SpellItem();
     item->update(c->spellid, spell, duration, 
-		 0, "Buff", m_player->id(), m_player->name());
+		 0, "", m_player->id(), m_player->name(), true, nameSuffix);
     m_spellList.append(item);
     if ((m_spellList.count() > 0) && (!m_timer->isActive()))
       m_timer->start(1000 *
@@ -275,19 +321,33 @@ void SpellShell::buffLoad(const spellBuff* c)
 
 void SpellShell::buff(const uint8_t* data, size_t, uint8_t dir)
 {
+  const buffStruct* b = (const buffStruct*)data;
+#ifdef DIAG_SPELLSHELL
+  seqDebug("SpellShell::buff(): spellID=%d (%d->%d) duration=%d changetype=%d"
+           " spellslot=%d effect_type=%d level=%d counters=%d unknown003=%d"
+           " dir=%d",
+          b->spellid, b->playerId, b->spawnid, b->duration, b->changetype,
+          b->spellslot, b->effect_type, b->level, b->counters, b->unknown003,
+          dir);
+#endif // DIAG_SPELLSHELL
+
   // we only care about the server
   if (dir == DIR_Client)
-    return;
-
-  const buffStruct* b = (const buffStruct*)data;
+  {
+#ifdef DIAG_SPELLSHELL
+      seqDebug("-SpellShell::buff(): DROPPING DIR_Client");
+#endif // DIAG_SPELLSHELL
+      return;
+  }
 
   // if this is the second server packet then ignore it
   if (b->spellid == 0xffffffff)
-    return;
-
+  {
 #ifdef DIAG_SPELLSHELL
-  seqDebug("Changing buff - id=%d from spawn=%d", b->spellid, b->spawnid);
+      seqDebug("-SpellShell::buff(): DROPPING spellId=0xffffffff");
 #endif // DIAG_SPELLSHELL
+      return;
+  }
 
   const Spell* spell = m_spells->spell(b->spellid);
 
@@ -295,7 +355,7 @@ void SpellShell::buff(const uint8_t* data, size_t, uint8_t dir)
   SpellItem* item;
   const Item* s;
   QString targetName;
-  if (!spell || spell->targetType() != 6)
+  if (!isPlayerBuff(spell, b->playerId, b->spawnid))
   {
     if (b->spawnid && 
 	((s = m_spawnShell->findID(tSpawn, b->spawnid))))
@@ -304,7 +364,9 @@ void SpellShell::buff(const uint8_t* data, size_t, uint8_t dir)
     item = findSpell(b->spellid, b->spawnid, targetName);
   }
   else
-    item = findSpell(b->spellid);
+  {
+    item = findPlayerBuff(b->spellid);
+  }
 
   if (!item)
     return;
@@ -319,12 +381,25 @@ void SpellShell::buff(const uint8_t* data, size_t, uint8_t dir)
   }
 }
 
-void SpellShell::action(const uint8_t* data, size_t, uint8_t)
+void SpellShell::action(const uint8_t* data, size_t, uint8_t dir)
 {
   const actionStruct* a = (const actionStruct*)data;
 
   if (a->type != 0xe7) // only things to do if action is a spell
     return;
+
+#ifdef DIAG_SPELLSHELL
+  seqDebug("SpellShell::action(): id=%d (%d->%d) (lvl: %d) causing %d damage. sequence=%d. buff=%d. dir=%d",
+          a->spell, a->source, a->target, a->level, a->damage, a->sequence, a->make_buff_icon, dir);
+#endif // DIAG_SPELLSHELL
+
+  if (a->make_buff_icon != 4)
+  {
+#ifdef DIAG_SPELLSHELL
+      seqDebug("-SpellShell::action(): make_buff_icon != 4");
+#endif // DIAG_SPELLSHELL
+      return;
+  }
 
   const Item* s;
   QString targetName;
@@ -334,48 +409,87 @@ void SpellShell::action(const uint8_t* data, size_t, uint8_t)
     targetName = s->name();
 
   SpellItem *item = findSpell(a->spell, a->target, targetName);
+  const Spell* spell = m_spells->spell(a->spell);
+  const bool is_player_buff = isPlayerBuff(spell, a->source, a->target);
 
-  if (item || (a->target == m_player->id()))
+  // Drop actions that do not involve the player or are not updates to
+  // existing spells
+  if (!item && !is_player_buff && a->source != m_player->id())
   {
-    int duration = 0;
-    const Spell* spell = m_spells->spell(a->spell);
-    if (spell)
+#ifdef DIAG_SPELLSHELL
+      seqDebug("-SpellShell::action(): DROP unimportant spell");
+#endif // DIAG_SPELLSHELL
+      return;
+  }
+
+  int duration = 0;
+  if (spell)
       duration = spell->calcDuration(a->level) * 6;
-    
-    QString casterName;
-    if (a->source && 
-	((s = m_spawnShell->findID(tSpawn, a->source))))
+
+  if (duration == 0)
+  {
+#ifdef DIAG_SPELLSHELL
+      seqDebug("-SpellShell::action(): DROP 0 duration spell");
+#endif // DIAG_SPELLSHELL
+      return;
+  }
+
+  QString casterName;
+  if (a->source && ((s = m_spawnShell->findID(tSpawn, a->source))))
       casterName = s->name();
 
-    if (item)
-    {
+  if (item)
+  {
 #ifdef DIAG_SPELLSHELL
-      seqDebug("action - found - source=%d (lvl: %d) cast id=%d on target=%d causing %d damage", 
-	       a->source, a->level, a->spell, a->target, a->damage);
+      seqDebug("-SpellShell::action(): found");
 #endif // DIAG_SPELLSHELL
-      
+
       item->update(a->spell, spell, duration, 
-		   a->source, casterName, a->target, targetName);
+              a->source, casterName,
+              is_player_buff ? m_player->id() : a->target,
+              is_player_buff ? m_player->name() : targetName,
+              is_player_buff);
       emit changeSpell(item);
-    }
-    else
-    {
+  }
+  else if (is_player_buff)
+  {
       // otherwise check for spells cast on us
 #ifdef DIAG_SPELLSHELL
-      seqDebug("action - new - source=%d (lvl: %d) cast id=%d on target=%d causing %d damage", 
-	       a->source, a->level, a->spell, a->target, a->damage);
+      seqDebug("-SpellShell::action(): new player buff");
 #endif // DIAG_SPELLSHELL
-      
+
       // only way to get here is if there wasn't an existing spell, so...
       item = new SpellItem();
       item->update(a->spell, spell, duration, 
-		   a->source, casterName, a->target, targetName);
+              a->source, casterName,
+              m_player->id(), m_player->name(), is_player_buff);
       m_spellList.append(item);
       if ((m_spellList.count() > 0) && (!m_timer->isActive()))
-	m_timer->start(1000 *
-		       pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
+          m_timer->start(1000 *
+                  pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
       emit addSpell(item);
-    }    
+  }
+  else if (a->source == m_player->id())
+  {
+      // otherwise check for spells cast by us
+#ifdef DIAG_SPELLSHELL
+      seqDebug("-SpellShell::action(): new");
+#endif // DIAG_SPELLSHELL
+
+      // only way to get here is if there wasn't an existing spell, so...
+      item = new SpellItem();
+      item->update(a->spell, spell, duration,
+              a->source, casterName,
+              a->target, targetName, false);
+      m_spellList.append(item);
+      if ((m_spellList.count() > 0) && (!m_timer->isActive()))
+          m_timer->start(1000 *
+                  pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
+      emit addSpell(item);
+  }
+  else
+  {
+      seqWarn("-SpellShell::action(): unexpected case");
   }
 }
 
@@ -409,11 +523,19 @@ void SpellShell::simpleMessage(const uint8_t* data, size_t, uint8_t)
   case 3285: // Your target is too powerful to be Castigated in this manner.
   case 9035: // Your target is too high of a level for your fear spell.
   case 9036: // This spell only works in the Planes of Power.
+#ifdef DIAG_SPELLSHELL
+    seqDebug("SpellShell::simpleMessage(): deleting m_lastPlayerSpell. messageFormat=%d",
+            smsg->messageFormat);
+#endif // DIAG_SPELLSHELL
     // delete the last player spell
     deleteSpell(m_lastPlayerSpell);
     m_lastPlayerSpell = 0;
     break;
   default:
+#ifdef DIAG_SPELLSHELL
+    seqDebug("SpellShell::simpleMessage(): ignoring messageFormat=%d",
+            smsg->messageFormat);
+#endif // DIAG_SPELLSHELL
     break;
   }
 }

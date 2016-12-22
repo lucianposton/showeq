@@ -28,6 +28,28 @@ const size_t playerClasses = 15;
 class Spell
 {
  public:
+  enum TargetType
+  {
+      // See eqemu common/spdat.h for more
+      // http://wiki.shardsofdalaya.com/index.php/Spells/Parsing/code:Main.java
+      // http://wiki.shardsofdalaya.com/index.php/Spells/Parsing/code:Tables.java
+      GROUP_TELEPORT = 3,
+      POINT_BLANK_AE = 4,
+      SINGLE = 5,
+      SELF = 6,
+      TARGET_AE = 8,
+      SINGLE_ANIMAL = 9,
+      SINGLE_UNDEAD = 10,
+      SINGLE_SUMMONED = 11,
+      SINGLE_LIFETAP = 13,
+      PET = 14,
+      SINGLE_CORSE = 15,
+      SINGLE_PLANT = 16,
+      SINGLE_GIANT = 17,
+      SINGLE_DRAGON = 18,
+      GROUP = 41,
+  };
+
   Spell(const QString& spells_enLine);
   ~Spell();
 
