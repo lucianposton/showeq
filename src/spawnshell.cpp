@@ -720,6 +720,7 @@ int32_t SpawnShell::fillSpawnStruct(spawnStruct *spawn, const uint8_t *data, siz
    spawn->posData[2] = netStream.readUInt32NC();
    spawn->posData[3] = netStream.readUInt32NC();
    spawn->posData[4] = netStream.readUInt32NC();
+   spawn->posData[5] = netStream.readUInt32NC();
    
    if(spawn->hasTitle)
    {
