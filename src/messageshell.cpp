@@ -20,6 +20,8 @@
 #include "filtermgr.h"
 #include "util.h"
 
+//#define MESSAGESHELL_DIAG 1
+
 //----------------------------------------------------------------------
 // MessageShell
 MessageShell::MessageShell(Messages* messages, EQStr* eqStrings,
@@ -443,6 +445,12 @@ void MessageShell::syncDateTime(const QDateTime& dt)
 void MessageShell::handleSpell(const uint8_t* data, size_t, uint8_t dir)
 {
   const memSpellStruct* mem = (const memSpellStruct*)data;
+#ifdef MESSAGESHELL_DIAG
+  seqDebug("MessageShell::handleSpell(): slotId=%d spellId=%d param1=%d param2=%d dir=%d"
+          " unknown12[0]=%x unknown12[1]=%x unknown12[2]=%x unknown12[3]=%x",
+          mem->slotId, mem->spellId, mem->param1, mem->param2, dir,
+          mem->unknown0012[0], mem->unknown0012[1], mem->unknown0012[2], mem->unknown0012[3]);
+#endif
   QString tempStr;
 
   bool client = (dir == DIR_Client);
