@@ -434,7 +434,7 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
 #endif
 	unknown = false; // 
 
-#ifdef PACKET_INFO_DIAG
+#if defined(PACKET_INFO_DIAG) && (PACKET_INFO_DIAG > 1)
 	seqDebug(
 		"\tmatched payload, find dispatcher in dict (%d/%d)",
 		m_dispatchers.count(), m_dispatchers.size());
@@ -509,13 +509,11 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
     }
 #endif // PACKET_PAYLOAD_SIZE_DIAG
   }
-#ifdef PACKET_INFO_DIAG
   else
   {
     seqWarn("dispatchPacket(): buffer size %d opcode %04x stream %s (%d) not in opcodeDB",
        len, opCode, EQStreamStr[m_streamid], m_streamid);
   }
-#endif
 
   emit decodedPacket(data, len, m_dir, opCode, opcodeEntry, unknown);
   if (decryptedData != NULL)
