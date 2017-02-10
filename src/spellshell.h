@@ -199,12 +199,9 @@ class SpellShell : public QObject
   void clear();
 
   // slots received from EQPacket...
-  void selfStartSpellCast(const uint8_t*);
   void buffLoad(const spellBuff*);
   void buff(const uint8_t*, size_t, uint8_t);
   void action(const uint8_t*, size_t, uint8_t);
-  void simpleMessage(const uint8_t* cmsg, size_t, uint8_t);
-  void spellMessage(QString&);
   void zoneChanged(void);
   void killSpawn(const Item* deceased);
   void timeout();
@@ -222,7 +219,6 @@ class SpellShell : public QObject
   SpawnShell* m_spawnShell;
   Spells* m_spells;
   QValueList<SpellItem *> m_spellList;
-  SpellItem* m_lastPlayerSpell;
   QTimer *m_timer;
 };
 

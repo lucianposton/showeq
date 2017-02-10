@@ -2010,10 +2010,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
   connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
 	  this, SLOT(zoneChanged(const QString&)));
 
-   // connect the SpellShell slots to EQInterface signals
-   connect(this, SIGNAL(spellMessage(QString&)),
-	   m_spellShell, SLOT(spellMessage(QString&)));
-
    // connect EQInterface slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(addItem(const Item*)),
 	   this, SLOT(addItem(const Item*)));
@@ -2098,19 +2094,12 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	   m_spellShell, SLOT(buffLoad(const spellBuff *)));
 
    // connect the SpellShell slots to EQPacket signals
-   m_packet->connect2("OP_CastSpell", SP_Zone, DIR_Server|DIR_Client,
-		      "startCastStruct", SZC_Match,
-		      m_spellShell, SLOT(selfStartSpellCast(const uint8_t*)));
    m_packet->connect2("OP_Buff", SP_Zone, DIR_Server|DIR_Client,
 		      "buffStruct", SZC_Match,
 		      m_spellShell, SLOT(buff(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_Action", SP_Zone, DIR_Server|DIR_Client,
 		      "actionStruct", SZC_Match,
 		      m_spellShell, SLOT(action(const uint8_t*, size_t, uint8_t)));
-   m_packet->connect2("OP_SimpleMessage", SP_Zone, DIR_Server,
-		      "simpleMessageStruct", SZC_Match,
-		      m_spellShell,
-		      SLOT(simpleMessage(const uint8_t*, size_t, uint8_t)));
 
 
    // connect Player slots to EQPacket signals

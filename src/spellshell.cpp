@@ -121,8 +121,7 @@ SpellShell::SpellShell(Player* player, SpawnShell* spawnshell, Spells* spells)
 : QObject(NULL, "spellshell"),
   m_player(player), 
   m_spawnShell(spawnshell),
-  m_spells(spells),
-  m_lastPlayerSpell(0)
+  m_spells(spells)
 {
    m_timer = new QTimer(this);
    m_spellList.clear();
@@ -189,7 +188,6 @@ void SpellShell::clear()
 {
    emit clearSpells();
 
-   m_lastPlayerSpell = 0;
    for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
          it != m_spellList.end(); it++)
       delete (*it);
@@ -208,8 +206,6 @@ void SpellShell::deleteSpell(SpellItem *item)
 {
    if (item) 
    {
-      if (m_lastPlayerSpell == item)
-	m_lastPlayerSpell = 0;
       m_spellList.remove(item);
       if (m_spellList.count() == 0)
          m_timer->stop();
@@ -232,60 +228,6 @@ bool SpellShell::isPlayerBuff(const Spell* spell, uint32_t sourceID, uint32_t ta
     }
 
     return false;
-}
-
-// slots
-
-void SpellShell::selfStartSpellCast(const uint8_t* data)
-{
-  const startCastStruct *c = (const startCastStruct *)data;
-#ifdef DIAG_SPELLSHELL
-  seqDebug("SpellShell::selfStartSpellCast(): id=%d (me->%d) (slot=%d, inv=%d)",
-          c->spellId, c->targetId, c->slot, c->inventorySlot);
-#endif // DIAG_SPELLSHELL
-
-  // get the target 
-  const Item* s;
-  QString targetName;
-  int duration = 0;
-  const Spell* spell = m_spells->spell(c->spellId);
-  SpellItem *item;
-  if (spell)
-    duration = spell->calcDuration(m_player->level()) * 6;
-
-  if (isPlayerBuff(spell, m_player->id(), c->targetId))
-  {
-#ifdef DIAG_SPELLSHELL
-      seqDebug("-SpellShell::selfStartSpellCast(): DROPPED self-buff (id=%d).",
-              c->targetId);
-#endif // DIAG_SPELLSHELL
-      return;
-  }
-
-  if (c->targetId && ((s = m_spawnShell->findID(tSpawn, c->targetId))))
-      targetName = s->name();
-
-  item = findSpell(c->spellId, c->targetId, targetName);
-  if (item) 
-  { // exists
-    item->update(c->spellId, spell, duration,
-		 m_player->id(), m_player->name(),
-		 c->targetId, targetName, false);
-    emit changeSpell(item);
-  } 
-  else 
-  { // new spell
-    item = new SpellItem();
-    item->update(c->spellId, spell, duration,
-		 m_player->id(), m_player->name(),
-		 c->targetId, targetName, false);
-    m_spellList.append(item);
-    if ((m_spellList.count() > 0) && (!m_timer->isActive()))
-      m_timer->start(1000 *
-		     pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
-    emit addSpell(item);
-    m_lastPlayerSpell = item;
-  }
 }
 
 //slot for loading buffs when main char struct is loaded
@@ -493,89 +435,8 @@ void SpellShell::action(const uint8_t* data, size_t, uint8_t dir)
   }
 }
 
-void SpellShell::simpleMessage(const uint8_t* data, size_t, uint8_t)
-{
-  // if no spell cast by the player recently, then nothing to do.
-  if (!m_lastPlayerSpell)
-    return;
-
-  const simpleMessageStruct* smsg = (const simpleMessageStruct*)data;
-  switch(smsg->messageFormat)
-  {
-  case 191: // Your target has no mana to affect
-  case 239: // Your target cannot be mesmerized.
-  case 240: // Your target cannot be mesmerized (with this spell).
-  case 242: // Your target is immune to changes in its attack speed.
-  case 243: // Your target is immune to fear spells.
-  case 244: // Your target is immune to changes in its run speed.
-  case 245: // You are unable to change form here.
-  case 248: // Your target is too high of a level for your charm spell.
-  case 251: // That spell can not affect this target NPC.
-  case 253: // This pet may not be made invisible.
-  case 255: // You do not have a pet.
-  case 263: // Your spell did not take hold.
-  case 264: // Your target has resisted your attempt to mesmerize it.
-  case 268: // Your target looks unaffected.
-  case 269: // Stick to singing until you learn to play this instrument.
-  case 271: // Your spell would not have taken hold on your target.
-  case 272: // You are missing some required spell components.
-  case 439: // Your spell is interrupted.
-  case 3285: // Your target is too powerful to be Castigated in this manner.
-  case 9035: // Your target is too high of a level for your fear spell.
-  case 9036: // This spell only works in the Planes of Power.
-#ifdef DIAG_SPELLSHELL
-    seqDebug("SpellShell::simpleMessage(): deleting m_lastPlayerSpell. messageFormat=%d",
-            smsg->messageFormat);
-#endif // DIAG_SPELLSHELL
-    // delete the last player spell
-    deleteSpell(m_lastPlayerSpell);
-    m_lastPlayerSpell = 0;
-    break;
-  default:
-#ifdef DIAG_SPELLSHELL
-    seqDebug("SpellShell::simpleMessage(): ignoring messageFormat=%d",
-            smsg->messageFormat);
-#endif // DIAG_SPELLSHELL
-    break;
-  }
-}
-
-
-void SpellShell::spellMessage(QString &str)
-{
-   QString spell = str.right(str.length() - 7); // drop 'Spell: '
-   bool b = false;
-   // Your xxx has worn off.
-   // Your target resisted the xxx spell.
-   // Your spell fizzles.
-   seqInfo("*** spellMessage *** %s", spell.latin1());
-   if (spell.left(25) == QString("Your target resisted the ")) {
-      spell = spell.right(spell.length() - 25);
-      spell = spell.left(spell.length() - 7);
-      seqInfo("RESIST: '%s'", spell.latin1());
-      b = true;
-   } else if (spell.right(20) == QString(" spell has worn off.")) {
-      spell = spell.right(spell.length() - 5);
-      spell = spell.left(spell.length() - 20);
-      seqInfo("WORE OFF: '%s'", spell.latin1());
-      b = true;
-   }
-
-   if (b) {
-      // Can't really tell which spell/target, so just delete the last one
-      for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
-         it != m_spellList.end(); it++) {
-         if ((*it)->spellName() == spell) {
-            (*it)->setDuration(0);
-            break;
-         }
-      }
-   }
-}
-
 void SpellShell::zoneChanged(void)
 {
-  m_lastPlayerSpell = 0;
   SpellItem* spell;
   for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();
       it != m_spellList.end(); it++) 
@@ -592,9 +453,6 @@ void SpellShell::killSpawn(const Item* deceased)
 {
   uint16_t id = deceased->id();
   SpellItem* spell;
-
-  if (m_lastPlayerSpell && (m_lastPlayerSpell->targetId() == id))
-    m_lastPlayerSpell = 0;
 
   QValueList<SpellItem*>::Iterator it = m_spellList.begin();
   while(it != m_spellList.end())
@@ -634,8 +492,6 @@ void SpellShell::timeout()
     else 
     {
       seqInfo("SpellItem '%s' finished.", (*it)->spellName().latin1());
-      if (m_lastPlayerSpell == spell)
-	m_lastPlayerSpell = 0;
       emit delSpell(spell);
       it = m_spellList.remove(it);
       delete spell;

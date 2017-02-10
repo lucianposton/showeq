@@ -226,7 +226,6 @@ class EQInterface:public QMainWindow
    void selectSpawn(const Item* item);
    void saveAllPrefs(void);
    void newZoneName (const QString &); 
-   void spellMessage(QString&);
    void restoreFonts();
 
    void combatSignal(int, int, int, int, int, QString, QString);
