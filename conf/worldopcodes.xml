@@ -13,10 +13,12 @@
 
 
     <opcode id="61b6" name="OP_ZoneServerInfo" updated="10/27/05">
-        <comment>old ZoneServerInfo</comment>
+        <comment></comment>
+        <payload dir="server" typename="ZoneServerInfo_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="4513" name="OP_SendCharInfo" updated="10/27/05">
-        <comment>Send all chars visible @ char select</comment>
+        <comment>Send all chars visible @ char select. CharacterSelectEntry_Struct is also sent on eqemu for each character above 0</comment>
+        <payload dir="server" typename="CharacterSelect_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="024d" name="OP_MOTD" updated="10/27/05">
         <comment>old MOTDCode Server message of the day</comment>
@@ -28,34 +30,65 @@
     </opcode>
     <opcode id="00d7" name="OP_SetChatServer" updated="10/27/05">
         <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
+        <payload dir="server" typename="char" sizechecktype="none"/>
     </opcode>
     <opcode id="6536" name="OP_SetChatServer2" updated="10/27/05">
         <comment>Chatserver? IP,Port,servername.Charname,password(?)</comment>
+        <payload dir="server" typename="char" sizechecktype="none"/>
     </opcode>
     <opcode id="3c25" name="OP_ApproveWorld" updated="10/27/05">
         <comment></comment>
+        <payload dir="server" typename="ApproveWorld_Struct" sizechecktype="match"/>
+        <payload dir="client" typename="none" sizechecktype="none"/>
     </opcode>
     <opcode id="0fa6" name="OP_LogServer" updated="10/27/05">
         <comment></comment>
+        <payload dir="server" typename="LogServer_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="4dd0" name="OP_SendLoginInfo" updated="10/27/05">
         <comment>Client starting world session by asking for login information</comment>
         <payload dir="client" typename="LoginInfo_Struct" sizechecktype="match"/>
     </opcode>
+    <opcode id="7718" name="OP_WorldLogout" updated="10/27/05">
+        <comment></comment>
+        <payload dir="client" typename="none" sizechecktype="match"/>
+    </opcode>
     <opcode id="509d" name="OP_WorldComplete" updated="10/27/05">
         <comment>Client telling world server it is done. World replies by disconnecting.</comment>
+        <payload dir="client" typename="none" sizechecktype="match"/>
     </opcode>
     <opcode id="5072" name="OP_World_Client_CRC1" updated="10/27/05">
         <comment>Contains a snippet of spell data</comment>
+        <payload dir="client" typename="none" sizechecktype="none"/>
     </opcode>
     <opcode id="5b18" name="OP_World_Client_CRC2" updated="10/27/05">
         <comment>Second client verification packet</comment>
+        <payload dir="client" typename="none" sizechecktype="none"/>
     </opcode>
     <opcode id="04ec" name="OP_ExpansionInfo" updated="10/27/05">
         <comment>Which expansions user has</comment>
+        <payload dir="server" typename="ExpansionInfo_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="7cba" name="OP_EnterWorld" updated="10/27/05">
         <comment>Server approval for client to enter world</comment>
+        <payload dir="server" typename="char" sizechecktype="none"/>
+        <payload dir="client" typename="EnterWorld_Struct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="6a1b" name="OP_FloatListThing" updated="10/27/05">
+        <comment>Seems related to character position/velocity</comment>
+        <payload dir="client" typename="unknown" sizechecktype="none"/>
+    </opcode>
+    <opcode id="52a4" name="OP_PostEnterWorld" updated="01/10/17">
+        <comment></comment>
+        <payload dir="server" typename="none" sizechecktype="match"/>
+    </opcode>
+    <opcode id="7752" name="OP_AckPacket" updated="10/27/05">
+        <comment>Appears to be generic ack at the presentation level</comment>
+        <payload dir="client" typename="AckPacket_Struct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="5e99" name="OP_WorldClientReady" updated="10/27/05">
+        <comment></comment>
+        <payload dir="client" typename="none" sizechecktype="match"/>
     </opcode>
     <opcode id="26c9" name="OP_DeleteCharacter" updated="10/27/05">
         <comment>Delete character @ char select</comment>
@@ -68,5 +101,9 @@
     </opcode>
     <opcode id="23d4" name="OP_RandomNameGenerator" updated="06/29/05">
         <comment>Returns a random name</comment>
+    </opcode>
+    <opcode id="1235" name="OP_WorldUnknown1" updated="10/27/05">
+        <comment>776 bytes. Comes before zone-to-client packet (0x1234) with nearly identical content</comment>
+        <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
 </seqopcodes>

@@ -1865,7 +1865,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_MoneyOnCorpse", SP_Zone, DIR_Server,
 			"moneyOnCorpseStruct", SZC_Match,
 			m_messageShell, SLOT(moneyOnCorpse(const uint8_t*)));
-     m_packet->connect2("OP_Logout", SP_Zone, DIR_Server,
+     m_packet->connect2("OP_LogoutReply", SP_Zone, DIR_Server,
 			"none", SZC_Match,
 			m_messageShell, SLOT(logOut(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_NewZone", SP_Zone, DIR_Server,

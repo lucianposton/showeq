@@ -659,11 +659,16 @@ bool OPCodeXmlContentHandler::startElement(const QString&, const QString&,
       QString value = attr.value(index);
 
       if (value == "both")
-	m_currentPayload->setDir(DIR_Client | DIR_Server);
+          m_currentPayload->setDir(DIR_Client | DIR_Server);
       else if (value == "server")
-	m_currentPayload->setDir(DIR_Server);
+          m_currentPayload->setDir(DIR_Server);
       else if (value == "client")
-	m_currentPayload->setDir(DIR_Client);
+          m_currentPayload->setDir(DIR_Client);
+      else
+          seqWarn("OPCodeXmlContentHandler::startElement(): Unknown dir"
+                  " value (%s) in opcode payload for opcode %#04x",
+                  (const char*)value,
+                  m_currentOPCode->opcode());
     }
 
     // get the typename attribute
