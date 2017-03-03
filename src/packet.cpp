@@ -33,8 +33,7 @@
 //----------------------------------------------------------------------
 // Macros
 
-//#define DEBUG_PACKET
-//#undef DEBUG_PACKET
+//#define DEBUG_PACKET 1
 
 // The following defines are used to diagnose packet handling behavior
 // this define is used to diagnose packet processing (in dispatchPacket mostly)
@@ -365,7 +364,7 @@ EQPacket::~EQPacket()
 void EQPacket::start (int delay)
 {
 #ifdef DEBUG_PACKET
-   debug ("start()");
+    seqDebug("start()");
 #endif /* DEBUG_PACKET */
    m_timer->start (delay, false);
 }
@@ -374,7 +373,7 @@ void EQPacket::start (int delay)
 void EQPacket::stop (void)
 {
 #ifdef DEBUG_PACKET
-   debug ("stop()");
+   seqDebug ("stop()");
 #endif /* DEBUG_PACKET */
    m_timer->stop ();
 }
@@ -405,7 +404,11 @@ void EQPacket::processPackets (void)
       time_t now = time(NULL);
       m_vPacket->Record((const char *) buffer, size, now, PACKETVERSION);
     }
-      
+
+#ifdef DEBUG_PACKET
+    seqDebug("EQPacket::processPackets(): Dispatching packet size=%d sizeof(struct ether_header)=%d BUFSIZ=%d",
+            size, sizeof(struct ether_header), BUFSIZ);
+#endif /* DEBUG_PACKET */
     dispatchPacket (size - sizeof (struct ether_header),
 		  (unsigned char *) buffer + sizeof (struct ether_header) );
   }
@@ -419,7 +422,7 @@ void EQPacket::processPackets (void)
 void EQPacket::processPlaybackPackets (void)
 {
 #ifdef DEBUG_PACKET
-//   debug ("processPackets()");
+   seqDebug ("processPackets()");
 #endif /* DEBUG_PACKET */
   /* Make sure we are not called while already busy */
   if (m_busy_decoding)
@@ -580,7 +583,7 @@ void EQPacket::connectStream(EQPacketStream* stream)
 void EQPacket::dispatchPacket(int size, unsigned char *buffer)
 {
 #ifdef DEBUG_PACKET
-  debug ("EQPacket::dispatchPacket()");
+    seqDebug("EQPacket::dispatchPacket(): received packet size=%d", size);
 #endif /* DEBUG_PACKET */
 
   // Create an object to parse the packet
@@ -802,7 +805,7 @@ void EQPacket::dispatchWorldChatData (size_t len, uint8_t *data,
 				      uint8_t dir)
 {
 #ifdef DEBUG_PACKET
-  debug ("dispatchWorldChatData()");
+    seqDebug("dispatchWorldChatData()");
 #endif /* DEBUG_PACKET */
   if (len < 10)
     return;
