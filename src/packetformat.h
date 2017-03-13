@@ -84,15 +84,18 @@ class EQProtocolPacket
  public:
   // constructors
   EQProtocolPacket()
-    : m_packet(NULL), 
-      m_length(0), 
+    : m_packetData(NULL),
+      m_packetDataLength(0),
+      m_uncompressedData(NULL),
+      m_uncompressedDataLength(0),
+      m_payload(NULL),
+      m_payloadLength(0),
+      m_netOp(0),
+      m_arqSeq(0),
       m_flags(0),
-      m_payload(NULL), 
       m_bAllocedPayload(false),
       m_bDecoded(false),
-      m_payloadLength(0),
-      m_arqSeq(0), 
-      m_ownCopy(false), 
+      m_ownCopy(false),
       m_subpacket(false)
     {  }
     
@@ -110,10 +113,10 @@ class EQProtocolPacket
   // operators
   EQProtocolPacket& operator=(const EQProtocolPacket& packet);
 
-  // Decode the packet. This processed compressed packets and readjusts
+  // decompress the packet. This processed compressed packets and readjusts
   // alignments if needed. If this returns false, using the packet isn't
   // recommended!
-  bool decode(uint32_t maxPacketLength);
+  bool decompressPacket(uint32_t maxPacketLength);
 
   uint16_t getNetOpCode() const { return m_netOp; }
 
@@ -161,29 +164,52 @@ class EQProtocolPacket
         return IS_APP_OPCODE(m_netOp);
     }
   }
+
   uint16_t crc() const
-  { 
+  {
     // return CRC in the appropriate endianess or DEAD if invalid
-    return (m_length >= 2) ? eqntohuint16(&m_packet[m_length - 2]) : 0xDEAD;
+      if (m_packetDataLength >= 2)
+      {
+          return eqntohuint16(&m_packetData[m_packetDataLength - 2]);
+      }
+      else
+      {
+          return 0xDEAD;
+      }
   }
 
   bool isSubpacket() const { return m_subpacket; }
 
-  // Payload is uncompressed (after decode is called) and aligned to the
-  // beginning of the payload (after net op, flags, seq if applicable)
+  // This is a pointer to the beginning of the eq application data packet (the
+  // payload of the udp packet). If any of the data from the wire was
+  // compressed, that will be present in this data.
+  uint8_t* rawPacket() const { return m_packetData; }
+  uint16_t rawPacketLength() const { return m_packetDataLength; }
+
+  // If the packet has not yet been decompressed (by calling
+  // decompressPacket()) or if the packet required no decompression, this will
+  // point to the beginning of the payload (or arqSeq, if present in the
+  // header), which may be compressed.
+  //
+  // After decompressing the packet (by calling decompressPacket()), this will
+  // will point to the beginning of the decompressed data, which is:
+  // - if an app packet, the high byte of the app op code,
+  // - if a net packet, the arqSeq (if present) or the payload.
+  //
+  // This is what is alloced if m_bAllocPayload is true.
+  uint8_t* rawPayload() const { return m_uncompressedData; }
+  uint16_t rawPayloadLength() const { return m_uncompressedDataLength; }
+
+  // If no decompression was required or if decompressed (by calling
+  // decompressPacket()), this is a pointer to the payload contained within the
+  // eq application packet (decompressed, if necessary).
+  //
+  // If decompression was required and decompressPacket() was not yet called,
+  // this basically points somewhere within the compressed portion of the
+  // packet, sometimes at the beginning. Don't use this before calling
+  // decompressPacket().
   uint8_t* payload() const { return m_payload; }
   uint16_t payloadLength() const { return m_payloadLength; }
-
-  // Raw Packet is compressed and aligned to the start of the net op. Length
-  // includes CRC if applicable.
-  uint8_t* rawPacket() const { return m_packet; }
-  uint16_t rawPacketLength() const { return m_length; }
-
-  // Raw payload is uncompressed (after decode is called) and aligned to
-  // the beginning of what was decompressed. This is what is alloced if
-  // m_bAllocPayload is true.
-  uint8_t* rawPayload() const { return m_rawPayload; }
-  uint16_t rawPayloadLength() const { return m_rawPayloadLength; }
 
  protected:
   void init();
@@ -191,17 +217,20 @@ class EQProtocolPacket
     bool copy=false, bool subpacket=false);
 
  private:
-  uint8_t* m_packet; // raw packet, untouched starting at net opcode
-  uint16_t m_length; // raw packet length
+  uint8_t* m_packetData; // raw eq packet, untouched starting at net opcode
+  uint16_t m_packetDataLength;
+
+  uint8_t* m_uncompressedData;
+  uint16_t m_uncompressedDataLength;
+
+  uint8_t* m_payload;
+  uint16_t m_payloadLength;
+
   uint16_t m_netOp; // protocol opcode
+  uint16_t m_arqSeq; // local copy to speed up comparisons
   uint8_t m_flags; // protocol flags
-  uint8_t* m_payload; // packet payload. Aligned and uncompressed if necessary.
   bool m_bAllocedPayload; // Whether payload was alloced or not
   bool m_bDecoded; // Whether this packet has been decoded
-  uint16_t m_payloadLength; // length of payload
-  uint8_t* m_rawPayload; // decompressed but not aligned payload
-  uint16_t m_rawPayloadLength; // length of raw payload
-  uint16_t m_arqSeq; // local copy to speed up comparisons
   bool m_ownCopy;
   bool m_subpacket;
 };
@@ -240,8 +269,8 @@ class EQUDPIPPacketFormat : public EQProtocolPacket
   in_port_t getSourcePortN() const { return m_udp->uh_sport; }
   in_port_t getDestPort() const { return ntohs(m_udp->uh_dport); }
   in_port_t getDestPortN() const { return m_udp->uh_dport; }
-  uint8_t* getUDPPayload() const { return m_rawpayload; }
-  uint32_t getUDPPayloadLength() const { return m_rawpayloadSize; }
+  uint8_t* getUDPPayload() const { return m_udpPayload; }
+  uint32_t getUDPPayloadLength() const { return m_udpPayloadLength; }
 
   // IP accessors
   uint8_t getIPVersion() const { return (uint8_t)m_ip->ip_v; }
@@ -271,12 +300,12 @@ class EQUDPIPPacketFormat : public EQProtocolPacket
   void init(uint8_t* data);
   
  private:
-  uint32_t m_dataLength;
+  uint32_t m_ipTotalLength;
   struct ip* m_ip;
   struct udphdr *m_udp;
   bool m_ownCopy;
-  uint8_t* m_rawpayload;
-  uint32_t m_rawpayloadSize;
+  uint8_t* m_udpPayload;
+  uint32_t m_udpPayloadLength;
   uint32_t m_sessionKey;
 };
 
