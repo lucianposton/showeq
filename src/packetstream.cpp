@@ -642,7 +642,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       // and process them individually. subpacket starts after the net opcode.
       uint8_t* subpacket = packet.payload();
 
-      while (subpacket < packet.payload() + packet.payloadLength())
+      while (subpacket + 3 < packet.payload() + packet.payloadLength())
       {
         // Length specified first on the wire.
         uint8_t subpacketLength = subpacket[0];
@@ -664,17 +664,37 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           // App opcode < 0x00ff. Skip the first byte and dispatch the app
           // opcode appropriately
           subpacket++;
+          subpacketLength--;
 
-          subOpCode = *(uint16_t*)subpacket;
+          if (subpacketLength < 2 || packet.payloadLength() < 3)
+          {
+              seqWarn("EQPacketStream::processPacket(): dropping 0000 troll packet"
+                      " OP_Combined. subOpCode=%#04x subpacketLength=%d"
+                      " stream %s (%d) packet.payloadLength()=%d",
+                      subOpCode, subpacketLength,
+                      EQStreamStr[m_streamid], m_streamid, packet.payloadLength());
+          }
+          else if(subpacket + 2 < packet.payload() + packet.payloadLength())
+          {
+              subOpCode = *(uint16_t*)subpacket;
 
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-          seqDebug("EQPacket: processing unrolled special app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#04x", 
-            subpacketLength-3, EQStreamStr[m_streamid], m_streamid, subOpCode);
+              seqDebug("EQPacket: processing unrolled special app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#04x", 
+                      subpacketLength-2, EQStreamStr[m_streamid], m_streamid, subOpCode);
 #endif
 
-          // App opcode. Dispatch it, skipping opcode.
-          dispatchPacket(&subpacket[2], subpacketLength-2,
-                  subOpCode, m_opcodeDB.find(subOpCode));
+              // App opcode. Dispatch it, skipping opcode.
+              dispatchPacket(&subpacket[2], subpacketLength-2,
+                      subOpCode, m_opcodeDB.find(subOpCode));
+          }
+          else
+          {
+              seqWarn("EQPacketStream::processPacket(): dropping troll packet"
+                      " OP_Combined. subOpCode=%#04x subpacketLength=%d"
+                      " stream %s (%d) packet.payloadLength()=%d",
+                      subOpCode, subpacketLength,
+                      EQStreamStr[m_streamid], m_streamid, packet.payloadLength());
+          }
         }
         else if (IS_NET_OPCODE(subOpCode))
         {
@@ -814,18 +834,29 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         // Opcode is next. Net opcode or app opcode?
         if (subOpCode == 0)
         {
-          // App opcode < 0x00ff. Skip the first byte and dispatch the app
-          // opcode appropriately
-          subOpCode = *(uint16_t*)&packet.payload()[1];
+          if (packet.payloadLength() < 3)
+          {
+              seqWarn("EQPacketStream::processPacket(): dropping 0000 troll packet"
+                      " OP_Packet. subOpCode=%#04x packet.payloadLength()=%d"
+                      " stream %s (%d)",
+                      subOpCode, packet.payloadLength(),
+                      EQStreamStr[m_streamid], m_streamid);
+          }
+          else
+          {
+              // App opcode < 0x00ff. Skip the first byte and dispatch the app
+              // opcode appropriately
+              subOpCode = *(uint16_t*)&packet.payload()[1];
 
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-          seqDebug("EQPacket: special app opcode extracted for opcode 0000 on stream %s (%d). Opcode %#04x", 
-            EQStreamStr[m_streamid], m_streamid, subOpCode);
+              seqDebug("EQPacket: special app opcode extracted for opcode 0000 on stream %s (%d). Opcode %#04x", 
+                      EQStreamStr[m_streamid], m_streamid, subOpCode);
 #endif
 
-          // App opcode. Dispatch it, skipping opcode.
-          dispatchPacket(&packet.payload()[3], packet.payloadLength()-3, 
-                  subOpCode, m_opcodeDB.find(subOpCode));
+              // App opcode. Dispatch it, skipping opcode.
+              dispatchPacket(&packet.payload()[3], packet.payloadLength()-3, 
+                      subOpCode, m_opcodeDB.find(subOpCode));
+          }
         }
         else if (IS_NET_OPCODE(subOpCode))
         {
