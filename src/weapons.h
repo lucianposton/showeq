@@ -69,8 +69,8 @@
     "BattleAxe",            // 0x3c
     "Whip",                 // 0x3d
     "FlameSword",           // 0x3e
-    "Generic",              // 0x3f
-    "Generic",              // 0x40
+    "GenericItem",          // 0x3f
+    "Bag",                  // 0x40
     "Letter",               // 0x41
     "Forge",                // 0x42
     "Doll",                 // 0x43
