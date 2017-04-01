@@ -50,7 +50,8 @@ class PacketLog : public SEQLogger
 		const QString& origPrefix = QString()); 
   void logData(const EQUDPIPPacketFormat& packet);
   void printData(const uint8_t* data, size_t len, uint8_t dir,
-		 uint16_t opcode, const QString& origPrefix = QString());
+          uint16_t opcode, const EQPacketOPCode* opcodeEntry,
+          const QString& origPrefix = QString());
 
  protected:
   QString m_timeDateFormat;

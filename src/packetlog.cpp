@@ -280,7 +280,9 @@ void PacketLog::logData(const EQUDPIPPacketFormat& packet)
 }
 
 void PacketLog::printData(const uint8_t* data, size_t len, uint8_t dir,
-			  uint16_t opcode, const QString& origPrefix)
+        uint16_t opcode, const EQPacketOPCode* opcodeEntry,
+        const QString& origPrefix)
+
 {
   if (!origPrefix.isEmpty())
     ::printf("%s ", (const char*)origPrefix);
@@ -290,6 +292,35 @@ void PacketLog::printData(const uint8_t* data, size_t len, uint8_t dir,
   ::printf("%s [Size: %lu]%s\n",
 	   ((dir == DIR_Server) ? "[Server->Client]" : "[Client->Server]"),
 	   len, (const char*)opCodeToString(opcode));
+
+  if (opcodeEntry)
+  {
+      ::printf("[Name: %s][Updated: %s] ",
+      (const char*)opcodeEntry->name(), (const char*)opcodeEntry->updated());
+      const EQPacketPayload* payload = opcodeEntry->find(data, len, dir);
+      if (payload)
+      {
+          ::printf("[Type: %s (%lu)",
+                  (const char*)payload->typeName(), payload->typeSize());
+          switch (payload->sizeCheckType())
+          {
+              case SZC_Match:
+                  ::printf(" ==]");
+                  break;
+              case SZC_Modulus:
+                  ::printf(" %%]");
+                  break;
+              case SZC_None:
+                  ::printf(" nc]");
+                  break;
+              default:
+                  ::printf(" %d]",
+                          payload->sizeCheckType());
+                  break;
+          }
+      }
+      ::putchar('\n');
+  }
 
   if (len)
   {
@@ -372,7 +403,7 @@ void UnknownPacketLog::packet(const uint8_t* data, size_t len, uint8_t dir,
     logData(data, len, dir, opcode, opcodeEntry);
    
     if (m_view)
-      printData(data, len, dir, opcode, "Unknown");
+      printData(data, len, dir, opcode, opcodeEntry, "Unknown");
   }
 }
 
@@ -501,7 +532,7 @@ void OPCodeMonitorPacketLog::packet(const uint8_t* data, size_t len,
     QString opCodeName = MonitoredOpCodeAliasList[uiOpCodeIndex - 1].latin1();
     
     if (m_view)
-      printData(data, len, dir, opcode, opCodeName);
+      printData(data, len, dir, opcode, opcodeEntry, opCodeName);
     
     if (m_log)
       logData(data, len, dir, opcode, opcodeEntry,opCodeName);
