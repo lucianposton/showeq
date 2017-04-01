@@ -393,9 +393,9 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
 				    uint16_t opCode, 
 				    const EQPacketOPCode* opcodeEntry)
 {
-  if(len > 65534)
+  if(len > 100000)
   {
-	seqDebug("dispatchPacket: attempting to dispatch packet len > 65534. opCode=%#04x. %#04x '%s' (size %zu)",
+	seqDebug("dispatchPacket: attempting to dispatch packet len > 10000 bytes. opCode=%#04x. %#04x '%s' (size %zu)",
 	    (unsigned)opCode,
         opcodeEntry ? opcodeEntry->opcode() : 0,
         opcodeEntry ? (const char*)opcodeEntry->name() : "null opcodeEntry",
