@@ -47,11 +47,13 @@ class PacketLog : public SEQLogger
 		uint8_t dir,
 		uint16_t opcode, 
 		const EQPacketOPCode* opcodeEntry,
-		const QString& origPrefix = QString()); 
+		const QString& origPrefix = QString(),
+        const QString& serverType = "Server");
   void logData(const EQUDPIPPacketFormat& packet);
   void printData(const uint8_t* data, size_t len, uint8_t dir,
           uint16_t opcode, const EQPacketOPCode* opcodeEntry,
-          const QString& origPrefix = QString());
+          const QString& origPrefix = QString(),
+          const QString& serverType = "Server");
 
  protected:
   QString m_timeDateFormat;
@@ -103,12 +105,20 @@ class UnknownPacketLog : public PacketLog
   void setView(bool val);
 
  public slots:
-   void packet(const uint8_t* data, size_t len, uint8_t dir, 
-	       uint16_t opcode, const EQPacketOPCode* opcodeEntry,
-	       bool unknown);
+   void zonePacket(const uint8_t* data, size_t len, uint8_t dir,
+           uint16_t opcode, const EQPacketOPCode* opcodeEntry,
+           bool unknown);
+   void worldPacket(const uint8_t* data, size_t len, uint8_t dir,
+           uint16_t opcode, const EQPacketOPCode* opcodeEntry,
+           bool unknown);
 
  protected:
   bool m_view;
+
+ private:
+   void packet(const uint8_t* data, size_t len, uint8_t dir,
+           uint16_t opcode, const EQPacketOPCode* opcodeEntry,
+           bool unknown, const QString& serverType);
 };
 
 inline bool UnknownPacketLog::view()

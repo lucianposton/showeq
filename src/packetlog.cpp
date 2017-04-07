@@ -151,7 +151,8 @@ void PacketLog::logData(const uint8_t* data,
 			uint8_t dir,
 			uint16_t opcode,
 			const EQPacketOPCode* opcodeEntry,
-			const QString& origPrefix)
+			const QString& origPrefix,
+            const QString& serverType)
 {
   if (!open())
     return;
@@ -164,7 +165,9 @@ void PacketLog::logData(const uint8_t* data,
     m_out << origPrefix << " ";
   
   // data direction and size
-  m_out << ((dir == DIR_Server) ? "[Server->Client] " : "[Client->Server] ")
+  m_out << "[" << ((dir == DIR_Server) ? serverType : "Client->")
+      << ((dir == DIR_Server) ? "->Client" : serverType)
+      << "]"
       << "[Size: " << QString::number(len) << "]" << endl;
 
   // output opcode info
@@ -281,7 +284,7 @@ void PacketLog::logData(const EQUDPIPPacketFormat& packet)
 
 void PacketLog::printData(const uint8_t* data, size_t len, uint8_t dir,
         uint16_t opcode, const EQPacketOPCode* opcodeEntry,
-        const QString& origPrefix)
+        const QString& origPrefix, const QString& serverType)
 
 {
   if (!origPrefix.isEmpty())
@@ -289,9 +292,10 @@ void PacketLog::printData(const uint8_t* data, size_t len, uint8_t dir,
   else
     ::putchar('\n');
   
-  ::printf("%s [Size: %lu]%s\n",
-	   ((dir == DIR_Server) ? "[Server->Client]" : "[Client->Server]"),
-	   len, (const char*)opCodeToString(opcode));
+  ::printf("[%s->%s] [Size: %lu]%s\n",
+          ((dir == DIR_Server) ? (const char*)serverType : "Client"),
+          ((dir == DIR_Server) ? "Client" : (const char*)serverType),
+          len, (const char*)opCodeToString(opcode));
 
   if (opcodeEntry)
   {
@@ -394,16 +398,28 @@ UnknownPacketLog::UnknownPacketLog(EQPacket& packet, const QString& fname,
 {
 }
 
-void UnknownPacketLog::packet(const uint8_t* data, size_t len, uint8_t dir, 
-			      uint16_t opcode, 
-			      const EQPacketOPCode* opcodeEntry, bool unknown)
+void UnknownPacketLog::zonePacket(const uint8_t* data, size_t len, uint8_t dir,
+        uint16_t opcode, const EQPacketOPCode* opcodeEntry, bool unknown)
+{
+    packet(data, len, dir, opcode, opcodeEntry, unknown, "zone");
+}
+
+void UnknownPacketLog::worldPacket(const uint8_t* data, size_t len, uint8_t dir,
+        uint16_t opcode, const EQPacketOPCode* opcodeEntry, bool unknown)
+{
+    packet(data, len, dir, opcode, opcodeEntry, unknown, "world");
+}
+
+void UnknownPacketLog::packet(const uint8_t* data, size_t len, uint8_t dir,
+        uint16_t opcode, const EQPacketOPCode* opcodeEntry, bool unknown,
+        const QString& serverType)
 {
   if (unknown)
   {
-    logData(data, len, dir, opcode, opcodeEntry);
+    logData(data, len, dir, opcode, opcodeEntry, "[Unknown]", serverType);
    
     if (m_view)
-      printData(data, len, dir, opcode, opcodeEntry, "Unknown");
+      printData(data, len, dir, opcode, opcodeEntry, "[Unknown]", serverType);
   }
 }
 

@@ -6109,30 +6109,31 @@ void EQInterface::createBazaarLog(void)
 
 void EQInterface::createUnknownZoneLog(void)
 {
-  if (m_unknownZoneLog)
-    return;
+    if (m_unknownZoneLog)
+        return;
 
-  QString section = "PacketLogging";
+    QString section = "PacketLogging";
 
-  QString logFile = pSEQPrefs->getPrefString("UnknownZoneLogFilename",
-					     section,
-					     "unknownzone.log");
+    QString logFile = pSEQPrefs->getPrefString("UnknownZoneLogFilename",
+            section,
+            "unknownzone.log");
 
-  QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
-  
-  logFile = logFileInfo.absFilePath();
+    QFileInfo logFileInfo = m_dataLocationMgr->findWriteFile("logs", logFile);
 
-  m_unknownZoneLog = new UnknownPacketLog(*m_packet, 
-					  logFile,
-					  this, "UnknownLog");
+    logFile = logFileInfo.absFilePath();
 
-  m_unknownZoneLog->setView(pSEQPrefs->getPrefBool("ViewUnknown", section, 
-						   false));
+    m_unknownZoneLog = new UnknownPacketLog(*m_packet,
+            logFile,
+            this, "UnknownLog");
 
-  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
-	  m_unknownZoneLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
-  connect(m_packet, SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
-	  m_unknownZoneLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
+    m_unknownZoneLog->setView(pSEQPrefs->getPrefBool("ViewUnknown", section,
+                false));
+
+    connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+            m_unknownZoneLog, SLOT(zonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
+
+    connect(m_packet, SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+            m_unknownZoneLog, SLOT(worldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
 }
 
 void EQInterface::createOPCodeMonitorLog(const QString& opCodeList)
