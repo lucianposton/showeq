@@ -29,7 +29,6 @@ class SEQLogger : public QObject
    bool open(void);
    bool isOpen(void);
    int outputf(const char *fmt, ...);
-   int output(const void *data, int length);
    void flush();
    void outputData(uint32_t len,
 		   const uint8_t* data);

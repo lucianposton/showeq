@@ -721,52 +721,57 @@ QString reformatMoney (unsigned int uiCopper)
   return ( qsMoney );
 }
 
-// prints up the passed in data to the file pointer
-void fprintData(FILE* fp,
-		uint32_t len,
-		const uint8_t* data
-		)
+void fprintDataAsHex(FILE* fp, int length, const uint8_t* data)
 {
-  if (fp == NULL)
-    return;
+    for(int i = 0; i < length; ++i, ++data)
+        fprintf(fp, "%02x ", *data);
+    fprintf (fp, "\n");
+}
 
-  char hex[128];
-  char asc[128];
-  char tmp[32];
-  
-  hex[0] = 0;
-  asc[0] = 0;
-  unsigned int c;
-  
-  for (c = 0; c < len; c ++)
+// prints up the passed in data to the file pointer
+void fprintData(FILE* fp, uint32_t len, const uint8_t* data)
+{
+    if (fp == NULL)
+        return;
+
+    char hex[128];
+    char asc[128];
+    char tmp[128];
+    memset(hex, 0, 128);
+    memset(tmp, 0, 128);
+    memset(asc, 0, 128);
+
+    unsigned int c;
+
+    for (c = 0; c < len; c ++)
     {
-      if ((!(c % 16)) && c)
-	{
-	  fprintf (fp, "%03d | %s | %s \n", c - 16, hex, asc);
-	  hex[0] = 0;
-	  asc[0] = 0;
-	}
-      
-      sprintf (tmp, "%02x ", data[c]);
-      strcat (hex, tmp);
-      
-      if ((data[c] >= 32) && (data[c] <= 126))
-	sprintf (tmp, "%c", data[c]);
-      
-      else
-	strcpy (tmp, ".");
-      
-      strcat (asc, tmp);
-      
+        if ((!(c % 16)) && c)
+        {
+            fprintf (fp, "%03d | %s | %s \n", c - 16, hex, asc);
+            hex[0] = 0;
+            asc[0] = 0;
+        }
+
+        sprintf (tmp, "%02x ", data[c]);
+        strcat (hex, tmp);
+
+        if ((data[c] >= 32) && (data[c] <= 126))
+            sprintf (tmp, "%c", data[c]);
+
+        else
+            strcpy (tmp, ".");
+
+        strcat (asc, tmp);
+
     }
-  
-  if (c % 16)
-    c = c - (c % 16);
-  
-  else
-    c -= 16;
-  
-  fprintf (fp, "%03d | %-48s | %s \n\n", c, hex, asc);
+
+    if (c % 16)
+        c = c - (c % 16);
+
+    else
+        c -= 16;
+
+    fprintf (fp, "%03d | %-48s | %s \n\n", c, hex, asc);
 }
 
 void diagFileWriteFail(QString filename)

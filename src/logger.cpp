@@ -17,6 +17,8 @@
 
 #include "logger.h"
 
+#include "util.h"
+
 SEQLogger::SEQLogger(FILE *fp, QObject* parent, const char* name)
   : QObject(parent, name)
 {
@@ -82,63 +84,11 @@ int SEQLogger::outputf(const char *fmt, ...)
   return count;
 }
 
-int SEQLogger::output(const void* data, int length)
-{
-  int i;
-  int count = 0;
-  unsigned char *ptr = (unsigned char *) data;
-  
-  for(i = 0; i < length; i++,ptr++)
-    count += printf("%.2X", *ptr);
-  
-  return count;
-}
-
 // prints up the passed in data to the file pointer
 void SEQLogger::outputData(uint32_t len,
-			  const uint8_t* data)
+        const uint8_t* data)
 {
-  if (!m_fp)
-    return;
-
-  char hex[128];
-  char asc[128];
-  char tmp[128];
-  memset(hex, 0, 128);
-  memset(tmp, 0, 128);
-  memset(asc, 0, 128);
-
-  unsigned int c;
-  
-  for (c = 0; c < len; c ++)
-  {
-    if ((!(c % 16)) && c)
-    {
-      fprintf (m_fp, "%03d | %s | %s \n", c - 16, hex, asc);
-      hex[0] = 0;
-      asc[0] = 0;
-    }
-    
-    sprintf (tmp, "%02x ", data[c]);
-    strcat (hex, tmp);
-    
-    if ((data[c] >= 32) && (data[c] <= 126))
-      sprintf (tmp, "%c", data[c]);
-    
-    else
-      strcpy (tmp, ".");
-    
-    strcat (asc, tmp);
-    
-  }
-  
-  if (c % 16)
-    c = c - (c % 16);
-  
-  else
-    c -= 16;
-  
-  fprintf (m_fp, "%03d | %-48s | %s \n\n", c, hex, asc);
+    fprintData(m_fp, len, data);
 }
 
 #include "logger.moc"
