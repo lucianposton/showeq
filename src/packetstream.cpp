@@ -673,6 +673,9 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
                       " stream %s (%d) packet.payloadLength()=%d",
                       subOpCode, subpacketLength,
                       EQStreamStr[m_streamid], m_streamid, packet.payloadLength());
+#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
+              fprintDataAsHex(stdout, subpacketLength, subpacket);
+#endif
           }
           else if(subpacket + 2 < packet.payload() + packet.payloadLength())
           {
@@ -694,6 +697,9 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
                       " stream %s (%d) packet.payloadLength()=%d",
                       subOpCode, subpacketLength,
                       EQStreamStr[m_streamid], m_streamid, packet.payloadLength());
+#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
+              fprintDataAsHex(stdout, subpacketLength, subpacket);
+#endif
           }
         }
         else if (IS_NET_OPCODE(subOpCode))
@@ -841,6 +847,9 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
                       " stream %s (%d)",
                       subOpCode, packet.payloadLength(),
                       EQStreamStr[m_streamid], m_streamid);
+#if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
+              fprintDataAsHex(stdout, packet.payloadLength()-1, packet.payload()+1);
+#endif
           }
           else
           {
