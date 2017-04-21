@@ -214,7 +214,7 @@ void EQPacketStream::setCache(uint16_t serverArqSeq, EQProtocolPacket& packet)
    // entry doesn't exist, so insert an entry into the cache
 
 #ifdef PACKET_PROCESS_DIAG
-      seqDebug("SEQ: Insert arq (%#04x) stream %d into cache", serverArqSeq, m_streamid);
+      seqDebug("SEQ: Insert arq (%#x) stream %d into cache", serverArqSeq, m_streamid);
 #endif
 
       m_cache.insert(EQPacketMap::value_type(serverArqSeq, 
@@ -229,7 +229,7 @@ void EQPacketStream::setCache(uint16_t serverArqSeq, EQProtocolPacket& packet)
 #endif
      {
 #ifdef PACKET_PROCESS_DIAG
-        seqDebug("SEQ: Update arq (%#04x) stream %d in cache", serverArqSeq, m_streamid);
+        seqDebug("SEQ: Update arq (%#x) stream %d in cache", serverArqSeq, m_streamid);
 #endif
 
         // Free the old packet at this place and replace with the new one.
@@ -238,7 +238,7 @@ void EQPacketStream::setCache(uint16_t serverArqSeq, EQProtocolPacket& packet)
      }
 #ifdef APPLY_CRC_CHECK
      else
-        seqWarn("SEQ: Not Updating arq (%#04x) stream %d into cache, CRC error!",
+        seqWarn("SEQ: Not Updating arq (%#x) stream %d into cache, CRC error!",
                serverArqSeq, m_streamid);
 #endif
    }
@@ -254,7 +254,7 @@ void EQPacketStream::setCache(uint16_t serverArqSeq, EQProtocolPacket& packet)
 void EQPacketStream::processCache()
 {
 #if defined(PACKET_CACHE_DIAG)
-  seqDebug("SEQ: START checking stream %s cache, arq %#04x, cache count %04d",
+  seqDebug("SEQ: START checking stream %s cache, arq (%#x), cache count %04d",
          EQStreamStr[m_streamid], m_arqSeqExp, m_cache.size());
 #endif
   EQPacketMap::iterator it;
@@ -281,7 +281,7 @@ void EQPacketStream::processCache()
     // one yet...
     while(it == m_cache.end())
     {
-      seqWarn("SEQ: Giving up on finding arq %#04x in stream %s cache, skipping!",
+      seqWarn("SEQ: Giving up on finding arq (%#x) in stream %s cache, skipping!",
 	     m_arqSeqExp, EQStreamStr[m_streamid]);
       
       // incremente the expected arq sequence number
@@ -314,7 +314,7 @@ void EQPacketStream::processCache()
       break;
     
 #ifdef PACKET_CACHE_DIAG
-    seqDebug("SEQ: found next arq %#04x in stream %s cache, cache count %04d",
+    seqDebug("SEQ: found next arq (%#x) in stream %s cache, cache count %04d",
 	   m_arqSeqExp, EQStreamStr[m_streamid], m_cache.size());
 #endif
     
@@ -325,7 +325,7 @@ void EQPacketStream::processCache()
     {
 #if defined (PACKET_CACHE_DIAG)
       // Something's screwed up
-      seqDebug("SEQ: INVALID PACKET: Bad CRC in packet in stream %s cache with arq %#04x! Droping it, but leaving expected seq as %#04x",
+      seqDebug("SEQ: INVALID PACKET: Bad CRC in packet in stream %s cache with arq (%#x)! Droping it, but leaving expected seq as (%#x)",
 	    EQStreamStr[m_streamid], packet->arqSeq(), m_arqSeqExp);
 #endif
 
@@ -340,7 +340,7 @@ void EQPacketStream::processCache()
       emit cacheSize(m_cache.size(), (int)m_streamid);
         
     #ifdef PACKET_CACHE_DIAG
-      seqDebug("SEQ: REMOVING arq %#04x from stream %s cache, cache count %04d",
+      seqDebug("SEQ: REMOVING arq (%#x) from stream %s cache, cache count %04d",
          packet->arqSeq(), EQStreamStr[m_streamid], m_cache.size());
     #endif
       // delete the packet
@@ -353,7 +353,7 @@ void EQPacketStream::processCache()
 #endif /* APPLY_CRC_CHECK */
     {
 #if defined (PACKET_CACHE_DIAG) && (PACKET_CACHE_DIAG > 2)
-      seqDebug("SEQ: Found next arq in stream %s cache, incrementing arq seq, %#04x", 
+      seqDebug("SEQ: Found next arq in stream %s cache, incrementing arq seq (%#x)", 
 	     EQStreamStr[m_streamid], packet->arqSeq());
 #endif
     
@@ -372,7 +372,7 @@ void EQPacketStream::processCache()
       emit cacheSize(m_cache.size(), (int)m_streamid);
     
 #ifdef PACKET_CACHE_DIAG
-      seqDebug("SEQ: REMOVING arq %#04x from stream %s cache, cache count %04d",
+      seqDebug("SEQ: REMOVING arq (%#x) from stream %s cache, cache count %04d",
 	     packet->arqSeq(), EQStreamStr[m_streamid], m_cache.size());
 #endif
       // delete the packet
@@ -384,7 +384,7 @@ void EQPacketStream::processCache()
   }
   
 #ifdef PACKET_CACHE_DIAG
-  seqDebug("SEQ: FINISHED checking stream %s cache, arq %#04x, cache count %04d",
+  seqDebug("SEQ: FINISHED checking stream %s cache, arq (%#x), cache count %04d",
          EQStreamStr[m_streamid], m_arqSeqExp, m_cache.size());
 #endif
 }
@@ -395,7 +395,7 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
 {
   if(len > 100000)
   {
-	seqDebug("dispatchPacket: attempting to dispatch packet len > 10000 bytes. opCode=%#04x. %#04x '%s' (size %zu)",
+	seqDebug("dispatchPacket: attempting to dispatch packet len > 10000 bytes. opCode=%#.4x. %#.4x '%s' (size %zu)",
 	    (unsigned)opCode,
         opcodeEntry ? opcodeEntry->opcode() : 0,
         opcodeEntry ? (const char*)opcodeEntry->name() : "null opcodeEntry",
@@ -415,7 +415,7 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
 
 #ifdef PACKET_INFO_DIAG
     seqDebug(
-	    "dispatchPacket: attempting to dispatch opcode %#04x '%s' (size %zu)",
+	    "dispatchPacket: attempting to dispatch opcode %#.4x '%s' (size %zu)",
 	    opcodeEntry->opcode(), (const char*)opcodeEntry->name(),len);
 #endif
 
@@ -480,7 +480,7 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
     if (!found && !opcodeEntry->isEmpty())
     {
         QString tempStr;
-        tempStr.sprintf("%s  (%#04x) (dataLen: %lu) doesn't match:",
+        tempStr.sprintf("%s  (%#.4x) (dataLen: %lu) doesn't match:",
                 (const char*)opcodeEntry->name(), opcodeEntry->opcode(), 
                 len);
 
@@ -506,7 +506,7 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
   }
   else
   {
-    seqWarn("dispatchPacket(): buffer size %d opcode %#04x stream %s (%d) not in opcodeDB",
+    seqWarn("dispatchPacket(): buffer size %d opcode %#.4x stream %s (%d) not in opcodeDB",
        len, opCode, EQStreamStr[m_streamid], m_streamid);
   }
 
@@ -531,10 +531,11 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
       ! m_sessionKey)
   {
 #if (defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)) || (defined(PACKET_SESSION_DIAG) && PACKET_SESSION_DIAG > 1)
-    seqDebug("discarding packet %s:%d ==>%s:%d netopcode=%#04x size=%d. Session not initialized. Need to zone to start picking up packets. Session tracking %s.",
+    seqDebug("discarding packet %s:%d ==>%s:%d netopcode=%#.4x size=%d stream %s (%d), seq (%#.4x). Session not initialized. Need to zone to start picking up packets. Session tracking %s.",
       (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
       (const char*)packet.getIPv4DestA(), packet.getDestPort(),
       packet.getNetOpCode(), packet.payloadLength(),
+      EQStreamStr[m_streamid], m_streamid, packet.arqSeq(),
         (m_session_tracking_enabled == 2 ? "locked on" : 
           (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
 #endif
@@ -549,10 +550,11 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
        (dir() == DIR_Client && m_sessionClientPort != packet.getSourcePort())))
   {
 #if (defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)) || (defined(PACKET_SESSION_DIAG) && PACKET_SESSION_DIAG > 1)
-    seqDebug("discarding packet %s:%d ==>%s:%d netopcode=%#04x size=%d. Multiple sessions on the same box? Ignoring all but one of them. Latched client port %d. Session tracking %s.",
+    seqDebug("discarding packet %s:%d ==>%s:%d netopcode=%#.4x size=%d stream %s (%d), seq (%#.4x). Multiple sessions on the same box? Ignoring all but one of them. Latched client port %d. Session tracking %s.",
       (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
       (const char*)packet.getIPv4DestA(), packet.getDestPort(),
       packet.getNetOpCode(), packet.payloadLength(),
+      EQStreamStr[m_streamid], m_streamid, packet.arqSeq(),
       m_sessionClientPort,
         (m_session_tracking_enabled == 2 ? "locked on" :
           (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
@@ -569,7 +571,7 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
 
     if (calcedCRC != packet.crc())
     {
-      seqWarn("INVALID PACKET: Bad CRC [%s:%d -> %s:%d] netOp %#04x seq %#04x len %d crc (%#04x != %#04x)",
+      seqWarn("INVALID PACKET: Bad CRC [%s:%d -> %s:%d] netOp %#.4x seq (%#x) len %d crc (%#04x != %#04x)",
          (const char*)packet.getIPv4SourceA(), packet.getSourcePort(),
          (const char*)packet.getIPv4DestA(), packet.getDestPort(),
          packet.getNetOpCode(), packet.arqSeq(), packet.getUDPPayloadLength(),
@@ -582,7 +584,7 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
   // decompress the packet first
   if (! packet.decompressPacket(m_maxLength))
   {
-    seqWarn("Packet decompress failed for stream %s (%d), op %#04x, flags %02x packet dropped.",
+    seqWarn("Packet decompress failed for stream %s (%d), op %#.4x, flags %02x packet dropped.",
       EQStreamStr[m_streamid], m_streamid, packet.getNetOpCode(),
       packet.getFlags());
     return;
@@ -590,7 +592,7 @@ void EQPacketStream::handlePacket(EQUDPIPPacketFormat& packet)
 #ifdef PACKET_DECODE_DIAG
   else if (packet.hasFlags())
   {
-    seqDebug("Successful decompress for stream %s (%d), op %#04x, flags %02x.",
+    seqDebug("Successful decompress for stream %s (%d), op %#.4x, flags %02x.",
         EQStreamStr[m_streamid], m_streamid, packet.getNetOpCode(),
         packet.getFlags());
   }
@@ -633,7 +635,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
     case OP_Combined:
     {
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-      seqDebug("EQPacket: found combined packet (net op: %#04x, size %d) on stream %s (%d). Unrolling.", 
+      seqDebug("EQPacket: found combined packet (net op: %#.4x, size %d) on stream %s (%d). Unrolling.", 
         packet.getNetOpCode(), packet.payloadLength(), 
         EQStreamStr[m_streamid], m_streamid);
 #endif
@@ -654,7 +656,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         uint16_t subOpCode = *(uint16_t*)subpacket;
         
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-        seqDebug("EQPacket: unrolling length %d bytes from combined packet on stream %s (%d). Opcode %#04x", 
+        seqDebug("EQPacket: unrolling length %d bytes from combined packet on stream %s (%d). Opcode %#.4x", 
           subpacketLength, EQStreamStr[m_streamid], m_streamid, subOpCode);
 #endif
         
@@ -669,7 +671,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           if (subpacketLength < 2 || packet.payloadLength() < 3)
           {
               seqWarn("EQPacketStream::processPacket(): dropping 0000 troll packet"
-                      " OP_Combined. subOpCode=%#04x subpacketLength=%d"
+                      " OP_Combined. subOpCode=%#.4x subpacketLength=%d"
                       " stream %s (%d) packet.payloadLength()=%d",
                       subOpCode, subpacketLength,
                       EQStreamStr[m_streamid], m_streamid, packet.payloadLength());
@@ -682,7 +684,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
               subOpCode = *(uint16_t*)subpacket;
 
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-              seqDebug("EQPacket: processing unrolled special app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#04x", 
+              seqDebug("EQPacket: processing unrolled special app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#.4x", 
                       subpacketLength-2, EQStreamStr[m_streamid], m_streamid, subOpCode);
 #endif
 
@@ -693,7 +695,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           else
           {
               seqWarn("EQPacketStream::processPacket(): dropping troll packet"
-                      " OP_Combined. subOpCode=%#04x subpacketLength=%d"
+                      " OP_Combined. subOpCode=%#.4x subpacketLength=%d"
                       " stream %s (%d) packet.payloadLength()=%d",
                       subOpCode, subpacketLength,
                       EQStreamStr[m_streamid], m_streamid, packet.payloadLength());
@@ -705,7 +707,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         else if (IS_NET_OPCODE(subOpCode))
         {
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-          seqDebug("EQPacket: processing unrolled net opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#04x", 
+          seqDebug("EQPacket: processing unrolled net opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#.4x", 
             subpacketLength, EQStreamStr[m_streamid], m_streamid, subOpCode);
 #endif
 
@@ -717,7 +719,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         else
         {
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-        seqDebug("EQPacket: processing unrolled app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#04x", 
+        seqDebug("EQPacket: processing unrolled app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#.4x", 
           subpacketLength-2, EQStreamStr[m_streamid], m_streamid, subOpCode);
 #endif
 
@@ -732,7 +734,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
     case OP_AppCombined:
     {
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-      seqDebug("EQPacket: found appcombined packet (net op: %#04x, size %d) on stream %s (%d). Unrolling.", 
+      seqDebug("EQPacket: found appcombined packet (net op: %#.4x, size %d) on stream %s (%d). Unrolling.", 
         packet.getNetOpCode(), packet.payloadLength(), 
         EQStreamStr[m_streamid], m_streamid);
 #endif
@@ -764,9 +766,9 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           }
 
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-        seqDebug("EQPacket: unrolling length %d bytes from combined packet on stream %s (%d). Opcode %#04x", 
+        seqDebug("EQPacket: unrolling length %d bytes from combined packet on stream %s (%d). Opcode %#.4x", 
           subpacketLength, EQStreamStr[m_streamid], m_streamid, subOpCode);
-        seqDebug("EQPacket: processing unrolled app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#04x", 
+        seqDebug("EQPacket: processing unrolled app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#.4x", 
           subpacketLength-2, EQStreamStr[m_streamid], m_streamid, subOpCode);
 #endif
 
@@ -799,9 +801,9 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           }
           
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-        seqDebug("EQPacket: unrolling length %d bytes from combined packet on stream %s (%d). Opcode %#04x", 
+        seqDebug("EQPacket: unrolling length %d bytes from combined packet on stream %s (%d). Opcode %#.4x", 
           longOne, EQStreamStr[m_streamid], m_streamid, subOpCode);
-        seqDebug("EQPacket: processing unrolled app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#04x", 
+        seqDebug("EQPacket: processing unrolled app opcode, length %d bytes from combined packet on stream %s (%d). Opcode %#.4x", 
           longOne-2, EQStreamStr[m_streamid], m_streamid, subOpCode);
 #endif
 
@@ -832,7 +834,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         uint16_t subOpCode = *(uint16_t*)(packet.payload());
        
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-        seqDebug("SEQ: Found next sequence number in data stream %s (%d), incrementing expected seq, %#04x (op code %#04x, sub opcode %#04x)", 
+        seqDebug("SEQ: Found next sequence number in data stream %s (%d), incrementing expected seq, (%#x) (op code %#.4x, sub opcode %#.4x)", 
           EQStreamStr[m_streamid], m_streamid, seq, 
           packet.getNetOpCode(), subOpCode);
 #endif
@@ -843,7 +845,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           if (packet.payloadLength() < 3)
           {
               seqWarn("EQPacketStream::processPacket(): dropping 0000 troll packet"
-                      " OP_Packet. subOpCode=%#04x packet.payloadLength()=%d"
+                      " OP_Packet. subOpCode=%#.4x packet.payloadLength()=%d"
                       " stream %s (%d)",
                       subOpCode, packet.payloadLength(),
                       EQStreamStr[m_streamid], m_streamid);
@@ -858,7 +860,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
               subOpCode = *(uint16_t*)&packet.payload()[1];
 
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-              seqDebug("EQPacket: special app opcode extracted for opcode 0000 on stream %s (%d). Opcode %#04x", 
+              seqDebug("EQPacket: special app opcode extracted for opcode 0000 on stream %s (%d). Opcode %#.4x", 
                       EQStreamStr[m_streamid], m_streamid, subOpCode);
 #endif
 
@@ -888,7 +890,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       {
         // Yeah, future packet. Push it on the packet cache.
 #ifdef PACKET_PROCESS_DIAG
-        seqDebug("SEQ: out of order sequence %#04x stream %s (%d) expecting %#04x, sending to cache, %04d",
+        seqDebug("SEQ: out of order sequence (%#x) stream %s (%d) expecting (%#x), sending to cache, %04d",
           seq, EQStreamStr[m_streamid], m_streamid, 
           m_arqSeqExp, m_cache.size());
 #endif
@@ -897,7 +899,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       else
       {
         // Past packet outside the cut off
-        seqWarn("SEQ: received sequenced %spacket outside expected window on stream %s (%d) netopcode=%#04x size=%d. Expecting seq=%#04x got seq=%#04x, window size %d, dropping packet as in the past.", 
+        seqWarn("SEQ: received sequenced %spacket outside expected window on stream %s (%d) netopcode=%#.4x size=%d. Expecting seq=(%#x) got seq=(%#x), window size %d, dropping packet as in the past.", 
           (isSubpacket ? "sub" : ""),
           EQStreamStr[m_streamid], m_streamid,
           packet.getNetOpCode(), packet.payloadLength(), 
@@ -919,7 +921,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         emit seqExpect(m_arqSeqExp, (int)m_streamid);
        
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-        seqDebug("SEQ: Found next sequence number in data stream %s (%d), incrementing expected seq, %#04x (op code %#04x)", 
+        seqDebug("SEQ: Found next sequence number in data stream %s (%d), incrementing expected seq (%#x), (op code %#.4x)", 
           EQStreamStr[m_streamid], m_streamid, seq, packet.getNetOpCode());
 #endif
 
@@ -932,7 +934,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           uint16_t fragOpCode = *(uint16_t*)(m_fragment.data());
 
 #ifdef PACKET_PROCESS_DIAG
-        seqDebug("SEQ: Completed oversized app packet on stream %s with seq %#04x, total size %d opcode %#04x", 
+        seqDebug("SEQ: Completed oversized app packet on stream %s with seq (%#x), total size %d opcode %#.4x", 
           EQStreamStr[m_streamid], seq, m_fragment.size()-2, fragOpCode);
 #endif
           // dispatch fragment. Skip opcode.
@@ -942,7 +944,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
             fragOpCode = *(uint16_t*)(&m_fragment.data()[1]);
 
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
-            seqDebug("EQPacket: special app opcode on completed fragment for opcode 0000 on stream %s (%d). Opcode %#04x", 
+            seqDebug("EQPacket: special app opcode on completed fragment for opcode 0000 on stream %s (%d). Opcode %#.4x", 
             EQStreamStr[m_streamid], m_streamid, fragOpCode);
 #endif
 
@@ -964,7 +966,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       {
         // Yeah, future packet. Push it on the packet cache.
 #ifdef PACKET_PROCESS_DIAG
-        seqDebug("SEQ: out of order sequence %#04x stream %s (%d) expecting %#04x, sending to cache, %04d",
+        seqDebug("SEQ: out of order sequence (%#x) stream %s (%d) expecting (%#x), sending to cache, %04d",
           seq, EQStreamStr[m_streamid], m_streamid, 
           m_arqSeqExp, m_cache.size());
 #endif
@@ -973,7 +975,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       else
       {
         // Past packet outside the cut off
-        seqWarn("SEQ: received sequenced %spacket outside expected window on stream %s (%d) netopcode=%#04x size=%d. Expecting seq=%#04x got seq=%#04x, window size %d, dropping packet as in the past.", 
+        seqWarn("SEQ: received sequenced %spacket outside expected window on stream %s (%d) netopcode=%#.4x size=%d. Expecting seq=(%#x) got seq=(%#x), window size %d, dropping packet as in the past.", 
           (isSubpacket ? "sub" : ""),
           EQStreamStr[m_streamid], m_streamid,
           packet.getNetOpCode(), packet.payloadLength(), 
@@ -1020,7 +1022,8 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       }
 
 #if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
-      seqDebug("EQPacket: SessionRequest found, resetting expected seq, stream %s (%d) (session tracking %s)",
+      seqDebug("EQPacket: SessionRequest found, resetting expected seq (was %#x), stream %s (%d) (session tracking %s)",
+              m_arqSeqExp,
 	    EQStreamStr[m_streamid], m_streamid,
         (m_session_tracking_enabled == 2 ? "locked on" : 
           (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
@@ -1102,11 +1105,12 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       }
 
 #if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
-      seqDebug("EQPacket: SessionResponse found %s:%u->%s:%u, resetting expected seq, stream %s (%d) (session tracking %s)",
+      seqDebug("EQPacket: SessionResponse found %s:%u->%s:%u, resetting expected seq (was %#x), stream %s (%d) (session tracking %s)",
         ((EQUDPIPPacketFormat&) packet).getIPv4SourceA().ascii(),
         ((EQUDPIPPacketFormat&) packet).getSourcePort(),
         ((EQUDPIPPacketFormat&) packet).getIPv4DestA().ascii(),
         ((EQUDPIPPacketFormat&) packet).getDestPort(),
+        m_arqSeqExp,
 	    EQStreamStr[m_streamid], m_streamid,
         (m_session_tracking_enabled == 2 ? "locked on" : 
           (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
@@ -1177,11 +1181,12 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
     case OP_SessionDisconnect:
     {
 #if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
-      seqDebug("EQPacket: SessionDisconnect found %s:%u->%s:%u, resetting expected seq, stream %s (%d) (session tracking %s)",
+      seqDebug("EQPacket: SessionDisconnect found %s:%u->%s:%u, resetting expected seq (was %#x), stream %s (%d) (session tracking %s)",
         ((EQUDPIPPacketFormat&) packet).getIPv4SourceA().ascii(),
         ((EQUDPIPPacketFormat&) packet).getSourcePort(),
         ((EQUDPIPPacketFormat&) packet).getIPv4DestA().ascii(),
         ((EQUDPIPPacketFormat&) packet).getDestPort(),
+        m_arqSeqExp,
 	    EQStreamStr[m_streamid], m_streamid,
         (m_session_tracking_enabled == 2 ? "locked on" : 
           (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
@@ -1216,7 +1221,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
     case OP_AckAfterDisconnect:
     {
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-      seqDebug("EQPacket: no-op on ACK for net opcode %#04x seq %#04x, stream %s (%d)",
+      seqDebug("EQPacket: no-op on ACK for net opcode %#.4x seq (%#x), stream %s (%d)",
 	    packet.getNetOpCode(), eqntohuint16(packet.payload()), 
         EQStreamStr[m_streamid], m_streamid);
 #endif
@@ -1227,14 +1232,14 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
     case OP_SessionStatResponse:
     {
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 2)
-      seqDebug("EQPacket: no-op on stats for net opcode %#04x, stream %s (%d)",
+      seqDebug("EQPacket: no-op on stats for net opcode %#.4x, stream %s (%d)",
 	    packet.getNetOpCode(), EQStreamStr[m_streamid], m_streamid);
 #endif
     }
     break;
     default :
     {
-      seqWarn("EQPacket: Unhandled net opcode %#04x, stream %s, size %d",
+      seqWarn("EQPacket: Unhandled net opcode %#.4x, stream %s, size %d",
         packet.getNetOpCode(), EQStreamStr[m_streamid], packet.payloadLength());
     }
   }

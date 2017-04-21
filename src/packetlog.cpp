@@ -33,7 +33,7 @@ PacketLog::~PacketLog()
 inline QString opCodeToString(uint16_t opCode)
 {
   QString tempStr;
-  tempStr.sprintf("[OPCode: %#.04x]", opCode);
+  tempStr.sprintf("[OPCode: %#.4x]", opCode);
 
   // Flags are gone? Combined and implicit don't make sense anymore and
   // nothing is compressed or encrypted at this point...
