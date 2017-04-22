@@ -531,7 +531,7 @@ int32_t ZoneMgr::fillProfileStruct(charProfileStruct *player, const uint8_t *dat
   player->autosplit = netStream.readUInt8();
 
   // Unknown
-  netStream.skipBytes(61);
+  netStream.skipBytes(57);
 
 
   player->ldon_guk_points = netStream.readUInt32NC();
