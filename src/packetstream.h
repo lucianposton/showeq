@@ -76,8 +76,8 @@ class EQPacketStream : public QObject
   bool connect2(const QString& opcodeName, 
 		const char* payload,  EQSizeCheckType szt, 
 		const QObject* receiver, const char* member);
-  void receiveSessionKey(uint32_t sessionId, EQStreamID streamid, 
-    uint32_t sessionKey);
+  void startNewSession(uint32_t sessionId, EQStreamID streamid, 
+    uint32_t sessionKey, uint32_t maxLength);
   void close(uint32_t sessionId, EQStreamID streamid, uint8_t sessionTracking);
   uint16_t calculateCRC(EQProtocolPacket& packet);
   uint32_t getSessionKey() const { return m_sessionKey; }
@@ -103,7 +103,8 @@ class EQPacketStream : public QObject
   void lockOnClient(in_port_t serverPort, in_port_t clientPort);
 
   // Signal a new session key being received
-  void sessionKey(uint32_t sessionId, EQStreamID streadid, uint32_t sessionKey);
+  void newSessionStarting(uint32_t sessionId, EQStreamID streamid,
+          uint32_t sessionKey, uint32_t maxLength);
 		    
   // used for net_stats display
   void cacheSize(int, int);

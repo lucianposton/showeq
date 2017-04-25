@@ -1006,42 +1006,23 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           break;
       }
 
+#ifdef PACKET_SESSION_DIAG
       // Pull off session request information
       SessionRequestStruct* request = (SessionRequestStruct*) packet.payload();
-
-      m_sessionId = eqntohuint32((uint8_t*)&(request->sessionId));
-      m_maxLength = eqntohuint32((uint8_t*)&(request->maxLength));
-
-      // Sanity check the max length requested
-      if (m_maxLength > maxPacketSize)
-      {
-        seqWarn("EQPacket: SessionRequest wanted a max packet size of %d which is above our sane max packet size of %d. Using our max",
-          m_maxLength, maxPacketSize);
-
-        m_maxLength = maxPacketSize;
-      }
-
-#if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
-      seqDebug("EQPacket: SessionRequest found, resetting expected seq (was %#x), stream %s (%d) (session tracking %s)",
-              m_arqSeqExp,
-	    EQStreamStr[m_streamid], m_streamid,
-        (m_session_tracking_enabled == 2 ? "locked on" : 
-          (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
 #endif
 
-#if defined(PACKET_SESSION_DIAG)
-      seqDebug("EQPacket: SessionRequest %s:%u->%s:%u, sessionId %u maxLength %u, awaiting key for stream %s (%d)",
-        ((EQUDPIPPacketFormat&) packet).getIPv4SourceA().ascii(),
-        ((EQUDPIPPacketFormat&) packet).getSourcePort(),
-        ((EQUDPIPPacketFormat&) packet).getIPv4DestA().ascii(),
-        ((EQUDPIPPacketFormat&) packet).getDestPort(),
-        m_sessionId, m_maxLength, EQStreamStr[m_streamid], m_streamid);
-#endif
-
-#if defined(PACKET_SESSION_DIAG) && (PACKET_SESSION_DIAG > 1)
-      seqDebug("EQPacket: SessionRequest contents: unknown %u, sessionId %u, maxLength %u",
-        eqntohuint32((uint8_t*)&(request->unknown0000)), 
-        m_sessionId, m_maxLength);
+#ifdef PACKET_SESSION_DIAG
+      seqDebug("EQPacket: SessionRequest sent %s:%u->%s:%u, stream %s (%d),"
+              " sessionId=%u, maxLength=%u,"
+              " session tracking %s",
+              ((EQUDPIPPacketFormat&) packet).getIPv4SourceA().ascii(),
+              ((EQUDPIPPacketFormat&) packet).getSourcePort(),
+              ((EQUDPIPPacketFormat&) packet).getIPv4DestA().ascii(),
+              ((EQUDPIPPacketFormat&) packet).getDestPort(),
+              EQStreamStr[m_streamid], m_streamid,
+              request->sessionId, request->maxLength,
+              (m_session_tracking_enabled == 2 ? "locked on" : 
+               (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
 #endif
 
 #if defined(PACKET_SESSION_DIAG) && (PACKET_SESSION_DIAG > 2)
@@ -1051,9 +1032,6 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         packet.payload()[6], packet.payload()[7], packet.payload()[8], 
         packet.payload()[9], packet.payload()[10], packet.payload()[11]);
 #endif
-
-      m_arqSeqExp = 0;
-      m_arqSeqFound = true;
 
       if (m_session_tracking_enabled)
       {
@@ -1088,46 +1066,34 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       }
 
       // Pull off session response information
-      SessionResponseStruct* response = 
-        (SessionResponseStruct*) packet.payload();
+      const SessionResponseStruct* response = (SessionResponseStruct*) packet.payload();
 
-      m_maxLength = eqntohuint32((uint8_t*)&(response->maxLength));
-      m_sessionKey = eqntohuint32((uint8_t*)&(response->key));
-      m_sessionId = eqntohuint32((uint8_t*)&(response->sessionId));
+      const uint32_t newSessionKey = eqntohuint32((uint8_t*)&(response->key));
+      const uint32_t newSessionId = eqntohuint32((uint8_t*)&(response->sessionId));
+      uint32_t newMaxLength = eqntohuint32((uint8_t*)&(response->maxLength));
 
       // Sanity check the max length requested
-      if (m_maxLength > maxPacketSize)
+      if (newMaxLength > maxPacketSize)
       {
         seqWarn("EQPacket: SessionResponse wanted a max packet size of %d which is above our sane max packet size of %d. Using our max",
-          m_maxLength, maxPacketSize);
+          newMaxLength, maxPacketSize);
 
-        m_maxLength = maxPacketSize;
+        newMaxLength = maxPacketSize;
       }
 
-#if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
-      seqDebug("EQPacket: SessionResponse found %s:%u->%s:%u, resetting expected seq (was %#x), stream %s (%d) (session tracking %s)",
-        ((EQUDPIPPacketFormat&) packet).getIPv4SourceA().ascii(),
-        ((EQUDPIPPacketFormat&) packet).getSourcePort(),
-        ((EQUDPIPPacketFormat&) packet).getIPv4DestA().ascii(),
-        ((EQUDPIPPacketFormat&) packet).getDestPort(),
-        m_arqSeqExp,
-	    EQStreamStr[m_streamid], m_streamid,
-        (m_session_tracking_enabled == 2 ? "locked on" : 
-          (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
-#endif
-      
-#if defined(PACKET_SESSION_DIAG)
-      seqDebug("EQPacket: SessionResponse sessionId %u maxLength %u, key is %u for stream %s (%d)",
-        m_sessionId, m_maxLength, m_sessionKey, 
-        EQStreamStr[m_streamid], m_streamid);
-#endif
-
 #if defined(PACKET_SESSION_DIAG) && (PACKET_SESSION_DIAG > 1)
-      seqDebug("EQPacket: SessionResponse contents: sessionId %u, key %u, unknown %u, unknown %u, maxLength %u, unknown %u",
-        m_sessionId, m_sessionKey, 
-        eqntohuint16((uint8_t*)&(response->unknown0008)),
-        response->unknown0010, m_maxLength,
-        eqntohuint32((uint8_t*) &(response->unknown0015)));
+      seqDebug("EQPacket: SessionResponse received %s:%u->%s:%u,"
+              " stream %s (%d),"
+              " newSessionId=%u, newSessionKey=%u, newMaxLength=%u,"
+              " session tracking %s",
+              ((EQUDPIPPacketFormat&) packet).getIPv4SourceA().ascii(),
+              ((EQUDPIPPacketFormat&) packet).getSourcePort(),
+              ((EQUDPIPPacketFormat&) packet).getIPv4DestA().ascii(),
+              ((EQUDPIPPacketFormat&) packet).getDestPort(),
+              EQStreamStr[m_streamid], m_streamid,
+              newSessionKey, newSessionId, newMaxLength,
+              (m_session_tracking_enabled == 2 ? "locked on" : 
+               (m_session_tracking_enabled == 1 ? "enabled" : "disabled")));
 #endif
 
 #if defined(PACKET_SESSION_DIAG) && (PACKET_SESSION_DIAG > 2)
@@ -1142,10 +1108,7 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
 #endif
 
       // Provide key to corresponding stream from this session/stream
-      emit sessionKey(m_sessionId, m_streamid, m_sessionKey);
-
-      m_arqSeqExp = 0;
-      m_arqSeqFound = true;
+      emit newSessionStarting(newSessionId, m_streamid, newSessionKey, newMaxLength);
 
       // Session tracking
       if (m_session_tracking_enabled)
@@ -1247,20 +1210,37 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
 
 /////////////////////////////////////////////////
 // Process a session key change
-void EQPacketStream::receiveSessionKey(uint32_t sessionId, 
-  EQStreamID streamid, uint32_t sessionKey)
+void EQPacketStream::startNewSession(uint32_t sessionId, 
+  EQStreamID streamid, uint32_t sessionKey, uint32_t maxLength)
 {
-  if (streamid != m_streamid && m_sessionId == sessionId)
-  {
-    // Key is for us
-    m_sessionKey = sessionKey;
-
-#ifdef PACKET_SESSION_DIAG
-    seqDebug("EQPacket: Received key %u for session %u on stream %s (%d) from stream %s (%d)",
-      m_sessionKey, m_sessionId, EQStreamStr[m_streamid], m_streamid,
-      EQStreamStr[streamid], streamid);
+    if ((streamid == world2client &&
+                (m_streamid == world2client || m_streamid == client2world))
+            || (streamid == zone2client &&
+                (m_streamid == zone2client || m_streamid == client2zone)))
+    {
+#if defined(PACKET_PROCESS_DIAG) || defined(PACKET_SESSION_DIAG)
+        seqDebug("EQPacketStream::startNewSession():"
+                " source stream %s(%d),"
+                " this stream %s(%d),"
+                " sessionId=%u->%u,"
+                " sessionKey=%u->%u,"
+                " maxLength=%u->%u,"
+                " m_arqSeqExp=%#x->0",
+                EQStreamStr[streamid], streamid,
+                EQStreamStr[m_streamid], m_streamid,
+                m_sessionId, sessionId,
+                m_sessionKey, sessionKey,
+                m_maxLength, maxLength,
+                m_arqSeqExp);
 #endif
-  }
+
+        m_sessionKey = sessionKey;
+        m_maxLength = maxLength;
+        m_sessionId = sessionId;
+
+        m_arqSeqExp = 0;
+        m_arqSeqFound = true;
+    }
 }
 
 ///////////////////////////////////////////////////////////////

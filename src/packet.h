@@ -107,8 +107,8 @@ class EQPacket : public QObject
    void packet_decryption(bool enable);
    void setArqSeqGiveUp(uint16_t giveUp);
    void setRealtime(bool val);
-   void dispatchSessionKey(uint32_t sessionId, EQStreamID streamid,
-      uint32_t sessionKey);
+   void startNewSession(uint32_t sessionId, EQStreamID streamid,
+      uint32_t sessionKey, uint32_t maxLength);
 
  protected slots:
    void closeStream(uint32_t sessionId, EQStreamID streamId);

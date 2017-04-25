@@ -572,9 +572,9 @@ void EQPacket::connectStream(EQPacketStream* stream)
       this,
       SLOT(closeStream(uint32_t, EQStreamID)));
   connect(stream,
-      SIGNAL(sessionKey(uint32_t, EQStreamID, uint32_t)),
+      SIGNAL(newSessionStarting(uint32_t, EQStreamID, uint32_t, uint32_t)),
       this,
-      SLOT(dispatchSessionKey(uint32_t, EQStreamID, uint32_t)));
+      SLOT(startNewSession(uint32_t, EQStreamID, uint32_t, uint32_t)));
 }
 
 ////////////////////////////////////////////////////
@@ -789,13 +789,13 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
   emit clientPortLatched(m_clientPort);
 }
 
-void EQPacket::dispatchSessionKey(uint32_t sessionId, EQStreamID streamid,
-  uint32_t sessionKey)
+void EQPacket::startNewSession(uint32_t sessionId, EQStreamID streamid,
+  uint32_t sessionKey, uint32_t maxLength)
 {
-  m_client2WorldStream->receiveSessionKey(sessionId, streamid, sessionKey);
-  m_world2ClientStream->receiveSessionKey(sessionId, streamid, sessionKey);
-  m_client2ZoneStream->receiveSessionKey(sessionId, streamid, sessionKey);
-  m_zone2ClientStream->receiveSessionKey(sessionId, streamid, sessionKey);
+  m_client2WorldStream->startNewSession(sessionId, streamid, sessionKey, maxLength);
+  m_world2ClientStream->startNewSession(sessionId, streamid, sessionKey, maxLength);
+  m_client2ZoneStream->startNewSession(sessionId, streamid, sessionKey, maxLength);
+  m_zone2ClientStream->startNewSession(sessionId, streamid, sessionKey, maxLength);
 }
 
 ///////////////////////////////////////////
