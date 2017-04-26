@@ -670,11 +670,13 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
 
           if (subpacketLength < 2 || packet.payloadLength() < 3)
           {
+#ifdef PACKET_PROCESS_DIAG
               seqWarn("EQPacketStream::processPacket(): dropping 0000 troll packet"
                       " OP_Combined. subOpCode=%#.4x subpacketLength=%d"
                       " stream %s (%d) packet.payloadLength()=%d",
                       subOpCode, subpacketLength,
                       EQStreamStr[m_streamid], m_streamid, packet.payloadLength());
+#endif
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
               fprintDataAsHex(stdout, subpacketLength, subpacket);
 #endif
@@ -694,11 +696,13 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
           }
           else
           {
+#ifdef PACKET_PROCESS_DIAG
               seqWarn("EQPacketStream::processPacket(): dropping troll packet"
                       " OP_Combined. subOpCode=%#.4x subpacketLength=%d"
                       " stream %s (%d) packet.payloadLength()=%d",
                       subOpCode, subpacketLength,
                       EQStreamStr[m_streamid], m_streamid, packet.payloadLength());
+#endif
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
               fprintDataAsHex(stdout, subpacketLength, subpacket);
 #endif
@@ -844,11 +848,13 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
         {
           if (packet.payloadLength() < 3)
           {
+#ifdef PACKET_PROCESS_DIAG
               seqWarn("EQPacketStream::processPacket(): dropping 0000 troll packet"
                       " OP_Packet. subOpCode=%#.4x packet.payloadLength()=%d"
                       " stream %s (%d)",
                       subOpCode, packet.payloadLength(),
                       EQStreamStr[m_streamid], m_streamid);
+#endif
 #if defined(PACKET_PROCESS_DIAG) && (PACKET_PROCESS_DIAG > 1)
               fprintDataAsHex(stdout, packet.payloadLength()-1, packet.payload()+1);
 #endif
@@ -898,12 +904,14 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       }
       else
       {
+#ifdef PACKET_PROCESS_DIAG
         // Past packet outside the cut off
         seqWarn("SEQ: received sequenced %spacket outside expected window on stream %s (%d) netopcode=%#.4x size=%d. Expecting seq=(%#x) got seq=(%#x), window size %d, dropping packet as in the past.", 
           (isSubpacket ? "sub" : ""),
           EQStreamStr[m_streamid], m_streamid,
           packet.getNetOpCode(), packet.payloadLength(), 
           m_arqSeqExp, seq, arqSeqWrapCutoff);
+#endif
       }
     }
     break;
@@ -974,12 +982,14 @@ void EQPacketStream::processPacket(EQProtocolPacket& packet, bool isSubpacket)
       }
       else
       {
+#ifdef PACKET_PROCESS_DIAG
         // Past packet outside the cut off
         seqWarn("SEQ: received sequenced %spacket outside expected window on stream %s (%d) netopcode=%#.4x size=%d. Expecting seq=(%#x) got seq=(%#x), window size %d, dropping packet as in the past.", 
           (isSubpacket ? "sub" : ""),
           EQStreamStr[m_streamid], m_streamid,
           packet.getNetOpCode(), packet.payloadLength(), 
           m_arqSeqExp, seq, arqSeqWrapCutoff);
+#endif
       }
     }
     break;
