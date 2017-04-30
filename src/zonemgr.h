@@ -40,8 +40,8 @@ class ZoneMgr : public QObject
   QString zoneNameFromID(uint16_t zoneId);
   QString zoneLongNameFromID(uint16_t zoneId);
   bool isZoning() const { return m_zoning; }
-  const QString& shortZoneName() const { return m_shortZoneName; }
-  const QString& longZoneName() const { return m_longZoneName; }
+  QString shortZoneName() const { return m_shortZoneName; }
+  QString longZoneName() const { return m_longZoneName; }
   const Point3D<int16_t>& safePoint() const { return m_safePoint; }
   float zoneExpMultiplier() { return m_zone_exp_multiplier; }
   const zonePointStruct* zonePoint(uint32_t zoneTrigger);
