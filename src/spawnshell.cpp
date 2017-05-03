@@ -716,7 +716,7 @@ void SpawnShell::updateSpawn(uint16_t id,
 	 // found a match, ignore it
 	 m_deadSpawnID[i] = 0;
 
-	 seqInfo("(%d) had been removed from the zone, but saw a position update on it, so assuming bogus update.", 
+	 seqDebug("(%d) had been removed from the zone, but saw a position update on it, so assuming bogus update.", 
 		id);
 
 	 return;
