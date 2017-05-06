@@ -381,12 +381,14 @@ void PacketStreamLog::rawStreamPacket(const uint8_t* data, size_t len,
     logData(data, len, dir, opcode, "[Raw]");
 }
 
-void PacketStreamLog::decodedStreamPacket(const uint8_t* data, size_t len, 
+void PacketStreamLog::decryptedStreamPacket(const uint8_t* data, size_t len, 
 					  uint8_t dir, uint16_t opcode, 
-					  const EQPacketOPCode* opcodeEntry)
+					  const EQPacketOPCode* opcodeEntry,
+                      bool unknown, bool decryptionApplied)
 {
   //  if ((opcode != 0x0028) && (opcode != 0x003f) && (opcode != 0x025e))
-    logData(data, len, dir, opcode, opcodeEntry, "[Decoded]");
+    QString prefix = (decryptionApplied ? "[Decoded,Decrypted]" : "[Decoded]");
+    logData(data, len, dir, opcode, opcodeEntry, prefix);
 }
 
 //----------------------------------------------------------------------
@@ -524,7 +526,7 @@ void OPCodeMonitorPacketLog::init(QString monitoredOPCodes)
 void OPCodeMonitorPacketLog::packet(const uint8_t* data, size_t len, 
 				    uint8_t dir, uint16_t opcode, 
 				    const EQPacketOPCode* opcodeEntry, 
-				    bool unknown)
+				    bool unknown, bool decryptionApplied)
 {
   unsigned int uiOpCodeIndex = 0;
   unsigned int uiIndex = 0;

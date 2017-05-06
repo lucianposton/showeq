@@ -509,9 +509,9 @@ void EQPacket::connectStream(EQPacketStream* stream)
         SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
 
       connect(stream,
-        SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+        SIGNAL(decryptedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)),
         this,
-        SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
+        SIGNAL(decryptedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)));
     }
     break;
     case world2client:
@@ -529,9 +529,9 @@ void EQPacket::connectStream(EQPacketStream* stream)
         SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
 
       connect(stream,
-        SIGNAL(decodedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+        SIGNAL(decryptedPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)),
         this,
-        SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
+        SIGNAL(decryptedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)));
     }
     break;
     default :

@@ -136,16 +136,16 @@ class EQPacket : public QObject
 		       uint16_t opcode);
    void decodedWorldPacket(const uint8_t* data, size_t len, uint8_t dir,
 			   uint16_t opcode, const EQPacketOPCode* opcodeEntry);
-   void decodedWorldPacket(const uint8_t* data, size_t len, uint8_t dir,
+   void decryptedWorldPacket(const uint8_t* data, size_t len, uint8_t dir,
 			   uint16_t opcode, const EQPacketOPCode* opcodeEntry,
-               bool unknown);
+               bool unknown, bool decryptionApplied);
    void rawZonePacket(const uint8_t* data, size_t len, uint8_t dir, 
 		      uint16_t opcode);
    void decodedZonePacket(const uint8_t* data, size_t len, uint8_t dir,
 			  uint16_t opcode, const EQPacketOPCode* opcodeEntry);
-   void decodedZonePacket(const uint8_t* data, size_t len, uint8_t dir,
+   void decryptedZonePacket(const uint8_t* data, size_t len, uint8_t dir,
 			  uint16_t opcode, const EQPacketOPCode* opcodeEntry,
-			  bool unknown);
+			  bool unknown, bool decryptionApplied);
 
  private:
       

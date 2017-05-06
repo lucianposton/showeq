@@ -91,9 +91,9 @@ class EQPacketStream : public QObject
 		 uint16_t opcode);
   void decodedPacket(const uint8_t* data, size_t len, uint8_t dir,
 		     uint16_t opcode, const EQPacketOPCode* opcodeEntry);
-  void decodedPacket(const uint8_t* data, size_t len, uint8_t dir,
+  void decryptedPacket(const uint8_t* data, size_t len, uint8_t dir,
 		     uint16_t opcode, const EQPacketOPCode* opcodeEntry,
-		     bool unknown);
+		     bool unknown, bool decryptionApplied);
 
   // this signals stream closure
   void closing(uint32_t sessionId, EQStreamID streamId);

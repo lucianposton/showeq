@@ -75,8 +75,9 @@ class PacketStreamLog : public PacketLog
  public slots:
    void rawStreamPacket(const uint8_t* data, size_t len, uint8_t dir, 
 			uint16_t opcode);
-   void decodedStreamPacket(const uint8_t* data, size_t len, uint8_t dir, 
-			    uint16_t opcode, const EQPacketOPCode* opcodeEntry);
+   void decryptedStreamPacket(const uint8_t* data, size_t len, uint8_t dir, 
+			    uint16_t opcode, const EQPacketOPCode* opcodeEntry,
+                bool unknown, bool decryptionApplied);
 
  protected:
    bool m_raw;
@@ -149,7 +150,7 @@ class OPCodeMonitorPacketLog : public PacketLog
  public slots:
   void packet(const uint8_t* data, size_t len, uint8_t dir, 
 	      uint16_t opcode, const EQPacketOPCode* opcodeEntry, 
-	      bool unknown);
+	      bool unknown, bool decryptionApplied);
 
  protected:
 #define OPCODE_SLOTS 15

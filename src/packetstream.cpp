@@ -510,7 +510,15 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
        len, opCode, EQStreamStr[m_streamid], m_streamid);
   }
 
-  emit decodedPacket(data, len, m_dir, opCode, opcodeEntry, unknown);
+  if (decryptedData)
+  {
+      emit decryptedPacket(decryptedData, len, m_dir, opCode, opcodeEntry, unknown, true);
+  }
+  else
+  {
+      emit decryptedPacket(data, len, m_dir, opCode, opcodeEntry, unknown, false);
+  }
+
   if (decryptedData != NULL)
       free(decryptedData);
 }

@@ -6058,8 +6058,8 @@ void EQInterface::createWorldLog(void)
 
   connect(m_packet, SIGNAL(rawWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t)),
 	  m_worldLog, SLOT(rawStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
-  connect(m_packet, SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
-	  m_worldLog, SLOT(decodedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
+  connect(m_packet, SIGNAL(decryptedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)),
+	  m_worldLog, SLOT(decryptedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)));
 }
 
 void EQInterface::createZoneLog(void)
@@ -6082,8 +6082,8 @@ void EQInterface::createZoneLog(void)
 
   connect(m_packet, SIGNAL(rawZonePacket(const uint8_t*, size_t, uint8_t, uint16_t)),
 	  m_zoneLog, SLOT(rawStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t)));
-  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)),
-	  m_zoneLog, SLOT(decodedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*)));
+  connect(m_packet, SIGNAL(decryptedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)),
+	  m_zoneLog, SLOT(decryptedStreamPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)));
 }
 
 void EQInterface::createBazaarLog(void)
@@ -6129,10 +6129,10 @@ void EQInterface::createUnknownZoneLog(void)
     m_unknownZoneLog->setView(pSEQPrefs->getPrefBool("ViewUnknown", section,
                 false));
 
-    connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+    connect(m_packet, SIGNAL(decryptedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)),
             m_unknownZoneLog, SLOT(zonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
 
-    connect(m_packet, SIGNAL(decodedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
+    connect(m_packet, SIGNAL(decryptedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)),
             m_unknownZoneLog, SLOT(worldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
 }
 
@@ -6159,8 +6159,8 @@ void EQInterface::createOPCodeMonitorLog(const QString& opCodeList)
   m_opcodeMonitorLog->setLog(pSEQPrefs->getPrefBool("Log", section, false));
   m_opcodeMonitorLog->setView(pSEQPrefs->getPrefBool("View", section, false));
   
-  connect(m_packet, SIGNAL(decodedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)),
-	  m_opcodeMonitorLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool)));
+  connect(m_packet, SIGNAL(decryptedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)),
+	  m_opcodeMonitorLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)));
 }
 
 
