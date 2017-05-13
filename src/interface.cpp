@@ -4728,44 +4728,53 @@ void EQInterface::changeItem(const Item* item)
 
 void EQInterface::updateSelectedSpawnStatus(const Item* item)
 {
-  if (item == 0)
-    return;
+    if (item == 0)
+        return;
 
-  const Spawn* spawn = 0;
+    const Spawn* spawn = 0;
 
-  if ((item->type() == tSpawn) || (item->type() == tPlayer))
-    spawn = (const Spawn*)item;
+    if ((item->type() == tSpawn) || (item->type() == tPlayer))
+        spawn = (const Spawn*)item;
 
-  // construct a message for the status message display
-  QString string("");
-  if (spawn != 0)
-    string.sprintf("%d: %s:%d (%d/%d) Pos:", // "%d/%d/%d (%d) %s %s Item:%s", 
-		   item->id(),
-		   (const char*)item->name().utf8(),
-		   spawn->level(), spawn->HP(),
-		   spawn->maxHP());
-  else
-    string.sprintf("%d: %s: Pos:", // "%d/%d/%d (%d) %s %s Item:%s", 
-		   item->id(),
-		   (const char*)item->name().utf8());
+    // construct a message for the status message display
+    QString string("");
+    if (spawn != 0)
+        string.sprintf("%d: %s [%d %s] (%d/%d) Pos:", // "%d/%d/%d (%d) %s %s Item:%s", 
+                item->id(),
+                (const char*)item->name().utf8(),
+                spawn->level(),
+                (const char*)spawn->classString().utf8(),
+                spawn->HP(),
+                spawn->maxHP());
+    else
+        string.sprintf("%d: %s [%s] Pos:", // "%d/%d/%d (%d) %s %s Item:%s", 
+                item->id(),
+                (const char*)item->name().utf8(),
+                (const char*)item->classString().utf8());
 
-  if (showeq_params->retarded_coords)
-    string += QString::number(item->y()) + "/" 
-      + QString::number(item->x()) + "/" 
-      + QString::number(item->z());
-  else
-    string += QString::number(item->x()) + "/" 
-      + QString::number(item->y()) + "/" 
-      + QString::number(item->z());
+    if (showeq_params->retarded_coords)
+        string += QString("(")
+            + QString::number(item->y()) + ","
+            + QString::number(item->x()) + ","
+            + QString::number(item->z()) + ")";
+    else
+        string += QString("(")
+            + QString::number(item->x()) + ","
+            + QString::number(item->y()) + ","
+            + QString::number(item->z()) + ")";
 
-  string += QString(" (") 
-    + QString::number(item->calcDist(m_player->x(),
-				     m_player->y(),
-				     m_player->z()))
-    + ") " + item->raceString() + " " + item->classString();
+    if (spawn && spawn->petOwnerID())
+        string += QString(" (ownerID: ")
+            + QString::number(spawn->petOwnerID()) + ")";
 
-  // just call the status message method
-  stsMessage(string);
+    string += QString(" (")
+        + QString::number(item->calcDist(m_player->x(),
+                    m_player->y(),
+                    m_player->z()))
+        + ") " + item->raceString();
+
+    // just call the status message method
+    stsMessage(string);
 }
 
 void EQInterface::addCategory(void)
