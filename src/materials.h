@@ -8,12 +8,12 @@
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     "None",                 // 0x00
     "Leather",              // 0x01
-    "Ringmail",             // 0x02
+    "Mail",                 // 0x02
     "Plate",                // 0x03
-    "Cured Silk",           // 0x04
+    "CuredSilk",            // 0x04
     "Chitin",               // 0x05
     NULL,                   // 0x06
-    "Scale/Fungi",          // 0x07
+    "Scale",                // 0x07
     NULL,                   // 0x08
     NULL,                   // 0x09
     "ElementRobe",          // 0x0A
@@ -24,12 +24,12 @@
     "MetallicRobe",         // 0x0F
     "Robe",                 // 0x10
     "PogLeather",           // 0x11
-    "PogChain",             // 0x12
+    "PogMail",              // 0x12
     "PogPlate",             // 0x13
     "VelLeather",           // 0x14
-    "VelChain",             // 0x15
+    "VelMail",              // 0x15
     "VelPlate",             // 0x16
-    "VeliousMonk",          // 0x17
+    "VelMonk",              // 0x17
     NULL,                   // 0x18
     NULL,                   // 0x19
     NULL,                   // 0x1a
@@ -246,7 +246,7 @@
     NULL,                   // 0xed
     NULL,                   // 0xee
     NULL,                   // 0xef
-    "Vel Helm",             // 0xf0
+    "VelHelm",              // 0xf0
     NULL,                   // 0xf1
     NULL,                   // 0xf2
     NULL,                   // 0xf3

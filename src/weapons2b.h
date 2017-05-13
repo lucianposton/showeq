@@ -15,10 +15,10 @@
     NULL,                 // 0x06
     NULL,                 // 0x07
     NULL,                 // 0x08
-    NULL,                 // 0x09
-    "Haven Shield",       // 0x0a
-    "Katta Shield",       // 0x0b
-    "Seru Shield",        // 0x0c
+    "HeroShield",         // 0x09
+    "HavenShield",        // 0x0a
+    "KattaShield",        // 0x0b
+    "SeruShield",         // 0x0c
     NULL,                 // 0x0d
     NULL,                 // 0x0e
     NULL,                 // 0x0f
