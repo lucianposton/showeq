@@ -91,7 +91,7 @@ void PacketCaptureThread::start(const char *device, const char *host,
     bpf_u_int32 mask; // sniff device netmask
     bpf_u_int32 net; // sniff device ip
 
-    seqInfo("Initializing Packet Capture Thread: ");
+    seqDebug("Initializing Packet Capture Thread: ");
     m_pcache_closed = false;
 
     // Fetch the netmask for the device to use later with the filter.
@@ -107,18 +107,18 @@ void PacketCaptureThread::start(const char *device, const char *host,
     {
         if (strcmp(host, AUTOMATIC_CLIENT_IP) == 0)
         {
-            seqInfo("Filtering packets on device %s, searching for EQ client...", device);
+            seqDebug("Filtering packets on device %s, searching for EQ client...", device);
             sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800");
         }
         else
         {
-            seqInfo("Filtering packets on device %s, IP host %s", device, host);
+            seqDebug("Filtering packets on device %s, IP host %s", device, host);
             sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and host %s and ether proto 0x0800", host);
         }
     }
     else if (address_type == MAC_ADDRESS_TYPE)
     {
-        seqInfo("Filtering packets on device %s, MAC host %s", device, host);
+        seqDebug("Filtering packets on device %s, MAC host %s", device, host);
         sprintf (filter_buf, "udp[0:2] > 1024 and udp[2:2] > 1024 and ether host %s and ether proto 0x0800", host);
     }
     else
@@ -210,7 +210,7 @@ void PacketCaptureThread::startOffline(const char* filename, int playbackSpeed)
 {
     char ebuf[256]; // pcap error buffer
 
-    seqInfo("Initializing Offline Packet Capture Thread: ");
+    seqDebug("Initializing Offline Packet Capture Thread: ");
     m_pcache_closed = false;
 
     // initialize the pcap object 
@@ -480,7 +480,7 @@ void PacketCaptureThread::setFilter (const char *device,
     else
     {
         // Not even a hostname. Leave really wide open!
-        seqInfo("Filtering packets on device %s, searching for EQ client...", 
+        seqDebug("Filtering packets on device %s, searching for EQ client...", 
                 device);
         sprintf(filter_buf, 
                 "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800");

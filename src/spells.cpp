@@ -205,7 +205,7 @@ int16_t Spell::calcDuration(uint8_t level) const
   case 3600:
     return 3600;
   default:
-    seqInfo("Spell::calcDuration(): Unknown formula for spell %.04x",
+    seqWarn("Spell::calcDuration(): Unknown formula for spell %.04x",
 	    m_spell);
     return m_buffDurationArgument;
   }
@@ -282,7 +282,7 @@ void Spells::loadSpells(const QString& spellsFileName)
       spellQueue.enqueue(newSpell);
     }
 
-    seqInfo("Loaded %d spells from '%s' maxSpell=%#.04x",
+    seqDebug("Loaded %d spells from '%s' maxSpell=%#.04x",
 	    spellQueue.count(), spellsFileName.latin1(), m_maxSpell);
 
     // allocate the spell array 

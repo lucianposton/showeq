@@ -69,7 +69,7 @@ void GuildMgr::writeGuildList(const worldGuildListStruct* gls, size_t len)
   guildDataStream.writeRawBytes((char *)gls->guilds, sizeof(gls->guilds));
 
   guildsfile.close();
-  seqInfo("GuildMgr: New guildsfile written");
+  seqDebug("GuildMgr: New guildsfile written");
 }
 
 void GuildMgr::readGuildList()
@@ -99,7 +99,7 @@ void GuildMgr::readGuildList()
      }
      
     guildsfile.close();
-    seqInfo("GuildMgr: Guildsfile loaded");
+    seqDebug("GuildMgr: Guildsfile loaded");
   }
   else
     seqWarn("GuildMgr: Could not load guildsfile, %s", (const char*)guildsFileName);

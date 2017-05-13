@@ -19,6 +19,7 @@
 #include "packetcommon.h"
 #include "filtermgr.h"
 #include "util.h"
+#include "diagnosticmessages.h"
 
 //#define MESSAGESHELL_DIAG 1
 
@@ -363,15 +364,12 @@ void MessageShell::logOut(const uint8_t*, size_t, uint8_t)
 
 void MessageShell::zoneEntryClient(const ClientZoneEntryStruct* zsentry)
 {
-  m_messages->addMessage(MT_Zone, "EntryCode: Client");
+    seqDebug("EntryCode: Client");
 }
 
 void MessageShell::zoneEntryServer(const ServerZoneEntryStruct* zsentry)
 {
-  QString tempStr;
-
-  tempStr = "EntryCode: Server";
-  m_messages->addMessage(MT_Zone, tempStr);
+    seqDebug("EntryCode: Server");
 }
 
 void MessageShell::zoneChanged(const zoneChangeStruct* zoneChange, size_t, uint8_t dir)

@@ -348,11 +348,11 @@ void MapMgr::loadZoneMap(const QString& shortZoneName)
   }
   else 
   {
-    seqInfo("No Map found for zone '%s'!", (const char*)shortZoneName);
-    seqInfo("    Checked for all variants of '%s.map', '%s.txt', and '%s_1.txt'",
+    seqDebug("No Map found for zone '%s'!", (const char*)shortZoneName);
+    seqDebug("    Checked for all variants of '%s.map', '%s.txt', and '%s_1.txt'",
         (const char*)shortZoneName, 
         (const char*)shortZoneName, (const char*)shortZoneName);
-    seqInfo("    in directories '%s' and '%s'!",
+    seqDebug("    in directories '%s' and '%s'!",
         (const char*)m_dataLocMgr->userDataDir("maps").absPath(),
         (const char*)m_dataLocMgr->pkgDataDir("maps").absPath());
   }
@@ -375,7 +375,7 @@ void MapMgr::loadMap ()
   if (fileName.isEmpty ())
     return;
 
-  seqInfo("Attempting to load map: %s", (const char*)fileName);
+  seqDebug("Attempting to load map: %s", (const char*)fileName);
 
   // load the map
   loadFileMap(fileName, false, true);
@@ -398,7 +398,7 @@ void MapMgr::importMap ()
   if (fileName.isEmpty ())
     return;
 
-  seqInfo("Attempting to import map: %s", (const char*)fileName);
+  seqDebug("Attempting to import map: %s", (const char*)fileName);
 
   // load the map
   loadFileMap(fileName, true, true);

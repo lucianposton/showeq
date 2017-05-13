@@ -888,10 +888,10 @@ void MapData::loadMap(const QString& fileName, bool import)
   if (m_image.load(imageFileName))
   {
     m_imageLoaded = true;
-    seqInfo("Loaded map image: '%s'", (const char*)imageFileName);
+    seqDebug("Loaded map image: '%s'", (const char*)imageFileName);
   }
 
-  seqInfo("Loaded map: '%s'", filename);
+  seqDebug("Loaded map: '%s'", filename);
 }
 
 void MapData::loadSOEMap(const QString& fileName, bool import)
@@ -1119,10 +1119,10 @@ void MapData::loadSOEMap(const QString& fileName, bool import)
   if (m_image.load(imageFileName))
   {
     m_imageLoaded = true;
-    seqInfo("Loaded map image: '%s'", (const char*)imageFileName);
+    seqDebug("Loaded map image: '%s'", (const char*)imageFileName);
   }
 
-  seqInfo("Loaded SOE map: '%s'", filename);
+  seqDebug("Loaded SOE map: '%s'", filename);
 }
 
 void MapData::saveMap(const QString& fileName) const
@@ -1259,7 +1259,7 @@ void MapData::saveMap(const QString& fileName) const
   
   fclose (fh);
 
-  seqInfo("Saved map: '%s'", filename);
+  seqDebug("Saved map: '%s'", filename);
 }
 
 void MapData::saveSOEMap(const QString& fileName) const
@@ -1374,7 +1374,7 @@ void MapData::saveSOEMap(const QString& fileName) const
   
   fclose (fh);
 
-  seqInfo("Saved SOE map: '%s'", filename);
+  seqDebug("Saved SOE map: '%s'", filename);
 }
 
 bool MapData::isAggro(const QString& name, uint16_t* range) const

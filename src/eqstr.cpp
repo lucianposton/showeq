@@ -94,7 +94,7 @@ bool EQStr::load(const QString& fileName)
   // note that strings are loaded
   m_loaded = true;
 
-  seqInfo("Loaded %d message strings from '%s' maxFormat=%d",
+  seqDebug("Loaded %d message strings from '%s' maxFormat=%d",
 	  m_messageStrings.count(), fileName.latin1(),
 	  maxFormatId);
   

@@ -123,7 +123,7 @@ void FilterMgr::loadFilters(void)
 
   m_filterFile = fileInfo.absFilePath();
 
-  seqInfo("Loading Filters from '%s'", (const char*)m_filterFile);
+  seqDebug("Loading Filters from '%s'", (const char*)m_filterFile);
 
   m_filters->load(m_filterFile);
 
@@ -137,7 +137,7 @@ void FilterMgr::loadFilters(const QString& fileName)
 
   m_filterFile = fileInfo.absFilePath();
 
-  seqInfo("Loading Filters from '%s'", (const char*)m_filterFile);
+  seqDebug("Loading Filters from '%s'", (const char*)m_filterFile);
   
   m_filters->load(m_filterFile);
 
@@ -153,7 +153,7 @@ void FilterMgr::saveFilters(void)
 
   m_filterFile = fileInfo.absFilePath();
 
-  seqInfo("Saving filters to %s", (const char*)m_filterFile);
+  seqDebug("Saving filters to %s", (const char*)m_filterFile);
 
   m_filters->save(m_filterFile);
 }
@@ -228,7 +228,7 @@ void FilterMgr::loadZone(const QString& shortZoneName)
 
   m_zoneFilterFile = fileInfo.absFilePath();
 
-  seqInfo("Loading Zone Filter File: %s", (const char*)m_zoneFilterFile);
+  seqDebug("Loading Zone Filter File: %s", (const char*)m_zoneFilterFile);
 
   m_zoneFilters->load(m_zoneFilterFile);
 
@@ -244,7 +244,7 @@ void FilterMgr::loadZoneFilters(void)
 
   m_zoneFilterFile = fileInfo.absFilePath();
 
-  seqInfo("Loading Zone Filter File: %s", (const char*)m_zoneFilterFile);
+  seqDebug("Loading Zone Filter File: %s", (const char*)m_zoneFilterFile);
 
   m_zoneFilters->load(m_zoneFilterFile);
   
@@ -266,7 +266,7 @@ void FilterMgr::saveZoneFilters(void)
 
   m_zoneFilterFile = fileInfo.absFilePath();
 
-  seqInfo("Saving filters to %s", (const char*)m_zoneFilterFile);
+  seqDebug("Saving filters to %s", (const char*)m_zoneFilterFile);
 
   if (! m_zoneFilters->save(m_zoneFilterFile))
   {

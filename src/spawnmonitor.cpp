@@ -336,7 +336,7 @@ void SpawnMonitor::saveSpawnPoints()
 	     (const char*)newName, (const char*)fileName);
   }
   m_modified = false;
-  seqInfo("Saved spawn points: %s", (const char*)fileName);
+  seqDebug("Saved spawn points: %s", (const char*)fileName);
 }
 
 
@@ -402,7 +402,7 @@ void SpawnMonitor::loadSpawnPoints()
     }
   }
 
-  seqInfo("Loaded spawn points: %s", (const char*)fileName);
+  seqDebug("Loaded spawn points: %s", (const char*)fileName);
   m_modified = false;
 }
 

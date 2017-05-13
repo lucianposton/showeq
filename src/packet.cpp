@@ -200,12 +200,12 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     if (m_ip ==  AUTOMATIC_CLIENT_IP)
     {
       m_detectingClient = true;
-      seqInfo("Listening for first client seen.");
+      seqDebug("Listening for first client seen.");
     }
     else
     {
       m_detectingClient = false;
-      seqInfo("Listening for client: %s",
+      seqDebug("Listening for client: %s",
 	      (const char*)m_ip);
     }
   }
@@ -235,7 +235,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
       pSEQPrefs->getPrefString("Filename", "VPacket");
 
     m_packetCapture->startOffline(filename, m_playbackSpeed);
-    seqInfo("Playing back packets from '%s' at speed '%d'", 
+    seqDebug("Playing back packets from '%s' at speed '%d'", 
       filename, m_playbackSpeed);
   }
 
@@ -283,7 +283,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     {
       m_vPacket = new VPacket(filename, 1, true);
       // Must appear befire next call to getPrefString, which uses a static string
-      seqInfo("Recording packets to '%s' for future playback", filename);
+      seqDebug("Recording packets to '%s' for future playback", filename);
       
       if (pSEQPrefs->getPrefString("FlushPackets", section))
 	m_vPacket->setFlushPacket(true);
@@ -294,7 +294,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
       m_vPacket->setCompressTime(pSEQPrefs->getPrefInt("CompressTime", section, 0));
       m_vPacket->setPlaybackSpeed(m_playbackSpeed);
       
-      seqInfo("Playing back packets from '%s' at speed '%d'", filename,
+      seqDebug("Playing back packets from '%s' at speed '%d'", filename,
 	     
 	     m_playbackSpeed);
     }
@@ -475,7 +475,7 @@ void EQPacket::processPlaybackPackets (void)
   // check if we've reached the end of the recording
   if (m_vPacket->endOfData())
   {
-    seqInfo("End of playback file '%s' reached."
+    seqDebug("End of playback file '%s' reached."
 	    "Playback Finished!",
 	    m_vPacket->getFileName());
 
@@ -645,7 +645,7 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     m_client_addr = packet.getIPv4DestN();
     m_detectingClient = false;
     emit clientChanged(m_client_addr);
-    seqInfo("Client Detected: %s", (const char*)m_ip);
+    seqDebug("Client Detected: %s", (const char*)m_ip);
   }
   else if (m_detectingClient && packet.getDestPort() == WorldServerGeneralPort)
   {
@@ -653,7 +653,7 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     m_client_addr = packet.getIPv4SourceN();
     m_detectingClient = false;
     emit clientChanged(m_client_addr);
-    seqInfo("Client Detected: %s", (const char*)m_ip);
+    seqDebug("Client Detected: %s", (const char*)m_ip);
   }
 
   // Dispatch based on known streams
@@ -739,7 +739,7 @@ void EQPacket::closeStream(uint32_t sessionId, EQStreamID streamId)
 
     emit clientPortLatched(m_clientPort);
 
-    seqInfo("EQPacket: SessionDisconnect detected, awaiting next zone session,  pcap filter: EQ Client %s",
+    seqDebug("EQPacket: SessionDisconnect detected, awaiting next zone session,  pcap filter: EQ Client %s",
 	  (const char*)m_ip);
   }
 }
@@ -777,12 +777,12 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
   // Wanted this message even if we're running on playback...
   if (m_mac.length() == 17)
   {
-    seqInfo("EQPacket: SessionRequest detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
+    seqDebug("EQPacket: SessionRequest detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
       (const char*)m_mac, m_clientPort, m_serverPort);
   }
   else
   {
-    seqInfo("EQPacket: SessionRequest detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
+    seqDebug("EQPacket: SessionRequest detected, pcap filter: EQ Client %s, Client port %d. Server port %d",
       (const char*)m_ip, m_clientPort, m_serverPort);
   }
   
@@ -953,7 +953,7 @@ void EQPacket::monitorIPClient(const QString& ip)
   
   resetEQPacket();
   
-  seqInfo("Listening for IP client: %s", (const char*)m_ip);
+  seqDebug("Listening for IP client: %s", (const char*)m_ip);
   if (m_playbackPackets == PLAYBACK_OFF || 
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
@@ -977,7 +977,7 @@ void EQPacket::monitorMACClient(const QString& mac)
 
   resetEQPacket();
 
-  seqInfo("Listening for MAC client: %s", 
+  seqDebug("Listening for MAC client: %s", 
 	 (const char*)m_mac);
 
   if (m_playbackPackets == PLAYBACK_OFF ||
@@ -1003,7 +1003,7 @@ void EQPacket::monitorNextClient()
 
   resetEQPacket();
 
-  seqInfo("Listening for next client seen. (you must zone for this to work!)");
+  seqDebug("Listening for next client seen. (you must zone for this to work!)");
 
   if (m_playbackPackets == PLAYBACK_OFF ||
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
@@ -1061,12 +1061,12 @@ void EQPacket::restartMonitor()
     if (m_ip ==  AUTOMATIC_CLIENT_IP)
     {
       m_detectingClient = true;
-      seqInfo("Listening for first client seen.");
+      seqDebug("Listening for first client seen.");
     }
     else
     {
       m_detectingClient = false;
-      seqInfo("Listening for client: %s",
+      seqDebug("Listening for client: %s",
 	     (const char*)m_ip);
     }
   }

@@ -340,7 +340,7 @@ void CategoryMgr::reloadCategories(void)
    // signal that the categories have been loaded
    emit loadedCategories();
 
-   seqInfo("Categories Reloaded");
+   seqDebug("Categories Reloaded");
 }
 
 void CategoryMgr::savePrefs(void)
