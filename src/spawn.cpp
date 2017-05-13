@@ -372,7 +372,6 @@ Spawn::Spawn(Spawn& s, uint16_t id)
   setLevel(s.level());
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s.equipment(i));
-  setEquipment(tUnknown1, 0);
   setTypeflag(s.typeflag());
   setGM(s.gm());
   setNPC(s.NPC());
@@ -418,7 +417,6 @@ void Spawn::update(const spawnStruct* s)
   setLevel(s->level);
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, s->equipment[i]);
-  setEquipment(tUnknown1, 0);
 
   setTypeflag(s->bodytype);
   setGM(s->gm);
@@ -761,7 +759,7 @@ QString Spawn::classString() const
 QString Spawn::info(const char* locationDelimiter) const
 {
   // Head, Chest, Arms, Waist, Gloves, Legs, Feet, Primary, Secondary
-  static const char* locs[]={"H","C","A","W","G","L","F","1","2", "B"};
+  static const char* locs[]={"H","C","A","W","G","L","F","1","2"};
   int i;
   QString temp = "";
   
@@ -778,16 +776,6 @@ QString Spawn::info(const char* locationDelimiter) const
   for (i = tFirstWeapon; i <= tLastWeapon; i++)
     if (equipment(i))
       temp += QString(locs[i]) + ":" +  + print_item(equipment(i)) + locationDelimiter;
-
-  // Worn stuff -- Current best quess is that this may be material?
-  i = tUnknown1;
-  if (equipment(i))
-    temp += QString(locs[i]) + ":" + print_material(equipment(i)) + locationDelimiter; 
-
-#if 1 // print also as slot U1 (Unknown1) until we're positive
-  if (equipment(i))
-    temp += QString("U1:U") + QString::number(equipment(i), 16) + locationDelimiter;
-#endif
 
   return temp;
 }

@@ -826,7 +826,6 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
 	 showeq_params->walkpathlength);
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, zsentry->equipment[i]);
-  setEquipment(tUnknown1, 0);
   seqDebug("Player::zoneBegin(): playerid=%d Pos (%f/%f/%f) Heading %f",
           zsentry->spawnId,
           float(zsentry->x)/8.0, float(zsentry->y)/8.0, float(zsentry->z)/8.0,

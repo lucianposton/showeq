@@ -64,10 +64,10 @@ enum itemWearSlot
   tFeet          = 6,
   tPrimary       = 7,
   tSecondary     = 8,
-  tUnknown1      = 9,
+  //tFaceChoice    = 9, // Server sends wear updates for face, but we ignore
 
   // these are for bookeeping
-  tNumWearSlots  = 10,
+  tNumWearSlots  = 9,
   tFirstMaterial = tHead,
   tLastMaterial  = tFeet,
   tFirstWeapon   = tPrimary,
