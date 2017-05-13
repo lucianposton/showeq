@@ -24,7 +24,7 @@
     "Brownie",                // 15
     "Centaur",                // 16
     "Golem",                  // 17
-    "Giant / Cyclops",        // 18
+    "Giant/Cyclops",          // 18
     "Trakenon",               // 19
     "Doppleganger",           // 20
     "Evil Eye",               // 21
