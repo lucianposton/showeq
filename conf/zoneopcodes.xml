@@ -103,9 +103,6 @@
     <opcode id="01ba" name="OP_ReqZoneObjects" updated="05/26/04">
         <comment>Client requesting zone objects</comment>
     </opcode>
-    <opcode id="01c4" name="OP_Translocate" updated="05/26/04">
-        <comment></comment>
-    </opcode>
     <opcode id="01ea" name="OP_RespondAA" updated="05/26/04">
         <comment></comment>
     </opcode>
@@ -225,6 +222,14 @@
     <opcode id="7ac2" name="OP_Bug" updated="10/27/05">
         <comment>/bug</comment>
     </opcode>
+    <opcode id="18b7" name="OP_GuildInvite" updated="10/27/05">
+        <comment></comment>
+        <payload dir="both" typename="GuildCommand_Struct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="61d0" name="OP_GuildInviteAccept" updated="10/27/05">
+        <comment></comment>
+        <payload dir="client" typename="GuildInviteAccept_Struct" sizechecktype="match"/>
+    </opcode>
     <opcode id="0f4d" name="OP_GuildMemberUpdate" updated="10/27/05">
         <comment></comment>
         <payload dir="server" typename="GuildMemberUpdate" sizechecktype="match"/>
@@ -288,10 +293,6 @@
         <comment>old EmoteTextCode</comment>
         <payload dir="both" typename="emoteTextStruct" sizechecktype="none"/>
     </opcode>
-    <opcode id="475a" name="OP_GuildMOTD" updated="10/27/05">
-        <comment>GuildMOTD</comment>
-        <payload dir="server" typename="guildMOTDStruct" sizechecktype="none"/>
-    </opcode>
     <opcode id="2dc1" name="OP_CancelTrade" updated="10/27/05">
         <comment>Cancel a trade window</comment>
         <payload dir="both" typename="CancelTrade_Struct" sizechecktype="match"/>
@@ -327,9 +328,6 @@
     <opcode id="5a48" name="OP_FormattedMessage" updated="10/27/05">
         <comment>old FormattedMessageCode</comment>
         <payload dir="server" typename="formattedMessageStruct" sizechecktype="none"/>
-    </opcode>
-    <opcode id="34e8" name="OP_DisarmTraps" updated="05/11/05">
-        <comment>Clicked disarm traps</comment>
     </opcode>
     <opcode id="757b" name="OP_WhoAllResponse" updated="10/27/05">
         <comment>Need a new sizechecktype for this one?</comment>
@@ -368,14 +366,24 @@
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
     <opcode id="4aba" name="OP_SetRunMode" updated="10/27/05">
-        <comment>old cRunToggleCode</comment>
+        <comment></comment>
+        <payload dir="client" typename="SetRunMode_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="5f58" name="OP_AAExpUpdate" updated="10/27/05">
         <comment>Receiving AA experience. Also when percent to AA changes.</comment>
          <payload dir="server" typename="altExpUpdateStruct" sizechecktype="match"/>
     </opcode>
+    <opcode id="475a" name="OP_GuildMOTD" updated="10/27/05">
+        <comment></comment>
+         <payload dir="server" typename="GuildMOTD_Struct" sizechecktype="match"/>
+    </opcode>
     <opcode id="7fec" name="OP_GetGuildMOTD" updated="10/27/05">
         <comment></comment>
+         <payload dir="client" typename="unknown" sizechecktype="none"/>
+    </opcode>
+    <opcode id="3246" name="OP_GetGuildMOTDReply" updated="10/27/05">
+        <comment></comment>
+         <payload dir="server" typename="GuildMOTD_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="591c" name="OP_SetGuildMOTD" updated="10/27/05">
         <comment></comment>
@@ -384,8 +392,9 @@
         <comment>old SimpleMessageCode</comment>
         <payload dir="server" typename="simpleMessageStruct" sizechecktype="match"/>
     </opcode>
-    <opcode id="6f64" name="OP_Hide" updated="06/29/05">
+    <opcode id="4312" name="OP_Hide" updated="06/29/05">
         <comment></comment>
+        <payload dir="client" typename="none" sizechecktype="match"/>
     </opcode>
     <opcode id="700d" name="OP_MoveDoor" updated="10/27/05">
         <comment>when door opens</comment>
@@ -393,6 +402,11 @@
     </opcode>
     <opcode id="5666" name="OP_SenseTraps" updated="10/27/05">
         <comment></comment>
+        <payload dir="client" typename="none" sizechecktype="match"/>
+    </opcode>
+    <opcode id="1241" name="OP_DisarmTraps" updated="05/11/05">
+        <comment></comment>
+        <payload dir="client" typename="none" sizechecktype="match"/>
     </opcode>
     <opcode id="05ac" name="OP_SenseHeading" updated="10/27/05">
         <comment></comment>
@@ -434,6 +448,8 @@
     </opcode>
     <opcode id="0f8e" name="OP_FaceChange" updated="10/27/05">
         <comment>/face</comment>
+        <payload dir="client" typename="FaceChange_Struct" sizechecktype="match"/>
+        <payload dir="server" typename="FaceChangeResponse_Struct" sizechecktype="none"/>
     </opcode>
     <opcode id="7bc7" name="OP_GroupFollow" updated="10/27/05">
         <payload dir="both" typename="groupFollowStruct" sizechecktype="match"/>
@@ -477,10 +493,8 @@
         <payload dir="client" typename="ItemViewRequest_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="0000" name="OP_ItemLinkText" updated="10/27/05">
-        <comment>String sent to client when player or groupmate loots item</comment>
-        <!--
-        <payload dir="server" typename="char" sizechecktype="none"/>
-        -->
+        <comment>sent from server when player or groupmate loots item</comment>
+        <payload dir="server" typename="unknown" sizechecktype="none"/>
     </opcode>
     <opcode id="2126" name="OP_SwapSpell" updated="10/27/05">
         <comment>old TradeSpellBookSlotsCode</comment>
@@ -613,7 +627,7 @@
     </opcode>
     <opcode id="2dd6" name="OP_GroupUpdate" updated="10/27/05">
         <payload dir="server" typename="groupFullUpdateStruct" sizechecktype="match"/>
-        <payload dir="server" typename="groupUpdateStruct" sizechecktype="match"/>
+        <payload dir="both" typename="groupUpdateStruct" sizechecktype="match"/>
         <comment></comment>
     </opcode>
     <opcode id="773f" name="OP_ConsiderCorpse" updated="10/27/05">
@@ -661,6 +675,10 @@
         <comment>/target</comment>
         <payload dir="both" typename="clientTargetStruct" sizechecktype="match"/>
     </opcode>
+    <opcode id="2f00" name="OP_TargetCommandDeny" updated="10/27/05">
+        <comment>response when /target fails. 11 bytes</comment>
+        <payload dir="server" typename="unknown" sizechecktype="none"/>
+    </opcode>
     <opcode id="7709" name="OP_Assist" updated="10/27/05">
         <comment></comment>
         <payload dir="both" typename="Assist_Struct" sizechecktype="match"/>
@@ -700,9 +718,6 @@
     </opcode>
     <opcode id="23a1" name="OP_GMLastName" updated="10/27/05">
         <comment>GM /lastname - Change user lastname</comment>
-    </opcode>
-    <opcode id="0840" name="OP_TradeSkillCombine" updated="06/29/05">
-        <comment></comment>
     </opcode>
     <opcode id="3d2d" name="OP_InitialMobHealth" updated="10/27/05">
         <comment>Initial health sent when a player clicks on the mob. Subsequent updated will be OP_MobHealth</comment>
@@ -831,7 +846,11 @@
     </opcode>
     <opcode id="4d81" name="OP_DeleteItem" updated="05/26/04">
         <comment></comment>
-        <payload dir="both" typename="DeleteItem_Struct" sizechecktype="match"/>
+        <payload dir="both" typename="MoveItem_Struct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="1c4a" name="OP_DeleteCharge" updated="05/26/04">
+        <comment></comment>
+        <payload dir="server" typename="MoveItem_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="5ee8" name="OP_CombatAbility" updated="02/15/05">
         <comment></comment>
@@ -840,6 +859,11 @@
     <opcode id="17d9" name="OP_Disarm" updated="02/15/05">
         <comment></comment>
         <payload dir="client" typename="unknown" sizechecktype="none"/>
+    </opcode>
+    <opcode id="2ad8" name="OP_PickPocket" updated="02/15/05">
+        <comment></comment>
+        <payload dir="client" typename="PickPocket_Struct" sizechecktype="match"/>
+        <payload dir="server" typename="PickPocketResponse_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="5e48" name="OP_Taunt" updated="05/26/04">
         <comment></comment>
@@ -870,9 +894,17 @@
         <comment>size 0, sent right after OP_Track</comment>
         <payload dir="client" typename="none" sizechecktype="match"/>
     </opcode>
+    <opcode id="7085" name="OP_TrackTarget" updated="02/15/05">
+        <comment></comment>
+        <payload dir="client" typename="TrackTarget_Struct" sizechecktype="match"/>
+    </opcode>
     <opcode id="6014" name="OP_FinishTrade" updated="02/15/05">
         <comment></comment>
         <payload dir="server" typename="none" sizechecktype="match"/>
+    </opcode>
+    <opcode id="8258" name="OP_Translocate" updated="05/26/04">
+        <comment></comment>
+        <payload dir="both" typename="Translocate_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="6f90" name="OP_LootRequest" updated="10/27/05">
         <comment></comment>
@@ -961,7 +993,7 @@
     </opcode>
     <opcode id="0b40" name="OP_TradeSkillCombine" updated="10/27/05">
         <comment></comment>
-        <payload dir="client" typename="ClickObjectAction_Struct" sizechecktype="match"/>
+        <payload dir="client" typename="NewCombine_Struct" sizechecktype="match"/>
         <payload dir="server" typename="none" sizechecktype="match"/>
     </opcode>
     <opcode id="1a85" name="OP_LFGAppearance" updated="10/27/05">
@@ -972,19 +1004,6 @@
         <comment></comment>
         <payload dir="client" typename="char" sizechecktype="none"/>
     </opcode>
-    <opcode id="26c9" name="OP_DeleteCharacter" updated="05/26/04">
-        <comment></comment>
-        <payload dir="client" typename="char" sizechecktype="none"/>
-    </opcode>
-    <opcode id="3ea6" name="OP_ApproveName" updated="05/26/04">
-        <comment></comment>
-        <payload dir="client" typename="ApproveName_Struct" sizechecktype="match"/>
-        <payload dir="server" typename="uint8_t" sizechecktype="match"/>
-    </opcode>
-    <opcode id="10b2" name="OP_CharacterCreate" updated="05/26/04">
-        <comment></comment>
-        <payload dir="client" typename="CharCreate_Struct" sizechecktype="match"/>
-    </opcode>
     <opcode id="1496" name="OP_ReadBook" updated="05/26/04">
         <comment></comment>
         <payload dir="client" typename="BookRequest_Struct" sizechecktype="none"/>
@@ -993,5 +1012,13 @@
     <opcode id="541e" name="OP_Sound" updated="05/26/04">
         <comment></comment>
         <payload dir="server" typename="QuestReward_Struct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="28e1" name="OP_RequestDuel" updated="05/26/04">
+        <comment></comment>
+        <payload dir="both" typename="Duel_Struct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="53df" name="OP_DisciplineTimer" updated="05/26/04">
+        <comment></comment>
+        <payload dir="server" typename="DisciplineTimer_Struct" sizechecktype="match"/>
     </opcode>
 </seqopcodes>

@@ -1841,7 +1841,11 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			m_messageShell,
 			SLOT(specialMessage(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_GuildMOTD", SP_Zone, DIR_Server,
-			"guildMOTDStruct", SZC_None,
+			"GuildMOTD_Struct", SZC_Match,
+			m_messageShell,
+			SLOT(guildMOTD(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_GetGuildMOTDReply", SP_Zone, DIR_Server,
+			"GuildMOTD_Struct", SZC_Match,
 			m_messageShell,
 			SLOT(guildMOTD(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_RandomReq", SP_Zone, DIR_Client,

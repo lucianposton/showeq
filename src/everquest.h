@@ -557,6 +557,35 @@ struct BindStruct
 /*020*/
 };
 
+struct FaceChange_Struct
+{
+/*000*/ uint8_t haircolor;
+/*001*/ uint8_t beardcolor;
+/*002*/ uint8_t eyecolor1; // the eyecolors always seem to be the same, maybe left and right eye?
+/*003*/ uint8_t eyecolor2;
+/*004*/ uint8_t hairstyle;
+/*005*/ uint8_t beard;	// vesuvias
+/*006*/ uint8_t face;
+/*007*/
+//vesuvias:
+//there are only 10 faces for barbs changing woad just
+//increase the face value by ten so if there were 8 woad
+//designs then there would be 80 barb faces
+};
+
+struct FaceChangeResponse_Struct
+{
+/*000*/ uint8_t haircolor;
+/*001*/ uint8_t beardcolor;
+/*002*/ uint8_t eyecolor1;
+/*003*/ uint8_t eyecolor2;
+/*004*/ uint8_t hairstyle;
+/*005*/ uint8_t beard;
+/*006*/ uint8_t face;
+/*007*/ uint8_t unknown007[12]; // probably has spawn id
+/*019*/
+};
+
 /*
 ** Type:   Zone Change Request (before hand)
 ** Length: 88 Octets
@@ -1077,10 +1106,6 @@ union
 /*0385*/
 };
 
-#if 0
-/*122*/ uint8_t pvp; // 0=Not pvp,1=pvp
-#endif
-
 /*
 ** Server Zone Entry struct
 ** Length: 383 Octets
@@ -1405,13 +1430,31 @@ struct specialMessageStruct
 ** Length: Variable Text
 ** OPCode: OP_GuildMOTD
 */
-struct guildMOTDStruct
+struct GuildMOTD_Struct
 {
-  /*0000*/ uint32_t unknown0000;      //***Placeholder
-  /*0004*/ char     target[64];       // motd target
-  /*0068*/ char     sender[64];       // motd "sender" (who set it)
-  /*0132*/ uint32_t unknown0132;      //***Placeholder
-  /*0136*/ char     message[0];
+/*0000*/	uint32_t	unknown0;
+/*0004*/	char	name[64];
+/*0068*/	char	setby_name[64];
+/*0132*/	uint32_t	unknown132;
+/*0136*/	char	motd[512];
+};
+
+struct GuildCommand_Struct
+{
+/*0000*/    char othername[64];
+/*0064*/    char myname[64];
+/*0128*/    uint16_t guildeqid;
+/*0130*/    uint8_t unknown[2]; // for guildinvite all 0's, for remove 0=0x56, 2=0x02
+/*0132*/    uint32_t officer;
+/*0136*/
+};
+
+struct GuildInviteAccept_Struct
+{
+	char inviter[64];
+	char newmember[64];
+	uint32_t response;
+	uint32_t guildeqid;
 };
 
 /*
@@ -2210,10 +2253,12 @@ struct memorizeSlotStruct
 /*0012*/
 };
 
-struct cRunToggleStruct
+struct SetRunMode_Struct
 {
-/*0000*/ uint32_t status;                   //01=run  00=walk
+	uint8_t mode;
+	uint8_t unknown[3];
 };
+
 
 struct cChatFiltersStruct
 {
@@ -2706,14 +2751,6 @@ struct MoveDoor_Struct
     uint8_t	action;
 };
 
-struct DeleteItem_Struct
-{
-/*0000*/ uint32_t	from_slot;
-/*0004*/ uint32_t	to_slot;
-/*0008*/ uint32_t	number_in_stack;
-/*0012*/
-};
-
 struct CombatAbility_Struct
 {
     uint32_t target;		//the ID of the target mob
@@ -2726,10 +2763,50 @@ struct Taunt_Struct
 /*000*/ uint32_t    spawn_id;
 };
 
+struct PickPocket_Struct
+{
+/*000*/ uint32_t    to;
+/*004*/ uint32_t    from;
+/*008*/ uint16_t    myskill;
+/*010*/ uint8_t     type; // -1 you are being picked, 0 failed , 1 = plat, 2 = gold, 3 = silver, 4 = copper, 5 = item
+/*011*/ uint8_t     unknown1; // 0 for response, unknown for input
+/*012*/ uint32_t    coin;
+/*016*/ uint8_t     lastsix[2];
+/*018*/
+};
+
+struct PickPocketResponse_Struct {
+/*000*/ uint32_t    to;
+/*004*/ uint32_t    from;
+/*008*/ uint32_t    myskill;
+/*012*/ uint32_t    type;
+/*016*/ uint32_t    coin;
+/*020*/ char        itemname[64];
+/*084*/
+};
+
 struct Track_Struct
 {
     uint32_t entityid;
     float distance;
+};
+
+struct TrackTarget_Struct
+{
+    uint32_t	EntityID;
+};
+
+
+struct Translocate_Struct
+{
+/*000*/	uint32_t	ZoneID;
+/*004*/	uint32_t	SpellID;
+/*008*/	uint32_t	unknown008; //Heading ?
+/*012*/	char		Caster[64];
+/*076*/	float		y;
+/*080*/	float		x;
+/*084*/	float		z;
+/*088*/	uint32_t	Complete;
 };
 
 struct TradeRequest_Struct
@@ -2939,6 +3016,14 @@ struct Assist_Struct
 /*04*/
 };
 
+struct NameGeneration_Struct
+{
+/*0000*/	uint32_t	race;
+/*0004*/	uint32_t	gender;
+/*0008*/	char		name[64];
+/*0072*/
+};
+
 struct ApproveName_Struct
 {
 /*000*/ char        character_name[64];
@@ -2985,6 +3070,19 @@ struct CharCreate_Struct
 /*0073*/    uint32_t	eyecolor2;	//since setting one sets the other we really can't check
 /*0076*/    uint32_t	tutorial;
 /*0080*/
+};
+
+struct Duel_Struct
+{
+	uint32_t duel_initiator;
+	uint32_t duel_target;
+};
+
+struct DisciplineTimer_Struct
+{
+/*00*/ uint32_t	TimerID;
+/*04*/ uint32_t	Duration;
+/*08*/ uint32_t	Unknown08;
 };
 
 // Restore structure packing to default

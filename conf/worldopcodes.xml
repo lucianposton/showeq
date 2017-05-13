@@ -91,16 +91,21 @@
         <payload dir="client" typename="none" sizechecktype="match"/>
     </opcode>
     <opcode id="26c9" name="OP_DeleteCharacter" updated="10/27/05">
-        <comment>Delete character @ char select</comment>
+        <comment>Delete character @ char select. Payload is char name.</comment>
+        <payload dir="client" typename="char" sizechecktype="none"/>
     </opcode>
-    <opcode id="6160" name="OP_CharacterCreate" updated="06/29/04">
-        <comment>Create character @ char select</comment>
-    </opcode>
-    <opcode id="3ea6" name="OP_ApproveName" updated="10/27/04">
+    <opcode id="3ea6" name="OP_ApproveName" updated="05/26/04">
         <comment>Approving new character name @ char creation</comment>
+        <payload dir="client" typename="ApproveName_Struct" sizechecktype="match"/>
+        <payload dir="server" typename="uint8_t" sizechecktype="match"/>
+    </opcode>
+    <opcode id="10b2" name="OP_CharacterCreate" updated="05/26/04">
+        <comment></comment>
+        <payload dir="client" typename="CharCreate_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="23d4" name="OP_RandomNameGenerator" updated="06/29/05">
-        <comment>Returns a random name</comment>
+        <comment>Requests and returns a random name at char creation</comment>
+        <payload dir="both" typename="NameGeneration_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="1235" name="OP_WorldUnknown1" updated="10/27/05">
         <comment>776 bytes. Comes before zone-to-client packet (0x1234) with nearly identical content</comment>

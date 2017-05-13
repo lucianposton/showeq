@@ -231,12 +231,12 @@ void MessageShell::guildMOTD(const uint8_t* data, size_t, uint8_t dir)
   if (dir == DIR_Client)
     return;
 
-  const guildMOTDStruct* gmotd = (const guildMOTDStruct*)data;
+  const GuildMOTD_Struct* gmotd = (const GuildMOTD_Struct*)data;
 
   m_messages->addMessage(MT_Guild, 
 			 QString("MOTD: %1 - %2")
-			 .arg(QString::fromUtf8(gmotd->sender))
-			 .arg(QString::fromUtf8(gmotd->message)));
+			 .arg(QString::fromUtf8(gmotd->setby_name))
+			 .arg(QString::fromUtf8(gmotd->motd)));
 }
 
 
