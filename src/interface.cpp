@@ -2035,6 +2035,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
 		      "spawnStruct", SZC_Match,
 		      m_spawnShell, SLOT(newSpawn(const uint8_t*)));
+   m_packet->connect2("OP_Charm", SP_Zone, DIR_Server,
+		      "Charm_Struct", SZC_Match,
+		      m_spawnShell, SLOT(charmUpdate(const uint8_t*)));
    m_packet->connect2("OP_MobHealth", SP_Zone, DIR_Server,
 		      "mobHealthStruct", SZC_Match,
 		      m_spawnShell, SLOT(mobHealthUpdate(const uint8_t*)));

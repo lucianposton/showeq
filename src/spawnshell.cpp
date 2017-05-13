@@ -912,6 +912,22 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
    }
 }
 
+void SpawnShell::charmUpdate(const uint8_t* data)
+{
+    const Charm_Struct* update = (const Charm_Struct*)data;
+#ifdef SPAWNSHELL_DIAG
+    seqDebug("SpawnShell::charmUpdate(owner_id=%d, pet_id=%d, command=%d)",
+            update->owner_id, update->pet_id, update->command);
+#endif
+    Item* item = m_spawns.find(update->pet_id);
+    if (item != NULL)
+    {
+        Spawn* spawn = (Spawn*)item;
+        spawn->setPetOwnerID(update->command ? update->owner_id : 0);
+        item->updateLastChanged();
+    }
+}
+
 void SpawnShell::mobHealthUpdate(const uint8_t* data)
 {
   const mobHealthStruct* hpupdate = (const mobHealthStruct*)data;
