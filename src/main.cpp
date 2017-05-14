@@ -44,6 +44,8 @@
 #include "itemdb.h"
 #include "datalocationmgr.h"
 
+#include <X11/Xlib.h>
+
 static const char *id="@(#) $Id$ $Name$";
 
 /* **********************************
@@ -165,7 +167,9 @@ int main (int argc, char **argv)
    int           option_index = 0;
    
    bool          bOptionHelp = false;
-        
+
+   XInitThreads();
+
    /* Create application instance */
    //   QApplication::setStyle( new QWindowsStyle );
    QApplication qapp (argc, argv);
