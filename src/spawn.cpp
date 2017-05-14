@@ -767,15 +767,15 @@ QString Spawn::info(const char* locationDelimiter) const
   if (light())
     temp += QString("Light:") + lightName() + locationDelimiter;
 
-  // Worn stuff
-  for (i = tFirstMaterial; i <= tLastMaterial ; i++)
-    if (equipment(i))
-      temp += QString(locs[i]) + ":" + print_material(equipment(i)) + locationDelimiter;
- 
  // Worn weapons
   for (i = tFirstWeapon; i <= tLastWeapon; i++)
     if (equipment(i))
       temp += QString(locs[i]) + ":" +  + print_item(equipment(i)) + locationDelimiter;
+
+  // Worn stuff
+  for (i = tFirstMaterial; i <= tLastMaterial ; i++)
+    if (equipment(i))
+      temp += QString(locs[i]) + ":" + print_material(equipment(i)) + locationDelimiter;
 
   return temp;
 }
