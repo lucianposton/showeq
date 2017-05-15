@@ -998,6 +998,16 @@ void Player::updateSpawnAppearance(const uint8_t* data)
     {
         switch(app->type)
         {
+            case 5: // light update
+                {
+                if (light() != app->parameter)
+                {
+                    setLight(app->parameter);
+                    updateLastChanged();
+                    emit changeItem(this, tSpawnChangedWearing);
+                }
+                }
+                break;
             case 22: // guild update
                 {
                     const uint16_t guild_id = app->parameter;

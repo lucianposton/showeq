@@ -867,6 +867,21 @@ void SpawnShell::updateSpawnAppearance(const uint8_t* data)
                emit changeItem(spawn, changed);
                }
                break;
+           case 5: // light update
+               {
+               if (spawn->light() != app->parameter)
+               {
+                   spawn->setLight(app->parameter);
+                   int changed = tSpawnChangedWearing;
+                   if (updateFilterFlags(spawn))
+                       changed |= tSpawnChangedFilter;
+                   if (updateRuntimeFilterFlags(spawn))
+                       changed |= tSpawnChangedRuntimeFilter;
+                   spawn->updateLastChanged();
+                   emit changeItem(spawn, changed);
+               }
+               }
+               break;
            case 22: // guild update
                {
                spawn->setGuildID(app->parameter);
