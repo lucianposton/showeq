@@ -4494,9 +4494,9 @@ EQInterface::numSpawns(int num)
 void
 EQInterface::newSpeed(double speed)
 {
-  // update twice per sec
+  // update 4 times per sec
   static int lastupdate = 0;
-  if ( (mTime() - lastupdate) < 500)
+  if ( (mTime() - lastupdate) < 250)
     return;
   lastupdate = mTime();
 
