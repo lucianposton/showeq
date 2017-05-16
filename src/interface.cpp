@@ -4486,12 +4486,6 @@ EQInterface::stsMessage(const QString &string, int timeout)
 void
 EQInterface::numSpawns(int num)
 {
-  // only update once per sec
-  static int lastupdate = 0;
-  if ( (mTime() - lastupdate) < 1000)
-    return;
-  lastupdate = mTime();
-
    QString tempStr;
    tempStr.sprintf("Mobs: %d", num);
    m_stsbarSpawns->setText(tempStr);
