@@ -509,6 +509,7 @@ void Spawn::setDeltas(int16_t deltaX, int16_t deltaY, int16_t deltaZ)
 
 QString Spawn::lightName() const
 {
+#if 0
   // a non-sparse array of lightnames
   static const char*  lightnames[] = 
   {
@@ -532,6 +533,7 @@ QString Spawn::lightName() const
   if (light() < (sizeof(lightnames) / sizeof (char*)))
     return lightnames[light()];
   else
+#endif
     return QString::number(light());
 }
 

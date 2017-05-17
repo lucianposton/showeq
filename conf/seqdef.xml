@@ -2677,7 +2677,7 @@ If any argument is left blank, it is filled in with its default...
    <comment>Category matching all will-o-wisp's carrying GLS's</comment>
   </property>
   <property name="Category5_Filter" >
-   <string value=":Race:Will[^:]:Light:GLS:" />
+   <string value=":Race:Will[^:]:Light:11:" />
    <comment>regular expression to match all will-o-wisp's carrying GLS's</comment>
   </property>
   <property name="Category5_Color" >
