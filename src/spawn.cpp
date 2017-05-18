@@ -764,10 +764,6 @@ QString Spawn::info(const char* locationDelimiter) const
   static const char* locs[]={"H","C","A","W","G","L","F","1","2"};
   int i;
   QString temp = "";
-  
-  // Add the light source to the list if it has one
-  if (light())
-    temp += QString("Light:") + lightName() + locationDelimiter;
 
  // Worn weapons
   for (i = tFirstWeapon; i <= tLastWeapon; i++)
@@ -778,6 +774,10 @@ QString Spawn::info(const char* locationDelimiter) const
   for (i = tFirstMaterial; i <= tLastMaterial ; i++)
     if (equipment(i))
       temp += QString(locs[i]) + ":" + print_material(equipment(i)) + locationDelimiter;
+
+  // Add the light source to the list if it has one
+  if (light())
+    temp += QString("Light:") + lightName() + locationDelimiter;
 
   return temp;
 }
