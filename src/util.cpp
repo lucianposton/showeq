@@ -300,7 +300,7 @@ print_material (uint8_t material)
   else
   {
     QString mat_str;
-    mat_str.sprintf("U%02x", material);
+    mat_str.sprintf("%#.2x", material);
     return mat_str;
   }
 }

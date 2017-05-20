@@ -145,7 +145,7 @@ QString print_item (uint16_t item)
   else
   {
     QString item_str;
-    item_str.sprintf("U%04x", item);
+    item_str.sprintf("%#.2x", item);
     return item_str;
   }
 }
