@@ -713,7 +713,7 @@ void EQPacket::closeStream(uint32_t sessionId, EQStreamID streamId)
 {
   // If this is the zone server session closing, reset the pcap filter to
   // a non-exclusive form
-  if ((streamId == zone2client || streamId == client2zone) &&
+  if (m_session_tracking && (streamId == zone2client || streamId == client2zone) &&
          (m_playbackPackets == PLAYBACK_OFF || 
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP))
   {
