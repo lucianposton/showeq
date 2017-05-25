@@ -1795,6 +1795,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	     m_filterMgr, SLOT(loadZone(const QString&)));
    }
 
+   m_packet->connect2("OP_ZoneServerInfo", SP_World, DIR_Server,
+           "ZoneServerInfo_Struct", SZC_Match,
+           this, SLOT(zoneServerInfo(const uint8_t*)));
    m_packet->connect2("OP_SendLoginInfo", SP_World, DIR_Client,
            "LoginInfo_Struct", SZC_Match,
            this, SLOT(extractDecryptionKey(const uint8_t*)));
@@ -6208,6 +6211,12 @@ void EQInterface::setDockEnabled(QDockWindow* dw, bool enable)
   QMainWindow::setDockEnabled(dw, DockBottom, enable);
   QMainWindow::setDockEnabled(dw, DockLeft, enable);
   QMainWindow::setDockEnabled(dw, DockRight, enable);
+}
+
+void EQInterface::zoneServerInfo(const uint8_t* data)
+{
+    const ZoneServerInfo_Struct* zsi = (const ZoneServerInfo_Struct*)data;
+    seqDebug("Zone server at %s:%d", zsi->ip, zsi->port);
 }
 
 void EQInterface::extractDecryptionKey(const uint8_t* data)

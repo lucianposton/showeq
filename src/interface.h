@@ -300,6 +300,7 @@ class EQInterface:public QMainWindow
    void toggleEQDisplayTime(int);
    void toggleUseColor(int);
 
+   void zoneServerInfo(const uint8_t* data);
    void extractDecryptionKey(const uint8_t* data);
 
  protected:
