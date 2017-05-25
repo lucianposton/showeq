@@ -61,9 +61,8 @@
 const in_port_t WorldServerGeneralPort = 9000;
 const in_port_t WorldServerChatPort = 9876;
 const in_port_t WorldServerChat2Port = 9875; // xgame tells, mail
-const in_port_t LoginServerMinPort = 15900;
-const in_port_t LoginServerMaxPort = 15910;
-const in_port_t ChatServerPort = 5998;
+const in_port_t LoginServerPort = 5998;
+const in_port_t ChatServerPort = 7778;
 
 //----------------------------------------------------------------------
 // Here begins the code
@@ -675,10 +674,8 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     // Drop email and cross-game chat traffic
     return;
   }
-  else if (((packet.getDestPort() >= LoginServerMinPort) &&
-      (packet.getDestPort() <= LoginServerMaxPort)) ||
-      ((packet.getSourcePort() >= LoginServerMinPort) &&
-      (packet.getSourcePort() <= LoginServerMaxPort)))
+  else if ((packet.getDestPort() == LoginServerPort) ||
+          (packet.getSourcePort() == LoginServerPort))
   {
     // Drop login server traffic
     return;
