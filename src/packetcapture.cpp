@@ -91,15 +91,26 @@ void PacketCaptureThread::start(const char *device, const char *host,
     bpf_u_int32 mask; // sniff device netmask
     bpf_u_int32 net; // sniff device ip
 
-    seqDebug("Initializing Packet Capture Thread: ");
+    seqDebug("PacketCaptureThread::start("
+            "device=%s, host=%s, realtime=%d, address_type=%d)",
+            device ? device : "NULL",
+            host ? host : "NULL",
+            realtime, address_type);
     m_pcache_closed = false;
 
+    ebuf[0] = '\0';
     // Fetch the netmask for the device to use later with the filter.
     if (pcap_lookupnet(device, &net, &mask, ebuf) == -1)
     {
         // Couldn't find net mask. Just leave it open.
         seqWarn("Couldn't determine netmask of device %s. Using 0.0.0.0. Error was %s",
                 device, ebuf);
+        mask = 0;
+    }
+    else
+    {
+        seqDebug("PacketCaptureThread::start(): net=%#.8x, mask=%#.8x, ebuf=%s",
+                net, mask, ebuf);
     }
 
     // create pcap style filter expressions
@@ -433,12 +444,27 @@ void PacketCaptureThread::setFilter (const char *device,
     bpf_u_int32 mask; // sniff device netmask
     bpf_u_int32 net; // sniff device ip
 
+    seqDebug("PacketCaptureThread::setFilter("
+            "device=%s, hostname=%s, realtime=%d, address_type=%d, "
+            "zone_port=%d, client_port=%d)",
+            device ? device : "NULL",
+            hostname ? hostname : "NULL",
+            realtime, address_type,
+            zone_port, client_port);
+
+    ebuf[0] = '\0';
     // Fetch the netmask for the device to use later with the filter
     if (pcap_lookupnet(device, &net, &mask, ebuf) == -1)
     {
         // Couldn't find net mask. Just leave it open.
         seqWarn("Couldn't determine netmask of device %s. Using 0.0.0.0. Error was %s",
                 device, ebuf);
+        mask = 0;
+    }
+    else
+    {
+        seqDebug("PacketCaptureThread::setFilter(): net=%#.8x, mask=%#.8x, ebuf=%s",
+                net, mask, ebuf);
     }
 
     /* Listen to World Server or the specified Zone Server */
