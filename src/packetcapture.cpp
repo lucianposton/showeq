@@ -499,9 +499,23 @@ void PacketCaptureThread::setFilter (const char *device,
     else if (hostname != NULL && !client_port && !zone_port)
     {
         // Leave wide open.
-        sprintf(filter_buf, 
-          "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and host %s", 
-          hostname);
+        if (address_type == IP_ADDRESS_TYPE)
+        {
+            sprintf(filter_buf,
+                    "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and host %s",
+                    hostname);
+        }
+        else if (address_type == MAC_ADDRESS_TYPE)
+        {
+            sprintf(filter_buf,
+                    "udp[0:2] > 1024 and udp[2:2] > 1024 and ether proto 0x0800 and ether host %s",
+                    hostname);
+        }
+        else
+        {
+            seqFatal("pcap_error:filter_string: unknown address_type (%d)", address_type);
+            exit(0);
+        }
     }
     else
     {

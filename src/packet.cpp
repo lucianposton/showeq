@@ -980,10 +980,10 @@ void EQPacket::monitorMACClient(const QString& mac)
   if (m_playbackPackets == PLAYBACK_OFF ||
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP)
   {
-    m_packetCapture->setFilter(m_device, m_ip,
-			       m_realtime, 
-			       IP_ADDRESS_TYPE, 0, 0);
-    emit filterChanged();
+      m_packetCapture->setFilter(m_device, m_mac,
+              m_realtime, 
+              MAC_ADDRESS_TYPE, 0, 0);
+      emit filterChanged();
   }
 }
 
