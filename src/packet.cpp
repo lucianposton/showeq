@@ -216,11 +216,11 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     if (m_mac.length() == 17)
       m_packetCapture->start(m_device, 
 			     m_mac, 
-			     m_realtime, MAC_ADDRESS_TYPE );
+			     m_realtime, MAC_ADDRESS_TYPE, m_net_id, m_net_mask );
     else
       m_packetCapture->start(m_device,
 			     m_ip, 
-			     m_realtime, IP_ADDRESS_TYPE );
+			     m_realtime, IP_ADDRESS_TYPE, m_net_id, m_net_mask );
     connect(m_packetCapture, SIGNAL(captureFailed()),
             this, SLOT(captureFailed()));
     emit filterChanged();
@@ -718,7 +718,7 @@ void EQPacket::closeStream(uint32_t sessionId, EQStreamID streamId)
           m_playbackPackets == PLAYBACK_FORMAT_TCPDUMP))
   {
     m_packetCapture->setFilter(m_device, m_ip,
-			       m_realtime, IP_ADDRESS_TYPE, 0, 0);
+			       m_realtime, IP_ADDRESS_TYPE, 0, 0, m_net_id, m_net_mask);
     emit filterChanged();
   }
 
@@ -757,7 +757,7 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
 				 m_mac,
 				 m_realtime, 
 				 MAC_ADDRESS_TYPE, 0, 
-				 m_clientPort);
+				 m_clientPort, m_net_id, m_net_mask);
       emit filterChanged();
     }
     else
@@ -766,7 +766,7 @@ void EQPacket::lockOnClient(in_port_t serverPort, in_port_t clientPort)
 				 m_ip,
 				 m_realtime, 
 				 IP_ADDRESS_TYPE, 0, 
-				 m_clientPort);
+				 m_clientPort, m_net_id, m_net_mask);
       emit filterChanged();
     }
   }
@@ -956,7 +956,7 @@ void EQPacket::monitorIPClient(const QString& ip)
   {
     m_packetCapture->setFilter(m_device, m_ip,
 			       m_realtime, 
-			       IP_ADDRESS_TYPE, 0, 0);
+			       IP_ADDRESS_TYPE, 0, 0, m_net_id, m_net_mask);
     emit filterChanged();
   }
 }
@@ -982,7 +982,7 @@ void EQPacket::monitorMACClient(const QString& mac)
   {
       m_packetCapture->setFilter(m_device, m_mac,
               m_realtime, 
-              MAC_ADDRESS_TYPE, 0, 0);
+              MAC_ADDRESS_TYPE, 0, 0, m_net_id, m_net_mask);
       emit filterChanged();
   }
 }
@@ -1007,7 +1007,7 @@ void EQPacket::monitorNextClient()
   {
     m_packetCapture->setFilter(m_device, NULL,
 			       m_realtime, 
-			       DEFAULT_ADDRESS_TYPE, 0, 0);
+			       DEFAULT_ADDRESS_TYPE, 0, 0, m_net_id, m_net_mask);
     emit filterChanged();
   }
 }
@@ -1074,10 +1074,10 @@ void EQPacket::restartMonitor()
   if (m_mac.length() == 17)
     m_packetCapture->start(m_device, 
 			   m_mac, 
-			   m_realtime, MAC_ADDRESS_TYPE );
+			   m_realtime, MAC_ADDRESS_TYPE, m_net_id, m_net_mask );
   else
     m_packetCapture->start(m_device, m_ip, 
-			   m_realtime, IP_ADDRESS_TYPE );
+			   m_realtime, IP_ADDRESS_TYPE, m_net_id, m_net_mask );
   emit filterChanged();
 }
 

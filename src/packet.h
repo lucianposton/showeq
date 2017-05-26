@@ -163,6 +163,8 @@ class EQPacket : public QObject
    QString m_device;
    QString m_ip;
    QString m_mac;
+   uint32_t m_net_id;
+   uint32_t m_net_mask;
    bool m_realtime;
    bool m_session_tracking;
    bool m_packet_decryption;

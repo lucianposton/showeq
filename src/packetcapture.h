@@ -51,12 +51,12 @@ class PacketCaptureThread : public QObject
          void setPlaybackSpeed(int playbackSpeed);
          int getPlaybackSpeed() { return (m_playbackSpeed == 100 ? 0 : m_playbackSpeed); }
 
-         void start (const char *device, const char *host, bool realtime, uint8_t address_type);
+         void start (const char *device, const char *host, bool realtime, uint8_t address_type, uint32_t &net_id, uint32_t &net_mask);
          void startOffline(const char* filename, int playbackSpeed);
          void stop ();
          uint16_t getPacket (unsigned char *buff); 
          void setFilter (const char *device, const char *hostname, bool realtime,
-                        uint8_t address_type, uint16_t zone_server_port, uint16_t client_port);
+                        uint8_t address_type, uint16_t zone_server_port, uint16_t client_port, uint32_t &net_id, uint32_t &net_mask);
          const QString getFilter();
          
  private:
