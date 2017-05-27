@@ -599,7 +599,11 @@ void EQPacket::dispatchPacket(int size, unsigned char *buffer)
 
 void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
 {
-  in_port_t destPort = packet.getDestPort();
+  const in_addr_t srcIP = packet.getIPv4SourceN();
+  const in_addr_t destIP = packet.getIPv4DestN();
+  const in_port_t srcPort = packet.getSourcePort();
+  const in_port_t destPort = packet.getDestPort();
+
   if ((destPort < 1024) ||
           (destPort == 9133) ||
           (destPort == 9415) ||
@@ -629,7 +633,6 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
       return;
   }
 
-  in_port_t srcPort = packet.getSourcePort();
   if ((srcPort == 9133) ||
           (srcPort == 9415) ||
           (srcPort == 56102) ||
@@ -640,18 +643,18 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
   }
 
   // Detect client by world server port traffic...
-  if (m_detectingClient && packet.getSourcePort() == WorldServerGeneralPort)
+  if (m_detectingClient && srcPort == WorldServerGeneralPort)
   {
     m_ip = packet.getIPv4DestA();
-    m_client_addr = packet.getIPv4DestN();
+    m_client_addr = destIP;
     m_detectingClient = false;
     emit clientChanged(m_client_addr);
     seqDebug("Client Detected: %s", (const char*)m_ip);
   }
-  else if (m_detectingClient && packet.getDestPort() == WorldServerGeneralPort)
+  else if (m_detectingClient && destPort == WorldServerGeneralPort)
   {
     m_ip = packet.getIPv4SourceA();
-    m_client_addr = packet.getIPv4SourceN();
+    m_client_addr = srcIP;
     m_detectingClient = false;
     emit clientChanged(m_client_addr);
     seqDebug("Client Detected: %s", (const char*)m_ip);
@@ -664,35 +667,35 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
   }
 
   // Dispatch based on known streams
-  if ((packet.getDestPort() == ChatServerPort) ||
-      (packet.getSourcePort() == ChatServerPort))
+  if ((destPort == ChatServerPort) ||
+      (srcPort == ChatServerPort))
   {
     // Drop chat server traffic
     return;
   }
-  else if ((packet.getDestPort() == WorldServerChatPort) ||
-      (packet.getSourcePort() == WorldServerChatPort))
+  else if ((destPort == WorldServerChatPort) ||
+      (srcPort == WorldServerChatPort))
   {
     // Drop cross-server chat traffic
     return;
   }
-  else if ((packet.getDestPort() == WorldServerChat2Port) ||
-      (packet.getSourcePort() == WorldServerChat2Port))
+  else if ((destPort == WorldServerChat2Port) ||
+      (srcPort == WorldServerChat2Port))
   {
     // Drop email and cross-game chat traffic
     return;
   }
-  else if ((packet.getDestPort() == LoginServerPort) ||
-          (packet.getSourcePort() == LoginServerPort))
+  else if ((destPort == LoginServerPort) ||
+          (srcPort == LoginServerPort))
   {
     // Drop login server traffic
     return;
   }
-  else if (packet.getDestPort() == WorldServerGeneralPort ||
-      packet.getSourcePort() == WorldServerGeneralPort)
+  else if (destPort == WorldServerGeneralPort ||
+      srcPort == WorldServerGeneralPort)
   {
     // World server traffic. Dispatch it.
-    if (packet.getIPv4SourceN() == m_client_addr)
+    if (srcIP == m_client_addr)
     {
       m_client2WorldStream->handlePacket(packet);
     }
@@ -701,13 +704,13 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
       m_world2ClientStream->handlePacket(packet);
     }
   }
-  else if ((packet.getDestPort() >= ZoneServerPort_MIN &&
-            packet.getDestPort() <= ZoneServerPort_MAX) ||
-          (packet.getSourcePort() >= ZoneServerPort_MIN &&
-           packet.getSourcePort() <= ZoneServerPort_MAX))
+  else if ((destPort >= ZoneServerPort_MIN &&
+            destPort <= ZoneServerPort_MAX) ||
+          (srcPort >= ZoneServerPort_MIN &&
+           srcPort <= ZoneServerPort_MAX))
   {
     // Anything else we assume is zone server traffic.
-    if (packet.getIPv4SourceN() == m_client_addr)
+    if (srcIP == m_client_addr)
     {
       m_client2ZoneStream->handlePacket(packet);
     }
@@ -721,10 +724,10 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
 #ifdef DEBUG_PACKET
       seqDebug("EQPacket: Dropping packet with unknown ports. "
               "%s:%d->%s:%d. Had net opcode %#.4x, size %d",
-              packet.getIPv4SourceA(),
-              packet.getSourcePort(),
-              packet.getIPv4DestA(),
-              packet.getDestPort(),
+              (const char*)packet.getIPv4SourceA(),
+              srcPort,
+              (const char*)packet.getIPv4DestA(),
+              destPort,
               packet.getNetOpCode(),
               packet.payloadLength());
 #endif
