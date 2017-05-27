@@ -654,6 +654,12 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     emit clientChanged(m_client_addr);
     seqDebug("Client Detected: %s", (const char*)m_ip);
   }
+  else if (m_detectingClient)
+  {
+#ifdef DEBUG_PACKET
+    seqDebug("Waiting to detect client. Dropping non-world packet");
+#endif
+  }
 
   // Dispatch based on known streams
   if ((packet.getDestPort() == ChatServerPort) ||
