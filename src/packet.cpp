@@ -63,6 +63,8 @@ const in_port_t WorldServerChatPort = 9876;
 const in_port_t WorldServerChat2Port = 9875; // xgame tells, mail
 const in_port_t LoginServerPort = 5998;
 const in_port_t ChatServerPort = 7778;
+const in_port_t ZoneServerPort_MIN = 7000;
+const in_port_t ZoneServerPort_MAX = 7200;
 
 //----------------------------------------------------------------------
 // Here begins the code
@@ -699,7 +701,10 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
       m_world2ClientStream->handlePacket(packet);
     }
   }
-  else
+  else if ((packet.getDestPort() >= ZoneServerPort_MIN &&
+            packet.getDestPort() <= ZoneServerPort_MAX) ||
+          (packet.getSourcePort() >= ZoneServerPort_MIN &&
+           packet.getSourcePort() <= ZoneServerPort_MAX))
   {
     // Anything else we assume is zone server traffic.
     if (packet.getIPv4SourceN() == m_client_addr)
@@ -710,6 +715,19 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     {
       m_zone2ClientStream->handlePacket(packet);
     }
+  }
+  else
+  {
+#ifdef DEBUG_PACKET
+      seqDebug("EQPacket: Dropping packet with unknown ports. "
+              "%s:%d->%s:%d. Had net opcode %#.4x, size %d",
+              packet.getIPv4SourceA(),
+              packet.getSourcePort(),
+              packet.getIPv4DestA(),
+              packet.getDestPort(),
+              packet.getNetOpCode(),
+              packet.payloadLength());
+#endif
   }
 } /* end dispatchPacket() */
 
