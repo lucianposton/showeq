@@ -185,7 +185,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     /* Substitute "special" IP which is interpreted 
        to set up a different filter for picking up new sessions */
     
-    if (m_ip == "auto")
+    if (strcmp(m_ip, "auto") == 0)
       inet_aton (AUTOMATIC_CLIENT_IP, &ia);
     else if (inet_aton (m_ip, &ia) == 0)
     {
@@ -198,7 +198,7 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     m_client_addr = ia.s_addr;
     m_ip = inet_ntoa(ia);
     
-    if (m_ip ==  AUTOMATIC_CLIENT_IP)
+    if (strcmp(m_ip, AUTOMATIC_CLIENT_IP) == 0)
     {
       m_detectingClient = true;
       seqDebug("Listening for first client seen.");
@@ -1069,7 +1069,7 @@ void EQPacket::restartMonitor()
     /* Substitute "special" IP which is interpreted 
        to set up a different filter for picking up new sessions */
     
-    if (m_ip == "auto")
+    if (strcmp(m_ip, "auto") == 0)
       inet_aton (AUTOMATIC_CLIENT_IP, &ia);
     else if (inet_aton (m_ip, &ia) == 0)
     {
@@ -1082,7 +1082,7 @@ void EQPacket::restartMonitor()
     m_client_addr = ia.s_addr;
     m_ip = inet_ntoa(ia);
     
-    if (m_ip ==  AUTOMATIC_CLIENT_IP)
+    if (strcmp(m_ip, AUTOMATIC_CLIENT_IP) == 0)
     {
       m_detectingClient = true;
       seqDebug("Listening for first client seen.");
