@@ -606,8 +606,6 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
   const in_addr_t destIP = packet.getIPv4DestN();
   const in_port_t srcPort = packet.getSourcePort();
   const in_port_t destPort = packet.getDestPort();
-  const in_addr_t net_first = m_net_id & m_net_mask;
-  const in_addr_t net_last = m_net_id | ~m_net_mask;
   if (m_session_tracking)
   {
       // We bind to the ip of the first world packet seen.
@@ -634,31 +632,6 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
 #endif
           return;
       }
-  }
-  // If pcap_lookupnet set m_net_mask to 0, ignore checking whether IPs are in
-  // the subnet. Ignore the 1st and last IPs (broadcasts) within the subnet,
-  // per RFC 1812.
-  else if (m_net_mask &&
-          (srcIP <= net_first || net_last <= srcIP) &&
-          (destIP <= net_first || net_last <= destIP))
-  {
-#ifdef DEBUG_PACKET
-      char net_ip_p[INET_ADDRSTRLEN];
-      inet_ntop(AF_INET, &m_net_id, net_ip_p, INET_ADDRSTRLEN);
-      net_ip_p[INET_ADDRSTRLEN-1] = '\0';
-      seqDebug("EQPacket: Dropping packet with IPs not in subnet. "
-              "%s:%d->%s:%d. m_net_id=%s, m_net_mask=%#.8x. "
-              "Had net opcode %#.4x, size %d",
-              (const char*)packet.getIPv4SourceA(),
-              srcPort,
-              (const char*)packet.getIPv4DestA(),
-              destPort,
-              net_ip_p,
-              m_net_mask,
-              packet.getNetOpCode(),
-              packet.payloadLength());
-#endif
-      return;
   }
 
   // Dispatch based on known streams
