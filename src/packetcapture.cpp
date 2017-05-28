@@ -81,20 +81,15 @@ void PacketCaptureThread::setPlaybackSpeed(int playbackSpeed)
     }
 }
 
-void PacketCaptureThread::start(
-        const char *device,
-        const char *host,
-        bool realtime,
-        uint8_t address_type,
-        uint32_t &net_id,
-        uint32_t &net_mask)
+void PacketCaptureThread::start(const char *device, const char *host, 
+        bool realtime, uint8_t address_type)
 {
     char ebuf[PCAP_ERRBUF_SIZE]; // pcap error buffer
     char filter_buf[256]; // pcap filter buffer 
     struct bpf_program bpp;
     struct sched_param sp;
-    bpf_u_int32 mask = 0; // sniff device netmask
-    bpf_u_int32 net = 0; // sniff device ip
+    bpf_u_int32 mask; // sniff device netmask
+    bpf_u_int32 net; // sniff device ip
 
     seqDebug("PacketCaptureThread::start("
             "device=%s, host=%s, realtime=%d, address_type=%d)",
@@ -117,8 +112,6 @@ void PacketCaptureThread::start(
         seqDebug("PacketCaptureThread::start(): net=%#.8x, mask=%#.8x, ebuf=%s",
                 net, mask, ebuf);
     }
-    net_id = net;
-    net_mask = mask;
 
     // create pcap style filter expressions
     if (address_type == IP_ADDRESS_TYPE)
@@ -442,16 +435,14 @@ void PacketCaptureThread::setFilter (const char *device,
                                      bool realtime,
                                      uint8_t address_type,
                                      uint16_t zone_port,
-                                     uint16_t client_port,
-                                     uint32_t &net_id,
-                                     uint32_t &net_mask)
+                                     uint16_t client_port)
 {
     char filter_buf[256]; // pcap filter buffer 
     char ebuf[PCAP_ERRBUF_SIZE];
     struct bpf_program bpp;
     struct sched_param sp;
-    bpf_u_int32 mask = 0; // sniff device netmask
-    bpf_u_int32 net = 0; // sniff device ip
+    bpf_u_int32 mask; // sniff device netmask
+    bpf_u_int32 net; // sniff device ip
 
     seqDebug("PacketCaptureThread::setFilter("
             "device=%s, hostname=%s, realtime=%d, address_type=%d, "
@@ -475,8 +466,6 @@ void PacketCaptureThread::setFilter (const char *device,
         seqDebug("PacketCaptureThread::setFilter(): net=%#.8x, mask=%#.8x, ebuf=%s",
                 net, mask, ebuf);
     }
-    net_id = net;
-    net_mask = mask;
 
     /* Listen to World Server or the specified Zone Server */
     if (address_type == IP_ADDRESS_TYPE && client_port)   
