@@ -642,28 +642,59 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
       return;
   }
 
-  // Detect client by world server port traffic...
-  if (m_detectingClient && srcPort == WorldServerGeneralPort)
+  const in_addr_t net_first = m_net_id & m_net_mask;
+  const in_addr_t net_last = m_net_id | ~m_net_mask;
+  if (m_session_tracking)
   {
-    m_ip = packet.getIPv4DestA();
-    m_client_addr = destIP;
-    m_detectingClient = false;
-    emit clientChanged(m_client_addr);
-    seqDebug("Client Detected: %s", (const char*)m_ip);
+      // We bind to the ip of the first world packet seen.
+      if (m_detectingClient && srcPort == WorldServerGeneralPort)
+      {
+          m_ip = packet.getIPv4DestA();
+          m_client_addr = destIP;
+          m_detectingClient = false;
+          emit clientChanged(m_client_addr);
+          seqDebug("Client Detected: %s", (const char*)m_ip);
+      }
+      else if (m_detectingClient && destPort == WorldServerGeneralPort)
+      {
+          m_ip = packet.getIPv4SourceA();
+          m_client_addr = srcIP;
+          m_detectingClient = false;
+          emit clientChanged(m_client_addr);
+          seqDebug("Client Detected: %s", (const char*)m_ip);
+      }
+      else if (m_detectingClient)
+      {
+#ifdef DEBUG_PACKET
+          seqDebug("Waiting to detect client. Dropping non-world packet");
+#endif
+          return;
+      }
   }
-  else if (m_detectingClient && destPort == WorldServerGeneralPort)
-  {
-    m_ip = packet.getIPv4SourceA();
-    m_client_addr = srcIP;
-    m_detectingClient = false;
-    emit clientChanged(m_client_addr);
-    seqDebug("Client Detected: %s", (const char*)m_ip);
-  }
-  else if (m_detectingClient)
+  // If pcap_lookupnet set m_net_mask to 0, ignore checking whether IPs are in
+  // the subnet. Ignore the 1st and last IPs (broadcasts) within the subnet,
+  // per RFC 1812.
+  else if (m_net_mask &&
+          (srcIP <= net_first || net_last <= srcIP) &&
+          (destIP <= net_first || net_last <= destIP))
   {
 #ifdef DEBUG_PACKET
-    seqDebug("Waiting to detect client. Dropping non-world packet");
+      char net_ip_p[INET_ADDRSTRLEN];
+      inet_ntop(AF_INET, &m_net_id, net_ip_p, INET_ADDRSTRLEN);
+      net_ip_p[INET_ADDRSTRLEN-1] = '\0';
+      seqDebug("EQPacket: Dropping packet with IPs not in subnet. "
+              "%s:%d->%s:%d. m_net_id=%s, m_net_mask=%#.8x. "
+              "Had net opcode %#.4x, size %d",
+              (const char*)packet.getIPv4SourceA(),
+              srcPort,
+              (const char*)packet.getIPv4DestA(),
+              destPort,
+              net_ip_p,
+              m_net_mask,
+              packet.getNetOpCode(),
+              packet.payloadLength());
 #endif
+      return;
   }
 
   // Dispatch based on known streams
@@ -691,33 +722,25 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     // Drop login server traffic
     return;
   }
-  else if (destPort == WorldServerGeneralPort ||
-      srcPort == WorldServerGeneralPort)
+  else if (destPort == WorldServerGeneralPort &&
+          (!m_session_tracking || srcIP == m_client_addr))
   {
-    // World server traffic. Dispatch it.
-    if (srcIP == m_client_addr)
-    {
       m_client2WorldStream->handlePacket(packet);
-    }
-    else
-    {
-      m_world2ClientStream->handlePacket(packet);
-    }
   }
-  else if ((destPort >= ZoneServerPort_MIN &&
-            destPort <= ZoneServerPort_MAX) ||
-          (srcPort >= ZoneServerPort_MIN &&
-           srcPort <= ZoneServerPort_MAX))
+  else if (srcPort == WorldServerGeneralPort &&
+          (!m_session_tracking || destIP == m_client_addr))
   {
-    // Anything else we assume is zone server traffic.
-    if (srcIP == m_client_addr)
-    {
+      m_world2ClientStream->handlePacket(packet);
+  }
+  else if (destPort >= ZoneServerPort_MIN && destPort <= ZoneServerPort_MAX &&
+          (!m_session_tracking || srcIP == m_client_addr))
+  {
       m_client2ZoneStream->handlePacket(packet);
-    }
-    else
-    {
+  }
+  else if (srcPort >= ZoneServerPort_MIN && srcPort <= ZoneServerPort_MAX &&
+          (!m_session_tracking || destIP == m_client_addr))
+  {
       m_zone2ClientStream->handlePacket(packet);
-    }
   }
   else
   {
