@@ -603,45 +603,6 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
   const in_addr_t destIP = packet.getIPv4DestN();
   const in_port_t srcPort = packet.getSourcePort();
   const in_port_t destPort = packet.getDestPort();
-
-  if ((destPort < 1024) ||
-          (destPort == 9133) ||
-          (destPort == 9415) ||
-          (destPort == 56102) ||
-          (destPort == 42045) ||
-          (destPort == 30303) ||
-          (destPort == 1048) ||
-          (destPort == 1085) ||
-          (destPort == 1119) ||
-          (destPort == 1194) ||
-          (destPort == 1200) ||
-          (destPort == 1434) ||
-          (destPort == 1512) ||
-          (destPort == 1725) ||
-          (destPort == 1900) ||
-          (destPort == 3306) ||
-          (destPort == 3478) ||
-          (destPort == 3702) ||
-          (destPort == 5353) ||
-          (destPort == 5355) ||
-          (destPort == 8767) ||
-          (destPort == 8768))
-  {
-      // TODO: could check for multicast/broadcast addresses
-
-      // Drop obviously non-eq ports
-      return;
-  }
-
-  if ((srcPort == 9133) ||
-          (srcPort == 9415) ||
-          (srcPort == 56102) ||
-          (srcPort == 42045) ||
-          (srcPort == 30303))
-  {
-      return;
-  }
-
   const in_addr_t net_first = m_net_id & m_net_mask;
   const in_addr_t net_last = m_net_id | ~m_net_mask;
   if (m_session_tracking)
