@@ -64,7 +64,10 @@ class EQPacket : public QObject
 	    int m_playbackPackets,
 	    int8_t m_playbackSpeed, 
 	    QObject *parent,
-            const char *name);
+            const char *name,
+           in_port_t worldServerGeneralPort,
+           in_port_t zoneServerPortMin,
+           in_port_t zoneServerPortMax);
    ~EQPacket();           
    void start(int delay = 0);
    void stop(void);
@@ -83,6 +86,9 @@ class EQPacket : public QObject
    size_t currentCacheSize(int);
    uint16_t serverSeqExp(int);
    uint16_t arqSeqGiveUp(void);
+   in_port_t worldServerGeneralPort();
+   in_port_t zoneServerPortMin();
+   in_port_t zoneServerPortMax();
    bool session_tracking(void);
    bool packet_decryption(void);
    bool realtime(void);
@@ -106,6 +112,9 @@ class EQPacket : public QObject
    void session_tracking(bool enable);
    void packet_decryption(bool enable);
    void setArqSeqGiveUp(uint16_t giveUp);
+   void setWorldServerGeneralPort(int);
+   void setZoneServerPortMin(int);
+   void setZoneServerPortMax(int);
    void setRealtime(bool val);
    void startNewSession(uint32_t sessionId, EQStreamID streamid,
       uint32_t sessionKey, uint32_t maxLength);
@@ -171,6 +180,9 @@ class EQPacket : public QObject
    bool m_recordPackets;
    int m_playbackPackets;
    int8_t m_playbackSpeed; // Should be signed since -1 is pause
+   in_port_t m_worldServerGeneralPort;
+   in_port_t m_zoneServerPortMin;
+   in_port_t m_zoneServerPortMax;
 
    EQPacketStream* m_client2WorldStream;
    EQPacketStream* m_world2ClientStream;
@@ -208,6 +220,21 @@ inline in_port_t EQPacket::serverPort(void)
 inline uint16_t EQPacket::arqSeqGiveUp(void)
 {
   return m_arqSeqGiveUp;
+}
+
+inline in_port_t EQPacket::worldServerGeneralPort()
+{
+  return m_worldServerGeneralPort;
+}
+
+inline in_port_t EQPacket::zoneServerPortMin()
+{
+  return m_zoneServerPortMin;
+}
+
+inline in_port_t EQPacket::zoneServerPortMax()
+{
+  return m_zoneServerPortMax;
 }
 
 inline bool EQPacket::session_tracking(void)

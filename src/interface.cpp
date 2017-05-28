@@ -228,7 +228,11 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 						  PLAYBACK_OFF),
 			   pSEQPrefs->getPrefInt("PlaybackRate", vpsection, 
 						 false),
-			   this, "packet");
+			   this, "packet",
+               pSEQPrefs->getPrefInt("WorldServerGeneralPort", section, 9000),
+               pSEQPrefs->getPrefInt("ZoneServerPortMin", section, 7000),
+               pSEQPrefs->getPrefInt("ZoneServerPortMax", section, 7200)
+               );
    
   ipstr[0] = m_packet->ip();	//Retrieves last IP used in previous session 
   for( int i = 1; i < 5; i++) 
@@ -1113,6 +1117,31 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    x = subMenu->insertItem("Enable Packet Decryption",
            this, SLOT(toggle_net_packet_decryption(int)));
    subMenu->setItemChecked(x, m_packet->packet_decryption());
+
+   subSubMenu = new QPopupMenu;
+   QSpinBox* worldGeneralPortSpinBox = new QSpinBox(1, 65535, 1, subSubMenu);
+   worldGeneralPortSpinBox->setValue(m_packet->worldServerGeneralPort());
+   connect(worldGeneralPortSpinBox, SIGNAL(valueChanged(int)),
+           this, SLOT(set_net_world_server_general_port(int)));
+   subSubMenu->insertItem(worldGeneralPortSpinBox);
+   subMenu->insertItem("World Server General Port", subSubMenu);
+
+   subSubMenu = new QPopupMenu;
+   QSpinBox* zoneServerPortMin = new QSpinBox(1, 65535, 1, subSubMenu);
+   zoneServerPortMin->setValue(m_packet->zoneServerPortMin());
+   connect(zoneServerPortMin, SIGNAL(valueChanged(int)),
+           this, SLOT(set_net_zone_server_port_min(int)));
+   subSubMenu->insertItem(zoneServerPortMin);
+   subMenu->insertItem("Zone Server Port Min", subSubMenu);
+
+   subSubMenu = new QPopupMenu;
+   QSpinBox* zoneServerPortMax = new QSpinBox(1, 65535, 1, subSubMenu);
+   zoneServerPortMax->setValue(m_packet->zoneServerPortMax());
+   connect(zoneServerPortMax, SIGNAL(valueChanged(int)),
+           this, SLOT(set_net_zone_server_port_max(int)));
+   subSubMenu->insertItem(zoneServerPortMax);
+   subMenu->insertItem("Zone Server Port Max", subSubMenu);
+
    m_netMenu->insertItem("Advanced", subMenu);
 
    // Character Menu 
@@ -4994,6 +5023,24 @@ void EQInterface::set_net_arq_giveup(int giveup)
 
   // set it as the value to use next session
   pSEQPrefs->setPrefInt("ArqSeqGiveUp", "Network", m_packet->arqSeqGiveUp());
+}
+
+void EQInterface::set_net_world_server_general_port(int val)
+{
+  m_packet->setWorldServerGeneralPort(val);
+  pSEQPrefs->setPrefInt("WorldServerGeneralPort", "Network", val);
+}
+
+void EQInterface::set_net_zone_server_port_min(int val)
+{
+  m_packet->setZoneServerPortMin(val);
+  pSEQPrefs->setPrefInt("ZoneServerPortMin", "Network", val);
+}
+
+void EQInterface::set_net_zone_server_port_max(int val)
+{
+  m_packet->setZoneServerPortMax(val);
+  pSEQPrefs->setPrefInt("ZoneServerPortMax", "Network", val);
 }
 
 void EQInterface::toggle_net_session_tracking()

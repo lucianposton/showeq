@@ -45,6 +45,18 @@
    <string value="zoneopcodes.xml" />
    <comment>Name of the file containing data about zone opcodes</comment>
   </property>
+  <property name="WorldServerGeneralPort" >
+   <int value="9000" />
+   <comment></comment>
+  </property>
+  <property name="ZoneServerPortMin" >
+   <int value="7000" />
+   <comment></comment>
+  </property>
+  <property name="ZoneServerPortMax" >
+   <int value="7200" />
+   <comment></comment>
+  </property>
  </section>
 <!-- ============================================================= -->
  <section name="Defaults" >

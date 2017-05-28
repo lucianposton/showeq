@@ -58,13 +58,10 @@
 //----------------------------------------------------------------------
 // constants
 
-const in_port_t WorldServerGeneralPort = 9000;
 const in_port_t WorldServerChatPort = 9876;
 const in_port_t WorldServerChat2Port = 9875; // xgame tells, mail
 const in_port_t LoginServerPort = 5998;
 const in_port_t ChatServerPort = 7778;
-const in_port_t ZoneServerPort_MIN = 7000;
-const in_port_t ZoneServerPort_MAX = 7200;
 
 //----------------------------------------------------------------------
 // Here begins the code
@@ -89,7 +86,10 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
 		   bool recordPackets,
 		   int playbackPackets,
 		   int8_t playbackSpeed, 
-		   QObject * parent, const char *name)
+		   QObject * parent, const char *name,
+           in_port_t worldServerGeneralPort,
+           in_port_t zoneServerPortMin,
+           in_port_t zoneServerPortMax)
   : QObject (parent, name),
     m_packetCapture(NULL),
     m_vPacket(NULL),
@@ -104,7 +104,10 @@ EQPacket::EQPacket(const QString& worldopcodesxml,
     m_packet_decryption(packetDecryption),
     m_recordPackets(recordPackets),
     m_playbackPackets(playbackPackets),
-    m_playbackSpeed(playbackSpeed)
+    m_playbackSpeed(playbackSpeed),
+    m_worldServerGeneralPort(worldServerGeneralPort),
+    m_zoneServerPortMin(zoneServerPortMin),
+    m_zoneServerPortMax(zoneServerPortMax)
 {
   // create the packet type db
   m_packetTypeDB = new EQPacketTypeDB();
@@ -608,7 +611,7 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
   if (m_session_tracking)
   {
       // We bind to the ip of the first world packet seen.
-      if (m_detectingClient && srcPort == WorldServerGeneralPort)
+      if (m_detectingClient && srcPort == m_worldServerGeneralPort)
       {
           m_ip = packet.getIPv4DestA();
           m_client_addr = destIP;
@@ -616,7 +619,7 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
           emit clientChanged(m_client_addr);
           seqDebug("Client Detected: %s", (const char*)m_ip);
       }
-      else if (m_detectingClient && destPort == WorldServerGeneralPort)
+      else if (m_detectingClient && destPort == m_worldServerGeneralPort)
       {
           m_ip = packet.getIPv4SourceA();
           m_client_addr = srcIP;
@@ -683,22 +686,22 @@ void EQPacket::dispatchPacket(EQUDPIPPacketFormat& packet)
     // Drop login server traffic
     return;
   }
-  else if (destPort == WorldServerGeneralPort &&
+  else if (destPort == m_worldServerGeneralPort &&
           (!m_session_tracking || srcIP == m_client_addr))
   {
       m_client2WorldStream->handlePacket(packet);
   }
-  else if (srcPort == WorldServerGeneralPort &&
+  else if (srcPort == m_worldServerGeneralPort &&
           (!m_session_tracking || destIP == m_client_addr))
   {
       m_world2ClientStream->handlePacket(packet);
   }
-  else if (destPort >= ZoneServerPort_MIN && destPort <= ZoneServerPort_MAX &&
+  else if (destPort >= m_zoneServerPortMin && destPort <= m_zoneServerPortMax &&
           (!m_session_tracking || srcIP == m_client_addr))
   {
       m_client2ZoneStream->handlePacket(packet);
   }
-  else if (srcPort >= ZoneServerPort_MIN && srcPort <= ZoneServerPort_MAX &&
+  else if (srcPort >= m_zoneServerPortMin && srcPort <= m_zoneServerPortMax &&
           (!m_session_tracking || destIP == m_client_addr))
   {
       m_zone2ClientStream->handlePacket(packet);
@@ -1153,6 +1156,36 @@ void EQPacket::setArqSeqGiveUp(uint16_t giveUp)
   m_world2ClientStream->setArqSeqGiveUp(giveUp);
   m_client2ZoneStream->setArqSeqGiveUp(giveUp);
   m_zone2ClientStream->setArqSeqGiveUp(giveUp);
+}
+
+void EQPacket::setWorldServerGeneralPort(int val)
+{
+    if (val < 1 || val > 65535)
+    {
+        seqWarn("Setting port to invalid value");
+        return;
+    }
+    m_worldServerGeneralPort = val;
+}
+
+void EQPacket::setZoneServerPortMin(int val)
+{
+    if (val < 1 || val > 65535)
+    {
+        seqWarn("Setting port to invalid value");
+        return;
+    }
+    m_zoneServerPortMin = val;
+}
+
+void EQPacket::setZoneServerPortMax(int val)
+{
+    if (val < 1 || val > 65535)
+    {
+        seqWarn("Setting port to invalid value");
+        return;
+    }
+    m_zoneServerPortMax = val;
 }
 
 void EQPacket::setRealtime(bool val)

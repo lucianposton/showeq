@@ -216,6 +216,9 @@ class EQInterface:public QMainWindow
    void set_net_client_MAC_address();
    void set_net_device();
    void set_net_arq_giveup(int giveup);
+   void set_net_world_server_general_port(int val);
+   void set_net_zone_server_port_min(int val);
+   void set_net_zone_server_port_max(int val);
    virtual void setCaption(const QString&);
    void restoreStatusFont();
    void showMessageFilterDialog(void);
