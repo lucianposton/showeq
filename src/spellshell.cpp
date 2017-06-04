@@ -83,7 +83,7 @@ void SpellItem::update(uint16_t spellId, const Spell* spell, int duration,
      {
        spellName = spell->name();
 
-       if (spell->targetType() != Spell::SELF && spell->targetType() != Spell::GROUP)
+       if (spell->targetType() != Spell::SELF)
            setTargetId(targetId);
      }
      else
@@ -222,7 +222,7 @@ bool SpellShell::isPlayerBuff(const Spell* spell, uint32_t sourceID, uint32_t ta
         return true;
     }
 
-    if (spell && (spell->targetType() == Spell::SELF || spell->targetType() == Spell::GROUP))
+    if (spell && (spell->targetType() == Spell::SELF))
     {
         return sourceID == player_id;
     }
