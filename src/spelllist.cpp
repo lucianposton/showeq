@@ -88,19 +88,19 @@ void SpellListItem::update()
   this->setTextBold(false);
   this->setTextColor(Qt::black);
 
-  if (m_item->duration() <= 120 and m_item->duration() > 60)
+  if (m_item->duration() <= 120 and m_item->duration() > 30)
   {
     this->setTextColor(Qt::blue);
   }
-  else if (m_item->duration() <= 60 and m_item->duration() > 30)
+  else if (m_item->duration() <= 30 and m_item->duration() > 18)
   {
     this->setTextBackgroundColor(Qt::lightGray);
   }
-  else if (m_item->duration() <= 30 and m_item->duration() > 18)
+  else if (m_item->duration() <= 18 and m_item->duration() > 6)
   {
     this->setTextBackgroundColor(Qt::yellow);
   }
-  else if (m_item->duration() <= 18)
+  else if (m_item->duration() <= 6)
   {
     this->setTextBackgroundColor(Qt::red);
     this->setTextBold(true);
