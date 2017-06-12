@@ -307,7 +307,19 @@ void SpellList::changeSpell(const SpellItem *item)
       if ((sid == item->spellId()) &&
           (cid == item->casterId()) &&
           (tid == item->targetId()))
-         i->update();
+      {
+         if (i->text(SPELLCOL_CASTTIME) == i->item()->castTimeStr())
+         {
+             i->update();
+         }
+         else
+         {
+             i->update();
+             // If spell list is sorting by duration or cast time, resorting
+             // is required. We use cast time to check if either has changed.
+             sort();
+         }
+      }
       else {
          DeleteItem(item);
          addSpell(item);
