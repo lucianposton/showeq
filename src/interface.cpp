@@ -2139,6 +2139,12 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Action", SP_Zone, DIR_Server|DIR_Client,
 		      "actionStruct", SZC_Match,
 		      m_spellShell, SLOT(action(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_Translocate", SP_Zone, DIR_Server,
+           "Translocate_Struct", SZC_Match,
+           m_spellShell, SLOT(translocate(const uint8_t*, size_t, uint8_t)));
+   m_packet->connect2("OP_RezzRequest", SP_Zone, DIR_Server,
+           "Resurrect_Struct", SZC_Match,
+           m_spellShell, SLOT(resurrect(const uint8_t*, size_t, uint8_t)));
 
 
    // connect Player slots to EQPacket signals

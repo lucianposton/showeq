@@ -184,6 +184,35 @@ SpellItem* SpellShell::findSpell(int spell_id)
   return NULL;
 }
 
+void SpellShell::updateOrAdd(SpellItem* item,
+        uint16_t spellid, const Spell* spell, int duration,
+        uint16_t casterId, const QString& casterName,
+        uint16_t targetId, const QString& targetName,
+        bool isPlayerBuff, const QString& nameSuffix)
+{
+    if (item)
+    {
+        item->update(spellid, spell, duration,
+                casterId, casterName,
+                targetId, targetName,
+                isPlayerBuff, nameSuffix);
+        emit changeSpell(item);
+    }
+    else
+    {
+        item = new SpellItem();
+        item->update(spellid, spell, duration,
+                casterId, casterName,
+                targetId, targetName,
+                isPlayerBuff, nameSuffix);
+        m_spellList.append(item);
+        if ((m_spellList.count() > 0) && (!m_timer->isActive()))
+            m_timer->start(1000 *
+                    pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
+        emit addSpell(item);
+    }
+}
+
 void SpellShell::clear()
 {
    emit clearSpells();
@@ -321,6 +350,42 @@ void SpellShell::buff(const uint8_t* data, size_t, uint8_t dir)
     item->setDuration(b->duration * 6);
     emit changeSpell(item);
   }
+}
+
+void SpellShell::translocate(const uint8_t* data, size_t, uint8_t dir)
+{
+    const Translocate_Struct* a = (const Translocate_Struct*)data;
+    const uint32_t spellid = a->SpellID;
+    const Spell* spell = m_spells->spell(spellid);
+    SpellItem *item = findPlayerBuff(spellid);
+#ifdef DIAG_SPELLSHELL
+    seqDebug("SpellShell::translocate(), spell->name()=%s item->spellName()=%s",
+            (const char*)spell->name(), item?(const char*)item->spellName():"n/a");
+#endif // DIAG_SPELLSHELL
+    const int duration = 50 * 6; // Seems hardcoded in client
+    updateOrAdd(item,
+            spellid, spell, duration,
+            0, "",
+            m_player->id(), m_player->name(),
+            true);
+}
+
+void SpellShell::resurrect(const uint8_t* data, size_t, uint8_t dir)
+{
+    const Resurrect_Struct* a = (const Resurrect_Struct*)data;
+    const uint32_t spellid = a->spellid;
+    const Spell* spell = m_spells->spell(spellid);
+    SpellItem *item = findPlayerBuff(spellid);
+#ifdef DIAG_SPELLSHELL
+    seqDebug("SpellShell::resurrect(), spell->name()=%s item->spellName()=%s",
+            (const char*)spell->name(), item?(const char*)item->spellName():"n/a");
+#endif // DIAG_SPELLSHELL
+    const int duration = 50 * 6; // Seems hardcoded in client
+    updateOrAdd(item,
+            spellid, spell, duration,
+            0, "",
+            m_player->id(), m_player->name(),
+            true);
 }
 
 void SpellShell::action(const uint8_t* data, size_t, uint8_t dir)

@@ -202,6 +202,8 @@ class SpellShell : public QObject
   void buffLoad(const spellBuff*);
   void buff(const uint8_t*, size_t, uint8_t);
   void action(const uint8_t*, size_t, uint8_t);
+  void translocate(const uint8_t*, size_t, uint8_t);
+  void resurrect(const uint8_t*, size_t, uint8_t);
   void zoneChanged(void);
   void killSpawn(const Item* deceased);
   void timeout();
@@ -213,6 +215,11 @@ class SpellShell : public QObject
 		       uint16_t targetId, const QString& targetName);
   SpellItem* findSpell(int spell_id);
   SpellItem* FindSpell(int spell_id, int target_id);
+  void updateOrAdd(SpellItem* item,
+          uint16_t spellId, const Spell* spell, int duration,
+          uint16_t casterId, const QString& casterName,
+          uint16_t targetId, const QString& targetName,
+          bool isPlayerBuff, const QString& nameSuffix="");
   
  private:
   Player* m_player;
