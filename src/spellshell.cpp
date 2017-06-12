@@ -271,23 +271,11 @@ void SpellShell::buffLoad(const spellBuff* c)
   int duration = c->duration * 6;
   QString nameSuffix = c->dmg_shield_remaining ? QString(" - %1").arg(c->dmg_shield_remaining) : "";
   SpellItem *item = findPlayerBuff(c->spellid);
-  if (item) 
-  { // exists
-    item->update(c->spellid, spell, duration, 
-		 0, "", m_player->id(), m_player->name(), true, nameSuffix);
-    emit changeSpell(item);
-  } 
-  else 
-  { // new spell
-    item = new SpellItem();
-    item->update(c->spellid, spell, duration, 
-		 0, "", m_player->id(), m_player->name(), true, nameSuffix);
-    m_spellList.append(item);
-    if ((m_spellList.count() > 0) && (!m_timer->isActive()))
-      m_timer->start(1000 *
-		     pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
-    emit addSpell(item);
-  }
+  updateOrAdd(item,
+          c->spellid, spell, duration,
+          0, "",
+          m_player->id(), m_player->name(),
+          true, nameSuffix);
 }
 
 void SpellShell::buff(const uint8_t* data, size_t, uint8_t dir)
@@ -445,59 +433,17 @@ void SpellShell::action(const uint8_t* data, size_t, uint8_t dir)
   if (a->source && ((s = m_spawnShell->findID(tSpawn, a->source))))
       casterName = s->name();
 
-  if (item)
-  {
 #ifdef DIAG_SPELLSHELL
-      seqDebug("-SpellShell::action(): found");
+  seqDebug("-SpellShell::action(): %s spell, is_player_buff=%d",
+          item?"found":"new", is_player_buff);
 #endif // DIAG_SPELLSHELL
 
-      item->update(a->spell, spell, duration, 
-              a->source, casterName,
-              is_player_buff ? m_player->id() : a->target,
-              is_player_buff ? m_player->name() : targetName,
-              is_player_buff);
-      emit changeSpell(item);
-  }
-  else if (is_player_buff)
-  {
-      // otherwise check for spells cast on us
-#ifdef DIAG_SPELLSHELL
-      seqDebug("-SpellShell::action(): new player buff");
-#endif // DIAG_SPELLSHELL
-
-      // only way to get here is if there wasn't an existing spell, so...
-      item = new SpellItem();
-      item->update(a->spell, spell, duration, 
-              a->source, casterName,
-              m_player->id(), m_player->name(), is_player_buff);
-      m_spellList.append(item);
-      if ((m_spellList.count() > 0) && (!m_timer->isActive()))
-          m_timer->start(1000 *
-                  pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
-      emit addSpell(item);
-  }
-  else if (a->source == m_player->id())
-  {
-      // otherwise check for spells cast by us
-#ifdef DIAG_SPELLSHELL
-      seqDebug("-SpellShell::action(): new");
-#endif // DIAG_SPELLSHELL
-
-      // only way to get here is if there wasn't an existing spell, so...
-      item = new SpellItem();
-      item->update(a->spell, spell, duration,
-              a->source, casterName,
-              a->target, targetName, false);
-      m_spellList.append(item);
-      if ((m_spellList.count() > 0) && (!m_timer->isActive()))
-          m_timer->start(1000 *
-                  pSEQPrefs->getPrefInt("SpellTimer", "SpellList", 6));
-      emit addSpell(item);
-  }
-  else
-  {
-      seqWarn("-SpellShell::action(): unexpected case");
-  }
+  updateOrAdd(item,
+          a->spell, spell, duration,
+          a->source, casterName,
+          is_player_buff ? m_player->id() : a->target,
+          is_player_buff ? m_player->name() : targetName,
+          is_player_buff);
 }
 
 void SpellShell::zoneChanged(void)
