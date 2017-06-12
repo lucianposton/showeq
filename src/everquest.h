@@ -1264,11 +1264,14 @@ struct itemInfoStruct
 
 struct spawnPositionUpdate 
 {
-/*0000*/ int16_t  spawnId;
-/*0002*/ int64_t  y:19, z:19, x:19, u3:7;
-         unsigned heading:12;
-         signed unused2:4;
-/*0010*/
+/*0000*/ uint16_t   spawnId;
+/*0002*/ int32_t    y:19,
+                    z:19,
+                    x:19,
+                    u3:7;
+         uint16_t   heading:12;
+/*0010*/ uint8_t    unused2:4;  // Always f0
+/*0012*/
 };
 
 /*
@@ -1437,6 +1440,7 @@ struct GuildMOTD_Struct
 /*0068*/	char	setby_name[64];
 /*0132*/	uint32_t	unknown132;
 /*0136*/	char	motd[512];
+/*0648*/
 };
 
 struct GuildCommand_Struct
@@ -1686,9 +1690,9 @@ struct GMSummon_Struct
 /*064*/ char        gmname[64];
 /*128*/ uint32_t    success;
 /*132*/ uint32_t    zoneID;
-/*136*/ int32_t     y;
-/*140*/ int32_t     x;
-/*144*/ int32_t     z;
+/*136*/ float       y;
+/*140*/ float       x;
+/*144*/ float       z;
 /*148*/ uint32_t    unknown2; // E0 E0 56 00
 /*152*/
 };
@@ -1706,6 +1710,23 @@ struct environmentDamageStruct
 /*0010*/ uint8_t unknown0010[12];
 /*0022*/ uint8_t type;              // Damage type. FC = fall. FA = lava.
 /*0023*/ uint8_t unknown0023[8];
+};
+
+struct Surname_Struct
+{
+/*0000*/	char name[64];
+/*0064*/	uint32_t unknown0064; // 0 for client request. 1 for server confirm
+/*0068*/	char lastname[32];
+/*0100*/
+};
+
+struct GMLastName_Struct
+{
+	char name[64];
+	char gmname[64];
+	char lastname[64];
+	uint16_t unknown[4];	// 0x00, 0x00
+					    // 0x01, 0x00 = Update the clients
 };
 
 /*
@@ -3083,6 +3104,24 @@ struct DisciplineTimer_Struct
 /*00*/ uint32_t	TimerID;
 /*04*/ uint32_t	Duration;
 /*08*/ uint32_t	Unknown08;
+};
+
+struct Resurrect_Struct
+{
+/*000*/ uint32_t    unknown00;
+/*004*/ uint16_t    zone_id;
+/*006*/ uint16_t    instance_id;
+/*008*/ float       y;
+/*012*/ float       x;
+/*016*/ float       z;
+/*020*/ uint32_t    unknown20;
+/*024*/ char        your_name[64];
+/*088*/ uint32_t    unknown88;
+/*092*/ char        rezzer_name[64];
+/*156*/ uint32_t    spellid;
+/*160*/ char        corpse_name[64];
+/*224*/ uint32_t    action;
+/*228*/
 };
 
 // Restore structure packing to default

@@ -5,8 +5,8 @@
      handlers. These need to be refound again, but we'd see errors if they
      were commented out. If you're looking for opcodes, find these first
      if you're so inclined! -->
-    <opcode id="003e" name="OP_MobUpdate" implicitlen="12" updated="05/26/04">
-        <comment>old MobUpdateCode</comment>
+    <opcode id="3a2b" name="OP_MobUpdate" implicitlen="12" updated="05/26/04">
+        <comment>Update with mob's stationary position</comment>
         <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
     </opcode>
     <opcode id="00d0" name="OP_CorpseLocResponse" updated="05/26/04">
@@ -385,8 +385,13 @@
         <comment></comment>
          <payload dir="server" typename="GuildMOTD_Struct" sizechecktype="match"/>
     </opcode>
+    <opcode id="4cfa" name="OP_Rewind" updated="10/27/05">
+        <comment></comment>
+        <payload dir="client" typename="none" sizechecktype="match"/>
+    </opcode>
     <opcode id="591c" name="OP_SetGuildMOTD" updated="10/27/05">
         <comment></comment>
+        <payload dir="client" typename="GuildMOTD_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="673c" name="OP_SimpleMessage" updated="10/27/05">
         <comment>old SimpleMessageCode</comment>
@@ -429,6 +434,7 @@
     </opcode>
     <opcode id="4668" name="OP_Surname" updated="10/27/05">
         <comment></comment>
+        <payload dir="both" typename="Surname_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="7213" name="OP_ZoneEntry" updated="10/27/05">
         <comment></comment>
@@ -713,11 +719,12 @@
         <payload dir="server" typename="ZonePlayerToBind_Struct" sizechecktype="none"/>
     </opcode>
     <opcode id="1edc" name="OP_GMSummon" updated="10/27/05">
-        <comment>Also used for corpse summon request.</comment>
+        <comment>Request to summon spawns or players. Includes /corpse requests</comment>
         <payload dir="client" typename="GMSummon_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="23a1" name="OP_GMLastName" updated="10/27/05">
         <comment>GM /lastname - Change user lastname</comment>
+        <payload dir="both" typename="GMLastName_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="3d2d" name="OP_InitialMobHealth" updated="10/27/05">
         <comment>Initial health sent when a player clicks on the mob. Subsequent updated will be OP_MobHealth</comment>
@@ -744,6 +751,10 @@
     </opcode>
     <opcode id="76a2" name="OP_CompletedTasks" updated="10/27/05">
         <comment>Task history for task window</comment>
+    </opcode>
+    <opcode id="5eba" name="OP_RequestTitles" updated="10/27/05">
+        <comment></comment>
+        <payload dir="client" typename="none" sizechecktype="match"/>
     </opcode>
     <opcode id="2a28" name="OP_CustomTitles" updated="10/27/05">
         <comment>List of available titles</comment>
@@ -1020,5 +1031,17 @@
     <opcode id="53df" name="OP_DisciplineTimer" updated="05/26/04">
         <comment></comment>
         <payload dir="server" typename="DisciplineTimer_Struct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="1035" name="OP_RezzRequest" updated="05/26/04">
+        <comment></comment>
+        <payload dir="server" typename="Resurrect_Struct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="6219" name="OP_RezzAnswer" updated="05/26/04">
+        <comment></comment>
+        <payload dir="client" typename="Resurrect_Struct" sizechecktype="match"/>
+    </opcode>
+    <opcode id="6957" name="OP_ZoneGuildList" updated="10/27/05">
+        <comment>Appears to be same as OP_GuildList</comment>
+        <payload dir="server" typename="worldGuildListStruct" sizechecktype="match"/>
     </opcode>
 </seqopcodes>
