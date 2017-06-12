@@ -26,9 +26,16 @@
 #include <qptrqueue.h>
 #include <qregexp.h>
 
-static inline int16_t min(const int16_t& __a,  const int16_t& __b)
+static inline int16_t calcMin(const int16_t& __a,  const int16_t& __b)
 {
-  if (__b < __a) return __b; return __a;
+    if (__b > 0 && __b < __a)
+    {
+        return __b;
+    }
+    else
+    {
+        return __a;
+    }
 }
 
 // Spell item ^ delmited fields
@@ -182,24 +189,24 @@ int16_t Spell::calcDuration(uint8_t level) const
     return 0;
   case 1:
   case 6:
-    return min(lroundf(float(level) / 2), m_buffDurationArgument);
+    return calcMin(lroundf(float(level) / 2), m_buffDurationArgument);
   case 3:
   case 4:
   case 11:
   case 12:
     return m_buffDurationArgument;
   case 2:
-    return min(lroundf(float(level) * 0.6), m_buffDurationArgument);
+    return calcMin(lroundf(float(level) * 0.6), m_buffDurationArgument);
   case 5:
     return 3;
   case 7:
-    return min(level, m_buffDurationArgument);
+    return calcMin(level, m_buffDurationArgument);
   case 8:
-    return min(level + 10, m_buffDurationArgument);
+    return calcMin(level + 10, m_buffDurationArgument);
   case 9:
-    return min(level * 2 + 10, m_buffDurationArgument);
+    return calcMin(level * 2 + 10, m_buffDurationArgument);
   case 10:
-    return min(level * 3 + 10, m_buffDurationArgument);
+    return calcMin(level * 3 + 10, m_buffDurationArgument);
   case 50:
     return 65535; // as close to permanent as I can get
   case 3600:
