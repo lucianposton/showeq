@@ -200,6 +200,12 @@ void PacketLog::logData(const uint8_t* data,
     }
 
     m_out  << endl;
+
+    for (QStringList::ConstIterator it = opcodeEntry->comments().begin();
+            it != opcodeEntry->comments().end(); ++it)
+    {
+        m_out << "[Comment: " << *it << ']' << endl;
+    }
   }
 
   flush();
@@ -324,6 +330,12 @@ void PacketLog::printData(const uint8_t* data, size_t len, uint8_t dir,
           }
       }
       ::putchar('\n');
+
+      for (QStringList::ConstIterator it = opcodeEntry->comments().begin();
+              it != opcodeEntry->comments().end(); ++it)
+      {
+          ::printf("[Comment: %s]\n", (const char*)(*it));
+      }
   }
 
   if (len)
