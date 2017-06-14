@@ -107,13 +107,19 @@ void SpawnPointListItem::paintCell(QPainter* p, const QColorGroup& cg,
   QColorGroup newCg( cg );
   QFont font = this->listView()->font();
   
-  if (m_spawnPoint->age() > 220)
+  if ( m_spawnPoint->diffTime() != 0 && m_spawnPoint->deathTime() != 0 )
   {
-    newCg.setColor(QColorGroup::Text, red);
-    font.setBold(true);
+      const long secsLeft = m_spawnPoint->secsLeft();
+      if (secsLeft < 60)
+      {
+          font.setBold(true);
+      }
+
+      if (secsLeft < 30)
+      {
+          newCg.setColor(QColorGroup::Text, red);
+      }
   }
-  else
-    font.setBold(false);
   
   p->setFont(font);
   
@@ -360,7 +366,7 @@ void SpawnPointList::refresh()
   while ((sp = it.current()))
   {
     ++it;
-    if (sp->secsLeft() < 20)
+    if (sp->diffTime() != 0 && sp->deathTime() != 0 && sp->secsLeft() < 30)
       aboutToPop = true;
   }
 
