@@ -20,38 +20,30 @@
 
 DateTimeMgr::DateTimeMgr(QObject* parent, const char* name)
   : QObject(parent, name),
-    m_updateFrequency(60 * 1000),
     m_timer(0)
 {
 }
 
-void DateTimeMgr::setUpdateFrequency(int seconds)
+DateTimeMgr::~DateTimeMgr()
 {
-  // set the new frequency (in ms)
-  m_updateFrequency = seconds * 1000;
-
-  if (m_timer)
-  {
-    // update the current time
-    update();
-
-    // set the timer to the new interval
-    m_timer->changeInterval(m_updateFrequency);
-  }
+    if (m_timer)
+    {
+        delete m_timer;
+    }
 }
 
 void DateTimeMgr::timeOfDay(const uint8_t* data)
 {
   const timeOfDayStruct* tday = (const timeOfDayStruct*)data;
 
-  m_refDateTime = QDateTime::currentDateTime(Qt::UTC);
   m_eqDateTime.setDate(QDate(tday->year, tday->month, tday->day));
   m_eqDateTime.setTime(QTime(tday->hour - 1, tday->minute, 0));
   if (!m_timer)
   {
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), SLOT(update()));
-    m_timer->start(m_updateFrequency, false);
+    // 3 seconds = 1 EQ minute
+    m_timer->start(3*1000, false);
   }
 
   emit syncDateTime(m_eqDateTime);
@@ -62,15 +54,8 @@ void DateTimeMgr::update()
   if (!m_eqDateTime.isValid())
     return;
 
-  const QDateTime& current = QDateTime::currentDateTime(Qt::UTC);
-
-  int secs = m_refDateTime.secsTo(current);
-  if (secs)
-  {
-    m_eqDateTime = m_eqDateTime.addSecs(secs * 20);
-    m_refDateTime = current;
-    emit updatedDateTime(m_eqDateTime);
-  }
+  m_eqDateTime = m_eqDateTime.addSecs(60);
+  emit updatedDateTime(m_eqDateTime);
 }
 
 #include "datetimemgr.moc"

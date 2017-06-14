@@ -29,10 +29,9 @@ class DateTimeMgr : public QObject
 
  public:
   DateTimeMgr(QObject* parent = 0, const char* name = 0);
+  virtual ~DateTimeMgr();
   const QDateTime& eqDateTime() const;
   const QDateTime& updatedDateTime();
-  int updateFrequency();
-  void setUpdateFrequency(int seconds); // 3 seconds = 1 EQ minute
 
  public slots:
   void timeOfDay(const uint8_t* tday);
@@ -45,10 +44,8 @@ class DateTimeMgr : public QObject
  protected:
 
  private:
-  int m_updateFrequency;
   QTimer* m_timer;
   QDateTime m_eqDateTime;
-  QDateTime m_refDateTime;
 };
 
 inline const QDateTime& DateTimeMgr::eqDateTime() const 
@@ -58,13 +55,7 @@ inline const QDateTime& DateTimeMgr::eqDateTime() const
 
 inline const QDateTime& DateTimeMgr::updatedDateTime() 
 {
-  update(); 
   return m_eqDateTime; 
-}
-
-inline int DateTimeMgr::updateFrequency() 
-{ 
-  return m_updateFrequency / 1000; 
 }
 
 #endif // _DATETIMEMGR_H_
