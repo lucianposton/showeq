@@ -46,6 +46,7 @@ public:
   virtual ~SpawnPointListItem();
 
   void update(void);
+  virtual int compare(QListViewItem*, int, bool) const;
   virtual void paintCell(QPainter *p, const QColorGroup &cg, 
 			 int column, int width, int alignment );
   

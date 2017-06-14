@@ -21,6 +21,7 @@
 #include <qlayout.h>
 
 #include "spawnpointlist.h"
+#include "diagnosticmessages.h"
 #include "main.h"
 
 SpawnPointListItem::SpawnPointListItem(QListView* parent, const SpawnPoint* sp)
@@ -64,7 +65,7 @@ void SpawnPointListItem::update()
     long secs = m_spawnPoint->secsLeft();
     
     if ( secs > 0 )
-      tmpStr.sprintf( "%2ld:%02ld", secs / 60, secs % 60  );
+      tmpStr.sprintf( "%3ld:%02ld", secs / 60, secs % 60  );
     else
       tmpStr = "   now"; // spaces followed by now
   }
@@ -94,6 +95,52 @@ void SpawnPointListItem::setTextColor( const QColor& color )
 {
   m_textColor = color;
   repaint();
+}
+
+int SpawnPointListItem::compare(QListViewItem* i, int col, bool ascending) const
+{
+    if (col != tSpawnPointRemaining)
+    {
+        return key(col, ascending).localeAwareCompare(i->key(col, ascending));
+    }
+
+#if 0
+    // Proper sorting of remaining time, if needed. Padding with spaces seems
+    // sufficient for now though.
+    const QString mykey = key(col, ascending);
+    const QString ikey = i->key(col, ascending);
+    const QString seconds_str = mykey.section(':',1,1);
+    const QString iseconds_str = ikey.section(':',1,1);
+    if (!seconds_str.isEmpty() && !iseconds_str.isEmpty())
+    {
+        bool ok;
+        const int mins = mykey.section(':',0,0).toInt(&ok);
+        if (!ok)
+            seqWarn("SpawnPointListItem::compare(%s,%s): mins failed",
+                    (const char*)mykey, (const char*)ikey);
+        const int imins = ikey.section(':',0,0).toInt(&ok);
+        if (!ok)
+            seqWarn("SpawnPointListItem::compare(%s,%s): imins failed",
+                    (const char*)mykey, (const char*)ikey);
+        if (mins != imins)
+        {
+            return mins - imins;
+        }
+
+        const int seconds = seconds_str.toInt(&ok);
+        if (!ok)
+            seqWarn("SpawnPointListItem::compare(%s,%s): seconds failed",
+                    (const char*)mykey, (const char*)ikey);
+        const int iseconds = iseconds_str.toInt(&ok);
+        if (!ok)
+            seqWarn("SpawnPointListItem::compare(%s,%s): iseconds failed",
+                    (const char*)mykey, (const char*)ikey);
+        return seconds - iseconds;
+    }
+#endif
+
+    // plain unicode comparison keeps "   now" sorted before remaining time
+    return key(col, ascending).compare(i->key(col, ascending));
 }
 
 // overridden from base class in order to change color and style attributes
