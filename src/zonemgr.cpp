@@ -209,7 +209,6 @@ void ZoneMgr::zoneEntryServer(const uint8_t* data, size_t len, uint8_t dir)
   const ServerZoneEntryStruct* zsentry = (const ServerZoneEntryStruct*)data;
   m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
   m_zoning = false;
-  emit zoneBegin(m_shortZoneName);
   emit zoneBegin(zsentry, len, dir);
 
   if (showeq_params->saveZoneState)
