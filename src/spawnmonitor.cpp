@@ -351,7 +351,7 @@ void SpawnMonitor::loadSpawnPoints()
 
   if (!fileInfo.exists())
   {
-    seqWarn("Can't find spawn point file %s", 
+    seqDebug("Previous spawn point file (%s) not found",
 	   (const char*)fileInfo.absFilePath());
     return;
   }
