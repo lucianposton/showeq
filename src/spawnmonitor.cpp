@@ -46,13 +46,8 @@ SpawnPoint::~SpawnPoint()
 QString SpawnPoint::key( int x, int y, int z)
 {
   QString		t;
-  t.sprintf( "%d%d%d", x, y, z );
+  t.sprintf( "%d_%d_%d", x, y, z );
   return t;
-}
-
-Spawn* SpawnPoint::getSpawn() const
-{
-  return NULL;
 }
 
 unsigned char SpawnPoint::age() const
@@ -113,10 +108,12 @@ SpawnMonitor::SpawnMonitor(const DataLocationMgr* dataLocMgr,
 	  this, SLOT( newSpawn(const Item*)));
   connect(spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)), 
 	  this, SLOT( killSpawn(const Item*)));
-  connect(zoneMgr, SIGNAL(zoneChanged(const QString&)), 
-	  this, SLOT( zoneChanged(const QString&)));
-  connect(zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)), 
-	  this, SLOT( zoneEnd( const QString&)));
+  connect(zoneMgr, SIGNAL(zoneBegin()),
+	  this, SLOT( zoneExit()));
+  connect(zoneMgr, SIGNAL(logOut()),
+	  this, SLOT( zoneExit()));
+  connect(zoneMgr, SIGNAL(zoneBegin(const QString&)), 
+	  this, SLOT( zoneEnter( const QString&)));
 
   m_modified = false;
 }
@@ -132,11 +129,6 @@ void SpawnMonitor::setName(const SpawnPoint* csp, const QString& name)
   
   SpawnPoint* sp = (SpawnPoint*)csp;
   sp->setName(name);
-  setModified(sp);
-}
-
-void SpawnMonitor::setModified( SpawnPoint* changedSp )
-{
   m_modified = true;
 }
 
@@ -153,10 +145,11 @@ void SpawnMonitor::setSelected(const SpawnPoint* selected)
 
 void SpawnMonitor::clear(void)
 {
+  m_selected = NULL;
+  emit selectionChanged(m_selected);
   emit clearSpawnPoints();
   m_spawns.clear();
   m_points.clear();
-  m_selected = NULL;
 }
 
 void SpawnMonitor::deleteSpawnPoint(const SpawnPoint* sp)
@@ -195,30 +188,21 @@ void SpawnMonitor::killSpawn(const Item* killedSpawn)
   }
 }
 
-void SpawnMonitor::zoneChanged( const QString& newZoneName )
+void SpawnMonitor::zoneExit()
 {
-  if ( m_zoneName != newZoneName )
-  {
     saveSpawnPoints();
-    
-    clear();
-    m_zoneName = newZoneName;
-    
-    loadSpawnPoints();
-  }
+    // clear zone name to prevent any intermittent spawns from saving
+    m_zoneName = "";
 }
 
-void SpawnMonitor::zoneEnd( const QString& newZoneName )
+void SpawnMonitor::zoneEnter( const QString& newZoneName )
 {
   QString lower = newZoneName.lower();
-  
-  if ( m_zoneName != lower )
-  {
-    saveSpawnPoints();
-    m_zoneName = lower;
-    clear();
-    loadSpawnPoints();
-  }
+
+  saveSpawnPoints();
+  clear();
+  m_zoneName = lower;
+  loadSpawnPoints();
 }
 
 void SpawnMonitor::restartSpawnPoint( SpawnPoint* sp )
@@ -229,7 +213,7 @@ void SpawnMonitor::restartSpawnPoint( SpawnPoint* sp )
 void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
 {
   // ignore everything but mobs
-  if ( ( spawn->NPC() != SPAWN_NPC ) || ( spawn->petOwnerID() != 0 ) || (spawn->level() == 30 && spawn->race() == 216) )
+  if ( ( spawn->NPC() != SPAWN_NPC ) || ( spawn->petOwnerID() != 0 ))
     return;
   
   QString		key = SpawnPoint::key( *spawn );
@@ -269,6 +253,8 @@ void SpawnMonitor::saveSpawnPoints()
 
   if ( !m_zoneName.length() )
   {
+    // This case occurs when the server sends spawns before OP_ZoneNew,
+    // causing m_modified to be set before the m_zoneName.
     seqWarn("Zone name not set in 'SpawnMonitor::saveSpawnPoints'!" );
     return;
   }
@@ -311,6 +297,8 @@ void SpawnMonitor::saveSpawnPoints()
 		<< " "
 		<< sp->name()
 		<< '\n';
+
+    // TODO: save list of known spawns
   }
   
   spFile.close();

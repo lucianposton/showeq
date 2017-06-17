@@ -1807,6 +1807,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_NewZone", SP_Zone, DIR_Server,
 			"newZoneStruct", SZC_Match,
 			m_zoneMgr, SLOT(zoneNew(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_LogoutReply", SP_Zone, DIR_Server,
+			"none", SZC_Match,
+			m_zoneMgr, SLOT(logoutReply()));
      m_packet->connect2("OP_SendZonePoints", SP_Zone, DIR_Server,
 			"zonePointsStruct", SZC_None,
 			m_zoneMgr, SLOT(zonePoints(const uint8_t*, size_t, uint8_t)));

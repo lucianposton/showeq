@@ -70,7 +70,6 @@ public:
   QString last() const { return m_last; }
   uint16_t lastID() const { return m_lastID; }
   int32_t count() const { return m_count; }
-  Spawn* getSpawn() const;
   time_t spawnTime() const { return m_spawnTime; }
   time_t deathTime() const { return m_deathTime; } 
   time_t diffTime() const { return m_diffTime; }
@@ -110,14 +109,13 @@ public:
 
 public slots:
   void setName(const SpawnPoint* sp, const QString& name);
-  void setModified( SpawnPoint* changedSp );
   void setSelected(const SpawnPoint* sp);
   void clear(void);
   void deleteSpawnPoint(const SpawnPoint* sp);
   void newSpawn(const Item* item );
   void killSpawn(const Item* item );
-  void zoneChanged( const QString& newZoneName );
-  void zoneEnd( const QString& newZoneName );
+  void zoneExit();
+  void zoneEnter( const QString& newZoneName );
   void saveSpawnPoints();
   void loadSpawnPoints();
 

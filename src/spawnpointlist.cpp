@@ -258,6 +258,9 @@ void SpawnPointList::handleSelectItem(QListViewItem* item)
 
 void SpawnPointList::handleSelChanged(const SpawnPoint* sp)
 {
+    if (sp == NULL)
+        clearSelection();
+
   QListViewItemIterator it(this);
 
   SpawnPointListItem* splitem;

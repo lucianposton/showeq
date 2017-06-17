@@ -57,6 +57,7 @@ class ZoneMgr : public QObject
   void zoneEntryServer(const uint8_t* zsentry, size_t, uint8_t);
   void zoneChange(const uint8_t* zoneChange, size_t, uint8_t);
   void zoneNew(const uint8_t* zoneNew, size_t, uint8_t);
+  void logoutReply();
   void zonePoints(const uint8_t* zp, size_t, uint8_t);
 
  signals:
@@ -67,6 +68,7 @@ class ZoneMgr : public QObject
   void zoneChanged(const QString& shortZoneName);
   void zoneChanged(const zoneChangeStruct*, size_t, uint8_t);
   void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
+  void logOut();
  private:
   QString m_longZoneName;
   QString m_shortZoneName;

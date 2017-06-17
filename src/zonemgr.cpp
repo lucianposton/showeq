@@ -46,6 +46,10 @@ const float defaultZoneExperienceMultiplier = 0.75;
 // zoneEntry(ServerZoneEntryStruct)      zoneBegin(shortName)          false
 // zoneNew(newZoneStruct)                zoneEnd(shortName, longName)  false
 //
+// Logout, /camp
+// EQPacket                              ZoneMgr                       isZoning
+// ----------                            -------                       --------
+// logoutReply()                         logOut()                      false
 ZoneMgr::ZoneMgr(QObject* parent, const char* name)
   : QObject(parent, name),
     m_zoning(false),
@@ -278,6 +282,11 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
 
   if (showeq_params->saveZoneState)
     saveZoneState();
+}
+
+void ZoneMgr::logoutReply()
+{
+    emit logOut();
 }
 
 void ZoneMgr::zonePoints(const uint8_t* data, size_t len, uint8_t)
