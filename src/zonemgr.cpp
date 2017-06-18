@@ -31,25 +31,30 @@ static const uint32_t* magic = (uint32_t*)magicStr;
 const float defaultZoneExperienceMultiplier = 0.75;
 
 // Sequence of signals on initial entry into eq from character select screen
-// EQPacket                              ZoneMgr                       isZoning
-// ----------                            -------                       --------
-// zoneEntry(ClientZoneEntryStruct)      zoneBegin()                   true
-// zoneEntry(ServerZoneEntryStruct)      zoneBegin(shortName)          false
-// zoneNew(newZoneStruct)                zoneEnd(shortName, longName)  false
+// EQPacket         ZoneMgr                ZoneMgr event                    isZoning
+// ----------       --------               --------------                   --------
+// OP_ZoneEntry     zoneEntryClient()      zoneBegin()                      false
+//                                         zoneBegin(ClientZoneEntryStruct) false
+// OP_PlayerProfile zonePlayer()           zoneBegin(shortName)             false
+// OP_ZoneEntry     zoneEntryServer()      zoneBegin(ServerZoneEntryStruct) false
+// OP_NewZone       zoneNew()              zoneEnd(shortName, longName)     false
 //
 // Sequence of signals on when zoning from zone A to zone B
-// EQPacket                              ZoneMgr                       isZoning
-// ----------                            -------                       --------
-// zoneChange(zoneChangeStruct, client)                                true
-// zoneChange(zoneChangeStruct, server)  zoneChanged(shortName)        true
-// zoneEntry(ClientZoneEntryStruct)      zoneBegin()                   false
-// zoneEntry(ServerZoneEntryStruct)      zoneBegin(shortName)          false
-// zoneNew(newZoneStruct)                zoneEnd(shortName, longName)  false
+// EQPacket         ZoneMgr                ZoneMgr event                    isZoning
+// ----------       --------               --------------                   --------
+// OP_ZoneChange    zoneChange(dir=client) zoneChanged(zoneChangeStruct)    true
+// OP_ZoneChange    zoneChange(dir=server) zoneChanged(shortName)           true
+//                                         zoneChanged(zoneChangeStruct)    true
+// OP_ZoneEntry     zoneEntryClient()      zoneBegin()                      false
+//                                         zoneBegin(ClientZoneEntryStruct) false
+// OP_PlayerProfile zonePlayer()           zoneBegin(shortName)             false
+// OP_ZoneEntry     zoneEntryServer()      zoneBegin(ServerZoneEntryStruct) false
+// OP_NewZone       zoneNew()              zoneEnd(shortName, longName)     false
 //
 // Logout, /camp
-// EQPacket                              ZoneMgr                       isZoning
-// ----------                            -------                       --------
-// logoutReply()                         logOut()                      false
+// EQPacket         ZoneMgr                ZoneMgr event                    isZoning
+// ----------       --------               --------------                   --------
+// OP_LogoutReply   logoutReply()          logOut()                         false
 ZoneMgr::ZoneMgr(QObject* parent, const char* name)
   : QObject(parent, name),
     m_zoning(false),
