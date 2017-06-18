@@ -1821,10 +1821,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    {
      connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
 	     m_filterMgr, SLOT(loadZone(const QString&)));
-     connect(m_zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)),
-	     m_filterMgr, SLOT(loadZone(const QString&)));
-     connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
-	     m_filterMgr, SLOT(loadZone(const QString&)));
    }
 
    m_packet->connect2("OP_ZoneServerInfo", SP_World, DIR_Server,
