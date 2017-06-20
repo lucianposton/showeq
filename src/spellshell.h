@@ -204,7 +204,7 @@ class SpellShell : public QObject
   void action(const uint8_t*, size_t, uint8_t);
   void translocate(const uint8_t*, size_t, uint8_t);
   void resurrect(const uint8_t*, size_t, uint8_t);
-  void zoneChanged(void);
+  void zoneBegin(void);
   void killSpawn(const Item* deceased);
   void timeout();
 

@@ -55,8 +55,8 @@ Player::Player (QObject* parent,
 
   connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, size_t, uint8_t)),
           this, SLOT(zoneBegin(const ServerZoneEntryStruct*)));
-  connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
-          this, SLOT(zoneChanged()));
+  connect(m_zoneMgr, SIGNAL(zoneBegin()),
+          this, SLOT(zoneBegin()));
   
   m_NPC = SPAWN_SELF;
 
@@ -801,7 +801,7 @@ void Player::setLastKill(const QString& name, uint8_t level)
   m_freshKill = true;
 }
 
-void Player::zoneChanged()
+void Player::zoneBegin()
 {
   reset();
   clear();

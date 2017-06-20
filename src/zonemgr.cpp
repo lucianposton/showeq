@@ -33,8 +33,8 @@ const float defaultZoneExperienceMultiplier = 0.75;
 // Sequence of signals on initial entry into eq from character select screen
 // EQPacket         ZoneMgr                ZoneMgr event                    isZoning
 // ----------       --------               --------------                   --------
-// OP_ZoneEntry     zoneEntryClient()      zoneBegin()                      false
-//                                         zoneBegin(ClientZoneEntryStruct) false
+// OP_ZoneEntry     zoneEntryClient()      zoneBegin()                      true
+//                                         zoneBegin(ClientZoneEntryStruct) true
 // OP_PlayerProfile zonePlayer()           zoneBegin(shortName)             false
 // OP_ZoneEntry     zoneEntryServer()      zoneBegin(ServerZoneEntryStruct) false
 // OP_NewZone       zoneNew()              zoneEnd(shortName, longName)     false
@@ -42,11 +42,11 @@ const float defaultZoneExperienceMultiplier = 0.75;
 // Sequence of signals on when zoning from zone A to zone B
 // EQPacket         ZoneMgr                ZoneMgr event                    isZoning
 // ----------       --------               --------------                   --------
-// OP_ZoneChange    zoneChange(dir=client) zoneChanged(zoneChangeStruct)    true
-// OP_ZoneChange    zoneChange(dir=server) zoneChanged(shortName)           true
-//                                         zoneChanged(zoneChangeStruct)    true
-// OP_ZoneEntry     zoneEntryClient()      zoneBegin()                      false
-//                                         zoneBegin(ClientZoneEntryStruct) false
+// OP_ZoneChange    zoneChange(dir=client) zoneChanging(zoneChangeStruct)   false
+// OP_ZoneChange    zoneChange(dir=server) zoneChanging(zoneChangeStruct)   false
+//                                         zoneChanging(shortName)          false
+// OP_ZoneEntry     zoneEntryClient()      zoneBegin()                      true
+//                                         zoneBegin(ClientZoneEntryStruct) true
 // OP_PlayerProfile zonePlayer()           zoneBegin(shortName)             false
 // OP_ZoneEntry     zoneEntryServer()      zoneBegin(ServerZoneEntryStruct) false
 // OP_NewZone       zoneNew()              zoneEnd(shortName, longName)     false
@@ -191,7 +191,7 @@ void ZoneMgr::zoneEntryClient(const uint8_t* data, size_t len, uint8_t dir)
   m_shortZoneName = "unknown";
   m_longZoneName = "unknown";
   m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
-  m_zoning = false;
+  m_zoning = true;
 
   emit zoneBegin();
   emit zoneBegin(zsentry, len, dir);
@@ -227,15 +227,17 @@ void ZoneMgr::zoneEntryServer(const uint8_t* data, size_t len, uint8_t dir)
 void ZoneMgr::zoneChange(const uint8_t* data, size_t len, uint8_t dir)
 {
   const zoneChangeStruct* zoneChange = (const zoneChangeStruct*)data;
+  emit zoneChanging(zoneChange, len, dir);
+  if (dir == DIR_Client)
+      return;
+
+  if (zoneChange->success != 1)
+      return;
+
   m_shortZoneName = zoneNameFromID(zoneChange->zoneId);
   m_longZoneName = zoneLongNameFromID(zoneChange->zoneId);
-  m_zone_exp_multiplier = defaultZoneExperienceMultiplier;
-  m_zoning = true;
 
-  if (dir == DIR_Server)
-    emit zoneChanged(m_shortZoneName);
-    emit zoneChanged(zoneChange, len, dir);
-
+  emit zoneChanging(m_shortZoneName);
   if (showeq_params->saveZoneState)
     saveZoneState();
 }
@@ -272,16 +274,6 @@ void ZoneMgr::zoneNew(const uint8_t* data, size_t len, uint8_t dir)
   m_longZoneName = zoneNew->longName;
   m_zoning = false;
 
-#if 1 // ZBTEMP
-  seqDebug("Welcome to lovely downtown '%s' (%s) with an experience multiplier of %f",
-	 zoneNew->longName, zoneNew->shortName, zoneNew->zone_exp_multiplier);
-  seqDebug("Safe Point (%f, %f, %f)", 
-	 zoneNew->safe_x, zoneNew->safe_y, zoneNew->safe_z);
-#endif // ZBTEMP
-  
-  // seqDebug("zoneNew: m_short(%s) m_long(%s)",
-  //    (const char*)m_shortZoneName,
-  //    (const char*)m_longZoneName);
   
   emit zoneEnd(m_shortZoneName, m_longZoneName);
 

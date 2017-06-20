@@ -69,7 +69,7 @@ public:
    void updateSpawnInfo(const uint8_t* su);
    void updateStamina(const uint8_t* stam);
    void setLastKill(const QString& name, uint8_t level);
-   void zoneChanged(void);
+   void zoneBegin(void);
    void zoneBegin(const ServerZoneEntryStruct* zsentry);
    void playerUpdateSelf(const uint8_t* pupdate, size_t, uint8_t);
    void consMessage(const uint8_t* con, size_t, uint8_t dir);

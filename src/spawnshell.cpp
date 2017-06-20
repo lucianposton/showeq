@@ -126,9 +126,7 @@ SpawnShell::SpawnShell(FilterMgr& filterMgr,
 	   this, SLOT(playerGuildChanged(uint16_t)));
 
    // connect SpawnShell slots to ZoneMgr signals
-   connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
-	   this, SLOT(clear(void)));
-   connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
+   connect(m_zoneMgr, SIGNAL(zoneBegin()),
 	   this, SLOT(clear(void)));
 
    // connect Player signals to SpawnShell signals

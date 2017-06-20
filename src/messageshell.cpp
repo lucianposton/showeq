@@ -364,39 +364,39 @@ void MessageShell::logOut(const uint8_t*, size_t, uint8_t)
 
 void MessageShell::zoneEntryClient(const ClientZoneEntryStruct* zsentry)
 {
-    seqDebug("EntryCode: Client");
+    seqDebug("ZoneEntry: Client");
 }
 
 void MessageShell::zoneEntryServer(const ServerZoneEntryStruct* zsentry)
 {
-    seqDebug("EntryCode: Server");
+    seqDebug("ZoneEntry: Server");
 }
 
-void MessageShell::zoneChanged(const zoneChangeStruct* zoneChange, size_t, uint8_t dir)
+void MessageShell::zoneChanging(const zoneChangeStruct* zoneChange, size_t, uint8_t dir)
 {
-  QString tempStr;
-
   if (dir == DIR_Client)
   {
-    tempStr = "ChangeCode: Client, Zone: ";
-    tempStr += m_zoneMgr->zoneNameFromID(zoneChange->zoneId);
+    seqDebug("Zone Change Request for '%s': reason=%u success=%d",
+    (const char*)m_zoneMgr->zoneNameFromID(zoneChange->zoneId),
+    zoneChange->zone_reason, zoneChange->success);
   }
   else
   {
-    tempStr = "ChangeCode: Server, Zone:";
-    tempStr += m_zoneMgr->zoneNameFromID(zoneChange->zoneId);
+    seqDebug("Zone Change Response for '%s': reason=%u success=%d",
+    (const char*)m_zoneMgr->zoneNameFromID(zoneChange->zoneId),
+    zoneChange->zone_reason, zoneChange->success);
   }
-  
-  m_messages->addMessage(MT_Zone, tempStr);
 }
 
 void MessageShell::zoneNew(const uint8_t* data, size_t, uint8_t dir)
 {
   const newZoneStruct* zoneNew = (const newZoneStruct*)data;
   QString tempStr;
-  tempStr = "NewCode: Zone: ";
-  tempStr += QString(zoneNew->shortName) + " ("
-    + zoneNew->longName + ")";
+  tempStr.sprintf("Entered zone '%s' (%s) with an experience multiplier"
+          " of %.2f and Safe Point (%.1f, %.1f, %.1f)",
+          zoneNew->longName, zoneNew->shortName,
+          zoneNew->zone_exp_multiplier, zoneNew->safe_x, zoneNew->safe_y,
+          zoneNew->safe_z);
   m_messages->addMessage(MT_Zone, tempStr);
 }
 
@@ -408,24 +408,13 @@ void MessageShell::zoneBegin(const QString& shortZoneName)
   m_messages->addMessage(MT_Zone, tempStr);
 }
 
-void MessageShell::zoneEnd(const QString& shortZoneName, 
-			   const QString& longZoneName)
-{
-  QString tempStr;
-  tempStr = QString("Entered: ShortName = '") + shortZoneName +
-                    "' LongName = " + longZoneName;
-
-  m_messages->addMessage(MT_Zone, tempStr);
-}
-
-void MessageShell::zoneChanged(const QString& shortZoneName)
+void MessageShell::zoneChanging(const QString& shortZoneName)
 {
   QString tempStr;
   tempStr = QString("Zoning, Please Wait...\t(Zone: '")
     + shortZoneName + "')";
   m_messages->addMessage(MT_Zone, tempStr);
 }
-
 
 void MessageShell::worldMOTD(const uint8_t* data)
 { 

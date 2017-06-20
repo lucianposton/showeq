@@ -446,7 +446,7 @@ void SpellShell::action(const uint8_t* data, size_t, uint8_t dir)
           is_player_buff);
 }
 
-void SpellShell::zoneChanged(void)
+void SpellShell::zoneBegin(void)
 {
   SpellItem* spell;
   for(QValueList<SpellItem*>::Iterator it = m_spellList.begin();

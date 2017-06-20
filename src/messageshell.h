@@ -63,10 +63,9 @@ class MessageShell : public QObject
    void zoneEntryClient(const ClientZoneEntryStruct* zsentry);
    void zoneEntryServer(const ServerZoneEntryStruct* zsentry);
    void zoneNew(const uint8_t* zoneNew, size_t, uint8_t);
-   void zoneChanged(const zoneChangeStruct*, size_t, uint8_t);
+   void zoneChanging(const zoneChangeStruct*, size_t, uint8_t);
    void zoneBegin(const QString& shortZoneName);
-   void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
-   void zoneChanged(const QString& shortZoneName);
+   void zoneChanging(const QString& shortZoneName);
 
    void worldMOTD(const uint8_t* motd);
 

@@ -1910,14 +1910,12 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	     m_messageShell, SLOT(zoneEntryClient(const ClientZoneEntryStruct*)));
      connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, size_t, uint8_t)),
 	     m_messageShell, SLOT(zoneEntryServer(const ServerZoneEntryStruct*)));
-     connect(m_zoneMgr, SIGNAL(zoneChanged(const zoneChangeStruct*, size_t, uint8_t)),
-	     m_messageShell, SLOT(zoneChanged(const zoneChangeStruct*, size_t, uint8_t)));
+     connect(m_zoneMgr, SIGNAL(zoneChanging(const zoneChangeStruct*, size_t, uint8_t)),
+	     m_messageShell, SLOT(zoneChanging(const zoneChangeStruct*, size_t, uint8_t)));
      connect(m_zoneMgr, SIGNAL(zoneBegin(const QString&)),
 	     m_messageShell, SLOT(zoneBegin(const QString&)));
-     connect(m_zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)),
-	     m_messageShell, SLOT(zoneEnd(const QString&, const QString&)));
-     connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
-	     m_messageShell, SLOT(zoneChanged(const QString&)));
+     connect(m_zoneMgr, SIGNAL(zoneChanging(const QString&)),
+	     m_messageShell, SLOT(zoneChanging(const QString&)));
 
      m_packet->connect2("OP_MOTD", SP_World, DIR_Server,
 			"worldMOTDStruct", SZC_None,
@@ -2042,8 +2040,6 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	  this, SLOT(zoneBegin(const QString&)));
   connect(m_zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)),
 	  this, SLOT(zoneEnd(const QString&, const QString&)));
-  connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
-	  this, SLOT(zoneChanged(const QString&)));
 
    // connect EQInterface slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(addItem(const Item*)),
@@ -2118,8 +2114,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 		      m_spawnShell, SLOT(zoneSpawns(const uint8_t*, size_t)));
 
    // connect the SpellShell slots to ZoneMgr signals
-   connect(m_zoneMgr, SIGNAL(zoneChanged(const QString&)),
-	   m_spellShell, SLOT(zoneChanged()));
+   connect(m_zoneMgr, SIGNAL(zoneBegin()),
+	   m_spellShell, SLOT(zoneBegin()));
    
    // connect the SpellShell slots to SpawnShell signals
    connect(m_spawnShell, SIGNAL(killSpawn(const Item*, const Item*, uint16_t)),
@@ -4626,10 +4622,9 @@ void EQInterface::syncDateTime(const QDateTime& dt)
 
 void EQInterface::zoneBegin(const QString& shortZoneName)
 {
+  stsMessage("- Busy Zoning -");
   emit newZoneName(shortZoneName);
-  float percentZEM = m_zoneMgr->zoneExpMultiplier();
-  QString tempStr;
-  tempStr.sprintf("ZEM: %3.2f", percentZEM);
+  const QString tempStr = "ZEM: N/A";
   if (m_stsbarZEM)
     m_stsbarZEM->setText(tempStr);
 }
@@ -4641,17 +4636,6 @@ void EQInterface::zoneEnd(const QString& shortZoneName,
   stsMessage("");
   float percentZEM = m_zoneMgr->zoneExpMultiplier();
   QString tempStr;
-  tempStr.sprintf("ZEM: %3.2f", percentZEM);
-  if (m_stsbarZEM)
-    m_stsbarZEM->setText(tempStr);
-}
-
-void EQInterface::zoneChanged(const QString& shortZoneName)
-{
-  QString tempStr;
-  stsMessage("- Busy Zoning -");
-  emit newZoneName(shortZoneName);
-  float percentZEM = m_zoneMgr->zoneExpMultiplier();
   tempStr.sprintf("ZEM: %3.2f", percentZEM);
   if (m_stsbarZEM)
     m_stsbarZEM->setText(tempStr);

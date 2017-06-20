@@ -65,8 +65,8 @@ class ZoneMgr : public QObject
   void zoneBegin(const QString& shortZoneName);
   void zoneBegin(const ClientZoneEntryStruct* zsentry, size_t len, uint8_t dir);
   void zoneBegin(const ServerZoneEntryStruct* zsentry, size_t len, uint8_t dir);
-  void zoneChanged(const QString& shortZoneName);
-  void zoneChanged(const zoneChangeStruct*, size_t, uint8_t);
+  void zoneChanging(const QString& shortZoneName);
+  void zoneChanging(const zoneChangeStruct*, size_t, uint8_t);
   void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
   void logOut();
  private:

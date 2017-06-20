@@ -258,10 +258,6 @@ MapMgr::MapMgr(const DataLocationMgr* dataLocMgr,
   // supply the MapMgr slots with signals from ZoneMgr
   connect(zoneMgr, SIGNAL(zoneBegin(const QString&)),
       this, SLOT(zoneBegin(const QString&)));
-  connect(zoneMgr, SIGNAL(zoneChanged(const QString&)),
-      this, SLOT(zoneChanged(const QString&)));
-  connect(zoneMgr, SIGNAL(zoneEnd(const QString&, const QString&)),
-      this, SLOT(zoneEnd(const QString&, const QString&)));
 
   // if there is a short zone name already, try to load its map
   QString shortZoneName = zoneMgr->shortZoneName();
@@ -292,34 +288,6 @@ void MapMgr::zoneBegin(const QString& shortZoneName)
   // signal that the map has been unloaded
   emit mapUnloaded();
   
-  // atttempt to load the new map
-  loadZoneMap(shortZoneName);
-}
-
-void MapMgr::zoneChanged(const QString& shortZoneName)
-{
-#ifdef DEBUGMAP
-  debug ("zoneChanged(%s)", 
-     (const char*)shortZoneName);
-#endif /* DEBUGMAP */
-
-  // clear the map data
-  m_mapData.clear();
-  
-  // signal that the map has been unloaded
-  emit mapUnloaded();
-
-  // atttempt to load the new map
-  loadZoneMap(shortZoneName);
-}
-
-void MapMgr::zoneEnd(const QString& shortZoneName, const QString& longZoneName)
-{
-#ifdef DEBUGMAP
-  debug ("zoneEnd(%s, %s)", 
-     (const char*)longZoneName, (const char*)shortZoneName);
-#endif /* DEBUGMAP */
-
   // atttempt to load the new map
   loadZoneMap(shortZoneName);
 }

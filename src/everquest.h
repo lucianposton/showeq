@@ -596,8 +596,12 @@ struct zoneChangeStruct
 /*0000*/ char     name[64];	     	// Character Name
 /*0064*/ uint16_t zoneId;           // zone Id
 /*0066*/ uint16_t zoneInstance;     // zone Instance
-/*0068*/ uint8_t  unknown0068[8];   // unknown
-/*0076*/ uint8_t  unknown0076[12];  // ***Placeholder (6/29/2005)
+/*0068*/ float    y;
+/*0072*/ float    x;
+/*0076*/ float    z;
+/*0080*/ uint32_t zone_reason;  //0x0A == death
+/*0084*/ int32_t  success; // =0 client->server, =1 server->client, -X=specific error
+                           // eqemu's common/eq_constants.h has error codes
 /*0088*/
 };
 
