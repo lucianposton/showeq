@@ -35,7 +35,8 @@ SpawnPoint::SpawnPoint(uint16_t spawnID,
     m_count(count),
     m_name( name ),
     m_last( QString::null ),
-    m_lastID(spawnID)
+    m_lastID(spawnID),
+    m_spawn_counts()
 {
 }
 
@@ -89,6 +90,20 @@ void SpawnPoint::update(const Spawn* spawn)
     m_diffTime = m_spawnTime - m_deathTime;
   
   m_count++;
+
+  const QString cleanedName = spawn->cleanedName();
+  int spawn_name_count = reinterpret_cast<long>(m_spawn_counts.take(cleanedName));
+  m_spawn_counts.insert(cleanedName, reinterpret_cast<void*>(spawn_name_count+1));
+}
+
+void SpawnPoint::setSpawnCount(const QString& name, int count)
+{
+    if (m_spawn_counts.find(name))
+    {
+        seqWarn("SpawnPoint::setSpawnCount(%s,%d): duplicate name",
+                (const char*)name, count);
+    }
+    m_spawn_counts.replace(name, reinterpret_cast<void*>(count));
 }
 
 SpawnMonitor::SpawnMonitor(const DataLocationMgr* dataLocMgr, 
@@ -298,7 +313,56 @@ void SpawnMonitor::saveSpawnPoints()
 		<< sp->name()
 		<< '\n';
 
-    // TODO: save list of known spawns
+    if (!sp->spawn_counts().isEmpty())
+    {
+        QString fileName_spc = sp->key() + ".spc";
+
+        QFileInfo fileInfo_spc = 
+            m_dataLocMgr->findWriteFile("spawnpoints/"+m_zoneName, fileName_spc, false);
+
+        fileName_spc = fileInfo_spc.absFilePath();
+
+        const QString newName_spc = fileName_spc + ".new";
+        QFile spcFile( newName_spc );
+
+        if (!spcFile.open(IO_WriteOnly))
+        {
+            seqWarn("Failed to open %s for writing", (const char*)newName_spc);
+            return;
+        }
+
+        QTextStream output_spc(&spcFile);
+        QDictIterator<void> spawn_counts_it(sp->spawn_counts());
+        for ( ; spawn_counts_it.current(); ++spawn_counts_it)
+        {
+            output_spc << reinterpret_cast<long>(spawn_counts_it.current())
+                << " "
+                << spawn_counts_it.currentKey()
+                << '\n';
+        }
+        spcFile.close();
+
+        QFileInfo fi( spcFile );
+        QFile old( fileName_spc );
+        QDir dir( fi.dir() );
+        QString backupName = fileName_spc + ".bak";
+
+        if (old.exists())
+        {
+            if (dir.rename( fileName_spc, backupName))
+            {
+                if (!dir.rename( newName_spc, fileName_spc))
+                    seqWarn( "Failed to rename %s to %s", 
+                            (const char*)newName_spc, (const char*)fileName_spc);
+            }
+        }
+        else
+        {
+            if (!dir.rename(newName_spc, fileName_spc))
+                seqWarn("Failed to rename %s to %s", 
+                        (const char*)newName_spc, (const char*)fileName_spc);
+        }
+    }
   }
   
   spFile.close();
@@ -377,19 +441,54 @@ void SpawnMonitor::loadSpawnPoints()
     {
       QString key = p->key();
       
-      if (!m_points.find(key))
-      {
-	m_points.insert(key, p);
-	emit newSpawnPoint(p);
-      }
-      else
+      if (m_points.find(key))
       {
 	seqWarn("Warning: spawn point key already in use!");
 	delete p;
+    continue;
       }
+
+      QString fileName_spc = key + ".spc";
+      QFileInfo fileInfo_spc = 
+          m_dataLocMgr->findExistingFile("spawnpoints/"+m_zoneName, fileName_spc, false);
+
+      if (!fileInfo_spc.exists())
+      {
+          seqDebug("Previous spawn point count file (%s) not found",
+                  (const char*)fileInfo_spc.absFilePath());
+          m_points.insert(key, p);
+          emit newSpawnPoint(p);
+          continue;
+      }
+
+      fileName_spc = fileInfo_spc.absFilePath();
+      QFile spcFile(fileName_spc);
+      if (!spcFile.open(IO_ReadOnly))
+      {
+          seqWarn( "Can't open spawn point count file %s", (const char*)fileName_spc );
+          m_points.insert(key, p);
+          emit newSpawnPoint(p);
+          continue;
+      }
+
+      QTextStream input_spc( &spcFile );
+      while (!input_spc.atEnd())
+      {
+          int spawn_count;
+          QString spawn_name;
+          input_spc >> spawn_count;
+          spawn_name = input_spc.readLine();
+          spawn_name.remove(0,1); // Remove leading space delimiter
+          p->setSpawnCount(spawn_name, spawn_count);
+      }
+      spcFile.close();
+
+      m_points.insert(key, p);
+      emit newSpawnPoint(p);
     }
   }
 
+  spFile.close();
   seqDebug("Loaded spawn points: %s", (const char*)fileName);
   m_modified = false;
 }

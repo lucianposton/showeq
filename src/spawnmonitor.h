@@ -42,6 +42,7 @@
 #include <time.h>
 #include <qobject.h>
 #include <qasciidict.h>
+#include <qdict.h>
 #include "spawn.h"
 #include "zonemgr.h"
 #include "spawnshell.h"
@@ -69,6 +70,7 @@ public:
   QString name() const { return m_name; }
   QString last() const { return m_last; }
   uint16_t lastID() const { return m_lastID; }
+  const QDict<void>& spawn_counts() const { return m_spawn_counts; }
   int32_t count() const { return m_count; }
   time_t spawnTime() const { return m_spawnTime; }
   time_t deathTime() const { return m_deathTime; } 
@@ -78,6 +80,7 @@ public:
   void setName(const QString& newName) { m_name = newName; }
   void setLast(const QString& last) { m_last = last; }
   void setLastID(uint16_t lastID) { m_lastID = lastID; }
+  void setSpawnCount(const QString& name, int count);
 
   // utility methods
   void update(const Spawn* spawn);
@@ -91,6 +94,8 @@ public:
   QString m_name;
   QString m_last;
   uint16_t m_lastID;
+  // QDict doesn't support value types, so using void* as int
+  QDict<void> m_spawn_counts;
 };
 
 class SpawnMonitor: public QObject
