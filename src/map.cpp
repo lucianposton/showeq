@@ -3906,47 +3906,7 @@ void Map::mouseMoveEvent( QMouseEvent* event )
   // spawn point was closer, display it's info
   if (sp != NULL)
   {
-    QString remaining;
-    if ( sp->diffTime() == 0 || sp->deathTime() == 0 )
-      remaining = "\277 ?";  
-    else
-    {
-      long secs = sp->secsLeft();
-    
-      if ( secs > 0 )
-    remaining.sprintf( "%2ld:%02ld", secs / 60, secs % 60  );
-      else
-    remaining = "now"; 
-    }
-
-    // construct and set the spawned string
-    QString spawned;
-    QDateTime dateTime;
-    dateTime.setTime_t(sp->spawnTime());
-    QDate createDate = dateTime.date();
-
-    // spawn time
-    if ( createDate != QDate::currentDate() )
-      spawned = createDate.dayName( createDate.dayOfWeek() ) + " ";
-    
-    spawned += dateTime.time().toString();
-    
-    QString string;
-    string.sprintf("SpawnPoint: %s\n"
-           "%.3s/Z: %5d/%5d/%5d\n"
-           "Last: %s\n"
-           "Spawned: %s\t Remaining: %s\t Count: %d", 
-           (const char*)sp->name(),
-           showeq_params->retarded_coords ? "Y/X" : "X/Y",
-           showeq_params->retarded_coords ? sp->y() : sp->x(),
-           showeq_params->retarded_coords ? sp->x() : sp->y(),
-           sp->z(),
-           (const char*)sp->last(), 
-           (const char*)spawned,
-           (const char*)remaining,
-           sp->count());
-
-    m_mapTip->setText( string  );
+    m_mapTip->setText(sp->displayString());
     QPoint popPoint = mapToGlobal(event->pos());
     m_mapTip->popup(QPoint(popPoint.x() + 15, popPoint.y() + 15));
   }

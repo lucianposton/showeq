@@ -108,6 +108,7 @@ class SpawnPointList : public SEQListView
   void clearItems(void);
   void refresh();
   void handleSelectItem(QListViewItem* item);
+  void mouseDoubleClickEvent(QListViewItem*);
   void newSpawnPoint(const SpawnPoint* sp);
   void clear();
   void handleSelChanged(const SpawnPoint* sp);

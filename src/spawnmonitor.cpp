@@ -29,15 +29,18 @@ SpawnPoint::SpawnPoint(uint16_t spawnID,
 		       const QString& name, 
 		       time_t diffTime, uint32_t count)
   : EQPoint(loc),
-    m_spawnTime(time(0)),
+    m_spawnTime(0),
     m_deathTime(0),
     m_diffTime(diffTime),
     m_count(count),
     m_name( name ),
     m_last( QString::null ),
     m_lastID(spawnID),
-    m_spawn_counts()
+    m_spawn_counts(),
+    m_spawnCountDisplayString(),
+    m_spawnedTimeDisplayString()
 {
+    regenerateDisplayStrings();
 }
 
 SpawnPoint::~SpawnPoint()
@@ -72,6 +75,90 @@ void SpawnPoint::restart(void)
   m_deathTime = time( 0 );
 }
 
+QString SpawnPoint::spawnCountDisplayString() const
+{
+    return m_spawnCountDisplayString;
+}
+
+QString SpawnPoint::spawnedTimeDisplayString() const
+{
+    return m_spawnedTimeDisplayString;
+}
+
+QString SpawnPoint::remainingTimeDisplayString(const char* na, const char* now) const
+{
+    QString remaining;
+    if ( diffTime() == 0 || deathTime() == 0 )
+    {
+        remaining = QString::fromUtf8(na);
+    }
+    else
+    {
+        const long secs = secsLeft();
+        if ( secs > 0 )
+            remaining.sprintf( "%3ld:%02ld", secs / 60, secs % 60  );
+        else
+            remaining = QString::fromUtf8(now);
+    }
+
+    return remaining;
+}
+
+QString SpawnPoint::displayString() const
+{
+    QString result;
+    result.sprintf("SpawnPoint: %s\n"
+           "%.3s/Z: %5d/%5d/%5d\n"
+           "Last: %s\n"
+           "Spawned: %s\t Remaining: %s\t Count: %d\n"
+           "%s",
+           (const char*)name(),
+           showeq_params->retarded_coords ? "Y/X" : "X/Y",
+           showeq_params->retarded_coords ? y() : x(),
+           showeq_params->retarded_coords ? x() : y(),
+           z(),
+           (const char*)last(),
+           (const char*)spawnedTimeDisplayString(),
+           (const char*)remainingTimeDisplayString(),
+           count(),
+           (const char*)spawnCountDisplayString());
+
+    return result;
+}
+
+void SpawnPoint::regenerateDisplayStrings()
+{
+    QString spawnCountDisplayString;
+    QDictIterator<void> it(m_spawn_counts);
+    for ( ; it.current(); ++it)
+    {
+        const int spawn_count = reinterpret_cast<long>(it.current());
+        spawnCountDisplayString += QString("%1% (%2):\t%3")
+            .arg(100.0 * float(spawn_count)/float(m_count), 4)
+            .arg(spawn_count)
+            .arg(it.currentKey());
+    }
+
+    m_spawnCountDisplayString = spawnCountDisplayString;
+
+
+    QString spawned;
+    if (spawnTime())
+    {
+        QDateTime dateTime;
+        dateTime.setTime_t(spawnTime());
+        QDate createDate = dateTime.date();
+        if ( createDate != QDate::currentDate() )
+            spawned = createDate.dayName( createDate.dayOfWeek() ) + " ";
+        spawned += dateTime.time().toString();
+    }
+    else
+    {
+        spawned = "";
+    }
+    m_spawnedTimeDisplayString = spawned;
+}
+
 void SpawnPoint::update(const Spawn* spawn)
 {
   if (spawn == NULL)
@@ -94,6 +181,8 @@ void SpawnPoint::update(const Spawn* spawn)
   const QString cleanedName = spawn->cleanedName();
   int spawn_name_count = reinterpret_cast<long>(m_spawn_counts.take(cleanedName));
   m_spawn_counts.insert(cleanedName, reinterpret_cast<void*>(spawn_name_count+1));
+
+  regenerateDisplayStrings();
 }
 
 void SpawnPoint::setSpawnCount(const QString& name, int count)
@@ -104,6 +193,7 @@ void SpawnPoint::setSpawnCount(const QString& name, int count)
                 (const char*)name, count);
     }
     m_spawn_counts.replace(name, reinterpret_cast<void*>(count));
+    regenerateDisplayStrings();
 }
 
 SpawnMonitor::SpawnMonitor(const DataLocationMgr* dataLocMgr, 
@@ -422,7 +512,7 @@ void SpawnMonitor::loadSpawnPoints()
   
   int16_t x, y, z;
   unsigned long diffTime;
-  uint32_t count;
+  int count;
   QString name;
 
   while (!input.atEnd())
@@ -471,17 +561,24 @@ void SpawnMonitor::loadSpawnPoints()
           continue;
       }
 
+      int total_spawn_count = 0;
       QTextStream input_spc( &spcFile );
       while (!input_spc.atEnd())
       {
           int spawn_count;
           QString spawn_name;
           input_spc >> spawn_count;
+          total_spawn_count += spawn_count;
           spawn_name = input_spc.readLine();
           spawn_name.remove(0,1); // Remove leading space delimiter
           p->setSpawnCount(spawn_name, spawn_count);
       }
       spcFile.close();
+
+      if (total_spawn_count != count)
+      {
+          p->setCount(total_spawn_count);
+      }
 
       m_points.insert(key, p);
       emit newSpawnPoint(p);

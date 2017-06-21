@@ -55,7 +55,7 @@ class SpawnPoint: public EQPoint
 public:
   SpawnPoint(uint16_t spawnID, const EQPoint& loc, 
 	     const QString& name = "", time_t diffTime = 0, 
-	     uint32_t count = 1);
+	     uint32_t count = 0);
 
   virtual ~SpawnPoint();
   
@@ -77,14 +77,22 @@ public:
   time_t diffTime() const { return m_diffTime; }
 
   // setters
-  void setName(const QString& newName) { m_name = newName; }
-  void setLast(const QString& last) { m_last = last; }
+  void setName(const QString& newName) { m_name = newName; regenerateDisplayStrings(); }
+  void setCount(int count) { m_count = count; regenerateDisplayStrings(); }
+  void setLast(const QString& last) { m_last = last; regenerateDisplayStrings(); }
   void setLastID(uint16_t lastID) { m_lastID = lastID; }
   void setSpawnCount(const QString& name, int count);
 
   // utility methods
   void update(const Spawn* spawn);
   void restart(void);
+  QString spawnCountDisplayString() const;
+  QString spawnedTimeDisplayString() const;
+  QString remainingTimeDisplayString(const char* na="n/a", const char* now="now") const;
+  QString displayString() const;
+
+private:
+  void regenerateDisplayStrings();
 
  protected:
   time_t m_spawnTime;
@@ -96,6 +104,8 @@ public:
   uint16_t m_lastID;
   // QDict doesn't support value types, so using void* as int
   QDict<void> m_spawn_counts;
+  QString m_spawnCountDisplayString;
+  QString m_spawnedTimeDisplayString;
 };
 
 class SpawnMonitor: public QObject

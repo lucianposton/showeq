@@ -42,7 +42,6 @@ SpawnPointListItem::~SpawnPointListItem()
 
 void SpawnPointListItem::update()
 {
-  QString tmpStr;
   // set the coordinate information
   if (showeq_params->retarded_coords)
   {
@@ -57,37 +56,10 @@ void SpawnPointListItem::update()
   setText(tSpawnPointCoord3, 
 	  QString::number(m_spawnPoint->z(), 'f', 1));
 
-  // construct and set the time remaining string
-  if ( m_spawnPoint->diffTime() == 0 || m_spawnPoint->deathTime() == 0 )
-    tmpStr = "\277 ?";  // upside down questoin mark followed by question mark
-  else
-  {
-    long secs = m_spawnPoint->secsLeft();
-    
-    if ( secs > 0 )
-      tmpStr.sprintf( "%3ld:%02ld", secs / 60, secs % 60  );
-    else
-      tmpStr = "   now"; // spaces followed by now
-  }
-  setText(tSpawnPointRemaining, tmpStr);
-
-  // set the name and last spawn info
+  setText(tSpawnPointRemaining, m_spawnPoint->remainingTimeDisplayString("\u00a0","   now"));
   setText(tSpawnPointName, m_spawnPoint->name());
   setText(tSpawnPointLast, m_spawnPoint->last());
-
-  // construct and set the spawned string
-  QDateTime       dateTime;
-  dateTime.setTime_t( m_spawnPoint->spawnTime() );
-  QDate           createDate = dateTime.date();
-  tmpStr = "";
-  // spawn time
-  if ( createDate != QDate::currentDate() )
-    tmpStr = createDate.dayName( createDate.dayOfWeek() ) + " ";
-  
-  tmpStr += dateTime.time().toString();
-
-  // set when it spawned and the count
-  setText(tSpawnPointSpawned, tmpStr);
+  setText(tSpawnPointSpawned, m_spawnPoint->spawnedTimeDisplayString());
   setText(tSpawnPointCount, QString::number(m_spawnPoint->count()));
 }
 
@@ -232,8 +204,23 @@ SpawnPointList::SpawnPointList(SpawnMonitor* spawnMonitor,
 	  this, SLOT(rightButtonClicked(QListViewItem*, const QPoint&, int)));
   connect(this, SIGNAL( selectionChanged(QListViewItem*)),
 	  this, SLOT(handleSelectItem(QListViewItem*)));
+  connect (this, SIGNAL(doubleClicked(QListViewItem*)),
+          this, SLOT(mouseDoubleClickEvent(QListViewItem*)));
   m_timer->start(10000L);
 }
+
+void SpawnPointList::mouseDoubleClickEvent(QListViewItem* litem)
+{
+    if (litem == NULL)
+        return;
+
+    const SpawnPoint* item = ((SpawnPointListItem*)litem)->spawnPoint();
+    if (item != NULL)
+    {
+        seqInfo("%s",(const char*)item->displayString());
+    }
+}
+
 
 void SpawnPointList::setKeepSorted(bool val)
 {
