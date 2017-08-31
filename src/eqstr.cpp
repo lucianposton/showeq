@@ -152,19 +152,7 @@ QString EQStr::formatMessage(uint32_t formatid,
   }
   else
   {
-    QValueVector<QString> argList;
-    argList.reserve(5); // reserve space for 5 elements to handle most common sizes
-    
-    // 
-    size_t totalArgsLen = 0;
-    const char* curArg;
-    while (totalArgsLen < argsLen)
-    {
-      curArg = arguments + totalArgsLen;
-      // insert argument into the argument list
-      argList.push_back(QString::fromUtf8(curArg));
-      totalArgsLen += strlen(curArg) + 1;
-    }
+    const QValueVector<QString> argList = makeMessageArgVector(arguments, argsLen);
 
     bool ok;
     int curPos;
@@ -230,4 +218,20 @@ QString EQStr::formatMessage(uint32_t formatid,
   }
 
   return tempStr;
+}
+
+QValueVector<QString> EQStr::makeMessageArgVector(const char* arguments, size_t argsLen) const
+{
+    QValueVector<QString> result;
+    result.reserve(5); // reserve space for 5 elements to handle most common sizes
+    size_t totalArgsLen = 0;
+    const char* curArg;
+    while (totalArgsLen < argsLen)
+    {
+        curArg = arguments + totalArgsLen;
+        result.push_back(QString::fromUtf8(curArg));
+        totalArgsLen += strlen(curArg) + 1;
+    }
+
+    return result;
 }

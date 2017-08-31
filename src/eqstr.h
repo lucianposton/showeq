@@ -15,6 +15,7 @@
 
 #include <qintdict.h>
 #include <qstring.h>
+#include <qvaluevector.h>
 
 //----------------------------------------------------------------------
 // EQStr
@@ -29,6 +30,7 @@ class EQStr
   QString message(uint32_t formatid) const;
   QString formatMessage(uint32_t formatid, 
 			const char* arguments, size_t argslen) const;
+  QValueVector<QString> makeMessageArgVector(const char* arguments, size_t argsLen) const;
 
  protected:
    QIntDict<QString> m_messageStrings;
