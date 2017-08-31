@@ -269,10 +269,6 @@ void Player::player(const uint8_t* data)
   setGuildTag(m_guildMgr->guildIdToName(guildID()));
   emit guildChanged();
 
-#if 1 // ZBTEMP
-  seqDebug("charProfile(%f/%f/%f - %f)",
-	   player->x, player->y, player->z, player->heading);
-#endif
   setPos((int16_t)lrintf(player->x), 
          (int16_t)lrintf(player->y), 
          (int16_t)lrintf(player->z),
@@ -280,11 +276,13 @@ void Player::player(const uint8_t* data)
 	 showeq_params->walkpathlength
         );
   setDeltas(0,0,0);
+#ifdef DEBUG_PLAYER
   seqDebug("Player::backfill(): Pos (%f/%f/%f) Heading: %f",
 	   player->x, player->y, player->z, player->heading);
   seqDebug("Player::backfill(bind): Pos (%f/%f/%f) Heading: %f",
 	   player->binds[0].x, player->binds[0].y, player->binds[0].z, 
        player->binds[0].heading);
+#endif
   setHeading((int8_t)lrintf(player->heading), 0);
   m_headingDegrees = 360 - ((((int8_t)lrintf(player->heading)) * 360) >> 11);
   m_validPos = true;
@@ -826,10 +824,12 @@ void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
 	 showeq_params->walkpathlength);
   for (int i = 0; i <= tLastCoreWearSlot; i++)
     setEquipment(i, zsentry->equipment[i]);
+#ifdef DEBUG_PLAYER
   seqDebug("Player::zoneBegin(): playerid=%d Pos (%f/%f/%f) Heading %f",
           zsentry->spawnId,
           float(zsentry->x)/8.0, float(zsentry->y)/8.0, float(zsentry->z)/8.0,
           float(zsentry->heading));
+#endif
   setHeading(zsentry->heading, 0);
   m_validPos = true;
 
