@@ -94,7 +94,7 @@ QString SpawnPoint::remainingTimeDisplayString(const char* na, const char* now) 
     }
     else
     {
-        const long secs = secsLeft();
+        const time_t secs = secsLeft();
         if ( secs > 0 )
             remaining.sprintf( "%3ld:%02ld", secs / 60, secs % 60  );
         else

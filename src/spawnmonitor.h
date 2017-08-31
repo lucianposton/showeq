@@ -59,7 +59,7 @@ public:
 
   virtual ~SpawnPoint();
   
-  long secsLeft() const { return m_diffTime - ( time( 0 ) - m_deathTime ); }
+  time_t secsLeft() const { return m_diffTime - ( time( 0 ) - m_deathTime ); }
   
   static QString key( int x, int y, int z );
   static QString key( const EQPoint& l ) { return key( l.x(), l.y(), l.z() ); }
