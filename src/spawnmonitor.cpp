@@ -132,11 +132,13 @@ void SpawnPoint::regenerateDisplayStrings()
     QDictIterator<void> it(m_spawn_counts);
     for ( ; it.current(); ++it)
     {
-        const int spawn_count = reinterpret_cast<long>(it.current());
-        spawnCountDisplayString += QString("%1% (%2):\t%3")
-            .arg(100.0 * float(spawn_count)/float(m_count), 4)
-            .arg(spawn_count)
-            .arg(it.currentKey());
+        const long spawn_count = reinterpret_cast<long>(it.current());
+        QString tmp;
+        tmp.sprintf("%4.1f%% (%ld):\t%s\n",
+            100.0 * float(spawn_count)/float(m_count),
+            spawn_count,
+            (const char*)it.currentKey());
+        spawnCountDisplayString += tmp;
     }
 
     m_spawnCountDisplayString = spawnCountDisplayString;
@@ -179,7 +181,7 @@ void SpawnPoint::update(const Spawn* spawn)
   m_count++;
 
   const QString cleanedName = spawn->cleanedName();
-  int spawn_name_count = reinterpret_cast<long>(m_spawn_counts.take(cleanedName));
+  long spawn_name_count = reinterpret_cast<long>(m_spawn_counts.take(cleanedName));
   m_spawn_counts.insert(cleanedName, reinterpret_cast<void*>(spawn_name_count+1));
 
   regenerateDisplayStrings();
