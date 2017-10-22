@@ -2104,7 +2104,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect(m_packet, SIGNAL(spawnWearingUpdate(const uint8_t*, size_t, uint8_t)),
 	   m_spawnShell, SLOT(spawnWearingUpdate(const uint8_t*)));
 #endif
-   m_packet->connect2("OP_Consider", SP_Zone, DIR_Server|DIR_Client,
+   m_packet->connect2("OP_Consider", SP_Zone, DIR_Client,
 		      "considerStruct", SZC_Match,
 		      m_spawnShell, SLOT(consMessage(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_ClientUpdate", SP_Zone, DIR_Server,
@@ -2177,7 +2177,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Stamina", SP_Zone, DIR_Server,
 		      "staminaStruct", SZC_Match,
 		      m_player, SLOT(updateStamina(const uint8_t*)));
-   m_packet->connect2("OP_Consider", SP_Zone, DIR_Server|DIR_Client,
+   m_packet->connect2("OP_Consider", SP_Zone, DIR_Server,
 		      "considerStruct", SZC_Match,
 		      m_player, SLOT(consMessage(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_SwapSpell", SP_Zone, DIR_Server,

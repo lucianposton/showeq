@@ -1006,79 +1006,20 @@ void SpawnShell::spawnWearingUpdate(const uint8_t* data)
 void SpawnShell::consMessage(const uint8_t* data, size_t, uint8_t dir) 
 {
   const considerStruct * con = (const considerStruct*)data;
-  Item* item;
-  Spawn* spawn;
-
-  if (dir == DIR_Client)
+  if (con->playerid != con->targetid)
   {
-    if (con->playerid != con->targetid) 
-    {
-      item = m_spawns.find(con->targetid);
+      Item* item = m_spawns.find(con->targetid);
       if (item != NULL)
       {
-	spawn = (Spawn*)item;
+          Spawn* spawn = (Spawn*)item;
 
-	// note that this spawn has been considered
-	spawn->setConsidered(true);
-	
-	emit spawnConsidered(item);
+          // note that this spawn has been considered
+          spawn->setConsidered(true);
+
+          emit spawnConsidered(item);
       }
-    }
-    return;
   }
-
-  // is it you that you've conned?
-  if (con->playerid != con->targetid) 
-  {
-    // find the spawn if it exists
-    item = m_spawns.find(con->targetid);
-    
-    // has the spawn been seen before?
-    if (item != NULL)
-    {
-      // yes
-      Spawn* spawn = (Spawn*)item;
-
-      int changed = tSpawnChangedNone;
-
-      /* maxhp and curhp are available when considering players, */
-      /* but not when considering mobs. */
-      if (con->maxHp || con->curHp)
-      {
-         if (spawn->NPC() == SPAWN_NPC_UNKNOWN)
-         {
-	   spawn->setNPC(SPAWN_PLAYER);        // player
-	   changed |= tSpawnChangedNPC;
-         }
-         spawn->setMaxHP(con->maxHp);
-         spawn->setHP(con->curHp);
-         changed |= tSpawnChangedHP;
-      }
-      else if (item->NPC() == SPAWN_NPC_UNKNOWN)
-      {
-         spawn->setNPC(SPAWN_NPC);
-         changed |= tSpawnChangedNPC;
-      }
-
-      // note the updates if any
-      if (changed != tSpawnChangedNone)
-      {
-        if (updateFilterFlags(item))
-           changed |= tSpawnChangedFilter;
-        if (updateRuntimeFilterFlags(item))
-           changed |= tSpawnChangedRuntimeFilter;
-
-	item->updateLastChanged();
-        emit changeItem(item, changed);
-      }
-
-      // note that this spawn has been considered
-      spawn->setConsidered(true);
-
-      emit spawnConsidered(item);
-    } // end if spawn found
-  } // else not yourself
-} // end consMessage()
+}
 
 void SpawnShell::deleteSpawn(const uint8_t* data)
 {

@@ -953,9 +953,6 @@ void Player::playerUpdateSelf(const uint8_t* data, size_t, uint8_t dir)
 
 void Player::consMessage(const uint8_t* data, size_t, uint8_t dir)
 {
-  if (dir == DIR_Client)
-    return;
-
   const considerStruct * con = (const considerStruct*)data;
 
   if (con->playerid == con->targetid) 
