@@ -68,6 +68,33 @@ private:
 
 
 ////////////////////////////////////////////
+//  DotOffenseRecord definition
+//////////////////////////////////////////`//
+class DotOffenseRecord
+{
+    public:
+        DotOffenseRecord(const Player* p, const QString& iSpellName);
+
+        int getTicks() { return m_iTicks; };
+        int getMinDamage() { return m_iMinDamage; };
+        int getMaxDamage() { return m_iMaxDamage; };
+        int getTotalDamage() { return m_iTotalDamage; };
+        QString getSpellName() { return m_iSpellName; };
+
+        void addTick(int iDamage);
+
+    private:
+        const QString m_iSpellName;
+        const Player* m_player;
+
+        int m_iTicks;
+        int m_iMinDamage;
+        int m_iMaxDamage;
+        int m_iTotalDamage;
+};
+
+
+////////////////////////////////////////////
 //  CombatDefenseRecord definition
 ////////////////////////////////////////////
 class CombatDefenseRecord
@@ -163,6 +190,8 @@ public:
 public slots:
 
 	virtual void savePrefs(void);
+	void addDotTick(const QString& iTargetName,
+			const QString& iSpellName, int iDamage);
 	void addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage, QString tName, QString sName);
 	void resetDPS();
 	void clearMob();
@@ -176,6 +205,7 @@ private:
 	QWidget* initDefenseWidget();
 	QWidget* initMobWidget();
 
+	void addDotOffenseRecord(const QString& iSpellName, int iDamage);
 	void addOffenseRecord(int iType, int iDamage, int iSpell);
 	void addDefenseRecord(int iDamage);
 	void addMobRecord(int iTargetID, int iSourceID, int iDamage, QString tName, QString sName);
@@ -204,9 +234,11 @@ private:
 	QLabel* 	m_label_offense_totaldamage;
 	QLabel*		m_label_offense_percentspecial;
 	QLabel*		m_label_offense_percentnonmelee;
+	QLabel*		m_label_offense_percentdot;
 	QLabel*		m_label_offense_avgmelee;
 	QLabel*		m_label_offense_avgspecial;
 	QLabel*		m_label_offense_avgnonmelee;
+	QLabel*		m_label_offense_avgdottick;
 
 	QLabel*		m_label_defense_avoid_misses;
 	QLabel*		m_label_defense_avoid_block;
@@ -228,6 +260,7 @@ private:
 	QLabel*		m_label_mob_lastdps;
 
 	QList<CombatOffenseRecord> m_combat_offense_list;
+	QList<DotOffenseRecord> m_dot_offense_list;
 	CombatDefenseRecord *m_combat_defense_record;
 	QList<CombatMobRecord> m_combat_mob_list;
 

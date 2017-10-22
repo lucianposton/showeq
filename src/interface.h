@@ -140,6 +140,7 @@ class EQInterface:public QMainWindow
    void resetPacket(int, int);
    void attack2Hand1(const uint8_t*);
    void action2Message(const uint8_t *);
+   void formattedMessage(const uint8_t*, size_t, uint8_t);
    void combatKillSpawn(const uint8_t*);
    void updatedDateTime(const QDateTime&);
    void syncDateTime(const QDateTime&);
@@ -230,6 +231,7 @@ class EQInterface:public QMainWindow
    void newZoneName (const QString &); 
    void restoreFonts();
 
+   void dotTickSignal(const QString&, const QString&, int);
    void combatSignal(int, int, int, int, int, QString, QString);
 
  private slots:

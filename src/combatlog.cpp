@@ -59,6 +59,35 @@ void CombatOffenseRecord::addHit(int iDamage)
 
 
 ////////////////////////////////////////////
+//  DotOffenseRecord implementation
+////////////////////////////////////////////
+DotOffenseRecord::DotOffenseRecord(const Player* p, const QString& iSpellName) :
+    m_iSpellName(iSpellName),
+    m_player(p),
+    m_iTicks(0),
+    m_iMinDamage(65536),
+    m_iMaxDamage(0),
+    m_iTotalDamage(0)
+{
+}
+
+void DotOffenseRecord::addTick(int iDamage)
+{
+    if(iDamage <= 0)
+        return;
+
+    m_iTicks++;
+    m_iTotalDamage += iDamage;
+
+    if(iDamage > 0 && iDamage < m_iMinDamage)
+        m_iMinDamage = iDamage;
+
+    if(iDamage > m_iMaxDamage)
+        m_iMaxDamage = iDamage;
+}
+
+
+////////////////////////////////////////////
 //  CombatDefenseRecord implementation
 ////////////////////////////////////////////
 CombatDefenseRecord::CombatDefenseRecord(Player* p) :
@@ -237,6 +266,7 @@ CombatWindow::CombatWindow(Player* player,
      otherwise won't be. */
 
 	m_combat_offense_list.setAutoDelete(true);
+	m_dot_offense_list.setAutoDelete(true);
 	m_combat_defense_record = new CombatDefenseRecord(player);
 	m_combat_mob_list.setAutoDelete(true);
 
@@ -333,6 +363,12 @@ QWidget* CombatWindow::initOffenseWidget()
 
 	new QLabel("Avg NonMelee:", summaryGrid);
 	m_label_offense_avgnonmelee = new QLabel(summaryGrid);
+
+	new QLabel("% from DoT:", summaryGrid);
+	m_label_offense_percentdot = new QLabel(summaryGrid);
+
+	new QLabel("Avg DoT Tick:", summaryGrid);
+	m_label_offense_avgdottick = new QLabel(summaryGrid);
 
 	((QGridLayout *)summaryGrid->layout())->setColStretch(1, 1);
 	((QGridLayout *)summaryGrid->layout())->setColStretch(3, 1);
@@ -491,17 +527,21 @@ void CombatWindow::updateOffense()
 	QString s_totaldamage;
 	QString s_percentspecial;
 	QString s_percentnonmelee;
+	QString s_percentdot;
 	QString s_avgmelee;
 	QString s_avgspecial;
 	QString s_avgnonmelee;
+	QString s_avgdottick;
 
 	int iTotalDamage = 0;
 	//int iTotalHits = 0;
 	double dPercentSpecial = 0.0;
 	double dPercentNonmelee = 0.0;
+	double dPercentDot = 0.0;
 	double dAvgMelee = 0.0;
 	double dAvgSpecial = 0.0;
 	double dAvgNonmelee = 0.0;
+	double dAvgDotTick = 0.0;
 
 	int iMeleeDamage = 0;
 	int iMeleeHits = 0;
@@ -509,6 +549,8 @@ void CombatWindow::updateOffense()
 	int iSpecialHits = 0;
 	int iNonmeleeDamage = 0;
 	int iNonmeleeHits = 0;
+	int iDotDamage = 0;
+	int iDotTicks = 0;
 
 
 	//	empty the list so we can repopulate
@@ -627,29 +669,71 @@ void CombatWindow::updateOffense()
 		}
 	}
 
-	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage;
+	DotOffenseRecord *dotRecord;
+
+	for(dotRecord = m_dot_offense_list.first(); dotRecord != 0; dotRecord = m_dot_offense_list.next())
+	{
+		int iTicks = dotRecord->getTicks();
+		int iMinDamage = dotRecord->getMinDamage();
+		int iMaxDamage = dotRecord->getMaxDamage();
+		int iDamage = dotRecord->getTotalDamage();
+
+		double dAvgDamage = (double)iDamage / (double)iTicks;
+
+		QString s_type;
+		s_type.sprintf("DoT: %s", (const char*)dotRecord->getSpellName());
+		QString s_hits;
+		s_hits.setNum(iTicks);
+		QString s_misses = "";
+		QString s_ratio = "";
+		QString s_avgdamage;
+		s_avgdamage.setNum(dAvgDamage);
+		QString s_mindamage;
+		s_mindamage.setNum(iMinDamage);
+		QString s_maxdamage;
+		s_maxdamage.setNum(iMaxDamage);
+		QString s_damage;
+		s_damage.setNum(iDamage);
+
+		QListViewItem *pItem = new QListViewItem(m_listview_offense,
+			s_type, s_hits, s_misses, s_ratio,
+			s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+
+		m_listview_offense->insertItem(pItem);
+
+		iDotDamage += iDamage;
+		iDotTicks += iTicks;
+	}
+
+	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage + iDotDamage;
 	//iTotalHits = iMeleeHits + iSpecialHits + iNonmeleeHits;
 
 	dPercentSpecial = ((double)iSpecialDamage / (double)iTotalDamage) * 100.0;
 	dPercentNonmelee = ((double)iNonmeleeDamage / (double)iTotalDamage) * 100.0;
+	dPercentDot = ((double)iDotDamage / (double)iTotalDamage) * 100.0;
 
 	dAvgMelee = (double)iMeleeDamage / (double)iMeleeHits;
 	dAvgSpecial = (double)iSpecialDamage / (double)iSpecialHits;
 	dAvgNonmelee = (double)iNonmeleeDamage / (double)iNonmeleeHits;
+	dAvgDotTick = (double)iDotDamage / (double)iDotTicks;
 
 	s_totaldamage.setNum(iTotalDamage);
 	s_percentspecial.setNum(dPercentSpecial);
 	s_percentnonmelee.setNum(dPercentNonmelee);
+	s_percentdot.setNum(dPercentDot);
 	s_avgmelee.setNum(dAvgMelee);
 	s_avgspecial.setNum(dAvgSpecial);
 	s_avgnonmelee.setNum(dAvgNonmelee);
+	s_avgdottick.setNum(dAvgDotTick);
 
 	m_label_offense_totaldamage->setText(s_totaldamage);
 	m_label_offense_percentspecial->setText(s_percentspecial);
 	m_label_offense_percentnonmelee->setText(s_percentnonmelee);
+	m_label_offense_percentdot->setText(s_percentdot);
 	m_label_offense_avgmelee->setText(s_avgmelee);
 	m_label_offense_avgspecial->setText(s_avgspecial);
 	m_label_offense_avgnonmelee->setText(s_avgnonmelee);
+	m_label_offense_avgdottick->setText(s_avgdottick);
 
 
 #ifdef DEBUGCOMBAT
@@ -744,6 +828,56 @@ void CombatWindow::updateMob()
 	m_label_mob_currentdps->setText(QString::number(m_dDPS));
 	m_label_mob_lastdps->setText(QString::number(m_dDPSLast));
 
+}
+
+void CombatWindow::addDotTick(
+        const QString& iTargetName, const QString& iSpellName, const int iDamage)
+{
+#ifdef DEBUGCOMBAT
+    seqDebug("CombatWindow::addDotTickstarting...");
+#endif
+
+    if (iSpellName.isEmpty())
+        return;
+
+    addDotOffenseRecord(iSpellName, iDamage);
+    updateOffense();
+    updateDPS(iDamage);
+
+#ifdef DEBUGCOMBAT
+    seqDebug("CombatWindow::addDotTickfinished...");
+#endif
+}
+
+void CombatWindow::addDotOffenseRecord(const QString& iSpellName, const int iDamage)
+{
+#ifdef DEBUGCOMBAT
+    seqDebug("CombatWindow::addDotOffenseRecord starting...");
+#endif
+
+    bool bFoundRecord = false;
+    DotOffenseRecord *pRecord;
+    for(pRecord = m_dot_offense_list.first();
+            pRecord != 0; pRecord = m_dot_offense_list.next())
+    {
+        if(pRecord->getSpellName() == iSpellName)
+        {
+            bFoundRecord = true;
+            break;
+        }
+    }
+
+    if(!bFoundRecord)
+    {
+        pRecord = new DotOffenseRecord(m_player, iSpellName);
+        m_dot_offense_list.append(pRecord);
+    }
+
+    pRecord->addTick(iDamage);
+
+#ifdef DEBUGCOMBAT
+    seqDebug("CombatWindow::addDotOffenseRecord finished...");
+#endif
 }
 
 void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage, QString tName, QString sName)
@@ -936,6 +1070,9 @@ void CombatWindow::updateDPS(int iDamage)
 
 void CombatWindow::resetDPS()
 {
+#ifdef DEBUGCOMBAT
+	seqDebug("CombatWindow::resetDPS");
+#endif
 	//	we'll let updateDPS do all the work
 	//	by simply setting m_iDPSTimeLast to 0
 
@@ -969,6 +1106,7 @@ void CombatWindow::clearOffense()
 	{
 		case 0:
 			m_combat_offense_list.clear();
+			m_dot_offense_list.clear();
 			updateOffense();
 			break;
 		default:
@@ -981,6 +1119,7 @@ void CombatWindow::clear(void)
   m_combat_mob_list.clear();
   updateMob();
   m_combat_offense_list.clear();
+  m_dot_offense_list.clear();
   updateOffense();
   m_combat_defense_record->clear();
   updateDefense();

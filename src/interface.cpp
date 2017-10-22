@@ -2020,6 +2020,10 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Action2", SP_Zone, DIR_Client|DIR_Server,
 		      "action2Struct", SZC_Match,
 		      this, SLOT(action2Message(const uint8_t*)));
+   m_packet->connect2("OP_FormattedMessage", SP_Zone, DIR_Server,
+           "formattedMessageStruct", SZC_None,
+           this,
+           SLOT(formattedMessage(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_Death", SP_Zone, DIR_Server,
 		      "newCorpseStruct", SZC_Match,
 		      this, SLOT(combatKillSpawn(const uint8_t*)));
@@ -2233,6 +2237,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      // connect CombatWindow slots to the signals
      connect(m_player, SIGNAL(newPlayer(void)),
 	     m_combatWindow, SLOT(clear(void)));
+     connect (this, SIGNAL(dotTickSignal(const QString&, const QString&, int)),
+	      m_combatWindow, SLOT(addDotTick(const QString&, const QString&, int)));
      connect (this, SIGNAL(combatSignal(int, int, int, int, int, QString, QString)),
 	      m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int, QString, QString)));
      connect (m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
@@ -4588,6 +4594,44 @@ void EQInterface::action2Message(const uint8_t* data)
   emit combatSignal(action2->target, action2->source, action2->type, action2->spell, action2->damage, 
 		    (target != 0) ? target->name() : QString("Unknown"), (source != 0) ? source->name() : QString("Unknown"));
 }
+
+void EQInterface::formattedMessage(const uint8_t* data, size_t len, uint8_t dir)
+{
+  if (dir == DIR_Client)
+    return;
+
+  const formattedMessageStruct* fmsg = (const formattedMessageStruct*)data;
+  const QString messageFormatString = m_eqStrings->find(fmsg->messageFormat);
+  if (messageFormatString != "%1 has taken %2 damage from your %3.")
+  {
+      return;
+  }
+
+  const size_t messagesLen = len
+      - ((uint8_t*)&fmsg->messages[0] - (uint8_t*)fmsg)
+      - sizeof(fmsg->unknownXXXX);
+  const QValueVector<QString> argList = m_eqStrings->makeMessageArgVector(
+          fmsg->messages,
+          messagesLen);
+
+  if (argList.size() != 3)
+  {
+      seqDebug("Expected 3 arguments for dot tick message, but got %zu", argList.size());
+      return;
+  }
+
+  bool ok;
+  const int damage = argList[1].toInt(&ok);
+  if (!ok)
+  {
+      seqDebug("Failed to parse damage value for dot tick message (%s,%s,%s)",
+              (const char*)argList[0], (const char*)argList[1], (const char*)argList[2]);
+      return;
+  }
+
+  emit dotTickSignal(argList[0], argList[2], damage);
+}
+
 
 // belith - combatKillSpawn, fix for the combat window
 //          this displays a killing shot on a mob in combat records
