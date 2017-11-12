@@ -1743,7 +1743,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_ItemPacket", SP_Zone, DIR_Server,
 			"itemPacketStruct", SZC_None,
 			m_itemDB, SLOT(item(const uint8_t*, size_t, uint8_t)));
-     m_packet->connect2("OP_ItemPlayerPacket", SP_Zone, DIR_Server,
+     m_packet->connect2("OP_CharInventory", SP_Zone, DIR_Server,
 			"char", SZC_None, m_itemDB, 
 			SLOT(playerItem(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_ItemLinkResponse", SP_Zone, DIR_Server,

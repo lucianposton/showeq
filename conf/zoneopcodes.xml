@@ -165,8 +165,8 @@
     </opcode>
 -->
 
-    <opcode id="5394" name="OP_ItemPlayerPacket" updated="10/27/05">
-        <comment>old ItemCode</comment>
+    <opcode id="5394" name="OP_CharInventory" updated="10/27/05">
+        <comment></comment>
         <payload dir="server" typename="char" sizechecktype="none"/>
     </opcode>
     <opcode id="00dd" name="OP_Dye" updated="10/27/05">
