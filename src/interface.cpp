@@ -2017,15 +2017,15 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect(m_packet, SIGNAL(attack2Hand1(const uint8_t*, size_t, uint8_t)), 
 	   this, SLOT(attack2Hand1(const uint8_t*)));
 #endif
-   m_packet->connect2("OP_Action2", SP_Zone, DIR_Client|DIR_Server,
-		      "action2Struct", SZC_Match,
-		      this, SLOT(action2Message(const uint8_t*)));
+   m_packet->connect2("OP_Damage", SP_Zone, DIR_Client|DIR_Server,
+		      "CombatDamage_Struct", SZC_Match,
+		      this, SLOT(combatDamageMessage(const uint8_t*)));
    m_packet->connect2("OP_FormattedMessage", SP_Zone, DIR_Server,
            "formattedMessageStruct", SZC_None,
            this,
            SLOT(formattedMessage(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_Death", SP_Zone, DIR_Server,
-		      "newCorpseStruct", SZC_Match,
+		      "Death_Struct", SZC_Match,
 		      this, SLOT(combatKillSpawn(const uint8_t*)));
 #if 0 // ZBTEMP
    connect(m_packet, SIGNAL(interruptSpellCast(const uint8_t*, size_t, uint8_t)),
@@ -2098,7 +2098,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 		      "spawnAppearanceStruct", SZC_Match,
 		      m_spawnShell, SLOT(updateSpawnAppearance(const uint8_t*)));
    m_packet->connect2("OP_Death", SP_Zone, DIR_Server,
-		      "newCorpseStruct", SZC_Match,
+		      "Death_Struct", SZC_Match,
 		      m_spawnShell, SLOT(killSpawn(const uint8_t*)));
 #if 0 // ZBTEMP
    connect(m_packet, SIGNAL(spawnWearingUpdate(const uint8_t*, size_t, uint8_t)),
@@ -4586,9 +4586,9 @@ void EQInterface::attack2Hand1(const uint8_t* data)
   // const attack2Struct * atk2 = (const attack2Struct*)data;
 }
 
-void EQInterface::action2Message(const uint8_t* data)
+void EQInterface::combatDamageMessage(const uint8_t* data)
 {
-  action2Struct *action2 = (action2Struct*)data;
+  CombatDamage_Struct *action2 = (CombatDamage_Struct*)data;
   const Item* target = m_spawnShell->findID(tSpawn, action2->target);
   const Item* source = m_spawnShell->findID(tSpawn, action2->source);
   emit combatSignal(action2->target, action2->source, action2->type, action2->spell, action2->damage, 
@@ -4637,7 +4637,8 @@ void EQInterface::formattedMessage(const uint8_t* data, size_t len, uint8_t dir)
 //          this displays a killing shot on a mob in combat records
 void EQInterface::combatKillSpawn(const uint8_t* data)
 {
-  const newCorpseStruct *deadspawn = (const newCorpseStruct *)data;
+  const Death_Struct *deadspawn = (const Death_Struct *)data;
+
   // only show my kills
   if (deadspawn && deadspawn->killerId == m_player->id())
   {

@@ -1042,7 +1042,7 @@ void SpawnShell::deleteSpawn(const uint8_t* data)
 
 void SpawnShell::killSpawn(const uint8_t* data)
 {
-  const newCorpseStruct* deadspawn = (const newCorpseStruct*)data;
+  const Death_Struct* deadspawn = (const Death_Struct*)data;
 #ifdef SPAWNSHELL_DIAG
    seqDebug("SpawnShell::killSpawn(id=%d, kid=%d)", 
 	  deadspawn->spawnId, deadspawn->killerId);

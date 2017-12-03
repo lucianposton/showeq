@@ -183,9 +183,9 @@
         <comment></comment>
         <payload dir="both" typename="Inspect_Struct" sizechecktype="match"/>
     </opcode>
-    <opcode id="5c78" name="OP_Action2" updated="10/27/05">
-        <comment>old ActionCode</comment>
-        <payload dir="both" typename="action2Struct" sizechecktype="match"/>
+    <opcode id="5c78" name="OP_Damage" updated="10/27/05">
+        <comment></comment>
+        <payload dir="both" typename="CombatDamage_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="3990" name="OP_BeginCast" updated="10/27/05">
         <comment>old BeginCastCode</comment>
@@ -707,8 +707,8 @@
         <comment>Used for changing percent, buying? and activating skills</comment>
     </opcode>
     <opcode id="6160" name="OP_Death" updated="10/27/05">
-        <comment>old NewCorpseCode</comment>
-        <payload dir="server" typename="newCorpseStruct" sizechecktype="match"/>
+        <comment>Killing blow</comment>
+        <payload dir="server" typename="Death_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="4dbc" name="OP_BecomeCorpse" updated="10/27/05">
         <comment></comment>

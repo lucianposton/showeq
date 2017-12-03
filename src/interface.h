@@ -139,7 +139,7 @@ class EQInterface:public QMainWindow
    void numPacket(int, int);
    void resetPacket(int, int);
    void attack2Hand1(const uint8_t*);
-   void action2Message(const uint8_t *);
+   void combatDamageMessage(const uint8_t *);
    void formattedMessage(const uint8_t*, size_t, uint8_t);
    void combatKillSpawn(const uint8_t*);
    void updatedDateTime(const QDateTime&);

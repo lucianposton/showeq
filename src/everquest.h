@@ -1649,24 +1649,24 @@ struct castOnStruct
 /*0034*/ uint8_t  unknown0034[2];         // ***Placeholder
 };
 
-/*
-** Spawn Death Blow
-** Length: 32 Octets
-** OpCode: NewCorpseCode
-*/
-
-struct newCorpseStruct
+struct Death_Struct
 {
-/*0000*/ uint32_t spawnId;                // Id of spawn that died
-/*0004*/ uint32_t killerId;               // Killer
-/*0008*/ uint32_t corpseid;               // corpses id
-/*0012*/ int32_t  type;                   // corpse type?  
-/*0016*/ uint32_t spellId;                // ID of Spell
-/*0020*/ uint16_t zoneId;                 // Bind zone id
-/*0022*/ uint16_t zoneInstance;           // Bind zone instance
-/*0024*/ uint32_t damage;                 // Damage
-/*0028*/ uint8_t  unknown0028[4];         // ***Placeholder
-/*0032*/
+/*000*/ uint32_t    spawnId;
+/*004*/ uint32_t    killerId;
+/*008*/ uint32_t    corpseid;
+/*012*/ uint32_t    unknown012; // NPC kills NPC = 1
+                                // NPC kills PC = ?
+                                // NPC kills player = 9
+                                // player kills NPC = 1
+                                // player kills PC = 93
+                                // player kills player = ?
+                                // PC kills ? = ?
+                                // player drowns = 47
+                                // player falls (pain and suffering) = 9
+/*016*/ uint32_t    spellId;
+/*020*/ uint32_t    type;   // attack type, 0xE7 (231) for spell
+/*024*/ uint32_t    damage;
+/*028*/ uint32_t    unknown028; // Always 0
 };
 
 struct BecomeCorpse_Struct
@@ -1762,22 +1762,24 @@ struct staminaStruct
 /*0008*/
 };
 
-/*
-** Battle Code
-** Length: 23 Octets
-** OpCode: ActionCode
-*/
-
-// This can be used to gather info on spells cast on us
-struct action2Struct
+// this is what prints the You have been struck. and the regular
+// melee messages like You try to pierce, etc.  It's basically the melee
+// and spell damage message
+//
+// Drowning: Involves 2 packets: first DIR=client, then DIR=server.
+// Falling: Involves only 1 DIR=client packet.
+// Melee: Involves only 1 DIR=server packet.
+struct CombatDamage_Struct
 {
-/*0000*/ uint16_t target;               // Target ID
-/*0002*/ uint16_t source;               // Source ID
-/*0004*/ uint8_t  type;                 // Bash, kick, cast, etc.
-/*0005*/ int16_t  spell;                // SpellID
-/*0007*/ int32_t  damage;
-/*0011*/ uint8_t  unknown0011[12];  // ***Placeholder
-/*0023*/
+/* 00 */	uint16_t	target;
+/* 02 */	uint16_t	source;
+/* 04 */	uint8_t	type; //slashing, etc.  231 (0xE7) for spells
+/* 05 */	uint16_t	spell; // spell id
+/* 07 */	uint32_t	damage;
+/* 11 */	float force; // Amplitude of push
+/* 15 */	float meleepush_xy;	// Also used as sequence tied to OP_Action
+/* 19 */	float meleepush_z;
+/* 23 */
 };
 
 // This is what causes the caster to animate and the target to
