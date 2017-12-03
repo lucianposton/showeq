@@ -1091,35 +1091,15 @@ void CombatWindow::resetDPS()
 
 void CombatWindow::clearMob()
 {
-	switch( QMessageBox::information( this, "ShowEQ",
-		"This function will clear all data listed on the mob "
-		"tab.  Do you want to continue?",
-		"&OK", "&Cancel", QString::null, 1, 1 ) )
-	{
-		case 0:
-			m_combat_mob_list.clear();
-			updateMob();
-			break;
-		default:
-			break;
-	}
+    m_combat_mob_list.clear();
+    updateMob();
 }
 
 void CombatWindow::clearOffense()
 {
-	switch( QMessageBox::information( this, "ShowEQ",
-		"This function will clear all data listed on the offense "
-		"tab.  Do you want to continue?",
-		"&OK", "&Cancel", QString::null, 1, 1 ) )
-	{
-		case 0:
-			m_combat_offense_list.clear();
-			m_dot_offense_list.clear();
-			updateOffense();
-			break;
-		default:
-			break;
-	}
+    m_combat_offense_list.clear();
+    m_dot_offense_list.clear();
+    updateOffense();
 }
 
 void CombatWindow::clear(void)
