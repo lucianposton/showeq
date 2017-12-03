@@ -4645,7 +4645,7 @@ void EQInterface::combatKillSpawn(const uint8_t* data)
     const Item* target = m_spawnShell->findID(tSpawn, deadspawn->spawnId);
     const Item* source = m_spawnShell->findID(tSpawn, deadspawn->killerId);
     emit combatSignal(deadspawn->spawnId, deadspawn->killerId,
-		      (deadspawn->type == -25) ? 231 : deadspawn->type,
+		      deadspawn->type,
 		      deadspawn->spellId, deadspawn->damage,
 		      (target != 0) ? target->name() : QString("Unknown"),
 		      (source != 0) ? source->name() : QString("Unknown"));
