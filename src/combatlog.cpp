@@ -902,6 +902,15 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 	}
 	else if(iSourceID == iPlayerID && iTargetID != iPlayerID)
 	{
+		// Damage shields show up as negative damage
+		if (iType != 231 && iDamage < 0)
+		{
+			addOffenseRecord(iType, -iDamage, iSpell);
+			updateOffense();
+			addMobRecord(iTargetID, iSourceID, -iDamage, tName, sName);
+			updateMob();
+		}
+
 		// Belith -- Lets not add buffs, etc
 		if ((iType == 231 && iDamage > 0) || iType != 231) {
 			addOffenseRecord(iType, iDamage, iSpell);
@@ -912,6 +921,8 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 
 		if(iDamage > 0)
 			updateDPS(iDamage);
+		else if(iType != 231 && iDamage < 0)
+			updateDPS(-iDamage);
 	}
 
 #ifdef DEBUGCOMBAT
