@@ -902,10 +902,10 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 	}
 	else if(iSourceID == iPlayerID && iTargetID != iPlayerID)
 	{
-		addOffenseRecord(iType, iDamage, iSpell);
-		updateOffense();
 		// Belith -- Lets not add buffs, etc
 		if ((iType == 231 && iDamage > 0) || iType != 231) {
+			addOffenseRecord(iType, iDamage, iSpell);
+			updateOffense();
 			addMobRecord(iTargetID, iSourceID, iDamage, tName, sName);
 			updateMob();
 		}
@@ -948,11 +948,8 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage, int iSpell)
 
 	if(!bFoundRecord)
 	{
-		// Belith -- Again lets skip buffs, etc
-		if ((iDamage > 0 && iType == 231) || iType != 231) {
-			pRecord = new CombatOffenseRecord(iType, m_player, iSpell);
-			m_combat_offense_list.append(pRecord);
-		}
+		pRecord = new CombatOffenseRecord(iType, m_player, iSpell);
+		m_combat_offense_list.append(pRecord);
 	}
 
 	if(iDamage > 0)
