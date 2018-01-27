@@ -235,10 +235,12 @@ private:
 	QLabel*		m_label_offense_percentspecial;
 	QLabel*		m_label_offense_percentnonmelee;
 	QLabel*		m_label_offense_percentdot;
+	QLabel*		m_label_offense_percentds;
 	QLabel*		m_label_offense_avgmelee;
 	QLabel*		m_label_offense_avgspecial;
 	QLabel*		m_label_offense_avgnonmelee;
 	QLabel*		m_label_offense_avgdottick;
+	QLabel*		m_label_offense_avgds;
 
 	QLabel*		m_label_defense_avoid_misses;
 	QLabel*		m_label_defense_avoid_block;

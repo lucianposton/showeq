@@ -440,6 +440,12 @@ QWidget* CombatWindow::initOffenseWidget()
 	new QLabel("Avg DoT Tick:", summaryGrid);
 	m_label_offense_avgdottick = new QLabel(summaryGrid);
 
+	new QLabel("% from DS:", summaryGrid);
+	m_label_offense_percentds = new QLabel(summaryGrid);
+
+	new QLabel("Avg DS:", summaryGrid);
+	m_label_offense_avgds = new QLabel(summaryGrid);
+
 	((QGridLayout *)summaryGrid->layout())->setColStretch(1, 1);
 	((QGridLayout *)summaryGrid->layout())->setColStretch(3, 1);
 	summaryGrid->layout()->setSpacing(5);
@@ -598,20 +604,24 @@ void CombatWindow::updateOffense()
 	QString s_percentspecial;
 	QString s_percentnonmelee;
 	QString s_percentdot;
+	QString s_percentds;
 	QString s_avgmelee;
 	QString s_avgspecial;
 	QString s_avgnonmelee;
 	QString s_avgdottick;
+	QString s_avgds;
 
 	int iTotalDamage = 0;
 	//int iTotalHits = 0;
 	double dPercentSpecial = 0.0;
 	double dPercentNonmelee = 0.0;
 	double dPercentDot = 0.0;
+	double dPercentDS = 0.0;
 	double dAvgMelee = 0.0;
 	double dAvgSpecial = 0.0;
 	double dAvgNonmelee = 0.0;
 	double dAvgDotTick = 0.0;
+	double dAvgDS = 0.0;
 
 	int iMeleeDamage = 0;
 	int iMeleeHits = 0;
@@ -621,6 +631,8 @@ void CombatWindow::updateOffense()
 	int iNonmeleeHits = 0;
 	int iDotDamage = 0;
 	int iDotTicks = 0;
+	int iDSDamage = 0;
+	int iDSHits = 0;
 
 
 	//	empty the list so we can repopulate
@@ -699,11 +711,16 @@ void CombatWindow::updateOffense()
 				break;
 			}
 			case DAMAGE_CATEGORY_NONMELEE:
-			case DAMAGE_CATEGORY_DAMAGE_SHIELD: // Could aggregate DS separate
-			default:
 			{
 				iNonmeleeDamage += iDamage;
 				iNonmeleeHits += iHits;
+				break;
+			}
+			case DAMAGE_CATEGORY_DAMAGE_SHIELD:
+			default:
+			{
+				iDSDamage += iDamage;
+				iDSHits += iHits;
 				break;
 			}
 		}
@@ -745,35 +762,41 @@ void CombatWindow::updateOffense()
 		iDotTicks += iTicks;
 	}
 
-	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage + iDotDamage;
+	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage + iDotDamage + iDSDamage;
 	//iTotalHits = iMeleeHits + iSpecialHits + iNonmeleeHits;
 
 	dPercentSpecial = ((double)iSpecialDamage / (double)iTotalDamage) * 100.0;
 	dPercentNonmelee = ((double)iNonmeleeDamage / (double)iTotalDamage) * 100.0;
 	dPercentDot = ((double)iDotDamage / (double)iTotalDamage) * 100.0;
+	dPercentDS = ((double)iDSDamage / (double)iTotalDamage) * 100.0;
 
 	dAvgMelee = (double)iMeleeDamage / (double)iMeleeHits;
 	dAvgSpecial = (double)iSpecialDamage / (double)iSpecialHits;
 	dAvgNonmelee = (double)iNonmeleeDamage / (double)iNonmeleeHits;
 	dAvgDotTick = (double)iDotDamage / (double)iDotTicks;
+	dAvgDS = (double)iDSDamage / (double)iDSHits;
 
 	s_totaldamage.setNum(iTotalDamage);
 	s_percentspecial.setNum(dPercentSpecial);
 	s_percentnonmelee.setNum(dPercentNonmelee);
 	s_percentdot.setNum(dPercentDot);
+	s_percentds.setNum(dPercentDS);
 	s_avgmelee.setNum(dAvgMelee);
 	s_avgspecial.setNum(dAvgSpecial);
 	s_avgnonmelee.setNum(dAvgNonmelee);
 	s_avgdottick.setNum(dAvgDotTick);
+	s_avgds.setNum(dAvgDS);
 
 	m_label_offense_totaldamage->setText(s_totaldamage);
 	m_label_offense_percentspecial->setText(s_percentspecial);
 	m_label_offense_percentnonmelee->setText(s_percentnonmelee);
 	m_label_offense_percentdot->setText(s_percentdot);
+	m_label_offense_percentds->setText(s_percentds);
 	m_label_offense_avgmelee->setText(s_avgmelee);
 	m_label_offense_avgspecial->setText(s_avgspecial);
 	m_label_offense_avgnonmelee->setText(s_avgnonmelee);
 	m_label_offense_avgdottick->setText(s_avgdottick);
+	m_label_offense_avgds->setText(s_avgds);
 
 
 #ifdef DEBUGCOMBAT
