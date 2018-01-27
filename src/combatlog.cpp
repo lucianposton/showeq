@@ -23,6 +23,76 @@
 
 #undef DEBUGCOMBAT
 
+namespace {
+
+enum DamageCategory
+{
+    DAMAGE_CATEGORY_MELEE,
+    DAMAGE_CATEGORY_MELEE_SPECIAL,
+    DAMAGE_CATEGORY_NONMELEE,
+    DAMAGE_CATEGORY_DAMAGE_SHIELD
+};
+
+static DamageCategory damageCategory(int iType)
+{
+    switch(iType)
+    {
+        case 0:		// 1H Blunt
+        case 1:		// 1H Slashing
+        case 2:		// 2H Blunt
+        case 3:		// 2H Slashing
+        case 28:	// Hand To Hand
+        case 36:	// Piercing
+            {
+                return DAMAGE_CATEGORY_MELEE;
+            }
+        case 7:		// Archery
+        case 8:		// Backstab
+        case 10:	// Bash
+        case 21:	// Dragon Punch
+        case 23:	// Eagle Strike
+        case 26:	// Flying Kick
+        case 30:	// Kick
+        case 38:	// Round Kick
+        case 51:	// Throwing
+        case 52:	// Tiger Claw
+            {
+                return DAMAGE_CATEGORY_MELEE_SPECIAL;
+            }
+        case 231:       // Non Melee Damage e.g. spells
+            {
+                return DAMAGE_CATEGORY_NONMELEE;
+            }
+        default:        // Damage Shield?
+            {
+                // 245 Mark of Retribution
+                // 248 Flameshield of Ro? (45pt) (mage)
+                // -11 Killing Blow with MoR
+                // -8  Killing Blow with Ro? (45pt) (mage)
+                return DAMAGE_CATEGORY_DAMAGE_SHIELD;
+            }
+    }
+}
+
+static bool isNonMeleeDamage(int iType, int iDamage)
+{
+    // Checking iDamage > 0 avoids buff spells
+    return damageCategory(iType) == DAMAGE_CATEGORY_NONMELEE && iDamage > 0;
+}
+
+static bool isMelee(int iType)
+{
+    DamageCategory c = damageCategory(iType);
+    return c == DAMAGE_CATEGORY_MELEE || c == DAMAGE_CATEGORY_MELEE_SPECIAL;
+}
+
+static bool isDamageShield(int iType)
+{
+    return damageCategory(iType) == DAMAGE_CATEGORY_DAMAGE_SHIELD;
+}
+
+} // namespace
+
 
 ////////////////////////////////////////////
 //  CombatOffenseRecord implementation
@@ -572,41 +642,23 @@ void CombatWindow::updateOffense()
 		double dRatio = (double)iHits / (double)iMisses;
 
 		QString s_type;
-		// Belith -- Damage shields are strange!
-		switch(iType)
+		switch(damageCategory(iType))
 		{
-			case 0:		// 1H Blunt
-			case 1:		// 1H Slashing
-			case 2:		// 2H Blunt
-			case 3:		// 2H Slashing
-			case 28:	// Hand To Hand
-			case 36:	// Piercing
-			case 7:		// Archery
-			case 8:		// Backstab
-			case 10:	// Bash
-			case 21:	// Dragon Punch
-			case 23:	// Eagle Strike
-			case 26:	// Flying Kick
-			case 30:	// Kick
-			case 38:	// Round Kick
-			case 51:	// Throwing
-			case 52:	// Tiger Claw
+			case DAMAGE_CATEGORY_MELEE:
+			case DAMAGE_CATEGORY_MELEE_SPECIAL:
 			{
 				// this is a normal skill
 				s_type.sprintf("%s(%d)", (const char*)skill_name(iType), iType);
 				break;
 			}
-			case 231:       // Non Melee Damage
+			case DAMAGE_CATEGORY_NONMELEE:
 			{
 				s_type.sprintf("Spell: %s(%d)", (const char*)spell_name(iSpell), iSpell);
 				break;
 			}
-			default:        // Damage Shield?
+			case DAMAGE_CATEGORY_DAMAGE_SHIELD:
+			default:
 			{
-				// 245 Mark of Retribution
-				// 248 Flameshield of Ro? (45pt) (mage)
-				// -11 Killing Blow with MoR
-				// -8  Killing Blow with Ro? (45pt) (mage)
 				s_type.sprintf("Damage Shield: (%d)", iType);
 				break;
 			}
@@ -632,34 +684,22 @@ void CombatWindow::updateOffense()
 
 		m_listview_offense->insertItem(pItem);
 
-		switch(iType)
+		switch(damageCategory(iType))
 		{
-			case 0:		// 1H Blunt
-			case 1:		// 1H Slashing
-			case 2:		// 2H Blunt
-			case 3:		// 2H Slashing
-			case 28:	// Hand To Hand
-			case 36:	// Piercing
+			case DAMAGE_CATEGORY_MELEE:
 			{
 				iMeleeDamage += iDamage;
 				iMeleeHits += iHits;
 				break;
 			}
-			case 7:		// Archery
-			case 8:		// Backstab
-			case 10:	// Bash
-			case 21:	// Dragon Punch
-			case 23:	// Eagle Strike
-			case 26:	// Flying Kick
-			case 30:	// Kick
-			case 38:	// Round Kick
-			case 51:	// Throwing
-			case 52:	// Tiger Claw
+			case DAMAGE_CATEGORY_MELEE_SPECIAL:
 			{
 				iSpecialDamage += iDamage;
 				iSpecialHits += iHits;
 				break;
 			}
+			case DAMAGE_CATEGORY_NONMELEE:
+			case DAMAGE_CATEGORY_DAMAGE_SHIELD: // Could aggregate DS separate
 			default:
 			{
 				iNonmeleeDamage += iDamage;
@@ -903,16 +943,14 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 	else if(iSourceID == iPlayerID && iTargetID != iPlayerID)
 	{
 		// Damage shields show up as negative damage
-		if (iType != 231 && iDamage < 0)
+		if (isDamageShield(iType))
 		{
 			addOffenseRecord(iType, -iDamage, iSpell);
 			updateOffense();
 			addMobRecord(iTargetID, iSourceID, -iDamage, tName, sName);
 			updateMob();
 		}
-
-		// Belith -- Lets not add buffs, etc
-		if ((iType == 231 && iDamage > 0) || iType != 231) {
+		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
 			addOffenseRecord(iType, iDamage, iSpell);
 			updateOffense();
 			addMobRecord(iTargetID, iSourceID, iDamage, tName, sName);
@@ -921,7 +959,7 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 
 		if(iDamage > 0)
 			updateDPS(iDamage);
-		else if(iType != 231 && iDamage < 0)
+		else if(isDamageShield(iType))
 			updateDPS(-iDamage);
 	}
 
@@ -943,14 +981,8 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage, int iSpell)
 
 	for(pRecord = m_combat_offense_list.first(); pRecord != 0; pRecord = m_combat_offense_list.next())
 	{
-		// Belith -- Lets match spells up as well
-		if(pRecord->getType() == iType && pRecord->getType() != 231)
-		{
-			bFoundRecord = true;
-			break;
-		}
-		if(pRecord->getType() == iType && pRecord->getType() == 231
-			&& pRecord->getSpell() == iSpell)
+		if(pRecord->getType() == iType
+			&& (isMelee(iType) || pRecord->getSpell() == iSpell))
 		{
 			bFoundRecord = true;
 			break;
@@ -967,7 +999,7 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage, int iSpell)
 	{
 		pRecord->addHit(iDamage);
 	}
-	else if (iType != 231)
+	else if (isMelee(iType))
 	{
 		pRecord->addMiss(iDamage);
 	}
