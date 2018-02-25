@@ -346,7 +346,12 @@ CombatWindow::CombatWindow(Player* player,
     m_iDPSStartTime(0),
     m_iDPSTimeLast(0),
     m_dDPS(0.0),
-    m_dDPSLast(0.0)
+    m_dDPSLast(0.0),
+    m_iPetCurrentDPSTotal(0),
+    m_iPetDPSStartTime(0),
+    m_iPetDPSTimeLast(0),
+    m_dPetDPS(0.0),
+    m_dPetDPSLast(0.0)
 {
   /* Hopefully this is only called once to set up the window,
      so this is a good place to initialize some things which
@@ -624,6 +629,12 @@ QWidget* CombatWindow::initMobWidget()
 
 	new QLabel("Last DPS:", summaryGrid);
 	m_label_mob_lastdps = new QLabel(summaryGrid);
+
+	new QLabel("Current Pet DPS:", summaryGrid);
+	m_label_mob_currentpetdps = new QLabel(summaryGrid);
+
+	new QLabel("Last Pet DPS:", summaryGrid);
+	m_label_mob_lastpetdps = new QLabel(summaryGrid);
 
 	((QGridLayout *)summaryGrid->layout())->setColStretch(1, 1);
 	((QGridLayout *)summaryGrid->layout())->setColStretch(3, 1);
@@ -1205,6 +1216,11 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetO
 			addPetOffenseRecord(iSourceID, sName, iType, iDamage, iSpell);
 			updateOffense();
 		}
+
+		if(iDamage > 0)
+			updatePetDPS(iDamage);
+		else if(isDamageShield(iType))
+			updatePetDPS(-iDamage);
 	}
 
 #ifdef DEBUGCOMBAT
@@ -1389,6 +1405,39 @@ void CombatWindow::updateDPS(int iDamage)
 }
 
 
+void CombatWindow::updatePetDPS(int iDamage)
+{
+#ifdef DEBUGCOMBAT
+	seqDebug("CombatWindow::updatePetDPS...");
+#endif
+
+	const int iTimeNow = mTime();
+
+	//	reset if it's been 10 seconds without an update
+	if(iTimeNow > (m_iPetDPSTimeLast + 10000))
+	{
+		//	reset DPS
+		m_dPetDPSLast = m_dPetDPS;
+		m_dPetDPS = 0;
+		m_iPetDPSStartTime = iTimeNow;
+		m_iPetCurrentDPSTotal = 0;
+	}
+
+	m_iPetDPSTimeLast = mTime();
+	m_iPetCurrentDPSTotal += iDamage;
+
+	const int iTimeElapsed = (iTimeNow - m_iPetDPSStartTime) / 1000;
+
+	if(iTimeElapsed > 0)
+	{
+		m_dPetDPS = (double)m_iPetCurrentDPSTotal / (double)iTimeElapsed;
+	}
+
+	m_label_mob_currentpetdps->setText(QString::number(m_dPetDPS, 'f', 1));
+	m_label_mob_lastpetdps->setText(QString::number(m_dPetDPSLast, 'f', 1));
+}
+
+
 void CombatWindow::resetDPS()
 {
 #ifdef DEBUGCOMBAT
@@ -1400,6 +1449,10 @@ void CombatWindow::resetDPS()
 	m_iDPSTimeLast = 0;
 
 	updateDPS(0);
+
+	m_iPetDPSTimeLast = 0;
+
+	updatePetDPS(0);
 }
 
 void CombatWindow::clearMob()

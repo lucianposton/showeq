@@ -236,7 +236,7 @@ private:
 	void updateDefense();
 	void updateMob();
 	void updateDPS(int iDamage);
-
+	void updatePetDPS(int iDamage);
 
 private:
 	Player*	m_player;
@@ -294,6 +294,8 @@ private:
 	QLabel*		m_label_mob_avgdps;
 	QLabel*		m_label_mob_currentdps;
 	QLabel*		m_label_mob_lastdps;
+	QLabel*		m_label_mob_currentpetdps;
+	QLabel*		m_label_mob_lastpetdps;
 
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	QList<DotOffenseRecord> m_dot_offense_list;
@@ -310,6 +312,11 @@ private:
 	double		m_dDPS;
 	double		m_dDPSLast;
 
+	int		m_iPetCurrentDPSTotal;
+	int		m_iPetDPSStartTime;
+	int		m_iPetDPSTimeLast;
+	double		m_dPetDPS;
+	double		m_dPetDPSLast;
 };
 
 #endif // COMBATLOG_H
