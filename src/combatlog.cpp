@@ -174,6 +174,7 @@ void CombatDefenseRecord::clear(void)
   m_iParries = 0;
   m_iRipostes = 0;
   m_iDodges = 0;
+  m_iShieldAbsorbs = 0;
   m_iMinDamage = 65536;
   m_iMaxDamage = 0;
   m_iTotalDamage = 0;
@@ -226,6 +227,11 @@ void CombatDefenseRecord::addMiss(int iMissReason)
 		case COMBAT_DODGE:
 		{
 			m_iDodges++;
+			break;
+		}
+		case COMBAT_SHIELD_ABSORB:
+		{
+			m_iShieldAbsorbs++;
 			break;
 		}
 		default:
@@ -479,6 +485,9 @@ QWidget* CombatWindow::initDefenseWidget()
 
 	new QLabel("Dodges:", avoidanceGrid);
 	m_label_defense_avoid_dodge = new QLabel(avoidanceGrid);
+
+	new QLabel("Absorbs:", avoidanceGrid);
+	m_label_defense_avoid_shield_absorb = new QLabel(avoidanceGrid);
 
 	new QLabel("Total:", avoidanceGrid);
 	m_label_defense_avoid_total = new QLabel(avoidanceGrid);
@@ -816,7 +825,8 @@ void CombatWindow::updateDefense()
 	int iParries = m_combat_defense_record->getParries();
 	int iRipostes = m_combat_defense_record->getRipostes();
 	int iDodges = m_combat_defense_record->getDodges();
-	int iTotalAvoid = iMisses+iBlocks+iParries+iRipostes+iDodges;
+	int iShieldAbsorbs = m_combat_defense_record->getShieldAbsorbs();
+	int iTotalAvoid = iMisses+iBlocks+iParries+iRipostes+iDodges+iShieldAbsorbs;
 
 	double dAvgHit = (double)m_combat_defense_record->getTotalDamage() / (double)m_combat_defense_record->getHits();
 	int iMinHit = m_combat_defense_record->getMinDamage();
@@ -832,6 +842,7 @@ void CombatWindow::updateDefense()
 	m_label_defense_avoid_parry->setText(QString::number(iParries));
 	m_label_defense_avoid_riposte->setText(QString::number(iRipostes));
 	m_label_defense_avoid_dodge->setText(QString::number(iDodges));
+	m_label_defense_avoid_shield_absorb->setText(QString::number(iShieldAbsorbs));
 	m_label_defense_avoid_total->setText(QString::number(iTotalAvoid));
 	m_label_defense_mitigate_avghit->setText(QString::number(dAvgHit, 'f', 0));
 	m_label_defense_mitigate_minhit->setText(QString::number(iMinHit));
