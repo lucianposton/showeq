@@ -235,6 +235,7 @@ private:
 	SEQListView* 	m_listview_mob;
 
 	QLabel* 	m_label_offense_totaldamage;
+	QLabel*		m_label_offense_percentmelee;
 	QLabel*		m_label_offense_percentspecial;
 	QLabel*		m_label_offense_percentnonmelee;
 	QLabel*		m_label_offense_percentdot;

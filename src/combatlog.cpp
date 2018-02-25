@@ -424,8 +424,8 @@ QWidget* CombatWindow::initOffenseWidget()
 
 	QGrid *summaryGrid = new QGrid(4, summaryGBox);
 
-	new QLabel("Total Damage:", summaryGrid);
-	m_label_offense_totaldamage = new QLabel(summaryGrid);
+	new QLabel("% from Melee:", summaryGrid);
+	m_label_offense_percentmelee = new QLabel(summaryGrid);
 
 	new QLabel("Avg Melee:", summaryGrid);
 	m_label_offense_avgmelee = new QLabel(summaryGrid);
@@ -453,6 +453,9 @@ QWidget* CombatWindow::initOffenseWidget()
 
 	new QLabel("Avg DS:", summaryGrid);
 	m_label_offense_avgds = new QLabel(summaryGrid);
+
+	new QLabel("Total Damage:", summaryGrid);
+	m_label_offense_totaldamage = new QLabel(summaryGrid);
 
 	((QGridLayout *)summaryGrid->layout())->setColStretch(1, 1);
 	((QGridLayout *)summaryGrid->layout())->setColStretch(3, 1);
@@ -612,6 +615,7 @@ void CombatWindow::updateOffense()
 
 
 	QString s_totaldamage;
+	QString s_percentmelee;
 	QString s_percentspecial;
 	QString s_percentnonmelee;
 	QString s_percentdot;
@@ -624,6 +628,7 @@ void CombatWindow::updateOffense()
 
 	int iTotalDamage = 0;
 	//int iTotalHits = 0;
+	double dPercentMelee = 0.0;
 	double dPercentSpecial = 0.0;
 	double dPercentNonmelee = 0.0;
 	double dPercentDot = 0.0;
@@ -778,6 +783,7 @@ void CombatWindow::updateOffense()
 	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage + iDotDamage + iDSDamage;
 	//iTotalHits = iMeleeHits + iSpecialHits + iNonmeleeHits;
 
+	dPercentMelee = ((double)iMeleeDamage / (double)iTotalDamage) * 100.0;
 	dPercentSpecial = ((double)iSpecialDamage / (double)iTotalDamage) * 100.0;
 	dPercentNonmelee = ((double)iNonmeleeDamage / (double)iTotalDamage) * 100.0;
 	dPercentDot = ((double)iDotDamage / (double)iTotalDamage) * 100.0;
@@ -790,6 +796,7 @@ void CombatWindow::updateOffense()
 	dAvgDS = (double)iDSDamage / (double)iDSHits;
 
 	s_totaldamage.setNum(iTotalDamage);
+	s_percentmelee = QString::number(dPercentMelee, 'f', 1);
 	s_percentspecial = QString::number(dPercentSpecial, 'f', 1);
 	s_percentnonmelee = QString::number(dPercentNonmelee, 'f', 1);
 	s_percentdot = QString::number(dPercentDot, 'f', 1);
@@ -801,6 +808,7 @@ void CombatWindow::updateOffense()
 	s_avgds = QString::number(dAvgDS, 'f', 0);
 
 	m_label_offense_totaldamage->setText(s_totaldamage);
+	m_label_offense_percentmelee->setText(s_percentmelee);
 	m_label_offense_percentspecial->setText(s_percentspecial);
 	m_label_offense_percentnonmelee->setText(s_percentnonmelee);
 	m_label_offense_percentdot->setText(s_percentdot);
