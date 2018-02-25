@@ -129,6 +129,17 @@ void CombatOffenseRecord::addHit(int iDamage)
 
 
 ////////////////////////////////////////////
+//  PetOffenseRecord implementation
+////////////////////////////////////////////
+PetOffenseRecord::PetOffenseRecord(int iPetID, const QString& iPetName, int iType, Player* p, int iSpell) :
+	CombatOffenseRecord(iType, p, iSpell),
+	m_iPetID(iPetID),
+	m_iPetName(iPetName)
+{
+}
+
+
+////////////////////////////////////////////
 //  DotOffenseRecord implementation
 ////////////////////////////////////////////
 DotOffenseRecord::DotOffenseRecord(const Player* p, const QString& iSpellName) :
@@ -342,6 +353,7 @@ CombatWindow::CombatWindow(Player* player,
      otherwise won't be. */
 
 	m_combat_offense_list.setAutoDelete(true);
+	m_pet_offense_list.setAutoDelete(true);
 	m_dot_offense_list.setAutoDelete(true);
 	m_combat_defense_record = new CombatDefenseRecord(player);
 	m_combat_mob_list.setAutoDelete(true);
@@ -453,6 +465,30 @@ QWidget* CombatWindow::initOffenseWidget()
 
 	new QLabel("Avg DS:", summaryGrid);
 	m_label_offense_avgds = new QLabel(summaryGrid);
+
+	new QLabel("% from Pet Melee:", summaryGrid);
+	m_label_offense_percentpetmelee = new QLabel(summaryGrid);
+
+	new QLabel("Avg Pet Melee:", summaryGrid);
+	m_label_offense_avgpetmelee = new QLabel(summaryGrid);
+
+	new QLabel("% from Pet Special:", summaryGrid);
+	m_label_offense_percentpetspecial = new QLabel(summaryGrid);
+
+	new QLabel("Avg Pet Special:", summaryGrid);
+	m_label_offense_avgpetspecial = new QLabel(summaryGrid);
+
+	new QLabel("% from Pet NonMelee:", summaryGrid);
+	m_label_offense_percentpetnonmelee = new QLabel(summaryGrid);
+
+	new QLabel("Avg Pet NonMelee:", summaryGrid);
+	m_label_offense_avgpetnonmelee = new QLabel(summaryGrid);
+
+	new QLabel("% from Pet DS:", summaryGrid);
+	m_label_offense_percentpetds = new QLabel(summaryGrid);
+
+	new QLabel("Avg Pet DS:", summaryGrid);
+	m_label_offense_avgpetds = new QLabel(summaryGrid);
 
 	new QLabel("Total Damage:", summaryGrid);
 	m_label_offense_totaldamage = new QLabel(summaryGrid);
@@ -625,6 +661,14 @@ void CombatWindow::updateOffense()
 	QString s_avgnonmelee;
 	QString s_avgdottick;
 	QString s_avgds;
+	QString s_percentpetmelee;
+	QString s_percentpetspecial;
+	QString s_percentpetnonmelee;
+	QString s_percentpetds;
+	QString s_avgpetmelee;
+	QString s_avgpetspecial;
+	QString s_avgpetnonmelee;
+	QString s_avgpetds;
 
 	int iTotalDamage = 0;
 	//int iTotalHits = 0;
@@ -649,6 +693,24 @@ void CombatWindow::updateOffense()
 	int iDotTicks = 0;
 	int iDSDamage = 0;
 	int iDSHits = 0;
+
+    double dPetPercentMelee = 0.0;
+    double dPetPercentSpecial = 0.0;
+    double dPetPercentNonmelee = 0.0;
+    double dPetPercentDS = 0.0;
+    double dPetAvgMelee = 0.0;
+    double dPetAvgSpecial = 0.0;
+    double dPetAvgNonmelee = 0.0;
+    double dPetAvgDS = 0.0;
+
+    int iPetMeleeDamage = 0;
+    int iPetMeleeHits = 0;
+    int iPetSpecialDamage = 0;
+    int iPetSpecialHits = 0;
+    int iPetNonmeleeDamage = 0;
+    int iPetNonmeleeHits = 0;
+    int iPetDSDamage = 0;
+    int iPetDSHits = 0;
 
 
 	//	empty the list so we can repopulate
@@ -745,6 +807,99 @@ void CombatWindow::updateOffense()
 		}
 	}
 
+    PetOffenseRecord *petRecord;
+    for(petRecord = m_pet_offense_list.first(); petRecord != 0; petRecord = m_pet_offense_list.next())
+    {
+        const QString iPetName = petRecord->getPetName();
+        const int iPetID = petRecord->getPetID();
+        const int iType = petRecord->getType();
+        const int iSpell = petRecord->getSpell();
+        const int iHits = petRecord->getHits();
+        const int iMisses = petRecord->getMisses();
+        const int iMinDamage = petRecord->getMinDamage();
+        const int iMaxDamage = petRecord->getMaxDamage();
+        const int iDamage = petRecord->getTotalDamage();
+
+        const double dAvgDamage = (double)iDamage / (double)iHits;
+        const double dAccuracy = (double)iHits / (double)(iMisses+iHits);
+
+        QString s_type;
+        const DamageCategory category = damageCategory(iType);
+        switch(category)
+        {
+            case DAMAGE_CATEGORY_MELEE:
+            case DAMAGE_CATEGORY_MELEE_SPECIAL:
+                {
+                    s_type.sprintf("Pet: %s(%d): %s",
+                            (const char*)iPetName, iPetID, (const char*)skill_name(iType));
+                    break;
+                }
+            case DAMAGE_CATEGORY_NONMELEE:
+                {
+                    s_type.sprintf("Pet: %s(%d): Spell: %s",
+                            (const char*)iPetName, iPetID, (const char*)spell_name(iSpell));
+                    break;
+                }
+            case DAMAGE_CATEGORY_DAMAGE_SHIELD:
+            default:
+                {
+                    s_type.sprintf("Pet: %s(%d): Damage Shield: (%d)", (const char*)iPetName, iPetID, iType);
+                    break;
+                }
+        }
+        QString s_hits;
+        s_hits.setNum(iHits);
+        QString s_misses;
+        QString s_accuracy;
+        if (category != DAMAGE_CATEGORY_DAMAGE_SHIELD)
+        {
+            s_misses.setNum(iMisses);
+            s_accuracy = QString::number(dAccuracy, 'f', 2);
+        }
+        QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
+        QString s_mindamage;
+        s_mindamage.setNum(iMinDamage);
+        QString s_maxdamage;
+        s_maxdamage.setNum(iMaxDamage);
+        QString s_damage;
+        s_damage.setNum(iDamage);
+
+        QListViewItem *pItem = new QListViewItem(m_listview_offense,
+                s_type, s_hits, s_misses, s_accuracy,
+                s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+
+        m_listview_offense->insertItem(pItem);
+
+        switch(damageCategory(iType))
+        {
+            case DAMAGE_CATEGORY_MELEE:
+                {
+                    iPetMeleeDamage += iDamage;
+                    iPetMeleeHits += iHits;
+                    break;
+                }
+            case DAMAGE_CATEGORY_MELEE_SPECIAL:
+                {
+                    iPetSpecialDamage += iDamage;
+                    iPetSpecialHits += iHits;
+                    break;
+                }
+            case DAMAGE_CATEGORY_NONMELEE:
+                {
+                    iPetNonmeleeDamage += iDamage;
+                    iPetNonmeleeHits += iHits;
+                    break;
+                }
+            case DAMAGE_CATEGORY_DAMAGE_SHIELD:
+            default:
+                {
+                    iPetDSDamage += iDamage;
+                    iPetDSHits += iHits;
+                    break;
+                }
+        }
+    }
+
 	DotOffenseRecord *dotRecord;
 
 	for(dotRecord = m_dot_offense_list.first(); dotRecord != 0; dotRecord = m_dot_offense_list.next())
@@ -780,7 +935,8 @@ void CombatWindow::updateOffense()
 		iDotTicks += iTicks;
 	}
 
-	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage + iDotDamage + iDSDamage;
+	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage + iDotDamage + iDSDamage
+		+ iPetMeleeDamage + iPetSpecialDamage + iPetNonmeleeDamage + iPetDSDamage;
 	//iTotalHits = iMeleeHits + iSpecialHits + iNonmeleeHits;
 
 	dPercentMelee = ((double)iMeleeDamage / (double)iTotalDamage) * 100.0;
@@ -795,19 +951,42 @@ void CombatWindow::updateOffense()
 	dAvgDotTick = (double)iDotDamage / (double)iDotTicks;
 	dAvgDS = (double)iDSDamage / (double)iDSHits;
 
+	dPetPercentMelee = ((double)iPetMeleeDamage / (double)iTotalDamage) * 100.0;
+	dPetPercentSpecial = ((double)iPetSpecialDamage / (double)iTotalDamage) * 100.0;
+	dPetPercentNonmelee = ((double)iPetNonmeleeDamage / (double)iTotalDamage) * 100.0;
+	dPetPercentDS = ((double)iPetDSDamage / (double)iTotalDamage) * 100.0;
+
+	dPetAvgMelee = (double)iPetMeleeDamage / (double)iPetMeleeHits;
+	dPetAvgSpecial = (double)iPetSpecialDamage / (double)iPetSpecialHits;
+	dPetAvgNonmelee = (double)iPetNonmeleeDamage / (double)iPetNonmeleeHits;
+	dPetAvgDS = (double)iPetDSDamage / (double)iPetDSHits;
+
 	s_totaldamage.setNum(iTotalDamage);
+
 	s_percentmelee = QString::number(dPercentMelee, 'f', 1);
 	s_percentspecial = QString::number(dPercentSpecial, 'f', 1);
 	s_percentnonmelee = QString::number(dPercentNonmelee, 'f', 1);
 	s_percentdot = QString::number(dPercentDot, 'f', 1);
 	s_percentds = QString::number(dPercentDS, 'f', 1);
+
 	s_avgmelee = QString::number(dAvgMelee, 'f', 0);
 	s_avgspecial = QString::number(dAvgSpecial, 'f', 0);
 	s_avgnonmelee = QString::number(dAvgNonmelee, 'f', 0);
 	s_avgdottick = QString::number(dAvgDotTick, 'f', 0);
 	s_avgds = QString::number(dAvgDS, 'f', 0);
 
+	s_percentpetmelee = QString::number(dPetPercentMelee, 'f', 1);
+	s_percentpetspecial = QString::number(dPetPercentSpecial, 'f', 1);
+	s_percentpetnonmelee = QString::number(dPetPercentNonmelee, 'f', 1);
+	s_percentpetds = QString::number(dPetPercentDS, 'f', 1);
+
+	s_avgpetmelee = QString::number(dPetAvgMelee, 'f', 0);
+	s_avgpetspecial = QString::number(dPetAvgSpecial, 'f', 0);
+	s_avgpetnonmelee = QString::number(dPetAvgNonmelee, 'f', 0);
+	s_avgpetds = QString::number(dPetAvgDS, 'f', 0);
+
 	m_label_offense_totaldamage->setText(s_totaldamage);
+
 	m_label_offense_percentmelee->setText(s_percentmelee);
 	m_label_offense_percentspecial->setText(s_percentspecial);
 	m_label_offense_percentnonmelee->setText(s_percentnonmelee);
@@ -818,6 +997,15 @@ void CombatWindow::updateOffense()
 	m_label_offense_avgnonmelee->setText(s_avgnonmelee);
 	m_label_offense_avgdottick->setText(s_avgdottick);
 	m_label_offense_avgds->setText(s_avgds);
+
+	m_label_offense_percentpetmelee->setText(s_percentpetmelee);
+	m_label_offense_percentpetspecial->setText(s_percentpetspecial);
+	m_label_offense_percentpetnonmelee->setText(s_percentpetnonmelee);
+	m_label_offense_percentpetds->setText(s_percentpetds);
+	m_label_offense_avgpetmelee->setText(s_avgpetmelee);
+	m_label_offense_avgpetspecial->setText(s_avgpetspecial);
+	m_label_offense_avgpetnonmelee->setText(s_avgpetnonmelee);
+	m_label_offense_avgpetds->setText(s_avgpetds);
 
 
 #ifdef DEBUGCOMBAT
@@ -963,7 +1151,7 @@ void CombatWindow::addDotOffenseRecord(const QString& iSpellName, const int iDam
 #endif
 }
 
-void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage, QString tName, QString sName)
+void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetOwnerID, int iType, int iSpell, int iDamage, QString tName, QString sName)
 {
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::addCombatRecord starting...");
@@ -1004,6 +1192,19 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iType, int 
 			updateDPS(iDamage);
 		else if(isDamageShield(iType))
 			updateDPS(-iDamage);
+	}
+	else if (iPlayerID == iSourcePetOwnerID)
+	{
+		// Damage shields show up as negative damage
+		if (isDamageShield(iType))
+		{
+			addPetOffenseRecord(iSourceID, sName, iType, -iDamage, iSpell);
+			updateOffense();
+		}
+		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
+			addPetOffenseRecord(iSourceID, sName, iType, iDamage, iSpell);
+			updateOffense();
+		}
 	}
 
 #ifdef DEBUGCOMBAT
@@ -1052,6 +1253,45 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage, int iSpell)
 #endif
 }
 
+void CombatWindow::addPetOffenseRecord(int petID, const QString& petName, int iType, int iDamage, int iSpell)
+{
+#ifdef DEBUGCOMBAT
+    seqDebug("CombatWindow::addPetOffenseRecord starting...");
+#endif
+
+	bool bFoundRecord = false;
+
+	PetOffenseRecord *pRecord;
+
+	for(pRecord = m_pet_offense_list.first(); pRecord != 0; pRecord = m_pet_offense_list.next())
+	{
+		if(pRecord->getType() == iType && pRecord->getPetID() == petID
+			&& (isMelee(iType) || pRecord->getSpell() == iSpell))
+		{
+			bFoundRecord = true;
+			break;
+		}
+	}
+
+	if(!bFoundRecord)
+	{
+		pRecord = new PetOffenseRecord(petID, petName, iType, m_player, iSpell);
+		m_pet_offense_list.append(pRecord);
+	}
+
+	if(iDamage > 0)
+	{
+		pRecord->addHit(iDamage);
+	}
+	else if (isMelee(iType))
+	{
+		pRecord->addMiss(iDamage);
+	}
+
+#ifdef DEBUGCOMBAT
+    seqDebug("CombatWindow::addPetOffenseRecord finished...");
+#endif
+}
 
 void CombatWindow::addDefenseRecord(int iDamage)
 {
@@ -1171,6 +1411,7 @@ void CombatWindow::clearMob()
 void CombatWindow::clearOffense()
 {
     m_combat_offense_list.clear();
+    m_pet_offense_list.clear();
     m_dot_offense_list.clear();
     updateOffense();
 }
@@ -1186,6 +1427,7 @@ void CombatWindow::clear(void)
   m_combat_mob_list.clear();
   updateMob();
   m_combat_offense_list.clear();
+  m_pet_offense_list.clear();
   m_dot_offense_list.clear();
   updateOffense();
   m_combat_defense_record->clear();

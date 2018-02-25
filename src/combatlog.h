@@ -68,6 +68,24 @@ private:
 
 
 ////////////////////////////////////////////
+//  PetOffenseRecord definition
+//////////////////////////////////////////`//
+class PetOffenseRecord : public CombatOffenseRecord
+{
+public:
+    PetOffenseRecord(int iPetID, const QString& iPetName, int iType,
+            Player* p, int iSpell);
+
+    int		getPetID() { return m_iPetID; };
+    QString		getPetName() { return m_iPetName; };
+
+private:
+    const int			m_iPetID;
+    const QString	m_iPetName;
+};
+
+
+////////////////////////////////////////////
 //  DotOffenseRecord definition
 //////////////////////////////////////////`//
 class DotOffenseRecord
@@ -194,7 +212,7 @@ public slots:
 	virtual void savePrefs(void);
 	void addDotTick(const QString& iTargetName,
 			const QString& iSpellName, int iDamage);
-	void addCombatRecord(int iTargetID, int iSourceID, int iType, int iSpell, int iDamage, QString tName, QString sName);
+	void addCombatRecord(int iTargetID, int iSourceID, int iSourcePetOwnerID, int iType, int iSpell, int iDamage, QString tName, QString sName);
 	void resetDPS();
 	void clearMob();
 	void clearOffense();
@@ -210,6 +228,7 @@ private:
 
 	void addDotOffenseRecord(const QString& iSpellName, int iDamage);
 	void addOffenseRecord(int iType, int iDamage, int iSpell);
+	void addPetOffenseRecord(int petID, const QString& petName, int iType, int iDamage, int iSpell);
 	void addDefenseRecord(int iDamage);
 	void addMobRecord(int iTargetID, int iSourceID, int iDamage, QString tName, QString sName);
 
@@ -235,6 +254,7 @@ private:
 	SEQListView* 	m_listview_mob;
 
 	QLabel* 	m_label_offense_totaldamage;
+
 	QLabel*		m_label_offense_percentmelee;
 	QLabel*		m_label_offense_percentspecial;
 	QLabel*		m_label_offense_percentnonmelee;
@@ -245,6 +265,15 @@ private:
 	QLabel*		m_label_offense_avgnonmelee;
 	QLabel*		m_label_offense_avgdottick;
 	QLabel*		m_label_offense_avgds;
+
+	QLabel*		m_label_offense_percentpetmelee;
+	QLabel*		m_label_offense_percentpetspecial;
+	QLabel*		m_label_offense_percentpetnonmelee;
+	QLabel*		m_label_offense_percentpetds;
+	QLabel*		m_label_offense_avgpetmelee;
+	QLabel*		m_label_offense_avgpetspecial;
+	QLabel*		m_label_offense_avgpetnonmelee;
+	QLabel*		m_label_offense_avgpetds;
 
 	QLabel*		m_label_defense_avoid_misses;
 	QLabel*		m_label_defense_avoid_block;
@@ -268,6 +297,7 @@ private:
 
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	QList<DotOffenseRecord> m_dot_offense_list;
+	QList<PetOffenseRecord> m_pet_offense_list;
 	CombatDefenseRecord *m_combat_defense_record;
 	QList<CombatMobRecord> m_combat_mob_list;
 

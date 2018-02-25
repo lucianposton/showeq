@@ -2239,8 +2239,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	     m_combatWindow, SLOT(clear(void)));
      connect (this, SIGNAL(dotTickSignal(const QString&, const QString&, int)),
 	      m_combatWindow, SLOT(addDotTick(const QString&, const QString&, int)));
-     connect (this, SIGNAL(combatSignal(int, int, int, int, int, QString, QString)),
-	      m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int, QString, QString)));
+     connect (this, SIGNAL(combatSignal(int, int, int, int, int, int, QString, QString)),
+	      m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int, int, QString, QString)));
      connect (m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
 	      m_combatWindow, SLOT(resetDPS()));
      connect(this, SIGNAL(restoreFonts(void)),
@@ -4589,9 +4589,10 @@ void EQInterface::attack2Hand1(const uint8_t* data)
 void EQInterface::combatDamageMessage(const uint8_t* data)
 {
   CombatDamage_Struct *action2 = (CombatDamage_Struct*)data;
-  const Item* target = m_spawnShell->findID(tSpawn, action2->target);
-  const Item* source = m_spawnShell->findID(tSpawn, action2->source);
-  emit combatSignal(action2->target, action2->source, action2->type, action2->spell, action2->damage, 
+  const Spawn* target = (Spawn*)m_spawnShell->findID(tSpawn, action2->target);
+  const Spawn* source = (Spawn*)m_spawnShell->findID(tSpawn, action2->source);
+  const int sourcePetOwnerID = (source == NULL) ? -1 : source->petOwnerID();
+  emit combatSignal(action2->target, action2->source, sourcePetOwnerID, action2->type, action2->spell, action2->damage, 
 		    (target != 0) ? target->name() : QString("Unknown"), (source != 0) ? source->name() : QString("Unknown"));
 }
 
@@ -4642,9 +4643,10 @@ void EQInterface::combatKillSpawn(const uint8_t* data)
   // only show my kills
   if (deadspawn && deadspawn->killerId == m_player->id())
   {
-    const Item* target = m_spawnShell->findID(tSpawn, deadspawn->spawnId);
-    const Item* source = m_spawnShell->findID(tSpawn, deadspawn->killerId);
-    emit combatSignal(deadspawn->spawnId, deadspawn->killerId,
+    const Spawn* target = (Spawn*)m_spawnShell->findID(tSpawn, deadspawn->spawnId);
+    const Spawn* source = (Spawn*)m_spawnShell->findID(tSpawn, deadspawn->killerId);
+    const int sourcePetOwnerID = (source == NULL) ? -1 : source->petOwnerID();
+    emit combatSignal(deadspawn->spawnId, deadspawn->killerId, sourcePetOwnerID,
 		      deadspawn->type,
 		      deadspawn->spellId, deadspawn->damage,
 		      (target != 0) ? target->name() : QString("Unknown"),

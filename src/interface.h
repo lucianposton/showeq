@@ -232,7 +232,7 @@ class EQInterface:public QMainWindow
    void restoreFonts();
 
    void dotTickSignal(const QString&, const QString&, int);
-   void combatSignal(int, int, int, int, int, QString, QString);
+   void combatSignal(int, int, int, int, int, int, QString, QString);
 
  private slots:
    void toggle_opt_Fast();
