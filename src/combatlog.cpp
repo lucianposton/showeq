@@ -396,7 +396,7 @@ QWidget* CombatWindow::initOffenseWidget()
 	m_listview_offense->setColumnAlignment(1, Qt::AlignRight);
 	m_listview_offense->addColumn("Miss");
 	m_listview_offense->setColumnAlignment(2, Qt::AlignRight);
-	m_listview_offense->addColumn("Ratio");
+	m_listview_offense->addColumn("Accuracy");
 	m_listview_offense->setColumnAlignment(3, Qt::AlignRight);
 	m_listview_offense->addColumn("Avg");
 	m_listview_offense->setColumnAlignment(4, Qt::AlignRight);
@@ -475,7 +475,7 @@ QWidget* CombatWindow::initDefenseWidget()
 	new QLabel("Ripostes:", avoidanceGrid);
 	m_label_defense_avoid_riposte = new QLabel(avoidanceGrid);
 
-	new QLabel("Dodges", avoidanceGrid);
+	new QLabel("Dodges:", avoidanceGrid);
 	m_label_defense_avoid_dodge = new QLabel(avoidanceGrid);
 
 	new QLabel("Total:", avoidanceGrid);
@@ -563,7 +563,7 @@ QWidget* CombatWindow::initMobWidget()
 
 	QGrid *summaryGrid = new QGrid(4, summaryGBox);
 
-	new QLabel("Total Mobs", summaryGrid);
+	new QLabel("Total Mobs:", summaryGrid);
 	m_label_mob_totalmobs = new QLabel(summaryGrid);
 
 	new QLabel("Avg DPS:", summaryGrid);
@@ -651,10 +651,11 @@ void CombatWindow::updateOffense()
 		int iDamage = pRecord->getTotalDamage();
 
 		double dAvgDamage = (double)iDamage / (double)iHits;
-		double dRatio = (double)iHits / (double)iMisses;
+		double dAccuracy = (double)iHits / (double)(iMisses+iHits);
 
 		QString s_type;
-		switch(damageCategory(iType))
+		DamageCategory category = damageCategory(iType);
+		switch(category)
 		{
 			case DAMAGE_CATEGORY_MELEE:
 			case DAMAGE_CATEGORY_MELEE_SPECIAL:
@@ -678,11 +679,13 @@ void CombatWindow::updateOffense()
 		QString s_hits;
 		s_hits.setNum(iHits);
 		QString s_misses;
-		s_misses.setNum(iMisses);
-		QString s_ratio;
-		s_ratio = QString("%1 to 1").arg(dRatio);
-		QString s_avgdamage;
-		s_avgdamage.setNum(dAvgDamage);
+		QString s_accuracy;
+		if (category != DAMAGE_CATEGORY_DAMAGE_SHIELD)
+		{
+			s_misses.setNum(iMisses);
+			s_accuracy = QString::number(dAccuracy, 'f', 2);
+		}
+		QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
 		QString s_mindamage;
 		s_mindamage.setNum(iMinDamage);
 		QString s_maxdamage;
@@ -691,7 +694,7 @@ void CombatWindow::updateOffense()
 		s_damage.setNum(iDamage);
 
 		QListViewItem *pItem = new QListViewItem(m_listview_offense,
-			s_type, s_hits, s_misses, s_ratio,
+			s_type, s_hits, s_misses, s_accuracy,
 			s_avgdamage, s_mindamage, s_maxdamage, s_damage);
 
 		m_listview_offense->insertItem(pItem);
@@ -742,9 +745,8 @@ void CombatWindow::updateOffense()
 		QString s_hits;
 		s_hits.setNum(iTicks);
 		QString s_misses = "";
-		QString s_ratio = "";
-		QString s_avgdamage;
-		s_avgdamage.setNum(dAvgDamage);
+		QString s_accuracy = "";
+		QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
 		QString s_mindamage;
 		s_mindamage.setNum(iMinDamage);
 		QString s_maxdamage;
@@ -753,7 +755,7 @@ void CombatWindow::updateOffense()
 		s_damage.setNum(iDamage);
 
 		QListViewItem *pItem = new QListViewItem(m_listview_offense,
-			s_type, s_hits, s_misses, s_ratio,
+			s_type, s_hits, s_misses, s_accuracy,
 			s_avgdamage, s_mindamage, s_maxdamage, s_damage);
 
 		m_listview_offense->insertItem(pItem);
@@ -777,15 +779,15 @@ void CombatWindow::updateOffense()
 	dAvgDS = (double)iDSDamage / (double)iDSHits;
 
 	s_totaldamage.setNum(iTotalDamage);
-	s_percentspecial.setNum(dPercentSpecial);
-	s_percentnonmelee.setNum(dPercentNonmelee);
-	s_percentdot.setNum(dPercentDot);
-	s_percentds.setNum(dPercentDS);
-	s_avgmelee.setNum(dAvgMelee);
-	s_avgspecial.setNum(dAvgSpecial);
-	s_avgnonmelee.setNum(dAvgNonmelee);
-	s_avgdottick.setNum(dAvgDotTick);
-	s_avgds.setNum(dAvgDS);
+	s_percentspecial = QString::number(dPercentSpecial, 'f', 1);
+	s_percentnonmelee = QString::number(dPercentNonmelee, 'f', 1);
+	s_percentdot = QString::number(dPercentDot, 'f', 1);
+	s_percentds = QString::number(dPercentDS, 'f', 1);
+	s_avgmelee = QString::number(dAvgMelee, 'f', 0);
+	s_avgspecial = QString::number(dAvgSpecial, 'f', 0);
+	s_avgnonmelee = QString::number(dAvgNonmelee, 'f', 0);
+	s_avgdottick = QString::number(dAvgDotTick, 'f', 0);
+	s_avgds = QString::number(dAvgDS, 'f', 0);
 
 	m_label_offense_totaldamage->setText(s_totaldamage);
 	m_label_offense_percentspecial->setText(s_percentspecial);
@@ -829,11 +831,11 @@ void CombatWindow::updateDefense()
 	m_label_defense_avoid_riposte->setText(QString::number(iRipostes));
 	m_label_defense_avoid_dodge->setText(QString::number(iDodges));
 	m_label_defense_avoid_total->setText(QString::number(iTotalAvoid));
-	m_label_defense_mitigate_avghit->setText(QString::number(dAvgHit));
+	m_label_defense_mitigate_avghit->setText(QString::number(dAvgHit, 'f', 0));
 	m_label_defense_mitigate_minhit->setText(QString::number(iMinHit));
 	m_label_defense_mitigate_maxhit->setText(QString::number(iMaxHit));
 	m_label_defense_summary_mobattacks->setText(QString::number(iMobAttacks));
-	m_label_defense_summary_percentavoided->setText(QString::number(dAvoided));
+	m_label_defense_summary_percentavoided->setText(QString::number(dAvoided, 'f', 1));
 	m_label_defense_summary_totaldamage->setText(QString::number(iTotalDamage));
 
 }
@@ -866,9 +868,9 @@ void CombatWindow::updateMob()
 		QString s_id = QString::number(iID);
 		QString s_duration = QString::number(iDuration);
 		QString s_damagegiven = QString::number(iDamageGiven);
-		QString s_dps = QString::number(dDPS);
+		QString s_dps = QString::number(dDPS, 'f', 1);
 		QString s_iDamageTaken = QString::number(iDamageTaken);
-		QString s_mobdps = QString::number(dMobDPS);
+		QString s_mobdps = QString::number(dMobDPS, 'f', 1);
 
 
 		QListViewItem *pItem = new QListViewItem(m_listview_mob,
@@ -887,10 +889,7 @@ void CombatWindow::updateMob()
 	  dAvgDPS = 0;
 
 	m_label_mob_totalmobs->setText(QString::number(iTotalMobs));
-	m_label_mob_avgdps->setText(QString::number(dAvgDPS));
-	m_label_mob_currentdps->setText(QString::number(m_dDPS));
-	m_label_mob_lastdps->setText(QString::number(m_dDPSLast));
-
+	m_label_mob_avgdps->setText(QString::number(dAvgDPS, 'f', 1));
 }
 
 void CombatWindow::addDotTick(
@@ -1124,10 +1123,8 @@ void CombatWindow::updateDPS(int iDamage)
 		m_dDPS = (double)m_iCurrentDPSTotal / (double)iTimeElapsed;
 	}
 
-	m_label_mob_currentdps->setText(QString::number(m_dDPS));
-	m_label_mob_lastdps->setText(QString::number(m_dDPSLast));
-
-
+	m_label_mob_currentdps->setText(QString::number(m_dDPS, 'f', 1));
+	m_label_mob_lastdps->setText(QString::number(m_dDPSLast, 'f', 1));
 }
 
 
