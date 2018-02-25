@@ -459,17 +459,17 @@ QWidget* CombatWindow::initOffenseWidget()
 	new QLabel("Avg NonMelee:", summaryGrid);
 	m_label_offense_avgnonmelee = new QLabel(summaryGrid);
 
-	new QLabel("% from DoT:", summaryGrid);
-	m_label_offense_percentdot = new QLabel(summaryGrid);
-
-	new QLabel("Avg DoT Tick:", summaryGrid);
-	m_label_offense_avgdottick = new QLabel(summaryGrid);
-
 	new QLabel("% from DS:", summaryGrid);
 	m_label_offense_percentds = new QLabel(summaryGrid);
 
 	new QLabel("Avg DS:", summaryGrid);
 	m_label_offense_avgds = new QLabel(summaryGrid);
+
+	new QLabel("% from DoT:", summaryGrid);
+	m_label_offense_percentdot = new QLabel(summaryGrid);
+
+	new QLabel("Avg DoT Tick:", summaryGrid);
+	m_label_offense_avgdottick = new QLabel(summaryGrid);
 
 	new QLabel("% from Pet Melee:", summaryGrid);
 	m_label_offense_percentpetmelee = new QLabel(summaryGrid);
@@ -665,13 +665,13 @@ void CombatWindow::updateOffense()
 	QString s_percentmelee;
 	QString s_percentspecial;
 	QString s_percentnonmelee;
-	QString s_percentdot;
 	QString s_percentds;
+	QString s_percentdot;
 	QString s_avgmelee;
 	QString s_avgspecial;
 	QString s_avgnonmelee;
-	QString s_avgdottick;
 	QString s_avgds;
+	QString s_avgdottick;
 	QString s_percentpetmelee;
 	QString s_percentpetspecial;
 	QString s_percentpetnonmelee;
@@ -686,13 +686,13 @@ void CombatWindow::updateOffense()
 	double dPercentMelee = 0.0;
 	double dPercentSpecial = 0.0;
 	double dPercentNonmelee = 0.0;
-	double dPercentDot = 0.0;
 	double dPercentDS = 0.0;
+	double dPercentDot = 0.0;
 	double dAvgMelee = 0.0;
 	double dAvgSpecial = 0.0;
 	double dAvgNonmelee = 0.0;
-	double dAvgDotTick = 0.0;
 	double dAvgDS = 0.0;
+	double dAvgDotTick = 0.0;
 
 	int iMeleeDamage = 0;
 	int iMeleeHits = 0;
@@ -700,10 +700,10 @@ void CombatWindow::updateOffense()
 	int iSpecialHits = 0;
 	int iNonmeleeDamage = 0;
 	int iNonmeleeHits = 0;
-	int iDotDamage = 0;
-	int iDotTicks = 0;
 	int iDSDamage = 0;
 	int iDSHits = 0;
+	int iDotDamage = 0;
+	int iDotTicks = 0;
 
     double dPetPercentMelee = 0.0;
     double dPetPercentSpecial = 0.0;
@@ -953,14 +953,14 @@ void CombatWindow::updateOffense()
 	dPercentMelee = ((double)iMeleeDamage / (double)iTotalDamage) * 100.0;
 	dPercentSpecial = ((double)iSpecialDamage / (double)iTotalDamage) * 100.0;
 	dPercentNonmelee = ((double)iNonmeleeDamage / (double)iTotalDamage) * 100.0;
-	dPercentDot = ((double)iDotDamage / (double)iTotalDamage) * 100.0;
 	dPercentDS = ((double)iDSDamage / (double)iTotalDamage) * 100.0;
+	dPercentDot = ((double)iDotDamage / (double)iTotalDamage) * 100.0;
 
 	dAvgMelee = (double)iMeleeDamage / (double)iMeleeHits;
 	dAvgSpecial = (double)iSpecialDamage / (double)iSpecialHits;
 	dAvgNonmelee = (double)iNonmeleeDamage / (double)iNonmeleeHits;
-	dAvgDotTick = (double)iDotDamage / (double)iDotTicks;
 	dAvgDS = (double)iDSDamage / (double)iDSHits;
+	dAvgDotTick = (double)iDotDamage / (double)iDotTicks;
 
 	dPetPercentMelee = ((double)iPetMeleeDamage / (double)iTotalDamage) * 100.0;
 	dPetPercentSpecial = ((double)iPetSpecialDamage / (double)iTotalDamage) * 100.0;
@@ -977,14 +977,14 @@ void CombatWindow::updateOffense()
 	s_percentmelee = QString::number(dPercentMelee, 'f', 1);
 	s_percentspecial = QString::number(dPercentSpecial, 'f', 1);
 	s_percentnonmelee = QString::number(dPercentNonmelee, 'f', 1);
-	s_percentdot = QString::number(dPercentDot, 'f', 1);
 	s_percentds = QString::number(dPercentDS, 'f', 1);
+	s_percentdot = QString::number(dPercentDot, 'f', 1);
 
 	s_avgmelee = QString::number(dAvgMelee, 'f', 0);
 	s_avgspecial = QString::number(dAvgSpecial, 'f', 0);
 	s_avgnonmelee = QString::number(dAvgNonmelee, 'f', 0);
-	s_avgdottick = QString::number(dAvgDotTick, 'f', 0);
 	s_avgds = QString::number(dAvgDS, 'f', 0);
+	s_avgdottick = QString::number(dAvgDotTick, 'f', 0);
 
 	s_percentpetmelee = QString::number(dPetPercentMelee, 'f', 1);
 	s_percentpetspecial = QString::number(dPetPercentSpecial, 'f', 1);
@@ -1001,13 +1001,13 @@ void CombatWindow::updateOffense()
 	m_label_offense_percentmelee->setText(s_percentmelee);
 	m_label_offense_percentspecial->setText(s_percentspecial);
 	m_label_offense_percentnonmelee->setText(s_percentnonmelee);
-	m_label_offense_percentdot->setText(s_percentdot);
 	m_label_offense_percentds->setText(s_percentds);
+	m_label_offense_percentdot->setText(s_percentdot);
 	m_label_offense_avgmelee->setText(s_avgmelee);
 	m_label_offense_avgspecial->setText(s_avgspecial);
 	m_label_offense_avgnonmelee->setText(s_avgnonmelee);
-	m_label_offense_avgdottick->setText(s_avgdottick);
 	m_label_offense_avgds->setText(s_avgds);
+	m_label_offense_avgdottick->setText(s_avgdottick);
 
 	m_label_offense_percentpetmelee->setText(s_percentpetmelee);
 	m_label_offense_percentpetspecial->setText(s_percentpetspecial);
