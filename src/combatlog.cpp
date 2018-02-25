@@ -411,7 +411,7 @@ QWidget* CombatWindow::initOffenseWidget()
 
 	m_listview_offense = new SEQListView(preferenceName(), listGBox);
 	m_listview_offense->addColumn("Type");
-	m_listview_offense->setColumnAlignment(0, Qt::AlignRight);
+	m_listview_offense->setColumnAlignment(0, Qt::AlignLeft);
 	m_listview_offense->addColumn("Hit");
 	m_listview_offense->setColumnAlignment(1, Qt::AlignRight);
 	m_listview_offense->addColumn("Miss");
@@ -588,9 +588,9 @@ QWidget* CombatWindow::initMobWidget()
 
 	m_listview_mob = new SEQListView(preferenceName(), listGBox);
 	m_listview_mob->addColumn("Time");
-	m_listview_mob->setColumnAlignment(0, Qt::AlignRight);
+	m_listview_mob->setColumnAlignment(0, Qt::AlignLeft);
 	m_listview_mob->addColumn("Name");
-	m_listview_mob->setColumnAlignment(1, Qt::AlignRight);
+	m_listview_mob->setColumnAlignment(1, Qt::AlignLeft);
 	m_listview_mob->addColumn("ID");
 	m_listview_mob->setColumnAlignment(2, Qt::AlignRight);
 	m_listview_mob->addColumn("Duration");
