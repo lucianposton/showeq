@@ -439,67 +439,105 @@ QWidget* CombatWindow::initOffenseWidget()
 	QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
 	m_layout_offense->addWidget(summaryGBox);
 
-	QGrid *summaryGrid = new QGrid(4, summaryGBox);
+	QGrid *summaryGrid = new QGrid(11, summaryGBox);
 
 	new QLabel("% from Melee:", summaryGrid);
 	m_label_offense_percentmelee = new QLabel(summaryGrid);
-
+	m_label_offense_percentmelee->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 	new QLabel("Avg Melee:", summaryGrid);
 	m_label_offense_avgmelee = new QLabel(summaryGrid);
+	m_label_offense_avgmelee->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("% from Pet Melee:", summaryGrid);
+	m_label_offense_percentpetmelee = new QLabel(summaryGrid);
+	m_label_offense_percentpetmelee->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("Avg Pet Melee:", summaryGrid);
+	m_label_offense_avgpetmelee = new QLabel(summaryGrid);
+	m_label_offense_avgpetmelee->setAlignment(Qt::AlignRight);
 
 	new QLabel("% from Special:", summaryGrid);
 	m_label_offense_percentspecial = new QLabel(summaryGrid);
-
+	m_label_offense_percentspecial->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 	new QLabel("Avg Special:", summaryGrid);
 	m_label_offense_avgspecial = new QLabel(summaryGrid);
+	m_label_offense_avgspecial->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("% from Pet Special:", summaryGrid);
+	m_label_offense_percentpetspecial = new QLabel(summaryGrid);
+	m_label_offense_percentpetspecial->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("Avg Pet Special:", summaryGrid);
+	m_label_offense_avgpetspecial = new QLabel(summaryGrid);
+	m_label_offense_avgpetspecial->setAlignment(Qt::AlignRight);
 
 	new QLabel("% from NonMelee:", summaryGrid);
 	m_label_offense_percentnonmelee = new QLabel(summaryGrid);
-
+	m_label_offense_percentnonmelee->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 	new QLabel("Avg NonMelee:", summaryGrid);
 	m_label_offense_avgnonmelee = new QLabel(summaryGrid);
+	m_label_offense_avgnonmelee->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("% from Pet NonMelee:", summaryGrid);
+	m_label_offense_percentpetnonmelee = new QLabel(summaryGrid);
+	m_label_offense_percentpetnonmelee->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("Avg Pet NonMelee:", summaryGrid);
+	m_label_offense_avgpetnonmelee = new QLabel(summaryGrid);
+	m_label_offense_avgpetnonmelee->setAlignment(Qt::AlignRight);
+
 
 	new QLabel("% from DS:", summaryGrid);
 	m_label_offense_percentds = new QLabel(summaryGrid);
-
+	m_label_offense_percentds->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 	new QLabel("Avg DS:", summaryGrid);
 	m_label_offense_avgds = new QLabel(summaryGrid);
+	m_label_offense_avgds->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("% from Pet DS:", summaryGrid);
+	m_label_offense_percentpetds = new QLabel(summaryGrid);
+	m_label_offense_percentpetds->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("Avg Pet DS:", summaryGrid);
+	m_label_offense_avgpetds = new QLabel(summaryGrid);
+	m_label_offense_avgpetds->setAlignment(Qt::AlignRight);
+
 
 	new QLabel("% from DoT:", summaryGrid);
 	m_label_offense_percentdot = new QLabel(summaryGrid);
-
+	m_label_offense_percentdot->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 	new QLabel("Avg DoT Tick:", summaryGrid);
 	m_label_offense_avgdottick = new QLabel(summaryGrid);
-
-	new QLabel("% from Pet Melee:", summaryGrid);
-	m_label_offense_percentpetmelee = new QLabel(summaryGrid);
-
-	new QLabel("Avg Pet Melee:", summaryGrid);
-	m_label_offense_avgpetmelee = new QLabel(summaryGrid);
-
-	new QLabel("% from Pet Special:", summaryGrid);
-	m_label_offense_percentpetspecial = new QLabel(summaryGrid);
-
-	new QLabel("Avg Pet Special:", summaryGrid);
-	m_label_offense_avgpetspecial = new QLabel(summaryGrid);
-
-	new QLabel("% from Pet NonMelee:", summaryGrid);
-	m_label_offense_percentpetnonmelee = new QLabel(summaryGrid);
-
-	new QLabel("Avg Pet NonMelee:", summaryGrid);
-	m_label_offense_avgpetnonmelee = new QLabel(summaryGrid);
-
-	new QLabel("% from Pet DS:", summaryGrid);
-	m_label_offense_percentpetds = new QLabel(summaryGrid);
-
-	new QLabel("Avg Pet DS:", summaryGrid);
-	m_label_offense_avgpetds = new QLabel(summaryGrid);
+	m_label_offense_avgdottick->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
 
 	new QLabel("Total Damage:", summaryGrid);
 	m_label_offense_totaldamage = new QLabel(summaryGrid);
+	m_label_offense_totaldamage->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+	new QLabel("% Total from Pet:", summaryGrid);
+	m_label_offense_percentpettotaldamage = new QLabel(summaryGrid);
+	m_label_offense_percentpettotaldamage->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
 
-	((QGridLayout *)summaryGrid->layout())->setColStretch(1, 1);
-	((QGridLayout *)summaryGrid->layout())->setColStretch(3, 1);
+	((QGridLayout *)summaryGrid->layout())->setColStretch(2, 1);
+	((QGridLayout *)summaryGrid->layout())->setColStretch(5, 1);
+	((QGridLayout *)summaryGrid->layout())->setColStretch(8, 1);
 	summaryGrid->layout()->setSpacing(5);
 
 	return pWidget;
@@ -662,6 +700,7 @@ void CombatWindow::updateOffense()
 
 
 	QString s_totaldamage;
+	QString s_percentpettotaldamage;
 	QString s_percentmelee;
 	QString s_percentspecial;
 	QString s_percentnonmelee;
@@ -682,6 +721,7 @@ void CombatWindow::updateOffense()
 	QString s_avgpetds;
 
 	int iTotalDamage = 0;
+	int iPetTotalDamage = 0;
 	//int iTotalHits = 0;
 	double dPercentMelee = 0.0;
 	double dPercentSpecial = 0.0;
@@ -704,6 +744,8 @@ void CombatWindow::updateOffense()
 	int iDSHits = 0;
 	int iDotDamage = 0;
 	int iDotTicks = 0;
+
+    double dPetPercentTotalDamage = 0.0;
 
     double dPetPercentMelee = 0.0;
     double dPetPercentSpecial = 0.0;
@@ -946,9 +988,12 @@ void CombatWindow::updateOffense()
 		iDotTicks += iTicks;
 	}
 
+	iPetTotalDamage = iPetMeleeDamage + iPetSpecialDamage + iPetNonmeleeDamage + iPetDSDamage;
 	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage + iDotDamage + iDSDamage
-		+ iPetMeleeDamage + iPetSpecialDamage + iPetNonmeleeDamage + iPetDSDamage;
+		+ iPetTotalDamage;
 	//iTotalHits = iMeleeHits + iSpecialHits + iNonmeleeHits;
+
+	dPetPercentTotalDamage = ((double)iPetTotalDamage / (double)iTotalDamage) * 100.0;
 
 	dPercentMelee = ((double)iMeleeDamage / (double)iTotalDamage) * 100.0;
 	dPercentSpecial = ((double)iSpecialDamage / (double)iTotalDamage) * 100.0;
@@ -973,6 +1018,7 @@ void CombatWindow::updateOffense()
 	dPetAvgDS = (double)iPetDSDamage / (double)iPetDSHits;
 
 	s_totaldamage.setNum(iTotalDamage);
+	s_percentpettotaldamage = QString::number(dPetPercentTotalDamage, 'f', 1);
 
 	s_percentmelee = QString::number(dPercentMelee, 'f', 1);
 	s_percentspecial = QString::number(dPercentSpecial, 'f', 1);
@@ -997,6 +1043,7 @@ void CombatWindow::updateOffense()
 	s_avgpetds = QString::number(dPetAvgDS, 'f', 0);
 
 	m_label_offense_totaldamage->setText(s_totaldamage);
+	m_label_offense_percentpettotaldamage->setText(s_percentpettotaldamage);
 
 	m_label_offense_percentmelee->setText(s_percentmelee);
 	m_label_offense_percentspecial->setText(s_percentspecial);
