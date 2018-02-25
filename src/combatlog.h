@@ -196,6 +196,7 @@ public slots:
 	void resetDPS();
 	void clearMob();
 	void clearOffense();
+	void clearDefense();
 	void clear(void);
 
 private:

@@ -366,7 +366,9 @@ void CombatWindow::initUI()
 	m_tab->addTab(m_widget_mob, "&Mobs");
 
 	m_clear_menu = new QPopupMenu(this);
+	m_clear_menu->insertItem("Clear All", this, SLOT(clear()));
 	m_clear_menu->insertItem("Clear Offense Stats", this, SLOT(clearOffense()));
+	m_clear_menu->insertItem("Clear Defense Stats", this, SLOT(clearDefense()));
 	m_clear_menu->insertItem("Clear Mob Stats", this, SLOT(clearMob()));
 
 	m_menu_bar->insertItem("&Clear", m_clear_menu);
@@ -1152,6 +1154,12 @@ void CombatWindow::clearOffense()
     m_combat_offense_list.clear();
     m_dot_offense_list.clear();
     updateOffense();
+}
+
+void CombatWindow::clearDefense()
+{
+    m_combat_defense_record->clear();
+    updateDefense();
 }
 
 void CombatWindow::clear(void)
