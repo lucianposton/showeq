@@ -110,7 +110,7 @@ static bool isNonMeleeDamage(int iType, int iDamage)
 
 static bool isMelee(int iType)
 {
-    DamageCategory c = damageCategory(iType);
+    const DamageCategory c = damageCategory(iType);
     return c == DAMAGE_CATEGORY_MELEE || c == DAMAGE_CATEGORY_MELEE_SPECIAL;
 }
 
@@ -946,7 +946,7 @@ void CombatWindow::updateOffense()
 		double dAccuracy = (double)iHits / (double)(iMisses+iHits);
 
 		QString s_type;
-		DamageCategory category = damageCategory(iType);
+		const DamageCategory category = damageCategory(iType);
 		switch(category)
 		{
 			case DAMAGE_CATEGORY_MELEE:
@@ -993,7 +993,7 @@ void CombatWindow::updateOffense()
 
 		m_listview_offense->insertItem(pItem);
 
-		switch(damageCategory(iType))
+		switch(category)
 		{
 			case DAMAGE_CATEGORY_MELEE:
 			{
@@ -1088,7 +1088,7 @@ void CombatWindow::updateOffense()
 
         m_listview_offense->insertItem(pItem);
 
-        switch(damageCategory(iType))
+        switch(category)
         {
             case DAMAGE_CATEGORY_MELEE:
                 {
