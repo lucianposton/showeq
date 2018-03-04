@@ -10,6 +10,8 @@
 #include "util.h"
 #include "diagnosticmessages.h"
 
+#include <algorithm>
+
 #include <qgrid.h>
 #include <qtimer.h>
 #include <qhbox.h>
@@ -278,15 +280,22 @@ void CombatDefenseRecord::addMiss(int iMissReason)
 ////////////////////////////////////////////
 //	CombatMobRecord implementation
 ////////////////////////////////////////////
-CombatMobRecord::CombatMobRecord(int iID, int iStartTime, Player* p) :
+CombatMobRecord::CombatMobRecord(int iID, const QString& mobName, Player* p) :
 m_iID(iID),
+m_iName(mobName),
 m_player(p),
-m_iStartTime(iStartTime),
-m_iLastTime(iStartTime),
+m_iStartTime(0),
+m_iLastTime(0),
 m_iDamageGiven(0),
 m_dDPS(0.0),
 m_iDamageTaken(0),
-m_dMobDPS(0.0)
+m_dMobDPS(0.0),
+m_iPetStartTime(0),
+m_iPetLastTime(0),
+m_iPetDamageGiven(0),
+m_dPetDPS(0.0),
+m_iPetDamageTaken(0),
+m_dPetMobDPS(0.0)
 {
 
 }
@@ -315,32 +324,85 @@ double CombatMobRecord::getMobDPS()
 	return m_dMobDPS;
 }
 
+double CombatMobRecord::getPetDPS()
+{
+    const int iTimeElapsed = (m_iPetLastTime - m_iPetStartTime) / 1000;
+
+    if (iTimeElapsed > 0)
+    {
+        m_dPetDPS = (double)m_iPetDamageGiven / (double)iTimeElapsed;
+    }
+
+    return m_dPetDPS;
+}
+
+double CombatMobRecord::getPetMobDPS()
+{
+    const int iTimeElapsed = (m_iPetLastTime - m_iPetStartTime) / 1000;
+
+    if (iTimeElapsed > 0)
+    {
+        m_dPetMobDPS = (double)m_iPetDamageTaken / (double)iTimeElapsed;
+    }
+
+    return m_dPetMobDPS;
+}
+
+int CombatMobRecord::getDuration()
+{
+    const int iTimeElapsed = m_iLastTime - m_iStartTime;
+    const int iPetTimeElapsed = m_iPetLastTime - m_iPetStartTime;
+    if (iTimeElapsed && iPetTimeElapsed)
+    {
+        return std::max(m_iLastTime, m_iPetLastTime) - std::min(m_iStartTime, m_iPetStartTime);
+    }
+    else if (iTimeElapsed)
+    {
+        return iTimeElapsed;
+    }
+    else // Assume iPetTimeElapsed
+    {
+        return iPetTimeElapsed;
+    }
+};
+
 void CombatMobRecord::addHit(int iTarget, int iSource, int iDamage)
 {
+    m_time = time(0);
+    const int iPlayerID = m_player->id();
+    const bool hitInvolvesPlayer = iPlayerID == iTarget || iPlayerID == iSource;
+    if (hitInvolvesPlayer)
+    {
+        m_iLastTime = mTime();
+        if (0 == m_iStartTime)
+            m_iStartTime = m_iLastTime;
+    }
+    else // Assume pet
+    {
+        m_iPetLastTime = mTime();
+        if (0 == m_iPetStartTime)
+            m_iPetStartTime = m_iPetLastTime;
+    }
 
-	int iPlayerID = m_player->id();
-
-	if(iSource == iPlayerID && iTarget == m_iID)
-	{
-		//	update m_iLastTime
-		m_iLastTime = mTime();
-
-		if(iDamage > 0)
-		{
-			m_iDamageGiven += iDamage;
-		}
-	}
-	else if(iSource == m_iID && iTarget == iPlayerID)
-	{
-		//	update m_iLastTime
-		m_iLastTime = mTime();
-
-		if(iDamage > 0)
-		{
-			m_iDamageTaken += iDamage;
-		}
-	}
-
+    if (iDamage > 0)
+    {
+        if (hitInvolvesPlayer && m_iID == iTarget)
+        {
+            m_iDamageGiven += iDamage;
+        }
+        else if (hitInvolvesPlayer && m_iID == iSource)
+        {
+            m_iDamageTaken += iDamage;
+        }
+        else if (m_iID == iTarget) // Assume pet
+        {
+            m_iPetDamageGiven += iDamage;
+        }
+        else // Assume pet
+        {
+            m_iPetDamageTaken += iDamage;
+        }
+    }
 }
 
 ////////////////////////////////////////////
@@ -662,14 +724,22 @@ QWidget* CombatWindow::initMobWidget()
 	m_listview_mob->setColumnAlignment(2, Qt::AlignRight);
 	m_listview_mob->addColumn("Duration");
 	m_listview_mob->setColumnAlignment(3, Qt::AlignRight);
-	m_listview_mob->addColumn("Damage Given");
+	m_listview_mob->addColumn("Damage to");
 	m_listview_mob->setColumnAlignment(4, Qt::AlignRight);
 	m_listview_mob->addColumn("DPS");
 	m_listview_mob->setColumnAlignment(5, Qt::AlignRight);
-	m_listview_mob->addColumn("Damage Taken");
+	m_listview_mob->addColumn("Damage from");
 	m_listview_mob->setColumnAlignment(6, Qt::AlignRight);
 	m_listview_mob->addColumn("MOB DPS");
 	m_listview_mob->setColumnAlignment(7, Qt::AlignRight);
+	m_listview_mob->addColumn("Pet Damage to");
+	m_listview_mob->setColumnAlignment(8, Qt::AlignRight);
+	m_listview_mob->addColumn("Pet DPS");
+	m_listview_mob->setColumnAlignment(9, Qt::AlignRight);
+	m_listview_mob->addColumn("Pet Damage from");
+	m_listview_mob->setColumnAlignment(10, Qt::AlignRight);
+	m_listview_mob->addColumn("Pet MOB DPS");
+	m_listview_mob->setColumnAlignment(11, Qt::AlignRight);
 
 	m_listview_mob->restoreColumns();
 
@@ -1183,6 +1253,10 @@ void CombatWindow::updateMob()
 		double dDPS = pRecord->getDPS();
 		int iDamageTaken = pRecord->getDamageTaken();
 		double dMobDPS = pRecord->getMobDPS();
+		const int iPetDamageGiven = pRecord->getPetDamageGiven();
+		const double dPetDPS = pRecord->getPetDPS();
+		const int iPetDamageTaken = pRecord->getPetDamageTaken();
+		const double dPetMobDPS = pRecord->getPetMobDPS();
 
 		char s_time[64];
 		time_t timev = pRecord->getTime();
@@ -1194,11 +1268,19 @@ void CombatWindow::updateMob()
 		QString s_dps = QString::number(dDPS, 'f', 1);
 		QString s_iDamageTaken = QString::number(iDamageTaken);
 		QString s_mobdps = QString::number(dMobDPS, 'f', 1);
+		QString s_petdamagegiven = QString::number(iPetDamageGiven);
+		QString s_petdps = QString::number(dPetDPS, 'f', 1);
+		QString s_petiDamageTaken = QString::number(iPetDamageTaken);
+		QString s_petmobdps = QString::number(dPetMobDPS, 'f', 1);
 
 
 		QListViewItem *pItem = new QListViewItem(m_listview_mob,
 			s_time, s_name, s_id, s_duration, s_damagegiven,
 			s_dps, s_iDamageTaken, s_mobdps);
+		pItem->setText(8, s_petdamagegiven);
+		pItem->setText(9, s_petdps);
+		pItem->setText(10, s_petiDamageTaken);
+		pItem->setText(11, s_petmobdps);
 
 		m_listview_mob->insertItem(pItem);
 
@@ -1288,7 +1370,9 @@ void CombatWindow::addDotOffenseRecord(const QString& iSpellName, const int iDam
 #endif
 }
 
-void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetOwnerID, int iType, int iSpell, int iDamage, QString tName, QString sName)
+void CombatWindow::addCombatRecord(int iTargetID, int iTargetPetOwnerID,
+        int iSourceID, int iSourcePetOwnerID,
+        int iType, int iSpell, int iDamage, QString tName, QString sName)
 {
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::addCombatRecord starting...");
@@ -1296,7 +1380,7 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetO
 			iTargetID, iSourceID, iType, iSpell, iDamage);
 #endif
 
-	int iPlayerID = m_player->id();
+	const int iPlayerID = m_player->id();
 
 	//	The one case we won't handle (for now) is where the Target
 	//	and Source are the same.
@@ -1305,7 +1389,7 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetO
 	{
 		addDefenseRecord(iDamage);
 		updateDefense();
-		addMobRecord(iTargetID, iSourceID, iDamage, tName, sName);
+		addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
 		updateMob();
 	}
 	else if(iSourceID == iPlayerID && iTargetID != iPlayerID)
@@ -1315,7 +1399,7 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetO
 		{
 			addOffenseRecord(iType, -iDamage, iSpell);
 			updateOffense();
-			addMobRecord(iTargetID, iSourceID, -iDamage, tName, sName);
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, -iDamage, tName, sName);
 			updateMob();
 		}
 		// For the player, non-melee has positive damage on killing blows
@@ -1324,7 +1408,7 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetO
 		else if (isMelee(iType)) {
 			addOffenseRecord(iType, iDamage, iSpell);
 			updateOffense();
-			addMobRecord(iTargetID, iSourceID, iDamage, tName, sName);
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
 			updateMob();
 		}
 
@@ -1334,6 +1418,19 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetO
 		else if(isDamageShield(iType))
 			updateDPS(-iDamage);
 	}
+	else if (iPlayerID == iTargetPetOwnerID)
+	{
+		// Damage shields show up as negative damage
+		if (isDamageShield(iType))
+		{
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, -iDamage, tName, sName);
+			updateMob();
+		}
+		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
+			updateMob();
+		}
+	}
 	else if (iPlayerID == iSourcePetOwnerID)
 	{
 		// Damage shields show up as negative damage
@@ -1341,10 +1438,14 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetO
 		{
 			addPetOffenseRecord(iSourceID, sName, iType, -iDamage, iSpell);
 			updateOffense();
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, -iDamage, tName, sName);
+			updateMob();
 		}
 		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
 			addPetOffenseRecord(iSourceID, sName, iType, iDamage, iSpell);
 			updateOffense();
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
+			updateMob();
 		}
 
 		if(iDamage > 0)
@@ -1448,23 +1549,24 @@ void CombatWindow::addDefenseRecord(int iDamage)
 
 }
 
-void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage, QString tName, QString sName)
+void CombatWindow::addMobRecord(int iTargetID, int iTargetPetOwnerID,
+        int iSourceID, int iSourcePetOwnerID,
+        int iDamage, QString tName, QString sName)
 {
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::addMobRecord starting...");
 #endif
 
-	int iTimeNow = mTime();
-	int iPlayerID = m_player->id();
+	const int iPlayerID = m_player->id();
 	int iMobID;
 	QString mobName;
 
-	if(iPlayerID == iTargetID)
+	if(iPlayerID == iTargetID || iPlayerID == iTargetPetOwnerID)
 	{
 		iMobID = iSourceID;
 		mobName = sName;
 	}
-	else if(iPlayerID == iSourceID)
+	else if(iPlayerID == iSourceID || iPlayerID == iSourcePetOwnerID)
 	{
 		iMobID = iTargetID;
 		mobName = tName;
@@ -1491,13 +1593,10 @@ void CombatWindow::addMobRecord(int iTargetID, int iSourceID, int iDamage, QStri
 
 	if(!bFoundRecord)
 	{
-		pRecord = new CombatMobRecord(iMobID, iTimeNow, m_player);
-		pRecord->setName(mobName);
+		pRecord = new CombatMobRecord(iMobID, mobName, m_player);
 		m_combat_mob_list.append(pRecord);
 	}
-	pRecord->setTime(time(0));
 	pRecord->addHit(iTargetID, iSourceID, iDamage);
-
 
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::addMobRecord finished...");

@@ -2241,8 +2241,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	      m_combatWindow, SLOT(addNonMeleeHit(const QString&, int)));
      connect (this, SIGNAL(dotTickSignal(const QString&, const QString&, int)),
 	      m_combatWindow, SLOT(addDotTick(const QString&, const QString&, int)));
-     connect (this, SIGNAL(combatSignal(int, int, int, int, int, int, QString, QString)),
-	      m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int, int, QString, QString)));
+     connect (this, SIGNAL(combatSignal(int, int, int, int, int, int, int, QString, QString)),
+	      m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int, int, int, QString, QString)));
      connect (m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
 	      m_combatWindow, SLOT(resetDPS()));
      connect(this, SIGNAL(restoreFonts(void)),
@@ -4594,7 +4594,8 @@ void EQInterface::combatDamageMessage(const uint8_t* data)
   const Spawn* target = (Spawn*)m_spawnShell->findID(tSpawn, action2->target);
   const Spawn* source = (Spawn*)m_spawnShell->findID(tSpawn, action2->source);
   const int sourcePetOwnerID = (source == NULL) ? -1 : source->petOwnerID();
-  emit combatSignal(action2->target, action2->source, sourcePetOwnerID, action2->type, action2->spell, action2->damage, 
+  const int targetPetOwnerID = (target == NULL) ? -1 : target->petOwnerID();
+  emit combatSignal(action2->target, targetPetOwnerID, action2->source, sourcePetOwnerID, action2->type, action2->spell, action2->damage, 
 		    (target != 0) ? target->name() : QString("Unknown"), (source != 0) ? source->name() : QString("Unknown"));
 }
 
@@ -4672,18 +4673,15 @@ void EQInterface::combatKillSpawn(const uint8_t* data)
 {
   const Death_Struct *deadspawn = (const Death_Struct *)data;
 
-  // only show my kills
-  if (deadspawn && deadspawn->killerId == m_player->id())
-  {
     const Spawn* target = (Spawn*)m_spawnShell->findID(tSpawn, deadspawn->spawnId);
     const Spawn* source = (Spawn*)m_spawnShell->findID(tSpawn, deadspawn->killerId);
     const int sourcePetOwnerID = (source == NULL) ? -1 : source->petOwnerID();
-    emit combatSignal(deadspawn->spawnId, deadspawn->killerId, sourcePetOwnerID,
+    const int targetPetOwnerID = (target == NULL) ? -1 : target->petOwnerID();
+    emit combatSignal(deadspawn->spawnId, targetPetOwnerID, deadspawn->killerId, sourcePetOwnerID,
 		      deadspawn->type,
 		      deadspawn->spellId, deadspawn->damage,
 		      (target != 0) ? target->name() : QString("Unknown"),
 		      (source != 0) ? source->name() : QString("Unknown"));
-  }
 }
 
 void EQInterface::updatedDateTime(const QDateTime& dt)

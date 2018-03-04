@@ -173,26 +173,29 @@ class CombatMobRecord
 {
 public:
 
-	CombatMobRecord(int iID, int iStartTime, Player* p);
+	CombatMobRecord(int iID, const QString& iName, Player* p);
 
 	int		getID() { return m_iID; };
-	int		getDuration() { return (m_iLastTime - m_iStartTime); };
+	int		getDuration();
 	int		getDamageGiven() { return m_iDamageGiven; };
 	int		getDamageTaken() { return m_iDamageTaken; };
+	int		getPetDamageGiven() { return m_iPetDamageGiven; };
+	int		getPetDamageTaken() { return m_iPetDamageTaken; };
 
 	QString		getName() { return m_iName; };
-	void		setName(QString iName) { m_iName = iName; };
 
 	time_t		getTime() { return m_time; };
-	void		setTime(time_t iTime) { m_time = iTime; };
 
 	double	getDPS();
 	double	getMobDPS();
+	double	getPetDPS();
+	double	getPetMobDPS();
 
 	void	addHit(int iTarget, int iSource, int iDamage);
 	
 private:
 	int			m_iID;
+	QString			m_iName;
 	Player*	m_player;
 
 	int			m_iStartTime;
@@ -202,7 +205,13 @@ private:
 	int			m_iDamageTaken;
 	double		m_dMobDPS;
 
-	QString			m_iName;
+	int			m_iPetStartTime;
+	int			m_iPetLastTime;
+	int			m_iPetDamageGiven;
+	double		m_dPetDPS;
+	int			m_iPetDamageTaken;
+	double		m_dPetMobDPS;
+
 	time_t			m_time;
 };
 
@@ -225,7 +234,7 @@ public slots:
 	void addNonMeleeHit(const QString& iTargetName, int iDamage);
 	void addDotTick(const QString& iTargetName,
 			const QString& iSpellName, int iDamage);
-	void addCombatRecord(int iTargetID, int iSourceID, int iSourcePetOwnerID, int iType, int iSpell, int iDamage, QString tName, QString sName);
+	void addCombatRecord(int iTargetID, int iTargetPetOwnerID, int iSourceID, int iSourcePetOwnerID, int iType, int iSpell, int iDamage, QString tName, QString sName);
 	void resetDPS();
 	void clearMob();
 	void clearOffense();
@@ -244,7 +253,7 @@ private:
 	void addOffenseRecord(int iType, int iDamage, int iSpell);
 	void addPetOffenseRecord(int petID, const QString& petName, int iType, int iDamage, int iSpell);
 	void addDefenseRecord(int iDamage);
-	void addMobRecord(int iTargetID, int iSourceID, int iDamage, QString tName, QString sName);
+	void addMobRecord(int iTargetID, int iTargetPetOwnerID, int iSourceID, int iSourcePetOwnerID, int iDamage, QString tName, QString sName);
 
 	void updateOffense();
 	void updateDefense();
