@@ -231,6 +231,7 @@ class EQInterface:public QMainWindow
    void newZoneName (const QString &); 
    void restoreFonts();
 
+   void nonMeleeHitSignal(const QString&, int);
    void dotTickSignal(const QString&, const QString&, int);
    void combatSignal(int, int, int, int, int, int, QString, QString);
 

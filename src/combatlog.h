@@ -53,7 +53,7 @@ public:
 	void	addMiss(int iMissReason) { m_iMisses++; };
 	void	addHit(int iDamage);
 
-private:
+protected:
 	int			m_iType;
 	int			m_iSpell;
 	Player*	m_player;
@@ -64,6 +64,18 @@ private:
 	int			m_iMaxDamage;
 	int			m_iTotalDamage;
 
+};
+
+
+////////////////////////////////////////////
+//  NonMeleeOffenseRecord definition
+//////////////////////////////////////////`//
+class NonMeleeOffenseRecord : public CombatOffenseRecord
+{
+public:
+    NonMeleeOffenseRecord();
+
+    void clear();
 };
 
 
@@ -210,6 +222,7 @@ public:
 public slots:
 
 	virtual void savePrefs(void);
+	void addNonMeleeHit(const QString& iTargetName, int iDamage);
 	void addDotTick(const QString& iTargetName,
 			const QString& iSpellName, int iDamage);
 	void addCombatRecord(int iTargetID, int iSourceID, int iSourcePetOwnerID, int iType, int iSpell, int iDamage, QString tName, QString sName);
@@ -226,6 +239,7 @@ private:
 	QWidget* initDefenseWidget();
 	QWidget* initMobWidget();
 
+	void addNonMeleeOffenseRecord(const QString& iTargetName, const int iDamage);
 	void addDotOffenseRecord(const QString& iSpellName, int iDamage);
 	void addOffenseRecord(int iType, int iDamage, int iSpell);
 	void addPetOffenseRecord(int petID, const QString& petName, int iType, int iDamage, int iSpell);
@@ -301,6 +315,7 @@ private:
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	QList<DotOffenseRecord> m_dot_offense_list;
 	QList<PetOffenseRecord> m_pet_offense_list;
+	NonMeleeOffenseRecord *m_nonmelee_offense_record;
 	CombatDefenseRecord *m_combat_defense_record;
 	QList<CombatMobRecord> m_combat_mob_list;
 

@@ -2237,6 +2237,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      // connect CombatWindow slots to the signals
      connect(m_player, SIGNAL(newPlayer(void)),
 	     m_combatWindow, SLOT(clear(void)));
+     connect (this, SIGNAL(nonMeleeHitSignal(const QString&, int)),
+	      m_combatWindow, SLOT(addNonMeleeHit(const QString&, int)));
      connect (this, SIGNAL(dotTickSignal(const QString&, const QString&, int)),
 	      m_combatWindow, SLOT(addDotTick(const QString&, const QString&, int)));
      connect (this, SIGNAL(combatSignal(int, int, int, int, int, int, QString, QString)),
@@ -4603,34 +4605,64 @@ void EQInterface::formattedMessage(const uint8_t* data, size_t len, uint8_t dir)
 
   const formattedMessageStruct* fmsg = (const formattedMessageStruct*)data;
   const QString messageFormatString = m_eqStrings->find(fmsg->messageFormat);
-  if (messageFormatString != "%1 has taken %2 damage from your %3.")
+  if (messageFormatString == "%1 has taken %2 damage from your %3.")
   {
+      const size_t messagesLen = len
+          - ((uint8_t*)&fmsg->messages[0] - (uint8_t*)fmsg)
+          - sizeof(fmsg->unknownXXXX);
+      const QValueVector<QString> argList = m_eqStrings->makeMessageArgVector(
+              fmsg->messages,
+              messagesLen);
+
+      if (argList.size() != 3)
+      {
+          seqDebug("Expected 3 arguments for dot tick message, but got %zu",
+                  argList.size());
+          return;
+      }
+
+      bool ok;
+      const int damage = argList[1].toInt(&ok);
+      if (!ok)
+      {
+          seqDebug("Failed to parse damage value for dot tick message (%s,%s,%s)",
+                  (const char*)argList[0], (const char*)argList[1],
+                  (const char*)argList[2]);
+          return;
+      }
+
+      emit dotTickSignal(argList[0], argList[2], damage);
       return;
   }
 
-  const size_t messagesLen = len
-      - ((uint8_t*)&fmsg->messages[0] - (uint8_t*)fmsg)
-      - sizeof(fmsg->unknownXXXX);
-  const QValueVector<QString> argList = m_eqStrings->makeMessageArgVector(
-          fmsg->messages,
-          messagesLen);
-
-  if (argList.size() != 3)
+  if (messageFormatString == "%1 was hit by non-melee for %2 points of damage.")
   {
-      seqDebug("Expected 3 arguments for dot tick message, but got %zu", argList.size());
+      const size_t messagesLen = len
+          - ((uint8_t*)&fmsg->messages[0] - (uint8_t*)fmsg)
+          - sizeof(fmsg->unknownXXXX);
+      const QValueVector<QString> argList = m_eqStrings->makeMessageArgVector(
+              fmsg->messages,
+              messagesLen);
+
+      if (argList.size() != 2)
+      {
+          seqDebug("Expected 2 arguments for non-melee hit message, but got %zu",
+                  argList.size());
+          return;
+      }
+
+      bool ok;
+      const int damage = argList[1].toInt(&ok);
+      if (!ok)
+      {
+          seqDebug("Failed to parse damage value for non-melee hit message (%s,%s)",
+                  (const char*)argList[0], (const char*)argList[1]);
+          return;
+      }
+
+      emit nonMeleeHitSignal(argList[0], damage);
       return;
   }
-
-  bool ok;
-  const int damage = argList[1].toInt(&ok);
-  if (!ok)
-  {
-      seqDebug("Failed to parse damage value for dot tick message (%s,%s,%s)",
-              (const char*)argList[0], (const char*)argList[1], (const char*)argList[2]);
-      return;
-  }
-
-  emit dotTickSignal(argList[0], argList[2], damage);
 }
 
 

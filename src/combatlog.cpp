@@ -129,6 +129,24 @@ void CombatOffenseRecord::addHit(int iDamage)
 
 
 ////////////////////////////////////////////
+//  NonMeleeOffenseRecord implementation
+////////////////////////////////////////////
+NonMeleeOffenseRecord::NonMeleeOffenseRecord() :
+    CombatOffenseRecord(231, NULL, ITEM_SPELLID_NOSPELL) // assume non-melee is spell, so 231
+{
+}
+
+void NonMeleeOffenseRecord::clear()
+{
+    m_iHits = 0;
+    m_iMisses = 0;
+    m_iMinDamage = 65536;
+    m_iMaxDamage = 0;
+    m_iTotalDamage = 0;
+}
+
+
+////////////////////////////////////////////
 //  PetOffenseRecord implementation
 ////////////////////////////////////////////
 PetOffenseRecord::PetOffenseRecord(int iPetID, const QString& iPetName, int iType, Player* p, int iSpell) :
@@ -336,6 +354,11 @@ CombatWindow::~CombatWindow()
 		delete m_combat_defense_record;
 		m_combat_defense_record = 0;
 	}
+	if(m_nonmelee_offense_record != 0)
+	{
+		delete m_nonmelee_offense_record;
+		m_nonmelee_offense_record = 0;
+	}
 }
 
 CombatWindow::CombatWindow(Player* player,
@@ -360,6 +383,7 @@ CombatWindow::CombatWindow(Player* player,
 	m_combat_offense_list.setAutoDelete(true);
 	m_pet_offense_list.setAutoDelete(true);
 	m_dot_offense_list.setAutoDelete(true);
+	m_nonmelee_offense_record = new NonMeleeOffenseRecord;
 	m_combat_defense_record = new CombatDefenseRecord(player);
 	m_combat_mob_list.setAutoDelete(true);
 
@@ -769,6 +793,38 @@ void CombatWindow::updateOffense()
 	//	empty the list so we can repopulate
 	m_listview_offense->clear();
 
+    if (0 != m_nonmelee_offense_record->getHits() + m_nonmelee_offense_record->getMisses())
+    {
+        const int iHits = m_nonmelee_offense_record->getHits();
+        const int iMinDamage = m_nonmelee_offense_record->getMinDamage();
+        const int iMaxDamage = m_nonmelee_offense_record->getMaxDamage();
+        const int iDamage = m_nonmelee_offense_record->getTotalDamage();
+
+        const double dAvgDamage = (double)iDamage / (double)iHits;
+
+        QString s_type = "Non-melee:";
+        QString s_hits;
+        s_hits.setNum(iHits);
+        QString s_misses;
+        QString s_accuracy;
+        QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
+        QString s_mindamage;
+        s_mindamage.setNum(iMinDamage);
+        QString s_maxdamage;
+        s_maxdamage.setNum(iMaxDamage);
+        QString s_damage;
+        s_damage.setNum(iDamage);
+
+        QListViewItem *pItem = new QListViewItem(m_listview_offense,
+                s_type, s_hits, s_misses, s_accuracy,
+                s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+
+        m_listview_offense->insertItem(pItem);
+
+        iNonmeleeDamage += iDamage;
+        iNonmeleeHits += iHits;
+    }
+
 	CombatOffenseRecord *pRecord;
 
 	for(pRecord = m_combat_offense_list.first(); pRecord != 0; pRecord = m_combat_offense_list.next())
@@ -1159,6 +1215,29 @@ void CombatWindow::updateMob()
 	m_label_mob_avgdps->setText(QString::number(dAvgDPS, 'f', 1));
 }
 
+void CombatWindow::addNonMeleeHit(const QString& iTargetName, const int iDamage)
+{
+#ifdef DEBUGCOMBAT
+    seqDebug("CombatWindow::addNonMeleeHit starting...");
+#endif
+
+    if (iTargetName.isEmpty())
+        return;
+
+    addNonMeleeOffenseRecord(iTargetName, iDamage);
+    updateOffense();
+    updateDPS(iDamage);
+
+#ifdef DEBUGCOMBAT
+    seqDebug("CombatWindow::addNonMeleeHit finished...");
+#endif
+}
+
+void CombatWindow::addNonMeleeOffenseRecord(const QString& iTargetName, const int iDamage)
+{
+    m_nonmelee_offense_record->addHit(iDamage);
+}
+
 void CombatWindow::addDotTick(
         const QString& iTargetName, const QString& iSpellName, const int iDamage)
 {
@@ -1245,6 +1324,9 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetO
 			addMobRecord(iTargetID, iSourceID, iDamage, tName, sName);
 			updateMob();
 		}
+		// For the player, non-melee has postive damage on killing blows
+		// (OP_Death) but not regular hits (OP_Action), so most of the
+		// non-melee damage is handled via addNonMeleeHit, not here
 
 		if(iDamage > 0)
 			updateDPS(iDamage);
@@ -1513,6 +1595,7 @@ void CombatWindow::clearOffense()
     m_combat_offense_list.clear();
     m_pet_offense_list.clear();
     m_dot_offense_list.clear();
+    m_nonmelee_offense_record->clear();
     updateOffense();
 }
 
@@ -1529,6 +1612,7 @@ void CombatWindow::clear(void)
   m_combat_offense_list.clear();
   m_pet_offense_list.clear();
   m_dot_offense_list.clear();
+  m_nonmelee_offense_record->clear();
   updateOffense();
   m_combat_defense_record->clear();
   updateDefense();
