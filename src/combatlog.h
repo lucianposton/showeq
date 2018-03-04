@@ -139,6 +139,7 @@ public:
 	int		getParries() { return m_iParries; };
 	int		getRipostes() { return m_iRipostes; };
 	int		getDodges() { return m_iDodges; };
+	int		getInvulnerables() { return m_iInvulnerables; };
 	int		getShieldAbsorbs() { return m_iShieldAbsorbs; };
 	int		getMinDamage() { return m_iMinDamage; };
 	int		getMaxDamage() { return m_iMaxDamage; };
@@ -158,6 +159,7 @@ private:
 	int			m_iParries;
 	int			m_iRipostes;
 	int			m_iDodges;
+	int			m_iInvulnerables;
 	int			m_iShieldAbsorbs;
 	int			m_iMinDamage;
 	int			m_iMaxDamage;
@@ -304,6 +306,7 @@ private:
 	QLabel*		m_label_defense_avoid_parry;
 	QLabel*		m_label_defense_avoid_riposte;
 	QLabel*		m_label_defense_avoid_dodge;
+	QLabel*		m_label_defense_avoid_invulnerables;
 	QLabel*		m_label_defense_avoid_shield_absorb;
 	QLabel*		m_label_defense_avoid_total;
 	QLabel*		m_label_defense_mitigate_avghit;

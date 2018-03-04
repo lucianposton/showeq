@@ -143,6 +143,7 @@
 #define COMBAT_PARRY					-2
 #define COMBAT_RIPOSTE					-3
 #define COMBAT_DODGE					-4
+#define COMBAT_INVULNERABLE				-5
 #define COMBAT_SHIELD_ABSORB			-6
 
 #define PLAYER_CLASSES     16

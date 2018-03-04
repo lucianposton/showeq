@@ -231,6 +231,7 @@ void CombatDefenseRecord::clear(void)
   m_iParries = 0;
   m_iRipostes = 0;
   m_iDodges = 0;
+  m_iInvulnerables= 0;
   m_iShieldAbsorbs = 0;
   m_iMinDamage = 0;
   m_iMaxDamage = 0;
@@ -284,6 +285,11 @@ void CombatDefenseRecord::addMiss(int iMissReason)
 		case COMBAT_DODGE:
 		{
 			m_iDodges++;
+			break;
+		}
+		case COMBAT_INVULNERABLE:
+		{
+			m_iInvulnerables++;
 			break;
 		}
 		case COMBAT_SHIELD_ABSORB:
@@ -677,6 +683,9 @@ QWidget* CombatWindow::initDefenseWidget()
 
 	new QLabel("Dodges:", avoidanceGrid);
 	m_label_defense_avoid_dodge = new QLabel(avoidanceGrid);
+
+	new QLabel("Invulnerables:", avoidanceGrid);
+	m_label_defense_avoid_invulnerables = new QLabel(avoidanceGrid);
 
 	new QLabel("Absorbs:", avoidanceGrid);
 	m_label_defense_avoid_shield_absorb = new QLabel(avoidanceGrid);
@@ -1244,8 +1253,9 @@ void CombatWindow::updateDefense()
 	int iParries = m_combat_defense_record->getParries();
 	int iRipostes = m_combat_defense_record->getRipostes();
 	int iDodges = m_combat_defense_record->getDodges();
+	int iInvulnerables = m_combat_defense_record->getInvulnerables();
 	int iShieldAbsorbs = m_combat_defense_record->getShieldAbsorbs();
-	int iTotalAvoid = iMisses+iBlocks+iParries+iRipostes+iDodges+iShieldAbsorbs;
+	int iTotalAvoid = iMisses+iBlocks+iParries+iRipostes+iDodges+iInvulnerables+iShieldAbsorbs;
 
 	double dAvgHit = (double)m_combat_defense_record->getTotalDamage() / (double)m_combat_defense_record->getHits();
 	int iMinDamage = m_combat_defense_record->getMinDamage();
@@ -1267,6 +1277,7 @@ void CombatWindow::updateDefense()
 	m_label_defense_avoid_parry->setText(QString::number(iParries));
 	m_label_defense_avoid_riposte->setText(QString::number(iRipostes));
 	m_label_defense_avoid_dodge->setText(QString::number(iDodges));
+	m_label_defense_avoid_invulnerables->setText(QString::number(iInvulnerables));
 	m_label_defense_avoid_shield_absorb->setText(QString::number(iShieldAbsorbs));
 	m_label_defense_avoid_total->setText(QString::number(iTotalAvoid));
 	m_label_defense_mitigate_avghit->setText(doubleToQString(dAvgHit, 0));
