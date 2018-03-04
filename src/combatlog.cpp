@@ -267,9 +267,7 @@ void CombatDefenseRecord::addMiss(int iMissReason)
 		}
 		default:
 		{
-#ifdef DEBUGCOMBAT
-		  seqDebug("CombatDefenseRecord::addMiss:WARNING: invalid miss reason");
-#endif
+		  seqDebug("CombatDefenseRecord::addMiss: invalid miss reason (%d)", iMissReason);
 			break;
 		}
 	}
