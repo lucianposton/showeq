@@ -498,7 +498,7 @@ QWidget* CombatWindow::initOffenseWidget()
 	QGroupBox *listGBox = new QVGroupBox(pWidget);
 	m_layout_offense->addWidget(listGBox);
 
-	m_listview_offense = new SEQListView(preferenceName(), listGBox);
+	m_listview_offense = new SEQListView(preferenceName()+"_OffenseListView", listGBox);
 	m_listview_offense->addColumn("Type");
 	m_listview_offense->setColumnAlignment(0, Qt::AlignLeft);
 	m_listview_offense->addColumn("Hit");
@@ -713,7 +713,7 @@ QWidget* CombatWindow::initMobWidget()
 	QGroupBox *listGBox = new QVGroupBox(pWidget);
 	m_layout_mob->addWidget(listGBox);
 
-	m_listview_mob = new SEQListView(preferenceName(), listGBox);
+	m_listview_mob = new SEQListView(preferenceName()+"_MobListView", listGBox);
 	m_listview_mob->addColumn("Time");
 	m_listview_mob->setColumnAlignment(0, Qt::AlignLeft);
 	m_listview_mob->addColumn("Name");
