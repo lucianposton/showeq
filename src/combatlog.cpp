@@ -27,6 +27,32 @@
 
 namespace {
 
+inline bool isNanOrZero(double d)
+{
+    // c++98, so using double != double, instead of std::isnan from c++11
+    return d == 0.0 || d != d;
+}
+
+QString doubleToQString(double d, int precision)
+{
+    QString result;
+    if (!isNanOrZero(d))
+    {
+        result.setNum(d, 'f', precision);
+    }
+    return result;
+}
+
+QString intToQString(int i)
+{
+    QString result;
+    if (i != 0)
+    {
+        result.setNum(i);
+    }
+    return result;
+}
+
 enum DamageCategory
 {
     DAMAGE_CATEGORY_MELEE,
@@ -105,7 +131,7 @@ CombatOffenseRecord::CombatOffenseRecord( int iType, Player* p, int iSpell) :
 	m_player(p),
 	m_iHits(0),
 	m_iMisses(0),
-	m_iMinDamage(65536),
+	m_iMinDamage(0),
 	m_iMaxDamage(0),
 	m_iTotalDamage(0)
 {
@@ -121,7 +147,7 @@ void CombatOffenseRecord::addHit(int iDamage)
 	m_iHits++;
 	m_iTotalDamage += iDamage;
 
-	if(iDamage > 0 && iDamage < m_iMinDamage)
+	if(iDamage > 0 && (iDamage < m_iMinDamage || !m_iMinDamage))
 		m_iMinDamage = iDamage;
 
 	if(iDamage > m_iMaxDamage)
@@ -142,7 +168,7 @@ void NonMeleeOffenseRecord::clear()
 {
     m_iHits = 0;
     m_iMisses = 0;
-    m_iMinDamage = 65536;
+    m_iMinDamage = 0;
     m_iMaxDamage = 0;
     m_iTotalDamage = 0;
 }
@@ -166,7 +192,7 @@ DotOffenseRecord::DotOffenseRecord(const Player* p, const QString& iSpellName) :
     m_iSpellName(iSpellName),
     m_player(p),
     m_iTicks(0),
-    m_iMinDamage(65536),
+    m_iMinDamage(0),
     m_iMaxDamage(0),
     m_iTotalDamage(0)
 {
@@ -180,7 +206,7 @@ void DotOffenseRecord::addTick(int iDamage)
     m_iTicks++;
     m_iTotalDamage += iDamage;
 
-    if(iDamage > 0 && iDamage < m_iMinDamage)
+    if(iDamage > 0 && (iDamage < m_iMinDamage || !m_iMinDamage))
         m_iMinDamage = iDamage;
 
     if(iDamage > m_iMaxDamage)
@@ -206,7 +232,7 @@ void CombatDefenseRecord::clear(void)
   m_iRipostes = 0;
   m_iDodges = 0;
   m_iShieldAbsorbs = 0;
-  m_iMinDamage = 65536;
+  m_iMinDamage = 0;
   m_iMaxDamage = 0;
   m_iTotalDamage = 0;
   m_iTotalAttacks = 0;
@@ -221,7 +247,7 @@ void CombatDefenseRecord::addHit(int iDamage)
 	m_iHits++;
 	m_iTotalDamage += iDamage;
 
-	if(iDamage > 0 && iDamage < m_iMinDamage)
+	if(iDamage > 0 && (iDamage < m_iMinDamage || !m_iMinDamage))
 		m_iMinDamage = iDamage;
 
 	if(iDamage > m_iMaxDamage)
@@ -877,9 +903,11 @@ void CombatWindow::updateOffense()
         QString s_accuracy;
         QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
         QString s_mindamage;
-        s_mindamage.setNum(iMinDamage);
+        if (iMinDamage)
+            s_mindamage.setNum(iMinDamage);
         QString s_maxdamage;
-        s_maxdamage.setNum(iMaxDamage);
+        if (iMaxDamage)
+            s_maxdamage.setNum(iMaxDamage);
         QString s_damage;
         s_damage.setNum(iDamage);
 
@@ -942,9 +970,11 @@ void CombatWindow::updateOffense()
 		}
 		QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
 		QString s_mindamage;
-		s_mindamage.setNum(iMinDamage);
+		if (iMinDamage)
+			s_mindamage.setNum(iMinDamage);
 		QString s_maxdamage;
-		s_maxdamage.setNum(iMaxDamage);
+		if (iMaxDamage)
+			s_maxdamage.setNum(iMaxDamage);
 		QString s_damage;
 		s_damage.setNum(iDamage);
 
@@ -1035,9 +1065,11 @@ void CombatWindow::updateOffense()
         }
         QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
         QString s_mindamage;
-        s_mindamage.setNum(iMinDamage);
+        if (iMinDamage)
+            s_mindamage.setNum(iMinDamage);
         QString s_maxdamage;
-        s_maxdamage.setNum(iMaxDamage);
+        if (iMaxDamage)
+            s_maxdamage.setNum(iMaxDamage);
         QString s_damage;
         s_damage.setNum(iDamage);
 
@@ -1096,9 +1128,11 @@ void CombatWindow::updateOffense()
 		QString s_accuracy = "";
 		QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
 		QString s_mindamage;
-		s_mindamage.setNum(iMinDamage);
+		if (iMinDamage)
+			s_mindamage.setNum(iMinDamage);
 		QString s_maxdamage;
-		s_maxdamage.setNum(iMaxDamage);
+		if (iMaxDamage)
+			s_maxdamage.setNum(iMaxDamage);
 		QString s_damage;
 		s_damage.setNum(iDamage);
 
@@ -1149,29 +1183,29 @@ void CombatWindow::updateOffense()
 	dPetAvgDS = (double)iPetDSDamage / (double)iPetDSHits;
 
 	s_totaldamage.setNum(iTotalDamage);
-	s_percentpettotaldamage = QString::number(dPetPercentTotalDamage, 'f', 1);
+	s_percentpettotaldamage = doubleToQString(dPetPercentTotalDamage, 1);
 
-	s_percentmelee = QString::number(dPercentMelee, 'f', 1);
-	s_percentspecial = QString::number(dPercentSpecial, 'f', 1);
-	s_percentnonmelee = QString::number(dPercentNonmelee, 'f', 1);
-	s_percentds = QString::number(dPercentDS, 'f', 1);
-	s_percentdot = QString::number(dPercentDot, 'f', 1);
+	s_percentmelee = doubleToQString(dPercentMelee, 1);
+	s_percentspecial = doubleToQString(dPercentSpecial, 1);
+	s_percentnonmelee = doubleToQString(dPercentNonmelee, 1);
+	s_percentds = doubleToQString(dPercentDS, 1);
+	s_percentdot = doubleToQString(dPercentDot, 1);
 
-	s_avgmelee = QString::number(dAvgMelee, 'f', 0);
-	s_avgspecial = QString::number(dAvgSpecial, 'f', 0);
-	s_avgnonmelee = QString::number(dAvgNonmelee, 'f', 0);
-	s_avgds = QString::number(dAvgDS, 'f', 0);
-	s_avgdottick = QString::number(dAvgDotTick, 'f', 0);
+	s_avgmelee = doubleToQString(dAvgMelee, 0);
+	s_avgspecial = doubleToQString(dAvgSpecial, 0);
+	s_avgnonmelee = doubleToQString(dAvgNonmelee, 0);
+	s_avgds = doubleToQString(dAvgDS, 0);
+	s_avgdottick = doubleToQString(dAvgDotTick, 0);
 
-	s_percentpetmelee = QString::number(dPetPercentMelee, 'f', 1);
-	s_percentpetspecial = QString::number(dPetPercentSpecial, 'f', 1);
-	s_percentpetnonmelee = QString::number(dPetPercentNonmelee, 'f', 1);
-	s_percentpetds = QString::number(dPetPercentDS, 'f', 1);
+	s_percentpetmelee = doubleToQString(dPetPercentMelee, 1);
+	s_percentpetspecial = doubleToQString(dPetPercentSpecial, 1);
+	s_percentpetnonmelee = doubleToQString(dPetPercentNonmelee, 1);
+	s_percentpetds = doubleToQString(dPetPercentDS, 1);
 
-	s_avgpetmelee = QString::number(dPetAvgMelee, 'f', 0);
-	s_avgpetspecial = QString::number(dPetAvgSpecial, 'f', 0);
-	s_avgpetnonmelee = QString::number(dPetAvgNonmelee, 'f', 0);
-	s_avgpetds = QString::number(dPetAvgDS, 'f', 0);
+	s_avgpetmelee = doubleToQString(dPetAvgMelee, 0);
+	s_avgpetspecial = doubleToQString(dPetAvgSpecial, 0);
+	s_avgpetnonmelee = doubleToQString(dPetAvgNonmelee, 0);
+	s_avgpetds = doubleToQString(dPetAvgDS, 0);
 
 	m_label_offense_totaldamage->setText(s_totaldamage);
 	m_label_offense_percentpettotaldamage->setText(s_percentpettotaldamage);
@@ -1214,13 +1248,19 @@ void CombatWindow::updateDefense()
 	int iTotalAvoid = iMisses+iBlocks+iParries+iRipostes+iDodges+iShieldAbsorbs;
 
 	double dAvgHit = (double)m_combat_defense_record->getTotalDamage() / (double)m_combat_defense_record->getHits();
-	int iMinHit = m_combat_defense_record->getMinDamage();
-	int iMaxHit = m_combat_defense_record->getMaxDamage();
+	int iMinDamage = m_combat_defense_record->getMinDamage();
+	int iMaxDamage = m_combat_defense_record->getMaxDamage();
 
 	int iMobAttacks = m_combat_defense_record->getTotalAttacks();
 	double dAvoided = ((double)iTotalAvoid / (double)iMobAttacks) * 100.0;
 	int iTotalDamage = m_combat_defense_record->getTotalDamage();
 
+	QString s_mindamage;
+	if (iMinDamage)
+		s_mindamage.setNum(iMinDamage);
+	QString s_maxdamage;
+	if (iMaxDamage)
+		s_maxdamage.setNum(iMaxDamage);
 
 	m_label_defense_avoid_misses->setText(QString::number(iMisses));
 	m_label_defense_avoid_block->setText(QString::number(iBlocks));
@@ -1229,11 +1269,11 @@ void CombatWindow::updateDefense()
 	m_label_defense_avoid_dodge->setText(QString::number(iDodges));
 	m_label_defense_avoid_shield_absorb->setText(QString::number(iShieldAbsorbs));
 	m_label_defense_avoid_total->setText(QString::number(iTotalAvoid));
-	m_label_defense_mitigate_avghit->setText(QString::number(dAvgHit, 'f', 0));
-	m_label_defense_mitigate_minhit->setText(QString::number(iMinHit));
-	m_label_defense_mitigate_maxhit->setText(QString::number(iMaxHit));
+	m_label_defense_mitigate_avghit->setText(doubleToQString(dAvgHit, 0));
+	m_label_defense_mitigate_minhit->setText(s_mindamage);
+	m_label_defense_mitigate_maxhit->setText(s_maxdamage);
 	m_label_defense_summary_mobattacks->setText(QString::number(iMobAttacks));
-	m_label_defense_summary_percentavoided->setText(QString::number(dAvoided, 'f', 1));
+	m_label_defense_summary_percentavoided->setText(doubleToQString(dAvoided, 1));
 	m_label_defense_summary_totaldamage->setText(QString::number(iTotalDamage));
 
 }
@@ -1269,14 +1309,14 @@ void CombatWindow::updateMob()
 		QString s_name = pRecord->getName();
 		QString s_id = QString::number(iID);
 		QString s_duration = QString::number(iDuration);
-		QString s_damagegiven = QString::number(iDamageGiven);
-		QString s_dps = QString::number(dDPS, 'f', 1);
-		QString s_iDamageTaken = QString::number(iDamageTaken);
-		QString s_mobdps = QString::number(dMobDPS, 'f', 1);
-		QString s_petdamagegiven = QString::number(iPetDamageGiven);
-		QString s_petdps = QString::number(dPetDPS, 'f', 1);
-		QString s_petiDamageTaken = QString::number(iPetDamageTaken);
-		QString s_petmobdps = QString::number(dPetMobDPS, 'f', 1);
+		QString s_damagegiven = intToQString(iDamageGiven);
+		QString s_dps = doubleToQString(dDPS, 1);
+		QString s_iDamageTaken = intToQString(iDamageTaken);
+		QString s_mobdps = doubleToQString(dMobDPS, 1);
+		QString s_petdamagegiven = intToQString(iPetDamageGiven);
+		QString s_petdps = doubleToQString(dPetDPS, 1);
+		QString s_petiDamageTaken = intToQString(iPetDamageTaken);
+		QString s_petmobdps = doubleToQString(dPetMobDPS, 1);
 
 
 		QListViewItem *pItem = new QListViewItem(m_listview_mob,
@@ -1296,10 +1336,10 @@ void CombatWindow::updateMob()
 	if (iTotalMobs)
 	  dAvgDPS = dDPSSum / (double)iTotalMobs;
 	else
-	  dAvgDPS = 0;
+	  dAvgDPS = 0.0;
 
 	m_label_mob_totalmobs->setText(QString::number(iTotalMobs));
-	m_label_mob_avgdps->setText(QString::number(dAvgDPS, 'f', 1));
+	m_label_mob_avgdps->setText(doubleToQString(dAvgDPS, 1));
 }
 
 void CombatWindow::addNonMeleeHit(const QString& iTargetName, const int iDamage)
@@ -1619,7 +1659,7 @@ void CombatWindow::updateDPS(int iDamage)
 	{
 		//	reset DPS
 		m_dDPSLast = m_dDPS;
-		m_dDPS = 0;
+		m_dDPS = 0.0;
 		m_iDPSStartTime = iTimeNow;
 		m_iCurrentDPSTotal = 0;
 	}
@@ -1634,8 +1674,8 @@ void CombatWindow::updateDPS(int iDamage)
 		m_dDPS = (double)m_iCurrentDPSTotal / (double)iTimeElapsed;
 	}
 
-	m_label_mob_currentdps->setText(QString::number(m_dDPS, 'f', 1));
-	m_label_mob_lastdps->setText(QString::number(m_dDPSLast, 'f', 1));
+	m_label_mob_currentdps->setText(doubleToQString(m_dDPS, 1));
+	m_label_mob_lastdps->setText(doubleToQString(m_dDPSLast, 1));
 }
 
 
@@ -1652,7 +1692,7 @@ void CombatWindow::updatePetDPS(int iDamage)
 	{
 		//	reset DPS
 		m_dPetDPSLast = m_dPetDPS;
-		m_dPetDPS = 0;
+		m_dPetDPS = 0.0;
 		m_iPetDPSStartTime = iTimeNow;
 		m_iPetCurrentDPSTotal = 0;
 	}
@@ -1667,8 +1707,8 @@ void CombatWindow::updatePetDPS(int iDamage)
 		m_dPetDPS = (double)m_iPetCurrentDPSTotal / (double)iTimeElapsed;
 	}
 
-	m_label_mob_currentpetdps->setText(QString::number(m_dPetDPS, 'f', 1));
-	m_label_mob_lastpetdps->setText(QString::number(m_dPetDPSLast, 'f', 1));
+	m_label_mob_currentpetdps->setText(doubleToQString(m_dPetDPS, 1));
+	m_label_mob_lastpetdps->setText(doubleToQString(m_dPetDPSLast, 1));
 }
 
 
