@@ -1112,6 +1112,13 @@ void CombatWindow::updateOffense()
 		iDotTicks += iTicks;
 	}
 
+	// iNonmeleeDamage includes the pet's non-melee damage because
+	// NonMeleeOffenseRecord simply accumulates all non-melee hit messages,
+	// which are sent to the client for both player's and pet's non-melee hits.
+	// We subtract out the pet's non-melee damage from the total, which gives
+	// us the player's non-melee damage.
+	iNonmeleeDamage -= iPetNonmeleeDamage;
+
 	iPetTotalDamage = iPetMeleeDamage + iPetSpecialDamage + iPetNonmeleeDamage + iPetDSDamage;
 	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage + iDotDamage + iDSDamage
 		+ iPetTotalDamage;
