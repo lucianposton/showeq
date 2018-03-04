@@ -1318,17 +1318,18 @@ void CombatWindow::addCombatRecord(int iTargetID, int iSourceID, int iSourcePetO
 			addMobRecord(iTargetID, iSourceID, -iDamage, tName, sName);
 			updateMob();
 		}
-		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
+		// For the player, non-melee has positive damage on killing blows
+		// (OP_Death) but not regular hits (OP_Action) against others, so
+		// the player's non-melee damage is handled via addNonMeleeHit, not here
+		else if (isMelee(iType)) {
 			addOffenseRecord(iType, iDamage, iSpell);
 			updateOffense();
 			addMobRecord(iTargetID, iSourceID, iDamage, tName, sName);
 			updateMob();
 		}
-		// For the player, non-melee has postive damage on killing blows
-		// (OP_Death) but not regular hits (OP_Action), so most of the
-		// non-melee damage is handled via addNonMeleeHit, not here
 
-		if(iDamage > 0)
+		// Check for melee to avoid non-melee killing blows from OP_Death
+		if(iDamage > 0 && isMelee(iType))
 			updateDPS(iDamage);
 		else if(isDamageShield(iType))
 			updateDPS(-iDamage);
