@@ -4592,6 +4592,26 @@ void EQInterface::attack2Hand1(const uint8_t* data)
 void EQInterface::combatDamageMessage(const uint8_t* data)
 {
   CombatDamage_Struct *action2 = (CombatDamage_Struct*)data;
+#ifdef DEBUG
+   seqDebug("EQInterface::combatDamageMessage ("
+           "target=%d "
+           "source=%d "
+           "type=%d "
+           "spell=%d "
+           "damage=%d "
+           "force=%f "
+           "meleepush_xy=%f "
+           "meleepush_z=%f "
+           ")",
+           action2->target,
+           action2->source,
+           action2->type,
+           action2->spell,
+           action2->damage,
+           action2->force,
+           action2->meleepush_xy,
+           action2->meleepush_z);
+#endif
   const Spawn* target = (Spawn*)m_spawnShell->findID(tSpawn, action2->target);
   const Spawn* source = (Spawn*)m_spawnShell->findID(tSpawn, action2->source);
   const int sourcePetOwnerID = (source == NULL) ? -1 : source->petOwnerID();
@@ -4691,6 +4711,25 @@ void EQInterface::formattedMessage(const uint8_t* data, size_t len, uint8_t dir)
 void EQInterface::combatKillSpawn(const uint8_t* data)
 {
   const Death_Struct *deadspawn = (const Death_Struct *)data;
+#ifdef DEBUG
+   seqDebug("EQInterface::combatKillSpawn ("
+           "spawnId=%d "
+           "killerId=%d "
+           "corpseid=%d "
+           "type=%d "
+           "spellId=%d "
+           "unknown012=%d "
+           "damage=%d "
+           "u=%d)",
+           deadspawn->spawnId,
+           deadspawn->killerId,
+           deadspawn->corpseid,
+           deadspawn->type,
+           deadspawn->spellId,
+           deadspawn->unknown012,
+           deadspawn->damage,
+           deadspawn->unknown028);
+#endif
 
     const Spawn* target = (Spawn*)m_spawnShell->findID(tSpawn, deadspawn->spawnId);
     const Spawn* source = (Spawn*)m_spawnShell->findID(tSpawn, deadspawn->killerId);
