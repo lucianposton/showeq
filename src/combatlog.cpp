@@ -92,10 +92,10 @@ static DamageCategory damageCategory(int iType)
             {
                 return DAMAGE_CATEGORY_NONMELEE;
             }
+        case 250: // Lava.
         case 251: // Drowning. In OP_Death, type=23 instead
         case 252: // Falling. In OP_Death, type=23 instead
-        //case ?: // Lava.
-        //case ?: // Physical Trap.
+        case 253: // Physical Trap.
         //case ?: // Magical Trap.
             {
                 return DAMAGE_CATEGORY_ENVIRONMENT;
