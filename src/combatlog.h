@@ -236,7 +236,7 @@ public slots:
 	void addNonMeleeHit(const QString& iTargetName, int iDamage);
 	void addDotTick(const QString& iTargetName,
 			const QString& iSpellName, int iDamage);
-	void addCombatRecord(int iTargetID, int iTargetPetOwnerID, int iSourceID, int iSourcePetOwnerID, int iType, int iSpell, int iDamage, QString tName, QString sName);
+	void addCombatRecord(int iTargetID, const Spawn* target, int iSourceID, const Spawn* source, int iType, int iSpell, int iDamage);
 	void resetDPS();
 	void clearMob();
 	void clearOffense();

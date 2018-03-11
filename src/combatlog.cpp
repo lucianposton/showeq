@@ -1411,9 +1411,10 @@ void CombatWindow::addDotOffenseRecord(const QString& iSpellName, const int iDam
 #endif
 }
 
-void CombatWindow::addCombatRecord(int iTargetID, int iTargetPetOwnerID,
-        int iSourceID, int iSourcePetOwnerID,
-        int iType, int iSpell, int iDamage, QString tName, QString sName)
+void CombatWindow::addCombatRecord(
+        int iTargetID, const Spawn* target,
+        int iSourceID, const Spawn* source,
+        int iType, int iSpell, int iDamage)
 {
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::addCombatRecord starting...");
@@ -1422,6 +1423,23 @@ void CombatWindow::addCombatRecord(int iTargetID, int iTargetPetOwnerID,
 #endif
 
 	const int iPlayerID = m_player->id();
+    const int iSourcePetOwnerID = (source == NULL) ? -1 : source->petOwnerID();
+    const int iTargetPetOwnerID = (target == NULL) ? -1 : target->petOwnerID();
+    QString tName;
+    if (target != NULL)
+        tName = target->name();
+    else if (iTargetID == 0)
+        tName = "Pain and suffering";
+    else // if (target == NULL)
+        tName.sprintf("Unknown(%d)", iTargetID);
+
+    QString sName;
+    if (source != NULL)
+        sName = source->name();
+    else if (iSourceID == 0)
+        sName = "Pain and suffering";
+    else // if (source == NULL)
+        sName.sprintf("Unknown(%d)", iSourceID);
 
 	//	The one case we won't handle (for now) is where the Target
 	//	and Source are the same.
