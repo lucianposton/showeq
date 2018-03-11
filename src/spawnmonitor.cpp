@@ -315,9 +315,20 @@ void SpawnMonitor::killSpawn(const Item* killedSpawn)
     if ( killedSpawn->id() == sp->lastID() )
     {
       restartSpawnPoint( sp );
-      break;
+      return;
     }
     ++it;
+  }
+
+  QAsciiDictIterator<SpawnPoint> it_spawns(m_spawns);
+  while ( ( sp = it_spawns.current() ) )
+  {
+    if ( killedSpawn->id() == sp->lastID() )
+    {
+      restartSpawnPoint( sp );
+      return;
+    }
+    ++it_spawns;
   }
 }
 
