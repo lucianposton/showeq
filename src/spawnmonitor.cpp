@@ -407,7 +407,7 @@ void SpawnMonitor::saveSpawnPoints()
 
     if (!sp->spawn_counts().isEmpty())
     {
-        QString fileName_spc = sp->key() + ".spc";
+        QString fileName_spc = m_zoneName + sp->key() + ".spc";
 
         QFileInfo fileInfo_spc = 
             m_dataLocMgr->findWriteFile("spawnpoints/"+m_zoneName, fileName_spc, false);
@@ -540,7 +540,7 @@ void SpawnMonitor::loadSpawnPoints()
     continue;
       }
 
-      QString fileName_spc = key + ".spc";
+      QString fileName_spc = m_zoneName + key + ".spc";
       QFileInfo fileInfo_spc = 
           m_dataLocMgr->findExistingFile("spawnpoints/"+m_zoneName, fileName_spc, false);
 
