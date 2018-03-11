@@ -134,6 +134,7 @@ public slots:
   void zoneEnter( const QString& newZoneName );
   void saveSpawnPoints();
   void loadSpawnPoints();
+  void initialZoneSpawn(bool isInitialZoneSpawn);
 
 signals:
   void newSpawnPoint( const SpawnPoint* spawnPoint );
@@ -150,6 +151,7 @@ protected:
   QAsciiDict<SpawnPoint> m_spawns;
   QAsciiDict<SpawnPoint> m_points;
   const SpawnPoint* m_selected;
+  bool m_isInitialZoneSpawn;
   bool m_modified;
 };
 

@@ -268,7 +268,8 @@ SpawnMonitor::SpawnMonitor(const DataLocationMgr* dataLocMgr,
   m_spawnShell(spawnShell),
   m_spawns( 613 ),
   m_points( 211 ),
-  m_selected(NULL)
+  m_selected(NULL),
+  m_isInitialZoneSpawn(false)
 {
   m_spawns.setAutoDelete( true );
   m_points.setAutoDelete( true );
@@ -283,6 +284,8 @@ SpawnMonitor::SpawnMonitor(const DataLocationMgr* dataLocMgr,
 	  this, SLOT( zoneExit()));
   connect(zoneMgr, SIGNAL(zoneBegin(const QString&)), 
 	  this, SLOT( zoneEnter( const QString&)));
+  connect(spawnShell, SIGNAL(initialZoneSpawn(bool)),
+          this, SLOT(initialZoneSpawn(bool)));
 
   m_modified = false;
 }
@@ -333,6 +336,11 @@ void SpawnMonitor::deleteSpawnPoint(const SpawnPoint* sp)
   // remove the spawn point (will automatically delete it).
   m_spawns.remove(sp->key());
   m_modified = true;
+}
+
+void SpawnMonitor::initialZoneSpawn(bool isInitialZoneSpawn)
+{
+    m_isInitialZoneSpawn = isInitialZoneSpawn;
 }
 
 void SpawnMonitor::newSpawn(const Item* item)
@@ -407,7 +415,9 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
   else
   {
     sp = findWithZFudgeFactor(m_spawns, spawn, key);
-    if ( sp )
+    // Check m_isInitialZoneSpawn so that we don't add a spawnpoint for two
+    // spawns that happen to be standing on same point when player zones in
+    if ( sp && !m_isInitialZoneSpawn )
     {
       sp->update(spawn);
       
@@ -422,7 +432,7 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
                   (const char*)key);
       }
     }
-    else
+    else if ( !sp )
     {
       key = SpawnPoint::key( *spawn );
       EQPoint loc(spawn->x(), spawn->y(), normalize_z(spawn->z(), spawn->size()));
