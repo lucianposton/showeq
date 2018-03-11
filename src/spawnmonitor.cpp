@@ -31,14 +31,50 @@ static int normalize_z(int z, float size)
 {
     // A spawn point's z may vary. This seems to be due to the spawn's size.
     // To account for the z variation, we normalize it based on the size.
-    //
-    // Another implementation option is to introduce a z axis fudge factor so
-    // that spawns above or below a spawnpoint by this fudge factor are
-    // assumed to belong to that nearby spawnpoint. An appropriate factor
-    // might be about 16 to accommodate size differences of 24 (hill giants
-    // are 24 size). It might need to be greater for large mobs e.g. cazic has
-    // size 40.
     return ceil(float(z) - size * 2.0/3.0);
+}
+
+static const int Z_FUDGE_FACTOR = 5;
+static SpawnPoint* findWithZFudgeFactor(
+        const QAsciiDict<SpawnPoint>& spawnpoints,
+        const Spawn* spawn,
+        QString& foundKey)
+{
+    // normalize_z() doesn't accommodate large spawns well e.g. size 24, hill
+    // giants. So in addition to normalizing z, we also search above and
+    // below the normalized z point by a fudge factor.
+    //
+    // A fudge factor of 4 is sufficient for spawnpoints that contain size 24
+    // and size 6 mobs. The fudge factor may need to be increased for
+    // unusually large spawns (e.g. cazic thule (size 40) or larger dragons
+    // (size 30)) that share a spawnpoint with regular sized spawns.
+    const int x = spawn->x();
+    const int y = spawn->y();
+    const int z = normalize_z(spawn->z(), spawn->size());
+
+    QString key = SpawnPoint::keyFromNormalizedCoords(x, y, z);
+    SpawnPoint* result = spawnpoints.find(key);
+    if (result)
+    {
+        foundKey = key;
+        return result;
+    }
+
+    for (int i = z - Z_FUDGE_FACTOR; i <= z + Z_FUDGE_FACTOR; ++i)
+    {
+        if (i != z)
+        {
+            key = SpawnPoint::keyFromNormalizedCoords(x, y, i);
+            result = spawnpoints.find(key);
+            if (result)
+            {
+                foundKey = key;
+                return result;
+            }
+        }
+    }
+
+    return NULL;
 }
 
 } // namespace
@@ -360,10 +396,9 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
   if ( ( spawn->NPC() != SPAWN_NPC ) || ( spawn->petOwnerID() != 0 ))
     return;
   
-  QString		key = SpawnPoint::key( *spawn );
-  
   SpawnPoint*		sp;
-  sp = m_points.find( key );
+  QString key;
+  sp = findWithZFudgeFactor(m_points, spawn, key);
   if ( sp )
   {
     m_modified = true;
@@ -371,7 +406,7 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
   }
   else
   {
-    sp = m_spawns.find( key );
+    sp = findWithZFudgeFactor(m_spawns, spawn, key);
     if ( sp )
     {
       sp->update(spawn);
@@ -379,10 +414,17 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
       m_points.insert( key, sp );
       emit newSpawnPoint( sp );
       m_modified = true;
-      m_spawns.take( key );
+      if (m_spawns.take( key ) == NULL)
+      {
+          seqWarn("SpawnMonitor::checkSpawnPoint(%s,id=%d): Failed to take "
+                  "spawnpoint from m_spawns. key=%s",
+                  (const char*)spawn->name(), spawn->id(),
+                  (const char*)key);
+      }
     }
     else
     {
+      key = SpawnPoint::key( *spawn );
       EQPoint loc(spawn->x(), spawn->y(), normalize_z(spawn->z(), spawn->size()));
       sp = new SpawnPoint( spawn->id(), loc );
       m_spawns.insert( key, sp );
