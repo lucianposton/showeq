@@ -803,7 +803,7 @@ QString Spawn::filterString() const
   QString buff;
   buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
 	       "Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:"
-           "IsGuildmate:%d:InPvPLevelRange:%d:Equipment:%s:",
+           "IsGuildmate:%d:InPvPLevelRange:%d:Size:%f:Equipment:%s:",
 	       (const char*)name.utf8(),
 	       level(),
 	       (const char*)raceString(),
@@ -818,6 +818,7 @@ QString Spawn::filterString() const
                (const char*)guildTag().utf8(),
                isPlayersGuildmate(),
                isInPvPLevelRangeToPlayer(),
+               size(),
                (const char*)info(":"));
 
   if (gm())
