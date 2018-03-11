@@ -2243,8 +2243,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	      m_combatWindow, SLOT(addDotTick(const QString&, const QString&, int)));
      connect (this, SIGNAL(combatSignal(int, int, int, int, int, int, int, QString, QString)),
 	      m_combatWindow, SLOT(addCombatRecord(int, int, int, int, int, int, int, QString, QString)));
-     connect (m_spawnShell, SIGNAL(spawnConsidered(const Item*)),
-	      m_combatWindow, SLOT(resetDPS()));
+     m_packet->connect2("OP_Consider", SP_Zone, DIR_Client,
+             "considerStruct", SZC_Match,
+             m_combatWindow, SLOT(resetDPS()));
      connect(this, SIGNAL(restoreFonts(void)),
 	     m_combatWindow, SLOT(restoreFont(void)));
      connect(this, SIGNAL(saveAllPrefs(void)),
