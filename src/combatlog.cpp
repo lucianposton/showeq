@@ -58,6 +58,7 @@ enum DamageCategory
     DAMAGE_CATEGORY_MELEE,
     DAMAGE_CATEGORY_MELEE_SPECIAL,
     DAMAGE_CATEGORY_NONMELEE,
+    DAMAGE_CATEGORY_ENVIRONMENT,
     DAMAGE_CATEGORY_DAMAGE_SHIELD
 };
 
@@ -90,6 +91,14 @@ static DamageCategory damageCategory(int iType)
         case 231:       // Non Melee Damage e.g. spells
             {
                 return DAMAGE_CATEGORY_NONMELEE;
+            }
+        case 251: // Drowning. In OP_Death, type=23 instead
+        case 252: // Falling. In OP_Death, type=23 instead
+        //case ?: // Lava.
+        //case ?: // Physical Trap.
+        //case ?: // Magical Trap.
+            {
+                return DAMAGE_CATEGORY_ENVIRONMENT;
             }
         default:        // Damage Shield?
             {
@@ -1443,10 +1452,20 @@ void CombatWindow::addCombatRecord(int iTargetID, int iTargetPetOwnerID,
 
 	if(iTargetID == iPlayerID && iSourceID != iPlayerID)
 	{
-		addDefenseRecord(iDamage);
-		updateDefense();
-		addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
-		updateMob();
+		// Damage shields show up as negative damage
+		if (isDamageShield(iType))
+		{
+			addDefenseRecord(-iDamage);
+			updateDefense();
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, -iDamage, tName, sName);
+			updateMob();
+		}
+		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
+			addDefenseRecord(iDamage);
+			updateDefense();
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
+			updateMob();
+		}
 	}
 	else if(iSourceID == iPlayerID && iTargetID != iPlayerID)
 	{
