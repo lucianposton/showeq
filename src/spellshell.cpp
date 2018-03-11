@@ -384,8 +384,8 @@ void SpellShell::action(const uint8_t* data, size_t, uint8_t dir)
     return;
 
 #ifdef DIAG_SPELLSHELL
-  seqDebug("SpellShell::action(): id=%d (%d->%d) (lvl: %d) causing %d damage. sequence=%d. buff=%d. dir=%d",
-          a->spell, a->source, a->target, a->level, a->damage, a->sequence, a->make_buff_icon, dir);
+  seqDebug("SpellShell::action(): id=%d (%d->%d) type=%d (lvl: %d) causing %d damage. sequence=%d. buff=%d. instrument_mod=%d. bard_focus_id=%d. dir=%d",
+          a->spell, a->source, a->target, a->type, a->level, a->damage, a->sequence, a->make_buff_icon, a->instrument_mod, a->bard_focus_id, dir);
 #endif // DIAG_SPELLSHELL
 
   if (a->make_buff_icon != 4)
