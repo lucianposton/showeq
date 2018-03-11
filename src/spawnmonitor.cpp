@@ -18,11 +18,30 @@
 #include "datalocationmgr.h"
 #include "diagnosticmessages.h"
 
+#include <math.h>
+
 #include <qdir.h>
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qtextstream.h>
 
+namespace {
+
+static int normalize_z(int z, float size)
+{
+    // A spawn point's z may vary. This seems to be due to the spawn's size.
+    // To account for the z variation, we normalize it based on the size.
+    //
+    // Another implementation option is to introduce a z axis fudge factor so
+    // that spawns above or below a spawnpoint by this fudge factor are
+    // assumed to belong to that nearby spawnpoint. An appropriate factor
+    // might be about 16 to accommodate size differences of 24 (hill giants
+    // are 24 size). It might need to be greater for large mobs e.g. cazic has
+    // size 40.
+    return ceil(float(z) - size * 2.0/3.0);
+}
+
+} // namespace
 
 SpawnPoint::SpawnPoint(uint16_t spawnID, 
 		       const EQPoint& loc, 
@@ -47,9 +66,16 @@ SpawnPoint::~SpawnPoint()
 {
 }
 
-QString SpawnPoint::key( int x, int y, int z)
+QString SpawnPoint::key( int x, int y, int z, float size )
 {
-  QString		t;
+  QString t;
+  t.sprintf( "%d_%d_%d", x, y, normalize_z(z, size) );
+  return t;
+}
+
+QString SpawnPoint::keyFromNormalizedCoords( int x, int y, int z )
+{
+  QString t;
   t.sprintf( "%d_%d_%d", x, y, z );
   return t;
 }
@@ -346,7 +372,8 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
     }
     else
     {
-      sp = new SpawnPoint( spawn->id(), *spawn );
+      EQPoint loc(spawn->x(), spawn->y(), normalize_z(spawn->z(), spawn->size()));
+      sp = new SpawnPoint( spawn->id(), loc );
       m_spawns.insert( key, sp );
     }
   }

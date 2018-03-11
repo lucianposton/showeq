@@ -61,9 +61,10 @@ public:
   
   time_t secsLeft() const { return m_diffTime - ( time( 0 ) - m_deathTime ); }
   
-  static QString key( int x, int y, int z );
-  static QString key( const EQPoint& l ) { return key( l.x(), l.y(), l.z() ); }
-  QString key() const { return key( x(), y(), z() ); }
+  static QString key( int x, int y, int z, float size );
+  static QString key( const Spawn& l ) { return key( l.x(), l.y(), l.z(), l.size() ); }
+  static QString keyFromNormalizedCoords( int x, int y, int z );
+  QString key() const { return keyFromNormalizedCoords( x(), y(), z() ); }
 
   // getters
   unsigned char age() const;
