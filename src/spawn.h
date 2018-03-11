@@ -226,6 +226,7 @@ class Spawn : public Item
   int16_t maxHP() const { return m_maxHP; }
   uint16_t guildID() const { return m_guildID; }
   QString guildTag() const { return m_guildTag; }
+  float size() const { return m_size; }
   uint16_t petOwnerID() const { return m_petOwnerID; }
   uint8_t light() const { return m_light; }
   QString lightName() const;
@@ -307,6 +308,7 @@ class Spawn : public Item
     { m_heading = heading; m_deltaHeading = deltaHeading; }
   void setDeltaHeading(int8_t deltaHeading) { m_deltaHeading = deltaHeading; }
   void setAnimation(uint8_t animation) { m_animation = animation; }
+  void setSize(float size) { m_size = size; }
   void setPetOwnerID(uint16_t petOwnerID) { m_petOwnerID = petOwnerID; }
   void setLight(uint8_t light) { m_light = light; }
   void setGender(uint8_t gender) { m_gender = gender; }
@@ -349,6 +351,7 @@ class Spawn : public Item
   int16_t m_deltaY;
   int16_t m_deltaZ;
   int8_t m_deltaHeading;
+  float m_size;
 
   // persisted info below
   uint16_t m_petOwnerID;

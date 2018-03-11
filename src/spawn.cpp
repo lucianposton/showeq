@@ -403,6 +403,7 @@ void Spawn::update(const spawnStruct* s)
     setLastName(s->lastName);
   }
 
+  setSize(s->size);
   setPos(s->x >> 3, s->y >> 3, s->z >> 3);
   setPetOwnerID(s->petOwnerId);
   setLight(s->light);
