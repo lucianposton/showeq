@@ -101,6 +101,9 @@ class SpawnPointList : public SEQListView
   bool keepSorted() { return m_keepSorted; }
   void setKeepSorted(bool val);
 
+ signals:
+  void spawnIdSelected(int id);
+
  public slots:
   void rightButtonClicked(QListViewItem*, const QPoint&, int);
   void renameItem(const SpawnPointListItem* item);

@@ -149,6 +149,7 @@ class EQInterface:public QMainWindow
    void zoneBegin(const QString& shortZoneName);
    void zoneEnd(const QString& shortZoneName, const QString& longZoneName);
 
+   void spawnIdSelected(int id);
    void spawnSelected(const Item* item);
    void spawnConsidered(const Item* item);
    void addItem(const Item* item);

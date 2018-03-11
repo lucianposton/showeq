@@ -4775,6 +4775,13 @@ void EQInterface::clientTarget(const uint8_t* data)
   }
 }
 
+void EQInterface::spawnIdSelected(const int id)
+{
+    const Item* spawn = m_spawnShell->findID(tSpawn, id);
+    if (spawn)
+        spawnSelected(spawn);
+}
+
 void EQInterface::spawnSelected(const Item* item)
 {
   if (item == 0)
@@ -5871,6 +5878,9 @@ void EQInterface::showSpawnPointList(void)
     if (!m_isSpawnPointListDocked &&
 	pSEQPrefs->getPrefBool("UseWindowPos", "Interface", 0)) 
       m_spawnPointList->restorePosition();
+
+     connect (m_spawnPointList->spawnPointList(), SIGNAL(spawnIdSelected(int)),
+             this, SLOT(spawnIdSelected(int)));
 
      // connections from interface to spawn list
      connect(this, SIGNAL(saveAllPrefs(void)),

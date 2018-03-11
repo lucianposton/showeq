@@ -219,6 +219,10 @@ void SpawnPointList::mouseDoubleClickEvent(QListViewItem* litem)
     {
         seqInfo("%s",(const char*)item->displayString());
     }
+
+    const uint16_t lastID = item->lastID();
+    if (lastID)
+        emit spawnIdSelected(lastID);
 }
 
 
