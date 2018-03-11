@@ -919,13 +919,9 @@ void CombatWindow::updateOffense()
         s_hits.setNum(iHits);
         QString s_misses;
         QString s_accuracy;
-        QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
-        QString s_mindamage;
-        if (iMinDamage)
-            s_mindamage.setNum(iMinDamage);
-        QString s_maxdamage;
-        if (iMaxDamage)
-            s_maxdamage.setNum(iMaxDamage);
+        QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+        QString s_mindamage = intToQString(iMinDamage);
+        QString s_maxdamage = intToQString(iMaxDamage);
         QString s_damage;
         s_damage.setNum(iDamage);
 
@@ -986,13 +982,9 @@ void CombatWindow::updateOffense()
 			s_misses.setNum(iMisses);
 			s_accuracy = QString::number(dAccuracy, 'f', 2);
 		}
-		QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
-		QString s_mindamage;
-		if (iMinDamage)
-			s_mindamage.setNum(iMinDamage);
-		QString s_maxdamage;
-		if (iMaxDamage)
-			s_maxdamage.setNum(iMaxDamage);
+		QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+		QString s_mindamage = intToQString(iMinDamage);
+		QString s_maxdamage = intToQString(iMaxDamage);
 		QString s_damage;
 		s_damage.setNum(iDamage);
 
@@ -1081,13 +1073,9 @@ void CombatWindow::updateOffense()
             s_misses.setNum(iMisses);
             s_accuracy = QString::number(dAccuracy, 'f', 2);
         }
-        QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
-        QString s_mindamage;
-        if (iMinDamage)
-            s_mindamage.setNum(iMinDamage);
-        QString s_maxdamage;
-        if (iMaxDamage)
-            s_maxdamage.setNum(iMaxDamage);
+        QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+        QString s_mindamage = intToQString(iMinDamage);
+        QString s_maxdamage = intToQString(iMaxDamage);
         QString s_damage;
         s_damage.setNum(iDamage);
 
@@ -1142,15 +1130,11 @@ void CombatWindow::updateOffense()
 		s_type.sprintf("DoT: %s", (const char*)dotRecord->getSpellName());
 		QString s_hits;
 		s_hits.setNum(iTicks);
-		QString s_misses = "";
-		QString s_accuracy = "";
-		QString s_avgdamage = QString::number(dAvgDamage, 'f', 0);
-		QString s_mindamage;
-		if (iMinDamage)
-			s_mindamage.setNum(iMinDamage);
-		QString s_maxdamage;
-		if (iMaxDamage)
-			s_maxdamage.setNum(iMaxDamage);
+		QString s_misses;
+		QString s_accuracy;
+		QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+		QString s_mindamage = intToQString(iMinDamage);
+		QString s_maxdamage = intToQString(iMaxDamage);
 		QString s_damage;
 		s_damage.setNum(iDamage);
 
@@ -1274,13 +1258,6 @@ void CombatWindow::updateDefense()
 	double dAvoided = ((double)iTotalAvoid / (double)iMobAttacks) * 100.0;
 	int iTotalDamage = m_combat_defense_record->getTotalDamage();
 
-	QString s_mindamage;
-	if (iMinDamage)
-		s_mindamage.setNum(iMinDamage);
-	QString s_maxdamage;
-	if (iMaxDamage)
-		s_maxdamage.setNum(iMaxDamage);
-
 	m_label_defense_avoid_misses->setText(QString::number(iMisses));
 	m_label_defense_avoid_block->setText(QString::number(iBlocks));
 	m_label_defense_avoid_parry->setText(QString::number(iParries));
@@ -1290,12 +1267,11 @@ void CombatWindow::updateDefense()
 	m_label_defense_avoid_shield_absorb->setText(QString::number(iShieldAbsorbs));
 	m_label_defense_avoid_total->setText(QString::number(iTotalAvoid));
 	m_label_defense_mitigate_avghit->setText(doubleToQString(dAvgHit, 0));
-	m_label_defense_mitigate_minhit->setText(s_mindamage);
-	m_label_defense_mitigate_maxhit->setText(s_maxdamage);
+	m_label_defense_mitigate_minhit->setText(intToQString(iMinDamage));
+	m_label_defense_mitigate_maxhit->setText(intToQString(iMaxDamage));
 	m_label_defense_summary_mobattacks->setText(QString::number(iMobAttacks));
 	m_label_defense_summary_percentavoided->setText(doubleToQString(dAvoided, 1));
 	m_label_defense_summary_totaldamage->setText(QString::number(iTotalDamage));
-
 }
 
 void CombatWindow::updateMob()
