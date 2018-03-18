@@ -968,7 +968,7 @@ void CombatWindow::updateOffense()
 
         const double dAvgDamage = (double)iDamage / (double)iHits;
 
-        QString s_type = "Non-melee:";
+        QString s_type = "Non-melee (all sources):";
         QString s_hits;
         s_hits.setNum(iHits);
         QString s_misses;
