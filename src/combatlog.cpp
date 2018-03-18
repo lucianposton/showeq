@@ -476,7 +476,17 @@ CombatWindow::CombatWindow(Player* player,
     m_iPetDPSStartTime(0),
     m_iPetDPSTimeLast(0),
     m_dPetDPS(0.0),
-    m_dPetDPSLast(0.0)
+    m_dPetDPSLast(0.0),
+    m_iCurrentMobDPSTotal(0),
+    m_iMobDPSStartTime(0),
+    m_iMobDPSTimeLast(0),
+    m_dMobDPS(0.0),
+    m_dMobDPSLast(0.0),
+    m_iPetCurrentMobDPSTotal(0),
+    m_iPetMobDPSStartTime(0),
+    m_iPetMobDPSTimeLast(0),
+    m_dPetMobDPS(0.0),
+    m_dPetMobDPSLast(0.0)
 {
   /* Hopefully this is only called once to set up the window,
      so this is a good place to initialize some things which
@@ -846,44 +856,63 @@ QWidget* CombatWindow::initMobWidget()
 	QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
 	m_layout_mob->addWidget(summaryGBox);
 
-	QGrid *summaryGrid = new QGrid(8, summaryGBox);
+	QGrid *summaryGrid = new QGrid(11, summaryGBox);
 
 	new QLabel("Avg DPS:", summaryGrid);
 	m_label_mob_avgdps = new QLabel(summaryGrid);
 	m_label_mob_avgdps->setAlignment(Qt::AlignRight);
 	new QLabel("", summaryGrid);
+	new QLabel("Avg Mob DPS:", summaryGrid);
+	m_label_mob_avgmobdps = new QLabel(summaryGrid);
+	m_label_mob_avgmobdps->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 	new QLabel("Avg Pet DPS:", summaryGrid);
 	m_label_mob_avgpetdps = new QLabel(summaryGrid);
 	m_label_mob_avgpetdps->setAlignment(Qt::AlignRight);
 	new QLabel("", summaryGrid);
-	new QLabel("Total Mobs:", summaryGrid);
-	m_label_mob_totalmobs = new QLabel(summaryGrid);
-	m_label_mob_totalmobs->setAlignment(Qt::AlignRight);
+	new QLabel("Avg Pet Mob DPS:", summaryGrid);
+	m_label_mob_avgpetmobdps = new QLabel(summaryGrid);
+	m_label_mob_avgpetmobdps->setAlignment(Qt::AlignRight);
 
 	new QLabel("Last DPS:", summaryGrid);
 	m_label_mob_lastdps = new QLabel(summaryGrid);
 	m_label_mob_lastdps->setAlignment(Qt::AlignRight);
 	new QLabel("", summaryGrid);
+	new QLabel("Last Mob DPS:", summaryGrid);
+	m_label_mob_lastmobdps = new QLabel(summaryGrid);
+	m_label_mob_lastmobdps->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 	new QLabel("Last Pet DPS:", summaryGrid);
 	m_label_mob_lastpetdps = new QLabel(summaryGrid);
 	m_label_mob_lastpetdps->setAlignment(Qt::AlignRight);
 	new QLabel("", summaryGrid);
-	new QLabel("", summaryGrid);
-	new QLabel("", summaryGrid);
+	new QLabel("Last Pet Mob DPS:", summaryGrid);
+	m_label_mob_lastpetmobdps = new QLabel(summaryGrid);
+	m_label_mob_lastpetmobdps->setAlignment(Qt::AlignRight);
 
 	new QLabel("Current DPS:", summaryGrid);
 	m_label_mob_currentdps = new QLabel(summaryGrid);
 	m_label_mob_currentdps->setAlignment(Qt::AlignRight);
 	new QLabel("", summaryGrid);
+	new QLabel("Current Mob DPS:", summaryGrid);
+	m_label_mob_currentmobdps = new QLabel(summaryGrid);
+	m_label_mob_currentmobdps->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 	new QLabel("Current Pet DPS:", summaryGrid);
 	m_label_mob_currentpetdps = new QLabel(summaryGrid);
 	m_label_mob_currentpetdps->setAlignment(Qt::AlignRight);
 	new QLabel("", summaryGrid);
-	new QLabel("", summaryGrid);
-	new QLabel("", summaryGrid);
+	new QLabel("Current Pet Mob DPS:", summaryGrid);
+	m_label_mob_currentpetmobdps = new QLabel(summaryGrid);
+	m_label_mob_currentpetmobdps->setAlignment(Qt::AlignRight);
+
+	new QLabel("Total Mobs:", summaryGrid);
+	m_label_mob_totalmobs = new QLabel(summaryGrid);
+	m_label_mob_totalmobs->setAlignment(Qt::AlignRight);
 
 	((QGridLayout *)summaryGrid->layout())->setColStretch(2, 1);
 	((QGridLayout *)summaryGrid->layout())->setColStretch(5, 1);
+	((QGridLayout *)summaryGrid->layout())->setColStretch(8, 1);
 	summaryGrid->layout()->setSpacing(5);
 
 
@@ -1361,6 +1390,11 @@ void CombatWindow::updateMob()
 	double dAvgPetDPS = 0.0;
 	double dPetDPSSum = 0.0;
 
+	double dAvgMobDPS = 0.0;
+	double dMobDPSSum = 0.0;
+	double dAvgPetMobDPS = 0.0;
+	double dPetMobDPSSum = 0.0;
+
 	//	empty the list so we can repopulate
 	m_listview_mob->clear();
 
@@ -1408,14 +1442,20 @@ void CombatWindow::updateMob()
 		iTotalMobs++;
 		dDPSSum += dDPS;
 		dPetDPSSum += dPetDPS;
+		dMobDPSSum += dMobDPS;
+		dPetMobDPSSum += dPetMobDPS;
 	}
 
 	dAvgDPS = dDPSSum / (double)iTotalMobs;
+	dAvgMobDPS = dMobDPSSum / (double)iTotalMobs;
 	dAvgPetDPS = dPetDPSSum / (double)iTotalMobs;
+	dAvgPetMobDPS = dPetMobDPSSum / (double)iTotalMobs;
 
 	m_label_mob_totalmobs->setText(QString::number(iTotalMobs));
 	m_label_mob_avgdps->setText(doubleToQString(dAvgDPS, 1));
+	m_label_mob_avgmobdps->setText(doubleToQString(dAvgMobDPS, 1));
 	m_label_mob_avgpetdps->setText(doubleToQString(dAvgPetDPS, 1));
+	m_label_mob_avgpetmobdps->setText(doubleToQString(dAvgPetMobDPS, 1));
 }
 
 void CombatWindow::addNonMeleeHit(const QString& iTargetName, const int iDamage)
@@ -1561,6 +1601,11 @@ void CombatWindow::addCombatRecord(
 			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
 			updateMob();
 		}
+
+		if(iDamage > 0)
+			updateMobDPS(iDamage);
+		else if(isDamageShield(iType))
+			updateMobDPS(-iDamage);
 	}
 	else if(iSourceID == iPlayerID && iTargetID != iPlayerID)
 	{
@@ -1600,6 +1645,11 @@ void CombatWindow::addCombatRecord(
 			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
 			updateMob();
 		}
+
+		if(iDamage > 0)
+			updatePetMobDPS(iDamage);
+		else if(isDamageShield(iType))
+			updatePetMobDPS(-iDamage);
 	}
 	else if (iPlayerID == iSourcePetOwnerID)
 	{
@@ -1845,6 +1895,68 @@ void CombatWindow::updatePetDPS(int iDamage)
 }
 
 
+void CombatWindow::updateMobDPS(int iDamage)
+{
+	const int iTimeNow = mTime();
+
+	//	reset if it's been 10 seconds without an update
+	if(iTimeNow > (m_iMobDPSTimeLast + 10000))
+	{
+		m_dMobDPSLast = m_dDPS;
+		m_dMobDPS = 0.0;
+		m_iMobDPSStartTime = iTimeNow;
+		m_iCurrentMobDPSTotal = 0;
+	}
+
+	m_iMobDPSTimeLast = mTime();
+	m_iCurrentMobDPSTotal += iDamage;
+
+	int iTimeElapsed = (iTimeNow - m_iMobDPSStartTime) / 1000;
+
+	if(iTimeElapsed > 0)
+	{
+		m_dMobDPS = (double)m_iCurrentMobDPSTotal / (double)iTimeElapsed;
+	}
+
+	const QString sMobDPS = doubleToQString(m_dMobDPS, 1);
+	const QString sMobDPSLast = doubleToQString(m_dMobDPSLast, 1);
+
+	m_label_mob_currentmobdps->setText(sMobDPS);
+	m_label_mob_lastmobdps->setText(sMobDPSLast);
+}
+
+
+void CombatWindow::updatePetMobDPS(int iDamage)
+{
+	const int iTimeNow = mTime();
+
+	//	reset if it's been 10 seconds without an update
+	if(iTimeNow > (m_iPetMobDPSTimeLast + 10000))
+	{
+		m_dPetMobDPSLast = m_dPetDPS;
+		m_dPetMobDPS = 0.0;
+		m_iPetMobDPSStartTime = iTimeNow;
+		m_iPetCurrentMobDPSTotal = 0;
+	}
+
+	m_iPetMobDPSTimeLast = mTime();
+	m_iPetCurrentMobDPSTotal += iDamage;
+
+	const int iTimeElapsed = (iTimeNow - m_iPetMobDPSStartTime) / 1000;
+
+	if(iTimeElapsed > 0)
+	{
+		m_dPetMobDPS = (double)m_iPetCurrentMobDPSTotal / (double)iTimeElapsed;
+	}
+
+	const QString sPetMobDPS = doubleToQString(m_dPetMobDPS, 1);
+	const QString sPetMobDPSLast = doubleToQString(m_dPetMobDPSLast, 1);
+
+	m_label_mob_currentpetmobdps->setText(sPetMobDPS);
+	m_label_mob_lastpetmobdps->setText(sPetMobDPSLast);
+}
+
+
 void CombatWindow::resetDPS()
 {
 #ifdef DEBUGCOMBAT
@@ -1860,6 +1972,14 @@ void CombatWindow::resetDPS()
 	m_iPetDPSTimeLast = 0;
 
 	updatePetDPS(0);
+
+	m_iMobDPSTimeLast = 0;
+
+	updateMobDPS(0);
+
+	m_iPetMobDPSTimeLast = 0;
+
+	updatePetMobDPS(0);
 }
 
 void CombatWindow::clearMob()

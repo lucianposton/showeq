@@ -262,6 +262,8 @@ private:
 	void updateMob();
 	void updateDPS(int iDamage);
 	void updatePetDPS(int iDamage);
+	void updateMobDPS(int iDamage);
+	void updatePetMobDPS(int iDamage);
 
 private:
 	Player*	m_player;
@@ -325,12 +327,20 @@ private:
 	QLabel*		m_label_defense_summary_totaldamage;
 
 	QLabel*		m_label_mob_totalmobs;
+
 	QLabel*		m_label_mob_avgdps;
-	QLabel*		m_label_mob_currentdps;
-	QLabel*		m_label_mob_lastdps;
-	QLabel*		m_label_mob_currentpetdps;
-	QLabel*		m_label_mob_lastpetdps;
 	QLabel*		m_label_mob_avgpetdps;
+	QLabel*		m_label_mob_currentdps;
+	QLabel*		m_label_mob_currentpetdps;
+	QLabel*		m_label_mob_lastdps;
+	QLabel*		m_label_mob_lastpetdps;
+
+	QLabel*		m_label_mob_avgmobdps;
+	QLabel*		m_label_mob_avgpetmobdps;
+	QLabel*		m_label_mob_currentmobdps;
+	QLabel*		m_label_mob_currentpetmobdps;
+	QLabel*		m_label_mob_lastmobdps;
+	QLabel*		m_label_mob_lastpetmobdps;
 
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	QList<DotOffenseRecord> m_dot_offense_list;
@@ -353,6 +363,18 @@ private:
 	int		m_iPetDPSTimeLast;
 	double		m_dPetDPS;
 	double		m_dPetDPSLast;
+
+	int		m_iCurrentMobDPSTotal;
+	int		m_iMobDPSStartTime;
+	int		m_iMobDPSTimeLast;
+	double		m_dMobDPS;
+	double		m_dMobDPSLast;
+
+	int		m_iPetCurrentMobDPSTotal;
+	int		m_iPetMobDPSStartTime;
+	int		m_iPetMobDPSTimeLast;
+	double		m_dPetMobDPS;
+	double		m_dPetMobDPSLast;
 };
 
 #endif // COMBATLOG_H
