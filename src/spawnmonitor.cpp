@@ -403,6 +403,14 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
   // ignore everything but mobs
   if ( ( spawn->NPC() != SPAWN_NPC ) || ( spawn->petOwnerID() != 0 ))
     return;
+
+#ifdef DEBUG_SPAWNMONITOR
+  seqDebug("SpawnMonitor::checkSpawnPoint() %d %s (%d,%d,%d)->(%s) size=%f",
+          spawn->id(), (const char*)spawn->name(),
+          spawn->x(), spawn->y(), spawn->z(),
+          (const char*)SpawnPoint::key(*spawn),
+          spawn->size());
+#endif
   
   SpawnPoint*		sp;
   QString key;
