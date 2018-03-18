@@ -16,6 +16,7 @@
 #include <qtimer.h>
 #include <qhbox.h>
 #include <qvgroupbox.h>
+#include <qhgroupbox.h>
 #include <qmessagebox.h>
 #include <qlayout.h>
 #include <stdio.h>
@@ -672,76 +673,129 @@ QWidget* CombatWindow::initDefenseWidget()
 {
 	QWidget *pWidget = new QWidget(m_tab);
 	m_layout_defense = new QVBoxLayout(pWidget);
+	QWidget *top_third_widget = new QWidget(pWidget);
+	m_layout_defense_top_third = new QHBoxLayout(top_third_widget);
+	m_layout_defense->addWidget(top_third_widget);
 
-	QGroupBox *avoidanceGBox = new QVGroupBox("Avoidance", pWidget);
-	m_layout_defense->addWidget(avoidanceGBox);
+	QGroupBox *avoidanceGBox = new QVGroupBox("Avoidance", top_third_widget);
+	m_layout_defense_top_third->addWidget(avoidanceGBox);
 
 	QGrid *avoidanceGrid = new QGrid(6, avoidanceGBox);
 
 	new QLabel("Misses:", avoidanceGrid);
 	m_label_defense_avoid_misses = new QLabel(avoidanceGrid);
-
+	m_label_defense_avoid_misses->setAlignment(Qt::AlignRight);
+	new QLabel("", avoidanceGrid);
 	new QLabel("Blocks:", avoidanceGrid);
 	m_label_defense_avoid_block = new QLabel(avoidanceGrid);
+	m_label_defense_avoid_block->setAlignment(Qt::AlignRight);
+	new QLabel("", avoidanceGrid);
 
 	new QLabel("Parries:", avoidanceGrid);
 	m_label_defense_avoid_parry = new QLabel(avoidanceGrid);
-
+	m_label_defense_avoid_parry->setAlignment(Qt::AlignRight);
+	new QLabel("", avoidanceGrid);
 	new QLabel("Ripostes:", avoidanceGrid);
 	m_label_defense_avoid_riposte = new QLabel(avoidanceGrid);
+	m_label_defense_avoid_riposte->setAlignment(Qt::AlignRight);
+	new QLabel("", avoidanceGrid);
 
 	new QLabel("Dodges:", avoidanceGrid);
 	m_label_defense_avoid_dodge = new QLabel(avoidanceGrid);
-
-	new QLabel("Invulnerables:", avoidanceGrid);
-	m_label_defense_avoid_invulnerables = new QLabel(avoidanceGrid);
-
-	new QLabel("Absorbs:", avoidanceGrid);
-	m_label_defense_avoid_shield_absorb = new QLabel(avoidanceGrid);
+	m_label_defense_avoid_dodge->setAlignment(Qt::AlignRight);
+	new QLabel("", avoidanceGrid);
+	new QLabel("", avoidanceGrid);
+	new QLabel("", avoidanceGrid);
+	new QLabel("", avoidanceGrid);
 
 	new QLabel("Total:", avoidanceGrid);
 	m_label_defense_avoid_total = new QLabel(avoidanceGrid);
+	m_label_defense_avoid_total->setAlignment(Qt::AlignRight);
 
-	((QGridLayout *)avoidanceGrid->layout())->setColStretch(1, 1);
-	((QGridLayout *)avoidanceGrid->layout())->setColStretch(3, 1);
+	((QGridLayout *)avoidanceGrid->layout())->setColStretch(2, 1);
 	((QGridLayout *)avoidanceGrid->layout())->setColStretch(5, 1);
 	avoidanceGrid->layout()->setSpacing(5);
+
+
+	QGroupBox *preventionGBox = new QVGroupBox("Prevention", top_third_widget);
+	m_layout_defense_top_third->addWidget(preventionGBox);
+
+	QGrid *preventionGrid = new QGrid(3, preventionGBox);
+	new QLabel("Invulnerables:", preventionGrid);
+	m_label_defense_prevented_invulnerables = new QLabel(preventionGrid);
+	m_label_defense_prevented_invulnerables->setAlignment(Qt::AlignRight);
+	new QLabel("", preventionGrid);
+
+	new QLabel("Absorbs:", preventionGrid);
+	m_label_defense_prevented_shield_absorb = new QLabel(preventionGrid);
+	m_label_defense_prevented_shield_absorb->setAlignment(Qt::AlignRight);
+	new QLabel("", preventionGrid);
+
+	new QLabel("", preventionGrid);
+	new QLabel("", preventionGrid);
+	new QLabel("", preventionGrid);
+
+	new QLabel("Total:", preventionGrid);
+	m_label_defense_prevented_total = new QLabel(preventionGrid);
+	m_label_defense_prevented_total->setAlignment(Qt::AlignRight);
+
+	((QGridLayout *)preventionGrid->layout())->setColStretch(2, 1);
+	preventionGrid->layout()->setSpacing(5);
+
 
 	QGroupBox *mitigationGBox = new QVGroupBox("Mitigation", pWidget);
 	m_layout_defense->addWidget(mitigationGBox);
 
 	QGrid *mitigationGrid = new QGrid(6, mitigationGBox);
 
-	new QLabel("Avg. Hit:", mitigationGrid);
-	m_label_defense_mitigate_avghit = new QLabel(mitigationGrid);
-
 	new QLabel("Min:", mitigationGrid);
 	m_label_defense_mitigate_minhit = new QLabel(mitigationGrid);
+	m_label_defense_mitigate_minhit->setAlignment(Qt::AlignRight);
+	new QLabel("", mitigationGrid);
+	new QLabel("Avg. Hit:", mitigationGrid);
+	m_label_defense_mitigate_avghit = new QLabel(mitigationGrid);
+	m_label_defense_mitigate_avghit->setAlignment(Qt::AlignRight);
+	new QLabel("", mitigationGrid);
 
 	new QLabel("Max:", mitigationGrid);
 	m_label_defense_mitigate_maxhit = new QLabel(mitigationGrid);
+	m_label_defense_mitigate_maxhit->setAlignment(Qt::AlignRight);
+	new QLabel("", mitigationGrid);
 
-	((QGridLayout *)mitigationGrid->layout())->setColStretch(1, 1);
-	((QGridLayout *)mitigationGrid->layout())->setColStretch(3, 1);
+	((QGridLayout *)mitigationGrid->layout())->setColStretch(2, 1);
 	((QGridLayout *)mitigationGrid->layout())->setColStretch(5, 1);
 	mitigationGrid->layout()->setSpacing(5);
+
 
 	QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
 	m_layout_defense->addWidget(summaryGBox);
 
 	QGrid *summaryGrid = new QGrid(6, summaryGBox);
 
-	new QLabel("Mob Attacks:", summaryGrid);
-	m_label_defense_summary_mobattacks = new QLabel(summaryGrid);
-
+	new QLabel("Mob Hits:", summaryGrid);
+	m_label_defense_summary_mobhits = new QLabel(summaryGrid);
+	m_label_defense_summary_mobhits->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 	new QLabel("% Avoided:", summaryGrid);
 	m_label_defense_summary_percentavoided = new QLabel(summaryGrid);
+	m_label_defense_summary_percentavoided->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+
+	new QLabel("Mob Attacks:", summaryGrid);
+	m_label_defense_summary_mobattacks = new QLabel(summaryGrid);
+	m_label_defense_summary_mobattacks->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("% Prevented:", summaryGrid);
+	m_label_defense_summary_percentprevented = new QLabel(summaryGrid);
+	m_label_defense_summary_percentprevented->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 
 	new QLabel("Total Damage:", summaryGrid);
 	m_label_defense_summary_totaldamage = new QLabel(summaryGrid);
+	m_label_defense_summary_totaldamage->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 
-	((QGridLayout *)summaryGrid->layout())->setColStretch(1, 1);
-	((QGridLayout *)summaryGrid->layout())->setColStretch(3, 1);
+	((QGridLayout *)summaryGrid->layout())->setColStretch(2, 1);
 	((QGridLayout *)summaryGrid->layout())->setColStretch(5, 1);
 	summaryGrid->layout()->setSpacing(5);
 
@@ -1241,6 +1295,7 @@ void CombatWindow::updateOffense()
 
 void CombatWindow::updateDefense()
 {
+	int iHits = m_combat_defense_record->getHits();
 	int iMisses = m_combat_defense_record->getMisses();
 	int iBlocks = m_combat_defense_record->getBlocks();
 	int iParries = m_combat_defense_record->getParries();
@@ -1248,7 +1303,8 @@ void CombatWindow::updateDefense()
 	int iDodges = m_combat_defense_record->getDodges();
 	int iInvulnerables = m_combat_defense_record->getInvulnerables();
 	int iShieldAbsorbs = m_combat_defense_record->getShieldAbsorbs();
-	int iTotalAvoid = iMisses+iBlocks+iParries+iRipostes+iDodges+iInvulnerables+iShieldAbsorbs;
+	int iTotalAvoid = iMisses+iBlocks+iParries+iRipostes+iDodges;
+	int iTotalPrevented = iInvulnerables+iShieldAbsorbs;
 
 	double dAvgHit = (double)m_combat_defense_record->getTotalDamage() / (double)m_combat_defense_record->getHits();
 	int iMinDamage = m_combat_defense_record->getMinDamage();
@@ -1256,6 +1312,7 @@ void CombatWindow::updateDefense()
 
 	int iMobAttacks = m_combat_defense_record->getTotalAttacks();
 	double dAvoided = ((double)iTotalAvoid / (double)iMobAttacks) * 100.0;
+	double dPrevented = ((double)iTotalPrevented / (double)iMobAttacks) * 100.0;
 	int iTotalDamage = m_combat_defense_record->getTotalDamage();
 
 	m_label_defense_avoid_misses->setText(QString::number(iMisses));
@@ -1263,14 +1320,17 @@ void CombatWindow::updateDefense()
 	m_label_defense_avoid_parry->setText(QString::number(iParries));
 	m_label_defense_avoid_riposte->setText(QString::number(iRipostes));
 	m_label_defense_avoid_dodge->setText(QString::number(iDodges));
-	m_label_defense_avoid_invulnerables->setText(QString::number(iInvulnerables));
-	m_label_defense_avoid_shield_absorb->setText(QString::number(iShieldAbsorbs));
 	m_label_defense_avoid_total->setText(QString::number(iTotalAvoid));
+	m_label_defense_prevented_shield_absorb->setText(QString::number(iShieldAbsorbs));
+	m_label_defense_prevented_invulnerables->setText(QString::number(iInvulnerables));
+	m_label_defense_prevented_total->setText(QString::number(iTotalPrevented));
 	m_label_defense_mitigate_avghit->setText(doubleToQString(dAvgHit, 0));
 	m_label_defense_mitigate_minhit->setText(intToQString(iMinDamage));
 	m_label_defense_mitigate_maxhit->setText(intToQString(iMaxDamage));
+	m_label_defense_summary_mobhits->setText(QString::number(iHits));
 	m_label_defense_summary_mobattacks->setText(QString::number(iMobAttacks));
 	m_label_defense_summary_percentavoided->setText(doubleToQString(dAvoided, 1));
+	m_label_defense_summary_percentprevented->setText(doubleToQString(dPrevented, 1));
 	m_label_defense_summary_totaldamage->setText(QString::number(iTotalDamage));
 }
 

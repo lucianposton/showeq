@@ -273,6 +273,7 @@ private:
 	QTabWidget*     m_tab;
 	QVBoxLayout*	m_layout_offense;
 	QVBoxLayout*	m_layout_defense;
+	QHBoxLayout*	m_layout_defense_top_third;
 	QVBoxLayout*	m_layout_mob;
 
 	SEQListView* 	m_listview_offense;
@@ -306,14 +307,17 @@ private:
 	QLabel*		m_label_defense_avoid_parry;
 	QLabel*		m_label_defense_avoid_riposte;
 	QLabel*		m_label_defense_avoid_dodge;
-	QLabel*		m_label_defense_avoid_invulnerables;
-	QLabel*		m_label_defense_avoid_shield_absorb;
 	QLabel*		m_label_defense_avoid_total;
+	QLabel*		m_label_defense_prevented_invulnerables;
+	QLabel*		m_label_defense_prevented_shield_absorb;
+	QLabel*		m_label_defense_prevented_total;
 	QLabel*		m_label_defense_mitigate_avghit;
 	QLabel*		m_label_defense_mitigate_minhit;
 	QLabel*		m_label_defense_mitigate_maxhit;
+	QLabel*		m_label_defense_summary_mobhits;
 	QLabel*		m_label_defense_summary_mobattacks;
 	QLabel*		m_label_defense_summary_percentavoided;
+	QLabel*		m_label_defense_summary_percentprevented;
 	//QLabel*		m_label_defense_summary_ratio;
 	QLabel*		m_label_defense_summary_totaldamage;
 
