@@ -651,15 +651,17 @@ QWidget* CombatWindow::initOffenseWidget()
 	m_label_offense_totaldamage = new QLabel(summaryGrid);
 	m_label_offense_totaldamage->setAlignment(Qt::AlignRight);
 	new QLabel("", summaryGrid);
-	new QLabel("", summaryGrid);
-	new QLabel("", summaryGrid);
+	new QLabel("Current DPS:", summaryGrid);
+	m_label_offense_currentdps= new QLabel(summaryGrid);
+	m_label_offense_currentdps->setAlignment(Qt::AlignRight);
 	new QLabel("", summaryGrid);
 	new QLabel("% Total from Pet:", summaryGrid);
 	m_label_offense_percentpettotaldamage = new QLabel(summaryGrid);
 	m_label_offense_percentpettotaldamage->setAlignment(Qt::AlignRight);
 	new QLabel("", summaryGrid);
-	new QLabel("", summaryGrid);
-	new QLabel("", summaryGrid);
+	new QLabel("Current Pet DPS:", summaryGrid);
+	m_label_offense_currentpetdps= new QLabel(summaryGrid);
+	m_label_offense_currentpetdps->setAlignment(Qt::AlignRight);
 
 	((QGridLayout *)summaryGrid->layout())->setColStretch(2, 1);
 	((QGridLayout *)summaryGrid->layout())->setColStretch(5, 1);
@@ -1797,8 +1799,12 @@ void CombatWindow::updateDPS(int iDamage)
 		m_dDPS = (double)m_iCurrentDPSTotal / (double)iTimeElapsed;
 	}
 
-	m_label_mob_currentdps->setText(doubleToQString(m_dDPS, 1));
-	m_label_mob_lastdps->setText(doubleToQString(m_dDPSLast, 1));
+	const QString sDPS = doubleToQString(m_dDPS, 1);
+	const QString sDPSLast = doubleToQString(m_dDPSLast, 1);
+
+	m_label_offense_currentdps->setText(sDPS);
+	m_label_mob_currentdps->setText(sDPS);
+	m_label_mob_lastdps->setText(sDPSLast);
 }
 
 
@@ -1830,8 +1836,12 @@ void CombatWindow::updatePetDPS(int iDamage)
 		m_dPetDPS = (double)m_iPetCurrentDPSTotal / (double)iTimeElapsed;
 	}
 
-	m_label_mob_currentpetdps->setText(doubleToQString(m_dPetDPS, 1));
-	m_label_mob_lastpetdps->setText(doubleToQString(m_dPetDPSLast, 1));
+	const QString sPetDPS = doubleToQString(m_dPetDPS, 1);
+	const QString sPetDPSLast = doubleToQString(m_dPetDPSLast, 1);
+
+	m_label_offense_currentpetdps->setText(sPetDPS);
+	m_label_mob_currentpetdps->setText(sPetDPS);
+	m_label_mob_lastpetdps->setText(sPetDPSLast);
 }
 
 
