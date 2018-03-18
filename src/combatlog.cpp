@@ -1441,6 +1441,27 @@ void CombatWindow::addCombatRecord(
     else // if (source == NULL)
         sName.sprintf("Unknown(%d)", iSourceID);
 
+#ifdef DEBUGCOMBAT
+    if (isDamageShield(category) && iDamage <= 0)
+    {
+        seqDebug("CombatWindow::addCombatRecord: UNEXPECTED iType (%d,%d,%d) "
+                "(%s->%s) "
+                "(%d[%d]->%d[%d])",
+                iType, iDamage, iSpell,
+                (const char*)sName, (const char*)tName,
+                iSourceID, iSourcePetOwnerID, iTargetID, iTargetPetOwnerID);
+    }
+    else if (damageCategory(iType) == DAMAGE_CATEGORY_ENVIRONMENT)
+    {
+        seqDebug("CombatWindow::addCombatRecord: ENVIRONMENT iType (%d,%d,%d) "
+                "(%s->%s) "
+                "(%d[%d]->%d[%d])",
+                iType, iDamage, iSpell,
+                (const char*)sName, (const char*)tName,
+                iSourceID, iSourcePetOwnerID, iTargetID, iTargetPetOwnerID);
+    }
+#endif
+
 	//	The one case we won't handle (for now) is where the Target
 	//	and Source are the same.
 
