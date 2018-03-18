@@ -335,6 +335,7 @@ void SpawnMonitor::deleteSpawnPoint(const SpawnPoint* sp)
 
   // remove the spawn point (will automatically delete it).
   m_spawns.remove(sp->key());
+  m_points.remove(sp->key());
   m_modified = true;
 }
 
