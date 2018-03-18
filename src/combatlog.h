@@ -327,6 +327,7 @@ private:
 	QLabel*		m_label_mob_lastdps;
 	QLabel*		m_label_mob_currentpetdps;
 	QLabel*		m_label_mob_lastpetdps;
+	QLabel*		m_label_mob_avgpetdps;
 
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	QList<DotOffenseRecord> m_dot_offense_list;

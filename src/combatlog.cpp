@@ -844,28 +844,44 @@ QWidget* CombatWindow::initMobWidget()
 	QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
 	m_layout_mob->addWidget(summaryGBox);
 
-	QGrid *summaryGrid = new QGrid(4, summaryGBox);
-
-	new QLabel("Total Mobs:", summaryGrid);
-	m_label_mob_totalmobs = new QLabel(summaryGrid);
+	QGrid *summaryGrid = new QGrid(8, summaryGBox);
 
 	new QLabel("Avg DPS:", summaryGrid);
 	m_label_mob_avgdps = new QLabel(summaryGrid);
-
-	new QLabel("Current DPS:", summaryGrid);
-	m_label_mob_currentdps = new QLabel(summaryGrid);
+	m_label_mob_avgdps->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("Avg Pet DPS:", summaryGrid);
+	m_label_mob_avgpetdps = new QLabel(summaryGrid);
+	m_label_mob_avgpetdps->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("Total Mobs:", summaryGrid);
+	m_label_mob_totalmobs = new QLabel(summaryGrid);
+	m_label_mob_totalmobs->setAlignment(Qt::AlignRight);
 
 	new QLabel("Last DPS:", summaryGrid);
 	m_label_mob_lastdps = new QLabel(summaryGrid);
-
-	new QLabel("Current Pet DPS:", summaryGrid);
-	m_label_mob_currentpetdps = new QLabel(summaryGrid);
-
+	m_label_mob_lastdps->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 	new QLabel("Last Pet DPS:", summaryGrid);
 	m_label_mob_lastpetdps = new QLabel(summaryGrid);
+	m_label_mob_lastpetdps->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
 
-	((QGridLayout *)summaryGrid->layout())->setColStretch(1, 1);
-	((QGridLayout *)summaryGrid->layout())->setColStretch(3, 1);
+	new QLabel("Current DPS:", summaryGrid);
+	m_label_mob_currentdps = new QLabel(summaryGrid);
+	m_label_mob_currentdps->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("Current Pet DPS:", summaryGrid);
+	m_label_mob_currentpetdps = new QLabel(summaryGrid);
+	m_label_mob_currentpetdps->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+	new QLabel("", summaryGrid);
+
+	((QGridLayout *)summaryGrid->layout())->setColStretch(2, 1);
+	((QGridLayout *)summaryGrid->layout())->setColStretch(5, 1);
 	summaryGrid->layout()->setSpacing(5);
 
 
@@ -1340,6 +1356,8 @@ void CombatWindow::updateMob()
 	int iTotalMobs = 0;
 	double dAvgDPS = 0.0;
 	double dDPSSum = 0.0;
+	double dAvgPetDPS = 0.0;
+	double dPetDPSSum = 0.0;
 
 	//	empty the list so we can repopulate
 	m_listview_mob->clear();
@@ -1387,15 +1405,15 @@ void CombatWindow::updateMob()
 
 		iTotalMobs++;
 		dDPSSum += dDPS;
+		dPetDPSSum += dPetDPS;
 	}
 
-	if (iTotalMobs)
-	  dAvgDPS = dDPSSum / (double)iTotalMobs;
-	else
-	  dAvgDPS = 0.0;
+	dAvgDPS = dDPSSum / (double)iTotalMobs;
+	dAvgPetDPS = dPetDPSSum / (double)iTotalMobs;
 
 	m_label_mob_totalmobs->setText(QString::number(iTotalMobs));
 	m_label_mob_avgdps->setText(doubleToQString(dAvgDPS, 1));
+	m_label_mob_avgpetdps->setText(doubleToQString(dAvgPetDPS, 1));
 }
 
 void CombatWindow::addNonMeleeHit(const QString& iTargetName, const int iDamage)
