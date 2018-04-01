@@ -19,6 +19,7 @@
 #include <qhgroupbox.h>
 #include <qmessagebox.h>
 #include <qlayout.h>
+#include <qcombobox.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -227,10 +228,20 @@ void DotOffenseRecord::addTick(int iDamage)
 ////////////////////////////////////////////
 //  CombatDefenseRecord implementation
 ////////////////////////////////////////////
-CombatDefenseRecord::CombatDefenseRecord(Player* p) :
-	m_player(p)
+CombatDefenseRecord::CombatDefenseRecord(const Spawn* s) :
+    m_displayString(createRecordIDString(s->name(), s->id(),
+                s->classString(), s->level()))
 {
   clear();
+}
+
+QString CombatDefenseRecord::createRecordIDString(
+        const QString& name, int id, const QString& classname, int level)
+{
+    QString result;
+    result.sprintf("%s [%d %s] (%d)",
+            (const char*)name, level, (const char*)classname, id);
+    return result;
 }
 
 void CombatDefenseRecord::clear(void)
@@ -467,6 +478,7 @@ CombatWindow::CombatWindow(Player* player,
 			   QWidget* parent, const char* name)
   : SEQWindow("Combat", "ShowEQ - Combat", parent, name),
     m_player(player),
+    m_autoupdate_pet_defense_selection(false),
     m_iCurrentDPSTotal(0),
     m_iDPSStartTime(0),
     m_iDPSTimeLast(0),
@@ -497,6 +509,8 @@ CombatWindow::CombatWindow(Player* player,
 	m_dot_offense_list.setAutoDelete(true);
 	m_nonmelee_offense_record = new NonMeleeOffenseRecord;
 	m_combat_defense_record = new CombatDefenseRecord(player);
+	m_combat_pet_defense_current_record = NULL;
+	m_combat_pet_defense_list.setAutoDelete(true);
 	m_combat_mob_list.setAutoDelete(true);
 
 	initUI();
@@ -521,6 +535,9 @@ void CombatWindow::initUI()
 	m_widget_defense = initDefenseWidget();
 	m_tab->addTab(m_widget_defense, "&Defense");
 
+	m_widget_pet_defense = initPetDefenseWidget();
+	m_tab->addTab(m_widget_pet_defense, "&Pet Defense");
+
 	m_widget_mob = initMobWidget();
 	m_tab->addTab(m_widget_mob, "&Mobs");
 
@@ -528,12 +545,14 @@ void CombatWindow::initUI()
 	m_clear_menu->insertItem("Clear All", this, SLOT(clear()));
 	m_clear_menu->insertItem("Clear Offense Stats", this, SLOT(clearOffense()));
 	m_clear_menu->insertItem("Clear Defense Stats", this, SLOT(clearDefense()));
+	m_clear_menu->insertItem("Clear Pet Defense Stats", this, SLOT(clearPetDefense()));
 	m_clear_menu->insertItem("Clear Mob Stats", this, SLOT(clearMob()));
 
 	m_menu_bar->insertItem("&Clear", m_clear_menu);
 
 	updateOffense();
 	updateDefense();
+	updatePetDefense();
 	updateMob();
 
 #ifdef DEBUGCOMBAT
@@ -686,11 +705,11 @@ QWidget* CombatWindow::initDefenseWidget()
 	QWidget *pWidget = new QWidget(m_tab);
 	m_layout_defense = new QVBoxLayout(pWidget);
 	QWidget *top_third_widget = new QWidget(pWidget);
-	m_layout_defense_top_third = new QHBoxLayout(top_third_widget);
+	QHBoxLayout* top_third_layout = new QHBoxLayout(top_third_widget);
 	m_layout_defense->addWidget(top_third_widget);
 
 	QGroupBox *avoidanceGBox = new QVGroupBox("Avoidance", top_third_widget);
-	m_layout_defense_top_third->addWidget(avoidanceGBox);
+	top_third_layout->addWidget(avoidanceGBox);
 
 	QGrid *avoidanceGrid = new QGrid(6, avoidanceGBox);
 
@@ -730,7 +749,7 @@ QWidget* CombatWindow::initDefenseWidget()
 
 
 	QGroupBox *preventionGBox = new QVGroupBox("Prevention", top_third_widget);
-	m_layout_defense_top_third->addWidget(preventionGBox);
+	top_third_layout->addWidget(preventionGBox);
 
 	QGrid *preventionGrid = new QGrid(3, preventionGBox);
 	new QLabel("Invulnerables:", preventionGrid);
@@ -812,6 +831,145 @@ QWidget* CombatWindow::initDefenseWidget()
 	summaryGrid->layout()->setSpacing(5);
 
 	return pWidget;
+}
+
+QWidget* CombatWindow::initPetDefenseWidget()
+{
+    QWidget *pWidget = new QWidget(m_tab);
+
+    m_layout_pet_defense = new QVBoxLayout(pWidget);
+    m_combobox_pet_defense = new QComboBox(false, pWidget);
+    m_layout_pet_defense->addWidget(m_combobox_pet_defense);
+    connect(m_combobox_pet_defense, SIGNAL(activated(const QString&)),
+            this, SLOT(petDefenseComboboxSelectionChanged(const QString&)));
+
+    QWidget *top_third_widget = new QWidget(pWidget);
+    QHBoxLayout* top_third_layout = new QHBoxLayout(top_third_widget);
+    m_layout_pet_defense->addWidget(top_third_widget);
+
+    QGroupBox *avoidanceGBox = new QVGroupBox("Avoidance", top_third_widget);
+    top_third_layout->addWidget(avoidanceGBox);
+
+    QGrid *avoidanceGrid = new QGrid(6, avoidanceGBox);
+
+    new QLabel("Misses:", avoidanceGrid);
+    m_label_pet_defense_avoid_misses = new QLabel(avoidanceGrid);
+    m_label_pet_defense_avoid_misses->setAlignment(Qt::AlignRight);
+    new QLabel("", avoidanceGrid);
+    new QLabel("Blocks:", avoidanceGrid);
+    m_label_pet_defense_avoid_block = new QLabel(avoidanceGrid);
+    m_label_pet_defense_avoid_block->setAlignment(Qt::AlignRight);
+    new QLabel("", avoidanceGrid);
+
+    new QLabel("Parries:", avoidanceGrid);
+    m_label_pet_defense_avoid_parry = new QLabel(avoidanceGrid);
+    m_label_pet_defense_avoid_parry->setAlignment(Qt::AlignRight);
+    new QLabel("", avoidanceGrid);
+    new QLabel("Ripostes:", avoidanceGrid);
+    m_label_pet_defense_avoid_riposte = new QLabel(avoidanceGrid);
+    m_label_pet_defense_avoid_riposte->setAlignment(Qt::AlignRight);
+    new QLabel("", avoidanceGrid);
+
+    new QLabel("Dodges:", avoidanceGrid);
+    m_label_pet_defense_avoid_dodge = new QLabel(avoidanceGrid);
+    m_label_pet_defense_avoid_dodge->setAlignment(Qt::AlignRight);
+    new QLabel("", avoidanceGrid);
+    new QLabel("", avoidanceGrid);
+    new QLabel("", avoidanceGrid);
+    new QLabel("", avoidanceGrid);
+
+    new QLabel("Total:", avoidanceGrid);
+    m_label_pet_defense_avoid_total = new QLabel(avoidanceGrid);
+    m_label_pet_defense_avoid_total->setAlignment(Qt::AlignRight);
+
+    ((QGridLayout *)avoidanceGrid->layout())->setColStretch(2, 1);
+    ((QGridLayout *)avoidanceGrid->layout())->setColStretch(5, 1);
+    avoidanceGrid->layout()->setSpacing(5);
+
+
+    QGroupBox *preventionGBox = new QVGroupBox("Prevention", top_third_widget);
+    top_third_layout->addWidget(preventionGBox);
+
+    QGrid *preventionGrid = new QGrid(3, preventionGBox);
+    new QLabel("Invulnerables:", preventionGrid);
+    m_label_pet_defense_prevented_invulnerables = new QLabel(preventionGrid);
+    m_label_pet_defense_prevented_invulnerables->setAlignment(Qt::AlignRight);
+    new QLabel("", preventionGrid);
+
+    new QLabel("Absorbs:", preventionGrid);
+    m_label_pet_defense_prevented_shield_absorb = new QLabel(preventionGrid);
+    m_label_pet_defense_prevented_shield_absorb->setAlignment(Qt::AlignRight);
+    new QLabel("", preventionGrid);
+
+    new QLabel("", preventionGrid);
+    new QLabel("", preventionGrid);
+    new QLabel("", preventionGrid);
+
+    new QLabel("Total:", preventionGrid);
+    m_label_pet_defense_prevented_total = new QLabel(preventionGrid);
+    m_label_pet_defense_prevented_total->setAlignment(Qt::AlignRight);
+
+    ((QGridLayout *)preventionGrid->layout())->setColStretch(2, 1);
+    preventionGrid->layout()->setSpacing(5);
+
+
+    QGroupBox *mitigationGBox = new QVGroupBox("Mitigation", pWidget);
+    m_layout_pet_defense->addWidget(mitigationGBox);
+
+    QGrid *mitigationGrid = new QGrid(6, mitigationGBox);
+
+    new QLabel("Min:", mitigationGrid);
+    m_label_pet_defense_mitigate_minhit = new QLabel(mitigationGrid);
+    m_label_pet_defense_mitigate_minhit->setAlignment(Qt::AlignRight);
+    new QLabel("", mitigationGrid);
+    new QLabel("Avg. Hit:", mitigationGrid);
+    m_label_pet_defense_mitigate_avghit = new QLabel(mitigationGrid);
+    m_label_pet_defense_mitigate_avghit->setAlignment(Qt::AlignRight);
+    new QLabel("", mitigationGrid);
+
+    new QLabel("Max:", mitigationGrid);
+    m_label_pet_defense_mitigate_maxhit = new QLabel(mitigationGrid);
+    m_label_pet_defense_mitigate_maxhit->setAlignment(Qt::AlignRight);
+    new QLabel("", mitigationGrid);
+
+    ((QGridLayout *)mitigationGrid->layout())->setColStretch(2, 1);
+    ((QGridLayout *)mitigationGrid->layout())->setColStretch(5, 1);
+    mitigationGrid->layout()->setSpacing(5);
+
+
+    QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
+    m_layout_pet_defense->addWidget(summaryGBox);
+
+    QGrid *summaryGrid = new QGrid(6, summaryGBox);
+
+    new QLabel("Mob Hits:", summaryGrid);
+    m_label_pet_defense_summary_mobhits = new QLabel(summaryGrid);
+    m_label_pet_defense_summary_mobhits->setAlignment(Qt::AlignRight);
+    new QLabel("", summaryGrid);
+    new QLabel("% Avoided:", summaryGrid);
+    m_label_pet_defense_summary_percentavoided = new QLabel(summaryGrid);
+    m_label_pet_defense_summary_percentavoided->setAlignment(Qt::AlignRight);
+    new QLabel("", summaryGrid);
+
+    new QLabel("Mob Attacks:", summaryGrid);
+    m_label_pet_defense_summary_mobattacks = new QLabel(summaryGrid);
+    m_label_pet_defense_summary_mobattacks->setAlignment(Qt::AlignRight);
+    new QLabel("", summaryGrid);
+    new QLabel("% Prevented:", summaryGrid);
+    m_label_pet_defense_summary_percentprevented = new QLabel(summaryGrid);
+    m_label_pet_defense_summary_percentprevented->setAlignment(Qt::AlignRight);
+    new QLabel("", summaryGrid);
+
+    new QLabel("Total Damage:", summaryGrid);
+    m_label_pet_defense_summary_totaldamage = new QLabel(summaryGrid);
+    m_label_pet_defense_summary_totaldamage->setAlignment(Qt::AlignRight);
+    new QLabel("", summaryGrid);
+
+    ((QGridLayout *)summaryGrid->layout())->setColStretch(2, 1);
+    ((QGridLayout *)summaryGrid->layout())->setColStretch(5, 1);
+    summaryGrid->layout()->setSpacing(5);
+
+    return pWidget;
 }
 
 QWidget* CombatWindow::initMobWidget()
@@ -1350,17 +1508,17 @@ void CombatWindow::updateDefense()
 	int iDodges = m_combat_defense_record->getDodges();
 	int iInvulnerables = m_combat_defense_record->getInvulnerables();
 	int iShieldAbsorbs = m_combat_defense_record->getShieldAbsorbs();
+	int iTotalDamage = m_combat_defense_record->getTotalDamage();
 	int iTotalAvoid = iMisses+iBlocks+iParries+iRipostes+iDodges;
 	int iTotalPrevented = iInvulnerables+iShieldAbsorbs;
 
-	double dAvgHit = (double)m_combat_defense_record->getTotalDamage() / (double)m_combat_defense_record->getHits();
+	double dAvgHit = (double)iTotalDamage / (double)iHits;
 	int iMinDamage = m_combat_defense_record->getMinDamage();
 	int iMaxDamage = m_combat_defense_record->getMaxDamage();
 
 	int iMobAttacks = m_combat_defense_record->getTotalAttacks();
 	double dAvoided = ((double)iTotalAvoid / (double)iMobAttacks) * 100.0;
 	double dPrevented = ((double)iTotalPrevented / (double)iMobAttacks) * 100.0;
-	int iTotalDamage = m_combat_defense_record->getTotalDamage();
 
 	m_label_defense_avoid_misses->setText(QString::number(iMisses));
 	m_label_defense_avoid_block->setText(QString::number(iBlocks));
@@ -1379,6 +1537,70 @@ void CombatWindow::updateDefense()
 	m_label_defense_summary_percentavoided->setText(doubleToQString(dAvoided, 1));
 	m_label_defense_summary_percentprevented->setText(doubleToQString(dPrevented, 1));
 	m_label_defense_summary_totaldamage->setText(QString::number(iTotalDamage));
+}
+
+void CombatWindow::updatePetDefense()
+{
+    const CombatDefenseRecord *pRecord = m_combat_pet_defense_current_record;
+    if(pRecord == NULL)
+    {
+        m_label_pet_defense_avoid_misses->clear();
+        m_label_pet_defense_avoid_block->clear();
+        m_label_pet_defense_avoid_parry->clear();
+        m_label_pet_defense_avoid_riposte->clear();
+        m_label_pet_defense_avoid_dodge->clear();
+        m_label_pet_defense_avoid_total->clear();
+        m_label_pet_defense_prevented_shield_absorb->clear();
+        m_label_pet_defense_prevented_invulnerables->clear();
+        m_label_pet_defense_prevented_total->clear();
+        m_label_pet_defense_mitigate_avghit->clear();
+        m_label_pet_defense_mitigate_minhit->clear();
+        m_label_pet_defense_mitigate_maxhit->clear();
+        m_label_pet_defense_summary_mobhits->clear();
+        m_label_pet_defense_summary_mobattacks->clear();
+        m_label_pet_defense_summary_percentavoided->clear();
+        m_label_pet_defense_summary_percentprevented->clear();
+        m_label_pet_defense_summary_totaldamage->clear();
+        return;
+    }
+
+    const int iHits = pRecord->getHits();
+    const int iMisses = pRecord->getMisses();
+    const int iBlocks = pRecord->getBlocks();
+    const int iParries = pRecord->getParries();
+    const int iRipostes = pRecord->getRipostes();
+    const int iDodges = pRecord->getDodges();
+    const int iInvulnerables = pRecord->getInvulnerables();
+    const int iShieldAbsorbs = pRecord->getShieldAbsorbs();
+    const int iTotalDamage = pRecord->getTotalDamage();
+    const int iTotalAvoid = iMisses+iBlocks+iParries+iRipostes+iDodges;
+    const int iTotalPrevented = iInvulnerables+iShieldAbsorbs;
+
+    const double dAvgHit = (double)iTotalDamage / (double)iHits;
+    const int iMinDamage = pRecord->getMinDamage();
+    const int iMaxDamage = pRecord->getMaxDamage();
+
+    const int iMobAttacks = pRecord->getTotalAttacks();
+    const double dAvoided = ((double)iTotalAvoid / (double)iMobAttacks) * 100.0;
+    const double dPrevented = ((double)iTotalPrevented / (double)iMobAttacks) * 100.0;
+
+    m_label_pet_defense_avoid_misses->setText(QString::number(iMisses));
+    m_label_pet_defense_avoid_block->setText(QString::number(iBlocks));
+    m_label_pet_defense_avoid_parry->setText(QString::number(iParries));
+    m_label_pet_defense_avoid_riposte->setText(QString::number(iRipostes));
+    m_label_pet_defense_avoid_dodge->setText(QString::number(iDodges));
+    m_label_pet_defense_avoid_total->setText(QString::number(iTotalAvoid));
+    m_label_pet_defense_prevented_shield_absorb->setText(QString::number(iShieldAbsorbs));
+    m_label_pet_defense_prevented_invulnerables->setText(QString::number(iInvulnerables));
+    m_label_pet_defense_prevented_total->setText(QString::number(iTotalPrevented));
+    m_label_pet_defense_mitigate_avghit->setText(doubleToQString(dAvgHit, 0));
+    m_label_pet_defense_mitigate_minhit->setText(intToQString(iMinDamage));
+    m_label_pet_defense_mitigate_maxhit->setText(intToQString(iMaxDamage));
+    m_label_pet_defense_summary_mobhits->setText(QString::number(iHits));
+    m_label_pet_defense_summary_mobattacks->setText(QString::number(iMobAttacks));
+    m_label_pet_defense_summary_percentavoided->setText(doubleToQString(dAvoided, 1));
+    m_label_pet_defense_summary_percentprevented->setText(doubleToQString(dPrevented, 1));
+    m_label_pet_defense_summary_totaldamage->setText(QString::number(iTotalDamage));
 }
 
 void CombatWindow::updateMob()
@@ -1638,10 +1860,14 @@ void CombatWindow::addCombatRecord(
 		// Damage shields show up as negative damage
 		if (isDamageShield(iType))
 		{
+			addPetDefenseRecord(target, -iDamage);
+			updatePetDefense();
 			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, -iDamage, tName, sName);
 			updateMob();
 		}
 		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
+			addPetDefenseRecord(target, iDamage);
+			updatePetDefense();
 			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
 			updateMob();
 		}
@@ -1767,6 +1993,60 @@ void CombatWindow::addDefenseRecord(int iDamage)
 	else
 		m_combat_defense_record->addMiss(iDamage);
 
+}
+
+void CombatWindow::addPetDefenseRecord(const Spawn* s, int iDamage)
+{
+    if (!s)
+    {
+        seqWarn("Failed to add pet defense record for unknown spawn");
+        return;
+    }
+
+    const QString pet_id_string = CombatDefenseRecord::createRecordIDString(
+            s->name(), s->id(), s->classString(), s->level());
+    bool bFoundRecord = false;
+    CombatDefenseRecord *pRecord;
+    for(pRecord = m_combat_pet_defense_list.first(); pRecord != 0; pRecord = m_combat_pet_defense_list.next())
+    {
+        if(pRecord->displayString() == pet_id_string)
+        {
+            bFoundRecord = true;
+            break;
+        }
+    }
+
+    if(!bFoundRecord)
+    {
+        pRecord = new CombatDefenseRecord(s);
+        m_combat_pet_defense_list.append(pRecord);
+        m_combobox_pet_defense->insertItem(pet_id_string, 0);
+    }
+
+    if (m_autoupdate_pet_defense_selection)
+    {
+        m_autoupdate_pet_defense_selection = false;
+        bool foundText = false;
+        for (int i = 0; i < m_combobox_pet_defense->count() ; ++i)
+        {
+            if (m_combobox_pet_defense->text(i) == pet_id_string)
+            {
+                foundText = true;
+                m_combobox_pet_defense->setCurrentItem(i);
+                break;
+            }
+        }
+        if (foundText)
+            m_combat_pet_defense_current_record = pRecord;
+        else
+            seqWarn("Combobox item missing for pet defense record. id=%s",
+                    (const char*)pet_id_string);
+    }
+
+    if(iDamage > 0)
+        pRecord->addHit(iDamage);
+    else
+        pRecord->addMiss(iDamage);
 }
 
 void CombatWindow::addMobRecord(int iTargetID, int iTargetPetOwnerID,
@@ -2003,6 +2283,14 @@ void CombatWindow::clearDefense()
     updateDefense();
 }
 
+void CombatWindow::clearPetDefense()
+{
+    m_combobox_pet_defense->clear();
+    m_combat_pet_defense_current_record = NULL;
+    m_combat_pet_defense_list.clear();
+    updatePetDefense();
+}
+
 void CombatWindow::clear(void)
 {
   m_combat_mob_list.clear();
@@ -2014,7 +2302,46 @@ void CombatWindow::clear(void)
   updateOffense();
   m_combat_defense_record->clear();
   updateDefense();
+  m_combobox_pet_defense->clear();
+  m_combat_pet_defense_current_record = NULL;
+  m_combat_pet_defense_list.clear();
+  updatePetDefense();
   resetDPS();
+}
+
+void CombatWindow::petDefenseComboboxSelectionChanged(const QString& selected)
+{
+    bool bFoundRecord = false;
+    const CombatDefenseRecord *pRecord;
+    for(pRecord = m_combat_pet_defense_list.first(); pRecord != 0; pRecord = m_combat_pet_defense_list.next())
+    {
+        if(pRecord->displayString() == selected)
+        {
+            bFoundRecord = true;
+            break;
+        }
+    }
+
+    if(!bFoundRecord)
+    {
+        seqWarn("Failed to select pet defense record. Unknown selection=%s",
+                (const char*)selected);
+        return;
+    }
+
+    m_combat_pet_defense_current_record = pRecord;
+    m_autoupdate_pet_defense_selection = false;
+    updatePetDefense();
+}
+
+void CombatWindow::charmUpdate(const uint8_t* data)
+{
+    const Charm_Struct* update = (const Charm_Struct*)data;
+
+    if (update->owner_id == m_player->id() && update->command)
+    {
+        m_autoupdate_pet_defense_selection = true;
+    }
 }
 
 #include "combatlog.moc"

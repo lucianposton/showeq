@@ -131,27 +131,31 @@ class CombatDefenseRecord
 {
 public:
 
-	CombatDefenseRecord(Player* p);
+	CombatDefenseRecord(const Spawn* s);
 
-	int		getHits() { return m_iHits; };
-	int		getMisses() { return m_iMisses; };
-	int		getBlocks() { return m_iBlocks; };
-	int		getParries() { return m_iParries; };
-	int		getRipostes() { return m_iRipostes; };
-	int		getDodges() { return m_iDodges; };
-	int		getInvulnerables() { return m_iInvulnerables; };
-	int		getShieldAbsorbs() { return m_iShieldAbsorbs; };
-	int		getMinDamage() { return m_iMinDamage; };
-	int		getMaxDamage() { return m_iMaxDamage; };
-	int		getTotalDamage() { return m_iTotalDamage; };
-	int		getTotalAttacks() { return m_iTotalAttacks; };
+	QString		displayString() const { return m_displayString; };
+	static QString createRecordIDString(const QString& name, int id,
+			const QString& classname, int level);
+
+	int		getHits() const { return m_iHits; };
+	int		getMisses() const { return m_iMisses; };
+	int		getBlocks() const { return m_iBlocks; };
+	int		getParries() const { return m_iParries; };
+	int		getRipostes() const { return m_iRipostes; };
+	int		getDodges() const { return m_iDodges; };
+	int		getInvulnerables() const { return m_iInvulnerables; };
+	int		getShieldAbsorbs() const { return m_iShieldAbsorbs; };
+	int		getMinDamage() const { return m_iMinDamage; };
+	int		getMaxDamage() const { return m_iMaxDamage; };
+	int		getTotalDamage() const { return m_iTotalDamage; };
+	int		getTotalAttacks() const { return m_iTotalAttacks; };
 
 	void    clear(void);
 	void	addMiss(int iMissReason);
 	void	addHit(int iDamage);
 
 private:
-	Player*	m_player;
+	const QString		m_displayString;
 
 	int 		m_iHits;
 	int			m_iMisses;
@@ -241,13 +245,18 @@ public slots:
 	void clearMob();
 	void clearOffense();
 	void clearDefense();
+	void clearPetDefense();
 	void clear(void);
+
+	void charmUpdate(const uint8_t* data);
+	void petDefenseComboboxSelectionChanged(const QString& selected);
 
 private:
 
 	void initUI();
 	QWidget* initOffenseWidget();
 	QWidget* initDefenseWidget();
+	QWidget* initPetDefenseWidget();
 	QWidget* initMobWidget();
 
 	void addNonMeleeOffenseRecord(const QString& iTargetName, const int iDamage);
@@ -255,10 +264,12 @@ private:
 	void addOffenseRecord(int iType, int iDamage, int iSpell);
 	void addPetOffenseRecord(int petID, const QString& petName, int iType, int iDamage, int iSpell);
 	void addDefenseRecord(int iDamage);
+	void addPetDefenseRecord(const Spawn* s, int iDamage);
 	void addMobRecord(int iTargetID, int iTargetPetOwnerID, int iSourceID, int iSourcePetOwnerID, int iDamage, QString tName, QString sName);
 
 	void updateOffense();
 	void updateDefense();
+	void updatePetDefense();
 	void updateMob();
 	void updateDPS(int iDamage);
 	void updatePetDPS(int iDamage);
@@ -267,16 +278,20 @@ private:
 
 private:
 	Player*	m_player;
+	bool	m_autoupdate_pet_defense_selection;
 
 	QWidget* 	m_widget_offense;
 	QWidget* 	m_widget_defense;
+	QWidget* 	m_widget_pet_defense;
 	QWidget*	m_widget_mob;
 
 	QTabWidget*     m_tab;
 	QVBoxLayout*	m_layout_offense;
 	QVBoxLayout*	m_layout_defense;
-	QHBoxLayout*	m_layout_defense_top_third;
 	QVBoxLayout*	m_layout_mob;
+	QVBoxLayout*	m_layout_pet_defense;
+
+    QComboBox* m_combobox_pet_defense;
 
 	SEQListView* 	m_listview_offense;
 	SEQListView* 	m_listview_mob;
@@ -326,6 +341,24 @@ private:
 	//QLabel*		m_label_defense_summary_ratio;
 	QLabel*		m_label_defense_summary_totaldamage;
 
+	QLabel*		m_label_pet_defense_avoid_misses;
+	QLabel*		m_label_pet_defense_avoid_block;
+	QLabel*		m_label_pet_defense_avoid_parry;
+	QLabel*		m_label_pet_defense_avoid_riposte;
+	QLabel*		m_label_pet_defense_avoid_dodge;
+	QLabel*		m_label_pet_defense_avoid_total;
+	QLabel*		m_label_pet_defense_prevented_invulnerables;
+	QLabel*		m_label_pet_defense_prevented_shield_absorb;
+	QLabel*		m_label_pet_defense_prevented_total;
+	QLabel*		m_label_pet_defense_mitigate_avghit;
+	QLabel*		m_label_pet_defense_mitigate_minhit;
+	QLabel*		m_label_pet_defense_mitigate_maxhit;
+	QLabel*		m_label_pet_defense_summary_mobhits;
+	QLabel*		m_label_pet_defense_summary_mobattacks;
+	QLabel*		m_label_pet_defense_summary_percentavoided;
+	QLabel*		m_label_pet_defense_summary_percentprevented;
+	QLabel*		m_label_pet_defense_summary_totaldamage;
+
 	QLabel*		m_label_mob_totalmobs;
 
 	QLabel*		m_label_mob_avgdps;
@@ -347,6 +380,8 @@ private:
 	QList<PetOffenseRecord> m_pet_offense_list;
 	NonMeleeOffenseRecord *m_nonmelee_offense_record;
 	CombatDefenseRecord *m_combat_defense_record;
+	QList<CombatDefenseRecord> m_combat_pet_defense_list;
+	const CombatDefenseRecord *m_combat_pet_defense_current_record;
 	QList<CombatMobRecord> m_combat_mob_list;
 
 	QMenuBar	*m_menu_bar;
