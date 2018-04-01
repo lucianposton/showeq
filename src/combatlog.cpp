@@ -419,6 +419,43 @@ void CombatMobRecord::addHit(int iTarget, int iSource, int iDamage)
     }
 }
 
+
+////////////////////////////////////////////
+//	CombatOtherRecord implementation
+////////////////////////////////////////////
+CombatOtherRecord::CombatOtherRecord(
+        int iTargetID, int iSourceID,
+        const QString& tName, const QString& sName) :
+    m_iTargetID(iTargetID),
+    m_iSourceID(iSourceID),
+    m_iTargetName(tName),
+    m_iSourceName(sName),
+    m_iStartTime(0),
+    m_iLastTime(0),
+    m_dDPS(0.0),
+    m_iDamageTotal(0),
+    m_time(0)
+{
+}
+
+void CombatOtherRecord::addHit(int iDamage)
+{
+    m_time = time(0);
+    m_iLastTime = mTime();
+    if (0 == m_iStartTime)
+        m_iStartTime = m_iLastTime;
+
+    if (iDamage > 0)
+        m_iDamageTotal += iDamage;
+
+    const int iTimeElapsed = (m_iLastTime - m_iStartTime) / 1000;
+    if (iTimeElapsed > 0)
+    {
+        m_dDPS = (double)m_iDamageTotal / (double)iTimeElapsed;
+    }
+}
+
+
 ////////////////////////////////////////////
 //	CombatWindow implementation
 ////////////////////////////////////////////
@@ -475,6 +512,7 @@ CombatWindow::CombatWindow(Player* player,
 	m_combat_pet_defense_current_record = NULL;
 	m_combat_pet_defense_list.setAutoDelete(true);
 	m_combat_mob_list.setAutoDelete(true);
+	m_combat_other_list.setAutoDelete(true);
 
 	initUI();
 }
@@ -504,12 +542,16 @@ void CombatWindow::initUI()
 	m_widget_mob = initMobWidget();
 	m_tab->addTab(m_widget_mob, "&Mobs");
 
+	m_widget_other = initOtherWidget();
+	m_tab->addTab(m_widget_other, "O&thers");
+
 	m_clear_menu = new QPopupMenu(this);
 	m_clear_menu->insertItem("Clear All", this, SLOT(clear()));
 	m_clear_menu->insertItem("Clear Offense Stats", this, SLOT(clearOffense()));
 	m_clear_menu->insertItem("Clear Defense Stats", this, SLOT(clearDefense()));
 	m_clear_menu->insertItem("Clear Pet Defense Stats", this, SLOT(clearPetDefense()));
 	m_clear_menu->insertItem("Clear Mob Stats", this, SLOT(clearMob()));
+	m_clear_menu->insertItem("Clear Other Stats", this, SLOT(clearOther()));
 
 	m_menu_bar->insertItem("&Clear", m_clear_menu);
 
@@ -517,6 +559,7 @@ void CombatWindow::initUI()
 	updateDefense();
 	updatePetDefense();
 	updateMob();
+	updateOther();
 
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::initUI: finished...");
@@ -1040,12 +1083,62 @@ QWidget* CombatWindow::initMobWidget()
 	return pWidget;
 }
 
+QWidget* CombatWindow::initOtherWidget()
+{
+    QWidget *pWidget = new QWidget(m_tab);
+
+    m_layout_other = new QVBoxLayout(pWidget);
+
+    QGroupBox *listGBox = new QVGroupBox(pWidget);
+    m_layout_other->addWidget(listGBox);
+
+    m_listview_other = new SEQListView(preferenceName()+"_OtherListView", listGBox);
+    m_listview_other->addColumn("Time");
+    m_listview_other->setColumnAlignment(0, Qt::AlignLeft);
+    m_listview_other->addColumn("Name");
+    m_listview_other->setColumnAlignment(1, Qt::AlignLeft);
+    m_listview_other->addColumn("ID");
+    m_listview_other->setColumnAlignment(2, Qt::AlignRight);
+    m_listview_other->addColumn("Defender Name");
+    m_listview_other->setColumnAlignment(3, Qt::AlignLeft);
+    m_listview_other->addColumn("Defender ID");
+    m_listview_other->setColumnAlignment(4, Qt::AlignRight);
+    m_listview_other->addColumn("Duration");
+    m_listview_other->setColumnAlignment(5, Qt::AlignRight);
+    m_listview_other->addColumn("Damage");
+    m_listview_other->setColumnAlignment(6, Qt::AlignRight);
+    m_listview_other->addColumn("DPS");
+    m_listview_other->setColumnAlignment(7, Qt::AlignRight);
+
+    m_listview_other->restoreColumns();
+
+    QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
+    m_layout_other->addWidget(summaryGBox);
+
+    QGrid *summaryGrid = new QGrid(5, summaryGBox);
+
+    new QLabel("Total Mobs:", summaryGrid);
+    m_label_other_totalmobs = new QLabel(summaryGrid);
+    m_label_other_totalmobs->setAlignment(Qt::AlignRight);
+    new QLabel("", summaryGrid);
+    new QLabel("Avg DPS:", summaryGrid);
+    m_label_other_avgdps = new QLabel(summaryGrid);
+    m_label_other_avgdps->setAlignment(Qt::AlignRight);
+
+    ((QGridLayout *)summaryGrid->layout())->setColStretch(2, 1);
+    ((QGridLayout *)summaryGrid->layout())->setColStretch(5, 1);
+    summaryGrid->layout()->setSpacing(5);
+
+    return pWidget;
+}
+
 void CombatWindow::savePrefs()
 {
   // save the SEQWindow's prefs
   SEQWindow::savePrefs();
 
   // save the SEQListViews' prefs
+  m_listview_other->savePrefs();
   m_listview_mob->savePrefs();
   m_listview_offense->savePrefs();
 }
@@ -1643,6 +1736,48 @@ void CombatWindow::updateMob()
 	m_label_mob_avgpetmobdps->setText(doubleToQString(dAvgPetMobDPS, 1));
 }
 
+void CombatWindow::updateOther()
+{
+    int iTotalMobs = 0;
+    double dAvgDPS = 0.0;
+    double dDPSSum = 0.0;
+
+    m_listview_other->clear();
+    CombatOtherRecord *pRecord;
+    for(pRecord = m_combat_other_list.first(); pRecord != 0;
+            pRecord = m_combat_other_list.next())
+    {
+        const int iDuration = pRecord->getDuration() / 1000;
+        const int iDamageTotal = pRecord->getDamageTotal();
+        const double dDPS = pRecord->getDPS();
+
+        char s_time[64];
+        time_t timev = pRecord->getTime();
+        strftime(s_time, 64, "%m/%d %H:%M:%S", localtime(&timev));
+        QString s_sourcename = pRecord->getSourceName();
+        QString s_targetname = pRecord->getTargetName();
+        QString s_sourceid = QString::number(pRecord->getSourceID());
+        QString s_targetid = QString::number(pRecord->getTargetID());
+        QString s_duration = QString::number(iDuration);
+        QString s_damagetotal = QString::number(iDamageTotal);
+        QString s_dps = doubleToQString(dDPS, 1);
+
+        QListViewItem *pItem = new QListViewItem(m_listview_other,
+                s_time, s_sourcename, s_sourceid, s_targetname, s_targetid,
+                s_duration, s_damagetotal, s_dps);
+
+        m_listview_other->insertItem(pItem);
+
+        iTotalMobs++;
+        dDPSSum += dDPS;
+    }
+
+    dAvgDPS = dDPSSum / (double)iTotalMobs;
+
+    m_label_other_totalmobs->setText(QString::number(iTotalMobs));
+    m_label_other_avgdps->setText(doubleToQString(dAvgDPS, 1));
+}
+
 void CombatWindow::addNonMeleeHit(const QString& iTargetName, const int iDamage)
 {
 #ifdef DEBUGCOMBAT
@@ -1719,12 +1854,12 @@ void CombatWindow::addDotOffenseRecord(const QString& iSpellName, const int iDam
 void CombatWindow::addCombatRecord(
         int iTargetID, const Spawn* target,
         int iSourceID, const Spawn* source,
-        int iType, int iSpell, int iDamage)
+        int iType, int iSpell, int iDamage, bool isKillingBlow)
 {
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::addCombatRecord starting...");
-	seqDebug("target=%d, source=%d, type=%d, spell=%d, damage=%d",
-			iTargetID, iSourceID, iType, iSpell, iDamage);
+	seqDebug("target=%d, source=%d, type=%d, spell=%d, damage=%d, isKillingBlow=%d",
+			iTargetID, iSourceID, iType, iSpell, iDamage, isKillingBlow);
 #endif
 
 	const int iPlayerID = m_player->id();
@@ -1861,6 +1996,19 @@ void CombatWindow::addCombatRecord(
 			updatePetDPS(iDamage);
 		else if(isDamageShield(iType))
 			updatePetDPS(-iDamage);
+	}
+	else if (iTargetID != iPlayerID && iSourceID != iPlayerID)
+	{
+		// Damage shields show up as negative damage
+		if (isDamageShield(iType))
+		{
+			addOtherRecord(iTargetID, iSourceID, -iDamage, tName, sName, isKillingBlow);
+			updateOther();
+		}
+		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
+			addOtherRecord(iTargetID, iSourceID, iDamage, tName, sName, isKillingBlow);
+			updateOther();
+		}
 	}
 
 #ifdef DEBUGCOMBAT
@@ -2066,6 +2214,37 @@ void CombatWindow::addMobRecord(int iTargetID, int iTargetPetOwnerID,
 #endif
 }
 
+void CombatWindow::addOtherRecord(int iTargetID, int iSourceID,
+        int iDamage, const QString& tName, const QString& sName,
+        bool isKillingBlow)
+{
+    bool bFoundRecord = false;
+    CombatOtherRecord *pRecord;
+    for (pRecord = m_combat_other_list.first(); pRecord != 0;
+            pRecord = m_combat_other_list.next())
+    {
+        if(pRecord->getSourceID() == iSourceID
+                && pRecord->getTargetID() == iTargetID
+                && pRecord->getSourceName() == sName
+                && pRecord->getTargetName() == tName)
+        {
+            bFoundRecord = true;
+            break;
+        }
+    }
+
+    if (!bFoundRecord)
+    {
+        if (isKillingBlow)
+            return;
+
+        pRecord = new CombatOtherRecord(iTargetID, iSourceID, tName, sName);
+        m_combat_other_list.append(pRecord);
+    }
+
+    pRecord->addHit(iDamage);
+}
+
 void CombatWindow::updateDPS(int iDamage)
 {
 
@@ -2224,6 +2403,12 @@ void CombatWindow::resetDPS()
 	updatePetMobDPS(0);
 }
 
+void CombatWindow::clearOther()
+{
+    m_combat_other_list.clear();
+    updateOther();
+}
+
 void CombatWindow::clearMob()
 {
     m_combat_mob_list.clear();
@@ -2255,6 +2440,8 @@ void CombatWindow::clearPetDefense()
 
 void CombatWindow::clear(void)
 {
+  m_combat_other_list.clear();
+  updateOther();
   m_combat_mob_list.clear();
   updateMob();
   m_combat_offense_list.clear();

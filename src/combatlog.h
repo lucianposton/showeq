@@ -221,6 +221,44 @@ private:
 	time_t			m_time;
 };
 
+
+////////////////////////////////////////////
+//  CombatOtherRecord definition
+////////////////////////////////////////////
+class CombatOtherRecord
+{
+public:
+    CombatOtherRecord(
+            int iTargetID, int iSourceID,
+            const QString& tName, const QString& sName);
+
+    int getSourceID() const { return m_iSourceID; };
+    int getTargetID() const { return m_iTargetID; };
+    QString getSourceName() const { return m_iSourceName; };
+    QString getTargetName() const { return m_iTargetName; };
+
+    int getDuration() const { return m_iLastTime - m_iStartTime; };
+    int getDamageTotal() const { return m_iDamageTotal; };
+    double getDPS() const { return m_dDPS; };
+
+    time_t getTime() const { return m_time; };
+
+    void addHit(int iDamage);
+
+private:
+    const int m_iTargetID;
+    const int m_iSourceID;
+    const QString m_iTargetName;
+    const QString m_iSourceName;
+
+    int m_iStartTime;
+    int m_iLastTime;
+    double m_dDPS;
+    int m_iDamageTotal;
+
+    time_t m_time;
+};
+
 ////////////////////////////////////////////
 //  CombatWindow definition
 ////////////////////////////////////////////
@@ -240,8 +278,9 @@ public slots:
 	void addNonMeleeHit(const QString& iTargetName, int iDamage);
 	void addDotTick(const QString& iTargetName,
 			const QString& iSpellName, int iDamage);
-	void addCombatRecord(int iTargetID, const Spawn* target, int iSourceID, const Spawn* source, int iType, int iSpell, int iDamage);
+	void addCombatRecord(int iTargetID, const Spawn* target, int iSourceID, const Spawn* source, int iType, int iSpell, int iDamage, bool isKillingBlow);
 	void resetDPS();
+	void clearOther();
 	void clearMob();
 	void clearOffense();
 	void clearDefense();
@@ -258,6 +297,7 @@ private:
 	QWidget* initDefenseWidget();
 	QWidget* initPetDefenseWidget();
 	QWidget* initMobWidget();
+	QWidget* initOtherWidget();
 
 	void addNonMeleeOffenseRecord(const QString& iTargetName, const int iDamage);
 	void addDotOffenseRecord(const QString& iSpellName, int iDamage);
@@ -266,11 +306,14 @@ private:
 	void addDefenseRecord(int iDamage);
 	void addPetDefenseRecord(const Spawn* s, int iDamage);
 	void addMobRecord(int iTargetID, int iTargetPetOwnerID, int iSourceID, int iSourcePetOwnerID, int iDamage, const QString& tName, const QString& sName);
+	void addOtherRecord(int iTargetID, int iSourceID, int iDamage,
+			const QString& tName, const QString& sName, bool isKillingBlow);
 
 	void updateOffense();
 	void updateDefense();
 	void updatePetDefense();
 	void updateMob();
+	void updateOther();
 	void updateDPS(int iDamage);
 	void updatePetDPS(int iDamage);
 	void updateMobDPS(int iDamage);
@@ -284,17 +327,20 @@ private:
 	QWidget* 	m_widget_defense;
 	QWidget* 	m_widget_pet_defense;
 	QWidget*	m_widget_mob;
+	QWidget*	m_widget_other;
 
 	QTabWidget*     m_tab;
 	QVBoxLayout*	m_layout_offense;
 	QVBoxLayout*	m_layout_defense;
 	QVBoxLayout*	m_layout_mob;
+	QVBoxLayout*	m_layout_other;
 	QVBoxLayout*	m_layout_pet_defense;
 
     QComboBox* m_combobox_pet_defense;
 
 	SEQListView* 	m_listview_offense;
 	SEQListView* 	m_listview_mob;
+	SEQListView* 	m_listview_other;
 
 	QLabel* 	m_label_offense_totaldamage;
 	QLabel* 	m_label_offense_percentpettotaldamage;
@@ -375,6 +421,10 @@ private:
 	QLabel*		m_label_mob_lastmobdps;
 	QLabel*		m_label_mob_lastpetmobdps;
 
+	QLabel*		m_label_other_totalmobs;
+
+	QLabel*		m_label_other_avgdps;
+
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	QList<DotOffenseRecord> m_dot_offense_list;
 	QList<PetOffenseRecord> m_pet_offense_list;
@@ -383,6 +433,7 @@ private:
 	QList<CombatDefenseRecord> m_combat_pet_defense_list;
 	const CombatDefenseRecord *m_combat_pet_defense_current_record;
 	QList<CombatMobRecord> m_combat_mob_list;
+	QList<CombatOtherRecord> m_combat_other_list;
 
 	QMenuBar	*m_menu_bar;
 	QPopupMenu	*m_clear_menu;

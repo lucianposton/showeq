@@ -2241,8 +2241,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	      m_combatWindow, SLOT(addNonMeleeHit(const QString&, int)));
      connect (this, SIGNAL(dotTickSignal(const QString&, const QString&, int)),
 	      m_combatWindow, SLOT(addDotTick(const QString&, const QString&, int)));
-     connect (this, SIGNAL(combatSignal(int, const Spawn*, int, const Spawn*, int, int, int)),
-	      m_combatWindow, SLOT(addCombatRecord(int, const Spawn*, int, const Spawn*, int, int, int)));
+     connect (this, SIGNAL(combatSignal(int, const Spawn*, int, const Spawn*, int, int, int, bool)),
+	      m_combatWindow, SLOT(addCombatRecord(int, const Spawn*, int, const Spawn*, int, int, int, bool)));
      m_packet->connect2("OP_Consider", SP_Zone, DIR_Client,
              "considerStruct", SZC_Match,
              m_combatWindow, SLOT(resetDPS()));
@@ -4620,7 +4620,8 @@ void EQInterface::combatDamageMessage(const uint8_t* data)
   emit combatSignal(
           action2->target, target,
           action2->source, source,
-          action2->type, action2->spell, action2->damage);
+          action2->type, action2->spell, action2->damage,
+          false);
 }
 
 void EQInterface::formattedMessage(const uint8_t* data, size_t len, uint8_t dir)
@@ -4721,7 +4722,8 @@ void EQInterface::combatKillSpawn(const uint8_t* data)
     emit combatSignal(
             deadspawn->spawnId, target,
             deadspawn->killerId, source,
-            deadspawn->type, deadspawn->spellId, deadspawn->damage);
+            deadspawn->type, deadspawn->spellId, deadspawn->damage,
+            true);
 }
 
 void EQInterface::updatedDateTime(const QDateTime& dt)
