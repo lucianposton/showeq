@@ -265,7 +265,7 @@ private:
 	void addPetOffenseRecord(int petID, const QString& petName, int iType, int iDamage, int iSpell);
 	void addDefenseRecord(int iDamage);
 	void addPetDefenseRecord(const Spawn* s, int iDamage);
-	void addMobRecord(int iTargetID, int iTargetPetOwnerID, int iSourceID, int iSourcePetOwnerID, int iDamage, QString tName, QString sName);
+	void addMobRecord(int iTargetID, int iTargetPetOwnerID, int iSourceID, int iSourcePetOwnerID, int iDamage, const QString& tName, const QString& sName);
 
 	void updateOffense();
 	void updateDefense();

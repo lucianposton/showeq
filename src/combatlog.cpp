@@ -2014,7 +2014,7 @@ void CombatWindow::addPetDefenseRecord(const Spawn* s, int iDamage)
 
 void CombatWindow::addMobRecord(int iTargetID, int iTargetPetOwnerID,
         int iSourceID, int iSourcePetOwnerID,
-        int iDamage, QString tName, QString sName)
+        int iDamage, const QString& tName, const QString& sName)
 {
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::addMobRecord starting...");
@@ -2065,7 +2065,6 @@ void CombatWindow::addMobRecord(int iTargetID, int iTargetPetOwnerID,
 	seqDebug("CombatWindow::addMobRecord finished...");
 #endif
 }
-
 
 void CombatWindow::updateDPS(int iDamage)
 {
