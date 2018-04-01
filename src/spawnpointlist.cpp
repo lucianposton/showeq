@@ -76,41 +76,6 @@ int SpawnPointListItem::compare(QListViewItem* i, int col, bool ascending) const
         return key(col, ascending).localeAwareCompare(i->key(col, ascending));
     }
 
-#if 0
-    // Proper sorting of remaining time, if needed. Padding with spaces seems
-    // sufficient for now though.
-    const QString mykey = key(col, ascending);
-    const QString ikey = i->key(col, ascending);
-    const QString seconds_str = mykey.section(':',1,1);
-    const QString iseconds_str = ikey.section(':',1,1);
-    if (!seconds_str.isEmpty() && !iseconds_str.isEmpty())
-    {
-        bool ok;
-        const int mins = mykey.section(':',0,0).toInt(&ok);
-        if (!ok)
-            seqWarn("SpawnPointListItem::compare(%s,%s): mins failed",
-                    (const char*)mykey, (const char*)ikey);
-        const int imins = ikey.section(':',0,0).toInt(&ok);
-        if (!ok)
-            seqWarn("SpawnPointListItem::compare(%s,%s): imins failed",
-                    (const char*)mykey, (const char*)ikey);
-        if (mins != imins)
-        {
-            return mins - imins;
-        }
-
-        const int seconds = seconds_str.toInt(&ok);
-        if (!ok)
-            seqWarn("SpawnPointListItem::compare(%s,%s): seconds failed",
-                    (const char*)mykey, (const char*)ikey);
-        const int iseconds = iseconds_str.toInt(&ok);
-        if (!ok)
-            seqWarn("SpawnPointListItem::compare(%s,%s): iseconds failed",
-                    (const char*)mykey, (const char*)ikey);
-        return seconds - iseconds;
-    }
-#endif
-
     // plain unicode comparison keeps "   now" sorted before remaining time
     return key(col, ascending).compare(i->key(col, ascending));
 }

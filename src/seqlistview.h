@@ -56,4 +56,35 @@ class SEQListView : public QListView
    bool m_sortIncreasing;
 };
 
+typedef int(*SEQListViewItemComparator)(const QString&, const QString&);
+
+int SEQListViewItemCompareInt(const QString&, const QString&);
+int SEQListViewItemCompareDouble(const QString&, const QString&);
+int SEQListViewItemCompareRemainingTime(const QString&, const QString&);
+
+template<int S=12>
+class SEQListViewItem : public QListViewItem
+{
+public:
+    SEQListViewItem(
+            QListView* parent,
+            const QString& l1=QString::null,
+            const QString& l2=QString::null,
+            const QString& l3=QString::null,
+            const QString& l4=QString::null,
+            const QString& l5=QString::null,
+            const QString& l6=QString::null,
+            const QString& l7=QString::null,
+            const QString& l8=QString::null);
+    virtual ~SEQListViewItem();
+
+    virtual int compare(QListViewItem*, int, bool) const;
+    void setColComparator(int, SEQListViewItemComparator);
+
+protected:
+    // No std::array in c++98...
+    // Using std::pair instead of std::optional, since using c++98
+    std::pair<bool,SEQListViewItemComparator> m_comparators[S];
+};
+
 #endif // SEQLISTVIEW_H

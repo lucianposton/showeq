@@ -16,6 +16,7 @@
 #include <qsizepolicy.h>
 
 #include "seqlistview.h"
+#include "diagnosticmessages.h"
 #include "main.h"
 
 SEQListView::SEQListView(const QString prefName, 
@@ -223,5 +224,157 @@ void SEQListView::setColumnVisible(int column, bool visible)
   // trigger an update, otherwise things may look messy
   triggerUpdate();
 }
+
+template<int S>
+SEQListViewItem<S>::SEQListViewItem(
+        QListView* parent,
+        const QString& l1,
+        const QString& l2,
+        const QString& l3,
+        const QString& l4,
+        const QString& l5,
+        const QString& l6,
+        const QString& l7,
+        const QString& l8)
+    : QListViewItem(parent, l1, l2, l3, l4, l5, l6, l7, l8)
+{
+    if (S < 1)
+        seqWarn("SEQListViewItem<S=%d> template parameter should be at least 1.", S);
+}
+
+template<int S>
+SEQListViewItem<S>::~SEQListViewItem()
+{
+}
+
+template<int S>
+int SEQListViewItem<S>::compare(QListViewItem* rhs, int col, bool ascending) const
+{
+    if (col < 0 || col >= S || !m_comparators[col].first)
+    {
+        return QListViewItem::compare(rhs, col, ascending);
+    }
+
+    return m_comparators[col].second(key(col, ascending), rhs->key(col, ascending));
+}
+
+template<int S>
+void SEQListViewItem<S>::setColComparator(int col, SEQListViewItemComparator comparator)
+{
+    if (col < 0)
+    {
+        seqWarn("Failed to set comparator. col=%d is less than 0", col);
+        return;
+    }
+    const int num_comparators = sizeof(m_comparators)/sizeof(m_comparators[0]);
+    if (col > num_comparators)
+    {
+        seqWarn("Failed to set comparator. col=%d is greater than size=%d",
+                col, num_comparators);
+        return;
+    }
+
+    m_comparators[col] = std::make_pair(true, comparator);
+}
+
+int SEQListViewItemCompareInt(const QString& lhs, const QString& rhs)
+{
+    const bool lhs_is_empty = lhs.isEmpty();
+    const bool rhs_is_empty = rhs.isEmpty();
+    if (lhs_is_empty && rhs_is_empty)
+        return 0;
+    else if (lhs_is_empty)
+        return -1;
+    else if (rhs_is_empty)
+        return 1;
+
+    bool ok;
+    const int lhs_int = lhs.toInt(&ok);
+    if (!ok)
+        seqWarn("SEQListViewItemCompareInt(%s,%s): lhs failed",
+                (const char*)lhs, (const char*)rhs);
+    const int rhs_int = rhs.toInt(&ok);
+    if (!ok)
+        seqWarn("SEQListViewItemCompareInt(%s,%s): rhs failed",
+                (const char*)lhs, (const char*)rhs);
+    return lhs_int - rhs_int;
+}
+
+int SEQListViewItemCompareDouble(const QString& lhs, const QString& rhs)
+{
+    const bool lhs_is_empty = lhs.isEmpty();
+    const bool rhs_is_empty = rhs.isEmpty();
+    if (lhs_is_empty && rhs_is_empty)
+        return 0;
+    else if (lhs_is_empty)
+        return -1;
+    else if (rhs_is_empty)
+        return 1;
+
+    bool ok;
+    const double lhs_double = lhs.toDouble(&ok);
+    if (!ok)
+        seqWarn("SEQListViewItemCompareDouble(%s,%s): lhs failed",
+                (const char*)lhs, (const char*)rhs);
+    const double rhs_double = rhs.toDouble(&ok);
+    if (!ok)
+        seqWarn("SEQListViewItemCompareDouble(%s,%s): rhs failed",
+                (const char*)lhs, (const char*)rhs);
+    if (lhs_double == rhs_double)
+        return 0;
+    else if (lhs_double < rhs_double)
+        return -1;
+    else if (lhs_double > rhs_double)
+        return 1;
+    else // if (lhs_double != rhs_double) // e.g. comparing nan to nan
+        // Return 1 to sort nan's after everything else
+        return 1;
+}
+
+int SEQListViewItemCompareRemainingTime(const QString& lhs, const QString& rhs)
+{
+    const bool lhs_is_empty = lhs.isEmpty();
+    const bool rhs_is_empty = rhs.isEmpty();
+    if (lhs_is_empty && rhs_is_empty)
+        return 0;
+    else if (lhs_is_empty)
+        return -1;
+    else if (rhs_is_empty)
+        return 1;
+
+    // Sorts "\d+:\d{2}"
+    const QString seconds_str = lhs.section(':',1,1);
+    const QString iseconds_str = rhs.section(':',1,1);
+    if (!seconds_str.isEmpty() && !iseconds_str.isEmpty())
+    {
+        bool ok;
+        const int mins = lhs.section(':',0,0).toInt(&ok);
+        if (!ok)
+            seqWarn("SEQListViewItemCompareRemainingTime(%s,%s): mins failed",
+                    (const char*)lhs, (const char*)rhs);
+        const int imins = rhs.section(':',0,0).toInt(&ok);
+        if (!ok)
+            seqWarn("SEQListViewItemCompareRemainingTime(%s,%s): imins failed",
+                    (const char*)lhs, (const char*)rhs);
+        if (mins != imins)
+            return mins - imins;
+
+        const int seconds = seconds_str.toInt(&ok);
+        if (!ok)
+            seqWarn("SEQListViewItemCompareRemainingTime(%s,%s): seconds failed",
+                    (const char*)lhs, (const char*)rhs);
+        const int iseconds = iseconds_str.toInt(&ok);
+        if (!ok)
+            seqWarn("SEQListViewItemCompareRemainingTime(%s,%s): iseconds failed",
+                    (const char*)lhs, (const char*)rhs);
+        return seconds - iseconds;
+    }
+
+    // plain unicode comparison keeps "   now" sorted before remaining time
+    return lhs.compare(rhs);
+}
+
+// Forward declare required sizes
+template class SEQListViewItem<12>;
 
 #include "seqlistview.moc"
