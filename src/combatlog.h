@@ -192,10 +192,10 @@ public:
 
 	time_t		getTime() { return m_time; };
 
-	double	getDPS();
-	double	getMobDPS();
-	double	getPetDPS();
-	double	getPetMobDPS();
+	double	getDPS() const { return m_dDPS; };
+	double	getMobDPS() const { return m_dMobDPS; };
+	double	getPetDPS() const { return m_dPetDPS; };
+	double	getPetMobDPS() const { return m_dPetMobDPS; };
 
 	void	addHit(int iTarget, int iSource, int iDamage);
 	

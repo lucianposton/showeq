@@ -348,55 +348,6 @@ m_dPetDPS(0.0),
 m_iPetDamageTaken(0),
 m_dPetMobDPS(0.0)
 {
-
-}
-
-double CombatMobRecord::getDPS()
-{
-	int iTimeElapsed = (m_iLastTime - m_iStartTime) / 1000;
-
-	if(iTimeElapsed > 0)
-	{
-		m_dDPS = (double)m_iDamageGiven / (double)iTimeElapsed;
-	}
-
-	return m_dDPS;
-}
-
-double CombatMobRecord::getMobDPS()
-{
-	int iTimeElapsed = (m_iLastTime - m_iStartTime) / 1000;
-
-	if(iTimeElapsed > 0)
-	{
-		m_dMobDPS = (double)m_iDamageTaken / (double)iTimeElapsed;
-	}
-
-	return m_dMobDPS;
-}
-
-double CombatMobRecord::getPetDPS()
-{
-    const int iTimeElapsed = (m_iPetLastTime - m_iPetStartTime) / 1000;
-
-    if (iTimeElapsed > 0)
-    {
-        m_dPetDPS = (double)m_iPetDamageGiven / (double)iTimeElapsed;
-    }
-
-    return m_dPetDPS;
-}
-
-double CombatMobRecord::getPetMobDPS()
-{
-    const int iTimeElapsed = (m_iPetLastTime - m_iPetStartTime) / 1000;
-
-    if (iTimeElapsed > 0)
-    {
-        m_dPetMobDPS = (double)m_iPetDamageTaken / (double)iTimeElapsed;
-    }
-
-    return m_dPetMobDPS;
 }
 
 int CombatMobRecord::getDuration()
@@ -440,18 +391,30 @@ void CombatMobRecord::addHit(int iTarget, int iSource, int iDamage)
         if (hitInvolvesPlayer && m_iID == iTarget)
         {
             m_iDamageGiven += iDamage;
+            const int iTimeElapsed = (m_iLastTime - m_iStartTime) / 1000;
+            if (iTimeElapsed > 0)
+                m_dDPS = (double)m_iDamageGiven / (double)iTimeElapsed;
         }
         else if (hitInvolvesPlayer && m_iID == iSource)
         {
             m_iDamageTaken += iDamage;
+            const int iTimeElapsed = (m_iLastTime - m_iStartTime) / 1000;
+            if (iTimeElapsed > 0)
+                m_dMobDPS = (double)m_iDamageTaken / (double)iTimeElapsed;
         }
         else if (m_iID == iTarget) // Assume pet
         {
             m_iPetDamageGiven += iDamage;
+            const int iTimeElapsed = (m_iPetLastTime - m_iPetStartTime) / 1000;
+            if (iTimeElapsed > 0)
+                m_dPetDPS = (double)m_iPetDamageGiven / (double)iTimeElapsed;
         }
         else // Assume pet
         {
             m_iPetDamageTaken += iDamage;
+            const int iTimeElapsed = (m_iPetLastTime - m_iPetStartTime) / 1000;
+            if (iTimeElapsed > 0)
+                m_dPetMobDPS = (double)m_iPetDamageTaken / (double)iTimeElapsed;
         }
     }
 }
