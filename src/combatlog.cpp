@@ -993,7 +993,7 @@ QWidget* CombatWindow::initMobWidget()
 	m_listview_mob->addColumn("Name");
 	m_listview_mob->setColumnAlignment(1, Qt::AlignLeft);
 	m_listview_mob->addColumn("ID");
-	m_listview_mob->setColumnAlignment(2, Qt::AlignRight);
+	m_listview_mob->setColumnAlignment(2, Qt::AlignHCenter);
 	m_listview_mob->addColumn("Duration");
 	m_listview_mob->setColumnAlignment(3, Qt::AlignRight);
 	m_listview_mob->addColumn("Damage to");
@@ -1098,11 +1098,11 @@ QWidget* CombatWindow::initOtherWidget()
     m_listview_other->addColumn("Name");
     m_listview_other->setColumnAlignment(1, Qt::AlignLeft);
     m_listview_other->addColumn("ID");
-    m_listview_other->setColumnAlignment(2, Qt::AlignRight);
+    m_listview_other->setColumnAlignment(2, Qt::AlignHCenter);
     m_listview_other->addColumn("Defender Name");
     m_listview_other->setColumnAlignment(3, Qt::AlignLeft);
     m_listview_other->addColumn("Defender ID");
-    m_listview_other->setColumnAlignment(4, Qt::AlignRight);
+    m_listview_other->setColumnAlignment(4, Qt::AlignHCenter);
     m_listview_other->addColumn("Duration");
     m_listview_other->setColumnAlignment(5, Qt::AlignRight);
     m_listview_other->addColumn("Damage");
