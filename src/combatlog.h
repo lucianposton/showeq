@@ -24,6 +24,7 @@
 # include <fcntl.h>
 # include <stdio.h>
 # include <cmath>
+# include <limits>
 
 #include "seqwindow.h"
 #include "seqlistview.h"
@@ -66,7 +67,7 @@ public:
 	int		getTotalDamage() { return m_iTotalDamage; };
 	double	getAverage() const { return m_dAverage; };
 	double	getStandardDeviation() const
-		{ return m_iHits < 2 ? 0.0 : std::sqrt(m_dM2/(m_iHits-1)); };
+		{ return m_iHits < 2 ? std::numeric_limits<double>::quiet_NaN() : std::sqrt(m_dM2/(m_iHits-1)); };
 
 	void	addMiss(int iMissReason) { m_iMisses++; };
 	void	addHit(int iDamage);
@@ -150,7 +151,7 @@ public:
 	int		getMeleeMaxDamage() const { return m_iMeleeMaxDamage; };
 	double	getMeleeAverage() const { return m_dMeleeAverage; };
 	double	getMeleeStandardDeviation() const
-		{ return m_iMeleeHits < 2 ? 0.0 : std::sqrt(m_dMeleeM2/(m_iMeleeHits-1)); };
+		{ return m_iMeleeHits < 2 ? std::numeric_limits<double>::quiet_NaN() : std::sqrt(m_dMeleeM2/(m_iMeleeHits-1)); };
 
 	int		getRangedHits() const { return m_iRangedHits; };
 	int		getRangedTotalDamage() const { return m_iRangedTotalDamage; };
@@ -158,7 +159,7 @@ public:
 	int		getRangedMaxDamage() const { return m_iRangedMaxDamage; };
 	double	getRangedAverage() const { return m_dRangedAverage; };
 	double	getRangedStandardDeviation() const
-		{ return m_iRangedHits < 2 ? 0.0 : std::sqrt(m_dRangedM2/(m_iRangedHits-1)); };
+		{ return m_iRangedHits < 2 ? std::numeric_limits<double>::quiet_NaN() : std::sqrt(m_dRangedM2/(m_iRangedHits-1)); };
 
 	int		getSpecialHits() const { return m_iSpecialHits; };
 	int		getSpecialTotalDamage() const { return m_iSpecialTotalDamage; };
@@ -166,7 +167,7 @@ public:
 	int		getSpecialMaxDamage() const { return m_iSpecialMaxDamage; };
 	double	getSpecialAverage() const { return m_dSpecialAverage; };
 	double	getSpecialStandardDeviation() const
-		{ return m_iSpecialHits < 2 ? 0.0 : std::sqrt(m_dSpecialM2/(m_iSpecialHits-1)); };
+		{ return m_iSpecialHits < 2 ? std::numeric_limits<double>::quiet_NaN() : std::sqrt(m_dSpecialM2/(m_iSpecialHits-1)); };
 
 	int		getBackstabHits() const { return m_iBackstabHits; };
 	int		getBackstabTotalDamage() const { return m_iBackstabTotalDamage; };
@@ -174,7 +175,7 @@ public:
 	int		getBackstabMaxDamage() const { return m_iBackstabMaxDamage; };
 	double	getBackstabAverage() const { return m_dBackstabAverage; };
 	double	getBackstabStandardDeviation() const
-		{ return m_iBackstabHits < 2 ? 0.0 : std::sqrt(m_dBackstabM2/(m_iBackstabHits-1)); };
+		{ return m_iBackstabHits < 2 ? std::numeric_limits<double>::quiet_NaN() : std::sqrt(m_dBackstabM2/(m_iBackstabHits-1)); };
 
 	int		getMonkHits() const { return m_iMonkHits; };
 	int		getMonkTotalDamage() const { return m_iMonkTotalDamage; };
@@ -182,7 +183,7 @@ public:
 	int		getMonkMaxDamage() const { return m_iMonkMaxDamage; };
 	double	getMonkAverage() const { return m_dMonkAverage; };
 	double	getMonkStandardDeviation() const
-		{ return m_iMonkHits < 2 ? 0.0 : std::sqrt(m_dMonkM2/(m_iMonkHits-1)); };
+		{ return m_iMonkHits < 2 ? std::numeric_limits<double>::quiet_NaN() : std::sqrt(m_dMonkM2/(m_iMonkHits-1)); };
 
 	int		getNonmeleeHits() const { return m_iNonmeleeHits; };
 	int		getNonmeleeTotalDamage() const { return m_iNonmeleeTotalDamage; };
@@ -190,7 +191,7 @@ public:
 	int		getNonmeleeMaxDamage() const { return m_iNonmeleeMaxDamage; };
 	double	getNonmeleeAverage() const { return m_dNonmeleeAverage; };
 	double	getNonmeleeStandardDeviation() const
-		{ return m_iNonmeleeHits < 2 ? 0.0 : std::sqrt(m_dNonmeleeM2/(m_iNonmeleeHits-1)); };
+		{ return m_iNonmeleeHits < 2 ? std::numeric_limits<double>::quiet_NaN() : std::sqrt(m_dNonmeleeM2/(m_iNonmeleeHits-1)); };
 
 	int		getDamageShieldHits() const { return m_iDamageShieldHits; };
 	int		getDamageShieldTotalDamage() const { return m_iDamageShieldTotalDamage; };
@@ -198,7 +199,7 @@ public:
 	int		getDamageShieldMaxDamage() const { return m_iDamageShieldMaxDamage; };
 	double	getDamageShieldAverage() const { return m_dDamageShieldAverage; };
 	double	getDamageShieldStandardDeviation() const
-		{ return m_iDamageShieldHits < 2 ? 0.0 : std::sqrt(m_dDamageShieldM2/(m_iDamageShieldHits-1)); };
+		{ return m_iDamageShieldHits < 2 ? std::numeric_limits<double>::quiet_NaN() : std::sqrt(m_dDamageShieldM2/(m_iDamageShieldHits-1)); };
 
 	void    clear(void);
 	void	addMiss(int iMissReason);
