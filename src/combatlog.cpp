@@ -58,7 +58,10 @@ QString intToQString(int i)
 enum DamageCategory
 {
     DAMAGE_CATEGORY_MELEE,
-    DAMAGE_CATEGORY_MELEE_SPECIAL,
+    DAMAGE_CATEGORY_MELEE_RANGED,
+    DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC,
+    DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB,
+    DAMAGE_CATEGORY_MELEE_SPECIAL_MONK,
     DAMAGE_CATEGORY_NONMELEE,
     DAMAGE_CATEGORY_ENVIRONMENT,
     DAMAGE_CATEGORY_DAMAGE_SHIELD
@@ -78,17 +81,26 @@ static DamageCategory damageCategory(int iType)
                 return DAMAGE_CATEGORY_MELEE;
             }
         case 7:		// Archery
-        case 8:		// Backstab
+        case 51:	// Throwing
+            {
+                return DAMAGE_CATEGORY_MELEE_RANGED;
+            }
         case 10:	// Bash
+        case 30:	// Kick
+            {
+                return DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC;
+            }
+        case 8:		// Backstab
+            {
+                return DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB;
+            }
         case 21:	// Dragon Punch
         case 23:	// Eagle Strike
         case 26:	// Flying Kick
-        case 30:	// Kick
         case 38:	// Round Kick
-        case 51:	// Throwing
         case 52:	// Tiger Claw
             {
-                return DAMAGE_CATEGORY_MELEE_SPECIAL;
+                return DAMAGE_CATEGORY_MELEE_SPECIAL_MONK;
             }
         case 231:       // Non Melee Damage e.g. spells
             {
@@ -122,7 +134,11 @@ static bool isNonMeleeDamage(int iType, int iDamage)
 static bool isMelee(int iType)
 {
     const DamageCategory c = damageCategory(iType);
-    return c == DAMAGE_CATEGORY_MELEE || c == DAMAGE_CATEGORY_MELEE_SPECIAL;
+    return c == DAMAGE_CATEGORY_MELEE
+        || c == DAMAGE_CATEGORY_MELEE_RANGED
+        || c == DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC
+        || c == DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB
+        || c == DAMAGE_CATEGORY_MELEE_SPECIAL_MONK;
 }
 
 static bool isDamageShield(int iType)
@@ -1277,7 +1293,10 @@ void CombatWindow::updateOffense()
 		switch(category)
 		{
 			case DAMAGE_CATEGORY_MELEE:
-			case DAMAGE_CATEGORY_MELEE_SPECIAL:
+			case DAMAGE_CATEGORY_MELEE_RANGED:
+			case DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC:
+			case DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB:
+			case DAMAGE_CATEGORY_MELEE_SPECIAL_MONK:
 			{
 				// this is a normal skill
 				s_type.sprintf("%s(%d)", (const char*)skill_name(iType), iType);
@@ -1331,7 +1350,10 @@ void CombatWindow::updateOffense()
 				iMeleeHits += iHits;
 				break;
 			}
-			case DAMAGE_CATEGORY_MELEE_SPECIAL:
+			case DAMAGE_CATEGORY_MELEE_RANGED:
+			case DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC:
+			case DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB:
+			case DAMAGE_CATEGORY_MELEE_SPECIAL_MONK:
 			{
 				iSpecialDamage += iDamage;
 				iSpecialHits += iHits;
@@ -1374,7 +1396,10 @@ void CombatWindow::updateOffense()
         switch(category)
         {
             case DAMAGE_CATEGORY_MELEE:
-            case DAMAGE_CATEGORY_MELEE_SPECIAL:
+            case DAMAGE_CATEGORY_MELEE_RANGED:
+            case DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC:
+            case DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB:
+            case DAMAGE_CATEGORY_MELEE_SPECIAL_MONK:
                 {
                     s_type.sprintf("Pet: %s(%d): %s",
                             (const char*)iPetName, iPetID, (const char*)skill_name(iType));
@@ -1429,7 +1454,10 @@ void CombatWindow::updateOffense()
                     iPetMeleeHits += iHits;
                     break;
                 }
-            case DAMAGE_CATEGORY_MELEE_SPECIAL:
+            case DAMAGE_CATEGORY_MELEE_RANGED:
+            case DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC:
+            case DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB:
+            case DAMAGE_CATEGORY_MELEE_SPECIAL_MONK:
                 {
                     iPetSpecialDamage += iDamage;
                     iPetSpecialHits += iHits;
