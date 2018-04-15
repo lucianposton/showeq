@@ -1861,14 +1861,16 @@ void CombatWindow::updateOffense()
             case DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB:
             case DAMAGE_CATEGORY_MELEE_SPECIAL_MONK:
                 {
-                    s_type.sprintf("Pet: %s(%d): %s",
-                            (const char*)iPetName, iPetID, (const char*)skill_name(iType));
+                    s_type.sprintf("Pet: %s(%d): %s(%d)",
+                            (const char*)iPetName, iPetID,
+                            (const char*)skill_name(iType), iType);
                     break;
                 }
             case DAMAGE_CATEGORY_NONMELEE:
                 {
-                    s_type.sprintf("Pet: %s(%d): Spell: %s",
-                            (const char*)iPetName, iPetID, (const char*)spell_name(iSpell));
+                    s_type.sprintf("Pet: %s(%d): Spell: %s(%d)",
+                            (const char*)iPetName, iPetID,
+                            (const char*)spell_name(iSpell), iSpell);
                     break;
                 }
             case DAMAGE_CATEGORY_DAMAGE_SHIELD:
