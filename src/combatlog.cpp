@@ -29,16 +29,16 @@
 
 namespace {
 
-inline bool isNanOrZero(double d)
+inline bool isNan(double d)
 {
     // c++98, so using double != double, instead of std::isnan from c++11
-    return d == 0.0 || d != d;
+    return d != d;
 }
 
-QString doubleToQString(double d, int precision)
+QString doubleToQString(double d, int precision, bool showZero=false)
 {
     QString result;
-    if (!isNanOrZero(d))
+    if (!isNan(d) && (showZero || d != 0.0))
     {
         result.setNum(d, 'f', precision);
     }
@@ -1703,7 +1703,7 @@ void CombatWindow::updateOffense()
         QString s_misses;
         QString s_accuracy;
         QString s_avgdamage = doubleToQString(dAvgDamage, 0);
-        QString s_sd = doubleToQString(dSD, 0);
+        QString s_sd = doubleToQString(dSD, 0, true);
         QString s_mindamage = intToQString(iMinDamage);
         QString s_maxdamage = intToQString(iMaxDamage);
         QString s_damage;
@@ -1779,7 +1779,7 @@ void CombatWindow::updateOffense()
 			s_accuracy = QString::number(dAccuracy, 'f', 2);
 		}
 		QString s_avgdamage = doubleToQString(dAvgDamage, 0);
-		QString s_sd = doubleToQString(dSD, 0);
+		QString s_sd = doubleToQString(dSD, 0, true);
 		QString s_mindamage = intToQString(iMinDamage);
 		QString s_maxdamage = intToQString(iMaxDamage);
 		QString s_damage;
@@ -1887,7 +1887,7 @@ void CombatWindow::updateOffense()
             s_accuracy = QString::number(dAccuracy, 'f', 2);
         }
         QString s_avgdamage = doubleToQString(dAvgDamage, 0);
-        QString s_sd = doubleToQString(dSD, 0);
+        QString s_sd = doubleToQString(dSD, 0, true);
         QString s_mindamage = intToQString(iMinDamage);
         QString s_maxdamage = intToQString(iMaxDamage);
         QString s_damage;
@@ -1960,7 +1960,7 @@ void CombatWindow::updateOffense()
 		QString s_misses;
 		QString s_accuracy;
 		QString s_avgdamage = doubleToQString(dAvgDamage, 0);
-		QString s_sd = doubleToQString(dSD, 0);
+		QString s_sd = doubleToQString(dSD, 0, true);
 		QString s_mindamage = intToQString(iMinDamage);
 		QString s_maxdamage = intToQString(iMaxDamage);
 		QString s_damage;
@@ -2167,49 +2167,49 @@ void CombatWindow::updateDefense()
 	m_label_defense_mitigate_melee_min->setText(intToQString(iMeleeMinDamage));
 	m_label_defense_mitigate_melee_max->setText(intToQString(iMeleeMaxDamage));
 	m_label_defense_mitigate_melee_count->setText(intToQString(iMeleeHits));
-	m_label_defense_mitigate_melee_sd->setText(doubleToQString(dMeleeSD, 0));
+	m_label_defense_mitigate_melee_sd->setText(doubleToQString(dMeleeSD, 0, true));
 
 	m_label_defense_mitigate_ranged_percent->setText(doubleToQString(dRangedPercent, 1));
 	m_label_defense_mitigate_ranged_avg->setText(doubleToQString(dRangedAvg, 0));
 	m_label_defense_mitigate_ranged_min->setText(intToQString(iRangedMinDamage));
 	m_label_defense_mitigate_ranged_max->setText(intToQString(iRangedMaxDamage));
 	m_label_defense_mitigate_ranged_count->setText(intToQString(iRangedHits));
-	m_label_defense_mitigate_ranged_sd->setText(doubleToQString(dRangedSD, 0));
+	m_label_defense_mitigate_ranged_sd->setText(doubleToQString(dRangedSD, 0, true));
 
 	m_label_defense_mitigate_special_percent->setText(doubleToQString(dSpecialPercent, 1));
 	m_label_defense_mitigate_special_avg->setText(doubleToQString(dSpecialAvg, 0));
 	m_label_defense_mitigate_special_min->setText(intToQString(iSpecialMinDamage));
 	m_label_defense_mitigate_special_max->setText(intToQString(iSpecialMaxDamage));
 	m_label_defense_mitigate_special_count->setText(intToQString(iSpecialHits));
-	m_label_defense_mitigate_special_sd->setText(doubleToQString(dSpecialSD, 0));
+	m_label_defense_mitigate_special_sd->setText(doubleToQString(dSpecialSD, 0, true));
 
 	m_label_defense_mitigate_backstab_percent->setText(doubleToQString(dBackstabPercent, 1));
 	m_label_defense_mitigate_backstab_avg->setText(doubleToQString(dBackstabAvg, 0));
 	m_label_defense_mitigate_backstab_min->setText(intToQString(iBackstabMinDamage));
 	m_label_defense_mitigate_backstab_max->setText(intToQString(iBackstabMaxDamage));
 	m_label_defense_mitigate_backstab_count->setText(intToQString(iBackstabHits));
-	m_label_defense_mitigate_backstab_sd->setText(doubleToQString(dBackstabSD, 0));
+	m_label_defense_mitigate_backstab_sd->setText(doubleToQString(dBackstabSD, 0, true));
 
 	m_label_defense_mitigate_monk_percent->setText(doubleToQString(dMonkPercent, 1));
 	m_label_defense_mitigate_monk_avg->setText(doubleToQString(dMonkAvg, 0));
 	m_label_defense_mitigate_monk_min->setText(intToQString(iMonkMinDamage));
 	m_label_defense_mitigate_monk_max->setText(intToQString(iMonkMaxDamage));
 	m_label_defense_mitigate_monk_count->setText(intToQString(iMonkHits));
-	m_label_defense_mitigate_monk_sd->setText(doubleToQString(dMonkSD, 0));
+	m_label_defense_mitigate_monk_sd->setText(doubleToQString(dMonkSD, 0, true));
 
 	m_label_defense_mitigate_nonmelee_percent->setText(doubleToQString(dNonmeleePercent, 1));
 	m_label_defense_mitigate_nonmelee_avg->setText(doubleToQString(dNonmeleeAvg, 0));
 	m_label_defense_mitigate_nonmelee_min->setText(intToQString(iNonmeleeMinDamage));
 	m_label_defense_mitigate_nonmelee_max->setText(intToQString(iNonmeleeMaxDamage));
 	m_label_defense_mitigate_nonmelee_count->setText(intToQString(iNonmeleeHits));
-	m_label_defense_mitigate_nonmelee_sd->setText(doubleToQString(dNonmeleeSD, 0));
+	m_label_defense_mitigate_nonmelee_sd->setText(doubleToQString(dNonmeleeSD, 0, true));
 
 	m_label_defense_mitigate_damageshield_percent->setText(doubleToQString(dDamageShieldPercent, 1));
 	m_label_defense_mitigate_damageshield_avg->setText(doubleToQString(dDamageShieldAvg, 0));
 	m_label_defense_mitigate_damageshield_min->setText(intToQString(iDamageShieldMinDamage));
 	m_label_defense_mitigate_damageshield_max->setText(intToQString(iDamageShieldMaxDamage));
 	m_label_defense_mitigate_damageshield_count->setText(intToQString(iDamageShieldHits));
-	m_label_defense_mitigate_damageshield_sd->setText(doubleToQString(dDamageShieldSD, 0));
+	m_label_defense_mitigate_damageshield_sd->setText(doubleToQString(dDamageShieldSD, 0, true));
 
 	m_label_defense_summary_mobhits->setText(QString::number(iHits));
 	m_label_defense_summary_mobattacks->setText(QString::number(iMobAttacks));
@@ -2380,49 +2380,49 @@ void CombatWindow::updatePetDefense()
     m_label_pet_defense_mitigate_melee_min->setText(intToQString(iMeleeMinDamage));
     m_label_pet_defense_mitigate_melee_max->setText(intToQString(iMeleeMaxDamage));
     m_label_pet_defense_mitigate_melee_count->setText(intToQString(iMeleeHits));
-    m_label_pet_defense_mitigate_melee_sd->setText(doubleToQString(dMeleeSD, 0));
+    m_label_pet_defense_mitigate_melee_sd->setText(doubleToQString(dMeleeSD, 0, true));
 
     m_label_pet_defense_mitigate_ranged_percent->setText(doubleToQString(dRangedPercent, 1));
     m_label_pet_defense_mitigate_ranged_avg->setText(doubleToQString(dRangedAvg, 0));
     m_label_pet_defense_mitigate_ranged_min->setText(intToQString(iRangedMinDamage));
     m_label_pet_defense_mitigate_ranged_max->setText(intToQString(iRangedMaxDamage));
     m_label_pet_defense_mitigate_ranged_count->setText(intToQString(iRangedHits));
-    m_label_pet_defense_mitigate_ranged_sd->setText(doubleToQString(dRangedSD, 0));
+    m_label_pet_defense_mitigate_ranged_sd->setText(doubleToQString(dRangedSD, 0, true));
 
     m_label_pet_defense_mitigate_special_percent->setText(doubleToQString(dSpecialPercent, 1));
     m_label_pet_defense_mitigate_special_avg->setText(doubleToQString(dSpecialAvg, 0));
     m_label_pet_defense_mitigate_special_min->setText(intToQString(iSpecialMinDamage));
     m_label_pet_defense_mitigate_special_max->setText(intToQString(iSpecialMaxDamage));
     m_label_pet_defense_mitigate_special_count->setText(intToQString(iSpecialHits));
-    m_label_pet_defense_mitigate_special_sd->setText(doubleToQString(dSpecialSD, 0));
+    m_label_pet_defense_mitigate_special_sd->setText(doubleToQString(dSpecialSD, 0, true));
 
     m_label_pet_defense_mitigate_backstab_percent->setText(doubleToQString(dBackstabPercent, 1));
     m_label_pet_defense_mitigate_backstab_avg->setText(doubleToQString(dBackstabAvg, 0));
     m_label_pet_defense_mitigate_backstab_min->setText(intToQString(iBackstabMinDamage));
     m_label_pet_defense_mitigate_backstab_max->setText(intToQString(iBackstabMaxDamage));
     m_label_pet_defense_mitigate_backstab_count->setText(intToQString(iBackstabHits));
-    m_label_pet_defense_mitigate_backstab_sd->setText(doubleToQString(dBackstabSD, 0));
+    m_label_pet_defense_mitigate_backstab_sd->setText(doubleToQString(dBackstabSD, 0, true));
 
     m_label_pet_defense_mitigate_monk_percent->setText(doubleToQString(dMonkPercent, 1));
     m_label_pet_defense_mitigate_monk_avg->setText(doubleToQString(dMonkAvg, 0));
     m_label_pet_defense_mitigate_monk_min->setText(intToQString(iMonkMinDamage));
     m_label_pet_defense_mitigate_monk_max->setText(intToQString(iMonkMaxDamage));
     m_label_pet_defense_mitigate_monk_count->setText(intToQString(iMonkHits));
-    m_label_pet_defense_mitigate_monk_sd->setText(doubleToQString(dMonkSD, 0));
+    m_label_pet_defense_mitigate_monk_sd->setText(doubleToQString(dMonkSD, 0, true));
 
     m_label_pet_defense_mitigate_nonmelee_percent->setText(doubleToQString(dNonmeleePercent, 1));
     m_label_pet_defense_mitigate_nonmelee_avg->setText(doubleToQString(dNonmeleeAvg, 0));
     m_label_pet_defense_mitigate_nonmelee_min->setText(intToQString(iNonmeleeMinDamage));
     m_label_pet_defense_mitigate_nonmelee_max->setText(intToQString(iNonmeleeMaxDamage));
     m_label_pet_defense_mitigate_nonmelee_count->setText(intToQString(iNonmeleeHits));
-    m_label_pet_defense_mitigate_nonmelee_sd->setText(doubleToQString(dNonmeleeSD, 0));
+    m_label_pet_defense_mitigate_nonmelee_sd->setText(doubleToQString(dNonmeleeSD, 0, true));
 
     m_label_pet_defense_mitigate_damageshield_percent->setText(doubleToQString(dDamageShieldPercent, 1));
     m_label_pet_defense_mitigate_damageshield_avg->setText(doubleToQString(dDamageShieldAvg, 0));
     m_label_pet_defense_mitigate_damageshield_min->setText(intToQString(iDamageShieldMinDamage));
     m_label_pet_defense_mitigate_damageshield_max->setText(intToQString(iDamageShieldMaxDamage));
     m_label_pet_defense_mitigate_damageshield_count->setText(intToQString(iDamageShieldHits));
-    m_label_pet_defense_mitigate_damageshield_sd->setText(doubleToQString(dDamageShieldSD, 0));
+    m_label_pet_defense_mitigate_damageshield_sd->setText(doubleToQString(dDamageShieldSD, 0, true));
 
     m_label_pet_defense_summary_mobhits->setText(QString::number(iHits));
     m_label_pet_defense_summary_mobattacks->setText(QString::number(iMobAttacks));
