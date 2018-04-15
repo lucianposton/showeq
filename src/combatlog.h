@@ -33,6 +33,20 @@
 // forward declarations
 class Player;
 
+//----------------------------------------------------------------------
+// enum declarations
+enum DamageCategory
+{
+    DAMAGE_CATEGORY_MELEE,
+    DAMAGE_CATEGORY_MELEE_RANGED,
+    DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC,
+    DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB,
+    DAMAGE_CATEGORY_MELEE_SPECIAL_MONK,
+    DAMAGE_CATEGORY_NONMELEE,
+    DAMAGE_CATEGORY_ENVIRONMENT,
+    DAMAGE_CATEGORY_DAMAGE_SHIELD
+};
+
 ////////////////////////////////////////////
 //  CombatOffenseRecord definition
 //////////////////////////////////////////`//
@@ -145,14 +159,47 @@ public:
 	int		getDodges() const { return m_iDodges; };
 	int		getInvulnerables() const { return m_iInvulnerables; };
 	int		getShieldAbsorbs() const { return m_iShieldAbsorbs; };
-	int		getMinDamage() const { return m_iMinDamage; };
-	int		getMaxDamage() const { return m_iMaxDamage; };
 	int		getTotalDamage() const { return m_iTotalDamage; };
 	int		getTotalAttacks() const { return m_iTotalAttacks; };
 
+	int		getMeleeHits() const { return m_iMeleeHits; };
+	int		getMeleeTotalDamage() const { return m_iMeleeTotalDamage; };
+	int		getMeleeMinDamage() const { return m_iMeleeMinDamage; };
+	int		getMeleeMaxDamage() const { return m_iMeleeMaxDamage; };
+
+	int		getRangedHits() const { return m_iRangedHits; };
+	int		getRangedTotalDamage() const { return m_iRangedTotalDamage; };
+	int		getRangedMinDamage() const { return m_iRangedMinDamage; };
+	int		getRangedMaxDamage() const { return m_iRangedMaxDamage; };
+
+	int		getSpecialHits() const { return m_iSpecialHits; };
+	int		getSpecialTotalDamage() const { return m_iSpecialTotalDamage; };
+	int		getSpecialMinDamage() const { return m_iSpecialMinDamage; };
+	int		getSpecialMaxDamage() const { return m_iSpecialMaxDamage; };
+
+	int		getBackstabHits() const { return m_iBackstabHits; };
+	int		getBackstabTotalDamage() const { return m_iBackstabTotalDamage; };
+	int		getBackstabMinDamage() const { return m_iBackstabMinDamage; };
+	int		getBackstabMaxDamage() const { return m_iBackstabMaxDamage; };
+
+	int		getMonkHits() const { return m_iMonkHits; };
+	int		getMonkTotalDamage() const { return m_iMonkTotalDamage; };
+	int		getMonkMinDamage() const { return m_iMonkMinDamage; };
+	int		getMonkMaxDamage() const { return m_iMonkMaxDamage; };
+
+	int		getNonmeleeHits() const { return m_iNonmeleeHits; };
+	int		getNonmeleeTotalDamage() const { return m_iNonmeleeTotalDamage; };
+	int		getNonmeleeMinDamage() const { return m_iNonmeleeMinDamage; };
+	int		getNonmeleeMaxDamage() const { return m_iNonmeleeMaxDamage; };
+
+	int		getDamageShieldHits() const { return m_iDamageShieldHits; };
+	int		getDamageShieldTotalDamage() const { return m_iDamageShieldTotalDamage; };
+	int		getDamageShieldMinDamage() const { return m_iDamageShieldMinDamage; };
+	int		getDamageShieldMaxDamage() const { return m_iDamageShieldMaxDamage; };
+
 	void    clear(void);
 	void	addMiss(int iMissReason);
-	void	addHit(int iDamage);
+	void	addHit(int iDamage, DamageCategory category);
 
 private:
 	const QString		m_displayString;
@@ -165,10 +212,43 @@ private:
 	int			m_iDodges;
 	int			m_iInvulnerables;
 	int			m_iShieldAbsorbs;
-	int			m_iMinDamage;
-	int			m_iMaxDamage;
 	int			m_iTotalDamage;
 	int			m_iTotalAttacks;
+
+	int 		m_iMeleeHits;
+	int			m_iMeleeTotalDamage;
+	int			m_iMeleeMinDamage;
+	int			m_iMeleeMaxDamage;
+
+	int 		m_iRangedHits;
+	int			m_iRangedTotalDamage;
+	int			m_iRangedMinDamage;
+	int			m_iRangedMaxDamage;
+
+	int 		m_iSpecialHits;
+	int			m_iSpecialTotalDamage;
+	int			m_iSpecialMinDamage;
+	int			m_iSpecialMaxDamage;
+
+	int 		m_iBackstabHits;
+	int			m_iBackstabTotalDamage;
+	int			m_iBackstabMinDamage;
+	int			m_iBackstabMaxDamage;
+
+	int 		m_iMonkHits;
+	int			m_iMonkTotalDamage;
+	int			m_iMonkMinDamage;
+	int			m_iMonkMaxDamage;
+
+	int 		m_iNonmeleeHits;
+	int			m_iNonmeleeTotalDamage;
+	int			m_iNonmeleeMinDamage;
+	int			m_iNonmeleeMaxDamage;
+
+	int 		m_iDamageShieldHits;
+	int			m_iDamageShieldTotalDamage;
+	int			m_iDamageShieldMinDamage;
+	int			m_iDamageShieldMaxDamage;
 };
 
 
@@ -303,8 +383,8 @@ private:
 	void addDotOffenseRecord(const QString& iSpellName, int iDamage);
 	void addOffenseRecord(int iType, int iDamage, int iSpell);
 	void addPetOffenseRecord(int petID, const QString& petName, int iType, int iDamage, int iSpell);
-	void addDefenseRecord(int iDamage);
-	void addPetDefenseRecord(const Spawn* s, int iDamage);
+	void addDefenseRecord(int iDamage, DamageCategory category);
+	void addPetDefenseRecord(const Spawn* s, int iDamage, DamageCategory category);
 	void addMobRecord(int iTargetID, int iTargetPetOwnerID, int iSourceID, int iSourcePetOwnerID, int iDamage, const QString& tName, const QString& sName);
 	void addOtherRecord(int iTargetID, int iSourceID, int iDamage,
 			const QString& tName, const QString& sName, bool isKillingBlow);
@@ -374,12 +454,53 @@ private:
 	QLabel*		m_label_defense_avoid_riposte;
 	QLabel*		m_label_defense_avoid_dodge;
 	QLabel*		m_label_defense_avoid_total;
+
 	QLabel*		m_label_defense_prevented_invulnerables;
 	QLabel*		m_label_defense_prevented_shield_absorb;
 	QLabel*		m_label_defense_prevented_total;
-	QLabel*		m_label_defense_mitigate_avghit;
-	QLabel*		m_label_defense_mitigate_minhit;
-	QLabel*		m_label_defense_mitigate_maxhit;
+
+	QLabel*		m_label_defense_mitigate_melee_percent;
+	QLabel*		m_label_defense_mitigate_melee_avg;
+	QLabel*		m_label_defense_mitigate_melee_min;
+	QLabel*		m_label_defense_mitigate_melee_max;
+	QLabel*		m_label_defense_mitigate_melee_count;
+
+	QLabel*		m_label_defense_mitigate_ranged_percent;
+	QLabel*		m_label_defense_mitigate_ranged_avg;
+	QLabel*		m_label_defense_mitigate_ranged_min;
+	QLabel*		m_label_defense_mitigate_ranged_max;
+	QLabel*		m_label_defense_mitigate_ranged_count;
+
+	QLabel*		m_label_defense_mitigate_special_percent;
+	QLabel*		m_label_defense_mitigate_special_avg;
+	QLabel*		m_label_defense_mitigate_special_min;
+	QLabel*		m_label_defense_mitigate_special_max;
+	QLabel*		m_label_defense_mitigate_special_count;
+
+	QLabel*		m_label_defense_mitigate_backstab_percent;
+	QLabel*		m_label_defense_mitigate_backstab_avg;
+	QLabel*		m_label_defense_mitigate_backstab_min;
+	QLabel*		m_label_defense_mitigate_backstab_max;
+	QLabel*		m_label_defense_mitigate_backstab_count;
+
+	QLabel*		m_label_defense_mitigate_monk_percent;
+	QLabel*		m_label_defense_mitigate_monk_avg;
+	QLabel*		m_label_defense_mitigate_monk_min;
+	QLabel*		m_label_defense_mitigate_monk_max;
+	QLabel*		m_label_defense_mitigate_monk_count;
+
+	QLabel*		m_label_defense_mitigate_nonmelee_percent;
+	QLabel*		m_label_defense_mitigate_nonmelee_avg;
+	QLabel*		m_label_defense_mitigate_nonmelee_min;
+	QLabel*		m_label_defense_mitigate_nonmelee_max;
+	QLabel*		m_label_defense_mitigate_nonmelee_count;
+
+	QLabel*		m_label_defense_mitigate_damageshield_percent;
+	QLabel*		m_label_defense_mitigate_damageshield_avg;
+	QLabel*		m_label_defense_mitigate_damageshield_min;
+	QLabel*		m_label_defense_mitigate_damageshield_max;
+	QLabel*		m_label_defense_mitigate_damageshield_count;
+
 	QLabel*		m_label_defense_summary_mobhits;
 	QLabel*		m_label_defense_summary_mobattacks;
 	QLabel*		m_label_defense_summary_percentavoided;
@@ -393,12 +514,53 @@ private:
 	QLabel*		m_label_pet_defense_avoid_riposte;
 	QLabel*		m_label_pet_defense_avoid_dodge;
 	QLabel*		m_label_pet_defense_avoid_total;
+
 	QLabel*		m_label_pet_defense_prevented_invulnerables;
 	QLabel*		m_label_pet_defense_prevented_shield_absorb;
 	QLabel*		m_label_pet_defense_prevented_total;
-	QLabel*		m_label_pet_defense_mitigate_avghit;
-	QLabel*		m_label_pet_defense_mitigate_minhit;
-	QLabel*		m_label_pet_defense_mitigate_maxhit;
+
+	QLabel*		m_label_pet_defense_mitigate_melee_percent;
+	QLabel*		m_label_pet_defense_mitigate_melee_avg;
+	QLabel*		m_label_pet_defense_mitigate_melee_min;
+	QLabel*		m_label_pet_defense_mitigate_melee_max;
+	QLabel*		m_label_pet_defense_mitigate_melee_count;
+
+	QLabel*		m_label_pet_defense_mitigate_ranged_percent;
+	QLabel*		m_label_pet_defense_mitigate_ranged_avg;
+	QLabel*		m_label_pet_defense_mitigate_ranged_min;
+	QLabel*		m_label_pet_defense_mitigate_ranged_max;
+	QLabel*		m_label_pet_defense_mitigate_ranged_count;
+
+	QLabel*		m_label_pet_defense_mitigate_special_percent;
+	QLabel*		m_label_pet_defense_mitigate_special_avg;
+	QLabel*		m_label_pet_defense_mitigate_special_min;
+	QLabel*		m_label_pet_defense_mitigate_special_max;
+	QLabel*		m_label_pet_defense_mitigate_special_count;
+
+	QLabel*		m_label_pet_defense_mitigate_backstab_percent;
+	QLabel*		m_label_pet_defense_mitigate_backstab_avg;
+	QLabel*		m_label_pet_defense_mitigate_backstab_min;
+	QLabel*		m_label_pet_defense_mitigate_backstab_max;
+	QLabel*		m_label_pet_defense_mitigate_backstab_count;
+
+	QLabel*		m_label_pet_defense_mitigate_monk_percent;
+	QLabel*		m_label_pet_defense_mitigate_monk_avg;
+	QLabel*		m_label_pet_defense_mitigate_monk_min;
+	QLabel*		m_label_pet_defense_mitigate_monk_max;
+	QLabel*		m_label_pet_defense_mitigate_monk_count;
+
+	QLabel*		m_label_pet_defense_mitigate_nonmelee_percent;
+	QLabel*		m_label_pet_defense_mitigate_nonmelee_avg;
+	QLabel*		m_label_pet_defense_mitigate_nonmelee_min;
+	QLabel*		m_label_pet_defense_mitigate_nonmelee_max;
+	QLabel*		m_label_pet_defense_mitigate_nonmelee_count;
+
+	QLabel*		m_label_pet_defense_mitigate_damageshield_percent;
+	QLabel*		m_label_pet_defense_mitigate_damageshield_avg;
+	QLabel*		m_label_pet_defense_mitigate_damageshield_min;
+	QLabel*		m_label_pet_defense_mitigate_damageshield_max;
+	QLabel*		m_label_pet_defense_mitigate_damageshield_count;
+
 	QLabel*		m_label_pet_defense_summary_mobhits;
 	QLabel*		m_label_pet_defense_summary_mobattacks;
 	QLabel*		m_label_pet_defense_summary_percentavoided;
