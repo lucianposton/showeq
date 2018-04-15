@@ -55,7 +55,7 @@ class CombatOffenseRecord
 {
 public:
 
-	CombatOffenseRecord(int iType, Player* p, int iSpell);
+	CombatOffenseRecord(int iType, const Player* p, int iSpell);
 
 	int		getType() { return m_iType; };
 	int		getSpell() { return m_iSpell; };
@@ -71,7 +71,7 @@ public:
 protected:
 	int			m_iType;
 	int			m_iSpell;
-	Player*	m_player;
+	const Player*	m_player;
 
 	int 		m_iHits;
 	int			m_iMisses;
@@ -115,27 +115,15 @@ private:
 ////////////////////////////////////////////
 //  DotOffenseRecord definition
 //////////////////////////////////////////`//
-class DotOffenseRecord
+class DotOffenseRecord : public CombatOffenseRecord
 {
     public:
         DotOffenseRecord(const Player* p, const QString& iSpellName);
 
-        int getTicks() { return m_iTicks; };
-        int getMinDamage() { return m_iMinDamage; };
-        int getMaxDamage() { return m_iMaxDamage; };
-        int getTotalDamage() { return m_iTotalDamage; };
         QString getSpellName() { return m_iSpellName; };
-
-        void addTick(int iDamage);
 
     private:
         const QString m_iSpellName;
-        const Player* m_player;
-
-        int m_iTicks;
-        int m_iMinDamage;
-        int m_iMaxDamage;
-        int m_iTotalDamage;
 };
 
 

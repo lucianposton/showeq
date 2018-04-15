@@ -140,7 +140,7 @@ static bool isDamageShield(int iType)
 ////////////////////////////////////////////
 //  CombatOffenseRecord implementation
 ////////////////////////////////////////////
-CombatOffenseRecord::CombatOffenseRecord( int iType, Player* p, int iSpell) :
+CombatOffenseRecord::CombatOffenseRecord( int iType, const Player* p, int iSpell) :
 	m_iType(iType),
 	m_iSpell(iSpell),
 	m_player(p),
@@ -204,28 +204,9 @@ PetOffenseRecord::PetOffenseRecord(int iPetID, const QString& iPetName, int iTyp
 //  DotOffenseRecord implementation
 ////////////////////////////////////////////
 DotOffenseRecord::DotOffenseRecord(const Player* p, const QString& iSpellName) :
-    m_iSpellName(iSpellName),
-    m_player(p),
-    m_iTicks(0),
-    m_iMinDamage(0),
-    m_iMaxDamage(0),
-    m_iTotalDamage(0)
+    CombatOffenseRecord(231, p, ITEM_SPELLID_NOSPELL), // assume spell, so 231
+    m_iSpellName(iSpellName)
 {
-}
-
-void DotOffenseRecord::addTick(int iDamage)
-{
-    if(iDamage <= 0)
-        return;
-
-    m_iTicks++;
-    m_iTotalDamage += iDamage;
-
-    if(iDamage > 0 && (iDamage < m_iMinDamage || !m_iMinDamage))
-        m_iMinDamage = iDamage;
-
-    if(iDamage > m_iMaxDamage)
-        m_iMaxDamage = iDamage;
 }
 
 
@@ -1952,7 +1933,7 @@ void CombatWindow::updateOffense()
 
 	for(dotRecord = m_dot_offense_list.first(); dotRecord != 0; dotRecord = m_dot_offense_list.next())
 	{
-		int iTicks = dotRecord->getTicks();
+		int iTicks = dotRecord->getHits();
 		int iMinDamage = dotRecord->getMinDamage();
 		int iMaxDamage = dotRecord->getMaxDamage();
 		int iDamage = dotRecord->getTotalDamage();
@@ -2635,7 +2616,7 @@ void CombatWindow::addDotOffenseRecord(const QString& iSpellName, const int iDam
         m_dot_offense_list.append(pRecord);
     }
 
-    pRecord->addTick(iDamage);
+    pRecord->addHit(iDamage);
 
 #ifdef DEBUGCOMBAT
     seqDebug("CombatWindow::addDotOffenseRecord finished...");
