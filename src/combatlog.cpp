@@ -154,6 +154,16 @@ CombatOffenseRecord::CombatOffenseRecord( int iType, const Player* p, int iSpell
 {
 }
 
+void CombatOffenseRecord::clear()
+{
+    m_iHits = 0;
+    m_iMisses = 0;
+    m_iMinDamage = 0;
+    m_iMaxDamage = 0;
+    m_iTotalDamage = 0;
+    m_dAverage = 0.0;
+    m_dM2 = 0.0;
+}
 
 void CombatOffenseRecord::addHit(int iDamage)
 {
@@ -173,24 +183,6 @@ void CombatOffenseRecord::addHit(int iDamage)
     m_dAverage += delta1 / m_iHits;
     const double delta2 = iDamage - m_dAverage;
     m_dM2 += delta1 * delta2;
-}
-
-
-////////////////////////////////////////////
-//  NonMeleeOffenseRecord implementation
-////////////////////////////////////////////
-NonMeleeOffenseRecord::NonMeleeOffenseRecord() :
-    CombatOffenseRecord(231, NULL, ITEM_SPELLID_NOSPELL) // assume non-melee is spell, so 231
-{
-}
-
-void NonMeleeOffenseRecord::clear()
-{
-    m_iHits = 0;
-    m_iMisses = 0;
-    m_iMinDamage = 0;
-    m_iMaxDamage = 0;
-    m_iTotalDamage = 0;
 }
 
 
@@ -649,7 +641,8 @@ CombatWindow::CombatWindow(Player* player,
 	m_combat_offense_list.setAutoDelete(true);
 	m_pet_offense_list.setAutoDelete(true);
 	m_dot_offense_list.setAutoDelete(true);
-	m_nonmelee_offense_record = new NonMeleeOffenseRecord;
+	// assume non-melee is spell, so 231
+	m_nonmelee_offense_record = new CombatOffenseRecord(231, NULL, ITEM_SPELLID_NOSPELL);
 	m_combat_defense_record = new CombatDefenseRecord(player);
 	m_combat_pet_defense_current_record = NULL;
 	m_combat_pet_defense_list.setAutoDelete(true);
@@ -1993,7 +1986,7 @@ void CombatWindow::updateOffense()
 	}
 
 	// iNonmeleeDamage includes the pet's non-melee damage because
-	// NonMeleeOffenseRecord simply accumulates all non-melee hit messages,
+	// m_nonmelee_offense_record simply accumulates all non-melee hit messages,
 	// which are sent to the client for both player's and pet's non-melee hits.
 	// We subtract out the pet's non-melee damage from the total, which gives
 	// us the player's non-melee damage.

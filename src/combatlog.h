@@ -71,6 +71,7 @@ public:
 	void	addMiss(int iMissReason) { m_iMisses++; };
 	void	addHit(int iDamage);
 
+	void clear();
 protected:
 	int			m_iType;
 	int			m_iSpell;
@@ -83,18 +84,6 @@ protected:
 	int			m_iTotalDamage;
 	double		m_dAverage;
 	double		m_dM2;
-};
-
-
-////////////////////////////////////////////
-//  NonMeleeOffenseRecord definition
-//////////////////////////////////////////`//
-class NonMeleeOffenseRecord : public CombatOffenseRecord
-{
-public:
-    NonMeleeOffenseRecord();
-
-    void clear();
 };
 
 
@@ -633,7 +622,7 @@ private:
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	QList<DotOffenseRecord> m_dot_offense_list;
 	QList<PetOffenseRecord> m_pet_offense_list;
-	NonMeleeOffenseRecord *m_nonmelee_offense_record;
+	CombatOffenseRecord *m_nonmelee_offense_record;
 	CombatDefenseRecord *m_combat_defense_record;
 	QList<CombatDefenseRecord> m_combat_pet_defense_list;
 	const CombatDefenseRecord *m_combat_pet_defense_current_record;
