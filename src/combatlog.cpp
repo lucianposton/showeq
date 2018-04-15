@@ -612,6 +612,7 @@ CombatWindow::CombatWindow(Player* player,
 			   QWidget* parent, const char* name)
   : SEQWindow("Combat", "ShowEQ - Combat", parent, name),
     m_player(player),
+    m_lastConsider(0),
     m_autoupdate_pet_defense_selection(false),
     m_iCurrentDPSTotal(0),
     m_iDPSStartTime(0),
@@ -3280,6 +3281,19 @@ void CombatWindow::charmUpdate(const uint8_t* data)
     {
         m_autoupdate_pet_defense_selection = true;
     }
+}
+
+void CombatWindow::considerSpawn()
+{
+    // clear all if it's been less than .2 seconds since last consider
+    const int iTimeNow = mTime();
+    if(m_lastConsider && iTimeNow < (m_lastConsider + 200))
+    {
+        clear();
+    }
+
+    m_lastConsider = iTimeNow;
+    resetDPS();
 }
 
 #include "combatlog.moc"

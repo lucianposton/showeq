@@ -385,6 +385,7 @@ public slots:
 	void clearDefense();
 	void clearPetDefense();
 	void clear(void);
+	void considerSpawn();
 
 	void charmUpdate(const uint8_t* data);
 	void petDefenseComboboxSelectionChanged(const QString& selected);
@@ -420,6 +421,7 @@ private:
 
 private:
 	Player*	m_player;
+	int		m_lastConsider;
 	bool	m_autoupdate_pet_defense_selection;
 
 	QWidget* 	m_widget_offense;
