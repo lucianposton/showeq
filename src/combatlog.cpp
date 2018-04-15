@@ -261,36 +261,50 @@ void CombatDefenseRecord::clear(void)
   m_iTotalDamage = 0;
   m_iTotalAttacks = 0;
 
+  m_dMeleeM2 = 0.0;
+  m_dMeleeAverage = 0.0;
   m_iMeleeHits = 0;
   m_iMeleeTotalDamage = 0;
   m_iMeleeMinDamage = 0;
   m_iMeleeMaxDamage = 0;
 
+  m_dRangedM2 = 0.0;
+  m_dRangedAverage = 0.0;
   m_iRangedHits = 0;
   m_iRangedTotalDamage = 0;
   m_iRangedMinDamage = 0;
   m_iRangedMaxDamage = 0;
 
+  m_dSpecialM2 = 0.0;
+  m_dSpecialAverage = 0.0;
   m_iSpecialHits = 0;
   m_iSpecialTotalDamage = 0;
   m_iSpecialMinDamage = 0;
   m_iSpecialMaxDamage = 0;
 
+  m_dBackstabM2 = 0.0;
+  m_dBackstabAverage = 0.0;
   m_iBackstabHits = 0;
   m_iBackstabTotalDamage = 0;
   m_iBackstabMinDamage = 0;
   m_iBackstabMaxDamage = 0;
 
+  m_dMonkM2 = 0.0;
+  m_dMonkAverage = 0.0;
   m_iMonkHits = 0;
   m_iMonkTotalDamage = 0;
   m_iMonkMinDamage = 0;
   m_iMonkMaxDamage = 0;
 
+  m_dNonmeleeM2 = 0.0;
+  m_dNonmeleeAverage = 0.0;
   m_iNonmeleeHits = 0;
   m_iNonmeleeTotalDamage = 0;
   m_iNonmeleeMinDamage = 0;
   m_iNonmeleeMaxDamage = 0;
 
+  m_dDamageShieldM2 = 0.0;
+  m_dDamageShieldAverage = 0.0;
   m_iDamageShieldHits = 0;
   m_iDamageShieldTotalDamage = 0;
   m_iDamageShieldMinDamage = 0;
@@ -309,61 +323,110 @@ void CombatDefenseRecord::addHit(int iDamage, DamageCategory category)
     switch(category)
     {
         case DAMAGE_CATEGORY_MELEE:
+            {
             m_iMeleeHits++;
+            const double delta1 = iDamage - m_dMeleeAverage;
+            m_dMeleeAverage += delta1 / m_iMeleeHits;
+            const double delta2 = iDamage - m_dMeleeAverage;
+            m_dMeleeM2 += delta1 * delta2;
+
             m_iMeleeTotalDamage += iDamage;
             if(iDamage < m_iMeleeMinDamage || !m_iMeleeMinDamage)
                 m_iMeleeMinDamage = iDamage;
             if(iDamage > m_iMeleeMaxDamage)
                 m_iMeleeMaxDamage = iDamage;
             break;
+            }
         case DAMAGE_CATEGORY_MELEE_RANGED:
+            {
             m_iRangedHits++;
+            const double delta1 = iDamage - m_dRangedAverage;
+            m_dRangedAverage += delta1 / m_iRangedHits;
+            const double delta2 = iDamage - m_dRangedAverage;
+            m_dRangedM2 += delta1 * delta2;
+
             m_iRangedTotalDamage += iDamage;
             if(iDamage < m_iRangedMinDamage || !m_iRangedMinDamage)
                 m_iRangedMinDamage = iDamage;
             if(iDamage > m_iRangedMaxDamage)
                 m_iRangedMaxDamage = iDamage;
             break;
+            }
         case DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC:
+            {
             m_iSpecialHits++;
+            const double delta1 = iDamage - m_dSpecialAverage;
+            m_dSpecialAverage += delta1 / m_iSpecialHits;
+            const double delta2 = iDamage - m_dSpecialAverage;
+            m_dSpecialM2 += delta1 * delta2;
+
             m_iSpecialTotalDamage += iDamage;
             if(iDamage < m_iSpecialMinDamage || !m_iSpecialMinDamage)
                 m_iSpecialMinDamage = iDamage;
             if(iDamage > m_iSpecialMaxDamage)
                 m_iSpecialMaxDamage = iDamage;
             break;
+            }
         case DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB:
+            {
             m_iBackstabHits++;
+            const double delta1 = iDamage - m_dBackstabAverage;
+            m_dBackstabAverage += delta1 / m_iBackstabHits;
+            const double delta2 = iDamage - m_dBackstabAverage;
+            m_dBackstabM2 += delta1 * delta2;
+
             m_iBackstabTotalDamage += iDamage;
             if(iDamage < m_iBackstabMinDamage || !m_iBackstabMinDamage)
                 m_iBackstabMinDamage = iDamage;
             if(iDamage > m_iBackstabMaxDamage)
                 m_iBackstabMaxDamage = iDamage;
             break;
+            }
         case DAMAGE_CATEGORY_MELEE_SPECIAL_MONK:
+            {
             m_iMonkHits++;
+            const double delta1 = iDamage - m_dMonkAverage;
+            m_dMonkAverage += delta1 / m_iMonkHits;
+            const double delta2 = iDamage - m_dMonkAverage;
+            m_dMonkM2 += delta1 * delta2;
+
             m_iMonkTotalDamage += iDamage;
             if(iDamage < m_iMonkMinDamage || !m_iMonkMinDamage)
                 m_iMonkMinDamage = iDamage;
             if(iDamage > m_iMonkMaxDamage)
                 m_iMonkMaxDamage = iDamage;
             break;
+            }
         case DAMAGE_CATEGORY_NONMELEE:
+            {
             m_iNonmeleeHits++;
+            const double delta1 = iDamage - m_dNonmeleeAverage;
+            m_dNonmeleeAverage += delta1 / m_iNonmeleeHits;
+            const double delta2 = iDamage - m_dNonmeleeAverage;
+            m_dNonmeleeM2 += delta1 * delta2;
+
             m_iNonmeleeTotalDamage += iDamage;
             if(iDamage < m_iNonmeleeMinDamage || !m_iNonmeleeMinDamage)
                 m_iNonmeleeMinDamage = iDamage;
             if(iDamage > m_iNonmeleeMaxDamage)
                 m_iNonmeleeMaxDamage = iDamage;
             break;
+            }
         case DAMAGE_CATEGORY_DAMAGE_SHIELD:
+            {
             m_iDamageShieldHits++;
+            const double delta1 = iDamage - m_dDamageShieldAverage;
+            m_dDamageShieldAverage += delta1 / m_iDamageShieldHits;
+            const double delta2 = iDamage - m_dDamageShieldAverage;
+            m_dDamageShieldM2 += delta1 * delta2;
+
             m_iDamageShieldTotalDamage += iDamage;
             if(iDamage < m_iDamageShieldMinDamage || !m_iDamageShieldMinDamage)
                 m_iDamageShieldMinDamage = iDamage;
             if(iDamage > m_iDamageShieldMaxDamage)
                 m_iDamageShieldMaxDamage = iDamage;
             break;
+            }
         case DAMAGE_CATEGORY_ENVIRONMENT:
             seqWarn("CombatDefenseRecord::addHit: unexpected category=%d", category);
             break;
@@ -876,7 +939,7 @@ QWidget* CombatWindow::initDefenseWidget()
 	QGroupBox *mitigationGBox = new QVGroupBox("Mitigation", pWidget);
 	m_layout_defense->addWidget(mitigationGBox);
 
-	QGrid *mitigationGrid = new QGrid(15, mitigationGBox);
+	QGrid *mitigationGrid = new QGrid(18, mitigationGBox);
 
 	new QLabel("Melee:", mitigationGrid);
 	new QLabel("% of Total:", mitigationGrid);
@@ -886,6 +949,10 @@ QWidget* CombatWindow::initDefenseWidget()
 	new QLabel("Avg:", mitigationGrid);
 	m_label_defense_mitigate_melee_avg = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_melee_avg->setAlignment(Qt::AlignRight);
+	new QLabel("", mitigationGrid);
+	new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+	m_label_defense_mitigate_melee_sd = new QLabel(mitigationGrid);
+	m_label_defense_mitigate_melee_sd->setAlignment(Qt::AlignRight);
 	new QLabel("", mitigationGrid);
 	new QLabel("Count:", mitigationGrid);
 	m_label_defense_mitigate_melee_count = new QLabel(mitigationGrid);
@@ -908,6 +975,10 @@ QWidget* CombatWindow::initDefenseWidget()
 	m_label_defense_mitigate_special_avg = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_special_avg->setAlignment(Qt::AlignRight);
 	new QLabel("", mitigationGrid);
+	new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+	m_label_defense_mitigate_special_sd = new QLabel(mitigationGrid);
+	m_label_defense_mitigate_special_sd->setAlignment(Qt::AlignRight);
+	new QLabel("", mitigationGrid);
 	new QLabel("Count:", mitigationGrid);
 	m_label_defense_mitigate_special_count = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_special_count->setAlignment(Qt::AlignRight);
@@ -928,6 +999,10 @@ QWidget* CombatWindow::initDefenseWidget()
 	new QLabel("Avg:", mitigationGrid);
 	m_label_defense_mitigate_backstab_avg = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_backstab_avg->setAlignment(Qt::AlignRight);
+	new QLabel("", mitigationGrid);
+	new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+	m_label_defense_mitigate_backstab_sd = new QLabel(mitigationGrid);
+	m_label_defense_mitigate_backstab_sd->setAlignment(Qt::AlignRight);
 	new QLabel("", mitigationGrid);
 	new QLabel("Count:", mitigationGrid);
 	m_label_defense_mitigate_backstab_count = new QLabel(mitigationGrid);
@@ -950,6 +1025,10 @@ QWidget* CombatWindow::initDefenseWidget()
 	m_label_defense_mitigate_monk_avg = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_monk_avg->setAlignment(Qt::AlignRight);
 	new QLabel("", mitigationGrid);
+	new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+	m_label_defense_mitigate_monk_sd = new QLabel(mitigationGrid);
+	m_label_defense_mitigate_monk_sd->setAlignment(Qt::AlignRight);
+	new QLabel("", mitigationGrid);
 	new QLabel("Count:", mitigationGrid);
 	m_label_defense_mitigate_monk_count = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_monk_count->setAlignment(Qt::AlignRight);
@@ -970,6 +1049,10 @@ QWidget* CombatWindow::initDefenseWidget()
 	new QLabel("Avg:", mitigationGrid);
 	m_label_defense_mitigate_ranged_avg = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_ranged_avg->setAlignment(Qt::AlignRight);
+	new QLabel("", mitigationGrid);
+	new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+	m_label_defense_mitigate_ranged_sd = new QLabel(mitigationGrid);
+	m_label_defense_mitigate_ranged_sd->setAlignment(Qt::AlignRight);
 	new QLabel("", mitigationGrid);
 	new QLabel("Count:", mitigationGrid);
 	m_label_defense_mitigate_ranged_count = new QLabel(mitigationGrid);
@@ -992,6 +1075,10 @@ QWidget* CombatWindow::initDefenseWidget()
 	m_label_defense_mitigate_damageshield_avg = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_damageshield_avg->setAlignment(Qt::AlignRight);
 	new QLabel("", mitigationGrid);
+	new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+	m_label_defense_mitigate_damageshield_sd = new QLabel(mitigationGrid);
+	m_label_defense_mitigate_damageshield_sd->setAlignment(Qt::AlignRight);
+	new QLabel("", mitigationGrid);
 	new QLabel("Count:", mitigationGrid);
 	m_label_defense_mitigate_damageshield_count = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_damageshield_count->setAlignment(Qt::AlignRight);
@@ -1013,6 +1100,10 @@ QWidget* CombatWindow::initDefenseWidget()
 	m_label_defense_mitigate_nonmelee_avg = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_nonmelee_avg->setAlignment(Qt::AlignRight);
 	new QLabel("", mitigationGrid);
+	new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+	m_label_defense_mitigate_nonmelee_sd = new QLabel(mitigationGrid);
+	m_label_defense_mitigate_nonmelee_sd->setAlignment(Qt::AlignRight);
+	new QLabel("", mitigationGrid);
 	new QLabel("Count:", mitigationGrid);
 	m_label_defense_mitigate_nonmelee_count = new QLabel(mitigationGrid);
 	m_label_defense_mitigate_nonmelee_count->setAlignment(Qt::AlignRight);
@@ -1030,6 +1121,7 @@ QWidget* CombatWindow::initDefenseWidget()
 	((QGridLayout *)mitigationGrid->layout())->setColStretch(6, 1);
 	((QGridLayout *)mitigationGrid->layout())->setColStretch(9, 1);
 	((QGridLayout *)mitigationGrid->layout())->setColStretch(12, 1);
+	((QGridLayout *)mitigationGrid->layout())->setColStretch(15, 1);
 	mitigationGrid->layout()->setSpacing(5);
 
 
@@ -1151,7 +1243,7 @@ QWidget* CombatWindow::initPetDefenseWidget()
     QGroupBox *mitigationGBox = new QVGroupBox("Mitigation", pWidget);
     m_layout_pet_defense->addWidget(mitigationGBox);
 
-    QGrid *mitigationGrid = new QGrid(15, mitigationGBox);
+    QGrid *mitigationGrid = new QGrid(18, mitigationGBox);
 
     new QLabel("Melee:", mitigationGrid);
     new QLabel("% of Total:", mitigationGrid);
@@ -1161,6 +1253,10 @@ QWidget* CombatWindow::initPetDefenseWidget()
     new QLabel("Avg:", mitigationGrid);
     m_label_pet_defense_mitigate_melee_avg = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_melee_avg->setAlignment(Qt::AlignRight);
+    new QLabel("", mitigationGrid);
+    new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+    m_label_pet_defense_mitigate_melee_sd = new QLabel(mitigationGrid);
+    m_label_pet_defense_mitigate_melee_sd->setAlignment(Qt::AlignRight);
     new QLabel("", mitigationGrid);
     new QLabel("Count:", mitigationGrid);
     m_label_pet_defense_mitigate_melee_count = new QLabel(mitigationGrid);
@@ -1183,6 +1279,10 @@ QWidget* CombatWindow::initPetDefenseWidget()
     m_label_pet_defense_mitigate_special_avg = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_special_avg->setAlignment(Qt::AlignRight);
     new QLabel("", mitigationGrid);
+    new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+    m_label_pet_defense_mitigate_special_sd = new QLabel(mitigationGrid);
+    m_label_pet_defense_mitigate_special_sd->setAlignment(Qt::AlignRight);
+    new QLabel("", mitigationGrid);
     new QLabel("Count:", mitigationGrid);
     m_label_pet_defense_mitigate_special_count = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_special_count->setAlignment(Qt::AlignRight);
@@ -1203,6 +1303,10 @@ QWidget* CombatWindow::initPetDefenseWidget()
     new QLabel("Avg:", mitigationGrid);
     m_label_pet_defense_mitigate_backstab_avg = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_backstab_avg->setAlignment(Qt::AlignRight);
+    new QLabel("", mitigationGrid);
+    new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+    m_label_pet_defense_mitigate_backstab_sd = new QLabel(mitigationGrid);
+    m_label_pet_defense_mitigate_backstab_sd->setAlignment(Qt::AlignRight);
     new QLabel("", mitigationGrid);
     new QLabel("Count:", mitigationGrid);
     m_label_pet_defense_mitigate_backstab_count = new QLabel(mitigationGrid);
@@ -1225,6 +1329,10 @@ QWidget* CombatWindow::initPetDefenseWidget()
     m_label_pet_defense_mitigate_monk_avg = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_monk_avg->setAlignment(Qt::AlignRight);
     new QLabel("", mitigationGrid);
+    new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+    m_label_pet_defense_mitigate_monk_sd = new QLabel(mitigationGrid);
+    m_label_pet_defense_mitigate_monk_sd->setAlignment(Qt::AlignRight);
+    new QLabel("", mitigationGrid);
     new QLabel("Count:", mitigationGrid);
     m_label_pet_defense_mitigate_monk_count = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_monk_count->setAlignment(Qt::AlignRight);
@@ -1245,6 +1353,10 @@ QWidget* CombatWindow::initPetDefenseWidget()
     new QLabel("Avg:", mitigationGrid);
     m_label_pet_defense_mitigate_ranged_avg = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_ranged_avg->setAlignment(Qt::AlignRight);
+    new QLabel("", mitigationGrid);
+    new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+    m_label_pet_defense_mitigate_ranged_sd = new QLabel(mitigationGrid);
+    m_label_pet_defense_mitigate_ranged_sd->setAlignment(Qt::AlignRight);
     new QLabel("", mitigationGrid);
     new QLabel("Count:", mitigationGrid);
     m_label_pet_defense_mitigate_ranged_count = new QLabel(mitigationGrid);
@@ -1267,6 +1379,10 @@ QWidget* CombatWindow::initPetDefenseWidget()
     m_label_pet_defense_mitigate_damageshield_avg = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_damageshield_avg->setAlignment(Qt::AlignRight);
     new QLabel("", mitigationGrid);
+    new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+    m_label_pet_defense_mitigate_damageshield_sd = new QLabel(mitigationGrid);
+    m_label_pet_defense_mitigate_damageshield_sd->setAlignment(Qt::AlignRight);
+    new QLabel("", mitigationGrid);
     new QLabel("Count:", mitigationGrid);
     m_label_pet_defense_mitigate_damageshield_count = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_damageshield_count->setAlignment(Qt::AlignRight);
@@ -1288,6 +1404,10 @@ QWidget* CombatWindow::initPetDefenseWidget()
     m_label_pet_defense_mitigate_nonmelee_avg = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_nonmelee_avg->setAlignment(Qt::AlignRight);
     new QLabel("", mitigationGrid);
+    new QLabel(QString::fromUtf8("\u03c3:"), mitigationGrid);
+    m_label_pet_defense_mitigate_nonmelee_sd = new QLabel(mitigationGrid);
+    m_label_pet_defense_mitigate_nonmelee_sd->setAlignment(Qt::AlignRight);
+    new QLabel("", mitigationGrid);
     new QLabel("Count:", mitigationGrid);
     m_label_pet_defense_mitigate_nonmelee_count = new QLabel(mitigationGrid);
     m_label_pet_defense_mitigate_nonmelee_count->setAlignment(Qt::AlignRight);
@@ -1305,6 +1425,7 @@ QWidget* CombatWindow::initPetDefenseWidget()
     ((QGridLayout *)mitigationGrid->layout())->setColStretch(6, 1);
     ((QGridLayout *)mitigationGrid->layout())->setColStretch(9, 1);
     ((QGridLayout *)mitigationGrid->layout())->setColStretch(12, 1);
+    ((QGridLayout *)mitigationGrid->layout())->setColStretch(15, 1);
     mitigationGrid->layout()->setSpacing(5);
 
 
@@ -1976,36 +2097,43 @@ void CombatWindow::updateDefense()
 	const int iMeleeTotalDamage = m_combat_defense_record->getMeleeTotalDamage();
 	const int iMeleeMinDamage = m_combat_defense_record->getMeleeMinDamage();
 	const int iMeleeMaxDamage = m_combat_defense_record->getMeleeMaxDamage();
+	const double dMeleeSD = m_combat_defense_record->getMeleeStandardDeviation();
 
 	const int iRangedHits = m_combat_defense_record->getRangedHits();
 	const int iRangedTotalDamage = m_combat_defense_record->getRangedTotalDamage();
 	const int iRangedMinDamage = m_combat_defense_record->getRangedMinDamage();
 	const int iRangedMaxDamage = m_combat_defense_record->getRangedMaxDamage();
+	const double dRangedSD = m_combat_defense_record->getRangedStandardDeviation();
 
 	const int iSpecialHits = m_combat_defense_record->getSpecialHits();
 	const int iSpecialTotalDamage = m_combat_defense_record->getSpecialTotalDamage();
 	const int iSpecialMinDamage = m_combat_defense_record->getSpecialMinDamage();
 	const int iSpecialMaxDamage = m_combat_defense_record->getSpecialMaxDamage();
+	const double dSpecialSD = m_combat_defense_record->getSpecialStandardDeviation();
 
 	const int iBackstabHits = m_combat_defense_record->getBackstabHits();
 	const int iBackstabTotalDamage = m_combat_defense_record->getBackstabTotalDamage();
 	const int iBackstabMinDamage = m_combat_defense_record->getBackstabMinDamage();
 	const int iBackstabMaxDamage = m_combat_defense_record->getBackstabMaxDamage();
+	const double dBackstabSD = m_combat_defense_record->getBackstabStandardDeviation();
 
 	const int iMonkHits = m_combat_defense_record->getMonkHits();
 	const int iMonkTotalDamage = m_combat_defense_record->getMonkTotalDamage();
 	const int iMonkMinDamage = m_combat_defense_record->getMonkMinDamage();
 	const int iMonkMaxDamage = m_combat_defense_record->getMonkMaxDamage();
+	const double dMonkSD = m_combat_defense_record->getMonkStandardDeviation();
 
 	const int iNonmeleeHits = m_combat_defense_record->getNonmeleeHits();
 	const int iNonmeleeTotalDamage = m_combat_defense_record->getNonmeleeTotalDamage();
 	const int iNonmeleeMinDamage = m_combat_defense_record->getNonmeleeMinDamage();
 	const int iNonmeleeMaxDamage = m_combat_defense_record->getNonmeleeMaxDamage();
+	const double dNonmeleeSD = m_combat_defense_record->getNonmeleeStandardDeviation();
 
 	const int iDamageShieldHits = m_combat_defense_record->getDamageShieldHits();
 	const int iDamageShieldTotalDamage = m_combat_defense_record->getDamageShieldTotalDamage();
 	const int iDamageShieldMinDamage = m_combat_defense_record->getDamageShieldMinDamage();
 	const int iDamageShieldMaxDamage = m_combat_defense_record->getDamageShieldMaxDamage();
+	const double dDamageShieldSD = m_combat_defense_record->getDamageShieldStandardDeviation();
 
 	const double dMeleePercent = (double)iMeleeTotalDamage / (double)iTotalDamage * 100.0;
 	const double dMeleeAvg = (double)iMeleeTotalDamage / (double)iMeleeHits;
@@ -2042,42 +2170,49 @@ void CombatWindow::updateDefense()
 	m_label_defense_mitigate_melee_min->setText(intToQString(iMeleeMinDamage));
 	m_label_defense_mitigate_melee_max->setText(intToQString(iMeleeMaxDamage));
 	m_label_defense_mitigate_melee_count->setText(intToQString(iMeleeHits));
+	m_label_defense_mitigate_melee_sd->setText(doubleToQString(dMeleeSD, 0));
 
 	m_label_defense_mitigate_ranged_percent->setText(doubleToQString(dRangedPercent, 1));
 	m_label_defense_mitigate_ranged_avg->setText(doubleToQString(dRangedAvg, 0));
 	m_label_defense_mitigate_ranged_min->setText(intToQString(iRangedMinDamage));
 	m_label_defense_mitigate_ranged_max->setText(intToQString(iRangedMaxDamage));
 	m_label_defense_mitigate_ranged_count->setText(intToQString(iRangedHits));
+	m_label_defense_mitigate_ranged_sd->setText(doubleToQString(dRangedSD, 0));
 
 	m_label_defense_mitigate_special_percent->setText(doubleToQString(dSpecialPercent, 1));
 	m_label_defense_mitigate_special_avg->setText(doubleToQString(dSpecialAvg, 0));
 	m_label_defense_mitigate_special_min->setText(intToQString(iSpecialMinDamage));
 	m_label_defense_mitigate_special_max->setText(intToQString(iSpecialMaxDamage));
 	m_label_defense_mitigate_special_count->setText(intToQString(iSpecialHits));
+	m_label_defense_mitigate_special_sd->setText(doubleToQString(dSpecialSD, 0));
 
 	m_label_defense_mitigate_backstab_percent->setText(doubleToQString(dBackstabPercent, 1));
 	m_label_defense_mitigate_backstab_avg->setText(doubleToQString(dBackstabAvg, 0));
 	m_label_defense_mitigate_backstab_min->setText(intToQString(iBackstabMinDamage));
 	m_label_defense_mitigate_backstab_max->setText(intToQString(iBackstabMaxDamage));
 	m_label_defense_mitigate_backstab_count->setText(intToQString(iBackstabHits));
+	m_label_defense_mitigate_backstab_sd->setText(doubleToQString(dBackstabSD, 0));
 
 	m_label_defense_mitigate_monk_percent->setText(doubleToQString(dMonkPercent, 1));
 	m_label_defense_mitigate_monk_avg->setText(doubleToQString(dMonkAvg, 0));
 	m_label_defense_mitigate_monk_min->setText(intToQString(iMonkMinDamage));
 	m_label_defense_mitigate_monk_max->setText(intToQString(iMonkMaxDamage));
 	m_label_defense_mitigate_monk_count->setText(intToQString(iMonkHits));
+	m_label_defense_mitigate_monk_sd->setText(doubleToQString(dMonkSD, 0));
 
 	m_label_defense_mitigate_nonmelee_percent->setText(doubleToQString(dNonmeleePercent, 1));
 	m_label_defense_mitigate_nonmelee_avg->setText(doubleToQString(dNonmeleeAvg, 0));
 	m_label_defense_mitigate_nonmelee_min->setText(intToQString(iNonmeleeMinDamage));
 	m_label_defense_mitigate_nonmelee_max->setText(intToQString(iNonmeleeMaxDamage));
 	m_label_defense_mitigate_nonmelee_count->setText(intToQString(iNonmeleeHits));
+	m_label_defense_mitigate_nonmelee_sd->setText(doubleToQString(dNonmeleeSD, 0));
 
 	m_label_defense_mitigate_damageshield_percent->setText(doubleToQString(dDamageShieldPercent, 1));
 	m_label_defense_mitigate_damageshield_avg->setText(doubleToQString(dDamageShieldAvg, 0));
 	m_label_defense_mitigate_damageshield_min->setText(intToQString(iDamageShieldMinDamage));
 	m_label_defense_mitigate_damageshield_max->setText(intToQString(iDamageShieldMaxDamage));
 	m_label_defense_mitigate_damageshield_count->setText(intToQString(iDamageShieldHits));
+	m_label_defense_mitigate_damageshield_sd->setText(doubleToQString(dDamageShieldSD, 0));
 
 	m_label_defense_summary_mobhits->setText(QString::number(iHits));
 	m_label_defense_summary_mobattacks->setText(QString::number(iMobAttacks));
@@ -2107,42 +2242,49 @@ void CombatWindow::updatePetDefense()
         m_label_pet_defense_mitigate_melee_min->clear();
         m_label_pet_defense_mitigate_melee_max->clear();
         m_label_pet_defense_mitigate_melee_count->clear();
+        m_label_pet_defense_mitigate_melee_sd->clear();
 
         m_label_pet_defense_mitigate_ranged_percent->clear();
         m_label_pet_defense_mitigate_ranged_avg->clear();
         m_label_pet_defense_mitigate_ranged_min->clear();
         m_label_pet_defense_mitigate_ranged_max->clear();
         m_label_pet_defense_mitigate_ranged_count->clear();
+        m_label_pet_defense_mitigate_ranged_sd->clear();
 
         m_label_pet_defense_mitigate_special_percent->clear();
         m_label_pet_defense_mitigate_special_avg->clear();
         m_label_pet_defense_mitigate_special_min->clear();
         m_label_pet_defense_mitigate_special_max->clear();
         m_label_pet_defense_mitigate_special_count->clear();
+        m_label_pet_defense_mitigate_special_sd->clear();
 
         m_label_pet_defense_mitigate_backstab_percent->clear();
         m_label_pet_defense_mitigate_backstab_avg->clear();
         m_label_pet_defense_mitigate_backstab_min->clear();
         m_label_pet_defense_mitigate_backstab_max->clear();
         m_label_pet_defense_mitigate_backstab_count->clear();
+        m_label_pet_defense_mitigate_backstab_sd->clear();
 
         m_label_pet_defense_mitigate_monk_percent->clear();
         m_label_pet_defense_mitigate_monk_avg->clear();
         m_label_pet_defense_mitigate_monk_min->clear();
         m_label_pet_defense_mitigate_monk_max->clear();
         m_label_pet_defense_mitigate_monk_count->clear();
+        m_label_pet_defense_mitigate_monk_sd->clear();
 
         m_label_pet_defense_mitigate_nonmelee_percent->clear();
         m_label_pet_defense_mitigate_nonmelee_avg->clear();
         m_label_pet_defense_mitigate_nonmelee_min->clear();
         m_label_pet_defense_mitigate_nonmelee_max->clear();
         m_label_pet_defense_mitigate_nonmelee_count->clear();
+        m_label_pet_defense_mitigate_nonmelee_sd->clear();
 
         m_label_pet_defense_mitigate_damageshield_percent->clear();
         m_label_pet_defense_mitigate_damageshield_avg->clear();
         m_label_pet_defense_mitigate_damageshield_min->clear();
         m_label_pet_defense_mitigate_damageshield_max->clear();
         m_label_pet_defense_mitigate_damageshield_count->clear();
+        m_label_pet_defense_mitigate_damageshield_sd->clear();
 
         m_label_pet_defense_summary_mobhits->clear();
         m_label_pet_defense_summary_mobattacks->clear();
@@ -2168,36 +2310,43 @@ void CombatWindow::updatePetDefense()
     const int iMeleeTotalDamage = pRecord->getMeleeTotalDamage();
     const int iMeleeMinDamage = pRecord->getMeleeMinDamage();
     const int iMeleeMaxDamage = pRecord->getMeleeMaxDamage();
+    const double dMeleeSD = pRecord->getMeleeStandardDeviation();
 
     const int iRangedHits = pRecord->getRangedHits();
     const int iRangedTotalDamage = pRecord->getRangedTotalDamage();
     const int iRangedMinDamage = pRecord->getRangedMinDamage();
     const int iRangedMaxDamage = pRecord->getRangedMaxDamage();
+    const double dRangedSD = pRecord->getRangedStandardDeviation();
 
     const int iSpecialHits = pRecord->getSpecialHits();
     const int iSpecialTotalDamage = pRecord->getSpecialTotalDamage();
     const int iSpecialMinDamage = pRecord->getSpecialMinDamage();
     const int iSpecialMaxDamage = pRecord->getSpecialMaxDamage();
+    const double dSpecialSD = pRecord->getSpecialStandardDeviation();
 
     const int iBackstabHits = pRecord->getBackstabHits();
     const int iBackstabTotalDamage = pRecord->getBackstabTotalDamage();
     const int iBackstabMinDamage = pRecord->getBackstabMinDamage();
     const int iBackstabMaxDamage = pRecord->getBackstabMaxDamage();
+    const double dBackstabSD = pRecord->getBackstabStandardDeviation();
 
     const int iMonkHits = pRecord->getMonkHits();
     const int iMonkTotalDamage = pRecord->getMonkTotalDamage();
     const int iMonkMinDamage = pRecord->getMonkMinDamage();
     const int iMonkMaxDamage = pRecord->getMonkMaxDamage();
+    const double dMonkSD = pRecord->getMonkStandardDeviation();
 
     const int iNonmeleeHits = pRecord->getNonmeleeHits();
     const int iNonmeleeTotalDamage = pRecord->getNonmeleeTotalDamage();
     const int iNonmeleeMinDamage = pRecord->getNonmeleeMinDamage();
     const int iNonmeleeMaxDamage = pRecord->getNonmeleeMaxDamage();
+    const double dNonmeleeSD = pRecord->getNonmeleeStandardDeviation();
 
     const int iDamageShieldHits = pRecord->getDamageShieldHits();
     const int iDamageShieldTotalDamage = pRecord->getDamageShieldTotalDamage();
     const int iDamageShieldMinDamage = pRecord->getDamageShieldMinDamage();
     const int iDamageShieldMaxDamage = pRecord->getDamageShieldMaxDamage();
+    const double dDamageShieldSD = pRecord->getDamageShieldStandardDeviation();
 
     const double dMeleePercent = (double)iMeleeTotalDamage / (double)iTotalDamage * 100.0;
     const double dMeleeAvg = (double)iMeleeTotalDamage / (double)iMeleeHits;
@@ -2234,42 +2383,49 @@ void CombatWindow::updatePetDefense()
     m_label_pet_defense_mitigate_melee_min->setText(intToQString(iMeleeMinDamage));
     m_label_pet_defense_mitigate_melee_max->setText(intToQString(iMeleeMaxDamage));
     m_label_pet_defense_mitigate_melee_count->setText(intToQString(iMeleeHits));
+    m_label_pet_defense_mitigate_melee_sd->setText(doubleToQString(dMeleeSD, 0));
 
     m_label_pet_defense_mitigate_ranged_percent->setText(doubleToQString(dRangedPercent, 1));
     m_label_pet_defense_mitigate_ranged_avg->setText(doubleToQString(dRangedAvg, 0));
     m_label_pet_defense_mitigate_ranged_min->setText(intToQString(iRangedMinDamage));
     m_label_pet_defense_mitigate_ranged_max->setText(intToQString(iRangedMaxDamage));
     m_label_pet_defense_mitigate_ranged_count->setText(intToQString(iRangedHits));
+    m_label_pet_defense_mitigate_ranged_sd->setText(doubleToQString(dRangedSD, 0));
 
     m_label_pet_defense_mitigate_special_percent->setText(doubleToQString(dSpecialPercent, 1));
     m_label_pet_defense_mitigate_special_avg->setText(doubleToQString(dSpecialAvg, 0));
     m_label_pet_defense_mitigate_special_min->setText(intToQString(iSpecialMinDamage));
     m_label_pet_defense_mitigate_special_max->setText(intToQString(iSpecialMaxDamage));
     m_label_pet_defense_mitigate_special_count->setText(intToQString(iSpecialHits));
+    m_label_pet_defense_mitigate_special_sd->setText(doubleToQString(dSpecialSD, 0));
 
     m_label_pet_defense_mitigate_backstab_percent->setText(doubleToQString(dBackstabPercent, 1));
     m_label_pet_defense_mitigate_backstab_avg->setText(doubleToQString(dBackstabAvg, 0));
     m_label_pet_defense_mitigate_backstab_min->setText(intToQString(iBackstabMinDamage));
     m_label_pet_defense_mitigate_backstab_max->setText(intToQString(iBackstabMaxDamage));
     m_label_pet_defense_mitigate_backstab_count->setText(intToQString(iBackstabHits));
+    m_label_pet_defense_mitigate_backstab_sd->setText(doubleToQString(dBackstabSD, 0));
 
     m_label_pet_defense_mitigate_monk_percent->setText(doubleToQString(dMonkPercent, 1));
     m_label_pet_defense_mitigate_monk_avg->setText(doubleToQString(dMonkAvg, 0));
     m_label_pet_defense_mitigate_monk_min->setText(intToQString(iMonkMinDamage));
     m_label_pet_defense_mitigate_monk_max->setText(intToQString(iMonkMaxDamage));
     m_label_pet_defense_mitigate_monk_count->setText(intToQString(iMonkHits));
+    m_label_pet_defense_mitigate_monk_sd->setText(doubleToQString(dMonkSD, 0));
 
     m_label_pet_defense_mitigate_nonmelee_percent->setText(doubleToQString(dNonmeleePercent, 1));
     m_label_pet_defense_mitigate_nonmelee_avg->setText(doubleToQString(dNonmeleeAvg, 0));
     m_label_pet_defense_mitigate_nonmelee_min->setText(intToQString(iNonmeleeMinDamage));
     m_label_pet_defense_mitigate_nonmelee_max->setText(intToQString(iNonmeleeMaxDamage));
     m_label_pet_defense_mitigate_nonmelee_count->setText(intToQString(iNonmeleeHits));
+    m_label_pet_defense_mitigate_nonmelee_sd->setText(doubleToQString(dNonmeleeSD, 0));
 
     m_label_pet_defense_mitigate_damageshield_percent->setText(doubleToQString(dDamageShieldPercent, 1));
     m_label_pet_defense_mitigate_damageshield_avg->setText(doubleToQString(dDamageShieldAvg, 0));
     m_label_pet_defense_mitigate_damageshield_min->setText(intToQString(iDamageShieldMinDamage));
     m_label_pet_defense_mitigate_damageshield_max->setText(intToQString(iDamageShieldMaxDamage));
     m_label_pet_defense_mitigate_damageshield_count->setText(intToQString(iDamageShieldHits));
+    m_label_pet_defense_mitigate_damageshield_sd->setText(doubleToQString(dDamageShieldSD, 0));
 
     m_label_pet_defense_summary_mobhits->setText(QString::number(iHits));
     m_label_pet_defense_summary_mobattacks->setText(QString::number(iMobAttacks));
