@@ -148,9 +148,10 @@ CombatOffenseRecord::CombatOffenseRecord( int iType, const Player* p, int iSpell
 	m_iMisses(0),
 	m_iMinDamage(0),
 	m_iMaxDamage(0),
-	m_iTotalDamage(0)
+	m_iTotalDamage(0),
+	m_dAverage(0.0),
+	m_dM2(0.0)
 {
-
 }
 
 
@@ -162,12 +163,16 @@ void CombatOffenseRecord::addHit(int iDamage)
 	m_iHits++;
 	m_iTotalDamage += iDamage;
 
-	if(iDamage > 0 && (iDamage < m_iMinDamage || !m_iMinDamage))
+	if(iDamage < m_iMinDamage || !m_iMinDamage)
 		m_iMinDamage = iDamage;
 
 	if(iDamage > m_iMaxDamage)
 		m_iMaxDamage = iDamage;
 
+    const double delta1 = iDamage - m_dAverage;
+    m_dAverage += delta1 / m_iHits;
+    const double delta2 = iDamage - m_dAverage;
+    m_dM2 += delta1 * delta2;
 }
 
 
@@ -723,12 +728,14 @@ QWidget* CombatWindow::initOffenseWidget()
 	m_listview_offense->setColumnAlignment(3, Qt::AlignRight);
 	m_listview_offense->addColumn("Avg");
 	m_listview_offense->setColumnAlignment(4, Qt::AlignRight);
-	m_listview_offense->addColumn("Min");
+	m_listview_offense->addColumn(QString::fromUtf8("SD (\u03c3)"));
 	m_listview_offense->setColumnAlignment(5, Qt::AlignRight);
-	m_listview_offense->addColumn("Max");
+	m_listview_offense->addColumn("Min");
 	m_listview_offense->setColumnAlignment(6, Qt::AlignRight);
-	m_listview_offense->addColumn("Total");
+	m_listview_offense->addColumn("Max");
 	m_listview_offense->setColumnAlignment(7, Qt::AlignRight);
+	m_listview_offense->addColumn("Total");
+	m_listview_offense->setColumnAlignment(8, Qt::AlignRight);
 
 	m_listview_offense->restoreColumns();
 
@@ -1693,6 +1700,7 @@ void CombatWindow::updateOffense()
         const int iMinDamage = m_nonmelee_offense_record->getMinDamage();
         const int iMaxDamage = m_nonmelee_offense_record->getMaxDamage();
         const int iDamage = m_nonmelee_offense_record->getTotalDamage();
+        const double dSD = m_nonmelee_offense_record->getStandardDeviation();
 
         const double dAvgDamage = (double)iDamage / (double)iHits;
 
@@ -1702,6 +1710,7 @@ void CombatWindow::updateOffense()
         QString s_misses;
         QString s_accuracy;
         QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+        QString s_sd = doubleToQString(dSD, 0);
         QString s_mindamage = intToQString(iMinDamage);
         QString s_maxdamage = intToQString(iMaxDamage);
         QString s_damage;
@@ -1709,14 +1718,16 @@ void CombatWindow::updateOffense()
 
         SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
                 s_type, s_hits, s_misses, s_accuracy,
-                s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+                s_avgdamage, s_sd, s_mindamage, s_maxdamage);
+        pItem->setText(8, s_damage);
         pItem->setColComparator(1, SEQListViewItemCompareInt);
         pItem->setColComparator(2, SEQListViewItemCompareInt);
         pItem->setColComparator(3, SEQListViewItemCompareDouble);
         pItem->setColComparator(4, SEQListViewItemCompareDouble);
-        pItem->setColComparator(5, SEQListViewItemCompareInt);
+        pItem->setColComparator(5, SEQListViewItemCompareDouble);
         pItem->setColComparator(6, SEQListViewItemCompareInt);
         pItem->setColComparator(7, SEQListViewItemCompareInt);
+        pItem->setColComparator(8, SEQListViewItemCompareInt);
 
         m_listview_offense->insertItem(pItem);
 
@@ -1735,6 +1746,7 @@ void CombatWindow::updateOffense()
 		int iMinDamage = pRecord->getMinDamage();
 		int iMaxDamage = pRecord->getMaxDamage();
 		int iDamage = pRecord->getTotalDamage();
+		const double dSD = pRecord->getStandardDeviation();
 
 		double dAvgDamage = (double)iDamage / (double)iHits;
 		double dAccuracy = (double)iHits / (double)(iMisses+iHits);
@@ -1774,6 +1786,7 @@ void CombatWindow::updateOffense()
 			s_accuracy = QString::number(dAccuracy, 'f', 2);
 		}
 		QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+		QString s_sd = doubleToQString(dSD, 0);
 		QString s_mindamage = intToQString(iMinDamage);
 		QString s_maxdamage = intToQString(iMaxDamage);
 		QString s_damage;
@@ -1781,14 +1794,16 @@ void CombatWindow::updateOffense()
 
 		SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
 			s_type, s_hits, s_misses, s_accuracy,
-			s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+			s_avgdamage, s_sd, s_mindamage, s_maxdamage);
+        pItem->setText(8, s_damage);
         pItem->setColComparator(1, SEQListViewItemCompareInt);
         pItem->setColComparator(2, SEQListViewItemCompareInt);
         pItem->setColComparator(3, SEQListViewItemCompareDouble);
         pItem->setColComparator(4, SEQListViewItemCompareDouble);
-        pItem->setColComparator(5, SEQListViewItemCompareInt);
+        pItem->setColComparator(5, SEQListViewItemCompareDouble);
         pItem->setColComparator(6, SEQListViewItemCompareInt);
         pItem->setColComparator(7, SEQListViewItemCompareInt);
+        pItem->setColComparator(8, SEQListViewItemCompareInt);
 
 		m_listview_offense->insertItem(pItem);
 
@@ -1837,6 +1852,7 @@ void CombatWindow::updateOffense()
         const int iMinDamage = petRecord->getMinDamage();
         const int iMaxDamage = petRecord->getMaxDamage();
         const int iDamage = petRecord->getTotalDamage();
+        const double dSD = petRecord->getStandardDeviation();
 
         const double dAvgDamage = (double)iDamage / (double)iHits;
         const double dAccuracy = (double)iHits / (double)(iMisses+iHits);
@@ -1878,6 +1894,7 @@ void CombatWindow::updateOffense()
             s_accuracy = QString::number(dAccuracy, 'f', 2);
         }
         QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+        QString s_sd = doubleToQString(dSD, 0);
         QString s_mindamage = intToQString(iMinDamage);
         QString s_maxdamage = intToQString(iMaxDamage);
         QString s_damage;
@@ -1885,14 +1902,16 @@ void CombatWindow::updateOffense()
 
         SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
                 s_type, s_hits, s_misses, s_accuracy,
-                s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+                s_avgdamage, s_sd, s_mindamage, s_maxdamage);
+        pItem->setText(8, s_damage);
         pItem->setColComparator(1, SEQListViewItemCompareInt);
         pItem->setColComparator(2, SEQListViewItemCompareInt);
         pItem->setColComparator(3, SEQListViewItemCompareDouble);
         pItem->setColComparator(4, SEQListViewItemCompareDouble);
-        pItem->setColComparator(5, SEQListViewItemCompareInt);
+        pItem->setColComparator(5, SEQListViewItemCompareDouble);
         pItem->setColComparator(6, SEQListViewItemCompareInt);
         pItem->setColComparator(7, SEQListViewItemCompareInt);
+        pItem->setColComparator(8, SEQListViewItemCompareInt);
 
         m_listview_offense->insertItem(pItem);
 
@@ -1937,6 +1956,7 @@ void CombatWindow::updateOffense()
 		int iMinDamage = dotRecord->getMinDamage();
 		int iMaxDamage = dotRecord->getMaxDamage();
 		int iDamage = dotRecord->getTotalDamage();
+		const double dSD = dotRecord->getStandardDeviation();
 
 		double dAvgDamage = (double)iDamage / (double)iTicks;
 
@@ -1947,6 +1967,7 @@ void CombatWindow::updateOffense()
 		QString s_misses;
 		QString s_accuracy;
 		QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+		QString s_sd = doubleToQString(dSD, 0);
 		QString s_mindamage = intToQString(iMinDamage);
 		QString s_maxdamage = intToQString(iMaxDamage);
 		QString s_damage;
@@ -1954,14 +1975,16 @@ void CombatWindow::updateOffense()
 
 		SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
 			s_type, s_hits, s_misses, s_accuracy,
-			s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+			s_avgdamage, s_sd, s_mindamage, s_maxdamage);
+        pItem->setText(8, s_damage);
         pItem->setColComparator(1, SEQListViewItemCompareInt);
         pItem->setColComparator(2, SEQListViewItemCompareInt);
         pItem->setColComparator(3, SEQListViewItemCompareDouble);
         pItem->setColComparator(4, SEQListViewItemCompareDouble);
-        pItem->setColComparator(5, SEQListViewItemCompareInt);
+        pItem->setColComparator(5, SEQListViewItemCompareDouble);
         pItem->setColComparator(6, SEQListViewItemCompareInt);
         pItem->setColComparator(7, SEQListViewItemCompareInt);
+        pItem->setColComparator(8, SEQListViewItemCompareInt);
 
 		m_listview_offense->insertItem(pItem);
 

@@ -64,6 +64,9 @@ public:
 	int		getMinDamage() { return m_iMinDamage; };
 	int		getMaxDamage() { return m_iMaxDamage; };
 	int		getTotalDamage() { return m_iTotalDamage; };
+	double	getAverage() const { return m_dAverage; };
+	double	getStandardDeviation() const
+		{ return m_iHits < 2 ? 0.0 : std::sqrt(m_dM2/(m_iHits-1)); };
 
 	void	addMiss(int iMissReason) { m_iMisses++; };
 	void	addHit(int iDamage);
@@ -78,7 +81,8 @@ protected:
 	int			m_iMinDamage;
 	int			m_iMaxDamage;
 	int			m_iTotalDamage;
-
+	double		m_dAverage;
+	double		m_dM2;
 };
 
 
