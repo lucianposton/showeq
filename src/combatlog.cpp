@@ -1240,9 +1240,16 @@ void CombatWindow::updateOffense()
         QString s_damage;
         s_damage.setNum(iDamage);
 
-        QListViewItem *pItem = new QListViewItem(m_listview_offense,
+        SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
                 s_type, s_hits, s_misses, s_accuracy,
                 s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+        pItem->setColComparator(1, SEQListViewItemCompareInt);
+        pItem->setColComparator(2, SEQListViewItemCompareInt);
+        pItem->setColComparator(3, SEQListViewItemCompareDouble);
+        pItem->setColComparator(4, SEQListViewItemCompareDouble);
+        pItem->setColComparator(5, SEQListViewItemCompareInt);
+        pItem->setColComparator(6, SEQListViewItemCompareInt);
+        pItem->setColComparator(7, SEQListViewItemCompareInt);
 
         m_listview_offense->insertItem(pItem);
 
@@ -1303,9 +1310,16 @@ void CombatWindow::updateOffense()
 		QString s_damage;
 		s_damage.setNum(iDamage);
 
-		QListViewItem *pItem = new QListViewItem(m_listview_offense,
+		SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
 			s_type, s_hits, s_misses, s_accuracy,
 			s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+        pItem->setColComparator(1, SEQListViewItemCompareInt);
+        pItem->setColComparator(2, SEQListViewItemCompareInt);
+        pItem->setColComparator(3, SEQListViewItemCompareDouble);
+        pItem->setColComparator(4, SEQListViewItemCompareDouble);
+        pItem->setColComparator(5, SEQListViewItemCompareInt);
+        pItem->setColComparator(6, SEQListViewItemCompareInt);
+        pItem->setColComparator(7, SEQListViewItemCompareInt);
 
 		m_listview_offense->insertItem(pItem);
 
@@ -1394,9 +1408,16 @@ void CombatWindow::updateOffense()
         QString s_damage;
         s_damage.setNum(iDamage);
 
-        QListViewItem *pItem = new QListViewItem(m_listview_offense,
+        SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
                 s_type, s_hits, s_misses, s_accuracy,
                 s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+        pItem->setColComparator(1, SEQListViewItemCompareInt);
+        pItem->setColComparator(2, SEQListViewItemCompareInt);
+        pItem->setColComparator(3, SEQListViewItemCompareDouble);
+        pItem->setColComparator(4, SEQListViewItemCompareDouble);
+        pItem->setColComparator(5, SEQListViewItemCompareInt);
+        pItem->setColComparator(6, SEQListViewItemCompareInt);
+        pItem->setColComparator(7, SEQListViewItemCompareInt);
 
         m_listview_offense->insertItem(pItem);
 
@@ -1453,9 +1474,16 @@ void CombatWindow::updateOffense()
 		QString s_damage;
 		s_damage.setNum(iDamage);
 
-		QListViewItem *pItem = new QListViewItem(m_listview_offense,
+		SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
 			s_type, s_hits, s_misses, s_accuracy,
 			s_avgdamage, s_mindamage, s_maxdamage, s_damage);
+        pItem->setColComparator(1, SEQListViewItemCompareInt);
+        pItem->setColComparator(2, SEQListViewItemCompareInt);
+        pItem->setColComparator(3, SEQListViewItemCompareDouble);
+        pItem->setColComparator(4, SEQListViewItemCompareDouble);
+        pItem->setColComparator(5, SEQListViewItemCompareInt);
+        pItem->setColComparator(6, SEQListViewItemCompareInt);
+        pItem->setColComparator(7, SEQListViewItemCompareInt);
 
 		m_listview_offense->insertItem(pItem);
 
@@ -1707,13 +1735,24 @@ void CombatWindow::updateMob()
 		QString s_petmobdps = doubleToQString(dPetMobDPS, 1);
 
 
-		QListViewItem *pItem = new QListViewItem(m_listview_mob,
+		SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_mob,
 			s_time, s_name, s_id, s_duration, s_damagegiven,
 			s_dps, s_iDamageTaken, s_mobdps);
 		pItem->setText(8, s_petdamagegiven);
 		pItem->setText(9, s_petdps);
 		pItem->setText(10, s_petiDamageTaken);
 		pItem->setText(11, s_petmobdps);
+
+        pItem->setColComparator(2, SEQListViewItemCompareInt);
+        pItem->setColComparator(3, SEQListViewItemCompareInt);
+        pItem->setColComparator(4, SEQListViewItemCompareInt);
+        pItem->setColComparator(5, SEQListViewItemCompareDouble);
+        pItem->setColComparator(6, SEQListViewItemCompareInt);
+        pItem->setColComparator(7, SEQListViewItemCompareDouble);
+        pItem->setColComparator(8, SEQListViewItemCompareInt);
+        pItem->setColComparator(9, SEQListViewItemCompareDouble);
+        pItem->setColComparator(10, SEQListViewItemCompareInt);
+        pItem->setColComparator(11, SEQListViewItemCompareDouble);
 
 		m_listview_mob->insertItem(pItem);
 
@@ -1762,9 +1801,14 @@ void CombatWindow::updateOther()
         QString s_damagetotal = QString::number(iDamageTotal);
         QString s_dps = doubleToQString(dDPS, 1);
 
-        QListViewItem *pItem = new QListViewItem(m_listview_other,
+        SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_other,
                 s_time, s_sourcename, s_sourceid, s_targetname, s_targetid,
                 s_duration, s_damagetotal, s_dps);
+        pItem->setColComparator(2, SEQListViewItemCompareInt);
+        pItem->setColComparator(4, SEQListViewItemCompareInt);
+        pItem->setColComparator(5, SEQListViewItemCompareInt);
+        pItem->setColComparator(6, SEQListViewItemCompareInt);
+        pItem->setColComparator(7, SEQListViewItemCompareDouble);
 
         m_listview_other->insertItem(pItem);
 
