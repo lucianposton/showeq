@@ -388,6 +388,7 @@ public slots:
 	void considerSpawn();
 
 	void charmUpdate(const uint8_t* data);
+	void newSpawn(const uint8_t* data);
 	void petDefenseComboboxSelectionChanged(const QString& selected);
 
 private:

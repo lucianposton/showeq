@@ -2926,7 +2926,7 @@ void CombatWindow::addPetDefenseRecord(const Spawn* s, int iDamage, DamageCatego
         m_combobox_pet_defense->insertItem(pet_id_string, 0);
     }
 
-    if (m_autoupdate_pet_defense_selection)
+    if (m_autoupdate_pet_defense_selection || m_combat_pet_defense_current_record == NULL)
     {
         m_autoupdate_pet_defense_selection = false;
         bool foundText = false;
@@ -3280,6 +3280,15 @@ void CombatWindow::charmUpdate(const uint8_t* data)
     const Charm_Struct* update = (const Charm_Struct*)data;
 
     if (update->owner_id == m_player->id() && update->command)
+    {
+        m_autoupdate_pet_defense_selection = true;
+    }
+}
+
+void CombatWindow::newSpawn(const uint8_t* data)
+{
+    const spawnStruct* s = (const spawnStruct*)data;
+    if (s->petOwnerId == m_player->id())
     {
         m_autoupdate_pet_defense_selection = true;
     }

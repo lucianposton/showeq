@@ -2249,6 +2249,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_Charm", SP_Zone, DIR_Server,
            "Charm_Struct", SZC_Match,
            m_combatWindow, SLOT(charmUpdate(const uint8_t*)));
+   m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
+           "spawnStruct", SZC_Match,
+           m_combatWindow, SLOT(newSpawn(const uint8_t*)));
      connect(this, SIGNAL(restoreFonts(void)),
 	     m_combatWindow, SLOT(restoreFont(void)));
      connect(this, SIGNAL(saveAllPrefs(void)),
