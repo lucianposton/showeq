@@ -1774,9 +1774,14 @@ void CombatWindow::updateOffense()
 				break;
 			}
 			case DAMAGE_CATEGORY_DAMAGE_SHIELD:
-			default:
 			{
 				s_type.sprintf("Damage Shield: (%d)", iType);
+				break;
+			}
+			case DAMAGE_CATEGORY_ENVIRONMENT:
+			case DAMAGE_CATEGORY_OTHER:
+			{
+				seqWarn("CombatWindow::updateOffense: Unknown s_type. unexpected category=%d", category);
 				break;
 			}
 		}
@@ -1835,10 +1840,15 @@ void CombatWindow::updateOffense()
 				break;
 			}
 			case DAMAGE_CATEGORY_DAMAGE_SHIELD:
-			default:
 			{
 				iDSDamage += iDamage;
 				iDSHits += iHits;
+				break;
+			}
+			case DAMAGE_CATEGORY_ENVIRONMENT:
+			case DAMAGE_CATEGORY_OTHER:
+			{
+				seqWarn("CombatWindow::updateOffense: Unknown damage type. unexpected category=%d", category);
 				break;
 			}
 		}
@@ -1884,9 +1894,14 @@ void CombatWindow::updateOffense()
                     break;
                 }
             case DAMAGE_CATEGORY_DAMAGE_SHIELD:
-            default:
                 {
                     s_type.sprintf("Pet: %s(%d): Damage Shield: (%d)", (const char*)iPetName, iPetID, iType);
+                    break;
+                }
+            case DAMAGE_CATEGORY_ENVIRONMENT:
+            case DAMAGE_CATEGORY_OTHER:
+                {
+                    seqWarn("CombatWindow::updateOffense: Unknown pet s_type. unexpected category=%d", category);
                     break;
                 }
         }
@@ -1945,10 +1960,15 @@ void CombatWindow::updateOffense()
                     break;
                 }
             case DAMAGE_CATEGORY_DAMAGE_SHIELD:
-            default:
                 {
                     iPetDSDamage += iDamage;
                     iPetDSHits += iHits;
+                    break;
+                }
+            case DAMAGE_CATEGORY_ENVIRONMENT:
+            case DAMAGE_CATEGORY_OTHER:
+                {
+                    seqWarn("CombatWindow::updateOffense: Unknown pet damage type. unexpected category=%d", category);
                     break;
                 }
         }
