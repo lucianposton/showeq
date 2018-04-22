@@ -102,6 +102,10 @@ static DamageCategory damageCategory(int iType)
             {
                 return DAMAGE_CATEGORY_ENVIRONMENT;
             }
+        case 4: // pet kills self, /pet get lost
+            {
+                return DAMAGE_CATEGORY_OTHER;
+            }
         default:        // Damage Shield?
             {
                 // 245 Mark of Retribution
@@ -132,6 +136,11 @@ static bool isMelee(int iType)
 static bool isDamageShield(int iType)
 {
     return damageCategory(iType) == DAMAGE_CATEGORY_DAMAGE_SHIELD;
+}
+
+static bool isIgnoredDamageCategory(DamageCategory c)
+{
+    return c == DAMAGE_CATEGORY_ENVIRONMENT || c == DAMAGE_CATEGORY_OTHER;
 }
 
 } // namespace
@@ -405,6 +414,7 @@ void CombatDefenseRecord::addHit(int iDamage, DamageCategory category)
                 m_iDamageShieldMaxDamage = iDamage;
             break;
             }
+        case DAMAGE_CATEGORY_OTHER:
         case DAMAGE_CATEGORY_ENVIRONMENT:
             seqWarn("CombatDefenseRecord::addHit: unexpected category=%d", category);
             break;
@@ -2654,6 +2664,9 @@ void CombatWindow::addCombatRecord(
 #endif
 
     const DamageCategory category = damageCategory(iType);
+    if (isIgnoredDamageCategory(category))
+        return;
+
 	const int iPlayerID = m_player->id();
     const int iSourcePetOwnerID = (source == NULL) ? -1 : source->petOwnerID();
     const int iTargetPetOwnerID = (target == NULL) ? -1 : target->petOwnerID();
