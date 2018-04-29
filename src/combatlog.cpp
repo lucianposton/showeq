@@ -146,10 +146,106 @@ static bool isIgnoredDamageCategory(DamageCategory c)
 } // namespace
 
 
+Record::Record() :
+    m_isDirty(true),
+    m_viewItem(NULL)
+{
+}
+
+Record::~Record()
+{
+}
+
+void Record::clear()
+{
+    clearImpl();
+    m_isDirty = true;
+    m_viewItem = NULL;
+}
+
+void Record::addHit(int iDamage, DamageCategory category,
+        int iTarget, int iSource)
+{
+    addHitImpl(iDamage, category, iTarget, iSource);
+    m_isDirty = true;
+}
+
+void Record::addMiss(int iMissReason)
+{
+    addMissImpl(iMissReason);
+    m_isDirty = true;
+}
+
+void Record::update(QListView* parent)
+{
+    if (!m_isDirty)
+        return;
+    m_isDirty = false;
+
+    updateImpl(parent);
+}
+
+void Record::updateViewItem(
+        QListView* parent,
+        const QString& l0,
+        const QString& l1,
+        const QString& l2,
+        const QString& l3,
+        const QString& l4,
+        const QString& l5,
+        const QString& l6,
+        const QString& l7,
+        const QString& l8,
+        const QString& l9,
+        const QString& l10,
+        const QString& l11)
+{
+    if (m_viewItem == NULL)
+    {
+        m_viewItem = new SEQListViewItem<>(
+                parent,
+                l0,
+                l1,
+                l2,
+                l3,
+                l4,
+                l5,
+                l6,
+                l7);
+        if (!l8.isNull())
+            m_viewItem->setText(8, l8);
+        if (!l9.isNull())
+            m_viewItem->setText(9, l9);
+        if (!l10.isNull())
+            m_viewItem->setText(10, l10);
+        if (!l11.isNull())
+            m_viewItem->setText(11, l11);
+        initializeViewItem(m_viewItem);
+        parent->insertItem(m_viewItem);
+    }
+    else
+    {
+        m_viewItem->setText(0, l0);
+        m_viewItem->setText(1, l1);
+        m_viewItem->setText(2, l2);
+        m_viewItem->setText(3, l3);
+        m_viewItem->setText(4, l4);
+        m_viewItem->setText(5, l5);
+        m_viewItem->setText(6, l6);
+        m_viewItem->setText(7, l7);
+        m_viewItem->setText(8, l8);
+        m_viewItem->setText(9, l9);
+        m_viewItem->setText(10, l10);
+        m_viewItem->setText(11, l11);
+    }
+}
+
+
 ////////////////////////////////////////////
 //  CombatOffenseRecord implementation
 ////////////////////////////////////////////
 CombatOffenseRecord::CombatOffenseRecord( int iType, const Player* p, int iSpell) :
+    Record(),
 	m_iType(iType),
 	m_iSpell(iSpell),
 	m_player(p),
@@ -163,7 +259,7 @@ CombatOffenseRecord::CombatOffenseRecord( int iType, const Player* p, int iSpell
 {
 }
 
-void CombatOffenseRecord::clear()
+void CombatOffenseRecord::clearImpl()
 {
     m_iHits = 0;
     m_iMisses = 0;
@@ -174,7 +270,7 @@ void CombatOffenseRecord::clear()
     m_dM2 = 0.0;
 }
 
-void CombatOffenseRecord::addHit(int iDamage)
+void CombatOffenseRecord::addHitImpl(int iDamage, DamageCategory, int, int)
 {
 	if(iDamage <= 0)
 		return;
@@ -194,6 +290,97 @@ void CombatOffenseRecord::addHit(int iDamage)
     m_dM2 += delta1 * delta2;
 }
 
+void CombatOffenseRecord::addMissImpl(int)
+{
+    m_iMisses += 1;
+}
+
+void CombatOffenseRecord::updateImpl(QListView* parent)
+{
+    const int iType = getType();
+    const int iSpell = getSpell();
+    const int iHits = getHits();
+    const int iMisses = getMisses();
+    const int iMinDamage = getMinDamage();
+    const int iMaxDamage = getMaxDamage();
+    const int iDamage = getTotalDamage();
+    const double dSD = getStandardDeviation();
+
+    const double dAvgDamage = (double)iDamage / (double)iHits;
+    const double dAccuracy = (double)iHits / (double)(iMisses+iHits);
+
+    QString s_type;
+    const DamageCategory category = damageCategory(iType);
+    switch(category)
+    {
+        case DAMAGE_CATEGORY_MELEE:
+        case DAMAGE_CATEGORY_MELEE_RANGED:
+        case DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC:
+        case DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB:
+        case DAMAGE_CATEGORY_MELEE_SPECIAL_MONK:
+            {
+                s_type.sprintf("%s(%d)", (const char*)skill_name(iType), iType);
+                break;
+            }
+        case DAMAGE_CATEGORY_NONMELEE:
+            {
+                s_type.sprintf("Spell: %s(%d)", (const char*)spell_name(iSpell), iSpell);
+                break;
+            }
+        case DAMAGE_CATEGORY_DAMAGE_SHIELD:
+            {
+                s_type.sprintf("Damage Shield: (%d)", iType);
+                break;
+            }
+        case DAMAGE_CATEGORY_ENVIRONMENT:
+        case DAMAGE_CATEGORY_OTHER:
+            {
+                seqWarn("CombatOffenseRecord::updateImpl: Unknown s_type. unexpected category=%d", category);
+                break;
+            }
+    }
+
+    QString s_hits;
+    s_hits.setNum(iHits);
+    QString s_misses;
+    QString s_accuracy;
+    if (category != DAMAGE_CATEGORY_DAMAGE_SHIELD)
+    {
+        s_misses.setNum(iMisses);
+        s_accuracy = QString::number(dAccuracy, 'f', 2);
+    }
+    const QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+    const QString s_sd = doubleToQString(dSD, 0, true);
+    const QString s_mindamage = intToQString(iMinDamage);
+    const QString s_maxdamage = intToQString(iMaxDamage);
+    QString s_damage;
+    s_damage.setNum(iDamage);
+
+    updateViewItem(
+            parent,
+            s_type,
+            s_hits,
+            s_misses,
+            s_accuracy,
+            s_avgdamage,
+            s_sd,
+            s_mindamage,
+            s_maxdamage,
+            s_damage);
+}
+
+void CombatOffenseRecord::initializeViewItem(SEQListViewItem<>* pItem)
+{
+    pItem->setColComparator(1, SEQListViewItemCompareInt);
+    pItem->setColComparator(2, SEQListViewItemCompareInt);
+    pItem->setColComparator(3, SEQListViewItemCompareDouble);
+    pItem->setColComparator(4, SEQListViewItemCompareDouble);
+    pItem->setColComparator(5, SEQListViewItemCompareDouble);
+    pItem->setColComparator(6, SEQListViewItemCompareInt);
+    pItem->setColComparator(7, SEQListViewItemCompareInt);
+    pItem->setColComparator(8, SEQListViewItemCompareInt);
+}
+
 
 ////////////////////////////////////////////
 //  PetOffenseRecord implementation
@@ -203,6 +390,98 @@ PetOffenseRecord::PetOffenseRecord(int iPetID, const QString& iPetName, int iTyp
 	m_iPetID(iPetID),
 	m_iPetName(iPetName)
 {
+}
+
+void PetOffenseRecord::updateImpl(QListView* parent)
+{
+    const QString iPetName = getPetName();
+    const int iPetID = getPetID();
+    const int iType = getType();
+    const int iSpell = getSpell();
+    const int iHits = getHits();
+    const int iMisses = getMisses();
+    const int iMinDamage = getMinDamage();
+    const int iMaxDamage = getMaxDamage();
+    const int iDamage = getTotalDamage();
+    const double dSD = getStandardDeviation();
+
+    const double dAvgDamage = (double)iDamage / (double)iHits;
+    const double dAccuracy = (double)iHits / (double)(iMisses+iHits);
+
+    QString s_type;
+    const DamageCategory category = damageCategory(iType);
+    switch(category)
+    {
+        case DAMAGE_CATEGORY_MELEE:
+        case DAMAGE_CATEGORY_MELEE_RANGED:
+        case DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC:
+        case DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB:
+        case DAMAGE_CATEGORY_MELEE_SPECIAL_MONK:
+            {
+                s_type.sprintf("Pet: %s(%d): %s(%d)",
+                        (const char*)iPetName, iPetID,
+                        (const char*)skill_name(iType), iType);
+                break;
+            }
+        case DAMAGE_CATEGORY_NONMELEE:
+            {
+                s_type.sprintf("Pet: %s(%d): Spell: %s(%d)",
+                        (const char*)iPetName, iPetID,
+                        (const char*)spell_name(iSpell), iSpell);
+                break;
+            }
+        case DAMAGE_CATEGORY_DAMAGE_SHIELD:
+            {
+                s_type.sprintf("Pet: %s(%d): Damage Shield: (%d)", (const char*)iPetName, iPetID, iType);
+                break;
+            }
+        case DAMAGE_CATEGORY_ENVIRONMENT:
+        case DAMAGE_CATEGORY_OTHER:
+            {
+                seqWarn("PetOffenseRecord::updateImpl: Unknown pet s_type. unexpected category=%d", category);
+                break;
+            }
+    }
+
+    QString s_hits;
+    s_hits.setNum(iHits);
+    QString s_misses;
+    QString s_accuracy;
+    if (category != DAMAGE_CATEGORY_DAMAGE_SHIELD)
+    {
+        s_misses.setNum(iMisses);
+        s_accuracy = QString::number(dAccuracy, 'f', 2);
+    }
+    const QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+    const QString s_sd = doubleToQString(dSD, 0, true);
+    const QString s_mindamage = intToQString(iMinDamage);
+    const QString s_maxdamage = intToQString(iMaxDamage);
+    QString s_damage;
+    s_damage.setNum(iDamage);
+
+    updateViewItem(
+            parent,
+            s_type,
+            s_hits,
+            s_misses,
+            s_accuracy,
+            s_avgdamage,
+            s_sd,
+            s_mindamage,
+            s_maxdamage,
+            s_damage);
+}
+
+void PetOffenseRecord::initializeViewItem(SEQListViewItem<>* pItem)
+{
+    pItem->setColComparator(1, SEQListViewItemCompareInt);
+    pItem->setColComparator(2, SEQListViewItemCompareInt);
+    pItem->setColComparator(3, SEQListViewItemCompareDouble);
+    pItem->setColComparator(4, SEQListViewItemCompareDouble);
+    pItem->setColComparator(5, SEQListViewItemCompareDouble);
+    pItem->setColComparator(6, SEQListViewItemCompareInt);
+    pItem->setColComparator(7, SEQListViewItemCompareInt);
+    pItem->setColComparator(8, SEQListViewItemCompareInt);
 }
 
 
@@ -215,11 +494,116 @@ DotOffenseRecord::DotOffenseRecord(const Player* p, const QString& iSpellName) :
 {
 }
 
+void DotOffenseRecord::updateImpl(QListView* parent)
+{
+    const int iTicks = getHits();
+    const int iMinDamage = getMinDamage();
+    const int iMaxDamage = getMaxDamage();
+    const int iDamage = getTotalDamage();
+    const double dSD = getStandardDeviation();
+
+    const double dAvgDamage = (double)iDamage / (double)iTicks;
+
+    QString s_type;
+    s_type.sprintf("DoT: %s", (const char*)getSpellName());
+    QString s_hits;
+    s_hits.setNum(iTicks);
+    QString s_misses;
+    QString s_accuracy;
+    const QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+    const QString s_sd = doubleToQString(dSD, 0, true);
+    const QString s_mindamage = intToQString(iMinDamage);
+    const QString s_maxdamage = intToQString(iMaxDamage);
+    QString s_damage;
+    s_damage.setNum(iDamage);
+
+    updateViewItem(
+            parent,
+            s_type,
+            s_hits,
+            s_misses,
+            s_accuracy,
+            s_avgdamage,
+            s_sd,
+            s_mindamage,
+            s_maxdamage,
+            s_damage);
+}
+
+void DotOffenseRecord::initializeViewItem(SEQListViewItem<>* pItem)
+{
+    pItem->setColComparator(1, SEQListViewItemCompareInt);
+    pItem->setColComparator(2, SEQListViewItemCompareInt);
+    pItem->setColComparator(3, SEQListViewItemCompareDouble);
+    pItem->setColComparator(4, SEQListViewItemCompareDouble);
+    pItem->setColComparator(5, SEQListViewItemCompareDouble);
+    pItem->setColComparator(6, SEQListViewItemCompareInt);
+    pItem->setColComparator(7, SEQListViewItemCompareInt);
+    pItem->setColComparator(8, SEQListViewItemCompareInt);
+}
+
+
+////////////////////////////////////////////
+//  NonmeleeOffenseRecord implementation
+////////////////////////////////////////////
+NonmeleeOffenseRecord::NonmeleeOffenseRecord() :
+    CombatOffenseRecord(231, NULL, ITEM_SPELLID_NOSPELL) // assume spell, so 231
+{
+}
+
+void NonmeleeOffenseRecord::updateImpl(QListView* parent)
+{
+    const int iHits = getHits();
+    const int iMinDamage = getMinDamage();
+    const int iMaxDamage = getMaxDamage();
+    const int iDamage = getTotalDamage();
+    const double dSD = getStandardDeviation();
+
+    const double dAvgDamage = (double)iDamage / (double)iHits;
+
+    const QString s_type = "Non-melee (all sources):";
+    QString s_hits;
+    s_hits.setNum(iHits);
+    const QString s_misses;
+    const QString s_accuracy;
+    const QString s_avgdamage = doubleToQString(dAvgDamage, 0);
+    const QString s_sd = doubleToQString(dSD, 0, true);
+    const QString s_mindamage = intToQString(iMinDamage);
+    const QString s_maxdamage = intToQString(iMaxDamage);
+    QString s_damage;
+    s_damage.setNum(iDamage);
+
+    updateViewItem(
+            parent,
+            s_type,
+            s_hits,
+            s_misses,
+            s_accuracy,
+            s_avgdamage,
+            s_sd,
+            s_mindamage,
+            s_maxdamage,
+            s_damage);
+}
+
+void NonmeleeOffenseRecord::initializeViewItem(SEQListViewItem<>* pItem)
+{
+    pItem->setColComparator(1, SEQListViewItemCompareInt);
+    pItem->setColComparator(2, SEQListViewItemCompareInt);
+    pItem->setColComparator(3, SEQListViewItemCompareDouble);
+    pItem->setColComparator(4, SEQListViewItemCompareDouble);
+    pItem->setColComparator(5, SEQListViewItemCompareDouble);
+    pItem->setColComparator(6, SEQListViewItemCompareInt);
+    pItem->setColComparator(7, SEQListViewItemCompareInt);
+    pItem->setColComparator(8, SEQListViewItemCompareInt);
+}
+
 
 ////////////////////////////////////////////
 //  CombatDefenseRecord implementation
 ////////////////////////////////////////////
 CombatDefenseRecord::CombatDefenseRecord(const Spawn* s) :
+    Record(),
     m_displayString(createRecordIDString(s->name(), s->id(),
                 s->classString(), s->level()))
 {
@@ -235,7 +619,7 @@ QString CombatDefenseRecord::createRecordIDString(
     return result;
 }
 
-void CombatDefenseRecord::clear(void)
+void CombatDefenseRecord::clearImpl()
 {
   m_iHits = 0;
   m_iMisses = 0;
@@ -298,7 +682,7 @@ void CombatDefenseRecord::clear(void)
   m_iDamageShieldMaxDamage = 0;
 }
 
-void CombatDefenseRecord::addHit(int iDamage, DamageCategory category)
+void CombatDefenseRecord::addHitImpl(int iDamage, DamageCategory category, int, int)
 {
 	if(iDamage <= 0)
 		return;
@@ -416,12 +800,12 @@ void CombatDefenseRecord::addHit(int iDamage, DamageCategory category)
             }
         case DAMAGE_CATEGORY_OTHER:
         case DAMAGE_CATEGORY_ENVIRONMENT:
-            seqWarn("CombatDefenseRecord::addHit: unexpected category=%d", category);
+            seqWarn("CombatDefenseRecord::addHitImpl: unexpected category=%d", category);
             break;
     }
 }
 
-void CombatDefenseRecord::addMiss(int iMissReason)
+void CombatDefenseRecord::addMissImpl(int iMissReason)
 {
 	m_iTotalAttacks++;
 
@@ -464,11 +848,20 @@ void CombatDefenseRecord::addMiss(int iMissReason)
 		}
 		default:
 		{
-		  seqDebug("CombatDefenseRecord::addMiss: invalid miss reason (%d)", iMissReason);
+		  seqDebug("CombatDefenseRecord::addMissImpl: invalid miss reason (%d)", iMissReason);
 			break;
 		}
 	}
+}
 
+void CombatDefenseRecord::updateImpl(QListView* parent)
+{
+    // Not used in a list view
+}
+
+void CombatDefenseRecord::initializeViewItem(SEQListViewItem<>* pItem)
+{
+    // Not used in a list view
 }
 
 
@@ -476,6 +869,7 @@ void CombatDefenseRecord::addMiss(int iMissReason)
 //	CombatMobRecord implementation
 ////////////////////////////////////////////
 CombatMobRecord::CombatMobRecord(int iID, const QString& mobName, Player* p) :
+    Record(),
 m_iID(iID),
 m_iName(mobName),
 m_player(p),
@@ -512,7 +906,7 @@ int CombatMobRecord::getDuration()
     }
 };
 
-void CombatMobRecord::addHit(int iTarget, int iSource, int iDamage)
+void CombatMobRecord::addHitImpl(int iDamage, DamageCategory, int iTarget, int iSource)
 {
     m_time = time(0);
     const int iPlayerID = m_player->id();
@@ -563,6 +957,84 @@ void CombatMobRecord::addHit(int iTarget, int iSource, int iDamage)
     }
 }
 
+void CombatMobRecord::addMissImpl(int)
+{
+}
+
+void CombatMobRecord::clearImpl()
+{
+    m_iStartTime = 0;
+    m_iLastTime = 0;
+    m_iDamageGiven = 0;
+    m_dDPS = 0.0;
+    m_iDamageTaken = 0;
+    m_dMobDPS = 0.0;
+    m_iPetStartTime = 0;
+    m_iPetLastTime = 0;
+    m_iPetDamageGiven = 0;
+    m_dPetDPS = 0.0;
+    m_iPetDamageTaken = 0;
+    m_dPetMobDPS = 0.0;
+}
+
+void CombatMobRecord::updateImpl(QListView* parent)
+{
+    const int iID = getID();
+    const int iDuration = getDuration() / 1000;
+    const int iDamageGiven = getDamageGiven();
+    const double dDPS = getDPS();
+    const int iDamageTaken = getDamageTaken();
+    const double dMobDPS = getMobDPS();
+    const int iPetDamageGiven = getPetDamageGiven();
+    const double dPetDPS = getPetDPS();
+    const int iPetDamageTaken = getPetDamageTaken();
+    const double dPetMobDPS = getPetMobDPS();
+
+    char s_time[64];
+    const time_t timev = getTime();
+    strftime(s_time, 64, "%m/%d %H:%M:%S", localtime(&timev));
+    const QString s_name = getName();
+    const QString s_id = QString::number(iID);
+    const QString s_duration = QString::number(iDuration);
+    const QString s_damagegiven = intToQString(iDamageGiven);
+    const QString s_dps = doubleToQString(dDPS, 1);
+    const QString s_iDamageTaken = intToQString(iDamageTaken);
+    const QString s_mobdps = doubleToQString(dMobDPS, 1);
+    const QString s_petdamagegiven = intToQString(iPetDamageGiven);
+    const QString s_petdps = doubleToQString(dPetDPS, 1);
+    const QString s_petiDamageTaken = intToQString(iPetDamageTaken);
+    const QString s_petmobdps = doubleToQString(dPetMobDPS, 1);
+
+    updateViewItem(
+            parent,
+            s_time,
+            s_name,
+            s_id,
+            s_duration,
+            s_damagegiven,
+            s_dps,
+            s_iDamageTaken,
+            s_mobdps,
+            s_petdamagegiven,
+            s_petdps,
+            s_petiDamageTaken,
+            s_petmobdps);
+}
+
+void CombatMobRecord::initializeViewItem(SEQListViewItem<>* pItem)
+{
+    pItem->setColComparator(2, SEQListViewItemCompareInt);
+    pItem->setColComparator(3, SEQListViewItemCompareInt);
+    pItem->setColComparator(4, SEQListViewItemCompareInt);
+    pItem->setColComparator(5, SEQListViewItemCompareDouble);
+    pItem->setColComparator(6, SEQListViewItemCompareInt);
+    pItem->setColComparator(7, SEQListViewItemCompareDouble);
+    pItem->setColComparator(8, SEQListViewItemCompareInt);
+    pItem->setColComparator(9, SEQListViewItemCompareDouble);
+    pItem->setColComparator(10, SEQListViewItemCompareInt);
+    pItem->setColComparator(11, SEQListViewItemCompareDouble);
+}
+
 
 ////////////////////////////////////////////
 //	CombatOtherRecord implementation
@@ -570,6 +1042,7 @@ void CombatMobRecord::addHit(int iTarget, int iSource, int iDamage)
 CombatOtherRecord::CombatOtherRecord(
         int iTargetID, int iSourceID,
         const QString& tName, const QString& sName) :
+    Record(),
     m_iTargetID(iTargetID),
     m_iSourceID(iSourceID),
     m_iTargetName(tName),
@@ -582,7 +1055,7 @@ CombatOtherRecord::CombatOtherRecord(
 {
 }
 
-void CombatOtherRecord::addHit(int iDamage)
+void CombatOtherRecord::addHitImpl(int iDamage, DamageCategory, int, int)
 {
     m_time = time(0);
     m_iLastTime = mTime();
@@ -597,6 +1070,57 @@ void CombatOtherRecord::addHit(int iDamage)
     {
         m_dDPS = (double)m_iDamageTotal / (double)iTimeElapsed;
     }
+}
+
+void CombatOtherRecord::addMissImpl(int)
+{
+}
+
+void CombatOtherRecord::clearImpl()
+{
+    m_iStartTime = 0;
+    m_iLastTime = 0;
+    m_dDPS = 0.0;
+    m_iDamageTotal = 0;
+    m_time = 0;
+}
+
+void CombatOtherRecord::updateImpl(QListView* parent)
+{
+    const int iDuration = getDuration() / 1000;
+    const int iDamageTotal = getDamageTotal();
+    const double dDPS = getDPS();
+
+    char s_time[64];
+    const time_t timev = getTime();
+    strftime(s_time, 64, "%m/%d %H:%M:%S", localtime(&timev));
+    const QString s_sourcename = getSourceName();
+    const QString s_targetname = getTargetName();
+    const QString s_sourceid = QString::number(getSourceID());
+    const QString s_targetid = QString::number(getTargetID());
+    const QString s_duration = QString::number(iDuration);
+    const QString s_damagetotal = QString::number(iDamageTotal);
+    const QString s_dps = doubleToQString(dDPS, 1);
+
+    updateViewItem(
+            parent,
+            s_time,
+            s_sourcename,
+            s_sourceid,
+            s_targetname,
+            s_targetid,
+            s_duration,
+            s_damagetotal,
+            s_dps);
+}
+
+void CombatOtherRecord::initializeViewItem(SEQListViewItem<>* pItem)
+{
+    pItem->setColComparator(2, SEQListViewItemCompareInt);
+    pItem->setColComparator(4, SEQListViewItemCompareInt);
+    pItem->setColComparator(5, SEQListViewItemCompareInt);
+    pItem->setColComparator(6, SEQListViewItemCompareInt);
+    pItem->setColComparator(7, SEQListViewItemCompareDouble);
 }
 
 
@@ -653,7 +1177,7 @@ CombatWindow::CombatWindow(Player* player,
 	m_pet_offense_list.setAutoDelete(true);
 	m_dot_offense_list.setAutoDelete(true);
 	// assume non-melee is spell, so 231
-	m_nonmelee_offense_record = new CombatOffenseRecord(231, NULL, ITEM_SPELLID_NOSPELL);
+	m_nonmelee_offense_record = new NonmeleeOffenseRecord;
 	m_combat_defense_record = new CombatDefenseRecord(player);
 	m_combat_pet_defense_current_record = NULL;
 	m_combat_pet_defense_list.setAutoDelete(true);
@@ -1694,128 +2218,24 @@ void CombatWindow::updateOffense()
     int iPetDSDamage = 0;
     int iPetDSHits = 0;
 
-
-	//	empty the list so we can repopulate
-	m_listview_offense->clear();
-
     if (0 != m_nonmelee_offense_record->getHits() + m_nonmelee_offense_record->getMisses())
     {
-        const int iHits = m_nonmelee_offense_record->getHits();
-        const int iMinDamage = m_nonmelee_offense_record->getMinDamage();
-        const int iMaxDamage = m_nonmelee_offense_record->getMaxDamage();
-        const int iDamage = m_nonmelee_offense_record->getTotalDamage();
-        const double dSD = m_nonmelee_offense_record->getStandardDeviation();
+        m_nonmelee_offense_record->update(m_listview_offense);
 
-        const double dAvgDamage = (double)iDamage / (double)iHits;
-
-        QString s_type = "Non-melee (all sources):";
-        QString s_hits;
-        s_hits.setNum(iHits);
-        QString s_misses;
-        QString s_accuracy;
-        QString s_avgdamage = doubleToQString(dAvgDamage, 0);
-        QString s_sd = doubleToQString(dSD, 0, true);
-        QString s_mindamage = intToQString(iMinDamage);
-        QString s_maxdamage = intToQString(iMaxDamage);
-        QString s_damage;
-        s_damage.setNum(iDamage);
-
-        SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
-                s_type, s_hits, s_misses, s_accuracy,
-                s_avgdamage, s_sd, s_mindamage, s_maxdamage);
-        pItem->setText(8, s_damage);
-        pItem->setColComparator(1, SEQListViewItemCompareInt);
-        pItem->setColComparator(2, SEQListViewItemCompareInt);
-        pItem->setColComparator(3, SEQListViewItemCompareDouble);
-        pItem->setColComparator(4, SEQListViewItemCompareDouble);
-        pItem->setColComparator(5, SEQListViewItemCompareDouble);
-        pItem->setColComparator(6, SEQListViewItemCompareInt);
-        pItem->setColComparator(7, SEQListViewItemCompareInt);
-        pItem->setColComparator(8, SEQListViewItemCompareInt);
-
-        m_listview_offense->insertItem(pItem);
-
-        iNonmeleeDamage += iDamage;
-        iNonmeleeHits += iHits;
+        iNonmeleeDamage += m_nonmelee_offense_record->getTotalDamage();
+        iNonmeleeHits += m_nonmelee_offense_record->getHits();
     }
 
 	CombatOffenseRecord *pRecord;
-
 	for(pRecord = m_combat_offense_list.first(); pRecord != 0; pRecord = m_combat_offense_list.next())
 	{
-		int iType = pRecord->getType();
-		int iSpell = pRecord->getSpell();
-		int iHits = pRecord->getHits();
-		int iMisses = pRecord->getMisses();
-		int iMinDamage = pRecord->getMinDamage();
-		int iMaxDamage = pRecord->getMaxDamage();
-		int iDamage = pRecord->getTotalDamage();
-		const double dSD = pRecord->getStandardDeviation();
+        pRecord->update(m_listview_offense);
 
-		double dAvgDamage = (double)iDamage / (double)iHits;
-		double dAccuracy = (double)iHits / (double)(iMisses+iHits);
+        const int iType = pRecord->getType();
+        const int iHits = pRecord->getHits();
+        const int iDamage = pRecord->getTotalDamage();
 
-		QString s_type;
 		const DamageCategory category = damageCategory(iType);
-		switch(category)
-		{
-			case DAMAGE_CATEGORY_MELEE:
-			case DAMAGE_CATEGORY_MELEE_RANGED:
-			case DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC:
-			case DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB:
-			case DAMAGE_CATEGORY_MELEE_SPECIAL_MONK:
-			{
-				s_type.sprintf("%s(%d)", (const char*)skill_name(iType), iType);
-				break;
-			}
-			case DAMAGE_CATEGORY_NONMELEE:
-			{
-				s_type.sprintf("Spell: %s(%d)", (const char*)spell_name(iSpell), iSpell);
-				break;
-			}
-			case DAMAGE_CATEGORY_DAMAGE_SHIELD:
-			{
-				s_type.sprintf("Damage Shield: (%d)", iType);
-				break;
-			}
-			case DAMAGE_CATEGORY_ENVIRONMENT:
-			case DAMAGE_CATEGORY_OTHER:
-			{
-				seqWarn("CombatWindow::updateOffense: Unknown s_type. unexpected category=%d", category);
-				break;
-			}
-		}
-		QString s_hits;
-		s_hits.setNum(iHits);
-		QString s_misses;
-		QString s_accuracy;
-		if (category != DAMAGE_CATEGORY_DAMAGE_SHIELD)
-		{
-			s_misses.setNum(iMisses);
-			s_accuracy = QString::number(dAccuracy, 'f', 2);
-		}
-		QString s_avgdamage = doubleToQString(dAvgDamage, 0);
-		QString s_sd = doubleToQString(dSD, 0, true);
-		QString s_mindamage = intToQString(iMinDamage);
-		QString s_maxdamage = intToQString(iMaxDamage);
-		QString s_damage;
-		s_damage.setNum(iDamage);
-
-		SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
-			s_type, s_hits, s_misses, s_accuracy,
-			s_avgdamage, s_sd, s_mindamage, s_maxdamage);
-        pItem->setText(8, s_damage);
-        pItem->setColComparator(1, SEQListViewItemCompareInt);
-        pItem->setColComparator(2, SEQListViewItemCompareInt);
-        pItem->setColComparator(3, SEQListViewItemCompareDouble);
-        pItem->setColComparator(4, SEQListViewItemCompareDouble);
-        pItem->setColComparator(5, SEQListViewItemCompareDouble);
-        pItem->setColComparator(6, SEQListViewItemCompareInt);
-        pItem->setColComparator(7, SEQListViewItemCompareInt);
-        pItem->setColComparator(8, SEQListViewItemCompareInt);
-
-		m_listview_offense->insertItem(pItem);
-
 		switch(category)
 		{
 			case DAMAGE_CATEGORY_MELEE:
@@ -1857,85 +2277,13 @@ void CombatWindow::updateOffense()
     PetOffenseRecord *petRecord;
     for(petRecord = m_pet_offense_list.first(); petRecord != 0; petRecord = m_pet_offense_list.next())
     {
-        const QString iPetName = petRecord->getPetName();
-        const int iPetID = petRecord->getPetID();
+        petRecord->update(m_listview_offense);
+
         const int iType = petRecord->getType();
-        const int iSpell = petRecord->getSpell();
         const int iHits = petRecord->getHits();
-        const int iMisses = petRecord->getMisses();
-        const int iMinDamage = petRecord->getMinDamage();
-        const int iMaxDamage = petRecord->getMaxDamage();
         const int iDamage = petRecord->getTotalDamage();
-        const double dSD = petRecord->getStandardDeviation();
 
-        const double dAvgDamage = (double)iDamage / (double)iHits;
-        const double dAccuracy = (double)iHits / (double)(iMisses+iHits);
-
-        QString s_type;
         const DamageCategory category = damageCategory(iType);
-        switch(category)
-        {
-            case DAMAGE_CATEGORY_MELEE:
-            case DAMAGE_CATEGORY_MELEE_RANGED:
-            case DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC:
-            case DAMAGE_CATEGORY_MELEE_SPECIAL_BACKSTAB:
-            case DAMAGE_CATEGORY_MELEE_SPECIAL_MONK:
-                {
-                    s_type.sprintf("Pet: %s(%d): %s(%d)",
-                            (const char*)iPetName, iPetID,
-                            (const char*)skill_name(iType), iType);
-                    break;
-                }
-            case DAMAGE_CATEGORY_NONMELEE:
-                {
-                    s_type.sprintf("Pet: %s(%d): Spell: %s(%d)",
-                            (const char*)iPetName, iPetID,
-                            (const char*)spell_name(iSpell), iSpell);
-                    break;
-                }
-            case DAMAGE_CATEGORY_DAMAGE_SHIELD:
-                {
-                    s_type.sprintf("Pet: %s(%d): Damage Shield: (%d)", (const char*)iPetName, iPetID, iType);
-                    break;
-                }
-            case DAMAGE_CATEGORY_ENVIRONMENT:
-            case DAMAGE_CATEGORY_OTHER:
-                {
-                    seqWarn("CombatWindow::updateOffense: Unknown pet s_type. unexpected category=%d", category);
-                    break;
-                }
-        }
-        QString s_hits;
-        s_hits.setNum(iHits);
-        QString s_misses;
-        QString s_accuracy;
-        if (category != DAMAGE_CATEGORY_DAMAGE_SHIELD)
-        {
-            s_misses.setNum(iMisses);
-            s_accuracy = QString::number(dAccuracy, 'f', 2);
-        }
-        QString s_avgdamage = doubleToQString(dAvgDamage, 0);
-        QString s_sd = doubleToQString(dSD, 0, true);
-        QString s_mindamage = intToQString(iMinDamage);
-        QString s_maxdamage = intToQString(iMaxDamage);
-        QString s_damage;
-        s_damage.setNum(iDamage);
-
-        SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
-                s_type, s_hits, s_misses, s_accuracy,
-                s_avgdamage, s_sd, s_mindamage, s_maxdamage);
-        pItem->setText(8, s_damage);
-        pItem->setColComparator(1, SEQListViewItemCompareInt);
-        pItem->setColComparator(2, SEQListViewItemCompareInt);
-        pItem->setColComparator(3, SEQListViewItemCompareDouble);
-        pItem->setColComparator(4, SEQListViewItemCompareDouble);
-        pItem->setColComparator(5, SEQListViewItemCompareDouble);
-        pItem->setColComparator(6, SEQListViewItemCompareInt);
-        pItem->setColComparator(7, SEQListViewItemCompareInt);
-        pItem->setColComparator(8, SEQListViewItemCompareInt);
-
-        m_listview_offense->insertItem(pItem);
-
         switch(category)
         {
             case DAMAGE_CATEGORY_MELEE:
@@ -1975,47 +2323,12 @@ void CombatWindow::updateOffense()
     }
 
 	DotOffenseRecord *dotRecord;
-
 	for(dotRecord = m_dot_offense_list.first(); dotRecord != 0; dotRecord = m_dot_offense_list.next())
 	{
-		int iTicks = dotRecord->getHits();
-		int iMinDamage = dotRecord->getMinDamage();
-		int iMaxDamage = dotRecord->getMaxDamage();
-		int iDamage = dotRecord->getTotalDamage();
-		const double dSD = dotRecord->getStandardDeviation();
+        dotRecord->update(m_listview_offense);
 
-		double dAvgDamage = (double)iDamage / (double)iTicks;
-
-		QString s_type;
-		s_type.sprintf("DoT: %s", (const char*)dotRecord->getSpellName());
-		QString s_hits;
-		s_hits.setNum(iTicks);
-		QString s_misses;
-		QString s_accuracy;
-		QString s_avgdamage = doubleToQString(dAvgDamage, 0);
-		QString s_sd = doubleToQString(dSD, 0, true);
-		QString s_mindamage = intToQString(iMinDamage);
-		QString s_maxdamage = intToQString(iMaxDamage);
-		QString s_damage;
-		s_damage.setNum(iDamage);
-
-		SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_offense,
-			s_type, s_hits, s_misses, s_accuracy,
-			s_avgdamage, s_sd, s_mindamage, s_maxdamage);
-        pItem->setText(8, s_damage);
-        pItem->setColComparator(1, SEQListViewItemCompareInt);
-        pItem->setColComparator(2, SEQListViewItemCompareInt);
-        pItem->setColComparator(3, SEQListViewItemCompareDouble);
-        pItem->setColComparator(4, SEQListViewItemCompareDouble);
-        pItem->setColComparator(5, SEQListViewItemCompareDouble);
-        pItem->setColComparator(6, SEQListViewItemCompareInt);
-        pItem->setColComparator(7, SEQListViewItemCompareInt);
-        pItem->setColComparator(8, SEQListViewItemCompareInt);
-
-		m_listview_offense->insertItem(pItem);
-
-		iDotDamage += iDamage;
-		iDotTicks += iTicks;
+        iDotDamage += dotRecord->getTotalDamage();
+        iDotTicks += dotRecord->getHits();
 	}
 
 	// iNonmeleeDamage includes the pet's non-melee damage because
@@ -2466,84 +2779,29 @@ void CombatWindow::updatePetDefense()
 
 void CombatWindow::updateMob()
 {
-
-	int iTotalMobs = 0;
-	double dAvgDPS = 0.0;
 	double dDPSSum = 0.0;
-	double dAvgPetDPS = 0.0;
 	double dPetDPSSum = 0.0;
-
-	double dAvgMobDPS = 0.0;
 	double dMobDPSSum = 0.0;
-	double dAvgPetMobDPS = 0.0;
 	double dPetMobDPSSum = 0.0;
-
-	//	empty the list so we can repopulate
-	m_listview_mob->clear();
 
 	CombatMobRecord *pRecord;
 
 	for(pRecord = m_combat_mob_list.first(); pRecord != 0; pRecord = m_combat_mob_list.next())
 	{
-		int iID = pRecord->getID();
-		int iDuration = pRecord->getDuration() / 1000;
-		int iDamageGiven = pRecord->getDamageGiven();
-		double dDPS = pRecord->getDPS();
-		int iDamageTaken = pRecord->getDamageTaken();
-		double dMobDPS = pRecord->getMobDPS();
-		const int iPetDamageGiven = pRecord->getPetDamageGiven();
-		const double dPetDPS = pRecord->getPetDPS();
-		const int iPetDamageTaken = pRecord->getPetDamageTaken();
-		const double dPetMobDPS = pRecord->getPetMobDPS();
+        pRecord->update(m_listview_mob);
 
-		char s_time[64];
-		time_t timev = pRecord->getTime();
-		strftime(s_time, 64, "%m/%d %H:%M:%S", localtime(&timev));
-		QString s_name = pRecord->getName();
-		QString s_id = QString::number(iID);
-		QString s_duration = QString::number(iDuration);
-		QString s_damagegiven = intToQString(iDamageGiven);
-		QString s_dps = doubleToQString(dDPS, 1);
-		QString s_iDamageTaken = intToQString(iDamageTaken);
-		QString s_mobdps = doubleToQString(dMobDPS, 1);
-		QString s_petdamagegiven = intToQString(iPetDamageGiven);
-		QString s_petdps = doubleToQString(dPetDPS, 1);
-		QString s_petiDamageTaken = intToQString(iPetDamageTaken);
-		QString s_petmobdps = doubleToQString(dPetMobDPS, 1);
-
-
-		SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_mob,
-			s_time, s_name, s_id, s_duration, s_damagegiven,
-			s_dps, s_iDamageTaken, s_mobdps);
-		pItem->setText(8, s_petdamagegiven);
-		pItem->setText(9, s_petdps);
-		pItem->setText(10, s_petiDamageTaken);
-		pItem->setText(11, s_petmobdps);
-
-        pItem->setColComparator(2, SEQListViewItemCompareInt);
-        pItem->setColComparator(3, SEQListViewItemCompareInt);
-        pItem->setColComparator(4, SEQListViewItemCompareInt);
-        pItem->setColComparator(5, SEQListViewItemCompareDouble);
-        pItem->setColComparator(6, SEQListViewItemCompareInt);
-        pItem->setColComparator(7, SEQListViewItemCompareDouble);
-        pItem->setColComparator(8, SEQListViewItemCompareInt);
-        pItem->setColComparator(9, SEQListViewItemCompareDouble);
-        pItem->setColComparator(10, SEQListViewItemCompareInt);
-        pItem->setColComparator(11, SEQListViewItemCompareDouble);
-
-		m_listview_mob->insertItem(pItem);
-
-		iTotalMobs++;
-		dDPSSum += dDPS;
-		dPetDPSSum += dPetDPS;
-		dMobDPSSum += dMobDPS;
-		dPetMobDPSSum += dPetMobDPS;
+        dDPSSum += pRecord->getDPS();
+        dPetDPSSum += pRecord->getPetDPS();
+        dMobDPSSum += pRecord->getMobDPS();
+        dPetMobDPSSum += pRecord->getPetMobDPS();
 	}
 
-	dAvgDPS = dDPSSum / (double)iTotalMobs;
-	dAvgMobDPS = dMobDPSSum / (double)iTotalMobs;
-	dAvgPetDPS = dPetDPSSum / (double)iTotalMobs;
-	dAvgPetMobDPS = dPetMobDPSSum / (double)iTotalMobs;
+    const int iTotalMobs = m_combat_mob_list.count();
+
+    const double dAvgDPS = dDPSSum / (double)iTotalMobs;
+    const double dAvgMobDPS = dMobDPSSum / (double)iTotalMobs;
+    const double dAvgPetDPS = dPetDPSSum / (double)iTotalMobs;
+    const double dAvgPetMobDPS = dPetMobDPSSum / (double)iTotalMobs;
 
 	m_label_mob_totalmobs->setText(QString::number(iTotalMobs));
 	m_label_mob_avgdps->setText(doubleToQString(dAvgDPS, 1));
@@ -2554,46 +2812,18 @@ void CombatWindow::updateMob()
 
 void CombatWindow::updateOther()
 {
-    int iTotalMobs = 0;
-    double dAvgDPS = 0.0;
     double dDPSSum = 0.0;
 
-    m_listview_other->clear();
     CombatOtherRecord *pRecord;
     for(pRecord = m_combat_other_list.first(); pRecord != 0;
             pRecord = m_combat_other_list.next())
     {
-        const int iDuration = pRecord->getDuration() / 1000;
-        const int iDamageTotal = pRecord->getDamageTotal();
-        const double dDPS = pRecord->getDPS();
-
-        char s_time[64];
-        time_t timev = pRecord->getTime();
-        strftime(s_time, 64, "%m/%d %H:%M:%S", localtime(&timev));
-        QString s_sourcename = pRecord->getSourceName();
-        QString s_targetname = pRecord->getTargetName();
-        QString s_sourceid = QString::number(pRecord->getSourceID());
-        QString s_targetid = QString::number(pRecord->getTargetID());
-        QString s_duration = QString::number(iDuration);
-        QString s_damagetotal = QString::number(iDamageTotal);
-        QString s_dps = doubleToQString(dDPS, 1);
-
-        SEQListViewItem<> *pItem = new SEQListViewItem<>(m_listview_other,
-                s_time, s_sourcename, s_sourceid, s_targetname, s_targetid,
-                s_duration, s_damagetotal, s_dps);
-        pItem->setColComparator(2, SEQListViewItemCompareInt);
-        pItem->setColComparator(4, SEQListViewItemCompareInt);
-        pItem->setColComparator(5, SEQListViewItemCompareInt);
-        pItem->setColComparator(6, SEQListViewItemCompareInt);
-        pItem->setColComparator(7, SEQListViewItemCompareDouble);
-
-        m_listview_other->insertItem(pItem);
-
-        iTotalMobs++;
-        dDPSSum += dDPS;
+        pRecord->update(m_listview_other);
+        dDPSSum += pRecord->getDPS();
     }
 
-    dAvgDPS = dDPSSum / (double)iTotalMobs;
+    const int iTotalMobs = m_combat_other_list.count();
+    const double dAvgDPS = dDPSSum / (double)iTotalMobs;
 
     m_label_other_totalmobs->setText(QString::number(iTotalMobs));
     m_label_other_avgdps->setText(doubleToQString(dAvgDPS, 1));
@@ -2619,7 +2849,7 @@ void CombatWindow::addNonMeleeHit(const QString& iTargetName, const int iDamage)
 
 void CombatWindow::addNonMeleeOffenseRecord(const QString& iTargetName, const int iDamage)
 {
-    m_nonmelee_offense_record->addHit(iDamage);
+    m_nonmelee_offense_record->addHit(iDamage, DAMAGE_CATEGORY_NONMELEE, 0, 0);
 }
 
 void CombatWindow::addDotTick(
@@ -2662,10 +2892,10 @@ void CombatWindow::addDotOffenseRecord(const QString& iSpellName, const int iDam
     if(!bFoundRecord)
     {
         pRecord = new DotOffenseRecord(m_player, iSpellName);
-        m_dot_offense_list.append(pRecord);
+        m_dot_offense_list.prepend(pRecord);
     }
 
-    pRecord->addHit(iDamage);
+    pRecord->addHit(iDamage, DAMAGE_CATEGORY_NONMELEE, 0, 0);
 
 #ifdef DEBUGCOMBAT
     seqDebug("CombatWindow::addDotOffenseRecord finished...");
@@ -2737,13 +2967,13 @@ void CombatWindow::addCombatRecord(
 		{
 			addDefenseRecord(-iDamage, category);
 			updateDefense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, -iDamage, tName, sName);
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, -iDamage, tName, sName);
 			updateMob();
 		}
 		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
 			addDefenseRecord(iDamage, category);
 			updateDefense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, iDamage, tName, sName);
 			updateMob();
 		}
 
@@ -2757,18 +2987,18 @@ void CombatWindow::addCombatRecord(
 		// Damage shields show up as negative damage
 		if (isDamageShield(iType))
 		{
-			addOffenseRecord(iType, -iDamage, iSpell);
+			addOffenseRecord(iType, category, -iDamage, iSpell);
 			updateOffense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, -iDamage, tName, sName);
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, -iDamage, tName, sName);
 			updateMob();
 		}
 		// For the player, non-melee has positive damage on killing blows
 		// (OP_Death) but not regular hits (OP_Action) against others, so
 		// the player's non-melee damage is handled via addNonMeleeHit, not here
 		else if (isMelee(iType)) {
-			addOffenseRecord(iType, iDamage, iSpell);
+			addOffenseRecord(iType, category, iDamage, iSpell);
 			updateOffense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, iDamage, tName, sName);
 			updateMob();
 		}
 
@@ -2785,13 +3015,13 @@ void CombatWindow::addCombatRecord(
 		{
 			addPetDefenseRecord(target, -iDamage, category);
 			updatePetDefense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, -iDamage, tName, sName);
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, -iDamage, tName, sName);
 			updateMob();
 		}
 		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
 			addPetDefenseRecord(target, iDamage, category);
 			updatePetDefense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, iDamage, tName, sName);
 			updateMob();
 		}
 
@@ -2805,15 +3035,15 @@ void CombatWindow::addCombatRecord(
 		// Damage shields show up as negative damage
 		if (isDamageShield(iType))
 		{
-			addPetOffenseRecord(iSourceID, sName, iType, -iDamage, iSpell);
+			addPetOffenseRecord(iSourceID, sName, iType, category, -iDamage, iSpell);
 			updateOffense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, -iDamage, tName, sName);
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, -iDamage, tName, sName);
 			updateMob();
 		}
 		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
-			addPetOffenseRecord(iSourceID, sName, iType, iDamage, iSpell);
+			addPetOffenseRecord(iSourceID, sName, iType, category, iDamage, iSpell);
 			updateOffense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, iDamage, tName, sName);
+			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, iDamage, tName, sName);
 			updateMob();
 		}
 
@@ -2827,11 +3057,11 @@ void CombatWindow::addCombatRecord(
 		// Damage shields show up as negative damage
 		if (isDamageShield(iType))
 		{
-			addOtherRecord(iTargetID, iSourceID, -iDamage, tName, sName, isKillingBlow);
+			addOtherRecord(category, iTargetID, iSourceID, -iDamage, tName, sName, isKillingBlow);
 			updateOther();
 		}
 		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
-			addOtherRecord(iTargetID, iSourceID, iDamage, tName, sName, isKillingBlow);
+			addOtherRecord(category, iTargetID, iSourceID, iDamage, tName, sName, isKillingBlow);
 			updateOther();
 		}
 	}
@@ -2841,7 +3071,8 @@ void CombatWindow::addCombatRecord(
 #endif
 }
 
-void CombatWindow::addOffenseRecord(int iType, int iDamage, int iSpell)
+void CombatWindow::addOffenseRecord(int iType, DamageCategory category,
+        int iDamage, int iSpell)
 {
 
 #ifdef DEBUGCOMBAT
@@ -2865,12 +3096,12 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage, int iSpell)
 	if(!bFoundRecord)
 	{
 		pRecord = new CombatOffenseRecord(iType, m_player, iSpell);
-		m_combat_offense_list.append(pRecord);
+		m_combat_offense_list.prepend(pRecord);
 	}
 
 	if(iDamage > 0)
 	{
-		pRecord->addHit(iDamage);
+		pRecord->addHit(iDamage, category, 0, 0);
 	}
 	else if (isMelee(iType))
 	{
@@ -2882,7 +3113,7 @@ void CombatWindow::addOffenseRecord(int iType, int iDamage, int iSpell)
 #endif
 }
 
-void CombatWindow::addPetOffenseRecord(int petID, const QString& petName, int iType, int iDamage, int iSpell)
+void CombatWindow::addPetOffenseRecord(int petID, const QString& petName, int iType, DamageCategory category, int iDamage, int iSpell)
 {
 #ifdef DEBUGCOMBAT
     seqDebug("CombatWindow::addPetOffenseRecord starting...");
@@ -2905,12 +3136,12 @@ void CombatWindow::addPetOffenseRecord(int petID, const QString& petName, int iT
 	if(!bFoundRecord)
 	{
 		pRecord = new PetOffenseRecord(petID, petName, iType, m_player, iSpell);
-		m_pet_offense_list.append(pRecord);
+		m_pet_offense_list.prepend(pRecord);
 	}
 
 	if(iDamage > 0)
 	{
-		pRecord->addHit(iDamage);
+		pRecord->addHit(iDamage, category, 0, 0);
 	}
 	else if (isMelee(iType))
 	{
@@ -2925,7 +3156,7 @@ void CombatWindow::addPetOffenseRecord(int petID, const QString& petName, int iT
 void CombatWindow::addDefenseRecord(int iDamage, DamageCategory category)
 {
 	if(iDamage > 0)
-		m_combat_defense_record->addHit(iDamage, category);
+		m_combat_defense_record->addHit(iDamage, category, 0, 0);
 	else
 		m_combat_defense_record->addMiss(iDamage);
 
@@ -2955,7 +3186,7 @@ void CombatWindow::addPetDefenseRecord(const Spawn* s, int iDamage, DamageCatego
     if(!bFoundRecord)
     {
         pRecord = new CombatDefenseRecord(s);
-        m_combat_pet_defense_list.append(pRecord);
+        m_combat_pet_defense_list.prepend(pRecord);
         m_combobox_pet_defense->insertItem(pet_id_string, 0);
     }
 
@@ -2980,13 +3211,13 @@ void CombatWindow::addPetDefenseRecord(const Spawn* s, int iDamage, DamageCatego
     }
 
     if(iDamage > 0)
-        pRecord->addHit(iDamage, category);
+        pRecord->addHit(iDamage, category, 0, 0);
     else
         pRecord->addMiss(iDamage);
 }
 
 void CombatWindow::addMobRecord(int iTargetID, int iTargetPetOwnerID,
-        int iSourceID, int iSourcePetOwnerID,
+        int iSourceID, int iSourcePetOwnerID, DamageCategory category,
         int iDamage, const QString& tName, const QString& sName)
 {
 #ifdef DEBUGCOMBAT
@@ -3030,16 +3261,17 @@ void CombatWindow::addMobRecord(int iTargetID, int iTargetPetOwnerID,
 	if(!bFoundRecord)
 	{
 		pRecord = new CombatMobRecord(iMobID, mobName, m_player);
-		m_combat_mob_list.append(pRecord);
+		m_combat_mob_list.prepend(pRecord);
 	}
-	pRecord->addHit(iTargetID, iSourceID, iDamage);
+	pRecord->addHit(iDamage, category, iTargetID, iSourceID);
 
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::addMobRecord finished...");
 #endif
 }
 
-void CombatWindow::addOtherRecord(int iTargetID, int iSourceID,
+void CombatWindow::addOtherRecord(
+        DamageCategory category, int iTargetID, int iSourceID,
         int iDamage, const QString& tName, const QString& sName,
         bool isKillingBlow)
 {
@@ -3066,10 +3298,10 @@ void CombatWindow::addOtherRecord(int iTargetID, int iSourceID,
             return;
 
         pRecord = new CombatOtherRecord(iTargetID, iSourceID, tName, sName);
-        m_combat_other_list.append(pRecord);
+        m_combat_other_list.prepend(pRecord);
     }
 
-    pRecord->addHit(iDamage);
+    pRecord->addHit(iDamage, category, iTargetID, iSourceID);
 }
 
 void CombatWindow::updateDPS(int iDamage)
@@ -3233,12 +3465,14 @@ void CombatWindow::resetDPS()
 void CombatWindow::clearOther()
 {
     m_combat_other_list.clear();
+    m_listview_other->clear();
     updateOther();
 }
 
 void CombatWindow::clearMob()
 {
     m_combat_mob_list.clear();
+    m_listview_mob->clear();
     updateMob();
 }
 
@@ -3248,6 +3482,7 @@ void CombatWindow::clearOffense()
     m_pet_offense_list.clear();
     m_dot_offense_list.clear();
     m_nonmelee_offense_record->clear();
+    m_listview_offense->clear();
     updateOffense();
 }
 
@@ -3267,21 +3502,11 @@ void CombatWindow::clearPetDefense()
 
 void CombatWindow::clear(void)
 {
-  m_combat_other_list.clear();
-  updateOther();
-  m_combat_mob_list.clear();
-  updateMob();
-  m_combat_offense_list.clear();
-  m_pet_offense_list.clear();
-  m_dot_offense_list.clear();
-  m_nonmelee_offense_record->clear();
-  updateOffense();
-  m_combat_defense_record->clear();
-  updateDefense();
-  m_combobox_pet_defense->clear();
-  m_combat_pet_defense_current_record = NULL;
-  m_combat_pet_defense_list.clear();
-  updatePetDefense();
+  clearOffense();
+  clearDefense();
+  clearPetDefense();
+  clearOther();
+  clearMob();
   resetDPS();
 }
 

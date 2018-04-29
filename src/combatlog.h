@@ -50,10 +50,49 @@ enum DamageCategory
     DAMAGE_CATEGORY_OTHER
 };
 
+class Record
+{
+    public:
+        Record();
+        virtual ~Record();
+
+        void addHit(int iDamage, DamageCategory category, int iTarget, int iSource);
+        void addMiss(int iMissReason);
+        void clear();
+
+        void update(QListView* parent);
+    protected:
+        void updateViewItem(
+                QListView* parent,
+                const QString& l0=QString::null,
+                const QString& l1=QString::null,
+                const QString& l2=QString::null,
+                const QString& l3=QString::null,
+                const QString& l4=QString::null,
+                const QString& l5=QString::null,
+                const QString& l6=QString::null,
+                const QString& l7=QString::null,
+                const QString& l8=QString::null,
+                const QString& l9=QString::null,
+                const QString& l10=QString::null,
+                const QString& l11=QString::null);
+    private:
+        virtual void addHitImpl(int iDamage, DamageCategory category,
+                int iTarget, int iSource) = 0;
+        virtual void addMissImpl(int iMissReason) = 0;
+        virtual void clearImpl() = 0;
+        virtual void updateImpl(QListView* parent) = 0;
+        virtual void initializeViewItem(SEQListViewItem<>*) = 0;
+
+        // TODO double check ptr lifetime
+        bool m_isDirty;
+        SEQListViewItem<>* m_viewItem;
+};
+
 ////////////////////////////////////////////
 //  CombatOffenseRecord definition
 //////////////////////////////////////////`//
-class CombatOffenseRecord
+class CombatOffenseRecord : public Record
 {
 public:
 
@@ -70,11 +109,14 @@ public:
 	double	getStandardDeviation() const
 		{ return m_iHits < 2 ? std::numeric_limits<double>::quiet_NaN() : std::sqrt(m_dM2/(m_iHits-1)); };
 
-	void	addMiss(int iMissReason) { m_iMisses++; };
-	void	addHit(int iDamage);
+private:
+    virtual void addHitImpl(int iDamage, DamageCategory category,
+            int iTarget, int iSource);
+    virtual void addMissImpl(int iMissReason);
+    virtual void clearImpl();
+    virtual void updateImpl(QListView* parent);
+    virtual void initializeViewItem(SEQListViewItem<>*);
 
-	void clear();
-protected:
 	int			m_iType;
 	int			m_iSpell;
 	const Player*	m_player;
@@ -102,6 +144,9 @@ public:
     QString		getPetName() { return m_iPetName; };
 
 private:
+    virtual void updateImpl(QListView* parent);
+    virtual void initializeViewItem(SEQListViewItem<>*);
+
     const int			m_iPetID;
     const QString	m_iPetName;
 };
@@ -118,14 +163,31 @@ class DotOffenseRecord : public CombatOffenseRecord
         QString getSpellName() { return m_iSpellName; };
 
     private:
+        virtual void updateImpl(QListView* parent);
+        virtual void initializeViewItem(SEQListViewItem<>*);
+
         const QString m_iSpellName;
+};
+
+
+////////////////////////////////////////////
+//  NonmeleeOffenseRecord definition
+//////////////////////////////////////////`//
+class NonmeleeOffenseRecord : public CombatOffenseRecord
+{
+    public:
+        NonmeleeOffenseRecord();
+
+    private:
+        virtual void updateImpl(QListView* parent);
+        virtual void initializeViewItem(SEQListViewItem<>*);
 };
 
 
 ////////////////////////////////////////////
 //  CombatDefenseRecord definition
 ////////////////////////////////////////////
-class CombatDefenseRecord
+class CombatDefenseRecord : public Record
 {
 public:
 
@@ -202,11 +264,14 @@ public:
 	double	getDamageShieldStandardDeviation() const
 		{ return m_iDamageShieldHits < 2 ? std::numeric_limits<double>::quiet_NaN() : std::sqrt(m_dDamageShieldM2/(m_iDamageShieldHits-1)); };
 
-	void    clear(void);
-	void	addMiss(int iMissReason);
-	void	addHit(int iDamage, DamageCategory category);
-
 private:
+    virtual void addHitImpl(int iDamage, DamageCategory category,
+            int iTarget, int iSource);
+    virtual void addMissImpl(int iMissReason);
+    virtual void clearImpl();
+    virtual void updateImpl(QListView* parent);
+    virtual void initializeViewItem(SEQListViewItem<>*);
+
 	const QString		m_displayString;
 
 	int 		m_iHits;
@@ -275,7 +340,7 @@ private:
 ////////////////////////////////////////////
 //  CombatMobRecord definition
 ////////////////////////////////////////////
-class CombatMobRecord
+class CombatMobRecord : public Record
 {
 public:
 
@@ -297,9 +362,14 @@ public:
 	double	getPetDPS() const { return m_dPetDPS; };
 	double	getPetMobDPS() const { return m_dPetMobDPS; };
 
-	void	addHit(int iTarget, int iSource, int iDamage);
-	
 private:
+    virtual void addHitImpl(int iDamage, DamageCategory category,
+            int iTarget, int iSource);
+    virtual void addMissImpl(int iMissReason);
+    virtual void clearImpl();
+    virtual void updateImpl(QListView* parent);
+    virtual void initializeViewItem(SEQListViewItem<>*);
+
 	int			m_iID;
 	QString			m_iName;
 	Player*	m_player;
@@ -325,7 +395,7 @@ private:
 ////////////////////////////////////////////
 //  CombatOtherRecord definition
 ////////////////////////////////////////////
-class CombatOtherRecord
+class CombatOtherRecord : public Record
 {
 public:
     CombatOtherRecord(
@@ -343,9 +413,14 @@ public:
 
     time_t getTime() const { return m_time; };
 
-    void addHit(int iDamage);
-
 private:
+    virtual void addHitImpl(int iDamage, DamageCategory category,
+            int iTarget, int iSource);
+    virtual void addMissImpl(int iMissReason);
+    virtual void clearImpl();
+    virtual void updateImpl(QListView* parent);
+    virtual void initializeViewItem(SEQListViewItem<>*);
+
     const int m_iTargetID;
     const int m_iSourceID;
     const QString m_iTargetName;
@@ -403,12 +478,12 @@ private:
 
 	void addNonMeleeOffenseRecord(const QString& iTargetName, const int iDamage);
 	void addDotOffenseRecord(const QString& iSpellName, int iDamage);
-	void addOffenseRecord(int iType, int iDamage, int iSpell);
-	void addPetOffenseRecord(int petID, const QString& petName, int iType, int iDamage, int iSpell);
+	void addOffenseRecord(int iType, DamageCategory category, int iDamage, int iSpell);
+	void addPetOffenseRecord(int petID, const QString& petName, int iType, DamageCategory category, int iDamage, int iSpell);
 	void addDefenseRecord(int iDamage, DamageCategory category);
 	void addPetDefenseRecord(const Spawn* s, int iDamage, DamageCategory category);
-	void addMobRecord(int iTargetID, int iTargetPetOwnerID, int iSourceID, int iSourcePetOwnerID, int iDamage, const QString& tName, const QString& sName);
-	void addOtherRecord(int iTargetID, int iSourceID, int iDamage,
+	void addMobRecord(int iTargetID, int iTargetPetOwnerID, int iSourceID, int iSourcePetOwnerID, DamageCategory category, int iDamage, const QString& tName, const QString& sName);
+	void addOtherRecord(DamageCategory c, int iTargetID, int iSourceID, int iDamage,
 			const QString& tName, const QString& sName, bool isKillingBlow);
 
 	void updateOffense();
@@ -627,7 +702,7 @@ private:
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	QList<DotOffenseRecord> m_dot_offense_list;
 	QList<PetOffenseRecord> m_pet_offense_list;
-	CombatOffenseRecord *m_nonmelee_offense_record;
+	NonmeleeOffenseRecord *m_nonmelee_offense_record;
 	CombatDefenseRecord *m_combat_defense_record;
 	QList<CombatDefenseRecord> m_combat_pet_defense_list;
 	const CombatDefenseRecord *m_combat_pet_defense_current_record;
