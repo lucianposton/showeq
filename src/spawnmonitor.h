@@ -85,7 +85,7 @@ public:
   void setSpawnCount(const QString& name, int count);
 
   // utility methods
-  void update(const Spawn* spawn);
+  void update(const Spawn* spawn, bool isInitialZoneSpawn);
   void restart(void);
   QString spawnCountDisplayString() const;
   QString spawnedTimeDisplayString() const;

@@ -223,7 +223,7 @@ void SpawnPoint::regenerateDisplayStrings()
     m_spawnedTimeDisplayString = spawned;
 }
 
-void SpawnPoint::update(const Spawn* spawn)
+void SpawnPoint::update(const Spawn* spawn, bool isInitialZoneSpawn)
 {
   if (spawn == NULL)
     return;
@@ -235,16 +235,20 @@ void SpawnPoint::update(const Spawn* spawn)
   else
     m_last = "";
   
-  m_spawnTime = time(0);
-  
-  if (m_deathTime != 0)
-    m_diffTime = m_spawnTime - m_deathTime;
-  
-  m_count++;
+  if (!isInitialZoneSpawn)
+  {
+      m_spawnTime = time(0);
 
-  const QString cleanedName = spawn->cleanedName();
-  long spawn_name_count = reinterpret_cast<long>(m_spawn_counts.take(cleanedName));
-  m_spawn_counts.insert(cleanedName, reinterpret_cast<void*>(spawn_name_count+1));
+      // The following updates occur only after the spawn has been killed
+      if (m_deathTime != 0)
+          m_diffTime = m_spawnTime - m_deathTime;
+
+      m_count++;
+
+      const QString cleanedName = spawn->cleanedName();
+      long spawn_name_count = reinterpret_cast<long>(m_spawn_counts.take(cleanedName));
+      m_spawn_counts.insert(cleanedName, reinterpret_cast<void*>(spawn_name_count+1));
+  }
 
   regenerateDisplayStrings();
 }
@@ -418,8 +422,9 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
   sp = findWithZFudgeFactor(m_points, spawn, key);
   if ( sp )
   {
-    m_modified = true;
-    sp->update(spawn);
+      sp->update(spawn, m_isInitialZoneSpawn);
+      if (!m_isInitialZoneSpawn)
+          m_modified = true;
   }
   else
   {
@@ -428,7 +433,7 @@ void SpawnMonitor::checkSpawnPoint(const Spawn* spawn )
     // spawns that happen to be standing on same point when player zones in
     if ( sp && !m_isInitialZoneSpawn )
     {
-      sp->update(spawn);
+      sp->update(spawn, m_isInitialZoneSpawn);
       
       m_points.insert( key, sp );
       emit newSpawnPoint( sp );
