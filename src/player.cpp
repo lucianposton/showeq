@@ -55,8 +55,6 @@ Player::Player (QObject* parent,
 
   connect(m_zoneMgr, SIGNAL(zoneBegin(const ServerZoneEntryStruct*, size_t, uint8_t)),
           this, SLOT(zoneBegin(const ServerZoneEntryStruct*)));
-  connect(m_zoneMgr, SIGNAL(zoneBegin()),
-          this, SLOT(zoneBegin()));
   
   m_NPC = SPAWN_SELF;
 
@@ -236,6 +234,9 @@ void Player::setDefaultDeity(uint16_t deity)
 
 void Player::player(const uint8_t* data)
 {
+  reset();
+  clear();
+
   const charProfileStruct* player = (const charProfileStruct*)data;
   QString messag;
 
@@ -797,12 +798,6 @@ void Player::setLastKill(const QString& name, uint8_t level)
   m_lastSpawnKilledName = name;
   m_lastSpawnKilledLevel = level;
   m_freshKill = true;
-}
-
-void Player::zoneBegin()
-{
-  reset();
-  clear();
 }
 
 void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
