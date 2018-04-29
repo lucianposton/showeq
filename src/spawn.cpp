@@ -422,10 +422,7 @@ void Spawn::update(const spawnStruct* s)
   setTypeflag(s->bodytype);
   setGM(s->gm);
 
-  // If it is a corpse with Unknown (NPC) religion.
-  if ((s->NPC == SPAWN_PC_CORPSE) && (s->deity == DEITY_UNKNOWN))
-    setNPC(SPAWN_NPC_CORPSE); // it's a dead monster
-  else if (s->NPC == SPAWN_PLAYER && s->deity == DEITY_UNKNOWN)
+  if (s->NPC == SPAWN_PLAYER && s->deity == DEITY_UNKNOWN)
       setNPC(SPAWN_NPC); // Set to NPC if deity is unknown
   else
     setNPC(s->NPC); // otherwise it is what it is
