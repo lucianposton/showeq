@@ -482,6 +482,10 @@
         <comment>Send by server when a click causes zone. Also, origin</comment>
         <payload dir="server" typename="requestZoneChangeStruct" sizechecktype="match"/>
     </opcode>
+    <opcode id="d743" name="OP_RequestZoneChange2" updated="10/27/05">
+        <comment>Send by server when porting to zone safe point. 24 bytes. Looks like same struct as OP_RequestZoneChange</comment>
+        <payload dir="server" typename="unknown" sizechecktype="none"/>
+    </opcode>
     <opcode id="3eba" name="OP_SendZonePoints" updated="10/27/05">
         <comment>Coords in a zone that will port you to another zone</comment>
         <payload dir="server" typename="zonePointsStruct" sizechecktype="none"/>
