@@ -1667,6 +1667,10 @@ QWidget* CombatWindow::initDefenseWidget()
 	m_label_defense_summary_totaldamage = new QLabel(summaryGrid);
 	m_label_defense_summary_totaldamage->setAlignment(Qt::AlignRight);
 	new QLabel("", summaryGrid);
+	new QLabel("Current Mob DPS:", summaryGrid);
+	m_label_defense_currentmobdps = new QLabel(summaryGrid);
+	m_label_defense_currentmobdps->setAlignment(Qt::AlignRight);
+	new QLabel("", summaryGrid);
 
 	((QGridLayout *)summaryGrid->layout())->setColStretch(2, 1);
 	((QGridLayout *)summaryGrid->layout())->setColStretch(5, 1);
@@ -1970,6 +1974,10 @@ QWidget* CombatWindow::initPetDefenseWidget()
     new QLabel("Total Damage:", summaryGrid);
     m_label_pet_defense_summary_totaldamage = new QLabel(summaryGrid);
     m_label_pet_defense_summary_totaldamage->setAlignment(Qt::AlignRight);
+    new QLabel("", summaryGrid);
+    new QLabel("Current Mob DPS:", summaryGrid);
+    m_label_pet_defense_currentpetmobdps = new QLabel(summaryGrid);
+    m_label_pet_defense_currentpetmobdps->setAlignment(Qt::AlignRight);
     new QLabel("", summaryGrid);
 
     ((QGridLayout *)summaryGrid->layout())->setColStretch(2, 1);
@@ -3365,6 +3373,7 @@ void CombatWindow::updateMobDPS(int iDamage)
 	const QString sMobDPS = doubleToQString(m_dMobDPS, 1);
 	const QString sMobDPSLast = doubleToQString(m_dMobDPSLast, 1);
 
+	m_label_defense_currentmobdps->setText(sMobDPS);
 	m_label_mob_currentmobdps->setText(sMobDPS);
 	m_label_mob_lastmobdps->setText(sMobDPSLast);
 }
@@ -3400,6 +3409,7 @@ void CombatWindow::updatePetMobDPS(int iDamage)
 	const QString sPetMobDPS = doubleToQString(m_dPetMobDPS, 1);
 	const QString sPetMobDPSLast = doubleToQString(m_dPetMobDPSLast, 1);
 
+	m_label_pet_defense_currentpetmobdps->setText(sPetMobDPS);
 	m_label_mob_currentpetmobdps->setText(sPetMobDPS);
 	m_label_mob_lastpetmobdps->setText(sPetMobDPSLast);
 }

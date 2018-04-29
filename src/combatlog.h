@@ -526,6 +526,9 @@ private:
 	QLabel* 	m_label_offense_currentdps;
 	QLabel* 	m_label_offense_currentpetdps;
 
+	QLabel* 	m_label_defense_currentmobdps;
+	QLabel* 	m_label_pet_defense_currentpetmobdps;
+
 	QLabel*		m_label_offense_percentmelee;
 	QLabel*		m_label_offense_percentspecial;
 	QLabel*		m_label_offense_percentnonmelee;
