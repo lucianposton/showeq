@@ -9,10 +9,6 @@
         <comment>Update with mob's stationary position</comment>
         <payload dir="both" typename="spawnPositionUpdate" sizechecktype="match"/>
     </opcode>
-    <opcode id="00d0" name="OP_CorpseLocResponse" updated="05/26/04">
-        <comment>old CorpseLocCode:</comment>
-        <payload dir="server" typename="corpseLocStruct" sizechecktype="match"/>
-    </opcode>
 
 
 <!-- OLD OPCODES. These haven't been mapped in a post 1/26/2005 world. If you

@@ -1468,20 +1468,6 @@ struct GuildInviteAccept_Struct
 };
 
 /*
-** Corpse location
-** Length: 18 Octets
-** OpCode: corpseLocCode
-*/
-
-struct corpseLocStruct
-{
-/*0000*/ uint32_t spawnId;
-/*0004*/ float    x;
-/*0008*/ float    y;
-/*0012*/ float    z;
-};
-
-/*
 ** Consent request
 ** Length: Variable by length of the name of the consentee
 */

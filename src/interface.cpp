@@ -2110,8 +2110,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_ClientUpdate", SP_Zone, DIR_Server,
 		      "playerSpawnPosStruct", SZC_Match,
 		      m_spawnShell, SLOT(playerUpdate(const uint8_t*, size_t, uint8_t)));
-   m_packet->connect2("OP_CorpseLocResponse", SP_Zone, DIR_Server,
-		      "corpseLocStruct", SZC_Match,
+   m_packet->connect2("OP_BecomeCorpse", SP_Zone, DIR_Server,
+		      "BecomeCorpse_Struct", SZC_Match,
 		      m_spawnShell, SLOT(corpseLoc(const uint8_t*)));
    m_packet->connect2("OP_ZoneSpawns", SP_Zone, DIR_Server,
 		      "spawnStruct", SZC_Modulus,

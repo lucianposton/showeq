@@ -1058,8 +1058,13 @@ void SpawnShell::killSpawn(const uint8_t* data)
      m_player->setLastKill(spawn->name(), spawn->level());
 
      spawn->killSpawn();
-     updateFilterFlags(item);
-     updateRuntimeFilterFlags(item);
+     int changeFlags = tSpawnChangedNPC;
+     if (updateFilterFlags(spawn))
+         changeFlags |= tSpawnChangedFilter;
+     if (updateRuntimeFilterFlags(spawn))
+         changeFlags |= tSpawnChangedRuntimeFilter;
+     spawn->updateLastChanged();
+     emit changeItem(spawn, changeFlags);
 
      spawn->setName(spawn->realName() + Spawn_Corpse_Designator);
 
@@ -1071,33 +1076,16 @@ void SpawnShell::killSpawn(const uint8_t* data)
 
 void SpawnShell::corpseLoc(const uint8_t* data)
 {
-  const corpseLocStruct* corpseLoc = (const corpseLocStruct*)data;
-  Item* item = m_spawns.find(corpseLoc->spawnId);
+  const BecomeCorpse_Struct* corpseLoc = (const BecomeCorpse_Struct*)data;
+  Item* item = m_spawns.find(corpseLoc->spawn_id);
   if (item != NULL)
   {
     Spawn* spawn = (Spawn*)item;
-
-    // set the corpses location, and make sure it's not moving... 
-    if ((spawn->NPC() == SPAWN_PLAYER) || (spawn->NPC() == SPAWN_PC_CORPSE))
-    {
-        spawn->setPos(int16_t(corpseLoc->y), int16_t(corpseLoc->x), 
-                      int16_t(corpseLoc->z),
-                      showeq_params->walkpathrecord,
-                      showeq_params->walkpathlength);
-    }
-    else 
-    {
         spawn->setPos(int16_t(corpseLoc->x), int16_t(corpseLoc->y), 
                       int16_t(corpseLoc->z),
                       showeq_params->walkpathrecord,
                       showeq_params->walkpathlength);
-    }
-    spawn->killSpawn();
     spawn->updateLast();
-    spawn->updateLastChanged();
-    
-    // signal that the spawn has changed
-    emit killSpawn(item, NULL, 0);
   }
 }
 
