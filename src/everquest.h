@@ -58,8 +58,8 @@
 */
 #define SPAWN_PLAYER                    0
 #define SPAWN_NPC                       1
-#define SPAWN_PC_CORPSE                 2
-#define SPAWN_NPC_CORPSE                3
+#define SPAWN_NPC_CORPSE                2
+#define SPAWN_PC_CORPSE                 3
 #define SPAWN_NPC_UNKNOWN               4
 #define SPAWN_DROP                      6
 #define SPAWN_DOOR                      7

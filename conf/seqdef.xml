@@ -2701,7 +2701,7 @@ If any argument is left blank, it is filled in with its default...
    <comment>Player Corpses</comment>
   </property>
   <property name="Category6_Filter" >
-   <string value="NPC:2" />
+   <string value="NPC:3" />
    <comment>regular expression to match all PC corpses</comment>
   </property>
   <property name="Category6_Color">
@@ -2713,7 +2713,7 @@ If any argument is left blank, it is filled in with its default...
    <comment>NPC Corpses</comment>
   </property>
   <property name="Category7_Filter" >
-   <string value="NPC:3" />
+   <string value="NPC:2" />
    <comment>regular expresssion matching all NPC corpses</comment>
   </property>
   <property name="Category7_Color" >
