@@ -568,7 +568,7 @@ QString Spawn::deityName() const
   };
 
   // if it's an NPC, return quickly
-  if (deity() == 0)
+  if (deity() == DEITY_UNKNOWN)
     return "NPC";
 
   // if agnostic return it
