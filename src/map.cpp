@@ -3957,13 +3957,13 @@ void Map::mouseMoveEvent( QMouseEvent* event )
         lastName = "";
 
       string.sprintf("%s %s%s\n"
-             "Level: %2d\tHP: %s\t %.3s/Z: %5d/%5d/%5d\n"
+             "Level: %2d\tHP: %s\t %.3s,z: (%d,%d,%d)\n"
              "Race: %s\t Class: %s", 
              (const char*)spawn->transformedName().utf8(),
              (const char*)lastName.utf8(),
              guild.latin1(),
              spawn->level(), (const char*)hp,
-             showeq_params->retarded_coords ? "Y/X" : "X/Y",
+             showeq_params->retarded_coords ? "y,x" : "x,y",
              showeq_params->retarded_coords ? spawn->y() : spawn->x(),
              showeq_params->retarded_coords ? spawn->x() : spawn->y(),
              item->z(),
@@ -3982,10 +3982,10 @@ void Map::mouseMoveEvent( QMouseEvent* event )
     else
     {
       string.sprintf("%s\n"
-             "%.3s/Z: %5d/%5d/%5d\n"
+             "%.3s,z: (%d,%d,%d)\n"
              "Race: %s\t Class: %s", 
              (const char*)item->transformedName().utf8(),
-             showeq_params->retarded_coords ? "Y/X" : "X/Y",
+             showeq_params->retarded_coords ? "y,x" : "x,y",
              showeq_params->retarded_coords ? item->y() : item->x(),
              showeq_params->retarded_coords ? item->x() : item->y(),
              item->z(),
