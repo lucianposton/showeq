@@ -117,15 +117,14 @@ static DamageCategory damageCategory(int iType)
     }
 }
 
-static bool isNonMeleeDamage(int iType, int iDamage)
+static bool isNonMeleeDamage(DamageCategory c, int iDamage)
 {
     // Checking iDamage > 0 avoids buff spells
-    return damageCategory(iType) == DAMAGE_CATEGORY_NONMELEE && iDamage > 0;
+    return c == DAMAGE_CATEGORY_NONMELEE && iDamage > 0;
 }
 
-static bool isMelee(int iType)
+static bool isMelee(DamageCategory c)
 {
-    const DamageCategory c = damageCategory(iType);
     return c == DAMAGE_CATEGORY_MELEE
         || c == DAMAGE_CATEGORY_MELEE_RANGED
         || c == DAMAGE_CATEGORY_MELEE_SPECIAL_BASIC
@@ -133,9 +132,9 @@ static bool isMelee(int iType)
         || c == DAMAGE_CATEGORY_MELEE_SPECIAL_MONK;
 }
 
-static bool isDamageShield(int iType)
+static bool isDamageShield(DamageCategory c)
 {
-    return damageCategory(iType) == DAMAGE_CATEGORY_DAMAGE_SHIELD;
+    return c == DAMAGE_CATEGORY_DAMAGE_SHIELD;
 }
 
 static bool isIgnoredDamageCategory(DamageCategory c)
@@ -2917,6 +2916,10 @@ void CombatWindow::addCombatRecord(
     if (isIgnoredDamageCategory(category))
         return;
 
+    // Damage shields show up as negative damage, so making positive
+    if (isDamageShield(category))
+        iDamage = -iDamage;
+
 	const int iPlayerID = m_player->id();
     const int iSourcePetOwnerID = (source == NULL) ? -1 : source->petOwnerID();
     const int iTargetPetOwnerID = (target == NULL) ? -1 : target->petOwnerID();
@@ -2962,105 +2965,55 @@ void CombatWindow::addCombatRecord(
 
 	if(iTargetID == iPlayerID && iSourceID != iPlayerID)
 	{
-		// Damage shields show up as negative damage
-		if (isDamageShield(iType))
+		if (isMelee(category) || isDamageShield(category) || isNonMeleeDamage(category, iDamage))
 		{
-			addDefenseRecord(-iDamage, category);
-			updateDefense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, -iDamage, tName, sName);
-			updateMob();
-		}
-		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
 			addDefenseRecord(iDamage, category);
 			updateDefense();
 			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, iDamage, tName, sName);
 			updateMob();
-		}
-
-		if(iDamage > 0)
 			updateMobDPS(iDamage);
-		else if(isDamageShield(iType))
-			updateMobDPS(-iDamage);
+		}
 	}
 	else if(iSourceID == iPlayerID && iTargetID != iPlayerID)
 	{
-		// Damage shields show up as negative damage
-		if (isDamageShield(iType))
-		{
-			addOffenseRecord(iType, category, -iDamage, iSpell);
-			updateOffense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, -iDamage, tName, sName);
-			updateMob();
-		}
 		// For the player, non-melee has positive damage on killing blows
 		// (OP_Death) but not regular hits (OP_Action) against others, so
 		// the player's non-melee damage is handled via addNonMeleeHit, not here
-		else if (isMelee(iType)) {
+		if (isMelee(category) || isDamageShield(category))
+		{
 			addOffenseRecord(iType, category, iDamage, iSpell);
 			updateOffense();
 			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, iDamage, tName, sName);
 			updateMob();
-		}
-
-		// Check for melee to avoid non-melee killing blows from OP_Death
-		if(iDamage > 0 && isMelee(iType))
 			updateDPS(iDamage);
-		else if(isDamageShield(iType))
-			updateDPS(-iDamage);
+		}
 	}
 	else if (iPlayerID == iTargetPetOwnerID)
 	{
-		// Damage shields show up as negative damage
-		if (isDamageShield(iType))
+		if (isMelee(category) || isDamageShield(category) || isNonMeleeDamage(category, iDamage))
 		{
-			addPetDefenseRecord(target, -iDamage, category);
-			updatePetDefense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, -iDamage, tName, sName);
-			updateMob();
-		}
-		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
 			addPetDefenseRecord(target, iDamage, category);
 			updatePetDefense();
 			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, iDamage, tName, sName);
 			updateMob();
-		}
-
-		if(iDamage > 0)
 			updatePetMobDPS(iDamage);
-		else if(isDamageShield(iType))
-			updatePetMobDPS(-iDamage);
+		}
 	}
 	else if (iPlayerID == iSourcePetOwnerID)
 	{
-		// Damage shields show up as negative damage
-		if (isDamageShield(iType))
+		if (isMelee(category) || isDamageShield(category) || isNonMeleeDamage(category, iDamage))
 		{
-			addPetOffenseRecord(iSourceID, sName, iType, category, -iDamage, iSpell);
-			updateOffense();
-			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, -iDamage, tName, sName);
-			updateMob();
-		}
-		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
 			addPetOffenseRecord(iSourceID, sName, iType, category, iDamage, iSpell);
 			updateOffense();
 			addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID, iSourcePetOwnerID, category, iDamage, tName, sName);
 			updateMob();
-		}
-
-		if(iDamage > 0)
 			updatePetDPS(iDamage);
-		else if(isDamageShield(iType))
-			updatePetDPS(-iDamage);
+		}
 	}
 	else if (iTargetID != iPlayerID && iSourceID != iPlayerID)
 	{
-		// Damage shields show up as negative damage
-		if (isDamageShield(iType))
+		if (isMelee(category) || isDamageShield(category) || isNonMeleeDamage(category, iDamage))
 		{
-			addOtherRecord(category, iTargetID, iSourceID, -iDamage, tName, sName, isKillingBlow);
-			updateOther();
-		}
-		else if (isNonMeleeDamage(iType, iDamage) || isMelee(iType)) {
 			addOtherRecord(category, iTargetID, iSourceID, iDamage, tName, sName, isKillingBlow);
 			updateOther();
 		}
@@ -3086,7 +3039,7 @@ void CombatWindow::addOffenseRecord(int iType, DamageCategory category,
 	for(pRecord = m_combat_offense_list.first(); pRecord != 0; pRecord = m_combat_offense_list.next())
 	{
 		if(pRecord->getType() == iType
-			&& (isMelee(iType) || pRecord->getSpell() == iSpell))
+			&& (isMelee(category) || pRecord->getSpell() == iSpell))
 		{
 			bFoundRecord = true;
 			break;
@@ -3103,7 +3056,7 @@ void CombatWindow::addOffenseRecord(int iType, DamageCategory category,
 	{
 		pRecord->addHit(iDamage, category, 0, 0);
 	}
-	else if (isMelee(iType))
+	else if (isMelee(category))
 	{
 		pRecord->addMiss(iDamage);
 	}
@@ -3126,7 +3079,7 @@ void CombatWindow::addPetOffenseRecord(int petID, const QString& petName, int iT
 	for(pRecord = m_pet_offense_list.first(); pRecord != 0; pRecord = m_pet_offense_list.next())
 	{
 		if(pRecord->getType() == iType && pRecord->getPetID() == petID
-			&& (isMelee(iType) || pRecord->getSpell() == iSpell))
+			&& (isMelee(category) || pRecord->getSpell() == iSpell))
 		{
 			bFoundRecord = true;
 			break;
@@ -3143,7 +3096,7 @@ void CombatWindow::addPetOffenseRecord(int petID, const QString& petName, int iT
 	{
 		pRecord->addHit(iDamage, category, 0, 0);
 	}
-	else if (isMelee(iType))
+	else if (isMelee(category))
 	{
 		pRecord->addMiss(iDamage);
 	}
@@ -3306,8 +3259,11 @@ void CombatWindow::addOtherRecord(
 
 void CombatWindow::updateDPS(int iDamage)
 {
+    // < 0 damage are misses e.g. dodge, block, etc
+    if (iDamage < 0)
+        iDamage = 0;
 
-	int iTimeNow = mTime();
+	const int iTimeNow = mTime();
 
 	//	reset if it's been 10 seconds without an update
 	if(iTimeNow > (m_iDPSTimeLast + 10000))
@@ -3319,7 +3275,7 @@ void CombatWindow::updateDPS(int iDamage)
 		m_iCurrentDPSTotal = 0;
 	}
 
-	m_iDPSTimeLast = mTime();
+	m_iDPSTimeLast = iTimeNow;
 	m_iCurrentDPSTotal += iDamage;
 
 	int iTimeElapsed = (iTimeNow - m_iDPSStartTime) / 1000;
@@ -3344,6 +3300,10 @@ void CombatWindow::updatePetDPS(int iDamage)
 	seqDebug("CombatWindow::updatePetDPS...");
 #endif
 
+    // < 0 damage are misses e.g. dodge, block, etc
+    if (iDamage < 0)
+        iDamage = 0;
+
 	const int iTimeNow = mTime();
 
 	//	reset if it's been 10 seconds without an update
@@ -3356,7 +3316,7 @@ void CombatWindow::updatePetDPS(int iDamage)
 		m_iPetCurrentDPSTotal = 0;
 	}
 
-	m_iPetDPSTimeLast = mTime();
+	m_iPetDPSTimeLast = iTimeNow;
 	m_iPetCurrentDPSTotal += iDamage;
 
 	const int iTimeElapsed = (iTimeNow - m_iPetDPSStartTime) / 1000;
@@ -3377,6 +3337,10 @@ void CombatWindow::updatePetDPS(int iDamage)
 
 void CombatWindow::updateMobDPS(int iDamage)
 {
+    // < 0 damage are misses e.g. dodge, block, etc
+    if (iDamage < 0)
+        iDamage = 0;
+
 	const int iTimeNow = mTime();
 
 	//	reset if it's been 10 seconds without an update
@@ -3388,7 +3352,7 @@ void CombatWindow::updateMobDPS(int iDamage)
 		m_iCurrentMobDPSTotal = 0;
 	}
 
-	m_iMobDPSTimeLast = mTime();
+	m_iMobDPSTimeLast = iTimeNow;
 	m_iCurrentMobDPSTotal += iDamage;
 
 	int iTimeElapsed = (iTimeNow - m_iMobDPSStartTime) / 1000;
@@ -3408,6 +3372,10 @@ void CombatWindow::updateMobDPS(int iDamage)
 
 void CombatWindow::updatePetMobDPS(int iDamage)
 {
+    // < 0 damage are misses e.g. dodge, block, etc
+    if (iDamage < 0)
+        iDamage = 0;
+
 	const int iTimeNow = mTime();
 
 	//	reset if it's been 10 seconds without an update
@@ -3419,7 +3387,7 @@ void CombatWindow::updatePetMobDPS(int iDamage)
 		m_iPetCurrentMobDPSTotal = 0;
 	}
 
-	m_iPetMobDPSTimeLast = mTime();
+	m_iPetMobDPSTimeLast = iTimeNow;
 	m_iPetCurrentMobDPSTotal += iDamage;
 
 	const int iTimeElapsed = (iTimeNow - m_iPetMobDPSStartTime) / 1000;
