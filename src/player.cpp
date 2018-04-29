@@ -625,6 +625,9 @@ void Player::updateAltExp(const uint8_t* data)
 void Player::updateExp(const uint8_t* data)
 {
   const expUpdateStruct* exp = (const expUpdateStruct*)data;
+#ifdef DEBUG_PLAYER
+  seqDebug("Player::updateExp(exp=%u, type=%u)", exp->exp, exp->type);
+#endif
 
   // if this is just setting the percentage, then do nothing (use info from
   //   player packet).
