@@ -89,6 +89,7 @@ public:
   void restart(void);
   QString spawnCountDisplayString() const;
   QString spawnedTimeDisplayString() const;
+  QString respawnTimeDisplayString() const;
   QString remainingTimeDisplayString(const char* na="n/a", const char* now="now") const;
   QString displayString() const;
 
@@ -107,6 +108,7 @@ private:
   QDict<void> m_spawn_counts;
   QString m_spawnCountDisplayString;
   QString m_spawnedTimeDisplayString;
+  QString m_respawnTimeDisplayString;
 };
 
 class SpawnMonitor: public QObject

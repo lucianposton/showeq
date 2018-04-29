@@ -93,7 +93,8 @@ SpawnPoint::SpawnPoint(uint16_t spawnID,
     m_lastID(spawnID),
     m_spawn_counts(),
     m_spawnCountDisplayString(),
-    m_spawnedTimeDisplayString()
+    m_spawnedTimeDisplayString(),
+    m_respawnTimeDisplayString()
 {
     regenerateDisplayStrings();
 }
@@ -147,6 +148,11 @@ QString SpawnPoint::spawnedTimeDisplayString() const
     return m_spawnedTimeDisplayString;
 }
 
+QString SpawnPoint::respawnTimeDisplayString() const
+{
+    return m_respawnTimeDisplayString;
+}
+
 QString SpawnPoint::remainingTimeDisplayString(const char* na, const char* now) const
 {
     QString remaining;
@@ -170,17 +176,18 @@ QString SpawnPoint::displayString() const
 {
     QString result;
     result.sprintf("SpawnPoint: %s\n"
-           "%.3s/Z: %5d/%5d/%5d\n"
-           "Last: %s\n"
-           "Spawned: %s\t Remaining: %s\t Count: %d\n"
+           "%.3s,z: (%d,%d,%d)\n"
+           "Last: %s\tSpawned: %s\n"
+           "Respawn: %s\tRemaining: %s\tCount: %d\n"
            "%s",
            (const char*)name(),
-           showeq_params->retarded_coords ? "Y/X" : "X/Y",
+           showeq_params->retarded_coords ? "y,x" : "x,y",
            showeq_params->retarded_coords ? y() : x(),
            showeq_params->retarded_coords ? x() : y(),
            z(),
            (const char*)last(),
            (const char*)spawnedTimeDisplayString(),
+           (const char*)respawnTimeDisplayString(),
            (const char*)remainingTimeDisplayString(),
            count(),
            (const char*)spawnCountDisplayString());
@@ -206,21 +213,29 @@ void SpawnPoint::regenerateDisplayStrings()
     m_spawnCountDisplayString = spawnCountDisplayString;
 
 
-    QString spawned;
-    if (spawnTime())
+    if (m_spawnTime)
     {
         QDateTime dateTime;
-        dateTime.setTime_t(spawnTime());
+        dateTime.setTime_t(m_spawnTime);
         QDate createDate = dateTime.date();
+        m_spawnedTimeDisplayString.truncate(0);
         if ( createDate != QDate::currentDate() )
-            spawned = createDate.dayName( createDate.dayOfWeek() ) + " ";
-        spawned += dateTime.time().toString();
+            m_spawnedTimeDisplayString = createDate.dayName( createDate.dayOfWeek() ) + " ";
+        m_spawnedTimeDisplayString += dateTime.time().toString();
     }
     else
     {
-        spawned = "";
+        m_spawnedTimeDisplayString.truncate(0);
     }
-    m_spawnedTimeDisplayString = spawned;
+
+    if (m_diffTime)
+    {
+        m_respawnTimeDisplayString.sprintf( "%ld:%02ld", m_diffTime / 60, m_diffTime % 60  );
+    }
+    else
+    {
+        m_respawnTimeDisplayString.truncate(0);
+    }
 }
 
 void SpawnPoint::update(const Spawn* spawn, bool isInitialZoneSpawn)
