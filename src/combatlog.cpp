@@ -3009,7 +3009,7 @@ void CombatWindow::addMobRecord(int iTargetID, int iTargetPetOwnerID,
 	}
 	else
 	{
-		//invalid record
+		seqWarn("CombatWindow::addMobRecord: Invalid record");
 		return;
 	}
 
@@ -3060,6 +3060,8 @@ void CombatWindow::addOtherRecord(int iTargetID, int iSourceID,
 
     if (!bFoundRecord)
     {
+        // Ignore killing blows, because these packets have no range limit
+        // while regular hit do
         if (isKillingBlow)
             return;
 
