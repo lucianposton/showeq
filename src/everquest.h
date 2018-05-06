@@ -1765,7 +1765,8 @@ struct CombatDamage_Struct
 /* 05 */	uint16_t	spell; // spell id
 /* 07 */	int32_t	damage; // Seems to always be 0 for spells with player as source. negative for damage shields
 /* 11 */	float force; // Amplitude of push
-/* 15 */	float meleepush_xy;	// Also used as sequence tied to OP_Action
+            // Also used as sequence tied to OP_Action
+/* 15 */	union { float to_float; uint32_t to_uint32_t; } meleepush_xy;
 /* 19 */	float meleepush_z;
 /* 23 */
 };

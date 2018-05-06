@@ -2241,8 +2241,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	      m_combatWindow, SLOT(addNonMeleeHit(const QString&, int)));
      connect (this, SIGNAL(dotTickSignal(const QString&, const QString&, int)),
 	      m_combatWindow, SLOT(addDotTick(const QString&, const QString&, int)));
-     connect (this, SIGNAL(combatSignal(int, const Spawn*, int, const Spawn*, int, int, int, bool)),
-	      m_combatWindow, SLOT(addCombatRecord(int, const Spawn*, int, const Spawn*, int, int, int, bool)));
+     connect (this, SIGNAL(combatSignal(int, const Spawn*, int, const Spawn*, int, int, int, bool, uint32_t)),
+	      m_combatWindow, SLOT(addCombatRecord(int, const Spawn*, int, const Spawn*, int, int, int, bool, uint32_t)));
      m_packet->connect2("OP_Consider", SP_Zone, DIR_Client,
              "considerStruct", SZC_Match,
              m_combatWindow, SLOT(considerSpawn()));
@@ -2252,6 +2252,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    m_packet->connect2("OP_NewSpawn", SP_Zone, DIR_Server,
            "spawnStruct", SZC_Match,
            m_combatWindow, SLOT(newSpawn(const uint8_t*)));
+   m_packet->connect2("OP_Action", SP_Zone, DIR_Server,
+           "actionStruct", SZC_Match,
+           m_combatWindow, SLOT(action(const uint8_t*)));
      connect(this, SIGNAL(restoreFonts(void)),
 	     m_combatWindow, SLOT(restoreFont(void)));
      connect(this, SIGNAL(saveAllPrefs(void)),
@@ -4606,7 +4609,7 @@ void EQInterface::combatDamageMessage(const uint8_t* data)
            "spell=%d "
            "damage=%d "
            "force=%f "
-           "meleepush_xy=%f "
+           "meleepush_xy=%u (%f) "
            "meleepush_z=%f "
            ")",
            action2->target,
@@ -4615,7 +4618,8 @@ void EQInterface::combatDamageMessage(const uint8_t* data)
            action2->spell,
            action2->damage,
            action2->force,
-           action2->meleepush_xy,
+           action2->meleepush_xy.to_uint32_t,
+           action2->meleepush_xy.to_float,
            action2->meleepush_z);
 #endif
   const Spawn* target = (Spawn*)m_spawnShell->findID(tSpawn, action2->target);
@@ -4624,7 +4628,7 @@ void EQInterface::combatDamageMessage(const uint8_t* data)
           action2->target, target,
           action2->source, source,
           action2->type, action2->spell, action2->damage,
-          false);
+          false, action2->meleepush_xy.to_uint32_t);
 }
 
 void EQInterface::formattedMessage(const uint8_t* data, size_t len, uint8_t dir)
@@ -4726,7 +4730,7 @@ void EQInterface::combatKillSpawn(const uint8_t* data)
             deadspawn->spawnId, target,
             deadspawn->killerId, source,
             deadspawn->type, deadspawn->spellId, deadspawn->damage,
-            true);
+            true, 0);
 }
 
 void EQInterface::updatedDateTime(const QDateTime& dt)

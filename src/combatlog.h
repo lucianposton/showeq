@@ -171,20 +171,6 @@ class DotOffenseRecord : public CombatOffenseRecord
 
 
 ////////////////////////////////////////////
-//  NonmeleeOffenseRecord definition
-//////////////////////////////////////////`//
-class NonmeleeOffenseRecord : public CombatOffenseRecord
-{
-    public:
-        NonmeleeOffenseRecord();
-
-    private:
-        virtual void updateImpl(QListView* parent);
-        virtual void initializeViewItem(SEQListViewItem<>*);
-};
-
-
-////////////////////////////////////////////
 //  CombatDefenseRecord definition
 ////////////////////////////////////////////
 class CombatDefenseRecord : public Record
@@ -453,7 +439,7 @@ public slots:
 	void addNonMeleeHit(const QString& iTargetName, int iDamage);
 	void addDotTick(const QString& iTargetName,
 			const QString& iSpellName, int iDamage);
-	void addCombatRecord(int iTargetID, const Spawn* target, int iSourceID, const Spawn* source, int iType, int iSpell, int iDamage, bool isKillingBlow);
+	void addCombatRecord(int iTargetID, const Spawn* target, int iSourceID, const Spawn* source, int iType, int iSpell, int iDamage, bool isKillingBlow, uint32_t action_sequence);
 	void resetDPS();
 	void clearOther();
 	void clearMob();
@@ -465,6 +451,7 @@ public slots:
 
 	void charmUpdate(const uint8_t* data);
 	void newSpawn(const uint8_t* data);
+	void action(const uint8_t* data);
 	void petDefenseComboboxSelectionChanged(const QString& selected);
 
 private:
@@ -476,7 +463,11 @@ private:
 	QWidget* initMobWidget();
 	QWidget* initOtherWidget();
 
-	void addNonMeleeOffenseRecord(const QString& iTargetName, const int iDamage);
+    void resetPlayerSpellActionState();
+    bool isPlayerSpellDamage(DamageCategory category, int iSpell,
+            bool isKillingBlow, int iDamage, int iTargetID, const Spawn* target,
+            uint32_t sequence, int& actualPlayerNonmeleeDamage);
+
 	void addDotOffenseRecord(const QString& iSpellName, int iDamage);
 	void addOffenseRecord(int iType, DamageCategory category, int iDamage, int iSpell);
 	void addPetOffenseRecord(int petID, const QString& petName, int iType, DamageCategory category, int iDamage, int iSpell);
@@ -705,7 +696,6 @@ private:
 	QList<CombatOffenseRecord> m_combat_offense_list;
 	QList<DotOffenseRecord> m_dot_offense_list;
 	QList<PetOffenseRecord> m_pet_offense_list;
-	NonmeleeOffenseRecord *m_nonmelee_offense_record;
 	CombatDefenseRecord *m_combat_defense_record;
 	QList<CombatDefenseRecord> m_combat_pet_defense_list;
 	const CombatDefenseRecord *m_combat_pet_defense_current_record;
@@ -738,6 +728,13 @@ private:
 	int		m_iPetMobDPSTimeLast;
 	double		m_dPetMobDPS;
 	double		m_dPetMobDPSLast;
+
+    uint32_t m_playerspell_action_sequence;
+    uint16_t m_playerspell_target_id;
+    int16_t m_playerspell_spell_id;
+    int m_playerspell_damage;
+    QString m_playerspell_target_cleaned_name;
+    bool m_playerspell_confirmed;
 };
 
 #endif // COMBATLOG_H

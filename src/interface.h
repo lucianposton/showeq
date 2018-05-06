@@ -234,7 +234,7 @@ class EQInterface:public QMainWindow
 
    void nonMeleeHitSignal(const QString&, int);
    void dotTickSignal(const QString&, const QString&, int);
-   void combatSignal(int, const Spawn*, int, const Spawn*, int, int, int, bool);
+   void combatSignal(int, const Spawn*, int, const Spawn*, int, int, int, bool, uint32_t);
 
  private slots:
    void toggle_opt_Fast();

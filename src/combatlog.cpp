@@ -543,62 +543,6 @@ void DotOffenseRecord::initializeViewItem(SEQListViewItem<>* pItem)
 
 
 ////////////////////////////////////////////
-//  NonmeleeOffenseRecord implementation
-////////////////////////////////////////////
-NonmeleeOffenseRecord::NonmeleeOffenseRecord() :
-    CombatOffenseRecord(231, NULL, ITEM_SPELLID_NOSPELL) // assume spell, so 231
-{
-}
-
-void NonmeleeOffenseRecord::updateImpl(QListView* parent)
-{
-    const int iHits = getHits();
-    const int iMinDamage = getMinDamage();
-    const int iMaxDamage = getMaxDamage();
-    const int iDamage = getTotalDamage();
-    const double dSD = getStandardDeviation();
-
-    const double dAvgDamage = (double)iDamage / (double)iHits;
-
-    const QString s_type = "Non-melee (all sources):";
-    QString s_hits;
-    s_hits.setNum(iHits);
-    const QString s_misses;
-    const QString s_accuracy;
-    const QString s_avgdamage = doubleToQString(dAvgDamage, 0);
-    const QString s_sd = doubleToQString(dSD, 0, true);
-    const QString s_mindamage = intToQString(iMinDamage);
-    const QString s_maxdamage = intToQString(iMaxDamage);
-    QString s_damage;
-    s_damage.setNum(iDamage);
-
-    updateViewItem(
-            parent,
-            s_type,
-            s_hits,
-            s_misses,
-            s_accuracy,
-            s_avgdamage,
-            s_sd,
-            s_mindamage,
-            s_maxdamage,
-            s_damage);
-}
-
-void NonmeleeOffenseRecord::initializeViewItem(SEQListViewItem<>* pItem)
-{
-    pItem->setColComparator(1, SEQListViewItemCompareInt);
-    pItem->setColComparator(2, SEQListViewItemCompareInt);
-    pItem->setColComparator(3, SEQListViewItemCompareDouble);
-    pItem->setColComparator(4, SEQListViewItemCompareDouble);
-    pItem->setColComparator(5, SEQListViewItemCompareDouble);
-    pItem->setColComparator(6, SEQListViewItemCompareInt);
-    pItem->setColComparator(7, SEQListViewItemCompareInt);
-    pItem->setColComparator(8, SEQListViewItemCompareInt);
-}
-
-
-////////////////////////////////////////////
 //  CombatDefenseRecord implementation
 ////////////////////////////////////////////
 CombatDefenseRecord::CombatDefenseRecord(const Spawn* s) :
@@ -1134,11 +1078,6 @@ CombatWindow::~CombatWindow()
 		delete m_combat_defense_record;
 		m_combat_defense_record = 0;
 	}
-	if(m_nonmelee_offense_record != 0)
-	{
-		delete m_nonmelee_offense_record;
-		m_nonmelee_offense_record = 0;
-	}
 }
 
 CombatWindow::CombatWindow(Player* player,
@@ -1166,7 +1105,13 @@ CombatWindow::CombatWindow(Player* player,
     m_iPetMobDPSStartTime(0),
     m_iPetMobDPSTimeLast(0),
     m_dPetMobDPS(0.0),
-    m_dPetMobDPSLast(0.0)
+    m_dPetMobDPSLast(0.0),
+    m_playerspell_action_sequence(0),
+    m_playerspell_target_id(0),
+    m_playerspell_spell_id(0),
+    m_playerspell_damage(0),
+    m_playerspell_target_cleaned_name(),
+    m_playerspell_confirmed(false)
 {
   /* Hopefully this is only called once to set up the window,
      so this is a good place to initialize some things which
@@ -1175,8 +1120,6 @@ CombatWindow::CombatWindow(Player* player,
 	m_combat_offense_list.setAutoDelete(true);
 	m_pet_offense_list.setAutoDelete(true);
 	m_dot_offense_list.setAutoDelete(true);
-	// assume non-melee is spell, so 231
-	m_nonmelee_offense_record = new NonmeleeOffenseRecord;
 	m_combat_defense_record = new CombatDefenseRecord(player);
 	m_combat_pet_defense_current_record = NULL;
 	m_combat_pet_defense_list.setAutoDelete(true);
@@ -2225,14 +2168,6 @@ void CombatWindow::updateOffense()
     int iPetDSDamage = 0;
     int iPetDSHits = 0;
 
-    if (0 != m_nonmelee_offense_record->getHits() + m_nonmelee_offense_record->getMisses())
-    {
-        m_nonmelee_offense_record->update(m_listview_offense);
-
-        iNonmeleeDamage += m_nonmelee_offense_record->getTotalDamage();
-        iNonmeleeHits += m_nonmelee_offense_record->getHits();
-    }
-
 	CombatOffenseRecord *pRecord;
 	for(pRecord = m_combat_offense_list.first(); pRecord != 0; pRecord = m_combat_offense_list.next())
 	{
@@ -2337,13 +2272,6 @@ void CombatWindow::updateOffense()
         iDotDamage += dotRecord->getTotalDamage();
         iDotTicks += dotRecord->getHits();
 	}
-
-	// iNonmeleeDamage includes the pet's non-melee damage because
-	// m_nonmelee_offense_record simply accumulates all non-melee hit messages,
-	// which are sent to the client for both player's and pet's non-melee hits.
-	// We subtract out the pet's non-melee damage from the total, which gives
-	// us the player's non-melee damage.
-	iNonmeleeDamage -= iPetNonmeleeDamage;
 
 	iPetTotalDamage = iPetMeleeDamage + iPetSpecialDamage + iPetNonmeleeDamage + iPetDSDamage;
 	iTotalDamage = iMeleeDamage + iSpecialDamage + iNonmeleeDamage + iDotDamage + iDSDamage
@@ -2845,18 +2773,12 @@ void CombatWindow::addNonMeleeHit(const QString& iTargetName, const int iDamage)
     if (iTargetName.isEmpty())
         return;
 
-    addNonMeleeOffenseRecord(iTargetName, iDamage);
-    updateOffense();
-    updateDPS(iDamage);
+    m_playerspell_target_cleaned_name = iTargetName;
+    m_playerspell_damage = iDamage;
 
 #ifdef DEBUGCOMBAT
     seqDebug("CombatWindow::addNonMeleeHit finished...");
 #endif
-}
-
-void CombatWindow::addNonMeleeOffenseRecord(const QString& iTargetName, const int iDamage)
-{
-    m_nonmelee_offense_record->addHit(iDamage, DAMAGE_CATEGORY_NONMELEE, 0, 0);
 }
 
 void CombatWindow::addDotTick(
@@ -2912,12 +2834,15 @@ void CombatWindow::addDotOffenseRecord(const QString& iSpellName, const int iDam
 void CombatWindow::addCombatRecord(
         int iTargetID, const Spawn* target,
         int iSourceID, const Spawn* source,
-        int iType, int iSpell, int iDamage, bool isKillingBlow)
+        int iType, int iSpell, int iDamage, bool isKillingBlow,
+        uint32_t action_sequence)
 {
 #ifdef DEBUGCOMBAT
 	seqDebug("CombatWindow::addCombatRecord starting...");
-	seqDebug("target=%d, source=%d, type=%d, spell=%d, damage=%d, isKillingBlow=%d",
-			iTargetID, iSourceID, iType, iSpell, iDamage, isKillingBlow);
+	seqDebug("target=%d, source=%d, type=%d, spell=%d, damage=%d, isKillingBlow=%d, "
+            "action_sequence=%u",
+			iTargetID, iSourceID, iType, iSpell, iDamage, isKillingBlow,
+            action_sequence);
 #endif
 
     const DamageCategory category = damageCategory(iType);
@@ -2971,6 +2896,8 @@ void CombatWindow::addCombatRecord(
 	//	The one case we won't handle (for now) is where the Target
 	//	and Source are the same.
 
+    int actualPlayerNonmeleeDamage = 0;
+    bool shouldRecordPlayerNonMeleeDamage = false;
 	if(iTargetID == iPlayerID && iSourceID != iPlayerID)
 	{
 		if (isMelee(category) || isDamageShield(category) || isNonMeleeDamage(category, iDamage))
@@ -2984,10 +2911,9 @@ void CombatWindow::addCombatRecord(
 	}
 	else if(iSourceID == iPlayerID && iTargetID != iPlayerID)
 	{
-		// For the player, non-melee has positive damage on killing blows
-		// (OP_Death) but not regular hits (OP_Action) against others, so
-		// the player's non-melee damage is handled via addNonMeleeHit, not here
-		if (isMelee(category) || isDamageShield(category))
+		// For the player, non-melee only has positive damage on killing blows
+		// (OP_Death), which are captured by isNonMeleeDamage below.
+		if (isMelee(category) || isDamageShield(category) || isNonMeleeDamage(category, iDamage))
 		{
 			addOffenseRecord(iType, category, iDamage, iSpell);
 			updateOffense();
@@ -2995,6 +2921,27 @@ void CombatWindow::addCombatRecord(
 			updateMob();
 			updateDPS(iDamage);
 		}
+        else
+        {
+            // For the player, non-killing blows (OP_Damage) always have 0 damage,
+            // which makes them difficult to distinguish from buffs.
+            // isPlayerSpellDamage does the work of determining whether
+            // a spell has caused non-melee damage.
+            shouldRecordPlayerNonMeleeDamage = isPlayerSpellDamage(
+                    category, iSpell, isKillingBlow, iDamage,
+                    iTargetID, target, action_sequence,
+                    actualPlayerNonmeleeDamage);
+            if (shouldRecordPlayerNonMeleeDamage)
+            {
+                addOffenseRecord(iType, category, actualPlayerNonmeleeDamage, iSpell);
+                updateOffense();
+                addMobRecord(iTargetID, iTargetPetOwnerID, iSourceID,
+                        iSourcePetOwnerID, category, actualPlayerNonmeleeDamage,
+                        tName, sName);
+                updateMob();
+                updateDPS(actualPlayerNonmeleeDamage);
+            }
+        }
 	}
 	else if (iPlayerID == iTargetPetOwnerID)
 	{
@@ -3026,6 +2973,12 @@ void CombatWindow::addCombatRecord(
 			addOtherRecord(category, iTargetID, iSourceID, iDamage, tName, sName, isKillingBlow);
 			updateOther();
 		}
+        else if (shouldRecordPlayerNonMeleeDamage)
+        {
+            addOtherRecord(category, iTargetID, iSourceID,
+                    actualPlayerNonmeleeDamage, tName, sName, isKillingBlow);
+            updateOther();
+        }
 	}
 
 #ifdef DEBUGCOMBAT
@@ -3254,9 +3207,11 @@ void CombatWindow::addOtherRecord(
 
     if (!bFoundRecord)
     {
-        // Ignore killing blows, because these packets have no range limit
-        // while regular hit do
-        if (isKillingBlow)
+        // Ignore killing blows, because death packets (OP_Death) have no
+        // range limit while regular hits (OP_Damage) do. Allow OP_Death where
+        // the player is the killer, since these are obviously within range of
+        // the player.
+        if (isKillingBlow && iSourceID != m_player->id())
             return;
 
         pRecord = new CombatOtherRecord(iTargetID, iSourceID, tName, sName);
@@ -3460,7 +3415,6 @@ void CombatWindow::clearOffense()
     m_combat_offense_list.clear();
     m_pet_offense_list.clear();
     m_dot_offense_list.clear();
-    m_nonmelee_offense_record->clear();
     m_listview_offense->clear();
     updateOffense();
 }
@@ -3544,6 +3498,97 @@ void CombatWindow::considerSpawn()
 
     m_lastConsider = iTimeNow;
     resetDPS();
+}
+
+void CombatWindow::action(const uint8_t* data)
+{
+    const actionStruct* a = (const actionStruct*)data;
+    // only handle player spell actions
+    if (a->type != 0xe7 || a->source != m_player->id())
+        return;
+
+#ifdef DEBUGCOMBAT
+    seqDebug("CombatWindow::action(): spell_id=%d (%d->%d) type=%d (lvl: %d) "
+            "causing %d damage. sequence=%d. buff=%d. "
+            "instrument_mod=%d. bard_focus_id=%d.",
+            a->spell, a->source, a->target, a->type, a->level,
+            a->damage, a->sequence, a->make_buff_icon,
+            a->instrument_mod, a->bard_focus_id);
+#endif
+
+    if (a->make_buff_icon == 0)
+    {
+        // Reset action session by recording action data for later comparison
+        resetPlayerSpellActionState();
+        m_playerspell_action_sequence = a->sequence;
+        m_playerspell_target_id = a->target;
+        m_playerspell_spell_id = a->spell;
+        return;
+    }
+
+    if (a->make_buff_icon != 4)
+    {
+        seqWarn("CombatWindow::action(): Unexpected make_buff_icon value (%d)",
+                a->make_buff_icon);
+        return;
+    }
+
+    if (m_playerspell_action_sequence != a->sequence ||
+            m_playerspell_target_id != a->target ||
+            m_playerspell_spell_id != a->spell)
+    {
+        // Clear saved action state because it doesn't match this confirmation action
+        resetPlayerSpellActionState();
+        return;
+    }
+
+    m_playerspell_confirmed = true;
+}
+
+bool CombatWindow::isPlayerSpellDamage(DamageCategory category, int iSpell,
+        bool isKillingBlow, int iDamage, int iTargetID, const Spawn* target,
+        uint32_t sequence, int& actualPlayerNonmeleeDamage)
+{
+#ifdef DEBUGCOMBAT
+    seqDebug("CombatWindow::isPlayerSpellDamage(): "
+            "confirmed=%d category=%d isKillingBlow=%d iDamage=%d iSpell=%d "
+            "m_playerspell_spell_id=%d iTargetID=%d m_playerspell_target_id=%d "
+            "sequence=%u m_playerspell_action_sequence=%u "
+            "target->cleanedName()=%s m_playerspell_target_cleaned_name=%s ",
+            m_playerspell_confirmed, category, isKillingBlow, iDamage, iSpell,
+            m_playerspell_spell_id, iTargetID, m_playerspell_target_id,
+            sequence, m_playerspell_action_sequence,
+            target == NULL ? "NULL" : (const char*)target->cleanedName(),
+            (const char*)m_playerspell_target_cleaned_name);
+#endif
+
+    if (m_playerspell_confirmed
+            && category == DAMAGE_CATEGORY_NONMELEE
+            && !isKillingBlow
+            && iDamage == 0
+            && iSpell == m_playerspell_spell_id
+            && iTargetID == m_playerspell_target_id
+            && sequence == m_playerspell_action_sequence
+            && target != NULL
+            && target->cleanedName() == m_playerspell_target_cleaned_name)
+    {
+        actualPlayerNonmeleeDamage = m_playerspell_damage;
+        resetPlayerSpellActionState();
+        return true;
+    }
+
+    resetPlayerSpellActionState();
+    return false;
+}
+
+void CombatWindow::resetPlayerSpellActionState()
+{
+    m_playerspell_action_sequence = 0;
+    m_playerspell_target_id = 0;
+    m_playerspell_spell_id = 0;
+    m_playerspell_damage = 0;
+    m_playerspell_target_cleaned_name.truncate(0);
+    m_playerspell_confirmed = false;
 }
 
 #include "combatlog.moc"
