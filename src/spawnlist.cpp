@@ -169,11 +169,12 @@ void SpawnList::changeItem(const Item* item, uint32_t changeItem)
   SpawnListItem *i = Find(it, item);
   while (i) 
   {
-    // reinsert only if level, NPC or filterFlags changes
+    // reinsert only if pet owner, level, NPC or filterFlags changes
     if (!(changeItem & (tSpawnChangedLevel |
 			tSpawnChangedNPC | 
 			tSpawnChangedFilter | 
-			tSpawnChangedRuntimeFilter)))
+			tSpawnChangedRuntimeFilter |
+            tSpawnChangedPetOwner)))
       i->update(m_player, changeItem);
     else 
     {

@@ -91,7 +91,8 @@ enum changeType
   tSpawnChangedName = 512,
   tSpawnChangedRace = 1024,
   tSpawnChangedGuild = 2048,
-  tSpawnChangedALL = 4095, // sum of all previous change types 
+  tSpawnChangedPetOwner = 4096,
+  tSpawnChangedALL = 8191, // sum of all previous change types 
 };
 
 

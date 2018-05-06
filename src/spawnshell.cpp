@@ -937,6 +937,7 @@ void SpawnShell::charmUpdate(const uint8_t* data)
     {
         Spawn* spawn = (Spawn*)item;
         spawn->setPetOwnerID(update->command ? update->owner_id : 0);
+        emit changeItem(item, tSpawnChangedPetOwner);
         item->updateLastChanged();
     }
 }
