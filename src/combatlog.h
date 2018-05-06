@@ -60,13 +60,14 @@ class Record
         void addMiss(int iMissReason);
         void clear();
 
-        void update(QListView* parent);
+        void update(QListView* parent, int last_consider_id);
 
         SEQListViewItem<>* getViewItem() { return m_viewItem; };
         virtual bool matchesForSelection(int id) { return false; };
     protected:
         void updateViewItem(
                 QListView* parent,
+                int last_consider_id,
                 const QString& l0=QString::null,
                 const QString& l1=QString::null,
                 const QString& l2=QString::null,
@@ -84,7 +85,7 @@ class Record
                 int iTarget, int iSource) = 0;
         virtual void addMissImpl(int iMissReason) = 0;
         virtual void clearImpl() = 0;
-        virtual void updateImpl(QListView* parent) = 0;
+        virtual void updateImpl(QListView* parent, int last_consider_id) = 0;
         virtual void initializeViewItem(SEQListViewItem<>*) = 0;
 
         // TODO double check ptr lifetime
@@ -117,7 +118,7 @@ private:
             int iTarget, int iSource);
     virtual void addMissImpl(int iMissReason);
     virtual void clearImpl();
-    virtual void updateImpl(QListView* parent);
+    virtual void updateImpl(QListView* parent, int last_consider_id);
     virtual void initializeViewItem(SEQListViewItem<>*);
 
 	int			m_iType;
@@ -147,7 +148,7 @@ public:
     QString		getPetName() { return m_iPetName; };
 
 private:
-    virtual void updateImpl(QListView* parent);
+    virtual void updateImpl(QListView* parent, int last_consider_id);
     virtual void initializeViewItem(SEQListViewItem<>*);
 
     const int			m_iPetID;
@@ -166,7 +167,7 @@ class DotOffenseRecord : public CombatOffenseRecord
         QString getSpellName() { return m_iSpellName; };
 
     private:
-        virtual void updateImpl(QListView* parent);
+        virtual void updateImpl(QListView* parent, int last_consider_id);
         virtual void initializeViewItem(SEQListViewItem<>*);
 
         const QString m_iSpellName;
@@ -258,7 +259,7 @@ private:
             int iTarget, int iSource);
     virtual void addMissImpl(int iMissReason);
     virtual void clearImpl();
-    virtual void updateImpl(QListView* parent);
+    virtual void updateImpl(QListView* parent, int last_consider_id);
     virtual void initializeViewItem(SEQListViewItem<>*);
 
 	const QString		m_displayString;
@@ -358,7 +359,7 @@ private:
             int iTarget, int iSource);
     virtual void addMissImpl(int iMissReason);
     virtual void clearImpl();
-    virtual void updateImpl(QListView* parent);
+    virtual void updateImpl(QListView* parent, int last_consider_id);
     virtual void initializeViewItem(SEQListViewItem<>*);
 
 	int			m_iID;
@@ -411,7 +412,7 @@ private:
             int iTarget, int iSource);
     virtual void addMissImpl(int iMissReason);
     virtual void clearImpl();
-    virtual void updateImpl(QListView* parent);
+    virtual void updateImpl(QListView* parent, int last_consider_id);
     virtual void initializeViewItem(SEQListViewItem<>*);
 
     const int m_iTargetID;
@@ -735,6 +736,8 @@ private:
 	int		m_iPetMobDPSTimeLast;
 	double		m_dPetMobDPS;
 	double		m_dPetMobDPSLast;
+
+    int m_last_consider_id;
 
     uint32_t m_playerspell_action_sequence;
     uint16_t m_playerspell_target_id;

@@ -191,17 +191,18 @@ void Record::addMiss(int iMissReason)
     m_isDirty = true;
 }
 
-void Record::update(QListView* parent)
+void Record::update(QListView* parent, int last_consider_id)
 {
     if (!m_isDirty)
         return;
     m_isDirty = false;
 
-    updateImpl(parent);
+    updateImpl(parent, last_consider_id);
 }
 
 void Record::updateViewItem(
         QListView* parent,
+        int last_consider_id,
         const QString& l0,
         const QString& l1,
         const QString& l2,
@@ -237,6 +238,8 @@ void Record::updateViewItem(
             m_viewItem->setText(11, l11);
         initializeViewItem(m_viewItem);
         parent->insertItem(m_viewItem);
+        if (last_consider_id && matchesForSelection(last_consider_id))
+            parent->setSelected(m_viewItem, true);
     }
     else
     {
@@ -310,7 +313,7 @@ void CombatOffenseRecord::addMissImpl(int)
     m_iMisses += 1;
 }
 
-void CombatOffenseRecord::updateImpl(QListView* parent)
+void CombatOffenseRecord::updateImpl(QListView* parent, int last_consider_id)
 {
     const int iType = getType();
     const int iSpell = getSpell();
@@ -373,6 +376,7 @@ void CombatOffenseRecord::updateImpl(QListView* parent)
 
     updateViewItem(
             parent,
+            last_consider_id,
             s_type,
             s_hits,
             s_misses,
@@ -407,7 +411,7 @@ PetOffenseRecord::PetOffenseRecord(int iPetID, const QString& iPetName, int iTyp
 {
 }
 
-void PetOffenseRecord::updateImpl(QListView* parent)
+void PetOffenseRecord::updateImpl(QListView* parent, int last_consider_id)
 {
     const QString iPetName = getPetName();
     const int iPetID = getPetID();
@@ -476,6 +480,7 @@ void PetOffenseRecord::updateImpl(QListView* parent)
 
     updateViewItem(
             parent,
+            last_consider_id,
             s_type,
             s_hits,
             s_misses,
@@ -509,7 +514,7 @@ DotOffenseRecord::DotOffenseRecord(const Player* p, const QString& iSpellName) :
 {
 }
 
-void DotOffenseRecord::updateImpl(QListView* parent)
+void DotOffenseRecord::updateImpl(QListView* parent, int last_consider_id)
 {
     const int iTicks = getHits();
     const int iMinDamage = getMinDamage();
@@ -534,6 +539,7 @@ void DotOffenseRecord::updateImpl(QListView* parent)
 
     updateViewItem(
             parent,
+            last_consider_id,
             s_type,
             s_hits,
             s_misses,
@@ -813,7 +819,7 @@ void CombatDefenseRecord::addMissImpl(int iMissReason)
 	}
 }
 
-void CombatDefenseRecord::updateImpl(QListView* parent)
+void CombatDefenseRecord::updateImpl(QListView* parent, int last_consider_id)
 {
     // Not used in a list view
 }
@@ -936,7 +942,7 @@ void CombatMobRecord::clearImpl()
     m_dPetMobDPS = 0.0;
 }
 
-void CombatMobRecord::updateImpl(QListView* parent)
+void CombatMobRecord::updateImpl(QListView* parent, int last_consider_id)
 {
     const int iID = getID();
     const int iDuration = getDuration() / 1000;
@@ -966,6 +972,7 @@ void CombatMobRecord::updateImpl(QListView* parent)
 
     updateViewItem(
             parent,
+            last_consider_id,
             s_time,
             s_name,
             s_id,
@@ -1044,7 +1051,7 @@ void CombatOtherRecord::clearImpl()
     m_time = 0;
 }
 
-void CombatOtherRecord::updateImpl(QListView* parent)
+void CombatOtherRecord::updateImpl(QListView* parent, int last_consider_id)
 {
     const int iDuration = getDuration() / 1000;
     const int iDamageTotal = getDamageTotal();
@@ -1063,6 +1070,7 @@ void CombatOtherRecord::updateImpl(QListView* parent)
 
     updateViewItem(
             parent,
+            last_consider_id,
             s_time,
             s_sourcename,
             s_sourceid,
@@ -1122,6 +1130,7 @@ CombatWindow::CombatWindow(Player* player,
     m_iPetMobDPSTimeLast(0),
     m_dPetMobDPS(0.0),
     m_dPetMobDPSLast(0.0),
+    m_last_consider_id(0),
     m_playerspell_action_sequence(0),
     m_playerspell_target_id(0),
     m_playerspell_spell_id(0),
@@ -2189,7 +2198,7 @@ void CombatWindow::updateOffense()
 	CombatOffenseRecord *pRecord;
 	for(pRecord = m_combat_offense_list.first(); pRecord != 0; pRecord = m_combat_offense_list.next())
 	{
-        pRecord->update(m_listview_offense);
+        pRecord->update(m_listview_offense, m_last_consider_id);
 
         const int iType = pRecord->getType();
         const int iHits = pRecord->getHits();
@@ -2237,7 +2246,7 @@ void CombatWindow::updateOffense()
     PetOffenseRecord *petRecord;
     for(petRecord = m_pet_offense_list.first(); petRecord != 0; petRecord = m_pet_offense_list.next())
     {
-        petRecord->update(m_listview_offense);
+        petRecord->update(m_listview_offense, m_last_consider_id);
 
         const int iType = petRecord->getType();
         const int iHits = petRecord->getHits();
@@ -2285,7 +2294,7 @@ void CombatWindow::updateOffense()
 	DotOffenseRecord *dotRecord;
 	for(dotRecord = m_dot_offense_list.first(); dotRecord != 0; dotRecord = m_dot_offense_list.next())
 	{
-        dotRecord->update(m_listview_offense);
+        dotRecord->update(m_listview_offense, m_last_consider_id);
 
         iDotDamage += dotRecord->getTotalDamage();
         iDotTicks += dotRecord->getHits();
@@ -2741,7 +2750,7 @@ void CombatWindow::updateMob()
 
 	for(pRecord = m_combat_mob_list.first(); pRecord != 0; pRecord = m_combat_mob_list.next())
 	{
-        pRecord->update(m_listview_mob);
+        pRecord->update(m_listview_mob, m_last_consider_id);
 
         dDPSSum += pRecord->getDPS();
         dPetDPSSum += pRecord->getPetDPS();
@@ -2771,7 +2780,7 @@ void CombatWindow::updateOther()
     for(pRecord = m_combat_other_list.first(); pRecord != 0;
             pRecord = m_combat_other_list.next())
     {
-        pRecord->update(m_listview_other);
+        pRecord->update(m_listview_other, m_last_consider_id);
         dDPSSum += pRecord->getDPS();
     }
 
@@ -3508,6 +3517,7 @@ void CombatWindow::newSpawn(const uint8_t* data)
 void CombatWindow::considerSpawn(const uint8_t* data)
 {
     const considerStruct* con = (const considerStruct*)data;
+    m_last_consider_id = con->targetid;
     selectRecordsById(m_listview_mob, m_combat_mob_list, con->targetid);
     selectRecordsById(m_listview_other, m_combat_other_list, con->targetid);
 
