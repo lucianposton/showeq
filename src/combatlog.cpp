@@ -142,6 +142,22 @@ static bool isIgnoredDamageCategory(DamageCategory c)
     return c == DAMAGE_CATEGORY_ENVIRONMENT || c == DAMAGE_CATEGORY_OTHER;
 }
 
+template <class T>
+void selectRecordsById(SEQListView* listView, QList<T>& records, int id)
+{
+    listView->clearSelection();
+    Record *pRecord;
+    for (pRecord = records.first(); pRecord != 0; pRecord = records.next())
+    {
+        if (pRecord->matchesForSelection(id))
+        {
+            SEQListViewItem<>* viewItem = pRecord->getViewItem();
+            if (viewItem)
+                listView->setSelected(viewItem, true);
+        }
+    }
+}
+
 } // namespace
 
 
@@ -1965,6 +1981,7 @@ QWidget* CombatWindow::initMobWidget()
 	m_listview_mob->addColumn("Pet MOB DPS");
 	m_listview_mob->setColumnAlignment(11, Qt::AlignRight);
 
+	m_listview_mob->setSelectionMode(QListView::Multi);
 	m_listview_mob->restoreColumns();
 
 	//m_listview_mob->setMinimumSize(m_listview_mob->sizeHint().width(), 200);
@@ -2062,6 +2079,7 @@ QWidget* CombatWindow::initOtherWidget()
     m_listview_other->addColumn("DPS");
     m_listview_other->setColumnAlignment(7, Qt::AlignRight);
 
+    m_listview_other->setSelectionMode(QListView::Multi);
     m_listview_other->restoreColumns();
 
     QGroupBox *summaryGBox = new QVGroupBox("Summary", pWidget);
@@ -3487,8 +3505,12 @@ void CombatWindow::newSpawn(const uint8_t* data)
     }
 }
 
-void CombatWindow::considerSpawn()
+void CombatWindow::considerSpawn(const uint8_t* data)
 {
+    const considerStruct* con = (const considerStruct*)data;
+    selectRecordsById(m_listview_mob, m_combat_mob_list, con->targetid);
+    selectRecordsById(m_listview_other, m_combat_other_list, con->targetid);
+
     // clear all if it's been less than .2 seconds since last consider
     const int iTimeNow = mTime();
     if(m_lastConsider && iTimeNow < (m_lastConsider + 200))

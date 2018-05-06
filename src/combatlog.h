@@ -61,6 +61,9 @@ class Record
         void clear();
 
         void update(QListView* parent);
+
+        SEQListViewItem<>* getViewItem() { return m_viewItem; };
+        virtual bool matchesForSelection(int id) { return false; };
     protected:
         void updateViewItem(
                 QListView* parent,
@@ -332,6 +335,8 @@ public:
 
 	CombatMobRecord(int iID, const QString& iName, Player* p);
 
+    virtual bool matchesForSelection(int id) { return id == m_iID; };
+
 	int		getID() { return m_iID; };
 	int		getDuration();
 	int		getDamageGiven() { return m_iDamageGiven; };
@@ -387,6 +392,8 @@ public:
     CombatOtherRecord(
             int iTargetID, int iSourceID,
             const QString& tName, const QString& sName);
+
+    virtual bool matchesForSelection(int id) { return m_iSourceID == id || m_iTargetID == id; };
 
     int getSourceID() const { return m_iSourceID; };
     int getTargetID() const { return m_iTargetID; };
@@ -447,7 +454,7 @@ public slots:
 	void clearDefense();
 	void clearPetDefense();
 	void clear(void);
-	void considerSpawn();
+	void considerSpawn(const uint8_t*);
 
 	void charmUpdate(const uint8_t* data);
 	void newSpawn(const uint8_t* data);

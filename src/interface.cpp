@@ -2245,7 +2245,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	      m_combatWindow, SLOT(addCombatRecord(int, const Spawn*, int, const Spawn*, int, int, int, bool, uint32_t)));
      m_packet->connect2("OP_Consider", SP_Zone, DIR_Client,
              "considerStruct", SZC_Match,
-             m_combatWindow, SLOT(considerSpawn()));
+             m_combatWindow, SLOT(considerSpawn(const uint8_t*)));
    m_packet->connect2("OP_Charm", SP_Zone, DIR_Server,
            "Charm_Struct", SZC_Match,
            m_combatWindow, SLOT(charmUpdate(const uint8_t*)));
