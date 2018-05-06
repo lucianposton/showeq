@@ -3018,7 +3018,8 @@ void CombatWindow::addCombatRecord(
 			updatePetDPS(iDamage);
 		}
 	}
-	else if (iTargetID != iPlayerID && iSourceID != iPlayerID)
+
+	if (iTargetID != iPlayerID || iSourceID != iPlayerID)
 	{
 		if (isMelee(category) || isDamageShield(category) || isNonMeleeDamage(category, iDamage))
 		{
