@@ -1209,10 +1209,10 @@ void CombatWindow::initUI()
 	m_tab->addTab(m_widget_pet_defense, "&Pet Defense");
 
 	m_widget_mob = initMobWidget();
-	m_tab->addTab(m_widget_mob, "&Mobs");
+	m_tab->addTab(m_widget_mob, "A&ttackers");
 
 	m_widget_other = initOtherWidget();
-	m_tab->addTab(m_widget_other, "O&thers");
+	m_tab->addTab(m_widget_other, "&All");
 
 	m_clear_menu = new QPopupMenu(this);
 	m_clear_menu->insertItem("Clear All", this, SLOT(clear()));
