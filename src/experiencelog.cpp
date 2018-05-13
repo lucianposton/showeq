@@ -195,13 +195,25 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
 
    m_exp_listview = new SEQListView(preferenceName(), listGBox);
    m_exp_listview->addColumn("Time");
+   m_exp_listview->setColumnAlignment(0, Qt::AlignLeft);
    m_exp_listview->addColumn("Mob");
+   m_exp_listview->setColumnAlignment(1, Qt::AlignLeft);
    m_exp_listview->addColumn("Level");
+   m_exp_listview->setColumnAlignment(2, Qt::AlignRight);
    m_exp_listview->addColumn("Base Exp");
-   m_exp_listview->addColumn("ZEM total");
-   m_exp_listview->addColumn("Class total");
-   m_exp_listview->addColumn("Group total");
-   m_exp_listview->addColumn("Experience Gained");
+   m_exp_listview->setColumnAlignment(3, Qt::AlignRight);
+   m_exp_listview->addColumn("ZEM Raw");
+   m_exp_listview->setColumnAlignment(4, Qt::AlignRight);
+   m_exp_listview->addColumn("ZEM %");
+   m_exp_listview->setColumnAlignment(5, Qt::AlignRight);
+   m_exp_listview->addColumn("ZEM Exp");
+   m_exp_listview->setColumnAlignment(6, Qt::AlignRight);
+   m_exp_listview->addColumn("Class Exp");
+   m_exp_listview->setColumnAlignment(7, Qt::AlignRight);
+   m_exp_listview->addColumn("Group Exp");
+   m_exp_listview->setColumnAlignment(8, Qt::AlignRight);
+   m_exp_listview->addColumn("Exp Gained");
+   m_exp_listview->setColumnAlignment(9, Qt::AlignRight);
    
    m_exp_listview->restoreColumns();
 
@@ -321,13 +333,12 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
       m_view_menu->setItemChecked(m_view_menu->idAt(10), false);
    }   
    s_xp_value.setNum(xp->getExpValue());
+   const QString s_zem_value = doubleToQString(m_zoneMgr->zoneExpMultiplier(), 2, true);
+   QString s_zem_bonus;
+   s_zem_bonus.setNum((int)(zemToExpBonus(m_zoneMgr->zoneExpMultiplier())*100));
    QString s_xp_valueZEM;
-   switch (m_ZEMviewtype) {
-      case 1 : s_xp_valueZEM.setNum(m_zoneMgr->zoneExpMultiplier()); break;
-      case 2 : s_xp_valueZEM = doubleToQString(zemToExpBonus(m_zoneMgr->zoneExpMultiplier())*100.0, 1, true);
-         break;
-      default: s_xp_valueZEM.setNum(xp->getExpValueZEM()); break;
-   }
+   s_xp_valueZEM.setNum(xp->getExpValueZEM());
+
    QString s_xp_valuep;
    s_xp_valuep.setNum(xp->getExpValuep());
    QString s_xp_valueg;
@@ -337,11 +348,26 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    time_t timev = xp->getTime();
    strftime(s_time, 64, "%m/%d %H:%M:%S", localtime( &timev ));
 
-   /* Update suggested by Shag */
-   QListViewItem *new_exp_entry = 
-     new QListViewItem( m_exp_listview, s_time, s_mob_name, 
-			s_mob_level, s_xp_value, s_xp_valueZEM,
-			s_xp_valuep, s_xp_valueg, s_xp_gained );
+   SEQListViewItem<>* new_exp_entry = new SEQListViewItem<>(
+           m_exp_listview,
+           s_time,
+           s_mob_name,
+           s_mob_level,
+           s_xp_value,
+           s_zem_value,
+           s_zem_bonus,
+           s_xp_valueZEM,
+           s_xp_valuep);
+   new_exp_entry->setText(8, s_xp_valueg);
+   new_exp_entry->setText(9, s_xp_gained);
+   new_exp_entry->setColComparator(2, SEQListViewItemCompareInt);
+   new_exp_entry->setColComparator(3, SEQListViewItemCompareInt);
+   new_exp_entry->setColComparator(4, SEQListViewItemCompareInt);
+   new_exp_entry->setColComparator(5, SEQListViewItemCompareDouble);
+   new_exp_entry->setColComparator(6, SEQListViewItemCompareInt);
+   new_exp_entry->setColComparator(7, SEQListViewItemCompareInt);
+   new_exp_entry->setColComparator(8, SEQListViewItemCompareInt);
+   new_exp_entry->setColComparator(9, SEQListViewItemCompareInt);
 
    m_exp_listview->insertItem( new_exp_entry );
    m_exp_listview->setSelected( new_exp_entry, TRUE );
