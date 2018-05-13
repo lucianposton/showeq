@@ -149,6 +149,8 @@
 #define PLAYER_CLASSES     16
 #define PLAYER_RACES       15
 
+#define BASE_ZEM_VALUE 0.30
+
 /*
 ** Item Packet Type
 */

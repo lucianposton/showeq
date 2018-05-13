@@ -625,6 +625,11 @@ uint32_t calc_exp (int level, uint16_t race, uint8_t class_)
   return (unsigned long)(exp);
 }
 
+float zemToExpBonus(float zem)
+{
+    return (zem - BASE_ZEM_VALUE)/BASE_ZEM_VALUE;
+}
+
 //
 // mTime
 //

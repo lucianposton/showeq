@@ -324,7 +324,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    QString s_xp_valueZEM;
    switch (m_ZEMviewtype) {
       case 1 : s_xp_valueZEM.setNum(m_zoneMgr->zoneExpMultiplier()); break;
-      case 2 : s_xp_valueZEM.setNum(((float)(m_zoneMgr->zoneExpMultiplier()-0.75)/0.75)*100);
+      case 2 : s_xp_valueZEM = doubleToQString(zemToExpBonus(m_zoneMgr->zoneExpMultiplier())*100.0, 1, true);
          break;
       default: s_xp_valueZEM.setNum(xp->getExpValueZEM()); break;
    }

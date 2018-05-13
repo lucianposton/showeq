@@ -51,6 +51,7 @@ QString slot_to_name(int16_t slotnr);
 
 uint32_t calc_exp (int level, uint16_t race, uint8_t class_);
 
+float zemToExpBonus(float zem);
 int  mTime(void);
 int calcMaxMana(int INT, int WIS, int daclass, int level);
 
