@@ -80,13 +80,13 @@ long ExperienceRecord::getExpValue() const
 
 long ExperienceRecord::getExpValueZEM() const 
 {
-  int ZEM = int(m_zem * 100);
-  return m_mob_level*m_mob_level*ZEM;
+  long ZEM = long(m_zem * 100);
+  return ZEM*m_mob_level*m_mob_level;
 }
  
 long ExperienceRecord::getExpValuep() const 
 {
-   int p_penalty; 
+   long p_penalty;
    // WAR and ROG are at 10 since thier EXP is not scaled to compensate
    // for thier bonus
    switch (m_class)
@@ -108,16 +108,15 @@ long ExperienceRecord::getExpValuep() const
       default: /* why are we here? */
          p_penalty = 10; break; 
    }
-   int baseExp = getExpValueZEM();
-   return (int)((float)baseExp*((float)p_penalty/(float)10));
+   long baseExp = getExpValueZEM();
+   return (long)((float)baseExp*((float)p_penalty/(float)10));
 }
 
 long ExperienceRecord::getExpValueg() const 
 {
-   int pExp = getExpValuep();
-   int myLevel = m_level;
+   long pExp = getExpValuep();
 
-   return int(((float)pExp)*m_groupBonus*((float)myLevel/m_totalLevels));
+   return (long)(((float)pExp)*m_groupBonus*((float)m_level/m_totalLevels));
 }
 
 time_t ExperienceRecord::getTime() const 
