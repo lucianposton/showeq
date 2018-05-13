@@ -686,9 +686,6 @@ void Player::updateLevel(const uint8_t* data)
 {
   const levelUpUpdateStruct *levelup = (const levelUpUpdateStruct *)data;
 
-  // cache previous experience for later calculations
-  uint32_t prevExp = m_currentExp;
-
   // save the new level information
   m_level  = levelup->level;
 
@@ -696,33 +693,6 @@ void Player::updateLevel(const uint8_t* data)
   m_minExp = calc_exp(level() - 1, race(), classVal());
   m_maxExp = calc_exp(level(), race(), classVal ());
   m_tickExp = (m_maxExp - m_minExp) / 330;
-  m_currentExp = (m_tickExp * levelup->exp) + m_minExp;
-  m_validExp = true;
-
-  // calculate the increment in experience between the current experience and
-  // the previous experience
-  uint32_t expIncrement =  m_currentExp - prevExp;
-  
-  emit newExp(expIncrement, m_currentExp, levelup->exp, 
-	      m_minExp, m_maxExp, m_tickExp);
-
-  if(m_freshKill)
-  {
-     emit expGained( m_lastSpawnKilledName,
-                     m_lastSpawnKilledLevel,
-                     expIncrement,
-                     m_zoneMgr->longZoneName());
-      
-     // have gained experience for the kill, it's no longer fresh
-     m_freshKill = false;
-  }
-  else
-     emit expGained( "Unknown", // Randomly blessed with xp?
-                     0, // don't know what gave it so, level 0
-		     expIncrement,
-		     m_zoneMgr->longZoneName());
-
-  emit expChangedInt( m_currentExp, m_minExp, m_maxExp);
 
   // update the con table
   fillConTable();

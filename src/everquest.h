@@ -1958,7 +1958,7 @@ struct levelUpUpdateStruct
 {
 /*0000*/ uint32_t level;                  // New level
 /*0004*/ uint32_t levelOld;               // Old level
-/*0008*/ uint32_t exp;                    // Current Experience
+/*0008*/ uint32_t exp;                    // bogus data?
 /*0012*/
 };
 
