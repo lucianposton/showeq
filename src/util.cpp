@@ -720,6 +720,32 @@ QString reformatMoney (unsigned int uiCopper)
   return ( qsMoney );
 }
 
+bool isNan(double d)
+{
+    // c++98, so using double != double, instead of std::isnan from c++11
+    return d != d;
+}
+
+QString doubleToQString(double d, int precision, bool showZero)
+{
+    QString result;
+    if (!isNan(d) && (showZero || d != 0.0))
+    {
+        result.setNum(d, 'f', precision);
+    }
+    return result;
+}
+
+QString intToQString(int i)
+{
+    QString result;
+    if (i != 0)
+    {
+        result.setNum(i);
+    }
+    return result;
+}
+
 void fprintDataAsHex(FILE* fp, int length, const uint8_t* data)
 {
     for(int i = 0; i < length; ++i, ++data)

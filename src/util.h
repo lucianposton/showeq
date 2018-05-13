@@ -56,6 +56,9 @@ int calcMaxMana(int INT, int WIS, int daclass, int level);
 
 QString reformatMoney (unsigned int uiCopper);
 
+inline bool isNan(double d);
+QString doubleToQString(double d, int precision, bool showZero=false);
+QString intToQString(int i);
 void fprintDataAsHex(FILE* fp, int length, const uint8_t* data);
 void fprintData(FILE* fp,
 		uint32_t len,
