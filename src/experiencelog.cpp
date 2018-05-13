@@ -314,7 +314,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    s_xp_gained.setNum(xp_gained);
    QString s_xp_value;
 
-   if (m_calcZEM)
+   if (m_calcZEM && mob_level > 0)
    {
       calculateZEM(xp_gained, mob_level);
       m_calcZEM = 0;

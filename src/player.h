@@ -247,6 +247,7 @@ public:
   
   // is the kill information fresh
   bool m_freshKill;
+  int m_freshKill_timestamp;
   
   // last spell cast on this player
   uint16_t m_lastSpellOnId;

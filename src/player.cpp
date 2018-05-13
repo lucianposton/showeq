@@ -143,6 +143,7 @@ void Player::clear()
   m_lastSpawnKilledName = "unknown";
   m_lastSpawnKilledLevel = 0;
   m_freshKill = false;
+  m_freshKill_timestamp = 0;
 
   m_heading = 0;
   m_headingDegrees = 360 - ((m_heading * 360) >> 11);
@@ -661,7 +662,8 @@ void Player::updateExp(const uint8_t* data)
   
   emit expChangedInt (realExp, m_minExp, m_maxExp);
     
-  if(m_freshKill)
+  // Check if fresh kill occurred in last 0.2 seconds
+  if(m_freshKill && mTime() < (m_freshKill_timestamp + 200))
   {
      emit expGained( m_lastSpawnKilledName,
                      m_lastSpawnKilledLevel,
@@ -671,12 +673,18 @@ void Player::updateExp(const uint8_t* data)
      // have gained experience for the kill, it's no longer fresh
      m_freshKill = false;
   }
+  else if (expIncrement)
+  {
+      // Quest exp, random exp, etc
+      emit expGained( "n/a",
+              0,
+              expIncrement,
+              m_zoneMgr->longZoneName());
+  }
   else
+  {
     emit setExp(m_currentExp, exp->exp, m_minExp, m_maxExp, m_tickExp);
-//     emit expGained( "Unknown", // Randomly blessed with xp?
-//                     0, // don't know what gave it so, level 0
-//		     expIncrement,
-//		     m_zoneMgr->longZoneName());
+  }
 
   if (showeq_params->savePlayerState)
     savePlayerState();
@@ -771,6 +779,7 @@ void Player::setLastKill(const QString& name, uint8_t level)
   m_lastSpawnKilledName = name;
   m_lastSpawnKilledLevel = level;
   m_freshKill = true;
+  m_freshKill_timestamp = mTime();
 }
 
 void Player::zoneBegin(const ServerZoneEntryStruct* zsentry)
