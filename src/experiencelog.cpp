@@ -25,6 +25,8 @@
 #include <qmessagebox.h>
 #include <qfileinfo.h>
 
+#include <cmath>
+
 #define DEBUGEXP
 
 #undef DEBUGEXP
@@ -498,7 +500,7 @@ void ExperienceWindow::updateAverage( )
 
    QString s_kills_to_level;
    if (mob_count)
-      s_kills_to_level.setNum( exp_remaining / (total_exp/mob_count) );
+      s_kills_to_level.setNum( std::ceil(exp_remaining / (total_exp/mob_count)) );
    else
       s_kills_to_level="unknown";
 
