@@ -8673,7 +8673,10 @@
 /* 0x21d5 -  8661 */ { "Conjure Corpse" }, 
 /* 0x21d6 -  8662 */ { "Cancel Magic" }, 
 /* 0x21d7 -  8663 */ { "Egress" }, 
+/* 0x21d8 -  8664 */ { "Aura of Green Petals" }, 
+/* 0x21d9 -  8665 */ { "Aura of Black Petals" }, 
+/* 0x21da -  8666 */ { "Voice of the Berserker" }, 
 // 
-// Max SpellId: 0x21d7 =  8663
-// Number of Spells: 8066
+// Max SpellId: 0x21da =  8666
+// Number of Spells: 8069
 // Empty Entries: 597
