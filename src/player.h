@@ -120,6 +120,7 @@ public:
 
    uint32_t getCurrentExp() { return m_currentExp; }
    uint32_t getMaxExp() { return m_maxExp; }
+   uint32_t getMinExp() { return m_minExp; }
    
    const QColor& conColorBase(ColorLevel level);
    void setConColorBase(ColorLevel level, const QColor& color);
@@ -129,6 +130,8 @@ public:
    bool getStatValue(uint8_t stat,
 		     uint32_t& curValue, 
 		     uint32_t& maxValue);
+
+   long getClassExpPenalty() const;
 
  signals:
    void newPlayer(void);
@@ -192,6 +195,7 @@ public:
 
  protected:
   void fillConTable();
+  uint32_t calc_exp(int level, uint16_t race, uint8_t class_) const;
   
  private:
   ZoneMgr* m_zoneMgr;

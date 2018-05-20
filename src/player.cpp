@@ -1285,6 +1285,97 @@ void Player::fillConTable()
   m_conTable[0] = m_conColorBases[tUnknownSpawn];
 }
 
+long Player::getClassExpPenalty() const
+{
+   long p_penalty;
+   // WAR and ROG are at 10 since thier EXP is not scaled to compensate
+   // for thier bonus
+   switch (classVal())
+   {
+      case 1 : p_penalty = 10; break; // WAR
+      case 2 : p_penalty = 10; break; // CLR
+      case 3 : p_penalty = 14; break; // PAL
+      case 4 : p_penalty = 14; break; // RNG
+      case 5 : p_penalty = 14; break; // SHD
+      case 6 : p_penalty = 10; break; // DRU
+      case 7 : p_penalty = 12; break; // MNK
+      case 8 : p_penalty = 14; break; // BRD
+      case 9 : p_penalty = 10; break; // ROG
+      case 10: p_penalty = 10; break; // SHM
+      case 11: p_penalty = 11; break; // NEC
+      case 12: p_penalty = 11; break; // WIZ
+      case 13: p_penalty = 11; break; // MAG
+      case 14: p_penalty = 11; break; // ENC
+      default: /* why are we here? */
+         p_penalty = 10; break;
+   }
+   return p_penalty;
+}
+
+uint32_t Player::calc_exp(int level, uint16_t race, uint8_t class_) const
+{
+    float exp = level*level*level;
+
+    if (level<30)       exp*=10;
+    else if (level<35)  exp*=11;
+    else if (level<40)  exp*=12;
+    else if (level<45)  exp*=13;
+    else if (level<51)  exp*=14;
+    else if (level<52)  exp*=15;
+    else if (level<53)  exp*=16;
+    else if (level<54)  exp*=17;
+    else if (level<55)  exp*=19;
+    else if (level<56)  exp*=21;
+    else if (level<57)  exp*=23;
+    else if (level<58)  exp*=25;
+    else if (level<59)  exp*=27;
+    else if (level<61)  exp*=30;
+    else if (level<62)  exp*=32;
+    else if (level<63)  exp*=34;
+    else if (level<64)  exp*=36;
+    else if (level<65)  exp*=38;
+    else                exp*=40;
+
+    switch (race)
+    {
+        case 1 :   exp*=10;   break; // human
+        case 2 :   exp*=10.5; break; // barbarian
+        case 3 :   exp*=10;   break; // erudite
+        case 4 :   exp*=10;   break; // wood elf
+        case 5 :   exp*=10;   break; // high elf
+        case 6 :   exp*=10;   break; // dark elf
+        case 7 :   exp*=10;   break; // half elf
+        case 8 :   exp*=10;   break; // dwarf
+        case 9 :   exp*=12;   break; // troll
+        case 10 :  exp*=11.5; break; // ogre
+        case 11 :  exp*=9.5;  break; // halfling
+        case 12 :  exp*=10;   break; // gnome
+        case 128 : exp*=12;   break; // iksar
+        default :  exp*=10;
+    }
+
+    switch (class_)
+    {
+        case 1 :  exp*=9;    break; // warrior
+        case 2 :  exp*=10;   break; // cleric
+        case 3 :  exp*=14;   break; // paladin
+        case 4 :  exp*=14;   break; // ranger
+        case 5 :  exp*=14;   break; // shadowknight
+        case 6 :  exp*=10;   break; // druid
+        case 7 :  exp*=12;   break; // monk
+        case 8 :  exp*=14;   break; // bard
+        case 9 :  exp*=9.05; break; // rogue
+        case 10 : exp*=10;   break; // shaman
+        case 11 : exp*=11;   break; // necromancer
+        case 12 : exp*=11;   break; // wizard
+        case 13 : exp*=11;   break; // magician
+        case 14 : exp*=11;   break; // enchanter
+        default : exp*=10;
+    }
+
+    return (uint32_t)exp;
+}
+
 QString Player::name() const
 {
   return (!m_useAutoDetectedSettings || m_useDefaults ?

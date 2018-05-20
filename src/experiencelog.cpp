@@ -36,10 +36,10 @@ ExperienceRecord::ExperienceRecord( const QString &mob_name,
 				    long xp_gained, 
 				    time_t time, 
 				    const QString &zone_name, 
-				    uint8_t classVal, uint8_t level, float zem,
+				    long penalty, uint8_t level, float zem,
 				    float totalLevels, 
 				    float groupBonus) 
-  : m_class(classVal),
+  : m_penalty(penalty),
     m_level(level),
     m_zem(zem),
     m_totalLevels(totalLevels),
@@ -86,30 +86,8 @@ long ExperienceRecord::getExpValueZEM() const
  
 long ExperienceRecord::getExpValuep() const 
 {
-   long p_penalty;
-   // WAR and ROG are at 10 since thier EXP is not scaled to compensate
-   // for thier bonus
-   switch (m_class)
-   {
-      case 1 : p_penalty = 10; break; // WAR
-      case 2 : p_penalty = 10; break; // CLR
-      case 3 : p_penalty = 14; break; // PAL
-      case 4 : p_penalty = 14; break; // RNG
-      case 5 : p_penalty = 14; break; // SHD
-      case 6 : p_penalty = 10; break; // DRU
-      case 7 : p_penalty = 12; break; // MNK
-      case 8 : p_penalty = 14; break; // BRD
-      case 9 : p_penalty = 10; break; // ROG
-      case 10: p_penalty = 10; break; // SHM
-      case 11: p_penalty = 11; break; // NEC
-      case 12: p_penalty = 11; break; // WIZ
-      case 13: p_penalty = 11; break; // MAG
-      case 14: p_penalty = 11; break; // ENC
-      default: /* why are we here? */
-         p_penalty = 10; break; 
-   }
    long baseExp = getExpValueZEM();
-   return (long)((float)baseExp*((float)p_penalty/(float)10));
+   return (long)((float)baseExp*((float)m_penalty/(float)10));
 }
 
 long ExperienceRecord::getExpValueg() const 
@@ -301,7 +279,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 
    ExperienceRecord *xp = 
      new ExperienceRecord(mob_name, mob_level, xp_gained, time(0), zone_name, 
-			  m_player->classVal(), m_player->level(), 
+			  m_player->getClassExpPenalty(), m_player->level(), 
 			  m_zoneMgr->zoneExpMultiplier(), 
 			  m_group->totalLevels(),
 			  m_group->groupBonus());
@@ -701,7 +679,7 @@ void ExperienceWindow::logexp(long xp_gained, int mob_level)
 void ExperienceWindow::calculateZEM(long xp_gained, int mob_level) 
 {
    float gbonus=1.00;
-   int penalty; 
+   const int penalty = m_player->getClassExpPenalty();
    int myLevel = m_player->level();
    int group_ag;
    gbonus = m_group->groupBonus();
@@ -711,26 +689,7 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
      seqInfo("MY Level: %d GroupTot: %d BONUS   :%d", 
 	     myLevel, group_ag, gbonus * 100);
    }
-   // WAR and ROG are at 10 since thier EXP is not scaled to compensate
-   // for thier bonus
-   switch (m_player->classVal())
-   {
-      case 1 : penalty = 10; break; // WAR
-      case 2 : penalty = 10; break; // CLR
-      case 3 : penalty = 14; break; // PAL
-      case 4 : penalty = 14; break; // RNG
-      case 5 : penalty = 14; break; // SHD
-      case 6 : penalty = 10; break; // DRU
-      case 7 : penalty = 12; break; // MNK
-      case 8 : penalty = 14; break; // BRD
-      case 9 : penalty = 10; break; // ROG
-      case 10: penalty = 10; break; // SHM
-      case 11: penalty = 11; break; // NEC
-      case 12: penalty = 11; break; // MAG
-      case 13: penalty = 11; break; // ENC
-      default: /* why are we here? */
-         penalty = 10; break; 
-   }
+
    unsigned char ZEM = (unsigned char) ((float)xp_gained*((float)((float)group_ag/(float)myLevel)*(float)((float)1.0/(float)gbonus))*((float)1/(float)(mob_level*mob_level))*((float)10/(float)penalty));
    seqInfo("xpgained: %ld group_ag: %d myLevel: %d gbonus: %d mob_level: %d penalty: %d ", xp_gained, group_ag, myLevel, gbonus, mob_level, penalty);
    seqInfo("ZEM - ZEM - ZEM ===== %d ", ZEM);

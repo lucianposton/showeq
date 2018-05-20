@@ -285,9 +285,7 @@ void StatList::updateStat(uint8_t stat)
 	case LIST_EXP: 
 	  {
 	    // get the experiance needed for the previous level
-	    uint32_t minExp = calc_exp(m_player->level() - 1,
-				       m_player->race(),
-				       m_player->classVal());
+	    const uint32_t minExp = m_player->getMinExp();
 
 	    valStr = Commanate(value - minExp);
 	    maxStr = Commanate(value - max);
