@@ -50,6 +50,7 @@ public:
  public slots:
    void clear();
    void reset();
+   void setUseClassExpPenalty(bool enable);
    void setUseAutoDetectedSettings(bool enable);
    void setDefaultName(const QString&);
    void setDefaultLastname(const QString&);
@@ -118,6 +119,7 @@ public:
    uint16_t getMana() { return m_mana; }
    uint32_t getSpellBookSlot(uint32_t slotid) { return m_spellBookSlots[slotid]; }
 
+   bool isClassExpPenaltyActive() { return m_classExpPenaltyIsActive; }
    uint32_t getCurrentExp() { return m_currentExp; }
    uint32_t getMaxExp() { return m_maxExp; }
    uint32_t getMinExp() { return m_minExp; }
@@ -232,6 +234,7 @@ public:
   // ExperienceWindow needs this
   uint32_t m_currentAltExp;
   uint16_t m_currentAApts;
+  int m_currentExpFraction;
   uint32_t m_currentExp;
   uint32_t m_minExp;
   uint32_t m_maxExp;
@@ -257,6 +260,7 @@ public:
   uint16_t m_lastSpellOnId;
   
   int16_t m_headingDegrees;
+  bool m_classExpPenaltyIsActive;
   // Wether or not we use defaults, determined by wether or not we could 
   // decode the zone loading data.  
   bool m_useDefaults;

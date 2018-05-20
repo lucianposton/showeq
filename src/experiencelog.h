@@ -99,6 +99,7 @@ public slots:
    void viewZEMraw();
    void viewZEMpercent();
    void viewZEMcalculated();
+   void toggleExpPenalty();
    void clear(void);
 
 private:
@@ -127,6 +128,7 @@ private:
 
    QMenuBar *m_menu_bar;
    QPopupMenu *m_view_menu, *m_exp_rate_menu, *m_ZEM_menu;
+   QPopupMenu *m_options_menu;
 
    int m_timeframe;
    int m_ratio;

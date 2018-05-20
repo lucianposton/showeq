@@ -160,10 +160,16 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_view_menu->insertItem( "ZEM View Options", m_ZEM_menu );
    m_view_menu->insertItem( "Calculate ZEM on next kill", this, SLOT(calcZEMNextKill()) );
 
-   m_layout = new QVBoxLayout(boxLayout());
+   m_options_menu = new QPopupMenu( this );
+   m_options_menu->insertItem( "&Enable Class EXP Penalty", this, SLOT(toggleExpPenalty()) );
+   m_options_menu->setItemChecked(m_options_menu->idAt(0), m_player->isClassExpPenaltyActive());
 
    m_menu_bar = new QMenuBar( this );
    m_menu_bar->insertItem( "&View", m_view_menu );
+   m_menu_bar->insertItem( "&Options", m_options_menu );
+
+   m_layout = new QVBoxLayout(boxLayout());
+
    //m_layout->addSpacing( m_menu_bar->height() + 5 );
    m_layout->addWidget(m_menu_bar);
 
@@ -541,6 +547,13 @@ void ExperienceWindow::resizeEvent ( QResizeEvent *e )
 
    //m_layout->setGeometry( 0, mh, e->size().width(),  e->size().height()-mh );
 
+}
+
+void ExperienceWindow::toggleExpPenalty()
+{
+    const bool val = !m_options_menu->isItemChecked(m_options_menu->idAt(0));
+    m_options_menu->setItemChecked(m_options_menu->idAt(0), val);
+    m_player->setUseClassExpPenalty(val);
 }
 
 void ExperienceWindow::viewAll() 

@@ -58,6 +58,9 @@ Player::Player (QObject* parent,
   
   m_NPC = SPAWN_SELF;
 
+  m_classExpPenaltyIsActive =
+    pSEQPrefs->getPrefBool("ClassExpPenalty", "Player", true);
+
   QString section = "Defaults";
   m_useAutoDetectedSettings = 
     pSEQPrefs->getPrefBool("useAutoDetectedSettings", section, true);
@@ -161,6 +164,7 @@ void Player::reset()
 
   m_currentAltExp = 0;
   m_currentExp = 0;
+  m_currentExpFraction = 0;
   m_minExp = calc_exp(level() - 1, race(), classVal());
   m_maxExp = calc_exp(level(), race(), classVal ());
   m_tickExp = (m_maxExp - m_minExp) / 330;
@@ -186,6 +190,18 @@ void Player::reset()
   fillConTable();
 
   updateLastChanged();
+}
+
+void Player::setUseClassExpPenalty(bool enable)
+{
+  m_classExpPenaltyIsActive = enable;
+  pSEQPrefs->setPrefBool("ClassExpPenalty", "Player", enable);
+
+  m_minExp = calc_exp(level() - 1, race(), classVal());
+  m_maxExp = calc_exp(level(), race(), classVal ());
+  m_tickExp = (m_maxExp - m_minExp) / 330;
+
+  m_currentExp = (m_tickExp * m_currentExpFraction) + m_minExp;
 }
 
 void Player::setUseAutoDetectedSettings(bool enable)
@@ -654,6 +670,7 @@ void Player::updateExp(const uint8_t* data)
     expIncrement = 0;
   
   m_currentExp = realExp;
+  m_currentExpFraction = exp->exp;
   m_validExp = true;
 
   // signal the new experience
@@ -1290,24 +1307,31 @@ long Player::getClassExpPenalty() const
    long p_penalty;
    // WAR and ROG are at 10 since thier EXP is not scaled to compensate
    // for thier bonus
-   switch (classVal())
+   if (m_classExpPenaltyIsActive)
    {
-      case 1 : p_penalty = 10; break; // WAR
-      case 2 : p_penalty = 10; break; // CLR
-      case 3 : p_penalty = 14; break; // PAL
-      case 4 : p_penalty = 14; break; // RNG
-      case 5 : p_penalty = 14; break; // SHD
-      case 6 : p_penalty = 10; break; // DRU
-      case 7 : p_penalty = 12; break; // MNK
-      case 8 : p_penalty = 14; break; // BRD
-      case 9 : p_penalty = 10; break; // ROG
-      case 10: p_penalty = 10; break; // SHM
-      case 11: p_penalty = 11; break; // NEC
-      case 12: p_penalty = 11; break; // WIZ
-      case 13: p_penalty = 11; break; // MAG
-      case 14: p_penalty = 11; break; // ENC
-      default: /* why are we here? */
-         p_penalty = 10; break;
+       switch (classVal())
+       {
+           case 1 : p_penalty = 10; break; // WAR
+           case 2 : p_penalty = 10; break; // CLR
+           case 3 : p_penalty = 14; break; // PAL
+           case 4 : p_penalty = 14; break; // RNG
+           case 5 : p_penalty = 14; break; // SHD
+           case 6 : p_penalty = 10; break; // DRU
+           case 7 : p_penalty = 12; break; // MNK
+           case 8 : p_penalty = 14; break; // BRD
+           case 9 : p_penalty = 10; break; // ROG
+           case 10: p_penalty = 10; break; // SHM
+           case 11: p_penalty = 11; break; // NEC
+           case 12: p_penalty = 11; break; // WIZ
+           case 13: p_penalty = 11; break; // MAG
+           case 14: p_penalty = 11; break; // ENC
+           default: /* why are we here? */
+                    p_penalty = 10; break;
+       }
+   }
+   else
+   {
+       p_penalty = 10;
    }
    return p_penalty;
 }
@@ -1354,24 +1378,34 @@ uint32_t Player::calc_exp(int level, uint16_t race, uint8_t class_) const
         default :  exp*=10;
     }
 
-    switch (class_)
+    float class_penalty;
+    if (m_classExpPenaltyIsActive)
     {
-        case 1 :  exp*=9;    break; // warrior
-        case 2 :  exp*=10;   break; // cleric
-        case 3 :  exp*=14;   break; // paladin
-        case 4 :  exp*=14;   break; // ranger
-        case 5 :  exp*=14;   break; // shadowknight
-        case 6 :  exp*=10;   break; // druid
-        case 7 :  exp*=12;   break; // monk
-        case 8 :  exp*=14;   break; // bard
-        case 9 :  exp*=9.05; break; // rogue
-        case 10 : exp*=10;   break; // shaman
-        case 11 : exp*=11;   break; // necromancer
-        case 12 : exp*=11;   break; // wizard
-        case 13 : exp*=11;   break; // magician
-        case 14 : exp*=11;   break; // enchanter
-        default : exp*=10;
+        switch (class_)
+        {
+            case 1 :  class_penalty = 9;    break; // warrior
+            case 2 :  class_penalty = 10;   break; // cleric
+            case 3 :  class_penalty = 14;   break; // paladin
+            case 4 :  class_penalty = 14;   break; // ranger
+            case 5 :  class_penalty = 14;   break; // shadowknight
+            case 6 :  class_penalty = 10;   break; // druid
+            case 7 :  class_penalty = 12;   break; // monk
+            case 8 :  class_penalty = 14;   break; // bard
+            case 9 :  class_penalty = 9.05; break; // rogue
+            case 10 : class_penalty = 10;   break; // shaman
+            case 11 : class_penalty = 11;   break; // necromancer
+            case 12 : class_penalty = 11;   break; // wizard
+            case 13 : class_penalty = 11;   break; // magician
+            case 14 : class_penalty = 11;   break; // enchanter
+            default : class_penalty = 10;
+        }
     }
+    else
+    {
+        class_penalty = 10;
+    }
+
+    exp *= class_penalty;
 
     return (uint32_t)exp;
 }
