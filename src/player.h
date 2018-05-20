@@ -238,7 +238,7 @@ public:
   uint32_t m_currentExp;
   uint32_t m_minExp;
   uint32_t m_maxExp;
-  uint32_t m_tickExp;
+  double m_tickExp;
   
   uint32_t m_spellBookSlots[MAX_SPELLBOOK_SLOTS];
   

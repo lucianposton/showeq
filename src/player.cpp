@@ -167,7 +167,7 @@ void Player::reset()
   m_currentExpFraction = 0;
   m_minExp = calc_exp(level() - 1, race(), classVal());
   m_maxExp = calc_exp(level(), race(), classVal ());
-  m_tickExp = (m_maxExp - m_minExp) / 330;
+  m_tickExp = double(m_maxExp - m_minExp) / 330.0;
 
   for (int a = 0; a < MAX_KNOWN_SKILLS; a++)
     m_playerSkills[a] = 255; // indicate an invalid value
@@ -199,7 +199,7 @@ void Player::setUseClassExpPenalty(bool enable)
 
   m_minExp = calc_exp(level() - 1, race(), classVal());
   m_maxExp = calc_exp(level(), race(), classVal ());
-  m_tickExp = (m_maxExp - m_minExp) / 330;
+  m_tickExp = double(m_maxExp - m_minExp) / 330.0;
 
   m_currentExp = (m_tickExp * m_currentExpFraction) + m_minExp;
 }
@@ -365,7 +365,7 @@ void Player::player(const uint8_t* data)
   // Exp handling
   m_minExp = calc_exp(m_level-1, m_race, m_class);
   m_maxExp = calc_exp(m_level, m_race, m_class);
-  m_tickExp = (m_maxExp - m_minExp) / 330;
+  m_tickExp = double(m_maxExp - m_minExp) / 330.0;
 
   m_currentExp = player->exp;
   m_currentAltExp = player->expAA;
@@ -717,7 +717,7 @@ void Player::updateLevel(const uint8_t* data)
   // calculate the new experience information
   m_minExp = calc_exp(level() - 1, race(), classVal());
   m_maxExp = calc_exp(level(), race(), classVal ());
-  m_tickExp = (m_maxExp - m_minExp) / 330;
+  m_tickExp = double(m_maxExp - m_minExp) / 330.0;
 
   // update the con table
   fillConTable();
