@@ -49,12 +49,15 @@ public:
    const QString &getMobName() const;
    int getMobLevel() const;
    long getExpGained() const;
-   long getExpValue() const; // BASE calculated from spawn level
-   long getExpValueZEM() const; // calculated from spawn level and ZEM
-   long getExpValuep() const; // calculated from spawn level and ZEM + penalty
-   long getExpValueg() const; // calculated from spawn level and all + group
+   long getBaseExp() const; // BASE calculated from spawn level
+   long getCalculatedExp() const; // calculated from spawn level and all + group
    time_t getTime()  const;
    const QString &getZoneName() const;
+
+   float getGroupBonus() const;
+   float getGroupShare() const;
+   float getClassBonus() const;
+   float getRaceBonus() const;
 
 private:
    const float m_raceBonus;

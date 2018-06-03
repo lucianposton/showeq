@@ -72,29 +72,41 @@ long ExperienceRecord::getExpGained() const
 
 }
 
-long ExperienceRecord::getExpValue() const 
+long ExperienceRecord::getBaseExp() const 
 {
    // TODO: This isn't right for all mob levels!
    //     But casey's working on it!
    return m_mob_level*m_mob_level*75;
 }
 
-long ExperienceRecord::getExpValueZEM() const 
+long ExperienceRecord::getCalculatedExp() const
 {
-    return zemToExpBonus(m_zem) * getExpValue();
-}
- 
-long ExperienceRecord::getExpValuep() const 
-{
-   long baseExp = getExpValueZEM();
-   return (long)((float)baseExp*m_classBonus*m_raceBonus);
+    return (float)getBaseExp()
+        * zemToExpBonus(m_zem)
+        * m_classBonus
+        * m_raceBonus
+        * m_groupBonus
+        * getGroupShare();
 }
 
-long ExperienceRecord::getExpValueg() const 
+float ExperienceRecord::getGroupShare() const
 {
-   long pExp = getExpValuep();
+    return (float)m_level/m_totalLevels;
+}
 
-   return (long)(((float)pExp)*m_groupBonus*((float)m_level/m_totalLevels));
+float ExperienceRecord::getGroupBonus() const
+{
+    return m_groupBonus;
+}
+
+float ExperienceRecord::getClassBonus() const
+{
+    return m_classBonus;
+}
+
+float ExperienceRecord::getRaceBonus() const
+{
+    return m_raceBonus;
 }
 
 time_t ExperienceRecord::getTime() const 
@@ -179,24 +191,26 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_exp_listview = new SEQListView(preferenceName(), listGBox);
    m_exp_listview->addColumn("Time");
    m_exp_listview->setColumnAlignment(0, Qt::AlignLeft);
-   m_exp_listview->addColumn("Mob");
+   m_exp_listview->addColumn("Mob Name");
    m_exp_listview->setColumnAlignment(1, Qt::AlignLeft);
    m_exp_listview->addColumn("Level");
    m_exp_listview->setColumnAlignment(2, Qt::AlignRight);
    m_exp_listview->addColumn("Base Exp");
    m_exp_listview->setColumnAlignment(3, Qt::AlignRight);
-   m_exp_listview->addColumn("ZEM Raw");
+   m_exp_listview->addColumn("Calculated Exp");
    m_exp_listview->setColumnAlignment(4, Qt::AlignRight);
-   m_exp_listview->addColumn("ZEM %");
+   m_exp_listview->addColumn("Exp Change");
    m_exp_listview->setColumnAlignment(5, Qt::AlignRight);
-   m_exp_listview->addColumn("ZEM Exp");
+   m_exp_listview->addColumn("Group");
    m_exp_listview->setColumnAlignment(6, Qt::AlignRight);
-   m_exp_listview->addColumn("Class Exp");
+   m_exp_listview->addColumn("Group Share");
    m_exp_listview->setColumnAlignment(7, Qt::AlignRight);
-   m_exp_listview->addColumn("Group Exp");
+   m_exp_listview->addColumn("Class");
    m_exp_listview->setColumnAlignment(8, Qt::AlignRight);
-   m_exp_listview->addColumn("Exp Gained");
+   m_exp_listview->addColumn("Race");
    m_exp_listview->setColumnAlignment(9, Qt::AlignRight);
+   m_exp_listview->addColumn("ZEM");
+   m_exp_listview->setColumnAlignment(10, Qt::AlignRight);
    
    m_exp_listview->restoreColumns();
 
@@ -290,6 +304,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 			  m_zoneMgr->zoneExpMultiplier(), 
 			  m_group->totalLevels(),
 			  m_group->groupBonus());
+   m_exp_list.append( xp );
 
 #ifdef DEBUGEXP
    resize( sizeHint() );
@@ -297,64 +312,59 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
       mob_name.ascii(), mob_level, xp_gained);
 #endif
 
-   if (m_log_exp)
-      logexp(xp_gained, mob_level);
-
-   m_exp_list.append( xp );
-
    // convert everything to string representations for the list view
-   QString s_mob_name = mob_name;
-   QString s_mob_level;
-   s_mob_level.setNum(mob_level);
-   QString s_xp_gained;
-   s_xp_gained.setNum(xp_gained);
-   QString s_xp_value;
+   char s_time[64];
+   time_t timev = xp->getTime();
+   strftime(s_time, 64, "%m/%d %H:%M:%S", localtime( &timev ));
+   const QString s_mob_level = intToQString(mob_level, true);
+   const QString s_base_exp = intToQString(xp->getBaseExp(), true);
+   const QString s_calculated_exp = intToQString(xp->getCalculatedExp(), true);
+   const QString s_exp_change = intToQString(xp->getExpGained(), true);
+   const QString s_group_bonus = doubleToQString(xp->getGroupBonus(), 2, true);
+   const QString s_group_share = doubleToQString(xp->getGroupShare(), 2, true);
+   const QString s_class_bonus = doubleToQString(xp->getClassBonus(), 2, true);
+   const QString s_race_bonus = doubleToQString(xp->getRaceBonus(), 2, true);
+   const QString s_zem_bonus = doubleToQString(zemToExpBonus(m_zoneMgr->zoneExpMultiplier()), 2, true);
 
+   SEQListViewItem<>* new_exp_entry = new SEQListViewItem<>(
+           m_exp_listview,
+           s_time,
+           mob_name,
+           s_mob_level,
+           s_base_exp,
+           s_calculated_exp,
+           s_exp_change,
+           s_group_bonus,
+           s_group_share);
+   new_exp_entry->setText(8, s_class_bonus);
+   new_exp_entry->setText(9, s_race_bonus);
+   new_exp_entry->setText(10, s_zem_bonus);
+
+   new_exp_entry->setColComparator(2, SEQListViewItemCompareInt);
+   new_exp_entry->setColComparator(3, SEQListViewItemCompareInt);
+   new_exp_entry->setColComparator(4, SEQListViewItemCompareInt);
+   new_exp_entry->setColComparator(5, SEQListViewItemCompareInt);
+   new_exp_entry->setColComparator(6, SEQListViewItemCompareDouble);
+   new_exp_entry->setColComparator(7, SEQListViewItemCompareDouble);
+   new_exp_entry->setColComparator(8, SEQListViewItemCompareDouble);
+   new_exp_entry->setColComparator(9, SEQListViewItemCompareDouble);
+   new_exp_entry->setColComparator(10, SEQListViewItemCompareDouble);
+
+   m_exp_listview->insertItem( new_exp_entry );
+   m_exp_listview->setSelected( new_exp_entry, TRUE );
+   m_exp_listview->ensureItemVisible( new_exp_entry );
+
+   // Print ZEM estimate
    if (m_calcZEM && mob_level > 0)
    {
       calculateZEM(xp_gained, mob_level);
       m_calcZEM = 0;
       m_view_menu->setItemChecked(m_view_menu->idAt(10), false);
-   }   
-   s_xp_value.setNum(xp->getExpValue());
-   const QString s_zem_value = doubleToQString(m_zoneMgr->zoneExpMultiplier(), 2, true);
-   const QString s_zem_bonus = doubleToQString(zemToExpBonus(m_zoneMgr->zoneExpMultiplier()), 2, true);
-   QString s_xp_valueZEM;
-   s_xp_valueZEM.setNum(xp->getExpValueZEM());
+   }
 
-   QString s_xp_valuep;
-   s_xp_valuep.setNum(xp->getExpValuep());
-   QString s_xp_valueg;
-   s_xp_valueg.setNum(xp->getExpValueg());
-
-   char s_time[64];
-   time_t timev = xp->getTime();
-   strftime(s_time, 64, "%m/%d %H:%M:%S", localtime( &timev ));
-
-   SEQListViewItem<>* new_exp_entry = new SEQListViewItem<>(
-           m_exp_listview,
-           s_time,
-           s_mob_name,
-           s_mob_level,
-           s_xp_value,
-           s_zem_value,
-           s_zem_bonus,
-           s_xp_valueZEM,
-           s_xp_valuep);
-   new_exp_entry->setText(8, s_xp_valueg);
-   new_exp_entry->setText(9, s_xp_gained);
-   new_exp_entry->setColComparator(2, SEQListViewItemCompareInt);
-   new_exp_entry->setColComparator(3, SEQListViewItemCompareInt);
-   new_exp_entry->setColComparator(4, SEQListViewItemCompareInt);
-   new_exp_entry->setColComparator(5, SEQListViewItemCompareDouble);
-   new_exp_entry->setColComparator(6, SEQListViewItemCompareInt);
-   new_exp_entry->setColComparator(7, SEQListViewItemCompareInt);
-   new_exp_entry->setColComparator(8, SEQListViewItemCompareInt);
-   new_exp_entry->setColComparator(9, SEQListViewItemCompareInt);
-
-   m_exp_listview->insertItem( new_exp_entry );
-   m_exp_listview->setSelected( new_exp_entry, TRUE );
-   m_exp_listview->ensureItemVisible( new_exp_entry );
+   // Old logging system
+   if (m_log_exp)
+      logexp(xp_gained, mob_level);
 
    // Initial work on new logging mechanism with more data
    FILE* newlogfp = NULL;
@@ -367,15 +377,23 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
       // append a new record entry
 
       fprintf(newlogfp, 
-              "0\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%lu",
+              "0"
+              "\t%s\t%s\t%d\t%s\t%s\t%s"
+              "\t%s\t%s\t%s\t%s\t%s"
+              "\t%s\t%s\t%u\t%u\t%lu",
               s_time,
-              (const char*)s_mob_name,
+              (const char*)mob_name,
               mob_level,
-              (const char*)s_xp_value,
-              (const char*)s_xp_valueZEM,
-              (const char*)s_xp_valuep,
-              (const char*)s_xp_valueg,
-              (const char*)s_xp_gained,
+              (const char*)s_base_exp,
+              (const char*)s_calculated_exp,
+              (const char*)s_exp_change,
+
+              (const char*)s_group_bonus,
+              (const char*)s_group_share,
+              (const char*)s_class_bonus,
+              (const char*)s_race_bonus,
+              (const char*)s_zem_bonus,
+
               (const char*)m_player->name(),
               (const char*)m_player->lastName(),
               m_player->level(),
