@@ -364,23 +364,23 @@ float GroupMgr::groupBonus()
     {
         switch (groupMembersInZoneCount())
         {
-            case 2:     return 1.9;
-            case 3:     return 2.3;
-            case 4:     return 2.7;
-            case 5:     return 3.1;
-            case 6:     return 3.5;
-            default:    return 1.5;
+            case 2:     return 2.72882653061;
+            case 3:     return 3.2335227; //3.2982809;?
+            case 4:     return 3.6244897959;
+            case 5:     return 4.12767379679;
+            case 6:     return 4.73195016269;
+            default:    return 1.50412;
         }
     }
     else
     {
         switch (groupMembersInZoneCount())
         {
-            case 2:	return 1.02;
-            case 3:	return 1.06;
-            case 4:	return 1.10;
-            case 5:	return 1.14;
-            case 6:	return 1.20;
+            case 2:	return 1.00;
+            case 3:	return 1.042;
+            case 4:	return 1.051;
+            case 5:	return 1.08203;
+            case 6:	return 1.1025;
             default:	return 1.00;
         }
     }
