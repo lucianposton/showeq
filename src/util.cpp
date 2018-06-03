@@ -672,10 +672,10 @@ QString doubleToQString(double d, int precision, bool showZero)
     return result;
 }
 
-QString intToQString(int i)
+QString intToQString(int i, bool showZero)
 {
     QString result;
-    if (i != 0)
+    if (showZero || i != 0)
     {
         result.setNum(i);
     }
