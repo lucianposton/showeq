@@ -1411,7 +1411,7 @@ uint32_t Player::calc_exp(int level, uint16_t race, uint8_t class_) const
             case 6 :  class_penalty = 10;   break; // druid
             case 7 :  class_penalty = 12;   break; // monk
             case 8 :  class_penalty = 14;   break; // bard
-            case 9 :  class_penalty = 9.05; break; // rogue
+            case 9 :  class_penalty = 9.05; break; // rogue // Is 9.1 in eqemu
             case 10 : class_penalty = 10;   break; // shaman
             case 11 : class_penalty = 11;   break; // necromancer
             case 12 : class_penalty = 11;   break; // wizard
