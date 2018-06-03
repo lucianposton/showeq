@@ -22,7 +22,6 @@
 #include <qtimer.h>
 #include <qhbox.h>
 #include <qvgroupbox.h>
-#include <qmessagebox.h>
 #include <qfileinfo.h>
 
 #include <cmath>
@@ -651,13 +650,7 @@ void ExperienceWindow::viewZEMpercent()
 
 void ExperienceWindow::viewClear() 
 {
-   if (QMessageBox::information( this, "ShowEQ",
-      "This function will clear all data listed in the experience "
-      "log.  Do you want to continue?",
-      "&OK", "&Cancel", QString::null, 1, 1) == 0) 
-   {
-     clear();
-   }
+    clear();
 }
 
 void ExperienceWindow::clear(void)
