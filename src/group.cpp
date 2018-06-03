@@ -311,24 +311,39 @@ void GroupMgr::killSpawn(const Item* item)
 
 void GroupMgr::changeItem(const Item* item, uint32_t changeType)
 {
-    if (! (changeType & tSpawnChangedLevel) ) {
+    if (item->type() != tSpawn && item->type() != tPlayer)
         return;
-    }
 
-    for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+    const Spawn* spawn = (const Spawn*)item;
+    if (!spawn->isPlayer())
+        return;
+
+    // tSpawnChangedAll is effectively a new spawn
+    if (changeType == tSpawnChangedALL && spawn->isOtherPlayer())
     {
-        if (m_members[i]->m_spawn && m_members[i]->m_spawn == item) {
-            if ((item->type() != tSpawn) && (item->type() != tPlayer)) {
-                seqWarn("Unexpected spawn type (%d) received by GroupMgr::changeItem.",
-                        item->type());
-                continue;
-            }
-
-            const Spawn* spawn = (const Spawn*)item;
+        for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+        {
             if (m_members[i]->m_name == spawn->name())
             {
+                m_members[i]->m_spawn = spawn;
                 m_members[i]->m_level = spawn->level();
+
+                m_membersInZoneCount++;
                 break;
+            }
+        }
+    }
+    else if (changeType & tSpawnChangedLevel)
+    {
+        for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+        {
+            if (m_members[i]->m_spawn && m_members[i]->m_spawn == item)
+            {
+                if (m_members[i]->m_name == spawn->name())
+                {
+                    m_members[i]->m_level = spawn->level();
+                    break;
+                }
             }
         }
     }
