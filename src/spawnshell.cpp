@@ -789,7 +789,7 @@ void SpawnShell::renameSpawn(const uint8_t* data)
           changeType |= tSpawnChangedRuntimeFilter;
 
         renameMe->updateLastChanged();
-        emit changeItem(renameMe, tSpawnChangedName);
+        emit changeItem(renameMe, changeType);
     }
     else
     {
