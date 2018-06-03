@@ -35,8 +35,8 @@ ExperienceRecord::ExperienceRecord( const QString &mob_name,
 				    long xp_gained, 
 				    time_t time, 
 				    const QString &zone_name, 
-                    long race_bonus,
-				    long class_bonus, uint8_t level, float zem,
+                    float race_bonus,
+				    float class_bonus, uint8_t level, float zem,
 				    float totalLevels, 
 				    float groupBonus) 
   : m_raceBonus(race_bonus),
@@ -87,7 +87,7 @@ long ExperienceRecord::getExpValueZEM() const
 long ExperienceRecord::getExpValuep() const 
 {
    long baseExp = getExpValueZEM();
-   return (long)((float)baseExp*(m_classBonus/10.0)*m_raceBonus);
+   return (long)((float)baseExp*m_classBonus*m_raceBonus);
 }
 
 long ExperienceRecord::getExpValueg() const 
@@ -702,7 +702,7 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
        / gbonus
        / (float)(mob_level*mob_level)
        / race_bonus
-       / (class_bonus/10.0);
+       / class_bonus;
    seqInfo("xpgained: %ld group_ag: %d myLevel: %d "
            "gbonus: %.2f mob_level: %d class_bonus: %.2f "
            "race_bonus: %.2f",

@@ -1331,22 +1331,22 @@ float Player::getClassExpBonus() const
    float bonus;
    switch (classVal())
    {
-       case 1 : bonus = 11.0; break; // WAR
-       case 2 : bonus = 10.0; break; // CLR
-       case 3 : bonus = 10.0; break; // PAL
-       case 4 : bonus = 10.0; break; // RNG
-       case 5 : bonus = 10.0; break; // SHD
-       case 6 : bonus = 10.0; break; // DRU
-       case 7 : bonus = 10.0; break; // MNK
-       case 8 : bonus = 10.0; break; // BRD
-       case 9 : bonus = 10.9; break; // ROG
-       case 10: bonus = 10.0; break; // SHM
-       case 11: bonus = 10.0; break; // NEC
-       case 12: bonus = 10.0; break; // WIZ
-       case 13: bonus = 10.0; break; // MAG
-       case 14: bonus = 10.0; break; // ENC
+       case 1 : bonus = 1.1;  break; // WAR
+       case 2 : bonus = 1.0;  break; // CLR
+       case 3 : bonus = 1.0;  break; // PAL
+       case 4 : bonus = 1.0;  break; // RNG
+       case 5 : bonus = 1.0;  break; // SHD
+       case 6 : bonus = 1.0;  break; // DRU
+       case 7 : bonus = 1.0;  break; // MNK
+       case 8 : bonus = 1.0;  break; // BRD
+       case 9 : bonus = 1.09; break; // ROG
+       case 10: bonus = 1.0;  break; // SHM
+       case 11: bonus = 1.0;  break; // NEC
+       case 12: bonus = 1.0;  break; // WIZ
+       case 13: bonus = 1.0;  break; // MAG
+       case 14: bonus = 1.0;  break; // ENC
        default: /* why are we here? */
-                bonus = 10.0; break;
+                bonus = 1.0;  break;
    }
 
    return bonus;
