@@ -558,7 +558,7 @@ QString slot_to_name(int16_t slotnr)
 
 float zemToExpBonus(float zem)
 {
-    return (zem - BASE_ZEM_VALUE)/BASE_ZEM_VALUE;
+    return 1.0 + (zem - BASE_ZEM_VALUE)/BASE_ZEM_VALUE;
 }
 
 //

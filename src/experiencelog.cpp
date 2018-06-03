@@ -80,8 +80,7 @@ long ExperienceRecord::getExpValue() const
 
 long ExperienceRecord::getExpValueZEM() const 
 {
-  long ZEM = long(m_zem * 100);
-  return ZEM*m_mob_level*m_mob_level;
+    return zemToExpBonus(m_zem) * getExpValue();
 }
  
 long ExperienceRecord::getExpValuep() const 
@@ -317,8 +316,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    }   
    s_xp_value.setNum(xp->getExpValue());
    const QString s_zem_value = doubleToQString(m_zoneMgr->zoneExpMultiplier(), 2, true);
-   QString s_zem_bonus;
-   s_zem_bonus.setNum((int)(zemToExpBonus(m_zoneMgr->zoneExpMultiplier())*100));
+   const QString s_zem_bonus = doubleToQString(zemToExpBonus(m_zoneMgr->zoneExpMultiplier()), 2, true);
    QString s_xp_valueZEM;
    s_xp_valueZEM.setNum(xp->getExpValueZEM());
 
