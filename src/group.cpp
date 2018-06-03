@@ -164,6 +164,24 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
       }
       break;
     case GUA_Left:
+      // Player was removed from group
+      if (gupdate->membername == m_player->name())
+      {
+          m_memberCount = 0;
+          m_membersInZoneCount = 0;
+
+          // iterate over all the member slots and clear them
+          for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+          {
+              m_members[i]->m_name = "";
+              m_members[i]->m_spawn = 0;
+              m_members[i]->m_level = 0;
+          }
+          emit cleared();
+      }
+      else
+      {
+
       // iterate over all the slots until the member is found
       for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
       {
@@ -183,6 +201,7 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
       m_members[i]->m_level = 0;
 	  break;
 	}
+      }
       }
       break;
     case GUA_LastLeft:
