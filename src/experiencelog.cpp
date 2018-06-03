@@ -37,13 +37,13 @@ ExperienceRecord::ExperienceRecord( const QString &mob_name,
 				    const QString &zone_name, 
                     float race_bonus,
 				    float class_bonus, uint8_t level, float zem,
-				    float totalLevels, 
+				    float groupShare,
 				    float groupBonus) 
   : m_raceBonus(race_bonus),
     m_classBonus(class_bonus),
     m_level(level),
     m_zem(zem),
-    m_totalLevels(totalLevels),
+    m_groupShare(groupShare),
     m_groupBonus(groupBonus),
     m_zone_name(zone_name), 
     m_mob_name(mob_name),
@@ -91,7 +91,7 @@ long ExperienceRecord::getCalculatedExp() const
 
 float ExperienceRecord::getGroupShare() const
 {
-    return (float)m_level/m_totalLevels;
+    return m_groupShare;
 }
 
 float ExperienceRecord::getGroupBonus() const
@@ -302,7 +302,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
              m_player->getRaceExpBonus(),
 			  m_player->getClassExpBonus(), m_player->level(),
 			  m_zoneMgr->zoneExpMultiplier(), 
-			  m_group->totalLevels(),
+			  m_group->groupExpShare(),
 			  m_group->groupBonus());
    m_exp_list.append( xp );
 
@@ -708,23 +708,24 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
    const float class_bonus = m_player->getClassExpBonus();
    const int myLevel = m_player->level();
    const int group_ag = m_group->totalLevels();
+   const int group_exp_share = m_group->groupExpShare();
 
    if (0 != m_group->groupSize())
    {
-       seqInfo("MY Level: %d GroupTot: %d BONUS   :%.2f", 
-               myLevel, group_ag, gbonus);
+       seqInfo("MY Level: %d GroupTot: %d GroupExpShare: %d BONUS   :%.2f", 
+               myLevel, group_ag, group_exp_share, gbonus);
    }
 
    float ZEM = (float)xp_gained
-       * ((float)group_ag/(float)myLevel)
+       / group_exp_share
        / gbonus
        / (float)(mob_level*mob_level)
        / race_bonus
        / class_bonus;
-   seqInfo("xpgained: %ld group_ag: %d myLevel: %d "
+   seqInfo("xpgained: %ld group_ag: %d myLevel: %d group_exp_share: %d"
            "gbonus: %.2f mob_level: %d class_bonus: %.2f "
            "race_bonus: %.2f",
-           xp_gained, group_ag, myLevel,
+           xp_gained, group_ag, myLevel, group_exp_share,
            gbonus, mob_level, class_bonus,
            race_bonus);
    seqInfo("ZEM - ZEM - ZEM ===== %.2f ", ZEM);

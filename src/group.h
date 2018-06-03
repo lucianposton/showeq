@@ -40,6 +40,7 @@ class GroupMgr: public QObject
   size_t groupMemberCount() { return m_memberCount; }
   size_t groupMembersInZoneCount() { return m_membersInZoneCount; }
   float groupBonus();
+  float groupExpShare();
   
   unsigned long totalLevels();
   

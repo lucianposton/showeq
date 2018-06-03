@@ -44,7 +44,7 @@ public:
 		    time_t time, const QString &zone_name, 
             float raceBonus,
 		    float classBonus, uint8_t level, float zem,
-		    float totalLevels, float groupBonus);
+		    float groupShare, float groupBonus);
 
    const QString &getMobName() const;
    int getMobLevel() const;
@@ -64,7 +64,7 @@ private:
    const float m_classBonus;
    uint8_t m_level;
    float m_zem;
-   float m_totalLevels;
+   float m_groupShare;
    float m_groupBonus;
    GroupMgr* m_group;
    QString m_zone_name;

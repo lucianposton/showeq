@@ -342,6 +342,11 @@ void GroupMgr::dumpInfo(QTextStream& out)
   }  
 }
 
+float GroupMgr::groupExpShare()
+{
+    return m_membersInZoneCount ? 1.0/m_membersInZoneCount : 1.0;
+}
+
 float GroupMgr::groupBonus()
 {
   switch (groupSize())
