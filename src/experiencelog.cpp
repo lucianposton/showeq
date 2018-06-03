@@ -691,21 +691,27 @@ void ExperienceWindow::logexp(long xp_gained, int mob_level)
 
 void ExperienceWindow::calculateZEM(long xp_gained, int mob_level) 
 {
-   float gbonus=1.00;
+   const float gbonus = m_group->groupBonus();
    const int penalty = m_player->getClassExpPenalty();
-   int myLevel = m_player->level();
-   int group_ag;
-   gbonus = m_group->groupBonus();
-   group_ag = m_group->totalLevels();
-   if (m_group->groupSize())
+   const int myLevel = m_player->level();
+   const int group_ag = m_group->totalLevels();
+
+   if (0 != m_group->groupSize())
    {
-     seqInfo("MY Level: %d GroupTot: %d BONUS   :%d", 
-	     myLevel, group_ag, gbonus * 100);
+       seqInfo("MY Level: %d GroupTot: %d BONUS   :%.2f", 
+               myLevel, group_ag, gbonus);
    }
 
-   unsigned char ZEM = (unsigned char) ((float)xp_gained*((float)((float)group_ag/(float)myLevel)*(float)((float)1.0/(float)gbonus))*((float)1/(float)(mob_level*mob_level))*((float)10/(float)penalty));
-   seqInfo("xpgained: %ld group_ag: %d myLevel: %d gbonus: %d mob_level: %d penalty: %d ", xp_gained, group_ag, myLevel, gbonus, mob_level, penalty);
-   seqInfo("ZEM - ZEM - ZEM ===== %d ", ZEM);
+   float ZEM = (float)xp_gained
+       * ((float)group_ag/(float)myLevel)
+       / gbonus
+       / (float)(mob_level*mob_level)
+       * (10.0/(float)penalty);
+   seqInfo("xpgained: %ld group_ag: %d myLevel: %d "
+           "gbonus: %.2f mob_level: %d penalty: %d ",
+           xp_gained, group_ag, myLevel,
+           gbonus, mob_level, penalty);
+   seqInfo("ZEM - ZEM - ZEM ===== %.2f ", ZEM);
 }
 
 #include "experiencelog.moc"
