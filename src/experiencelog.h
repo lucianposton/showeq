@@ -104,6 +104,7 @@ public slots:
    void viewZEMraw();
    void viewZEMpercent();
    void viewZEMcalculated();
+   void togglePvPExpBonus();
    void toggleExpPenalty();
    void clear(void);
 

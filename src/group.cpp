@@ -11,6 +11,7 @@
 #include "spawnshell.h"
 #include "everquest.h"
 #include "diagnosticmessages.h"
+#include "main.h"
 
 GroupMgr::GroupMgr(SpawnShell* spawnShell, 
 		   Player* player,  
@@ -21,6 +22,9 @@ GroupMgr::GroupMgr(SpawnShell* spawnShell,
     m_memberCount(0),
     m_membersInZoneCount(0)
 {
+  m_pvpExpBonusIsActive =
+    pSEQPrefs->getPrefBool("PvPExpBonus", "Experience", false);
+
   for (int i=0; i<MAX_GROUP_MEMBERS; i++)
   {
     m_members[i] = new GroupMember();
@@ -347,17 +351,38 @@ float GroupMgr::groupExpShare()
     return m_membersInZoneCount ? 1.0/m_membersInZoneCount : 1.0;
 }
 
+void GroupMgr::setUsePvPExpBonus(bool enable)
+{
+  m_pvpExpBonusIsActive = enable;
+  pSEQPrefs->setPrefBool("PvPExpBonus", "Experience", enable);
+}
+
 float GroupMgr::groupBonus()
 {
-  switch (groupSize())
-  {
-  case 2:	return 1.02;
-  case 3:	return 1.06;
-  case 4:	return 1.10;
-  case 5:	return 1.14;
-  case 6:	return 1.20;
-  default:	return 1.00;
-  }
+    if (m_pvpExpBonusIsActive)
+    {
+        switch (groupSize())
+        {
+            case 2:     return 1.9;
+            case 3:     return 2.3;
+            case 4:     return 2.7;
+            case 5:     return 3.1;
+            case 6:     return 3.5;
+            default:    return 1.5;
+        }
+    }
+    else
+    {
+        switch (groupSize())
+        {
+            case 2:	return 1.02;
+            case 3:	return 1.06;
+            case 4:	return 1.10;
+            case 5:	return 1.14;
+            case 6:	return 1.20;
+            default:	return 1.00;
+        }
+    }
 }
 
 unsigned long GroupMgr::totalLevels()

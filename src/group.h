@@ -39,6 +39,8 @@ class GroupMgr: public QObject
   size_t groupSize() { return m_memberCount; }
   size_t groupMemberCount() { return m_memberCount; }
   size_t groupMembersInZoneCount() { return m_membersInZoneCount; }
+  void setUsePvPExpBonus(bool enable);
+  bool isPvPExpBonusActive() { return m_pvpExpBonusIsActive; }
   float groupBonus();
   float groupExpShare();
   
@@ -71,6 +73,7 @@ class GroupMgr: public QObject
   }* m_members[MAX_GROUP_MEMBERS];
   size_t m_memberCount;
   size_t m_membersInZoneCount;
+  bool m_pvpExpBonusIsActive;
 };
 
 #endif // _GROUP_H_
