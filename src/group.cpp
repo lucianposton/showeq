@@ -362,7 +362,7 @@ float GroupMgr::groupBonus()
 {
     if (m_pvpExpBonusIsActive)
     {
-        switch (groupSize())
+        switch (groupMembersInZoneCount())
         {
             case 2:     return 1.9;
             case 3:     return 2.3;
@@ -374,7 +374,7 @@ float GroupMgr::groupBonus()
     }
     else
     {
-        switch (groupSize())
+        switch (groupMembersInZoneCount())
         {
             case 2:	return 1.02;
             case 3:	return 1.06;
