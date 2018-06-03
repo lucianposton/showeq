@@ -173,6 +173,10 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 	  // yes, announce its removal
 	  emit removed(m_members[i]->m_name, m_members[i]->m_spawn);
 
+      m_memberCount--;
+      if (m_members[i]->m_spawn)
+          m_membersInZoneCount--;
+
 	  // clear it
 	  m_members[i]->m_name = "";
 	  m_members[i]->m_spawn = 0;
@@ -204,13 +208,12 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 void GroupMgr::addItem(const Item* item)
 {
   // only care about Spawn class
-  if ((item->type() != tSpawn) && (item->type() != tPlayer))
+  if ((item->type() != tSpawn))
     return;
 
   const Spawn* spawn = (const Spawn*)item;
 
-  // only care about players
-  if (!spawn->isPlayer())
+  if (!spawn->isOtherPlayer())
     return;
 
   // iterate over the group members
@@ -233,13 +236,12 @@ void GroupMgr::addItem(const Item* item)
 
 void GroupMgr::delItem(const Item* item)
 {
-  if ((item->type() != tSpawn) && (item->type() != tPlayer))
+  if ((item->type() != tSpawn))
     return;
 
   const Spawn* spawn = (const Spawn*)item;
 
-  // only care about players
-  if (!spawn->isPlayer())
+  if (!spawn->isOtherPlayer())
     return;
 
   // iterate over the group members
@@ -262,13 +264,12 @@ void GroupMgr::delItem(const Item* item)
 
 void GroupMgr::killSpawn(const Item* item)
 {
-  if ((item->type() != tSpawn) && (item->type() != tPlayer))
+  if ((item->type() != tSpawn))
     return;
 
   const Spawn* spawn = (const Spawn*)item;
 
-  // only care about players
-  if (!spawn->isPlayer())
+  if (!spawn->isOtherPlayer())
     return;
 
   // iterate over the group members
