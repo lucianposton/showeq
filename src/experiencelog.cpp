@@ -35,10 +35,12 @@ ExperienceRecord::ExperienceRecord( const QString &mob_name,
 				    long xp_gained, 
 				    time_t time, 
 				    const QString &zone_name, 
+                    long race_bonus,
 				    long class_bonus, uint8_t level, float zem,
 				    float totalLevels, 
 				    float groupBonus) 
-  : m_classBonus(class_bonus),
+  : m_raceBonus(race_bonus),
+    m_classBonus(class_bonus),
     m_level(level),
     m_zem(zem),
     m_totalLevels(totalLevels),
@@ -85,7 +87,7 @@ long ExperienceRecord::getExpValueZEM() const
 long ExperienceRecord::getExpValuep() const 
 {
    long baseExp = getExpValueZEM();
-   return (long)((float)baseExp*(m_classBonus/10.0));
+   return (long)((float)baseExp*(m_classBonus/10.0)*m_raceBonus);
 }
 
 long ExperienceRecord::getExpValueg() const 
@@ -283,6 +285,7 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 
    ExperienceRecord *xp = 
      new ExperienceRecord(mob_name, mob_level, xp_gained, time(0), zone_name, 
+             m_player->getRaceExpBonus(),
 			  m_player->getClassExpBonus(), m_player->level(),
 			  m_zoneMgr->zoneExpMultiplier(), 
 			  m_group->totalLevels(),
@@ -683,6 +686,7 @@ void ExperienceWindow::logexp(long xp_gained, int mob_level)
 void ExperienceWindow::calculateZEM(long xp_gained, int mob_level) 
 {
    const float gbonus = m_group->groupBonus();
+   const float race_bonus = m_player->getRaceExpBonus();
    const float class_bonus = m_player->getClassExpBonus();
    const int myLevel = m_player->level();
    const int group_ag = m_group->totalLevels();
@@ -697,11 +701,14 @@ void ExperienceWindow::calculateZEM(long xp_gained, int mob_level)
        * ((float)group_ag/(float)myLevel)
        / gbonus
        / (float)(mob_level*mob_level)
+       / race_bonus
        / (class_bonus/10.0);
    seqInfo("xpgained: %ld group_ag: %d myLevel: %d "
-           "gbonus: %.2f mob_level: %d class_bonus: %.2f ",
+           "gbonus: %.2f mob_level: %d class_bonus: %.2f "
+           "race_bonus: %.2f",
            xp_gained, group_ag, myLevel,
-           gbonus, mob_level, class_bonus);
+           gbonus, mob_level, class_bonus,
+           race_bonus);
    seqInfo("ZEM - ZEM - ZEM ===== %.2f ", ZEM);
 }
 

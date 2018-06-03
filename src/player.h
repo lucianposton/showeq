@@ -134,6 +134,7 @@ public:
 		     uint32_t& maxValue);
 
    float getClassExpBonus() const;
+   float getRaceExpBonus() const;
 
  signals:
    void newPlayer(void);

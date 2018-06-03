@@ -42,7 +42,8 @@ public:
 
    ExperienceRecord(const QString &mob_name, int mob_level, long xp_gained,
 		    time_t time, const QString &zone_name, 
-		    long expPenalty, uint8_t level, float zem, 
+            long raceBonus,
+		    long classBonus, uint8_t level, float zem, 
 		    float totalLevels, float groupBonus);
 
    const QString &getMobName() const;
@@ -56,6 +57,7 @@ public:
    const QString &getZoneName() const;
 
 private:
+   const float m_raceBonus;
    const float m_classBonus;
    uint8_t m_level;
    float m_zem;

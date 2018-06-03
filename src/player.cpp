@@ -1302,6 +1302,30 @@ void Player::fillConTable()
   m_conTable[0] = m_conColorBases[tUnknownSpawn];
 }
 
+float Player::getRaceExpBonus() const
+{
+   float bonus;
+   switch (race())
+   {
+       case 1 :   bonus = 1.0;   break; // human
+       case 2 :   bonus = 0.95;  break; // barbarian
+       case 3 :   bonus = 1.0;   break; // erudite
+       case 4 :   bonus = 1.0;   break; // wood elf
+       case 5 :   bonus = 1.0;   break; // high elf
+       case 6 :   bonus = 1.0;   break; // dark elf
+       case 7 :   bonus = 1.0;   break; // half elf
+       case 8 :   bonus = 1.0;   break; // dwarf
+       case 9 :   bonus = 0.8;   break; // troll
+       case 10 :  bonus = 0.85;  break; // ogre
+       case 11 :  bonus = 1.05;  break; // halfling
+       case 12 :  bonus = 1.0;   break; // gnome
+       case 128 : bonus = 0.8;   break; // iksar
+       default :  bonus = 1.0;
+   }
+
+   return bonus;
+}
+
 float Player::getClassExpBonus() const
 {
    float bonus;
