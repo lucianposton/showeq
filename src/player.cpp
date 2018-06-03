@@ -610,7 +610,7 @@ void Player::updateAltExp(const uint8_t* data)
   uint32_t realExp = altexp->altexp * altexp->percent * (15000000 / 33000);
   uint32_t expIncrement;
 
-  if (realExp > m_currentExp)
+  if (realExp > m_currentAltExp)
     expIncrement = realExp - m_currentAltExp;
   else
     expIncrement = 0;
@@ -618,7 +618,7 @@ void Player::updateAltExp(const uint8_t* data)
   uint32_t realExp = altexp->altexp * (15000000 / 330);
   uint32_t expIncrement;
 
-  if (realExp > m_currentExp)
+  if (realExp > m_currentAltExp)
   {
     expIncrement = realExp - m_currentAltExp;
   }
