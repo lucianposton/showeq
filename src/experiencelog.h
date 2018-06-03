@@ -56,7 +56,7 @@ public:
    const QString &getZoneName() const;
 
 private:
-   const long m_penalty;
+   const float m_classBonus;
    uint8_t m_level;
    float m_zem;
    float m_totalLevels;

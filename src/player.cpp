@@ -1302,38 +1302,30 @@ void Player::fillConTable()
   m_conTable[0] = m_conColorBases[tUnknownSpawn];
 }
 
-long Player::getClassExpPenalty() const
+float Player::getClassExpBonus() const
 {
-   long p_penalty;
-   // WAR and ROG are at 10 since thier EXP is not scaled to compensate
-   // for thier bonus
-   if (m_classExpPenaltyIsActive)
+   float bonus;
+   switch (classVal())
    {
-       switch (classVal())
-       {
-           case 1 : p_penalty = 10; break; // WAR
-           case 2 : p_penalty = 10; break; // CLR
-           case 3 : p_penalty = 14; break; // PAL
-           case 4 : p_penalty = 14; break; // RNG
-           case 5 : p_penalty = 14; break; // SHD
-           case 6 : p_penalty = 10; break; // DRU
-           case 7 : p_penalty = 12; break; // MNK
-           case 8 : p_penalty = 14; break; // BRD
-           case 9 : p_penalty = 10; break; // ROG
-           case 10: p_penalty = 10; break; // SHM
-           case 11: p_penalty = 11; break; // NEC
-           case 12: p_penalty = 11; break; // WIZ
-           case 13: p_penalty = 11; break; // MAG
-           case 14: p_penalty = 11; break; // ENC
-           default: /* why are we here? */
-                    p_penalty = 10; break;
-       }
+       case 1 : bonus = 11.0; break; // WAR
+       case 2 : bonus = 10.0; break; // CLR
+       case 3 : bonus = 10.0; break; // PAL
+       case 4 : bonus = 10.0; break; // RNG
+       case 5 : bonus = 10.0; break; // SHD
+       case 6 : bonus = 10.0; break; // DRU
+       case 7 : bonus = 10.0; break; // MNK
+       case 8 : bonus = 10.0; break; // BRD
+       case 9 : bonus = 10.9; break; // ROG
+       case 10: bonus = 10.0; break; // SHM
+       case 11: bonus = 10.0; break; // NEC
+       case 12: bonus = 10.0; break; // WIZ
+       case 13: bonus = 10.0; break; // MAG
+       case 14: bonus = 10.0; break; // ENC
+       default: /* why are we here? */
+                bonus = 10.0; break;
    }
-   else
-   {
-       p_penalty = 10;
-   }
-   return p_penalty;
+
+   return bonus;
 }
 
 uint32_t Player::calc_exp(int level, uint16_t race, uint8_t class_) const

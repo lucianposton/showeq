@@ -133,7 +133,7 @@ public:
 		     uint32_t& curValue, 
 		     uint32_t& maxValue);
 
-   long getClassExpPenalty() const;
+   float getClassExpBonus() const;
 
  signals:
    void newPlayer(void);
