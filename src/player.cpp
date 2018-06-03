@@ -1376,6 +1376,7 @@ uint32_t Player::calc_exp(int level, uint16_t race, uint8_t class_) const
     else if (level<65)  exp*=38;
     else                exp*=40;
 
+#if 0
     switch (race)
     {
         case 1 :   exp*=10;   break; // human
@@ -1393,6 +1394,9 @@ uint32_t Player::calc_exp(int level, uint16_t race, uint8_t class_) const
         case 128 : exp*=12;   break; // iksar
         default :  exp*=10;
     }
+#else
+    exp *= 10;
+#endif
 
     float class_penalty;
     if (m_classExpPenaltyIsActive)
