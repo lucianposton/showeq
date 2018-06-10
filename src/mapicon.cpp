@@ -1264,7 +1264,7 @@ QColor MapIcons::pickSpawnPointColor(const SpawnPoint* sp,
   if ( age == 255 )
     return darkRed;
 
-  if ( age > 220 )
+  if ( age > 220 && sp->secsLeft() < 30 )
   {
     if (m_flash)
       return red;
