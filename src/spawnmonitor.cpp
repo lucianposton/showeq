@@ -25,6 +25,8 @@
 #include <qfileinfo.h>
 #include <qtextstream.h>
 
+//#define DEBUG_SPAWNMONITOR
+
 namespace {
 
 static int normalize_z(int z, float size)
@@ -40,6 +42,16 @@ static SpawnPoint* findWithZFudgeFactor(
         const Spawn* spawn,
         QString& foundKey)
 {
+#ifdef DEBUG_SPAWNMONITOR
+    seqDebug("SpawnPoint::findWithZFudgeFactor(%s, id=%d, (%d,%d,%d->%d)",
+            (const char*)spawn->name(),
+            spawn->id(),
+            spawn->x(),
+            spawn->y(),
+            spawn->z(),
+            normalize_z(spawn->z(), spawn->size()));
+#endif
+
     // normalize_z() doesn't accommodate large spawns well e.g. size 24, hill
     // giants. So in addition to normalizing z, we also search above and
     // below the normalized z point by a fudge factor.
@@ -56,6 +68,10 @@ static SpawnPoint* findWithZFudgeFactor(
     SpawnPoint* result = spawnpoints.find(key);
     if (result)
     {
+#ifdef DEBUG_SPAWNMONITOR
+        seqDebug("SpawnPoint::findWithZFudgeFactor. found spawnpoint with key (%s)",
+                (const char*)key);
+#endif
         foundKey = key;
         return result;
     }
@@ -68,6 +84,14 @@ static SpawnPoint* findWithZFudgeFactor(
             result = spawnpoints.find(key);
             if (result)
             {
+#ifdef DEBUG_SPAWNMONITOR
+                seqDebug("SpawnPoint::findWithZFudgeFactor. fudged spawn "
+                        "%s,id=%d (%d,%d,%d) with normalized_z=%d to "
+                        "spawnpoint with key (%s)",
+                        (const char*)spawn->name(), spawn->id(),
+                        spawn->x(), spawn->y(), spawn->z(), z,
+                        (const char*)key);
+#endif
                 foundKey = key;
                 return result;
             }
