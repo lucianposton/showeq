@@ -399,8 +399,7 @@ void SpellShell::action(const uint8_t* data, size_t, uint8_t dir)
   const Item* s;
   QString targetName;
 
-  if (a->target && 
-      ((s = m_spawnShell->findID(tSpawn, a->target))))
+  if (a->target && (s = m_spawnShell->findID(tSpawn, a->target)))
     targetName = s->name();
 
   SpellItem *item = findSpell(a->spell, a->target, targetName);
