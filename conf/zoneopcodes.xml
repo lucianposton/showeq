@@ -246,6 +246,11 @@
     <opcode id="022f" name="OP_LFGGetMatchesRequest" updated="10/27/05">
         <comment></comment>
     </opcode>
+    <opcode id="2c81" name="OP_ControlBoat" updated="10/27/05">
+        <comment>When clicking on a boat to take the helm</comment>
+        <payload dir="server" typename="none" sizechecktype="match"/>
+        <payload dir="client" typename="ControlBoat_Struct" sizechecktype="match"/>
+    </opcode>
     <opcode id="3bc2" name="OP_ClickObject" updated="10/27/05">
         <comment>old RemDropCode</comment>
         <payload dir="both" typename="remDropStruct" sizechecktype="match"/>

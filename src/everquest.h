@@ -3121,6 +3121,13 @@ struct Resurrect_Struct
 /*228*/
 };
 
+struct ControlBoat_Struct
+{
+/*000*/	uint32_t	boatId;			// entitylist id of the boat
+/*004*/	bool	TakeControl;	// 01 if taking control, 00 if releasing it
+/*007*/	char	unknown[3];		// no idea what these last three bytes represent
+};
+
 // Restore structure packing to default
 #pragma pack()
 
