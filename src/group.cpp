@@ -13,6 +13,8 @@
 #include "diagnosticmessages.h"
 #include "main.h"
 
+//#define DEBUG_GROUPMGR
+
 GroupMgr::GroupMgr(SpawnShell* spawnShell, 
 		   Player* player,  
 		   QObject* parent, const char* name)
@@ -35,6 +37,10 @@ GroupMgr::GroupMgr(SpawnShell* spawnShell,
     m_members[i]->m_spawn = 0;
     m_members[i]->m_level = 0;
   }
+#ifdef DEBUG_GROUPMGR
+  seqDebug("m_membersInZoneCount init %d", m_membersInZoneCount);
+  seqDebug("m_memberCount init %d", m_memberCount);
+#endif
 }
 
 GroupMgr::~GroupMgr()
@@ -52,6 +58,10 @@ void GroupMgr::player(const uint8_t* data)
   // reset counters
   m_memberCount = 0;
   m_membersInZoneCount = 0;
+#ifdef DEBUG_GROUPMGR
+  seqDebug("m_membersInZoneCount player packet, reset to %d", m_membersInZoneCount);
+  seqDebug("m_memberCount player packet, reset to %d", m_memberCount);
+#endif
 
   emit cleared();
 
@@ -62,7 +72,12 @@ void GroupMgr::player(const uint8_t* data)
     m_members[i]->m_level = 0;
 
     if (!m_members[i]->m_name.isEmpty())
+    {
       m_memberCount++;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_memberCount player packet, +1 to %d", m_memberCount);
+#endif
+    }
 
     if (m_members[i]->m_name != player->name)
       m_members[i]->m_spawn = 0;
@@ -74,6 +89,9 @@ void GroupMgr::player(const uint8_t* data)
       }
       
       m_membersInZoneCount++;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_membersInZoneCount player packet, +1 to %d", m_membersInZoneCount);
+#endif
     }
 
     emit added(m_members[i]->m_name, m_members[i]->m_spawn);
@@ -96,6 +114,10 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
       // reset counters
       m_memberCount = 0;
       m_membersInZoneCount = 0;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_membersInZoneCount FullGroupInfo reset to %d", m_membersInZoneCount);
+      seqDebug("m_memberCount FullGroupInfo, reset to %d", m_memberCount);
+#endif
 
       emit cleared();
 
@@ -108,7 +130,12 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 
 	// if their is a member, increment the member count
 	if (!m_members[i]->m_name.isEmpty()) 
+    {
 	  m_memberCount++;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_memberCount FullGroupInfo, +1 to %d", m_memberCount);
+#endif
+    }
 
 	// attempt to retrieve the members spawn
 	m_members[i]->m_spawn = 
@@ -117,6 +144,9 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 	// incremement the spawn count
 	if (m_members[i]->m_spawn) {
 	  m_membersInZoneCount++;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_membersInZoneCount FullGroupInfo +1 to %d", m_membersInZoneCount);
+#endif
       m_members[i]->m_level = m_members[i]->m_spawn->level();
     }
 
@@ -143,7 +173,12 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 	  
 	  // if their is a member, increment the member count
 	  if (!m_members[i]->m_name.isEmpty()) 
+      {
 	    m_memberCount++;
+#ifdef DEBUG_GROUPMGR
+        seqDebug("m_memberCount GUA_Joined, +1 to %d", m_memberCount);
+#endif
+      }
 	  
 	  // attempt to retrieve the members spawn
 	  m_members[i]->m_spawn = 
@@ -152,6 +187,9 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 	  // incremement the spawn count
 	  if (m_members[i]->m_spawn) {
 	    m_membersInZoneCount++;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_membersInZoneCount GUA_Joined, +1 to %d", m_membersInZoneCount);
+#endif
         m_members[i]->m_level = m_members[i]->m_spawn->level();
       }
 
@@ -169,6 +207,10 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
       {
           m_memberCount = 0;
           m_membersInZoneCount = 0;
+#ifdef DEBUG_GROUPMGR
+          seqDebug("m_membersInZoneCount GUA_Left, reset to %d", m_membersInZoneCount);
+          seqDebug("m_memberCount GUA_Left, reset to %d", m_memberCount);
+#endif
 
           // iterate over all the member slots and clear them
           for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
@@ -192,8 +234,16 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
 	  emit removed(m_members[i]->m_name, m_members[i]->m_spawn);
 
       m_memberCount--;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_memberCount GUA_Left, -1 to %d", m_memberCount);
+#endif
       if (m_members[i]->m_spawn)
+      {
           m_membersInZoneCount--;
+#ifdef DEBUG_GROUPMGR
+          seqDebug("m_membersInZoneCount GUA_Left, -1 to %d", m_membersInZoneCount);
+#endif
+      }
 
 	  // clear it
 	  m_members[i]->m_name = "";
@@ -208,6 +258,10 @@ void GroupMgr::groupUpdate(const uint8_t* data, size_t size)
       // reset counters
       m_memberCount = 0;
       m_membersInZoneCount = 0;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_membersInZoneCount GUA_LastLeft, reset to %d", m_membersInZoneCount);
+      seqDebug("m_memberCount GUA_LastLeft, reset to %d", m_memberCount);
+#endif
 
       // iterate over all the member slots and clear them
       for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
@@ -247,6 +301,9 @@ void GroupMgr::addItem(const Item* item)
 
       // decrement member in zone count
       m_membersInZoneCount++;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_membersInZoneCount addItem, +1 to %d", m_membersInZoneCount);
+#endif
 
       break;
     }
@@ -275,6 +332,9 @@ void GroupMgr::delItem(const Item* item)
 
       // decrement member in zone count
       m_membersInZoneCount--;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_membersInZoneCount delItem, -1 to %d", m_membersInZoneCount);
+#endif
 
       break;
     }
@@ -303,6 +363,9 @@ void GroupMgr::killSpawn(const Item* item)
 
       // decrement members in zone count
       m_membersInZoneCount--;
+#ifdef DEBUG_GROUPMGR
+      seqDebug("m_membersInZoneCount killSpawn, -1 to %d", m_membersInZoneCount);
+#endif
 
       break;
     }
@@ -329,6 +392,9 @@ void GroupMgr::changeItem(const Item* item, uint32_t changeType)
                 m_members[i]->m_level = spawn->level();
 
                 m_membersInZoneCount++;
+#ifdef DEBUG_GROUPMGR
+                seqDebug("m_membersInZoneCount changeItem, +1 to %d", m_membersInZoneCount);
+#endif
                 break;
             }
         }
