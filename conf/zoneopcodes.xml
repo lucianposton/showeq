@@ -604,7 +604,9 @@
         <comment></comment>
     </opcode>
     <opcode id="61ef" name="OP_YellForHelp" updated="10/27/05">
-        <comment></comment>
+        <comment>4 bytes when dir=server</comment>
+        <payload dir="server" typename="unknown" sizechecktype="none"/>
+        <payload dir="client" typename="none" sizechecktype="match"/>
     </opcode>
     <opcode id="4839" name="OP_ManaChange" updated="10/27/05">
         <comment>Mana change. Bards send this up with no size. Casters receive this for mana updates.</comment>
