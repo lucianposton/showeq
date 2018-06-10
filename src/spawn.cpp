@@ -422,8 +422,9 @@ void Spawn::update(const spawnStruct* s)
   setTypeflag(s->bodytype);
   setGM(s->gm);
 
-  if (s->NPC == SPAWN_PLAYER && s->deity == DEITY_UNKNOWN)
-      setNPC(SPAWN_NPC); // Set to NPC if deity is unknown
+  if (s->NPC == SPAWN_PLAYER && s->deity == DEITY_UNKNOWN
+          && s->race == 72 && s->bodytype == 5)
+      setNPC(SPAWN_NPC); // Set to NPC if is a boat
   else
     setNPC(s->NPC); // otherwise it is what it is
 

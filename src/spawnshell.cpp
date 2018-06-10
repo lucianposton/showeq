@@ -1058,6 +1058,9 @@ void SpawnShell::killSpawn(const uint8_t* data)
      // set the last kill info on the player (do this before changing name)
      m_player->setLastKill(spawn->name(), spawn->level());
 
+     Item* killer;
+     killer = m_spawns.find(deadspawn->killerId);
+     emit killingSpawn(item, killer, deadspawn->killerId);
      spawn->killSpawn();
      int changeFlags = tSpawnChangedNPC;
      if (updateFilterFlags(spawn))
@@ -1069,8 +1072,6 @@ void SpawnShell::killSpawn(const uint8_t* data)
 
      spawn->setName(spawn->realName() + Spawn_Corpse_Designator);
 
-     Item* killer;
-     killer = m_spawns.find(deadspawn->killerId);
      emit killSpawn(item, killer, deadspawn->killerId);
    }
 }

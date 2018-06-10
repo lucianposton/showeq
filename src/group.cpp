@@ -341,7 +341,7 @@ void GroupMgr::delItem(const Item* item)
   }
 }
 
-void GroupMgr::killSpawn(const Item* item)
+void GroupMgr::killingSpawn(const Item* item)
 {
   if ((item->type() != tSpawn))
     return;

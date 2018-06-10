@@ -51,7 +51,7 @@ class GroupMgr: public QObject
   void groupUpdate(const uint8_t* data, size_t size);
   void addItem(const Item* item);
   void delItem(const Item* item);
-  void killSpawn(const Item* item);
+  void killingSpawn(const Item* item);
   void changeItem(const Item* item, uint32_t changeType);
 
   // dump debug info

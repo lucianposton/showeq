@@ -88,6 +88,7 @@ signals:
    void addItem(const Item* item);
    void delItem(const Item* item);
    void changeItem(const Item* item, uint32_t changeType);
+   void killingSpawn(const Item* deceased, const Item* killer, uint16_t killerId);
    void killSpawn(const Item* deceased, const Item* killer, uint16_t killerId);
    void selectSpawn(const Item* item);
    void spawnConsidered(const Item* item);
