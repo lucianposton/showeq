@@ -716,6 +716,7 @@ void MessageShell::player(const uint8_t* data)
 		  player->silver_cursor, player->copper_cursor);
   m_messages->addMessage(MT_Player, message);
 
+#if 0 // Future expansion
   message.sprintf("SharedMoney: P=%d",
 		  player->platinum_shared);
   m_messages->addMessage(MT_Player, message);
@@ -723,14 +724,17 @@ void MessageShell::player(const uint8_t* data)
   message.sprintf("DoN Crystals: Radiant=%d Ebon=%d",
           player->currentRadCrystals, player->currentEbonCrystals);
   m_messages->addMessage(MT_Player, message);
+#endif
 
   message = "Exp: " + Commanate(player->exp);
   m_messages->addMessage(MT_Player, message);
 
+#if 0 // Luclin expansion
   message = "ExpAA: " + Commanate(player->expAA) + 
       " (aa spent: " + Commanate(player->aa_spent) + 
       ", aa unspent: " + Commanate(player->aa_unspent) + ")";
   m_messages->addMessage(MT_Player, message);
+#endif
 
 #if 0 
   // Format for the aa values used to 0-1000 for group, 0-2000 for raid,
@@ -763,6 +767,7 @@ void MessageShell::player(const uint8_t* data)
     }
   }
 
+#if 0 // LDoN expansion
   message = "LDoN Earned Guk Points: " + Commanate(player->ldon_guk_points);
   m_messages->addMessage(MT_Player, message);
   message = "LDoN Earned Mira Points: " + Commanate(player->ldon_mir_points);
@@ -775,6 +780,7 @@ void MessageShell::player(const uint8_t* data)
   m_messages->addMessage(MT_Player, message);
   message = "LDoN Unspent Points: " + Commanate(player->ldon_avail_points);
   m_messages->addMessage(MT_Player, message);
+#endif
 }
 
 void MessageShell::increaseSkill(const uint8_t* data)
