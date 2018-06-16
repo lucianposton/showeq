@@ -691,6 +691,10 @@ void Player::updateExp(const uint8_t* data)
      m_freshKill = false;
   }
   else if (expIncrement)
+      // Note: Quests that give such little exp that m_currentExpFraction
+      // doesn't move fail this condition. If we want to capture these quest
+      // exp rewards, we would need to differentiate these rewards from the
+      // initial OP_ExpUpdate sent upon zoning.
   {
       // Quest exp, random exp, etc
       emit expGained( "n/a",
