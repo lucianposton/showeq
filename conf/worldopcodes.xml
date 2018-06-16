@@ -103,6 +103,10 @@
         <comment></comment>
         <payload dir="client" typename="CharCreate_Struct" sizechecktype="match"/>
     </opcode>
+    <opcode id="407c" name="OP_ZoneUnavail" updated="05/26/04">
+        <comment>First byte is beginning of zone name</comment>
+        <payload dir="server" typename="unknown" sizechecktype="none"/>
+    </opcode>
     <opcode id="23d4" name="OP_RandomNameGenerator" updated="06/29/05">
         <comment>Requests and returns a random name at char creation</comment>
         <payload dir="both" typename="NameGeneration_Struct" sizechecktype="match"/>
