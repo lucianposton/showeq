@@ -463,7 +463,7 @@ void ExperienceWindow::updateAverage( )
    }
 
    // calculate the number of minutes that have passed
-   double minutes = ( time(0) - first_kill_time ) / 60;
+   double minutes = ( time(0) - first_kill_time ) / 60.0;
       
    if (!first_kill_time || minutes < 1)
       minutes = 0;
@@ -476,7 +476,7 @@ void ExperienceWindow::updateAverage( )
    if (!m_timeframe) {
       avg_exp = ( minutes ? total_exp/minutes : 0 );
       s_avg_exp=Commanate( (uint32_t)(avg_exp * m_ratio) );
-      s_play_time.setNum( minutes );
+      s_play_time.setNum( uint32_t(minutes) );
       s_play_time+=" min";
    } 
    else 
