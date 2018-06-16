@@ -26,6 +26,10 @@ static const char* itemdbid = "@(#) $Id$ $Name$";
 // define the current version number for data in database
 #define CURRENT_ITEM_FORMAT_VERSION 2
 
+// Note: Use if compiler warns about strict aliasing
+// TODO: remove after fixing aliasing issues in itemdb
+//#pragma GCC diagnostic warning "-Wstrict-aliasing"
+
 // forward declarations
 QString& getField(QString& field, const char*& curPos);
 QString& getLastField(QString& field, const char*& curPos);

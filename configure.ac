@@ -531,6 +531,10 @@ AC_CHECK_RPATH
 CFLAGS="$USE_THREADS $USE_OPT_C $USE_DEBUG_C $USE_INLINE_C $USE_PROFILE_C $CFLAGS"
 CXXFLAGS="$USE_THREADS $USE_OPT_CXX $USE_DEBUG_CXX $USE_INLINE_CXX  $USE_PROFILE_CXX -DQT_THREAD_SUPPORT=1 -DDISPLAY_ICONS=${CGI_ICONS} -DICON_DIR=\\\"${CGI_ICON_DIR}\\\" $CXXFLAGS"
 
+dnl Enable to instruct compiler to error on warnings
+dnl CFLAGS="$CFLAGS -Werror -Wno-error=parentheses"
+dnl CXXFLAGS="$CXXFLAGS -Werror -Wno-error=parentheses"
+
 AC_DEFUN([SUCCESS],[
 echo "Success!"
 case $target_os in
