@@ -528,7 +528,7 @@ void ExperienceWindow::updateAverage( )
      s_exp_remaining="unknown";
 
    QString s_kills_to_level;
-   if (mob_count)
+   if (mob_count > 0 && total_exp > 0)
       s_kills_to_level.setNum( std::ceil(exp_remaining / (total_exp/mob_count)) );
    else
       s_kills_to_level="unknown";
