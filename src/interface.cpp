@@ -4391,7 +4391,7 @@ EQInterface::set_opt_WalkPathLength(int len)
   if ((len > 0) && (len <= 8192))
     showeq_params->walkpathlength = len;
 
-    pSEQPrefs->setPrefInt("WalkPathLength", "Misc", showeq_params->walkpathlength);
+  pSEQPrefs->setPrefInt("WalkPathLength", "Misc", showeq_params->walkpathlength);
 }
 
 void

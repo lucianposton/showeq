@@ -2854,7 +2854,7 @@ void CombatWindow::addCombatRecord(
     if (isDamageShield(category))
         iDamage = -iDamage;
 
-	const int iPlayerID = m_player->id();
+    const int iPlayerID = m_player->id();
     const int iSourcePetOwnerID = (source == NULL) ? -1 : source->petOwnerID();
     const int iTargetPetOwnerID = (target == NULL) ? -1 : target->petOwnerID();
     QString tName;
@@ -3228,7 +3228,7 @@ void CombatWindow::updateDPS(int iDamage)
     if (iDamage < 0)
         iDamage = 0;
 
-	const int iTimeNow = mTime();
+    const int iTimeNow = mTime();
 
 	//	reset if it's been 10 seconds without an update
 	if(iTimeNow > (m_iDPSTimeLast + 10000))
@@ -3269,7 +3269,7 @@ void CombatWindow::updatePetDPS(int iDamage)
     if (iDamage < 0)
         iDamage = 0;
 
-	const int iTimeNow = mTime();
+    const int iTimeNow = mTime();
 
 	//	reset if it's been 10 seconds without an update
 	if(iTimeNow > (m_iPetDPSTimeLast + 10000))
@@ -3306,7 +3306,7 @@ void CombatWindow::updateMobDPS(int iDamage)
     if (iDamage < 0)
         iDamage = 0;
 
-	const int iTimeNow = mTime();
+    const int iTimeNow = mTime();
 
 	//	reset if it's been 10 seconds without an update
 	if(iTimeNow > (m_iMobDPSTimeLast + 10000))
@@ -3342,7 +3342,7 @@ void CombatWindow::updatePetMobDPS(int iDamage)
     if (iDamage < 0)
         iDamage = 0;
 
-	const int iTimeNow = mTime();
+    const int iTimeNow = mTime();
 
 	//	reset if it's been 10 seconds without an update
 	if(iTimeNow > (m_iPetMobDPSTimeLast + 10000))
