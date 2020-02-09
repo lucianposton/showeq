@@ -2017,9 +2017,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    connect(m_packet, SIGNAL(attack2Hand1(const uint8_t*, size_t, uint8_t)), 
 	   this, SLOT(attack2Hand1(const uint8_t*)));
 #endif
-   m_packet->connect2("OP_Damage", SP_Zone, DIR_Server,
+   m_packet->connect2("OP_Damage", SP_Zone, DIR_Server|DIR_Client,
 		      "CombatDamage_Struct", SZC_Match,
-		      this, SLOT(combatDamageMessage(const uint8_t*)));
+		      this, SLOT(combatDamageMessage(const uint8_t*, size_t, uint8_t)));
    m_packet->connect2("OP_FormattedMessage", SP_Zone, DIR_Server,
            "formattedMessageStruct", SZC_None,
            this,
@@ -4598,11 +4598,11 @@ void EQInterface::attack2Hand1(const uint8_t* data)
   // const attack2Struct * atk2 = (const attack2Struct*)data;
 }
 
-void EQInterface::combatDamageMessage(const uint8_t* data)
+void EQInterface::combatDamageMessage(const uint8_t* data, size_t, uint8_t dir)
 {
   CombatDamage_Struct *action2 = (CombatDamage_Struct*)data;
 #ifdef DEBUG
-   seqDebug("EQInterface::combatDamageMessage ("
+   seqDebug("EQInterface::combatDamageMessage%s ("
            "target=%d "
            "source=%d "
            "type=%d "
@@ -4612,6 +4612,7 @@ void EQInterface::combatDamageMessage(const uint8_t* data)
            "meleepush_xy=%u (%f) "
            "meleepush_z=%f "
            ")",
+           dir == DIR_Client ? "->client" : "<-server",
            action2->target,
            action2->source,
            action2->type,
