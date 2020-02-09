@@ -79,8 +79,8 @@ class Point3D
   QPoint qpoint() const { return QPoint(x(), y()); }
   
   // retrieve offset point
-  QPoint& offsetPoint(const QPoint& centerPoint, double ratio);
-  QPoint& inverseOffsetPoint(const QPoint& centerPoint, double ratio);
+  QPoint offsetPoint(const QPoint& centerPoint, double ratio);
+  QPoint inverseOffsetPoint(const QPoint& centerPoint, double ratio);
 
   // Calculate distance in 2 space ignoring Z dimension
   uint32_t calcDist2DInt(_T x, _T y) const;
@@ -242,14 +242,14 @@ void Point3D<_T>::addPoint(_T x, _T y, _T z)
 }
 
 template <class _T> inline
-QPoint& Point3D<_T>::offsetPoint(const QPoint& centerPoint, double ratio)
+QPoint Point3D<_T>::offsetPoint(const QPoint& centerPoint, double ratio)
 { 
   return QPoint((centerPoint.x() - (int)(x() / ratio)),
 		(centerPoint.y() - (int)(y() / ratio)));
 }
 
 template <class _T> inline
-QPoint& Point3D<_T>::inverseOffsetPoint(const QPoint& centerPoint, double ratio)
+QPoint Point3D<_T>::inverseOffsetPoint(const QPoint& centerPoint, double ratio)
 {
   return QPoint(int(rint((centerPoint.x() - x()) * ratio)),
 		int(rint((centerPoint.y() - y()) * ratio)));
