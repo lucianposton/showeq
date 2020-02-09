@@ -147,15 +147,12 @@ void PacketCaptureThread::start(const char *device, const char *host,
      ** Not all  platforms  support  a read timeout; on platforms that
      ** don't, the read timeout is ignored.
      ** 
-     ** In Linux 2.4.x with the to_ms set to 0 we get packets immediatly,
-     ** and thats what we need in this application, so don't change it!! 
-     ** 
      ** a race condition exists between this thread and the main thread 
      ** any artificial delay in getting packets can cause filtering problems
-     ** and cause us to miss new stream when the player zones.
+     ** and cause us to miss new stream when the player zones. (or does it?)
      */
     // initialize the pcap object 
-    m_pcache_pcap = pcap_open_live((char *) device, BUFSIZ, true, 0, ebuf);
+    m_pcache_pcap = pcap_open_live((char *) device, BUFSIZ, true, 20, ebuf);
 #ifdef __FreeBSD__
     // if we're on FreeBSD, we need to call ioctl on the file descriptor
     // with BIOCIMMEDIATE to get the kernel Berkeley Packet Filter device
