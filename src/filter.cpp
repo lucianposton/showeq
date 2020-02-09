@@ -444,13 +444,13 @@ bool Filters::clear(void)
   FilterMap::iterator it;
 
   // iterate over the filters
-  for (it = m_filters.begin(); it != m_filters.end(); it++)
+  for (it = m_filters.begin(); it != m_filters.end();)
   {
     // get the Filter object
     filter = it->second;
     
     // erase the member from the list
-    m_filters.erase(it);
+    m_filters.erase(it++);
 
     // delete the filter
     delete filter;
