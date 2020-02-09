@@ -10,6 +10,8 @@
 #include <qdatetime.h>
 #include <ctype.h>
 
+#include <algorithm>
+
 #include "bazaarlog.h"
 #include "spawnshell.h"
 #include "diagnosticmessages.h"
@@ -47,7 +49,7 @@ void BazaarLog::bazaarSearch(const uint8_t* data, size_t len, uint8_t dir)
       // First copy and remove count from item name
       char name[256];
       // assert(255>sizeof(resp.item_name));
-      strncpy(name,resp.item_name,sizeof(resp.item_name));
+      strncpy(name,resp.item_name,std::min(sizeof(resp.item_name),sizeof(name)));
       char *p;
       if ((p = rindex(name,'(')) != NULL && isdigit(*(p+1)))
 	*p=0;
