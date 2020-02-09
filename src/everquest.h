@@ -2730,6 +2730,7 @@ struct ZoneServerInfo_Struct
 {
 /*0000*/    char        ip[128];
 /*0128*/    uint16_t    port;
+/*0130*/    char        unknown1[0]; // variable length
 };
 
 struct RaidAdd_Struct

@@ -1824,7 +1824,7 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    }
 
    m_packet->connect2("OP_ZoneServerInfo", SP_World, DIR_Server,
-           "ZoneServerInfo_Struct", SZC_Match,
+           "ZoneServerInfo_Struct", SZC_None,
            this, SLOT(zoneServerInfo(const uint8_t*)));
    m_packet->connect2("OP_SendLoginInfo", SP_World, DIR_Client,
            "LoginInfo_Struct", SZC_Match,

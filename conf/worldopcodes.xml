@@ -14,7 +14,7 @@
 
     <opcode id="61b6" name="OP_ZoneServerInfo" updated="10/27/05">
         <comment></comment>
-        <payload dir="server" typename="ZoneServerInfo_Struct" sizechecktype="match"/>
+        <payload dir="server" typename="ZoneServerInfo_Struct" sizechecktype="none"/>
     </opcode>
     <opcode id="4513" name="OP_SendCharInfo" updated="10/27/05">
         <comment>Send all chars visible @ char select. CharacterSelectEntry_Struct is also sent on eqemu for each character above 0</comment>
