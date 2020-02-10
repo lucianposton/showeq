@@ -832,7 +832,6 @@ QString Spawn::dumpString() const
 {
   return QString("ID:") + QString::number(id()) 
     + ":Name:" + transformedName() 
-    + ":LastName:" + lastName() 
     + ":Level:" + QString::number(level())
     + ":HP:" + QString::number(HP())
     + ":MaxHP:" + QString::number(maxHP())
@@ -847,9 +846,12 @@ QString Spawn::dumpString() const
     + ":RTeam:" + QString::number(raceTeam())
     + ":DTeam:" + QString::number(deityTeam())
     + ":Type:" + typeString()
+    + ":LastName:" + lastName() 
     + ":Guild:" + guildTag()
     + ":IsGuildmate:" + QString::number(isPlayersGuildmate())
     + ":InPvPLevelRange:" + QString::number(isInPvPLevelRangeToPlayer())
+    + ":Size:" + size()
+    + ":Equipment:" + ((const char*)info(":"))
     + ":FilterFlags:" + QString::number(filterFlags(),2)
     + ":";
 }
