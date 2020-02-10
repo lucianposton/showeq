@@ -545,6 +545,10 @@
         <comment>Communicate textual info to client</comment>
         <payload dir="server" typename="specialMessageStruct" sizechecktype="none"/>
     </opcode>
+    <opcode id="024d" name="OP_NewMOTD" updated="10/27/05">
+        <comment></comment>
+         <payload dir="server" typename="NewMOTD_Struct" sizechecktype="none"/>
+    </opcode>
     <opcode id="6c47" name="OP_TargetMouse" updated="10/27/05">
         <comment>Targeting a person - old ClientTargetCode</comment>
         <payload dir="both" typename="clientTargetStruct" sizechecktype="match"/>

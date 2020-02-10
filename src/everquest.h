@@ -1436,6 +1436,11 @@ struct specialMessageStruct
   /*0yyy*/ char      message[0];      // message text
 };
 
+struct NewMOTD_Struct
+{
+  /*0000*/ char motd[0]; // variable length
+};
+
 /*
 ** Guild MOTD Struct
 ** Length: Variable Text

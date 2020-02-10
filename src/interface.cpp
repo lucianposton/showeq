@@ -1871,6 +1871,10 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 			"specialMessageStruct", SZC_None,
 			m_messageShell,
 			SLOT(specialMessage(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_NewMOTD", SP_Zone, DIR_Server,
+			"NewMOTD_Struct", SZC_None,
+			m_messageShell,
+			SLOT(newMotd(const uint8_t*, size_t, uint8_t)));
      m_packet->connect2("OP_GuildMOTD", SP_Zone, DIR_Server,
 			"GuildMOTD_Struct", SZC_Match,
 			m_messageShell,

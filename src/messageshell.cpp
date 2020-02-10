@@ -98,6 +98,12 @@ void MessageShell::channelMessage(const uint8_t* data, size_t, uint8_t dir)
   m_messages->addMessage((MessageType)cmsg->chanNum, tempStr);
 }
 
+void MessageShell::newMotd(const uint8_t* data, size_t, uint8_t dir)
+{
+  const NewMOTD_Struct* newMotd = (const NewMOTD_Struct*)data;
+  m_messages->addMessage(MT_Motd, QString::fromUtf8(newMotd->motd));
+}
+
 static MessageType chatColor2MessageType(ChatColor chatColor)
 {
   MessageType messageType;
