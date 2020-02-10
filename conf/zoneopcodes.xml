@@ -378,6 +378,10 @@
         <comment>Receiving AA experience. Also when percent to AA changes.</comment>
          <payload dir="server" typename="altExpUpdateStruct" sizechecktype="match"/>
     </opcode>
+    <opcode id="4cc7" name="OP_NewGuildCreated" updated="10/27/05">
+        <comment>Indicates new guild was formed</comment>
+         <payload dir="server" typename="NewGuildCreated_Struct" sizechecktype="match"/>
+    </opcode>
     <opcode id="475a" name="OP_GuildMOTD" updated="10/27/05">
         <comment></comment>
          <payload dir="server" typename="GuildMOTD_Struct" sizechecktype="match"/>

@@ -1474,6 +1474,13 @@ struct GuildInviteAccept_Struct
 	uint32_t guildeqid;
 };
 
+struct NewGuildCreated_Struct
+{
+/*0000*/    uint32_t guildeqid;
+/*0004*/    char name[64];
+/*0068*/
+};
+
 /*
 ** Consent request
 ** Length: Variable by length of the name of the consentee
