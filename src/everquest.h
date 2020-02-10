@@ -2276,6 +2276,11 @@ struct memorizeSlotStruct
 /*0012*/
 };
 
+struct SetMeditateMode_Struct
+{
+    uint8_t mode; // bool as 0 or 1
+};
+
 struct SetRunMode_Struct
 {
 	uint8_t mode;

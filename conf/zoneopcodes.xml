@@ -366,6 +366,10 @@
         <comment></comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
+    <opcode id="1254" name="OP_SetMeditateMode" updated="10/27/05">
+        <comment></comment>
+         <payload dir="client" typename="SetMeditateMode_Struct" sizechecktype="match"/>
+    </opcode>
     <opcode id="4aba" name="OP_SetRunMode" updated="10/27/05">
         <comment></comment>
         <payload dir="client" typename="SetRunMode_Struct" sizechecktype="match"/>
