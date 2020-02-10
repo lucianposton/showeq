@@ -281,6 +281,8 @@ class Spawn : public Item
     { return (m_NPC == SPAWN_PLAYER); }
   bool isNPC() const 
     { return (m_NPC == SPAWN_NPC); }
+  bool isPet() const 
+    { return (m_petOwnerID != 0); }
   bool isUnknown() const
     { return (m_NPC == SPAWN_NPC_UNKNOWN); }
   bool isSameRaceTeam(const Spawn* spawn) const

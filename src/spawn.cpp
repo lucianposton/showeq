@@ -801,7 +801,7 @@ QString Spawn::filterString() const
   QString name = transformedName();
 
   QString buff;
-  buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:X:%d:Y:%d:Z:%d:"
+  buff.sprintf("Name:%s:Level:%d:Race:%s:Class:%s:NPC:%d:IsPet:%d:X:%d:Y:%d:Z:%d:"
 	       "Deity:%s:RTeam:%d:DTeam:%d:Type:%s:LastName:%s:Guild:%s:"
            "IsGuildmate:%d:InPvPLevelRange:%d:Size:%f:Equipment:%s:",
 	       (const char*)name.utf8(),
@@ -809,6 +809,7 @@ QString Spawn::filterString() const
 	       (const char*)raceString(),
 	       (const char*)classString(),
 	       ((NPC() == 10) ? 0 : NPC()), 
+           isPet(),
 	       x(), y(), z(),
 	       (const char*)deityName(),
 	       raceTeam(), 
@@ -838,6 +839,7 @@ QString Spawn::dumpString() const
     + ":Race:" + raceString()
     + ":Class:" + classString() 
     + ":NPC:" + QString::number(NPC())
+    + ":IsPet:" + QString::number(isPet())
     + ":X:" + QString::number(x()) 
     + ":Y:" + QString::number(y())
     + ":Z:" + QString::number(z()) 
