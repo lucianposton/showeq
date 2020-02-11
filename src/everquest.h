@@ -2672,6 +2672,11 @@ struct EnterWorld_Struct
 /*068*/ uint32_t    return_home;		// 01 on "Return Home", 00 if not
 };
 
+struct PostEnterWorld_Struct
+{
+    uint8_t unknown996[996];
+};
+
 struct ExpansionInfo_Struct
 {
     uint8_t unknown46[46];
