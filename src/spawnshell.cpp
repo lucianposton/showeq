@@ -526,7 +526,7 @@ void SpawnShell::newSpawn(const spawnStruct& s)
        m_deadSpawnID[i] = 0;
 
        // let the user know what's going on
-       seqInfo("%s(%d) has already been removed from the zone before we processed it.", 
+       seqDebug("%s(%d) has already been removed from the zone before we processed it.", 
 	      s.name, s.spawnId);
        
        // and stop the attempt to add the spawn.
