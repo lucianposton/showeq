@@ -170,7 +170,7 @@ ExperienceWindow::ExperienceWindow(const DataLocationMgr* dataLocMgr,
    m_ZEM_menu->insertItem( "Percent Bonus", this, SLOT(viewZEMpercent()) );
    m_ZEM_menu->setItemChecked( m_ZEM_menu->idAt(0), true );
    m_view_menu->insertItem( "ZEM View Options", m_ZEM_menu );
-   m_view_menu->insertItem( "Calculate ZEM on next kill", this, SLOT(calcZEMNextKill()) );
+   m_view_menu->insertItem( "Calculate ZEM on kills", this, SLOT(calcZEMNextKill()) );
 
    m_options_menu = new QPopupMenu( this );
    m_options_menu->insertItem( "Enable &Class EXP Penalty", this, SLOT(toggleExpPenalty()) );
@@ -360,8 +360,6 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
    if (m_calcZEM && mob_level > 0)
    {
       calculateZEM(xp_gained, mob_level);
-      m_calcZEM = 0;
-      m_view_menu->setItemChecked(m_view_menu->idAt(10), false);
    }
 
    // Old logging system
@@ -647,7 +645,7 @@ void ExperienceWindow::viewRatePerMinute()
 
 void ExperienceWindow::calcZEMNextKill() 
 {
-   m_calcZEM = 1;
+   m_calcZEM = !m_calcZEM;
    m_view_menu->setItemChecked(m_view_menu->idAt(10), true);
 }
 
