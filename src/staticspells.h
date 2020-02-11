@@ -1401,7 +1401,7 @@
 /* 0x056d -  1389 */ { "Knight's Blessing" }, 
 /* 0x056e -  1390 */ { "Prime Healer's Blessing" }, 
 /* 0x056f -  1391 */ { "Dead Men Floating" }, 
-/* 0x0570 -  1392 */ { "Fireburst" }, 
+/* 0x0570 -  1392 */ { "Lightning_Call" }, 
 /* 0x0571 -  1393 */ { "Gangrenous Touch of Zum`uul" }, 
 /* 0x0572 -  1394 */ { "Maelstrom of Electricity" }, 
 /* 0x0573 -  1395 */ { "Harvest Leaves" }, 
@@ -8676,7 +8676,10 @@
 /* 0x21d8 -  8664 */ { "Aura of Green Petals" }, 
 /* 0x21d9 -  8665 */ { "Aura of Black Petals" }, 
 /* 0x21da -  8666 */ { "Voice of the Berserker" }, 
+/* 0x21db -  8667 */ { "_" }, 
+/* 0x21dc -  8668 */ { "Song of the Deep Sea's" }, 
+/* 0x21dd -  8669 */ { "Feast of Blood Recourse" }, 
 // 
-// Max SpellId: 0x21da =  8666
-// Number of Spells: 8069
+// Max SpellId: 0x21dd =  8669
+// Number of Spells: 8072
 // Empty Entries: 597
