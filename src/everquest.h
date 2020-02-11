@@ -2674,8 +2674,7 @@ struct EnterWorld_Struct
 
 struct ExpansionInfo_Struct
 {
-/*00*/    uint32_t    unknown00;
-/*04*/    uint32_t    unknown04;
+    uint8_t unknown46[46];
 };
 
 struct CharacterSelectEntry_Struct
