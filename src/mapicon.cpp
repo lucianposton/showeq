@@ -1259,18 +1259,27 @@ QColor MapIcons::pickSpawnPointColor(const SpawnPoint* sp,
   QColor color = defColor;
 
   // calculate the pen color
-  unsigned char age = sp->age();
-  
+  const unsigned char age = sp->age();
+  const time_t secsLeft = sp->secsLeft();
+  const time_t diffTime = sp->diffTime();
+  const time_t criticalPoint = 3*60;
+
   if ( age == 255 )
     return darkRed;
 
-  if ( age > 220 && sp->secsLeft() < 30 )
-  {
-    if (m_flash)
-      return red;
+  if ( secsLeft < 15 ) {
+      if ( m_flash )
+          color = red;
+  } else if ( secsLeft < 45 ) {
+      if ( m_flash )
+          color = yellow;
+  } else if ( secsLeft < criticalPoint ) {
+      unsigned char c = (1.0-((float)secsLeft-45)/(criticalPoint-45))*200 + 55;
+      color = QColor(c, c, std::max(25, c/4));
+  } else {
+      unsigned char c = (1.0-((float)secsLeft-criticalPoint)/(diffTime-criticalPoint))*255;
+      color = QColor(0, 0, c);
   }
-  else
-    color = QColor(age, age, 0);
 
   return color;
 }
