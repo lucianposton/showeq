@@ -680,7 +680,7 @@ void Player::updateExp(const uint8_t* data)
   emit expChangedInt (realExp, m_minExp, m_maxExp);
     
   // Check if fresh kill occurred in last 0.2 seconds
-  if(m_freshKill && mTime() < (m_freshKill_timestamp + 200))
+  if(m_freshKill && mTime() < (m_freshKill_timestamp + 200) && !m_zoneMgr->isAwaitingZoneInExp())
   {
      emit expGained( m_lastSpawnKilledName,
                      m_lastSpawnKilledLevel,
@@ -690,7 +690,7 @@ void Player::updateExp(const uint8_t* data)
      // have gained experience for the kill, it's no longer fresh
      m_freshKill = false;
   }
-  else if (expIncrement)
+  else if (expIncrement && !m_zoneMgr->isAwaitingZoneInExp())
       // Note: Quests that give such little exp that m_currentExpFraction
       // doesn't move fail this condition. If we want to capture these quest
       // exp rewards, we would need to differentiate these rewards from the

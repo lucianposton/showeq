@@ -57,6 +57,7 @@ static const uint32_t* magic = (uint32_t*)magicStr;
 ZoneMgr::ZoneMgr(QObject* parent, const char* name)
   : QObject(parent, name),
     m_zoning(false),
+    m_isAwaitingZoneInExp(false),
     m_zone_exp_multiplier(BASE_ZEM_VALUE),
     m_zonePointCount(0),
     m_zonePoints(0)
@@ -301,6 +302,12 @@ void ZoneMgr::zonePoints(const uint8_t* data, size_t len, uint8_t)
   // copy the zone point information
   memcpy((void*)m_zonePoints, zp->zonePoints, 
 	 sizeof(zonePointStruct) * m_zonePointCount);
+}
+
+void ZoneMgr::zoneInExp(const uint8_t*, size_t, uint8_t dir)
+{
+    seqDebug("ZoneMgr::zoneInExp(dir=%s)", dir == DIR_Server ? "DIR_Server" : "DIR_Client");
+    m_isAwaitingZoneInExp = dir == DIR_Client;
 }
 
 #include "zonemgr.moc"

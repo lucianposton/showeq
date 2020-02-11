@@ -1813,6 +1813,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
      m_packet->connect2("OP_SendZonePoints", SP_Zone, DIR_Server,
 			"zonePointsStruct", SZC_None,
 			m_zoneMgr, SLOT(zonePoints(const uint8_t*, size_t, uint8_t)));
+     m_packet->connect2("OP_SendExpZonein", SP_Zone, DIR_Client|DIR_Server,
+			"none", SZC_Match,
+			m_zoneMgr, SLOT(zoneInExp(const uint8_t*, size_t, uint8_t)));
      connect(m_spawnShell, SIGNAL(initialZoneSpawn(bool)),
              m_zoneMgr, SLOT(initialZoneSpawn(bool)));
    }

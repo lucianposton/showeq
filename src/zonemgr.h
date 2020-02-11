@@ -40,6 +40,7 @@ class ZoneMgr : public QObject
   QString zoneNameFromID(uint16_t zoneId);
   QString zoneLongNameFromID(uint16_t zoneId);
   bool isZoning() const { return m_zoning; }
+  bool isAwaitingZoneInExp() const { return m_isAwaitingZoneInExp; }
   QString shortZoneName() const { return m_shortZoneName; }
   QString longZoneName() const { return m_longZoneName; }
   const Point3D<int16_t>& safePoint() const { return m_safePoint; }
@@ -59,6 +60,7 @@ class ZoneMgr : public QObject
   void zoneNew(const uint8_t* zoneNew, size_t, uint8_t);
   void logoutReply();
   void zonePoints(const uint8_t* zp, size_t, uint8_t);
+  void zoneInExp(const uint8_t* zp, size_t, uint8_t);
 
  signals:
   void zoneBegin();
@@ -73,6 +75,7 @@ class ZoneMgr : public QObject
   QString m_longZoneName;
   QString m_shortZoneName;
   bool m_zoning;
+  bool m_isAwaitingZoneInExp;
   Point3D<int16_t>  m_safePoint;
   float m_zone_exp_multiplier;
   size_t m_zonePointCount;
