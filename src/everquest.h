@@ -2694,6 +2694,11 @@ struct ExpansionInfo_Struct
     uint8_t unknown46[46];
 };
 
+struct P99Unknown1251_Struct
+{
+    uint8_t unknown358[358];
+};
+
 struct CharacterSelectEntry_Struct
 {
 /*0000*/    char Name[64];

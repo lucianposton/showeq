@@ -366,6 +366,10 @@
         <comment></comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
+    <opcode id="1251" name="OP_P99Unknown1251" updated="01/10/17">
+        <comment>Sent while zoning. Size is 4+6*x. See corresponding world opcode.</comment>
+        <payload dir="client" sizechecktype="none"/>
+    </opcode>
     <opcode id="1253" name="OP_List" updated="10/27/05">
         <comment>Used for /list command</comment>
          <payload dir="both" typename="List_Struct" sizechecktype="match"/>

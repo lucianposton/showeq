@@ -83,6 +83,11 @@
         <payload dir="server" typename="PostEnterWorld_Struct" sizechecktype="match"/>
         <payload dir="server" typename="none" sizechecktype="match"/>
     </opcode>
+    <opcode id="1251" name="OP_P99Unknown1251" updated="01/10/17">
+        <comment>See corresponding zone opcode</comment>
+        <payload dir="server" typename="uint8_t" sizechecktype="match"/>
+        <payload dir="client" typename="P99Unknown1251_Struct" sizechecktype="match"/>
+    </opcode>
     <opcode id="7752" name="OP_AckPacket" updated="10/27/05">
         <comment>Appears to be generic ack at the presentation level</comment>
         <payload dir="client" typename="AckPacket_Struct" sizechecktype="match"/>
