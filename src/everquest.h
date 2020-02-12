@@ -2288,6 +2288,18 @@ struct SetMeditateMode_Struct
     uint8_t mode; // bool as 0 or 1
 };
 
+struct List_Struct
+{
+    uint8_t op; // 1 = client->zone: when arg=0, info requested via /list
+                //                   when arg=1, confirm add to list
+                //     zone->client: arg indicates current queue length
+                // 2 = zone->client: afk check request
+                // 3 = client->zone: remove from list, occurs when client
+                //                   receives an afk check request while
+                //                   an afk check popup is active
+    uint32_t arg;
+};
+
 struct SetRunMode_Struct
 {
 	uint8_t mode;

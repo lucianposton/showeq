@@ -366,6 +366,10 @@
         <comment></comment>
         <payload dir="server" typename="uint8_t" sizechecktype="none"/>
     </opcode>
+    <opcode id="1253" name="OP_List" updated="10/27/05">
+        <comment>Used for /list command</comment>
+         <payload dir="both" typename="List_Struct" sizechecktype="match"/>
+    </opcode>
     <opcode id="1254" name="OP_SetMeditateMode" updated="10/27/05">
         <comment></comment>
          <payload dir="client" typename="SetMeditateMode_Struct" sizechecktype="match"/>
