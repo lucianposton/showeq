@@ -3578,11 +3578,17 @@ bool CombatWindow::isPlayerSpellDamage(DamageCategory category, int iSpell,
             && target != NULL
             && target->cleanedName() == m_playerspell_target_cleaned_name)
     {
+#ifdef DEBUGCOMBAT
+        seqDebug("   CombatWindow::isPlayerSpellDamage(): TRUE");
+#endif
         actualPlayerNonmeleeDamage = m_playerspell_damage;
         resetPlayerSpellActionState();
         return true;
     }
 
+#ifdef DEBUGCOMBAT
+    seqDebug("   CombatWindow::isPlayerSpellDamage(): TRUE");
+#endif
     resetPlayerSpellActionState();
     return false;
 }
