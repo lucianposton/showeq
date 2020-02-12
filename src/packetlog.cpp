@@ -537,10 +537,26 @@ void OPCodeMonitorPacketLog::init(QString monitoredOPCodes)
   }
 }
 
+void OPCodeMonitorPacketLog::zonePacket(const uint8_t* data, size_t len,
+        uint8_t dir, uint16_t opcode,
+        const EQPacketOPCode* opcodeEntry,
+        bool unknown, bool decryptionApplied)
+{
+    packet(data, len, dir, opcode, opcodeEntry, unknown, decryptionApplied, "zone");
+}
+
+void OPCodeMonitorPacketLog::worldPacket(const uint8_t* data, size_t len,
+        uint8_t dir, uint16_t opcode,
+        const EQPacketOPCode* opcodeEntry,
+        bool unknown, bool decryptionApplied)
+{
+    packet(data, len, dir, opcode, opcodeEntry, unknown, decryptionApplied, "world");
+}
+
 void OPCodeMonitorPacketLog::packet(const uint8_t* data, size_t len, 
 				    uint8_t dir, uint16_t opcode, 
 				    const EQPacketOPCode* opcodeEntry, 
-				    bool unknown, bool decryptionApplied)
+				    bool unknown, bool decryptionApplied, const QString& serverType)
 {
   unsigned int uiOpCodeIndex = 0;
   unsigned int uiIndex = 0;
@@ -567,10 +583,10 @@ void OPCodeMonitorPacketLog::packet(const uint8_t* data, size_t len,
             decryptionApplied ? "[Decrypted]" : "");
     
     if (m_view)
-      printData(data, len, dir, opcode, opcodeEntry, prefix);
+      printData(data, len, dir, opcode, opcodeEntry, prefix, serverType);
     
     if (m_log)
-      logData(data, len, dir, opcode, opcodeEntry, prefix);
+      logData(data, len, dir, opcode, opcodeEntry, prefix, serverType);
   }
 }
 

@@ -6353,7 +6353,9 @@ void EQInterface::createOPCodeMonitorLog(const QString& opCodeList)
   m_opcodeMonitorLog->setView(pSEQPrefs->getPrefBool("View", section, false));
   
   connect(m_packet, SIGNAL(decryptedZonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)),
-	  m_opcodeMonitorLog, SLOT(packet(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)));
+	  m_opcodeMonitorLog, SLOT(zonePacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)));
+  connect(m_packet, SIGNAL(decryptedWorldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)),
+	  m_opcodeMonitorLog, SLOT(worldPacket(const uint8_t*, size_t, uint8_t, uint16_t, const EQPacketOPCode*, bool, bool)));
 }
 
 

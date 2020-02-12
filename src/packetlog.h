@@ -148,7 +148,10 @@ class OPCodeMonitorPacketLog : public PacketLog
   void init(QString monitoredOPCodes);
 
  public slots:
-  void packet(const uint8_t* data, size_t len, uint8_t dir, 
+  void zonePacket(const uint8_t* data, size_t len, uint8_t dir, 
+	      uint16_t opcode, const EQPacketOPCode* opcodeEntry, 
+	      bool unknown, bool decryptionApplied);
+  void worldPacket(const uint8_t* data, size_t len, uint8_t dir, 
 	      uint16_t opcode, const EQPacketOPCode* opcodeEntry, 
 	      bool unknown, bool decryptionApplied);
 
@@ -158,6 +161,11 @@ class OPCodeMonitorPacketLog : public PacketLog
   QString MonitoredOpCodeAliasList[OPCODE_SLOTS];
   bool m_log;
   bool m_view;
+
+ private:
+  void packet(const uint8_t* data, size_t len, uint8_t dir,
+          uint16_t opcode, const EQPacketOPCode* opcodeEntry,
+          bool unknown, bool decryptionApplied, const QString& serverType);
 };
 
 inline bool OPCodeMonitorPacketLog::log()
