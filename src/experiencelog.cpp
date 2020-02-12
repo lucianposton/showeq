@@ -310,8 +310,9 @@ void ExperienceWindow::addExpRecord(const QString &mob_name,
 
 #ifdef DEBUGEXP
    resize( sizeHint() );
-  qDebug("ExperienceWindow::addExpRecord()  '%s', lvl %d, exp %d",
-      mob_name.ascii(), mob_level, xp_gained);
+  qDebug("ExperienceWindow::addExpRecord()  '%s', lvl %d, exp %d, group members %d/%d",
+      mob_name.ascii(), mob_level, xp_gained,
+      m_group->groupMembersInZoneCount(), m_group->groupSize());
 #endif
 
    // convert everything to string representations for the list view
