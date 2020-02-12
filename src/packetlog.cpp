@@ -561,13 +561,16 @@ void OPCodeMonitorPacketLog::packet(const uint8_t* data, size_t len,
   
   if (uiOpCodeIndex > 0)
   {
-    QString opCodeName = MonitoredOpCodeAliasList[uiOpCodeIndex - 1].latin1();
+    QString prefix;
+    prefix.sprintf("[%s]%s",
+            MonitoredOpCodeAliasList[uiOpCodeIndex - 1].latin1(),
+            decryptionApplied ? "[Decrypted]" : "");
     
     if (m_view)
-      printData(data, len, dir, opcode, opcodeEntry, opCodeName);
+      printData(data, len, dir, opcode, opcodeEntry, prefix);
     
     if (m_log)
-      logData(data, len, dir, opcode, opcodeEntry,opCodeName);
+      logData(data, len, dir, opcode, opcodeEntry, prefix);
   }
 }
 
