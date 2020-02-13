@@ -83,6 +83,9 @@
 #include <qcdestyle.h>
 #include <qsgistyle.h>
 
+#define DEBUGINTERFACE
+#undef DEBUGINTERFACE
+
 // this define is used to diagnose the order with which zone packets are rcvd
 #define ZONE_ORDER_DIAG
 
@@ -3371,10 +3374,6 @@ void EQInterface::set_filter_AudioCommand(int id)
 
 void EQInterface::listSpawns (void)
 {
-#ifdef DEBUG
-  debug ("listSpawns()");
-#endif /* DEBUG */
-
   QString outText;
 
   // open the output data stream
@@ -3388,9 +3387,6 @@ void EQInterface::listSpawns (void)
 
 void EQInterface::listDrops (void)
 {
-#ifdef DEBUG
-  debug ("listDrops()");
-#endif /* DEBUG */
   QString outText;
 
   // open the output data stream
@@ -3404,9 +3400,6 @@ void EQInterface::listDrops (void)
 
 void EQInterface::listMapInfo(void)
 {
-#ifdef DEBUG
-  debug ("listMapInfo()");
-#endif /* DEBUG */
   QString outText;
 
   // open the output data stream
@@ -3428,10 +3421,6 @@ void EQInterface::listMapInfo(void)
 
 void EQInterface::listInterfaceInfo(void)
 {
-#ifdef DEBUG
-  debug ("listMapInfo()");
-#endif /* DEBUG */
-
   QString outText;
 
   // open the output data stream
@@ -3448,9 +3437,6 @@ void EQInterface::listInterfaceInfo(void)
 
 void EQInterface::listGroup(void)
 {
-#ifdef DEBUG
-  debug ("listGroup()");
-#endif /* DEBUG */
   QString outText;
 
   // open the output data stream
@@ -3465,9 +3451,6 @@ void EQInterface::listGroup(void)
 
 void EQInterface::listGuild(void)
 {
-#ifdef DEBUG
-  debug ("listGuild()");
-#endif /* DEBUG */
   QString outText;
 
   // open the output data stream
@@ -3481,10 +3464,6 @@ void EQInterface::listGuild(void)
 
 void EQInterface::dumpSpawns (void)
 {
-#ifdef DEBUG
-  debug ("dumpSpawns()");
-#endif /* DEBUG */
-  
   QString logFile = pSEQPrefs->getPrefString("DumpSpawnsFilename", "Interface",
 					     "dumpspawns.txt");
 
@@ -3501,10 +3480,6 @@ void EQInterface::dumpSpawns (void)
 
 void EQInterface::dumpDrops (void)
 {
-#ifdef DEBUG
-  debug ("dumpDrops()");
-#endif /* DEBUG */
-
   QString logFile = pSEQPrefs->getPrefString("DumpDropsFilename", "Interface",
 					     "dumpdrops.txt");
 
@@ -3521,10 +3496,6 @@ void EQInterface::dumpDrops (void)
 
 void EQInterface::dumpMapInfo(void)
 {
-#ifdef DEBUG
-  debug ("dumpMapInfo()");
-#endif /* DEBUG */
-
   QString logFile = pSEQPrefs->getPrefString("DumpMapInfoFilename", 
 					     "Interface",
 					     "mapinfo.txt");
@@ -3561,10 +3532,6 @@ void EQInterface::dumpGuildInfo(void)
 
 void EQInterface::dumpSpellBook(void)
 {
-#ifdef DEBUG
-  debug ("dumpSpellBook");
-#endif /* DEBUG */
-
   QString logFile = pSEQPrefs->getPrefString("DumpSpellBookFilename", 
 					     "Interface", 
 					     "spellbook.txt");
@@ -3618,10 +3585,6 @@ void EQInterface::dumpSpellBook(void)
 
 void EQInterface::dumpGroup(void)
 {
-#ifdef DEBUG
-  debug ("dumpGroup()");
-#endif /* DEBUG */
-
   QString logFile = pSEQPrefs->getPrefString("DumpGroupFilename", "Interface",
 					     "dumpgroup.txt");
 
@@ -3638,10 +3601,6 @@ void EQInterface::dumpGroup(void)
 
 void EQInterface::dumpGuild(void)
 {
-#ifdef DEBUG
-  debug ("dumpGuild()");
-#endif /* DEBUG */
-
   QString logFile = pSEQPrefs->getPrefString("DumpGuildFilename", "Interface",
 					     "dumpguild.txt");
 
@@ -4608,7 +4567,7 @@ void EQInterface::attack2Hand1(const uint8_t* data)
 void EQInterface::combatDamageMessage(const uint8_t* data, size_t, uint8_t dir)
 {
   CombatDamage_Struct *action2 = (CombatDamage_Struct*)data;
-#ifdef DEBUG
+#ifdef DEBUGINTERFACE
    seqDebug("EQInterface::combatDamageMessage%s ("
            "target=%d "
            "source=%d "
@@ -4712,7 +4671,7 @@ void EQInterface::formattedMessage(const uint8_t* data, size_t len, uint8_t dir)
 void EQInterface::combatKillSpawn(const uint8_t* data)
 {
   const Death_Struct *deadspawn = (const Death_Struct *)data;
-#ifdef DEBUG
+#ifdef DEBUGINTERFACE
    seqDebug("EQInterface::combatKillSpawn ("
            "spawnId=%d "
            "killerId=%d "
