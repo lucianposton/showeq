@@ -380,13 +380,13 @@ void SpellShell::action(const uint8_t* data, size_t, uint8_t dir)
 {
   const actionStruct* a = (const actionStruct*)data;
 
-  if (a->type != 0xe7) // only things to do if action is a spell
-    return;
-
 #ifdef DIAG_SPELLSHELL
   seqDebug("SpellShell::action(): id=%d (%d->%d) type=%d (lvl: %d) causing %d damage. sequence=%d. buff=%d. instrument_mod=%d. bard_focus_id=%d. dir=%d",
           a->spell, a->source, a->target, a->type, a->level, a->damage, a->sequence, a->make_buff_icon, a->instrument_mod, a->bard_focus_id, dir);
 #endif // DIAG_SPELLSHELL
+
+  if (a->type != 0xe7) // only things to do if action is a spell
+    return;
 
   if (a->make_buff_icon != 4)
   {
