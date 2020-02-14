@@ -97,6 +97,27 @@ static SpawnPoint* findWithZFudgeFactor(
             }
         }
     }
+#ifdef DEBUG_SPAWNMONITOR
+    for (int i = z - 20*Z_FUDGE_FACTOR; i <= z + 20*Z_FUDGE_FACTOR; ++i)
+    {
+        if (i < z - Z_FUDGE_FACTOR || i > z + Z_FUDGE_FACTOR)
+        {
+            key = SpawnPoint::keyFromNormalizedCoords(x, y, i);
+            result = spawnpoints.find(key);
+            if (result)
+            {
+                seqDebug("SpawnPoint::findWithZFudgeFactor. Found spawn with "
+                        "unexpectedly large fudge factor, (%d). "
+                        "%s,id=%d (%d,%d,%d) with normalized_z=%d to "
+                        "spawnpoint with key (%s)",
+                        z - i,
+                        (const char*)spawn->name(), spawn->id(),
+                        spawn->x(), spawn->y(), spawn->z(), z,
+                        (const char*)key);
+            }
+        }
+    }
+#endif
 
     return NULL;
 }
