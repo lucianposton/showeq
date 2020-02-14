@@ -24,6 +24,9 @@
 #include <qdatastream.h>
 #include <qregexp.h>
 
+#define DEBUGZONEMGR
+#undef DEBUGZONEMGR
+
 //----------------------------------------------------------------------
 // constants
 static const char magicStr[5] = "zon2"; // magic is the size of uint32_t + a null
@@ -306,7 +309,9 @@ void ZoneMgr::zonePoints(const uint8_t* data, size_t len, uint8_t)
 
 void ZoneMgr::zoneInExp(const uint8_t*, size_t, uint8_t dir)
 {
+#ifdef DEBUGZONEMGR
     seqDebug("ZoneMgr::zoneInExp(dir=%s)", dir == DIR_Server ? "DIR_Server" : "DIR_Client");
+#endif
     m_isAwaitingZoneInExp = dir == DIR_Client;
 }
 
