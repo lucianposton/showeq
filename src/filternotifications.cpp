@@ -70,35 +70,35 @@ void FilterNotifications::addItem(const Item* item)
 
   // first handle alert
   if (filterFlags & FILTER_FLAG_ALERT)
-    handleAlert(item, "SpawnAudioCommand", "Spawned");
+    handleAlert(item->transformedName(), "SpawnAudioCommand", "Spawned");
 
   // then PvP
   if (filterFlags & FILTER_FLAG_PVP)
-    handleAlert(item, "PvPSpawnAudioCommand", "PvP Spawned");
+    handleAlert(item->transformedName(), "PvPSpawnAudioCommand", "PvP Spawned");
 
   // then the rest of the filters
   if (filterFlags & FILTER_FLAG_LOCATE)
-    handleAlert(item, "LocateSpawnAudioCommand", "Locate Spawned");
+    handleAlert(item->transformedName(), "LocateSpawnAudioCommand", "Locate Spawned");
   if (filterFlags & FILTER_FLAG_CAUTION)
-    handleAlert(item, "CautionSpawnAudioCommand", "Caution Spawned");
+    handleAlert(item->transformedName(), "CautionSpawnAudioCommand", "Caution Spawned");
   if (filterFlags & FILTER_FLAG_HUNT)
-    handleAlert(item, "HuntSpawnAudioCommand", "Hunt Spawned");
+    handleAlert(item->transformedName(), "HuntSpawnAudioCommand", "Hunt Spawned");
   if (filterFlags & FILTER_FLAG_DANGER)
-    handleAlert(item, "DangerSpawnAudioCommand", "Danger Spawned");
+    handleAlert(item->transformedName(), "DangerSpawnAudioCommand", "Danger Spawned");
 }
 
 void FilterNotifications::delItem(const Item* item)
 {
   // first handle alert
   if (item->filterFlags() & FILTER_FLAG_ALERT)
-    handleAlert(item, "DeSpawnAudioCommand", "Despawned");
+    handleAlert(item->transformedName(), "DeSpawnAudioCommand", "Despawned");
 }
 
 void FilterNotifications::killSpawn(const Item* item)
 {
   // first handle alert
   if (item->filterFlags() & FILTER_FLAG_ALERT)
-    handleAlert(item, "DeathAudioCommand", "Died");
+    handleAlert(item->transformedName(), "DeathAudioCommand", "Died");
 }
 
 void FilterNotifications::changeItem(const Item* item, uint32_t changeType)
@@ -108,7 +108,7 @@ void FilterNotifications::changeItem(const Item* item, uint32_t changeType)
     addItem(item);
 }
 
-void FilterNotifications::handleAlert(const Item* item, 
+void FilterNotifications::handleAlert(const QString& name, 
 				      const QString& commandPref, 
 				      const QString& cue)
 {
@@ -116,7 +116,7 @@ void FilterNotifications::handleAlert(const Item* item,
     beep();
 
   if (m_useCommands && isCommandActive(commandPref))
-    executeCommand(item, pSEQPrefs->getPrefString(commandPref, "Filters"), cue);
+    executeCommand(name, pSEQPrefs->getPrefString(commandPref, "Filters"), cue);
 }
 
 void FilterNotifications::beep(void)
@@ -124,7 +124,7 @@ void FilterNotifications::beep(void)
   QApplication::beep();
 }
 
-void FilterNotifications::executeCommand(const Item* item, 
+void FilterNotifications::executeCommand(const QString& name, 
 					 const QString& rawCommand,
 					 const QString& audioCue)
 {
@@ -138,7 +138,6 @@ void FilterNotifications::executeCommand(const Item* item,
   QRegExp cueExp("%c");
   
   // get the name, and replace all occurrances of %n with the name
-  QString name = item->transformedName();
   command.replace(nameExp, name);
   
   // now, replace all occurrances of %c with the audio cue

@@ -44,10 +44,10 @@ class FilterNotifications : public QObject
    void initialZoneSpawn(bool);
 
  protected:
-   void handleAlert(const Item* item, 
+   void handleAlert(const QString& name, 
 		    const QString& commandPref, const QString& cue);
    void beep(void);
-   void executeCommand(const Item* item, 
+   void executeCommand(const QString& name, 
 		       const QString& rawCommand,
 		       const QString& audioCue);
 
