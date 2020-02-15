@@ -59,16 +59,14 @@ static const uint32_t* magic = (uint32_t*)magicStr;
 // OP_LogoutReply   logoutReply()          logOut()                         false
 ZoneMgr::ZoneMgr(QObject* parent, const char* name)
   : QObject(parent, name),
+    m_longZoneName("unknown"),
+    m_shortZoneName("unknown"),
     m_zoning(false),
     m_isAwaitingZoneInExp(false),
     m_zone_exp_multiplier(BASE_ZEM_VALUE),
     m_zonePointCount(0),
     m_zonePoints(0)
 {
-  m_shortZoneName = "unknown";
-  m_longZoneName = "unknown";
-  m_zoning = false;
-
   if (showeq_params->restoreZoneState)
     restoreZoneState();
 }
