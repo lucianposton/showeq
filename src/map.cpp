@@ -4194,12 +4194,9 @@ const SpawnPoint* Map::closestSpawnPointToPoint(const QPoint& pt,
   EQPoint testPoint;
 
   QAsciiDictIterator<SpawnPoint> it(m_spawnMonitor->spawnPoints());
-  SpawnPoint* sp;
 
-  while ((sp = it.current()))
+  for (SpawnPoint* sp = NULL; (sp = it.current()); ++it)
   {
-    ++it;
-
     if (m_spawnDepthFilter &&
         ((sp->z() > m_param.playerHeadRoom()) ||
          (sp->z() < m_param.playerFloorRoom())))
