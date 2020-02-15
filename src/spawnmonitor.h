@@ -124,6 +124,7 @@ public:
   const QAsciiDict<SpawnPoint>& spawnPoints() { return m_points; }
   const QAsciiDict<SpawnPoint>& spawns() { return m_spawns; }
   const SpawnPoint* selected() { return m_selected; }
+  const SpawnPoint* findSpawnPointForSpawn(const Spawn* spawn);
 
 public slots:
   void setName(const SpawnPoint* sp, const QString& name);

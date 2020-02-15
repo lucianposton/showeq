@@ -358,6 +358,22 @@ SpawnMonitor::~SpawnMonitor()
 {
 }
 
+const SpawnPoint* SpawnMonitor::findSpawnPointForSpawn(const Spawn* spawn)
+{
+  // ignore everything but mobs
+  if ( spawn == NULL || spawn->NPC() != SPAWN_NPC || spawn->petOwnerID() != 0 )
+    return NULL;
+
+  QAsciiDictIterator<SpawnPoint> it(m_points);
+  for (SpawnPoint* sp = NULL; (sp = it.current()); ++it) {
+      if (spawn->id() == sp->lastID()) {
+          return sp;
+      }
+  }
+
+  return NULL;
+}
+
 void SpawnMonitor::setName(const SpawnPoint* csp, const QString& name)
 {
   if (csp == NULL)

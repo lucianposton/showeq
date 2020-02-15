@@ -1660,6 +1660,36 @@ void Map::mouseDoubleClickEvent(QMouseEvent * me)
 #endif /* DEBUGMAP */
   if (me->button () == MidButton)
     viewTarget();
+  if (me->button () == LeftButton) {
+      if (m_showSpawnPoints) {
+          uint32_t dist = 15;
+          const Spawn* closestSpawn = spawnType(closestSpawnToPoint(me->pos(), dist));
+          const SpawnPoint* closestSP = closestSpawnPointToPoint(me->pos(), dist);
+
+          if (closestSP != NULL) {
+              const uint16_t lastID = closestSP->lastID();
+              const Spawn* closestSPsSpawn = spawnType(m_spawnShell->findID(tSpawn, lastID));
+              if (closestSPsSpawn != NULL) {
+                  m_selectedItem = closestSPsSpawn;
+                  emit spawnSelected(m_selectedItem);
+                  // reAdjust to make sure it's focused around
+                  reAdjust();
+                  // repaint if necessary
+                  if(!m_cacheChanges)
+                      refreshMap();
+              }
+          }
+
+          if (closestSpawn != NULL) {
+              const SpawnPoint* closestSpawnsSP= m_spawnMonitor->findSpawnPointForSpawn(closestSpawn);
+              if (closestSpawnsSP != NULL)
+              {
+                  m_spawnMonitor->setSelected(closestSpawnsSP);
+                  return;
+              }
+          }
+      }
+  }
 }
 
 void Map::mouseReleaseEvent(QMouseEvent* me)
