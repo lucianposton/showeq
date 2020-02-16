@@ -2226,6 +2226,10 @@
    <string value="/usr/bin/esdplay /usr/local/share/showeq/dangerspawn.wave &amp;" />
    <comment>Command line to exectue when a new Danger spawn is seen</comment>
   </property>
+  <property name="ListAfkCheckCommand" >
+   <string value="/usr/bin/esdplay /usr/local/share/showeq/listafkcheck.wave &amp;" />
+   <comment>Command line to exectue when client performs afk check for list queue</comment>
+  </property>
  </section>
 <!-- ============================================================= -->
 <!-- Item Database Options -->

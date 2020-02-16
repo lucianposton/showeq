@@ -13,6 +13,7 @@
 #include "spawn.h"
 #include "main.h"
 #include "diagnosticmessages.h"
+#include "packetcommon.h"
 
 #include <stdio.h>
 
@@ -59,6 +60,18 @@ void FilterNotifications::setUseCommands(bool val)
 void FilterNotifications::initialZoneSpawn(bool isInitialZoneSpawn)
 {
     m_isInitialZoneSpawn = isInitialZoneSpawn;
+}
+
+void FilterNotifications::listAfkCheck(const uint8_t* data, size_t, uint8_t dir)
+{
+    if (dir == DIR_Client)
+        return;
+
+    const List_Struct* list = (const List_Struct*)data;
+    if (list->op != 2)
+        return;
+
+    handleAlert("none", "ListAfkCheckCommand", "none");
 }
 
 void FilterNotifications::addItem(const Item* item)

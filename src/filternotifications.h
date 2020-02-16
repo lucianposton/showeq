@@ -37,6 +37,7 @@ class FilterNotifications : public QObject
    void setUseSystemBeep(bool val);
    void setUseCommands(bool val);
    
+   void listAfkCheck(const uint8_t* data, size_t, uint8_t dir);
    void addItem(const Item* item);
    void delItem(const Item* item);
    void killSpawn(const Item* item);

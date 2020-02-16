@@ -1273,6 +1273,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    x = filterCmdToggleEnabled->insertItem( "PvP");
    filterCmdToggleEnabled->setItemParameter(x, 8);
    filterCmdToggleEnabled->setItemChecked(x, pSEQPrefs->getPrefBool("PvPSpawnAudioCommandEnabled", "Filters", true));
+   x = filterCmdToggleEnabled->insertItem( "List AFK Check");
+   filterCmdToggleEnabled->setItemParameter(x, 9);
+   filterCmdToggleEnabled->setItemChecked(x, pSEQPrefs->getPrefBool("ListAfkCheckCommandEnabled", "Filters", true));
    connect(filterCmdToggleEnabled, SIGNAL(activated(int)),
 	   this, SLOT(toggle_AudioCommand(int)));
 
@@ -1295,6 +1298,8 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
    filterCmdMenu->setItemParameter(x, 7);
    x = filterCmdMenu->insertItem( "PvP...");
    filterCmdMenu->setItemParameter(x, 8);
+   x = filterCmdMenu->insertItem( "List AFK Check...");
+   filterCmdMenu->setItemParameter(x, 9);
    connect(filterCmdMenu, SIGNAL(activated(int)),
 	   this, SLOT(set_filter_AudioCommand(int)));
 
@@ -2017,6 +2022,9 @@ EQInterface::EQInterface(DataLocationMgr* dlm,
 	     SLOT(changeItem(const Item*, uint32_t)));
      connect(m_spawnShell, SIGNAL(initialZoneSpawn(bool)),
 	     m_filterNotifications, SLOT(initialZoneSpawn(bool)));
+     m_packet->connect2("OP_List", SP_Zone, DIR_Server|DIR_Client,
+             "List_Struct", SZC_Match,
+             m_filterNotifications, SLOT(listAfkCheck(const uint8_t*, size_t, uint8_t)));
    }
 
    // connect interface slots to Packet signals
@@ -3307,6 +3315,9 @@ void EQInterface::toggle_AudioCommand(int id)
   case 8:
     property = "PvPSpawnAudioCommand";
     break;
+  case 9:
+    property = "ListAfkCheckCommand";
+    break;
   default:
     return;
   }
@@ -3353,6 +3364,10 @@ void EQInterface::set_filter_AudioCommand(int id)
   case 8:
     property = "PvPSpawnAudioCommand";
     prettyName = "PvP Spawn";
+    break;
+  case 9:
+    property = "ListAfkCheckCommand";
+    prettyName = "List AFK Check";
     break;
   default: 
     return;
