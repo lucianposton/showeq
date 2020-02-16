@@ -488,7 +488,7 @@
         <payload dir="client" typename="itemInfoReqStruct" sizechecktype="none"/>
     </opcode>
     <opcode id="5e20" name="OP_ClientReady" updated="10/27/05">
-        <comment>Client requesting zone in packet, etc</comment>
+        <comment>Client indicating it has all data to finally zone in</comment>
         <payload dir="client" typename="none" sizechecktype="match"/>
     </opcode>
     <opcode id="5dd8" name="OP_ZoneChange" updated="10/27/05">
@@ -839,7 +839,7 @@
         <payload dir="server" typename="TributeTimer_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="63da" name="OP_PlayerStateAdd" updated="10/27/05">
-        <comment></comment>
+        <comment>Sent to server as the final packet during zoning after OP_ClientReady</comment>
         <payload dir="both" typename="PlayerState_Struct" sizechecktype="match"/>
     </opcode>
     <opcode id="381d" name="OP_PlayerStateRemove" updated="10/27/05">
