@@ -1431,7 +1431,7 @@ struct specialMessageStruct
   /*0003*/ ChatColor messageColor;    // message color
   /*0007*/ uint16_t  target;          // message target
   /*0009*/ uint16_t  padding;         // padding
-  /*0011*/ char      source[0];       // message text
+  /*0011*/ char      source[1];       // message text. Variable length, but [1] to avoid undefined behavior
   /*0xxx*/ uint32_t  unknown0xxx[3];  //***Placeholder
   /*0yyy*/ char      message[0];      // message text
 };
