@@ -155,6 +155,10 @@ void FilterNotifications::executeCommand(const QString& name,
   
   // now, replace all occurrances of %c with the audio cue
   command.replace(cueExp, audioCue);
+
+  // Append " &" if it doesn't already end with "&"
+  if (!command.endsWith("&"))
+      command.append(" &");
   
   // fire off the command
   if (-1 == system((const char*)command))
