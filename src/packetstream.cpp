@@ -444,6 +444,8 @@ void EQPacketStream::dispatchPacket(uint8_t* data, size_t len,
               const bool shouldDecrypt = m_packet_decryption_enabled
                   && m_hasValidDecryptionKey && payload->decrypt();
 
+              // TODO: There is a bug here when multiple matching payloads
+              // require decryption
               if(shouldDecrypt && decryptedData == NULL)
               {
                   uint16_t i    = 0;
