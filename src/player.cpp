@@ -1153,6 +1153,7 @@ void Player::setConColorBase(ColorLevel level, const QColor& color)
 
 void Player::fillConTable()
 {
+    // TODO fix this
 // keep around for historical giggles
 //
 // to make changes here, simply alter greenRange and cyanRange
