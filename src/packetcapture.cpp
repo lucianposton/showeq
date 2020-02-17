@@ -246,6 +246,9 @@ void PacketCaptureThread::stop()
 {
     // close the pcap session
     pcap_breakloop(m_pcache_pcap);
+    // TODO: may need to cancel m_tid pthread in order for pcap_breakloop to
+    // function, at least until some newer pcap release
+    // https://github.com/the-tcpdump-group/libpcap/issues/734#issuecomment-505557496
     pthread_join(m_tid, NULL);
     pcap_close(m_pcache_pcap);
     m_pcache_pcap = NULL;
