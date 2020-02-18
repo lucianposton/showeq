@@ -1312,6 +1312,7 @@ float Player::getRaceExpBonus() const
    float bonus;
    switch (race())
    {
+       // TODO: This should not be necessary because calc_exp should accomodate
        case 1 :   bonus = 1.0;   break; // human
        case 2 :   bonus = 0.95;  break; // barbarian
        case 3 :   bonus = 1.0;   break; // erudite
@@ -1336,6 +1337,7 @@ float Player::getClassExpBonus() const
    float bonus;
    switch (classVal())
    {
+       // TODO: This should not be necessary because calc_exp should accomodate
        case 1 : bonus = 1.1;  break; // WAR
        case 2 : bonus = 1.0;  break; // CLR
        case 3 : bonus = 1.0;  break; // PAL
@@ -1381,6 +1383,7 @@ uint32_t Player::calc_exp(int level, uint16_t race, uint8_t class_) const
     else if (level<65)  exp*=38;
     else                exp*=40;
 
+    // TODO why disabled here but not in getRacePenalty()?
 #if 0
     switch (race)
     {
@@ -1427,6 +1430,7 @@ uint32_t Player::calc_exp(int level, uint16_t race, uint8_t class_) const
     }
     else
     {
+        // TODO: war/rog bonuses missing
         class_penalty = 10;
     }
 
@@ -1434,6 +1438,14 @@ uint32_t Player::calc_exp(int level, uint16_t race, uint8_t class_) const
 
     return (uint32_t)exp;
 }
+
+// TODO for group exp share estimation
+#if 0
+uint32_t Spawn::estimatedExp() const
+{
+    return calc_exp(level(), race(), classVal());
+}
+#endif
 
 QString Player::name() const
 {

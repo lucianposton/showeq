@@ -449,7 +449,26 @@ void GroupMgr::dumpInfo(QTextStream& out)
 
 float GroupMgr::groupExpShare()
 {
+    // TODO: This is a rough approximation. The exp share should be the ratio
+    // of your total exp to the sum of the totals of all party members,
+    // including race and class penalties.
     return m_membersInZoneCount ? 1.0/m_membersInZoneCount : 1.0;
+
+#if 0
+    if (m_membersInZoneCount == 0)
+        return 1.0;
+
+    unsigned long playerTotalExp = m_player->getCurrentExp();
+    unsigned long groupTotalExp = 0;
+    for (int i = 0; i < MAX_GROUP_MEMBERS; i++)
+    {
+        if (m_members[i]->m_spawn && m_members[i]->m_spawn->m_name != m_player->m_name) {
+            groupTotalExp += m_members[i]->m_spawn->estimatedExp();
+        }
+    }
+
+    return float(playerExp)/float(totalGroupExp);
+#endif
 }
 
 void GroupMgr::setUsePvPExpBonus(bool enable)
@@ -476,6 +495,7 @@ float GroupMgr::groupBonus()
     {
         switch (groupMembersInZoneCount())
         {
+            // TODO: Should be 2%, 4%, 6%, 8%, 10%. Then 2,6,10,14,20 @ Jan 14 2001
             case 2:	return 1.00;
             case 3:	return 1.042;
             case 4:	return 1.051;
